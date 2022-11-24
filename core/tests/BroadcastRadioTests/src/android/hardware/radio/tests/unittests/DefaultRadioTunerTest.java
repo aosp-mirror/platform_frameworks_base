@@ -130,6 +130,18 @@ public final class DefaultRadioTunerTest {
     };
 
     @Test
+    public void seek_forRadioTuner_throwsException() {
+        UnsupportedOperationException thrown = assertThrows(
+                UnsupportedOperationException.class, () -> {
+                    DEFAULT_RADIO_TUNER.seek(RadioTuner.DIRECTION_DOWN,
+                            /* skipSubChannel= */ false);
+                });
+
+        assertWithMessage("Exception for seeking on default radio tuner")
+                .that(thrown).hasMessageThat().contains("Seeking is not supported");
+    }
+
+    @Test
     public void getDynamicProgramList_forRadioTuner_returnsNull() {
         assertWithMessage("Dynamic program list obtained from default radio tuner")
                 .that(DEFAULT_RADIO_TUNER.getDynamicProgramList(new ProgramList.Filter())).isNull();
@@ -143,29 +155,45 @@ public final class DefaultRadioTunerTest {
 
     @Test
     public void isConfigFlagSet_forRadioTuner_throwsException() {
-        assertThrows(UnsupportedOperationException.class, () -> {
-            DEFAULT_RADIO_TUNER.isConfigFlagSet(/* flag= */ 1);
-        });
+        UnsupportedOperationException thrown = assertThrows(
+                UnsupportedOperationException.class, () -> {
+                    DEFAULT_RADIO_TUNER.isConfigFlagSet(/* flag= */ 1);
+                });
+
+        assertWithMessage("Exception for isConfigFlagSet on default radio tuner")
+                .that(thrown).hasMessageThat().contains("isConfigFlagSet is not supported");
     }
 
     @Test
     public void setConfigFlag_forRadioTuner_throwsException() {
-        assertThrows(UnsupportedOperationException.class, () -> {
+        UnsupportedOperationException thrown = assertThrows(UnsupportedOperationException.class,
+                () -> {
             DEFAULT_RADIO_TUNER.setConfigFlag(/* flag= */ 1, /* value= */ false);
         });
+
+        assertWithMessage("Exception for setting config flag on default radio tuner")
+                .that(thrown).hasMessageThat().contains("Setting config flag is not supported");
     }
 
     @Test
     public void setParameters_forRadioTuner_throwsException() {
-        assertThrows(UnsupportedOperationException.class, () -> {
+        UnsupportedOperationException thrown = assertThrows(UnsupportedOperationException.class,
+                () -> {
             DEFAULT_RADIO_TUNER.setParameters(Map.of("testKey", "testValue"));
         });
+
+        assertWithMessage("Exception for setting parameters from default radio tuner")
+                .that(thrown).hasMessageThat().contains("Setting parameters is not supported");
     }
 
     @Test
     public void getParameters_forRadioTuner_throwsException() {
-        assertThrows(UnsupportedOperationException.class, () -> {
+        UnsupportedOperationException thrown = assertThrows(UnsupportedOperationException.class,
+                () -> {
             DEFAULT_RADIO_TUNER.getParameters(List.of("testKey"));
         });
+
+        assertWithMessage("Exception for getting parameters from default radio tuner")
+                .that(thrown).hasMessageThat().contains("Getting parameters is not supported");
     }
 }

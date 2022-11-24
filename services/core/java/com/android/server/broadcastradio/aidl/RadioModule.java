@@ -147,8 +147,9 @@ final class RadioModule {
         @Override
         public void onConfigFlagUpdated(int flag, boolean value) {
             fireLater(() -> {
-                // TODO(b/243853343): implement config flag update method in
-                //  android.hardware.radio.ITunerCallback
+                synchronized (mLock) {
+                    fanoutAidlCallbackLocked(cb -> cb.onConfigFlagUpdated(flag, value));
+                }
             });
         }
 

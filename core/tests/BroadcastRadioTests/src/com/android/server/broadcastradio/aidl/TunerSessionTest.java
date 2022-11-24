@@ -377,28 +377,28 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    public void scan_withDirectionUp() throws Exception {
+    public void seek_withDirectionUp() throws Exception {
         long initFreq = AM_FM_FREQUENCY_LIST[2];
         ProgramSelector initialSel = AidlTestUtils.makeFmSelector(initFreq);
-        RadioManager.ProgramInfo scanUpInfo = AidlTestUtils.makeProgramInfo(
+        RadioManager.ProgramInfo seekUpInfo = AidlTestUtils.makeProgramInfo(
                 AidlTestUtils.makeFmSelector(getSeekFrequency(initFreq, /* seekDown= */ false)),
                 SIGNAL_QUALITY);
         openAidlClients(/* numClients= */ 1);
         mHalCurrentInfo = AidlTestUtils.makeHalProgramInfo(
                 ConversionUtils.programSelectorToHalProgramSelector(initialSel), SIGNAL_QUALITY);
 
-        mTunerSessions[0].scan(/* directionDown= */ false, /* skipSubChannel= */ false);
+        mTunerSessions[0].seek(/* directionDown= */ false, /* skipSubChannel= */ false);
 
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT)
-                .onCurrentProgramInfoChanged(scanUpInfo);
+                .onCurrentProgramInfoChanged(seekUpInfo);
     }
 
     @Test
-    public void scan_callsOnTuneFailedWhenTimeout() throws Exception {
+    public void seek_callsOnTuneFailedWhenTimeout() throws Exception {
         int numSessions = 2;
         openAidlClients(numSessions);
 
-        mTunerSessions[0].scan(/* directionDown= */ false, /* skipSubChannel= */ false);
+        mTunerSessions[0].seek(/* directionDown= */ false, /* skipSubChannel= */ false);
 
         for (int index = 0; index < numSessions; index++) {
             verify(mAidlTunerCallbackMocks[index], CALLBACK_TIMEOUT)
@@ -407,19 +407,19 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    public void scan_withDirectionDown() throws Exception {
+    public void seek_withDirectionDown() throws Exception {
         long initFreq = AM_FM_FREQUENCY_LIST[2];
         ProgramSelector initialSel = AidlTestUtils.makeFmSelector(initFreq);
-        RadioManager.ProgramInfo scanUpInfo = AidlTestUtils.makeProgramInfo(
+        RadioManager.ProgramInfo seekUpInfo = AidlTestUtils.makeProgramInfo(
                 AidlTestUtils.makeFmSelector(getSeekFrequency(initFreq, /* seekDown= */ true)),
                 SIGNAL_QUALITY);
         openAidlClients(/* numClients= */ 1);
         mHalCurrentInfo = AidlTestUtils.makeHalProgramInfo(
                 ConversionUtils.programSelectorToHalProgramSelector(initialSel), SIGNAL_QUALITY);
 
-        mTunerSessions[0].scan(/* directionDown= */ true, /* skipSubChannel= */ false);
+        mTunerSessions[0].seek(/* directionDown= */ true, /* skipSubChannel= */ false);
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT)
-                .onCurrentProgramInfoChanged(scanUpInfo);
+                .onCurrentProgramInfoChanged(seekUpInfo);
     }
 
     @Test
@@ -585,7 +585,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    public void onConfigFlagUpdated_forTunerCallback() throws Exception {
+    public void onAntennaStateChange_forTunerCallback() throws Exception {
         int numSessions = 3;
         openAidlClients(numSessions);
 
@@ -594,6 +594,21 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
         for (int index = 0; index < numSessions; index++) {
             verify(mAidlTunerCallbackMocks[index], CALLBACK_TIMEOUT)
                     .onAntennaState(/* connected= */ false);
+        }
+    }
+
+    @Test
+    public void onConfigFlagUpdated_forTunerCallback() throws Exception {
+        int numSessions = 3;
+        openAidlClients(numSessions);
+        int flag = UNSUPPORTED_CONFIG_FLAG + 1;
+        boolean configFlagValue = true;
+
+        mHalTunerCallback.onConfigFlagUpdated(flag, configFlagValue);
+
+        for (int index = 0; index < numSessions; index++) {
+            verify(mAidlTunerCallbackMocks[index], CALLBACK_TIMEOUT)
+                    .onConfigFlagUpdated(flag, configFlagValue);
         }
     }
 

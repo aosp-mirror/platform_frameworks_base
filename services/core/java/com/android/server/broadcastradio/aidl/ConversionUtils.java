@@ -143,6 +143,7 @@ final class ConversionUtils {
             case ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE:
             case ProgramSelector.IDENTIFIER_TYPE_DAB_SCID:
             case ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY:
+            case ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT:
                 return ProgramSelector.PROGRAM_TYPE_DAB;
             case ProgramSelector.IDENTIFIER_TYPE_DRMO_SERVICE_ID:
             case ProgramSelector.IDENTIFIER_TYPE_DRMO_FREQUENCY:

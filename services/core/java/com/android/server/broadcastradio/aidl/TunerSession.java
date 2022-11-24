@@ -178,8 +178,8 @@ final class TunerSession extends ITuner.Stub {
     }
 
     @Override
-    public void scan(boolean directionDown, boolean skipSubChannel) throws RemoteException {
-        mLogger.logRadioEvent("Scan with direction %s, skipSubChannel? %s",
+    public void seek(boolean directionDown, boolean skipSubChannel) throws RemoteException {
+        mLogger.logRadioEvent("Seek with direction %s, skipSubChannel? %s",
                 directionDown ? "down" : "up", skipSubChannel ? "yes" : "no");
         if (!RadioServiceUserController.isCurrentOrSystemUser()) {
             Slogf.w(TAG, "Cannot scan on AIDL HAL client from non-current user");
@@ -232,8 +232,7 @@ final class TunerSession extends ITuner.Stub {
 
     @Override
     public void cancelAnnouncement() {
-        // TODO(b/244485175): deperacte cancelAnnouncement
-        Slogf.i(TAG, "Announcements control doesn't involve cancelling at the HAL level in AIDL");
+        Slogf.w(TAG, "Announcements control doesn't involve cancelling at the HAL level in AIDL");
     }
 
     @Override
@@ -244,7 +243,7 @@ final class TunerSession extends ITuner.Stub {
 
     @Override
     public boolean startBackgroundScan() {
-        Slogf.i(TAG, "Explicit background scan trigger is not supported with HAL AIDL");
+        Slogf.w(TAG, "Explicit background scan trigger is not supported with HAL AIDL");
         if (!RadioServiceUserController.isCurrentOrSystemUser()) {
             Slogf.w(TAG, "Cannot start background scan on AIDL HAL client from non-current user");
             return false;

@@ -55,7 +55,6 @@ public final class TunerAdapterTest {
     private static final int AM_LOWER_LIMIT_KHZ = 150;
 
     private static final RadioManager.BandConfig TEST_BAND_CONFIG = createBandConfig();
-
     private static final ProgramSelector.Identifier FM_IDENTIFIER =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY,
                     /* value= */ 94300);
@@ -170,15 +169,30 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void scan_forTunerAdapter_succeeds() throws Exception {
+        doAnswer(invocation -> {
+            mTunerCallback.onCurrentProgramInfoChanged(FM_PROGRAM_INFO);
+            return RadioManager.STATUS_OK;
+        }).when(mTunerMock).seek(anyBoolean(), anyBoolean());
+
+        int scanStatus = mRadioTuner.scan(RadioTuner.DIRECTION_DOWN, /* skipSubChannel= */ false);
+
+        verify(mTunerMock).seek(/* directionDown= */ true, /* skipSubChannel= */ false);
+        assertWithMessage("Status for scaning")
+                .that(scanStatus).isEqualTo(RadioManager.STATUS_OK);
+        verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onProgramInfoChanged(FM_PROGRAM_INFO);
+    }
+
+    @Test
     public void seek_forTunerAdapter_succeeds() throws Exception {
         doAnswer(invocation -> {
             mTunerCallback.onCurrentProgramInfoChanged(FM_PROGRAM_INFO);
             return RadioManager.STATUS_OK;
-        }).when(mTunerMock).scan(anyBoolean(), anyBoolean());
+        }).when(mTunerMock).seek(anyBoolean(), anyBoolean());
 
         int scanStatus = mRadioTuner.scan(RadioTuner.DIRECTION_DOWN, /* skipSubChannel= */ false);
 
-        verify(mTunerMock).scan(/* directionDown= */ true, /* skipSubChannel= */ false);
+        verify(mTunerMock).seek(/* directionDown= */ true, /* skipSubChannel= */ false);
         assertWithMessage("Status for seeking")
                 .that(scanStatus).isEqualTo(RadioManager.STATUS_OK);
         verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onProgramInfoChanged(FM_PROGRAM_INFO);
@@ -187,13 +201,14 @@ public final class TunerAdapterTest {
     @Test
     public void seek_forTunerAdapter_invokesOnErrorWhenTimeout() throws Exception {
         doAnswer(invocation -> {
-            mTunerCallback.onError(RadioTuner.ERROR_SCAN_TIMEOUT);
+            mTunerCallback.onTuneFailed(RadioManager.STATUS_TIMED_OUT, FM_SELECTOR);
             return RadioManager.STATUS_OK;
-        }).when(mTunerMock).scan(anyBoolean(), anyBoolean());
+        }).when(mTunerMock).seek(anyBoolean(), anyBoolean());
 
         mRadioTuner.scan(RadioTuner.DIRECTION_UP, /* skipSubChannel*/ true);
 
-        verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onError(RadioTuner.ERROR_SCAN_TIMEOUT);
+        verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onTuneFailed(
+                RadioManager.STATUS_TIMED_OUT, FM_SELECTOR);
     }
 
     @Test
@@ -412,6 +427,17 @@ public final class TunerAdapterTest {
         mTunerCallback.onProgramListChanged();
 
         verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onProgramListChanged();
+    }
+
+    @Test
+    public void onConfigFlagUpdated_forTunerCallbackAdapter() throws Exception {
+        int configFlag = RadioManager.CONFIG_RDS_AF;
+        boolean configFlagValue = true;
+
+        mTunerCallback.onConfigFlagUpdated(configFlag, configFlagValue);
+
+        verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS))
+                .onConfigFlagUpdated(configFlag, configFlagValue);
     }
 
     @Test

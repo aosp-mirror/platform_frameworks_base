@@ -189,9 +189,9 @@ class Tuner extends ITuner.Stub {
     }
 
     @Override
-    public void scan(boolean directionDown, boolean skipSubChannel) {
+    public void seek(boolean directionDown, boolean skipSubChannel) {
         if (!RadioServiceUserController.isCurrentOrSystemUser()) {
-            Slogf.w(TAG, "Cannot scan on HAL 1.x client from non-current user");
+            Slogf.w(TAG, "Cannot seek on HAL 1.x client from non-current user");
             return;
         }
         synchronized (mLock) {

@@ -82,6 +82,24 @@ public class RadioManager {
     /** Method return status: time out before operation completion */
     public static final int STATUS_TIMED_OUT = -110;
 
+    /**
+     *  Radio operation status types
+     *
+     * @hide
+     */
+    @IntDef(prefix = { "STATUS_" }, value = {
+            STATUS_OK,
+            STATUS_ERROR,
+            STATUS_PERMISSION_DENIED,
+            STATUS_NO_INIT,
+            STATUS_BAD_VALUE,
+            STATUS_DEAD_OBJECT,
+            STATUS_INVALID_OPERATION,
+            STATUS_TIMED_OUT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RadioStatusType{}
+
 
     // keep in sync with radio_class_t in /system/core/incluse/system/radio.h
     /** Radio module class supporting FM (including HD radio) and AM */
@@ -330,6 +348,7 @@ public class RadioManager {
          * program list.
          * @return the number of audio sources available.
          */
+        @RadioStatusType
         public int getNumAudioSources() {
             return mNumAudioSources;
         }
@@ -1724,6 +1743,7 @@ public class RadioManager {
      * </ul>
      */
     @RequiresPermission(Manifest.permission.ACCESS_BROADCAST_RADIO)
+    @RadioStatusType
     public int listModules(List<ModuleProperties> modules) {
         if (modules == null) {
             Log.e(TAG, "the output list must not be empty");

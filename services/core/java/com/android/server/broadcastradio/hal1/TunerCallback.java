@@ -174,8 +174,13 @@ class TunerCallback implements ITunerCallback {
     }
 
     @Override
+    public void onConfigFlagUpdated(int flag, boolean value) {
+        Slog.w(TAG, "Not applicable for HAL 1.x");
+    }
+
+    @Override
     public void onParametersUpdated(Map<String, String> parameters) {
-        Slog.e(TAG, "Not applicable for HAL 1.x");
+        Slog.w(TAG, "Not applicable for HAL 1.x");
     }
 
     @Override
