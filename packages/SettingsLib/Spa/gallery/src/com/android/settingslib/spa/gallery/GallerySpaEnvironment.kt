@@ -23,6 +23,7 @@ import com.android.settingslib.spa.framework.common.SettingsPageProviderReposito
 import com.android.settingslib.spa.framework.common.SpaEnvironment
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
+import com.android.settingslib.spa.gallery.dialog.AlterDialogPageProvider
 import com.android.settingslib.spa.gallery.home.HomePageProvider
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
 import com.android.settingslib.spa.gallery.page.ChartPageProvider
@@ -72,6 +73,7 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 ActionButtonPageProvider,
                 ProgressBarPageProvider,
                 ChartPageProvider,
+                AlterDialogPageProvider,
             ),
             rootPages = listOf(
                 HomePageProvider.createSettingsPage(),

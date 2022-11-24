@@ -27,6 +27,7 @@ import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
+import com.android.settingslib.spa.gallery.dialog.AlterDialogPageProvider
 import com.android.settingslib.spa.gallery.page.ArgumentPageModel
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
 import com.android.settingslib.spa.gallery.page.ChartPageProvider
@@ -58,6 +59,7 @@ object HomePageProvider : SettingsPageProvider {
             ActionButtonPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             ProgressBarPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             ChartPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            AlterDialogPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
         )
     }
 
