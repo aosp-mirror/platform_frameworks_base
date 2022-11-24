@@ -1958,7 +1958,7 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Questa app richiede maggiore sicurezza. Prova a usare il telefono."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Non è possibile accedere a questa impostazione su <xliff:g id="DEVICE">%1$s</xliff:g>. Prova a usare il dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Non è possibile accedere a questa impostazione su <xliff:g id="DEVICE">%1$s</xliff:g>. Prova a usare il tablet."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Non è possibile accedere a questa impostazione su <xliff:g id="DEVICE">%1$s</xliff:g>. Prova a usare il telefono."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Non è possibile accedere su <xliff:g id="DEVICE">%1$s</xliff:g>. Prova a usare il telefono."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Questa app è stata realizzata per una versione precedente di Android e potrebbe non funzionare correttamente. Prova a verificare la disponibilità di aggiornamenti o contatta lo sviluppatore."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Cerca aggiornamenti"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Hai nuovi messaggi"</string>
