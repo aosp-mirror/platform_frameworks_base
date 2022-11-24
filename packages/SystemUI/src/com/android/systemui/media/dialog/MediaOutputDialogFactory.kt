@@ -31,6 +31,7 @@ import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
+import com.android.systemui.flags.FeatureFlags
 import java.util.Optional
 import javax.inject.Inject
 
@@ -49,7 +50,8 @@ class MediaOutputDialogFactory @Inject constructor(
     private val nearbyMediaDevicesManagerOptional: Optional<NearbyMediaDevicesManager>,
     private val audioManager: AudioManager,
     private val powerExemptionManager: PowerExemptionManager,
-    private val keyGuardManager: KeyguardManager
+    private val keyGuardManager: KeyguardManager,
+    private val featureFlags: FeatureFlags
 ) {
     companion object {
         private const val INTERACTION_JANK_TAG = "media_output"
@@ -65,7 +67,7 @@ class MediaOutputDialogFactory @Inject constructor(
             context, packageName,
             mediaSessionManager, lbm, starter, notifCollection,
             dialogLaunchAnimator, nearbyMediaDevicesManagerOptional, audioManager,
-            powerExemptionManager, keyGuardManager)
+            powerExemptionManager, keyGuardManager, featureFlags)
         val dialog =
             MediaOutputDialog(context, aboveStatusBar, broadcastSender, controller, uiEventLogger)
         mediaOutputDialog = dialog

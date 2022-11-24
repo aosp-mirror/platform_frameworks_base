@@ -73,6 +73,8 @@ import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.plugins.ActivityStarter;
@@ -147,6 +149,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private int mColorDialogBackground;
     private float mInactiveRadius;
     private float mActiveRadius;
+    private FeatureFlags mFeatureFlags;
 
     public enum BroadcastNotifyDialog {
         ACTION_FIRST_LAUNCH,
@@ -162,7 +165,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             Optional<NearbyMediaDevicesManager> nearbyMediaDevicesManagerOptional,
             AudioManager audioManager,
             PowerExemptionManager powerExemptionManager,
-            KeyguardManager keyGuardManager) {
+            KeyguardManager keyGuardManager,
+            FeatureFlags featureFlags) {
         mContext = context;
         mPackageName = packageName;
         mMediaSessionManager = mediaSessionManager;
@@ -172,6 +176,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mAudioManager = audioManager;
         mPowerExemptionManager = powerExemptionManager;
         mKeyGuardManager = keyGuardManager;
+        mFeatureFlags = featureFlags;
         InfoMediaManager imm = new InfoMediaManager(mContext, packageName, null, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
@@ -599,6 +604,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 currentConnectedMediaDevice);
     }
 
+    public boolean isAdvancedLayoutSupported() {
+        return mFeatureFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT);
+    }
+
     List<MediaDevice> getGroupMediaDevices() {
         final List<MediaDevice> selectedDevices = getSelectedMediaDevice();
         final List<MediaDevice> selectableDevices = getSelectableMediaDevice();
@@ -792,7 +801,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         MediaOutputController controller = new MediaOutputController(mContext, mPackageName,
                 mMediaSessionManager, mLocalBluetoothManager, mActivityStarter,
                 mNotifCollection, mDialogLaunchAnimator, Optional.of(mNearbyMediaDevicesManager),
-                mAudioManager, mPowerExemptionManager, mKeyGuardManager);
+                mAudioManager, mPowerExemptionManager, mKeyGuardManager, mFeatureFlags);
         MediaOutputBroadcastDialog dialog = new MediaOutputBroadcastDialog(mContext, true,
                 broadcastSender, controller);
         mDialogLaunchAnimator.showFromView(dialog, mediaOutputDialog);

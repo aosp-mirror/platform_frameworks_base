@@ -16,8 +16,11 @@
 
 package com.android.systemui.media.dialog;
 
+import static com.android.systemui.media.dialog.MediaOutputSeekbar.VOLUME_PERCENTAGE_SCALE_SIZE;
+
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.annotation.DrawableRes;
 import android.app.WallpaperColors;
 import android.content.Context;
 import android.graphics.PorterDuff;
@@ -80,8 +83,9 @@ public abstract class MediaOutputBaseAdapter extends
     public MediaDeviceBaseViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup,
             int viewType) {
         mContext = viewGroup.getContext();
-        mHolderView = LayoutInflater.from(mContext).inflate(R.layout.media_output_list_item,
-                viewGroup, false);
+        mHolderView = LayoutInflater.from(mContext).inflate(
+                mController.isAdvancedLayoutSupported() ? R.layout.media_output_list_item_advanced
+                        : R.layout.media_output_list_item, viewGroup, false);
 
         return null;
     }
@@ -131,9 +135,11 @@ public abstract class MediaOutputBaseAdapter extends
 
         final LinearLayout mContainerLayout;
         final FrameLayout mItemLayout;
+        final FrameLayout mIconAreaLayout;
         final TextView mTitleText;
         final TextView mTwoLineTitleText;
         final TextView mSubTitleText;
+        final TextView mVolumeValueText;
         final ImageView mTitleIcon;
         final ProgressBar mProgressBar;
         final MediaOutputSeekbar mSeekBar;
@@ -159,6 +165,13 @@ public abstract class MediaOutputBaseAdapter extends
             mStatusIcon = view.requireViewById(R.id.media_output_item_status);
             mCheckBox = view.requireViewById(R.id.check_box);
             mEndTouchArea = view.requireViewById(R.id.end_action_area);
+            if (mController.isAdvancedLayoutSupported()) {
+                mVolumeValueText = view.requireViewById(R.id.volume_value);
+                mIconAreaLayout = view.requireViewById(R.id.icon_area);
+            } else {
+                mVolumeValueText = null;
+                mIconAreaLayout = null;
+            }
             initAnimator();
         }
 
@@ -170,9 +183,14 @@ public abstract class MediaOutputBaseAdapter extends
             mEndTouchArea.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
             mContainerLayout.setOnClickListener(null);
             mContainerLayout.setContentDescription(null);
+            mTitleIcon.setOnClickListener(null);
             mTitleText.setTextColor(mController.getColorItemContent());
             mSubTitleText.setTextColor(mController.getColorItemContent());
             mTwoLineTitleText.setTextColor(mController.getColorItemContent());
+            if (mController.isAdvancedLayoutSupported()) {
+                mIconAreaLayout.setOnClickListener(null);
+                mVolumeValueText.setTextColor(mController.getColorItemContent());
+            }
             mSeekBar.getProgressDrawable().setColorFilter(
                     new PorterDuffColorFilter(mController.getColorSeekbarProgress(),
                             PorterDuff.Mode.SRC_IN));
@@ -203,13 +221,28 @@ public abstract class MediaOutputBaseAdapter extends
                                     .findDrawableByLayerId(android.R.id.progress);
                     final GradientDrawable progressDrawable =
                             (GradientDrawable) clipDrawable.getDrawable();
-                    progressDrawable.setCornerRadius(mController.getActiveRadius());
+                    if (mController.isAdvancedLayoutSupported()) {
+                        progressDrawable.setCornerRadii(
+                                new float[]{0, 0, mController.getActiveRadius(),
+                                        mController.getActiveRadius(),
+                                        mController.getActiveRadius(),
+                                        mController.getActiveRadius(), 0, 0});
+                    } else {
+                        progressDrawable.setCornerRadius(mController.getActiveRadius());
+                    }
                 }
             }
             mItemLayout.getBackground().setColorFilter(new PorterDuffColorFilter(
                     isActive ? mController.getColorConnectedItemBackground()
                             : mController.getColorItemBackground(),
                     PorterDuff.Mode.SRC_IN));
+            if (mController.isAdvancedLayoutSupported()) {
+                mIconAreaLayout.getBackground().setColorFilter(new PorterDuffColorFilter(
+                        showSeekBar ? mController.getColorSeekbarProgress()
+                                : showProgressBar ? mController.getColorConnectedItemBackground()
+                                        : mController.getColorItemBackground(),
+                        PorterDuff.Mode.SRC_IN));
+            }
             mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
             mSeekBar.setAlpha(1);
             mSeekBar.setVisibility(showSeekBar ? View.VISIBLE : View.GONE);
@@ -263,16 +296,41 @@ public abstract class MediaOutputBaseAdapter extends
             final int currentVolume = device.getCurrentVolume();
             if (mSeekBar.getVolume() != currentVolume) {
                 if (isCurrentSeekbarInvisible && !mIsInitVolumeFirstTime) {
+                    if (mController.isAdvancedLayoutSupported()) {
+                        updateTitleIcon(currentVolume == 0 ? R.drawable.media_output_icon_volume_off
+                                        : R.drawable.media_output_icon_volume,
+                                mController.getColorItemContent());
+                    }
                     animateCornerAndVolume(mSeekBar.getProgress(),
                             MediaOutputSeekbar.scaleVolumeToProgress(currentVolume));
                 } else {
                     if (!mVolumeAnimator.isStarted()) {
+                        if (mController.isAdvancedLayoutSupported()) {
+                            int percentage =
+                                    (int) ((double) currentVolume * VOLUME_PERCENTAGE_SCALE_SIZE
+                                            / (double) mSeekBar.getMax());
+                            if (percentage == 0) {
+                                updateMutedVolumeIcon();
+                            } else {
+                                updateUnmutedVolumeIcon();
+                            }
+                        }
                         mSeekBar.setVolume(currentVolume);
                     }
                 }
+            } else if (mController.isAdvancedLayoutSupported() && currentVolume == 0) {
+                mSeekBar.resetVolume();
+                updateMutedVolumeIcon();
             }
             if (mIsInitVolumeFirstTime) {
                 mIsInitVolumeFirstTime = false;
+            }
+            if (mController.isAdvancedLayoutSupported()) {
+                updateIconAreaClickListener((v) -> {
+                    mSeekBar.resetVolume();
+                    mController.adjustVolume(device, 0);
+                    updateMutedVolumeIcon();
+                });
             }
             mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
@@ -280,23 +338,90 @@ public abstract class MediaOutputBaseAdapter extends
                     if (device == null || !fromUser) {
                         return;
                     }
-                    int currentVolume = MediaOutputSeekbar.scaleProgressToVolume(progress);
+                    int progressToVolume = MediaOutputSeekbar.scaleProgressToVolume(progress);
                     int deviceVolume = device.getCurrentVolume();
-                    if (currentVolume != deviceVolume) {
-                        mController.adjustVolume(device, currentVolume);
+                    if (mController.isAdvancedLayoutSupported()) {
+                        int percentage =
+                                (int) ((double) progressToVolume * VOLUME_PERCENTAGE_SCALE_SIZE
+                                        / (double) seekBar.getMax());
+                        mVolumeValueText.setText(mContext.getResources().getString(
+                                R.string.media_output_dialog_volume_percentage, percentage));
+                        mVolumeValueText.setVisibility(View.VISIBLE);
+                    }
+                    if (progressToVolume != deviceVolume) {
+                        mController.adjustVolume(device, progressToVolume);
+                        if (mController.isAdvancedLayoutSupported() && deviceVolume == 0) {
+                            updateUnmutedVolumeIcon();
+                        }
                     }
                 }
 
                 @Override
                 public void onStartTrackingTouch(SeekBar seekBar) {
+                    if (mController.isAdvancedLayoutSupported()) {
+                        mTitleIcon.setVisibility(View.INVISIBLE);
+                        mVolumeValueText.setVisibility(View.VISIBLE);
+                    }
                     mIsDragging = true;
                 }
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
+                    if (mController.isAdvancedLayoutSupported()) {
+                        int currentVolume = MediaOutputSeekbar.scaleProgressToVolume(
+                                seekBar.getProgress());
+                        int percentage =
+                                (int) ((double) currentVolume * VOLUME_PERCENTAGE_SCALE_SIZE
+                                        / (double) seekBar.getMax());
+                        if (percentage == 0) {
+                            seekBar.setProgress(0);
+                            updateMutedVolumeIcon();
+                        } else {
+                            updateUnmutedVolumeIcon();
+                        }
+                        mTitleIcon.setVisibility(View.VISIBLE);
+                        mVolumeValueText.setVisibility(View.GONE);
+                    }
                     mIsDragging = false;
                 }
             });
+        }
+
+        void updateMutedVolumeIcon() {
+            updateTitleIcon(R.drawable.media_output_icon_volume_off,
+                    mController.getColorItemContent());
+            final GradientDrawable iconAreaBackgroundDrawable =
+                    (GradientDrawable) mIconAreaLayout.getBackground();
+            iconAreaBackgroundDrawable.setCornerRadius(mController.getActiveRadius());
+        }
+
+        void updateUnmutedVolumeIcon() {
+            updateTitleIcon(R.drawable.media_output_icon_volume,
+                    mController.getColorItemContent());
+            final GradientDrawable iconAreaBackgroundDrawable =
+                    (GradientDrawable) mIconAreaLayout.getBackground();
+            iconAreaBackgroundDrawable.setCornerRadii(new float[]{
+                    mController.getActiveRadius(),
+                    mController.getActiveRadius(),
+                    0, 0, 0, 0, mController.getActiveRadius(), mController.getActiveRadius()
+            });
+        }
+
+        void updateTitleIcon(@DrawableRes int id, int color) {
+            mTitleIcon.setImageDrawable(mContext.getDrawable(id));
+            mTitleIcon.setColorFilter(color);
+            if (mController.isAdvancedLayoutSupported()) {
+                mIconAreaLayout.getBackground().setColorFilter(
+                        new PorterDuffColorFilter(mController.getColorSeekbarProgress(),
+                                PorterDuff.Mode.SRC_IN));
+            }
+        }
+
+        void updateIconAreaClickListener(View.OnClickListener listener) {
+            if (mController.isAdvancedLayoutSupported()) {
+                mIconAreaLayout.setOnClickListener(listener);
+            }
+            mTitleIcon.setOnClickListener(listener);
         }
 
         void initMutingExpectedDevice() {
@@ -316,11 +441,26 @@ public abstract class MediaOutputBaseAdapter extends
             final ClipDrawable clipDrawable =
                     (ClipDrawable) ((LayerDrawable) mSeekBar.getProgressDrawable())
                             .findDrawableByLayerId(android.R.id.progress);
-            final GradientDrawable progressDrawable = (GradientDrawable) clipDrawable.getDrawable();
+            final GradientDrawable targetBackgroundDrawable =
+                    (GradientDrawable) (mController.isAdvancedLayoutSupported()
+                            ? mIconAreaLayout.getBackground()
+                            : clipDrawable.getDrawable());
             mCornerAnimator.addUpdateListener(animation -> {
                 float value = (float) animation.getAnimatedValue();
                 layoutBackgroundDrawable.setCornerRadius(value);
-                progressDrawable.setCornerRadius(value);
+                if (mController.isAdvancedLayoutSupported()) {
+                    if (toProgress == 0) {
+                        targetBackgroundDrawable.setCornerRadius(value);
+                    } else {
+                        targetBackgroundDrawable.setCornerRadii(new float[]{
+                                value,
+                                value,
+                                0, 0, 0, 0, value, value
+                        });
+                    }
+                } else {
+                    targetBackgroundDrawable.setCornerRadius(value);
+                }
             });
             mVolumeAnimator.setIntValues(fromProgress, toProgress);
             mVolumeAnimator.start();
