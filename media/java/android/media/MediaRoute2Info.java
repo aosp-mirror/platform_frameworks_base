@@ -28,6 +28,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.android.internal.util.Preconditions;
+
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -374,6 +376,7 @@ public final class MediaRoute2Info implements Parcelable {
 
     MediaRoute2Info(@NonNull Parcel in) {
         mId = in.readString();
+        Preconditions.checkArgument(!TextUtils.isEmpty(mId));
         mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mFeatures = in.createStringArrayList();
         mType = in.readInt();
@@ -403,7 +406,7 @@ public final class MediaRoute2Info implements Parcelable {
      */
     @NonNull
     public String getId() {
-        if (mProviderId != null) {
+        if (!TextUtils.isEmpty(mProviderId)) {
             return toUniqueId(mProviderId, mId);
         } else {
             return mId;
