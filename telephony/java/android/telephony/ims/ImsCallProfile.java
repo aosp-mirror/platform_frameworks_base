@@ -78,8 +78,9 @@ public final class ImsCallProfile implements Parcelable {
     public static final int SERVICE_TYPE_EMERGENCY = 2;
 
     /**
-     * Call types
+     * Call type none
      */
+    public static final int CALL_TYPE_NONE = 0;
     /**
      * IMSPhone to support IR.92 & IR.94 (voice + video upgrade/downgrade)
      */
