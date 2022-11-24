@@ -595,7 +595,7 @@ final class HotwordDetectionConnection {
         detectFromDspSource(event, callback);
     }
 
-    private void detectFromDspSource(SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,
+    void detectFromDspSource(SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,
             IHotwordRecognitionStatusCallback externalCallback) {
         if (DEBUG) {
             Slog.d(TAG, "detectFromDspSource");

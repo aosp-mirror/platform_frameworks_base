@@ -418,6 +418,9 @@ object Flags {
     @JvmField val UDFPS_ELLIPSE_DEBUG_UI = unreleasedFlag(2201, "udfps_ellipse_debug")
     @JvmField val UDFPS_ELLIPSE_DETECTION = unreleasedFlag(2202, "udfps_ellipse_detection")
 
+    // 2300 - stylus
+    @JvmField val TRACK_STYLUS_EVER_USED = unreleasedFlag(2300, "track_stylus_ever_used")
+
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag(2, "exp_flag_release")
 }

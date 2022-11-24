@@ -272,6 +272,7 @@ public class SettingsBackupTest {
                     Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
                     Settings.Global.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS,
                     Settings.Global.STYLUS_HANDWRITING_ENABLED,
+                    Settings.Global.STYLUS_EVER_USED,
                     Settings.Global.ENABLE_ADB_INCREMENTAL_INSTALL_DEFAULT,
                     Settings.Global.ENABLE_MULTI_SLOT_TIMEOUT_MILLIS,
                     Settings.Global.ENHANCED_4G_MODE_ENABLED,

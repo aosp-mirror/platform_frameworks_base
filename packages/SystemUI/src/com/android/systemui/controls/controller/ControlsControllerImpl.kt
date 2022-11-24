@@ -39,6 +39,7 @@ import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
+import com.android.systemui.controls.ui.SelectedItem
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
@@ -558,8 +559,8 @@ class ControlsControllerImpl @Inject constructor (
         )
     }
 
-    override fun getPreferredStructure(): StructureInfo {
-        return uiController.getPreferredStructure(getFavorites())
+    override fun getPreferredSelection(): SelectedItem {
+        return uiController.getPreferredSelectedItem(getFavorites())
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {

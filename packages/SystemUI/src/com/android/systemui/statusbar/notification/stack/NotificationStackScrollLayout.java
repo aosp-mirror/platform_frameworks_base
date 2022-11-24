@@ -1553,7 +1553,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             final int pinnedHeight = firstVisibleSection != null
                     ? firstVisibleSection.getFirstVisibleChild().getPinnedHeadsUpHeight()
                     : 0;
-            return mHeadsUpInset + pinnedHeight;
+            return mHeadsUpInset - mAmbientState.getStackTopMargin() + pinnedHeight;
         }
         return getMinExpansionHeight();
     }
@@ -1809,7 +1809,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @Override
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        mBottomInset = insets.getSystemWindowInsetBottom();
+        mBottomInset = insets.getSystemWindowInsetBottom()
+                + insets.getInsets(WindowInsets.Type.ime()).bottom;
 
         mWaterfallTopInset = 0;
         final DisplayCutout cutout = insets.getDisplayCutout();

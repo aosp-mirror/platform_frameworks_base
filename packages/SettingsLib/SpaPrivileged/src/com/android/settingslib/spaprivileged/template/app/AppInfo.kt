@@ -101,5 +101,5 @@ internal fun AppIcon(app: ApplicationInfo, size: Dp) {
 @Composable
 internal fun AppLabel(app: ApplicationInfo) {
     val appRepository = rememberAppRepository()
-    SettingsTitle(appRepository.produceLabel(app))
+    SettingsTitle(title = appRepository.produceLabel(app), useMediumWeight = true)
 }
