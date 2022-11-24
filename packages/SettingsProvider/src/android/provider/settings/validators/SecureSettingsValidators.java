@@ -86,6 +86,7 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.CONTRAST_LEVEL, new InclusiveFloatRangeValidator(-1f, 1f));
         VALIDATORS.put(
                 Secure.ACCESSIBILITY_CAPTIONING_PRESET,
                 new DiscreteValueValidator(new String[] {"-1", "0", "1", "2", "3", "4"}));
