@@ -126,6 +126,9 @@
     <uses-permission android:name="android.permission.ALLOW_SLIPPERY_TOUCHES" />
     <uses-permission android:name="android.permission.INPUT_CONSUMER" />
 
+    <!-- DeviceStateManager -->
+    <uses-permission android:name="android.permission.CONTROL_DEVICE_STATE" />
+
     <!-- DreamManager -->
     <uses-permission android:name="android.permission.READ_DREAM_STATE" />
     <uses-permission android:name="android.permission.WRITE_DREAM_STATE" />

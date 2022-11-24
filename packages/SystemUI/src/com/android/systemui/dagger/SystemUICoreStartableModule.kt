@@ -36,6 +36,7 @@ import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderCoordinator
 import com.android.systemui.power.PowerUI
+import com.android.systemui.reardisplay.RearDisplayDialogController
 import com.android.systemui.recents.Recents
 import com.android.systemui.settings.dagger.MultiUserUtilsModule
 import com.android.systemui.shortcut.ShortcutKeyDispatcher
@@ -243,4 +244,11 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(ChipbarCoordinator::class)
     abstract fun bindChipbarController(sysui: ChipbarCoordinator): CoreStartable
+
+
+    /** Inject into RearDisplayDialogController) */
+    @Binds
+    @IntoMap
+    @ClassKey(RearDisplayDialogController::class)
+    abstract fun bindRearDisplayDialogController(sysui: RearDisplayDialogController): CoreStartable
 }
