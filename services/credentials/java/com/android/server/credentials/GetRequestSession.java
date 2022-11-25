@@ -88,20 +88,49 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
 
     @Override
     public void onFinalResponseReceived(ComponentName componentName,
-            GetCredentialResponse response) {
+            @Nullable GetCredentialResponse response) {
         Log.i(TAG, "onFinalCredentialReceived from: " + componentName.flattenToString());
         if (response != null) {
-            respondToClientAndFinish(response);
+            respondToClientWithResponseAndFinish(response);
+        } else {
+            // TODO("Replace with no credentials/unknown type when ready)
+            respondToClientWithErrorAndFinish("unknown_type",
+                    "Invalid response from provider");
         }
     }
 
-    private void respondToClientAndFinish(GetCredentialResponse response) {
-        Log.i(TAG, "respondToClientAndFinish");
+    //TODO: Try moving the three error & response methods below to RequestSession to be shared
+    // between get & create.
+    @Override
+    public void onFinalErrorReceived(ComponentName componentName, String errorType,
+            String message) {
+        respondToClientWithErrorAndFinish(errorType, message);
+    }
+
+    private void respondToClientWithResponseAndFinish(GetCredentialResponse response) {
+        Log.i(TAG, "respondToClientWithResponseAndFinish");
         try {
             mClientCallback.onResponse(response);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
         finishSession();
+    }
+
+    private void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
+        Log.i(TAG, "respondToClientWithErrorAndFinish");
+        try {
+            mClientCallback.onError(errorType, errorMsg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        finishSession();
+    }
+
+    @Override
+    public void onUiCancellation() {
+        // TODO("Replace with properly defined error type")
+        respondToClientWithErrorAndFinish("user_canceled",
+                "User cancelled the selector");
     }
 }

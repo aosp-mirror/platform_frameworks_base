@@ -24,7 +24,6 @@ import android.credentials.Credential;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
 import android.service.credentials.CredentialEntry;
-import android.service.credentials.CredentialProviderException;
 import android.service.credentials.CredentialProviderInfo;
 import android.util.Pair;
 
@@ -37,6 +36,8 @@ import java.util.UUID;
  */
 public abstract class ProviderSession<T, R>
         implements RemoteCredentialService.ProviderCallbacks<R> {
+
+    private static final String TAG = "ProviderSession";
     // Key to be used as an entry key for a remote entry
     protected static final String REMOTE_ENTRY_KEY = "remote_entry_key";
 
@@ -51,6 +52,7 @@ public abstract class ProviderSession<T, R>
     @NonNull protected final T mProviderRequest;
     @Nullable protected R mProviderResponse;
     @Nullable protected Pair<String, CredentialEntry> mUiRemoteEntry;
+
 
     /**
      * Returns true if the given status reflects that the provider state is ready to be shown
@@ -95,8 +97,12 @@ public abstract class ProviderSession<T, R>
         /** Called when status changes. */
         void onProviderStatusChanged(Status status, ComponentName componentName);
 
-        /** Called when the final credential to be returned to the client has been received. */
+        /** Called when the final credential is received through an entry selection. */
         void onFinalResponseReceived(ComponentName componentName, V response);
+
+        /** Called when an error is received through an entry selection. */
+        void onFinalErrorReceived(ComponentName componentName, String errorType,
+                @Nullable String message);
     }
 
     protected ProviderSession(@NonNull Context context, @NonNull CredentialProviderInfo info,
@@ -129,8 +135,7 @@ public abstract class ProviderSession<T, R>
 
     /** Converts exception to a provider session status. */
     @NonNull
-    public static Status toStatus(
-            @CredentialProviderException.CredentialProviderError int errorCode) {
+    public static Status toStatus(int errorCode) {
         // TODO : Add more mappings as more flows are supported
         return Status.CANCELED;
     }

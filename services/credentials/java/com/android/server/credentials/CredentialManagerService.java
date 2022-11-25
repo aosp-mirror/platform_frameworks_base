@@ -175,12 +175,20 @@ public final class CredentialManagerService
 
             // Initiate all provider sessions
             List<ProviderSession> providerSessions =
-                    initiateProviderSessions(
-                            session,
-                            request.getGetCredentialOptions().stream()
-                                    .map(GetCredentialOption::getType)
-                                    .collect(Collectors.toList()));
-            // TODO : Return error when no providers available
+                    initiateProviderSessions(session, request.getGetCredentialOptions()
+                            .stream().map(GetCredentialOption::getType)
+                            .collect(Collectors.toList()));
+
+            if (providerSessions.isEmpty()) {
+                try {
+                    // TODO("Replace with properly defined error type")
+                    callback.onError("unknown_type",
+                            "No providers available to fulfill request.");
+                } catch (RemoteException e) {
+                    Log.i(TAG, "Issue invoking onError on IGetCredentialCallback "
+                            + "callback: " + e.getMessage());
+                }
+            }
 
             // Iterate over all provider sessions and invoke the request
             providerSessions.forEach(providerGetSession -> {
@@ -212,7 +220,17 @@ public final class CredentialManagerService
             // Initiate all provider sessions
             List<ProviderSession> providerSessions =
                     initiateProviderSessions(session, List.of(request.getType()));
-            // TODO : Return error when no providers available
+
+            if (providerSessions.isEmpty()) {
+                try {
+                    // TODO("Replace with properly defined error type")
+                    callback.onError("unknown_type",
+                            "No providers available to fulfill request.");
+                } catch (RemoteException e) {
+                    Log.i(TAG, "Issue invoking onError on ICreateCredentialCallback "
+                            + "callback: " + e.getMessage());
+                }
+            }
 
             // Iterate over all provider sessions and invoke the request
             providerSessions.forEach(

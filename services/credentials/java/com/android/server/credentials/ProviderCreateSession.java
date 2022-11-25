@@ -23,6 +23,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.Signature;
+import android.credentials.CreateCredentialException;
 import android.credentials.ui.CreateCredentialProviderData;
 import android.credentials.ui.Entry;
 import android.credentials.ui.ProviderPendingIntentResponse;
@@ -57,6 +58,8 @@ public final class ProviderCreateSession extends ProviderSession<
     private final Map<String, CreateEntry> mUiSaveEntries = new HashMap<>();
     /** The complete request to be used in the second round. */
     private final CreateCredentialRequest mCompleteRequest;
+
+    private CreateCredentialException mProviderException;
 
     /** Creates a new provider session to be used by the request session. */
     @Nullable public static ProviderCreateSession createNewSession(
@@ -124,8 +127,11 @@ public final class ProviderCreateSession extends ProviderSession<
 
     /** Called when the provider response resulted in a failure. */
     @Override
-    public void onProviderResponseFailure(int errorCode, @Nullable String errorType,
-            @Nullable CharSequence message) {
+    public void onProviderResponseFailure(int errorCode, @Nullable Exception exception) {
+        if (exception instanceof CreateCredentialException) {
+            // Store query phase exception for aggregation with final response
+            mProviderException = (CreateCredentialException) exception;
+        }
         updateStatusAndInvokeCallback(toStatus(errorCode));
     }
 
@@ -177,16 +183,20 @@ public final class ProviderCreateSession extends ProviderSession<
                 if (mUiSaveEntries.containsKey(entryKey)) {
                     onSaveEntrySelected(providerPendingIntentResponse);
                 } else {
-                    //TODO: Handle properly
                     Log.i(TAG, "Unexpected save entry key");
+                    // TODO("Replace with no credentials error type");
+                    invokeCallbackWithError("unknown_type",
+                            "Issue while retrieving credential");
                 }
                 break;
             case REMOTE_ENTRY_KEY:
                 if (mUiRemoteEntry.first.equals(entryKey)) {
                     onRemoteEntrySelected(providerPendingIntentResponse);
                 } else {
-                    //TODO: Handle properly
                     Log.i(TAG, "Unexpected remote entry key");
+                    // TODO("Replace with unknown/no credentials exception")
+                    invokeCallbackWithError("unknown_type",
+                            "Issue while retrieving credential");
                 }
                 break;
             default:
@@ -227,19 +237,53 @@ public final class ProviderCreateSession extends ProviderSession<
     }
 
     private void onSaveEntrySelected(ProviderPendingIntentResponse pendingIntentResponse) {
-        if (pendingIntentResponse == null) {
+        CreateCredentialException exception = maybeGetPendingIntentException(
+                pendingIntentResponse);
+        if (exception != null) {
+            invokeCallbackWithError(
+                    exception.errorType,
+                    exception.getMessage());
             return;
-            //TODO: Handle failure if pending intent is null
         }
-        if (PendingIntentResultHandler.isSuccessfulResponse(pendingIntentResponse)) {
-            android.credentials.CreateCredentialResponse credentialResponse =
-                    PendingIntentResultHandler.extractCreateCredentialResponse(
-                            pendingIntentResponse.getResultData());
-            if (credentialResponse != null) {
-                mCallbacks.onFinalResponseReceived(mComponentName, credentialResponse);
-                return;
+        android.credentials.CreateCredentialResponse credentialResponse =
+                PendingIntentResultHandler.extractCreateCredentialResponse(
+                        pendingIntentResponse.getResultData());
+        if (credentialResponse != null) {
+            mCallbacks.onFinalResponseReceived(mComponentName, credentialResponse);
+            return;
+        } else {
+            Log.i(TAG, "onSaveEntrySelected - no response or error found in pending "
+                    + "intent response");
+            invokeCallbackWithError(
+                    // TODO("Replace with unknown/no credentials exception")
+                    "unknown",
+                    "Issue encountered while retrieving the credential");
+        }
+    }
+
+    private void invokeCallbackWithError(String errorType, @Nullable String message) {
+        mCallbacks.onFinalErrorReceived(mComponentName, errorType, message);
+    }
+
+    @Nullable
+    private CreateCredentialException maybeGetPendingIntentException(
+            ProviderPendingIntentResponse pendingIntentResponse) {
+        if (pendingIntentResponse == null) {
+            Log.i(TAG, "pendingIntentResponse is null");
+            return null;
+        }
+        if (PendingIntentResultHandler.isValidResponse(pendingIntentResponse)) {
+            CreateCredentialException exception = PendingIntentResultHandler
+                    .extractCreateCredentialException(pendingIntentResponse.getResultData());
+            if (exception != null) {
+                Log.i(TAG, "Pending intent contains provider exception");
+                return exception;
             }
+        } else {
+            Log.i(TAG, "Pending intent result code not Activity.RESULT_OK");
+            // TODO("Update with unknown exception when ready")
+            return new CreateCredentialException("unknown");
         }
-        //TODO: Handle failure case is pending intent response does not have a credential
+        return null;
     }
 }
