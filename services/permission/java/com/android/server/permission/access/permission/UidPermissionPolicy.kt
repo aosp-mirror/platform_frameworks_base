@@ -36,6 +36,7 @@ import com.android.server.permission.access.SchemePolicy
 import com.android.server.permission.access.UidUri
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.andInv
+import com.android.server.permission.access.util.hasAnyBit
 import com.android.server.permission.access.util.hasBits
 import com.android.server.pm.KnownPackages
 import com.android.server.pm.parsing.PackageInfoUtils
@@ -76,7 +77,9 @@ class UidPermissionPolicy : SchemePolicy() {
     override fun MutateStateScope.onUserAdded(userId: Int) {
         newState.systemState.packageStates.forEach { (_, packageState) ->
             evaluateAllPermissionStatesForPackageAndUser(packageState, userId, null)
-            grantImplicitPermissions(packageState, userId)
+        }
+        newState.systemState.appIds.forEachKeyIndexed { _, appId ->
+            inheritImplicitPermissionStates(appId, userId)
         }
     }
 
@@ -88,6 +91,47 @@ class UidPermissionPolicy : SchemePolicy() {
         }
     }
 
+    override fun MutateStateScope.onStorageVolumeMounted(
+        volumeUuid: String?,
+        isSystemUpdated: Boolean
+    ) {
+        // TODO: STOPSHIP: Either make addPermissionGroups() favor system packages
+        // like addPermissions(), or sort system packages before non-system packages for this loop.
+        val changedPermissionNames = IndexedSet<String>()
+        newState.systemState.packageStates.forEach { (_, packageState) ->
+            val androidPackage = packageState.androidPackage
+            if (androidPackage == null || androidPackage.volumeUuid != volumeUuid) {
+                return@forEach
+            }
+            adoptPermissions(packageState, changedPermissionNames)
+            addPermissionGroups(packageState)
+            addPermissions(packageState, changedPermissionNames)
+            trimPermissions(packageState.packageName, changedPermissionNames)
+            trimPermissionStates(packageState.appId)
+        }
+        changedPermissionNames.forEachIndexed { _, permissionName ->
+            evaluatePermissionStateForAllPackages(permissionName, null)
+        }
+
+        newState.systemState.packageStates.forEach { (_, packageState) ->
+            val androidPackage = packageState.androidPackage
+            if (androidPackage == null || androidPackage.volumeUuid != volumeUuid) {
+                return@forEach
+            }
+            val installedPackageState = if (isSystemUpdated) packageState else null
+            evaluateAllPermissionStatesForPackage(packageState, installedPackageState)
+        }
+        newState.systemState.packageStates.forEach { (_, packageState) ->
+            val androidPackage = packageState.androidPackage
+            if (androidPackage == null || androidPackage.volumeUuid != volumeUuid) {
+                return@forEach
+            }
+            newState.systemState.userIds.forEachIndexed { _, userId ->
+                inheritImplicitPermissionStates(packageState.appId, userId)
+            }
+        }
+    }
+
     override fun MutateStateScope.onPackageAdded(packageState: PackageState) {
         val changedPermissionNames = IndexedSet<String>()
         adoptPermissions(packageState, changedPermissionNames)
@@ -95,17 +139,21 @@ class UidPermissionPolicy : SchemePolicy() {
         addPermissions(packageState, changedPermissionNames)
         // TODO: revokeStoragePermissionsIfScopeExpandedInternal()
         trimPermissions(packageState.packageName, changedPermissionNames)
+        trimPermissionStates(packageState.appId)
         changedPermissionNames.forEachIndexed { _, permissionName ->
-            evaluatePermissionStateForAllPackages(permissionName, packageState)
+            evaluatePermissionStateForAllPackages(permissionName, null)
         }
-
         evaluateAllPermissionStatesForPackage(packageState, packageState)
         newState.systemState.userIds.forEachIndexed { _, userId ->
-            grantImplicitPermissions(packageState, userId)
+            inheritImplicitPermissionStates(packageState.appId, userId)
         }
+    }
 
-        // TODO: add trimPermissionStates() here for removing the permission states that are
-        // no longer requested. (equivalent to revokeUnusedSharedUserPermissionsLocked())
+    override fun MutateStateScope.onPackageRemoved(packageName: String, appId: Int) {
+        // TODO: STOPSHIP: Remove this check or at least turn into logging.
+        check(packageName !in newState.systemState.disabledSystemPackageStates) {
+            "Package $packageName reported as removed before disabled system package is enabled"
+        }
     }
 
     private fun MutateStateScope.adoptPermissions(
@@ -361,6 +409,20 @@ class UidPermissionPolicy : SchemePolicy() {
             }
         }
 
+    private fun MutateStateScope.trimPermissionStates(appId: Int) {
+        val requestedPermissions = IndexedSet<String>()
+        forEachPackageInAppId(appId) {
+            requestedPermissions += it.androidPackage!!.requestedPermissions
+        }
+        newState.userStates.forEachIndexed { _, userId, userState ->
+            userState.uidPermissionFlags[appId].forEachReversedIndexed { _, permissionName, _ ->
+                if (permissionName !in requestedPermissions) {
+                    setPermissionFlags(appId, userId, permissionName, 0)
+                }
+            }
+        }
+    }
+
     private fun MutateStateScope.evaluatePermissionStateForAllPackages(
         permissionName: String,
         installedPackageState: PackageState?
@@ -415,8 +477,17 @@ class UidPermissionPolicy : SchemePolicy() {
             // For non-shared-user packages with missing androidPackage, skip evaluation.
             return
         }
-        val permission = newState.systemState.permissions[permissionName] ?: return
+        val permission = newState.systemState.permissions[permissionName]
         val oldFlags = getPermissionFlags(appId, userId, permissionName)
+        if (permission == null) {
+            if (oldFlags == 0) {
+                // If the permission definition is missing and we don't have any permission states
+                // for this permission, add the INSTALL_REVOKED flag to ensure that we don't
+                // automatically grant the permission when it's defined
+                setPermissionFlags(appId, userId, permissionName, PermissionFlags.INSTALL_REVOKED)
+            }
+            return
+        }
         if (permission.isNormal) {
             val wasGranted = oldFlags.hasBits(PermissionFlags.INSTALL_GRANTED)
             if (!wasGranted) {
@@ -479,21 +550,98 @@ class UidPermissionPolicy : SchemePolicy() {
             }
             setPermissionFlags(appId, userId, permissionName, newFlags)
         } else if (permission.isRuntime) {
-            // TODO: add runtime permissions
+            var newFlags = oldFlags and PermissionFlags.MASK_RUNTIME
+            if (getAppIdTargetSdkVersion(appId, permissionName) < Build.VERSION_CODES.M) {
+                newFlags = newFlags or PermissionFlags.LEGACY_GRANTED
+                // Explicitly check against the old state to determine if this permission is new.
+                val isNewPermission =
+                    getPermissionFlags(appId, userId, permissionName, oldState) == 0
+                if (isNewPermission) {
+                    newFlags = newFlags or PermissionFlags.IMPLICIT
+                }
+            } else {
+                newFlags = newFlags andInv PermissionFlags.LEGACY_GRANTED
+                val wasGrantedByImplicit = newFlags.hasBits(PermissionFlags.IMPLICIT_GRANTED)
+                val isLeanBackNotificationsPermission = newState.systemState.isLeanback &&
+                    permissionName in NOTIFICATION_PERMISSIONS
+                val isImplicitPermission = anyPackageInAppId(appId) {
+                    permissionName in it.androidPackage!!.implicitPermissions
+                }
+                val sourcePermissions = newState.systemState
+                    .implicitToSourcePermissions[permissionName]
+                val isAnySourcePermissionNonRuntime = sourcePermissions?.any {
+                    val sourcePermission = newState.systemState.permissions[it]
+                    checkNotNull(sourcePermission) {
+                        "Unknown source permission $it in split permissions"
+                    }
+                    !sourcePermission.isRuntime
+                } ?: false
+                val shouldGrantByImplicit = isLeanBackNotificationsPermission ||
+                    (isImplicitPermission && isAnySourcePermissionNonRuntime)
+                if (shouldGrantByImplicit) {
+                    newFlags = newFlags or PermissionFlags.IMPLICIT_GRANTED
+                } else {
+                    newFlags = newFlags andInv PermissionFlags.IMPLICIT_GRANTED
+                }
+                val hasImplicitFlag = newFlags.hasBits(PermissionFlags.IMPLICIT)
+                if (!isImplicitPermission && hasImplicitFlag) {
+                    // TODO: We might not want to remove the IMPLICIT flag
+                    // for NOTIFICATION_PERMISSIONS
+                    newFlags = newFlags andInv PermissionFlags.IMPLICIT
+                    var shouldRetainAsNearbyDevices = false
+                    if (permissionName in NEARBY_DEVICES_PERMISSIONS) {
+                        val accessBackgroundLocationFlags = getPermissionFlags(
+                            appId, userId, Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                        )
+                        shouldRetainAsNearbyDevices =
+                            PermissionFlags.isAppOpGranted(accessBackgroundLocationFlags) &&
+                                !accessBackgroundLocationFlags.hasBits(PermissionFlags.IMPLICIT)
+                    }
+                    // These are the permission flags that imply we shouldn't automatically
+                    // modify the permission grant state.
+                    val shouldRetainByMask = newFlags.hasAnyBit(
+                        PermissionFlags.SYSTEM_FIXED or PermissionFlags.POLICY_FIXED
+                    )
+                    if (shouldRetainAsNearbyDevices || shouldRetainByMask) {
+                        if (wasGrantedByImplicit) {
+                            newFlags = newFlags or PermissionFlags.RUNTIME_GRANTED
+                        }
+                    } else {
+                        newFlags = newFlags andInv (
+                            PermissionFlags.RUNTIME_GRANTED or PermissionFlags.USER_SET or
+                                PermissionFlags.USER_FIXED
+                        )
+                    }
+                }
+            }
+
+            val isExempt = newFlags.hasAnyBit(PermissionFlags.MASK_EXEMPT)
+            val isHardRestricted = permission.isHardRestricted && !isExempt
+            newFlags = if (isHardRestricted) {
+                newFlags or PermissionFlags.RESTRICTION_REVOKED
+            } else {
+                newFlags andInv PermissionFlags.RESTRICTION_REVOKED
+            }
+            val isSoftRestricted = permission.isSoftRestricted && !isExempt
+            newFlags = if (isSoftRestricted) {
+                newFlags or PermissionFlags.SOFT_RESTRICTED
+            } else {
+                newFlags andInv PermissionFlags.SOFT_RESTRICTED
+            }
+            setPermissionFlags(appId, userId, permissionName, newFlags)
         } else {
             Log.e(LOG_TAG, "Unknown protection level ${permission.protectionLevel}" +
                 "for permission ${permission.name} while evaluating permission state" +
                 "for appId $appId and userId $userId")
         }
-
-        // TODO: revokePermissionsNoLongerImplicitLocked() for runtime permissions
     }
 
-    private fun MutateStateScope.grantImplicitPermissions(packageState: PackageState, userId: Int) {
-        val appId = packageState.appId
-        val androidPackage = packageState.androidPackage ?: return
-        androidPackage.implicitPermissions.forEachIndexed implicitPermissions@ {
-            _, implicitPermissionName ->
+    private fun MutateStateScope.inheritImplicitPermissionStates(appId: Int, userId: Int) {
+        val implicitPermissions = IndexedSet<String>()
+        forEachPackageInAppId(appId) {
+            implicitPermissions += it.androidPackage!!.implicitPermissions
+        }
+        implicitPermissions.forEachIndexed implicitPermissions@ { _, implicitPermissionName ->
             val implicitPermission = newState.systemState.permissions[implicitPermissionName]
             checkNotNull(implicitPermission) {
                 "Unknown implicit permission $implicitPermissionName in split permissions"
@@ -502,15 +650,14 @@ class UidPermissionPolicy : SchemePolicy() {
                 return@implicitPermissions
             }
             // Explicitly check against the old state to determine if this permission is new.
-            val isNewPermission = getPermissionFlags(
-                appId, userId, implicitPermissionName, oldState
-            ) == 0
+            val isNewPermission =
+                getPermissionFlags(appId, userId, implicitPermissionName, oldState) == 0
             if (!isNewPermission) {
                 return@implicitPermissions
             }
             val sourcePermissions = newState.systemState
                 .implicitToSourcePermissions[implicitPermissionName] ?: return@implicitPermissions
-            var newFlags = 0
+            var newFlags = getPermissionFlags(appId, userId, implicitPermissionName)
             sourcePermissions.forEachIndexed sourcePermissions@ { _, sourcePermissionName ->
                 val sourcePermission = newState.systemState.permissions[sourcePermissionName]
                 checkNotNull(sourcePermission) {
@@ -525,12 +672,13 @@ class UidPermissionPolicy : SchemePolicy() {
                         newFlags = 0
                     }
                     newFlags = newFlags or (sourceFlags and PermissionFlags.MASK_RUNTIME)
-                    if (!sourcePermission.isRuntime && isSourceGranted) {
-                        newFlags = newFlags or PermissionFlags.IMPLICIT_GRANTED
-                    }
                 }
             }
-            newFlags = newFlags or PermissionFlags.IMPLICIT
+            if (implicitPermissionName in RETAIN_IMPLICIT_FLAGS_PERMISSIONS) {
+                newFlags = newFlags andInv PermissionFlags.IMPLICIT
+            } else {
+                newFlags = newFlags or PermissionFlags.IMPLICIT
+            }
             setPermissionFlags(appId, userId, implicitPermissionName, newFlags)
         }
     }
@@ -618,7 +766,7 @@ class UidPermissionPolicy : SchemePolicy() {
         val permissionAllowlist = newState.systemState.permissionAllowlist
         // TODO(b/261913353): STOPSHIP: Add AndroidPackage.apexModuleName. The below is only for
         //  passing compilation but won't actually work.
-        //val apexModuleName = androidPackage.apexModuleName
+        // val apexModuleName = androidPackage.apexModuleName
         val apexModuleName = androidPackage.packageName
         val packageName = androidPackage.packageName
         return when {
@@ -654,6 +802,17 @@ class UidPermissionPolicy : SchemePolicy() {
         }
     }
 
+    private fun MutateStateScope.getAppIdTargetSdkVersion(appId: Int, permissionName: String): Int {
+        var targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT
+        forEachPackageInAppId(appId) { packageState ->
+            val androidPackage = packageState.androidPackage!!
+            if (permissionName in androidPackage.requestedPermissions) {
+                targetSdkVersion = targetSdkVersion.coerceAtMost(androidPackage.targetSdkVersion)
+            }
+        }
+        return targetSdkVersion
+    }
+
     private fun MutateStateScope.anyPackageInAppId(
         appId: Int,
         state: AccessState = newState,
@@ -663,6 +822,20 @@ class UidPermissionPolicy : SchemePolicy() {
         return packageNames.anyIndexed { _, packageName ->
             val packageState = state.systemState.packageStates[packageName]!!
             packageState.androidPackage != null && predicate(packageState)
+        }
+    }
+
+    private fun MutateStateScope.forEachPackageInAppId(
+        appId: Int,
+        state: AccessState = newState,
+        action: (PackageState) -> Unit
+    ) {
+        val packageNames = state.systemState.appIds[appId]
+        packageNames.forEachIndexed { _, packageName ->
+            val packageState = state.systemState.packageStates[packageName]!!
+            if (packageState.androidPackage != null) {
+                action(packageState)
+            }
         }
     }
 
@@ -813,13 +986,6 @@ class UidPermissionPolicy : SchemePolicy() {
         return uid == ownerUid
     }
 
-    override fun MutateStateScope.onPackageRemoved(packageName: String, appId: Int) {
-        // TODO: STOPSHIP: Remove this check or at least turn into logging.
-        check(packageName !in newState.systemState.disabledSystemPackageStates) {
-            "Package $packageName reported as removed before disabled system package is enabled"
-        }
-    }
-
     override fun BinaryXmlPullParser.parseSystemState(state: AccessState) {
         with(persistence) { this@parseSystemState.parseSystemState(state) }
     }
@@ -928,12 +1094,23 @@ class UidPermissionPolicy : SchemePolicy() {
         private const val PLATFORM_PACKAGE_NAME = "android"
 
         // A set of permissions that we don't want to revoke when they are no longer implicit.
-        private val RETAIN_IMPLICIT_GRANT_PERMISSIONS = indexedSetOf(
+        private val RETAIN_IMPLICIT_FLAGS_PERMISSIONS = indexedSetOf(
             Manifest.permission.ACCESS_MEDIA_LOCATION,
             Manifest.permission.ACTIVITY_RECOGNITION,
             Manifest.permission.READ_MEDIA_AUDIO,
             Manifest.permission.READ_MEDIA_IMAGES,
             Manifest.permission.READ_MEDIA_VIDEO,
+        )
+
+        // TODO: also add the permission NEARBY_WIFI_DEVICES to this set
+        private val NEARBY_DEVICES_PERMISSIONS = indexedSetOf(
+            Manifest.permission.BLUETOOTH_ADVERTISE,
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.BLUETOOTH_SCAN
+        )
+
+        private val NOTIFICATION_PERMISSIONS = indexedSetOf(
+            Manifest.permission.POST_NOTIFICATIONS
         )
     }
 

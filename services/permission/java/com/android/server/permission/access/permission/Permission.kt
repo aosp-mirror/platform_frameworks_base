@@ -46,11 +46,14 @@ data class Permission(
     inline val isAppOp: Boolean
         get() = permissionInfo.protection == PermissionInfo.PROTECTION_FLAG_APPOP
 
+    inline val isRemoved: Boolean
+        get() = permissionInfo.flags.hasBits(PermissionInfo.FLAG_REMOVED)
+
     inline val isSoftRestricted: Boolean
-        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.FLAG_SOFT_RESTRICTED)
+        get() = permissionInfo.flags.hasBits(PermissionInfo.FLAG_SOFT_RESTRICTED)
 
     inline val isHardRestricted: Boolean
-        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.FLAG_HARD_RESTRICTED)
+        get() = permissionInfo.flags.hasBits(PermissionInfo.FLAG_HARD_RESTRICTED)
 
     inline val isSignature: Boolean
         get() = permissionInfo.protection == PermissionInfo.PROTECTION_SIGNATURE
