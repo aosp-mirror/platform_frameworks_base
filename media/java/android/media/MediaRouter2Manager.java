@@ -35,6 +35,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -93,6 +94,11 @@ public final class MediaRouter2Manager {
     @NonNull
     final ConcurrentMap<String, RouteDiscoveryPreference> mDiscoveryPreferenceMap =
             new ConcurrentHashMap<>();
+    // TODO(b/241888071): Merge mDiscoveryPreferenceMap and mPackageToRouteListingPreferenceMap into
+    //     a single record object maintained by a single package-to-record map.
+    @NonNull
+    private final ConcurrentMap<String, RouteListingPreference>
+            mPackageToRouteListingPreferenceMap = new ConcurrentHashMap<>();
 
     private final AtomicInteger mNextRequestId = new AtomicInteger(1);
     private final CopyOnWriteArrayList<TransferRequest> mTransferRequests =
@@ -352,6 +358,16 @@ public final class MediaRouter2Manager {
         Objects.requireNonNull(packageName, "packageName must not be null");
 
         return mDiscoveryPreferenceMap.getOrDefault(packageName, RouteDiscoveryPreference.EMPTY);
+    }
+
+    /**
+     * Returns the {@link RouteListingPreference} of the app with the given {@code packageName}, or
+     * null if the app has not set any.
+     */
+    @Nullable
+    public RouteListingPreference getRouteListingPreference(@NonNull String packageName) {
+        Preconditions.checkArgument(!TextUtils.isEmpty(packageName));
+        return mPackageToRouteListingPreferenceMap.get(packageName);
     }
 
     /**
@@ -686,6 +702,24 @@ public final class MediaRouter2Manager {
         }
     }
 
+    private void updateRouteListingPreference(
+            @NonNull String packageName, @Nullable RouteListingPreference routeListingPreference) {
+        RouteListingPreference oldRouteListingPreference =
+                routeListingPreference == null
+                        ? mPackageToRouteListingPreferenceMap.remove(packageName)
+                        : mPackageToRouteListingPreferenceMap.put(
+                                packageName, routeListingPreference);
+        if (Objects.equals(oldRouteListingPreference, routeListingPreference)) {
+            return;
+        }
+        for (CallbackRecord record : mCallbackRecords) {
+            record.mExecutor.execute(
+                    () ->
+                            record.mCallback.onRouteListingPreferenceUpdated(
+                                    packageName, routeListingPreference));
+        }
+    }
+
     /**
      * Gets the unmodifiable list of selected routes for the session.
      */
@@ -971,6 +1005,19 @@ public final class MediaRouter2Manager {
         }
 
         /**
+         * Called when the app with the given {@code packageName} updates its {@link
+         * MediaRouter2#setRouteListingPreference route listing preference}.
+         *
+         * @param packageName The package name of the app that changed its listing preference.
+         * @param routeListingPreference The new {@link RouteListingPreference} set by the app with
+         *     the given {@code packageName}. Maybe null if an app has unset its preference (by
+         *     passing null to {@link MediaRouter2#setRouteListingPreference}).
+         */
+        default void onRouteListingPreferenceUpdated(
+                @NonNull String packageName,
+                @Nullable RouteListingPreference routeListingPreference) {}
+
+        /**
          * Called when a previous request has failed.
          *
          * @param reason the reason that the request has failed. Can be one of followings:
@@ -1053,6 +1100,17 @@ public final class MediaRouter2Manager {
                 RouteDiscoveryPreference discoveryPreference) {
             mHandler.sendMessage(obtainMessage(MediaRouter2Manager::updateDiscoveryPreference,
                     MediaRouter2Manager.this, packageName, discoveryPreference));
+        }
+
+        @Override
+        public void notifyRouteListingPreferenceChange(
+                String packageName, @Nullable RouteListingPreference routeListingPreference) {
+            mHandler.sendMessage(
+                    obtainMessage(
+                            MediaRouter2Manager::updateRouteListingPreference,
+                            MediaRouter2Manager.this,
+                            packageName,
+                            routeListingPreference));
         }
 
         @Override
