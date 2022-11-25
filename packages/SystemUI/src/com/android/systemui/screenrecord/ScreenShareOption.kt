@@ -20,11 +20,11 @@ import androidx.annotation.StringRes
 import kotlin.annotation.Retention
 
 @Retention(AnnotationRetention.SOURCE)
-@IntDef(SINGLE_APP, ENTIRE_SCREEN)
+@IntDef(ENTIRE_SCREEN, SINGLE_APP)
 annotation class ScreenShareMode
 
-const val SINGLE_APP = 0
-const val ENTIRE_SCREEN = 1
+const val ENTIRE_SCREEN = 0
+const val SINGLE_APP = 1
 
 class ScreenShareOption(
     @ScreenShareMode val mode: Int,
