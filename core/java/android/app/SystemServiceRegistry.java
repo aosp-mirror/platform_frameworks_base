@@ -207,6 +207,7 @@ import android.service.oemlock.OemLockManager;
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.service.vr.IVrManager;
+import android.system.virtualmachine.VirtualizationFrameworkInitializer;
 import android.telecom.TelecomManager;
 import android.telephony.MmsManager;
 import android.telephony.TelephonyFrameworkInitializer;
@@ -1541,6 +1542,7 @@ public final class SystemServiceRegistry {
             ConnectivityFrameworkInitializerTiramisu.registerServiceWrappers();
             NearbyFrameworkInitializer.registerServiceWrappers();
             OnDevicePersonalizationFrameworkInitializer.registerServiceWrappers();
+            VirtualizationFrameworkInitializer.registerServiceWrappers();
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...
