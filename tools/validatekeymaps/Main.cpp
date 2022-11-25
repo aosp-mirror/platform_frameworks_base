@@ -167,8 +167,8 @@ static bool validateFile(const char* filename) {
             android::base::Result<std::unique_ptr<PropertyMap>> propertyMap =
                     PropertyMap::load(String8(filename));
             if (!propertyMap.ok()) {
-                error("Error %d parsing input device configuration file.\n\n",
-                      propertyMap.error().code());
+                error("Error parsing input device configuration file: %s.\n\n",
+                      propertyMap.error().message().c_str());
                 return false;
             }
             break;

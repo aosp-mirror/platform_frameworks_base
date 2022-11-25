@@ -7898,6 +7898,13 @@ public final class Settings {
                 "high_text_contrast_enabled";
 
         /**
+         * The color contrast, float in [-1, 1], 1 being the highest contrast.
+         *
+         * @hide
+         */
+        public static final String CONTRAST_LEVEL = "contrast_level";
+
+        /**
          * Setting that specifies whether the display magnification is enabled via a system-wide
          * triple tap gesture. Display magnifications allows the user to zoom in the display content
          * and is targeted to low vision users. The current magnification scale is controlled by

@@ -214,6 +214,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             return;
         }
         mDisplayId = displayId;
+        parseCurrentSysuiState();
         mCommandQueue.addCallback(this);
         mOverviewProxyService.addCallback(this);
         mEdgeBackGestureHandler.onNavigationModeChanged(
@@ -269,6 +270,13 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
      */
     public boolean isInitialized() {
         return mInitialized;
+    }
+
+    private void parseCurrentSysuiState() {
+        NavBarHelper.CurrentSysuiState state = mNavBarHelper.getCurrentSysuiState();
+        if (state.mWindowStateDisplayId == mDisplayId) {
+            mTaskBarWindowState = state.mWindowState;
+        }
     }
 
     private void updateSysuiFlags() {

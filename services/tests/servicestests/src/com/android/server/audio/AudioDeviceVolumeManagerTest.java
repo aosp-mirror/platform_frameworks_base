@@ -84,12 +84,12 @@ public class AudioDeviceVolumeManagerTest {
         final AudioDeviceAttributes usbDevice = new AudioDeviceAttributes(
                 /*native type*/ AudioSystem.DEVICE_OUT_USB_DEVICE, /*address*/ "bla");
 
-        mAudioService.setDeviceVolume(volMin, usbDevice, mPackageName, TAG);
+        mAudioService.setDeviceVolume(volMin, usbDevice, mPackageName);
         mTestLooper.dispatchAll();
         verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
                         AudioManager.STREAM_MUSIC, minIndex, AudioSystem.DEVICE_OUT_USB_DEVICE);
 
-        mAudioService.setDeviceVolume(volMid, usbDevice, mPackageName, TAG);
+        mAudioService.setDeviceVolume(volMid, usbDevice, mPackageName);
         mTestLooper.dispatchAll();
         verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
                 AudioManager.STREAM_MUSIC, midIndex, AudioSystem.DEVICE_OUT_USB_DEVICE);

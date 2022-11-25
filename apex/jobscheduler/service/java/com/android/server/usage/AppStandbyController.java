@@ -63,6 +63,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager.ForcedReasons;
@@ -108,6 +109,7 @@ import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.view.Display;
@@ -116,6 +118,8 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
@@ -278,6 +282,13 @@ public class AppStandbyController
      */
     @GuardedBy("mPendingIdleStateChecks")
     private final SparseLongArray mPendingIdleStateChecks = new SparseLongArray();
+
+    /**
+     * Map of uids to their current app-op mode for
+     * {@link AppOpsManager#OPSTR_SYSTEM_EXEMPT_FROM_APP_STANDBY}.
+     */
+    @GuardedBy("mSystemExemptionAppOpMode")
+    private final SparseIntArray mSystemExemptionAppOpMode = new SparseIntArray();
 
     // Cache the active network scorer queried from the network scorer service
     private volatile String mCachedNetworkScorer = null;
@@ -488,6 +499,7 @@ public class AppStandbyController
 
     private AppWidgetManager mAppWidgetManager;
     private PackageManager mPackageManager;
+    private AppOpsManager mAppOpsManager;
     Injector mInjector;
 
     private static class Pool<T> {
@@ -647,6 +659,28 @@ public class AppStandbyController
             settingsObserver.start();
 
             mAppWidgetManager = mContext.getSystemService(AppWidgetManager.class);
+            mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
+            IAppOpsService iAppOpsService = mInjector.getAppOpsService();
+            try {
+                iAppOpsService.startWatchingMode(
+                        AppOpsManager.OP_SYSTEM_EXEMPT_FROM_APP_STANDBY,
+                        /*packageName=*/ null,
+                        new IAppOpsCallback.Stub() {
+                            @Override
+                            public void opChanged(int op, int uid, String packageName) {
+                                final int userId = UserHandle.getUserId(uid);
+                                synchronized (mSystemExemptionAppOpMode) {
+                                    mSystemExemptionAppOpMode.delete(uid);
+                                }
+                                mHandler.obtainMessage(
+                                        MSG_CHECK_PACKAGE_IDLE_STATE, userId, uid, packageName)
+                                        .sendToTarget();
+                            }
+                        });
+            } catch (RemoteException e) {
+                // Should not happen.
+                Slog.wtf(TAG, "Failed start watching for app op", e);
+            }
 
             mInjector.registerDisplayListener(mDisplayListener, mHandler);
             synchronized (mAppIdleLock) {
@@ -1417,6 +1451,23 @@ public class AppStandbyController
                 return STANDBY_BUCKET_EXEMPTED;
             }
 
+            final int uid = UserHandle.getUid(userId, appId);
+            synchronized (mSystemExemptionAppOpMode) {
+                if (mSystemExemptionAppOpMode.indexOfKey(uid) >= 0) {
+                    if (mSystemExemptionAppOpMode.get(uid)
+                            == AppOpsManager.MODE_ALLOWED) {
+                        return STANDBY_BUCKET_EXEMPTED;
+                    }
+                } else {
+                    int mode = mAppOpsManager.checkOpNoThrow(
+                            AppOpsManager.OP_SYSTEM_EXEMPT_FROM_APP_STANDBY, uid, packageName);
+                    mSystemExemptionAppOpMode.put(uid, mode);
+                    if (mode == AppOpsManager.MODE_ALLOWED) {
+                        return STANDBY_BUCKET_EXEMPTED;
+                    }
+                }
+            }
+
             if (mAppWidgetManager != null
                     && mInjector.isBoundWidgetPackage(mAppWidgetManager, packageName, userId)) {
                 return STANDBY_BUCKET_ACTIVE;
@@ -2129,6 +2180,12 @@ public class AppStandbyController
                     clearAppIdleForPackage(pkgName, userId);
                 }
             }
+            synchronized (mSystemExemptionAppOpMode) {
+                if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+                    mSystemExemptionAppOpMode.delete(UserHandle.getUid(userId, getAppId(pkgName)));
+                }
+            }
+
         }
     }
 
@@ -2522,6 +2579,11 @@ public class AppStandbyController
             synchronized (mPowerWhitelistedApps) {
                 return mPowerWhitelistedApps.contains(packageName);
             }
+        }
+
+        IAppOpsService getAppOpsService() {
+            return IAppOpsService.Stub.asInterface(
+                    ServiceManager.getService(Context.APP_OPS_SERVICE));
         }
 
         /**

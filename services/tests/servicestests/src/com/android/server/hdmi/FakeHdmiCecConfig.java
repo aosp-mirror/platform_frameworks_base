@@ -348,6 +348,17 @@ final class FakeHdmiCecConfig extends HdmiCecConfig {
         doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMaxDisabled_allowed);
         doReturn(false).when(resources).getBoolean(R.bool.config_cecQuerySadMaxDisabled_default);
 
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_earcEnabled_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_earcFeatureEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_earcFeatureEnabled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_earcFeatureDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_earcFeatureDisabled_default);
+
         return resources;
     }
 

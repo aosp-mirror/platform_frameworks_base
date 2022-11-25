@@ -7,6 +7,7 @@
   <string name="string_create_in_another_place">Create in another place</string>
   <string name="string_save_to_another_place">Save to another place</string>
   <string name="string_use_another_device">Use another device</string>
+  <string name="string_save_to_another_device">Save to another device</string>
   <string name="string_no_thanks">No thanks</string>
   <string name="passkey_creation_intro_title">A simple way to sign in safely</string>
   <string name="passkey_creation_intro_body">Use your fingerprint, face or screen lock to sign in with a unique passkey that can’t be forgotten or stolen. Learn more</string>

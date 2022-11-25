@@ -36,6 +36,7 @@ data class CreateCredentialUiState(
   val disabledProviders: List<DisabledProviderInfo>? = null,
   val currentScreenState: CreateScreenState,
   val requestDisplayInfo: RequestDisplayInfo,
+  val showActiveEntryOnly: Boolean,
   val activeEntry: ActiveEntry? = null,
   val selectedEntry: EntryInfo? = null,
 )
@@ -56,13 +57,18 @@ class CreateCredentialViewModel(
   }
 
   fun onConfirmIntro() {
-    if (uiState.enabledProviders.size > 1) {
-      uiState = uiState.copy(
-        currentScreenState = CreateScreenState.PROVIDER_SELECTION
+    var createOptionSize = 0
+    uiState.enabledProviders.forEach {
+      enabledProvider -> createOptionSize += enabledProvider.createOptions.size}
+    uiState = if (createOptionSize > 1) {
+      uiState.copy(
+        currentScreenState = CreateScreenState.PROVIDER_SELECTION,
+        showActiveEntryOnly = true
       )
-    } else if (uiState.enabledProviders.size == 1){
-      uiState = uiState.copy(
+    } else if (createOptionSize == 1){
+      uiState.copy(
         currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
+        showActiveEntryOnly = false,
         activeEntry = ActiveEntry(uiState.enabledProviders.first(),
           uiState.enabledProviders.first().createOptions.first()
         )
@@ -90,16 +96,18 @@ class CreateCredentialViewModel(
     )
   }
 
-  fun onMoreOptionsRowSelected(activeEntry: ActiveEntry) {
+  fun onEntrySelectedFromMoreOptionScreen(activeEntry: ActiveEntry) {
     uiState = uiState.copy(
       currentScreenState = CreateScreenState.MORE_OPTIONS_ROW_INTRO,
+      showActiveEntryOnly = false,
       activeEntry = activeEntry
     )
   }
 
-  fun onMoreOptionsRowSelectedForFirstUse(activeEntry: ActiveEntry) {
+  fun onEntrySelectedFromFirstUseScreen(activeEntry: ActiveEntry) {
     uiState = uiState.copy(
       currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
+      showActiveEntryOnly = true,
       activeEntry = activeEntry
     )
   }
