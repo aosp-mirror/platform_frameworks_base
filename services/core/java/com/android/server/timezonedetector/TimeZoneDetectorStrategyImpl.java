@@ -47,6 +47,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemTimeZone.TimeZoneConfidence;
+import com.android.server.timezonedetector.ConfigurationInternal.DetectionMode;
 
 import java.io.PrintWriter;
 import java.time.Duration;
@@ -597,9 +598,10 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     @GuardedBy("this")
     private void doAutoTimeZoneDetection(
             @NonNull ConfigurationInternal currentUserConfig, @NonNull String detectionReason) {
-        // Use the correct algorithm based on the user's current configuration. If it changes, then
-        // detection will be re-run.
-        switch (currentUserConfig.getDetectionMode()) {
+        // Use the correct detection algorithm based on the device's config and the user's current
+        // configuration. If user config changes, then detection will be re-run.
+        @DetectionMode int detectionMode = currentUserConfig.getDetectionMode();
+        switch (detectionMode) {
             case ConfigurationInternal.DETECTION_MODE_MANUAL:
                 // No work to do.
                 break;
@@ -635,9 +637,14 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
             case ConfigurationInternal.DETECTION_MODE_TELEPHONY:
                 doTelephonyTimeZoneDetection(detectionReason);
                 break;
+            case ConfigurationInternal.DETECTION_MODE_UNKNOWN:
+                // The "DETECTION_MODE_UNKNOWN" state can occur on devices with only location
+                // detection algorithm support and when the user's master location toggle is off.
+                Slog.i(LOG_TAG, "Unknown detection mode: " + detectionMode + ", is location off?");
+                break;
             default:
-                Slog.wtf(LOG_TAG, "Unknown detection mode: "
-                        + currentUserConfig.getDetectionMode());
+                // Coding error
+                Slog.wtf(LOG_TAG, "Unknown detection mode: " + detectionMode);
         }
     }
 
