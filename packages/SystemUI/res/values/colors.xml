@@ -247,4 +247,8 @@
     <color name="dream_overlay_clock_ambient_text_shadow_color">#4D000000</color>
     <color name="dream_overlay_status_bar_key_text_shadow_color">#66000000</color>
     <color name="dream_overlay_status_bar_ambient_text_shadow_color">#59000000</color>
+
+    <!-- Rear Display Education -->
+    <color name="rear_display_overlay_animation_background_color">#1E1B17</color>
+    <color name="rear_display_overlay_dialog_background_color">#1E1B17</color>
 </resources>

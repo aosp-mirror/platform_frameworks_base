@@ -35,7 +35,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.ArrayMap;
-import android.window.WindowContext;
 import android.window.WindowProvider;
 
 import androidx.annotation.NonNull;
@@ -310,19 +309,20 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         }
         final int windowingMode;
         if (context instanceof Activity) {
-            windowingMode = ActivityClient.getInstance().getTaskWindowingMode(
+            final Configuration taskConfig = ActivityClient.getInstance().getTaskConfiguration(
                     context.getActivityToken());
+            if (taskConfig == null) {
+                // If we cannot determine the task configuration for any reason, it is likely that
+                // we won't be able to determine its position correctly as well. DisplayFeatures'
+                // bounds in this case can't be computed correctly, so we should skip.
+                return false;
+            }
+            windowingMode = taskConfig.windowConfiguration.getWindowingMode();
         } else {
             // TODO(b/242674941): use task windowing mode for window context that associates with
             //  activity.
             windowingMode = context.getResources().getConfiguration().windowConfiguration
                     .getWindowingMode();
-        }
-        if (windowingMode == -1) {
-            // If we cannot determine the task windowing mode for any reason, it is likely that we
-            // won't be able to determine its position correctly as well. DisplayFeatures' bounds
-            // in this case can't be computed correctly, so we should skip.
-            return false;
         }
         // It is recommended not to report any display features in multi-window mode, since it
         // won't be possible to synchronize the display feature positions with window movement.
