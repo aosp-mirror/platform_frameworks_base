@@ -321,6 +321,7 @@ public class TransitionAnimationHelper {
                         .setPixelFormat(PixelFormat.RGBA_8888)
                         .setChildrenOnly(true)
                         .setAllowProtected(true)
+                        .setCaptureSecureLayers(true)
                         .build();
         final SurfaceControl.ScreenshotHardwareBuffer edgeBuffer =
                 SurfaceControl.captureLayers(captureArgs);
