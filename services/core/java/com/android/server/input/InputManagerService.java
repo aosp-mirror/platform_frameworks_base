@@ -2770,6 +2770,11 @@ public class InputManagerService extends IInputManager.Stub
             if (mOverriddenPointerDisplayId != Display.INVALID_DISPLAY) {
                 pw.println("mOverriddenPointerDisplayId: " + mOverriddenPointerDisplayId);
             }
+
+            pw.println("mAcknowledgedPointerDisplayId=" + mAcknowledgedPointerDisplayId);
+            pw.println("mRequestedPointerDisplayId=" + mRequestedPointerDisplayId);
+            pw.println("mPointerIconType=" + PointerIcon.typeToString(mPointerIconType));
+            pw.println("mPointerIcon=" + mPointerIcon);
         }
     }
     private boolean checkCallingPermission(String permission, String func) {
