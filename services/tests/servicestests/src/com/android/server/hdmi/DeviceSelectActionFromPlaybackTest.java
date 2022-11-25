@@ -102,7 +102,7 @@ public class DeviceSelectActionFromPlaybackTest {
                         Collections.singletonList(HdmiDeviceInfo.DEVICE_PLAYBACK),
                         new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
-                    boolean isControlEnabled() {
+                    boolean isCecControlEnabled() {
                         return true;
                     }
 

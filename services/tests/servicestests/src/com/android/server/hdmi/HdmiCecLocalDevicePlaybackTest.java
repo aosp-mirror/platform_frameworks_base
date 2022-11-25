@@ -108,7 +108,7 @@ public class HdmiCecLocalDevicePlaybackTest {
                     }
 
                     @Override
-                    boolean isControlEnabled() {
+                    boolean isCecControlEnabled() {
                         return true;
                     }
 

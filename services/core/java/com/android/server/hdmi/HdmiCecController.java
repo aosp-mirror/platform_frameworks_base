@@ -636,7 +636,7 @@ final class HdmiCecController {
     void onReceiveCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (((ACTION_ON_RECEIVE_MSG & CEC_DISABLED_IGNORE) == 0)
-                && !mService.isControlEnabled()
+                && !mService.isCecControlEnabled()
                 && !HdmiCecMessage.isCecTransportMessage(message.getOpcode())) {
             if ((ACTION_ON_RECEIVE_MSG & CEC_DISABLED_LOG_WARNING) != 0) {
                 HdmiLogger.warning("Message " + message + " received when cec disabled");

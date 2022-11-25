@@ -259,7 +259,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
             return;
         }
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             setActiveSource(targetDevice, "HdmiCecLocalDeviceTv#deviceSelect()");
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
@@ -272,7 +272,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private void handleSelectInternalSource() {
         assertRunOnServiceThread();
         // Seq #18
-        if (mService.isControlEnabled()
+        if (mService.isCecControlEnabled()
                 && getActiveSource().logicalAddress != getDeviceInfo().getLogicalAddress()) {
             updateActiveSource(
                     getDeviceInfo().getLogicalAddress(),
@@ -371,7 +371,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return;
         }
         getActiveSource().invalidate();
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             setActivePortId(portId);
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
@@ -694,7 +694,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                         // Since we removed all devices when it starts and
                         // device discovery action does not poll local devices,
                         // we should put device info of local device manually here
-                        for (HdmiCecLocalDevice device : mService.getAllLocalDevices()) {
+                        for (HdmiCecLocalDevice device : mService.getAllCecLocalDevices()) {
                             mService.getHdmiCecNetwork().addCecDevice(device.getDeviceInfo());
                         }
 
@@ -742,7 +742,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // Seq #32
     void changeSystemAudioMode(boolean enabled, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
-        if (!mService.isControlEnabled() || hasAction(DeviceDiscoveryAction.class)) {
+        if (!mService.isCecControlEnabled() || hasAction(DeviceDiscoveryAction.class)) {
             setSystemAudioMode(false);
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
@@ -1181,7 +1181,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     private boolean isMessageForSystemAudio(HdmiCecMessage message) {
-        return mService.isControlEnabled()
+        return mService.isCecControlEnabled()
                 && message.getSource() == Constants.ADDR_AUDIO_SYSTEM
                 && (message.getDestination() == Constants.ADDR_TV
                         || message.getDestination() == Constants.ADDR_BROADCAST)
@@ -1330,7 +1330,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(SystemAudioAutoInitiationAction.class);
         removeAction(VolumeControlAction.class);
 
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             setSystemAudioMode(false);
         }
     }
@@ -1376,7 +1376,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected void onStandby(boolean initiatedByCec, int standbyAction) {
         assertRunOnServiceThread();
         // Seq #11
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             return;
         }
         boolean sendStandbyOnSleep =
@@ -1415,7 +1415,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @Constants.HandleMessageResult
     int startOneTouchRecord(int recorderAddress, byte[] recordSource) {
         assertRunOnServiceThread();
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             Slog.w(TAG, "Can not start one touch record. CEC control is disabled.");
             announceOneTouchRecordResult(recorderAddress, ONE_TOUCH_RECORD_CEC_DISABLED);
             return Constants.ABORT_NOT_IN_CORRECT_MODE;
@@ -1444,7 +1444,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void stopOneTouchRecord(int recorderAddress) {
         assertRunOnServiceThread();
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             Slog.w(TAG, "Can not stop one touch record. CEC control is disabled.");
             announceOneTouchRecordResult(recorderAddress, ONE_TOUCH_RECORD_CEC_DISABLED);
             return;
@@ -1478,7 +1478,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void startTimerRecording(int recorderAddress, int sourceType, byte[] recordSource) {
         assertRunOnServiceThread();
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             Slog.w(TAG, "Can not start one touch record. CEC control is disabled.");
             announceTimerRecordingResult(recorderAddress,
                     TIMER_RECORDING_RESULT_EXTRA_CEC_DISABLED);
@@ -1514,7 +1514,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void clearTimerRecording(int recorderAddress, int sourceType, byte[] recordSource) {
         assertRunOnServiceThread();
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             Slog.w(TAG, "Can not start one touch record. CEC control is disabled.");
             announceClearTimerRecordingResult(recorderAddress, CLEAR_TIMER_STATUS_CEC_DISABLE);
             return;

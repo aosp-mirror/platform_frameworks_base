@@ -136,7 +136,7 @@ public class HdmiCecLocalDeviceTvTest {
                         super.wakeUp();
                     }
                     @Override
-                    boolean isControlEnabled() {
+                    boolean isCecControlEnabled() {
                         return true;
                     }
 

@@ -99,7 +99,7 @@ public class RequestSadActionTest {
                 new HdmiControlService(context, Collections.singletonList(HdmiDeviceInfo.DEVICE_TV),
                         new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
-                    boolean isControlEnabled() {
+                    boolean isCecControlEnabled() {
                         return true;
                     }
 
