@@ -5291,11 +5291,8 @@ package android.app {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.ForegroundServiceStartNotAllowedException> CREATOR;
   }
 
-  public final class ForegroundServiceTypeNotAllowedException extends android.app.ServiceStartNotAllowedException implements android.os.Parcelable {
-    ctor public ForegroundServiceTypeNotAllowedException(@NonNull String);
-    method public int describeContents();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.ForegroundServiceTypeNotAllowedException> CREATOR;
+  public abstract class ForegroundServiceTypeException extends android.app.ServiceStartNotAllowedException {
+    ctor public ForegroundServiceTypeException(@NonNull String);
   }
 
   @Deprecated public class Fragment implements android.content.ComponentCallbacks2 android.view.View.OnCreateContextMenuListener {
@@ -5738,6 +5735,13 @@ package android.app {
     method @Deprecated public void setIntentRedelivery(boolean);
   }
 
+  public final class InvalidForegroundServiceTypeException extends android.app.ForegroundServiceTypeException implements android.os.Parcelable {
+    ctor public InvalidForegroundServiceTypeException(@NonNull String);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.InvalidForegroundServiceTypeException> CREATOR;
+  }
+
   public class KeyguardManager {
     method @RequiresPermission(android.Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE) public void addKeyguardLockedStateListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.KeyguardManager.KeyguardLockedStateListener);
     method @Deprecated public android.content.Intent createConfirmDeviceCredentialIntent(CharSequence, CharSequence);
@@ -5890,6 +5894,13 @@ package android.app {
     method public void setExtendedSettingsClickListener(android.view.View.OnClickListener);
     method public void setRouteTypes(int);
     method public void showDialog();
+  }
+
+  public final class MissingForegroundServiceTypeException extends android.app.ForegroundServiceTypeException implements android.os.Parcelable {
+    ctor public MissingForegroundServiceTypeException(@NonNull String);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.MissingForegroundServiceTypeException> CREATOR;
   }
 
   public class NativeActivity extends android.app.Activity implements android.view.InputQueue.Callback android.view.SurfaceHolder.Callback2 android.view.ViewTreeObserver.OnGlobalLayoutListener {
@@ -8475,31 +8486,19 @@ package android.app.job {
 
   public abstract class JobService extends android.app.Service {
     ctor public JobService();
-    method public long getTransferredDownloadBytes();
-    method public long getTransferredDownloadBytes(@NonNull android.app.job.JobWorkItem);
-    method public long getTransferredUploadBytes();
-    method public long getTransferredUploadBytes(@NonNull android.app.job.JobWorkItem);
     method public final void jobFinished(android.app.job.JobParameters, boolean);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract boolean onStartJob(android.app.job.JobParameters);
     method public abstract boolean onStopJob(android.app.job.JobParameters);
-    method public final void updateEstimatedNetworkBytes(@NonNull android.app.job.JobParameters, long, long);
-    method public final void updateEstimatedNetworkBytes(@NonNull android.app.job.JobParameters, @NonNull android.app.job.JobWorkItem, long, long);
-    method public final void updateTransferredNetworkBytes(@NonNull android.app.job.JobParameters, long, long);
-    method public final void updateTransferredNetworkBytes(@NonNull android.app.job.JobParameters, @NonNull android.app.job.JobWorkItem, long, long);
     field public static final String PERMISSION_BIND = "android.permission.BIND_JOB_SERVICE";
   }
 
   public abstract class JobServiceEngine {
     ctor public JobServiceEngine(android.app.Service);
     method public final android.os.IBinder getBinder();
-    method public long getTransferredDownloadBytes(@NonNull android.app.job.JobParameters, @Nullable android.app.job.JobWorkItem);
-    method public long getTransferredUploadBytes(@NonNull android.app.job.JobParameters, @Nullable android.app.job.JobWorkItem);
     method public void jobFinished(android.app.job.JobParameters, boolean);
     method public abstract boolean onStartJob(android.app.job.JobParameters);
     method public abstract boolean onStopJob(android.app.job.JobParameters);
-    method public void updateEstimatedNetworkBytes(@NonNull android.app.job.JobParameters, @NonNull android.app.job.JobWorkItem, long, long);
-    method public void updateTransferredNetworkBytes(@NonNull android.app.job.JobParameters, @Nullable android.app.job.JobWorkItem, long, long);
   }
 
   public final class JobWorkItem implements android.os.Parcelable {
@@ -20899,8 +20898,11 @@ package android.media {
     method public void onRoutingChanged(android.media.AudioRouting);
   }
 
-  public final class AudioTimestamp {
+  public final class AudioTimestamp implements android.os.Parcelable {
     ctor public AudioTimestamp();
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioTimestamp> CREATOR;
     field public static final int TIMEBASE_BOOTTIME = 1; // 0x1
     field public static final int TIMEBASE_MONOTONIC = 0; // 0x0
     field public long framePosition;
@@ -49747,7 +49749,7 @@ package android.view {
     method public static void request(@NonNull android.view.Surface, @Nullable android.graphics.Rect, @NonNull android.graphics.Bitmap, @NonNull android.view.PixelCopy.OnPixelCopyFinishedListener, @NonNull android.os.Handler);
     method public static void request(@NonNull android.view.Window, @NonNull android.graphics.Bitmap, @NonNull android.view.PixelCopy.OnPixelCopyFinishedListener, @NonNull android.os.Handler);
     method public static void request(@NonNull android.view.Window, @Nullable android.graphics.Rect, @NonNull android.graphics.Bitmap, @NonNull android.view.PixelCopy.OnPixelCopyFinishedListener, @NonNull android.os.Handler);
-    method public static void request(@NonNull android.view.PixelCopy.Request);
+    method public static void request(@NonNull android.view.PixelCopy.Request, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.PixelCopy.Result>);
     field public static final int ERROR_DESTINATION_INVALID = 5; // 0x5
     field public static final int ERROR_SOURCE_INVALID = 4; // 0x4
     field public static final int ERROR_SOURCE_NO_DATA = 3; // 0x3
@@ -49763,14 +49765,14 @@ package android.view {
   public static final class PixelCopy.Request {
     method @Nullable public android.graphics.Bitmap getDestinationBitmap();
     method @Nullable public android.graphics.Rect getSourceRect();
-    method @NonNull public static android.view.PixelCopy.Request.Builder ofSurface(@NonNull android.view.Surface, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.PixelCopy.Result>);
-    method @NonNull public static android.view.PixelCopy.Request.Builder ofSurface(@NonNull android.view.SurfaceView, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.PixelCopy.Result>);
-    method @NonNull public static android.view.PixelCopy.Request.Builder ofWindow(@NonNull android.view.Window, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.PixelCopy.Result>);
-    method @NonNull public static android.view.PixelCopy.Request.Builder ofWindow(@NonNull android.view.View, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.PixelCopy.Result>);
   }
 
   public static final class PixelCopy.Request.Builder {
     method @NonNull public android.view.PixelCopy.Request build();
+    method @NonNull public static android.view.PixelCopy.Request.Builder ofSurface(@NonNull android.view.Surface);
+    method @NonNull public static android.view.PixelCopy.Request.Builder ofSurface(@NonNull android.view.SurfaceView);
+    method @NonNull public static android.view.PixelCopy.Request.Builder ofWindow(@NonNull android.view.Window);
+    method @NonNull public static android.view.PixelCopy.Request.Builder ofWindow(@NonNull android.view.View);
     method @NonNull public android.view.PixelCopy.Request.Builder setDestinationBitmap(@Nullable android.graphics.Bitmap);
     method @NonNull public android.view.PixelCopy.Request.Builder setSourceRect(@Nullable android.graphics.Rect);
   }

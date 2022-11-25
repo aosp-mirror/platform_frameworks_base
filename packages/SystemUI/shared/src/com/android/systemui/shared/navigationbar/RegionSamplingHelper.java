@@ -117,7 +117,7 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
             @Override
             public void onSampleCollected(float medianLuma) {
                 if (mSamplingEnabled) {
-                    updateMediaLuma(medianLuma);
+                    updateMedianLuma(medianLuma);
                 }
             }
         };
@@ -261,7 +261,7 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
         }
     }
 
-    private void updateMediaLuma(float medianLuma) {
+    private void updateMedianLuma(float medianLuma) {
         mCurrentMedianLuma = medianLuma;
 
         // If the difference between the new luma and the current luma is larger than threshold

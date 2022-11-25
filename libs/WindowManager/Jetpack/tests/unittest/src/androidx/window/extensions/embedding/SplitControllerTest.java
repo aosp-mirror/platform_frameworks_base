@@ -261,7 +261,7 @@ public class SplitControllerTest {
 
         assertNotNull(tf);
         assertNotNull(taskContainer);
-        assertEquals(TASK_BOUNDS, taskContainer.getTaskBounds());
+        assertEquals(TASK_BOUNDS, taskContainer.getConfiguration().windowConfiguration.getBounds());
     }
 
     @Test

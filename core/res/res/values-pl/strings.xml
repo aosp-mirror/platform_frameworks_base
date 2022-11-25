@@ -497,10 +497,8 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Ta aplikacja może nagrywać dźwięk przy użyciu mikrofonu, gdy jest używana."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"nagrywanie dźwięku w tle"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Ta aplikacja może w dowolnym momencie nagrywać dźwięk przy użyciu mikrofonu."</string>
-    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
-    <skip />
-    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
-    <skip />
+    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"wykrywanie zrzutów ekranu z oknami aplikacji"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"Ta aplikacja będzie powiadamiana o zrzutach ekranu robionych po jej uruchomieniu."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"wysyłanie poleceń do karty SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Pozwala aplikacji na wysyłanie poleceń do karty SIM. To bardzo niebezpieczne."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"rozpoznawanie aktywności fizycznej"</string>
@@ -2344,8 +2342,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nie można korzystać z aparatu telefonu na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nie można korzystać z aparatu tabletu na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Nie można z tego skorzystać podczas strumieniowania. Użyj telefonu."</string>
-    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
-    <skip />
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Podczas strumieniowania nie można wyświetlać obrazu w obrazie"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Ustawienie domyślne systemu"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KARTA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

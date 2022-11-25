@@ -947,112 +947,108 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     + " left=" + (mWindowSpaceLeft != mLocation[0])
                     + " top=" + (mWindowSpaceTop != mLocation[1]));
 
+            mVisible = mRequestedVisible;
+            mWindowSpaceLeft = mLocation[0];
+            mWindowSpaceTop = mLocation[1];
+            mSurfaceWidth = myWidth;
+            mSurfaceHeight = myHeight;
+            mFormat = mRequestedFormat;
+            mAlpha = alpha;
+            mLastWindowVisibility = mWindowVisibility;
+            mTransformHint = viewRoot.getBufferTransformHint();
+            mSubLayer = mRequestedSubLayer;
+
+            mScreenRect.left = mWindowSpaceLeft;
+            mScreenRect.top = mWindowSpaceTop;
+            mScreenRect.right = mWindowSpaceLeft + getWidth();
+            mScreenRect.bottom = mWindowSpaceTop + getHeight();
+            if (translator != null) {
+                translator.translateRectInAppWindowToScreen(mScreenRect);
+            }
+
+            final Rect surfaceInsets = viewRoot.mWindowAttributes.surfaceInsets;
+            mScreenRect.offset(surfaceInsets.left, surfaceInsets.top);
+            // Collect all geometry changes and apply these changes on the RenderThread worker
+            // via the RenderNode.PositionUpdateListener.
+            final Transaction surfaceUpdateTransaction = new Transaction();
+            if (creating) {
+                updateOpaqueFlag();
+                final String name = "SurfaceView[" + viewRoot.getTitle().toString() + "]";
+                createBlastSurfaceControls(viewRoot, name, surfaceUpdateTransaction);
+            } else if (mSurfaceControl == null) {
+                return;
+            }
+
+            final boolean redrawNeeded = sizeChanged || creating || hintChanged
+                    || (mVisible && !mDrawFinished) || alphaChanged || relativeZChanged;
+            boolean shouldSyncBuffer =
+                    redrawNeeded && viewRoot.wasRelayoutRequested() && viewRoot.isInLocalSync();
+            SyncBufferTransactionCallback syncBufferTransactionCallback = null;
+            if (shouldSyncBuffer) {
+                syncBufferTransactionCallback = new SyncBufferTransactionCallback();
+                mBlastBufferQueue.syncNextTransaction(
+                        false /* acquireSingleBuffer */,
+                        syncBufferTransactionCallback::onTransactionReady);
+            }
+
+            final boolean realSizeChanged = performSurfaceTransaction(viewRoot, translator,
+                    creating, sizeChanged, hintChanged, relativeZChanged,
+                    surfaceUpdateTransaction);
+
             try {
-                mVisible = mRequestedVisible;
-                mWindowSpaceLeft = mLocation[0];
-                mWindowSpaceTop = mLocation[1];
-                mSurfaceWidth = myWidth;
-                mSurfaceHeight = myHeight;
-                mFormat = mRequestedFormat;
-                mAlpha = alpha;
-                mLastWindowVisibility = mWindowVisibility;
-                mTransformHint = viewRoot.getBufferTransformHint();
-                mSubLayer = mRequestedSubLayer;
+                SurfaceHolder.Callback[] callbacks = null;
 
-                mScreenRect.left = mWindowSpaceLeft;
-                mScreenRect.top = mWindowSpaceTop;
-                mScreenRect.right = mWindowSpaceLeft + getWidth();
-                mScreenRect.bottom = mWindowSpaceTop + getHeight();
-                if (translator != null) {
-                    translator.translateRectInAppWindowToScreen(mScreenRect);
+                final boolean surfaceChanged = creating;
+                if (mSurfaceCreated && (surfaceChanged || (!mVisible && visibleChanged))) {
+                    mSurfaceCreated = false;
+                    notifySurfaceDestroyed();
                 }
 
-                final Rect surfaceInsets = viewRoot.mWindowAttributes.surfaceInsets;
-                mScreenRect.offset(surfaceInsets.left, surfaceInsets.top);
-                // Collect all geometry changes and apply these changes on the RenderThread worker
-                // via the RenderNode.PositionUpdateListener.
-                final Transaction surfaceUpdateTransaction = new Transaction();
-                if (creating) {
-                    updateOpaqueFlag();
-                    final String name = "SurfaceView[" + viewRoot.getTitle().toString() + "]";
-                    createBlastSurfaceControls(viewRoot, name, surfaceUpdateTransaction);
-                } else if (mSurfaceControl == null) {
-                    return;
-                }
+                copySurface(creating /* surfaceControlCreated */, sizeChanged);
 
-                final boolean redrawNeeded = sizeChanged || creating || hintChanged
-                        || (mVisible && !mDrawFinished) || alphaChanged || relativeZChanged;
-                boolean shouldSyncBuffer =
-                        redrawNeeded && viewRoot.wasRelayoutRequested() && viewRoot.isInLocalSync();
-                SyncBufferTransactionCallback syncBufferTransactionCallback = null;
-                if (shouldSyncBuffer) {
-                    syncBufferTransactionCallback = new SyncBufferTransactionCallback();
-                    mBlastBufferQueue.syncNextTransaction(
-                            false /* acquireSingleBuffer */,
-                            syncBufferTransactionCallback::onTransactionReady);
-                }
-
-                final boolean realSizeChanged = performSurfaceTransaction(viewRoot, translator,
-                        creating, sizeChanged, hintChanged, relativeZChanged,
-                        surfaceUpdateTransaction);
-
-                try {
-                    SurfaceHolder.Callback[] callbacks = null;
-
-                    final boolean surfaceChanged = creating;
-                    if (mSurfaceCreated && (surfaceChanged || (!mVisible && visibleChanged))) {
-                        mSurfaceCreated = false;
-                        notifySurfaceDestroyed();
+                if (mVisible && mSurface.isValid()) {
+                    if (!mSurfaceCreated && (surfaceChanged || visibleChanged)) {
+                        mSurfaceCreated = true;
+                        mIsCreating = true;
+                        if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
+                                + "visibleChanged -- surfaceCreated");
+                        callbacks = getSurfaceCallbacks();
+                        for (SurfaceHolder.Callback c : callbacks) {
+                            c.surfaceCreated(mSurfaceHolder);
+                        }
                     }
-
-                    copySurface(creating /* surfaceControlCreated */, sizeChanged);
-
-                    if (mVisible && mSurface.isValid()) {
-                        if (!mSurfaceCreated && (surfaceChanged || visibleChanged)) {
-                            mSurfaceCreated = true;
-                            mIsCreating = true;
-                            if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
-                                    + "visibleChanged -- surfaceCreated");
+                    if (creating || formatChanged || sizeChanged || hintChanged
+                            || visibleChanged || realSizeChanged) {
+                        if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
+                                + "surfaceChanged -- format=" + mFormat
+                                + " w=" + myWidth + " h=" + myHeight);
+                        if (callbacks == null) {
                             callbacks = getSurfaceCallbacks();
-                            for (SurfaceHolder.Callback c : callbacks) {
-                                c.surfaceCreated(mSurfaceHolder);
-                            }
                         }
-                        if (creating || formatChanged || sizeChanged || hintChanged
-                                || visibleChanged || realSizeChanged) {
-                            if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
-                                    + "surfaceChanged -- format=" + mFormat
-                                    + " w=" + myWidth + " h=" + myHeight);
-                            if (callbacks == null) {
-                                callbacks = getSurfaceCallbacks();
-                            }
-                            for (SurfaceHolder.Callback c : callbacks) {
-                                c.surfaceChanged(mSurfaceHolder, mFormat, myWidth, myHeight);
-                            }
-                        }
-                        if (redrawNeeded) {
-                            if (DEBUG) {
-                                Log.i(TAG, System.identityHashCode(this) + " surfaceRedrawNeeded");
-                            }
-                            if (callbacks == null) {
-                                callbacks = getSurfaceCallbacks();
-                            }
-
-                            if (shouldSyncBuffer) {
-                                handleSyncBufferCallback(callbacks, syncBufferTransactionCallback);
-                            } else {
-                                handleSyncNoBuffer(callbacks);
-                            }
+                        for (SurfaceHolder.Callback c : callbacks) {
+                            c.surfaceChanged(mSurfaceHolder, mFormat, myWidth, myHeight);
                         }
                     }
-                } finally {
-                    mIsCreating = false;
-                    if (mSurfaceControl != null && !mSurfaceCreated) {
-                        releaseSurfaces(false /* releaseSurfacePackage*/);
+                    if (redrawNeeded) {
+                        if (DEBUG) {
+                            Log.i(TAG, System.identityHashCode(this) + " surfaceRedrawNeeded");
+                        }
+                        if (callbacks == null) {
+                            callbacks = getSurfaceCallbacks();
+                        }
+
+                        if (shouldSyncBuffer) {
+                            handleSyncBufferCallback(callbacks, syncBufferTransactionCallback);
+                        } else {
+                            handleSyncNoBuffer(callbacks);
+                        }
                     }
                 }
-            } catch (Exception ex) {
-                Log.e(TAG, "Exception configuring surface", ex);
+            } finally {
+                mIsCreating = false;
+                if (mSurfaceControl != null && !mSurfaceCreated) {
+                    releaseSurfaces(false /* releaseSurfacePackage*/);
+                }
             }
             if (DEBUG) Log.v(
                 TAG, "Layout: x=" + mScreenRect.left + " y=" + mScreenRect.top

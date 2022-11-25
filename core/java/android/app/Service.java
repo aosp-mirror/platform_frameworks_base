@@ -748,7 +748,12 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * If the app targeting API is
      * {@link android.os.Build.VERSION_CODES#S} or later, and the service is restricted from
      * becoming foreground service due to background restriction.
-     * @throws ForegroundServiceTypeNotAllowedException
+     * @throws InvalidForegroundServiceTypeException
+     * If the app targeting API is
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or later, and the manifest attribute
+     * {@link android.R.attr#foregroundServiceType} is set to invalid types(i.e.
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_NONE}).
+     * @throws MissingForegroundServiceTypeException
      * If the app targeting API is
      * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or later, and the manifest attribute
      * {@link android.R.attr#foregroundServiceType} is not set.
@@ -761,7 +766,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * {@link NotificationManager#notify(int, Notification)
      * NotificationManager.notify(int, Notification)}; must not be 0.
      * @param notification The Notification to be displayed.
-     * 
+     *
      * @see #stopForeground(boolean)
      */
     public final void startForeground(int id, Notification notification) {
@@ -832,11 +837,16 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * If the app targeting API is
      * {@link android.os.Build.VERSION_CODES#S} or later, and the service is restricted from
      * becoming foreground service due to background restriction.
-     * @throws ForegroundServiceTypeNotAllowedException
+     * @throws InvalidForegroundServiceTypeException
      * If the app targeting API is
      * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or later, and the manifest attribute
-     * {@link android.R.attr#foregroundServiceType} is not set, or the param
-     * {@code foregroundServiceType} is {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_NONE}.
+     * {@link android.R.attr#foregroundServiceType} or the param {@code foregroundServiceType}
+     * is set to invalid types(i.e.{@link ServiceInfo#FOREGROUND_SERVICE_TYPE_NONE}).
+     * @throws MissingForegroundServiceTypeException
+     * If the app targeting API is
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or later, and the manifest attribute
+     * {@link android.R.attr#foregroundServiceType} is not set and the param
+     * {@code foregroundServiceType} is set to {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_MANIFEST}.
      * @throws SecurityException If the app targeting API is
      * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or later and doesn't have the
      * permission to start the foreground service with the specified type in

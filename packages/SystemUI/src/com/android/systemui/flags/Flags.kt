@@ -205,10 +205,6 @@ object Flags {
     @JvmField val QS_SECONDARY_DATA_SUB_INFO = releasedFlag(508, "qs_secondary_data_sub_info")
 
     // 600- status bar
-    // TODO(b/254513246): Tracking Bug
-    val STATUS_BAR_USER_SWITCHER =
-        resourceBooleanFlag(602, R.bool.flag_user_switcher_chip, "status_bar_user_switcher")
-
     // TODO(b/254512623): Tracking Bug
     @Deprecated("Replaced by mobile and wifi specific flags.")
     val NEW_STATUS_BAR_PIPELINE_BACKEND =

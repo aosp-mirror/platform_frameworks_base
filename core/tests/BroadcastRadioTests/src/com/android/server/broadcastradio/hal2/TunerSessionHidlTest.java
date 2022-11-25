@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -337,6 +338,20 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
+    public void tune_forCurrentUser_doesNotTune() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        ProgramSelector initialSel = TestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
+        RadioManager.ProgramInfo tuneInfo =
+                TestUtils.makeProgramInfo(initialSel, SIGNAL_QUALITY);
+
+        mTunerSessions[0].tune(initialSel);
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT.times(0))
+                .onCurrentProgramInfoChanged(tuneInfo);
+    }
+
+    @Test
     public void step_withDirectionUp() throws Exception {
         long initFreq = AM_FM_FREQUENCY_LIST[1];
         ProgramSelector initialSel = TestUtils.makeFmSelector(initFreq);
@@ -424,6 +439,18 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
         mTunerSessions[0].cancel();
 
         verify(mHalTunerSessionMock).cancel();
+    }
+
+    @Test
+    public void cancel_forNonCurrentUser() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramSelector initialSel = TestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
+        mTunerSessions[0].tune(initialSel);
+        doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+
+        mTunerSessions[0].cancel();
+
+        verify(mHalTunerSessionMock, never()).cancel();
     }
 
     @Test

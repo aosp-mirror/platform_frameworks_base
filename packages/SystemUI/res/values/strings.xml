@@ -2847,4 +2847,17 @@
     shortcut button on the lock screen. [CHAR LIMIT=NONE].
     -->
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2">&#8226; At least one device is available</string>
+
+    <!-- Text for education page of cancel button to hide the page. [CHAR_LIMIT=NONE] -->
+    <string name="rear_display_bottom_sheet_cancel">Cancel</string>
+    <!-- Text for the user to confirm they flipped the device around. [CHAR_LIMIT=NONE] -->
+    <string name="rear_display_bottom_sheet_confirm">Flip now</string>
+    <!-- Text for education page title to guide user to unfold phone. [CHAR_LIMIT=50] -->
+    <string name="rear_display_fold_bottom_sheet_title">Unfold phone for a better selfie</string>
+    <!-- Text for education page title to guide user to flip to the front display. [CHAR_LIMIT=50] -->
+    <string name="rear_display_unfold_bottom_sheet_title">Flip to front display for a better selfie?</string>
+    <!-- Text for education page description to suggest user to use rear selfie capture. [CHAR_LIMIT=NONE] -->
+    <string name="rear_display_bottom_sheet_description">Use the rear-facing camera for a wider photo with higher resolution.</string>
+    <!-- Text for education page description to warn user that the display will turn off if the button is clicked. [CHAR_LIMIT=NONE] -->
+    <string name="rear_display_bottom_sheet_warning"><b>&#x2731; This screen will turn off</b></string>
 </resources>

@@ -20,18 +20,18 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Exception thrown when an app tries to start a foreground {@link Service} without a valid type.
+ * Exception thrown when an app tries to start a foreground {@link Service} with an invalid type.
  */
-public final class ForegroundServiceTypeNotAllowedException
-        extends ServiceStartNotAllowedException implements Parcelable {
+public final class InvalidForegroundServiceTypeException
+        extends ForegroundServiceTypeException implements Parcelable {
     /**
      * Constructor.
      */
-    public ForegroundServiceTypeNotAllowedException(@NonNull String message) {
+    public InvalidForegroundServiceTypeException(@NonNull String message) {
         super(message);
     }
 
-    ForegroundServiceTypeNotAllowedException(@NonNull Parcel source) {
+    InvalidForegroundServiceTypeException(@NonNull Parcel source) {
         super(source.readString());
     }
 
@@ -45,17 +45,17 @@ public final class ForegroundServiceTypeNotAllowedException
         dest.writeString(getMessage());
     }
 
-    public static final @NonNull Creator<android.app.ForegroundServiceTypeNotAllowedException>
-            CREATOR = new Creator<android.app.ForegroundServiceTypeNotAllowedException>() {
+    public static final @NonNull Creator<android.app.InvalidForegroundServiceTypeException>
+            CREATOR = new Creator<android.app.InvalidForegroundServiceTypeException>() {
                 @NonNull
-                public android.app.ForegroundServiceTypeNotAllowedException createFromParcel(
+                public android.app.InvalidForegroundServiceTypeException createFromParcel(
                         Parcel source) {
-                    return new android.app.ForegroundServiceTypeNotAllowedException(source);
+                    return new android.app.InvalidForegroundServiceTypeException(source);
                 }
 
                 @NonNull
-                public android.app.ForegroundServiceTypeNotAllowedException[] newArray(int size) {
-                    return new android.app.ForegroundServiceTypeNotAllowedException[size];
+                public android.app.InvalidForegroundServiceTypeException[] newArray(int size) {
+                    return new android.app.InvalidForegroundServiceTypeException[size];
                 }
             };
 }

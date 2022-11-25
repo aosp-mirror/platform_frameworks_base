@@ -395,54 +395,30 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Ilovaga o‘zining komponentlarini xotirada doimiy saqlashga ruxsat beradi. Bu mavjud xotirani cheklashi va telefonni sekin ishlashiga sabab bo‘lishi mumkin."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"faol xizmatlarni ishga tushirish"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Ilovaga faol xizmatlardan foydalanishga ruxsat beradi."</string>
-    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
-    <skip />
+    <string name="permlab_foregroundServiceCamera" msgid="7814751737955715297">"“camera” turidagi faol xizmatni ishga tushirish"</string>
+    <string name="permdesc_foregroundServiceCamera" msgid="6973701931250595727">"Ilovaga “camera” turidagi faol xizmatlardan foydalanishga ruxsat beradi"</string>
+    <string name="permlab_foregroundServiceConnectedDevice" msgid="3019650546176872501">"“connectedDevice” turidagi faol xizmatni ishga tushirish"</string>
+    <string name="permdesc_foregroundServiceConnectedDevice" msgid="1067457315741352963">"Ilovaga “connectedDevice” turidagi faol xizmatlardan foydalanishga ruxsat beradi"</string>
+    <string name="permlab_foregroundServiceDataSync" msgid="5847463514326881076">"“dataSync” turidagi faol xizmatni ishga tushirish"</string>
+    <string name="permdesc_foregroundServiceDataSync" msgid="2267140263423973050">"Ilovaga “dataSync” turidagi faol xizmatlardan foydalanishga ruxsat beradi"</string>
+    <string name="permlab_foregroundServiceLocation" msgid="3745428302378535690">"“location” turidagi faol xizmatni ishga tushirish"</string>
+    <string name="permdesc_foregroundServiceLocation" msgid="118894034365177183">"Ilovaga “location” turidagi faol xizmatlardan foydalanishga ruxsat beradi"</string>
+    <string name="permlab_foregroundServiceMediaPlayback" msgid="4002687983891935514">"“mediaPlayback” turidagi faol xizmatni ishga tushirish"</string>
+    <string name="permdesc_foregroundServiceMediaPlayback" msgid="3638032446063968043">"Ilovaga “mediaPlayback” turidagi faol xizmatlardan foydalanishga ruxsat beradi"</string>
+    <string name="permlab_foregroundServiceMediaProjection" msgid="2630868915733312527">"“mediaProjection” turidagi faol xizmatni ishga tushirish"</string>
+    <string name="permdesc_foregroundServiceMediaProjection" msgid="4805677128082002298">"Ilovaga “mediaProjection” turidagi faol xizmatlardan foydalanishga ruxsat beradi"</string>
+    <string name="permlab_foregroundServiceMicrophone" msgid="7390033424890545399">"“microphone” turidagi faol xizmatni ishga tushirish"</string>
+    <string name="permdesc_foregroundServiceMicrophone" msgid="1206041516173483201">"Ilovaga “microphone” turidagi faol xizmatlardan foydalanishga ruxsat beradi"</string>
+    <string name="permlab_foregroundServicePhoneCall" msgid="627937743867697892">"“phoneCall” turidagi faol xizmatni ishga tushirish"</string>
+    <string name="permdesc_foregroundServicePhoneCall" msgid="5941660252587015147">"Ilovaga “phoneCall” turidagi faol xizmatlardan foydalanishga ruxsat beradi"</string>
+    <string name="permlab_foregroundServiceHealth" msgid="3675776442080928184">"“health” turidagi faol xizmatni ishga tushirish"</string>
+    <string name="permdesc_foregroundServiceHealth" msgid="2024586220562667185">"Ilovaga “health” turidagi faol xizmatlardan foydalanishga ruxsat beradi"</string>
+    <string name="permlab_foregroundServiceRemoteMessaging" msgid="105670277002780950">"“remoteMessaging” turidagi faol xizmatni ishga tushirish"</string>
+    <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Ilovaga “remoteMessaging” turidagi faol xizmatlardan foydalanishga ruxsat beradi"</string>
+    <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"“systemExempted” turidagi faol xizmatni ishga tushirish"</string>
+    <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Ilovaga “systemExempted” turidagi faol xizmatlardan foydalanishga ruxsat beradi"</string>
+    <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"“specialUse” turidagi faol xizmatni ishga tushirish"</string>
+    <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Ilovaga “specialUse” turidagi faol xizmatlardan foydalanishga ruxsat beradi"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"ilovalar egallagan xotira joyini hisoblash"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Ilova o‘zining kodi, ma’lumotlari va kesh o‘lchami to‘g‘risidagi ma’lumotlarni olishi mumkin"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"tizim sozlamalarini o‘zgartirish"</string>
@@ -2340,8 +2316,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> qurilmasidan telefonning kamerasiga kirish imkonsiz"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> qurilmasidan planshetning kamerasiga kirish imkonsiz"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Bu kontent striming vaqtida ochilmaydi. Telefon orqali urininb koʻring."</string>
-    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
-    <skip />
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Striming vaqtida tasvir ustida tasvir rejimida koʻrib boʻlmaydi"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Tizim standarti"</string>
     <string name="default_card_name" msgid="9198284935962911468">"SIM KARTA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

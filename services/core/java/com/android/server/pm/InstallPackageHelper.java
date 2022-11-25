@@ -1816,8 +1816,6 @@ final class InstallPackageHelper {
 
         // Collect files we care for fs-verity setup.
         ArrayMap<String, String> fsverityCandidates = new ArrayMap<>();
-        // NB: These files will become only accessible if the signing key is loaded in kernel's
-        // .fs-verity keyring.
         fsverityCandidates.put(pkg.getBaseApkPath(),
                 VerityUtils.getFsveritySignatureFilePath(pkg.getBaseApkPath()));
 
@@ -1855,20 +1853,6 @@ final class InstallPackageHelper {
                         throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
                                 "fs-verity signature does not verify against a known key");
                     }
-                } else {
-                    // Without signature, we don't need to access the digest right away and can
-                    // enable fs-verity in background (since this is a blocking call).
-                    new Thread("fsverity-setup") {
-                        @Override public void run() {
-                            try {
-                                VerityUtils.setUpFsverity(filePath, (byte[]) null);
-                            } catch (IOException e) {
-                                // There's nothing we can do if the setup failed. Since fs-verity is
-                                // optional, just ignore the error for now.
-                                Slog.e(TAG, "Failed to enable fs-verity to " + filePath);
-                            }
-                        }
-                    }.start();
                 }
             } catch (IOException e) {
                 throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
@@ -2243,6 +2227,22 @@ final class InstallPackageHelper {
                 }
                 incrementalStorages.add(storage);
             }
+
+            try {
+                if (!VerityUtils.hasFsverity(pkg.getBaseApkPath())) {
+                    VerityUtils.setUpFsverity(pkg.getBaseApkPath(), (byte[]) null);
+                }
+                for (String path : pkg.getSplitCodePaths()) {
+                    if (!VerityUtils.hasFsverity(path)) {
+                        VerityUtils.setUpFsverity(path, (byte[]) null);
+                    }
+                }
+            } catch (IOException e) {
+                // There's nothing we can do if the setup failed. Since fs-verity is
+                // optional, just ignore the error for now.
+                Slog.e(TAG, "Failed to fully enable fs-verity to " + packageName);
+            }
+
             // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
             mAppDataHelper.prepareAppDataPostCommitLIF(pkg, 0);
             if (installRequest.isClearCodeCache()) {

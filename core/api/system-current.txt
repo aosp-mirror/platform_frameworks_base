@@ -79,6 +79,7 @@ package android {
     field public static final String BIND_TRUST_AGENT = "android.permission.BIND_TRUST_AGENT";
     field public static final String BIND_TV_REMOTE_SERVICE = "android.permission.BIND_TV_REMOTE_SERVICE";
     field public static final String BIND_WALLPAPER_EFFECTS_GENERATION_SERVICE = "android.permission.BIND_WALLPAPER_EFFECTS_GENERATION_SERVICE";
+    field public static final String BIND_WEARABLE_SENSING_SERVICE = "android.permission.BIND_WEARABLE_SENSING_SERVICE";
     field public static final String BLUETOOTH_MAP = "android.permission.BLUETOOTH_MAP";
     field public static final String BRICK = "android.permission.BRICK";
     field public static final String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
@@ -199,6 +200,7 @@ package android {
     field public static final String MANAGE_USER_OEM_UNLOCK_STATE = "android.permission.MANAGE_USER_OEM_UNLOCK_STATE";
     field public static final String MANAGE_WALLPAPER_EFFECTS_GENERATION = "android.permission.MANAGE_WALLPAPER_EFFECTS_GENERATION";
     field public static final String MANAGE_WEAK_ESCROW_TOKEN = "android.permission.MANAGE_WEAK_ESCROW_TOKEN";
+    field public static final String MANAGE_WEARABLE_SENSING_SERVICE = "android.permission.MANAGE_WEARABLE_SENSING_SERVICE";
     field public static final String MANAGE_WIFI_COUNTRY_CODE = "android.permission.MANAGE_WIFI_COUNTRY_CODE";
     field public static final String MARK_DEVICE_ORGANIZATION_OWNED = "android.permission.MARK_DEVICE_ORGANIZATION_OWNED";
     field public static final String MEDIA_RESOURCE_OVERRIDE_PID = "android.permission.MEDIA_RESOURCE_OVERRIDE_PID";
@@ -2876,6 +2878,21 @@ package android.app.wallpapereffectsgeneration {
 
 }
 
+package android.app.wearable {
+
+  public class WearableSensingManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideData(@NonNull android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideDataStream(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    field public static final int STATUS_ACCESS_DENIED = 5; // 0x5
+    field public static final int STATUS_SERVICE_UNAVAILABLE = 3; // 0x3
+    field public static final int STATUS_SUCCESS = 1; // 0x1
+    field public static final int STATUS_UNKNOWN = 0; // 0x0
+    field public static final int STATUS_UNSUPPORTED = 2; // 0x2
+    field public static final int STATUS_WEARABLE_UNAVAILABLE = 4; // 0x4
+  }
+
+}
+
 package android.apphibernation {
 
   public class AppHibernationManager {
@@ -3095,6 +3112,7 @@ package android.content {
     field public static final String APP_HIBERNATION_SERVICE = "app_hibernation";
     field public static final String APP_INTEGRITY_SERVICE = "app_integrity";
     field public static final String APP_PREDICTION_SERVICE = "app_prediction";
+    field public static final String AUDIO_DEVICE_VOLUME_SERVICE = "audio_device_volume";
     field public static final String BACKUP_SERVICE = "backup";
     field public static final String BATTERY_STATS_SERVICE = "batterystats";
     field public static final int BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS = 1048576; // 0x100000
@@ -3130,6 +3148,7 @@ package android.content {
     field public static final String UWB_SERVICE = "uwb";
     field public static final String VR_SERVICE = "vrmanager";
     field public static final String WALLPAPER_EFFECTS_GENERATION_SERVICE = "wallpaper_effects_generation";
+    field public static final String WEARABLE_SENSING_SERVICE = "wearable_sensing";
     field public static final String WIFI_NL80211_SERVICE = "wifinl80211";
     field @Deprecated public static final String WIFI_RTT_SERVICE = "rttmanager";
     field public static final String WIFI_SCANNING_SERVICE = "wifiscanner";
@@ -4141,11 +4160,13 @@ package android.hardware.hdmi {
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public java.util.List<java.lang.String> getAllowedCecSettingStringValues(@NonNull String);
     method @Nullable public android.hardware.hdmi.HdmiClient getClient(int);
     method @NonNull public java.util.List<android.hardware.hdmi.HdmiDeviceInfo> getConnectedDevices();
+    method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getEarcEnabled();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getHdmiCecEnabled();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getHdmiCecVersion();
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getHdmiCecVolumeControlEnabled();
     method public int getPhysicalAddress();
     method @Nullable public android.hardware.hdmi.HdmiPlaybackClient getPlaybackClient();
+    method @NonNull public java.util.List<android.hardware.hdmi.HdmiPortInfo> getPortInfo();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public String getPowerControlMode();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public String getPowerStateChangeOnActiveSourceLost();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getRoutingControl();
@@ -4162,6 +4183,7 @@ package android.hardware.hdmi {
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void removeHdmiCecEnabledChangeListener(@NonNull android.hardware.hdmi.HdmiControlManager.CecSettingChangeListener);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void removeHotplugEventListener(android.hardware.hdmi.HdmiControlManager.HotplugEventListener);
     method public void setActiveSource(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
+    method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setEarcEnabled(@NonNull int);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setHdmiCecEnabled(@NonNull int);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setHdmiCecVersion(@NonNull int);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setHdmiCecVolumeControlEnabled(int);
@@ -4216,6 +4238,8 @@ package android.hardware.hdmi {
     field public static final int DEVICE_EVENT_ADD_DEVICE = 1; // 0x1
     field public static final int DEVICE_EVENT_REMOVE_DEVICE = 2; // 0x2
     field public static final int DEVICE_EVENT_UPDATE_DEVICE = 3; // 0x3
+    field public static final int EARC_FEATURE_DISABLED = 0; // 0x0
+    field public static final int EARC_FEATURE_ENABLED = 1; // 0x1
     field public static final String EXTRA_MESSAGE_EXTRA_PARAM1 = "android.hardware.hdmi.extra.MESSAGE_EXTRA_PARAM1";
     field public static final String EXTRA_MESSAGE_ID = "android.hardware.hdmi.extra.MESSAGE_ID";
     field public static final int HDMI_CEC_CONTROL_DISABLED = 0; // 0x0
@@ -4275,6 +4299,7 @@ package android.hardware.hdmi {
     field public static final int RESULT_TIMEOUT = 1; // 0x1
     field public static final int ROUTING_CONTROL_DISABLED = 0; // 0x0
     field public static final int ROUTING_CONTROL_ENABLED = 1; // 0x1
+    field public static final String SETTING_NAME_EARC_ENABLED = "earc_enabled";
     field public static final int SYSTEM_AUDIO_CONTROL_DISABLED = 0; // 0x0
     field public static final int SYSTEM_AUDIO_CONTROL_ENABLED = 1; // 0x1
     field public static final int SYSTEM_AUDIO_MODE_MUTING_DISABLED = 0; // 0x0
@@ -4449,7 +4474,7 @@ package android.hardware.hdmi {
 
   public class HdmiSwitchClient extends android.hardware.hdmi.HdmiClient {
     method public int getDeviceType();
-    method @NonNull public java.util.List<android.hardware.hdmi.HdmiPortInfo> getPortInfo();
+    method @Deprecated @NonNull public java.util.List<android.hardware.hdmi.HdmiPortInfo> getPortInfo();
     method public void selectPort(int, @NonNull android.hardware.hdmi.HdmiSwitchClient.OnSelectListener);
     method public void selectPort(int, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.hdmi.HdmiSwitchClient.OnSelectListener);
   }
@@ -6293,7 +6318,7 @@ package android.media {
   }
 
   public class AudioDeviceVolumeManager {
-    ctor public AudioDeviceVolumeManager(@NonNull android.content.Context);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.VolumeInfo getDeviceVolume(@NonNull android.media.VolumeInfo, @NonNull android.media.AudioDeviceAttributes);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setDeviceVolume(@NonNull android.media.VolumeInfo, @NonNull android.media.AudioDeviceAttributes);
   }
 
@@ -6631,8 +6656,9 @@ package android.media {
     method public int getMaxVolumeIndex();
     method public int getMinVolumeIndex();
     method public int getStreamType();
-    method @Nullable public android.media.audiopolicy.AudioVolumeGroup getVolumeGroup();
+    method @NonNull public android.media.audiopolicy.AudioVolumeGroup getVolumeGroup();
     method public int getVolumeIndex();
+    method public boolean hasMuteCommand();
     method public boolean hasStreamType();
     method public boolean hasVolumeGroup();
     method public boolean isMuted();
@@ -10574,6 +10600,7 @@ package android.provider {
     field public static final String NAMESPACE_TEXTCLASSIFIER = "textclassifier";
     field public static final String NAMESPACE_TRANSPARENCY_METADATA = "transparency_metadata";
     field public static final String NAMESPACE_UWB = "uwb";
+    field public static final String NAMESPACE_WEARABLE_SENSING = "wearable_sensing";
     field public static final String NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT = "window_manager_native_boot";
   }
 
@@ -12356,6 +12383,18 @@ package android.service.watchdog {
 
 }
 
+package android.service.wearable {
+
+  public abstract class WearableSensingService extends android.app.Service {
+    ctor public WearableSensingService();
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method @BinderThread public abstract void onDataProvided(@NonNull android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @BinderThread public abstract void onDataStreamProvided(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    field public static final String SERVICE_INTERFACE = "android.service.wearable.WearableSensingService";
+  }
+
+}
+
 package android.telecom {
 
   @Deprecated public class AudioState implements android.os.Parcelable {
@@ -12771,14 +12810,14 @@ package android.telephony {
     method @NonNull public android.telephony.BarringInfo createLocationInfoSanitizedCopy();
   }
 
-  public final class CallAttributes implements android.os.Parcelable {
-    ctor public CallAttributes(@NonNull android.telephony.PreciseCallState, int, @NonNull android.telephony.CallQuality);
-    method public int describeContents();
-    method @NonNull public android.telephony.CallQuality getCallQuality();
-    method public int getNetworkType();
-    method @NonNull public android.telephony.PreciseCallState getPreciseCallState();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallAttributes> CREATOR;
+  @Deprecated public final class CallAttributes implements android.os.Parcelable {
+    ctor @Deprecated public CallAttributes(@NonNull android.telephony.PreciseCallState, int, @NonNull android.telephony.CallQuality);
+    method @Deprecated public int describeContents();
+    method @Deprecated @NonNull public android.telephony.CallQuality getCallQuality();
+    method @Deprecated public int getNetworkType();
+    method @Deprecated @NonNull public android.telephony.PreciseCallState getPreciseCallState();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallAttributes> CREATOR;
   }
 
   public final class CallForwardingInfo implements android.os.Parcelable {
@@ -12856,6 +12895,28 @@ package android.telephony {
     method @NonNull public android.telephony.CallQuality.Builder setOutgoingSilenceDetectedAtCallSetup(boolean);
     method @NonNull public android.telephony.CallQuality.Builder setRtpInactivityDetected(boolean);
     method @NonNull public android.telephony.CallQuality.Builder setUplinkCallQualityLevel(int);
+  }
+
+  public final class CallState implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.telephony.CallQuality getCallQuality();
+    method public int getCallState();
+    method public int getImsCallServiceType();
+    method @Nullable public String getImsCallSessionId();
+    method public int getImsCallType();
+    method public int getNetworkType();
+    method public void writeToParcel(@Nullable android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallState> CREATOR;
+  }
+
+  public static final class CallState.Builder {
+    ctor public CallState.Builder(int);
+    method @NonNull public android.telephony.CallState build();
+    method @NonNull public android.telephony.CallState.Builder setCallQuality(@Nullable android.telephony.CallQuality);
+    method @NonNull public android.telephony.CallState.Builder setImsCallServiceType(int);
+    method @NonNull public android.telephony.CallState.Builder setImsCallSessionId(@Nullable String);
+    method @NonNull public android.telephony.CallState.Builder setImsCallType(int);
+    method @NonNull public android.telephony.CallState.Builder setNetworkType(int);
   }
 
   public class CarrierConfigManager {
@@ -13608,7 +13669,8 @@ package android.telephony {
   }
 
   public static interface TelephonyCallback.CallAttributesListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onCallAttributesChanged(@NonNull android.telephony.CallAttributes);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public default void onCallAttributesChanged(@NonNull android.telephony.CallAttributes);
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public default void onCallStatesChanged(@NonNull java.util.List<android.telephony.CallState>);
   }
 
   public static interface TelephonyCallback.DataEnabledListener {
@@ -14709,6 +14771,7 @@ package android.telephony.ims {
     field public static final int CALL_RESTRICT_CAUSE_HD = 3; // 0x3
     field public static final int CALL_RESTRICT_CAUSE_NONE = 0; // 0x0
     field public static final int CALL_RESTRICT_CAUSE_RAT = 1; // 0x1
+    field public static final int CALL_TYPE_NONE = 0; // 0x0
     field public static final int CALL_TYPE_VIDEO_N_VOICE = 3; // 0x3
     field public static final int CALL_TYPE_VOICE = 2; // 0x2
     field public static final int CALL_TYPE_VOICE_N_VIDEO = 1; // 0x1

@@ -17,18 +17,15 @@ package com.android.internal.app;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.AppGlobals;
-import android.app.admin.DevicePolicyEventLogger;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
-import android.content.pm.ResolveInfo;
-import android.os.AsyncTask;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.os.UserManager;
-import android.stats.devicepolicy.DevicePolicyEnums;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -60,71 +57,29 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     private final Context mContext;
     private int mCurrentPage;
     private OnProfileSelectedListener mOnProfileSelectedListener;
-    private OnSwitchOnWorkSelectedListener mOnSwitchOnWorkSelectedListener;
     private Set<Integer> mLoadedPages;
-    private final UserHandle mPersonalProfileUserHandle;
+    private final EmptyStateProvider mEmptyStateProvider;
     private final UserHandle mWorkProfileUserHandle;
-    private Injector mInjector;
-    private boolean mIsWaitingToEnableWorkProfile;
+    private final QuietModeManager mQuietModeManager;
 
     AbstractMultiProfilePagerAdapter(Context context, int currentPage,
-            UserHandle personalProfileUserHandle,
+            EmptyStateProvider emptyStateProvider,
+            QuietModeManager quietModeManager,
             UserHandle workProfileUserHandle) {
         mContext = Objects.requireNonNull(context);
         mCurrentPage = currentPage;
         mLoadedPages = new HashSet<>();
-        mPersonalProfileUserHandle = personalProfileUserHandle;
         mWorkProfileUserHandle = workProfileUserHandle;
-        UserManager userManager = context.getSystemService(UserManager.class);
-        mInjector = new Injector() {
-            @Override
-            public boolean hasCrossProfileIntents(List<Intent> intents, int sourceUserId,
-                    int targetUserId) {
-                return AbstractMultiProfilePagerAdapter.this
-                        .hasCrossProfileIntents(intents, sourceUserId, targetUserId);
-            }
-
-            @Override
-            public boolean isQuietModeEnabled(UserHandle workProfileUserHandle) {
-                return userManager.isQuietModeEnabled(workProfileUserHandle);
-            }
-
-            @Override
-            public void requestQuietModeEnabled(boolean enabled, UserHandle workProfileUserHandle) {
-                AsyncTask.THREAD_POOL_EXECUTOR.execute(() -> {
-                    userManager.requestQuietModeEnabled(enabled, workProfileUserHandle);
-                });
-                mIsWaitingToEnableWorkProfile = true;
-            }
-        };
+        mEmptyStateProvider = emptyStateProvider;
+        mQuietModeManager = quietModeManager;
     }
 
-    protected void markWorkProfileEnabledBroadcastReceived() {
-        mIsWaitingToEnableWorkProfile = false;
-    }
-
-    protected boolean isWaitingToEnableWorkProfile() {
-        return mIsWaitingToEnableWorkProfile;
-    }
-
-    /**
-     * Overrides the default {@link Injector} for testing purposes.
-     */
-    @VisibleForTesting
-    public void setInjector(Injector injector) {
-        mInjector = injector;
-    }
-
-    protected boolean isQuietModeEnabled(UserHandle workProfileUserHandle) {
-        return mInjector.isQuietModeEnabled(workProfileUserHandle);
+    private boolean isQuietModeEnabled(UserHandle workProfileUserHandle) {
+        return mQuietModeManager.isQuietModeEnabled(workProfileUserHandle);
     }
 
     void setOnProfileSelectedListener(OnProfileSelectedListener listener) {
         mOnProfileSelectedListener = listener;
-    }
-
-    void setOnSwitchOnWorkSelectedListener(OnSwitchOnWorkSelectedListener listener) {
-        mOnSwitchOnWorkSelectedListener = listener;
     }
 
     Context getContext() {
@@ -280,8 +235,6 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
 
     abstract @Nullable ViewGroup getInactiveAdapterView();
 
-    abstract String getMetricsCategory();
-
     /**
      * Rebuilds the tab that is currently visible to the user.
      * <p>Returns {@code true} if rebuild has completed.
@@ -317,40 +270,17 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     }
 
     private boolean rebuildTab(ResolverListAdapter activeListAdapter, boolean doPostProcessing) {
-        if (shouldShowNoCrossProfileIntentsEmptyState(activeListAdapter)) {
+        if (shouldSkipRebuild(activeListAdapter)) {
             activeListAdapter.postListReadyRunnable(doPostProcessing, /* rebuildCompleted */ true);
             return false;
         }
         return activeListAdapter.rebuildList(doPostProcessing);
     }
 
-    private boolean shouldShowNoCrossProfileIntentsEmptyState(
-            ResolverListAdapter activeListAdapter) {
-        UserHandle listUserHandle = activeListAdapter.getUserHandle();
-        return UserHandle.myUserId() != listUserHandle.getIdentifier()
-                && allowShowNoCrossProfileIntentsEmptyState()
-                && !mInjector.hasCrossProfileIntents(activeListAdapter.getIntents(),
-                        UserHandle.myUserId(), listUserHandle.getIdentifier());
+    private boolean shouldSkipRebuild(ResolverListAdapter activeListAdapter) {
+        EmptyState emptyState = mEmptyStateProvider.getEmptyState(activeListAdapter);
+        return emptyState != null && emptyState.shouldSkipDataRebuild();
     }
-
-    boolean allowShowNoCrossProfileIntentsEmptyState() {
-        return true;
-    }
-
-    protected abstract void showWorkProfileOffEmptyState(
-            ResolverListAdapter activeListAdapter, View.OnClickListener listener);
-
-    protected abstract void showNoPersonalToWorkIntentsEmptyState(
-            ResolverListAdapter activeListAdapter);
-
-    protected abstract void showNoPersonalAppsAvailableEmptyState(
-            ResolverListAdapter activeListAdapter);
-
-    protected abstract void showNoWorkAppsAvailableEmptyState(
-            ResolverListAdapter activeListAdapter);
-
-    protected abstract void showNoWorkToPersonalIntentsEmptyState(
-            ResolverListAdapter activeListAdapter);
 
     /**
      * The empty state screens are shown according to their priority:
@@ -366,109 +296,97 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
      * anyway.
      */
     void showEmptyResolverListEmptyState(ResolverListAdapter listAdapter) {
-        if (maybeShowNoCrossProfileIntentsEmptyState(listAdapter)) {
-            return;
-        }
-        if (maybeShowWorkProfileOffEmptyState(listAdapter)) {
-            return;
-        }
-        maybeShowNoAppsAvailableEmptyState(listAdapter);
-    }
+        final EmptyState emptyState = mEmptyStateProvider.getEmptyState(listAdapter);
 
-    private boolean maybeShowNoCrossProfileIntentsEmptyState(ResolverListAdapter listAdapter) {
-        if (!shouldShowNoCrossProfileIntentsEmptyState(listAdapter)) {
-            return false;
+        if (emptyState == null) {
+            return;
         }
-        if (listAdapter.getUserHandle().equals(mPersonalProfileUserHandle)) {
-            DevicePolicyEventLogger.createEvent(
-                    DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_PERSONAL)
-                    .setStrings(getMetricsCategory())
-                    .write();
-            showNoWorkToPersonalIntentsEmptyState(listAdapter);
-        } else {
-            DevicePolicyEventLogger.createEvent(
-                    DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_WORK)
-                    .setStrings(getMetricsCategory())
-                    .write();
-            showNoPersonalToWorkIntentsEmptyState(listAdapter);
+
+        emptyState.onEmptyStateShown();
+
+        View.OnClickListener clickListener = null;
+
+        if (emptyState.getButtonClickListener() != null) {
+            clickListener = v -> emptyState.getButtonClickListener().onClick(() -> {
+                ProfileDescriptor descriptor = getItem(
+                        userHandleToPageIndex(listAdapter.getUserHandle()));
+                AbstractMultiProfilePagerAdapter.this.showSpinner(descriptor.getEmptyStateView());
+            });
         }
-        return true;
+
+        showEmptyState(listAdapter, emptyState, clickListener);
     }
 
     /**
-     * Returns {@code true} if the work profile off empty state screen is shown.
+     * Class to get user id of the current process
      */
-    private boolean maybeShowWorkProfileOffEmptyState(ResolverListAdapter listAdapter) {
-        UserHandle listUserHandle = listAdapter.getUserHandle();
-        if (!listUserHandle.equals(mWorkProfileUserHandle)
-                || !mInjector.isQuietModeEnabled(mWorkProfileUserHandle)
-                || listAdapter.getCount() == 0) {
-            return false;
-        }
-        DevicePolicyEventLogger
-                .createEvent(DevicePolicyEnums.RESOLVER_EMPTY_STATE_WORK_APPS_DISABLED)
-                .setStrings(getMetricsCategory())
-                .write();
-        showWorkProfileOffEmptyState(listAdapter,
-                v -> {
-                    ProfileDescriptor descriptor = getItem(
-                            userHandleToPageIndex(listAdapter.getUserHandle()));
-                    showSpinner(descriptor.getEmptyStateView());
-                    if (mOnSwitchOnWorkSelectedListener != null) {
-                        mOnSwitchOnWorkSelectedListener.onSwitchOnWorkSelected();
-                    }
-                    mInjector.requestQuietModeEnabled(false, mWorkProfileUserHandle);
-                });
-        return true;
-    }
-
-    private void maybeShowNoAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
-        UserHandle listUserHandle = listAdapter.getUserHandle();
-        if (mWorkProfileUserHandle != null
-                && (UserHandle.myUserId() == listUserHandle.getIdentifier()
-                        || !hasAppsInOtherProfile(listAdapter))) {
-            DevicePolicyEventLogger.createEvent(
-                    DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_APPS_RESOLVED)
-                    .setStrings(getMetricsCategory())
-                    .setBoolean(/*isPersonalProfile*/ listUserHandle == mPersonalProfileUserHandle)
-                    .write();
-            if (listUserHandle == mPersonalProfileUserHandle) {
-                showNoPersonalAppsAvailableEmptyState(listAdapter);
-            } else {
-                showNoWorkAppsAvailableEmptyState(listAdapter);
-            }
-        } else if (mWorkProfileUserHandle == null) {
-            showConsumerUserNoAppsAvailableEmptyState(listAdapter);
+    public static class MyUserIdProvider {
+        /**
+         * @return user id of the current process
+         */
+        public int getMyUserId() {
+            return UserHandle.myUserId();
         }
     }
 
-    protected void showEmptyState(ResolverListAdapter activeListAdapter, String title,
-            String subtitle) {
-        showEmptyState(activeListAdapter, title, subtitle, /* buttonOnClick */ null);
+    /**
+     * Utility class to check if there are cross profile intents, it is in a separate class so
+     * it could be mocked in tests
+     */
+    public static class CrossProfileIntentsChecker {
+
+        private final ContentResolver mContentResolver;
+
+        public CrossProfileIntentsChecker(@NonNull ContentResolver contentResolver) {
+            mContentResolver = contentResolver;
+        }
+
+        /**
+         * Returns {@code true} if at least one of the provided {@code intents} can be forwarded
+         * from {@code source} (user id) to {@code target} (user id).
+         */
+        public boolean hasCrossProfileIntents(List<Intent> intents, @UserIdInt int source,
+                @UserIdInt int target) {
+            IPackageManager packageManager = AppGlobals.getPackageManager();
+
+            return intents.stream().anyMatch(intent ->
+                    null != IntentForwarderActivity.canForward(intent, source, target,
+                            packageManager, mContentResolver));
+        }
     }
 
-    protected void showEmptyState(ResolverListAdapter activeListAdapter,
-            String title, String subtitle, View.OnClickListener buttonOnClick) {
+    protected void showEmptyState(ResolverListAdapter activeListAdapter, EmptyState emptyState,
+            View.OnClickListener buttonOnClick) {
         ProfileDescriptor descriptor = getItem(
                 userHandleToPageIndex(activeListAdapter.getUserHandle()));
         descriptor.rootView.findViewById(R.id.resolver_list).setVisibility(View.GONE);
         ViewGroup emptyStateView = descriptor.getEmptyStateView();
-        resetViewVisibilitiesForWorkProfileEmptyState(emptyStateView);
+        resetViewVisibilitiesForEmptyState(emptyStateView);
         emptyStateView.setVisibility(View.VISIBLE);
 
         View container = emptyStateView.findViewById(R.id.resolver_empty_state_container);
         setupContainerPadding(container);
 
         TextView titleView = emptyStateView.findViewById(R.id.resolver_empty_state_title);
-        titleView.setText(title);
+        String title = emptyState.getTitle();
+        if (title != null) {
+            titleView.setVisibility(View.VISIBLE);
+            titleView.setText(title);
+        } else {
+            titleView.setVisibility(View.GONE);
+        }
 
         TextView subtitleView = emptyStateView.findViewById(R.id.resolver_empty_state_subtitle);
+        String subtitle = emptyState.getSubtitle();
         if (subtitle != null) {
             subtitleView.setVisibility(View.VISIBLE);
             subtitleView.setText(subtitle);
         } else {
             subtitleView.setVisibility(View.GONE);
         }
+
+        View defaultEmptyText = emptyStateView.findViewById(R.id.empty);
+        defaultEmptyText.setVisibility(emptyState.useDefaultEmptyView() ? View.VISIBLE : View.GONE);
 
         Button button = emptyStateView.findViewById(R.id.resolver_empty_state_button);
         button.setVisibility(buttonOnClick != null ? View.VISIBLE : View.GONE);
@@ -483,22 +401,6 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
      */
     protected void setupContainerPadding(View container) {}
 
-    private void showConsumerUserNoAppsAvailableEmptyState(ResolverListAdapter activeListAdapter) {
-        ProfileDescriptor descriptor = getItem(
-                userHandleToPageIndex(activeListAdapter.getUserHandle()));
-        descriptor.rootView.findViewById(R.id.resolver_list).setVisibility(View.GONE);
-        View emptyStateView = descriptor.getEmptyStateView();
-        resetViewVisibilitiesForConsumerUserEmptyState(emptyStateView);
-        emptyStateView.setVisibility(View.VISIBLE);
-
-        activeListAdapter.markTabLoaded();
-    }
-
-    private boolean isSpinnerShowing(View emptyStateView) {
-        return emptyStateView.findViewById(R.id.resolver_empty_state_progress).getVisibility()
-                == View.VISIBLE;
-    }
-
     private void showSpinner(View emptyStateView) {
         emptyStateView.findViewById(R.id.resolver_empty_state_title).setVisibility(View.INVISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_button).setVisibility(View.INVISIBLE);
@@ -506,20 +408,12 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         emptyStateView.findViewById(R.id.empty).setVisibility(View.GONE);
     }
 
-    private void resetViewVisibilitiesForWorkProfileEmptyState(View emptyStateView) {
+    private void resetViewVisibilitiesForEmptyState(View emptyStateView) {
         emptyStateView.findViewById(R.id.resolver_empty_state_title).setVisibility(View.VISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_subtitle).setVisibility(View.VISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_button).setVisibility(View.INVISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_progress).setVisibility(View.GONE);
         emptyStateView.findViewById(R.id.empty).setVisibility(View.GONE);
-    }
-
-    private void resetViewVisibilitiesForConsumerUserEmptyState(View emptyStateView) {
-        emptyStateView.findViewById(R.id.resolver_empty_state_title).setVisibility(View.GONE);
-        emptyStateView.findViewById(R.id.resolver_empty_state_subtitle).setVisibility(View.GONE);
-        emptyStateView.findViewById(R.id.resolver_empty_state_button).setVisibility(View.GONE);
-        emptyStateView.findViewById(R.id.resolver_empty_state_progress).setVisibility(View.GONE);
-        emptyStateView.findViewById(R.id.empty).setVisibility(View.VISIBLE);
     }
 
     protected void showListView(ResolverListAdapter activeListAdapter) {
@@ -528,33 +422,6 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         descriptor.rootView.findViewById(R.id.resolver_list).setVisibility(View.VISIBLE);
         View emptyStateView = descriptor.rootView.findViewById(R.id.resolver_empty_state);
         emptyStateView.setVisibility(View.GONE);
-    }
-
-    private boolean hasCrossProfileIntents(List<Intent> intents, int source, int target) {
-        IPackageManager packageManager = AppGlobals.getPackageManager();
-        ContentResolver contentResolver = mContext.getContentResolver();
-        for (Intent intent : intents) {
-            if (IntentForwarderActivity.canForward(intent, source, target, packageManager,
-                    contentResolver) != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean hasAppsInOtherProfile(ResolverListAdapter adapter) {
-        if (mWorkProfileUserHandle == null) {
-            return false;
-        }
-        List<ResolverActivity.ResolvedComponentInfo> resolversForIntent =
-                adapter.getResolversForUser(UserHandle.of(UserHandle.myUserId()));
-        for (ResolverActivity.ResolvedComponentInfo info : resolversForIntent) {
-            ResolveInfo resolveInfo = info.getResolveInfoAt(0);
-            if (resolveInfo.targetUserId != UserHandle.USER_CURRENT) {
-                return true;
-            }
-        }
-        return false;
     }
 
     boolean shouldShowEmptyStateScreen(ResolverListAdapter listAdapter) {
@@ -600,6 +467,98 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     }
 
     /**
+     * Returns an empty state to show for the current profile page (tab) if necessary.
+     * This could be used e.g. to show a blocker on a tab if device management policy doesn't
+     * allow to use it or there are no apps available.
+     */
+    public interface EmptyStateProvider {
+        /**
+         * When a non-null empty state is returned the corresponding profile page will show
+         * this empty state
+         * @param resolverListAdapter the current adapter
+         */
+        @Nullable
+        default EmptyState getEmptyState(ResolverListAdapter resolverListAdapter) {
+            return null;
+        }
+    }
+
+    /**
+     * Empty state provider that combines multiple providers. Providers earlier in the list have
+     * priority, that is if there is a provider that returns non-null empty state then all further
+     * providers will be ignored.
+     */
+    public static class CompositeEmptyStateProvider implements EmptyStateProvider {
+
+        private final EmptyStateProvider[] mProviders;
+
+        public CompositeEmptyStateProvider(EmptyStateProvider... providers) {
+            mProviders = providers;
+        }
+
+        @Nullable
+        @Override
+        public EmptyState getEmptyState(ResolverListAdapter resolverListAdapter) {
+            for (EmptyStateProvider provider : mProviders) {
+                EmptyState emptyState = provider.getEmptyState(resolverListAdapter);
+                if (emptyState != null) {
+                    return emptyState;
+                }
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Describes how the blocked empty state should look like for a profile tab
+     */
+    public interface EmptyState {
+        /**
+         * Title that will be shown on the empty state
+         */
+        @Nullable
+        default String getTitle() { return null; }
+
+        /**
+         * Subtitle that will be shown underneath the title on the empty state
+         */
+        @Nullable
+        default String getSubtitle()  { return null; }
+
+        /**
+         * If non-null then a button will be shown and this listener will be called
+         * when the button is clicked
+         */
+        @Nullable
+        default ClickListener getButtonClickListener()  { return null; }
+
+        /**
+         * If true then default text ('No apps can perform this action') and style for the empty
+         * state will be applied, title and subtitle will be ignored.
+         */
+        default boolean useDefaultEmptyView() { return false; }
+
+        /**
+         * Returns true if for this empty state we should skip rebuilding of the apps list
+         * for this tab.
+         */
+        default boolean shouldSkipDataRebuild() { return false; }
+
+        /**
+         * Called when empty state is shown, could be used e.g. to track analytics events
+         */
+        default void onEmptyStateShown() {}
+
+        interface ClickListener {
+            void onClick(TabControl currentTab);
+        }
+
+        interface TabControl {
+            void showSpinner();
+        }
+    }
+
+    /**
      * Listener for when the user switches on the work profile from the work tab.
      */
     interface OnSwitchOnWorkSelectedListener {
@@ -612,14 +571,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     /**
      * Describes an injector to be used for cross profile functionality. Overridable for testing.
      */
-    @VisibleForTesting
-    public interface Injector {
-        /**
-         * Returns {@code true} if at least one of the provided {@code intents} can be forwarded
-         * from {@code sourceUserId} to {@code targetUserId}.
-         */
-        boolean hasCrossProfileIntents(List<Intent> intents, int sourceUserId, int targetUserId);
-
+    public interface QuietModeManager {
         /**
          * Returns whether the given profile is in quiet mode or not.
          */
@@ -629,5 +581,15 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
          * Enables or disables quiet mode for a managed profile.
          */
         void requestQuietModeEnabled(boolean enabled, UserHandle workProfileUserHandle);
+
+        /**
+         * Should be called when the work profile enabled broadcast received
+         */
+        void markWorkProfileEnabledBroadcastReceived();
+
+        /**
+         * Returns true if enabling of work profile is in progress
+         */
+        boolean isWaitingToEnableWorkProfile();
     }
 }

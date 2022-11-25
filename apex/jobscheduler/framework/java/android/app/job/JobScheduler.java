@@ -23,11 +23,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UserIdInt;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
 import android.content.ClipData;
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 
@@ -97,16 +94,6 @@ import java.util.List;
  */
 @SystemService(Context.JOB_SCHEDULER_SERVICE)
 public abstract class JobScheduler {
-    /**
-     * Whether to throw an exception when an app doesn't properly implement all the necessary
-     * data transfer APIs.
-     *
-     * @hide
-     */
-    @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
-    public static final long THROW_ON_INVALID_DATA_TRANSFER_IMPLEMENTATION = 255371817L;
-
     /** @hide */
     @IntDef(prefix = { "RESULT_" }, value = {
             RESULT_FAILURE,
