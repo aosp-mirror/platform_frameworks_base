@@ -41,7 +41,6 @@ import static androidx.window.extensions.embedding.SplitContainer.shouldFinishAs
 import static androidx.window.extensions.embedding.SplitContainer.shouldFinishAssociatedContainerWhenStacked;
 import static androidx.window.extensions.embedding.SplitPresenter.RESULT_EXPAND_FAILED_NO_TF_INFO;
 import static androidx.window.extensions.embedding.SplitPresenter.getActivityIntentMinDimensionsPair;
-import static androidx.window.extensions.embedding.SplitPresenter.getNonEmbeddedActivityBounds;
 import static androidx.window.extensions.embedding.SplitPresenter.shouldShowSplit;
 
 import android.app.Activity;
@@ -464,7 +463,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // parentInfo#isVisibleRequested is true.
             return;
         }
-        onTaskContainerInfoChanged(taskContainer, parentInfo.getConfiguration());
         if (isInPictureInPicture(parentInfo.getConfiguration())) {
             // No need to update presentation in PIP until the Task exit PIP.
             return;
@@ -612,12 +610,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             }
             return;
         }
-    }
-
-    @GuardedBy("mLock")
-    private void onTaskContainerInfoChanged(@NonNull TaskContainer taskContainer,
-            @NonNull Configuration config) {
-        taskContainer.setTaskBounds(config.windowConfiguration.getBounds());
     }
 
     /** Returns whether the given {@link TaskContainer} may show in split. */
@@ -1235,13 +1227,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         final TaskContainer taskContainer = mTaskContainers.get(taskId);
         final TaskFragmentContainer container = new TaskFragmentContainer(pendingAppearedActivity,
                 pendingAppearedIntent, taskContainer, this);
-        if (!taskContainer.isTaskBoundsInitialized()) {
-            // Get the initial bounds before the TaskFragment has appeared.
-            final Rect taskBounds = getNonEmbeddedActivityBounds(activityInTask);
-            if (!taskContainer.setTaskBounds(taskBounds)) {
-                Log.w(TAG, "Can't find bounds from activity=" + activityInTask);
-            }
-        }
         return container;
     }
 

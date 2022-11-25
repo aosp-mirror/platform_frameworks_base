@@ -932,11 +932,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         if (taskContainer != null) {
             return taskContainer.getTaskProperties();
         }
-        // Use a copy of configuration because activity's configuration may be updated later,
-        // or we may get unexpected TaskContainer's configuration if Activity's configuration is
-        // updated. An example is Activity is going to be in split.
-        return new TaskProperties(activity.getDisplayId(),
-                new Configuration(activity.getResources().getConfiguration()));
+        return TaskProperties.getTaskPropertiesFromActivity(activity);
     }
 
     @NonNull
@@ -949,17 +945,5 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final Rect taskBounds = taskConfiguration.windowConfiguration.getBounds();
         // TODO(b/190433398): Supply correct insets.
         return new WindowMetrics(taskBounds, WindowInsets.CONSUMED);
-    }
-
-    /** Obtains the bounds from a non-embedded Activity. */
-    @NonNull
-    static Rect getNonEmbeddedActivityBounds(@NonNull Activity activity) {
-        final WindowConfiguration windowConfiguration =
-                activity.getResources().getConfiguration().windowConfiguration;
-        if (!activity.isInMultiWindowMode()) {
-            // In fullscreen mode the max bounds should correspond to the task bounds.
-            return windowConfiguration.getMaxBounds();
-        }
-        return windowConfiguration.getBounds();
     }
 }

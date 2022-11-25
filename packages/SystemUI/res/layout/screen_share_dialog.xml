@@ -16,7 +16,7 @@
 
 <!-- Scrollview is necessary to fit everything in landscape layout -->
 <ScrollView  xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/screen_share_permission_dialog"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -32,10 +32,11 @@
         android:gravity="center_horizontal">
 
         <ImageView
+            android:id="@+id/screen_share_dialog_icon"
             android:layout_width="@dimen/screenrecord_logo_size"
             android:layout_height="@dimen/screenrecord_logo_size"
-            android:src="@drawable/ic_screenrecord"
-            android:tint="@color/screenrecord_icon_color"
+            android:src="@drawable/ic_media_projection_permission"
+            android:tint="?androidprv:attr/colorAccentPrimary"
             android:importantForAccessibility="no"/>
         <TextView
             android:id="@+id/screen_share_dialog_title"
@@ -43,34 +44,37 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:fontFamily="@*android:string/config_headlineFontFamily"
-            android:layout_marginTop="22dp"
-            android:layout_marginBottom="15dp"/>
+            android:layout_marginTop="@dimen/screenrecord_title_margin_top"
+            android:gravity="center"/>
         <Spinner
             android:id="@+id/screen_share_mode_spinner"
-            android:layout_width="320dp"
-            android:layout_height="72dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="24dp" />
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/screenrecord_spinner_height"
+            android:layout_marginTop="@dimen/screenrecord_spinner_margin"
+            android:layout_marginBottom="@dimen/screenrecord_spinner_margin"
+            android:gravity="center_vertical"
+            android:background="@drawable/screenshare_options_spinner_background"
+            android:popupBackground="@drawable/screenrecord_options_spinner_popup_background"/>
         <ViewStub
             android:id="@+id/options_stub"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
         <TextView
             android:id="@+id/text_warning"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/screenrecord_description"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:textColorSecondary"
             android:gravity="start"
-            android:layout_marginBottom="20dp"/>
+            android:lineHeight="@dimen/screenrecord_warning_line_height"/>
 
         <!-- Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="36dp">
+            android:layout_marginTop="@dimen/screenrecord_buttons_margin_top">
             <TextView
                 android:id="@+id/button_cancel"
                 android:layout_width="wrap_content"

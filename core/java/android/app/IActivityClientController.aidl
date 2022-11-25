@@ -78,7 +78,11 @@ interface IActivityClientController {
     boolean willActivityBeVisible(in IBinder token);
     int getDisplayId(in IBinder activityToken);
     int getTaskForActivity(in IBinder token, in boolean onlyRoot);
-    int getTaskWindowingMode(in IBinder activityToken);
+    /**
+     * Returns the {@link Configuration} of the task which hosts the Activity, or {@code null} if
+     * the task {@link Configuration} cannot be obtained.
+     */
+    Configuration getTaskConfiguration(in IBinder activityToken);
     IBinder getActivityTokenBelow(IBinder token);
     ComponentName getCallingActivity(in IBinder token);
     String getCallingPackage(in IBinder token);
