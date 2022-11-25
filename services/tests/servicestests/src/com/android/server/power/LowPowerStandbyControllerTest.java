@@ -16,7 +16,13 @@
 
 package com.android.server.power;
 
+import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION;
+import static android.os.PowerManager.LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN;
+
 import static com.google.common.truth.Truth.assertThat;
+
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -37,10 +43,12 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.IPowerManager;
 import android.os.PowerManager;
+import android.os.PowerManager.LowPowerStandbyPolicy;
 import android.os.PowerManagerInternal;
 import android.os.test.TestLooper;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
+import android.util.ArraySet;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -48,6 +56,7 @@ import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.power.LowPowerStandbyController.DeviceConfigWrapper;
 import com.android.server.testutils.OffsettableClock;
 
 import org.junit.After;
@@ -58,6 +67,8 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.File;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -69,12 +80,18 @@ import java.util.concurrent.TimeUnit;
 public class LowPowerStandbyControllerTest {
     private static final int STANDBY_TIMEOUT = 5000;
 
+    private static final LowPowerStandbyPolicy EMPTY_POLICY = new LowPowerStandbyPolicy(
+            "Test policy", Collections.emptySet(), 0, Collections.emptySet());
+
     private LowPowerStandbyController mController;
     private BroadcastInterceptingContext mContextSpy;
     private Resources mResourcesSpy;
     private OffsettableClock mClock;
     private TestLooper mTestLooper;
+    private File mTestPolicyFile;
 
+    @Mock
+    private DeviceConfigWrapper mDeviceConfigWrapperMock;
     @Mock
     private AlarmManager mAlarmManagerMock;
     @Mock
@@ -82,7 +99,7 @@ public class LowPowerStandbyControllerTest {
     @Mock
     private PowerManagerInternal mPowerManagerInternalMock;
     @Mock
-    private NetworkPolicyManagerInternal mNetworkPolicyManagerInternal;
+    private NetworkPolicyManagerInternal mNetworkPolicyManagerInternalMock;
 
     @Before
     public void setUp() throws Exception {
@@ -93,10 +110,11 @@ public class LowPowerStandbyControllerTest {
         PowerManager powerManager = new PowerManager(mContextSpy, mIPowerManagerMock, null, null);
         when(mContextSpy.getSystemService(PowerManager.class)).thenReturn(powerManager);
         addLocalServiceMock(PowerManagerInternal.class, mPowerManagerInternalMock);
-        addLocalServiceMock(NetworkPolicyManagerInternal.class, mNetworkPolicyManagerInternal);
+        addLocalServiceMock(NetworkPolicyManagerInternal.class, mNetworkPolicyManagerInternalMock);
 
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
+        when(mDeviceConfigWrapperMock.enableCustomPolicy()).thenReturn(true);
         mResourcesSpy = spy(mContextSpy.getResources());
         when(mContextSpy.getResources()).thenReturn(mResourcesSpy);
         when(mResourcesSpy.getBoolean(
@@ -117,8 +135,9 @@ public class LowPowerStandbyControllerTest {
         mClock = new OffsettableClock.Stopped();
         mTestLooper = new TestLooper(mClock::now);
 
+        mTestPolicyFile = new File(mContextSpy.getCacheDir(), "lps_policy.xml");
         mController = new LowPowerStandbyController(mContextSpy, mTestLooper.getLooper(),
-                () -> mClock.now());
+                () -> mClock.now(), mDeviceConfigWrapperMock, mTestPolicyFile);
     }
 
     @After
@@ -126,6 +145,7 @@ public class LowPowerStandbyControllerTest {
         LocalServices.removeServiceForTest(PowerManagerInternal.class);
         LocalServices.removeServiceForTest(LowPowerStandbyControllerInternal.class);
         LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
+        mTestPolicyFile.delete();
     }
 
     @Test
@@ -135,7 +155,7 @@ public class LowPowerStandbyControllerTest {
 
         assertThat(mController.isActive()).isFalse();
         verify(mPowerManagerInternalMock, never()).setLowPowerStandbyActive(anyBoolean());
-        verify(mNetworkPolicyManagerInternal, never()).setLowPowerStandbyActive(anyBoolean());
+        verify(mNetworkPolicyManagerInternalMock, never()).setLowPowerStandbyActive(anyBoolean());
     }
 
     @Test
@@ -148,7 +168,7 @@ public class LowPowerStandbyControllerTest {
         awaitStandbyTimeoutAlarm();
         assertThat(mController.isActive()).isTrue();
         verify(mPowerManagerInternalMock, times(1)).setLowPowerStandbyActive(true);
-        verify(mNetworkPolicyManagerInternal, times(1)).setLowPowerStandbyActive(true);
+        verify(mNetworkPolicyManagerInternalMock, times(1)).setLowPowerStandbyActive(true);
     }
 
     private void awaitStandbyTimeoutAlarm() {
@@ -176,7 +196,7 @@ public class LowPowerStandbyControllerTest {
 
         assertThat(mController.isActive()).isFalse();
         verify(mPowerManagerInternalMock, never()).setLowPowerStandbyActive(anyBoolean());
-        verify(mNetworkPolicyManagerInternal, never()).setLowPowerStandbyActive(anyBoolean());
+        verify(mNetworkPolicyManagerInternalMock, never()).setLowPowerStandbyActive(anyBoolean());
     }
 
     @Test
@@ -190,7 +210,7 @@ public class LowPowerStandbyControllerTest {
 
         assertThat(mController.isActive()).isTrue();
         verify(mPowerManagerInternalMock, times(1)).setLowPowerStandbyActive(true);
-        verify(mNetworkPolicyManagerInternal, times(1)).setLowPowerStandbyActive(true);
+        verify(mNetworkPolicyManagerInternalMock, times(1)).setLowPowerStandbyActive(true);
     }
 
     @Test
@@ -206,7 +226,7 @@ public class LowPowerStandbyControllerTest {
 
         assertThat(mController.isActive()).isFalse();
         verify(mPowerManagerInternalMock, never()).setLowPowerStandbyActive(anyBoolean());
-        verify(mNetworkPolicyManagerInternal, never()).setLowPowerStandbyActive(anyBoolean());
+        verify(mNetworkPolicyManagerInternalMock, never()).setLowPowerStandbyActive(anyBoolean());
     }
 
     private void verifyStandbyAlarmCancelled() {
@@ -231,7 +251,7 @@ public class LowPowerStandbyControllerTest {
 
         assertThat(mController.isActive()).isFalse();
         verify(mPowerManagerInternalMock, times(1)).setLowPowerStandbyActive(false);
-        verify(mNetworkPolicyManagerInternal, times(1)).setLowPowerStandbyActive(false);
+        verify(mNetworkPolicyManagerInternalMock, times(1)).setLowPowerStandbyActive(false);
     }
 
     @Test
@@ -249,7 +269,7 @@ public class LowPowerStandbyControllerTest {
 
         assertThat(mController.isActive()).isFalse();
         verify(mPowerManagerInternalMock, times(1)).setLowPowerStandbyActive(false);
-        verify(mNetworkPolicyManagerInternal, times(1)).setLowPowerStandbyActive(false);
+        verify(mNetworkPolicyManagerInternalMock, times(1)).setLowPowerStandbyActive(false);
     }
 
     @Test
@@ -267,7 +287,7 @@ public class LowPowerStandbyControllerTest {
 
         assertThat(mController.isActive()).isTrue();
         verify(mPowerManagerInternalMock, never()).setLowPowerStandbyActive(false);
-        verify(mNetworkPolicyManagerInternal, never()).setLowPowerStandbyActive(false);
+        verify(mNetworkPolicyManagerInternalMock, never()).setLowPowerStandbyActive(false);
     }
 
     @Test
@@ -286,7 +306,7 @@ public class LowPowerStandbyControllerTest {
 
         assertThat(mController.isActive()).isTrue();
         verify(mPowerManagerInternalMock, times(2)).setLowPowerStandbyActive(true);
-        verify(mNetworkPolicyManagerInternal, times(2)).setLowPowerStandbyActive(true);
+        verify(mNetworkPolicyManagerInternalMock, times(2)).setLowPowerStandbyActive(true);
     }
 
     @Test
@@ -299,7 +319,7 @@ public class LowPowerStandbyControllerTest {
         assertThat(mController.isActive()).isFalse();
         verify(mAlarmManagerMock, never()).setExact(anyInt(), anyLong(), anyString(), any(), any());
         verify(mPowerManagerInternalMock, never()).setLowPowerStandbyActive(anyBoolean());
-        verify(mNetworkPolicyManagerInternal, never()).setLowPowerStandbyActive(anyBoolean());
+        verify(mNetworkPolicyManagerInternalMock, never()).setLowPowerStandbyActive(anyBoolean());
     }
 
     @Test
@@ -356,24 +376,6 @@ public class LowPowerStandbyControllerTest {
     }
 
     @Test
-    public void testAllowlistChange_servicesAreNotified() throws Exception {
-        setLowPowerStandbySupportedConfig(true);
-        mController.systemReady();
-
-        LowPowerStandbyControllerInternal service = LocalServices.getService(
-                LowPowerStandbyControllerInternal.class);
-        service.addToAllowlist(10);
-        mTestLooper.dispatchAll();
-        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[] {10});
-        verify(mNetworkPolicyManagerInternal).setLowPowerStandbyAllowlist(new int[] {10});
-
-        service.removeFromAllowlist(10);
-        mTestLooper.dispatchAll();
-        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[] {});
-        verify(mNetworkPolicyManagerInternal).setLowPowerStandbyAllowlist(new int[] {});
-    }
-
-    @Test
     public void testForceActive() throws Exception {
         setLowPowerStandbySupportedConfig(false);
         mController.systemReady();
@@ -383,20 +385,154 @@ public class LowPowerStandbyControllerTest {
 
         assertThat(mController.isActive()).isTrue();
         verify(mPowerManagerInternalMock).setLowPowerStandbyActive(true);
-        verify(mNetworkPolicyManagerInternal).setLowPowerStandbyActive(true);
+        verify(mNetworkPolicyManagerInternalMock).setLowPowerStandbyActive(true);
 
         mController.forceActive(false);
         mTestLooper.dispatchAll();
 
         assertThat(mController.isActive()).isFalse();
         verify(mPowerManagerInternalMock).setLowPowerStandbyActive(false);
-        verify(mNetworkPolicyManagerInternal).setLowPowerStandbyActive(false);
+        verify(mNetworkPolicyManagerInternalMock).setLowPowerStandbyActive(false);
     }
 
     private void setLowPowerStandbySupportedConfig(boolean supported) {
         when(mResourcesSpy.getBoolean(
                 com.android.internal.R.bool.config_lowPowerStandbySupported))
                 .thenReturn(supported);
+    }
+
+    @Test
+    public void testSetPolicy() throws Exception {
+        mController.systemReady();
+        mController.setPolicy(EMPTY_POLICY);
+        assertThat(mController.getPolicy()).isEqualTo(EMPTY_POLICY);
+    }
+
+    @Test
+    public void testSetDefaultPolicy() throws Exception {
+        mController.systemReady();
+        mController.setPolicy(EMPTY_POLICY);
+        mController.setPolicy(null);
+        assertThat(mController.getPolicy()).isNotNull();
+        assertThat(mController.getPolicy()).isEqualTo(LowPowerStandbyController.DEFAULT_POLICY);
+    }
+
+    @Test
+    public void testAddToAllowlist_ReasonIsAllowed_servicesAreNotified() throws Exception {
+        mController.systemReady();
+        mController.setPolicy(
+                policyWithAllowedReasons(LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION));
+
+        LowPowerStandbyControllerInternal service = LocalServices.getService(
+                LowPowerStandbyControllerInternal.class);
+        service.addToAllowlist(10, LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION);
+        mTestLooper.dispatchAll();
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{10});
+        verify(mNetworkPolicyManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{10});
+
+        service.removeFromAllowlist(10, LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION);
+        mTestLooper.dispatchAll();
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{});
+        verify(mNetworkPolicyManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{});
+    }
+
+    @Test
+    public void testRemoveFromAllowlist_ReasonIsAllowed_servicesAreNotified() throws Exception {
+        mController.systemReady();
+        mController.setPolicy(
+                policyWithAllowedReasons(LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION));
+
+        LowPowerStandbyControllerInternal service = LocalServices.getService(
+                LowPowerStandbyControllerInternal.class);
+        service.addToAllowlist(10, LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION);
+        mTestLooper.dispatchAll();
+
+        service.removeFromAllowlist(10, LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION);
+        mTestLooper.dispatchAll();
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{});
+        verify(mNetworkPolicyManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{});
+    }
+
+    @Test
+    public void testSetAllowReasons_ActiveExemptionsNoLongerAllowed_servicesAreNotified() {
+        mController.systemReady();
+        mController.setEnabled(true);
+        mController.setPolicy(
+                policyWithAllowedReasons(LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION));
+
+        LowPowerStandbyControllerInternal service = LocalServices.getService(
+                LowPowerStandbyControllerInternal.class);
+        service.addToAllowlist(10, LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION);
+        mTestLooper.dispatchAll();
+
+        mController.setPolicy(EMPTY_POLICY);
+        mTestLooper.dispatchAll();
+
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{});
+        verify(mNetworkPolicyManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{});
+    }
+
+    @Test
+    public void testSetAllowReasons_ReasonBecomesAllowed_servicesAreNotified() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(true);
+        mController.setPolicy(EMPTY_POLICY);
+
+        LowPowerStandbyControllerInternal service = LocalServices.getService(
+                LowPowerStandbyControllerInternal.class);
+        service.addToAllowlist(10, LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION);
+        mTestLooper.dispatchAll();
+
+        verify(mPowerManagerInternalMock, never()).setLowPowerStandbyAllowlist(any());
+        verify(mNetworkPolicyManagerInternalMock, never()).setLowPowerStandbyAllowlist(any());
+
+        mController.setPolicy(
+                policyWithAllowedReasons(LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION));
+        mTestLooper.dispatchAll();
+
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{10});
+        verify(mNetworkPolicyManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{10});
+    }
+
+    @Test
+    public void testSetAllowReasons_NoActiveExemptions_servicesAreNotNotified() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(true);
+        mController.setPolicy(
+                policyWithAllowedReasons(LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION));
+        mController.setPolicy(EMPTY_POLICY);
+        mTestLooper.dispatchAll();
+
+        verify(mPowerManagerInternalMock, never()).setLowPowerStandbyAllowlist(any());
+        verify(mNetworkPolicyManagerInternalMock, never()).setLowPowerStandbyAllowlist(any());
+    }
+
+    @Test
+    public void testSetAllowedFeatures_isAllowedIfDisabled() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(false);
+        mTestLooper.dispatchAll();
+
+        assertTrue(mController.isAllowed(LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN));
+    }
+
+    @Test
+    public void testSetAllowedFeatures_isAllowedWhenEnabled() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(true);
+        mController.setPolicy(policyWithAllowedFeatures(LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN));
+        mTestLooper.dispatchAll();
+
+        assertTrue(mController.isAllowed(LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN));
+    }
+
+    @Test
+    public void testSetAllowedFeatures_isNotAllowed() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(true);
+        mTestLooper.dispatchAll();
+
+        assertFalse(mController.isAllowed(LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN));
     }
 
     private void setInteractive() throws Exception {
@@ -412,6 +548,24 @@ public class LowPowerStandbyControllerTest {
     private void setDeviceIdleMode(boolean idle) throws Exception {
         when(mIPowerManagerMock.isDeviceIdleMode()).thenReturn(idle);
         mContextSpy.sendBroadcast(new Intent(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED));
+    }
+
+    private LowPowerStandbyPolicy policyWithAllowedReasons(int allowedReasons) {
+        return new LowPowerStandbyPolicy(
+                "Test policy",
+                Collections.emptySet(),
+                allowedReasons,
+                Collections.emptySet()
+        );
+    }
+
+    private LowPowerStandbyPolicy policyWithAllowedFeatures(String... allowedFeatures) {
+        return new LowPowerStandbyPolicy(
+                "Test policy",
+                Collections.emptySet(),
+                0,
+                new ArraySet<>(allowedFeatures)
+        );
     }
 
     private void advanceTime(long timeMs) {

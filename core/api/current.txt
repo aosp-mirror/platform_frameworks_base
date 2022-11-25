@@ -32831,9 +32831,12 @@ package android.os {
     method public int getCurrentThermalStatus();
     method public int getLocationPowerSaveMode();
     method public float getThermalHeadroom(@IntRange(from=0, to=60) int);
+    method public boolean isAllowedInLowPowerStandby(int);
+    method public boolean isAllowedInLowPowerStandby(@NonNull String);
     method public boolean isBatteryDischargePredictionPersonalized();
     method public boolean isDeviceIdleMode();
     method public boolean isDeviceLightIdleMode();
+    method public boolean isExemptFromLowPowerStandby();
     method public boolean isIgnoringBatteryOptimizations(String);
     method public boolean isInteractive();
     method public boolean isLowPowerStandbyEnabled();
@@ -32856,6 +32859,8 @@ package android.os {
     field public static final int LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF = 1; // 0x1
     field public static final int LOCATION_MODE_NO_CHANGE = 0; // 0x0
     field public static final int LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF = 4; // 0x4
+    field public static final int LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION = 1; // 0x1
+    field public static final String LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN = "com.android.lowpowerstandby.WAKE_ON_LAN";
     field public static final int ON_AFTER_RELEASE = 536870912; // 0x20000000
     field public static final int PARTIAL_WAKE_LOCK = 1; // 0x1
     field public static final int PROXIMITY_SCREEN_OFF_WAKE_LOCK = 32; // 0x20
