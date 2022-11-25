@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.framework
+package com.android.settingslib.spa.slice
 
 import android.content.BroadcastReceiver
 import android.content.Context

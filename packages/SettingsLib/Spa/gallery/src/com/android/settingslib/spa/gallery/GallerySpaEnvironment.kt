@@ -17,7 +17,6 @@
 package com.android.settingslib.spa.gallery
 
 import android.content.Context
-import com.android.settingslib.spa.framework.SpaSliceBroadcastReceiver
 import com.android.settingslib.spa.framework.common.LocalLogger
 import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
 import com.android.settingslib.spa.framework.common.SpaEnvironment
@@ -39,6 +38,7 @@ import com.android.settingslib.spa.gallery.preference.SwitchPreferencePageProvid
 import com.android.settingslib.spa.gallery.preference.TwoTargetSwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.ui.CategoryPageProvider
 import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
+import com.android.settingslib.spa.slice.SpaSliceBroadcastReceiver
 
 /**
  * Enum to define all SPP name here.
@@ -81,9 +81,12 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
         )
     }
 
+    override val logger = LocalLogger()
+
     override val browseActivityClass = GalleryMainActivity::class.java
     override val sliceBroadcastReceiverClass = SpaSliceBroadcastReceiver::class.java
+
+    // For debugging
     override val searchProviderAuthorities = "com.android.spa.gallery.search.provider"
     override val sliceProviderAuthorities = "com.android.spa.gallery.slice.provider"
-    override val logger = LocalLogger()
 }

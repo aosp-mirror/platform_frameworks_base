@@ -17,7 +17,9 @@
 package com.android.settingslib.spa.framework.common
 
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -57,6 +59,9 @@ class SpaLoggerForTest : SpaLogger {
 }
 
 class MockActivity : BrowseActivity()
+class MockSliceBroadcastReceiver : BroadcastReceiver() {
+    override fun onReceive(p0: Context?, p1: Intent?) {}
+}
 
 object SppHome : SettingsPageProvider {
     override val name = "SppHome"
@@ -104,7 +109,13 @@ object SppLayer2 : SettingsPageProvider {
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         val owner = this.createSettingsPage()
         return listOf(
-            SettingsEntryBuilder.create(owner, "Layer2Entry1").build(),
+            SettingsEntryBuilder.create(owner, "Layer2Entry1")
+                .setSliceDataFn { _, _ ->
+                    return@setSliceDataFn object : EntrySliceData() {
+                        init { postValue(null) }
+                    }
+                }
+                .build(),
             SettingsEntryBuilder.create(owner, "Layer2Entry2").build(),
         )
     }
@@ -113,7 +124,9 @@ object SppLayer2 : SettingsPageProvider {
 class SpaEnvironmentForTest(
     context: Context,
     override val browseActivityClass: Class<out Activity>? = MockActivity::class.java,
-    override val logger: SpaLogger = SpaLoggerForTest()
+    override val sliceBroadcastReceiverClass: Class<out BroadcastReceiver>? =
+        MockSliceBroadcastReceiver::class.java,
+    override val logger: SpaLogger = object : SpaLogger {}
 ) : SpaEnvironment(context) {
 
     override val pageProviderRepository = lazy {
