@@ -86,11 +86,11 @@ class ActivityEmbeddingAnimationSpec {
         final int startLeft;
         final int startTop;
         if (parentBounds.top == bounds.top && parentBounds.bottom == bounds.bottom) {
-            // The window will be animated in from left or right depends on its position.
+            // The window will be animated in from left or right depending on its position.
             startTop = 0;
             startLeft = parentBounds.left == bounds.left ? -bounds.width() : bounds.width();
         } else {
-            // The window will be animated in from top or bottom depends on its position.
+            // The window will be animated in from top or bottom depending on its position.
             startTop = parentBounds.top == bounds.top ? -bounds.height() : bounds.height();
             startLeft = 0;
         }
@@ -114,11 +114,11 @@ class ActivityEmbeddingAnimationSpec {
         final int endTop;
         final int endLeft;
         if (parentBounds.top == bounds.top && parentBounds.bottom == bounds.bottom) {
-            // The window will be animated out to left or right depends on its position.
+            // The window will be animated out to left or right depending on its position.
             endTop = 0;
             endLeft = parentBounds.left == bounds.left ? -bounds.width() : bounds.width();
         } else {
-            // The window will be animated out to top or bottom depends on its position.
+            // The window will be animated out to top or bottom depending on its position.
             endTop = parentBounds.top == bounds.top ? -bounds.height() : bounds.height();
             endLeft = 0;
         }
