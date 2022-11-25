@@ -196,6 +196,7 @@ public abstract class KeyProperties {
     @StringDef(prefix = { "KEY_" }, value = {
         KEY_ALGORITHM_RSA,
         KEY_ALGORITHM_EC,
+        KEY_ALGORITHM_XDH,
         KEY_ALGORITHM_AES,
         KEY_ALGORITHM_HMAC_SHA1,
         KEY_ALGORITHM_HMAC_SHA224,
@@ -210,6 +211,11 @@ public abstract class KeyProperties {
 
     /** Elliptic Curve (EC) Cryptography key. */
     public static final String KEY_ALGORITHM_EC = "EC";
+
+    /** Curve 25519 based Agreement key.
+     * @hide
+     */
+    public static final String KEY_ALGORITHM_XDH = "XDH";
 
     /** Advanced Encryption Standard (AES) key. */
     public static final String KEY_ALGORITHM_AES = "AES";
@@ -246,7 +252,8 @@ public abstract class KeyProperties {
 
         public static int toKeymasterAsymmetricKeyAlgorithm(
                 @NonNull @KeyAlgorithmEnum String algorithm) {
-            if (KEY_ALGORITHM_EC.equalsIgnoreCase(algorithm)) {
+            if (KEY_ALGORITHM_EC.equalsIgnoreCase(algorithm)
+                    || KEY_ALGORITHM_XDH.equalsIgnoreCase(algorithm)) {
                 return KeymasterDefs.KM_ALGORITHM_EC;
             } else if (KEY_ALGORITHM_RSA.equalsIgnoreCase(algorithm)) {
                 return KeymasterDefs.KM_ALGORITHM_RSA;
