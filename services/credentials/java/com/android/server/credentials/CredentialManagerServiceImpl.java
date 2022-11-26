@@ -22,8 +22,10 @@ import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.service.credentials.CredentialProviderInfo;
+import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.infra.AbstractPerUserSystemService;
 
 import java.util.List;
@@ -37,26 +39,33 @@ public final class CredentialManagerServiceImpl extends
     private static final String TAG = "CredManSysServiceImpl";
 
     // TODO(b/210531) : Make final when update flow is fixed
-    private ComponentName mRemoteServiceComponentName;
+    @GuardedBy("mLock")
     private CredentialProviderInfo mInfo;
 
-    public CredentialManagerServiceImpl(
+    CredentialManagerServiceImpl(
             @NonNull CredentialManagerService master,
             @NonNull Object lock, int userId, String serviceName)
             throws PackageManager.NameNotFoundException {
         super(master, lock, userId);
-        Slog.i(TAG, "in CredentialManagerServiceImpl cons");
-        // TODO : Replace with newServiceInfoLocked after confirming behavior
-        mRemoteServiceComponentName = ComponentName.unflattenFromString(serviceName);
-        mInfo = new CredentialProviderInfo(getContext(), mRemoteServiceComponentName, mUserId);
+        Log.i(TAG, "in CredentialManagerServiceImpl constructed with: " + serviceName);
+        synchronized (mLock) {
+            newServiceInfoLocked(ComponentName.unflattenFromString(serviceName));
+        }
     }
 
     @Override // from PerUserSystemService
+    @GuardedBy("mLock")
     protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)
             throws PackageManager.NameNotFoundException {
         // TODO : Test update flows with multiple providers
-        Slog.i(TAG , "newServiceInfoLocked with : " + serviceComponent.getPackageName());
-        mRemoteServiceComponentName = serviceComponent;
+        if (mInfo != null) {
+            Log.i(TAG, "newServiceInfoLocked with : "
+                    + mInfo.getServiceInfo().getComponentName().flattenToString() + " , "
+                    + serviceComponent.getPackageName());
+        } else {
+            Log.i(TAG, "newServiceInfoLocked with null mInfo , "
+                    + serviceComponent.getPackageName());
+        }
         mInfo = new CredentialProviderInfo(getContext(), serviceComponent, mUserId);
         return mInfo.getServiceInfo();
     }
@@ -64,8 +73,13 @@ public final class CredentialManagerServiceImpl extends
     /**
      * Starts a provider session and associates it with the given request session. */
     @Nullable
-    public ProviderSession initiateProviderSessionForRequest(
-            RequestSession requestSession) {
+    @GuardedBy("mLock")
+    public ProviderSession initiateProviderSessionForRequestLocked(
+            RequestSession requestSession, List<String> requestOptions) {
+        if (!isServiceCapableLocked(requestOptions)) {
+            Log.i(TAG, "Service is not capable");
+            return null;
+        }
         Slog.i(TAG, "in initiateProviderSessionForRequest in CredManServiceImpl");
         if (mInfo == null) {
             Slog.i(TAG, "in initiateProviderSessionForRequest in CredManServiceImpl, "
@@ -80,7 +94,8 @@ public final class CredentialManagerServiceImpl extends
     }
 
     /** Return true if at least one capability found. */
-    boolean isServiceCapable(List<String> requestedOptions) {
+    @GuardedBy("mLock")
+    boolean isServiceCapableLocked(List<String> requestedOptions) {
         if (mInfo == null) {
             Slog.i(TAG, "in isServiceCapable, mInfo is null");
             return false;
