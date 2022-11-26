@@ -116,7 +116,7 @@
     <public name="handwritingBoundsOffsetBottom" />
     <public name="accessibilityDataPrivate" />
     <public name="enableTextStylingShortcuts" />
-    <public name="targetDisplayCategory"/>
+    <public name="requiredDisplayCategory"/>
     <public name="maxConcurrentSessionsCount" />
   </staging-public-group>
 

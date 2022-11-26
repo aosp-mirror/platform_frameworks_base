@@ -220,17 +220,17 @@ public class ParsedActivityUtils {
                 pkg.setVisibleToInstantApps(true);
             }
 
-            String targetDisplayCategory = sa.getNonConfigurationString(
-                    R.styleable.AndroidManifestActivity_targetDisplayCategory, 0);
+            String requiredDisplayCategory = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestActivity_requiredDisplayCategory, 0);
 
-            if (targetDisplayCategory != null
-                    && FrameworkParsingPackageUtils.validateName(targetDisplayCategory,
+            if (requiredDisplayCategory != null
+                    && FrameworkParsingPackageUtils.validateName(requiredDisplayCategory,
                     false /* requireSeparator */, false /* requireFilename */) != null) {
-                return input.error("targetDisplayCategory attribute can only consists of "
-                        + "alphanumeric characters, '_', and '.'");
+                return input.error("requiredDisplayCategory attribute can only consist "
+                        + "of alphanumeric characters, '_', and '.'");
             }
 
-            activity.setTargetDisplayCategory(targetDisplayCategory);
+            activity.setRequiredDisplayCategory(requiredDisplayCategory);
 
             return parseActivityOrAlias(activity, pkg, tag, parser, res, sa, receiver,
                     false /*isAlias*/, visibleToEphemeral, input,
