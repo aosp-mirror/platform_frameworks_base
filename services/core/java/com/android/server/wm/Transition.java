@@ -626,8 +626,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 if (target.asDisplayContent() != null || target.asActivityRecord() != null) {
                     t.setCrop(targetLeash, null /* crop */);
                 } else {
-                    // Crop to the requested bounds.
-                    final Rect clipRect = target.getRequestedOverrideBounds();
+                    // Crop to the resolved override bounds.
+                    final Rect clipRect = target.getResolvedOverrideBounds();
                     t.setWindowCrop(targetLeash, clipRect.width(), clipRect.height());
                 }
                 t.setCornerRadius(targetLeash, 0);
