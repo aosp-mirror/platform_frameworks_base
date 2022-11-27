@@ -3761,6 +3761,7 @@
   <java-symbol type="string" name="config_defaultTranslationService" />
   <java-symbol type="string" name="config_defaultAppPredictionService" />
   <java-symbol type="string" name="config_defaultContentSuggestionsService" />
+  <java-symbol type="string" name="config_defaultCredentialManagerHybridService" />
   <java-symbol type="string" name="config_defaultSearchUiService" />
   <java-symbol type="string" name="config_defaultSmartspaceService" />
   <java-symbol type="string" name="config_defaultWallpaperEffectsGenerationService" />
