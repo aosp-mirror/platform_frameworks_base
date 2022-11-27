@@ -22,7 +22,6 @@ import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -43,7 +42,7 @@ import com.android.settingslib.spaprivileged.model.app.AppListModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.android.settingslib.spaprivileged.model.app.userId
 import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
-import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProvider
+import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderImpl
 import com.android.settingslib.spaprivileged.template.preference.RestrictedSwitchPreference
 import kotlinx.coroutines.flow.Flow
 
@@ -146,9 +145,7 @@ internal class TogglePermissionInternalAppListModel<T : AppRecord>(
         listModel.filter(userIdFlow, recordListFlow)
 
     @Composable
-    override fun getSummary(option: Int, record: T): State<String> {
-        return getSummary(record)
-    }
+    override fun getSummary(option: Int, record: T) = getSummary(record)
 
     @Composable
     fun getSummary(record: T): State<String> {
@@ -157,27 +154,27 @@ internal class TogglePermissionInternalAppListModel<T : AppRecord>(
                 userId = record.app.userId,
                 keys = listModel.switchRestrictionKeys,
             )
-            RestrictionsProvider(context, restrictions)
+            RestrictionsProviderImpl(context, restrictions)
         }
-        val restrictedMode = restrictionsProvider.restrictedMode.observeAsState()
+        val restrictedMode = restrictionsProvider.restrictedModeState()
         val allowed = listModel.isAllowed(record)
         return remember {
             derivedStateOf {
                 RestrictedSwitchPreference.getSummary(
                     context = context,
                     restrictedMode = restrictedMode.value,
-                    noRestrictedSummary = getNoRestrictedSummary(allowed),
+                    summaryIfNoRestricted = getSummaryIfNoRestricted(allowed),
                     checked = allowed,
                 ).value
             }
         }
     }
 
-    private fun getNoRestrictedSummary(allowed: State<Boolean?>) = derivedStateOf {
+    private fun getSummaryIfNoRestricted(allowed: State<Boolean?>) = derivedStateOf {
         when (allowed.value) {
             true -> context.getString(R.string.app_permission_summary_allowed)
             false -> context.getString(R.string.app_permission_summary_not_allowed)
-            else -> context.getString(R.string.summary_placeholder)
+            null -> context.getString(R.string.summary_placeholder)
         }
     }
 }

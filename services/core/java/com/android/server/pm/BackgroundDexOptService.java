@@ -92,6 +92,8 @@ public final class BackgroundDexOptService {
             new ComponentName("android", BackgroundDexOptJobService.class.getName());
 
     // Possible return codes of individual optimization steps.
+    /** Initial value. */
+    public static final int STATUS_UNSPECIFIED = -1;
     /** Ok status: Optimizations finished, All packages were processed, can continue */
     public static final int STATUS_OK = 0;
     /** Optimizations should be aborted. Job scheduler requested it. */
@@ -108,16 +110,20 @@ public final class BackgroundDexOptService {
      * job will exclude those failed packages.
      */
     public static final int STATUS_DEX_OPT_FAILED = 5;
+    /** Encountered fatal error, such as a runtime exception. */
+    public static final int STATUS_FATAL_ERROR = 6;
 
     @IntDef(prefix = {"STATUS_"},
             value =
                     {
+                            STATUS_UNSPECIFIED,
                             STATUS_OK,
                             STATUS_ABORT_BY_CANCELLATION,
                             STATUS_ABORT_NO_SPACE_LEFT,
                             STATUS_ABORT_THERMAL,
                             STATUS_ABORT_BATTERY,
                             STATUS_DEX_OPT_FAILED,
+                            STATUS_FATAL_ERROR,
                     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Status {}
@@ -153,7 +159,7 @@ public final class BackgroundDexOptService {
     // True if JobScheduler invocations of dexopt have been disabled.
     @GuardedBy("mLock") private boolean mDisableJobSchedulerJobs;
 
-    @GuardedBy("mLock") @Status private int mLastExecutionStatus = STATUS_OK;
+    @GuardedBy("mLock") @Status private int mLastExecutionStatus = STATUS_UNSPECIFIED;
 
     @GuardedBy("mLock") private long mLastExecutionStartUptimeMs;
     @GuardedBy("mLock") private long mLastExecutionDurationMs;
@@ -561,18 +567,26 @@ public final class BackgroundDexOptService {
     private boolean runIdleOptimization(
             PackageManagerService pm, List<String> pkgs, boolean isPostBootUpdate) {
         synchronized (mLock) {
+            mLastExecutionStatus = STATUS_UNSPECIFIED;
             mLastExecutionStartUptimeMs = SystemClock.uptimeMillis();
             mLastExecutionDurationMs = -1;
         }
-        long lowStorageThreshold = getLowStorageThreshold();
-        int status = idleOptimizePackages(pm, pkgs, lowStorageThreshold, isPostBootUpdate);
-        logStatus(status);
-        synchronized (mLock) {
-            mLastExecutionStatus = status;
-            mLastExecutionDurationMs = SystemClock.uptimeMillis() - mLastExecutionStartUptimeMs;
-        }
 
-        return status == STATUS_OK || status == STATUS_DEX_OPT_FAILED;
+        int status = STATUS_UNSPECIFIED;
+        try {
+            long lowStorageThreshold = getLowStorageThreshold();
+            status = idleOptimizePackages(pm, pkgs, lowStorageThreshold, isPostBootUpdate);
+            logStatus(status);
+            return status == STATUS_OK || status == STATUS_DEX_OPT_FAILED;
+        } catch (RuntimeException e) {
+            status = STATUS_FATAL_ERROR;
+            throw e;
+        } finally {
+            synchronized (mLock) {
+                mLastExecutionStatus = status;
+                mLastExecutionDurationMs = SystemClock.uptimeMillis() - mLastExecutionStartUptimeMs;
+            }
+        }
     }
 
     /** Gets the size of the directory. It uses recursion to go over all files. */

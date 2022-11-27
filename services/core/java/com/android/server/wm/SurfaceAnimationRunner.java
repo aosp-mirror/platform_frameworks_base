@@ -441,6 +441,7 @@ class SurfaceAnimationRunner {
                         .setPixelFormat(PixelFormat.RGBA_8888)
                         .setChildrenOnly(true)
                         .setAllowProtected(true)
+                        .setCaptureSecureLayers(true)
                         .build();
         final ScreenCapture.ScreenshotHardwareBuffer edgeBuffer =
                 ScreenCapture.captureLayers(captureArgs);

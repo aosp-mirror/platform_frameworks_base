@@ -99,6 +99,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 @Presubmit
@@ -181,14 +182,36 @@ public class VirtualDeviceManagerServiceTest {
         return blockedActivities;
     }
 
+    private Intent createRestrictedActivityBlockedIntent(List displayCategories,
+            String targetDisplayCategory) {
+        mDeviceImpl.onVirtualDisplayCreatedLocked(
+                mDeviceImpl.createWindowPolicyController(displayCategories), DISPLAY_ID);
+        GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
+                DISPLAY_ID);
+        doNothing().when(mContext).startActivityAsUser(any(), any(), any());
+
+        ArrayList<ActivityInfo> activityInfos = getActivityInfoList(
+                NONBLOCKED_APP_PACKAGE_NAME,
+                NONBLOCKED_APP_PACKAGE_NAME,
+                /* displayOnRemoveDevices= */ true,
+                targetDisplayCategory);
+        Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
+                activityInfos.get(0), mAssociationInfo.getDisplayName());
+        gwpc.canContainActivities(activityInfos, WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
+        return blockedAppIntent;
+    }
+
+
     private ArrayList<ActivityInfo> getActivityInfoList(
-            String packageName, String name, boolean displayOnRemoveDevices) {
+            String packageName, String name, boolean displayOnRemoveDevices,
+            String targetDisplayCategory) {
         ActivityInfo activityInfo = new ActivityInfo();
         activityInfo.packageName = packageName;
         activityInfo.name = name;
         activityInfo.flags = displayOnRemoveDevices
                 ? FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES : FLAG_CANNOT_DISPLAY_ON_REMOTE_DEVICES;
         activityInfo.applicationInfo = mApplicationInfoMock;
+        activityInfo.targetDisplayCategory = targetDisplayCategory;
         return new ArrayList<>(Arrays.asList(activityInfo));
     }
 
@@ -298,7 +321,7 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void onVirtualDisplayRemovedLocked_doesNotThrowException() {
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
         // This call should not throw any exceptions.
         mDeviceImpl.onVirtualDisplayRemovedLocked(DISPLAY_ID);
     }
@@ -317,7 +340,7 @@ public class VirtualDeviceManagerServiceTest {
     public void onVirtualDisplayRemovedLocked_listenersNotified() {
         mLocalService.registerVirtualDisplayListener(mDisplayListener);
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
 
         mLocalService.onVirtualDisplayRemoved(mDeviceImpl, DISPLAY_ID);
         TestableLooper.get(this).processAllMessages();
@@ -379,7 +402,7 @@ public class VirtualDeviceManagerServiceTest {
                 nullable(String.class), nullable(String.class), nullable(WorkSource.class),
                 nullable(String.class), anyInt(), eq(null));
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
         verify(mIPowerManagerMock).acquireWakeLock(any(Binder.class), anyInt(),
                 nullable(String.class), nullable(String.class), nullable(WorkSource.class),
                 nullable(String.class), eq(DISPLAY_ID), eq(null));
@@ -388,9 +411,10 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void onVirtualDisplayCreatedLocked_duplicateCalls_onlyOneWakeLockIsAcquired()
             throws RemoteException {
-        GenericWindowPolicyController gwpc = mDeviceImpl.createWindowPolicyController();
+        GenericWindowPolicyController gwpc = mDeviceImpl.createWindowPolicyController(
+                new ArrayList<>());
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
         assertThrows(IllegalStateException.class,
                 () -> mDeviceImpl.onVirtualDisplayCreatedLocked(gwpc, DISPLAY_ID));
         TestableLooper.get(this).processAllMessages();
@@ -409,7 +433,7 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void onVirtualDisplayRemovedLocked_wakeLockIsReleased() throws RemoteException {
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
         ArgumentCaptor<IBinder> wakeLockCaptor = ArgumentCaptor.forClass(IBinder.class);
         TestableLooper.get(this).processAllMessages();
         verify(mIPowerManagerMock).acquireWakeLock(wakeLockCaptor.capture(),
@@ -425,7 +449,7 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void addVirtualDisplay_displayNotReleased_wakeLockIsReleased() throws RemoteException {
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
         ArgumentCaptor<IBinder> wakeLockCaptor = ArgumentCaptor.forClass(IBinder.class);
         TestableLooper.get(this).processAllMessages();
         verify(mIPowerManagerMock).acquireWakeLock(wakeLockCaptor.capture(),
@@ -625,7 +649,7 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void onAudioSessionStarting_hasVirtualAudioController() {
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
 
         mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mRoutingCallback, mConfigChangedCallback);
 
@@ -635,7 +659,7 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void onAudioSessionEnded_noVirtualAudioController() {
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
         mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mRoutingCallback, mConfigChangedCallback);
 
         mDeviceImpl.onAudioSessionEnded();
@@ -646,7 +670,7 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void close_cleanVirtualAudioController() {
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
         mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mRoutingCallback, mConfigChangedCallback);
 
         mDeviceImpl.close();
@@ -863,14 +887,16 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void openNonBlockedAppOnVirtualDisplay_doesNotStartBlockedAlertActivity() {
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
         GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
                 DISPLAY_ID);
         doNothing().when(mContext).startActivityAsUser(any(), any(), any());
 
         ArrayList<ActivityInfo> activityInfos = getActivityInfoList(
                 NONBLOCKED_APP_PACKAGE_NAME,
-                NONBLOCKED_APP_PACKAGE_NAME, /* displayOnRemoveDevices */ true);
+                NONBLOCKED_APP_PACKAGE_NAME,
+                /* displayOnRemoveDevices */ true,
+                /* targetDisplayCategory */ null);
         Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
                 activityInfos.get(0), mAssociationInfo.getDisplayName());
         gwpc.canContainActivities(activityInfos, WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
@@ -882,14 +908,16 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void openPermissionControllerOnVirtualDisplay_startBlockedAlertActivity() {
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
         GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
                 DISPLAY_ID);
         doNothing().when(mContext).startActivityAsUser(any(), any(), any());
 
         ArrayList<ActivityInfo> activityInfos = getActivityInfoList(
                 PERMISSION_CONTROLLER_PACKAGE_NAME,
-                PERMISSION_CONTROLLER_PACKAGE_NAME, /* displayOnRemoveDevices */  false);
+                PERMISSION_CONTROLLER_PACKAGE_NAME,
+                /* displayOnRemoveDevices */  false,
+                /* targetDisplayCategory */ null);
         Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
                 activityInfos.get(0), mAssociationInfo.getDisplayName());
         gwpc.canContainActivities(activityInfos, WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
@@ -901,14 +929,16 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void openSettingsOnVirtualDisplay_startBlockedAlertActivity() {
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
         GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
                 DISPLAY_ID);
         doNothing().when(mContext).startActivityAsUser(any(), any(), any());
 
         ArrayList<ActivityInfo> activityInfos = getActivityInfoList(
                 SETTINGS_PACKAGE_NAME,
-                SETTINGS_PACKAGE_NAME, /* displayOnRemoveDevices */  true);
+                SETTINGS_PACKAGE_NAME,
+                /* displayOnRemoveDevices */ true,
+                /* targetDisplayCategory */ null);
         Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
                 activityInfos.get(0), mAssociationInfo.getDisplayName());
         gwpc.canContainActivities(activityInfos, WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
@@ -920,14 +950,16 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void openVendingOnVirtualDisplay_startBlockedAlertActivity() {
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
         GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
                 DISPLAY_ID);
         doNothing().when(mContext).startActivityAsUser(any(), any(), any());
 
         ArrayList<ActivityInfo> activityInfos = getActivityInfoList(
                 VENDING_PACKAGE_NAME,
-                VENDING_PACKAGE_NAME, /* displayOnRemoveDevices */  true);
+                VENDING_PACKAGE_NAME,
+                /* displayOnRemoveDevices */ true,
+                /* targetDisplayCategory */ null);
         Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
                 activityInfos.get(0), mAssociationInfo.getDisplayName());
         gwpc.canContainActivities(activityInfos, WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
@@ -939,14 +971,16 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void openGoogleDialerOnVirtualDisplay_startBlockedAlertActivity() {
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
         GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
                 DISPLAY_ID);
         doNothing().when(mContext).startActivityAsUser(any(), any(), any());
 
         ArrayList<ActivityInfo> activityInfos = getActivityInfoList(
                 GOOGLE_DIALER_PACKAGE_NAME,
-                GOOGLE_DIALER_PACKAGE_NAME, /* displayOnRemoveDevices */  true);
+                GOOGLE_DIALER_PACKAGE_NAME,
+                /* displayOnRemoveDevices */ true,
+                /* targetDisplayCategory */ null);
         Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
                 activityInfos.get(0), mAssociationInfo.getDisplayName());
         gwpc.canContainActivities(activityInfos, WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
@@ -958,14 +992,16 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void openGoogleMapsOnVirtualDisplay_startBlockedAlertActivity() {
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
         GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
                 DISPLAY_ID);
         doNothing().when(mContext).startActivityAsUser(any(), any(), any());
 
         ArrayList<ActivityInfo> activityInfos = getActivityInfoList(
                 GOOGLE_MAPS_PACKAGE_NAME,
-                GOOGLE_MAPS_PACKAGE_NAME, /* displayOnRemoveDevices */  true);
+                GOOGLE_MAPS_PACKAGE_NAME,
+                /* displayOnRemoveDevices */ true,
+                /* targetDisplayCategory */ null);
         Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
                 activityInfos.get(0), mAssociationInfo.getDisplayName());
         gwpc.canContainActivities(activityInfos, WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
@@ -978,7 +1014,7 @@ public class VirtualDeviceManagerServiceTest {
     public void registerRunningAppsChangedListener_onRunningAppsChanged_listenersNotified() {
         ArraySet<Integer> uids = new ArraySet<>(Arrays.asList(UID_1, UID_2));
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
         GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
                 DISPLAY_ID);
 
@@ -993,7 +1029,7 @@ public class VirtualDeviceManagerServiceTest {
     public void noRunningAppsChangedListener_onRunningAppsChanged_doesNotThrowException() {
         ArraySet<Integer> uids = new ArraySet<>(Arrays.asList(UID_1, UID_2));
         mDeviceImpl.onVirtualDisplayCreatedLocked(
-                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
         GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
                 DISPLAY_ID);
         mDeviceImpl.onVirtualDisplayRemovedLocked(DISPLAY_ID);
@@ -1003,4 +1039,37 @@ public class VirtualDeviceManagerServiceTest {
 
         assertThat(gwpc.getRunningAppsChangedListenersSizeForTesting()).isEqualTo(0);
     }
+
+    @Test
+    public void nonRestrictedActivityOnRestrictedVirtualDisplay_startBlockedAlertActivity() {
+        Intent blockedAppIntent = createRestrictedActivityBlockedIntent(List.of("abc"),
+                /* targetDisplayCategory= */ null);
+        verify(mContext).startActivityAsUser(argThat(intent ->
+                intent.filterEquals(blockedAppIntent)), any(), any());
+
+    }
+
+    @Test
+    public void restrictedActivityOnRestrictedVirtualDisplay_doesNotStartBlockedAlertActivity() {
+        Intent blockedAppIntent = createRestrictedActivityBlockedIntent(List.of("abc"), "abc");
+        verify(mContext, never()).startActivityAsUser(argThat(intent ->
+                intent.filterEquals(blockedAppIntent)), any(), any());
+    }
+
+    @Test
+    public void restrictedActivityOnNonRestrictedVirtualDisplay_startBlockedAlertActivity() {
+        Intent blockedAppIntent = createRestrictedActivityBlockedIntent(
+                /* displayCategories= */ List.of(), "abc");
+        verify(mContext).startActivityAsUser(argThat(intent ->
+                intent.filterEquals(blockedAppIntent)), any(), any());
+    }
+
+    @Test
+    public void
+            restrictedActivityOnNonMatchingRestrictedVirtualDisplay_startBlockedAlertActivity() {
+        Intent blockedAppIntent = createRestrictedActivityBlockedIntent(List.of("abc"), "def");
+        verify(mContext).startActivityAsUser(argThat(intent ->
+                intent.filterEquals(blockedAppIntent)), any(), any());
+    }
+
 }

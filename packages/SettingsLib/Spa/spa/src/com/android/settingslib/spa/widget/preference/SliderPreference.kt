@@ -31,8 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.util.EntryHighlight
 import com.android.settingslib.spa.widget.ui.SettingsSlider
-import com.android.settingslib.spa.widget.util.EntryHighlight
 
 /**
  * The widget model for [SliderPreference] widget.

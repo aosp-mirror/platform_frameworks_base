@@ -17,7 +17,7 @@
 package com.android.settingslib.spa.widget.preference
 
 import androidx.compose.runtime.Composable
-import com.android.settingslib.spa.widget.util.EntryHighlight
+import com.android.settingslib.spa.framework.util.EntryHighlight
 import com.android.settingslib.spa.widget.ui.SettingsSwitch
 
 @Composable

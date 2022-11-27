@@ -28,7 +28,7 @@ import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsShape
 import com.android.settingslib.spa.framework.theme.SettingsTheme
-import com.android.settingslib.spa.widget.util.EntryHighlight
+import com.android.settingslib.spa.framework.util.EntryHighlight
 
 @Composable
 fun MainSwitchPreference(model: SwitchPreferenceModel) {

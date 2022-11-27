@@ -41,6 +41,7 @@ import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
 import android.media.MediaRouter2Manager;
 import android.media.RouteDiscoveryPreference;
+import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Binder;
 import android.os.Bundle;
@@ -251,6 +252,24 @@ class MediaRouter2ServiceImpl {
                     return;
                 }
                 setDiscoveryRequestWithRouter2Locked(routerRecord, preference);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    public void setRouteListingPreference(
+            @NonNull IMediaRouter2 router,
+            @Nullable RouteListingPreference routeListingPreference) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                RouterRecord routerRecord = mAllRouterRecords.get(router.asBinder());
+                if (routerRecord == null) {
+                    Slog.w(TAG, "Ignoring updating route listing of null routerRecord.");
+                    return;
+                }
+                setRouteListingPreferenceLocked(routerRecord, routeListingPreference);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -771,6 +790,31 @@ class MediaRouter2ServiceImpl {
                         routerRecord.mUserRecord.mHandler));
     }
 
+    @GuardedBy("mLock")
+    private void setRouteListingPreferenceLocked(
+            RouterRecord routerRecord, @Nullable RouteListingPreference routeListingPreference) {
+        routerRecord.mRouteListingPreference = routeListingPreference;
+        String routeListingAsString =
+                routeListingPreference != null
+                        ? routeListingPreference.getItems().stream()
+                                .map(RouteListingPreference.Item::getRouteId)
+                                .collect(Collectors.joining(","))
+                        : null;
+        mEventLogger.enqueue(
+                EventLogger.StringEvent.from(
+                        "setRouteListingPreference",
+                        "router id: %d, route listing preference: [%s]",
+                        routerRecord.mRouterId,
+                        routeListingAsString));
+
+        routerRecord.mUserRecord.mHandler.sendMessage(
+                obtainMessage(
+                        UserHandler::notifyRouteListingPreferenceChangeToManagers,
+                        routerRecord.mUserRecord.mHandler,
+                        routerRecord.mPackageName,
+                        routeListingPreference));
+    }
+
     private void setRouteVolumeWithRouter2Locked(@NonNull IMediaRouter2 router,
             @NonNull MediaRoute2Info route, int volume) {
         final IBinder binder = router.asBinder();
@@ -1021,6 +1065,15 @@ class MediaRouter2ServiceImpl {
         // RouteCallback#onRoutesAdded() for system MR2 will never be called with initial routes
         // due to the lack of features.
         for (RouterRecord routerRecord : userRecord.mRouterRecords) {
+            // Send route listing preferences before discovery preferences and routes to avoid an
+            // inconsistent state where there are routes to show, but the manager thinks
+            // the app has not expressed a preference for listing.
+            userRecord.mHandler.sendMessage(
+                    obtainMessage(
+                            UserHandler::notifyRouteListingPreferenceChangeToManagers,
+                            routerRecord.mUserRecord.mHandler,
+                            routerRecord.mPackageName,
+                            routerRecord.mRouteListingPreference));
             // TODO: UserRecord <-> routerRecord, why do they reference each other?
             // How about removing mUserRecord from routerRecord?
             routerRecord.mUserRecord.mHandler.sendMessage(
@@ -1400,6 +1453,7 @@ class MediaRouter2ServiceImpl {
         public final int mRouterId;
 
         public RouteDiscoveryPreference mDiscoveryPreference;
+        @Nullable public RouteListingPreference mRouteListingPreference;
 
         RouterRecord(UserRecord userRecord, IMediaRouter2 router, int uid, int pid,
                 String packageName, boolean hasConfigureWifiDisplayPermission,
@@ -2427,6 +2481,34 @@ class MediaRouter2ServiceImpl {
             }
         }
 
+        private void notifyRouteListingPreferenceChangeToManagers(
+                String routerPackageName, @Nullable RouteListingPreference routeListingPreference) {
+            MediaRouter2ServiceImpl service = mServiceRef.get();
+            if (service == null) {
+                return;
+            }
+            List<IMediaRouter2Manager> managers = new ArrayList<>();
+            synchronized (service.mLock) {
+                for (ManagerRecord managerRecord : mUserRecord.mManagerRecords) {
+                    managers.add(managerRecord.mManager);
+                }
+            }
+            for (IMediaRouter2Manager manager : managers) {
+                try {
+                    manager.notifyRouteListingPreferenceChange(
+                            routerPackageName, routeListingPreference);
+                } catch (RemoteException ex) {
+                    Slog.w(
+                            TAG,
+                            "Failed to notify preferred features changed."
+                                    + " Manager probably died.",
+                            ex);
+                }
+            }
+            // TODO(b/238178508): In order to support privileged media router instances, we also
+            //    need to update routers other than the one making the update.
+        }
+
         private void notifyRequestFailedToManager(@NonNull IMediaRouter2Manager manager,
                 int requestId, int reason) {
             try {
@@ -2506,7 +2588,6 @@ class MediaRouter2ServiceImpl {
             }
             return null;
         }
-
     }
     static final class SessionCreationRequest {
         public final RouterRecord mRouterRecord;

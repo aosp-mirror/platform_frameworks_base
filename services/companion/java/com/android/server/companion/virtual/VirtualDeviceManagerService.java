@@ -332,7 +332,8 @@ public class VirtualDeviceManagerService extends SystemService {
             GenericWindowPolicyController gwpc;
             final long token = Binder.clearCallingIdentity();
             try {
-                gwpc = virtualDeviceImpl.createWindowPolicyController();
+                gwpc = virtualDeviceImpl.createWindowPolicyController(
+                    virtualDisplayConfig.getDisplayCategories());
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

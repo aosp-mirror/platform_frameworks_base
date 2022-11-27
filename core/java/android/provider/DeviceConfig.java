@@ -262,6 +262,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_GAME_DRIVER = "game_driver";
 
     /**
+     * Namespace for all HDMI Control features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_HDMI_CONTROL = "hdmi_control";
+
+    /**
      * Namespace for all input-related features that are used at the native level.
      * These features are applied at reboot.
      *

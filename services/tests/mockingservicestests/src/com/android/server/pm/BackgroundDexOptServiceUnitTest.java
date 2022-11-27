@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import static com.android.server.pm.BackgroundDexOptService.STATUS_DEX_OPT_FAILED;
+import static com.android.server.pm.BackgroundDexOptService.STATUS_FATAL_ERROR;
 import static com.android.server.pm.BackgroundDexOptService.STATUS_OK;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -24,6 +25,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -261,6 +263,20 @@ public final class BackgroundDexOptServiceUnitTest {
 
         assertThat(getFailedPackageNamesPrimary()).isEmpty();
         assertThat(getFailedPackageNamesSecondary()).isEmpty();
+    }
+
+    @Test
+    public void testIdleJobFullRunWithFatalError() {
+        initUntilBootCompleted();
+        runFullJob(mJobServiceForPostBoot, mJobParametersForPostBoot,
+                /* expectedReschedule= */ false, /* expectedStatus= */ STATUS_OK,
+                /* totalJobFinishedWithParams= */ 1, /* expectedSkippedPackage= */ null);
+
+        doThrow(RuntimeException.class).when(mDexOptHelper).performDexOptWithStatus(any());
+
+        runFullJob(mJobServiceForIdle, mJobParametersForIdle,
+                /* expectedReschedule= */ false, /* expectedStatus= */ STATUS_FATAL_ERROR,
+                /* totalJobFinishedWithParams= */ 1, /* expectedSkippedPackage= */ null);
     }
 
     @Test
@@ -510,13 +526,21 @@ public final class BackgroundDexOptServiceUnitTest {
         ArgumentCaptor<Runnable> argThreadRunnable = ArgumentCaptor.forClass(Runnable.class);
         verify(mInjector, atLeastOnce()).createAndStartThread(any(), argThreadRunnable.capture());
 
-        argThreadRunnable.getValue().run();
+        try {
+            argThreadRunnable.getValue().run();
+        } catch (RuntimeException e) {
+            if (expectedStatus != STATUS_FATAL_ERROR) {
+                throw e;
+            }
+        }
 
         verify(jobService, times(totalJobFinishedWithParams)).jobFinished(params,
                 expectedReschedule);
         // Never block
         verify(mDexOptHelper, never()).controlDexOptBlocking(true);
-        verifyPerformDexOpt();
+        if (expectedStatus != STATUS_FATAL_ERROR) {
+            verifyPerformDexOpt();
+        }
         assertThat(getLastExecutionStatus()).isEqualTo(expectedStatus);
     }
 

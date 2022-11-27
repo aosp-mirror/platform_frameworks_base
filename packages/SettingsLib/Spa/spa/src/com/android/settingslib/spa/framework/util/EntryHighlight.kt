@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.widget.util
+package com.android.settingslib.spa.framework.util
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.RepeatMode

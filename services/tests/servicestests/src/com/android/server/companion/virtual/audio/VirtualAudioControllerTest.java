@@ -72,21 +72,24 @@ public class VirtualAudioControllerTest {
         MockitoAnnotations.initMocks(this);
         mContext = Mockito.spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         mVirtualAudioController = new VirtualAudioController(mContext);
-        mGenericWindowPolicyController = new GenericWindowPolicyController(
-                FLAG_SECURE,
-                SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
-                /* allowedUsers= */ new ArraySet<>(),
-                /* allowedCrossTaskNavigations= */ new ArraySet<>(),
-                /* blockedCrossTaskNavigations= */ new ArraySet<>(),
-                /* allowedActivities= */ new ArraySet<>(),
-                /* blockedActivities= */ new ArraySet<>(),
-                VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED,
-                /* activityListener= */ null,
-                /* pipBlockedCallback= */ null,
-                /* activityBlockedCallback= */ null,
-                /* secureWindowCallback= */ null,
-                /* deviceProfile= */ DEVICE_PROFILE_APP_STREAMING);
+        mGenericWindowPolicyController =
+                new GenericWindowPolicyController(
+                        FLAG_SECURE,
+                        SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                        /* allowedUsers= */ new ArraySet<>(),
+                        /* allowedCrossTaskNavigations= */ new ArraySet<>(),
+                        /* blockedCrossTaskNavigations= */ new ArraySet<>(),
+                        /* allowedActivities= */ new ArraySet<>(),
+                        /* blockedActivities= */ new ArraySet<>(),
+                        VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED,
+                        /* activityListener= */ null,
+                        /* pipBlockedCallback= */ null,
+                        /* activityBlockedCallback= */ null,
+                        /* secureWindowCallback= */ null,
+                        /* deviceProfile= */ DEVICE_PROFILE_APP_STREAMING,
+                        /* displayCategories= */ new ArrayList<>());
     }
+
 
     @Test
     public void startListening_receivesCallback() throws RemoteException {

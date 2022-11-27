@@ -279,15 +279,18 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
             final boolean autoDetectionEnabled = configuration.isAutoDetectionEnabled();
             setAutoDetectionEnabledIfRequired(autoDetectionEnabled);
 
-            // Avoid writing the geo detection enabled setting for devices with settings that
-            // are currently overridden by server flags: otherwise we might overwrite a droidfood
-            // user's real setting permanently.
-            // Also avoid writing the geo detection enabled setting for devices that do not support
-            // geo time zone detection: if we wrote it down then we'd set the value explicitly,
-            // which would prevent detecting "default" later. That might influence what happens on
-            // later releases that start to support geo detection on the same hardware.
+            // Only write the geo detection enabled setting when its values is used, e.g.:
+            // 1) Devices with a setting value that is not currently overridden by server flags
+            // 2) Devices that support both telephony and location detection algorithms
+            //
+            // If we wrote a setting value down when it's not used then we'd be setting the value
+            // explicitly, which would prevent detecting the setting is in "default" state later.
+            // Not being able to detect if the user has actually expressed a preference could
+            // influence what happens on later releases that start to support geo detection on the
+            // user's same hardware.
             if (!getGeoDetectionSettingEnabledOverride().isPresent()
-                    && isGeoTimeZoneDetectionFeatureSupported()) {
+                    && isGeoTimeZoneDetectionFeatureSupported()
+                    && isTelephonyTimeZoneDetectionFeatureSupported()) {
                 final boolean geoDetectionEnabledSetting = configuration.isGeoDetectionEnabled();
                 setGeoDetectionEnabledSettingIfRequired(userId, geoDetectionEnabledSetting);
             }
