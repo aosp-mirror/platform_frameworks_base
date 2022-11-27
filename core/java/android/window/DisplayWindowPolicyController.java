@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import android.annotation.NonNull;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.util.ArraySet;
 
@@ -114,7 +115,7 @@ public abstract class DisplayWindowPolicyController {
     /**
      * Returns {@code true} if the given new task can be launched on this virtual display.
      */
-    public abstract boolean canActivityBeLaunched(@NonNull ActivityInfo activityInfo,
+    public abstract boolean canActivityBeLaunched(@NonNull ActivityInfo activityInfo, Intent intent,
             @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
             boolean isNewTask);
 

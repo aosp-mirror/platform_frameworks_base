@@ -31,6 +31,7 @@ import static org.mockito.Mockito.mock;
 
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.UserHandle;
 import android.util.ArraySet;
@@ -227,7 +228,7 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         ArraySet<Integer> mRunningUids = new ArraySet<>();
 
         @Override
-        public boolean canActivityBeLaunched(@NonNull ActivityInfo activity,
+        public boolean canActivityBeLaunched(@NonNull ActivityInfo activity, Intent intent,
                 @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
                 boolean isNewTask) {
             return false;

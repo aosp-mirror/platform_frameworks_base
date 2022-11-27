@@ -33,6 +33,7 @@ import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
+import android.companion.virtual.IVirtualDeviceIntentInterceptor;
 import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
@@ -43,6 +44,7 @@ import android.companion.virtual.sensor.VirtualSensorEvent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.graphics.PointF;
 import android.hardware.display.DisplayManager;
@@ -114,6 +116,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final VirtualDeviceParams mParams;
     private final Map<Integer, PowerManager.WakeLock> mPerDisplayWakelocks = new ArrayMap<>();
     private final IVirtualDeviceActivityListener mActivityListener;
+    @GuardedBy("mVirtualDeviceLock")
+    private final Map<IBinder, IntentFilter> mIntentInterceptors = new ArrayMap<>();
     @NonNull
     private Consumer<ArraySet<Integer>> mRunningAppsChangedCallback;
     // The default setting for showing the pointer on new displays.
@@ -680,6 +684,31 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
+    @Override // Binder call
+    public void registerIntentInterceptor(IVirtualDeviceIntentInterceptor intentInterceptor,
+            IntentFilter filter) {
+        Objects.requireNonNull(intentInterceptor);
+        Objects.requireNonNull(filter);
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
+                "Permission required to register intent interceptor");
+        synchronized (mVirtualDeviceLock) {
+            mIntentInterceptors.put(intentInterceptor.asBinder(), filter);
+        }
+    }
+
+    @Override // Binder call
+    public void unregisterIntentInterceptor(
+            @NonNull IVirtualDeviceIntentInterceptor intentInterceptor) {
+        Objects.requireNonNull(intentInterceptor);
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
+                "Permission required to unregister intent interceptor");
+        synchronized (mVirtualDeviceLock) {
+            mIntentInterceptors.remove(intentInterceptor.asBinder());
+        }
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
         fout.println("  VirtualDevice: ");
@@ -713,6 +742,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                             this::onEnteringPipBlocked,
                             this::onActivityBlocked,
                             this::onSecureWindowShown,
+                            this::shouldInterceptIntent,
                             displayCategories,
                             mParams.getDefaultRecentsPolicy());
             gwpc.registerRunningAppsChangedListener(/* listener= */ this);
@@ -870,6 +900,34 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     void onEnteringPipBlocked(int uid) {
         showToastWhereUidIsRunning(uid, com.android.internal.R.string.vdm_pip_blocked,
                 Toast.LENGTH_LONG, mContext.getMainLooper());
+    }
+
+    /**
+     * Intercepts intent when matching any of the IntentFilter of any interceptor. Returns true if
+     * the intent matches any filter notifying the DisplayPolicyController to abort the
+     * activity launch to be replaced by the interception.
+     */
+    private boolean shouldInterceptIntent(Intent intent) {
+        synchronized (mVirtualDeviceLock) {
+            boolean hasInterceptedIntent = false;
+            for (Map.Entry<IBinder, IntentFilter> interceptor : mIntentInterceptors.entrySet()) {
+                if (interceptor.getValue().match(
+                        intent.getAction(), intent.getType(), intent.getScheme(), intent.getData(),
+                        intent.getCategories(), TAG) >= 0) {
+                    try {
+                        // For privacy reasons, only returning the intents action and data. Any
+                        // other required field will require a review.
+                        IVirtualDeviceIntentInterceptor.Stub.asInterface(interceptor.getKey())
+                            .onIntentIntercepted(new Intent(intent.getAction(), intent.getData()));
+                        hasInterceptedIntent = true;
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Unable to call mVirtualDeviceIntentInterceptor", e);
+                    }
+                }
+            }
+
+            return hasInterceptedIntent;
+        }
     }
 
     interface OnDeviceCloseListener {
