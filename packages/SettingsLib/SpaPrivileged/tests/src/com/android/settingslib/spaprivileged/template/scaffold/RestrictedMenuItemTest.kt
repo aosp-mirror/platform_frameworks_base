@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spaprivileged.template.preference
+package com.android.settingslib.spaprivileged.template.scaffold
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.isOff
-import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
+import com.android.settingslib.spa.widget.scaffold.MoreOptionsScope
 import com.android.settingslib.spaprivileged.model.enterprise.BaseUserRestricted
 import com.android.settingslib.spaprivileged.model.enterprise.NoRestricted
 import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
@@ -39,7 +36,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class RestrictedSwitchPreferenceTest {
+class RestrictedMenuItemTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -47,11 +44,7 @@ class RestrictedSwitchPreferenceTest {
 
     private val fakeRestrictionsProvider = FakeRestrictionsProvider()
 
-    private val switchPreferenceModel = object : SwitchPreferenceModel {
-        override val title = TITLE
-        override val checked = mutableStateOf(true)
-        override val onCheckedChange: (Boolean) -> Unit = { checked.value = it }
-    }
+    private var menuItemOnClickIsCalled = false
 
     @Test
     fun whenRestrictionsKeysIsEmpty_enabled() {
@@ -59,18 +52,17 @@ class RestrictedSwitchPreferenceTest {
 
         setContent(restrictions)
 
-        composeTestRule.onNodeWithText(TITLE).assertIsDisplayed().assertIsEnabled()
-        composeTestRule.onNode(isOn()).assertIsDisplayed()
+        composeTestRule.onNodeWithText(TEXT).assertIsDisplayed().assertIsEnabled()
     }
 
     @Test
-    fun whenRestrictionsKeysIsEmpty_toggleable() {
+    fun whenRestrictionsKeysIsEmpty_clickable() {
         val restrictions = Restrictions(userId = USER_ID, keys = emptyList())
 
         setContent(restrictions)
         composeTestRule.onRoot().performClick()
 
-        composeTestRule.onNode(isOff()).assertIsDisplayed()
+        assertThat(menuItemOnClickIsCalled).isTrue()
     }
 
     @Test
@@ -80,19 +72,18 @@ class RestrictedSwitchPreferenceTest {
 
         setContent(restrictions)
 
-        composeTestRule.onNodeWithText(TITLE).assertIsDisplayed().assertIsEnabled()
-        composeTestRule.onNode(isOn()).assertIsDisplayed()
+        composeTestRule.onNodeWithText(TEXT).assertIsDisplayed().assertIsEnabled()
     }
 
     @Test
-    fun whenNoRestricted_toggleable() {
+    fun whenNoRestricted_clickable() {
         val restrictions = Restrictions(userId = USER_ID, keys = listOf(RESTRICTION_KEY))
         fakeRestrictionsProvider.restrictedMode = NoRestricted
 
         setContent(restrictions)
         composeTestRule.onRoot().performClick()
 
-        composeTestRule.onNode(isOff()).assertIsDisplayed()
+        assertThat(menuItemOnClickIsCalled).isTrue()
     }
 
     @Test
@@ -102,19 +93,18 @@ class RestrictedSwitchPreferenceTest {
 
         setContent(restrictions)
 
-        composeTestRule.onNodeWithText(TITLE).assertIsDisplayed().assertIsNotEnabled()
-        composeTestRule.onNode(isOff()).assertIsDisplayed()
+        composeTestRule.onNodeWithText(TEXT).assertIsDisplayed().assertIsNotEnabled()
     }
 
     @Test
-    fun whenBaseUserRestricted_notToggleable() {
+    fun whenBaseUserRestricted_notClickable() {
         val restrictions = Restrictions(userId = USER_ID, keys = listOf(RESTRICTION_KEY))
         fakeRestrictionsProvider.restrictedMode = BaseUserRestricted
 
         setContent(restrictions)
         composeTestRule.onRoot().performClick()
 
-        composeTestRule.onNode(isOff()).assertIsDisplayed()
+        assertThat(menuItemOnClickIsCalled).isFalse()
     }
 
     @Test
@@ -124,13 +114,11 @@ class RestrictedSwitchPreferenceTest {
 
         setContent(restrictions)
 
-        composeTestRule.onNodeWithText(TITLE).assertIsDisplayed().assertIsEnabled()
-        composeTestRule.onNodeWithText(FakeBlockedByAdmin.SUMMARY).assertIsDisplayed()
-        composeTestRule.onNode(isOn()).assertIsDisplayed()
+        composeTestRule.onNodeWithText(TEXT).assertIsDisplayed().assertIsEnabled()
     }
 
     @Test
-    fun whenBlockedByAdmin_click() {
+    fun whenBlockedByAdmin_onClick_showAdminSupportDetails() {
         val restrictions = Restrictions(userId = USER_ID, keys = listOf(RESTRICTION_KEY))
         fakeRestrictionsProvider.restrictedMode = fakeBlockedByAdmin
 
@@ -138,18 +126,25 @@ class RestrictedSwitchPreferenceTest {
         composeTestRule.onRoot().performClick()
 
         assertThat(fakeBlockedByAdmin.sendShowAdminSupportDetailsIntentIsCalled).isTrue()
+        assertThat(menuItemOnClickIsCalled).isFalse()
     }
 
     private fun setContent(restrictions: Restrictions) {
+        val fakeMoreOptionsScope = object : MoreOptionsScope {
+            override fun dismiss() {}
+        }
         composeTestRule.setContent {
-            RestrictedSwitchPreferenceImpl(switchPreferenceModel, restrictions) { _, _ ->
-                fakeRestrictionsProvider
-            }
+            fakeMoreOptionsScope.RestrictedMenuItemImpl(
+                text = TEXT,
+                restrictions = restrictions,
+                onClick = { menuItemOnClickIsCalled = true },
+                restrictionsProviderFactory = { _, _ -> fakeRestrictionsProvider },
+            )
         }
     }
 
     private companion object {
-        const val TITLE = "Title"
+        const val TEXT = "Text"
         const val USER_ID = 0
         const val RESTRICTION_KEY = "restriction_key"
     }
