@@ -1207,6 +1207,7 @@ public class Typeface {
      * It is safe to call this method twice or more on the same instance.
      * @hide
      */
+    @TestApi
     public void releaseNativeObjectForTest() {
         mCleaner.run();
     }
@@ -1293,6 +1294,13 @@ public class Typeface {
     // buffer's byte order should be BIG_ENDIAN.
     /**
      * Deserialize the font mapping from the serialized byte buffer.
+     *
+     * <p>Warning: the given {@code buffer} must outlive generated Typeface
+     * objects in {@code out}. In production code, this is guaranteed by
+     * storing the buffer in {@link #sSystemFontMapBuffer}.
+     * If you call this method in a test, please make sure to destroy the
+     * generated Typeface objects by calling
+     * {@link #releaseNativeObjectForTest()}.
      *
      * @hide
      */

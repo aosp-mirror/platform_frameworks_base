@@ -203,16 +203,22 @@ public class TypefaceTest {
                 fallbackMap);
         SharedMemory sharedMemory = Typeface.serializeFontMap(systemFontMap);
         Map<String, Typeface> copiedFontMap = new ArrayMap<>();
-        Typeface.deserializeFontMap(sharedMemory.mapReadOnly().order(ByteOrder.BIG_ENDIAN),
-                copiedFontMap);
-        assertEquals(systemFontMap.size(), copiedFontMap.size());
-        for (String key : systemFontMap.keySet()) {
-            assertTrue(copiedFontMap.containsKey(key));
-            Typeface original = systemFontMap.get(key);
-            Typeface copied = copiedFontMap.get(key);
-            assertEquals(original.getStyle(), copied.getStyle());
-            assertEquals(original.getWeight(), copied.getWeight());
-            assertEquals(measureText(original, "hello"), measureText(copied, "hello"), 1e-6);
+        try {
+            Typeface.deserializeFontMap(sharedMemory.mapReadOnly().order(ByteOrder.BIG_ENDIAN),
+                    copiedFontMap);
+            assertEquals(systemFontMap.size(), copiedFontMap.size());
+            for (String key : systemFontMap.keySet()) {
+                assertTrue(copiedFontMap.containsKey(key));
+                Typeface original = systemFontMap.get(key);
+                Typeface copied = copiedFontMap.get(key);
+                assertEquals(original.getStyle(), copied.getStyle());
+                assertEquals(original.getWeight(), copied.getWeight());
+                assertEquals(measureText(original, "hello"), measureText(copied, "hello"), 1e-6);
+            }
+        } finally {
+            for (Typeface typeface : copiedFontMap.values()) {
+                typeface.releaseNativeObjectForTest();
+            }
         }
     }
 

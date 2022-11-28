@@ -1037,6 +1037,7 @@ package android.graphics {
     method @NonNull public static android.util.Pair<java.util.List<android.graphics.Typeface>,java.util.List<android.graphics.Typeface>> changeDefaultFontForTest(@NonNull java.util.List<android.graphics.Typeface>, @NonNull java.util.List<android.graphics.Typeface>);
     method @NonNull public static long[] deserializeFontMap(@NonNull java.nio.ByteBuffer, @NonNull java.util.Map<java.lang.String,android.graphics.Typeface>) throws java.io.IOException;
     method @Nullable public static android.os.SharedMemory getSystemFontMapSharedMemory();
+    method public void releaseNativeObjectForTest();
     method @NonNull public static android.os.SharedMemory serializeFontMap(@NonNull java.util.Map<java.lang.String,android.graphics.Typeface>) throws android.system.ErrnoException, java.io.IOException;
   }
 
