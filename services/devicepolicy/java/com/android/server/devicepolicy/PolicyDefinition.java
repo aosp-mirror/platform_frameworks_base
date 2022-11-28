@@ -25,8 +25,6 @@ import com.android.internal.util.function.QuadFunction;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
-import org.xmlpull.v1.XmlPullParserException;
-
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -225,8 +223,8 @@ final class PolicyDefinition<V> {
         mPolicySerializer.saveToXml(serializer, attributeName, value);
     }
 
-    V readPolicyValueFromXml(TypedXmlPullParser parser, String attributeName)
-            throws XmlPullParserException {
+    @Nullable
+    V readPolicyValueFromXml(TypedXmlPullParser parser, String attributeName) {
         return mPolicySerializer.readFromXml(parser, attributeName);
     }
 }

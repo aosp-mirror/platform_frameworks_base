@@ -16,16 +16,15 @@
 
 package com.android.server.devicepolicy;
 
+import android.annotation.NonNull;
+
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
-
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 
 abstract class PolicySerializer<V> {
-    abstract void saveToXml(TypedXmlSerializer serializer, String attributeName, V value)
+    abstract void saveToXml(TypedXmlSerializer serializer, String attributeName, @NonNull V value)
             throws IOException;
-    abstract V readFromXml(TypedXmlPullParser parser, String attributeName)
-            throws XmlPullParserException;
+    abstract V readFromXml(TypedXmlPullParser parser, String attributeName);
 }

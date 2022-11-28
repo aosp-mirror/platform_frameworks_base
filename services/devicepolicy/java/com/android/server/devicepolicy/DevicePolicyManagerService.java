@@ -12275,8 +12275,38 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             enforceCanCallLockTaskLocked(caller);
             checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_LOCK_TASK_PACKAGES);
-            final int userHandle = caller.getUserId();
-            setLockTaskPackagesLocked(userHandle, new ArrayList<>(Arrays.asList(packages)));
+        }
+
+        if (isCoexistenceEnabled(caller)) {
+            EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(who);
+            if (packages.length == 0) {
+                mDevicePolicyEngine.removeLocalPolicy(
+                        PolicyDefinition.LOCK_TASK,
+                        admin,
+                        caller.getUserId());
+            } else {
+                LockTaskPolicy currentPolicy = mDevicePolicyEngine.getLocalPolicy(
+                        PolicyDefinition.LOCK_TASK,
+                        caller.getUserId()).getPoliciesSetByAdmins().get(admin);
+                LockTaskPolicy policy;
+                if (currentPolicy == null) {
+                    policy = new LockTaskPolicy(Set.of(packages));
+                } else {
+                    policy = currentPolicy.clone();
+                    policy.setPackages(Set.of(packages));
+                }
+
+                mDevicePolicyEngine.setLocalPolicy(
+                        PolicyDefinition.LOCK_TASK,
+                        EnforcingAdmin.createEnterpriseEnforcingAdmin(who),
+                        policy,
+                        caller.getUserId());
+            }
+        } else {
+            synchronized (getLockObject()) {
+                final int userHandle = caller.getUserId();
+                setLockTaskPackagesLocked(userHandle, new ArrayList<>(Arrays.asList(packages)));
+            }
         }
     }
 
@@ -12297,8 +12327,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         synchronized (getLockObject()) {
             enforceCanCallLockTaskLocked(caller);
-            final List<String> packages = getUserData(userHandle).mLockTaskPackages;
-            return packages.toArray(new String[packages.size()]);
+        }
+
+        if (isCoexistenceEnabled(caller)) {
+            LockTaskPolicy policy = mDevicePolicyEngine.getLocalPolicy(
+                    PolicyDefinition.LOCK_TASK, userHandle).getCurrentResolvedPolicy();
+            if (policy == null) {
+                return new String[0];
+            } else {
+                return policy.getPackages().toArray(new String[policy.getPackages().size()]);
+            }
+        } else {
+            synchronized (getLockObject()) {
+                final List<String> packages = getUserData(userHandle).mLockTaskPackages;
+                return packages.toArray(new String[packages.size()]);
+            }
         }
     }
 
@@ -12314,8 +12357,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         final int userId = mInjector.userHandleGetCallingUserId();
-        synchronized (getLockObject()) {
-            return getUserData(userId).mLockTaskPackages.contains(pkg);
+        // TODO(b/260560985): This is not the right check, as the flag could be enabled but there
+        //  could be an admin that hasn't targeted U.
+        if (isCoexistenceFlagEnabled()) {
+            LockTaskPolicy policy = mDevicePolicyEngine.getLocalPolicy(
+                    PolicyDefinition.LOCK_TASK, userId).getCurrentResolvedPolicy();
+            if (policy == null) {
+                return false;
+            }
+            return policy.getPackages().contains(pkg);
+        } else {
+            synchronized (getLockObject()) {
+                return getUserData(userId).mLockTaskPackages.contains(pkg);
+            }
         }
     }
 
@@ -12338,7 +12392,28 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             enforceCanCallLockTaskLocked(caller);
             enforceCanSetLockTaskFeaturesOnFinancedDevice(caller, flags);
             checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_LOCK_TASK_FEATURES);
-            setLockTaskFeaturesLocked(userHandle, flags);
+        }
+        if (isCoexistenceEnabled(caller)) {
+            EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(who);
+            LockTaskPolicy currentPolicy = mDevicePolicyEngine.getLocalPolicy(
+                    PolicyDefinition.LOCK_TASK,
+                    caller.getUserId()).getPoliciesSetByAdmins().get(admin);
+            if (currentPolicy == null) {
+                throw new IllegalArgumentException("Can't set a lock task flags without setting "
+                        + "lock task packages first.");
+            }
+            LockTaskPolicy policy = currentPolicy.clone();
+            policy.setFlags(flags);
+
+            mDevicePolicyEngine.setLocalPolicy(
+                    PolicyDefinition.LOCK_TASK,
+                    EnforcingAdmin.createEnterpriseEnforcingAdmin(who),
+                    policy,
+                    caller.getUserId());
+        } else {
+            synchronized (getLockObject()) {
+                setLockTaskFeaturesLocked(userHandle, flags);
+            }
         }
     }
 
@@ -12356,7 +12431,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int userHandle = caller.getUserId();
         synchronized (getLockObject()) {
             enforceCanCallLockTaskLocked(caller);
-            return getUserData(userHandle).mLockTaskFeatures;
+        }
+
+        if (isCoexistenceEnabled(caller)) {
+            LockTaskPolicy policy = mDevicePolicyEngine.getLocalPolicy(
+                    PolicyDefinition.LOCK_TASK, userHandle).getCurrentResolvedPolicy();
+            if (policy == null) {
+                // We default on the power button menu, in order to be consistent with pre-P
+                // behaviour.
+                return DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS;
+            }
+            return policy.getFlags();
+        } else {
+            synchronized (getLockObject()) {
+                return getUserData(userHandle).mLockTaskFeatures;
+            }
         }
     }
 
