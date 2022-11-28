@@ -137,7 +137,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                         // Since we removed all devices when it starts and device discovery action
                         // does not poll local devices, we should put device info of local device
                         // manually here.
-                        for (HdmiCecLocalDevice device : mService.getAllLocalDevices()) {
+                        for (HdmiCecLocalDevice device : mService.getAllCecLocalDevices()) {
                             mService.getHdmiCecNetwork().addCecDevice(device.getDeviceInfo());
                         }
 
@@ -190,7 +190,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         if (isAlreadyActiveSource(targetDevice, targetAddress, callback)) {
             return;
         }
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             setActiveSource(targetDevice, "HdmiCecLocalDevicePlayback#deviceSelect()");
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
@@ -239,7 +239,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected void onStandby(boolean initiatedByCec, int standbyAction) {
         assertRunOnServiceThread();
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             return;
         }
         boolean wasActiveSource = isActiveSource();

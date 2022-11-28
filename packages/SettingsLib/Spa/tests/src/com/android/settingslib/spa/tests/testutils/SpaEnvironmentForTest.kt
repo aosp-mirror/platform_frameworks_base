@@ -14,14 +14,27 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.framework.common
+package com.android.settingslib.spa.tests.testutils
 
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.android.settingslib.spa.framework.BrowseActivity
+import com.android.settingslib.spa.framework.common.EntrySliceData
+import com.android.settingslib.spa.framework.common.LogCategory
+import com.android.settingslib.spa.framework.common.LogEvent
+import com.android.settingslib.spa.framework.common.SettingsEntry
+import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
+import com.android.settingslib.spa.framework.common.SettingsPage
+import com.android.settingslib.spa.framework.common.SettingsPageProvider
+import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
+import com.android.settingslib.spa.framework.common.SpaEnvironment
+import com.android.settingslib.spa.framework.common.SpaLogger
+import com.android.settingslib.spa.framework.common.createSettingsPage
 
 class SpaLoggerForTest : SpaLogger {
     data class MsgCountKey(val msg: String, val category: LogCategory)
@@ -32,22 +45,22 @@ class SpaLoggerForTest : SpaLogger {
 
     override fun message(tag: String, msg: String, category: LogCategory) {
         val key = MsgCountKey("[$tag]$msg", category)
-        messageCount[key] = messageCount.getOrDefault(key, 0) + 1
+        messageCount[key] = (messageCount[key] ?: 0) + 1
     }
 
     override fun event(id: String, event: LogEvent, category: LogCategory, details: String?) {
         val key = EventCountKey(id, event, category)
-        eventCount[key] = eventCount.getOrDefault(key, 0) + 1
+        eventCount[key] = (eventCount[key] ?: 0) + 1
     }
 
     fun getMessageCount(tag: String, msg: String, category: LogCategory): Int {
         val key = MsgCountKey("[$tag]$msg", category)
-        return messageCount.getOrDefault(key, 0)
+        return messageCount[key] ?: 0
     }
 
     fun getEventCount(id: String, event: LogEvent, category: LogCategory): Int {
         val key = EventCountKey(id, event, category)
-        return eventCount.getOrDefault(key, 0)
+        return eventCount[key] ?: 0
     }
 
     fun reset() {
@@ -56,7 +69,10 @@ class SpaLoggerForTest : SpaLogger {
     }
 }
 
-class MockActivity : BrowseActivity()
+class BlankActivity : BrowseActivity()
+class BlankSliceBroadcastReceiver : BroadcastReceiver() {
+    override fun onReceive(p0: Context?, p1: Intent?) {}
+}
 
 object SppHome : SettingsPageProvider {
     override val name = "SppHome"
@@ -104,7 +120,15 @@ object SppLayer2 : SettingsPageProvider {
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         val owner = this.createSettingsPage()
         return listOf(
-            SettingsEntryBuilder.create(owner, "Layer2Entry1").build(),
+            SettingsEntryBuilder.create(owner, "Layer2Entry1")
+                .setSliceDataFn { _, _ ->
+                    return@setSliceDataFn object : EntrySliceData() {
+                        init {
+                            postValue(null)
+                        }
+                    }
+                }
+                .build(),
             SettingsEntryBuilder.create(owner, "Layer2Entry2").build(),
         )
     }
@@ -112,8 +136,10 @@ object SppLayer2 : SettingsPageProvider {
 
 class SpaEnvironmentForTest(
     context: Context,
-    override val browseActivityClass: Class<out Activity>? = MockActivity::class.java,
-    override val logger: SpaLogger = SpaLoggerForTest()
+    override val browseActivityClass: Class<out Activity>? = BlankActivity::class.java,
+    override val sliceBroadcastReceiverClass: Class<out BroadcastReceiver>? =
+        BlankSliceBroadcastReceiver::class.java,
+    override val logger: SpaLogger = object : SpaLogger {}
 ) : SpaEnvironment(context) {
 
     override val pageProviderRepository = lazy {

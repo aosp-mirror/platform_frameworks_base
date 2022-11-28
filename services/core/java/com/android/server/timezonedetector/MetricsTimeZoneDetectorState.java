@@ -136,7 +136,7 @@ public final class MetricsTimeZoneDetectorState {
      * testing only.
      */
     public boolean getGeoDetectionRunInBackgroundEnabled() {
-        return mConfigurationInternal.getGeoDetectionRunInBackgroundEnabled();
+        return mConfigurationInternal.getGeoDetectionRunInBackgroundEnabledSetting();
     }
 
     /** Returns true if enhanced metric collection is enabled. */

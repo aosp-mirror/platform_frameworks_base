@@ -109,7 +109,6 @@ public class MediaProjectionPermissionActivity extends Activity
         CharSequence dialogTitle = null;
         String appName = null;
         if (Utils.isHeadlessRemoteDisplayProvider(packageManager, mPackageName)) {
-            // TODO(b/253438807): handle special app name
             dialogText = getString(R.string.media_projection_dialog_service_text);
             dialogTitle = getString(R.string.media_projection_dialog_service_title);
         } else {

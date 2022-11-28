@@ -111,7 +111,7 @@ public class DeviceSelectActionFromTvTest {
                         Collections.singletonList(HdmiDeviceInfo.DEVICE_TV),
                         new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
-                    boolean isControlEnabled() {
+                    boolean isCecControlEnabled() {
                         return true;
                     }
 

@@ -24,6 +24,8 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.server.utils.EventLogger;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +39,8 @@ import java.util.Objects;
 class MediaSessionStack {
     private static final boolean DEBUG = MediaSessionService.DEBUG;
     private static final String TAG = "MediaSessionStack";
+
+    private static final int DUMP_EVENTS_MAX_COUNT = 70;
 
     /**
      * Listen the change in the media button session.
@@ -56,6 +60,8 @@ class MediaSessionStack {
 
     private final AudioPlayerStateMonitor mAudioPlayerStateMonitor;
     private final OnMediaButtonSessionChangedListener mOnMediaButtonSessionChangedListener;
+
+    private final EventLogger mEventLogger = new EventLogger(DUMP_EVENTS_MAX_COUNT, TAG);
 
     /**
      * The media button session which receives media key events.
@@ -80,6 +86,11 @@ class MediaSessionStack {
      * @param record The record to add.
      */
     public void addSession(MediaSessionRecordImpl record) {
+        mEventLogger.enqueue(EventLogger.StringEvent.from(
+                "addSession() (to bottom of stack)",
+                "record: %s",
+                record
+        ));
         mSessions.add(record);
         clearCache(record.getUserId());
 
@@ -95,6 +106,11 @@ class MediaSessionStack {
      * @param record The record to remove.
      */
     public void removeSession(MediaSessionRecordImpl record) {
+        mEventLogger.enqueue(EventLogger.StringEvent.from(
+                "removeSession()",
+                "record: %s",
+                record
+        ));
         mSessions.remove(record);
         if (mMediaButtonSession == record) {
             // When the media button session is removed, nullify the media button session and do not
@@ -140,6 +156,11 @@ class MediaSessionStack {
     public void onPlaybackStateChanged(
             MediaSessionRecordImpl record, boolean shouldUpdatePriority) {
         if (shouldUpdatePriority) {
+            mEventLogger.enqueue(EventLogger.StringEvent.from(
+                    "onPlaybackStateChanged() - Pushing session to top",
+                    "record: %s",
+                    record
+            ));
             mSessions.remove(record);
             mSessions.add(0, record);
             clearCache(record.getUserId());
@@ -344,6 +365,8 @@ class MediaSessionStack {
         for (MediaSessionRecordImpl record : mSessions) {
             record.dump(pw, indent);
         }
+        pw.println(prefix + "Session stack events:");
+        mEventLogger.dump(pw, indent);
     }
 
     /**

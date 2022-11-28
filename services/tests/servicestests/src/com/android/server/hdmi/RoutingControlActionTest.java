@@ -151,7 +151,7 @@ public class RoutingControlActionTest {
                         Collections.singletonList(HdmiDeviceInfo.DEVICE_TV),
                         new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
-                    boolean isControlEnabled() {
+                    boolean isCecControlEnabled() {
                         return true;
                     }
 

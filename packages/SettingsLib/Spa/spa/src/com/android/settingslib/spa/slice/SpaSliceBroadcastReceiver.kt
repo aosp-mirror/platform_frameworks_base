@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.robotests;
+package com.android.settingslib.spa.slice
 
-import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
-import static com.google.common.truth.Truth.assertThat;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 
-@SmallTest
-@RunWith(AndroidJUnit4.class)
-public class SysuiResourceLoadingTest extends SysuiRoboBase {
-    @Test
-    public void testResources() {
-        assertThat(getContext().getString(com.android.systemui.R.string.app_label))
-                .isEqualTo("System UI");
-        assertThat(getContext().getString(com.android.systemui.tests.R.string.test_content))
-                .isNotEmpty();
+class SpaSliceBroadcastReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context?, intent: Intent?) {
+        val sliceRepository by SpaEnvironmentFactory.instance.sliceDataRepository
+        val sliceUri = intent?.data ?: return
+        val sliceData = sliceRepository.getActiveSliceData(sliceUri) ?: return
+        sliceData.doAction()
     }
 }

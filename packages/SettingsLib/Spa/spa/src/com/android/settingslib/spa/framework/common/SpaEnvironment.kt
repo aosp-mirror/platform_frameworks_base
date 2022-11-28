@@ -70,11 +70,14 @@ abstract class SpaEnvironment(context: Context) {
     // In Robolectric test, applicationContext is not available. Use context as fallback.
     val appContext: Context = context.applicationContext ?: context
 
+    open val logger: SpaLogger = object : SpaLogger {}
+
     open val browseActivityClass: Class<out Activity>? = null
     open val sliceBroadcastReceiverClass: Class<out BroadcastReceiver>? = null
+
+    // Specify provider authorities for debugging purpose.
     open val searchProviderAuthorities: String? = null
     open val sliceProviderAuthorities: String? = null
-    open val logger: SpaLogger = object : SpaLogger {}
 
     // TODO: add other environment setup here.
 }

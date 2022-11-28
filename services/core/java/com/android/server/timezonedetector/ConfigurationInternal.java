@@ -109,7 +109,7 @@ public final class ConfigurationInternal {
      * testing only. See {@link #isGeoDetectionExecutionEnabled()} and {@link #getDetectionMode()}
      * for details.
      */
-    boolean getGeoDetectionRunInBackgroundEnabled() {
+    boolean getGeoDetectionRunInBackgroundEnabledSetting() {
         return mGeoDetectionRunInBackgroundEnabled;
     }
 
@@ -132,7 +132,7 @@ public final class ConfigurationInternal {
      * from the raw setting value.
      */
     public boolean getAutoDetectionEnabledBehavior() {
-        return isAutoDetectionSupported() && mAutoDetectionEnabledSetting;
+        return isAutoDetectionSupported() && getAutoDetectionEnabledSetting();
     }
 
     /** Returns the ID of the user this configuration is associated with. */
@@ -171,27 +171,55 @@ public final class ConfigurationInternal {
      * time zone.
      */
     public @DetectionMode int getDetectionMode() {
-        if (!getAutoDetectionEnabledBehavior()) {
+        if (!isAutoDetectionSupported()) {
+            // Handle the easy case first: No auto detection algorithms supported must mean manual.
             return DETECTION_MODE_MANUAL;
-        } else if (isGeoDetectionSupported() && getLocationEnabledSetting()
-                && getGeoDetectionEnabledSetting()) {
+        } else if (!getAutoDetectionEnabledSetting()) {
+            // Auto detection algorithms are supported, but disabled by the user.
+            return DETECTION_MODE_MANUAL;
+        } else if (getGeoDetectionEnabledBehavior()) {
             return DETECTION_MODE_GEO;
-        } else {
+        } else if (isTelephonyDetectionSupported()) {
             return DETECTION_MODE_TELEPHONY;
+        } else {
+            // On devices with telephony detection support, telephony is used instead of geo when
+            // geo cannot be used. This "unknown" case can occur on devices with only the location
+            // detection algorithm supported when the user's master location setting prevents its
+            // use.
+            return DETECTION_MODE_UNKNOWN;
         }
+    }
+
+    private boolean getGeoDetectionEnabledBehavior() {
+        // isAutoDetectionSupported() should already have been checked before calling this method.
+        if (isGeoDetectionSupported() && getLocationEnabledSetting()) {
+            if (isTelephonyDetectionSupported()) {
+                // This is the "normal" case for smartphones that have both telephony and geo
+                // detection: the user chooses which type of detection to use.
+                return getGeoDetectionEnabledSetting();
+            } else {
+                // When only geo detection is supported then there is no choice for the user to
+                // make between detection modes, so no user setting is consulted.
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
      * Returns true if geolocation time zone detection behavior can execute. Typically, this will
      * agree with {@link #getDetectionMode()}, but under rare circumstances the geolocation detector
-     * may be run in the background if the user's settings allow. See also {@link
-     * #getGeoDetectionRunInBackgroundEnabled()}.
+     * may be run in the background if the user's settings allow.
      */
     public boolean isGeoDetectionExecutionEnabled() {
+        return getDetectionMode() == DETECTION_MODE_GEO
+                || getGeoDetectionRunInBackgroundEnabledBehavior();
+    }
+
+    private boolean getGeoDetectionRunInBackgroundEnabledBehavior() {
         return isGeoDetectionSupported()
                 && getLocationEnabledSetting()
-                && ((mAutoDetectionEnabledSetting && getGeoDetectionEnabledSetting())
-                || getGeoDetectionRunInBackgroundEnabled());
+                && getGeoDetectionRunInBackgroundEnabledSetting();
     }
 
     @NonNull
@@ -216,11 +244,19 @@ public final class ConfigurationInternal {
         builder.setConfigureAutoDetectionEnabledCapability(configureAutoDetectionEnabledCapability);
 
         boolean deviceHasLocationTimeZoneDetection = isGeoDetectionSupported();
+        boolean deviceHasTelephonyDetection = isTelephonyDetectionSupported();
+
         // Note: allowConfigDateTime does not restrict the ability to change location time zone
         // detection enabled. This is intentional as it has user privacy implications and so it
-        // makes sense to leave this under a user's control.
+        // makes sense to leave this under a user's control. The only time this is not true is
+        // on devices that only support location-based detection and the main auto detection setting
+        // is used to influence whether location can be used.
         final @CapabilityState int configureGeolocationDetectionEnabledCapability;
-        if (!deviceHasLocationTimeZoneDetection) {
+        if (!deviceHasLocationTimeZoneDetection || !deviceHasTelephonyDetection) {
+            // If the device doesn't have geolocation detection support OR it ONLY has geolocation
+            // detection support (no telephony) then the user doesn't need the ability to toggle the
+            // location-based detection on and off (the auto detection toggle is considered
+            // sufficient).
             configureGeolocationDetectionEnabledCapability = CAPABILITY_NOT_SUPPORTED;
         } else if (!mAutoDetectionEnabledSetting || !getLocationEnabledSetting()) {
             configureGeolocationDetectionEnabledCapability = CAPABILITY_NOT_APPLICABLE;

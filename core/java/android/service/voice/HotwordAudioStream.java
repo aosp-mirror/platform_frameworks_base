@@ -92,41 +92,6 @@ public final class HotwordAudioStream implements Parcelable {
         return new PersistableBundle();
     }
 
-    private String timestampToString() {
-        if (mTimestamp == null) {
-            return "";
-        }
-        return "TimeStamp:"
-                + " framePos=" + mTimestamp.framePosition
-                + " nanoTime=" + mTimestamp.nanoTime;
-    }
-
-    private void parcelTimestamp(Parcel dest, int flags) {
-        if (mTimestamp != null) {
-            // mTimestamp is not null, we write it to the parcel, set true.
-            dest.writeBoolean(true);
-            dest.writeLong(mTimestamp.framePosition);
-            dest.writeLong(mTimestamp.nanoTime);
-        } else {
-            // mTimestamp is null, we don't write any value out, set false.
-            dest.writeBoolean(false);
-        }
-    }
-
-    @Nullable
-    private static AudioTimestamp unparcelTimestamp(Parcel in) {
-        // If it is true, it means we wrote the value to the parcel before, parse it.
-        // Otherwise, return null.
-        if (in.readBoolean()) {
-            final AudioTimestamp timeStamp = new AudioTimestamp();
-            timeStamp.framePosition = in.readLong();
-            timeStamp.nanoTime = in.readLong();
-            return timeStamp;
-        } else {
-            return null;
-        }
-    }
-
     /**
      * Provides an instance of {@link Builder} with state corresponding to this instance.
      * @hide
@@ -229,7 +194,7 @@ public final class HotwordAudioStream implements Parcelable {
         return "HotwordAudioStream { " +
                 "audioFormat = " + mAudioFormat + ", " +
                 "audioStreamParcelFileDescriptor = " + mAudioStreamParcelFileDescriptor + ", " +
-                "timestamp = " + timestampToString() + ", " +
+                "timestamp = " + mTimestamp + ", " +
                 "metadata = " + mMetadata +
         " }";
     }
@@ -278,7 +243,7 @@ public final class HotwordAudioStream implements Parcelable {
         dest.writeByte(flg);
         dest.writeTypedObject(mAudioFormat, flags);
         dest.writeTypedObject(mAudioStreamParcelFileDescriptor, flags);
-        parcelTimestamp(dest, flags);
+        if (mTimestamp != null) dest.writeTypedObject(mTimestamp, flags);
         dest.writeTypedObject(mMetadata, flags);
     }
 
@@ -296,7 +261,7 @@ public final class HotwordAudioStream implements Parcelable {
         byte flg = in.readByte();
         AudioFormat audioFormat = (AudioFormat) in.readTypedObject(AudioFormat.CREATOR);
         ParcelFileDescriptor audioStreamParcelFileDescriptor = (ParcelFileDescriptor) in.readTypedObject(ParcelFileDescriptor.CREATOR);
-        AudioTimestamp timestamp = unparcelTimestamp(in);
+        AudioTimestamp timestamp = (flg & 0x4) == 0 ? null : (AudioTimestamp) in.readTypedObject(AudioTimestamp.CREATOR);
         PersistableBundle metadata = (PersistableBundle) in.readTypedObject(PersistableBundle.CREATOR);
 
         this.mAudioFormat = audioFormat;
@@ -449,10 +414,10 @@ public final class HotwordAudioStream implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1666342101364L,
+            time = 1669184301563L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/HotwordAudioStream.java",
-            inputSignatures = "private final @android.annotation.NonNull android.media.AudioFormat mAudioFormat\nprivate final @android.annotation.NonNull android.os.ParcelFileDescriptor mAudioStreamParcelFileDescriptor\nprivate final @android.annotation.Nullable android.media.AudioTimestamp mTimestamp\nprivate final @android.annotation.NonNull android.os.PersistableBundle mMetadata\nprivate static  android.media.AudioTimestamp defaultTimestamp()\nprivate static  android.os.PersistableBundle defaultMetadata()\nprivate  java.lang.String timestampToString()\nprivate  void parcelTimestamp(android.os.Parcel,int)\nprivate static @android.annotation.Nullable android.media.AudioTimestamp unparcelTimestamp(android.os.Parcel)\npublic  android.service.voice.HotwordAudioStream.Builder buildUpon()\nclass HotwordAudioStream extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genParcelable=true, genToString=true)")
+            inputSignatures = "private final @android.annotation.NonNull android.media.AudioFormat mAudioFormat\nprivate final @android.annotation.NonNull android.os.ParcelFileDescriptor mAudioStreamParcelFileDescriptor\nprivate final @android.annotation.Nullable android.media.AudioTimestamp mTimestamp\nprivate final @android.annotation.NonNull android.os.PersistableBundle mMetadata\nprivate static  android.media.AudioTimestamp defaultTimestamp()\nprivate static  android.os.PersistableBundle defaultMetadata()\npublic  android.service.voice.HotwordAudioStream.Builder buildUpon()\nclass HotwordAudioStream extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 

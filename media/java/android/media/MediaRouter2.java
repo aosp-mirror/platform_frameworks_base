@@ -112,6 +112,10 @@ public final class MediaRouter2 {
     @GuardedBy("mLock")
     final Map<String, MediaRoute2Info> mRoutes = new ArrayMap<>();
 
+    @GuardedBy("mLock")
+    @Nullable
+    private RouteListingPreference mRouteListingPreference;
+
     final RoutingController mSystemController;
 
     @GuardedBy("mLock")
@@ -457,6 +461,52 @@ public final class MediaRouter2 {
                     ex.rethrowFromSystemServer();
                 }
                 mStub = null;
+            }
+        }
+    }
+
+    /**
+     * Sets the {@link RouteListingPreference} of the app associated to this media router.
+     *
+     * <p>Use this method to inform the system UI of the routes that you would like to list for
+     * media routing, via the Output Switcher.
+     *
+     * <p>You should call this method before {@link #registerRouteCallback registering any route
+     * callbacks} and immediately after receiving any {@link RouteCallback#onRoutesUpdated route
+     * updates} in order to keep the system UI in a consistent state. You can also call this method
+     * at any other point to update the listing preference dynamically.
+     *
+     * <p>Notes:
+     *
+     * <ol>
+     *   <li>You should not include the ids of two or more routes with a match in their {@link
+     *       MediaRoute2Info#getDeduplicationIds() deduplication ids}. If you do, the system will
+     *       deduplicate them using its own criteria.
+     *   <li>You can use this method to rank routes in the output switcher, placing the more
+     *       important routes first. The system might override the proposed ranking.
+     *   <li>You can use this method to avoid listing routes using dynamic criteria. For example,
+     *       you can limit access to a specific type of device according to runtime criteria.
+     * </ol>
+     *
+     * @param routeListingPreference The {@link RouteListingPreference} for the system to use for
+     *     route listing. When null, the system uses its default listing criteria.
+     */
+    public void setRouteListingPreference(@Nullable RouteListingPreference routeListingPreference) {
+        synchronized (mLock) {
+            if (Objects.equals(mRouteListingPreference, routeListingPreference)) {
+                // Nothing changed. We return early to save a call to the system server.
+                return;
+            }
+            mRouteListingPreference = routeListingPreference;
+            try {
+                if (mStub == null) {
+                    MediaRouter2Stub stub = new MediaRouter2Stub();
+                    mMediaRouterService.registerRouter2(stub, mPackageName);
+                    mStub = stub;
+                }
+                mMediaRouterService.setRouteListingPreference(mStub, mRouteListingPreference);
+            } catch (RemoteException ex) {
+                ex.rethrowFromSystemServer();
             }
         }
     }

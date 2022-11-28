@@ -1042,7 +1042,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
             return;
         }
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             setRoutingPort(portId);
             setLocalActivePort(portId);
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);

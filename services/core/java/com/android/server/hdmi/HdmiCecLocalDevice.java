@@ -698,7 +698,7 @@ abstract class HdmiCecLocalDevice {
 
     protected void reportFeatures() {
         List<Integer> localDeviceTypes = new ArrayList<>();
-        for (HdmiCecLocalDevice localDevice : mService.getAllLocalDevices()) {
+        for (HdmiCecLocalDevice localDevice : mService.getAllCecLocalDevices()) {
             localDeviceTypes.add(localDevice.mDeviceType);
         }
 
@@ -728,7 +728,7 @@ abstract class HdmiCecLocalDevice {
     protected int handleStandby(HdmiCecMessage message) {
         assertRunOnServiceThread();
         // Seq #12
-        if (mService.isControlEnabled()
+        if (mService.isCecControlEnabled()
                 && !mService.isProhibitMode()
                 && mService.isPowerOnOrTransient()) {
             mService.standby();

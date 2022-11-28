@@ -19,6 +19,10 @@ package com.android.settingslib.spa.framework.common
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.settingslib.spa.tests.testutils.SpaEnvironmentForTest
+import com.android.settingslib.spa.tests.testutils.SppHome
+import com.android.settingslib.spa.tests.testutils.SppLayer1
+import com.android.settingslib.spa.tests.testutils.SppLayer2
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith

@@ -22,6 +22,9 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.settingslib.spa.tests.testutils.BlankActivity
+import com.android.settingslib.spa.tests.testutils.SpaEnvironmentForTest
+import com.android.settingslib.spa.tests.testutils.SpaLoggerForTest
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,9 +45,9 @@ class SettingsPageTest {
         assertThat(page.isCreateBy("NULL")).isTrue()
         assertThat(page.isCreateBy("Spp")).isFalse()
         assertThat(page.hasRuntimeParam()).isFalse()
-        assertThat(page.isBrowsable(context, MockActivity::class.java)).isFalse()
-        assertThat(page.createBrowseIntent(context, MockActivity::class.java)).isNull()
-        assertThat(page.createBrowseAdbCommand(context, MockActivity::class.java)).isNull()
+        assertThat(page.isBrowsable(context, BlankActivity::class.java)).isFalse()
+        assertThat(page.createBrowseIntent(context, BlankActivity::class.java)).isNull()
+        assertThat(page.createBrowseAdbCommand(context, BlankActivity::class.java)).isNull()
     }
 
     @Test
@@ -57,9 +60,9 @@ class SettingsPageTest {
         assertThat(page.isCreateBy("NULL")).isFalse()
         assertThat(page.isCreateBy("mySpp")).isTrue()
         assertThat(page.hasRuntimeParam()).isFalse()
-        assertThat(page.isBrowsable(context, MockActivity::class.java)).isTrue()
-        assertThat(page.createBrowseIntent(context, MockActivity::class.java)).isNotNull()
-        assertThat(page.createBrowseAdbCommand(context, MockActivity::class.java)).contains(
+        assertThat(page.isBrowsable(context, BlankActivity::class.java)).isTrue()
+        assertThat(page.createBrowseIntent(context, BlankActivity::class.java)).isNotNull()
+        assertThat(page.createBrowseAdbCommand(context, BlankActivity::class.java)).contains(
             "-e spaActivityDestination mySpp"
         )
     }
@@ -80,9 +83,9 @@ class SettingsPageTest {
         assertThat(page.buildRoute()).isEqualTo("SppWithParam/myStr/10")
         assertThat(page.isCreateBy("SppWithParam")).isTrue()
         assertThat(page.hasRuntimeParam()).isFalse()
-        assertThat(page.isBrowsable(context, MockActivity::class.java)).isTrue()
-        assertThat(page.createBrowseIntent(context, MockActivity::class.java)).isNotNull()
-        assertThat(page.createBrowseAdbCommand(context, MockActivity::class.java)).contains(
+        assertThat(page.isBrowsable(context, BlankActivity::class.java)).isTrue()
+        assertThat(page.createBrowseIntent(context, BlankActivity::class.java)).isNotNull()
+        assertThat(page.createBrowseAdbCommand(context, BlankActivity::class.java)).contains(
             "-e spaActivityDestination SppWithParam/myStr/10"
         )
     }
@@ -105,9 +108,9 @@ class SettingsPageTest {
         assertThat(page.buildRoute()).isEqualTo("SppWithRtParam/myStr/10/rtStr")
         assertThat(page.isCreateBy("SppWithRtParam")).isTrue()
         assertThat(page.hasRuntimeParam()).isTrue()
-        assertThat(page.isBrowsable(context, MockActivity::class.java)).isFalse()
-        assertThat(page.createBrowseIntent(context, MockActivity::class.java)).isNull()
-        assertThat(page.createBrowseAdbCommand(context, MockActivity::class.java)).isNull()
+        assertThat(page.isBrowsable(context, BlankActivity::class.java)).isFalse()
+        assertThat(page.createBrowseIntent(context, BlankActivity::class.java)).isNull()
+        assertThat(page.createBrowseAdbCommand(context, BlankActivity::class.java)).isNull()
     }
 
     @Test
