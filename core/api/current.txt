@@ -34805,6 +34805,7 @@ package android.provider {
     field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/phone_v2";
     field public static final android.net.Uri CONTENT_URI;
     field public static final android.net.Uri ENTERPRISE_CONTENT_FILTER_URI;
+    field @NonNull public static final android.net.Uri ENTERPRISE_CONTENT_URI;
     field public static final String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
     field public static final String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
     field public static final String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
@@ -34985,6 +34986,7 @@ package android.provider {
     field public static final String CONTENT_VCARD_TYPE = "text/x-vcard";
     field public static final android.net.Uri CONTENT_VCARD_URI;
     field public static final android.net.Uri ENTERPRISE_CONTENT_FILTER_URI;
+    field @NonNull public static final android.net.Uri ENTERPRISE_CONTENT_URI;
     field public static final String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
     field public static final String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
     field public static final String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
