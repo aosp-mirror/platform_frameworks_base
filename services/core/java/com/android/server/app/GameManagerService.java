@@ -449,6 +449,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     public void setGameState(String packageName, @NonNull GameState gameState,
             @UserIdInt int userId) {
         if (!isPackageGame(packageName, userId)) {
+            Slog.d(TAG, "No-op for attempt to set game state for non-game app: " + packageName);
             // Restrict to games only.
             return;
         }
@@ -975,11 +976,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
     }
 
-    private @GameMode int[] getAvailableGameModesUnchecked(String packageName) {
-        final GamePackageConfiguration config;
-        synchronized (mDeviceConfigLock) {
-            config = mConfigs.get(packageName);
-        }
+    private @GameMode int[] getAvailableGameModesUnchecked(String packageName, int userId) {
+        final GamePackageConfiguration config = getConfig(packageName, userId);
         if (config == null) {
             return new int[]{GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM};
         }
@@ -1002,9 +1000,13 @@ public final class GameManagerService extends IGameManagerService.Stub {
      */
     @Override
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
-    public @GameMode int[] getAvailableGameModes(String packageName) throws SecurityException {
+    public @GameMode int[] getAvailableGameModes(String packageName, int userId)
+            throws SecurityException {
         checkPermission(Manifest.permission.MANAGE_GAME_MODE);
-        return getAvailableGameModesUnchecked(packageName);
+        if (!isPackageGame(packageName, userId)) {
+            return new int[]{};
+        }
+        return getAvailableGameModesUnchecked(packageName, userId);
     }
 
     private @GameMode int getGameModeFromSettingsUnchecked(String packageName,
@@ -1071,7 +1073,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
         // Check the caller has the necessary permission.
         checkPermission(Manifest.permission.MANAGE_GAME_MODE);
 
-        // Restrict to games only.
         if (!isPackageGame(packageName, userId)) {
             return null;
         }
@@ -1101,7 +1102,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         } else {
             return new GameModeInfo.Builder()
                     .setActiveGameMode(activeGameMode)
-                    .setAvailableGameModes(getAvailableGameModesUnchecked(packageName))
+                    .setAvailableGameModes(getAvailableGameModesUnchecked(packageName, userId))
                     .build();
         }
     }
@@ -1115,9 +1116,11 @@ public final class GameManagerService extends IGameManagerService.Stub {
     public void setGameMode(String packageName, @GameMode int gameMode, int userId)
             throws SecurityException {
         checkPermission(Manifest.permission.MANAGE_GAME_MODE);
-
-        if (!isPackageGame(packageName, userId) || gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
-            // Restrict to games and valid game modes only.
+        if (gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
+            Slog.d(TAG, "No-op for attempt to set UNSUPPORTED mode for app: " + packageName);
+            return;
+        } else if (!isPackageGame(packageName, userId)) {
+            Slog.d(TAG, "No-op for attempt to set game mode for non-game app: " + packageName);
             return;
         }
         int fromGameMode;
@@ -1216,17 +1219,16 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 Binder.getCallingUid(), userId, false, true, "notifyGraphicsEnvironmentSetup",
                 "com.android.server.app.GameManagerService");
 
-        // Restrict to games only.
-        if (!isPackageGame(packageName, userId)) {
-            return;
-        }
-
         if (!isValidPackageName(packageName, userId)) {
+            Slog.d(TAG, "No-op for attempt to notify graphics env setup for different package"
+                    + "than caller with uid: " + Binder.getCallingUid());
             return;
         }
 
         final int gameMode = getGameMode(packageName, userId);
         if (gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
+            Slog.d(TAG, "No-op for attempt to notify graphics env setup for non-game app: "
+                    + packageName);
             return;
         }
         int loadingBoostDuration = getLoadingBoostDuration(packageName, userId);
@@ -1341,6 +1343,11 @@ public final class GameManagerService extends IGameManagerService.Stub {
             GameModeConfiguration gameModeConfig, int userId)
             throws SecurityException, IllegalArgumentException {
         checkPermission(Manifest.permission.MANAGE_GAME_MODE);
+        if (!isPackageGame(packageName, userId)) {
+            Slog.d(TAG, "No-op for attempt to update custom game mode for non-game app: "
+                    + packageName);
+            return;
+        }
         synchronized (mLock) {
             if (!mSettings.containsKey(userId)) {
                 throw new IllegalArgumentException("User " + userId + " wasn't started");

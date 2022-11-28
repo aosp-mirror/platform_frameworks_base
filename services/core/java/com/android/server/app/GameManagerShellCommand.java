@@ -105,7 +105,9 @@ public class GameManagerShellCommand extends ShellCommand {
                 ServiceManager.getServiceOrThrow(Context.GAME_SERVICE));
         boolean batteryModeSupported = false;
         boolean perfModeSupported = false;
-        int[] modes = service.getAvailableGameModes(packageName);
+        int userId = userIdStr != null ? Integer.parseInt(userIdStr)
+                : ActivityManager.getCurrentUser();
+        int[] modes = service.getAvailableGameModes(packageName, userId);
         for (int mode : modes) {
             if (mode == GameManager.GAME_MODE_PERFORMANCE) {
                 perfModeSupported = true;
@@ -113,8 +115,6 @@ public class GameManagerShellCommand extends ShellCommand {
                 batteryModeSupported = true;
             }
         }
-        int userId = userIdStr != null ? Integer.parseInt(userIdStr)
-                : ActivityManager.getCurrentUser();
         switch (gameMode.toLowerCase()) {
             case "1":
             case "standard":
@@ -223,7 +223,7 @@ public class GameManagerShellCommand extends ShellCommand {
 
         boolean batteryModeSupported = false;
         boolean perfModeSupported = false;
-        int [] modes = gameManagerService.getAvailableGameModes(packageName);
+        int [] modes = gameManagerService.getAvailableGameModes(packageName, userId);
 
         for (int mode : modes) {
             if (mode == GameManager.GAME_MODE_PERFORMANCE) {

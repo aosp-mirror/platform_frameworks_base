@@ -18,6 +18,8 @@ package com.android.server.app;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.server.app.GameManagerService.CANCEL_GAME_LOADING_MODE;
+import static com.android.server.app.GameManagerService.LOADING_BOOST_MAX_DURATION;
+import static com.android.server.app.GameManagerService.SET_GAME_STATE;
 import static com.android.server.app.GameManagerService.WRITE_SETTINGS;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -59,6 +61,7 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.hardware.power.Mode;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManagerInternal;
@@ -104,7 +107,8 @@ public class GameManagerServiceTests {
     private static final String PACKAGE_NAME_INVALID = "com.android.app";
     private static final int USER_ID_1 = 1001;
     private static final int USER_ID_2 = 1002;
-    private static final int DEFAULT_PACKAGE_UID = 12345;
+    // to pass the valid package check in some of the server methods
+    private static final int DEFAULT_PACKAGE_UID = Binder.getCallingUid();
 
     private MockitoSession mMockingSession;
     private String mPackageName;
@@ -205,26 +209,31 @@ public class GameManagerServiceTests {
                 .startMocking();
         mMockContext = new MockContext(InstrumentationRegistry.getContext());
         mPackageName = mMockContext.getPackageName();
-        final ApplicationInfo applicationInfo = new ApplicationInfo();
-        applicationInfo.category = ApplicationInfo.CATEGORY_GAME;
-        applicationInfo.packageName = mPackageName;
-        final PackageInfo pi = new PackageInfo();
-        pi.packageName = mPackageName;
-        pi.applicationInfo = applicationInfo;
-        final List<PackageInfo> packages = new ArrayList<>();
-        packages.add(pi);
-
+        mockAppCategory(mPackageName, ApplicationInfo.CATEGORY_GAME);
         final Resources resources =
                 InstrumentationRegistry.getInstrumentation().getContext().getResources();
         when(mMockPackageManager.getResourcesForApplication(anyString()))
                 .thenReturn(resources);
-        when(mMockPackageManager.getInstalledPackagesAsUser(anyInt(), anyInt()))
-                .thenReturn(packages);
-        when(mMockPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
-                .thenReturn(applicationInfo);
         when(mMockPackageManager.getPackageUidAsUser(mPackageName, USER_ID_1)).thenReturn(
                 DEFAULT_PACKAGE_UID);
         LocalServices.addService(PowerManagerInternal.class, mMockPowerManager);
+    }
+
+    private void mockAppCategory(String packageName, @ApplicationInfo.Category int category)
+            throws Exception {
+        reset(mMockPackageManager);
+        final ApplicationInfo gameApplicationInfo = new ApplicationInfo();
+        gameApplicationInfo.category = category;
+        gameApplicationInfo.packageName = packageName;
+        final PackageInfo pi = new PackageInfo();
+        pi.packageName = packageName;
+        pi.applicationInfo = gameApplicationInfo;
+        final List<PackageInfo> packages = new ArrayList<>();
+        packages.add(pi);
+        when(mMockPackageManager.getInstalledPackagesAsUser(anyInt(), anyInt()))
+                .thenReturn(packages);
+        when(mMockPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(gameApplicationInfo);
     }
 
     @After
@@ -457,14 +466,19 @@ public class GameManagerServiceTests {
      * By default game mode is set to STANDARD
      */
     @Test
-    public void testGameModeDefaultValue() {
-        GameManagerService gameManagerService =
-                new GameManagerService(mMockContext, mTestLooper.getLooper());
-
-        startUser(gameManagerService, USER_ID_1);
+    public void testGetGameMode_defaultValue() {
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
         mockModifyGameModeGranted();
-
         assertEquals(GameManager.GAME_MODE_STANDARD,
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
+    }
+
+    @Test
+    public void testGetGameMode_nonGame() throws Exception {
+        mockAppCategory(mPackageName, ApplicationInfo.CATEGORY_AUDIO);
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        mockModifyGameModeGranted();
+        assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
                 gameManagerService.getGameMode(mPackageName, USER_ID_1));
     }
 
@@ -614,16 +628,21 @@ public class GameManagerServiceTests {
             int... requiredAvailableModes) {
         Arrays.sort(requiredAvailableModes);
         // check getAvailableGameModes
-        int[] reportedAvailableModes = gameManagerService.getAvailableGameModes(mPackageName);
+        int[] reportedAvailableModes = gameManagerService.getAvailableGameModes(mPackageName,
+                USER_ID_1);
         Arrays.sort(reportedAvailableModes);
         assertArrayEquals(requiredAvailableModes, reportedAvailableModes);
 
         // check GetModeInfo.getAvailableGameModes
         GameModeInfo info = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
-        assertNotNull(info);
-        reportedAvailableModes = info.getAvailableGameModes();
-        Arrays.sort(reportedAvailableModes);
-        assertArrayEquals(requiredAvailableModes, reportedAvailableModes);
+        if (requiredAvailableModes.length == 0) {
+            assertNull(info);
+        } else {
+            assertNotNull(info);
+            reportedAvailableModes = info.getAvailableGameModes();
+            Arrays.sort(reportedAvailableModes);
+            assertArrayEquals(requiredAvailableModes, reportedAvailableModes);
+        }
     }
 
     private void checkReportedOptedInGameModes(GameManagerService gameManagerService,
@@ -724,6 +743,14 @@ public class GameManagerServiceTests {
         mockModifyGameModeGranted();
         checkReportedAvailableGameModes(createServiceAndStartUser(USER_ID_1),
                 GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM);
+    }
+
+    @Test
+    public void testDeviceConfig_nonGame() throws Exception {
+        mockAppCategory(mPackageName, ApplicationInfo.CATEGORY_AUDIO);
+        mockDeviceConfigAll();
+        mockModifyGameModeGranted();
+        checkReportedAvailableGameModes(createServiceAndStartUser(USER_ID_1));
     }
 
     /**
@@ -1443,12 +1470,10 @@ public class GameManagerServiceTests {
     }
 
     @Test
-    public void testGameStateLoadingRequiresPerformanceMode() {
+    public void testSetGameState_loadingRequiresPerformanceMode() {
         mockDeviceConfigNone();
         mockModifyGameModeGranted();
-        GameManagerService gameManagerService =
-                new GameManagerService(mMockContext, mTestLooper.getLooper());
-        startUser(gameManagerService, USER_ID_1);
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
         GameState gameState = new GameState(true, GameState.MODE_NONE);
         gameManagerService.setGameState(mPackageName, gameState, USER_ID_1);
         mTestLooper.dispatchAll();
@@ -1509,9 +1534,7 @@ public class GameManagerServiceTests {
     public void testSetGameStateNotLoading() {
         mockDeviceConfigNone();
         mockModifyGameModeGranted();
-        GameManagerService gameManagerService =
-                new GameManagerService(mMockContext, mTestLooper.getLooper());
-        startUser(gameManagerService, USER_ID_1);
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
         gameManagerService.setGameMode(
                 mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
         int testMode = GameState.MODE_GAMEPLAY_UNINTERRUPTIBLE;
@@ -1523,10 +1546,22 @@ public class GameManagerServiceTests {
         assertEquals(testLabel, gameState.getLabel());
         assertEquals(testQuality, gameState.getQuality());
         gameManagerService.setGameState(mPackageName, gameState, USER_ID_1);
+        assertTrue(gameManagerService.mHandler.hasEqualMessages(SET_GAME_STATE, gameState));
         mTestLooper.dispatchAll();
         verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME_LOADING, false);
         assertFalse(
                 gameManagerService.mHandler.hasMessages(CANCEL_GAME_LOADING_MODE));
+    }
+
+    @Test
+    public void testSetGameState_nonGame() throws Exception {
+        mockAppCategory(mPackageName, ApplicationInfo.CATEGORY_AUDIO);
+        mockDeviceConfigNone();
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        GameState gameState = new GameState(true, GameState.MODE_NONE);
+        gameManagerService.setGameState(mPackageName, gameState, USER_ID_1);
+        assertFalse(gameManagerService.mHandler.hasMessages(SET_GAME_STATE));
     }
 
     private List<String> readGameModeInterventionList() throws Exception {
@@ -1824,6 +1859,21 @@ public class GameManagerServiceTests {
     }
 
     @Test
+    public void testUpdateCustomGameModeConfiguration_nonGame() throws Exception {
+        mockAppCategory(mPackageName, ApplicationInfo.CATEGORY_IMAGE);
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        gameManagerService.updateCustomGameModeConfiguration(mPackageName,
+                new GameModeConfiguration.Builder().setScalingFactor(0.35f).setFpsOverride(
+                        60).build(),
+                USER_ID_1);
+        assertFalse(gameManagerService.mHandler.hasMessages(WRITE_SETTINGS));
+        GameManagerService.GamePackageConfiguration pkgConfig = gameManagerService.getConfig(
+                mPackageName, USER_ID_1);
+        assertNull(pkgConfig);
+    }
+
+    @Test
     public void testWritingSettingFile_onShutdown() throws InterruptedException {
         mockModifyGameModeGranted();
         mockDeviceConfigAll();
@@ -1982,5 +2032,112 @@ public class GameManagerServiceTests {
             }
         }
         folder.delete();
+    }
+
+    @Test
+    public void testNotifyGraphicsEnvironmentSetup() {
+        String configString = "mode=2,loadingBoost=2000";
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configString);
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        gameManagerService.notifyGraphicsEnvironmentSetup(mPackageName, USER_ID_1);
+        verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME_LOADING, true);
+        reset(mMockPowerManager);
+        assertTrue(gameManagerService.mHandler.hasMessages(CANCEL_GAME_LOADING_MODE));
+        mTestLooper.moveTimeForward(2000);
+        mTestLooper.dispatchAll();
+        verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME_LOADING, false);
+    }
+
+    @Test
+    public void testNotifyGraphicsEnvironmentSetup_outOfBoundBoostValue() {
+        String configString = "mode=2,loadingBoost=0:mode=3,loadingBoost=7000";
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configString);
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        gameManagerService.notifyGraphicsEnvironmentSetup(mPackageName, USER_ID_1);
+        verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME_LOADING, true);
+        reset(mMockPowerManager);
+        assertTrue(gameManagerService.mHandler.hasMessages(CANCEL_GAME_LOADING_MODE));
+        mTestLooper.moveTimeForward(100);
+        mTestLooper.dispatchAll();
+        // 0 loading boost value should still trigger max timeout
+        verify(mMockPowerManager, never()).setPowerMode(anyInt(), anyBoolean());
+        assertTrue(gameManagerService.mHandler.hasMessages(CANCEL_GAME_LOADING_MODE));
+        mTestLooper.moveTimeForward(LOADING_BOOST_MAX_DURATION);
+        mTestLooper.dispatchAll();
+        verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME_LOADING, false);
+        reset(mMockPowerManager);
+        assertFalse(gameManagerService.mHandler.hasMessages(CANCEL_GAME_LOADING_MODE));
+
+        // 7000 loading boost value should exceed the max timeout of 5s and be bounded
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_BATTERY, USER_ID_1);
+        gameManagerService.notifyGraphicsEnvironmentSetup(mPackageName, USER_ID_1);
+        verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME_LOADING, true);
+        reset(mMockPowerManager);
+        assertTrue(gameManagerService.mHandler.hasMessages(CANCEL_GAME_LOADING_MODE));
+        mTestLooper.moveTimeForward(LOADING_BOOST_MAX_DURATION);
+        mTestLooper.dispatchAll();
+        verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME_LOADING, false);
+        assertFalse(gameManagerService.mHandler.hasMessages(CANCEL_GAME_LOADING_MODE));
+    }
+
+    @Test
+    public void testNotifyGraphicsEnvironmentSetup_noDeviceConfig() {
+        mockDeviceConfigNone();
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        gameManagerService.notifyGraphicsEnvironmentSetup(mPackageName, USER_ID_1);
+        verify(mMockPowerManager, never()).setPowerMode(anyInt(), anyBoolean());
+        assertFalse(gameManagerService.mHandler.hasMessages(CANCEL_GAME_LOADING_MODE));
+    }
+
+    @Test
+    public void testNotifyGraphicsEnvironmentSetup_noLoadingBoostValue() {
+        mockDeviceConfigAll();
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        gameManagerService.notifyGraphicsEnvironmentSetup(mPackageName, USER_ID_1);
+        verify(mMockPowerManager, never()).setPowerMode(anyInt(), anyBoolean());
+        assertFalse(gameManagerService.mHandler.hasMessages(CANCEL_GAME_LOADING_MODE));
+    }
+
+    @Test
+    public void testNotifyGraphicsEnvironmentSetup_nonGame() throws Exception {
+        String configString = "mode=2,loadingBoost=2000";
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configString);
+        mockModifyGameModeGranted();
+        mockAppCategory(mPackageName, ApplicationInfo.CATEGORY_IMAGE);
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
+        gameManagerService.notifyGraphicsEnvironmentSetup(mPackageName, USER_ID_1);
+        verify(mMockPowerManager, never()).setPowerMode(anyInt(), anyBoolean());
+        assertFalse(gameManagerService.mHandler.hasMessages(CANCEL_GAME_LOADING_MODE));
+    }
+
+    @Test
+    public void testNotifyGraphicsEnvironmentSetup_differentApp() throws Exception {
+        String configString = "mode=2,loadingBoost=2000";
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configString);
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        String someGamePkg = "some.game";
+        mockAppCategory(someGamePkg, ApplicationInfo.CATEGORY_GAME);
+        when(mMockPackageManager.getPackageUidAsUser(someGamePkg, USER_ID_1)).thenReturn(
+                DEFAULT_PACKAGE_UID + 1);
+        gameManagerService.setGameMode(someGamePkg, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        assertEquals(GameManager.GAME_MODE_PERFORMANCE,
+                gameManagerService.getGameMode(someGamePkg, USER_ID_1));
+        gameManagerService.notifyGraphicsEnvironmentSetup(someGamePkg, USER_ID_1);
+        verify(mMockPowerManager, never()).setPowerMode(anyInt(), anyBoolean());
+        assertFalse(gameManagerService.mHandler.hasMessages(CANCEL_GAME_LOADING_MODE));
     }
 }
