@@ -29,6 +29,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
+import com.android.server.display.brightness.strategy.BoostBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DozeBrightnessStrategy;
 import com.android.server.display.brightness.strategy.InvalidBrightnessStrategy;
 import com.android.server.display.brightness.strategy.OverrideBrightnessStrategy;
@@ -55,6 +56,8 @@ public final class DisplayBrightnessStrategySelectorTest {
     private OverrideBrightnessStrategy mOverrideBrightnessStrategy;
     @Mock
     private TemporaryBrightnessStrategy mTemporaryBrightnessStrategy;
+    @Mock
+    private BoostBrightnessStrategy mBoostBrightnessStrategy;
     @Mock
     private InvalidBrightnessStrategy mInvalidBrightnessStrategy;
     @Mock
@@ -89,6 +92,11 @@ public final class DisplayBrightnessStrategySelectorTest {
                     @Override
                     TemporaryBrightnessStrategy getTemporaryBrightnessStrategy() {
                         return mTemporaryBrightnessStrategy;
+                    }
+
+                    @Override
+                    BoostBrightnessStrategy getBoostBrightnessStrategy() {
+                        return mBoostBrightnessStrategy;
                     }
 
                     @Override
@@ -140,10 +148,22 @@ public final class DisplayBrightnessStrategySelectorTest {
     }
 
     @Test
+    public void selectStrategySelectsBoostStrategyWhenValid() {
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
+                DisplayManagerInternal.DisplayPowerRequest.class);
+        displayPowerRequest.boostScreenBrightness = true;
+        displayPowerRequest.screenBrightnessOverride = Float.NaN;
+        when(mTemporaryBrightnessStrategy.getTemporaryScreenBrightness()).thenReturn(Float.NaN);
+        assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(displayPowerRequest,
+                Display.STATE_ON), mBoostBrightnessStrategy);
+    }
+
+    @Test
     public void selectStrategySelectsInvalidStrategyWhenNoStrategyIsValid() {
         DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
                 DisplayManagerInternal.DisplayPowerRequest.class);
         displayPowerRequest.screenBrightnessOverride = Float.NaN;
+        when(mTemporaryBrightnessStrategy.getTemporaryScreenBrightness()).thenReturn(Float.NaN);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(displayPowerRequest,
                 Display.STATE_ON), mInvalidBrightnessStrategy);
     }
