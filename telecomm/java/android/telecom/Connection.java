@@ -33,6 +33,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.hardware.camera2.CameraManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -1050,6 +1051,13 @@ public abstract class Connection extends Conferenceable {
     public static final String EXTRA_CALL_QUALITY_REPORT =
             "android.telecom.extra.CALL_QUALITY_REPORT";
 
+    /**
+     * Key to obtain location as a result of ({@code queryLocationForEmergency} from Bundle
+     * @hide
+     */
+    public static final String EXTRA_KEY_QUERY_LOCATION =
+            "android.telecom.extra.KEY_QUERY_LOCATION";
+
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
 
@@ -1285,6 +1293,9 @@ public abstract class Connection extends Conferenceable {
         public void onConnectionTimeReset(Connection c) {}
         public void onEndpointChanged(Connection c, CallEndpoint endpoint, Executor executor,
                 OutcomeReceiver<Void, CallEndpointException> callback) {}
+        public void onQueryLocation(Connection c, long timeoutMillis, @NonNull String provider,
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull OutcomeReceiver<Location, QueryLocationException> callback) {}
     }
 
     /**
@@ -3230,6 +3241,36 @@ public abstract class Connection extends Conferenceable {
      */
     public final void sendRemoteRttRequest() {
         mListeners.forEach((l) -> l.onRemoteRttRequest(Connection.this));
+    }
+
+    /**
+     * Query the device's location in order to place an Emergency Call.
+     * Only SIM call managers can call this method for Connections representing Emergency calls.
+     * If a previous location query request is not completed, the new location query request will
+     * be rejected and return a QueryLocationException with
+     * {@code QueryLocationException#ERROR_PREVIOUS_REQUEST_EXISTS}
+     *
+     * @param timeoutMillis long: Timeout in millis waiting for query response (MAX:5000, MIN:100).
+     * @param provider String: the location provider name, This value cannot be null.
+     *                 It is the caller's responsibility to select an enabled provider. The caller
+     *                 can use {@link android.location.LocationManager#getProviders(boolean)}
+     *                 to choose one of the enabled providers and pass it in.
+     * @param executor The executor of where the callback will execute.
+     * @param callback The callback to notify the result of queryLocation.
+     */
+    public final void queryLocationForEmergency(
+            @IntRange(from = 100, to = 5000) long timeoutMillis,
+            @NonNull String provider,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<Location, QueryLocationException> callback) {
+        if (provider == null || executor == null || callback == null) {
+            throw new IllegalArgumentException("There are arguments that must not be null");
+        }
+        if (timeoutMillis < 100 || timeoutMillis > 5000) {
+            throw new IllegalArgumentException("The timeoutMillis should be min 100, max 5000");
+        }
+        mListeners.forEach((l) ->
+                l.onQueryLocation(this, timeoutMillis, provider, executor, callback));
     }
 
     /**

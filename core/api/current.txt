@@ -41314,6 +41314,7 @@ package android.telecom {
     method public void onUsingAlternativeUi(boolean);
     method public static String propertiesToString(int);
     method public final void putExtras(@NonNull android.os.Bundle);
+    method public final void queryLocationForEmergency(@IntRange(from=100, to=5000) long, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.location.Location,android.telecom.QueryLocationException>);
     method public final void removeExtras(java.util.List<java.lang.String>);
     method public final void removeExtras(java.lang.String...);
     method @Deprecated public void requestBluetoothAudio(@NonNull android.bluetooth.BluetoothDevice);
@@ -41714,6 +41715,22 @@ package android.telecom {
     field public static final int REASON_NONE = 0; // 0x0
     field public static final int REASON_OTHER = 4; // 0x4
     field public static final int REASON_USER_SET = 3; // 0x3
+  }
+
+  public final class QueryLocationException extends java.lang.RuntimeException implements android.os.Parcelable {
+    ctor public QueryLocationException(@Nullable String);
+    ctor public QueryLocationException(@Nullable String, int);
+    ctor public QueryLocationException(@Nullable String, int, @Nullable Throwable);
+    method public int describeContents();
+    method public int getCode();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.QueryLocationException> CREATOR;
+    field public static final int ERROR_NOT_ALLOWED_FOR_NON_EMERGENCY_CONNECTIONS = 4; // 0x4
+    field public static final int ERROR_NOT_PERMITTED = 3; // 0x3
+    field public static final int ERROR_PREVIOUS_REQUEST_EXISTS = 2; // 0x2
+    field public static final int ERROR_REQUEST_TIME_OUT = 1; // 0x1
+    field public static final int ERROR_SERVICE_UNAVAILABLE = 5; // 0x5
+    field public static final int ERROR_UNSPECIFIED = 6; // 0x6
   }
 
   public final class RemoteConference {

@@ -517,6 +517,12 @@ final class RemoteConnectionService {
                 ResultReceiver callback, Session.Info sessionInfo) {
             // Do nothing
         }
+
+        @Override
+        public void queryLocation(String callId, long timeoutMillis, String provider,
+                ResultReceiver callback, Session.Info sessionInfo) {
+            // Do nothing
+        }
     };
 
     private final ConnectionServiceAdapterServant mServant =

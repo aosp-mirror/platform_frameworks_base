@@ -16,6 +16,9 @@
 
 package android.telecom;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.NonNull;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -745,6 +748,47 @@ final class ConnectionServiceAdapter implements DeathRecipient {
             try {
                 a.setCallDirection(callId, direction, Log.getExternalSession());
             } catch (RemoteException e) {
+            }
+        }
+    }
+
+    /**
+     * Query location information.
+     * Only SIM call managers can call this method for Connections representing Emergency calls.
+     * If the previous request is not completed, the new request will be rejected.
+     *
+     * @param timeoutMillis long: Timeout in millis waiting for query response.
+     * @param provider String: the location provider name, This value cannot be null.
+     * @param executor The executor of where the callback will execute.
+     * @param callback The callback to notify the result of queryLocation.
+     */
+    void queryLocation(String callId, long timeoutMillis, @NonNull String provider,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<Location, QueryLocationException> callback) {
+        Log.v(this, "queryLocation: %s %d", callId, timeoutMillis);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.queryLocation(callId, timeoutMillis, provider,
+                        new ResultReceiver(null) {
+                            @Override
+                            protected void onReceiveResult(int resultCode, Bundle result) {
+                                super.onReceiveResult(resultCode, result);
+
+                                if (resultCode == 1 /* success */) {
+                                    executor.execute(() -> callback.onResult(result.getParcelable(
+                                            Connection.EXTRA_KEY_QUERY_LOCATION, Location.class)));
+                                } else {
+                                    executor.execute(() -> callback.onError(result.getParcelable(
+                                            QueryLocationException.QUERY_LOCATION_ERROR,
+                                            QueryLocationException.class)));
+                                }
+                            }
+                        },
+                        Log.getExternalSession());
+            } catch (RemoteException e) {
+                Log.d(this, "queryLocation: Exception e : " + e);
+                executor.execute(() -> callback.onError(new QueryLocationException(
+                        e.getMessage(), QueryLocationException.ERROR_SERVICE_UNAVAILABLE)));
             }
         }
     }
