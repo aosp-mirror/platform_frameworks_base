@@ -17,16 +17,17 @@
 package com.android.settingslib.spa.gallery.page
 
 import android.os.Bundle
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.SystemUpdate
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
@@ -34,17 +35,14 @@ import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
-import com.android.settingslib.spa.widget.preference.ProgressBarPreference
-import com.android.settingslib.spa.widget.preference.ProgressBarPreferenceModel
-import com.android.settingslib.spa.widget.preference.ProgressBarWithDataPreference
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
-import com.android.settingslib.spa.widget.ui.CircularProgressBar
-import kotlinx.coroutines.delay
+import com.android.settingslib.spa.widget.ui.CircularLoadingBar
+import com.android.settingslib.spa.widget.ui.LinearLoadingBar
 
-private const val TITLE = "Sample ProgressBar"
+private const val TITLE = "Sample LoadingBar"
 
-object ProgressBarPageProvider : SettingsPageProvider {
-    override val name = "ProgressBar"
+object LoadingBarPageProvider : SettingsPageProvider {
+    override val name = "LoadingBar"
 
     fun buildInjectEntry(): SettingsEntryBuilder {
         return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
@@ -63,57 +61,29 @@ object ProgressBarPageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
+        var loading by remember { mutableStateOf(true) }
         RegularScaffold(title = getTitle(arguments)) {
-            // Auto update the progress and finally jump tp 0.4f.
-            var progress by remember { mutableStateOf(0f) }
-            LaunchedEffect(Unit) {
-                while (progress < 1f) {
-                    delay(100)
-                    progress += 0.01f
+            Button(
+                onClick = { loading = !loading },
+                modifier = Modifier.padding(start = 20.dp)
+            ) {
+                if (loading) {
+                    Text(text = "Stop")
+                } else {
+                    Text(text = "Resume")
                 }
-                delay(500)
-                progress = 0.4f
             }
-
-            LargeProgressBar(progress)
-            SimpleProgressBar()
-            ProgressBarWithData()
-            CircularProgressBar(progress = progress, radius = 160f)
         }
+
+        LinearLoadingBar(isLoading = loading, yOffset = 104.dp)
+        CircularLoadingBar(isLoading = loading)
     }
-}
-
-@Composable
-private fun LargeProgressBar(progress: Float) {
-    ProgressBarPreference(object : ProgressBarPreferenceModel {
-        override val title = "Large Progress Bar"
-        override val progress = progress
-        override val height = 20f
-    })
-}
-
-@Composable
-private fun SimpleProgressBar() {
-    ProgressBarPreference(object : ProgressBarPreferenceModel {
-        override val title = "Simple Progress Bar"
-        override val progress = 0.2f
-        override val icon = Icons.Outlined.SystemUpdate
-    })
-}
-
-@Composable
-private fun ProgressBarWithData() {
-    ProgressBarWithDataPreference(model = object : ProgressBarPreferenceModel {
-        override val title = "Progress Bar with Data"
-        override val progress = 0.2f
-        override val icon = Icons.Outlined.Delete
-    }, data = "25G")
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun ProgressBarPagePreview() {
+private fun LoadingBarPagePreview() {
     SettingsTheme {
-        ProgressBarPageProvider.Page(null)
+        LoadingBarPageProvider.Page(null)
     }
 }
