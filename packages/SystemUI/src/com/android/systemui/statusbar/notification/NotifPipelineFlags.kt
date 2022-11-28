@@ -33,6 +33,8 @@ class NotifPipelineFlags @Inject constructor(
     fun fullScreenIntentRequiresKeyguard(): Boolean =
         featureFlags.isEnabled(Flags.FSI_REQUIRES_KEYGUARD)
 
+    fun fsiOnDNDUpdate(): Boolean = featureFlags.isEnabled(Flags.FSI_ON_DND_UPDATE)
+
     val isStabilityIndexFixEnabled: Boolean by lazy {
         featureFlags.isEnabled(Flags.STABILITY_INDEX_FIX)
     }
