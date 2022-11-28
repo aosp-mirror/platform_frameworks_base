@@ -210,6 +210,15 @@ public final class SmsApplication {
     }
 
     /**
+     * Returns the userHandle of the current process, if called from a system app,
+     * otherwise it returns the caller's userHandle
+     * @return userHandle of the caller.
+     */
+    private static UserHandle getIncomingUserHandle() {
+        return UserHandle.of(getIncomingUserId());
+    }
+
+    /**
      * Returns the list of available SMS apps defined as apps that are registered for both the
      * SMS_RECEIVED_ACTION (SMS) and WAP_PUSH_RECEIVED_ACTION (MMS) broadcasts (and their broadcast
      * receivers are enabled)
@@ -951,24 +960,28 @@ public final class SmsApplication {
      */
     @UnsupportedAppUsage
     public static ComponentName getDefaultSmsApplication(Context context, boolean updateIfNeeded) {
-        return getDefaultSmsApplicationAsUser(context, updateIfNeeded, getIncomingUserId());
+        return getDefaultSmsApplicationAsUser(context, updateIfNeeded, getIncomingUserHandle());
     }
 
     /**
      * Gets the default SMS application on a given user
      * @param context context from the calling app
      * @param updateIfNeeded update the default app if there is no valid default app configured.
-     * @param userId target user ID.
+     * @param userHandle target user handle
+     * if {@code null} is passed in then calling package uid is used to find out target user handle.
      * @return component name of the app and class to deliver SMS messages to
      */
-    @VisibleForTesting
     public static ComponentName getDefaultSmsApplicationAsUser(Context context,
-            boolean updateIfNeeded, int userId) {
+            boolean updateIfNeeded, @Nullable UserHandle userHandle) {
+        if (userHandle == null) {
+            userHandle = getIncomingUserHandle();
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             ComponentName component = null;
             SmsApplicationData smsApplicationData = getApplication(context, updateIfNeeded,
-                    userId);
+                    userHandle.getIdentifier());
             if (smsApplicationData != null) {
                 component = new ComponentName(smsApplicationData.mPackageName,
                         smsApplicationData.mSmsReceiverClass);
@@ -987,23 +1000,28 @@ public final class SmsApplication {
      */
     @UnsupportedAppUsage
     public static ComponentName getDefaultMmsApplication(Context context, boolean updateIfNeeded) {
-        return getDefaultMmsApplicationAsUser(context, updateIfNeeded, getIncomingUserId());
+        return getDefaultMmsApplicationAsUser(context, updateIfNeeded, getIncomingUserHandle());
     }
 
     /**
      * Gets the default MMS application on a given user
      * @param context context from the calling app
      * @param updateIfNeeded update the default app if there is no valid default app configured.
-     * @param userId target user ID.
+     * @param userHandle target user handle
+     * if {@code null} is passed in then calling package uid is used to find out target user handle.
      * @return component name of the app and class to deliver MMS messages to.
      */
     public static ComponentName getDefaultMmsApplicationAsUser(Context context,
-            boolean updateIfNeeded, int userId) {
+            boolean updateIfNeeded, @Nullable UserHandle userHandle) {
+        if (userHandle == null) {
+            userHandle = getIncomingUserHandle();
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             ComponentName component = null;
             SmsApplicationData smsApplicationData = getApplication(context, updateIfNeeded,
-                    userId);
+                    userHandle.getIdentifier());
             if (smsApplicationData != null) {
                 component = new ComponentName(smsApplicationData.mPackageName,
                         smsApplicationData.mMmsReceiverClass);
@@ -1024,23 +1042,28 @@ public final class SmsApplication {
     public static ComponentName getDefaultRespondViaMessageApplication(Context context,
             boolean updateIfNeeded) {
         return getDefaultRespondViaMessageApplicationAsUser(context, updateIfNeeded,
-                getIncomingUserId());
+                getIncomingUserHandle());
     }
 
     /**
      * Gets the default Respond Via Message application on a given user
      * @param context context from the calling app
      * @param updateIfNeeded update the default app if there is no valid default app configured
-     * @param userId target user ID.
+     * @param userHandle target user handle
+     * if {@code null} is passed in then calling package uid is used to find out target user handle.
      * @return component name of the app and class to direct Respond Via Message intent to
      */
     public static ComponentName getDefaultRespondViaMessageApplicationAsUser(Context context,
-            boolean updateIfNeeded, int userId) {
+            boolean updateIfNeeded, @Nullable UserHandle userHandle) {
+        if (userHandle == null) {
+            userHandle = getIncomingUserHandle();
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             ComponentName component = null;
             SmsApplicationData smsApplicationData = getApplication(context, updateIfNeeded,
-                    userId);
+                    userHandle.getIdentifier());
             if (smsApplicationData != null) {
                 component = new ComponentName(smsApplicationData.mPackageName,
                         smsApplicationData.mRespondViaMessageClass);
@@ -1062,6 +1085,7 @@ public final class SmsApplication {
     public static ComponentName getDefaultSendToApplication(Context context,
             boolean updateIfNeeded) {
         int userId = getIncomingUserId();
+
         final long token = Binder.clearCallingIdentity();
         try {
             ComponentName component = null;
@@ -1087,7 +1111,7 @@ public final class SmsApplication {
     public static ComponentName getDefaultExternalTelephonyProviderChangedApplication(
             Context context, boolean updateIfNeeded) {
         return getDefaultExternalTelephonyProviderChangedApplicationAsUser(context, updateIfNeeded,
-                getIncomingUserId());
+                getIncomingUserHandle());
     }
 
     /**
@@ -1095,16 +1119,21 @@ public final class SmsApplication {
      * MmsProvider on a given user.
      * @param context context from the calling app
      * @param updateIfNeeded update the default app if there is no valid default app configured
-     * @param userId target user ID.
+     * @param userHandle target user handle
+     * if {@code null} is passed in then calling package uid is used to find out target user handle.
      * @return component name of the app and class to deliver change intents to.
      */
     public static ComponentName getDefaultExternalTelephonyProviderChangedApplicationAsUser(
-            Context context, boolean updateIfNeeded, int userId) {
+            Context context, boolean updateIfNeeded, @Nullable UserHandle userHandle) {
+        if (userHandle == null) {
+            userHandle = getIncomingUserHandle();
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             ComponentName component = null;
             SmsApplicationData smsApplicationData = getApplication(context, updateIfNeeded,
-                    userId);
+                    userHandle.getIdentifier());
             if (smsApplicationData != null
                     && smsApplicationData.mProviderChangedReceiverClass != null) {
                 component = new ComponentName(smsApplicationData.mPackageName,
@@ -1124,23 +1153,28 @@ public final class SmsApplication {
      */
     public static ComponentName getDefaultSimFullApplication(
             Context context, boolean updateIfNeeded) {
-        return getDefaultSimFullApplicationAsUser(context, updateIfNeeded, getIncomingUserId());
+        return getDefaultSimFullApplicationAsUser(context, updateIfNeeded, getIncomingUserHandle());
     }
 
     /**
      * Gets the default application that handles sim full event on a given user.
      * @param context context from the calling app
      * @param updateIfNeeded update the default app if there is no valid default app configured
-     * @param userId target user ID.
+     * @param userHandle target user handle
+     * if {@code null} is passed in then calling package uid is used to find out target user handle.
      * @return component name of the app and class to deliver change intents to
      */
     public static ComponentName getDefaultSimFullApplicationAsUser(Context context,
-            boolean updateIfNeeded, int userId) {
+            boolean updateIfNeeded, @Nullable UserHandle userHandle) {
+        if (userHandle == null) {
+            userHandle = getIncomingUserHandle();
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             ComponentName component = null;
             SmsApplicationData smsApplicationData = getApplication(context, updateIfNeeded,
-                    userId);
+                    userHandle.getIdentifier());
             if (smsApplicationData != null
                     && smsApplicationData.mSimFullReceiverClass != null) {
                 component = new ComponentName(smsApplicationData.mPackageName,
@@ -1153,19 +1187,35 @@ public final class SmsApplication {
     }
 
     /**
-     * Returns whether need to wrgetIncomingUserIdite the SMS message to SMS database for this
-     * package.
+     * Returns whether it is required to write the SMS message to SMS database for this package.
+     *
+     * @param packageName the name of the package to be checked
+     * @param context context from the calling app
+     * @return true if it is required to write SMS message to SMS database for this package.
+     *
      * <p>
      * Caller must pass in the correct user context if calling from a singleton service.
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static boolean shouldWriteMessageForPackage(String packageName, Context context) {
-        return !shouldWriteMessageForPackageAsUser(packageName, context, getIncomingUserId());
+        return !shouldWriteMessageForPackageAsUser(packageName, context, getIncomingUserHandle());
     }
 
+    /**
+     * Returns whether it is required to write the SMS message to SMS database for this package.
+     *
+     * @param packageName the name of the package to be checked
+     * @param context context from the calling app
+     * @param userHandle target user handle
+     * if {@code null} is passed in then calling package uid is used to find out target user handle.
+     * @return true if it is required to write SMS message to SMS database for this package.
+     *
+     * <p>
+     * Caller must pass in the correct user context if calling from a singleton service.
+     */
     public static boolean shouldWriteMessageForPackageAsUser(String packageName, Context context,
-            int userId) {
-        return !isDefaultSmsApplicationAsUser(context, packageName, userId);
+            @Nullable UserHandle userHandle) {
+        return !isDefaultSmsApplicationAsUser(context, packageName, userHandle);
     }
 
     /**
@@ -1177,7 +1227,7 @@ public final class SmsApplication {
      */
     @UnsupportedAppUsage
     public static boolean isDefaultSmsApplication(Context context, String packageName) {
-        return isDefaultSmsApplicationAsUser(context, packageName, getIncomingUserId());
+        return isDefaultSmsApplicationAsUser(context, packageName, getIncomingUserHandle());
     }
 
     /**
@@ -1185,16 +1235,22 @@ public final class SmsApplication {
      *
      * @param context context from the calling app
      * @param packageName the name of the package to be checked
-     * @param userId target user ID.
+     * @param userHandle target user handle
+     * if {@code null} is passed in then calling package uid is used to find out target user handle.
      * @return true if the package is default sms app or bluetooth
      */
     public static boolean isDefaultSmsApplicationAsUser(Context context, String packageName,
-            int userId) {
+            @Nullable UserHandle userHandle) {
         if (packageName == null) {
             return false;
         }
+
+        if (userHandle == null) {
+            userHandle = getIncomingUserHandle();
+        }
+
         ComponentName component = getDefaultSmsApplicationAsUser(context, false,
-                userId);
+                userHandle);
         if (component == null) {
             return false;
         }
@@ -1222,7 +1278,7 @@ public final class SmsApplication {
      */
     @UnsupportedAppUsage
     public static boolean isDefaultMmsApplication(Context context, String packageName) {
-        return isDefaultMmsApplicationAsUser(context, packageName, getIncomingUserId());
+        return isDefaultMmsApplicationAsUser(context, packageName, getIncomingUserHandle());
     }
 
     /**
@@ -1230,17 +1286,22 @@ public final class SmsApplication {
      *
      * @param context context from the calling app
      * @param packageName the name of the package to be checked
-     * @param userId target user ID.
+     * @param userHandle target user handle
+     * if {@code null} is passed in then calling package uid is used to find out target user handle.
      * @return true if the package is default mms app or bluetooth
      */
     public static boolean isDefaultMmsApplicationAsUser(Context context, String packageName,
-            int userId) {
+            @Nullable UserHandle userHandle) {
         if (packageName == null) {
             return false;
         }
 
+        if (userHandle == null) {
+            userHandle = getIncomingUserHandle();
+        }
+
         ComponentName component = getDefaultMmsApplicationAsUser(context, false,
-                userId);
+                userHandle);
         if (component == null) {
             return false;
         }

@@ -17,6 +17,7 @@
 package com.android.internal.telephony;
 
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
@@ -2618,4 +2619,14 @@ interface ITelephony {
      * @hide
      */
     boolean isRemovableEsimDefaultEuicc(String callingPackage);
+
+     /**
+      * Get the component name of the default app to direct respond-via-message intent for the
+      * user associated with this subscription, update the cache if there is no respond-via-message
+      * application currently configured for this user.
+      * @return component name of the app and class to direct Respond Via Message intent to, or
+      * {@code null} if the functionality is not supported.
+      * @hide
+      */
+      ComponentName getDefaultRespondViaMessageApplication(int subId, boolean updateIfNeeded);
 }

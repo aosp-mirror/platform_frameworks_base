@@ -27,6 +27,8 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.SystemProperties;
+import android.os.UserHandle;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
 import java.io.PrintWriter;
@@ -211,5 +213,31 @@ public final class TelephonyUtils {
             default:
                 return "UNKNOWN(" + mobileDataPolicy + ")";
         }
+    }
+
+    /**
+     * Utility method to get user handle associated with this subscription.
+     *
+     * This method should be used internally as it returns null instead of throwing
+     * IllegalArgumentException or IllegalStateException.
+     *
+     * @param context Context object
+     * @param subId the subId of the subscription.
+     * @return userHandle associated with this subscription
+     * or {@code null} if:
+     * 1. subscription is not associated with any user
+     * 2. subId is invalid.
+     * 3. subscription service is not available.
+     *
+     * @throws SecurityException if the caller doesn't have permissions required.
+     */
+    @Nullable
+    public static UserHandle getSubscriptionUserHandle(Context context, int subId) {
+        UserHandle userHandle = null;
+        SubscriptionManager subManager =  context.getSystemService(SubscriptionManager.class);
+        if ((subManager != null) && (SubscriptionManager.isValidSubscriptionId(subId))) {
+            userHandle = subManager.getSubscriptionUserHandle(subId);
+        }
+        return userHandle;
     }
 }

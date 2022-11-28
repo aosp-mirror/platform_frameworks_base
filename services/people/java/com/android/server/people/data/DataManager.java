@@ -788,7 +788,7 @@ public class DataManager {
 
     private void updateDefaultSmsApp(@NonNull UserData userData) {
         ComponentName component = SmsApplication.getDefaultSmsApplicationAsUser(
-                mContext, /* updateIfNeeded= */ false, userData.getUserId());
+                mContext, /* updateIfNeeded= */ false, UserHandle.of(userData.getUserId()));
         String defaultSmsApp = component != null ? component.getPackageName() : null;
         userData.setDefaultSmsApp(defaultSmsApp);
     }
