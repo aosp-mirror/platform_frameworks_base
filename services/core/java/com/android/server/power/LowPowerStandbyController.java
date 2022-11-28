@@ -41,6 +41,7 @@ import android.os.PowerManager.LowPowerStandbyPolicy;
 import android.os.PowerManagerInternal;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -133,7 +134,7 @@ public class LowPowerStandbyController {
     @GuardedBy("mLock")
     private boolean mEnableCustomPolicy;
 
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mIdleBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
@@ -146,6 +147,41 @@ public class LowPowerStandbyController {
                 case PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED:
                     onDeviceIdleModeChanged();
                     break;
+            }
+        }
+    };
+
+    private final BroadcastReceiver mPackageBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (DEBUG) {
+                Slog.d(TAG, "Received package intent: action=" + intent.getAction() + ", data="
+                        + intent.getData());
+            }
+            final boolean replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+            if (replacing) {
+                return;
+            }
+            final Uri intentUri = intent.getData();
+            final String packageName = (intentUri != null) ? intentUri.getSchemeSpecificPart()
+                    : null;
+            synchronized (mLock) {
+                final LowPowerStandbyPolicy policy = getPolicy();
+                if (policy.getExemptPackages().contains(packageName)) {
+                    enqueueNotifyAllowlistChangedLocked();
+                }
+            }
+        }
+    };
+
+    private final BroadcastReceiver mUserReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (DEBUG) {
+                Slog.d(TAG, "Received user intent: action=" + intent.getAction());
+            }
+            synchronized (mLock) {
+                enqueueNotifyAllowlistChangedLocked();
             }
         }
     };
@@ -599,11 +635,25 @@ public class LowPowerStandbyController {
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
 
-        mContext.registerReceiver(mBroadcastReceiver, intentFilter);
+        mContext.registerReceiver(mIdleBroadcastReceiver, intentFilter);
+
+        IntentFilter packageFilter = new IntentFilter();
+        packageFilter.addDataScheme(IntentFilter.SCHEME_PACKAGE);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        packageFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        mContext.registerReceiver(mPackageBroadcastReceiver, packageFilter);
+
+        final IntentFilter userFilter = new IntentFilter();
+        userFilter.addAction(Intent.ACTION_USER_ADDED);
+        userFilter.addAction(Intent.ACTION_USER_REMOVED);
+        mContext.registerReceiver(mUserReceiver, userFilter, null, mHandler);
     }
 
     private void unregisterBroadcastReceiver() {
-        mContext.unregisterReceiver(mBroadcastReceiver);
+        mContext.unregisterReceiver(mIdleBroadcastReceiver);
+        mContext.unregisterReceiver(mPackageBroadcastReceiver);
+        mContext.unregisterReceiver(mUserReceiver);
     }
 
     @GuardedBy("mLock")
@@ -814,7 +864,10 @@ public class LowPowerStandbyController {
 
         int policyAllowedReasonsChanged = policyA.getAllowedReasons() ^ policyB.getAllowedReasons();
 
-        return (policyAllowedReasonsChanged & allowedReasonsInUse) != 0;
+        boolean exemptPackagesChanged = !policyA.getExemptPackages().equals(
+                policyB.getExemptPackages());
+
+        return (policyAllowedReasonsChanged & allowedReasonsInUse) != 0 || exemptPackagesChanged;
     }
 
     void dump(PrintWriter pw) {
@@ -1033,12 +1086,21 @@ public class LowPowerStandbyController {
 
     @GuardedBy("mLock")
     private int[] getAllowlistUidsLocked() {
+        final UserManager userManager = mContext.getSystemService(UserManager.class);
+        final List<UserHandle> userHandles = userManager.getUserHandles(true);
         final ArraySet<Integer> uids = new ArraySet<>(mUidAllowedReasons.size());
+        final LowPowerStandbyPolicy policy = getPolicy();
 
-        final int policyAllowedReasons = getPolicy().getAllowedReasons();
+        final int policyAllowedReasons = policy.getAllowedReasons();
         for (int i = 0; i < mUidAllowedReasons.size(); i++) {
             Integer uid = mUidAllowedReasons.keyAt(i);
             if ((mUidAllowedReasons.valueAt(i) & policyAllowedReasons) != 0) {
+                uids.add(uid);
+            }
+        }
+
+        for (int appId : getExemptPackageAppIdsLocked()) {
+            for (int uid : uidsForAppId(appId, userHandles)) {
                 uids.add(uid);
             }
         }
@@ -1049,6 +1111,15 @@ public class LowPowerStandbyController {
         }
         Arrays.sort(allowlistUids);
         return allowlistUids;
+    }
+
+    private int[] uidsForAppId(int appUid, List<UserHandle> userHandles) {
+        final int appId = UserHandle.getAppId(appUid);
+        final int[] uids = new int[userHandles.size()];
+        for (int i = 0; i < userHandles.size(); i++) {
+            uids[i] = userHandles.get(i).getUid(appId);
+        }
+        return uids;
     }
 
     @GuardedBy("mLock")

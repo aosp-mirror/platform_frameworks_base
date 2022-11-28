@@ -33,18 +33,25 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.IPowerManager;
 import android.os.PowerManager;
 import android.os.PowerManager.LowPowerStandbyPolicy;
 import android.os.PowerManagerInternal;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.test.TestLooper;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
@@ -69,6 +76,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -79,7 +87,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class LowPowerStandbyControllerTest {
     private static final int STANDBY_TIMEOUT = 5000;
-
+    private static final String TEST_PKG1 = "PKG1";
+    private static final String TEST_PKG2 = "PKG2";
+    private static final int TEST_PKG1_APP_ID = 123;
+    private static final int TEST_PKG2_APP_ID = 456;
+    private static final int USER_ID_1 = 0;
+    private static final int USER_ID_2 = 10;
     private static final LowPowerStandbyPolicy EMPTY_POLICY = new LowPowerStandbyPolicy(
             "Test policy", Collections.emptySet(), 0, Collections.emptySet());
 
@@ -95,6 +108,10 @@ public class LowPowerStandbyControllerTest {
     @Mock
     private AlarmManager mAlarmManagerMock;
     @Mock
+    private PackageManager mPackageManagerMock;
+    @Mock
+    private UserManager mUserManagerMock;
+    @Mock
     private IPowerManager mIPowerManagerMock;
     @Mock
     private PowerManagerInternal mPowerManagerInternalMock;
@@ -106,7 +123,9 @@ public class LowPowerStandbyControllerTest {
         MockitoAnnotations.initMocks(this);
 
         mContextSpy = spy(new BroadcastInterceptingContext(InstrumentationRegistry.getContext()));
+        when(mContextSpy.getPackageManager()).thenReturn(mPackageManagerMock);
         when(mContextSpy.getSystemService(AlarmManager.class)).thenReturn(mAlarmManagerMock);
+        when(mContextSpy.getSystemService(UserManager.class)).thenReturn(mUserManagerMock);
         PowerManager powerManager = new PowerManager(mContextSpy, mIPowerManagerMock, null, null);
         when(mContextSpy.getSystemService(PowerManager.class)).thenReturn(powerManager);
         addLocalServiceMock(PowerManagerInternal.class, mPowerManagerInternalMock);
@@ -131,6 +150,11 @@ public class LowPowerStandbyControllerTest {
         MockContentResolver cr = new MockContentResolver(mContextSpy);
         cr.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContextSpy.getContentResolver()).thenReturn(cr);
+
+        when(mUserManagerMock.getUserHandles(true)).thenReturn(List.of(
+                UserHandle.of(USER_ID_1), UserHandle.of(USER_ID_2)));
+        when(mPackageManagerMock.getPackageUid(eq(TEST_PKG1), any())).thenReturn(TEST_PKG1_APP_ID);
+        when(mPackageManagerMock.getPackageUid(eq(TEST_PKG2), any())).thenReturn(TEST_PKG2_APP_ID);
 
         mClock = new OffsettableClock.Stopped();
         mTestLooper = new TestLooper(mClock::now);
@@ -535,6 +559,110 @@ public class LowPowerStandbyControllerTest {
         assertFalse(mController.isAllowed(LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN));
     }
 
+    @Test
+    public void testSetExemptPackages_uidPerUserIsExempt() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(true);
+        mController.setPolicy(policyWithExemptPackages(TEST_PKG1, TEST_PKG2));
+        mTestLooper.dispatchAll();
+
+        int[] expectedUidAllowlist = {
+                UserHandle.getUid(USER_ID_1, TEST_PKG1_APP_ID),
+                UserHandle.getUid(USER_ID_1, TEST_PKG2_APP_ID),
+                UserHandle.getUid(USER_ID_2, TEST_PKG1_APP_ID),
+                UserHandle.getUid(USER_ID_2, TEST_PKG2_APP_ID)
+        };
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(expectedUidAllowlist);
+        verify(mNetworkPolicyManagerInternalMock).setLowPowerStandbyAllowlist(expectedUidAllowlist);
+    }
+
+    @Test
+    public void testExemptPackageIsRemoved_servicesAreNotified() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(true);
+        mController.setPolicy(policyWithExemptPackages(TEST_PKG1));
+        mTestLooper.dispatchAll();
+
+        int[] expectedUidAllowlist = {
+                UserHandle.getUid(USER_ID_1, TEST_PKG1_APP_ID),
+                UserHandle.getUid(USER_ID_2, TEST_PKG1_APP_ID),
+        };
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(expectedUidAllowlist);
+        verify(mNetworkPolicyManagerInternalMock).setLowPowerStandbyAllowlist(expectedUidAllowlist);
+        verifyNoMoreInteractions(mPowerManagerInternalMock, mNetworkPolicyManagerInternalMock);
+
+        reset(mPackageManagerMock);
+        when(mPackageManagerMock.getPackageUid(eq(TEST_PKG1), any()))
+                .thenThrow(PackageManager.NameNotFoundException.class);
+
+        Intent intent = new Intent(Intent.ACTION_PACKAGE_REMOVED);
+        intent.setData(Uri.fromParts(IntentFilter.SCHEME_PACKAGE, TEST_PKG1, null));
+        intent.putExtra(Intent.EXTRA_REPLACING, false);
+        mContextSpy.sendBroadcast(intent);
+        mTestLooper.dispatchAll();
+
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[0]);
+        verify(mNetworkPolicyManagerInternalMock).setLowPowerStandbyAllowlist(new int[0]);
+    }
+
+    @Test
+    public void testUsersChanged_packagesExemptForNewUser() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(true);
+        mController.setPolicy(policyWithExemptPackages(TEST_PKG1));
+        mTestLooper.dispatchAll();
+
+        InOrder inOrder = inOrder(mPowerManagerInternalMock);
+
+        inOrder.verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[] {
+                UserHandle.getUid(USER_ID_1, TEST_PKG1_APP_ID),
+                UserHandle.getUid(USER_ID_2, TEST_PKG1_APP_ID),
+        });
+        inOrder.verifyNoMoreInteractions();
+
+        when(mUserManagerMock.getUserHandles(true)).thenReturn(List.of(UserHandle.of(USER_ID_1)));
+        Intent intent = new Intent(Intent.ACTION_USER_REMOVED);
+        intent.putExtra(Intent.EXTRA_USER, UserHandle.of(USER_ID_2));
+        mContextSpy.sendBroadcast(intent);
+        mTestLooper.dispatchAll();
+
+        inOrder.verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[] {
+                UserHandle.getUid(USER_ID_1, TEST_PKG1_APP_ID)
+        });
+        inOrder.verifyNoMoreInteractions();
+
+        when(mUserManagerMock.getUserHandles(true)).thenReturn(
+                List.of(UserHandle.of(USER_ID_1), UserHandle.of(USER_ID_2)));
+        intent = new Intent(Intent.ACTION_USER_ADDED);
+        intent.putExtra(Intent.EXTRA_USER, UserHandle.of(USER_ID_2));
+        mContextSpy.sendBroadcast(intent);
+        mTestLooper.dispatchAll();
+
+        inOrder.verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{
+                UserHandle.getUid(USER_ID_1, TEST_PKG1_APP_ID),
+                UserHandle.getUid(USER_ID_2, TEST_PKG1_APP_ID)
+        });
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void testIsExempt_exemptIfDisabled() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(false);
+        mTestLooper.dispatchAll();
+
+        assertTrue(mController.isPackageExempt(TEST_PKG1_APP_ID));
+    }
+
+    @Test
+    public void testIsExempt_notExemptIfEnabled() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(true);
+        mTestLooper.dispatchAll();
+
+        assertFalse(mController.isPackageExempt(TEST_PKG1_APP_ID));
+    }
+
     private void setInteractive() throws Exception {
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
         mContextSpy.sendBroadcast(new Intent(Intent.ACTION_SCREEN_ON));
@@ -565,6 +693,15 @@ public class LowPowerStandbyControllerTest {
                 Collections.emptySet(),
                 0,
                 new ArraySet<>(allowedFeatures)
+        );
+    }
+
+    private LowPowerStandbyPolicy policyWithExemptPackages(String... exemptPackages) {
+        return new LowPowerStandbyPolicy(
+                "Test policy",
+                new ArraySet<>(exemptPackages),
+                0,
+                Collections.emptySet()
         );
     }
 
