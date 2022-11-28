@@ -34,10 +34,13 @@ import org.junit.runners.Parameterized.Parameters
 @SmallTest
 @RunWith(Parameterized::class)
 class SinglePointerTouchProcessorTest(val testCase: TestCase) : SysuiTestCase() {
-    private val underTest = SinglePointerTouchProcessor()
+    private val overlapDetector = FakeOverlapDetector()
+    private val underTest = SinglePointerTouchProcessor(overlapDetector)
 
     @Test
     fun processTouch() {
+        overlapDetector.shouldReturn = testCase.isGoodOverlap
+
         val actual =
             underTest.processTouch(
                 testCase.event,
@@ -53,6 +56,7 @@ class SinglePointerTouchProcessorTest(val testCase: TestCase) : SysuiTestCase() 
 
     data class TestCase(
         val event: MotionEvent,
+        val isGoodOverlap: Boolean,
         val previousPointerOnSensorId: Int,
         val overlayParams: UdfpsOverlayParams,
         val expected: TouchProcessorResult,
@@ -87,28 +91,28 @@ class SinglePointerTouchProcessorTest(val testCase: TestCase) : SysuiTestCase() 
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_DOWN,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
-                        isWithinSensor = true,
+                        isGoodOverlap = true,
                         expectedInteractionEvent = InteractionEvent.DOWN,
                         expectedPointerOnSensorId = POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_DOWN,
                         previousPointerOnSensorId = POINTER_ID,
-                        isWithinSensor = true,
+                        isGoodOverlap = true,
                         expectedInteractionEvent = InteractionEvent.DOWN,
                         expectedPointerOnSensorId = POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_DOWN,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
-                        isWithinSensor = false,
+                        isGoodOverlap = false,
                         expectedInteractionEvent = InteractionEvent.UNCHANGED,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_DOWN,
                         previousPointerOnSensorId = POINTER_ID,
-                        isWithinSensor = false,
+                        isGoodOverlap = false,
                         expectedInteractionEvent = InteractionEvent.UP,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
@@ -116,28 +120,28 @@ class SinglePointerTouchProcessorTest(val testCase: TestCase) : SysuiTestCase() 
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_MOVE,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
-                        isWithinSensor = true,
+                        isGoodOverlap = true,
                         expectedInteractionEvent = InteractionEvent.DOWN,
                         expectedPointerOnSensorId = POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_MOVE,
                         previousPointerOnSensorId = POINTER_ID,
-                        isWithinSensor = true,
+                        isGoodOverlap = true,
                         expectedInteractionEvent = InteractionEvent.UNCHANGED,
                         expectedPointerOnSensorId = POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_MOVE,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
-                        isWithinSensor = false,
+                        isGoodOverlap = false,
                         expectedInteractionEvent = InteractionEvent.UNCHANGED,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_MOVE,
                         previousPointerOnSensorId = POINTER_ID,
-                        isWithinSensor = false,
+                        isGoodOverlap = false,
                         expectedInteractionEvent = InteractionEvent.UP,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
@@ -145,28 +149,28 @@ class SinglePointerTouchProcessorTest(val testCase: TestCase) : SysuiTestCase() 
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_UP,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
-                        isWithinSensor = true,
+                        isGoodOverlap = true,
                         expectedInteractionEvent = InteractionEvent.UP,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_UP,
                         previousPointerOnSensorId = POINTER_ID,
-                        isWithinSensor = true,
+                        isGoodOverlap = true,
                         expectedInteractionEvent = InteractionEvent.UP,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_UP,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
-                        isWithinSensor = false,
+                        isGoodOverlap = false,
                         expectedInteractionEvent = InteractionEvent.UNCHANGED,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_UP,
                         previousPointerOnSensorId = POINTER_ID,
-                        isWithinSensor = false,
+                        isGoodOverlap = false,
                         expectedInteractionEvent = InteractionEvent.UP,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
@@ -174,28 +178,28 @@ class SinglePointerTouchProcessorTest(val testCase: TestCase) : SysuiTestCase() 
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_CANCEL,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
-                        isWithinSensor = true,
+                        isGoodOverlap = true,
                         expectedInteractionEvent = InteractionEvent.CANCEL,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_CANCEL,
                         previousPointerOnSensorId = POINTER_ID,
-                        isWithinSensor = true,
+                        isGoodOverlap = true,
                         expectedInteractionEvent = InteractionEvent.CANCEL,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_CANCEL,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
-                        isWithinSensor = false,
+                        isGoodOverlap = false,
                         expectedInteractionEvent = InteractionEvent.CANCEL,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_CANCEL,
                         previousPointerOnSensorId = POINTER_ID,
-                        isWithinSensor = false,
+                        isGoodOverlap = false,
                         expectedInteractionEvent = InteractionEvent.CANCEL,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
@@ -376,7 +380,7 @@ private data class OrientationBasedInputs(
 private fun genPositiveTestCases(
     motionEventAction: Int,
     previousPointerOnSensorId: Int,
-    isWithinSensor: Boolean,
+    isGoodOverlap: Boolean,
     expectedInteractionEvent: InteractionEvent,
     expectedPointerOnSensorId: Int
 ): List<SinglePointerTouchProcessorTest.TestCase> {
@@ -391,8 +395,8 @@ private fun genPositiveTestCases(
     return scaleFactors.flatMap { scaleFactor ->
         orientations.map { orientation ->
             val overlayParams = orientation.toOverlayParams(scaleFactor)
-            val nativeX = orientation.getNativeX(isWithinSensor)
-            val nativeY = orientation.getNativeY(isWithinSensor)
+            val nativeX = orientation.getNativeX(isGoodOverlap)
+            val nativeY = orientation.getNativeY(isGoodOverlap)
             val event =
                 MOTION_EVENT.copy(
                     action = motionEventAction,
@@ -403,8 +407,8 @@ private fun genPositiveTestCases(
                 )
             val expectedTouchData =
                 NORMALIZED_TOUCH_DATA.copy(
-                    x = ROTATION_0_INPUTS.getNativeX(isWithinSensor),
-                    y = ROTATION_0_INPUTS.getNativeY(isWithinSensor),
+                    x = ROTATION_0_INPUTS.getNativeX(isGoodOverlap),
+                    y = ROTATION_0_INPUTS.getNativeY(isGoodOverlap),
                 )
             val expected =
                 TouchProcessorResult.ProcessedTouch(
@@ -414,6 +418,7 @@ private fun genPositiveTestCases(
                 )
             SinglePointerTouchProcessorTest.TestCase(
                 event = event,
+                isGoodOverlap = isGoodOverlap,
                 previousPointerOnSensorId = previousPointerOnSensorId,
                 overlayParams = overlayParams,
                 expected = expected,
@@ -425,12 +430,12 @@ private fun genPositiveTestCases(
 private fun genTestCasesForUnsupportedAction(
     motionEventAction: Int
 ): List<SinglePointerTouchProcessorTest.TestCase> {
-    val isWithinSensor = true
+    val isGoodOverlap = true
     val previousPointerOnSensorIds = listOf(INVALID_POINTER_ID, POINTER_ID)
     return previousPointerOnSensorIds.map { previousPointerOnSensorId ->
         val overlayParams = ROTATION_0_INPUTS.toOverlayParams(scaleFactor = 1f)
-        val nativeX = ROTATION_0_INPUTS.getNativeX(isWithinSensor)
-        val nativeY = ROTATION_0_INPUTS.getNativeY(isWithinSensor)
+        val nativeX = ROTATION_0_INPUTS.getNativeX(isGoodOverlap)
+        val nativeY = ROTATION_0_INPUTS.getNativeY(isGoodOverlap)
         val event =
             MOTION_EVENT.copy(
                 action = motionEventAction,
@@ -441,6 +446,7 @@ private fun genTestCasesForUnsupportedAction(
             )
         SinglePointerTouchProcessorTest.TestCase(
             event = event,
+            isGoodOverlap = isGoodOverlap,
             previousPointerOnSensorId = previousPointerOnSensorId,
             overlayParams = overlayParams,
             expected = TouchProcessorResult.Failure(),

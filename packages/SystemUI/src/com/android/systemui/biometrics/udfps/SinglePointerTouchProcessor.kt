@@ -24,9 +24,15 @@ import android.view.Surface
 import com.android.systemui.biometrics.UdfpsOverlayParams
 import com.android.systemui.biometrics.udfps.TouchProcessorResult.Failure
 import com.android.systemui.biometrics.udfps.TouchProcessorResult.ProcessedTouch
+import com.android.systemui.dagger.SysUISingleton
+import javax.inject.Inject
 
-// TODO(b/259140693): Consider using an object pool of TouchProcessorResult to avoid allocations.
-class SinglePointerTouchProcessor : TouchProcessor {
+/**
+ * TODO(b/259140693): Consider using an object pool of TouchProcessorResult to avoid allocations.
+ */
+@SysUISingleton
+class SinglePointerTouchProcessor @Inject constructor(val overlapDetector: OverlapDetector) :
+    TouchProcessor {
 
     override fun processTouch(
         event: MotionEvent,
@@ -34,15 +40,21 @@ class SinglePointerTouchProcessor : TouchProcessor {
         overlayParams: UdfpsOverlayParams,
     ): TouchProcessorResult {
 
+        fun preprocess(): PreprocessedTouch {
+            // TODO(b/253085297): Add multitouch support. pointerIndex can be > 0 for ACTION_MOVE.
+            val pointerIndex = 0
+            val touchData = event.normalize(pointerIndex, overlayParams)
+            val isGoodOverlap =
+                overlapDetector.isGoodOverlap(touchData, overlayParams.nativeSensorBounds)
+            return PreprocessedTouch(touchData, previousPointerOnSensorId, isGoodOverlap)
+        }
+
         return when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN ->
-                processActionDown(event.preprocess(previousPointerOnSensorId, overlayParams))
-            MotionEvent.ACTION_MOVE ->
-                processActionMove(event.preprocess(previousPointerOnSensorId, overlayParams))
-            MotionEvent.ACTION_UP ->
-                processActionUp(event.preprocess(previousPointerOnSensorId, overlayParams))
+            MotionEvent.ACTION_DOWN -> processActionDown(preprocess())
+            MotionEvent.ACTION_MOVE -> processActionMove(preprocess())
+            MotionEvent.ACTION_UP -> processActionUp(preprocess())
             MotionEvent.ACTION_CANCEL ->
-                processActionCancel(event.preprocess(previousPointerOnSensorId, overlayParams))
+                processActionCancel(event.normalize(pointerIndex = 0, overlayParams))
             else ->
                 Failure("Unsupported MotionEvent." + MotionEvent.actionToString(event.actionMasked))
         }
@@ -52,11 +64,11 @@ class SinglePointerTouchProcessor : TouchProcessor {
 private data class PreprocessedTouch(
     val data: NormalizedTouchData,
     val previousPointerOnSensorId: Int,
-    val isWithinSensor: Boolean,
+    val isGoodOverlap: Boolean,
 )
 
 private fun processActionDown(touch: PreprocessedTouch): TouchProcessorResult {
-    return if (touch.isWithinSensor) {
+    return if (touch.isGoodOverlap) {
         ProcessedTouch(InteractionEvent.DOWN, pointerOnSensorId = touch.data.pointerId, touch.data)
     } else {
         val event =
@@ -73,8 +85,8 @@ private fun processActionMove(touch: PreprocessedTouch): TouchProcessorResult {
     val hadPointerOnSensor = touch.previousPointerOnSensorId != INVALID_POINTER_ID
     val interactionEvent =
         when {
-            touch.isWithinSensor && !hadPointerOnSensor -> InteractionEvent.DOWN
-            !touch.isWithinSensor && hadPointerOnSensor -> InteractionEvent.UP
+            touch.isGoodOverlap && !hadPointerOnSensor -> InteractionEvent.DOWN
+            !touch.isGoodOverlap && hadPointerOnSensor -> InteractionEvent.UP
             else -> InteractionEvent.UNCHANGED
         }
     val pointerOnSensorId =
@@ -87,7 +99,7 @@ private fun processActionMove(touch: PreprocessedTouch): TouchProcessorResult {
 }
 
 private fun processActionUp(touch: PreprocessedTouch): TouchProcessorResult {
-    return if (touch.isWithinSensor) {
+    return if (touch.isGoodOverlap) {
         ProcessedTouch(InteractionEvent.UP, pointerOnSensorId = INVALID_POINTER_ID, touch.data)
     } else {
         val event =
@@ -100,24 +112,8 @@ private fun processActionUp(touch: PreprocessedTouch): TouchProcessorResult {
     }
 }
 
-private fun processActionCancel(touch: PreprocessedTouch): TouchProcessorResult {
-    return ProcessedTouch(
-        InteractionEvent.CANCEL,
-        pointerOnSensorId = INVALID_POINTER_ID,
-        touch.data
-    )
-}
-
-/** Returns [PreprocessedTouch], which is an input to all the action-specific functions. */
-private fun MotionEvent.preprocess(
-    previousPointerOnSensorId: Int,
-    overlayParams: UdfpsOverlayParams
-): PreprocessedTouch {
-    // TODO(b/253085297): Add multitouch support. pointerIndex can be > 0 for ACTION_MOVE.
-    val pointerIndex = 0
-    val touchData = normalize(pointerIndex, overlayParams)
-    val isWithinSensor = touchData.isWithinSensor(overlayParams.nativeSensorBounds)
-    return PreprocessedTouch(touchData, previousPointerOnSensorId, isWithinSensor)
+private fun processActionCancel(data: NormalizedTouchData): TouchProcessorResult {
+    return ProcessedTouch(InteractionEvent.CANCEL, pointerOnSensorId = INVALID_POINTER_ID, data)
 }
 
 /**

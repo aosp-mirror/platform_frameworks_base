@@ -938,7 +938,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     public void onPointerDown(long requestId, int sensorId, int x, int y,
             float minor, float major) {
         if (mService == null) {
-            Slog.w(TAG, "onFingerDown: no fingerprint service");
+            Slog.w(TAG, "onPointerDown: no fingerprint service");
             return;
         }
 
@@ -955,7 +955,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public void onPointerUp(long requestId, int sensorId) {
         if (mService == null) {
-            Slog.w(TAG, "onFingerDown: no fingerprint service");
+            Slog.w(TAG, "onPointerUp: no fingerprint service");
             return;
         }
 
@@ -964,6 +964,58 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * TODO(b/218388821): The parameter list should be replaced with PointerContext.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void onPointerDown(
+            long requestId,
+            int sensorId,
+            int pointerId,
+            float x,
+            float y,
+            float minor,
+            float major,
+            float orientation,
+            long time,
+            long gestureStart,
+            boolean isAod) {
+        if (mService == null) {
+            Slog.w(TAG, "onPointerDown: no fingerprint service");
+            return;
+        }
+
+        // TODO(b/218388821): Propagate all the parameters to FingerprintService.
+        Slog.e(TAG, "onPointerDown: not implemented!");
+    }
+
+    /**
+     * TODO(b/218388821): The parameter list should be replaced with PointerContext.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void onPointerUp(
+            long requestId,
+            int sensorId,
+            int pointerId,
+            float x,
+            float y,
+            float minor,
+            float major,
+            float orientation,
+            long time,
+            long gestureStart,
+            boolean isAod) {
+        if (mService == null) {
+            Slog.w(TAG, "onPointerUp: no fingerprint service");
+            return;
+        }
+
+        // TODO(b/218388821): Propagate all the parameters to FingerprintService.
+        Slog.e(TAG, "onPointerUp: not implemented!");
     }
 
     /**
