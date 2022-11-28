@@ -87,10 +87,6 @@ final class LetterboxUiController {
     private final LetterboxConfiguration mLetterboxConfiguration;
     private final ActivityRecord mActivityRecord;
 
-    // Taskbar expanded height. Used to determine whether to crop an app window to display rounded
-    // corners above the taskbar.
-    private final float mExpandedTaskBarHeight;
-
     private boolean mShowWallpaperForLetterboxBackground;
 
     @Nullable
@@ -102,8 +98,6 @@ final class LetterboxUiController {
         // is created in its constructor. It shouldn't be used in this constructor but it's safe
         // to use it after since controller is only used in ActivityRecord.
         mActivityRecord = activityRecord;
-        mExpandedTaskBarHeight =
-                getResources().getDimensionPixelSize(R.dimen.taskbar_frame_height);
     }
 
     /** Cleans up {@link Letterbox} if it exists.*/
@@ -555,7 +549,6 @@ final class LetterboxUiController {
         final InsetsSource taskbarInsetsSource = getTaskbarInsetsSource(mainWindow);
 
         return taskbarInsetsSource != null
-                && taskbarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight
                 && taskbarInsetsSource.isVisible();
     }
 
