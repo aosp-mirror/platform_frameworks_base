@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,27 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log
+package com.android.systemui.log.table
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.LogBufferHelper.Companion.adjustMaxSize
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogcatEchoTracker
-
+import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 
 @SysUISingleton
-class LogBufferFactory @Inject constructor(
+class TableLogBufferFactory
+@Inject
+constructor(
     private val dumpManager: DumpManager,
-    private val logcatEchoTracker: LogcatEchoTracker
+    private val systemClock: SystemClock,
 ) {
-    @JvmOverloads
     fun create(
         name: String,
         maxSize: Int,
-        systrace: Boolean = true
-    ): LogBuffer {
-        val buffer = LogBuffer(name, adjustMaxSize(maxSize), logcatEchoTracker, systrace)
-        dumpManager.registerBuffer(name, buffer)
-        return buffer
+    ): TableLogBuffer {
+        val tableBuffer = TableLogBuffer(adjustMaxSize(maxSize), name, systemClock)
+        tableBuffer.registerDumpables(dumpManager)
+        return tableBuffer
     }
 }
