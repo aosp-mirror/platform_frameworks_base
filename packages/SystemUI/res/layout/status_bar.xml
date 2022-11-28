@@ -55,6 +55,7 @@
             android:id="@+id/status_bar_start_side_container"
             android:layout_height="match_parent"
             android:layout_width="0dp"
+            android:clipChildren="false"
             android:layout_weight="1">
 
             <!-- Container that is wrapped around the views on the start half of the status bar.
