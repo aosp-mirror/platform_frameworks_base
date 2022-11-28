@@ -35,6 +35,7 @@ import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AppOpsManagerInternal;
+import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.KeyguardManager;
@@ -257,6 +258,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private boolean mIsProviderInfoPersisted;
     private boolean mIsCombinedBroadcastEnabled;
 
+    // Mark widget lifecycle broadcasts as 'interactive'
+    private Bundle mInteractiveBroadcast;
+
     AppWidgetServiceImpl(Context context) {
         mContext = context;
     }
@@ -285,6 +289,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         if (DEBUG_PROVIDER_INFO_CACHE && !mIsProviderInfoPersisted) {
             Slog.d(TAG, "App widget provider info will not be persisted on this device");
         }
+
+        BroadcastOptions opts = BroadcastOptions.makeBasic();
+        opts.setBackgroundActivityStartsAllowed(false);
+        opts.setInteractive(true);
+        mInteractiveBroadcast = opts.toBundle();
 
         computeMaximumWidgetBitmapMemory();
         registerBroadcastReceiver();
@@ -2379,33 +2388,40 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_ENABLE_AND_UPDATE);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
         intent.setComponent(p.id.componentName);
-        sendBroadcastAsUser(intent, p.id.getProfile());
+        // Placing a widget is something users expect to be UX-responsive, so mark this
+        // broadcast as interactive
+        sendBroadcastAsUser(intent, p.id.getProfile(), true);
     }
 
     private void sendEnableIntentLocked(Provider p) {
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_ENABLED);
         intent.setComponent(p.id.componentName);
-        sendBroadcastAsUser(intent, p.id.getProfile());
+        // Enabling the widget is something users expect to be UX-responsive, so mark this
+        // broadcast as interactive
+        sendBroadcastAsUser(intent, p.id.getProfile(), true);
     }
 
     private void sendUpdateIntentLocked(Provider provider, int[] appWidgetIds) {
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
         intent.setComponent(provider.id.componentName);
-        sendBroadcastAsUser(intent, provider.id.getProfile());
+        // Periodic background widget update heartbeats are not an interactive use case
+        sendBroadcastAsUser(intent, provider.id.getProfile(), false);
     }
 
     private void sendDeletedIntentLocked(Widget widget) {
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_DELETED);
         intent.setComponent(widget.provider.id.componentName);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widget.appWidgetId);
-        sendBroadcastAsUser(intent, widget.provider.id.getProfile());
+        // Cleanup after deletion isn't an interactive UX case
+        sendBroadcastAsUser(intent, widget.provider.id.getProfile(), false);
     }
 
     private void sendDisabledIntentLocked(Provider provider) {
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_DISABLED);
         intent.setComponent(provider.id.componentName);
-        sendBroadcastAsUser(intent, provider.id.getProfile());
+        // Cleanup after disable isn't an interactive UX case
+        sendBroadcastAsUser(intent, provider.id.getProfile(), false);
     }
 
     public void sendOptionsChangedIntentLocked(Widget widget) {
@@ -2413,7 +2429,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         intent.setComponent(widget.provider.id.componentName);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widget.appWidgetId);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, widget.options);
-        sendBroadcastAsUser(intent, widget.provider.id.getProfile());
+        // The user's changed the options, so seeing them take effect promptly is
+        // an interactive UX expectation
+        sendBroadcastAsUser(intent, widget.provider.id.getProfile(), true);
     }
 
     @GuardedBy("mLock")
@@ -3666,10 +3684,17 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         return null;
     }
 
-    private void sendBroadcastAsUser(Intent intent, UserHandle userHandle) {
+    /**
+     * Sends a widget lifecycle broadcast within the specified user.  If {@code isInteractive}
+     * is specified as {@code true}, the broadcast dispatch mechanism will be told that it
+     * is related to a UX flow with user-visible expectations about timely dispatch.  This
+     * should only be used for broadcast flows that do have such expectations.
+     */
+    private void sendBroadcastAsUser(Intent intent, UserHandle userHandle, boolean isInteractive) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            mContext.sendBroadcastAsUser(intent, userHandle);
+            mContext.sendBroadcastAsUser(intent, userHandle, null,
+                    isInteractive ? mInteractiveBroadcast : null);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -5008,18 +5033,20 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         private void sendWidgetRestoreBroadcastLocked(String action, Provider provider,
                 Host host, int[] oldIds, int[] newIds, UserHandle userHandle) {
+            // Users expect restore to emplace widgets properly ASAP, so flag these as
+            // being interactive broadcast dispatches
             Intent intent = new Intent(action);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OLD_IDS, oldIds);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, newIds);
             if (provider != null) {
                 intent.setComponent(provider.id.componentName);
-                sendBroadcastAsUser(intent, userHandle);
+                sendBroadcastAsUser(intent, userHandle, true);
             }
             if (host != null) {
                 intent.setComponent(null);
                 intent.setPackage(host.id.packageName);
                 intent.putExtra(AppWidgetManager.EXTRA_HOST_ID, host.id.hostId);
-                sendBroadcastAsUser(intent, userHandle);
+                sendBroadcastAsUser(intent, userHandle, true);
             }
         }
 
