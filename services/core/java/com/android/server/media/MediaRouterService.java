@@ -638,9 +638,11 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         synchronized (mLock) {
             if (mCurrentActiveUserId != newActiveUserId) {
                 mCurrentActiveUserId = newActiveUserId;
-                for (int i = 0; i < mUserRecords.size(); i++) {
-                    int userId = mUserRecords.keyAt(i);
-                    UserRecord userRecord = mUserRecords.valueAt(i);
+                // disposeUserIfNeededLocked might modify the collection, hence clone
+                final var userRecords = mUserRecords.clone();
+                for (int i = 0; i < userRecords.size(); i++) {
+                    int userId = userRecords.keyAt(i);
+                    UserRecord userRecord = userRecords.valueAt(i);
                     if (isUserActiveLocked(userId)) {
                         // userId corresponds to the active user, or one of its profiles. We
                         // ensure the associated structures are initialized.
