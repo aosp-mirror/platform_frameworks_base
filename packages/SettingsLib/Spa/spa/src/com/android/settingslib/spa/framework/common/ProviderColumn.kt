@@ -17,6 +17,7 @@
 package com.android.settingslib.spa.framework.common
 
 import android.content.UriMatcher
+import androidx.annotation.VisibleForTesting
 
 /**
  * Enum to define all column names in provider.
@@ -125,14 +126,17 @@ enum class QueryEnum(
     ),
 }
 
-internal fun QueryEnum.getColumns(): Array<String> {
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+fun QueryEnum.getColumns(): Array<String> {
     return columnNames.map { it.id }.toTypedArray()
 }
 
-internal fun QueryEnum.getIndex(name: ColumnEnum): Int {
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+fun QueryEnum.getIndex(name: ColumnEnum): Int {
     return columnNames.indexOf(name)
 }
 
-internal fun QueryEnum.addUri(uriMatcher: UriMatcher, authority: String) {
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+fun QueryEnum.addUri(uriMatcher: UriMatcher, authority: String) {
     uriMatcher.addURI(authority, queryPath, queryMatchCode)
 }

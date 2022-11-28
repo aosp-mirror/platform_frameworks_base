@@ -64,6 +64,7 @@ class SettingsEntryTest {
         assertThat(entry.isAllowSearch).isFalse()
         assertThat(entry.isSearchDataDynamic).isFalse()
         assertThat(entry.hasMutableStatus).isFalse()
+        assertThat(entry.hasSliceSupport).isFalse()
     }
 
     @Test
@@ -121,12 +122,13 @@ class SettingsEntryTest {
     @Test
     fun testSetAttributes() {
         val owner = SettingsPage.create("mySpp")
-        val entry = SettingsEntryBuilder.create(owner, "myEntry")
+        val entryBuilder = SettingsEntryBuilder.create(owner, "myEntry")
             .setDisplayName("myEntryDisplay")
-            .setIsAllowSearch(true)
             .setIsSearchDataDynamic(false)
             .setHasMutableStatus(true)
-            .build()
+            .setSearchDataFn { null }
+            .setSliceDataFn { _, _ -> null }
+        val entry = entryBuilder.build()
         assertThat(entry.id).isEqualTo(getUniqueEntryId("myEntry", owner))
         assertThat(entry.displayName).isEqualTo("myEntryDisplay")
         assertThat(entry.fromPage).isNull()
@@ -134,6 +136,10 @@ class SettingsEntryTest {
         assertThat(entry.isAllowSearch).isTrue()
         assertThat(entry.isSearchDataDynamic).isFalse()
         assertThat(entry.hasMutableStatus).isTrue()
+        assertThat(entry.hasSliceSupport).isTrue()
+
+        val entry2 = entryBuilder.clearSearchDataFn().build()
+        assertThat(entry2.isAllowSearch).isFalse()
     }
 
     @Test
@@ -150,6 +156,10 @@ class SettingsEntryTest {
 
         val rtArguments = bundleOf("rtParam" to "v2")
         composeTestRule.setContent { entry.UiLayout(rtArguments) }
+        assertThat(entry.isAllowSearch).isTrue()
+        assertThat(entry.isSearchDataDynamic).isFalse()
+        assertThat(entry.hasMutableStatus).isFalse()
+        assertThat(entry.hasSliceSupport).isFalse()
         val searchData = entry.getSearchData(rtArguments)
         val statusData = entry.getStatusData(rtArguments)
         assertThat(searchData?.title).isEqualTo("myTitle")

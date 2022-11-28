@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.framework
+package com.android.settingslib.spa.search
 
 import android.content.ContentProvider
 import android.content.ContentValues
@@ -26,6 +26,7 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.android.settingslib.spa.framework.common.ColumnEnum
 import com.android.settingslib.spa.framework.common.QueryEnum
 import com.android.settingslib.spa.framework.common.SettingsEntry
@@ -115,7 +116,8 @@ class SpaSearchProvider : ContentProvider() {
         }
     }
 
-    private fun querySearchImmutableStatusData(): Cursor {
+    @VisibleForTesting
+    fun querySearchImmutableStatusData(): Cursor {
         val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.SEARCH_IMMUTABLE_STATUS_DATA_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
@@ -125,7 +127,8 @@ class SpaSearchProvider : ContentProvider() {
         return cursor
     }
 
-    private fun querySearchMutableStatusData(): Cursor {
+    @VisibleForTesting
+    fun querySearchMutableStatusData(): Cursor {
         val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.SEARCH_MUTABLE_STATUS_DATA_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
@@ -135,7 +138,8 @@ class SpaSearchProvider : ContentProvider() {
         return cursor
     }
 
-    private fun querySearchStaticData(): Cursor {
+    @VisibleForTesting
+    fun querySearchStaticData(): Cursor {
         val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.SEARCH_STATIC_DATA_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
@@ -145,7 +149,8 @@ class SpaSearchProvider : ContentProvider() {
         return cursor
     }
 
-    private fun querySearchDynamicData(): Cursor {
+    @VisibleForTesting
+    fun querySearchDynamicData(): Cursor {
         val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.SEARCH_DYNAMIC_DATA_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {

@@ -74,10 +74,14 @@ class SettingsPageTest {
             "int_param" to 10,
         )
         val page = spaEnvironment.createPage("SppWithParam", arguments)
-        assertThat(page.id).isEqualTo(getUniquePageId("SppWithParam", listOf(
-            navArgument("string_param") { type = NavType.StringType },
-            navArgument("int_param") { type = NavType.IntType },
-        ), arguments))
+        assertThat(page.id).isEqualTo(
+            getUniquePageId(
+                "SppWithParam", listOf(
+                    navArgument("string_param") { type = NavType.StringType },
+                    navArgument("int_param") { type = NavType.IntType },
+                ), arguments
+            )
+        )
         assertThat(page.sppName).isEqualTo("SppWithParam")
         assertThat(page.displayName).isEqualTo("SppWithParam")
         assertThat(page.buildRoute()).isEqualTo("SppWithParam/myStr/10")
@@ -98,11 +102,15 @@ class SettingsPageTest {
             "rt_param" to "rtStr",
         )
         val page = spaEnvironment.createPage("SppWithRtParam", arguments)
-        assertThat(page.id).isEqualTo(getUniquePageId("SppWithRtParam", listOf(
-            navArgument("string_param") { type = NavType.StringType },
-            navArgument("int_param") { type = NavType.IntType },
-            navArgument("rt_param") { type = NavType.StringType },
-        ), arguments))
+        assertThat(page.id).isEqualTo(
+            getUniquePageId(
+                "SppWithRtParam", listOf(
+                    navArgument("string_param") { type = NavType.StringType },
+                    navArgument("int_param") { type = NavType.IntType },
+                    navArgument("rt_param") { type = NavType.StringType },
+                ), arguments
+            )
+        )
         assertThat(page.sppName).isEqualTo("SppWithRtParam")
         assertThat(page.displayName).isEqualTo("SppWithRtParam")
         assertThat(page.buildRoute()).isEqualTo("SppWithRtParam/myStr/10/rtStr")

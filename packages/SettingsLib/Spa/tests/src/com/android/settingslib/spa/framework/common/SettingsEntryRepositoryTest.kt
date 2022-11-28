@@ -30,7 +30,8 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SettingsEntryRepositoryTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val spaEnvironment = SpaEnvironmentForTest(context)
+    private val spaEnvironment =
+        SpaEnvironmentForTest(context, listOf(SppHome.createSettingsPage()))
     private val entryRepository by spaEnvironment.entryRepository
 
     @Test

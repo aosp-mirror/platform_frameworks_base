@@ -70,7 +70,6 @@ internal class TogglePermissionAppListPageProvider(
             entryList.add(
                 SettingsEntryBuilder.createLinkFrom("${ENTRY_NAME}_$category", appListPage)
                     .setLink(toPage = appInfoPage)
-                    .setIsAllowSearch(false)
                     .build()
             )
         }
@@ -120,7 +119,7 @@ internal class TogglePermissionAppListPageProvider(
                 parameter = PAGE_PARAMETER,
                 arguments = bundleOf(PERMISSION to permissionType)
             )
-            return SettingsEntryBuilder.createInject(owner = appListPage).setIsAllowSearch(false)
+            return SettingsEntryBuilder.createInject(owner = appListPage)
                 .setUiLayoutFn {
                     val listModel = rememberContext(listModelSupplier)
                     Preference(
