@@ -16,6 +16,7 @@
 
 package com.android.settingslib.spaprivileged.framework.common
 
+import android.app.ActivityManager
 import android.app.AlarmManager
 import android.app.AppOpsManager
 import android.app.admin.DevicePolicyManager
@@ -27,6 +28,9 @@ import android.content.pm.verify.domain.DomainVerificationManager
 import android.os.UserHandle
 import android.os.UserManager
 import android.permission.PermissionControllerManager
+
+/** The [ActivityManager] instance. */
+val Context.activityManager get() = getSystemService(ActivityManager::class.java)!!
 
 /** The [AlarmManager] instance. */
 val Context.alarmManager get() = getSystemService(AlarmManager::class.java)!!
