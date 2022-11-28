@@ -412,6 +412,14 @@ public final class JobStore {
 
     /** Version of the db schema. */
     private static final int JOBS_FILE_VERSION = 1;
+    /**
+     * For legacy reasons, this tag is used to encapsulate the entire job list.
+     */
+    private static final String XML_TAG_JOB_INFO = "job-info";
+    /**
+     * For legacy reasons, this tag represents a single {@link JobStatus} object.
+     */
+    private static final String XML_TAG_JOB = "job";
     /** Tag corresponds to constraints this job needs. */
     private static final String XML_TAG_PARAMS_CONSTRAINTS = "constraints";
     /** Tag corresponds to execution parameters. */
@@ -645,19 +653,19 @@ public final class JobStore {
                 out.startDocument(null, true);
                 out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
-                out.startTag(null, "job-info");
+                out.startTag(null, XML_TAG_JOB_INFO);
                 out.attribute(null, "version", Integer.toString(JOBS_FILE_VERSION));
                 for (int i=0; i<jobList.size(); i++) {
                     JobStatus jobStatus = jobList.get(i);
                     if (DEBUG) {
                         Slog.d(TAG, "Saving job " + jobStatus.getJobId());
                     }
-                    out.startTag(null, "job");
+                    out.startTag(null, XML_TAG_JOB);
                     addAttributesToJobTag(out, jobStatus);
                     writeConstraintsToXml(out, jobStatus);
                     writeExecutionCriteriaToXml(out, jobStatus);
                     writeBundleToXml(jobStatus.getJob().getExtras(), out);
-                    out.endTag(null, "job");
+                    out.endTag(null, XML_TAG_JOB);
 
                     numJobs++;
                     if (jobStatus.getUid() == Process.SYSTEM_UID) {
@@ -667,7 +675,7 @@ public final class JobStore {
                         }
                     }
                 }
-                out.endTag(null, "job-info");
+                out.endTag(null, XML_TAG_JOB_INFO);
                 out.endDocument();
 
                 file.finishWrite(fos);
@@ -903,17 +911,17 @@ public final class JobStore {
                 return;
             }
             boolean needFileMigration = false;
-            long now = sElapsedRealtimeClock.millis();
+            long nowElapsed = sElapsedRealtimeClock.millis();
             for (File file : files) {
                 final AtomicFile aFile = createJobFile(file);
                 try (FileInputStream fis = aFile.openRead()) {
                     synchronized (mLock) {
-                        jobs = readJobMapImpl(fis, rtcGood);
+                        jobs = readJobMapImpl(fis, rtcGood, nowElapsed);
                         if (jobs != null) {
                             for (int i = 0; i < jobs.size(); i++) {
                                 JobStatus js = jobs.get(i);
                                 js.prepareLocked();
-                                js.enqueueTime = now;
+                                js.enqueueTime = nowElapsed;
                                 this.jobSet.add(js);
 
                                 numJobs++;
@@ -959,7 +967,7 @@ public final class JobStore {
             }
         }
 
-        private List<JobStatus> readJobMapImpl(InputStream fis, boolean rtcIsGood)
+        private List<JobStatus> readJobMapImpl(InputStream fis, boolean rtcIsGood, long nowElapsed)
                 throws XmlPullParserException, IOException {
             TypedXmlPullParser parser = Xml.resolvePullParser(fis);
 
@@ -977,28 +985,24 @@ public final class JobStore {
             }
 
             String tagName = parser.getName();
-            if ("job-info".equals(tagName)) {
+            if (XML_TAG_JOB_INFO.equals(tagName)) {
                 final List<JobStatus> jobs = new ArrayList<JobStatus>();
-                final int version;
+                final int version = parser.getAttributeInt(null, "version");
                 // Read in version info.
-                try {
-                    version = Integer.parseInt(parser.getAttributeValue(null, "version"));
-                    if (version > JOBS_FILE_VERSION || version < 0) {
-                        Slog.d(TAG, "Invalid version number, aborting jobs file read.");
-                        return null;
-                    }
-                } catch (NumberFormatException e) {
-                    Slog.e(TAG, "Invalid version number, aborting jobs file read.");
+                if (version > JOBS_FILE_VERSION || version < 0) {
+                    Slog.d(TAG, "Invalid version number, aborting jobs file read.");
                     return null;
                 }
+
                 eventType = parser.next();
                 do {
                     // Read each <job/>
                     if (eventType == XmlPullParser.START_TAG) {
                         tagName = parser.getName();
                         // Start reading job.
-                        if ("job".equals(tagName)) {
-                            JobStatus persistedJob = restoreJobFromXml(rtcIsGood, parser, version);
+                        if (XML_TAG_JOB.equals(tagName)) {
+                            JobStatus persistedJob =
+                                    restoreJobFromXml(rtcIsGood, parser, version, nowElapsed);
                             if (persistedJob != null) {
                                 if (DEBUG) {
                                     Slog.d(TAG, "Read out " + persistedJob);
@@ -1022,7 +1026,7 @@ public final class JobStore {
          * @return Newly instantiated job holding all the information we just read out of the xml tag.
          */
         private JobStatus restoreJobFromXml(boolean rtcIsGood, TypedXmlPullParser parser,
-                int schemaVersion) throws XmlPullParserException, IOException {
+                int schemaVersion, long nowElapsed) throws XmlPullParserException, IOException {
             JobInfo.Builder jobBuilder;
             int uid, sourceUserId;
             long lastSuccessfulRunTime;
@@ -1113,18 +1117,9 @@ public final class JobStore {
             }
 
             // Tuple of (earliest runtime, latest runtime) in UTC.
-            final Pair<Long, Long> rtcRuntimes;
-            try {
-                rtcRuntimes = buildRtcExecutionTimesFromXml(parser);
-            } catch (NumberFormatException e) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Error parsing execution time parameters, skipping.");
-                }
-                return null;
-            }
+            final Pair<Long, Long> rtcRuntimes = buildRtcExecutionTimesFromXml(parser);
 
-            final long elapsedNow = sElapsedRealtimeClock.millis();
-            Pair<Long, Long> elapsedRuntimes = convertRtcBoundsToElapsed(rtcRuntimes, elapsedNow);
+            Pair<Long, Long> elapsedRuntimes = convertRtcBoundsToElapsed(rtcRuntimes, nowElapsed);
 
             if (XML_TAG_PERIODIC.equals(parser.getName())) {
                 try {
@@ -1137,8 +1132,8 @@ public final class JobStore {
                     // from now. This is the latest the periodic could be pushed out. This could
                     // happen if the periodic ran early (at flex time before period), and then the
                     // device rebooted.
-                    if (elapsedRuntimes.second > elapsedNow + periodMillis + flexMillis) {
-                        final long clampedLateRuntimeElapsed = elapsedNow + flexMillis
+                    if (elapsedRuntimes.second > nowElapsed + periodMillis + flexMillis) {
+                        final long clampedLateRuntimeElapsed = nowElapsed + flexMillis
                                 + periodMillis;
                         final long clampedEarlyRuntimeElapsed = clampedLateRuntimeElapsed
                                 - flexMillis;
@@ -1163,11 +1158,11 @@ public final class JobStore {
             } else if (XML_TAG_ONEOFF.equals(parser.getName())) {
                 try {
                     if (elapsedRuntimes.first != JobStatus.NO_EARLIEST_RUNTIME) {
-                        jobBuilder.setMinimumLatency(elapsedRuntimes.first - elapsedNow);
+                        jobBuilder.setMinimumLatency(elapsedRuntimes.first - nowElapsed);
                     }
                     if (elapsedRuntimes.second != JobStatus.NO_LATEST_RUNTIME) {
                         jobBuilder.setOverrideDeadline(
-                                elapsedRuntimes.second - elapsedNow);
+                                elapsedRuntimes.second - nowElapsed);
                     }
                 } catch (NumberFormatException e) {
                     Slog.d(TAG, "Error reading job execution criteria, skipping.");
@@ -1236,7 +1231,7 @@ public final class JobStore {
 
             // And now we're done
             final int appBucket = JobSchedulerService.standbyBucketForPackage(sourcePackageName,
-                    sourceUserId, elapsedNow);
+                    sourceUserId, nowElapsed);
             JobStatus js = new JobStatus(
                     builtJob, uid, sourcePackageName, sourceUserId,
                     appBucket, sourceTag,
@@ -1246,9 +1241,10 @@ public final class JobStore {
             return js;
         }
 
-        private JobInfo.Builder buildBuilderFromXml(XmlPullParser parser) throws NumberFormatException {
+        private JobInfo.Builder buildBuilderFromXml(TypedXmlPullParser parser)
+                throws XmlPullParserException {
             // Pull out required fields from <job> attributes.
-            int jobId = Integer.parseInt(parser.getAttributeValue(null, "jobid"));
+            int jobId = parser.getAttributeInt(null, "jobid");
             String packageName = parser.getAttributeValue(null, "package");
             String className = parser.getAttributeValue(null, "class");
             ComponentName cname = new ComponentName(packageName, className);
@@ -1405,20 +1401,13 @@ public final class JobStore {
          * @return A Pair of timestamps in UTC wall-clock time.  The first is the earliest
          *     time at which the job is to become runnable, and the second is the deadline at
          *     which it becomes overdue to execute.
-         * @throws NumberFormatException
          */
-        private Pair<Long, Long> buildRtcExecutionTimesFromXml(XmlPullParser parser)
-                throws NumberFormatException {
-            String val;
+        private Pair<Long, Long> buildRtcExecutionTimesFromXml(TypedXmlPullParser parser) {
             // Pull out execution time data.
-            val = parser.getAttributeValue(null, "delay");
-            final long earliestRunTimeRtc = (val != null)
-                    ? Long.parseLong(val)
-                    : JobStatus.NO_EARLIEST_RUNTIME;
-            val = parser.getAttributeValue(null, "deadline");
-            final long latestRunTimeRtc = (val != null)
-                    ? Long.parseLong(val)
-                    : JobStatus.NO_LATEST_RUNTIME;
+            final long earliestRunTimeRtc =
+                    parser.getAttributeLong(null, "delay", JobStatus.NO_EARLIEST_RUNTIME);
+            final long latestRunTimeRtc =
+                    parser.getAttributeLong(null, "deadline", JobStatus.NO_LATEST_RUNTIME);
             return Pair.create(earliestRunTimeRtc, latestRunTimeRtc);
         }
     }
