@@ -114,6 +114,7 @@ import android.location.CountryDetector;
 import android.location.ICountryDetector;
 import android.location.ILocationManager;
 import android.location.LocationManager;
+import android.media.AudioDeviceVolumeManager;
 import android.media.AudioManager;
 import android.media.MediaFrameworkInitializer;
 import android.media.MediaFrameworkPlatformInitializer;
@@ -336,6 +337,13 @@ public final class SystemServiceRegistry {
             @Override
             public AudioManager createService(ContextImpl ctx) {
                 return new AudioManager(ctx);
+            }});
+
+        registerService(Context.AUDIO_DEVICE_VOLUME_SERVICE, AudioDeviceVolumeManager.class,
+                new CachedServiceFetcher<AudioDeviceVolumeManager>() {
+            @Override
+            public AudioDeviceVolumeManager createService(ContextImpl ctx) {
+                return new AudioDeviceVolumeManager(ctx);
             }});
 
         registerService(Context.MEDIA_ROUTER_SERVICE, MediaRouter.class,
