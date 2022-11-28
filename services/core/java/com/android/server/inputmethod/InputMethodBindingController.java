@@ -279,7 +279,7 @@ final class InputMethodBindingController {
                     if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
                     final InputMethodInfo info = mMethodMap.get(mSelectedMethodId);
                     mSupportsStylusHw = info.supportsStylusHandwriting();
-                    mService.initializeImeLocked(mCurMethod, mCurToken, info.getConfigChanges());
+                    mService.initializeImeLocked(mCurMethod, mCurToken);
                     mService.scheduleNotifyImeUidToAudioService(mCurMethodUid);
                     mService.reRequestCurrentClientSessionLocked();
                     mService.performOnCreateInlineSuggestionsRequestLocked();

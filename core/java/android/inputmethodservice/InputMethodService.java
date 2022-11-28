@@ -70,11 +70,14 @@ import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -98,6 +101,7 @@ import android.text.method.MovementMethod;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
+import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 import android.view.BatchedInputEventReceiver.SimpleBatchedInputEventReceiver;
 import android.view.Choreographer;
@@ -157,6 +161,8 @@ import com.android.internal.inputmethod.InputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.util.RingBuffer;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -730,7 +736,6 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public final void initializeInternal(@NonNull IInputMethod.InitParams params) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.initializeInternal");
-            mConfigTracker.onInitialize(params.configChanges);
             mPrivOps.set(params.privilegedOperations);
             InputMethodPrivilegedOperationsRegistry.put(params.token, mPrivOps);
             mNavigationBarController.onNavButtonFlagsChanged(params.navigationBarFlags);
@@ -1601,6 +1606,8 @@ public class InputMethodService extends AbstractInputMethodService {
         mHideNavBarForKeyboard = getApplicationContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_hideNavBarForKeyboard);
 
+        initConfigurationTracker();
+
         // TODO(b/111364446) Need to address context lifecycle issue if need to re-create
         // for update resources & configuration correctly when show soft input
         // in non-default display.
@@ -1654,6 +1661,36 @@ public class InputMethodService extends AbstractInputMethodService {
                 this::onCreateInlineSuggestionsRequest, this::getHostInputToken,
                 this::onInlineSuggestionsResponse);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+    }
+
+    private void initConfigurationTracker() {
+        final int flags = PackageManager.GET_META_DATA
+                | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
+        final ComponentName imeComponent = new ComponentName(
+                getPackageName(), getClass().getName());
+        final String imeId = imeComponent.flattenToShortString();
+        final ServiceInfo si;
+        try {
+            si = getPackageManager().getServiceInfo(imeComponent,
+                    PackageManager.ComponentInfoFlags.of(flags));
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.wtf(TAG, "Unable to find input method " + imeId, e);
+            return;
+        }
+        try (XmlResourceParser parser = si.loadXmlMetaData(getPackageManager(),
+                InputMethod.SERVICE_META_DATA);
+             TypedArray sa = getResources().obtainAttributes(Xml.asAttributeSet(parser),
+                     com.android.internal.R.styleable.InputMethod)) {
+            if (parser == null) {
+                throw new XmlPullParserException(
+                        "No " + InputMethod.SERVICE_META_DATA + " meta-data");
+            }
+            final int handledConfigChanges = sa.getInt(
+                    com.android.internal.R.styleable.InputMethod_configChanges, 0);
+            mConfigTracker.onInitialize(handledConfigChanges);
+        } catch (Exception e) {
+            Log.wtf(TAG, "Unable to load input method " + imeId, e);
+        }
     }
 
     /**
