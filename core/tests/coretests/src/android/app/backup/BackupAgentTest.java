@@ -21,7 +21,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 import android.app.backup.BackupAgent.IncludeExcludeRules;
-import android.app.backup.BackupManager.OperationType;
+import android.app.backup.BackupAnnotations.BackupDestination;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.app.backup.FullBackup.BackupScheme.PathWithRequiredFlags;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
@@ -66,7 +67,7 @@ public class BackupAgentTest {
         excludePaths.add(path);
         IncludeExcludeRules expectedRules = new IncludeExcludeRules(includePaths, excludePaths);
 
-        mBackupAgent = getAgentForOperationType(OperationType.BACKUP);
+        mBackupAgent = getAgentForBackupDestination(BackupDestination.CLOUD);
         when(mBackupScheme.maybeParseAndGetCanonicalExcludePaths()).thenReturn(excludePaths);
         when(mBackupScheme.maybeParseAndGetCanonicalIncludePaths()).thenReturn(includePaths);
 
@@ -110,9 +111,9 @@ public class BackupAgentTest {
                 .isEqualTo(DATA_TYPE_BACKED_UP);
     }
 
-    private BackupAgent getAgentForOperationType(@OperationType int operationType) {
+    private BackupAgent getAgentForBackupDestination(@BackupDestination int backupDestination) {
         BackupAgent agent = new TestFullBackupAgent();
-        agent.onCreate(USER_HANDLE, operationType);
+        agent.onCreate(USER_HANDLE, backupDestination);
         return agent;
     }
 

@@ -200,22 +200,6 @@ public class BackupManager {
     @SystemApi
     public static final int ERROR_TRANSPORT_INVALID = -2;
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
-        OperationType.BACKUP,
-        OperationType.MIGRATION,
-        OperationType.ADB_BACKUP,
-    })
-    public @interface OperationType {
-        // A backup / restore to / from an off-device location, e.g. cloud.
-        int BACKUP = 0;
-        // A direct transfer to another device.
-        int MIGRATION = 1;
-        // Backup via adb, data saved on the host machine.
-        int ADB_BACKUP = 3;
-    }
-
     private Context mContext;
     @UnsupportedAppUsage
     private static IBackupManager sService;

@@ -304,7 +304,7 @@ interface IActivityManager {
     @UnsupportedAppUsage
     void resumeAppSwitches();
     boolean bindBackupAgent(in String packageName, int backupRestoreMode, int targetUserId,
-            int operationType);
+            int backupDestination);
     void backupAgentCreated(in String packageName, in IBinder agent, int userId);
     void unbindBackupAgent(in ApplicationInfo appInfo);
     int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,

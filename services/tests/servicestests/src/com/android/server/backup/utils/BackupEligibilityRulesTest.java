@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
-import android.app.backup.BackupManager.OperationType;
+import android.app.backup.BackupAnnotations.BackupDestination;
 import android.compat.testing.PlatformCompatChangeRule;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -78,7 +78,7 @@ public class BackupEligibilityRulesTest {
         MockitoAnnotations.initMocks(this);
 
         mUserId = UserHandle.USER_SYSTEM;
-        mBackupEligibilityRules = getBackupEligibilityRules(OperationType.BACKUP);
+        mBackupEligibilityRules = getBackupEligibilityRules(BackupDestination.CLOUD);
     }
 
     @Test
@@ -225,7 +225,7 @@ public class BackupEligibilityRulesTest {
                 /* flags */ 0, CUSTOM_BACKUP_AGENT_NAME);
 
         BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
-                OperationType.MIGRATION);
+                BackupDestination.DEVICE_TRANSFER);
         boolean isEligible = eligibilityRules.appIsEligibleForBackup(applicationInfo);
 
         assertThat(isEligible).isTrue();
@@ -237,7 +237,7 @@ public class BackupEligibilityRulesTest {
         ApplicationInfo applicationInfo = getApplicationInfo(Process.SYSTEM_UID,
                 ApplicationInfo.FLAG_SYSTEM, CUSTOM_BACKUP_AGENT_NAME);
         BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
-                OperationType.MIGRATION);
+                BackupDestination.DEVICE_TRANSFER);
         boolean isEligible = eligibilityRules.appIsEligibleForBackup(applicationInfo);
 
         assertThat(isEligible).isFalse();
@@ -250,7 +250,7 @@ public class BackupEligibilityRulesTest {
         ApplicationInfo applicationInfo = getApplicationInfo(Process.FIRST_APPLICATION_UID,
                 /* flags */ ApplicationInfo.PRIVATE_FLAG_PRIVILEGED, CUSTOM_BACKUP_AGENT_NAME);
         BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
-                OperationType.ADB_BACKUP);
+                BackupDestination.ADB_BACKUP);
         when(mPackageManager.getPropertyAsUser(eq(PackageManager.PROPERTY_ALLOW_ADB_BACKUP),
                 eq(TEST_PACKAGE_NAME), isNull(), eq(mUserId)))
                 .thenReturn(getAdbBackupProperty(/* allowAdbBackup */ false));
@@ -267,7 +267,7 @@ public class BackupEligibilityRulesTest {
         ApplicationInfo applicationInfo = getApplicationInfo(Process.FIRST_APPLICATION_UID,
                 /* flags */ ApplicationInfo.PRIVATE_FLAG_PRIVILEGED, CUSTOM_BACKUP_AGENT_NAME);
         BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
-                OperationType.ADB_BACKUP);
+                BackupDestination.ADB_BACKUP);
         when(mPackageManager.getPropertyAsUser(eq(PackageManager.PROPERTY_ALLOW_ADB_BACKUP),
                 eq(TEST_PACKAGE_NAME), isNull(), eq(mUserId)))
                 .thenReturn(getAdbBackupProperty(/* allowAdbBackup */ true));
@@ -284,7 +284,7 @@ public class BackupEligibilityRulesTest {
         ApplicationInfo applicationInfo = getApplicationInfo(Process.FIRST_APPLICATION_UID,
                 /* flags */ ApplicationInfo.FLAG_DEBUGGABLE, CUSTOM_BACKUP_AGENT_NAME);
         BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
-                OperationType.ADB_BACKUP);
+                BackupDestination.ADB_BACKUP);
 
         boolean isEligible = eligibilityRules.appIsEligibleForBackup(applicationInfo);
 
@@ -298,7 +298,7 @@ public class BackupEligibilityRulesTest {
         ApplicationInfo applicationInfo = getApplicationInfo(Process.FIRST_APPLICATION_UID,
                 ApplicationInfo.FLAG_ALLOW_BACKUP, CUSTOM_BACKUP_AGENT_NAME);
         BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
-                OperationType.ADB_BACKUP);
+                BackupDestination.ADB_BACKUP);
 
         boolean isEligible = eligibilityRules.appIsEligibleForBackup(applicationInfo);
 
@@ -312,7 +312,7 @@ public class BackupEligibilityRulesTest {
         ApplicationInfo applicationInfo = getApplicationInfo(Process.FIRST_APPLICATION_UID,
                 /* flags */ 0, CUSTOM_BACKUP_AGENT_NAME);
         BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
-                OperationType.ADB_BACKUP);
+                BackupDestination.ADB_BACKUP);
 
         boolean isEligible = eligibilityRules.appIsEligibleForBackup(applicationInfo);
 
@@ -787,9 +787,10 @@ public class BackupEligibilityRulesTest {
         assertThat(result).isFalse();
     }
 
-    private BackupEligibilityRules getBackupEligibilityRules(@OperationType int operationType) {
+    private BackupEligibilityRules getBackupEligibilityRules(
+            @BackupDestination int backupDestination) {
         return new BackupEligibilityRules(mPackageManager, mMockPackageManagerInternal, mUserId,
-                operationType);
+                backupDestination);
     }
 
     private static Signature generateSignature(byte i) {

@@ -18,9 +18,9 @@ package com.android.server.backup;
 
 import android.app.IWallpaperManager;
 import android.app.backup.BackupAgentHelper;
+import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupHelper;
-import android.app.backup.BackupManager;
 import android.app.backup.FullBackup;
 import android.app.backup.FullBackupDataOutput;
 import android.app.backup.WallpaperBackupHelper;
@@ -89,8 +89,8 @@ public class SystemBackupAgent extends BackupAgentHelper {
     private int mUserId = UserHandle.USER_SYSTEM;
 
     @Override
-    public void onCreate(UserHandle user, @BackupManager.OperationType int operationType) {
-        super.onCreate(user, operationType);
+    public void onCreate(UserHandle user, @BackupDestination int backupDestination) {
+        super.onCreate(user, backupDestination);
 
         mUserId = user.getIdentifier();
 

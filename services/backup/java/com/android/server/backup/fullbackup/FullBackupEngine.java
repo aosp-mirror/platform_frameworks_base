@@ -315,7 +315,7 @@ public class FullBackupEngine {
             mAgent =
                     backupManagerService.bindToAgentSynchronous(
                             mPkg.applicationInfo, ApplicationThreadConstants.BACKUP_MODE_FULL,
-                            mBackupEligibilityRules.getOperationType());
+                            mBackupEligibilityRules.getBackupDestination());
         }
         return mAgent != null;
     }

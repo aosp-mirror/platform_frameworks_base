@@ -47,6 +47,7 @@ import android.app.RemoteServiceException.MissingRequestPasswordComplexityPermis
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
+import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -799,7 +800,7 @@ public final class ActivityThread extends ClientTransactionHandler
         ApplicationInfo appInfo;
         int backupMode;
         int userId;
-        int operationType;
+        @BackupDestination int backupDestination;
         public String toString() {
             return "CreateBackupAgentData{appInfo=" + appInfo
                     + " backupAgent=" + appInfo.backupAgentName
@@ -1034,12 +1035,12 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         public final void scheduleCreateBackupAgent(ApplicationInfo app,
-                int backupMode, int userId, int operationType) {
+                int backupMode, int userId, @BackupDestination int backupDestination) {
             CreateBackupAgentData d = new CreateBackupAgentData();
             d.appInfo = app;
             d.backupMode = backupMode;
             d.userId = userId;
-            d.operationType = operationType;
+            d.backupDestination = backupDestination;
 
             sendMessage(H.CREATE_BACKUP_AGENT, d);
         }
@@ -4402,7 +4403,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     context.setOuterContext(agent);
                     agent.attach(context);
 
-                    agent.onCreate(UserHandle.of(data.userId), data.operationType);
+                    agent.onCreate(UserHandle.of(data.userId), data.backupDestination);
                     binder = agent.onBind();
                     backupAgents.put(packageName, agent);
                 } catch (Exception e) {
