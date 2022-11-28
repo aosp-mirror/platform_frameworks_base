@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.rotation
 
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.WindowManager
@@ -203,6 +204,31 @@ open class SeamlessAppRotationTest(testSpec: FlickerTestParameter) : RotationTra
     @FlakyTest
     @Test
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
+
+    @Test
+    @IwTest(focusArea = "ime")
+    override fun cujCompleted() {
+        if (!testSpec.isTablet) {
+            // not yet tablet compatible
+            appLayerRotates()
+            appLayerAlwaysVisible()
+        }
+
+        appWindowFullScreen()
+        appWindowSeamlessRotation()
+        focusDoesNotChange()
+        statusBarLayerIsAlwaysInvisible()
+        statusBarWindowIsAlwaysInvisible()
+        appLayerRotates_StartingPos()
+        appLayerRotates_EndingPos()
+        entireScreenCovered()
+        navBarLayerIsVisibleAtStartAndEnd()
+        navBarWindowIsAlwaysVisible()
+        taskBarLayerIsVisibleAtStartAndEnd()
+        taskBarWindowIsAlwaysVisible()
+        visibleLayersShownMoreThanOneConsecutiveEntry()
+        visibleWindowsShownMoreThanOneConsecutiveEntry()
+    }
 
     companion object {
         private val FlickerTestParameter.starveUiThread

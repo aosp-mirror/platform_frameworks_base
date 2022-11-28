@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
@@ -77,6 +78,14 @@ class OpenImeWindowAndCloseTest(testSpec: FlickerTestParameter) : BaseTest(testS
     fun visibleLayersShownMoreThanOneConsecutiveEntry_shellTransit() {
         Assume.assumeTrue(isShellTransitionsEnabled)
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
+    }
+
+    @Test
+    @IwTest(focusArea = "ime")
+    override fun cujCompleted() {
+        super.cujCompleted()
+        imeLayerBecomesInvisible()
+        imeWindowBecomesInvisible()
     }
 
     companion object {

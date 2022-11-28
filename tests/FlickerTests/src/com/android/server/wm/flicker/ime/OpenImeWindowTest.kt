@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.ime
 
+import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
@@ -48,6 +49,15 @@ class OpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
             testApp.closeIME(wmHelper)
             testApp.exit(wmHelper)
         }
+    }
+
+    @Test
+    @IwTest(focusArea = "ime")
+    override fun cujCompleted() {
+        super.cujCompleted()
+        imeWindowBecomesVisible()
+        appWindowAlwaysVisibleOnTop()
+        layerAlwaysVisible()
     }
 
     @Presubmit @Test fun imeWindowBecomesVisible() = testSpec.imeWindowBecomesVisible()
