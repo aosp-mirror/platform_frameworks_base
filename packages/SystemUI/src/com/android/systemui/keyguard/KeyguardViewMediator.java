@@ -1233,7 +1233,9 @@ public class KeyguardViewMediator extends SystemUI {
     public void doKeyguardTimeout(Bundle options) {
         mHandler.removeMessages(KEYGUARD_TIMEOUT);
         Message msg = mHandler.obtainMessage(KEYGUARD_TIMEOUT, options);
-        mHandler.sendMessage(msg);
+        // Treat these messages with priority - A call to timeout means the device should lock
+        // as soon as possible and not wait for other messages on the thread to process first.
+        mHandler.sendMessageAtFrontOfQueue(msg);
     }
 
     /**
@@ -1420,12 +1422,15 @@ public class KeyguardViewMediator extends SystemUI {
      * @see #handleShow
      */
     private void showLocked(Bundle options) {
-        Trace.beginSection("KeyguardViewMediator#showLocked aqcuiring mShowKeyguardWakeLock");
+        Trace.beginSection("KeyguardViewMediator#showLocked acquiring mShowKeyguardWakeLock");
         if (DEBUG) Log.d(TAG, "showLocked");
         // ensure we stay awake until we are finished displaying the keyguard
         mShowKeyguardWakeLock.acquire();
         Message msg = mHandler.obtainMessage(SHOW, options);
-        mHandler.sendMessage(msg);
+        // Treat these messages with priority - This call can originate from #doKeyguardTimeout,
+        // meaning the device should lock as soon as possible and not wait for other messages on
+        // the thread to process first.
+        mHandler.sendMessageAtFrontOfQueue(msg);
         Trace.endSection();
     }
 
@@ -1584,6 +1589,7 @@ public class KeyguardViewMediator extends SystemUI {
                 case KEYGUARD_TIMEOUT:
                     synchronized (KeyguardViewMediator.this) {
                         doKeyguardLocked((Bundle) msg.obj);
+                        notifyDefaultDisplayCallbacks(mShowing);
                     }
                     break;
                 case DISMISS:
@@ -2154,7 +2160,7 @@ public class KeyguardViewMediator extends SystemUI {
         for (int i = size - 1; i >= 0; i--) {
             IKeyguardStateCallback callback = mKeyguardStateCallbacks.get(i);
             try {
-                callback.onShowingStateChanged(showing);
+                callback.onShowingStateChanged(showing, KeyguardUpdateMonitor.getCurrentUser());
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to call onShowingStateChanged", e);
                 if (e instanceof DeadObjectException) {
@@ -2202,7 +2208,7 @@ public class KeyguardViewMediator extends SystemUI {
             mKeyguardStateCallbacks.add(callback);
             try {
                 callback.onSimSecureStateChanged(mUpdateMonitor.isSimPinSecure());
-                callback.onShowingStateChanged(mShowing);
+                callback.onShowingStateChanged(mShowing, KeyguardUpdateMonitor.getCurrentUser());
                 callback.onInputRestrictedStateChanged(mInputRestricted);
                 callback.onTrustedChanged(mUpdateMonitor.getUserHasTrust(
                         KeyguardUpdateMonitor.getCurrentUser()));
