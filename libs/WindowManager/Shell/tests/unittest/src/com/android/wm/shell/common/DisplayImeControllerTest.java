@@ -21,7 +21,9 @@ import static android.view.InsetsState.ITYPE_IME;
 import static android.view.Surface.ROTATION_0;
 import static android.view.WindowInsets.Type.ime;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -87,6 +89,22 @@ public class DisplayImeControllerTest extends ShellTestCase {
     public void insetsControlChanged_schedulesNoWorkOnExecutor() {
         mPerDisplay.insetsControlChanged(insetsStateWithIme(false), insetsSourceControl());
         verifyZeroInteractions(mExecutor);
+    }
+
+    @Test
+    public void insetsControlChanged_updateExpectedImeSourceControl() {
+        final InsetsSourceControl[] insetsSourceControls = new InsetsSourceControl[]{
+                new InsetsSourceControl(ITYPE_IME, mock(SurfaceControl.class), false,
+                        new Point(0, 0), Insets.NONE)};
+        final InsetsSourceControl imeSourceControl = insetsSourceControls[0];
+
+        mPerDisplay.insetsControlChanged(insetsStateWithIme(false), insetsSourceControls);
+
+        assertEquals(imeSourceControl, mPerDisplay.mImeSourceControl);
+
+        mPerDisplay.insetsControlChanged(insetsStateWithIme(false), null);
+
+        assertNull(mPerDisplay.mImeSourceControl);
     }
 
     @Test
