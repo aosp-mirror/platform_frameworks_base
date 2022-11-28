@@ -1632,6 +1632,34 @@ public final class GameManagerService extends IGameManagerService.Stub {
     public void setGameModeConfigOverride(String packageName, @UserIdInt int userId,
             @GameMode int gameMode, String fpsStr, String scaling) throws SecurityException {
         checkPermission(Manifest.permission.MANAGE_GAME_MODE);
+        int gameUid = -1;
+        try {
+            gameUid = mPackageManager.getPackageUidAsUser(packageName, userId);
+        } catch (NameNotFoundException ex) {
+            Slog.d(TAG, "Cannot find the UID for package " + packageName + " under user " + userId);
+        }
+        GamePackageConfiguration pkgConfig = getConfig(packageName, userId);
+        if (pkgConfig != null && pkgConfig.getGameModeConfiguration(gameMode) != null) {
+            final GamePackageConfiguration.GameModeConfiguration currentModeConfig =
+                    pkgConfig.getGameModeConfiguration(gameMode);
+            FrameworkStatsLog.write(FrameworkStatsLog.GAME_MODE_CONFIGURATION_CHANGED, gameUid,
+                    Binder.getCallingUid(), gameModeToStatsdGameMode(gameMode),
+                    currentModeConfig.getScaling() /* fromScaling */,
+                    scaling == null ? currentModeConfig.getScaling()
+                            : Float.parseFloat(scaling) /* toScaling */,
+                    currentModeConfig.getFps() /* fromFps */,
+                    fpsStr == null ? currentModeConfig.getFps()
+                            : Integer.parseInt(fpsStr)) /* toFps */;
+        } else {
+            FrameworkStatsLog.write(FrameworkStatsLog.GAME_MODE_CONFIGURATION_CHANGED, gameUid,
+                    Binder.getCallingUid(), gameModeToStatsdGameMode(gameMode),
+                    GamePackageConfiguration.GameModeConfiguration.DEFAULT_SCALING /* fromScaling*/,
+                    scaling == null ? GamePackageConfiguration.GameModeConfiguration.DEFAULT_SCALING
+                            : Float.parseFloat(scaling) /* toScaling */,
+                    0 /* fromFps */,
+                    fpsStr == null ? 0 : Integer.parseInt(fpsStr) /* toFps */);
+        }
+
         // Adding game mode config override of the given package name
         GamePackageConfiguration configOverride;
         synchronized (mLock) {
