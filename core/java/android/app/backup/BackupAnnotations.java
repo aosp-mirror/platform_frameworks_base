@@ -30,10 +30,12 @@ public class BackupAnnotations {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
+            OperationType.UNKNOWN,
             OperationType.BACKUP,
             OperationType.RESTORE,
     })
     public @interface OperationType {
+        int UNKNOWN = -1;
         int BACKUP = 0;
         int RESTORE = 1;
     }

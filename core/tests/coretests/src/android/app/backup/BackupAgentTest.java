@@ -85,24 +85,26 @@ public class BackupAgentTest {
     @Test
     public void getBackupRestoreEventLogger_afterOnCreateForBackup_initializedForBackup() {
         BackupAgent agent = new TestFullBackupAgent();
-        agent.onCreate(USER_HANDLE, OperationType.BACKUP); // TODO: pass in new operation type
+        agent.onCreate(USER_HANDLE, BackupDestination.CLOUD, OperationType.BACKUP);
 
-        assertThat(agent.getBackupRestoreEventLogger().getOperationType()).isEqualTo(1);
+        assertThat(agent.getBackupRestoreEventLogger().getOperationType()).isEqualTo(
+                OperationType.BACKUP);
     }
 
     @Test
     public void getBackupRestoreEventLogger_afterOnCreateForRestore_initializedForRestore() {
         BackupAgent agent = new TestFullBackupAgent();
-        agent.onCreate(USER_HANDLE, OperationType.BACKUP); // TODO: pass in new operation type
+        agent.onCreate(USER_HANDLE, BackupDestination.CLOUD, OperationType.RESTORE);
 
-        assertThat(agent.getBackupRestoreEventLogger().getOperationType()).isEqualTo(1);
+        assertThat(agent.getBackupRestoreEventLogger().getOperationType()).isEqualTo(
+                OperationType.RESTORE);
     }
 
     @Test
     public void getBackupRestoreEventLogger_afterBackup_containsLogsLoggedByAgent()
             throws Exception {
         BackupAgent agent = new TestFullBackupAgent();
-        agent.onCreate(USER_HANDLE, OperationType.BACKUP); // TODO: pass in new operation type
+        agent.onCreate(USER_HANDLE, BackupDestination.CLOUD, OperationType.BACKUP);
 
         // TestFullBackupAgent logs DATA_TYPE_BACKED_UP when onFullBackup is called.
         agent.onFullBackup(new FullBackupDataOutput(/* quota = */ 0));
