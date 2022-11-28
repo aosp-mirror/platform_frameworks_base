@@ -80,7 +80,7 @@ final class PolicyState<V> {
 
     private boolean resolvePolicy() {
         V resolvedPolicy = mPolicyDefinition.resolvePolicy(mAdminsPolicy);
-        boolean policyChanged = Objects.equals(resolvedPolicy, mCurrentResolvedPolicy);
+        boolean policyChanged = !Objects.equals(resolvedPolicy, mCurrentResolvedPolicy);
         mCurrentResolvedPolicy = resolvedPolicy;
 
         return policyChanged;
