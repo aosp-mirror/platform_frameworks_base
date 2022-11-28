@@ -439,14 +439,25 @@ public class MockingOomAdjusterTests {
     @SuppressWarnings("GuardedBy")
     @Test
     public void testUpdateOomAdj_DoOne_FgService_ShortFgs() {
+        sService.mConstants.TOP_TO_FGS_GRACE_DURATION = 100_000;
+        sService.mConstants.mShortFgsProcStateExtraWaitDuration = 200_000;
+
+        ServiceRecord s = ServiceRecord.newEmptyInstanceForTest(sService);
+        s.startRequested = true;
+        s.isForeground = true;
+        s.foregroundServiceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
+        s.setShortFgsInfo(SystemClock.uptimeMillis());
+
         // SHORT_SERVICE FGS will get IMP_FG and a slightly different recent-adjustment.
         {
             ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                     MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
+            app.mServices.startService(s);
             app.mServices.setHasForegroundServices(true,
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, /* hasNoneType=*/false);
             app.mState.setLastTopTime(SystemClock.uptimeMillis());
             sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+
             sService.mOomAdjuster.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_NONE);
 
             assertProcStates(app, PROCESS_STATE_IMPORTANT_FOREGROUND,
@@ -461,15 +472,44 @@ public class MockingOomAdjusterTests {
                     MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
             app.mServices.setHasForegroundServices(true,
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, /* hasNoneType=*/false);
+            app.mServices.startService(s);
             app.mState.setLastTopTime(SystemClock.uptimeMillis()
                     - sService.mConstants.TOP_TO_FGS_GRACE_DURATION);
             sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+
             sService.mOomAdjuster.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_NONE);
 
             assertProcStates(app, PROCESS_STATE_IMPORTANT_FOREGROUND,
                     PERCEPTIBLE_MEDIUM_APP_ADJ + 1, SCHED_GROUP_DEFAULT);
             // Still should get network access.
             assertTrue((app.mState.getSetCapability() & PROCESS_CAPABILITY_NETWORK) != 0);
+        }
+
+        // SHORT_SERVICE, timed out already.
+        s = ServiceRecord.newEmptyInstanceForTest(sService);
+        s.startRequested = true;
+        s.isForeground = true;
+        s.foregroundServiceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
+        s.setShortFgsInfo(SystemClock.uptimeMillis()
+                - sService.mConstants.mShortFgsTimeoutDuration
+                - sService.mConstants.mShortFgsProcStateExtraWaitDuration);
+        {
+            ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                    MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
+            app.mServices.setHasForegroundServices(true,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, /* hasNoneType=*/false);
+            app.mServices.startService(s);
+            app.mState.setLastTopTime(SystemClock.uptimeMillis()
+                    - sService.mConstants.TOP_TO_FGS_GRACE_DURATION);
+            sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+
+            sService.mOomAdjuster.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_NONE);
+
+            // Procstate should be lower than FGS. (It should be SERVICE)
+            assertEquals(app.mState.getSetProcState(), PROCESS_STATE_SERVICE);
+
+            // Shouldn't have the network capability now.
+            assertTrue((app.mState.getSetCapability() & PROCESS_CAPABILITY_NETWORK) == 0);
         }
     }
 
