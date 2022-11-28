@@ -15,12 +15,14 @@
  */
 package com.android.server.pm;
 
+import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE;
+import static com.android.server.pm.UserVisibilityChangedEvent.onInvisible;
 import static com.android.server.pm.UserVisibilityChangedEvent.onVisible;
 import static com.android.server.pm.UserVisibilityMediator.INITIAL_CURRENT_USER_ID;
 
@@ -37,6 +39,88 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
 
     public UserVisibilityMediatorMUMDTest() throws Exception {
         super(/* usersOnSecondaryDisplaysEnabled= */ true);
+    }
+
+    @Test
+    public void testStartFgUser_onDefaultDisplay() throws Exception {
+        AsyncUserVisibilityListener listener = addListenerForEvents(
+                onInvisible(INITIAL_CURRENT_USER_ID),
+                onVisible(USER_ID));
+
+        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, FG,
+                DEFAULT_DISPLAY);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
+
+        expectUserIsVisible(USER_ID);
+        expectUserIsVisibleOnDisplay(USER_ID, DEFAULT_DISPLAY);
+        expectUserIsNotVisibleOnDisplay(USER_ID, INVALID_DISPLAY);
+        expectUserIsNotVisibleOnDisplay(USER_ID, SECONDARY_DISPLAY_ID);
+        expectVisibleUsers(USER_ID);
+
+        expectDisplayAssignedToUser(USER_ID, DEFAULT_DISPLAY);
+        expectUserAssignedToDisplay(DEFAULT_DISPLAY, USER_ID);
+        expectUserAssignedToDisplay(INVALID_DISPLAY, USER_ID);
+        expectUserAssignedToDisplay(SECONDARY_DISPLAY_ID, USER_ID);
+
+        expectDisplayAssignedToUser(USER_NULL, INVALID_DISPLAY);
+
+        listener.verify();
+    }
+
+    @Test
+    public void testSwitchFgUser_onDefaultDisplay() throws Exception {
+        int previousCurrentUserId = OTHER_USER_ID;
+        int currentUserId = USER_ID;
+        AsyncUserVisibilityListener listener = addListenerForEvents(
+                onInvisible(INITIAL_CURRENT_USER_ID),
+                onVisible(previousCurrentUserId),
+                onInvisible(previousCurrentUserId),
+                onVisible(currentUserId));
+        startForegroundUser(previousCurrentUserId);
+
+        int result = mMediator.assignUserToDisplayOnStart(currentUserId, currentUserId, FG,
+                DEFAULT_DISPLAY);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
+
+        expectUserIsVisible(currentUserId);
+        expectUserIsVisibleOnDisplay(currentUserId, DEFAULT_DISPLAY);
+        expectUserIsNotVisibleOnDisplay(currentUserId, INVALID_DISPLAY);
+        expectUserIsNotVisibleOnDisplay(currentUserId, SECONDARY_DISPLAY_ID);
+        expectVisibleUsers(currentUserId);
+
+        expectDisplayAssignedToUser(currentUserId, DEFAULT_DISPLAY);
+        expectUserAssignedToDisplay(DEFAULT_DISPLAY, currentUserId);
+        expectUserAssignedToDisplay(INVALID_DISPLAY, currentUserId);
+        expectUserAssignedToDisplay(SECONDARY_DISPLAY_ID, currentUserId);
+
+        expectUserIsNotVisibleAtAll(previousCurrentUserId);
+        expectNoDisplayAssignedToUser(previousCurrentUserId);
+
+        listener.verify();
+    }
+
+    @Test
+    public void testStartBgProfile_onDefaultDisplay_whenParentIsCurrentUser() throws Exception {
+        AsyncUserVisibilityListener listener = addListenerForEvents(
+                onInvisible(INITIAL_CURRENT_USER_ID),
+                onVisible(PARENT_USER_ID),
+                onVisible(PROFILE_USER_ID));
+        startForegroundUser(PARENT_USER_ID);
+
+        int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID, BG,
+                DEFAULT_DISPLAY);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
+
+        expectUserIsVisible(PROFILE_USER_ID);
+        expectUserIsNotVisibleOnDisplay(PROFILE_USER_ID, INVALID_DISPLAY);
+        expectUserIsNotVisibleOnDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+        expectUserIsVisibleOnDisplay(PROFILE_USER_ID, DEFAULT_DISPLAY);
+        expectVisibleUsers(PARENT_USER_ID, PROFILE_USER_ID);
+
+        expectDisplayAssignedToUser(PROFILE_USER_ID, DEFAULT_DISPLAY);
+        expectUserAssignedToDisplay(DEFAULT_DISPLAY, PARENT_USER_ID);
+
+        listener.verify();
     }
 
     @Test
@@ -89,15 +173,15 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
         startDefaultProfile();
 
         // Make sure they were visible before
-        expectUserIsVisibleOnDisplay(PARENT_USER_ID, SECONDARY_DISPLAY_ID);
-        expectUserIsVisibleOnDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+        expectUserIsNotVisibleOnDisplay("before", PARENT_USER_ID, SECONDARY_DISPLAY_ID);
+        expectUserIsNotVisibleOnDisplay("before", PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
 
         int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG,
                 SECONDARY_DISPLAY_ID);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
 
-        expectUserIsNotVisibleOnDisplay(PARENT_USER_ID, SECONDARY_DISPLAY_ID);
-        expectUserIsNotVisibleOnDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+        expectUserIsNotVisibleOnDisplay("after", PARENT_USER_ID, SECONDARY_DISPLAY_ID);
+        expectUserIsNotVisibleOnDisplay("after", PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
     }
 
     @Test
