@@ -1167,12 +1167,10 @@ public final class DeviceConfig {
      * @see #removeOnPropertiesChangedListener(OnPropertiesChangedListener)
      */
     @SystemApi
-    @RequiresPermission(READ_DEVICE_CONFIG)
     public static void addOnPropertiesChangedListener(
             @NonNull String namespace,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnPropertiesChangedListener onPropertiesChangedListener) {
-        Settings.Config.enforceReadPermission(namespace);
         synchronized (sLock) {
             Pair<String, Executor> oldNamespace = sListeners.get(onPropertiesChangedListener);
             if (oldNamespace == null) {
