@@ -21,6 +21,7 @@ import android.bluetooth.BluetoothA2dpSink;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHapClient;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHeadsetClient;
 import android.bluetooth.BluetoothHearingAid;
@@ -103,6 +104,7 @@ public class LocalBluetoothProfileManager {
     private PbapClientProfile mPbapClientProfile;
     private PbapServerProfile mPbapProfile;
     private HearingAidProfile mHearingAidProfile;
+    private HapClientProfile mHapClientProfile;
     private CsipSetCoordinatorProfile mCsipSetCoordinatorProfile;
     private LeAudioProfile mLeAudioProfile;
     private LocalBluetoothLeBroadcast mLeAudioBroadcast;
@@ -188,6 +190,12 @@ public class LocalBluetoothProfileManager {
                     this);
             addProfile(mHearingAidProfile, HearingAidProfile.NAME,
                     BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED);
+        }
+        if (mHapClientProfile == null && supportedList.contains(BluetoothProfile.HAP_CLIENT)) {
+            if (DEBUG) Log.d(TAG, "Adding local HAP_CLIENT profile");
+            mHapClientProfile = new HapClientProfile(mContext, mDeviceManager, this);
+            addProfile(mHapClientProfile, HapClientProfile.NAME,
+                    BluetoothHapClient.ACTION_HAP_CONNECTION_STATE_CHANGED);
         }
         if (mHidProfile == null && supportedList.contains(BluetoothProfile.HID_HOST)) {
             if (DEBUG) Log.d(TAG, "Adding local HID_HOST profile");
@@ -524,6 +532,10 @@ public class LocalBluetoothProfileManager {
         return mHearingAidProfile;
     }
 
+    public HapClientProfile getHapClientProfile() {
+        return mHapClientProfile;
+    }
+
     public LeAudioProfile getLeAudioProfile() {
         return mLeAudioProfile;
     }
@@ -673,6 +685,11 @@ public class LocalBluetoothProfileManager {
         if (ArrayUtils.contains(uuids, BluetoothUuid.HEARING_AID) && mHearingAidProfile != null) {
             profiles.add(mHearingAidProfile);
             removedProfiles.remove(mHearingAidProfile);
+        }
+
+        if (mHapClientProfile != null && ArrayUtils.contains(uuids, BluetoothUuid.HAS)) {
+            profiles.add(mHapClientProfile);
+            removedProfiles.remove(mHapClientProfile);
         }
 
         if (mSapProfile != null && ArrayUtils.contains(uuids, BluetoothUuid.SAP)) {
