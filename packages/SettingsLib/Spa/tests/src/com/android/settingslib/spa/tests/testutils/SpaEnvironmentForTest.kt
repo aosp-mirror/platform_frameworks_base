@@ -35,6 +35,7 @@ import com.android.settingslib.spa.framework.common.SettingsPageProviderReposito
 import com.android.settingslib.spa.framework.common.SpaEnvironment
 import com.android.settingslib.spa.framework.common.SpaLogger
 import com.android.settingslib.spa.framework.common.createSettingsPage
+import com.android.settingslib.spa.widget.preference.SimplePreferenceMacro
 
 class SpaLoggerForTest : SpaLogger {
     data class MsgCountKey(val msg: String, val category: LogCategory)
@@ -98,6 +99,12 @@ object SppLayer1 : SettingsPageProvider {
 
     fun buildInject(): SettingsEntryBuilder {
         return SettingsEntryBuilder.createInject(this.createSettingsPage())
+            .setMacro {
+                SimplePreferenceMacro(
+                    title = "SppHome to Layer1",
+                    clickRoute = name
+                )
+            }
     }
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
