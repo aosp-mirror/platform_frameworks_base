@@ -20,6 +20,7 @@ package com.android.systemui.keyguard
 import android.content.ContentValues
 import android.content.pm.PackageManager
 import android.content.pm.ProviderInfo
+import android.os.UserHandle
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SystemUIAppComponentFactoryBase
@@ -27,8 +28,10 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceProviderClientFactory
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceSelectionManager
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLocalUserSelectionManager
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -74,8 +77,8 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
 
         underTest = KeyguardQuickAffordanceProvider()
         val scope = CoroutineScope(IMMEDIATE)
-        val selectionManager =
-            KeyguardQuickAffordanceSelectionManager(
+        val localUserSelectionManager =
+            KeyguardQuickAffordanceLocalUserSelectionManager(
                 context = context,
                 userFileManager =
                     mock<UserFileManager>().apply {
@@ -91,11 +94,20 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                 userTracker = userTracker,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
+        val remoteUserSelectionManager =
+            KeyguardQuickAffordanceRemoteUserSelectionManager(
+                scope = scope,
+                userTracker = userTracker,
+                clientFactory = FakeKeyguardQuickAffordanceProviderClientFactory(userTracker),
+                userHandle = UserHandle.SYSTEM,
+            )
         val quickAffordanceRepository =
             KeyguardQuickAffordanceRepository(
                 appContext = context,
                 scope = scope,
-                selectionManager = selectionManager,
+                localUserSelectionManager = localUserSelectionManager,
+                remoteUserSelectionManager = remoteUserSelectionManager,
+                userTracker = userTracker,
                 configs =
                     setOf(
                         FakeKeyguardQuickAffordanceConfig(
@@ -114,9 +126,10 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                         scope = scope,
                         backgroundDispatcher = IMMEDIATE,
                         secureSettings = FakeSettings(),
-                        selectionsManager = selectionManager,
+                        selectionsManager = localUserSelectionManager,
                     ),
                 dumpManager = mock(),
+                userHandle = UserHandle.SYSTEM,
             )
         underTest.interactor =
             KeyguardQuickAffordanceInteractor(
