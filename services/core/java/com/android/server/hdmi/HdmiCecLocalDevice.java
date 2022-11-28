@@ -1359,7 +1359,8 @@ abstract class HdmiCecLocalDevice {
         List<SendKeyAction> action = getActions(SendKeyAction.class);
         int logicalAddress = findAudioReceiverAddress();
         if (logicalAddress == Constants.ADDR_INVALID
-                || logicalAddress == mDeviceInfo.getLogicalAddress()) {
+                || mService.getAllCecLocalDevices().stream().anyMatch(
+                        device -> device.getDeviceInfo().getLogicalAddress() == logicalAddress)) {
             // Don't send key event to invalid device or itself.
             Slog.w(
                     TAG,

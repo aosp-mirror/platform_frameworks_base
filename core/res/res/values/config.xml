@@ -5354,6 +5354,12 @@
     <bool name="config_cecRoutingControlDisabled_allowed">true</bool>
     <bool name="config_cecRoutingControlDisabled_default">true</bool>
 
+    <bool name="config_cecSoundbarMode_userConfigurable">true</bool>
+    <bool name="config_cecSoundbarModeEnabled_allowed">true</bool>
+    <bool name="config_cecSoundbarModeEnabled_default">false</bool>
+    <bool name="config_cecSoundbarModeDisabled_allowed">true</bool>
+    <bool name="config_cecSoundbarModeDisabled_default">true</bool>
+
     <bool name="config_cecPowerControlMode_userConfigurable">true</bool>
     <bool name="config_cecPowerControlModeTv_allowed">true</bool>
     <bool name="config_cecPowerControlModeTv_default">false</bool>

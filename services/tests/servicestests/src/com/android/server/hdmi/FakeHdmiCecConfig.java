@@ -80,6 +80,17 @@ final class FakeHdmiCecConfig extends HdmiCecConfig {
                 R.bool.config_cecRoutingControlDisabled_default);
 
         doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSoundbarMode_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSoundbarModeEnabled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecSoundbarModeEnabled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSoundbarModeDisabled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSoundbarModeDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(
                 R.bool.config_cecPowerControlMode_userConfigurable);
         doReturn(true).when(resources).getBoolean(
                 R.bool.config_cecPowerControlModeTv_allowed);

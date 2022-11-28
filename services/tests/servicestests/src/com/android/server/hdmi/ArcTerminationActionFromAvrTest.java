@@ -143,8 +143,12 @@ public class ArcTerminationActionFromAvrTest {
                 Constants.ADDR_AUDIO_SYSTEM, Constants.ADDR_TV);
 
         assertThat(mNativeWrapper.getResultMessages()).contains(terminateArc);
+        mTestLooper.dispatchAll();
 
-        assertThat(mHdmiCecLocalDeviceAudioSystem.isArcEnabled()).isTrue();
+        mTestLooper.moveTimeForward(ArcTerminationActionFromAvr.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiCecLocalDeviceAudioSystem.isArcEnabled()).isFalse();
     }
 
     @Test
