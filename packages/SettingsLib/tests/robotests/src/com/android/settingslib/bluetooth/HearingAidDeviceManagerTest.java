@@ -17,6 +17,7 @@ package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -106,7 +107,7 @@ public class HearingAidDeviceManagerTest {
      * deviceSide, deviceMode.
      */
     @Test
-    public void initHearingAidDeviceIfNeeded_validHiSyncId_setHearingAidInfos() {
+    public void initHearingAidDeviceIfNeeded_validHiSyncId_setHearingAidInfo() {
         when(mHearingAidProfile.getHiSyncId(mDevice1)).thenReturn(HISYNCID1);
         when(mHearingAidProfile.getDeviceMode(mDevice1)).thenReturn(
                 HearingAidProfile.DeviceMode.MODE_BINAURAL);
@@ -118,21 +119,22 @@ public class HearingAidDeviceManagerTest {
 
         assertThat(mCachedDevice1.getHiSyncId()).isEqualTo(HISYNCID1);
         assertThat(mCachedDevice1.getDeviceMode()).isEqualTo(
-                HearingAidProfile.DeviceMode.MODE_BINAURAL);
+                HearingAidInfo.DeviceMode.MODE_BINAURAL);
         assertThat(mCachedDevice1.getDeviceSide()).isEqualTo(
-                HearingAidProfile.DeviceSide.SIDE_RIGHT);
+                HearingAidInfo.DeviceSide.SIDE_RIGHT);
     }
 
     /**
      * Test initHearingAidDeviceIfNeeded, an invalid HiSyncId will not be assigned
      */
     @Test
-    public void initHearingAidDeviceIfNeeded_invalidHiSyncId_notToSetHiSyncId() {
+    public void initHearingAidDeviceIfNeeded_invalidHiSyncId_notToSetHearingAidInfo() {
         when(mHearingAidProfile.getHiSyncId(mDevice1)).thenReturn(
                 BluetoothHearingAid.HI_SYNC_ID_INVALID);
+
         mHearingAidDeviceManager.initHearingAidDeviceIfNeeded(mCachedDevice1);
 
-        verify(mCachedDevice1, never()).setHiSyncId(anyLong());
+        verify(mCachedDevice1, never()).setHearingAidInfo(any(HearingAidInfo.class));
     }
 
     /**
@@ -140,9 +142,10 @@ public class HearingAidDeviceManagerTest {
      */
     @Test
     public void setSubDeviceIfNeeded_sameHiSyncId_setSubDevice() {
-        mCachedDevice1.setHiSyncId(HISYNCID1);
-        mCachedDevice2.setHiSyncId(HISYNCID1);
+        mCachedDevice1.setHearingAidInfo(getLeftAshaHearingAidInfo(HISYNCID1));
+        mCachedDevice2.setHearingAidInfo(getRightAshaHearingAidInfo(HISYNCID1));
         mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
+
         mHearingAidDeviceManager.setSubDeviceIfNeeded(mCachedDevice2);
 
         assertThat(mCachedDevice1.getSubDevice()).isEqualTo(mCachedDevice2);
@@ -153,9 +156,10 @@ public class HearingAidDeviceManagerTest {
      */
     @Test
     public void setSubDeviceIfNeeded_differentHiSyncId_notSetSubDevice() {
-        mCachedDevice1.setHiSyncId(HISYNCID1);
-        mCachedDevice2.setHiSyncId(HISYNCID2);
+        mCachedDevice1.setHearingAidInfo(getLeftAshaHearingAidInfo(HISYNCID1));
+        mCachedDevice2.setHearingAidInfo(getRightAshaHearingAidInfo(HISYNCID2));
         mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
+
         mHearingAidDeviceManager.setSubDeviceIfNeeded(mCachedDevice2);
 
         assertThat(mCachedDevice1.getSubDevice()).isNull();
@@ -276,9 +280,9 @@ public class HearingAidDeviceManagerTest {
 
         assertThat(mCachedDevice1.getHiSyncId()).isEqualTo(HISYNCID1);
         assertThat(mCachedDevice1.getDeviceMode()).isEqualTo(
-                HearingAidProfile.DeviceMode.MODE_BINAURAL);
+                HearingAidInfo.DeviceMode.MODE_BINAURAL);
         assertThat(mCachedDevice1.getDeviceSide()).isEqualTo(
-                HearingAidProfile.DeviceSide.SIDE_RIGHT);
+                HearingAidInfo.DeviceSide.SIDE_RIGHT);
         verify(mHearingAidDeviceManager).onHiSyncIdChanged(HISYNCID1);
     }
 
@@ -389,11 +393,9 @@ public class HearingAidDeviceManagerTest {
     @Test
     public void onProfileConnectionStateChanged_disconnected_mainDevice_subDeviceConnected_switch()
     {
-        when(mCachedDevice1.getHiSyncId()).thenReturn(HISYNCID1);
-        mCachedDevice1.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_LEFT);
-        when(mCachedDevice2.getHiSyncId()).thenReturn(HISYNCID1);
+        mCachedDevice1.setHearingAidInfo(getLeftAshaHearingAidInfo(HISYNCID1));
+        mCachedDevice2.setHearingAidInfo(getRightAshaHearingAidInfo(HISYNCID1));
         when(mCachedDevice2.isConnected()).thenReturn(true);
-        mCachedDevice2.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_RIGHT);
         mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
         mCachedDevice1.setSubDevice(mCachedDevice2);
 
@@ -404,10 +406,8 @@ public class HearingAidDeviceManagerTest {
 
         assertThat(mCachedDevice1.mDevice).isEqualTo(mDevice2);
         assertThat(mCachedDevice2.mDevice).isEqualTo(mDevice1);
-        assertThat(mCachedDevice1.getDeviceSide()).isEqualTo(
-                HearingAidProfile.DeviceSide.SIDE_RIGHT);
-        assertThat(mCachedDevice2.getDeviceSide()).isEqualTo(
-                HearingAidProfile.DeviceSide.SIDE_LEFT);
+        assertThat(mCachedDevice1.getDeviceSide()).isEqualTo(HearingAidInfo.DeviceSide.SIDE_RIGHT);
+        assertThat(mCachedDevice2.getDeviceSide()).isEqualTo(HearingAidInfo.DeviceSide.SIDE_LEFT);
         verify(mCachedDevice1).refresh();
     }
 
@@ -454,5 +454,19 @@ public class HearingAidDeviceManagerTest {
 
         assertThat(mHearingAidDeviceManager.findMainDevice(mCachedDevice2)).
                 isEqualTo(mCachedDevice1);
+    }
+
+    private HearingAidInfo getLeftAshaHearingAidInfo(long hiSyncId) {
+        return new HearingAidInfo.Builder()
+                .setAshaDeviceSide(HearingAidInfo.DeviceSide.SIDE_LEFT)
+                .setHiSyncId(hiSyncId)
+                .build();
+    }
+
+    private HearingAidInfo getRightAshaHearingAidInfo(long hiSyncId) {
+        return new HearingAidInfo.Builder()
+                .setAshaDeviceSide(HearingAidInfo.DeviceSide.SIDE_RIGHT)
+                .setHiSyncId(hiSyncId)
+                .build();
     }
 }
