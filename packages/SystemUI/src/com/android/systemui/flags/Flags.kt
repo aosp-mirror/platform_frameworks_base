@@ -253,10 +253,6 @@ object Flags {
     // TODO(b/254512848): Tracking Bug
     val REGION_SAMPLING = unreleasedFlag(801, "region_sampling")
 
-    // 802 - wallpaper rendering
-    // TODO(b/254512923): Tracking Bug
-    @JvmField val USE_CANVAS_RENDERER = unreleasedFlag(802, "use_canvas_renderer")
-
     // 803 - screen contents translation
     // TODO(b/254513187): Tracking Bug
     val SCREEN_CONTENTS_TRANSLATION = unreleasedFlag(803, "screen_contents_translation")
