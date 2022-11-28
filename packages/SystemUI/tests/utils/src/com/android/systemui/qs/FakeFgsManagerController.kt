@@ -77,7 +77,5 @@ class FakeFgsManagerController(
         dialogDismissedListeners.remove(listener)
     }
 
-    override fun shouldUpdateFooterVisibility(): Boolean = false
-
     override fun visibleButtonsCount(): Int = 0
 }

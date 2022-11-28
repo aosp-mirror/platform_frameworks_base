@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.Nullable;
 import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Rect;
@@ -42,6 +44,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.lifecycle.Lifecycle;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.BouncerPanelExpansionCalculator;
@@ -50,12 +53,12 @@ import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.ui.MediaHost;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.qs.external.TileServiceRequestController;
+import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
@@ -99,6 +102,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     @Mock private QSAnimator mQSAnimator;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private QSSquishinessController mSquishinessController;
+    @Mock private FooterActionsViewModel mFooterActionsViewModel;
+    @Mock private FooterActionsViewModel.Factory mFooterActionsViewModelFactory;
     private View mQsFragmentView;
 
     public QSFragmentTest() {
@@ -245,7 +250,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         fragment.setQsExpansion(expansion, panelExpansionFraction, proposedTranslation,
                 squishinessFraction);
 
-        verify(mQSFooterActionController).setExpansion(panelExpansionFraction);
+        verify(mFooterActionsViewModel).onQuickSettingsExpansionChanged(
+                panelExpansionFraction, /* isInSplitShade= */ true);
     }
 
     @Test
@@ -262,7 +268,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         fragment.setQsExpansion(expansion, panelExpansionFraction, proposedTranslation,
                 squishinessFraction);
 
-        verify(mQSFooterActionController).setExpansion(expansion);
+        verify(mFooterActionsViewModel).onQuickSettingsExpansionChanged(
+                expansion, /* isInSplitShade= */ false);
     }
 
     @Test
@@ -379,6 +386,13 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         assertThat(mQsFragmentView.getTranslationY()).isEqualTo(0);
     }
 
+    private Lifecycle.State getListeningAndVisibilityLifecycleState() {
+        return getFragment()
+                .getListeningAndVisibilityLifecycleOwner()
+                .getLifecycle()
+                .getCurrentState();
+    }
+
     @Test
     public void setListeningFalse_notVisible() {
         QSFragment fragment = resumeAndGetFragment();
@@ -387,7 +401,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.setListening(false);
         verify(mQSContainerImplController).setListening(false);
-        verify(mQSFooterActionController).setListening(false);
+        assertThat(getListeningAndVisibilityLifecycleState()).isEqualTo(Lifecycle.State.CREATED);
         verify(mQSPanelController).setListening(eq(false), anyBoolean());
     }
 
@@ -399,7 +413,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.setListening(true);
         verify(mQSContainerImplController).setListening(false);
-        verify(mQSFooterActionController).setListening(false);
+        assertThat(getListeningAndVisibilityLifecycleState()).isEqualTo(Lifecycle.State.STARTED);
         verify(mQSPanelController).setListening(eq(false), anyBoolean());
     }
 
@@ -411,7 +425,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.setListening(false);
         verify(mQSContainerImplController).setListening(false);
-        verify(mQSFooterActionController).setListening(false);
+        assertThat(getListeningAndVisibilityLifecycleState()).isEqualTo(Lifecycle.State.CREATED);
         verify(mQSPanelController).setListening(eq(false), anyBoolean());
     }
 
@@ -423,7 +437,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.setListening(true);
         verify(mQSContainerImplController).setListening(true);
-        verify(mQSFooterActionController).setListening(true);
+        assertThat(getListeningAndVisibilityLifecycleState()).isEqualTo(Lifecycle.State.RESUMED);
         verify(mQSPanelController).setListening(eq(true), anyBoolean());
     }
 
@@ -480,7 +494,6 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         setUpOther();
 
         FakeFeatureFlags featureFlags = new FakeFeatureFlags();
-        featureFlags.set(Flags.NEW_FOOTER_ACTIONS, false);
         return new QSFragment(
                 new RemoteInputQuickSettingsDisabler(
                         context, commandQueue, mock(ConfigurationController.class)),
@@ -495,8 +508,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mFalsingManager,
                 mock(DumpManager.class),
                 featureFlags,
-                mock(NewFooterActionsController.class),
-                mock(FooterActionsViewModel.Factory.class));
+                mock(FooterActionsController.class),
+                mFooterActionsViewModelFactory);
     }
 
     private void setUpOther() {
@@ -505,6 +518,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         when(mQSContainerImplController.getView()).thenReturn(mContainer);
         when(mQSPanelController.getTileLayout()).thenReturn(mQQsTileLayout);
         when(mQuickQSPanelController.getTileLayout()).thenReturn(mQsTileLayout);
+        when(mFooterActionsViewModelFactory.create(any())).thenReturn(mFooterActionsViewModel);
     }
 
     private void setUpMedia() {
@@ -519,13 +533,38 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 .thenReturn(mQSPanelScrollView);
         when(mQsFragmentView.findViewById(R.id.header)).thenReturn(mHeader);
         when(mQsFragmentView.findViewById(android.R.id.edit)).thenReturn(new View(mContext));
+        when(mQsFragmentView.findViewById(R.id.qs_footer_actions)).thenAnswer(
+                invocation -> FooterActionsViewBinder.create(mContext));
     }
 
     private void setUpInflater() {
+        LayoutInflater realInflater = LayoutInflater.from(mContext);
+
         when(mLayoutInflater.cloneInContext(any(Context.class))).thenReturn(mLayoutInflater);
-        when(mLayoutInflater.inflate(anyInt(), any(ViewGroup.class), anyBoolean()))
-                .thenReturn(mQsFragmentView);
+        when(mLayoutInflater.inflate(anyInt(), nullable(ViewGroup.class), anyBoolean()))
+                .thenAnswer((invocation) -> inflate(realInflater, (int) invocation.getArgument(0),
+                        (ViewGroup) invocation.getArgument(1),
+                        (boolean) invocation.getArgument(2)));
+        when(mLayoutInflater.inflate(anyInt(), nullable(ViewGroup.class)))
+                .thenAnswer((invocation) -> inflate(realInflater, (int) invocation.getArgument(0),
+                        (ViewGroup) invocation.getArgument(1)));
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE, mLayoutInflater);
+    }
+
+    private View inflate(LayoutInflater realInflater, int layoutRes, @Nullable ViewGroup root) {
+        return inflate(realInflater, layoutRes, root, root != null);
+    }
+
+    private View inflate(LayoutInflater realInflater, int layoutRes, @Nullable ViewGroup root,
+            boolean attachToRoot) {
+        if (layoutRes == R.layout.footer_actions
+                || layoutRes == R.layout.footer_actions_text_button
+                || layoutRes == R.layout.footer_actions_number_button
+                || layoutRes == R.layout.footer_actions_icon_button) {
+            return realInflater.inflate(layoutRes, root, attachToRoot);
+        }
+
+        return mQsFragmentView;
     }
 
     private void setupQsComponent() {

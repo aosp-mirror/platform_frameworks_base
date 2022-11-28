@@ -204,9 +204,6 @@ object Flags {
             "full_screen_user_switcher"
         )
 
-    // TODO(b/254512678): Tracking Bug
-    @JvmField val NEW_FOOTER_ACTIONS = releasedFlag(507, "new_footer_actions")
-
     // TODO(b/244064524): Tracking Bug
     @JvmField
     val QS_SECONDARY_DATA_SUB_INFO =

@@ -17,6 +17,7 @@
 package com.android.systemui.security.data.model
 
 import android.graphics.drawable.Drawable
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.policy.SecurityController
 import kotlinx.coroutines.CoroutineDispatcher
@@ -55,8 +56,8 @@ data class SecurityModel(
          * Important: This method should be called from a background thread as this will do a lot of
          * binder calls.
          */
-        // TODO(b/242040009): Remove this.
         @JvmStatic
+        @VisibleForTesting
         fun create(securityController: SecurityController): SecurityModel {
             val deviceAdminInfo =
                 if (securityController.isParentalControlsEnabled) {

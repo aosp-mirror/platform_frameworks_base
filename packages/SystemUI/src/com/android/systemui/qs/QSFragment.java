@@ -33,6 +33,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.LinearLayout;
 
 import androidx.annotation.FloatRange;
 import androidx.annotation.Nullable;
@@ -48,7 +49,6 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.ui.MediaHost;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
@@ -114,7 +114,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private final QSFragmentDisableFlagsLogger mQsFragmentDisableFlagsLogger;
     private final QSTileHost mHost;
     private final FeatureFlags mFeatureFlags;
-    private final NewFooterActionsController mNewFooterActionsController;
+    private final FooterActionsController mFooterActionsController;
     private final FooterActionsViewModel.Factory mFooterActionsViewModelFactory;
     private final ListeningAndVisibilityLifecycleOwner mListeningAndVisibilityLifecycleOwner;
     private boolean mShowCollapsedOnKeyguard;
@@ -132,9 +132,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private QSPanelController mQSPanelController;
     private QuickQSPanelController mQuickQSPanelController;
     private QSCustomizerController mQSCustomizerController;
-    @Nullable
-    private FooterActionsController mQSFooterActionController;
-    @Nullable
     private FooterActionsViewModel mQSFooterActionsViewModel;
     @Nullable
     private ScrollListener mScrollListener;
@@ -185,7 +182,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             QSFragmentComponent.Factory qsComponentFactory,
             QSFragmentDisableFlagsLogger qsFragmentDisableFlagsLogger,
             FalsingManager falsingManager, DumpManager dumpManager, FeatureFlags featureFlags,
-            NewFooterActionsController newFooterActionsController,
+            FooterActionsController footerActionsController,
             FooterActionsViewModel.Factory footerActionsViewModelFactory) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mQsMediaHost = qsMediaHost;
@@ -199,7 +196,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mStatusBarStateController = statusBarStateController;
         mDumpManager = dumpManager;
         mFeatureFlags = featureFlags;
-        mNewFooterActionsController = newFooterActionsController;
+        mFooterActionsController = footerActionsController;
         mFooterActionsViewModelFactory = footerActionsViewModelFactory;
         mListeningAndVisibilityLifecycleOwner = new ListeningAndVisibilityLifecycleOwner();
     }
@@ -226,18 +223,12 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQSPanelController.init();
         mQuickQSPanelController.init();
 
-        if (mFeatureFlags.isEnabled(Flags.NEW_FOOTER_ACTIONS)) {
-            mQSFooterActionsViewModel = mFooterActionsViewModelFactory.create(/* lifecycleOwner */
-                    this);
-            FooterActionsView footerActionsView = view.findViewById(R.id.qs_footer_actions);
-            FooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
-                    mListeningAndVisibilityLifecycleOwner);
-
-            mNewFooterActionsController.init();
-        } else {
-            mQSFooterActionController = qsFragmentComponent.getQSFooterActionController();
-            mQSFooterActionController.init();
-        }
+        mQSFooterActionsViewModel = mFooterActionsViewModelFactory.create(/* lifecycleOwner */
+                this);
+        LinearLayout footerActionsView = view.findViewById(R.id.qs_footer_actions);
+        FooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
+                mListeningAndVisibilityLifecycleOwner);
+        mFooterActionsController.init();
 
         mQSPanelScrollView = view.findViewById(R.id.expanded_qs_scroll_view);
         mQSPanelScrollView.addOnLayoutChangeListener(
@@ -436,9 +427,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mContainer.disable(state1, state2, animate);
         mHeader.disable(state1, state2, animate);
         mFooter.disable(state1, state2, animate);
-        if (mQSFooterActionController != null) {
-            mQSFooterActionController.disable(state2);
-        }
         updateQsState();
     }
 
@@ -457,11 +445,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         boolean footerVisible = qsPanelVisible && (mQsExpanded || !keyguardShowing
                 || mHeaderAnimating || mShowCollapsedOnKeyguard);
         mFooter.setVisibility(footerVisible ? View.VISIBLE : View.INVISIBLE);
-        if (mQSFooterActionController != null) {
-            mQSFooterActionController.setVisible(footerVisible);
-        } else {
-            mQSFooterActionsViewModel.onVisibilityChangeRequested(footerVisible);
-        }
+        mQSFooterActionsViewModel.onVisibilityChangeRequested(footerVisible);
         mFooter.setExpanded((keyguardShowing && !mHeaderAnimating && !mShowCollapsedOnKeyguard)
                 || (mQsExpanded && !mStackScrollerOverscrolling));
         mQSPanelController.setVisibility(qsPanelVisible ? View.VISIBLE : View.INVISIBLE);
@@ -534,9 +518,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
 
         mFooter.setKeyguardShowing(keyguardShowing);
-        if (mQSFooterActionController != null) {
-            mQSFooterActionController.setKeyguardShowing(keyguardShowing);
-        }
         updateQsState();
     }
 
@@ -552,9 +533,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (DEBUG) Log.d(TAG, "setListening " + listening);
         mListening = listening;
         mQSContainerImplController.setListening(listening && mQsVisible);
-        if (mQSFooterActionController != null) {
-            mQSFooterActionController.setListening(listening && mQsVisible);
-        }
         mListeningAndVisibilityLifecycleOwner.updateState();
         updateQsPanelControllerListening();
     }
@@ -665,12 +643,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mFooter.setExpansion(onKeyguardAndExpanded ? 1 : expansion);
         float footerActionsExpansion =
                 onKeyguardAndExpanded ? 1 : mInSplitShade ? alphaProgress : expansion;
-        if (mQSFooterActionController != null) {
-            mQSFooterActionController.setExpansion(footerActionsExpansion);
-        } else {
-            mQSFooterActionsViewModel.onQuickSettingsExpansionChanged(footerActionsExpansion,
-                    mInSplitShade);
-        }
+        mQSFooterActionsViewModel.onQuickSettingsExpansionChanged(footerActionsExpansion,
+                mInSplitShade);
         mQSPanelController.setRevealExpansion(expansion);
         mQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
         mQuickQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
@@ -835,11 +809,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         boolean customizing = isCustomizing();
         mQSPanelScrollView.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
         mFooter.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
-        if (mQSFooterActionController != null) {
-            mQSFooterActionController.setVisible(!customizing);
-        } else {
-            mQSFooterActionsViewModel.onVisibilityChangeRequested(!customizing);
-        }
+        mQSFooterActionsViewModel.onVisibilityChangeRequested(!customizing);
         mHeader.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
         // Let the panel know the position changed and it needs to update where notifications
         // and whatnot are.
@@ -927,6 +897,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         updateShowCollapsedOnKeyguard();
     }
 
+    @VisibleForTesting
+    public ListeningAndVisibilityLifecycleOwner getListeningAndVisibilityLifecycleOwner() {
+        return mListeningAndVisibilityLifecycleOwner;
+    }
+
     @Override
     public void dump(PrintWriter pw, String[] args) {
         IndentingPrintWriter indentingPw = new IndentingPrintWriter(pw, /* singleIndent= */ "  ");
@@ -994,7 +969,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
      *  - STARTED when mListening == true && mQsVisible == false.
      *  - RESUMED when mListening == true && mQsVisible == true.
      */
-    private class ListeningAndVisibilityLifecycleOwner implements LifecycleOwner {
+    @VisibleForTesting
+    class ListeningAndVisibilityLifecycleOwner implements LifecycleOwner {
         private final LifecycleRegistry mLifecycleRegistry = new LifecycleRegistry(this);
         private boolean mDestroyed = false;
 

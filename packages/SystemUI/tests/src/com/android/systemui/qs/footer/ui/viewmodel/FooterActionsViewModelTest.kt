@@ -385,4 +385,86 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         underTest.onVisibilityChangeRequested(visible = true)
         assertThat(underTest.isVisible.value).isTrue()
     }
+
+    @Test
+    fun alpha_inSplitShade_followsExpansion() {
+        val underTest = utils.footerActionsViewModel()
+
+        underTest.onQuickSettingsExpansionChanged(0f, isInSplitShade = true)
+        assertThat(underTest.alpha.value).isEqualTo(0f)
+
+        underTest.onQuickSettingsExpansionChanged(0.25f, isInSplitShade = true)
+        assertThat(underTest.alpha.value).isEqualTo(0.25f)
+
+        underTest.onQuickSettingsExpansionChanged(0.5f, isInSplitShade = true)
+        assertThat(underTest.alpha.value).isEqualTo(0.5f)
+
+        underTest.onQuickSettingsExpansionChanged(0.75f, isInSplitShade = true)
+        assertThat(underTest.alpha.value).isEqualTo(0.75f)
+
+        underTest.onQuickSettingsExpansionChanged(1f, isInSplitShade = true)
+        assertThat(underTest.alpha.value).isEqualTo(1f)
+    }
+
+    @Test
+    fun backgroundAlpha_inSplitShade_followsExpansion_with_0_99_delay() {
+        val underTest = utils.footerActionsViewModel()
+        val floatTolerance = 0.01f
+
+        underTest.onQuickSettingsExpansionChanged(0f, isInSplitShade = true)
+        assertThat(underTest.backgroundAlpha.value).isEqualTo(0f)
+
+        underTest.onQuickSettingsExpansionChanged(0.5f, isInSplitShade = true)
+        assertThat(underTest.backgroundAlpha.value).isEqualTo(0f)
+
+        underTest.onQuickSettingsExpansionChanged(0.9f, isInSplitShade = true)
+        assertThat(underTest.backgroundAlpha.value).isEqualTo(0f)
+
+        underTest.onQuickSettingsExpansionChanged(0.991f, isInSplitShade = true)
+        assertThat(underTest.backgroundAlpha.value).isWithin(floatTolerance).of(0.1f)
+
+        underTest.onQuickSettingsExpansionChanged(0.995f, isInSplitShade = true)
+        assertThat(underTest.backgroundAlpha.value).isWithin(floatTolerance).of(0.5f)
+
+        underTest.onQuickSettingsExpansionChanged(1f, isInSplitShade = true)
+        assertThat(underTest.backgroundAlpha.value).isEqualTo(1f)
+    }
+
+    @Test
+    fun alpha_inSingleShade_followsExpansion_with_0_9_delay() {
+        val underTest = utils.footerActionsViewModel()
+        val floatTolerance = 0.01f
+
+        underTest.onQuickSettingsExpansionChanged(0f, isInSplitShade = false)
+        assertThat(underTest.alpha.value).isEqualTo(0f)
+
+        underTest.onQuickSettingsExpansionChanged(0.5f, isInSplitShade = false)
+        assertThat(underTest.alpha.value).isEqualTo(0f)
+
+        underTest.onQuickSettingsExpansionChanged(0.9f, isInSplitShade = false)
+        assertThat(underTest.alpha.value).isEqualTo(0f)
+
+        underTest.onQuickSettingsExpansionChanged(0.91f, isInSplitShade = false)
+        assertThat(underTest.alpha.value).isWithin(floatTolerance).of(0.1f)
+
+        underTest.onQuickSettingsExpansionChanged(0.95f, isInSplitShade = false)
+        assertThat(underTest.alpha.value).isWithin(floatTolerance).of(0.5f)
+
+        underTest.onQuickSettingsExpansionChanged(1f, isInSplitShade = false)
+        assertThat(underTest.alpha.value).isEqualTo(1f)
+    }
+
+    @Test
+    fun backgroundAlpha_inSingleShade_always1() {
+        val underTest = utils.footerActionsViewModel()
+
+        underTest.onQuickSettingsExpansionChanged(0f, isInSplitShade = false)
+        assertThat(underTest.backgroundAlpha.value).isEqualTo(1f)
+
+        underTest.onQuickSettingsExpansionChanged(0.5f, isInSplitShade = false)
+        assertThat(underTest.backgroundAlpha.value).isEqualTo(1f)
+
+        underTest.onQuickSettingsExpansionChanged(1f, isInSplitShade = false)
+        assertThat(underTest.backgroundAlpha.value).isEqualTo(1f)
+    }
 }

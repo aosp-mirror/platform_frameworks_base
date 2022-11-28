@@ -215,7 +215,7 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
                 // Some views are always full width or have dependent padding
                 continue;
             }
-            if (!(view instanceof FooterActionsView)) {
+            if (view.getId() != R.id.qs_footer_actions) {
                 // Only padding for FooterActionsView, no margin. That way, the background goes
                 // all the way to the edge.
                 LayoutParams lp = (LayoutParams) view.getLayoutParams();
