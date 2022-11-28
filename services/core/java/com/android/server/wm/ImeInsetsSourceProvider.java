@@ -140,10 +140,14 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
 
     @Override
     protected boolean updateClientVisibility(InsetsControlTarget caller) {
+        if (caller != getControlTarget()) {
+            return false;
+        }
         boolean changed = super.updateClientVisibility(caller);
         if (changed && caller.isRequestedVisible(mSource.getType())) {
             reportImeDrawnForOrganizer(caller);
         }
+        changed |= mDisplayContent.onImeInsetsClientVisibilityUpdate();
         return changed;
     }
 
