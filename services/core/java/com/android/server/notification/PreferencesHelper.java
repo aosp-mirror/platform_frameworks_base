@@ -918,7 +918,7 @@ public class PreferencesHelper implements RankingConfig {
                 throw new IllegalArgumentException("Reserved id");
             }
             NotificationChannel existing = r.channels.get(channel.getId());
-            if (existing != null) {
+            if (existing != null && fromTargetApp) {
                 // Actually modifying an existing channel - keep most of the existing settings
                 if (existing.isDeleted()) {
                     // The existing channel was deleted - undelete it.
@@ -1004,7 +1004,9 @@ public class PreferencesHelper implements RankingConfig {
                 }
                 if (fromTargetApp) {
                     channel.setLockscreenVisibility(r.visibility);
-                    channel.setAllowBubbles(NotificationChannel.DEFAULT_ALLOW_BUBBLE);
+                    channel.setAllowBubbles(existing != null
+                            ? existing.getAllowBubbles()
+                            : NotificationChannel.DEFAULT_ALLOW_BUBBLE);
                 }
                 clearLockedFieldsLocked(channel);
 
