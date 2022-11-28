@@ -46,6 +46,7 @@ import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.telephony.IIntegerConsumer;
+import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ISms;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.SmsRawData;
@@ -3507,5 +3508,42 @@ public final class SmsManager {
 
     private static String formatCrossStackMessageId(long id) {
         return "{x-message-id:" + id + "}";
+    }
+
+    /**
+     * Fetches the EF_PSISMSC value from the UICC that contains the Public Service Identity of
+     * the SM-SC (either a SIP URI or tel URI). The EF_PSISMSC of ISIM and USIM can be found in
+     * DF_TELECOM.
+     * The EF_PSISMSC value is used by the ME to submit SMS over IP as defined in 24.341 [55].
+     *
+     * @return Uri : Public Service Identity of SM-SC from the ISIM or USIM if the ISIM is not
+     * available.
+     * @throws SecurityException if the caller does not have the required permission/privileges.
+     * @throws IllegalStateException in case of telephony service is not available.
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    public Uri getSmscIdentity() {
+        Uri smscUri = Uri.EMPTY;
+        try {
+            IPhoneSubInfo info = TelephonyManager.getSubscriberInfoService();
+            if (info == null) {
+                Rlog.e(TAG, "getSmscIdentity(): IPhoneSubInfo instance is NULL");
+                throw new IllegalStateException("Telephony service is not available");
+            }
+            /** Fetches the SIM EF_PSISMSC value based on subId and appType */
+            smscUri = info.getSmscIdentity(getSubscriptionId(), TelephonyManager.APPTYPE_ISIM);
+            if (Uri.EMPTY.equals(smscUri)) {
+                /** Fallback in case where ISIM is not available */
+                smscUri = info.getSmscIdentity(getSubscriptionId(), TelephonyManager.APPTYPE_USIM);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getSmscIdentity(): Exception : " + ex);
+            ex.rethrowAsRuntimeException();
+        }
+        return smscUri;
     }
 }
