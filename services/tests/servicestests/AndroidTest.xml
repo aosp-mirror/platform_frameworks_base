@@ -33,6 +33,7 @@
         <option name="test-file-name" value="SimpleServiceTestApp1.apk" />
         <option name="test-file-name" value="SimpleServiceTestApp2.apk" />
         <option name="test-file-name" value="SimpleServiceTestApp3.apk" />
+        <option name="test-file-name" value="MediaButtonReceiverHolderTestHelperApp.apk" />
     </target_preparer>
 
     <!-- Create place to store apks -->
