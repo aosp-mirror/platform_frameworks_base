@@ -16,7 +16,13 @@
 
 package android.app.job;
 
+import static android.app.job.JobScheduler.THROW_ON_INVALID_DATA_TRANSFER_IMPLEMENTATION;
+
+import android.annotation.BytesLong;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Service;
+import android.compat.Compatibility;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
@@ -24,6 +30,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+
+import com.android.internal.os.SomeArgs;
 
 import java.lang.ref.WeakReference;
 
@@ -51,6 +59,20 @@ public abstract class JobServiceEngine {
      * Message that the client has completed execution of this job.
      */
     private static final int MSG_JOB_FINISHED = 2;
+    /**
+     * Message that will result in a call to
+     * {@link #getTransferredDownloadBytes(JobParameters, JobWorkItem)}.
+     */
+    private static final int MSG_GET_TRANSFERRED_DOWNLOAD_BYTES = 3;
+    /**
+     * Message that will result in a call to
+     * {@link #getTransferredUploadBytes(JobParameters, JobWorkItem)}.
+     */
+    private static final int MSG_GET_TRANSFERRED_UPLOAD_BYTES = 4;
+    /** Message that the client wants to update JobScheduler of the data transfer progress. */
+    private static final int MSG_UPDATE_TRANSFERRED_NETWORK_BYTES = 5;
+    /** Message that the client wants to update JobScheduler of the estimated transfer size. */
+    private static final int MSG_UPDATE_ESTIMATED_NETWORK_BYTES = 6;
 
     private final IJobService mBinder;
 
@@ -65,6 +87,32 @@ public abstract class JobServiceEngine {
 
         JobInterface(JobServiceEngine service) {
             mService = new WeakReference<>(service);
+        }
+
+        @Override
+        public void getTransferredDownloadBytes(@NonNull JobParameters jobParams,
+                @Nullable JobWorkItem jobWorkItem) throws RemoteException {
+            JobServiceEngine service = mService.get();
+            if (service != null) {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = jobParams;
+                args.arg2 = jobWorkItem;
+                service.mHandler.obtainMessage(MSG_GET_TRANSFERRED_DOWNLOAD_BYTES, args)
+                        .sendToTarget();
+            }
+        }
+
+        @Override
+        public void getTransferredUploadBytes(@NonNull JobParameters jobParams,
+                @Nullable JobWorkItem jobWorkItem) throws RemoteException {
+            JobServiceEngine service = mService.get();
+            if (service != null) {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = jobParams;
+                args.arg2 = jobWorkItem;
+                service.mHandler.obtainMessage(MSG_GET_TRANSFERRED_UPLOAD_BYTES, args)
+                        .sendToTarget();
+            }
         }
 
         @Override
@@ -98,9 +146,9 @@ public abstract class JobServiceEngine {
 
         @Override
         public void handleMessage(Message msg) {
-            final JobParameters params = (JobParameters) msg.obj;
             switch (msg.what) {
-                case MSG_EXECUTE_JOB:
+                case MSG_EXECUTE_JOB: {
+                    final JobParameters params = (JobParameters) msg.obj;
                     try {
                         boolean workOngoing = JobServiceEngine.this.onStartJob(params);
                         ackStartMessage(params, workOngoing);
@@ -109,7 +157,9 @@ public abstract class JobServiceEngine {
                         throw new RuntimeException(e);
                     }
                     break;
-                case MSG_STOP_JOB:
+                }
+                case MSG_STOP_JOB: {
+                    final JobParameters params = (JobParameters) msg.obj;
                     try {
                         boolean ret = JobServiceEngine.this.onStopJob(params);
                         ackStopMessage(params, ret);
@@ -118,7 +168,9 @@ public abstract class JobServiceEngine {
                         throw new RuntimeException(e);
                     }
                     break;
-                case MSG_JOB_FINISHED:
+                }
+                case MSG_JOB_FINISHED: {
+                    final JobParameters params = (JobParameters) msg.obj;
                     final boolean needsReschedule = (msg.arg2 == 1);
                     IJobCallback callback = params.getCallback();
                     if (callback != null) {
@@ -132,9 +184,107 @@ public abstract class JobServiceEngine {
                         Log.e(TAG, "finishJob() called for a nonexistent job id.");
                     }
                     break;
+                }
+                case MSG_GET_TRANSFERRED_DOWNLOAD_BYTES: {
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final JobParameters params = (JobParameters) args.arg1;
+                    final JobWorkItem item = (JobWorkItem) args.arg2;
+                    try {
+                        long ret = JobServiceEngine.this.getTransferredDownloadBytes(params, item);
+                        ackGetTransferredDownloadBytesMessage(params, item, ret);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Application unable to handle getTransferredDownloadBytes.", e);
+                        throw new RuntimeException(e);
+                    }
+                    args.recycle();
+                    break;
+                }
+                case MSG_GET_TRANSFERRED_UPLOAD_BYTES: {
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final JobParameters params = (JobParameters) args.arg1;
+                    final JobWorkItem item = (JobWorkItem) args.arg2;
+                    try {
+                        long ret = JobServiceEngine.this.getTransferredUploadBytes(params, item);
+                        ackGetTransferredUploadBytesMessage(params, item, ret);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Application unable to handle getTransferredUploadBytes.", e);
+                        throw new RuntimeException(e);
+                    }
+                    args.recycle();
+                    break;
+                }
+                case MSG_UPDATE_TRANSFERRED_NETWORK_BYTES: {
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final JobParameters params = (JobParameters) args.arg1;
+                    IJobCallback callback = params.getCallback();
+                    if (callback != null) {
+                        try {
+                            callback.updateTransferredNetworkBytes(params.getJobId(),
+                                    (JobWorkItem) args.arg2, args.argl1, args.argl2);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Error updating data transfer progress to system:"
+                                    + " binder has gone away.");
+                        }
+                    } else {
+                        Log.e(TAG, "updateDataTransferProgress() called for a nonexistent job id.");
+                    }
+                    args.recycle();
+                    break;
+                }
+                case MSG_UPDATE_ESTIMATED_NETWORK_BYTES: {
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final JobParameters params = (JobParameters) args.arg1;
+                    IJobCallback callback = params.getCallback();
+                    if (callback != null) {
+                        try {
+                            callback.updateEstimatedNetworkBytes(params.getJobId(),
+                                    (JobWorkItem) args.arg2, args.argl1, args.argl2);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Error updating estimated transfer size to system:"
+                                    + " binder has gone away.");
+                        }
+                    } else {
+                        Log.e(TAG,
+                                "updateEstimatedNetworkBytes() called for a nonexistent job id.");
+                    }
+                    args.recycle();
+                    break;
+                }
                 default:
                     Log.e(TAG, "Unrecognised message received.");
                     break;
+            }
+        }
+
+        private void ackGetTransferredDownloadBytesMessage(@NonNull JobParameters params,
+                @Nullable JobWorkItem item, long progress) {
+            final IJobCallback callback = params.getCallback();
+            final int jobId = params.getJobId();
+            final int workId = item == null ? -1 : item.getWorkId();
+            if (callback != null) {
+                try {
+                    callback.acknowledgeGetTransferredDownloadBytesMessage(jobId, workId, progress);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "System unreachable for returning progress.");
+                }
+            } else if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Attempting to ack a job that has already been processed.");
+            }
+        }
+
+        private void ackGetTransferredUploadBytesMessage(@NonNull JobParameters params,
+                @Nullable JobWorkItem item, long progress) {
+            final IJobCallback callback = params.getCallback();
+            final int jobId = params.getJobId();
+            final int workId = item == null ? -1 : item.getWorkId();
+            if (callback != null) {
+                try {
+                    callback.acknowledgeGetTransferredUploadBytesMessage(jobId, workId, progress);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "System unreachable for returning progress.");
+                }
+            } else if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Attempting to ack a job that has already been processed.");
             }
         }
 
@@ -144,7 +294,7 @@ public abstract class JobServiceEngine {
             if (callback != null) {
                 try {
                     callback.acknowledgeStartMessage(jobId, workOngoing);
-                } catch(RemoteException e) {
+                } catch (RemoteException e) {
                     Log.e(TAG, "System unreachable for starting job.");
                 }
             } else {
@@ -212,5 +362,74 @@ public abstract class JobServiceEngine {
         Message m = Message.obtain(mHandler, MSG_JOB_FINISHED, params);
         m.arg2 = needsReschedule ? 1 : 0;
         m.sendToTarget();
+    }
+
+    /**
+     * Engine's request to get how much data has been downloaded.
+     *
+     * @hide
+     * @see JobService#getTransferredDownloadBytes()
+     */
+    @BytesLong
+    public long getTransferredDownloadBytes(@NonNull JobParameters params,
+            @Nullable JobWorkItem item) {
+        if (Compatibility.isChangeEnabled(THROW_ON_INVALID_DATA_TRANSFER_IMPLEMENTATION)) {
+            throw new RuntimeException("Not implemented. Must override in a subclass.");
+        }
+        return 0;
+    }
+
+    /**
+     * Engine's request to get how much data has been uploaded.
+     *
+     * @hide
+     * @see JobService#getTransferredUploadBytes()
+     */
+    @BytesLong
+    public long getTransferredUploadBytes(@NonNull JobParameters params,
+            @Nullable JobWorkItem item) {
+        if (Compatibility.isChangeEnabled(THROW_ON_INVALID_DATA_TRANSFER_IMPLEMENTATION)) {
+            throw new RuntimeException("Not implemented. Must override in a subclass.");
+        }
+        return 0;
+    }
+
+    /**
+     * Call in to engine to report data transfer progress.
+     *
+     * @hide
+     * @see JobService#updateTransferredNetworkBytes(JobParameters, long, long)
+     */
+    public void updateTransferredNetworkBytes(@NonNull JobParameters params,
+            @Nullable JobWorkItem item, long downloadBytes, long uploadBytes) {
+        if (params == null) {
+            throw new NullPointerException("params");
+        }
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = params;
+        args.arg2 = item;
+        args.argl1 = downloadBytes;
+        args.argl2 = uploadBytes;
+        mHandler.obtainMessage(MSG_UPDATE_TRANSFERRED_NETWORK_BYTES, args).sendToTarget();
+    }
+
+    /**
+     * Call in to engine to report data transfer progress.
+     *
+     * @hide
+     * @see JobService#updateEstimatedNetworkBytes(JobParameters, JobWorkItem, long, long)
+     */
+    public void updateEstimatedNetworkBytes(@NonNull JobParameters params,
+            @NonNull JobWorkItem item,
+            @BytesLong long downloadBytes, @BytesLong long uploadBytes) {
+        if (params == null) {
+            throw new NullPointerException("params");
+        }
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = params;
+        args.arg2 = item;
+        args.argl1 = downloadBytes;
+        args.argl2 = uploadBytes;
+        mHandler.obtainMessage(MSG_UPDATE_ESTIMATED_NETWORK_BYTES, args).sendToTarget();
     }
 }
