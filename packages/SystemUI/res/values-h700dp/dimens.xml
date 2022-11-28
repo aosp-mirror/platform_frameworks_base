@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2018 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
   -->
 
 <resources>
-    <!-- With the large clock, move up slightly from the center -->
-    <dimen name="keyguard_large_clock_top_margin">-112dp</dimen>
-
     <!-- Margin above the ambient indication container -->
-    <dimen name="ambient_indication_container_margin_top">20dp</dimen>
+    <dimen name="ambient_indication_container_margin_top">15dp</dimen>
 </resources>
