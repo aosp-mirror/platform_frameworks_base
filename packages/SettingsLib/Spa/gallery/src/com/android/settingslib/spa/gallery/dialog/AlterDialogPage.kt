@@ -50,7 +50,6 @@ object AlterDialogPageProvider : SettingsPageProvider {
     )
 
     fun buildInjectEntry() = SettingsEntryBuilder.createInject(owner)
-        .setIsAllowSearch(true)
         .setUiLayoutFn {
             Preference(object : PreferenceModel {
                 override val title = TITLE

@@ -46,28 +46,24 @@ object TwoTargetSwitchPreferencePageProvider : SettingsPageProvider {
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
             SettingsEntryBuilder.create( "TwoTargetSwitchPreference", owner)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     SampleTwoTargetSwitchPreference()
                 }.build()
         )
         entryList.add(
             SettingsEntryBuilder.create( "TwoTargetSwitchPreference with summary", owner)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     SampleTwoTargetSwitchPreferenceWithSummary()
                 }.build()
         )
         entryList.add(
             SettingsEntryBuilder.create( "TwoTargetSwitchPreference with async summary", owner)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     SampleTwoTargetSwitchPreferenceWithAsyncSummary()
                 }.build()
         )
         entryList.add(
             SettingsEntryBuilder.create( "TwoTargetSwitchPreference not changeable", owner)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     SampleNotChangeableTwoTargetSwitchPreference()
                 }.build()
@@ -78,7 +74,6 @@ object TwoTargetSwitchPreferencePageProvider : SettingsPageProvider {
 
     fun buildInjectEntry(): SettingsEntryBuilder {
         return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
-            .setIsAllowSearch(true)
             .setUiLayoutFn {
                 Preference(object : PreferenceModel {
                     override val title = TITLE
