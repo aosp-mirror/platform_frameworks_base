@@ -1500,7 +1500,8 @@
     <dimen name="dream_overlay_status_bar_extra_margin">8dp</dimen>
 
     <!-- Dream overlay complications related dimensions -->
-    <dimen name="dream_overlay_complication_clock_time_text_size">86sp</dimen>
+    <dimen name="dream_overlay_complication_clock_time_text_size">86dp</dimen>
+    <dimen name="dream_overlay_complication_clock_time_translation_y">28dp</dimen>
     <dimen name="dream_overlay_complication_home_controls_padding">28dp</dimen>
     <dimen name="dream_overlay_complication_clock_subtitle_text_size">24sp</dimen>
     <dimen name="dream_overlay_complication_preview_text_size">36sp</dimen>
