@@ -21,6 +21,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.UserManager.DEV_CREATE_OVERRIDE_PROPERTY;
 import static android.os.UserManager.DISALLOW_USER_SWITCH;
 import static android.os.UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY;
+import static android.os.UserManager.USER_OPERATION_ERROR_UNKNOWN;
 
 import android.Manifest;
 import android.accounts.Account;
@@ -637,6 +638,9 @@ public class UserManagerService extends IUserManager.Stub {
 
     private final UserVisibilityMediator mUserVisibilityMediator;
 
+    @GuardedBy("mUsersLock")
+    private @UserIdInt int mBootUser = UserHandle.USER_NULL;
+
     private static UserManagerService sInstance;
 
     public static UserManagerService getInstance() {
@@ -933,6 +937,26 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         return UserHandle.USER_NULL;
+    }
+
+    @Override
+    public void setBootUser(@UserIdInt int userId) {
+        checkCreateUsersPermission("Set boot user");
+        synchronized (mUsersLock) {
+            // TODO(b/263381643): Change to EventLog.
+            Slogf.i(LOG_TAG, "setBootUser %d", userId);
+            mBootUser = userId;
+        }
+    }
+
+    @Override
+    public @UserIdInt int getBootUser() {
+        checkCreateUsersPermission("Get boot user");
+        try {
+            return mLocalService.getBootUser();
+        } catch (UserManager.CheckedUserOperationException e) {
+            throw e.toServiceSpecificException();
+        }
     }
 
     @Override
@@ -1573,6 +1597,8 @@ public class UserManagerService extends IUserManager.Stub {
                     final int number = mUser0Allocations.incrementAndGet();
                     Slog.w(LOG_TAG, "System user instantiated at least " + number + " times");
                 }
+                name = getOwnerName();
+            } else if (orig.isMain()) {
                 name = getOwnerName();
             } else if (orig.isGuest()) {
                 name = getGuestName();
@@ -4557,7 +4583,7 @@ public class UserManagerService extends IUserManager.Stub {
                     UserHandle.USER_NULL, null);
 
             if (userInfo == null) {
-                throw new ServiceSpecificException(UserManager.USER_OPERATION_ERROR_UNKNOWN);
+                throw new ServiceSpecificException(USER_OPERATION_ERROR_UNKNOWN);
             }
         } catch (UserManager.CheckedUserOperationException e) {
             throw e.toServiceSpecificException();
@@ -4686,7 +4712,7 @@ public class UserManagerService extends IUserManager.Stub {
                     if (parent == null) {
                         throwCheckedUserOperationException(
                                 "Cannot find user data for parent user " + parentId,
-                                UserManager.USER_OPERATION_ERROR_UNKNOWN);
+                                USER_OPERATION_ERROR_UNKNOWN);
                     }
                 }
                 if (!preCreate && !canAddMoreUsersOfType(userTypeDetails)) {
@@ -4714,7 +4740,7 @@ public class UserManagerService extends IUserManager.Stub {
                         && !isCreationOverrideEnabled()) {
                     throwCheckedUserOperationException(
                             "Cannot add restricted profile - parent user must be system",
-                            UserManager.USER_OPERATION_ERROR_UNKNOWN);
+                            USER_OPERATION_ERROR_UNKNOWN);
                 }
 
                 userId = getNextAvailableId();
@@ -6480,6 +6506,9 @@ public class UserManagerService extends IUserManager.Stub {
         if (DBG_ALLOCATION) {
             pw.println("  System user allocations: " + mUser0Allocations.get());
         }
+        synchronized (mUsersLock) {
+            pw.println("  Boot user: " + mBootUser);
+        }
 
         pw.println();
         pw.println("Number of listeners for");
@@ -6670,6 +6699,18 @@ public class UserManagerService extends IUserManager.Stub {
      */
     boolean isUserInitialized(@UserIdInt int userId) {
         return mLocalService.isUserInitialized(userId);
+    }
+
+    /**
+     * Creates a new user, intended to be the initial user on a device in headless system user mode.
+     */
+    private UserInfo createInitialUserForHsum() throws UserManager.CheckedUserOperationException {
+        final int flags = UserInfo.FLAG_ADMIN | UserInfo.FLAG_MAIN;
+
+        // Null name will be replaced with "Owner" on-demand to allow for localisation.
+        return createUserInternalUnchecked(/* name= */ null, UserManager.USER_TYPE_FULL_SECONDARY,
+                flags, UserHandle.USER_NULL, /* preCreate= */ false,
+                /* disallowedPackages= */ null, /* token= */ null);
     }
 
     private class LocalService extends UserManagerInternal {
@@ -7105,6 +7146,56 @@ public class UserManagerService extends IUserManager.Stub {
             return getMainUserIdUnchecked();
         }
 
+        @Override
+        public @UserIdInt int getBootUser() throws UserManager.CheckedUserOperationException {
+            synchronized (mUsersLock) {
+                // TODO(b/242195409): On Automotive, block if boot user not provided.
+                if (mBootUser != UserHandle.USER_NULL) {
+                    final UserData userData = mUsers.get(mBootUser);
+                    if (userData != null && userData.info.supportsSwitchToByUser()) {
+                        Slogf.i(LOG_TAG, "Using provided boot user: %d", mBootUser);
+                        return mBootUser;
+                    } else {
+                        Slogf.w(LOG_TAG,
+                                "Provided boot user cannot be switched to: %d", mBootUser);
+                    }
+                }
+            }
+
+            if (isHeadlessSystemUserMode()) {
+                // Return the previous foreground user, if there is one.
+                final int previousUser = getPreviousFullUserToEnterForeground();
+                if (previousUser != UserHandle.USER_NULL) {
+                    Slogf.i(LOG_TAG, "Boot user is previous user %d", previousUser);
+                    return previousUser;
+                }
+                // No previous user. Return the first switchable user if there is one.
+                synchronized (mUsersLock) {
+                    final int userSize = mUsers.size();
+                    for (int i = 0; i < userSize; i++) {
+                        final UserData userData = mUsers.valueAt(i);
+                        if (userData.info.supportsSwitchToByUser()) {
+                            int firstSwitchable = userData.info.id;
+                            Slogf.i(LOG_TAG,
+                                    "Boot user is first switchable user %d", firstSwitchable);
+                            return firstSwitchable;
+                        }
+                    }
+                }
+                // No switchable users. Create the initial user.
+                final UserInfo newInitialUser = createInitialUserForHsum();
+                if (newInitialUser == null) {
+                    throw new UserManager.CheckedUserOperationException(
+                            "Initial user creation failed", USER_OPERATION_ERROR_UNKNOWN);
+                }
+                Slogf.i(LOG_TAG,
+                        "No switchable users. Boot user is new user %d", newInitialUser.id);
+                return newInitialUser.id;
+            }
+            // Not HSUM, return system user.
+            return UserHandle.USER_SYSTEM;
+        }
+
     } // class LocalService
 
 
@@ -7124,7 +7215,7 @@ public class UserManagerService extends IUserManager.Stub {
                     + restriction + " is enabled.";
             Slog.w(LOG_TAG, errorMessage);
             throw new UserManager.CheckedUserOperationException(errorMessage,
-                    UserManager.USER_OPERATION_ERROR_UNKNOWN);
+                    USER_OPERATION_ERROR_UNKNOWN);
         }
     }
 

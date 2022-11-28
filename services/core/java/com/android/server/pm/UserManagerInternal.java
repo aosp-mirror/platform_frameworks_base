@@ -485,4 +485,20 @@ public abstract class UserManagerInternal {
      * @see UserManager#isMainUser()
      */
     public abstract @UserIdInt int getMainUserId();
+
+    /**
+     * Returns the id of the user which should be in the foreground after boot completes.
+     *
+     * <p>If a boot user has been provided by calling {@link UserManager#setBootUser}, the
+     * returned value will be whatever was specified, as long as that user exists and can be
+     * switched to.
+     *
+     * <p>Otherwise, in {@link UserManager#isHeadlessSystemUserMode() headless system user mode},
+     * this will be the user who was last in the foreground on this device. If there is no
+     * switchable user on the device, a new user will be created and its id will be returned.
+     *
+     * <p>In non-headless system user mode, the return value will be {@link UserHandle#USER_SYSTEM}.
+     */
+    public abstract @UserIdInt int getBootUser()
+            throws UserManager.CheckedUserOperationException;
 }

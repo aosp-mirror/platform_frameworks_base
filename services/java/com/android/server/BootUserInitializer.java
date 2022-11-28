@@ -17,7 +17,6 @@ package com.android.server;
 
 import android.annotation.UserIdInt;
 import android.content.ContentResolver;
-import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -26,8 +25,6 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.Slogf;
 import com.android.server.utils.TimingsTraceAndSlog;
-
-import java.util.List;
 
 /**
  * Class responsible for booting the device in the proper user on headless system user mode.
@@ -56,50 +53,18 @@ final class BootUserInitializer {
         // this class or the setup wizard app
         provisionHeadlessSystemUser();
 
-        UserManagerInternal um = LocalServices.getService(UserManagerInternal.class);
-        t.traceBegin("get-existing-users");
-        List<UserInfo> existingUsers = um.getUsers(/* excludeDying= */ true);
-        t.traceEnd();
-
-        Slogf.d(TAG, "%d existing users", existingUsers.size());
-
-        int initialUserId = UserHandle.USER_NULL;
-
-        for (int i = 0; i < existingUsers.size(); i++) {
-            UserInfo user = existingUsers.get(i);
-            if (DEBUG) {
-                Slogf.d(TAG, "User at position %d: %s", i, user.toFullString());
-            }
-            if (user.id != UserHandle.USER_SYSTEM && user.isFull()) {
-                if (DEBUG) {
-                    Slogf.d(TAG, "Found initial user: %d", user.id);
-                }
-                initialUserId = user.id;
-                break;
-            }
-        }
-
-        if (initialUserId == UserHandle.USER_NULL) {
-            Slogf.d(TAG, "Creating initial user");
-            t.traceBegin("create-initial-user");
-            try {
-                int flags = UserInfo.FLAG_ADMIN | UserInfo.FLAG_MAIN;
-                // TODO(b/204091126): proper name for user
-                UserInfo newUser = um.createUserEvenWhenDisallowed("Real User",
-                        UserManager.USER_TYPE_FULL_SECONDARY, flags,
-                        /* disallowedPackages= */ null, /* token= */ null);
-                Slogf.i(TAG, "Created initial user: %s", newUser.toFullString());
-                initialUserId = newUser.id;
-            } catch (Exception e) {
-                Slogf.wtf(TAG, "failed to created initial user", e);
-                return;
-            } finally {
-                t.traceEnd(); // create-initial-user
-            }
-        }
-
         unlockSystemUser(t);
-        switchToInitialUser(initialUserId);
+
+        try {
+            t.traceBegin("getBootUser");
+            int bootUser = LocalServices.getService(UserManagerInternal.class).getBootUser();
+            t.traceEnd();
+            t.traceBegin("switchToBootUser-" + bootUser);
+            switchToBootUser(bootUser);
+            t.traceEnd();
+        } catch (UserManager.CheckedUserOperationException e) {
+            Slogf.wtf(TAG, "Failed to created boot user", e);
+        }
     }
 
     /* TODO(b/261791491): STOPSHIP - SUW should be responsible for this. */
@@ -152,12 +117,12 @@ final class BootUserInitializer {
         }
     }
 
-    private void switchToInitialUser(@UserIdInt int initialUserId) {
-        Slogf.i(TAG, "Switching to initial user %d", initialUserId);
-        boolean started = mAms.startUserInForegroundWithListener(initialUserId,
+    private void switchToBootUser(@UserIdInt int bootUserId) {
+        Slogf.i(TAG, "Switching to boot user %d", bootUserId);
+        boolean started = mAms.startUserInForegroundWithListener(bootUserId,
                 /* unlockListener= */ null);
         if (!started) {
-            Slogf.wtf(TAG, "Failed to start user %d in foreground", initialUserId);
+            Slogf.wtf(TAG, "Failed to start user %d in foreground", bootUserId);
         }
     }
 }

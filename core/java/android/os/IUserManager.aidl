@@ -142,4 +142,8 @@ interface IUserManager {
     long getUserStartRealtime();
     long getUserUnlockRealtime();
     boolean setUserEphemeral(int userId, boolean enableEphemeral);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS})")
+    void setBootUser(int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS})")
+    int getBootUser();
 }
