@@ -17,6 +17,8 @@
 package com.android.settingslib.spa.gallery.preference
 
 import android.os.Bundle
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AirplanemodeActive
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -34,6 +36,7 @@ import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.preference.SwitchPreference
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
+import com.android.settingslib.spa.widget.ui.SettingsIcon
 import kotlinx.coroutines.delay
 
 private const val TITLE = "Sample SwitchPreference"
@@ -70,6 +73,13 @@ object SwitchPreferencePageProvider : SettingsPageProvider {
                 .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     SampleNotChangeableSwitchPreference()
+                }.build()
+        )
+        entryList.add(
+            SettingsEntryBuilder.create( "SwitchPreference with icon", owner)
+                .setIsAllowSearch(true)
+                .setUiLayoutFn {
+                    SampleSwitchPreferenceWithIcon()
                 }.build()
         )
 
@@ -144,6 +154,21 @@ private fun SampleNotChangeableSwitchPreference() {
             override val changeable = stateOf(false)
             override val checked = checked
             override val onCheckedChange = { newChecked: Boolean -> checked.value = newChecked }
+        }
+    })
+}
+
+@Composable
+private fun SampleSwitchPreferenceWithIcon() {
+    val checked = rememberSaveable { mutableStateOf(true) }
+    SwitchPreference(remember {
+        object : SwitchPreferenceModel {
+            override val title = "SwitchPreference"
+            override val checked = checked
+            override val onCheckedChange = { newChecked: Boolean -> checked.value = newChecked }
+            override val icon = @Composable {
+                SettingsIcon(imageVector = Icons.Outlined.AirplanemodeActive)
+            }
         }
     })
 }

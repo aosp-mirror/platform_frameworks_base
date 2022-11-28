@@ -20,6 +20,8 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AirplanemodeActive
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
@@ -33,6 +35,7 @@ import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.util.EntryHighlight
 import com.android.settingslib.spa.framework.util.wrapOnSwitchWithLog
+import com.android.settingslib.spa.widget.ui.SettingsIcon
 import com.android.settingslib.spa.widget.ui.SettingsSwitch
 
 /**
@@ -49,6 +52,14 @@ interface SwitchPreferenceModel {
      */
     val summary: State<String>
         get() = stateOf("")
+
+    /**
+     * The icon of this [Preference].
+     *
+     * Default is `null` which means no icon.
+     */
+    val icon: (@Composable () -> Unit)?
+        get() = null
 
     /**
      * Indicates whether this [SwitchPreference] is checked.
@@ -84,6 +95,7 @@ fun SwitchPreference(model: SwitchPreferenceModel) {
         InternalSwitchPreference(
             title = model.title,
             summary = model.summary,
+            icon = model.icon,
             checked = model.checked,
             changeable = model.changeable,
             onCheckedChange = model.onCheckedChange,
@@ -95,6 +107,7 @@ fun SwitchPreference(model: SwitchPreferenceModel) {
 internal fun InternalSwitchPreference(
     title: String,
     summary: State<String> = "".toState(),
+    icon: @Composable (() -> Unit)? = null,
     checked: State<Boolean?>,
     changeable: State<Boolean> = true.toState(),
     paddingStart: Dp = SettingsDimension.itemPaddingStart,
@@ -125,6 +138,7 @@ internal fun InternalSwitchPreference(
         paddingStart = paddingStart,
         paddingEnd = paddingEnd,
         paddingVertical = paddingVertical,
+        icon = icon,
     ) {
         SettingsSwitch(
             checked = checked,
@@ -151,6 +165,15 @@ private fun SwitchPreferencePreview() {
                 summary = "Summary".toState(),
                 checked = false.toState(),
                 onCheckedChange = {},
+            )
+            InternalSwitchPreference(
+                title = "Use Dark theme",
+                summary = "Summary".toState(),
+                checked = true.toState(),
+                onCheckedChange = {},
+                icon = @Composable {
+                    SettingsIcon(imageVector = Icons.Outlined.AirplanemodeActive)
+                },
             )
         }
     }
