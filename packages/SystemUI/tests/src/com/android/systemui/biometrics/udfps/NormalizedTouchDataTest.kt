@@ -3,7 +3,6 @@ package com.android.systemui.biometrics.udfps
 import android.graphics.Rect
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.UdfpsOverlayParams
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,7 +16,7 @@ class NormalizedTouchDataTest(val testCase: TestCase) : SysuiTestCase() {
     @Test
     fun isWithinSensor() {
         val touchData = TOUCH_DATA.copy(x = testCase.x.toFloat(), y = testCase.y.toFloat())
-        val actual = touchData.isWithinSensor(OVERLAY_PARAMS)
+        val actual = touchData.isWithinSensor(SENSOR)
 
         assertThat(actual).isEqualTo(testCase.expected)
     }
@@ -66,7 +65,6 @@ private val TOUCH_DATA =
     )
 
 private val SENSOR = Rect(100 /* left */, 200 /* top */, 300 /* right */, 500 /* bottom */)
-private val OVERLAY_PARAMS = UdfpsOverlayParams(sensorBounds = SENSOR)
 
 private fun genTestCases(
     xs: List<Int>,

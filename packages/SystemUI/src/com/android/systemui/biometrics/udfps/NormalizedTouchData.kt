@@ -16,9 +16,8 @@
 
 package com.android.systemui.biometrics.udfps
 
-import android.graphics.RectF
+import android.graphics.Rect
 import android.view.MotionEvent
-import com.android.systemui.biometrics.UdfpsOverlayParams
 
 /** Touch data in natural orientation and native resolution. */
 data class NormalizedTouchData(
@@ -52,13 +51,15 @@ data class NormalizedTouchData(
 ) {
 
     /**
-     * [overlayParams] contains the location and dimensions of the sensor area, as well as the scale
-     * factor and orientation of the overlay. See [UdfpsOverlayParams].
+     * [nativeSensorBounds] contains the location and dimensions of the sensor area in native
+     * resolution and natural orientation.
      *
-     * Returns whether the given pointer is within the sensor's bounding box.
+     * Returns whether the coordinates of the given pointer are within the sensor's bounding box.
      */
-    fun isWithinSensor(overlayParams: UdfpsOverlayParams): Boolean {
-        val r = RectF(overlayParams.sensorBounds).apply { scale(1f / overlayParams.scaleFactor) }
-        return r.left <= x && r.right >= x && r.top <= y && r.bottom >= y
+    fun isWithinSensor(nativeSensorBounds: Rect): Boolean {
+        return nativeSensorBounds.left <= x &&
+            nativeSensorBounds.right >= x &&
+            nativeSensorBounds.top <= y &&
+            nativeSensorBounds.bottom >= y
     }
 }

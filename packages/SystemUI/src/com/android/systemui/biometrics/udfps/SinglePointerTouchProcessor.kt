@@ -116,7 +116,7 @@ private fun MotionEvent.preprocess(
     // TODO(b/253085297): Add multitouch support. pointerIndex can be > 0 for ACTION_MOVE.
     val pointerIndex = 0
     val touchData = normalize(pointerIndex, overlayParams)
-    val isWithinSensor = touchData.isWithinSensor(overlayParams)
+    val isWithinSensor = touchData.isWithinSensor(overlayParams.nativeSensorBounds)
     return PreprocessedTouch(touchData, previousPointerOnSensorId, isWithinSensor)
 }
 
