@@ -2072,6 +2072,13 @@ public final class NotificationPanelViewController implements Dumpable {
                 mInitialTouchX = x;
                 initVelocityTracker();
                 trackMovement(event);
+                float qsExpansionFraction = computeQsExpansionFraction();
+                // Intercept the touch if QS is between fully collapsed and fully expanded state
+                if (qsExpansionFraction > 0.0 && qsExpansionFraction < 1.0) {
+                    mShadeLog.logMotionEvent(event,
+                            "onQsIntercept: down action, QS partially expanded/collapsed");
+                    return true;
+                }
                 if (mKeyguardShowing
                         && shouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, 0)) {
                     // Dragging down on the lockscreen statusbar should prohibit other interactions
@@ -2324,6 +2331,13 @@ public final class NotificationPanelViewController implements Dumpable {
         if (!isFullyCollapsed()) {
             handleQsDown(event);
         }
+        // defer touches on QQS to shade while shade is collapsing. Added margin for error
+        // as sometimes the qsExpansionFraction can be a tiny value instead of 0 when in QQS.
+        if (computeQsExpansionFraction() <= 0.01 && getExpandedFraction() < 1.0) {
+            mShadeLog.logMotionEvent(event,
+                    "handleQsTouch: QQS touched while shade collapsing");
+            mQsTracking = false;
+        }
         if (!mQsExpandImmediate && mQsTracking) {
             onQsTouch(event);
             if (!mConflictingQsExpansionGesture && !mSplitShadeEnabled) {
@@ -2564,7 +2578,6 @@ public final class NotificationPanelViewController implements Dumpable {
         // Reset scroll position and apply that position to the expanded height.
         float height = mQsExpansionHeight;
         setQsExpansionHeight(height);
-        updateExpandedHeightToMaxHeight();
         mNotificationStackScrollLayoutController.checkSnoozeLeavebehind();
 
         // When expanding QS, let's authenticate the user if possible,
