@@ -146,7 +146,7 @@ public abstract class WindowProviderService extends Service implements WindowPro
 
     @SuppressLint("OnNameExpected")
     @Override
-    public void onConfigurationChanged(@Nullable Configuration configuration) {
+    public void onConfigurationChanged(@NonNull Configuration configuration) {
         // This is only called from WindowTokenClient.
         mCallbacksController.dispatchConfigurationChanged(configuration);
     }
