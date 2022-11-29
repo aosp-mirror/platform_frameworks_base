@@ -20,13 +20,18 @@ import android.accessibilityservice.AccessibilityGestureEvent;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
+import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.accessibilityservice.MagnificationConfig;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ResolveInfo;
 import android.graphics.Region;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
@@ -34,14 +39,15 @@ import android.view.inputmethod.EditorInfo;
 import com.android.internal.inputmethod.IAccessibilityInputMethodSessionCallback;
 import com.android.internal.inputmethod.RemoteAccessibilityInputConnection;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
  * Allows a privileged app - an app with MANAGE_ACCESSIBILITY permission and SystemAPI access - to
  * interact with the windows in the display that this proxy represents. Proxying the default display
- * or a display that is not tracked will throw an exception. Only the real user has access to global
- * clients like SystemUI.
+ * or a display that is not tracked by accessibility, such as private displays, will throw an
+ * exception. Only the real user has access to global clients like SystemUI.
  *
  * <p>
  * To register and unregister a proxy, use
@@ -49,7 +55,16 @@ import java.util.concurrent.Executor;
  * and {@link AccessibilityManager#unregisterDisplayProxy(AccessibilityDisplayProxy)}. If the app
  * that has registered the proxy dies, the system will remove the proxy.
  *
- * TODO(241429275): Complete proxy impl and add additional support (if necessary) like cache methods
+ * <p>
+ * Avoid using the app's main thread. Proxy methods such as {@link #getWindows} and node methods
+ * like {@link AccessibilityNodeInfo#getChild(int)} will happen frequently. Node methods may also
+ * wait on the displayed app's UI thread to obtain accurate screen data.
+ *
+ * <p>
+ * To get a list of {@link AccessibilityServiceInfo}s that have populated {@link ComponentName}s and
+ * {@link ResolveInfo}s, retrieve the list using {@link #getInstalledAndEnabledServices()} after
+ * {@link #onProxyConnected()} has been called.
+ *
  * @hide
  */
 @SystemApi
@@ -91,7 +106,134 @@ public abstract class AccessibilityDisplayProxy {
     }
 
     /**
-     * An IAccessibilityServiceClient that handles interrupts and accessibility events.
+     * Handles {@link android.view.accessibility.AccessibilityEvent}s.
+     * <p>
+     * AccessibilityEvents represent changes to the UI, or what parts of the node tree have changed.
+     * AccessibilityDisplayProxy should use these to query new UI and send appropriate feedback
+     * to their users.
+     * <p>
+     * For example, a {@link AccessibilityEvent#TYPE_WINDOWS_CHANGED} indicates a change in windows,
+     * so a proxy may query {@link #getWindows} to obtain updated UI and potentially inform of a new
+     * window title. Or a proxy may emit an earcon on a
+     * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
+     */
+    public void onAccessibilityEvent(@NonNull AccessibilityEvent event) {
+        // Default no-op
+    }
+
+    /**
+     * Handles a successful system connection after
+     * {@link AccessibilityManager#registerDisplayProxy(AccessibilityDisplayProxy)} is called.
+     *
+     * <p>
+     * At this point, querying for UI is available and {@link AccessibilityEvent}s will begin being
+     * sent. An AccessibilityDisplayProxy may instantiate core infrastructure components here.
+     */
+    public void onProxyConnected() {
+        // Default no-op
+    }
+
+    /**
+     * Handles a request to interrupt the accessibility feedback.
+     * <p>
+     * AccessibilityDisplayProxy should interrupt the accessibility activity occurring on its
+     * display. For example, a screen reader may interrupt speech.
+     *
+     * @see AccessibilityManager#interrupt()
+     * @see AccessibilityService#onInterrupt()
+     */
+    public void interrupt() {
+        // Default no-op
+    }
+
+    /**
+     * Gets the focus of the window specified by {@code windowInfo}.
+     *
+     * @param windowInfo the window to search
+     * @param focus The focus to find. One of {@link AccessibilityNodeInfo#FOCUS_INPUT} or
+     * {@link AccessibilityNodeInfo#FOCUS_ACCESSIBILITY}.
+     * @return The node info of the focused view or null.
+     * @hide
+     * TODO(254545943): Do not expose until support for accessibility focus and/or input is in place
+     */
+    @Nullable
+    public AccessibilityNodeInfo findFocus(@NonNull AccessibilityWindowInfo windowInfo, int focus) {
+        AccessibilityNodeInfo windowRoot = windowInfo.getRoot();
+        return windowRoot != null ? windowRoot.findFocus(focus) : null;
+    }
+
+    /**
+     * Gets the windows of the tracked display.
+     *
+     * @see AccessibilityService#getWindows()
+     */
+    @NonNull
+    public List<AccessibilityWindowInfo> getWindows() {
+        return AccessibilityInteractionClient.getInstance().getWindowsOnDisplay(mConnectionId,
+                mDisplayId);
+    }
+
+    /**
+     * Sets the list of {@link AccessibilityServiceInfo}s describing the services interested in the
+     * {@link AccessibilityDisplayProxy}'s display.
+     *
+     * <p>These represent a11y features and services that are installed and running. These should
+     * not include {@link AccessibilityService}s installed on the phone.
+     *
+     * @param installedAndEnabledServices the list of installed and running a11y services.
+     */
+    public void setInstalledAndEnabledServices(
+            @NonNull List<AccessibilityServiceInfo> installedAndEnabledServices) {
+        mInstalledAndEnabledServices = installedAndEnabledServices;
+        sendServiceInfos();
+    }
+
+    /**
+     * Sets the {@link AccessibilityServiceInfo} for this service if the latter is
+     * properly set and there is an {@link IAccessibilityServiceConnection} to the
+     * AccessibilityManagerService.
+     */
+    private void sendServiceInfos() {
+        IAccessibilityServiceConnection connection =
+                AccessibilityInteractionClient.getInstance().getConnection(mConnectionId);
+        if (mInstalledAndEnabledServices != null && mInstalledAndEnabledServices.size() > 0
+                && connection != null) {
+            try {
+                connection.setInstalledAndEnabledServices(mInstalledAndEnabledServices);
+                AccessibilityInteractionClient.getInstance().clearCache(mConnectionId);
+            } catch (RemoteException re) {
+                Log.w(LOG_TAG, "Error while setting AccessibilityServiceInfos", re);
+                re.rethrowFromSystemServer();
+            }
+        }
+        mInstalledAndEnabledServices = null;
+    }
+
+    /**
+     * Gets the list of {@link AccessibilityServiceInfo}s describing the services interested in the
+     * {@link AccessibilityDisplayProxy}'s display.
+     *
+     * @return The {@link AccessibilityServiceInfo}s of interested services.
+     * @see AccessibilityServiceInfo
+     */
+    @NonNull
+    public final List<AccessibilityServiceInfo> getInstalledAndEnabledServices() {
+        IAccessibilityServiceConnection connection =
+                AccessibilityInteractionClient.getInstance().getConnection(mConnectionId);
+        if (connection != null) {
+            try {
+                return connection.getInstalledAndEnabledServices();
+            } catch (RemoteException re) {
+                Log.w(LOG_TAG, "Error while getting AccessibilityServiceInfo", re);
+                re.rethrowFromSystemServer();
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * An IAccessibilityServiceClient that handles interrupts, accessibility events, and system
+     * connection.
      */
     private class IAccessibilityServiceClientImpl extends
             AccessibilityService.IAccessibilityServiceClientWrapper {
@@ -100,17 +242,24 @@ public abstract class AccessibilityDisplayProxy {
             super(context, executor, new AccessibilityService.Callbacks() {
                 @Override
                 public void onAccessibilityEvent(AccessibilityEvent event) {
-                    // TODO: call AccessiiblityProxy.onAccessibilityEvent
+                    // TODO(254545943): Remove check when event processing is done more upstream in
+                    // AccessibilityManagerService.
+                    if (event.getDisplayId() == mDisplayId) {
+                        AccessibilityDisplayProxy.this.onAccessibilityEvent(event);
+                    }
                 }
 
                 @Override
                 public void onInterrupt() {
-                    // TODO: call AccessiiblityProxy.onInterrupt
+                    AccessibilityDisplayProxy.this.interrupt();
                 }
+
                 @Override
                 public void onServiceConnected() {
-                    // TODO: send service infos and call AccessiiblityProxy.onProxyConnected
+                    AccessibilityDisplayProxy.this.sendServiceInfos();
+                    AccessibilityDisplayProxy.this.onProxyConnected();
                 }
+
                 @Override
                 public void init(int connectionId, IBinder windowToken) {
                     mConnectionId = connectionId;
