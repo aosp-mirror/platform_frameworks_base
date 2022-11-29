@@ -16,13 +16,19 @@
 
 package com.android.server.tare;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
+import android.content.Context;
+import android.content.PermissionChecker;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.RemoteException;
+
+import com.android.internal.util.ArrayUtils;
 
 /** POJO to cache only the information about installed packages that TARE cares about. */
 class InstalledPackageInfo {
@@ -31,14 +37,22 @@ class InstalledPackageInfo {
     public final int uid;
     public final String packageName;
     public final boolean hasCode;
+    public final boolean isSystemInstaller;
     @Nullable
     public final String installerPackageName;
 
-    InstalledPackageInfo(@NonNull PackageInfo packageInfo) {
+    InstalledPackageInfo(@NonNull Context context, @NonNull PackageInfo packageInfo) {
         final ApplicationInfo applicationInfo = packageInfo.applicationInfo;
         uid = applicationInfo == null ? NO_UID : applicationInfo.uid;
         packageName = packageInfo.packageName;
         hasCode = applicationInfo != null && applicationInfo.hasCode();
+        isSystemInstaller = applicationInfo != null
+                && ArrayUtils.indexOf(
+                packageInfo.requestedPermissions, Manifest.permission.INSTALL_PACKAGES) >= 0
+                && PackageManager.PERMISSION_GRANTED
+                == PermissionChecker.checkPermissionForPreflight(context,
+                Manifest.permission.INSTALL_PACKAGES, PermissionChecker.PID_UNKNOWN,
+                applicationInfo.uid, packageName);
         InstallSourceInfo installSourceInfo = null;
         try {
             installSourceInfo = AppGlobals.getPackageManager().getInstallSourceInfo(packageName);

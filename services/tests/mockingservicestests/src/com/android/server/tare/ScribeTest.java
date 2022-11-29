@@ -402,6 +402,6 @@ public class ScribeTest {
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = UserHandle.getUid(userId, Math.abs(pkgName.hashCode()));
         pkgInfo.applicationInfo = applicationInfo;
-        mInstalledPackages.add(userId, pkgName, new InstalledPackageInfo(pkgInfo));
+        mInstalledPackages.add(userId, pkgName, new InstalledPackageInfo(getContext(), pkgInfo));
     }
 }

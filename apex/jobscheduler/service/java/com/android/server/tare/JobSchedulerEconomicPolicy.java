@@ -117,6 +117,7 @@ import static com.android.server.tare.Modifier.COST_MODIFIER_CHARGING;
 import static com.android.server.tare.Modifier.COST_MODIFIER_DEVICE_IDLE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_POWER_SAVE_MODE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_PROCESS_STATE;
+import static com.android.server.tare.TareUtils.appToString;
 import static com.android.server.tare.TareUtils.cakeToString;
 
 import android.annotation.NonNull;
@@ -209,6 +210,22 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
     long getMaxSatiatedBalance(int userId, @NonNull String pkgName) {
         if (mIrs.isPackageRestricted(userId, pkgName)) {
             return 0;
+        }
+        final InstalledPackageInfo ipo = mIrs.getInstalledPackageInfo(userId, pkgName);
+        if (ipo == null) {
+            Slog.wtfStack(TAG,
+                    "Tried to get max balance of invalid app: " + appToString(userId, pkgName));
+        } else {
+            // A system installer's max balance is elevated for some time after first boot so
+            // they can use jobs to download and install apps.
+            if (ipo.isSystemInstaller) {
+                final long timeSinceFirstSetupMs = mIrs.getRealtimeSinceFirstSetupMs();
+                final boolean stillExempted = timeSinceFirstSetupMs
+                        < InternalResourceService.INSTALLER_FIRST_SETUP_GRACE_PERIOD_MS;
+                if (stillExempted) {
+                    return mMaxSatiatedConsumptionLimit;
+                }
+            }
         }
         return mMaxSatiatedBalance;
     }
