@@ -34,6 +34,7 @@ ndk_library {
 
 cc_defaults {
     name: "libandroid_defaults",
+    cpp_std: "gnu++20",
     cflags: [
         "-Wall",
         "-Werror",
