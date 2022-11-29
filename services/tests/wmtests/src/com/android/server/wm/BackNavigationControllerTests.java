@@ -114,6 +114,20 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     }
 
     @Test
+    public void backTypeBackToHomeDifferentUser() {
+        Task taskA = createTask(mDefaultDisplay);
+        ActivityRecord recordA = createActivityRecord(taskA);
+        Mockito.doNothing().when(recordA).reparentSurfaceControl(any(), any());
+        doReturn(false).when(taskA).showToCurrentUser();
+
+        withSystemCallback(createTopTaskWithActivity());
+        BackNavigationInfo backNavigationInfo = startBackNavigation();
+        assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
+        assertThat(typeToString(backNavigationInfo.getType()))
+                .isEqualTo(typeToString(BackNavigationInfo.TYPE_RETURN_TO_HOME));
+    }
+
+    @Test
     public void backTypeCrossActivityWhenBackToPreviousActivity() {
         CrossActivityTestCase testCase = createTopTaskWithTwoActivities();
         IOnBackInvokedCallback callback = withSystemCallback(testCase.task);

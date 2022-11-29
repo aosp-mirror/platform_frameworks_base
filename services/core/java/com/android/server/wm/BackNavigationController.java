@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
@@ -226,9 +227,8 @@ class BackNavigationController {
 
             mBackAnimationInProgress = true;
             // We don't have an application callback, let's find the destination of the back gesture
-            Task finalTask = currentTask;
-            prevActivity = currentTask.getActivity(
-                    (r) -> !r.finishing && r.getTask() == finalTask && !r.isTopRunningActivity());
+            // The search logic should align with ActivityClientController#finishActivity
+            prevActivity = currentTask.topRunningActivity(currentActivity.token, INVALID_TASK_ID);
             // TODO Dialog window does not need to attach on activity, check
             // window.mAttrs.type != TYPE_BASE_APPLICATION
             if ((window.getParent().getChildCount() > 1
@@ -244,12 +244,14 @@ class BackNavigationController {
             } else if (currentTask.returnsToHomeRootTask()) {
                 // Our Task should bring back to home
                 removedWindowContainer = currentTask;
+                prevTask = currentTask.getDisplayArea().getRootHomeTask();
                 backType = BackNavigationInfo.TYPE_RETURN_TO_HOME;
                 mShowWallpaper = true;
             } else if (currentActivity.isRootOfTask()) {
                 // TODO(208789724): Create single source of truth for this, maybe in
                 //  RootWindowContainer
-                prevTask = currentTask.mRootWindowContainer.getTaskBelow(currentTask);
+                prevTask = currentTask.mRootWindowContainer.getTask(Task::showToCurrentUser,
+                        currentTask, false /*includeBoundary*/, true /*traverseTopToBottom*/);
                 removedWindowContainer = currentTask;
                 // If it reaches the top activity, we will check the below task from parent.
                 // If it's null or multi-window, fallback the type to TYPE_CALLBACK.
@@ -423,6 +425,11 @@ class BackNavigationController {
 
         void reset(@NonNull WindowContainer close, @NonNull WindowContainer open) {
             clearBackAnimateTarget(null);
+            if (close == null || open == null) {
+                Slog.e(TAG, "reset animation with null target close: "
+                        + close + " open: " + open);
+                return;
+            }
             if (close.asActivityRecord() != null && open.asActivityRecord() != null
                     && (close.asActivityRecord().getTask() == open.asActivityRecord().getTask())) {
                 mSwitchType = ACTIVITY_SWITCH;
