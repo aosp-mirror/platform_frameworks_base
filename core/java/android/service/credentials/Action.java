@@ -27,8 +27,6 @@ import java.util.Objects;
 /**
  * An action defined by the provider that intents into the provider's app for specific
  * user actions.
- *
- * @hide
  */
 public final class Action implements Parcelable {
     /** Slice object containing display content to be displayed with this action on the UI. */
@@ -38,6 +36,13 @@ public final class Action implements Parcelable {
 
     /**
      * Constructs an action to be displayed on the UI.
+     *
+     * <p> Actions must be used for any provider related operations, such as opening the provider
+     * app, intenting straight into certain app activities like 'manage credentials', top
+     * level authentication before displaying any content etc.
+     *
+     * <p> See details on usage of {@code Action} for various actionable entries in
+     * {@link BeginCreateCredentialResponse} and {@link GetCredentialsResponse}.
      *
      * @param slice the display content to be displayed on the UI, along with this action
      * @param pendingIntent the intent to be invoked when the user selects this action

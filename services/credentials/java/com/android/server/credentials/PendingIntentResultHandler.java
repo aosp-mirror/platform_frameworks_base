@@ -22,7 +22,7 @@ import android.credentials.CreateCredentialResponse;
 import android.credentials.Credential;
 import android.credentials.ui.ProviderPendingIntentResponse;
 import android.service.credentials.CredentialProviderService;
-import android.service.credentials.CredentialsDisplayContent;
+import android.service.credentials.CredentialsResponseContent;
 
 /**
  * Helper class for setting up pending intent, and extracting objects from it.
@@ -37,14 +37,15 @@ public class PendingIntentResultHandler {
         return pendingIntentResponse.getResultCode() == Activity.RESULT_OK;
     }
 
-    /** Extracts the {@link CredentialsDisplayContent} object added to the result data. */
-    public static CredentialsDisplayContent extractCredentialsDisplayContent(Intent resultData) {
+    /** Extracts the {@link CredentialsResponseContent} object added to the result data. */
+    public static CredentialsResponseContent extractResponseContent(Intent resultData) {
         if (resultData == null) {
             return null;
         }
         return resultData.getParcelableExtra(
-                CredentialProviderService.EXTRA_GET_CREDENTIALS_DISPLAY_CONTENT,
-                CredentialsDisplayContent.class);
+                CredentialProviderService
+                        .EXTRA_GET_CREDENTIALS_CONTENT_RESULT,
+                CredentialsResponseContent.class);
     }
 
     /** Extracts the {@link CreateCredentialResponse} object added to the result data. */
@@ -53,7 +54,7 @@ public class PendingIntentResultHandler {
             return null;
         }
         return resultData.getParcelableExtra(
-                CredentialProviderService.EXTRA_CREATE_CREDENTIAL_RESPONSE,
+                CredentialProviderService.EXTRA_CREATE_CREDENTIAL_RESULT,
                 CreateCredentialResponse.class);
     }
 
@@ -63,7 +64,7 @@ public class PendingIntentResultHandler {
             return null;
         }
         return resultData.getParcelableExtra(
-                CredentialProviderService.EXTRA_GET_CREDENTIAL,
+                CredentialProviderService.EXTRA_CREDENTIAL_RESULT,
                 Credential.class);
     }
 }

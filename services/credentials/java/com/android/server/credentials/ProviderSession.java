@@ -23,7 +23,7 @@ import android.content.Context;
 import android.credentials.Credential;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
-import android.service.credentials.Action;
+import android.service.credentials.CredentialEntry;
 import android.service.credentials.CredentialProviderException;
 import android.service.credentials.CredentialProviderInfo;
 import android.util.Pair;
@@ -50,7 +50,7 @@ public abstract class ProviderSession<T, R>
     @Nullable protected Credential mFinalCredentialResponse;
     @NonNull protected final T mProviderRequest;
     @Nullable protected R mProviderResponse;
-    @Nullable protected Pair<String, Action> mUiRemoteEntry;
+    @Nullable protected Pair<String, CredentialEntry> mUiRemoteEntry;
 
     /**
      * Returns true if the given status reflects that the provider state is ready to be shown

@@ -29,8 +29,6 @@ import java.util.Objects;
 
 /**
  * Request for getting user's credentials from a given credential provider.
- *
- * @hide
  */
 public final class GetCredentialsRequest implements Parcelable {
     /** Calling package of the app requesting for credentials. */

@@ -31,8 +31,6 @@ import java.util.Objects;
 /**
  * A credential entry that is displayed on the account selector UI. Each entry corresponds to
  * something that the user can select.
- *
- * @hide
  */
 public final class CredentialEntry implements Parcelable {
     /** The type of the credential entry to be shown on the UI. */
@@ -145,61 +143,67 @@ public final class CredentialEntry implements Parcelable {
         private boolean mAutoSelectAllowed = false;
 
         /**
-         * Builds the instance.
+         * Creates a builder for a {@link CredentialEntry} that should invoke a
+         * {@link PendingIntent} when selected by the user.
+         *
+         * <p>The {@code pendingIntent} can be used to launch activities that require some user
+         * engagement before getting the credential corresponding to this entry,
+         * e.g. authentication, confirmation etc.
+         * Once the activity fulfills the required user engagement, the
+         * {@link android.app.Activity} result should be set to
+         * {@link android.app.Activity#RESULT_OK}, and the
+         * {@link CredentialProviderService#EXTRA_CREDENTIAL_RESULT} must be set with a
+         * {@link Credential} object.
+         *
          * @param type the type of credential underlying this credential entry
          * @param slice the content to be displayed with this entry on the UI
+         * @param pendingIntent the pendingIntent to be invoked when this entry is selected by the
+         *                      user
          *
-         * @throws IllegalArgumentException If {@code type} is null or empty.
-         * @throws NullPointerException If {@code slice} is null.
+         * @throws NullPointerException If {@code slice}, or {@code pendingIntent} is null.
+         * @throws IllegalArgumentException If {@code type} is null or empty, or if
+         * {@code pendingIntent} was not created with {@link PendingIntent#getActivity}
+         * or {@link PendingIntent#getActivities}.
          */
-        public Builder(@NonNull String type, @NonNull Slice slice) {
+        public Builder(@NonNull String type, @NonNull Slice slice,
+                @NonNull PendingIntent pendingIntent) {
             mType = Preconditions.checkStringNotEmpty(type, "type must not be "
                     + "null, or empty");
             mSlice = Objects.requireNonNull(slice,
                     "slice must not be null");
+            mPendingIntent = Objects.requireNonNull(pendingIntent,
+                    "pendingIntent must not be null");
+            if (!mPendingIntent.isActivity()) {
+                throw new IllegalStateException("Pending intent must start an activity");
+            }
         }
 
         /**
-         * Sets the pendingIntent to be invoked if the user selects this entry.
+         * Creates a builder for a {@link CredentialEntry} that contains a {@link Credential},
+         * and does not require further action.
+         * @param type the type of credential underlying this credential entry
+         * @param slice the content to be displayed with this entry on the UI
+         * @param credential the credential to be returned to the client app, when this entry is
+         *                   selected by the user
          *
-         * The pending intent can be used to launch activities that require some user engagement
-         * before getting the credential corresponding to this entry, e.g. authentication,
-         * confirmation etc.
-         * Once the activity fulfills the required user engagement, a {@link Credential} object
-         * must be returned as an extra on activity finish.
-         *
-         * @throws IllegalStateException If {@code credential} is already set. Must either set the
-         * {@code credential}, or the {@code pendingIntent}.
+         * @throws IllegalArgumentException If {@code type} is null or empty.
+         * @throws NullPointerException If {@code slice}, or {@code credential} is null.
          */
-        public @NonNull Builder setPendingIntent(@Nullable PendingIntent pendingIntent) {
-            if (pendingIntent != null) {
-                Preconditions.checkState(mCredential == null,
-                        "credential is already set. Cannot set both the pendingIntent "
-                                + "and the credential");
-            }
-            mPendingIntent = pendingIntent;
-            return this;
-        }
-
-        /**
-         * Sets the credential to be used, if the user selects this entry.
-         *
-         * @throws IllegalStateException If {@code pendingIntent} is already set. Must either set
-         * the {@code pendingIntent}, or the {@code credential}.
-         */
-        public @NonNull Builder setCredential(@Nullable Credential credential) {
-            if (credential != null) {
-                Preconditions.checkState(mPendingIntent == null,
-                        "pendingIntent is already set. Cannot set both the "
-                                + "pendingIntent and the credential");
-            }
-            mCredential = credential;
-            return this;
+        public Builder(@NonNull String type, @NonNull Slice slice, @NonNull Credential credential) {
+            mType = Preconditions.checkStringNotEmpty(type, "type must not be "
+                    + "null, or empty");
+            mSlice = Objects.requireNonNull(slice,
+                    "slice must not be null");
+            mCredential = Objects.requireNonNull(credential,
+                    "credential must not be null");
         }
 
         /**
          * Sets whether the entry is allowed to be auto selected by the framework.
          * The default value is set to false.
+         *
+         * <p> The entry is only auto selected if it is the only entry on the user selector,
+         * AND the developer has also enabled auto select, while building the request.
          */
         public @NonNull Builder setAutoSelectAllowed(@NonNull boolean autoSelectAllowed) {
             mAutoSelectAllowed = autoSelectAllowed;

@@ -26,9 +26,11 @@ import com.android.internal.util.Preconditions;
 import java.util.Objects;
 
 /**
- * Request for creating a credential.
+ * Request for beginning a create credential request.
+ *
+ * See {@link BeginCreateCredentialResponse} for the counterpart response
  */
-public final class CreateCredentialRequest implements Parcelable {
+public final class BeginCreateCredentialRequest implements Parcelable {
     private final @NonNull String mCallingPackage;
     private final @NonNull String mType;
     private final @NonNull Bundle mData;
@@ -40,7 +42,7 @@ public final class CreateCredentialRequest implements Parcelable {
      * null or empty.
      * @throws NullPointerException If {@code data} is null.
      */
-    public CreateCredentialRequest(@NonNull String callingPackage,
+    public BeginCreateCredentialRequest(@NonNull String callingPackage,
             @NonNull String type, @NonNull Bundle data) {
         mCallingPackage = Preconditions.checkStringNotEmpty(callingPackage,
                 "callingPackage must not be null or empty");
@@ -49,22 +51,22 @@ public final class CreateCredentialRequest implements Parcelable {
         mData = Objects.requireNonNull(data, "data must not be null");
     }
 
-    private CreateCredentialRequest(@NonNull Parcel in) {
+    private BeginCreateCredentialRequest(@NonNull Parcel in) {
         mCallingPackage = in.readString8();
         mType = in.readString8();
-        mData = in.readTypedObject(Bundle.CREATOR);
+        mData = in.readBundle(Bundle.class.getClassLoader());
     }
 
-    public static final @NonNull Creator<CreateCredentialRequest> CREATOR =
-            new Creator<CreateCredentialRequest>() {
+    public static final @NonNull Creator<BeginCreateCredentialRequest> CREATOR =
+            new Creator<BeginCreateCredentialRequest>() {
                 @Override
-                public CreateCredentialRequest createFromParcel(@NonNull Parcel in) {
-                    return new CreateCredentialRequest(in);
+                public BeginCreateCredentialRequest createFromParcel(@NonNull Parcel in) {
+                    return new BeginCreateCredentialRequest(in);
                 }
 
                 @Override
-                public CreateCredentialRequest[] newArray(int size) {
-                    return new CreateCredentialRequest[size];
+                public BeginCreateCredentialRequest[] newArray(int size) {
+                    return new BeginCreateCredentialRequest[size];
                 }
             };
 
@@ -77,7 +79,7 @@ public final class CreateCredentialRequest implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mCallingPackage);
         dest.writeString8(mType);
-        dest.writeTypedObject(mData, flags);
+        dest.writeBundle(mData);
     }
 
     /** Returns the calling package of the calling app. */
@@ -92,7 +94,7 @@ public final class CreateCredentialRequest implements Parcelable {
         return mType;
     }
 
-    /** Returns the data to be used while creating the credential. */
+    /** Returns the data to be used while resolving the credential to create. */
     @NonNull
     public Bundle getData() {
         return mData;

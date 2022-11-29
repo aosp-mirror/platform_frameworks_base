@@ -39,6 +39,7 @@ import android.graphics.drawable.Icon
 import android.os.Binder
 import android.os.Bundle
 import android.os.ResultReceiver
+import android.service.credentials.CredentialProviderService
 import com.android.credentialmanager.createflow.ActiveEntry
 import com.android.credentialmanager.createflow.CreateCredentialUiState
 import com.android.credentialmanager.createflow.CreateScreenState
@@ -390,11 +391,12 @@ class CredentialManagerRepo(
       intent, (PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
               or PendingIntent.FLAG_ONE_SHOT))
     val createPasswordRequest = android.service.credentials.CreateCredentialRequest(
-      context.applicationInfo.packageName,
-      "PASSWORD",
-      toBundle("beckett-bakert@gmail.com", "password123")
+            context.applicationInfo.packageName,
+            TYPE_PASSWORD_CREDENTIAL,
+            toBundle("beckett-bakert@gmail.com", "password123")
     )
-    val fillInIntent = Intent().putExtra("create_request_params", createPasswordRequest)
+    val fillInIntent = Intent().putExtra(CredentialProviderService.EXTRA_CREATE_CREDENTIAL_REQUEST,
+            createPasswordRequest)
 
     val slice = Slice.Builder(
       Entry.CREDENTIAL_MANAGER_ENTRY_URI, SliceSpec(Entry.VERSION, 1)
