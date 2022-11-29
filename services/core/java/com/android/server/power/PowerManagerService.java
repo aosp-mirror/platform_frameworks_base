@@ -2197,6 +2197,15 @@ public final class PowerManagerService extends SystemService
                     if (sQuiescent) {
                         mDirty |= DIRTY_QUIESCENT;
                     }
+                    PowerGroup defaultGroup = mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP);
+                    if (defaultGroup.getWakefulnessLocked() == WAKEFULNESS_DOZING) {
+                        // Workaround for b/187231320 where the AOD can get stuck in a "half on /
+                        // half off" state when a non-default-group VirtualDisplay causes the global
+                        // wakefulness to change to awake, even though the default display is
+                        // dozing. We set sandman summoned to restart dreaming to get it unstuck.
+                        // TODO(b/255688811) - fix this so that AOD never gets interrupted at all.
+                        defaultGroup.setSandmanSummonedLocked(true);
+                    }
                     break;
 
                 case WAKEFULNESS_ASLEEP:
