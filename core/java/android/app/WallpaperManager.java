@@ -1132,9 +1132,23 @@ public class WallpaperManager {
      * @return the dimensions of system wallpaper
      * @hide
      */
+    @Nullable
     public Rect peekBitmapDimensions() {
         return sGlobals.peekWallpaperDimensions(
                 mContext, true /* returnDefault */, mContext.getUserId());
+    }
+
+    /**
+     * Peek the dimensions of given wallpaper of the user without decoding it.
+     *
+     * @param which Wallpaper type. Must be either {@link #FLAG_SYSTEM} or
+     *     {@link #FLAG_LOCK}.
+     * @return the dimensions of system wallpaper
+     * @hide
+     */
+    @Nullable
+    public Rect peekBitmapDimensions(@SetWallpaperFlags int which) {
+        return peekBitmapDimensions();
     }
 
     /**

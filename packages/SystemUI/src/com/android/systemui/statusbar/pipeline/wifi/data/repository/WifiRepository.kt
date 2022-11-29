@@ -36,6 +36,9 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
+import com.android.systemui.statusbar.pipeline.dagger.WifiTableLog
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.SB_LOGGING_TAG
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logInputChange
@@ -82,6 +85,7 @@ class WifiRepositoryImpl @Inject constructor(
     broadcastDispatcher: BroadcastDispatcher,
     connectivityManager: ConnectivityManager,
     logger: ConnectivityPipelineLogger,
+    @WifiTableLog wifiTableLogBuffer: TableLogBuffer,
     @Main mainExecutor: Executor,
     @Application scope: CoroutineScope,
     wifiManager: WifiManager?,
@@ -199,6 +203,12 @@ class WifiRepositoryImpl @Inject constructor(
 
         awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
     }
+        .distinctUntilChanged()
+        .logDiffsForTable(
+            wifiTableLogBuffer,
+            columnPrefix = "wifiNetwork",
+            initialValue = WIFI_NETWORK_DEFAULT,
+        )
         // There will be multiple wifi icons in different places that will frequently
         // subscribe/unsubscribe to flows as the views attach/detach. Using [stateIn] ensures that
         // new subscribes will get the latest value immediately upon subscription. Otherwise, the
