@@ -71,9 +71,10 @@ public class EventLoggerTest {
         }
 
         @Test
-        public void testThatPrintWriterProducesEmptyListFromEmptyLog() {
+        public void testThatPrintWriterProducesOnlyTitleFromEmptyLog() {
             mEventLogger.dump(mTestPrintWriter);
-            assertThat(mTestStringWriter.toString()).isEmpty();
+            assertThat(mTestStringWriter.toString())
+                    .isEqualTo(mEventLogger.getDumpTitle() + "\n");
         }
     }
 
@@ -87,27 +88,27 @@ public class EventLoggerTest {
                         // insertion order, max size is 3
                         new EventLogger.Event[] { TEST_EVENT_1, TEST_EVENT_2 },
                         // expected events
-                        new EventLogger.Event[] { TEST_EVENT_2, TEST_EVENT_1 }
+                        new EventLogger.Event[] { TEST_EVENT_1, TEST_EVENT_2 }
                     },
                     {
                         // insertion order, max size is 3
                         new EventLogger.Event[] { TEST_EVENT_1, TEST_EVENT_3, TEST_EVENT_2 },
                         // expected events
-                        new EventLogger.Event[] { TEST_EVENT_2, TEST_EVENT_3, TEST_EVENT_1 }
+                        new EventLogger.Event[] { TEST_EVENT_1, TEST_EVENT_3, TEST_EVENT_2 }
                     },
                     {
                         // insertion order, max size is 3
                         new EventLogger.Event[] { TEST_EVENT_1, TEST_EVENT_2, TEST_EVENT_3,
                             TEST_EVENT_4 },
                         // expected events
-                        new EventLogger.Event[] { TEST_EVENT_4, TEST_EVENT_3, TEST_EVENT_2 }
+                        new EventLogger.Event[] { TEST_EVENT_2, TEST_EVENT_3, TEST_EVENT_4 }
                     },
                     {
                         // insertion order, max size is 3
                         new EventLogger.Event[] { TEST_EVENT_1, TEST_EVENT_2, TEST_EVENT_3,
                             TEST_EVENT_4, TEST_EVENT_5 },
                         // expected events
-                        new EventLogger.Event[] { TEST_EVENT_5, TEST_EVENT_4, TEST_EVENT_3 }
+                        new EventLogger.Event[] { TEST_EVENT_3, TEST_EVENT_4, TEST_EVENT_5 }
                     }
             });
         }
