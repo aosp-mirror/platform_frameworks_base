@@ -146,6 +146,9 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     static final String KEY_NETWORK_ACCESS_TIMEOUT_MS = "network_access_timeout_ms";
 
+    static final String KEY_USE_TIERED_CACHED_ADJ = "use_tiered_cached_adj";
+    static final String KEY_TIERED_CACHED_ADJ_DECAY_TIME = "tiered_cached_adj_decay_time";
+
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final boolean DEFAULT_PRIORITIZE_ALARM_BROADCASTS = true;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
@@ -200,6 +203,9 @@ final class ActivityManagerConstants extends ContentObserver {
     static final boolean DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE = true;
 
     static final int DEFAULT_MAX_SERVICE_CONNECTIONS_PER_PROCESS = 3000;
+
+    private static final boolean DEFAULT_USE_TIERED_CACHED_ADJ = false;
+    private static final long DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME = 60 * 1000;
 
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
@@ -1011,6 +1017,12 @@ final class ActivityManagerConstants extends ContentObserver {
     public volatile long mShortFgsAnrExtraWaitDuration =
             DEFAULT_SHORT_FGS_ANR_EXTRA_WAIT_DURATION;
 
+    /** @see #KEY_USE_TIERED_CACHED_ADJ */
+    public boolean USE_TIERED_CACHED_ADJ = DEFAULT_USE_TIERED_CACHED_ADJ;
+
+    /** @see #KEY_TIERED_CACHED_ADJ_DECAY_TIME */
+    public long TIERED_CACHED_ADJ_DECAY_TIME = DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME;
+
     private final OnPropertiesChangedListener mOnDeviceConfigChangedListener =
             new OnPropertiesChangedListener() {
                 @Override
@@ -1178,6 +1190,10 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_MAX_PREVIOUS_TIME:
                                 updateMaxPreviousTime();
+                                break;
+                            case KEY_USE_TIERED_CACHED_ADJ:
+                            case KEY_TIERED_CACHED_ADJ_DECAY_TIME:
+                                updateUseTieredCachedAdj();
                                 break;
                             default:
                                 break;
@@ -1924,6 +1940,17 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION);
     }
 
+    private void updateUseTieredCachedAdj() {
+        USE_TIERED_CACHED_ADJ = DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+            KEY_USE_TIERED_CACHED_ADJ,
+            DEFAULT_USE_TIERED_CACHED_ADJ);
+        TIERED_CACHED_ADJ_DECAY_TIME = DeviceConfig.getLong(
+            DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+            KEY_TIERED_CACHED_ADJ_DECAY_TIME,
+            DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME);
+    }
+
     @NeverCompile // Avoid size overhead of debugging code.
     void dump(PrintWriter pw) {
         pw.println("ACTIVITY MANAGER SETTINGS (dumpsys activity settings) "
@@ -2107,6 +2134,11 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mShortFgsProcStateExtraWaitDuration);
         pw.print("  "); pw.print(KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION);
         pw.print("="); pw.println(mShortFgsAnrExtraWaitDuration);
+
+        pw.print("  "); pw.print(KEY_USE_TIERED_CACHED_ADJ);
+        pw.print("="); pw.println(USE_TIERED_CACHED_ADJ);
+        pw.print("  "); pw.print(KEY_TIERED_CACHED_ADJ_DECAY_TIME);
+        pw.print("="); pw.println(TIERED_CACHED_ADJ_DECAY_TIME);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {
