@@ -344,7 +344,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
         // Assume the activity is finishing and hidden because it was crashed.
         activity.finishing = true;
-        activity.mVisibleRequested = false;
+        activity.setVisibleRequested(false);
         activity.setVisible(false);
         activity.getTask().setPausingActivity(activity);
         homeActivity.setState(PAUSED, "test");
