@@ -661,6 +661,8 @@ public class LocationProviderManager extends
                 if (!GPS_PROVIDER.equals(mName)) {
                     Log.e(TAG, "adas gnss bypass request received in non-gps provider");
                     adasGnssBypass = false;
+                } else if (!mUserHelper.isCurrentUserId(getIdentity().getUserId())) {
+                    adasGnssBypass = false;
                 } else if (!mLocationSettings.getUserSettings(
                         getIdentity().getUserId()).isAdasGnssLocationEnabled()) {
                     adasGnssBypass = false;
@@ -1711,6 +1713,8 @@ public class LocationProviderManager extends
             // if we are not currently allowed use adas gnss bypass, disable it
             if (!GPS_PROVIDER.equals(mName)) {
                 Log.e(TAG, "adas gnss bypass request received in non-gps provider");
+                adasGnssBypass = false;
+            } else if (!mUserHelper.isCurrentUserId(identity.getUserId())) {
                 adasGnssBypass = false;
             } else if (!mLocationSettings.getUserSettings(
                     identity.getUserId()).isAdasGnssLocationEnabled()) {
