@@ -731,9 +731,9 @@ class WallpaperController {
         }
 
         final boolean newTargetHidden = wallpaperTarget.mActivityRecord != null
-                && !wallpaperTarget.mActivityRecord.mVisibleRequested;
+                && !wallpaperTarget.mActivityRecord.isVisibleRequested();
         final boolean oldTargetHidden = prevWallpaperTarget.mActivityRecord != null
-                && !prevWallpaperTarget.mActivityRecord.mVisibleRequested;
+                && !prevWallpaperTarget.mActivityRecord.isVisibleRequested();
 
         ProtoLog.v(WM_DEBUG_WALLPAPER, "Animating wallpapers: "
                 + "old: %s hidden=%b new: %s hidden=%b",

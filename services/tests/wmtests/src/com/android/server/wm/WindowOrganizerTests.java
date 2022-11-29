@@ -992,7 +992,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final Task task = createTask(rootTaskController1);
         final WindowState w = createAppWindow(task, TYPE_APPLICATION, "Enlightened Window");
 
-        w.mActivityRecord.mVisibleRequested = true;
+        w.mActivityRecord.setVisibleRequested(true);
         w.mActivityRecord.setVisible(true);
 
         BLASTSyncEngine bse = new BLASTSyncEngine(mWm);

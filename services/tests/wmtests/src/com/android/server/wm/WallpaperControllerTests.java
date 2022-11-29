@@ -311,12 +311,12 @@ public class WallpaperControllerTests extends WindowTestsBase {
         r.applyFixedRotationTransform(mDisplayContent.getDisplayInfo(),
                 mDisplayContent.mDisplayFrames, mDisplayContent.getConfiguration());
         // Invisible requested activity should not share its rotation transform.
-        r.mVisibleRequested = false;
+        r.setVisibleRequested(false);
         mDisplayContent.mWallpaperController.adjustWallpaperWindows();
         assertFalse(wallpaperToken.hasFixedRotationTransform());
 
         // Wallpaper should link the transform of its target.
-        r.mVisibleRequested = true;
+        r.setVisibleRequested(true);
         mDisplayContent.mWallpaperController.adjustWallpaperWindows();
         assertEquals(appWin, mDisplayContent.mWallpaperController.getWallpaperTarget());
         assertTrue(r.hasFixedRotationTransform());

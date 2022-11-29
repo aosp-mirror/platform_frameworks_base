@@ -112,7 +112,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                 mTargetActivityType);
         ActivityRecord targetActivity = getTargetActivity(targetRootTask);
         if (targetActivity != null) {
-            if (targetActivity.mVisibleRequested || targetActivity.isTopRunningActivity()) {
+            if (targetActivity.isVisibleRequested() || targetActivity.isTopRunningActivity()) {
                 // The activity is ready.
                 return;
             }
@@ -195,7 +195,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
 
         // Send launch hint if we are actually launching the target. If it's already visible
         // (shouldn't happen in general) we don't need to send it.
-        if (targetActivity == null || !targetActivity.mVisibleRequested) {
+        if (targetActivity == null || !targetActivity.isVisibleRequested()) {
             mService.mRootWindowContainer.startPowerModeLaunchIfNeeded(
                     true /* forceSend */, targetActivity);
         }

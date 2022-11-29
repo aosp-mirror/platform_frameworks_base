@@ -561,7 +561,7 @@ public class ActivityStartController {
         if (rootTask == null) return false;
         final RemoteTransition remote = options.getRemoteTransition();
         final ActivityRecord r = rootTask.topRunningActivity();
-        if (r == null || r.mVisibleRequested || !r.attachedToProcess() || remote == null
+        if (r == null || r.isVisibleRequested() || !r.attachedToProcess() || remote == null
                 || !r.mActivityComponent.equals(intent.getComponent())
                 // Recents keeps invisible while device is locked.
                 || r.mDisplayContent.isKeyguardLocked()) {

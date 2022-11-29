@@ -800,7 +800,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // it will sometimes be true a little earlier: when the activity record has
     // been shown, but is still waiting for its app transition to execute
     // before making its windows shown.
-    boolean mVisibleRequested;
+    private boolean mVisibleRequested;
 
     // Last visibility state we reported to the app token.
     boolean reportedVisible;
@@ -3622,7 +3622,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // implied that the current finishing activity should be added into stopping list rather
         // than destroy immediately.
         final boolean isNextNotYetVisible = next != null
-                && (!next.nowVisible || !next.mVisibleRequested);
+                && (!next.nowVisible || !next.isVisibleRequested());
 
         // Clear last paused activity to ensure top activity can be resumed during sleeping.
         if (isNextNotYetVisible && mDisplayContent.isSleeping()
@@ -4440,7 +4440,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void transferStartingWindowFromHiddenAboveTokenIfNeeded() {
         task.forAllActivities(fromActivity -> {
             if (fromActivity == this) return true;
-            return !fromActivity.mVisibleRequested && transferStartingWindow(fromActivity);
+            return !fromActivity.isVisibleRequested() && transferStartingWindow(fromActivity);
         });
     }
 
@@ -5105,7 +5105,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * This is the only place that writes {@link #mVisibleRequested} (except unit test). The caller
      * outside of this class should use {@link #setVisibility}.
      */
-    private void setVisibleRequested(boolean visible) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    void setVisibleRequested(boolean visible) {
         if (visible == mVisibleRequested) {
             return;
         }
@@ -6549,7 +6550,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (associatedTask == null) {
             removeStartingWindow();
         } else if (associatedTask.getActivity(
-                r -> r.mVisibleRequested && !r.firstWindowDrawn) == null) {
+                r -> r.isVisibleRequested() && !r.firstWindowDrawn) == null) {
             // The last drawn activity may not be the one that owns the starting window.
             final ActivityRecord r = associatedTask.topActivityContainsStartingWindow();
             if (r != null) {

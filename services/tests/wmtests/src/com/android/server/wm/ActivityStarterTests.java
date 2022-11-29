@@ -514,7 +514,9 @@ public class ActivityStarterTests extends WindowTestsBase {
                 .setCreateActivity(true)
                 .build()
                 .getTopMostActivity();
-        splitPrimaryActivity.mVisibleRequested = splitSecondActivity.mVisibleRequested = true;
+
+        splitPrimaryActivity.setVisibleRequested(true);
+        splitSecondActivity.setVisibleRequested(true);
 
         assertEquals(splitOrg.mPrimary, splitPrimaryActivity.getRootTask());
         assertEquals(splitOrg.mSecondary, splitSecondActivity.getRootTask());
@@ -527,7 +529,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 .setCreateActivity(true).build().getTopMostActivity();
         final ActivityRecord translucentActivity = new TaskBuilder(mSupervisor)
                 .setCreateActivity(true).build().getTopMostActivity();
-        assertTrue(activity.mVisibleRequested);
+        assertTrue(activity.isVisibleRequested());
 
         final ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK,
                 false /* mockGetRootTask */);
@@ -1050,7 +1052,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                         ACTIVITY_TYPE_STANDARD, false /* onTop */));
         // Activity should start invisible since we are bringing it to front.
         singleTaskActivity.setVisible(false);
-        singleTaskActivity.mVisibleRequested = false;
+        singleTaskActivity.setVisibleRequested(false);
 
         // Create another activity on top of the secondary display.
         final Task topStack = secondaryTaskContainer.createRootTask(WINDOWING_MODE_FULLSCREEN,
@@ -1268,7 +1270,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityStarter starter = prepareStarter(0 /* flags */);
         final ActivityRecord target = new ActivityBuilder(mAtm).setCreateTask(true).build();
         starter.mStartActivity = target;
-        target.mVisibleRequested = false;
+        target.setVisibleRequested(false);
         target.setTurnScreenOn(true);
         // Assume the flag was consumed by relayout.
         target.setCurrentLaunchCanTurnScreenOn(false);
@@ -1589,10 +1591,10 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityRecord activityTop = new ActivityBuilder(mAtm).setTask(task).build();
 
         activityBot.setVisible(false);
-        activityBot.mVisibleRequested = false;
+        activityBot.setVisibleRequested(false);
 
         assertTrue(activityTop.isVisible());
-        assertTrue(activityTop.mVisibleRequested);
+        assertTrue(activityTop.isVisibleRequested());
 
         final ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_REORDER_TO_FRONT
                         | FLAG_ACTIVITY_NEW_TASK, false /* mockGetRootTask */);

@@ -191,7 +191,7 @@ class EnsureActivitiesVisibleHelper {
             if (!r.attachedToProcess()) {
                 makeVisibleAndRestartIfNeeded(mStarting, mConfigChanges, isTop,
                         resumeTopActivity && isTop, r);
-            } else if (r.mVisibleRequested) {
+            } else if (r.isVisibleRequested()) {
                 // If this activity is already visible, then there is nothing to do here.
                 if (DEBUG_VISIBILITY) {
                     Slog.v(TAG_VISIBILITY, "Skipping: already visible at " + r);
@@ -244,7 +244,7 @@ class EnsureActivitiesVisibleHelper {
         // invisible. If the app is already visible, it must have died while it was visible. In this
         // case, we'll show the dead window but will not restart the app. Otherwise we could end up
         // thrashing.
-        if (!isTop && r.mVisibleRequested && !r.isState(INITIALIZING)) {
+        if (!isTop && r.isVisibleRequested() && !r.isState(INITIALIZING)) {
             return;
         }
 
@@ -256,7 +256,7 @@ class EnsureActivitiesVisibleHelper {
         if (r != starting) {
             r.startFreezingScreenLocked(configChanges);
         }
-        if (!r.mVisibleRequested || r.mLaunchTaskBehind) {
+        if (!r.isVisibleRequested() || r.mLaunchTaskBehind) {
             if (DEBUG_VISIBILITY) {
                 Slog.v(TAG_VISIBILITY, "Starting and making visible: " + r);
             }
