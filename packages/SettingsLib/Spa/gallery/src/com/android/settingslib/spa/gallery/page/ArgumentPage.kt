@@ -55,7 +55,6 @@ object ArgumentPageProvider : SettingsPageProvider {
         entryList.add(
             createEntry(owner, EntryEnum.STRING_PARAM)
                 // Set attributes
-                .setIsAllowSearch(true)
                 .setIsSearchDataDynamic(true)
                 .setSearchDataFn { ArgumentPageModel.genStringParamSearchData() }
                 .setUiLayoutFn {
@@ -67,7 +66,6 @@ object ArgumentPageProvider : SettingsPageProvider {
         entryList.add(
             createEntry(owner, EntryEnum.INT_PARAM)
                 // Set attributes
-                .setIsAllowSearch(true)
                 .setIsSearchDataDynamic(true)
                 .setSearchDataFn { ArgumentPageModel.genIntParamSearchData() }
                 .setUiLayoutFn {
@@ -90,8 +88,6 @@ object ArgumentPageProvider : SettingsPageProvider {
             owner = createSettingsPage(arguments),
             displayName = "${name}_$stringParam",
         )
-            // Set attributes
-            .setIsAllowSearch(false)
             .setSearchDataFn { ArgumentPageModel.genInjectSearchData() }
             .setUiLayoutFn {
                 // Set ui rendering
