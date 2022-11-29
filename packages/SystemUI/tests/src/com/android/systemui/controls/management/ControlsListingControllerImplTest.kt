@@ -31,6 +31,7 @@ import android.service.controls.ControlsProviderService
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.settingslib.applications.ServiceListing
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.dump.DumpManager
@@ -109,6 +110,12 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
         `when`(packageManager.getComponentEnabledSetting(any()))
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
         mContext.setMockPackageManager(packageManager)
+
+        mContext.orCreateTestableResources
+                .addOverride(
+                        R.array.config_controlsPreferredPackages,
+                        arrayOf(componentName.packageName)
+                )
 
         // Return true by default, we'll test the false path
         `when`(featureFlags.isEnabled(USE_APP_PANELS)).thenReturn(true)
@@ -468,6 +475,35 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
                 ActivityInfo(
                         activityName,
                         enabled = true,
+                        exported = true,
+                        permission = Manifest.permission.BIND_CONTROLS
+                )
+        ))
+
+        val list = listOf(serviceInfo)
+        serviceListingCallbackCaptor.value.onServicesReloaded(list)
+
+        executor.runAllReady()
+
+        assertNull(controller.getCurrentServices()[0].panelActivity)
+    }
+
+    @Test
+    fun testPackageNotPreferred_nullPanel() {
+        mContext.orCreateTestableResources
+                .addOverride(R.array.config_controlsPreferredPackages, arrayOf<String>())
+
+        val serviceInfo = ServiceInfo(
+                componentName,
+                activityName
+        )
+
+        `when`(packageManager.getComponentEnabledSetting(eq(activityName)))
+                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
+
+        setUpQueryResult(listOf(
+                ActivityInfo(
+                        activityName,
                         exported = true,
                         permission = Manifest.permission.BIND_CONTROLS
                 )
