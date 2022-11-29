@@ -317,7 +317,9 @@ public class UtilsTest {
 
     @Test
     public void getBatteryStatus_statusIsFull_returnFullString() {
-        final Intent intent = new Intent().putExtra(BatteryManager.EXTRA_LEVEL, 100);
+        final Intent intent = new Intent()
+                .putExtra(BatteryManager.EXTRA_LEVEL, 100)
+                .putExtra(BatteryManager.EXTRA_SCALE, 100);
         final Resources resources = mContext.getResources();
 
         assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ false)).isEqualTo(
@@ -326,7 +328,9 @@ public class UtilsTest {
 
     @Test
     public void getBatteryStatus_statusIsFullAndUseCompactStatus_returnFullyChargedString() {
-        final Intent intent = new Intent().putExtra(BatteryManager.EXTRA_LEVEL, 100);
+        final Intent intent = new Intent()
+                .putExtra(BatteryManager.EXTRA_LEVEL, 100)
+                .putExtra(BatteryManager.EXTRA_SCALE, 100);
         final Resources resources = mContext.getResources();
 
         assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ true)).isEqualTo(
