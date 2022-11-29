@@ -958,9 +958,8 @@ class UserController implements Handler.Callback {
     int stopUser(final int userId, final boolean force, boolean allowDelayedLocking,
             final IStopUserCallback stopUserCallback, KeyEvictedCallback keyEvictedCallback) {
         checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "stopUser");
-        if (userId < 0 || userId == UserHandle.USER_SYSTEM) {
-            throw new IllegalArgumentException("Can't stop system user " + userId);
-        }
+        Preconditions.checkArgument(userId >= 0, "Invalid user id %d", userId);
+
         enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
         synchronized (mLock) {
             return stopUsersLU(userId, force, allowDelayedLocking, stopUserCallback,

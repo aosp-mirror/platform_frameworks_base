@@ -645,6 +645,39 @@ public class UserControllerTest {
                 /* keyEvictedCallback= */ mKeyEvictedCallback, /* expectLocking= */ true);
     }
 
+    @Test
+    public void testStopUser_invalidUser() {
+        int userId = -1;
+
+        assertThrows(IllegalArgumentException.class,
+                () -> mUserController.stopUser(userId, /* force= */ true,
+                        /* allowDelayedLocking= */ true, /* stopUserCallback= */ null,
+                        /* keyEvictedCallback= */ null));
+    }
+
+    @Test
+    public void testStopUser_systemUser() {
+        int userId = UserHandle.USER_SYSTEM;
+
+        int r = mUserController.stopUser(userId, /* force= */ true,
+                /* allowDelayedLocking= */ true, /* stopUserCallback= */ null,
+                /* keyEvictedCallback= */ null);
+
+        assertThat(r).isEqualTo(ActivityManager.USER_OP_ERROR_IS_SYSTEM);
+    }
+
+    @Test
+    public void testStopUser_currentUser() {
+        setUpUser(TEST_USER_ID1, /* flags= */ 0);
+        mUserController.startUser(TEST_USER_ID1, /* foreground= */ true);
+
+        int r = mUserController.stopUser(TEST_USER_ID1, /* force= */ true,
+                /* allowDelayedLocking= */ true, /* stopUserCallback= */ null,
+                /* keyEvictedCallback= */ null);
+
+        assertThat(r).isEqualTo(ActivityManager.USER_OP_IS_CURRENT);
+    }
+
     /**
      * Test conditional delayed locking with mDelayUserDataLocking true.
      */
