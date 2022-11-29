@@ -263,6 +263,18 @@ public class DisplayModeDirector {
             disableRefreshRateSwitching = false;
             appRequestBaseModeRefreshRate = 0f;
         }
+
+        @Override
+        public String toString() {
+            return  "minPhysicalRefreshRate=" + minPhysicalRefreshRate
+                    + ", maxPhysicalRefreshRate=" + maxPhysicalRefreshRate
+                    + ", minRenderFrameRate=" + minRenderFrameRate
+                    + ", maxRenderFrameRate=" + maxRenderFrameRate
+                    + ", width=" + width
+                    + ", height=" + height
+                    + ", disableRefreshRateSwitching=" + disableRefreshRateSwitching
+                    + ", appRequestBaseModeRefreshRate=" + appRequestBaseModeRefreshRate;
+        }
     }
 
     // VoteSummary is returned as an output param to cut down a bit on the number of temporary
@@ -316,18 +328,8 @@ public class DisplayModeDirector {
             }
 
             if (mLoggingEnabled) {
-                Slog.w(TAG, "Vote summary for priority "
-                        + Vote.priorityToString(priority)
-                        + ": width=" + summary.width
-                        + ", height=" + summary.height
-                        + ", minPhysicalRefreshRate=" + summary.minPhysicalRefreshRate
-                        + ", maxPhysicalRefreshRate=" + summary.maxPhysicalRefreshRate
-                        + ", minRenderFrameRate=" + summary.minRenderFrameRate
-                        + ", maxRenderFrameRate=" + summary.maxRenderFrameRate
-                        + ", disableRefreshRateSwitching="
-                        + summary.disableRefreshRateSwitching
-                        + ", appRequestBaseModeRefreshRate="
-                        + summary.appRequestBaseModeRefreshRate);
+                Slog.w(TAG, "Vote summary for priority " + Vote.priorityToString(priority)
+                        + ": " + summary);
             }
         }
     }
@@ -361,6 +363,23 @@ public class DisplayModeDirector {
         return !availableModes.isEmpty() ? availableModes.get(0) : null;
     }
 
+    private void disableModeSwitching(VoteSummary summary, float fps) {
+        summary.minPhysicalRefreshRate = summary.maxPhysicalRefreshRate = fps;
+        summary.maxRenderFrameRate = Math.min(summary.maxRenderFrameRate, fps);
+
+        if (mLoggingEnabled) {
+            Slog.i(TAG, "Disabled mode switching on summary: " + summary);
+        }
+    }
+
+    private void disableRenderRateSwitching(VoteSummary summary) {
+        summary.minRenderFrameRate = summary.maxRenderFrameRate;
+
+        if (mLoggingEnabled) {
+            Slog.i(TAG, "Disabled render rate switching on summary: " + summary);
+        }
+    }
+
     /**
      * Calculates the refresh rate ranges and display modes that the system is allowed to freely
      * switch between based on global and display-specific constraints.
@@ -389,7 +408,7 @@ public class DisplayModeDirector {
             int highestConsideredPriority = Vote.MAX_PRIORITY;
 
             if (mAlwaysRespectAppRequest) {
-                lowestConsideredPriority = Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE;
+                lowestConsideredPriority = Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE;
                 highestConsideredPriority = Vote.PRIORITY_APP_REQUEST_SIZE;
             }
 
@@ -517,18 +536,15 @@ public class DisplayModeDirector {
 
             if (modeSwitchingDisabled || primarySummary.disableRefreshRateSwitching) {
                 float fps = baseMode.getRefreshRate();
-                primarySummary.minPhysicalRefreshRate = primarySummary.maxPhysicalRefreshRate = fps;
+                disableModeSwitching(primarySummary, fps);
                 if (modeSwitchingDisabled) {
-                    appRequestSummary.minPhysicalRefreshRate =
-                            appRequestSummary.maxPhysicalRefreshRate = fps;
-                }
-            }
+                    disableModeSwitching(appRequestSummary, fps);
+                    disableRenderRateSwitching(primarySummary);
 
-            if (mModeSwitchingType == DisplayManager.SWITCHING_TYPE_NONE) {
-                primarySummary.minRenderFrameRate = primarySummary.minPhysicalRefreshRate;
-                primarySummary.maxRenderFrameRate = primarySummary.maxPhysicalRefreshRate;
-                appRequestSummary.minRenderFrameRate = appRequestSummary.minPhysicalRefreshRate;
-                appRequestSummary.maxRenderFrameRate = appRequestSummary.maxPhysicalRefreshRate;
+                    if (mModeSwitchingType == DisplayManager.SWITCHING_TYPE_NONE) {
+                        disableRenderRateSwitching(appRequestSummary);
+                    }
+                }
             }
 
             boolean allowGroupSwitching =
