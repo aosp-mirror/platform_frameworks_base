@@ -16,13 +16,17 @@
 
 package com.android.systemui.stylus
 
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.hardware.input.InputManager
 import android.os.Handler
 import android.util.ArrayMap
+import android.util.Log
 import android.view.InputDevice
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /**
@@ -34,10 +38,14 @@ class StylusManager
 @Inject
 constructor(
     private val inputManager: InputManager,
+    private val bluetoothAdapter: BluetoothAdapter,
     @Background private val handler: Handler,
-) : InputManager.InputDeviceListener {
+    @Background private val executor: Executor,
+) : InputManager.InputDeviceListener, BluetoothAdapter.OnMetadataChangedListener {
 
     private val stylusCallbacks: CopyOnWriteArrayList<StylusCallback> = CopyOnWriteArrayList()
+    private val stylusBatteryCallbacks: CopyOnWriteArrayList<StylusBatteryCallback> =
+        CopyOnWriteArrayList()
     // This map should only be accessed on the handler
     private val inputDeviceAddressMap: MutableMap<Int, String?> = ArrayMap()
 
@@ -60,6 +68,14 @@ constructor(
         stylusCallbacks.remove(callback)
     }
 
+    fun registerBatteryCallback(callback: StylusBatteryCallback) {
+        stylusBatteryCallbacks.add(callback)
+    }
+
+    fun unregisterBatteryCallback(callback: StylusBatteryCallback) {
+        stylusBatteryCallbacks.remove(callback)
+    }
+
     override fun onInputDeviceAdded(deviceId: Int) {
         val device: InputDevice = inputManager.getInputDevice(deviceId) ?: return
         if (!device.supportsSource(InputDevice.SOURCE_STYLUS)) return
@@ -70,6 +86,7 @@ constructor(
         executeStylusCallbacks { cb -> cb.onStylusAdded(deviceId) }
 
         if (btAddress != null) {
+            onStylusBluetoothConnected(btAddress)
             executeStylusCallbacks { cb -> cb.onStylusBluetoothConnected(deviceId, btAddress) }
         }
     }
@@ -84,10 +101,12 @@ constructor(
         inputDeviceAddressMap[deviceId] = currAddress
 
         if (prevAddress == null && currAddress != null) {
+            onStylusBluetoothConnected(currAddress)
             executeStylusCallbacks { cb -> cb.onStylusBluetoothConnected(deviceId, currAddress) }
         }
 
         if (prevAddress != null && currAddress == null) {
+            onStylusBluetoothDisconnected(prevAddress)
             executeStylusCallbacks { cb -> cb.onStylusBluetoothDisconnected(deviceId, prevAddress) }
         }
     }
@@ -98,13 +117,53 @@ constructor(
         val btAddress: String? = inputDeviceAddressMap[deviceId]
         inputDeviceAddressMap.remove(deviceId)
         if (btAddress != null) {
+            onStylusBluetoothDisconnected(btAddress)
             executeStylusCallbacks { cb -> cb.onStylusBluetoothDisconnected(deviceId, btAddress) }
         }
         executeStylusCallbacks { cb -> cb.onStylusRemoved(deviceId) }
     }
 
+    override fun onMetadataChanged(device: BluetoothDevice, key: Int, value: ByteArray?) {
+        handler.post executeMetadataChanged@{
+            if (key != BluetoothDevice.METADATA_MAIN_CHARGING || value == null)
+                return@executeMetadataChanged
+
+            val inputDeviceId: Int =
+                inputDeviceAddressMap.filterValues { it == device.address }.keys.firstOrNull()
+                    ?: return@executeMetadataChanged
+
+            val isCharging = String(value) == "true"
+
+            executeStylusBatteryCallbacks { cb ->
+                cb.onStylusBluetoothChargingStateChanged(inputDeviceId, device, isCharging)
+            }
+        }
+    }
+
+    private fun onStylusBluetoothConnected(btAddress: String) {
+        val device: BluetoothDevice = bluetoothAdapter.getRemoteDevice(btAddress) ?: return
+        try {
+            bluetoothAdapter.addOnMetadataChangedListener(device, executor, this)
+        } catch (e: IllegalArgumentException) {
+            Log.e(TAG, "$e: Metadata listener already registered for device. Ignoring.")
+        }
+    }
+
+    private fun onStylusBluetoothDisconnected(btAddress: String) {
+        val device: BluetoothDevice = bluetoothAdapter.getRemoteDevice(btAddress) ?: return
+        try {
+            bluetoothAdapter.removeOnMetadataChangedListener(device, this)
+        } catch (e: IllegalArgumentException) {
+            Log.e(TAG, "$e: Metadata listener does not exist for device. Ignoring.")
+        }
+    }
+
     private fun executeStylusCallbacks(run: (cb: StylusCallback) -> Unit) {
         stylusCallbacks.forEach(run)
+    }
+
+    private fun executeStylusBatteryCallbacks(run: (cb: StylusBatteryCallback) -> Unit) {
+        stylusBatteryCallbacks.forEach(run)
     }
 
     private fun addExistingStylusToMap() {
@@ -123,6 +182,15 @@ constructor(
         fun onStylusRemoved(deviceId: Int) {}
         fun onStylusBluetoothConnected(deviceId: Int, btAddress: String) {}
         fun onStylusBluetoothDisconnected(deviceId: Int, btAddress: String) {}
+    }
+
+    /** Callback interface to receive stylus battery events from the StylusManager. */
+    interface StylusBatteryCallback {
+        fun onStylusBluetoothChargingStateChanged(
+            inputDeviceId: Int,
+            btDevice: BluetoothDevice,
+            isCharging: Boolean
+        ) {}
     }
 
     companion object {
