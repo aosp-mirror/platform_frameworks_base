@@ -420,7 +420,9 @@ constructor(
      */
     fun getMeasurementsForState(hostState: MediaHostState): MeasurementOutput? =
         traceSection("MediaViewController#getMeasurementsForState") {
-            val viewState = obtainViewState(hostState) ?: return null
+            // measurements should never factor in the squish fraction
+            val viewState =
+                obtainViewState(hostState.copy().also { it.squishFraction = 1.0f }) ?: return null
             measurement.measuredWidth = viewState.width
             measurement.measuredHeight = viewState.height
             return measurement
