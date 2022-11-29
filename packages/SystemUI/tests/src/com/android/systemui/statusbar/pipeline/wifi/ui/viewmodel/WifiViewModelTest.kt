@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepo
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiActivityModel
+import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -57,6 +58,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var tableLogBuffer: TableLogBuffer
     @Mock private lateinit var connectivityConstants: ConnectivityConstants
     @Mock private lateinit var wifiConstants: WifiConstants
     private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
@@ -101,21 +103,21 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun wifiIcon_allLocationViewModelsReceiveSameData() = runBlocking(IMMEDIATE) {
-        var latestHome: Icon? = null
+        var latestHome: WifiIcon? = null
         val jobHome = underTest
             .home
             .wifiIcon
             .onEach { latestHome = it }
             .launchIn(this)
 
-        var latestKeyguard: Icon? = null
+        var latestKeyguard: WifiIcon? = null
         val jobKeyguard = underTest
             .keyguard
             .wifiIcon
             .onEach { latestKeyguard = it }
             .launchIn(this)
 
-        var latestQs: Icon? = null
+        var latestQs: WifiIcon? = null
         val jobQs = underTest
             .qs
             .wifiIcon
@@ -131,7 +133,7 @@ class WifiViewModelTest : SysuiTestCase() {
         )
         yield()
 
-        assertThat(latestHome).isInstanceOf(Icon.Resource::class.java)
+        assertThat(latestHome).isInstanceOf(WifiIcon.Visible::class.java)
         assertThat(latestHome).isEqualTo(latestKeyguard)
         assertThat(latestKeyguard).isEqualTo(latestQs)
 
@@ -539,6 +541,7 @@ class WifiViewModelTest : SysuiTestCase() {
             connectivityConstants,
             context,
             logger,
+            tableLogBuffer,
             interactor,
             scope,
             statusBarPipelineFlags,
