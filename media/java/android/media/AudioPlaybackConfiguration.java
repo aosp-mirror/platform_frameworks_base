@@ -221,13 +221,6 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     /**
      * @hide
-     * Mute state used for the initial state and when API is accessed without permission.
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public static final int MUTED_BY_UNKNOWN = -1;
-    /**
-     * @hide
      * Flag used when muted by master volume.
      */
     @SystemApi
@@ -317,7 +310,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         mPlayerType = pic.mPlayerType;
         mClientUid = uid;
         mClientPid = pid;
-        mMutedState = MUTED_BY_UNKNOWN;
+        mMutedState = 0;
         mDeviceId = PLAYER_DEVICEID_INVALID;
         mPlayerState = PLAYER_STATE_IDLE;
         mPlayerAttr = pic.mAttributes;
@@ -366,7 +359,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         anonymCopy.mPlayerAttr = builder.build();
         anonymCopy.mDeviceId = in.mDeviceId;
         // anonymized data
-        anonymCopy.mMutedState = MUTED_BY_UNKNOWN;
+        anonymCopy.mMutedState = 0;
         anonymCopy.mPlayerType = PLAYER_TYPE_UNKNOWN;
         anonymCopy.mClientUid = PLAYER_UPID_INVALID;
         anonymCopy.mClientPid = PLAYER_UPID_INVALID;
@@ -435,14 +428,13 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public boolean isMuted() {
-        return mMutedState != 0 && mMutedState != MUTED_BY_UNKNOWN;
+        return mMutedState != 0;
     }
 
     /**
      * @hide
      * Returns a bitmask expressing the mute state as a combination of MUTED_BY_* flags.
-     * <br>Note that if the mute state is not set the result will be {@link #MUTED_BY_UNKNOWN}. A
-     * value of 0 represents a player which is not muted.
+     * <br>A value of 0 corresponds to an unmuted player.
      * @return the mute state.
      */
     @SystemApi
@@ -602,11 +594,6 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     }
 
     private boolean isMuteAffectingActiveState() {
-        if (mMutedState == MUTED_BY_UNKNOWN) {
-            // mute state is not set, therefore it will not affect the active state
-            return false;
-        }
-
         return (mMutedState & MUTED_BY_CLIENT_VOLUME) != 0
                 || (mMutedState & MUTED_BY_VOLUME_SHAPER) != 0
                 || (mMutedState & MUTED_BY_APP_OPS) != 0;
@@ -726,9 +713,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
                 "/").append(mClientPid).append(" state:").append(
                 toLogFriendlyPlayerState(mPlayerState)).append(" attr:").append(mPlayerAttr).append(
                 " sessionId:").append(mSessionId).append(" mutedState:");
-        if (mMutedState == MUTED_BY_UNKNOWN) {
-            apcToString.append("unknown ");
-        } else if (mMutedState == 0) {
+        if (mMutedState == 0) {
             apcToString.append("none ");
         } else {
             if ((mMutedState & MUTED_BY_MASTER) != 0) {
