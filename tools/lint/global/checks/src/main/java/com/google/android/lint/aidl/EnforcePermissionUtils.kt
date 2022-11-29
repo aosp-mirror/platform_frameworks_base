@@ -16,14 +16,9 @@
 
 package com.google.android.lint.aidl
 
-import com.android.tools.lint.detector.api.getUMethod
-import com.google.android.lint.ANNOTATION_PERMISSION_METHOD
-import com.google.android.lint.ANNOTATION_PERMISSION_NAME
 import com.google.android.lint.CLASS_STUB
 import com.intellij.psi.PsiAnonymousClass
-import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.UParameter
 
 /**
  * Given a UMethod, determine if this method is
@@ -50,18 +45,4 @@ private fun isInClassCalledStub(node: UMethod): Boolean {
     return node.containingClass?.extendsList?.referenceElements?.any {
         it.referenceName == CLASS_STUB
     } ?: false
-}
-
-fun isPermissionMethodCall(callExpression: UCallExpression): Boolean {
-    val method = callExpression.resolve()?.getUMethod() ?: return false
-    return hasPermissionMethodAnnotation(method)
-}
-
-fun hasPermissionMethodAnnotation(method: UMethod): Boolean = method.annotations
-    .any {
-        it.hasQualifiedName(ANNOTATION_PERMISSION_METHOD)
-    }
-
-fun hasPermissionNameAnnotation(parameter: UParameter) = parameter.annotations.any {
-    it.hasQualifiedName(ANNOTATION_PERMISSION_NAME)
 }
