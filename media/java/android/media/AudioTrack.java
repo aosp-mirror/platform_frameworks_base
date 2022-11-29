@@ -1233,18 +1233,6 @@ public class AudioTrack extends PlayerBase
         }
 
         /**
-         * Sets the tuner configuration for the {@code AudioTrack}.
-         *
-         * The {@link AudioTrack.TunerConfiguration} consists of parameters obtained from
-         * the Android TV tuner API which indicate the audio content stream id and the
-         * synchronization id for the {@code AudioTrack}.
-         *
-         * @param tunerConfiguration obtained by {@link AudioTrack.TunerConfiguration.Builder}.
-         * @return the same Builder instance.
-         * @hide
-         */
-
-        /**
          * @hide
          * Sets the {@link AudioTrack} call redirection mode.
          * Used when creating an AudioTrack to inject audio to call uplink path. The mode
