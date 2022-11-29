@@ -245,7 +245,7 @@ final class HotwordDetectionConnection {
         mVoiceInteractionServiceUid = voiceInteractionServiceUid;
         mVoiceInteractorIdentity = voiceInteractorIdentity;
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
-        mHotwordAudioStreamCopier = new HotwordAudioStreamCopier(mAppOpsManager,
+        mHotwordAudioStreamCopier = new HotwordAudioStreamCopier(mAppOpsManager, detectorType,
                 mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
                 mVoiceInteractorIdentity.attributionTag);
         mDetectionComponentName = serviceName;
