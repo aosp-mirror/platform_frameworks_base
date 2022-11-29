@@ -28,6 +28,7 @@ import android.app.IAppTask;
 import android.app.IAssistDataReceiver;
 import android.app.IInstrumentationWatcher;
 import android.app.IProcessObserver;
+import android.app.IScreenCaptureObserver;
 import android.app.IServiceConnection;
 import android.app.IStopUserCallback;
 import android.app.ITaskStackListener;
@@ -354,4 +355,23 @@ interface IActivityTaskManager {
      */
     android.window.BackNavigationInfo startBackNavigation(
             in IWindowFocusObserver focusObserver, in BackAnimationAdapter adaptor);
+
+    /**
+     * registers a callback to be invoked when the screen is captured.
+     *
+     * @param observer callback to be registered.
+     * @param activityToken The token for the activity to set the callback to.
+     * @hide
+     */
+    void registerScreenCaptureObserver(IBinder activityToken, IScreenCaptureObserver observer);
+
+    /**
+     * unregisters the screen capture callback which was registered with
+     * {@link #registerScreenCaptureObserver(ScreenCaptureObserver)}.
+     *
+     * @param observer callback to be unregistered.
+     * @param activityToken The token for the activity to unset the callback from.
+     * @hide
+     */
+    void unregisterScreenCaptureObserver(IBinder activityToken, IScreenCaptureObserver observer);
 }

@@ -4319,6 +4319,7 @@ package android.app {
     method public void recreate();
     method public void registerActivityLifecycleCallbacks(@NonNull android.app.Application.ActivityLifecycleCallbacks);
     method public void registerForContextMenu(android.view.View);
+    method @RequiresPermission(android.Manifest.permission.DETECT_SCREEN_CAPTURE) public void registerScreenCaptureCallback(@NonNull java.util.concurrent.Executor, @NonNull android.app.Activity.ScreenCaptureCallback);
     method public boolean releaseInstance();
     method @Deprecated public final void removeDialog(int);
     method public void reportFullyDrawn();
@@ -4404,6 +4405,7 @@ package android.app {
     method public void triggerSearch(String, @Nullable android.os.Bundle);
     method public void unregisterActivityLifecycleCallbacks(@NonNull android.app.Application.ActivityLifecycleCallbacks);
     method public void unregisterForContextMenu(android.view.View);
+    method @RequiresPermission(android.Manifest.permission.DETECT_SCREEN_CAPTURE) public void unregisterScreenCaptureCallback(@NonNull android.app.Activity.ScreenCaptureCallback);
     field public static final int DEFAULT_KEYS_DIALER = 1; // 0x1
     field public static final int DEFAULT_KEYS_DISABLE = 0; // 0x0
     field public static final int DEFAULT_KEYS_SEARCH_GLOBAL = 4; // 0x4
@@ -4415,6 +4417,10 @@ package android.app {
     field public static final int RESULT_CANCELED = 0; // 0x0
     field public static final int RESULT_FIRST_USER = 1; // 0x1
     field public static final int RESULT_OK = -1; // 0xffffffff
+  }
+
+  public static interface Activity.ScreenCaptureCallback {
+    method public void onScreenCaptured();
   }
 
   @Deprecated public class ActivityGroup extends android.app.Activity {

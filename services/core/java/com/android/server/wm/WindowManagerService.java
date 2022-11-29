@@ -26,6 +26,7 @@ import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.Manifest.permission.RESTRICTED_VR_ACCESS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
@@ -168,6 +169,7 @@ import android.app.IActivityManager;
 import android.app.IAssistDataReceiver;
 import android.app.WindowConfiguration;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -9446,5 +9448,56 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void markSurfaceSyncGroupReady(IBinder syncGroupToken) {
         mSurfaceSyncGroupController.markSyncGroupReady(syncGroupToken);
+    }
+
+    private ArraySet<ActivityRecord> getVisibleActivityRecords(int displayId) {
+        ArraySet<ActivityRecord> result = new ArraySet<>();
+        synchronized (mGlobalLock) {
+            ArraySet<ComponentName> addedActivities = new ArraySet<>();
+            DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent != null) {
+                displayContent.forAllWindows(
+                        (w) -> {
+                            if (w.isVisible()
+                                    && w.isDisplayed()
+                                    && w.mActivityRecord != null
+                                    && !addedActivities.contains(
+                                    w.mActivityRecord.mActivityComponent)
+                                    && w.mActivityRecord.isVisible()
+                                    && w.isVisibleNow()) {
+                                addedActivities.add(w.mActivityRecord.mActivityComponent);
+                                result.add(w.mActivityRecord);
+                            }
+                        },
+                        true /* traverseTopToBottom */);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Must be called when a screenshot is taken via hardware chord.
+     *
+     * Notifies all registered visible activities that have registered for screencapture callback,
+     * Returns a list of visible apps component names.
+     */
+    @Override
+    public List<ComponentName> notifyScreenshotListeners(int displayId) {
+        // make sure caller is SysUI.
+        if (!checkCallingPermission(STATUS_BAR_SERVICE,
+                "notifyScreenshotListeners()")) {
+            throw new SecurityException("Requires STATUS_BAR_SERVICE permission");
+        }
+        synchronized (mGlobalLock) {
+            ArraySet<ComponentName> notifiedApps = new ArraySet<>();
+            ArraySet<ActivityRecord> visibleApps = getVisibleActivityRecords(displayId);
+            for (ActivityRecord ar : visibleApps) {
+                if (ar.isRegisteredForScreenCaptureCallback()) {
+                    ar.reportScreenCaptured();
+                    notifiedApps.add(ar.mActivityComponent);
+                }
+            }
+            return List.copyOf(notifiedApps);
+        }
     }
 }

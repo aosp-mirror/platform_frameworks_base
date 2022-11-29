@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.DETECT_SCREEN_CAPTURE;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -26,6 +27,7 @@ import static android.os.Process.myUid;
 import static java.lang.Character.MIN_VALUE;
 
 import android.annotation.CallSuper;
+import android.annotation.CallbackExecutor;
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
@@ -1016,6 +1018,7 @@ public class Activity extends ContextThemeWrapper
     private ComponentCallbacksController mCallbacksController;
 
     @Nullable private IVoiceInteractionManagerService mVoiceInteractionManagerService;
+    private ScreenCaptureCallbackHandler mScreenCaptureCallbackHandler;
 
     private final WindowControllerCallback mWindowControllerCallback =
             new WindowControllerCallback() {
@@ -9221,5 +9224,44 @@ public class Activity extends ContextThemeWrapper
                     + "non-visual activities");
         }
         return mWindow.getOnBackInvokedDispatcher();
+    }
+
+    /**
+     * Interface for observing screen captures of an {@link Activity}.
+     */
+    public interface ScreenCaptureCallback {
+        /**
+         * Called when one of the monitored activities is captured.
+         * This is not invoked if the activity window
+         * has {@link WindowManager.LayoutParams#FLAG_SECURE} set.
+         */
+        void onScreenCaptured();
+    }
+
+    /**
+     * Registers a screen capture callback for this activity.
+     * The callback will be triggered when a screen capture of this activity is attempted.
+     * This callback will be executed on the thread of the passed {@code executor}.
+     * For details, see {@link ScreenCaptureCallback#onScreenCaptured}.
+     */
+    @RequiresPermission(DETECT_SCREEN_CAPTURE)
+    public void registerScreenCaptureCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull ScreenCaptureCallback callback) {
+        if (mScreenCaptureCallbackHandler == null) {
+            mScreenCaptureCallbackHandler = new ScreenCaptureCallbackHandler(mToken);
+        }
+        mScreenCaptureCallbackHandler.registerScreenCaptureCallback(executor, callback);
+    }
+
+
+    /**
+     * Unregisters a screen capture callback for this surface.
+     */
+    @RequiresPermission(DETECT_SCREEN_CAPTURE)
+    public void unregisterScreenCaptureCallback(@NonNull ScreenCaptureCallback callback) {
+        if (mScreenCaptureCallbackHandler != null) {
+            mScreenCaptureCallbackHandler.unregisterScreenCaptureCallback(callback);
+        }
     }
 }
