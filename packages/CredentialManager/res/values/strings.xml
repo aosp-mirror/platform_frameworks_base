@@ -34,6 +34,7 @@
   <string name="passkey">passkey</string>
   <string name="password">password</string>
   <string name="sign_ins">sign-ins</string>
+  <string name="passkey_before_subtitle">Passkey</string>
   <string name="another_device">Another device</string>
   <string name="other_password_manager">Other password managers</string>
   <!-- TODO: Check the wording here. -->

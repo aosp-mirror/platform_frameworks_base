@@ -73,7 +73,7 @@ class RemoteInfo(
 
 data class RequestDisplayInfo(
   val title: String,
-  val subtitle: String,
+  val subtitle: String?,
   val type: String,
   val appDomainName: String,
   val typeIcon: Drawable,
