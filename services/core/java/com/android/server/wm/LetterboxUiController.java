@@ -285,14 +285,17 @@ final class LetterboxUiController {
     }
 
     float getSplitScreenAspectRatio() {
+        // Getting the same aspect ratio that apps get in split screen.
+        final DisplayContent displayContent = mActivityRecord.getDisplayContent();
+        if (displayContent == null) {
+            return getDefaultMinAspectRatioForUnresizableApps();
+        }
         int dividerWindowWidth =
                 getResources().getDimensionPixelSize(R.dimen.docked_stack_divider_thickness);
         int dividerInsets =
                 getResources().getDimensionPixelSize(R.dimen.docked_stack_divider_insets);
         int dividerSize = dividerWindowWidth - dividerInsets * 2;
-
-        // Getting the same aspect ratio that apps get in split screen.
-        Rect bounds = new Rect(mActivityRecord.getDisplayContent().getBounds());
+        final Rect bounds = new Rect(displayContent.getBounds());
         if (bounds.width() >= bounds.height()) {
             bounds.inset(/* dx */ dividerSize / 2, /* dy */ 0);
             bounds.right = bounds.centerX();
