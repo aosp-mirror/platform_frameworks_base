@@ -8955,6 +8955,9 @@
         <!-- Flag indicating whether a recognition service can be selected as default. The default
              value of this flag is true. -->
         <attr name="selectableAsDefault" format="boolean" />
+        <!-- The maximal number of recognition sessions ongoing at the same time.
+             The default value is 1, meaning no concurrency. -->
+        <attr name="maxConcurrentSessionsCount" format="integer" />
     </declare-styleable>
 
     <!-- Use <code>voice-interaction-service</code> as the root tag of the XML resource that
