@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.pipeline.dagger
 
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepositoryImpl
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
@@ -32,6 +35,7 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiReposito
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryImpl
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 
 @Module
 abstract class StatusBarPipelineModule {
@@ -57,4 +61,15 @@ abstract class StatusBarPipelineModule {
 
     @Binds
     abstract fun mobileIconsInteractor(impl: MobileIconsInteractorImpl): MobileIconsInteractor
+
+    @Module
+    companion object {
+        @JvmStatic
+        @Provides
+        @SysUISingleton
+        @WifiTableLog
+        fun provideWifiTableLogBuffer(factory: TableLogBufferFactory): TableLogBuffer {
+            return factory.create("WifiTableLog", 100)
+        }
+    }
 }

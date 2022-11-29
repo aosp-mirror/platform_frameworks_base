@@ -12,22 +12,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.android.systemui.keyguard.data.quickaffordance
+package com.android.systemui.log.table
 
 /**
- * Unique identifier keys for all known built-in quick affordances.
+ * A class that logs a row to [TableLogBuffer].
  *
- * Please ensure uniqueness by never associating more than one class with each key.
+ * Objects that implement [Diffable] will receive an instance of this class, and can log any changes
+ * to individual fields using the [logChange] methods. All logged changes will be associated with
+ * the same timestamp.
  */
-object BuiltInKeyguardQuickAffordanceKeys {
-    // Please keep alphabetical order of const names to simplify future maintenance.
-    const val CAMERA = "camera"
-    const val FLASHLIGHT = "flashlight"
-    const val HOME_CONTROLS = "home"
-    const val QR_CODE_SCANNER = "qr_code_scanner"
-    const val QUICK_ACCESS_WALLET = "wallet"
-    // Please keep alphabetical order of const names to simplify future maintenance.
+interface TableRowLogger {
+    /** Logs a change to a string value. */
+    fun logChange(columnName: String, value: String?)
+
+    /** Logs a change to a boolean value. */
+    fun logChange(columnName: String, value: Boolean)
+
+    /** Logs a change to an int value. */
+    fun logChange(columnName: String, value: Int)
 }
