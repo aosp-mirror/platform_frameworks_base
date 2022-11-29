@@ -289,7 +289,7 @@ public class InstantAppNotifier extends CoreStartable
                             .setComponent(aiaComponent)
                             .setAction(Intent.ACTION_VIEW)
                             .addCategory(Intent.CATEGORY_BROWSABLE)
-                            .addCategory("unique:" + System.currentTimeMillis())
+                            .setIdentifier("unique:" + System.currentTimeMillis())
                             .putExtra(Intent.EXTRA_PACKAGE_NAME, appInfo.packageName)
                             .putExtra(
                                     Intent.EXTRA_VERSION_CODE,

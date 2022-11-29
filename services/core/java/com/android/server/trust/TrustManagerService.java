@@ -602,9 +602,12 @@ public class TrustManagerService extends SystemService {
         synchronized (mUserTrustState) {
             wasTrusted = (mUserTrustState.get(userId) == TrustState.TRUSTED);
             wasTrustable = (mUserTrustState.get(userId) == TrustState.TRUSTABLE);
+            boolean isAutomotive = getContext().getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_AUTOMOTIVE);
             boolean renewingTrust = wasTrustable && (
                     (flags & TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) != 0);
-            boolean canMoveToTrusted = alreadyUnlocked || isFromUnlock || renewingTrust;
+            boolean canMoveToTrusted =
+                    alreadyUnlocked || isFromUnlock || renewingTrust || isAutomotive;
             boolean upgradingTrustForCurrentUser = (userId == mCurrentUser);
 
             if (trustedByAtLeastOneAgent && wasTrusted) {
@@ -687,7 +690,7 @@ public class TrustManagerService extends SystemService {
      */
     public void lockUser(int userId) {
         mLockPatternUtils.requireStrongAuth(
-                StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED, userId);
+                StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST, userId);
         try {
             WindowManagerGlobal.getWindowManagerService().lockNow(null);
         } catch (RemoteException e) {
@@ -2084,7 +2087,7 @@ public class TrustManagerService extends SystemService {
             if (mStrongAuthTracker.isTrustAllowedForUser(mUserId)) {
                 if (DEBUG) Slog.d(TAG, "Revoking all trust because of trust timeout");
                 mLockPatternUtils.requireStrongAuth(
-                        mStrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED, mUserId);
+                        mStrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST, mUserId);
             }
             maybeLockScreen(mUserId);
         }

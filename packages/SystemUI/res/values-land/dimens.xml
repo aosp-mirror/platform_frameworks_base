@@ -59,4 +59,5 @@
     <dimen name="large_dialog_width">348dp</dimen>
 
     <dimen name="qs_panel_padding_top">@dimen/qqs_layout_margin_top</dimen>
+    <dimen name="qs_panel_padding_top_combined_headers">@dimen/qs_panel_padding_top</dimen>
 </resources>

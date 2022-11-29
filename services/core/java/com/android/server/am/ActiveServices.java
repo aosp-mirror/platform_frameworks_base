@@ -4219,7 +4219,8 @@ public final class ActiveServices {
         final String procName = r.processName;
         HostingRecord hostingRecord = new HostingRecord(
                 HostingRecord.HOSTING_TYPE_SERVICE, r.instanceName,
-                r.definingPackageName, r.definingUid, r.serviceInfo.processName);
+                r.definingPackageName, r.definingUid, r.serviceInfo.processName,
+                getHostingRecordTriggerType(r));
         ProcessRecord app;
 
         if (!isolated) {
@@ -4321,6 +4322,14 @@ public final class ActiveServices {
         }
 
         return null;
+    }
+
+    private String getHostingRecordTriggerType(ServiceRecord r) {
+        if (Manifest.permission.BIND_JOB_SERVICE.equals(r.permission)
+                && r.mRecentCallingUid == SYSTEM_UID) {
+            return HostingRecord.TRIGGER_TYPE_JOB;
+        }
+        return HostingRecord.TRIGGER_TYPE_UNKNOWN;
     }
 
     private final void requestServiceBindingsLocked(ServiceRecord r, boolean execInFg)

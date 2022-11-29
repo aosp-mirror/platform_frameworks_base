@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.flags.Flags.MODERN_BOUNCER;
+
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -524,5 +526,12 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         when(mDreamOverlayStateController.isOverlayActive()).thenReturn(true);
         mBouncerExpansionCallback.onVisibilityChanged(false);
         verify(mCentralSurfaces).setBouncerShowingOverDream(false);
+    }
+
+    @Test
+    public void flag_off_DoesNotCallBouncerInteractor() {
+        when(mFeatureFlags.isEnabled(MODERN_BOUNCER)).thenReturn(false);
+        mStatusBarKeyguardViewManager.hideBouncer(false);
+        verify(mBouncerInteractor, never()).hide();
     }
 }
