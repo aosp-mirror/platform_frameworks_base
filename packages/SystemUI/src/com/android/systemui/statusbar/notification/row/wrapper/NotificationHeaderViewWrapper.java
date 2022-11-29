@@ -71,6 +71,8 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
     private View mFeedbackIcon;
     private boolean mIsLowPriority;
     private boolean mTransformLowPriorityTitle;
+    private boolean mUseRoundnessSourceTypes;
+    private RoundnessChangedListener mRoundnessChangedListener;
 
     protected NotificationHeaderViewWrapper(Context ctx, View view, ExpandableNotificationRow row) {
         super(ctx, view, row);
@@ -115,6 +117,20 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
     @Override
     public RoundableState getRoundableState() {
         return mRoundableState;
+    }
+
+    @Override
+    public void applyRoundnessAndInvalidate() {
+        if (mUseRoundnessSourceTypes && mRoundnessChangedListener != null) {
+            // We cannot apply the rounded corner to this View, so our parents (in drawChild()) will
+            // clip our canvas. So we should invalidate our parent.
+            mRoundnessChangedListener.applyRoundnessAndInvalidate();
+        }
+        Roundable.super.applyRoundnessAndInvalidate();
+    }
+
+    public void setOnRoundnessChangedListener(RoundnessChangedListener listener) {
+        mRoundnessChangedListener = listener;
     }
 
     protected void resolveHeaderViews() {
@@ -342,6 +358,15 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
                 mTransformationHelper.addViewTransformingToSimilar(view);
             }
         }
+    }
+
+    /**
+     * Enable the support for rounded corner based on the SourceType
+     *
+     * @param enabled true if is supported
+     */
+    public void useRoundnessSourceTypes(boolean enabled) {
+        mUseRoundnessSourceTypes = enabled;
     }
 
     /**
