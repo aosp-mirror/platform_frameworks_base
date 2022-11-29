@@ -39,6 +39,7 @@ import com.android.credentialmanager.jetpack.developer.CreatePublicKeyCredential
 import com.android.credentialmanager.jetpack.provider.ActionUi
 import com.android.credentialmanager.jetpack.provider.CredentialEntryUi
 import com.android.credentialmanager.jetpack.provider.SaveEntryUi
+import org.json.JSONObject
 
 /** Utility functions for converting CredentialManager data structures to or from UI formats. */
 class GetFlowUtils {
@@ -235,33 +236,42 @@ class CreateFlowUtils {
           it
         )
       }
-      // TODO: covert from real requestInfo
       when (createCredentialRequestJetpack) {
-          is CreatePasswordRequest -> {
-            return RequestDisplayInfo(
-              createCredentialRequestJetpack.id,
-              createCredentialRequestJetpack.password,
-              createCredentialRequestJetpack.type,
-              "tribank",
-              context.getDrawable(R.drawable.ic_password)!!
-            )
-          }
-        is CreatePublicKeyCredentialRequest -> {
+        is CreatePasswordRequest -> {
           return RequestDisplayInfo(
-            "beckett-bakert@gmail.com",
-            "Elisa Beckett",
+            createCredentialRequestJetpack.id,
+            createCredentialRequestJetpack.password,
             createCredentialRequestJetpack.type,
-            "tribank",
+            requestInfo.appPackageName,
+            context.getDrawable(R.drawable.ic_password)!!
+          )
+        }
+        is CreatePublicKeyCredentialRequest -> {
+          val requestJson = createCredentialRequestJetpack.requestJson
+          val json = JSONObject(requestJson)
+          var name = ""
+          var displayName = ""
+          if (json.has("user")) {
+            val user: JSONObject = json.getJSONObject("user")
+            name = user.getString("name")
+            displayName = user.getString("displayName")
+          }
+          return RequestDisplayInfo(
+            name,
+            displayName,
+            createCredentialRequestJetpack.type,
+            requestInfo.appPackageName,
             context.getDrawable(R.drawable.ic_passkey)!!)
         }
+        // TODO: correctly parsing for other sign-ins
         else -> {
           return RequestDisplayInfo(
             "beckett-bakert@gmail.com",
             "Elisa Beckett",
             "other-sign-ins",
-            "tribank",
+            requestInfo.appPackageName,
             context.getDrawable(R.drawable.ic_other_sign_in)!!)
-          }
+        }
       }
     }
 

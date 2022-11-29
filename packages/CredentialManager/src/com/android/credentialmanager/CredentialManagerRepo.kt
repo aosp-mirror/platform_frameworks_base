@@ -425,7 +425,40 @@ class CredentialManagerRepo(
   }
 
   private fun testCreatePasskeyRequestInfo(): RequestInfo {
-    val request = CreatePublicKeyCredentialRequest("json")
+    val request = CreatePublicKeyCredentialRequest("{\"extensions\": {\n" +
+            "                     \"webauthn.loc\": true\n" +
+            "                   },\n" +
+            "                   \"attestation\": \"direct\",\n" +
+            "                   \"challenge\": \"-rSQHXSQUdaK1N-La5bE-JPt6EVAW4SxX1K_tXhZ_Gk\",\n" +
+            "                   \"user\": {\n" +
+            "                     \"displayName\": \"testName\",\n" +
+            "                     \"name\": \"credManTesting@gmail.com\",\n" +
+            "                     \"id\": \"eD4o2KoXLpgegAtnM5cDhhUPvvk2\"\n" +
+            "                   },\n" +
+            "                   \"excludeCredentials\": [],\n" +
+            "                   \"rp\": {\n" +
+            "                     \"name\": \"Address Book\",\n" +
+            "                     \"id\": \"addressbook-c7876.uc.r.appspot.com\"\n" +
+            "                   },\n" +
+            "                   \"timeout\": 60000,\n" +
+            "                   \"pubKeyCredParams\": [\n" +
+            "                     {\n" +
+            "                       \"type\": \"public-key\",\n" +
+            "                       \"alg\": -7\n" +
+            "                     },\n" +
+            "                     {\n" +
+            "                       \"type\": \"public-key\",\n" +
+            "                       \"alg\": -257\n" +
+            "                     },\n" +
+            "                     {\n" +
+            "                       \"type\": \"public-key\",\n" +
+            "                       \"alg\": -37\n" +
+            "                     }\n" +
+            "                   ],\n" +
+            "                   \"authenticatorSelection\": {\n" +
+            "                     \"residentKey\": \"required\",\n" +
+            "                     \"requireResidentKey\": true\n" +
+            "                   }}")
     val data = request.data
     return RequestInfo.newCreateRequestInfo(
       Binder(),
