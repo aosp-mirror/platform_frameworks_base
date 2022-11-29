@@ -136,7 +136,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 StatusBarManager.DISABLE2_NOTIFICATION_SHADE, false);
 
         verify(mCentralSurfaces).updateQsExpansionEnabled();
-        verify(mShadeController).animateCollapsePanels();
+        verify(mShadeController).animateCollapseShade();
 
         // Trying to open it does nothing.
         mSbcqCallbacks.animateExpandNotificationsPanel();
@@ -154,7 +154,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
         mSbcqCallbacks.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
                 StatusBarManager.DISABLE2_NONE, false);
         verify(mCentralSurfaces).updateQsExpansionEnabled();
-        verify(mShadeController, never()).animateCollapsePanels();
+        verify(mShadeController, never()).animateCollapseShade();
 
         // Can now be opened.
         mSbcqCallbacks.animateExpandNotificationsPanel();

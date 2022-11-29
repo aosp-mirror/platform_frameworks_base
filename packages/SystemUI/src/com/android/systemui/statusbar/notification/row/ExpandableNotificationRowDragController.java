@@ -54,8 +54,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
-import java.util.Collections;
-
 import javax.inject.Inject;
 
 /**
