@@ -16,6 +16,9 @@
 
 package com.android.systemui.shade;
 
+import android.view.MotionEvent;
+
+import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -29,31 +32,32 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
  */
 public interface ShadeController {
 
-    /**
-     * Make our window larger and the panel expanded
-     */
-    void instantExpandNotificationsPanel();
+    /** Make our window larger and the shade expanded */
+    void instantExpandShade();
 
-    /** See {@link #animateCollapsePanels(int, boolean)}. */
-    void animateCollapsePanels();
+    /** Collapse the shade instantly with no animation. */
+    void instantCollapseShade();
 
-    /** See {@link #animateCollapsePanels(int, boolean)}. */
-    void animateCollapsePanels(int flags);
+    /** See {@link #animateCollapsePanels(int, boolean, boolean, float)}. */
+    void animateCollapseShade();
+
+    /** See {@link #animateCollapsePanels(int, boolean, boolean, float)}. */
+    void animateCollapseShade(int flags);
+
+    /** See {@link #animateCollapsePanels(int, boolean, boolean, float)}. */
+    void animateCollapseShadeForced();
+
+    /** See {@link #animateCollapsePanels(int, boolean, boolean, float)}. */
+    void animateCollapseShadeDelayed();
 
     /**
      * Collapse the shade animated, showing the bouncer when on {@link StatusBarState#KEYGUARD} or
-     * dismissing {@link CentralSurfaces} when on {@link StatusBarState#SHADE}.
+     * dismissing status bar when on {@link StatusBarState#SHADE}.
      */
-    void animateCollapsePanels(int flags, boolean force);
-
-    /** See {@link #animateCollapsePanels(int, boolean)}. */
-    void animateCollapsePanels(int flags, boolean force, boolean delayed);
-
-    /** See {@link #animateCollapsePanels(int, boolean)}. */
     void animateCollapsePanels(int flags, boolean force, boolean delayed, float speedUpFactor);
 
     /**
-     * If the notifications panel is not fully expanded, collapse it animated.
+     * If the shade is not fully expanded, collapse it animated.
      *
      * @return Seems to always return false
      */
@@ -77,9 +81,7 @@ public interface ShadeController {
      */
     void addPostCollapseAction(Runnable action);
 
-    /**
-     * Run all of the runnables added by {@link #addPostCollapseAction}.
-     */
+    /** Run all of the runnables added by {@link #addPostCollapseAction}. */
     void runPostCollapseRunnables();
 
     /**
@@ -87,13 +89,48 @@ public interface ShadeController {
      *
      * @return true if the shade was open, else false
      */
-    boolean collapsePanel();
+    boolean collapseShade();
 
     /**
-     * If animate is true, does the same as {@link #collapsePanel()}. Otherwise, instantly collapse
-     * the panel. Post collapse runnables will be executed
+     * If animate is true, does the same as {@link #collapseShade()}. Otherwise, instantly collapse
+     * the shade. Post collapse runnables will be executed
      *
      * @param animate true to animate the collapse, false for instantaneous collapse
      */
-    void collapsePanel(boolean animate);
+    void collapseShade(boolean animate);
+
+    /** Makes shade expanded but not visible. */
+    void makeExpandedInvisible();
+
+    /** Makes shade expanded and visible. */
+    void makeExpandedVisible(boolean force);
+
+    /** Returns whether the shade is expanded and visible. */
+    boolean isExpandedVisible();
+
+    /** Handle status bar touch event. */
+    void onStatusBarTouch(MotionEvent event);
+
+    /** Sets the listener for when the visibility of the shade changes. */
+    void setVisibilityListener(ShadeVisibilityListener listener);
+
+    /** */
+    void setNotificationPresenter(NotificationPresenter presenter);
+
+    /** */
+    void setNotificationShadeWindowViewController(
+            NotificationShadeWindowViewController notificationShadeWindowViewController);
+
+    /** */
+    void setNotificationPanelViewController(
+            NotificationPanelViewController notificationPanelViewController);
+
+    /** Listens for shade visibility changes. */
+    interface ShadeVisibilityListener {
+        /** Called when the visibility of the shade changes. */
+        void visibilityChanged(boolean visible);
+
+        /** Called when shade expanded and visible state changed. */
+        void expandedVisibleChanged(boolean expandedVisible);
+    }
 }
