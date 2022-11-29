@@ -3353,7 +3353,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     }
                 }
                 mWmService.mLatencyTracker.onActionStart(ACTION_ROTATE_SCREEN);
-                controller.mTransitionMetricsReporter.associate(t,
+                controller.mTransitionMetricsReporter.associate(t.getToken(),
                         startTime -> mWmService.mLatencyTracker.onActionEnd(ACTION_ROTATE_SCREEN));
                 startAsyncRotation(false /* shouldDebounce */);
             }
