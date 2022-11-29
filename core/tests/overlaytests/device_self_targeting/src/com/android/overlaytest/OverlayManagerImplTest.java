@@ -17,15 +17,22 @@
 package com.android.overlaytest;
 
 import static android.content.Context.MODE_PRIVATE;
+import static android.content.pm.PackageManager.SIGNATURE_NO_MATCH;
 
 import static com.android.internal.content.om.OverlayManagerImpl.SELF_TARGET;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.om.OverlayInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.FabricatedOverlayInternal;
@@ -72,10 +79,22 @@ public class OverlayManagerImplTest {
     private static final String TARGET_COLOR_RES = "color/mycolor";
     private static final String TARGET_STRING_RES = "string/mystring";
     private static final String TARGET_DRAWABLE_RES = "drawable/mydrawable";
+    private static final String PUBLIC_OVERLAYABLE = "PublicOverlayable";
+    private static final String SIGNATURE_OVERLAYABLE = "SignatureOverlayable";
+    private static final String SYSTEM_APP_OVERLAYABLE = "SystemAppOverlayable";
+    private static final String ODM_OVERLAYABLE = "OdmOverlayable";
+    private static final String OEM_OVERLAYABLE = "OemOverlayable";
+    private static final String VENDOR_OVERLAYABLE = "VendorOverlayable";
+    private static final String PRODUCT_OVERLAYABLE = "ProductOverlayable";
+    private static final String ACTOR_OVERLAYABLE = "ActorOverlayable";
+    private static final String CONFIG_OVERLAYABLE = "ConfigOverlayable";
 
     private Context mContext;
     private OverlayManagerImpl mOverlayManagerImpl;
     private String mOverlayName;
+
+    private PackageManager mMockPackageManager;
+    private ApplicationInfo mMockApplicationInfo;
 
     @Rule public TestName mTestName = new TestName();
 
@@ -111,7 +130,36 @@ public class OverlayManagerImplTest {
     public void setUp() throws IOException {
         clearDir();
         mOverlayName = mTestName.getMethodName();
-        mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        final Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+
+        mMockApplicationInfo = mock(ApplicationInfo.class);
+        when(mMockApplicationInfo.isSystemApp()).thenReturn(false);
+        when(mMockApplicationInfo.isSystemExt()).thenReturn(false);
+        when(mMockApplicationInfo.isOdm()).thenReturn(false);
+        when(mMockApplicationInfo.isOem()).thenReturn(false);
+        when(mMockApplicationInfo.isVendor()).thenReturn(false);
+        when(mMockApplicationInfo.isProduct()).thenReturn(false);
+        when(mMockApplicationInfo.getBaseCodePath()).thenReturn(
+                context.getApplicationInfo().getBaseCodePath());
+        mMockApplicationInfo.sourceDir = context.getApplicationInfo().sourceDir;
+
+        mMockPackageManager = mock(PackageManager.class);
+        when(mMockPackageManager.checkSignatures(anyString(), anyString()))
+                .thenReturn(SIGNATURE_NO_MATCH);
+
+        mContext =
+                new ContextWrapper(context) {
+                    @Override
+                    public ApplicationInfo getApplicationInfo() {
+                        return mMockApplicationInfo;
+                    }
+
+                    @Override
+                    public PackageManager getPackageManager() {
+                        return mMockPackageManager;
+                    }
+                };
+
         mOverlayManagerImpl = new OverlayManagerImpl(mContext);
     }
 
@@ -144,12 +192,14 @@ public class OverlayManagerImplTest {
 
     private <T> FabricatedOverlayInternal createOverlayWithName(
             @NonNull String overlayName,
+            @NonNull String targetOverlayable,
             @NonNull String targetPackageName,
             @NonNull List<Pair<String, Pair<String, T>>> entryDefinitions) {
         final String packageName = mContext.getPackageName();
         FabricatedOverlayInternal overlayInternal = new FabricatedOverlayInternal();
         overlayInternal.overlayName = overlayName;
         overlayInternal.targetPackageName = targetPackageName;
+        overlayInternal.targetOverlayable = targetOverlayable;
         overlayInternal.packageName = packageName;
 
         addOverlayEntry(overlayInternal, entryDefinitions);
@@ -162,6 +212,7 @@ public class OverlayManagerImplTest {
         FabricatedOverlayInternal overlayInternal =
                 createOverlayWithName(
                         mOverlayName,
+                        SYSTEM_APP_OVERLAYABLE,
                         "android",
                         List.of(Pair.create("color/white", Pair.create(null, Color.BLACK))));
 
@@ -190,6 +241,7 @@ public class OverlayManagerImplTest {
         FabricatedOverlayInternal overlayInternal =
                 createOverlayWithName(
                         mOverlayName,
+                        SIGNATURE_OVERLAYABLE,
                         mContext.getPackageName(),
                         List.of(Pair.create(TARGET_COLOR_RES, Pair.create(null, Color.WHITE))));
 
@@ -215,6 +267,7 @@ public class OverlayManagerImplTest {
         FabricatedOverlayInternal overlayInternal =
                 createOverlayWithName(
                         mOverlayName,
+                        SIGNATURE_OVERLAYABLE,
                         mContext.getPackageName(),
                         List.of(Pair.create(TARGET_STRING_RES, Pair.create(null, "HELLO"))));
 
@@ -242,6 +295,7 @@ public class OverlayManagerImplTest {
         FabricatedOverlayInternal overlayInternal =
                 createOverlayWithName(
                         mOverlayName,
+                        SIGNATURE_OVERLAYABLE,
                         mContext.getPackageName(),
                         List.of(Pair.create(TARGET_DRAWABLE_RES,
                                             Pair.create(null, parcelFileDescriptor))));
@@ -268,6 +322,7 @@ public class OverlayManagerImplTest {
         FabricatedOverlayInternal overlayInternal =
                 createOverlayWithName(
                         mOverlayName,
+                        SIGNATURE_OVERLAYABLE,
                         mContext.getPackageName(),
                         List.of(Pair.create("color/not_existed", Pair.create(null, "HELLO"))));
 
@@ -301,6 +356,7 @@ public class OverlayManagerImplTest {
         FabricatedOverlayInternal overlayInternal =
                 createOverlayWithName(
                         mOverlayName,
+                        SIGNATURE_OVERLAYABLE,
                         mContext.getPackageName(),
                         List.of(Pair.create(TARGET_COLOR_RES, Pair.create(null, Color.WHITE))));
         mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal);
@@ -309,6 +365,7 @@ public class OverlayManagerImplTest {
         overlayInternal =
                 createOverlayWithName(
                         secondOverlayName,
+                        SIGNATURE_OVERLAYABLE,
                         mContext.getPackageName(),
                         List.of(Pair.create(TARGET_COLOR_RES, Pair.create(null, Color.WHITE))));
         mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal);
@@ -341,6 +398,7 @@ public class OverlayManagerImplTest {
         FabricatedOverlayInternal overlayInternal =
                 createOverlayWithName(
                         mOverlayName,
+                        SIGNATURE_OVERLAYABLE,
                         mContext.getPackageName(),
                         List.of(Pair.create(TARGET_COLOR_RES, Pair.create(null, Color.WHITE))));
         mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal);
@@ -349,6 +407,7 @@ public class OverlayManagerImplTest {
         overlayInternal =
                 createOverlayWithName(
                         mOverlayName,
+                        SIGNATURE_OVERLAYABLE,
                         mContext.getPackageName(),
                         List.of(Pair.create(TARGET_COLOR_RES, Pair.create(null, Color.WHITE))));
         mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal);
@@ -407,5 +466,178 @@ public class OverlayManagerImplTest {
                 };
 
         assertThrows(SecurityException.class, () -> new OverlayManagerImpl(fakeContext));
+    }
+
+    FabricatedOverlayInternal prepareFabricatedOverlayInternal(
+            String targetOverlayableName, String targetEntryName) {
+        return createOverlayWithName(
+                mOverlayName,
+                targetOverlayableName,
+                mContext.getPackageName(),
+                List.of(
+                        Pair.create(
+                                targetEntryName,
+                                Pair.create(null, Color.WHITE))));
+    }
+
+    @Test
+    public void registerOverlayOnSystemOverlayable_selfIsNotSystemApp_shouldFail() {
+        final FabricatedOverlayInternal overlayInternal = prepareFabricatedOverlayInternal(
+                SYSTEM_APP_OVERLAYABLE,
+                "color/system_app_overlayable_color");
+
+        assertThrows(
+                IOException.class,
+                () -> mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal));
+    }
+
+    @Test
+    public void registerOverlayOnOdmOverlayable_selfIsNotOdm_shouldFail() {
+        final FabricatedOverlayInternal overlayInternal = prepareFabricatedOverlayInternal(
+                ODM_OVERLAYABLE,
+                "color/odm_overlayable_color");
+
+        assertThrows(
+                IOException.class,
+                () -> mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal));
+    }
+
+    @Test
+    public void registerOverlayOnOemOverlayable_selfIsNotOem_shouldFail() {
+        final FabricatedOverlayInternal overlayInternal = prepareFabricatedOverlayInternal(
+                OEM_OVERLAYABLE,
+                "color/oem_overlayable_color");
+
+        assertThrows(
+                IOException.class,
+                () -> mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal));
+    }
+
+    @Test
+    public void registerOverlayOnVendorOverlayable_selfIsNotVendor_shouldFail() {
+        final FabricatedOverlayInternal overlayInternal = prepareFabricatedOverlayInternal(
+                VENDOR_OVERLAYABLE,
+                "color/vendor_overlayable_color");
+
+        assertThrows(
+                IOException.class,
+                () -> mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal));
+    }
+
+    @Test
+    public void registerOverlayOnProductOverlayable_selfIsNotProduct_shouldFail() {
+        final FabricatedOverlayInternal overlayInternal = prepareFabricatedOverlayInternal(
+                PRODUCT_OVERLAYABLE,
+                "color/product_overlayable_color");
+
+        assertThrows(
+                IOException.class,
+                () -> mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal));
+    }
+
+    @Test
+    public void registerOverlayOnActorOverlayable_notSupport_shouldFail() {
+        final FabricatedOverlayInternal overlayInternal = prepareFabricatedOverlayInternal(
+                ACTOR_OVERLAYABLE,
+                "color/actor_overlayable_color");
+
+        assertThrows(
+                IOException.class,
+                () -> mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal));
+    }
+
+    @Test
+    public void registerOverlayOnConfigOverlayable_notSupport_shouldFail() {
+        final FabricatedOverlayInternal overlayInternal = prepareFabricatedOverlayInternal(
+                CONFIG_OVERLAYABLE,
+                "color/config_overlayable_color");
+
+        assertThrows(
+                IOException.class,
+                () -> mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal));
+    }
+
+    @Test
+    public void registerOverlayOnPublicOverlayable_shouldAlwaysSucceed()
+            throws PackageManager.NameNotFoundException, IOException {
+        final FabricatedOverlayInternal overlayInternal = prepareFabricatedOverlayInternal(
+                PUBLIC_OVERLAYABLE,
+                "color/public_overlayable_color");
+
+        mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal);
+
+        assertThat(mOverlayManagerImpl.getOverlayInfosForTarget(mContext.getPackageName()).size())
+                .isEqualTo(1);
+    }
+
+    @Test
+    public void registerOverlayOnSystemOverlayable_selfIsSystemApp_shouldSucceed()
+            throws PackageManager.NameNotFoundException, IOException {
+        final FabricatedOverlayInternal overlayInternal = prepareFabricatedOverlayInternal(
+                SYSTEM_APP_OVERLAYABLE,
+                "color/system_app_overlayable_color");
+        when(mMockApplicationInfo.isSystemApp()).thenReturn(true);
+        when(mMockApplicationInfo.isSystemExt()).thenReturn(true);
+
+        mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal);
+
+        assertThat(mOverlayManagerImpl.getOverlayInfosForTarget(mContext.getPackageName()).size())
+                .isEqualTo(1);
+    }
+
+    @Test
+    public void registerOverlayOnOdmOverlayable_selfIsOdm_shouldSucceed()
+            throws PackageManager.NameNotFoundException, IOException {
+        final FabricatedOverlayInternal overlayInternal = prepareFabricatedOverlayInternal(
+                ODM_OVERLAYABLE,
+                "color/odm_overlayable_color");
+        when(mMockApplicationInfo.isOdm()).thenReturn(true);
+
+        mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal);
+
+        assertThat(mOverlayManagerImpl.getOverlayInfosForTarget(mContext.getPackageName()).size())
+                .isEqualTo(1);
+    }
+
+    @Test
+    public void registerOverlayOnOemOverlayable_selfIsOem_shouldSucceed()
+            throws PackageManager.NameNotFoundException, IOException {
+        final FabricatedOverlayInternal overlayInternal = prepareFabricatedOverlayInternal(
+                OEM_OVERLAYABLE,
+                "color/oem_overlayable_color");
+        when(mMockApplicationInfo.isOem()).thenReturn(true);
+
+        mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal);
+
+        assertThat(mOverlayManagerImpl.getOverlayInfosForTarget(mContext.getPackageName()).size())
+                .isEqualTo(1);
+    }
+
+    @Test
+    public void registerOverlayOnVendorOverlayable_selfIsVendor_shouldSucceed()
+            throws PackageManager.NameNotFoundException, IOException {
+        final FabricatedOverlayInternal overlayInternal = prepareFabricatedOverlayInternal(
+                VENDOR_OVERLAYABLE,
+                "color/vendor_overlayable_color");
+        when(mMockApplicationInfo.isVendor()).thenReturn(true);
+
+        mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal);
+
+        assertThat(mOverlayManagerImpl.getOverlayInfosForTarget(mContext.getPackageName()).size())
+                .isEqualTo(1);
+    }
+
+    @Test
+    public void registerOverlayOnProductOverlayable_selfIsProduct_shouldSucceed()
+            throws PackageManager.NameNotFoundException, IOException {
+        final FabricatedOverlayInternal overlayInternal = prepareFabricatedOverlayInternal(
+                PRODUCT_OVERLAYABLE,
+                "color/product_overlayable_color");
+        when(mMockApplicationInfo.isProduct()).thenReturn(true);
+
+        mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal);
+
+        assertThat(mOverlayManagerImpl.getOverlayInfosForTarget(mContext.getPackageName()).size())
+                .isEqualTo(1);
     }
 }

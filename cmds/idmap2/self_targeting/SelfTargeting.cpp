@@ -38,9 +38,10 @@ namespace android::self_targeting {
 constexpr const mode_t kIdmapFilePermission = S_IRUSR | S_IWUSR;  // u=rw-, g=---, o=---
 
 extern "C" bool
-CreateFrroFile(std::string& out_err_result, std::string& packageName, std::string& overlayName,
-               std::string& targetPackageName, std::optional<std::string>& targetOverlayable,
-               std::vector<FabricatedOverlayEntryParameters>& entries_params,
+CreateFrroFile(std::string& out_err_result, const std::string& packageName,
+               const std::string& overlayName, const std::string& targetPackageName,
+               const std::optional<std::string>& targetOverlayable,
+               const std::vector<FabricatedOverlayEntryParameters>& entries_params,
                const std::string& frro_file_path) {
     android::idmap2::FabricatedOverlay::Builder builder(packageName, overlayName,
                                                         targetPackageName);
@@ -90,9 +91,46 @@ CreateFrroFile(std::string& out_err_result, std::string& packageName, std::strin
     return true;
 }
 
+static PolicyBitmask GetFulfilledPolicy(const bool isSystem, const bool isVendor,
+                                        const bool isProduct, const bool isTargetSignature,
+                                        const bool isOdm, const bool isOem) {
+    auto fulfilled_policy = static_cast<PolicyBitmask>(PolicyFlags::PUBLIC);
+
+    if (isSystem) {
+        fulfilled_policy |= PolicyFlags::SYSTEM_PARTITION;
+    }
+    if (isVendor) {
+        fulfilled_policy |= PolicyFlags::VENDOR_PARTITION;
+    }
+    if (isProduct) {
+        fulfilled_policy |= PolicyFlags::PRODUCT_PARTITION;
+    }
+    if (isOdm) {
+        fulfilled_policy |= PolicyFlags::ODM_PARTITION;
+    }
+    if (isOem) {
+        fulfilled_policy |= PolicyFlags::OEM_PARTITION;
+    }
+    if (isTargetSignature) {
+        fulfilled_policy |= PolicyFlags::SIGNATURE;
+    }
+
+    // Not support actor_signature and config_overlay_signature
+    fulfilled_policy &=
+            ~(PolicyFlags::ACTOR_SIGNATURE | PolicyFlags::CONFIG_SIGNATURE);
+
+    ALOGV(
+            "fulfilled_policy = 0x%08x, isSystem = %d, isVendor = %d, isProduct = %d,"
+            " isTargetSignature = %d, isOdm = %d, isOem = %d,",
+            fulfilled_policy, isSystem, isVendor, isProduct, isTargetSignature, isOdm, isOem);
+    return fulfilled_policy;
+}
+
 extern "C" bool
 CreateIdmapFile(std::string& out_err, const std::string& targetPath, const std::string& overlayPath,
-                const std::string& idmapPath, const std::string& overlayName) {
+                const std::string& idmapPath, const std::string& overlayName,
+                const bool isSystem, const bool isVendor, const bool isProduct,
+                const bool isTargetSignature, const bool isOdm, const bool isOem) {
     // idmap files are mapped with mmap in libandroidfw. Deleting and recreating the idmap
     // guarantees that existing memory maps will continue to be valid and unaffected. The file must
     // be deleted before attempting to create the idmap, so that if idmap  creation fails, the
@@ -114,14 +152,11 @@ CreateIdmapFile(std::string& out_err, const std::string& targetPath, const std::
     }
 
     // Overlay self target process. Only allow self-targeting types.
-    const auto fulfilled_policies = static_cast<PolicyBitmask>(
-            PolicyFlags::PUBLIC | PolicyFlags::SYSTEM_PARTITION | PolicyFlags::VENDOR_PARTITION |
-            PolicyFlags::PRODUCT_PARTITION | PolicyFlags::SIGNATURE | PolicyFlags::ODM_PARTITION |
-            PolicyFlags::OEM_PARTITION | PolicyFlags::ACTOR_SIGNATURE |
-            PolicyFlags::CONFIG_SIGNATURE);
+    const auto fulfilled_policies = GetFulfilledPolicy(isSystem, isVendor, isProduct,
+                                                       isTargetSignature, isOdm, isOem);
 
     const auto idmap = Idmap::FromContainers(**target, **overlay, overlayName,
-                                             fulfilled_policies, false /* enforce_overlayable */);
+                                             fulfilled_policies, true /* enforce_overlayable */);
     if (!idmap) {
         out_err = base::StringPrintf("Failed to create idmap because of %s",
                                      idmap.GetErrorMessage().c_str());

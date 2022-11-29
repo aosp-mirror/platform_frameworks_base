@@ -170,6 +170,16 @@ public class OverlayManagerImpl {
         mBasePath = baseFile.toPath();
     }
 
+    private boolean isSameWithTargetSignature(final String targetPackage) {
+        final PackageManager packageManager = mContext.getPackageManager();
+        final String packageName = mContext.getPackageName();
+        if (TextUtils.equals(packageName, targetPackage)) {
+            return true;
+        }
+        return packageManager.checkSignatures(packageName, targetPackage)
+                == PackageManager.SIGNATURE_MATCH;
+    }
+
     /**
      * Check if the overlay name is valid or not.
      *
@@ -202,6 +212,9 @@ public class OverlayManagerImpl {
     /**
      * Save FabricatedOverlay instance as frro and idmap files.
      *
+     * <p>In order to fill the overlayable policy, it's necessary to collect the information from
+     * app. And then, the information is passed to native layer to fill the overlayable policy
+     *
      * @param overlayInternal the FabricatedOverlayInternal to be saved.
      */
     public void registerFabricatedOverlay(@NonNull FabricatedOverlayInternal overlayInternal)
@@ -214,6 +227,9 @@ public class OverlayManagerImpl {
         final String overlayName = checkOverlayNameValid(overlayInternal.overlayName);
         checkPackageName(overlayInternal.packageName);
         checkPackageName(overlayInternal.targetPackageName);
+        Preconditions.checkStringNotEmpty(
+                overlayInternal.targetOverlayable,
+                "Target overlayable should be neither null nor empty string.");
 
         final ApplicationInfo applicationInfo = mContext.getApplicationInfo();
         final String targetPackage = Preconditions.checkStringNotEmpty(
@@ -223,7 +239,17 @@ public class OverlayManagerImpl {
 
         createFrroFile(frroPath.toString(), overlayInternal);
         try {
-            createIdmapFile(targetPackage, frroPath.toString(), idmapPath.toString(), overlayName);
+            createIdmapFile(
+                    targetPackage,
+                    frroPath.toString(),
+                    idmapPath.toString(),
+                    overlayName,
+                    applicationInfo.isSystemApp() || applicationInfo.isSystemExt() /* isSystem */,
+                    applicationInfo.isVendor(),
+                    applicationInfo.isProduct(),
+                    isSameWithTargetSignature(overlayInternal.targetPackageName),
+                    applicationInfo.isOdm(),
+                    applicationInfo.isOem());
         } catch (IOException e) {
             if (!frroPath.toFile().delete()) {
                 Log.w(TAG, "Failed to delete file " + frroPath);
@@ -315,7 +341,13 @@ public class OverlayManagerImpl {
             @NonNull String targetPath,
             @NonNull String overlayPath,
             @NonNull String idmapPath,
-            @NonNull String overlayName)
+            @NonNull String overlayName,
+            boolean isSystem,
+            boolean isVendor,
+            boolean isProduct,
+            boolean isSameWithTargetSignature,
+            boolean isOdm,
+            boolean isOem)
             throws IOException;
 
     private static native FabricatedOverlayInfo getFabricatedOverlayInfo(

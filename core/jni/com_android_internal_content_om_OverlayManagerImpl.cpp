@@ -123,8 +123,12 @@ public:
 
     bool callCreateIdmapFile(std::string& out_error, const std::string& targetPath,
                              const std::string& overlayPath, const std::string& idmapPath,
-                             const std::string& overlayName) {
-        return createIdmapFileFuncPtr_(out_error, targetPath, overlayPath, idmapPath, overlayName);
+                             const std::string& overlayName, const bool isSystem,
+                             const bool isVendor, const bool isProduct,
+                             const bool isTargetSignature, const bool isOdm, const bool isOem) {
+        return createIdmapFileFuncPtr_(out_error, targetPath, overlayPath, idmapPath, overlayName,
+                                       isSystem, isVendor, isProduct, isTargetSignature, isOdm,
+                                       isOem);
     }
 
     bool callGetFabricatedOverlayInfo(std::string& out_error, const std::string& overlay_path,
@@ -158,7 +162,10 @@ private:
     typedef bool (*CreateIdmapFileFunc)(std::string& out_error, const std::string& targetPath,
                                         const std::string& overlayPath,
                                         const std::string& idmapPath,
-                                        const std::string& overlayName);
+                                        const std::string& overlayName, const jboolean isSystem,
+                                        const jboolean isVendor, const jboolean isProduct,
+                                        const jboolean isSameWithTargetSignature,
+                                        const jboolean isOdm, const jboolean isOem);
 
     typedef bool (*GetFabricatedOverlayInfoFunc)(std::string& out_error,
                                                  const std::string& overlay_path,
@@ -295,7 +302,9 @@ static void CreateFrroFile(JNIEnv* env, jclass /*clazz*/, jstring jsFrroFilePath
 }
 
 static void CreateIdmapFile(JNIEnv* env, jclass /* clazz */, jstring jsTargetPath,
-                            jstring jsOverlayPath, jstring jsIdmapPath, jstring jsOverlayName) {
+                            jstring jsOverlayPath, jstring jsIdmapPath, jstring jsOverlayName,
+                            jboolean isSystem, jboolean isVendor, jboolean isProduct,
+                            jboolean isTargetSignature, jboolean isOdm, jboolean isOem) {
     DynamicLibraryLoader& dlLoader = EnsureDynamicLibraryLoader(env);
     if (!dlLoader) {
         jniThrowNullPointerException(env, "libidmap2 is not loaded");
@@ -327,7 +336,10 @@ static void CreateIdmapFile(JNIEnv* env, jclass /* clazz */, jstring jsTargetPat
 
     std::string err_result;
     if (!dlLoader.callCreateIdmapFile(err_result, targetPath.c_str(), overlayPath.c_str(),
-                                      idmapPath.c_str(), overlayName.c_str())) {
+                                      idmapPath.c_str(), overlayName.c_str(),
+                                      (isSystem == JNI_TRUE), (isVendor == JNI_TRUE),
+                                      (isProduct == JNI_TRUE), (isTargetSignature == JNI_TRUE),
+                                      (isOdm == JNI_TRUE), (isOem == JNI_TRUE))) {
         jniThrowException(env, kIOException, err_result.c_str());
         return;
     }
@@ -374,7 +386,7 @@ static const JNINativeMethod gOverlayManagerMethods[] = {
         {"createFrroFile", "(Ljava/lang/String;Landroid/os/FabricatedOverlayInternal;)V",
          reinterpret_cast<void*>(self_targeting::CreateFrroFile)},
         {"createIdmapFile",
-         "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+         "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZZZZ)V",
          reinterpret_cast<void*>(self_targeting::CreateIdmapFile)},
         {"getFabricatedOverlayInfo", "(Ljava/lang/String;)Landroid/os/FabricatedOverlayInfo;",
          reinterpret_cast<void*>(self_targeting::GetFabricatedOverlayInfo)},
