@@ -27,7 +27,7 @@ public class ArcTerminationActionFromAvr extends HdmiCecFeatureAction {
     private static final int STATE_ARC_TERMINATED = 2;
 
     // the required maximum response time specified in CEC 9.2
-    private static final int TIMEOUT_MS = 1000;
+    public static final int TIMEOUT_MS = 1000;
 
     ArcTerminationActionFromAvr(HdmiCecLocalDevice source) {
         super(source);
@@ -85,6 +85,8 @@ public class ArcTerminationActionFromAvr extends HdmiCecFeatureAction {
     }
 
     private void handleTerminateArcTimeout() {
+        // Disable ARC if TV didn't respond with <Report ARC Terminated> in time.
+        audioSystem().setArcStatus(false);
         HdmiLogger.debug("handleTerminateArcTimeout");
         finish();
     }

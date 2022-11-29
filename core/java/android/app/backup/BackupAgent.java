@@ -20,7 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.IBackupAgent;
 import android.app.QueuedWork;
-import android.app.backup.BackupManager.OperationType;
+import android.app.backup.BackupAnnotations.BackupDestination;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.app.backup.FullBackup.BackupScheme.PathWithRequiredFlags;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -137,7 +138,7 @@ import java.util.concurrent.CountDownLatch;
 public abstract class BackupAgent extends ContextWrapper {
     private static final String TAG = "BackupAgent";
     private static final boolean DEBUG = false;
-    private static final int DEFAULT_OPERATION_TYPE = OperationType.BACKUP;
+    private static final int DEFAULT_BACKUP_DESTINATION = BackupDestination.CLOUD;
 
     /** @hide */
     public static final int RESULT_SUCCESS = 0;
@@ -207,7 +208,7 @@ public abstract class BackupAgent extends ContextWrapper {
     @Nullable private UserHandle mUser;
      // This field is written from the main thread (in onCreate), and read in a Binder thread (in
      // onFullBackup that is called from system_server via Binder).
-    @OperationType private volatile int mOperationType = DEFAULT_OPERATION_TYPE;
+    @BackupDestination private volatile int mBackupDestination = DEFAULT_BACKUP_DESTINATION;
 
     Handler getHandler() {
         if (mHandler == null) {
@@ -265,13 +266,6 @@ public abstract class BackupAgent extends ContextWrapper {
     }
 
     /**
-     * @hide
-     */
-    public void onCreate(UserHandle user) {
-        onCreate(user, DEFAULT_OPERATION_TYPE);
-    }
-
-    /**
      * Provided as a convenience for agent implementations that need an opportunity
      * to do one-time initialization before the actual backup or restore operation
      * is begun with information about the calling user.
@@ -279,14 +273,33 @@ public abstract class BackupAgent extends ContextWrapper {
      *
      * @hide
      */
-    public void onCreate(UserHandle user, @OperationType int operationType) {
-        // TODO: Instantiate with the correct type using a parameter.
-        mLogger = new BackupRestoreEventLogger(BackupRestoreEventLogger.OperationType.BACKUP);
-
+    public void onCreate(UserHandle user) {
         onCreate();
+    }
 
+    /**
+     * @deprecated Use {@link BackupAgent#onCreate(UserHandle, int, int)} instead.
+     *
+     * @hide
+     */
+    @Deprecated
+    public void onCreate(UserHandle user, @BackupDestination int backupDestination) {
         mUser = user;
-        mOperationType = operationType;
+        mBackupDestination = backupDestination;
+
+        onCreate(user);
+    }
+
+    /**
+    * @hide
+    */
+    public void onCreate(UserHandle user, @BackupDestination int backupDestination,
+            @OperationType int operationType) {
+        mUser = user;
+        mBackupDestination = backupDestination;
+        mLogger = new BackupRestoreEventLogger(operationType);
+
+        onCreate(user, backupDestination);
     }
 
     /**
@@ -433,7 +446,7 @@ public abstract class BackupAgent extends ContextWrapper {
      */
     public void onFullBackup(FullBackupDataOutput data) throws IOException {
         FullBackup.BackupScheme backupScheme = FullBackup.getBackupScheme(this,
-                mOperationType);
+                mBackupDestination);
         if (!backupScheme.isFullBackupEnabled(data.getTransportFlags())) {
             return;
         }
@@ -643,7 +656,7 @@ public abstract class BackupAgent extends ContextWrapper {
         if (includeMap == null || includeMap.size() == 0) {
             // Do entire sub-tree for the provided token.
             fullBackupFileTree(packageName, domainToken,
-                    FullBackup.getBackupScheme(this, mOperationType)
+                    FullBackup.getBackupScheme(this, mBackupDestination)
                             .tokenToDirectoryPath(domainToken),
                     filterSet, traversalExcludeSet, data);
         } else if (includeMap.get(domainToken) != null) {
@@ -815,7 +828,7 @@ public abstract class BackupAgent extends ContextWrapper {
                                             ArraySet<String> systemExcludes,
             FullBackupDataOutput output) {
         // Pull out the domain and set it aside to use when making the tarball.
-        String domainPath = FullBackup.getBackupScheme(this, mOperationType)
+        String domainPath = FullBackup.getBackupScheme(this, mBackupDestination)
                 .tokenToDirectoryPath(domain);
         if (domainPath == null) {
             // Should never happen.
@@ -927,7 +940,7 @@ public abstract class BackupAgent extends ContextWrapper {
     }
 
     private boolean isFileEligibleForRestore(File destination) throws IOException {
-        FullBackup.BackupScheme bs = FullBackup.getBackupScheme(this, mOperationType);
+        FullBackup.BackupScheme bs = FullBackup.getBackupScheme(this, mBackupDestination);
         if (!bs.isFullRestoreEnabled()) {
             if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {
                 Log.v(FullBackup.TAG_XML_PARSER,
@@ -1001,7 +1014,7 @@ public abstract class BackupAgent extends ContextWrapper {
                 + " domain=" + domain + " relpath=" + path + " mode=" + mode
                 + " mtime=" + mtime);
 
-        basePath = FullBackup.getBackupScheme(this, mOperationType).tokenToDirectoryPath(
+        basePath = FullBackup.getBackupScheme(this, mBackupDestination).tokenToDirectoryPath(
                 domain);
         if (domain.equals(FullBackup.MANAGED_EXTERNAL_TREE_TOKEN)) {
             mode = -1;  // < 0 is a token to skip attempting a chmod()

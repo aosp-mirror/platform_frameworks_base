@@ -755,28 +755,30 @@ public class ApplicationsStateRoboTest {
 
     @Test
     public void shouldShowInPersonalTab_forCurrentUser_returnsTrue() {
+        UserManager um = RuntimeEnvironment.application.getSystemService(UserManager.class);
         ApplicationInfo appInfo = createApplicationInfo(PKG_1);
         AppEntry primaryUserApp = createAppEntry(appInfo, 1);
 
-        assertThat(primaryUserApp.shouldShowInPersonalTab(mContext, appInfo.uid)).isTrue();
+        assertThat(primaryUserApp.shouldShowInPersonalTab(um, appInfo.uid)).isTrue();
     }
 
     @Test
     public void shouldShowInPersonalTab_userProfilePreU_returnsFalse() {
+        UserManager um = RuntimeEnvironment.application.getSystemService(UserManager.class);
         ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT",
                 Build.VERSION_CODES.TIRAMISU);
         // Create an app (and subsequent AppEntry) in a non-primary user profile.
         ApplicationInfo appInfo1 = createApplicationInfo(PKG_1, PROFILE_UID_1);
         AppEntry nonPrimaryUserApp = createAppEntry(appInfo1, 1);
 
-        assertThat(nonPrimaryUserApp.shouldShowInPersonalTab(mContext, appInfo1.uid)).isFalse();
+        assertThat(nonPrimaryUserApp.shouldShowInPersonalTab(um, appInfo1.uid)).isFalse();
     }
 
     @Test
     public void shouldShowInPersonalTab_currentUserIsParent_returnsAsPerUserPropertyOfProfile1() {
         // Mark system user as parent for both profile users.
-        ShadowUserManager shadowUserManager = Shadow
-                .extract(RuntimeEnvironment.application.getSystemService(UserManager.class));
+        UserManager um = RuntimeEnvironment.application.getSystemService(UserManager.class);
+        ShadowUserManager shadowUserManager = Shadow.extract(um);
         shadowUserManager.addProfile(USER_SYSTEM, PROFILE_USERID,
                 CLONE_USER, 0);
         shadowUserManager.addProfile(USER_SYSTEM, PROFILE_USERID2,
@@ -796,7 +798,7 @@ public class ApplicationsStateRoboTest {
         AppEntry nonPrimaryUserApp1 = createAppEntry(appInfo1, 1);
         AppEntry nonPrimaryUserApp2 = createAppEntry(appInfo2, 2);
 
-        assertThat(nonPrimaryUserApp1.shouldShowInPersonalTab(mContext, appInfo1.uid)).isTrue();
-        assertThat(nonPrimaryUserApp2.shouldShowInPersonalTab(mContext, appInfo2.uid)).isFalse();
+        assertThat(nonPrimaryUserApp1.shouldShowInPersonalTab(um, appInfo1.uid)).isTrue();
+        assertThat(nonPrimaryUserApp2.shouldShowInPersonalTab(um, appInfo2.uid)).isFalse();
     }
 }

@@ -880,7 +880,7 @@ public class TimeZoneDetectorStrategyImplTest {
         TimeZoneDetectorStatus expectedInitialDetectorStatus = new TimeZoneDetectorStatus(
                 DETECTOR_STATUS_RUNNING,
                 TELEPHONY_ALGORITHM_RUNNING_STATUS,
-                LocationTimeZoneAlgorithmStatus.UNKNOWN);
+                LocationTimeZoneAlgorithmStatus.RUNNING_NOT_REPORTED);
         script.verifyCachedDetectorStatus(expectedInitialDetectorStatus);
 
         LocationTimeZoneAlgorithmStatus algorithmStatus1 = new LocationTimeZoneAlgorithmStatus(

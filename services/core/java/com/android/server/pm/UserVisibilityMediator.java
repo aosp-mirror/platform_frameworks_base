@@ -413,41 +413,12 @@ public final class UserVisibilityMediator implements Dumpable {
         if (displayId == Display.INVALID_DISPLAY) {
             return false;
         }
-        if (!mUsersOnSecondaryDisplaysEnabled) {
-            return isCurrentUserOrRunningProfileOfCurrentUser(userId);
-        }
 
-        // TODO(b/256242848): temporary workaround to let WM use this API without breaking current
-        // behavior - return true for current user / profile for any display (other than those
-        // explicitly assigned to another users), otherwise they wouldn't be able to launch
-        // activities on other non-passenger displays, like cluster).
-        // In the long-term, it should rely just on mUsersOnSecondaryDisplays, which
-        // would be updated by CarService to allow additional mappings.
-        if (isCurrentUserOrRunningProfileOfCurrentUser(userId)) {
-            synchronized (mLock) {
-                boolean assignedToUser = false;
-                boolean assignedToAnotherUser = false;
-                for (int i = 0; i < mUsersOnSecondaryDisplays.size(); i++) {
-                    if (mUsersOnSecondaryDisplays.valueAt(i) == displayId) {
-                        if (mUsersOnSecondaryDisplays.keyAt(i) == userId) {
-                            assignedToUser = true;
-                            break;
-                        } else {
-                            assignedToAnotherUser = true;
-                            // Cannot break because it could be assigned to a profile of the user
-                            // (and we better not assume that the iteration will check for the
-                            // parent user before its profiles)
-                        }
-                    }
-                }
-                if (DBG) {
-                    Slogf.d(TAG, "isUserVisibleOnDisplay(%d, %d): assignedToUser=%b, "
-                            + "assignedToAnotherUser=%b, mUsersOnSecondaryDisplays=%s",
-                            userId, displayId, assignedToUser, assignedToAnotherUser,
-                            mUsersOnSecondaryDisplays);
-                }
-                return assignedToUser || !assignedToAnotherUser;
-            }
+        if (!mUsersOnSecondaryDisplaysEnabled || displayId == Display.DEFAULT_DISPLAY) {
+            // TODO(b/245939659): will need to move the displayId == Display.DEFAULT_DISPLAY outside
+            // once it supports background users on DEFAULT_DISPLAY (for example, passengers in a
+            // no-driver configuration)
+            return isCurrentUserOrRunningProfileOfCurrentUser(userId);
         }
 
         synchronized (mLock) {

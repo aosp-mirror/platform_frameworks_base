@@ -33,4 +33,20 @@ import java.lang.annotation.Target;
  */
 @Retention(CLASS)
 @Target({METHOD})
-public @interface PermissionMethod {}
+public @interface PermissionMethod {
+    /**
+     * Hard-coded list of permissions checked by this method
+     */
+    @PermissionName String[] value() default {};
+    /**
+     * If true, the check passes if the caller
+     * has any ONE of the supplied permissions
+     */
+    boolean anyOf() default false;
+    /**
+     * Signifies that the permission check passes if
+     * the calling process OR the current process has
+     * the permission
+     */
+    boolean orSelf() default false;
+}

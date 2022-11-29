@@ -667,9 +667,11 @@ class MediaRouter2ServiceImpl {
                                 "userId: %d", newActiveUserId));
 
                 mCurrentActiveUserId = newActiveUserId;
-                for (int i = 0; i < mUserRecords.size(); i++) {
-                    int userId = mUserRecords.keyAt(i);
-                    UserRecord userRecord = mUserRecords.valueAt(i);
+                // disposeUserIfNeededLocked might modify the collection, hence clone
+                final var userRecords = mUserRecords.clone();
+                for (int i = 0; i < userRecords.size(); i++) {
+                    int userId = userRecords.keyAt(i);
+                    UserRecord userRecord = userRecords.valueAt(i);
                     if (isUserActiveLocked(userId)) {
                         // userId corresponds to the active user, or one of its profiles. We
                         // ensure the associated structures are initialized.
@@ -1742,6 +1744,9 @@ class MediaRouter2ServiceImpl {
                     indexOfRouteProviderInfoByUniqueId(provider.getUniqueId(), mLastProviderInfos);
             MediaRoute2ProviderInfo oldInfo =
                     providerInfoIndex == -1 ? null : mLastProviderInfos.get(providerInfoIndex);
+            MediaRouter2ServiceImpl mediaRouter2Service = mServiceRef.get();
+            EventLogger eventLogger =
+                    mediaRouter2Service != null ? mediaRouter2Service.mEventLogger : null;
             if (oldInfo == newInfo) {
                 // Nothing to do.
                 return;
@@ -1767,6 +1772,7 @@ class MediaRouter2ServiceImpl {
             }
 
             // Add new routes to the maps.
+            ArrayList<MediaRoute2Info> addedRoutes = new ArrayList<>();
             boolean hasAddedOrModifiedRoutes = false;
             for (MediaRoute2Info newRouteInfo : newRoutes) {
                 if (!newRouteInfo.isValid()) {
@@ -1781,11 +1787,14 @@ class MediaRouter2ServiceImpl {
                 MediaRoute2Info oldRouteInfo =
                         mLastNotifiedRoutesToPrivilegedRouters.put(
                                 newRouteInfo.getId(), newRouteInfo);
-                hasAddedOrModifiedRoutes |=
-                        oldRouteInfo == null || !oldRouteInfo.equals(newRouteInfo);
+                hasAddedOrModifiedRoutes |= !newRouteInfo.equals(oldRouteInfo);
+                if (oldRouteInfo == null) {
+                    addedRoutes.add(newRouteInfo);
+                }
             }
 
             // Remove stale routes from the maps.
+            ArrayList<MediaRoute2Info> removedRoutes = new ArrayList<>();
             Collection<MediaRoute2Info> oldRoutes =
                     oldInfo == null ? Collections.emptyList() : oldInfo.getRoutes();
             boolean hasRemovedRoutes = false;
@@ -1795,6 +1804,26 @@ class MediaRouter2ServiceImpl {
                     hasRemovedRoutes = true;
                     mLastNotifiedRoutesToPrivilegedRouters.remove(oldRouteId);
                     mLastNotifiedRoutesToNonPrivilegedRouters.remove(oldRouteId);
+                    removedRoutes.add(oldRoute);
+                }
+            }
+
+            if (eventLogger != null) {
+                if (!addedRoutes.isEmpty()) {
+                    // If routes were added, newInfo cannot be null.
+                    eventLogger.enqueue(
+                            toLoggingEvent(
+                                    /* source= */ "addProviderRoutes",
+                                    newInfo.getUniqueId(),
+                                    addedRoutes));
+                }
+                if (!removedRoutes.isEmpty()) {
+                    // If routes were removed, oldInfo cannot be null.
+                    eventLogger.enqueue(
+                            toLoggingEvent(
+                                    /* source= */ "removeProviderRoutes",
+                                    oldInfo.getUniqueId(),
+                                    removedRoutes));
                 }
             }
 
@@ -1803,6 +1832,16 @@ class MediaRouter2ServiceImpl {
                     hasRemovedRoutes,
                     provider.mIsSystemRouteProvider,
                     mSystemProvider.getDefaultRoute());
+        }
+
+        private static EventLogger.Event toLoggingEvent(
+                String source, String providerId, ArrayList<MediaRoute2Info> routes) {
+            String routesString =
+                    routes.stream()
+                            .map(it -> String.format("%s | %s", it.getOriginalId(), it.getName()))
+                            .collect(Collectors.joining(/* delimiter= */ ", "));
+            return EventLogger.StringEvent.from(
+                    source, "provider: %s, routes: [%s]", providerId, routesString);
         }
 
         /**

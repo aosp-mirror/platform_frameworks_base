@@ -28,6 +28,7 @@ import android.annotation.NonNull;
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
 import android.app.backup.BackupAgent;
+import android.app.backup.BackupAnnotations;
 import android.app.backup.BackupManager;
 import android.app.backup.FullBackup;
 import android.app.backup.IBackupManagerMonitor;
@@ -398,7 +399,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                     FullBackup.KEY_VALUE_DATA_TOKEN.equals(info.domain)
                                             ? ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL
                                             : ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL,
-                                    mBackupEligibilityRules.getOperationType());
+                                    mBackupEligibilityRules.getBackupDestination());
                             mAgentPackage = pkg;
                         } catch (IOException | NameNotFoundException e) {
                             // fall through to error handling
@@ -707,7 +708,8 @@ public class FullRestoreEngine extends RestoreEngine {
     }
 
     private boolean isRestorableFile(FileMetadata info) {
-        if (mBackupEligibilityRules.getOperationType() == BackupManager.OperationType.MIGRATION) {
+        if (mBackupEligibilityRules.getBackupDestination()
+                == BackupAnnotations.BackupDestination.DEVICE_TRANSFER) {
             // Everything is eligible for device-to-device migration.
             return true;
         }

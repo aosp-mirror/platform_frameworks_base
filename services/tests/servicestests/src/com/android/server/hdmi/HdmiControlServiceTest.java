@@ -44,6 +44,7 @@ import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener;
 import android.hardware.hdmi.IHdmiControlStatusChangeListener;
 import android.hardware.hdmi.IHdmiVendorCommandListener;
+import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -58,7 +59,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,8 +89,12 @@ public class HdmiControlServiceTest {
     private HdmiPortInfo[] mHdmiPortInfo;
     private ArrayList<Integer> mLocalDeviceTypes = new ArrayList<>();
 
+    @Mock protected AudioManager mAudioManager;
+
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
         HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
@@ -132,6 +139,7 @@ public class HdmiControlServiceTest {
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlServiceSpy.setPowerManager(mPowerManager);
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mHdmiControlServiceSpy.setAudioManager(mAudioManager);
 
         mTestLooper.dispatchAll();
     }
@@ -1024,6 +1032,48 @@ public class HdmiControlServiceTest {
 
         assertThat(mHdmiControlServiceSpy.readDeviceTypes())
                 .containsExactly(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM);
+    }
+
+    @Test
+    public void setSoundbarMode_enabled_addAudioSystemLocalDevice() {
+        // Initialize the local devices excluding the audio system.
+        mHdmiControlServiceSpy.clearCecLocalDevices();
+        mLocalDevices.remove(mAudioSystemDeviceSpy);
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNull();
+
+        // Enable the setting and check if the audio system local device is found in the network.
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                HdmiControlManager.SOUNDBAR_MODE_ENABLED);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNotNull();
+    }
+
+    @Test
+    public void setSoundbarMode_disabled_removeAudioSystemLocalDevice() {
+        // Initialize the local devices excluding the audio system.
+        mHdmiControlServiceSpy.clearCecLocalDevices();
+        mLocalDevices.remove(mAudioSystemDeviceSpy);
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNull();
+
+        // Enable the setting and check if the audio system local device is found in the network.
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                HdmiControlManager.SOUNDBAR_MODE_ENABLED);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNotNull();
+
+        // Disable the setting and check if the audio system local device is removed from the
+        // network.
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                HdmiControlManager.SOUNDBAR_MODE_DISABLED);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNull();
     }
 
     protected static class MockPlaybackDevice extends HdmiCecLocalDevicePlayback {

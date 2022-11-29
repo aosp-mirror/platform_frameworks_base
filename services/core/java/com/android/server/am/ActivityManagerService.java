@@ -206,7 +206,7 @@ import android.app.ProfilerInfo;
 import android.app.SyncNotedAppOp;
 import android.app.WaitResult;
 import android.app.assist.ActivityId;
-import android.app.backup.BackupManager.OperationType;
+import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.IBackupManager;
 import android.app.compat.CompatChanges;
 import android.app.job.JobParameters;
@@ -1563,6 +1563,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int WAIT_FOR_CONTENT_PROVIDER_TIMEOUT_MSG = 73;
     static final int DISPATCH_SENDING_BROADCAST_EVENT = 74;
     static final int DISPATCH_BINDING_SERVICE_EVENT = 75;
+    static final int SERVICE_SHORT_FGS_TIMEOUT_MSG = 76;
+    static final int SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG = 77;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -1896,6 +1898,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 case DISPATCH_BINDING_SERVICE_EVENT: {
                     mBindServiceEventListeners.forEach(l ->
                             l.onBindingService((String) msg.obj, msg.arg1));
+                } break;
+                case SERVICE_SHORT_FGS_TIMEOUT_MSG: {
+                    mServices.onShortFgsTimeout((ServiceRecord) msg.obj);
+                } break;
+                case SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG: {
+                    mServices.onShortFgsAnrTimeout((ServiceRecord) msg.obj);
                 } break;
             }
         }
@@ -5179,7 +5187,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                              PackageManager.NOTIFY_PACKAGE_USE_BACKUP);
             try {
                 thread.scheduleCreateBackupAgent(backupTarget.appInfo,
-                        backupTarget.backupMode, backupTarget.userId, backupTarget.operationType);
+                        backupTarget.backupMode, backupTarget.userId,
+                        backupTarget.backupDestination);
             } catch (Exception e) {
                 Slog.wtf(TAG, "Exception thrown creating backup agent in " + app, e);
                 badApp = true;
@@ -6141,6 +6150,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * This can be called with or without the global lock held.
      */
+    @PermissionMethod(anyOf = true)
     private void enforceCallingHasAtLeastOnePermission(String func, String... permissions) {
         for (String permission : permissions) {
             if (checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED) {
@@ -13129,7 +13139,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // instantiated.  The backup agent will invoke backupAgentCreated() on the
     // activity manager to announce its creation.
     public boolean bindBackupAgent(String packageName, int backupMode, int targetUserId,
-            @OperationType int operationType) {
+            @BackupDestination int backupDestination) {
         if (DEBUG_BACKUP) {
             Slog.v(TAG, "bindBackupAgent: app=" + packageName + " mode=" + backupMode
                     + " targetUserId=" + targetUserId + " callingUid = " + Binder.getCallingUid()
@@ -13196,7 +13206,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + app.packageName + ": " + e);
             }
 
-            BackupRecord r = new BackupRecord(app, backupMode, targetUserId, operationType);
+            BackupRecord r = new BackupRecord(app, backupMode, targetUserId, backupDestination);
             ComponentName hostingName =
                     (backupMode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL)
                             ? new ComponentName(app.packageName, app.backupAgentName)
@@ -13238,7 +13248,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "Agent proc already running: " + proc);
                 try {
                     thread.scheduleCreateBackupAgent(app, backupMode, targetUserId,
-                            operationType);
+                            backupDestination);
                 } catch (RemoteException e) {
                     // Will time out on the backup manager side
                 }

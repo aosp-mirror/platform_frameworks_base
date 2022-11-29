@@ -68,6 +68,21 @@ public final class DisplayBrightnessController {
     }
 
     /**
+     * Sets the temporary brightness
+     */
+    public void setTemporaryBrightness(Float temporaryBrightness) {
+        mDisplayBrightnessStrategySelector.getTemporaryDisplayBrightnessStrategy()
+                .setTemporaryScreenBrightness(temporaryBrightness);
+    }
+
+    /**
+     * Returns the current selected DisplayBrightnessStrategy
+     */
+    public DisplayBrightnessStrategy getCurrentDisplayBrightnessStrategy() {
+        return mDisplayBrightnessStrategy;
+    }
+
+    /**
      * Returns a boolean flag indicating if the light sensor is to be used to decide the screen
      * brightness when dozing
      */

@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.backup.BackupAgent;
-import android.app.backup.BackupManager.OperationType;
+import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
 import android.content.Context;
@@ -148,18 +148,18 @@ public class UserBackupManagerServiceTest {
     }
 
     @Test
-    public void testGetOperationTypeFromTransport_returnsBackupByDefault()
+    public void testGetBackupDestinationFromTransport_returnsCloudByDefault()
             throws Exception {
         when(mTransportConnection.connectOrThrow(any())).thenReturn(mBackupTransport);
         when(mBackupTransport.getTransportFlags()).thenReturn(0);
 
-        int operationType = mService.getOperationTypeFromTransport(mTransportConnection);
+        int backupDestination = mService.getBackupDestinationFromTransport(mTransportConnection);
 
-        assertThat(operationType).isEqualTo(OperationType.BACKUP);
+        assertThat(backupDestination).isEqualTo(BackupDestination.CLOUD);
     }
 
     @Test
-    public void testGetOperationTypeFromTransport_returnsMigrationForMigrationTransport()
+    public void testGetBackupDestinationFromTransport_returnsDeviceTransferForD2dTransport()
             throws Exception {
         // This is a temporary flag to control the new behaviour until it's ready to be fully
         // rolled out.
@@ -169,9 +169,9 @@ public class UserBackupManagerServiceTest {
         when(mBackupTransport.getTransportFlags()).thenReturn(
                 BackupAgent.FLAG_DEVICE_TO_DEVICE_TRANSFER);
 
-        int operationType = mService.getOperationTypeFromTransport(mTransportConnection);
+        int backupDestination = mService.getBackupDestinationFromTransport(mTransportConnection);
 
-        assertThat(operationType).isEqualTo(OperationType.MIGRATION);
+        assertThat(backupDestination).isEqualTo(BackupDestination.DEVICE_TRANSFER);
     }
 
     @Test

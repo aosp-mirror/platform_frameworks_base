@@ -19,6 +19,7 @@ package com.android.server.display.brightness;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.display.DisplayManagerInternal;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.view.Display;
 
@@ -29,6 +30,7 @@ import com.android.server.display.brightness.strategy.DozeBrightnessStrategy;
 import com.android.server.display.brightness.strategy.InvalidBrightnessStrategy;
 import com.android.server.display.brightness.strategy.OverrideBrightnessStrategy;
 import com.android.server.display.brightness.strategy.ScreenOffBrightnessStrategy;
+import com.android.server.display.brightness.strategy.TemporaryBrightnessStrategy;
 
 import java.io.PrintWriter;
 
@@ -48,7 +50,9 @@ public class DisplayBrightnessStrategySelector {
     // The brightness strategy used to manage the brightness state when the request state is
     // invalid.
     private final OverrideBrightnessStrategy mOverrideBrightnessStrategy;
-    // The brightness strategy used to manage the brightness state request is invalid.
+    // The brightness strategy used to manage the brightness state in temporary state
+    private final TemporaryBrightnessStrategy mTemporaryBrightnessStrategy;
+    // The brightness strategy used to manage the brightness state when the request is invalid.
     private final InvalidBrightnessStrategy mInvalidBrightnessStrategy;
 
     // We take note of the old brightness strategy so that we can know when the strategy changes.
@@ -67,6 +71,7 @@ public class DisplayBrightnessStrategySelector {
         mDozeBrightnessStrategy = injector.getDozeBrightnessStrategy();
         mScreenOffBrightnessStrategy = injector.getScreenOffBrightnessStrategy();
         mOverrideBrightnessStrategy = injector.getOverrideBrightnessStrategy();
+        mTemporaryBrightnessStrategy = injector.getTemporaryBrightnessStrategy();
         mInvalidBrightnessStrategy = injector.getInvalidBrightnessStrategy();
         mAllowAutoBrightnessWhileDozingConfig = context.getResources().getBoolean(
                 R.bool.config_allowAutoBrightnessWhileDozing);
@@ -89,6 +94,9 @@ public class DisplayBrightnessStrategySelector {
         } else if (BrightnessUtils
                 .isValidBrightnessValue(displayPowerRequest.screenBrightnessOverride)) {
             displayBrightnessStrategy = mOverrideBrightnessStrategy;
+        } else if (BrightnessUtils.isValidBrightnessValue(
+                mTemporaryBrightnessStrategy.getTemporaryScreenBrightness())) {
+            displayBrightnessStrategy = mTemporaryBrightnessStrategy;
         }
 
         if (!mOldBrightnessStrategyName.equals(displayBrightnessStrategy.getName())) {
@@ -99,6 +107,10 @@ public class DisplayBrightnessStrategySelector {
             mOldBrightnessStrategyName = displayBrightnessStrategy.getName();
         }
         return displayBrightnessStrategy;
+    }
+
+    public TemporaryBrightnessStrategy getTemporaryDisplayBrightnessStrategy() {
+        return mTemporaryBrightnessStrategy;
     }
 
     /**
@@ -120,6 +132,8 @@ public class DisplayBrightnessStrategySelector {
         writer.println(
                 "  mAllowAutoBrightnessWhileDozingConfig= "
                         + mAllowAutoBrightnessWhileDozingConfig);
+        IndentingPrintWriter ipw = new IndentingPrintWriter(writer, " ");
+        mTemporaryBrightnessStrategy.dump(ipw);
     }
 
     /**
@@ -150,6 +164,10 @@ public class DisplayBrightnessStrategySelector {
 
         OverrideBrightnessStrategy getOverrideBrightnessStrategy() {
             return new OverrideBrightnessStrategy();
+        }
+
+        TemporaryBrightnessStrategy getTemporaryBrightnessStrategy() {
+            return new TemporaryBrightnessStrategy();
         }
 
         InvalidBrightnessStrategy getInvalidBrightnessStrategy() {

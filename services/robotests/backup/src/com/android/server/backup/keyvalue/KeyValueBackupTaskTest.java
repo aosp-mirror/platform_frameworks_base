@@ -74,6 +74,7 @@ import android.annotation.Nullable;
 import android.app.Application;
 import android.app.IBackupAgent;
 import android.app.backup.BackupAgent;
+import android.app.backup.BackupAnnotations;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupManager;
@@ -183,7 +184,7 @@ public class KeyValueBackupTaskTest  {
     private static final String BACKUP_AGENT_SHARED_PREFS_SYNCHRONIZER_CLASS =
             "android.app.backup.BackupAgent$SharedPrefsSynchronizer";
     private static final int USER_ID = 10;
-    private static final int OPERATION_TYPE = BackupManager.OperationType.BACKUP;
+    private static final int BACKUP_DESTINATION = BackupAnnotations.BackupDestination.CLOUD;
 
     @Mock private TransportManager mTransportManager;
     @Mock private DataChangedJournal mOldJournal;
@@ -264,7 +265,8 @@ public class KeyValueBackupTaskTest  {
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
         mBackupEligibilityRules = new BackupEligibilityRules(mPackageManager,
-                LocalServices.getService(PackageManagerInternal.class), USER_ID, OPERATION_TYPE);
+                LocalServices.getService(PackageManagerInternal.class), USER_ID,
+                BACKUP_DESTINATION);
     }
 
     @After

@@ -799,6 +799,16 @@ constructor(
         }
 
         if (
+            desiredLocation == LOCATION_QS &&
+                previousLocation == LOCATION_LOCKSCREEN &&
+                statusbarState == StatusBarState.SHADE
+        ) {
+            // This is an invalid transition, can happen when tapping on home control and the UMO
+            // while being on landscape orientation in tablet.
+            return false
+        }
+
+        if (
             statusbarState == StatusBarState.KEYGUARD &&
                 (currentLocation == LOCATION_LOCKSCREEN || previousLocation == LOCATION_LOCKSCREEN)
         ) {

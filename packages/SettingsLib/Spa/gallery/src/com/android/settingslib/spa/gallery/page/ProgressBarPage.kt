@@ -27,7 +27,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
@@ -39,9 +38,7 @@ import com.android.settingslib.spa.widget.preference.ProgressBarPreference
 import com.android.settingslib.spa.widget.preference.ProgressBarPreferenceModel
 import com.android.settingslib.spa.widget.preference.ProgressBarWithDataPreference
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
-import com.android.settingslib.spa.widget.ui.CircularLoadingBar
 import com.android.settingslib.spa.widget.ui.CircularProgressBar
-import com.android.settingslib.spa.widget.ui.LinearLoadingBar
 import kotlinx.coroutines.delay
 
 private const val TITLE = "Sample ProgressBar"
@@ -66,18 +63,10 @@ object ProgressBarPageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        // Mocks a loading time of 2 seconds.
-        var loading by remember { mutableStateOf(true) }
-        LaunchedEffect(Unit) {
-            delay(2000)
-            loading = false
-        }
-
         RegularScaffold(title = getTitle(arguments)) {
             // Auto update the progress and finally jump tp 0.4f.
             var progress by remember { mutableStateOf(0f) }
             LaunchedEffect(Unit) {
-                delay(2000)
                 while (progress < 1f) {
                     delay(100)
                     progress += 0.01f
@@ -86,19 +75,11 @@ object ProgressBarPageProvider : SettingsPageProvider {
                 progress = 0.4f
             }
 
-            // Show as a placeholder for progress bar
             LargeProgressBar(progress)
-            // The remaining information only shows after loading complete.
-            if (!loading) {
-                SimpleProgressBar()
-                ProgressBarWithData()
-                CircularProgressBar(progress = progress, radius = 160f)
-            }
+            SimpleProgressBar()
+            ProgressBarWithData()
+            CircularProgressBar(progress = progress, radius = 160f)
         }
-
-        // Add loading bar examples, running for 2 seconds.
-        LinearLoadingBar(isLoading = loading, yOffset = 64.dp)
-        CircularLoadingBar(isLoading = loading)
     }
 }
 

@@ -16,7 +16,6 @@
 
 package com.android.settingslib.spaprivileged.template.preference
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
@@ -28,14 +27,12 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
 import com.android.settingslib.spaprivileged.model.enterprise.BaseUserRestricted
-import com.android.settingslib.spaprivileged.model.enterprise.BlockedByAdmin
 import com.android.settingslib.spaprivileged.model.enterprise.NoRestricted
-import com.android.settingslib.spaprivileged.model.enterprise.RestrictedMode
 import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
-import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProvider
+import com.android.settingslib.spaprivileged.tests.testutils.FakeBlockedByAdmin
+import com.android.settingslib.spaprivileged.tests.testutils.FakeRestrictionsProvider
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -46,15 +43,7 @@ class RestrictedSwitchPreferenceTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val fakeBlockedByAdmin = object : BlockedByAdmin {
-        var sendShowAdminSupportDetailsIntentIsCalled = false
-
-        override fun getSummary(checked: Boolean?) = BLOCKED_BY_ADMIN_SUMMARY
-
-        override fun sendShowAdminSupportDetailsIntent() {
-            sendShowAdminSupportDetailsIntentIsCalled = true
-        }
-    }
+    private val fakeBlockedByAdmin = FakeBlockedByAdmin()
 
     private val fakeRestrictionsProvider = FakeRestrictionsProvider()
 
@@ -136,7 +125,7 @@ class RestrictedSwitchPreferenceTest {
         setContent(restrictions)
 
         composeTestRule.onNodeWithText(TITLE).assertIsDisplayed().assertIsEnabled()
-        composeTestRule.onNodeWithText(BLOCKED_BY_ADMIN_SUMMARY).assertIsDisplayed()
+        composeTestRule.onNodeWithText(FakeBlockedByAdmin.SUMMARY).assertIsDisplayed()
         composeTestRule.onNode(isOn()).assertIsDisplayed()
     }
 
@@ -163,13 +152,5 @@ class RestrictedSwitchPreferenceTest {
         const val TITLE = "Title"
         const val USER_ID = 0
         const val RESTRICTION_KEY = "restriction_key"
-        const val BLOCKED_BY_ADMIN_SUMMARY = "Blocked by admin"
     }
-}
-
-private class FakeRestrictionsProvider : RestrictionsProvider {
-    var restrictedMode: RestrictedMode? = null
-
-    @Composable
-    override fun restrictedModeState() = stateOf(restrictedMode)
 }
