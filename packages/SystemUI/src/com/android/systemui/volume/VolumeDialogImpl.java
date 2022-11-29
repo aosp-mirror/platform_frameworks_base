@@ -1668,6 +1668,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         if (ss.level == row.requestedLevel) {
             row.requestedLevel = -1;
         }
+        final boolean isVoiceCallStream = row.stream == AudioManager.STREAM_VOICE_CALL;
         final boolean isA11yStream = row.stream == STREAM_ACCESSIBILITY;
         final boolean isRingStream = row.stream == AudioManager.STREAM_RING;
         final boolean isSystemStream = row.stream == AudioManager.STREAM_SYSTEM;
@@ -1712,8 +1713,12 @@ public class VolumeDialogImpl implements VolumeDialog,
         } else if (isRingSilent || zenMuted) {
             iconRes = row.iconMuteRes;
         } else if (ss.routedToBluetooth) {
-            iconRes = isStreamMuted(ss) ? R.drawable.ic_volume_media_bt_mute
-                                        : R.drawable.ic_volume_media_bt;
+            if (isVoiceCallStream) {
+                iconRes = R.drawable.ic_volume_bt_sco;
+            } else {
+                iconRes = isStreamMuted(ss) ? R.drawable.ic_volume_media_bt_mute
+                                            : R.drawable.ic_volume_media_bt;
+            }
         } else if (isStreamMuted(ss)) {
             iconRes = ss.muted ? R.drawable.ic_volume_media_off : row.iconMuteRes;
         } else {
