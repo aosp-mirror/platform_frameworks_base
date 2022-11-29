@@ -73,6 +73,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @hide
@@ -103,6 +104,9 @@ public class BinaryTransparencyService extends SystemService {
     static final String BUNDLE_CONTENT_DIGEST_ALGORITHM = "content-digest-algo";
     @VisibleForTesting
     static final String BUNDLE_CONTENT_DIGEST = "content-digest";
+
+    static final String APEX_PRELOAD_LOCATION = "/system/apex/";
+    static final String APEX_PRELOAD_LOCATION_ERROR = "could-not-be-determined";
 
     // used for indicating any type of error during MBA measurement
     static final int MBA_STATUS_ERROR = 0;
@@ -1110,18 +1114,22 @@ public class BinaryTransparencyService extends SystemService {
         }
     }
 
-    // TODO(b/259349011): Need to be more robust against package name mismatch in the filename
+    @NonNull
     private String getOriginalApexPreinstalledLocation(String packageName,
                                                    String currentInstalledLocation) {
-        if (currentInstalledLocation.contains("/decompressed/")) {
-            String resultPath = "system/apex" + packageName + ".capex";
-            File f = new File(resultPath);
-            if (f.exists()) {
-                return resultPath;
+        // get a listing of all apex files in /system/apex/
+        Set<String> originalApexs = Stream.of(new File(APEX_PRELOAD_LOCATION).listFiles())
+                                        .filter(f -> !f.isDirectory())
+                                        .map(File::getName)
+                                        .collect(Collectors.toSet());
+
+        for (String originalApex : originalApexs) {
+            if (originalApex.startsWith(packageName)) {
+                return APEX_PRELOAD_LOCATION + originalApex;
             }
-            return "/system/apex/" + packageName + ".next.capex";
         }
-        return "/system/apex" + packageName + "apex";
+
+        return APEX_PRELOAD_LOCATION_ERROR;
     }
 
     /**
