@@ -23,5 +23,5 @@ package android.credentials;
  */
 interface IClearCredentialStateCallback {
     oneway void onSuccess();
-    oneway void onError(int errorCode, String message);
+    oneway void onError(String errorType, String message);
 }
