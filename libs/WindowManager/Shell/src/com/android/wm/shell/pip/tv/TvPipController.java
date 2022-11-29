@@ -55,6 +55,7 @@ import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.ShellController;
@@ -118,6 +119,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
     private final ShellController mShellController;
     private final TvPipBoundsState mTvPipBoundsState;
+    private final PipSizeSpecHandler mPipSizeSpecHandler;
     private final TvPipBoundsAlgorithm mTvPipBoundsAlgorithm;
     private final TvPipBoundsController mTvPipBoundsController;
     private final PipAppOpsListener mAppOpsListener;
@@ -152,6 +154,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             ShellInit shellInit,
             ShellController shellController,
             TvPipBoundsState tvPipBoundsState,
+            PipSizeSpecHandler pipSizeSpecHandler,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             TvPipBoundsController tvPipBoundsController,
             PipAppOpsListener pipAppOpsListener,
@@ -171,6 +174,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 shellInit,
                 shellController,
                 tvPipBoundsState,
+                pipSizeSpecHandler,
                 tvPipBoundsAlgorithm,
                 tvPipBoundsController,
                 pipAppOpsListener,
@@ -192,6 +196,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             ShellInit shellInit,
             ShellController shellController,
             TvPipBoundsState tvPipBoundsState,
+            PipSizeSpecHandler pipSizeSpecHandler,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             TvPipBoundsController tvPipBoundsController,
             PipAppOpsListener pipAppOpsListener,
@@ -212,10 +217,13 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         mShellController = shellController;
         mDisplayController = displayController;
 
-        mTvPipBoundsState = tvPipBoundsState;
-        mTvPipBoundsState.setDisplayId(context.getDisplayId());
-        mTvPipBoundsState.setDisplayLayout(new DisplayLayout(context, context.getDisplay()));
+        DisplayLayout layout = new DisplayLayout(context, context.getDisplay());
 
+        mTvPipBoundsState = tvPipBoundsState;
+        mTvPipBoundsState.setDisplayLayout(layout);
+        mTvPipBoundsState.setDisplayId(context.getDisplayId());
+        mPipSizeSpecHandler = pipSizeSpecHandler;
+        mPipSizeSpecHandler.setDisplayLayout(layout);
         mTvPipBoundsAlgorithm = tvPipBoundsAlgorithm;
         mTvPipBoundsController = tvPipBoundsController;
         mTvPipBoundsController.setListener(this);
