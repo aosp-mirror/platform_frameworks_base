@@ -459,6 +459,8 @@ package android.app {
 
   public class WallpaperManager {
     method @Nullable public android.graphics.Bitmap getBitmap();
+    method @Nullable public android.graphics.Rect peekBitmapDimensions();
+    method @Nullable public android.graphics.Rect peekBitmapDimensions(int);
     method public boolean shouldEnableWideColorGamut();
     method @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) public boolean wallpaperSupportsWcg(int);
   }
