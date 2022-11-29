@@ -551,6 +551,15 @@ public class CameraServiceProxy extends SystemService
                     lensFacing, ignoreResizableAndSdkCheck);
         }
 
+        /**
+         * Placeholder method to fetch the system state for autoframing.
+         * TODO: b/260617354
+         */
+        @Override
+        public int getAutoframingOverride(String packageName) {
+            return CaptureRequest.CONTROL_AUTOFRAMING_OFF;
+        }
+
         @Override
         public void pingForUserUpdate() {
             if (Binder.getCallingUid() != Process.CAMERASERVER_UID) {
