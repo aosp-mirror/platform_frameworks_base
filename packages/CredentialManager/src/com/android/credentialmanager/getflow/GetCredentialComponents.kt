@@ -167,7 +167,7 @@ fun PrimarySelectionCard(
         horizontalArrangement = Arrangement.Start,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
       ) {
-        CancelButton(stringResource(R.string.string_no_thanks), onCancel)
+        CancelButton(stringResource(R.string.get_dialog_button_label_no_thanks), onCancel)
       }
       Divider(
         thickness = 18.dp,
