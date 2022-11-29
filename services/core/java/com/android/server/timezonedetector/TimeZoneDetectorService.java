@@ -91,7 +91,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             deviceActivityMonitor.addListener(new DeviceActivityMonitor.Listener() {
                 @Override
                 public void onFlightComplete() {
-                    timeZoneDetectorStrategy.enableTelephonyTimeZoneFallback();
+                    timeZoneDetectorStrategy.enableTelephonyTimeZoneFallback("onFlightComplete()");
                 }
             });
 
@@ -402,9 +402,9 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
      * Sends a signal to enable telephony fallback. Provided for command-line access for use
      * during tests. This is not exposed as a binder API.
      */
-    void enableTelephonyFallback() {
+    void enableTelephonyFallback(@NonNull String reason) {
         enforceManageTimeZoneDetectorPermission();
-        mTimeZoneDetectorStrategy.enableTelephonyTimeZoneFallback();
+        mTimeZoneDetectorStrategy.enableTelephonyTimeZoneFallback(reason);
     }
 
     /**

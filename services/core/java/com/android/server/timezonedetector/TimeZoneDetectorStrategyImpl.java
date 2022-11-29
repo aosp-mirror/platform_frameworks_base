@@ -63,12 +63,8 @@ import java.util.Objects;
 public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrategy {
 
     /**
-     * Used by {@link TimeZoneDetectorStrategyImpl} to interact with device configuration / settings
-     * / system properties. It can be faked for testing.
-     *
-     * <p>Note: Because the settings / system properties-derived values can currently be modified
-     * independently and from different threads (and processes!), their use is prone to race
-     * conditions.
+     * Used by {@link TimeZoneDetectorStrategyImpl} to interact with device state besides that
+     * available from {@link #mServiceConfigAccessor}. It can be faked for testing.
      */
     @VisibleForTesting
     public interface Environment {
@@ -234,7 +230,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
      * allows).
      *
      * <p>This field is only actually used when telephony time zone fallback is supported, but the
-     * value is maintained even when it isn't supported as it can be turned on at any time via
+     * value is maintained even when it isn't supported as support can be turned on at any time via
      * server flags. The elapsed realtime when the mode last changed is used to help ordering
      * between fallback mode switches and suggestions.
      *
@@ -421,10 +417,15 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
             notifyStateChangeListenersAsynchronously();
         }
 
-        // Update the mTelephonyTimeZoneFallbackEnabled state if needed: a certain suggestion
-        // will usually disable telephony fallback mode if it is currently enabled.
-        // TODO(b/236624675)Some provider status codes can be used to enable telephony fallback.
-        disableTelephonyFallbackIfNeeded();
+        // Manage telephony fallback state.
+        if (event.getAlgorithmStatus().couldEnableTelephonyFallback()) {
+            // An event may trigger entry into telephony fallback mode if the status
+            // indicates the location algorithm cannot work and is likely to stay not working.
+            enableTelephonyTimeZoneFallback("handleLocationAlgorithmEvent(), event=" + event);
+        } else {
+            // A certain suggestion will exit telephony fallback mode.
+            disableTelephonyFallbackIfNeeded();
+        }
 
         // Now perform auto time zone detection. The new event may be used to modify the time zone
         // setting.
@@ -497,38 +498,41 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     }
 
     @Override
-    public synchronized void enableTelephonyTimeZoneFallback() {
-        // Only do any work if fallback is currently not enabled.
+    public synchronized void enableTelephonyTimeZoneFallback(@NonNull String reason) {
+        // Only do any work to enter fallback mode if fallback is currently not already enabled.
         if (!mTelephonyTimeZoneFallbackEnabled.getValue()) {
             ConfigurationInternal currentUserConfig = mCurrentConfigurationInternal;
             final boolean fallbackEnabled = true;
             mTelephonyTimeZoneFallbackEnabled = new TimestampedValue<>(
                     mEnvironment.elapsedRealtimeMillis(), fallbackEnabled);
 
-            String logMsg = "enableTelephonyTimeZoneFallbackMode: "
-                    + " currentUserConfig=" + currentUserConfig
-                    + ", mTelephonyTimeZoneFallbackEnabled="
-                    + mTelephonyTimeZoneFallbackEnabled;
+            String logMsg = "enableTelephonyTimeZoneFallback: "
+                    + " reason=" + reason
+                    + ", currentUserConfig=" + currentUserConfig
+                    + ", mTelephonyTimeZoneFallbackEnabled=" + mTelephonyTimeZoneFallbackEnabled;
             logTimeZoneDebugInfo(logMsg);
 
             // mTelephonyTimeZoneFallbackEnabled and mLatestLocationAlgorithmEvent interact.
-            // If the latest event contains a "certain" geolocation suggestion, then the telephony
-            // fallback value needs to be considered after changing it.
+            // If the latest location algorithm event contains a "certain" geolocation suggestion,
+            // then the telephony fallback mode needs to be (re)considered after changing it.
+            //
             // With the way that the mTelephonyTimeZoneFallbackEnabled time is currently chosen
             // above, and the fact that geolocation suggestions should never have a time in the
-            // future, the following call will be a no-op, and telephony fallback will remain
-            // enabled. This comment / call is left as a reminder that it is possible for there to
-            // be a current, "certain" geolocation suggestion when this signal arrives and it is
-            // intentional that fallback stays enabled in this case. The choice to do this
-            // is mostly for symmetry WRT the case where fallback is enabled and an old "certain"
-            // geolocation is received; that would also leave telephony fallback enabled.
-            // This choice means that telephony fallback will remain enabled until a new "certain"
-            // geolocation suggestion is received. If, instead, the next geolocation is "uncertain",
-            // then telephony fallback will occur.
+            // future, the following call will usually be a no-op, and telephony fallback mode will
+            // remain enabled. This comment / call is left as a reminder that it is possible in some
+            // cases for there to be a current, "certain" geolocation suggestion when an attempt is
+            // made to enable telephony fallback mode and it is intentional that fallback mode stays
+            // enabled in this case. The choice to do this is mostly for symmetry WRT the case where
+            // fallback is enabled and then an old "certain" geolocation suggestion is received;
+            // that would also leave telephony fallback mode enabled.
+            //
+            // This choice means that telephony fallback mode remains enabled if there is an
+            // existing "certain" suggestion until a new "certain" geolocation suggestion is
+            // received. If, instead, the next geolocation suggestion is "uncertain", then telephony
+            // fallback, i.e. the use of a telephony suggestion, will actually occur.
             disableTelephonyFallbackIfNeeded();
 
             if (currentUserConfig.isTelephonyFallbackSupported()) {
-                String reason = "enableTelephonyTimeZoneFallbackMode";
                 doAutoTimeZoneDetection(currentUserConfig, reason);
             }
         }

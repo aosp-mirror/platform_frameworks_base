@@ -19,6 +19,7 @@ package android.app.time;
 import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_NOT_RUNNING;
 import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_NOT_SUPPORTED;
 import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_RUNNING;
+import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_UNKNOWN;
 import static android.app.time.DetectorStatusTypes.detectionAlgorithmStatusFromString;
 import static android.app.time.DetectorStatusTypes.detectionAlgorithmStatusToString;
 import static android.app.time.DetectorStatusTypes.requireValidDetectionAlgorithmStatus;
@@ -317,6 +318,40 @@ public final class LocationTimeZoneAlgorithmStatus implements Parcelable {
         return Objects.hash(mStatus,
                 mPrimaryProviderStatus, mPrimaryProviderReportedStatus,
                 mSecondaryProviderStatus, mSecondaryProviderReportedStatus);
+    }
+
+    /**
+     * Returns {@code true} if the algorithm status could allow the time zone detector to enter
+     * telephony fallback mode.
+     */
+    public boolean couldEnableTelephonyFallback() {
+        if (mStatus == DETECTION_ALGORITHM_STATUS_UNKNOWN
+                || mStatus == DETECTION_ALGORITHM_STATUS_NOT_RUNNING
+                || mStatus == DETECTION_ALGORITHM_STATUS_NOT_SUPPORTED) {
+            // This method is not expected to be called on objects with these statuses. Fallback
+            // should not be enabled if it is.
+            return false;
+        }
+
+        // mStatus == DETECTOR_STATUS_RUNNING.
+
+        boolean primarySuggestsFallback = false;
+        if (mPrimaryProviderStatus == PROVIDER_STATUS_NOT_PRESENT) {
+            primarySuggestsFallback = true;
+        } else if (mPrimaryProviderStatus == PROVIDER_STATUS_IS_UNCERTAIN
+                && mPrimaryProviderReportedStatus != null) {
+            primarySuggestsFallback = mPrimaryProviderReportedStatus.couldEnableTelephonyFallback();
+        }
+
+        boolean secondarySuggestsFallback = false;
+        if (mSecondaryProviderStatus == PROVIDER_STATUS_NOT_PRESENT) {
+            secondarySuggestsFallback = true;
+        } else if (mSecondaryProviderStatus == PROVIDER_STATUS_IS_UNCERTAIN
+                && mSecondaryProviderReportedStatus != null) {
+            secondarySuggestsFallback =
+                    mSecondaryProviderReportedStatus.couldEnableTelephonyFallback();
+        }
+        return primarySuggestsFallback && secondarySuggestsFallback;
     }
 
     /** @hide */
