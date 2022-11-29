@@ -140,9 +140,7 @@ import com.android.server.location.provider.StationaryThrottlingLocationProvider
 import com.android.server.location.provider.proxy.ProxyLocationProvider;
 import com.android.server.location.settings.LocationSettings;
 import com.android.server.location.settings.LocationUserSettings;
-import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
-import com.android.server.utils.Slogf;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -310,10 +308,6 @@ public class LocationManagerService extends ILocationManager.Stub implements
         permissionManagerInternal.setLocationExtraPackagesProvider(
                 userId -> mContext.getResources().getStringArray(
                         com.android.internal.R.array.config_locationExtraPackageNames));
-
-        // TODO(b/241604546): properly handle this callback
-        LocalServices.getService(UserManagerInternal.class).addUserVisibilityListener(
-                (u, v) -> Slogf.i(TAG, "onUserVisibilityChanged(): %d -> %b", u, v));
     }
 
     @Nullable
@@ -1702,7 +1696,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
 
         private final Context mContext;
 
-        private final UserInfoHelper mUserInfoHelper;
+        private final SystemUserInfoHelper mUserInfoHelper;
         private final LocationSettings mLocationSettings;
         private final AlarmHelper mAlarmHelper;
         private final SystemAppOpsHelper mAppOpsHelper;
@@ -1725,7 +1719,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
         @GuardedBy("this")
         private boolean mSystemReady;
 
-        SystemInjector(Context context, UserInfoHelper userInfoHelper) {
+        SystemInjector(Context context, SystemUserInfoHelper userInfoHelper) {
             mContext = context;
 
             mUserInfoHelper = userInfoHelper;
@@ -1745,6 +1739,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
 
         synchronized void onSystemReady() {
+            mUserInfoHelper.onSystemReady();
             mAppOpsHelper.onSystemReady();
             mLocationPermissionsHelper.onSystemReady();
             mSettingsHelper.onSystemReady();
