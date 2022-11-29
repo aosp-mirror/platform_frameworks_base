@@ -38,7 +38,7 @@ JNIEXPORT jint JNICALL Java_randomparcel_FuzzBinder_registerNatives(JNIEnv* env)
     return registerFrameworkNatives(env);
 }
 
-JNIEXPORT void JNICALL Java_randomparcel_FuzzBinder_getRandomParcel(JNIEnv *env, jobject thiz, jobject jparcel, jbyteArray fuzzData) {
+JNIEXPORT void JNICALL Java_randomparcel_FuzzBinder_fillParcelInternal(JNIEnv *env, jobject thiz, jobject jparcel, jbyteArray fuzzData) {
     size_t len = static_cast<size_t>(env->GetArrayLength(fuzzData));
     uint8_t data[len];
     env->GetByteArrayRegion(fuzzData, 0, len, reinterpret_cast<jbyte*>(data));
