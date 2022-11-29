@@ -374,7 +374,7 @@ bool AssetManager2::GetOverlayablesToString(android::StringPiece package_name,
         const std::string name = ToFormattedResourceString(*res_name);
         output.append(base::StringPrintf(
             "resource='%s' overlayable='%s' actor='%s' policy='0x%08x'\n",
-            name.c_str(), info->name.c_str(), info->actor.c_str(), info->policy_flags));
+            name.c_str(), info->name.data(), info->actor.data(), info->policy_flags));
       }
     }
   }

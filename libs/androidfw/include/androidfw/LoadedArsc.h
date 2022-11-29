@@ -99,8 +99,8 @@ enum : package_property_t {
 };
 
 struct OverlayableInfo {
-  std::string name;
-  std::string actor;
+  std::string_view name;
+  std::string_view actor;
   uint32_t policy_flags;
 };
 

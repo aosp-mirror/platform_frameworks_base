@@ -648,10 +648,11 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
         util::ReadUtf16StringFromDevice(overlayable->name, std::size(overlayable->name), &name);
         std::string actor;
         util::ReadUtf16StringFromDevice(overlayable->actor, std::size(overlayable->actor), &actor);
-        auto [it, inserted] =
-            loaded_package->overlayable_map_.emplace(name, actor);
+        auto [name_to_actor_it, inserted] =
+            loaded_package->overlayable_map_.emplace(std::move(name), std::move(actor));
         if (!inserted) {
-          LOG(ERROR) << "Multiple <overlayable> blocks with the same name '" << it->first << "'.";
+          LOG(ERROR) << "Multiple <overlayable> blocks with the same name '"
+                     << name_to_actor_it->first << "'.";
           return {};
         }
 
@@ -668,7 +669,6 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
                 LOG(ERROR) << "RES_TABLE_OVERLAYABLE_POLICY_TYPE too small.";
                 return {};
               }
-
               if ((overlayable_child_chunk.data_size() / sizeof(ResTable_ref))
                   < dtohl(policy_header->entry_count)) {
                 LOG(ERROR) <<  "RES_TABLE_OVERLAYABLE_POLICY_TYPE too small to hold entries.";
@@ -690,8 +690,8 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
 
               // Add the pairing of overlayable properties and resource ids to the package
               OverlayableInfo overlayable_info {
-                .name = name,
-                .actor = actor,
+                .name = name_to_actor_it->first,
+                .actor = name_to_actor_it->second,
                 .policy_flags = policy_header->policy_flags
               };
               loaded_package->overlayable_infos_.emplace_back(std::move(overlayable_info), std::move(ids));

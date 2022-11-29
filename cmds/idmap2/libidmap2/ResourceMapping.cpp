@@ -89,7 +89,7 @@ Result<Unit> CheckOverlayable(const TargetResourceContainer& target,
     // If the overlay supplies a target overlayable name, the resource must belong to the
     // overlayable defined with the specified name to be overlaid.
     return Error(R"(<overlay> android:targetName "%s" does not match overlayable name "%s")",
-                 overlay_info.target_name.c_str(), (*overlayable_info)->name.c_str());
+                 overlay_info.target_name.c_str(), (*overlayable_info)->name.data());
   }
 
   // Enforce policy restrictions if the resource is declared as overlayable.
