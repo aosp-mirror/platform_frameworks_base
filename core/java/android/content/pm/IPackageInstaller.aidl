@@ -69,4 +69,7 @@ interface IPackageInstaller {
     void setSilentUpdatesThrottleTime(long throttleTimeInSeconds);
     void checkInstallConstraints(String installerPackageName, in List<String> packageNames,
             in PackageInstaller.InstallConstraints constraints, in RemoteCallback callback);
+    void waitForInstallConstraints(String installerPackageName, in List<String> packageNames,
+            in PackageInstaller.InstallConstraints constraints, in IntentSender callback,
+            long timeout);
 }
