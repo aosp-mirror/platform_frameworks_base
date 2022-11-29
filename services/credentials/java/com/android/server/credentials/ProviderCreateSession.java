@@ -28,6 +28,7 @@ import android.credentials.ui.ProviderPendingIntentResponse;
 import android.os.Bundle;
 import android.service.credentials.BeginCreateCredentialRequest;
 import android.service.credentials.BeginCreateCredentialResponse;
+import android.service.credentials.CreateCredentialRequest;
 import android.service.credentials.CreateEntry;
 import android.service.credentials.CredentialProviderInfo;
 import android.service.credentials.CredentialProviderService;
@@ -53,7 +54,7 @@ public final class ProviderCreateSession extends ProviderSession<
     @NonNull
     private final Map<String, CreateEntry> mUiSaveEntries = new HashMap<>();
     /** The complete request to be used in the second round. */
-    private final BeginCreateCredentialRequest mCompleteRequest;
+    private final CreateCredentialRequest mCompleteRequest;
 
     /** Creates a new provider session to be used by the request session. */
     @Nullable public static ProviderCreateSession createNewSession(
@@ -62,39 +63,35 @@ public final class ProviderCreateSession extends ProviderSession<
             CredentialProviderInfo providerInfo,
             CreateRequestSession createRequestSession,
             RemoteCredentialService remoteCredentialService) {
-        BeginCreateCredentialRequest providerRequest =
+        CreateCredentialRequest providerCreateRequest =
                 createProviderRequest(providerInfo.getCapabilities(),
                         createRequestSession.mClientRequest,
                         createRequestSession.mClientCallingPackage);
-        if (providerRequest != null) {
+        if (providerCreateRequest != null) {
+            // TODO : Replace with proper splitting of request
+            BeginCreateCredentialRequest providerBeginCreateRequest =
+                    new BeginCreateCredentialRequest(
+                            providerCreateRequest.getCallingPackage(),
+                            providerCreateRequest.getType(),
+                            new Bundle());
             return new ProviderCreateSession(context, providerInfo, createRequestSession, userId,
-                    remoteCredentialService, providerRequest);
+                    remoteCredentialService, providerBeginCreateRequest, providerCreateRequest);
         }
         Log.i(TAG, "Unable to create provider session");
         return null;
     }
 
     @Nullable
-    private static BeginCreateCredentialRequest createProviderRequest(
-            List<String> providerCapabilities,
+    private static CreateCredentialRequest createProviderRequest(List<String> providerCapabilities,
             android.credentials.CreateCredentialRequest clientRequest,
             String clientCallingPackage) {
         String capability = clientRequest.getType();
         if (providerCapabilities.contains(capability)) {
-            return new BeginCreateCredentialRequest(clientCallingPackage, capability,
+            return new CreateCredentialRequest(clientCallingPackage, capability,
                     clientRequest.getData());
         }
         Log.i(TAG, "Unable to create provider request - capabilities do not match");
         return null;
-    }
-
-    private static BeginCreateCredentialRequest getFirstRoundRequest(
-            BeginCreateCredentialRequest request) {
-        // TODO: Replace with first round bundle from request when ready
-        return new BeginCreateCredentialRequest(
-                request.getCallingPackage(),
-                request.getType(),
-                new Bundle());
     }
 
     private ProviderCreateSession(
@@ -103,11 +100,11 @@ public final class ProviderCreateSession extends ProviderSession<
             @NonNull ProviderInternalCallback callbacks,
             @UserIdInt int userId,
             @NonNull RemoteCredentialService remoteCredentialService,
-            @NonNull BeginCreateCredentialRequest request) {
-        super(context, info, getFirstRoundRequest(request), callbacks, userId,
+            @NonNull BeginCreateCredentialRequest beginCreateRequest,
+            @NonNull CreateCredentialRequest completeCreateRequest) {
+        super(context, info, beginCreateRequest, callbacks, userId,
                 remoteCredentialService);
-        // TODO : Replace with proper splitting of request
-        mCompleteRequest = request;
+        mCompleteRequest = completeCreateRequest;
         setStatus(Status.PENDING);
     }
 
