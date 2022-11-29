@@ -31,7 +31,9 @@ import static org.mockito.Mockito.when;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.om.FabricatedOverlay;
 import android.content.om.OverlayInfo;
+import android.content.om.OverlayManagerTransaction;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -448,6 +450,40 @@ public class OverlayManagerImplTest {
         final OverlayManagerImpl overlayManagerImpl = new OverlayManagerImpl(fakeContext);
 
         assertThrows(IllegalArgumentException.class, overlayManagerImpl::ensureBaseDir);
+    }
+
+    @Test
+    public void commit_withNullTransaction_shouldFail() {
+        assertThrows(NullPointerException.class, () -> mOverlayManagerImpl.commit(null));
+    }
+
+    @Test
+    public void commitRegisterOverlay_fromOtherBuilder_shouldWork()
+            throws PackageManager.NameNotFoundException, IOException {
+        FabricatedOverlay overlay =
+                new FabricatedOverlay.Builder(
+                                mContext.getPackageName(), mOverlayName, mContext.getPackageName())
+                        .setTargetOverlayable(SIGNATURE_OVERLAYABLE)
+                        .setResourceValue(
+                                TARGET_COLOR_RES, TypedValue.TYPE_INT_COLOR_ARGB8, Color.WHITE)
+                        .build();
+        OverlayManagerTransaction transaction =
+                new OverlayManagerTransaction.Builder().registerFabricatedOverlay(overlay).build();
+
+        mOverlayManagerImpl.commit(transaction);
+
+        final List<OverlayInfo> overlayInfos =
+                mOverlayManagerImpl.getOverlayInfosForTarget(mContext.getPackageName());
+        final int firstNumberOfOverlays = overlayInfos.size();
+        expect.that(firstNumberOfOverlays).isEqualTo(1);
+        final OverlayInfo overlayInfo = overlayInfos.get(0);
+        expect.that(overlayInfo).isNotNull();
+        Truth.assertThat(expect.hasFailures()).isFalse();
+        expect.that(overlayInfo.isFabricated()).isTrue();
+        expect.that(overlayInfo.getOverlayName()).isEqualTo(mOverlayName);
+        expect.that(overlayInfo.getPackageName()).isEqualTo(mContext.getPackageName());
+        expect.that(overlayInfo.getTargetPackageName()).isEqualTo(mContext.getPackageName());
+        expect.that(overlayInfo.getUserId()).isEqualTo(mContext.getUserId());
     }
 
     @Test
