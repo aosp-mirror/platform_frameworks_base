@@ -34,13 +34,19 @@ import platform.test.screenshot.*
 /**
  * A rule that allows to run a screenshot diff test on a view that is hosted in another activity.
  */
-class ExternalViewScreenshotTestRule(emulationSpec: DeviceEmulationSpec) : TestRule {
+class ExternalViewScreenshotTestRule(
+    emulationSpec: DeviceEmulationSpec,
+    assetPathRelativeToBuildRoot: String
+) : TestRule {
 
     private val colorsRule = MaterialYouColorsRule()
     private val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
     private val screenshotRule =
         ScreenshotTestRule(
-            SystemUIGoldenImagePathManager(getEmulatedDevicePathConfig(emulationSpec))
+            SystemUIGoldenImagePathManager(
+                getEmulatedDevicePathConfig(emulationSpec),
+                assetPathRelativeToBuildRoot
+            )
         )
     private val delegateRule =
         RuleChain.outerRule(colorsRule).around(deviceEmulationRule).around(screenshotRule)
