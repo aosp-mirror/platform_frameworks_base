@@ -48,7 +48,7 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfigInterface;
 import android.provider.Settings;
-import android.sysprop.DisplayProperties;
+import android.sysprop.SurfaceFlingerProperties;
 import android.text.TextUtils;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
@@ -137,8 +137,7 @@ public class DisplayModeDirector {
 
     private boolean mAlwaysRespectAppRequest;
 
-    // TODO(b/241447632): remove the flag once SF changes are ready
-    private final boolean mRenderFrameRateIsPhysicalRefreshRate;
+    private final boolean mSupportsFrameRateOverride;
 
     /**
      * The allowed refresh rate switching type. This is used by SurfaceFlinger.
@@ -175,7 +174,7 @@ public class DisplayModeDirector {
         mHbmObserver = new HbmObserver(injector, ballotBox, BackgroundThread.getHandler(),
                 mDeviceConfigDisplaySettings);
         mAlwaysRespectAppRequest = false;
-        mRenderFrameRateIsPhysicalRefreshRate = injector.renderFrameRateIsPhysicalRefreshRate();
+        mSupportsFrameRateOverride = injector.supportsFrameRateOverride();
     }
 
     /**
@@ -234,21 +233,6 @@ public class DisplayModeDirector {
                 if (votes.indexOfKey(priority) < 0) {
                     votes.put(priority, globalVotes.valueAt(i));
                 }
-            }
-        }
-
-        if (mRenderFrameRateIsPhysicalRefreshRate) {
-            for (int i = 0; i < votes.size(); i++) {
-
-                Vote vote = votes.valueAt(i);
-                vote.refreshRateRanges.physical.min = Math.max(vote.refreshRateRanges.physical.min,
-                        vote.refreshRateRanges.render.min);
-                vote.refreshRateRanges.physical.max = Math.min(vote.refreshRateRanges.physical.max,
-                        vote.refreshRateRanges.render.max);
-                vote.refreshRateRanges.render.min = Math.max(vote.refreshRateRanges.physical.min,
-                        vote.refreshRateRanges.render.min);
-                vote.refreshRateRanges.render.max = Math.min(vote.refreshRateRanges.physical.max,
-                        vote.refreshRateRanges.render.max);
             }
         }
 
@@ -540,8 +524,7 @@ public class DisplayModeDirector {
                 }
             }
 
-            if (mModeSwitchingType == DisplayManager.SWITCHING_TYPE_NONE
-                    || mRenderFrameRateIsPhysicalRefreshRate) {
+            if (mModeSwitchingType == DisplayManager.SWITCHING_TYPE_NONE) {
                 primarySummary.minRenderFrameRate = primarySummary.minPhysicalRefreshRate;
                 primarySummary.maxRenderFrameRate = primarySummary.maxPhysicalRefreshRate;
                 appRequestSummary.minRenderFrameRate = appRequestSummary.minPhysicalRefreshRate;
@@ -609,6 +592,22 @@ public class DisplayModeDirector {
                             + ", modeRefreshRate=" + physicalRefreshRate);
                 }
                 continue;
+            }
+
+            // The physical refresh rate must be in the render frame rate range, unless
+            // frame rate override is supported.
+            if (!mSupportsFrameRateOverride) {
+                if (physicalRefreshRate < (summary.minRenderFrameRate - FLOAT_TOLERANCE)
+                        || physicalRefreshRate > (summary.maxRenderFrameRate + FLOAT_TOLERANCE)) {
+                    if (mLoggingEnabled) {
+                        Slog.w(TAG, "Discarding mode " + mode.getModeId()
+                                + ", outside render rate bounds"
+                                + ": minPhysicalRefreshRate=" + summary.minPhysicalRefreshRate
+                                + ", maxPhysicalRefreshRate=" + summary.maxPhysicalRefreshRate
+                                + ", modeRefreshRate=" + physicalRefreshRate);
+                    }
+                    continue;
+                }
             }
 
             // Check whether the render frame rate range is achievable by the mode's physical
@@ -2976,7 +2975,7 @@ public class DisplayModeDirector {
 
         IThermalService getThermalService();
 
-        boolean renderFrameRateIsPhysicalRefreshRate();
+        boolean supportsFrameRateOverride();
     }
 
     @VisibleForTesting
@@ -3031,9 +3030,11 @@ public class DisplayModeDirector {
         }
 
         @Override
-        public boolean renderFrameRateIsPhysicalRefreshRate() {
-            return DisplayProperties
-                    .debug_render_frame_rate_is_physical_refresh_rate().orElse(true);
+        public boolean supportsFrameRateOverride() {
+            return SurfaceFlingerProperties.enable_frame_rate_override().orElse(false)
+                            && !SurfaceFlingerProperties.frame_rate_override_for_native_rates()
+                                    .orElse(true)
+                            && SurfaceFlingerProperties.frame_rate_override_global().orElse(false);
         }
 
         private DisplayManager getDisplayManager() {
