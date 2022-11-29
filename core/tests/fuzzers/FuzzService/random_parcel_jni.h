@@ -23,4 +23,6 @@ extern "C" {
 
     // Function from AndroidRuntime
     jint registerFrameworkNatives(JNIEnv* env);
+
+    JNIEXPORT void JNICALL Java_randomparcel_FuzzBinder_getRandomParcel(JNIEnv *env, jobject thiz, jobject parcel, jbyteArray fuzzData);
 }
