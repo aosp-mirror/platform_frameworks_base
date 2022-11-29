@@ -189,6 +189,7 @@ struct JTuner : public RefBase {
     int scan(const FrontendSettings& settings, FrontendScanType scanType);
     int stopScan();
     int setLnb(sp<LnbClient> lnbClient);
+    bool isLnaSupported();
     int setLna(bool enable);
     jobject openLnbByHandle(int handle);
     jobject openLnbByName(jstring name);
