@@ -44,12 +44,10 @@ import com.android.credentialmanager.createflow.ActiveEntry
 import com.android.credentialmanager.createflow.CreateCredentialUiState
 import com.android.credentialmanager.createflow.CreateScreenState
 import com.android.credentialmanager.createflow.EnabledProviderInfo
-import com.android.credentialmanager.createflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.GetScreenState
-import com.android.credentialmanager.jetpack.developer.CreateCredentialRequest.Companion.createFrom
-import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest
 import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest.Companion.toBundle
+import com.android.credentialmanager.jetpack.developer.CreatePublicKeyCredentialRequest
 import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 
 // Consider repo per screen, similar to view model?
@@ -67,7 +65,7 @@ class CredentialManagerRepo(
     requestInfo = intent.extras?.getParcelable(
       RequestInfo.EXTRA_REQUEST_INFO,
       RequestInfo::class.java
-    ) ?: testCreateRequestInfo()
+    ) ?: testCreatePasskeyRequestInfo()
 
     providerEnabledList = when (requestInfo.type) {
       RequestInfo.TYPE_CREATE ->
@@ -137,9 +135,10 @@ class CredentialManagerRepo(
   }
 
   fun createCredentialInitialUiState(): CreateCredentialUiState {
+    val requestDisplayInfo = CreateFlowUtils.toRequestDisplayInfo(requestInfo, context)
     val providerEnabledList = CreateFlowUtils.toEnabledProviderList(
       // Handle runtime cast error
-      providerEnabledList as List<CreateCredentialProviderData>, context)
+      providerEnabledList as List<CreateCredentialProviderData>, requestDisplayInfo, context)
     val providerDisabledList = CreateFlowUtils.toDisabledProviderList(
       // Handle runtime cast error
       providerDisabledList as List<DisabledProviderData>, context)
@@ -148,21 +147,6 @@ class CredentialManagerRepo(
     providerEnabledList.forEach{providerInfo -> providerInfo.createOptions =
       providerInfo.createOptions.sortedWith(compareBy { it.lastUsedTimeMillis }).reversed()
       if (providerInfo.isDefault) {hasDefault = true; defaultProvider = providerInfo} }
-    // TODO: covert from real requestInfo for create passkey
-    var requestDisplayInfo = RequestDisplayInfo(
-      "beckett-bakert@gmail.com",
-      "Elisa Beckett",
-      TYPE_PUBLIC_KEY_CREDENTIAL,
-      "tribank")
-    val createCredentialRequest = requestInfo.createCredentialRequest
-    val createCredentialRequestJetpack = createCredentialRequest?.let { createFrom(it) }
-    if (createCredentialRequestJetpack is CreatePasswordRequest) {
-      requestDisplayInfo = RequestDisplayInfo(
-        createCredentialRequestJetpack.id,
-        createCredentialRequestJetpack.password,
-        TYPE_PASSWORD_CREDENTIAL,
-        "tribank")
-    }
     return CreateCredentialUiState(
       enabledProviders = providerEnabledList,
       disabledProviders = providerDisabledList,
@@ -440,12 +424,39 @@ class CredentialManagerRepo(
     )
   }
 
-  private fun testCreateRequestInfo(): RequestInfo {
-    val data = toBundle("beckett-bakert@gmail.com", "password123")
+  private fun testCreatePasskeyRequestInfo(): RequestInfo {
+    val request = CreatePublicKeyCredentialRequest("json")
+    val data = request.data
     return RequestInfo.newCreateRequestInfo(
       Binder(),
       CreateCredentialRequest(
         TYPE_PUBLIC_KEY_CREDENTIAL,
+        data
+      ),
+      /*isFirstUsage=*/false,
+      "tribank"
+    )
+  }
+
+  private fun testCreatePasswordRequestInfo(): RequestInfo {
+    val data = toBundle("beckett-bakert@gmail.com", "password123")
+    return RequestInfo.newCreateRequestInfo(
+      Binder(),
+      CreateCredentialRequest(
+        TYPE_PASSWORD_CREDENTIAL,
+        data
+      ),
+      /*isFirstUsage=*/false,
+      "tribank"
+    )
+  }
+
+  private fun testCreateOtherCredentialRequestInfo(): RequestInfo {
+    val data = Bundle()
+    return RequestInfo.newCreateRequestInfo(
+      Binder(),
+      CreateCredentialRequest(
+        "other-sign-ins",
         data
       ),
       /*isFirstUsage=*/false,

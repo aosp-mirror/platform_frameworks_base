@@ -23,14 +23,19 @@ import android.credentials.ui.Entry
 import android.credentials.ui.GetCredentialProviderData
 import android.credentials.ui.CreateCredentialProviderData
 import android.credentials.ui.DisabledProviderData
+import android.credentials.ui.RequestInfo
 import android.graphics.drawable.Drawable
 import com.android.credentialmanager.createflow.CreateOptionInfo
 import com.android.credentialmanager.createflow.RemoteInfo
+import com.android.credentialmanager.createflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.ActionEntryInfo
 import com.android.credentialmanager.getflow.AuthenticationEntryInfo
 import com.android.credentialmanager.getflow.CredentialEntryInfo
 import com.android.credentialmanager.getflow.ProviderInfo
 import com.android.credentialmanager.getflow.RemoteEntryInfo
+import com.android.credentialmanager.jetpack.developer.CreateCredentialRequest
+import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest
+import com.android.credentialmanager.jetpack.developer.CreatePublicKeyCredentialRequest
 import com.android.credentialmanager.jetpack.provider.ActionUi
 import com.android.credentialmanager.jetpack.provider.CredentialEntryUi
 import com.android.credentialmanager.jetpack.provider.SaveEntryUi
@@ -172,6 +177,7 @@ class CreateFlowUtils {
 
     fun toEnabledProviderList(
       providerDataList: List<CreateCredentialProviderData>,
+      requestDisplayInfo: RequestDisplayInfo,
       context: Context,
     ): List<com.android.credentialmanager.createflow.EnabledProviderInfo> {
       // TODO: get from the actual service info
@@ -194,7 +200,7 @@ class CreateFlowUtils {
           name = it.providerFlattenedComponentName,
           displayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString(),
           createOptions = toCreationOptionInfoList(
-            it.providerFlattenedComponentName, it.saveEntries, context),
+            it.providerFlattenedComponentName, it.saveEntries, requestDisplayInfo, context),
           isDefault = it.isDefaultProvider,
           remoteEntry = toRemoteInfo(it.providerFlattenedComponentName, it.remoteEntry),
         )
@@ -219,9 +225,50 @@ class CreateFlowUtils {
       }
     }
 
+    fun toRequestDisplayInfo(
+      requestInfo: RequestInfo,
+      context: Context,
+    ): RequestDisplayInfo {
+      val createCredentialRequest = requestInfo.createCredentialRequest
+      val createCredentialRequestJetpack = createCredentialRequest?.let {
+        CreateCredentialRequest.createFrom(
+          it
+        )
+      }
+      // TODO: covert from real requestInfo
+      when (createCredentialRequestJetpack) {
+          is CreatePasswordRequest -> {
+            return RequestDisplayInfo(
+              createCredentialRequestJetpack.id,
+              createCredentialRequestJetpack.password,
+              createCredentialRequestJetpack.type,
+              "tribank",
+              context.getDrawable(R.drawable.ic_password)!!
+            )
+          }
+        is CreatePublicKeyCredentialRequest -> {
+          return RequestDisplayInfo(
+            "beckett-bakert@gmail.com",
+            "Elisa Beckett",
+            createCredentialRequestJetpack.type,
+            "tribank",
+            context.getDrawable(R.drawable.ic_passkey)!!)
+        }
+        else -> {
+          return RequestDisplayInfo(
+            "beckett-bakert@gmail.com",
+            "Elisa Beckett",
+            "other-sign-ins",
+            "tribank",
+            context.getDrawable(R.drawable.ic_other_sign_in)!!)
+          }
+      }
+    }
+
     private fun toCreationOptionInfoList(
       providerId: String,
       creationEntries: List<Entry>,
+      requestDisplayInfo: RequestDisplayInfo,
       context: Context,
     ): List<CreateOptionInfo> {
       return creationEntries.map {
@@ -236,7 +283,7 @@ class CreateFlowUtils {
           fillInIntent = it.frameworkExtrasIntent,
           userProviderDisplayName = saveEntryUi.userProviderAccountName as String,
           profileIcon = saveEntryUi.profileIcon?.loadDrawable(context)
-            ?: context.getDrawable(R.drawable.ic_profile)!!,
+            ?: requestDisplayInfo.typeIcon,
           passwordCount = saveEntryUi.passwordCount ?: 0,
           passkeyCount = saveEntryUi.passkeyCount ?: 0,
           totalCredentialCount = saveEntryUi.totalCredentialCount ?: 0,

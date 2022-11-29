@@ -76,6 +76,7 @@ data class RequestDisplayInfo(
   val subtitle: String,
   val type: String,
   val appDomainName: String,
+  val typeIcon: Drawable,
 )
 
 /**
