@@ -78,8 +78,8 @@
   </string-array>
   <string-array name="tile_states_location">
     <item msgid="3316542218706374405">"No disponible"</item>
-    <item msgid="4813655083852587017">"Desactivado"</item>
-    <item msgid="6744077414775180687">"Activado"</item>
+    <item msgid="4813655083852587017">"Desactivada"</item>
+    <item msgid="6744077414775180687">"Activada"</item>
   </string-array>
   <string-array name="tile_states_hotspot">
     <item msgid="3145597331197351214">"No disponible"</item>

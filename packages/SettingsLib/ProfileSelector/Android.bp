@@ -8,21 +8,20 @@ package {
 }
 
 android_library {
-    name: "SettingsLibSettingsTheme",
+    name: "SettingsLibProfileSelector",
 
+    srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
 
     static_libs: [
-            "androidx.preference_preference",
-        ],
+        "com.google.android.material_material",
+        "SettingsLibSettingsTheme",
+    ],
 
     sdk_version: "system_current",
-    min_sdk_version: "21",
+    min_sdk_version: "23",
     apex_available: [
         "//apex_available:platform",
-        "com.android.adservices",
-        "com.android.cellbroadcast",
-        "com.android.permission",
         "com.android.mediaprovider",
     ],
 }
