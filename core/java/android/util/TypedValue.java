@@ -20,6 +20,7 @@ import android.annotation.AnyRes;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.content.pm.ActivityInfo.Config;
 
 import java.lang.annotation.Retention;
@@ -100,6 +101,9 @@ public class TypedValue {
      *  {@link #COMPLEX_UNIT_SHIFT}). This gives us 16 possible types, as
      *  defined below. */
     public static final int COMPLEX_UNIT_MASK = 0xf;
+
+    private static final float INCHES_PER_PT = (1.0f / 72);
+    private static final float INCHES_PER_MM = (1.0f / 25.4f);
 
     /** @hide **/
     @IntDef(prefix = "COMPLEX_UNIT_", value = {
@@ -387,27 +391,30 @@ public class TypedValue {
      }
 
     /**
-     * Converts an unpacked complex data value holding a dimension to its final floating 
-     * point value. The two parameters <var>unit</var> and <var>value</var>
-     * are as in {@link #TYPE_DIMENSION}.
-     *  
+     * Converts an unpacked complex data value holding a dimension to its final floating point pixel
+     * value. The two parameters <var>unit</var> and <var>value</var> are as in {@link
+     * #TYPE_DIMENSION}.
+     *
+     * <p>To convert the other way, e.g. from pixels to DP, use {@link #deriveDimension(int, float,
+     * DisplayMetrics)}.
+     *
      * @param unit The unit to convert from.
      * @param value The value to apply the unit to.
      * @param metrics Current display metrics to use in the conversion -- 
      *                supplies display density and scaling information.
      * 
-     * @return The complex floating point value multiplied by the appropriate 
-     * metrics depending on its unit. 
+     * @return The equivalent pixel value—i.e. the complex floating point value multiplied by the
+     * appropriate metrics depending on its unit—or zero if unit is not valid.
      */
     public static float applyDimension(@ComplexDimensionUnit int unit, float value,
                                        DisplayMetrics metrics)
     {
         switch (unit) {
-        case COMPLEX_UNIT_PX:
-            return value;
-        case COMPLEX_UNIT_DIP:
-            return value * metrics.density;
-        case COMPLEX_UNIT_SP:
+            case COMPLEX_UNIT_PX:
+                return value;
+            case COMPLEX_UNIT_DIP:
+                return value * metrics.density;
+            case COMPLEX_UNIT_SP:
                 if (metrics.fontScaleConverter != null) {
                     return applyDimension(
                             COMPLEX_UNIT_DIP,
@@ -416,14 +423,75 @@ public class TypedValue {
                 } else {
                     return value * metrics.scaledDensity;
                 }
-        case COMPLEX_UNIT_PT:
-            return value * metrics.xdpi * (1.0f/72);
-        case COMPLEX_UNIT_IN:
-            return value * metrics.xdpi;
-        case COMPLEX_UNIT_MM:
-            return value * metrics.xdpi * (1.0f/25.4f);
+            case COMPLEX_UNIT_PT:
+                return value * metrics.xdpi * INCHES_PER_PT;
+            case COMPLEX_UNIT_IN:
+                return value * metrics.xdpi;
+            case COMPLEX_UNIT_MM:
+                return value * metrics.xdpi * INCHES_PER_MM;
         }
         return 0;
+    }
+
+
+    /**
+     * Converts a pixel value to the given dimension, e.g. PX to DP.
+     *
+     * <p>This is the inverse of {@link #applyDimension(int, float, DisplayMetrics)}
+     *
+     * @param unitToConvertTo The unit to convert to.
+     * @param pixelValue The raw pixels value to convert from.
+     * @param metrics Current display metrics to use in the conversion --
+     *                supplies display density and scaling information.
+     *
+     * @return A dimension value equivalent to the given number of pixels
+     * @throws IllegalArgumentException if unitToConvertTo is not valid.
+     */
+    public static float deriveDimension(
+            @ComplexDimensionUnit int unitToConvertTo,
+            float pixelValue,
+            @NonNull DisplayMetrics metrics) {
+        switch (unitToConvertTo) {
+            case COMPLEX_UNIT_PX:
+                return pixelValue;
+            case COMPLEX_UNIT_DIP: {
+                // Avoid divide-by-zero, and return 0 since that's what the inverse function will do
+                if (metrics.density == 0) {
+                    return 0;
+                }
+                return pixelValue / metrics.density;
+            }
+            case COMPLEX_UNIT_SP:
+                if (metrics.fontScaleConverter != null) {
+                    final float dpValue = deriveDimension(COMPLEX_UNIT_DIP, pixelValue, metrics);
+                    return metrics.fontScaleConverter.convertDpToSp(dpValue);
+                } else {
+                    if (metrics.scaledDensity == 0) {
+                        return 0;
+                    }
+                    return pixelValue / metrics.scaledDensity;
+                }
+            case COMPLEX_UNIT_PT: {
+                if (metrics.xdpi == 0) {
+                    return 0;
+                }
+                return pixelValue / metrics.xdpi / INCHES_PER_PT;
+            }
+            case COMPLEX_UNIT_IN: {
+                if (metrics.xdpi == 0) {
+                    return 0;
+                }
+                return pixelValue / metrics.xdpi;
+            }
+            case COMPLEX_UNIT_MM: {
+                if (metrics.xdpi == 0) {
+                    return 0;
+                }
+                return pixelValue / metrics.xdpi / INCHES_PER_MM;
+            }
+            default:
+                throw new IllegalArgumentException("Invalid unitToConvertTo " + unitToConvertTo);
+        }
     }
 
     /**
