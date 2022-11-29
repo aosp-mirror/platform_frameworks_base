@@ -408,7 +408,14 @@ public class TypedValue {
         case COMPLEX_UNIT_DIP:
             return value * metrics.density;
         case COMPLEX_UNIT_SP:
-            return value * metrics.scaledDensity;
+                if (metrics.fontScaleConverter != null) {
+                    return applyDimension(
+                            COMPLEX_UNIT_DIP,
+                            metrics.fontScaleConverter.convertSpToDp(value),
+                            metrics);
+                } else {
+                    return value * metrics.scaledDensity;
+                }
         case COMPLEX_UNIT_PT:
             return value * metrics.xdpi * (1.0f/72);
         case COMPLEX_UNIT_IN:

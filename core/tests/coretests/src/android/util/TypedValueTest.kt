@@ -16,16 +16,17 @@
 
 package android.util
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.filters.SmallTest
-import androidx.test.runner.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
+import kotlin.math.abs
+import kotlin.math.min
+import kotlin.math.roundToInt
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
-import kotlin.math.abs
-import kotlin.math.min
-import kotlin.math.roundToInt
 
 @RunWith(AndroidJUnit4::class)
 class TypedValueTest {
@@ -151,5 +152,20 @@ class TypedValueTest {
         )
         val widthPx = TypedValue.complexToDimensionPixelSize(widthDimen, metrics)
         assertEquals(widthFloat.roundToInt(), widthPx)
+    }
+
+    @SmallTest
+    @Test
+    fun testNonLinearFontScaling_nullLookupFallsBackToScaledDensity() {
+        val metrics: DisplayMetrics = mock(DisplayMetrics::class.java)
+        val fontScale = 2f
+        metrics.density = 1f
+        metrics.scaledDensity = fontScale * metrics.density
+        metrics.fontScaleConverter = null
+
+        assertThat(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 10f, metrics))
+                .isEqualTo(20f)
+        assertThat(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 50f, metrics))
+                .isEqualTo(100f)
     }
 }
