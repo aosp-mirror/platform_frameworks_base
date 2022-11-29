@@ -24,16 +24,6 @@
         <item name="android:layout_gravity">top</item>
     </style>
 
-    <style name="AuthCredentialPatternContainerStyle">
-        <item name="android:gravity">center</item>
-        <item name="android:maxHeight">420dp</item>
-        <item name="android:maxWidth">420dp</item>
-        <item name="android:minHeight">200dp</item>
-        <item name="android:minWidth">200dp</item>
-        <item name="android:paddingHorizontal">180dp</item>
-        <item name="android:paddingVertical">80dp</item>
-    </style>
-
     <style name="TextAppearance.AuthNonBioCredential.Title">
         <item name="android:fontFamily">google-sans</item>
         <item name="android:layout_marginTop">24dp</item>
