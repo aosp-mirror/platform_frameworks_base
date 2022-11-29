@@ -249,6 +249,7 @@ public class KeyguardService extends Service {
                                 synchronized (mFinishCallbacks) {
                                     if (mFinishCallbacks.remove(transition) == null) return;
                                 }
+                                info.releaseAllSurfaces();
                                 Slog.d(TAG, "Finish IRemoteAnimationRunner.");
                                 finishCallback.onTransitionFinished(null /* wct */, null /* t */);
                             }
@@ -264,6 +265,8 @@ public class KeyguardService extends Service {
                     synchronized (mFinishCallbacks) {
                         origFinishCB = mFinishCallbacks.remove(transition);
                     }
+                    info.releaseAllSurfaces();
+                    t.close();
                     if (origFinishCB == null) {
                         // already finished (or not started yet), so do nothing.
                         return;
@@ -459,12 +462,15 @@ public class KeyguardService extends Service {
             t.apply();
             mBinder.setOccluded(true /* isOccluded */, true /* animate */);
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+            info.releaseAllSurfaces();
         }
 
         @Override
         public void mergeAnimation(IBinder transition, TransitionInfo info,
                 SurfaceControl.Transaction t, IBinder mergeTarget,
                 IRemoteTransitionFinishedCallback finishCallback) {
+            t.close();
+            info.releaseAllSurfaces();
         }
     };
 
@@ -476,12 +482,15 @@ public class KeyguardService extends Service {
             t.apply();
             mBinder.setOccluded(false /* isOccluded */, true /* animate */);
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+            info.releaseAllSurfaces();
         }
 
         @Override
         public void mergeAnimation(IBinder transition, TransitionInfo info,
                 SurfaceControl.Transaction t, IBinder mergeTarget,
                 IRemoteTransitionFinishedCallback finishCallback) {
+            t.close();
+            info.releaseAllSurfaces();
         }
     };
 

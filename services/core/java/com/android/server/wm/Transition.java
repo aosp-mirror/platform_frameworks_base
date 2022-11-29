@@ -751,6 +751,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, TRACE_NAME_PLAY_TRANSITION,
                     System.identityHashCode(this));
         }
+        // Close the transactions now. They were originally copied to Shell in case we needed to
+        // apply them due to a remote failure. Since we don't need to apply them anymore, free them
+        // immediately.
+        if (mStartTransaction != null) mStartTransaction.close();
+        if (mFinishTransaction != null) mFinishTransaction.close();
         mStartTransaction = mFinishTransaction = null;
         if (mState < STATE_PLAYING) {
             throw new IllegalStateException("Can't finish a non-playing transition " + mSyncId);
@@ -892,6 +897,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             mController.mAtm.mWindowManager.updateRotation(false /* alwaysSendConfiguration */,
                     false /* forceRelayout */);
         }
+        cleanUpInternal();
     }
 
     void abort() {
@@ -934,6 +940,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             dc.getPendingTransaction().merge(transaction);
             mSyncId = -1;
             mOverrideOptions = null;
+            cleanUpInternal();
             return;
         }
         // Ensure that wallpaper visibility is updated with the latest wallpaper target.
@@ -1053,6 +1060,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         "Calling onTransitionReady: %s", info);
                 mController.getTransitionPlayer().onTransitionReady(
                         mToken, info, transaction, mFinishTransaction);
+                // Since we created root-leash but no longer reference it from core, release it now
+                info.releaseAnimSurfaces();
                 if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
                     Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, TRACE_NAME_PLAY_TRANSITION,
                             System.identityHashCode(this));
@@ -1086,6 +1095,16 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             mFinishTransaction.apply();
         }
         mController.finishTransition(mToken);
+    }
+
+    private void cleanUpInternal() {
+        // Clean-up any native references.
+        for (int i = 0; i < mChanges.size(); ++i) {
+            final ChangeInfo ci = mChanges.valueAt(i);
+            if (ci.mSnapshot != null) {
+                ci.mSnapshot.release();
+            }
+        }
     }
 
     /** @see RecentsAnimationController#attachNavigationBarToApp */
