@@ -28,7 +28,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
-import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ProviderInfo;
@@ -104,10 +103,9 @@ public class InstallStart extends Activity {
                 Intent.EXTRA_INSTALLER_PACKAGE_NAME);
         if (installerPackageNameFromIntent != null) {
             final String callingPkgName = getLaunchedFromPackage();
-            if (installerPackageNameFromIntent.length() >= SessionParams.MAX_PACKAGE_NAME_LENGTH
-                    || (!TextUtils.equals(installerPackageNameFromIntent, callingPkgName)
+            if (!TextUtils.equals(installerPackageNameFromIntent, callingPkgName)
                     && mPackageManager.checkPermission(Manifest.permission.INSTALL_PACKAGES,
-                    callingPkgName) != PackageManager.PERMISSION_GRANTED)) {
+                    callingPkgName) != PackageManager.PERMISSION_GRANTED) {
                 Log.e(LOG_TAG, "The given installer package name " + installerPackageNameFromIntent
                         + " is invalid. Remove it.");
                 EventLog.writeEvent(0x534e4554, "236687884", getLaunchedFromUid(),
