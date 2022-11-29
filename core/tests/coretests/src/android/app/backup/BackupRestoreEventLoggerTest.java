@@ -16,8 +16,8 @@
 
 package android.app.backup;
 
-import static android.app.backup.BackupRestoreEventLogger.OperationType.BACKUP;
-import static android.app.backup.BackupRestoreEventLogger.OperationType.RESTORE;
+import static android.app.backup.BackupAnnotations.OperationType.BACKUP;
+import static android.app.backup.BackupAnnotations.OperationType.RESTORE;
 
 import static com.google.common.truth.Truth.assertThat;
 

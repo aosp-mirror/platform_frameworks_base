@@ -16,8 +16,9 @@
 
 package android.app.time;
 
+import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_NOT_RUNNING;
+import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_NOT_SUPPORTED;
 import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_RUNNING;
-import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_UNKNOWN;
 import static android.app.time.DetectorStatusTypes.detectionAlgorithmStatusFromString;
 import static android.app.time.DetectorStatusTypes.detectionAlgorithmStatusToString;
 import static android.app.time.DetectorStatusTypes.requireValidDetectionAlgorithmStatus;
@@ -86,12 +87,24 @@ public final class LocationTimeZoneAlgorithmStatus implements Parcelable {
     public static final @ProviderStatus int PROVIDER_STATUS_IS_UNCERTAIN = 4;
 
     /**
-     * An instance that provides no information about algorithm status because the algorithm has not
-     * yet reported. Effectively a "null" status placeholder.
+     * An instance used when the location algorithm is not supported by the device.
      */
-    @NonNull
-    public static final LocationTimeZoneAlgorithmStatus UNKNOWN =
-            new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_UNKNOWN,
+    public static final LocationTimeZoneAlgorithmStatus NOT_SUPPORTED =
+            new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_NOT_SUPPORTED,
+                    PROVIDER_STATUS_NOT_PRESENT, null, PROVIDER_STATUS_NOT_PRESENT, null);
+
+    /**
+     * An instance used when the location algorithm is running, but has not reported an event.
+     */
+    public static final LocationTimeZoneAlgorithmStatus RUNNING_NOT_REPORTED =
+            new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_NOT_RUNNING,
+                    PROVIDER_STATUS_NOT_READY, null, PROVIDER_STATUS_NOT_READY, null);
+
+    /**
+     * An instance used when the location algorithm is supported but not running.
+     */
+    public static final LocationTimeZoneAlgorithmStatus NOT_RUNNING =
+            new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_NOT_RUNNING,
                     PROVIDER_STATUS_NOT_READY, null, PROVIDER_STATUS_NOT_READY, null);
 
     private final @DetectionAlgorithmStatus int mStatus;

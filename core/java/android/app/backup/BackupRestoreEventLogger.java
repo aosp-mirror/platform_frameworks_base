@@ -16,13 +16,13 @@
 
 package android.app.backup;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.util.Slog;
 
 import java.lang.annotation.Retention;
@@ -54,21 +54,6 @@ public class BackupRestoreEventLogger {
      * to use more distinct data type values will be rejected.
      */
     public static final int DATA_TYPES_ALLOWED = 15;
-
-    /**
-     * Operation types for which this logger can be used.
-     *
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
-            OperationType.BACKUP,
-            OperationType.RESTORE
-    })
-    @interface OperationType {
-        int BACKUP = 1;
-        int RESTORE = 2;
-    }
 
     /**
      * Denotes that the annotated element identifies a data type as required by the logging methods

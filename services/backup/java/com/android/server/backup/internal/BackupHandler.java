@@ -20,7 +20,7 @@ import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
-import android.app.backup.BackupManager.OperationType;
+import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.RestoreSet;
 import android.os.Handler;
@@ -240,7 +240,7 @@ public class BackupHandler extends Handler {
                                 /* userInitiated */ false,
                                 /* nonIncremental */ false,
                                 backupManagerService.getEligibilityRulesForOperation(
-                                        OperationType.BACKUP));
+                                        BackupDestination.CLOUD));
                     } catch (Exception e) {
                         // unable to ask the transport its dir name -- transient failure, since
                         // the above check succeeded.  Try again next time.

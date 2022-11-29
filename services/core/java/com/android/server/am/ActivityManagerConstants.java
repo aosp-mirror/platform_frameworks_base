@@ -954,7 +954,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final long DEFAULT_SHORT_FGS_TIMEOUT_DURATION = 60_000;
 
     /** @see #KEY_SHORT_FGS_TIMEOUT_DURATION */
-    public static volatile long mShortFgsTimeoutDuration = DEFAULT_SHORT_FGS_TIMEOUT_DURATION;
+    public volatile long mShortFgsTimeoutDuration = DEFAULT_SHORT_FGS_TIMEOUT_DURATION;
 
     /**
      * If a "short service" doesn't finish within this after the timeout (
@@ -967,7 +967,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final long DEFAULT_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION = 5_000;
 
     /** @see #KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION */
-    public static volatile long mShortFgsProcStateExtraWaitDuration =
+    public volatile long mShortFgsProcStateExtraWaitDuration =
             DEFAULT_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION;
 
     /**
@@ -983,7 +983,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final long DEFAULT_SHORT_FGS_ANR_EXTRA_WAIT_DURATION = 10_000;
 
     /** @see #KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION */
-    public static volatile long mShortFgsAnrExtraWaitDuration =
+    public volatile long mShortFgsAnrExtraWaitDuration =
             DEFAULT_SHORT_FGS_ANR_EXTRA_WAIT_DURATION;
 
     private final OnPropertiesChangedListener mOnDeviceConfigChangedListener =

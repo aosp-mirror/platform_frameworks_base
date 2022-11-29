@@ -25,6 +25,7 @@ package com.android.systemui.keyguard.data.quickaffordance
 object BuiltInKeyguardQuickAffordanceKeys {
     // Please keep alphabetical order of const names to simplify future maintenance.
     const val CAMERA = "camera"
+    const val FLASHLIGHT = "flashlight"
     const val HOME_CONTROLS = "home"
     const val QR_CODE_SCANNER = "qr_code_scanner"
     const val QUICK_ACCESS_WALLET = "wallet"

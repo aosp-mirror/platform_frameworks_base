@@ -16,6 +16,7 @@
 package com.android.settingslib.media;
 
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHearingAid;
 import android.media.MediaRoute2Info;
 
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -32,7 +33,9 @@ public class MediaDeviceUtils {
      */
     public static String getId(CachedBluetoothDevice cachedDevice) {
         if (cachedDevice.isHearingAidDevice()) {
-            return Long.toString(cachedDevice.getHiSyncId());
+            if (cachedDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID) {
+                return Long.toString(cachedDevice.getHiSyncId());
+            }
         }
         return cachedDevice.getAddress();
     }

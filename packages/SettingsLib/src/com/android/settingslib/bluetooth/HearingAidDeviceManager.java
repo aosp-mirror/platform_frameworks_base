@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * HearingAidDeviceManager manages the set of remote HearingAid Bluetooth devices.
+ * HearingAidDeviceManager manages the set of remote HearingAid(ASHA) Bluetooth devices.
  */
 public class HearingAidDeviceManager {
     private static final String TAG = "HearingAidDeviceManager";
@@ -44,12 +44,12 @@ public class HearingAidDeviceManager {
     void initHearingAidDeviceIfNeeded(CachedBluetoothDevice newDevice) {
         long hiSyncId = getHiSyncId(newDevice.getDevice());
         if (isValidHiSyncId(hiSyncId)) {
-            // Once hiSyncId is valid, assign hiSyncId
-            newDevice.setHiSyncId(hiSyncId);
-            final int side = getDeviceSide(newDevice.getDevice());
-            final int mode = getDeviceMode(newDevice.getDevice());
-            newDevice.setDeviceSide(side);
-            newDevice.setDeviceMode(mode);
+            // Once hiSyncId is valid, assign hearing aid info
+            final HearingAidInfo.Builder infoBuilder = new HearingAidInfo.Builder()
+                    .setAshaDeviceSide(getDeviceSide(newDevice.getDevice()))
+                    .setAshaDeviceMode(getDeviceMode(newDevice.getDevice()))
+                    .setHiSyncId(hiSyncId);
+            newDevice.setHearingAidInfo(infoBuilder.build());
         }
     }
 
@@ -123,12 +123,14 @@ public class HearingAidDeviceManager {
                 final long newHiSyncId = getHiSyncId(cachedDevice.getDevice());
                 // Do nothing if there is no HiSyncId on Bluetooth device
                 if (isValidHiSyncId(newHiSyncId)) {
-                    cachedDevice.setHiSyncId(newHiSyncId);
+                    // Once hiSyncId is valid, assign hearing aid info
+                    final HearingAidInfo.Builder infoBuilder = new HearingAidInfo.Builder()
+                            .setAshaDeviceSide(getDeviceSide(cachedDevice.getDevice()))
+                            .setAshaDeviceMode(getDeviceMode(cachedDevice.getDevice()))
+                            .setHiSyncId(newHiSyncId);
+                    cachedDevice.setHearingAidInfo(infoBuilder.build());
+
                     newSyncIdSet.add(newHiSyncId);
-                    final int side = getDeviceSide(cachedDevice.getDevice());
-                    final int mode = getDeviceMode(cachedDevice.getDevice());
-                    cachedDevice.setDeviceSide(side);
-                    cachedDevice.setDeviceMode(mode);
                 }
             }
         }

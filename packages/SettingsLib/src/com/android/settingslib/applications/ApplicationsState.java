@@ -1598,6 +1598,11 @@ public class ApplicationsState {
          */
         public boolean isHomeApp;
 
+        /**
+         * Whether or not it's a cloned app .
+         */
+        public boolean isCloned;
+
         public String getNormalizedLabel() {
             if (normalizedLabel != null) {
                 return normalizedLabel;
@@ -1637,7 +1642,12 @@ public class ApplicationsState {
                 ThreadUtils.postOnBackgroundThread(
                         () -> this.ensureLabelDescriptionLocked(context));
             }
-            this.showInPersonalTab = shouldShowInPersonalTab(context, info.uid);
+            UserManager um = UserManager.get(context);
+            this.showInPersonalTab = shouldShowInPersonalTab(um, info.uid);
+            UserInfo userInfo = um.getUserInfo(UserHandle.getUserId(info.uid));
+            if (userInfo != null) {
+                this.isCloned = userInfo.isCloneProfile();
+            }
         }
 
         /**
@@ -1645,8 +1655,7 @@ public class ApplicationsState {
          * {@link UserProperties#SHOW_IN_SETTINGS_WITH_PARENT} set.
          */
         @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-        boolean shouldShowInPersonalTab(Context context, int uid) {
-            UserManager userManager = UserManager.get(context);
+        boolean shouldShowInPersonalTab(UserManager userManager, int uid) {
             int userId = UserHandle.getUserId(uid);
 
             // Regardless of apk version, if the app belongs to the current user then return true.

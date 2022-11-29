@@ -175,6 +175,9 @@ final class ProcessServiceRecord {
         }
     }
 
+    /**
+     * @return true if this process has any foreground services (even timed-out short-FGS)
+     */
     boolean hasForegroundServices() {
         return mHasForegroundServices;
     }
@@ -222,6 +225,33 @@ final class ProcessServiceRecord {
         }
         // If not, we can just check mFgServiceTypes.
         return mFgServiceTypes != ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
+    }
+
+    /**
+     * @return if this process:
+     * - has at least one short-FGS
+     * - has no other types of FGS
+     * - and all the short-FGSes are procstate-timed out.
+     */
+    boolean areAllShortForegroundServicesProcstateTimedOut(long nowUptime) {
+        if (!mHasForegroundServices) { // Process has no FGS?
+            return false;
+        }
+        if (hasNonShortForegroundServices()) {  // Any non-short FGS running?
+            return false;
+        }
+        // Now we need to look at all short-FGS within the process and see if all of them are
+        // procstate-timed-out or not.
+        for (int i = mServices.size() - 1; i >= 0; i--) {
+            final ServiceRecord sr = mServices.valueAt(i);
+            if (!sr.isShortFgs() || !sr.hasShortFgsInfo()) {
+                continue;
+            }
+            if (sr.getShortFgsInfo().getProcStateDemoteTime() >= nowUptime) {
+                return false;
+            }
+        }
+        return true;
     }
 
     int getReportedForegroundServiceTypes() {

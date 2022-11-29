@@ -398,6 +398,30 @@ public final class HdmiControlManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface RoutingControl {}
 
+    // -- Whether the Soundbar mode feature is enabled or disabled.
+    /**
+     * Soundbar mode feature enabled.
+     *
+     * @see HdmiControlManager#CEC_SETTING_NAME_SOUNDBAR_MODE
+     */
+    public static final int SOUNDBAR_MODE_ENABLED = 1;
+    /**
+     * Soundbar mode feature disabled.
+     *
+     * @see HdmiControlManager#CEC_SETTING_NAME_SOUNDBAR_MODE
+     */
+    public static final int SOUNDBAR_MODE_DISABLED = 0;
+    /**
+     * @see HdmiControlManager#CEC_SETTING_NAME_SOUNDBAR_MODE
+     * @hide
+     */
+    @IntDef(prefix = { "SOUNDBAR_MODE" }, value = {
+            SOUNDBAR_MODE_ENABLED,
+            SOUNDBAR_MODE_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SoundbarMode {}
+
     // -- Scope of CEC power control messages sent by a playback device.
     /**
      * Send CEC power control messages to TV only:
@@ -820,6 +844,14 @@ public final class HdmiControlManager {
      */
     public static final String CEC_SETTING_NAME_ROUTING_CONTROL = "routing_control";
     /**
+     * Name of a setting deciding whether the Soundbar mode feature is enabled.
+     * Before exposing this setting make sure the hardware supports it, otherwise, you may
+     * experience multiple issues.
+     *
+     * @see HdmiControlManager#setSoundbarMode(int)
+     */
+    public static final String CEC_SETTING_NAME_SOUNDBAR_MODE = "soundbar_mode";
+    /**
      * Name of a setting deciding on the power control mode.
      *
      * @see HdmiControlManager#setPowerControlMode(String)
@@ -1070,6 +1102,8 @@ public final class HdmiControlManager {
     @StringDef(value = {
         CEC_SETTING_NAME_HDMI_CEC_ENABLED,
         CEC_SETTING_NAME_HDMI_CEC_VERSION,
+        CEC_SETTING_NAME_ROUTING_CONTROL,
+        CEC_SETTING_NAME_SOUNDBAR_MODE,
         CEC_SETTING_NAME_POWER_CONTROL_MODE,
         CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
         CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL,
@@ -1222,7 +1256,16 @@ public final class HdmiControlManager {
             case HdmiDeviceInfo.DEVICE_PLAYBACK:
                 return mHasPlaybackDevice ? new HdmiPlaybackClient(mService) : null;
             case HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM:
-                return mHasAudioSystemDevice ? new HdmiAudioSystemClient(mService) : null;
+                try {
+                    if ((mService.getCecSettingIntValue(CEC_SETTING_NAME_SOUNDBAR_MODE)
+                            == SOUNDBAR_MODE_ENABLED && mHasPlaybackDevice)
+                            || mHasAudioSystemDevice) {
+                        return new HdmiAudioSystemClient(mService);
+                    }
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+                return null;
             case HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH:
                 return (mHasSwitchDevice || mIsSwitchDevice)
                     ? new HdmiSwitchClient(mService) : null;
@@ -2284,6 +2327,54 @@ public final class HdmiControlManager {
         }
         try {
             return mService.getCecSettingIntValue(CEC_SETTING_NAME_ROUTING_CONTROL);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the status of Soundbar mode feature.
+     *
+     * <p>This allows to enable/disable Soundbar mode on the playback device.
+     * The setting's effect will be available on devices where the hardware supports this feature.
+     * If enabled, an audio system local device will be allocated and try to establish an ARC
+     * connection with the TV. If disabled, the ARC connection will be terminated and the audio
+     * system local device will be removed from the network.
+     *
+     * @see HdmiControlManager#CEC_SETTING_NAME_SOUNDBAR_MODE
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setSoundbarMode(@SoundbarMode int value) {
+        if (mService == null) {
+            Log.e(TAG, "setSoundbarMode: HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingIntValue(CEC_SETTING_NAME_SOUNDBAR_MODE, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the current status of Soundbar mode feature.
+     *
+     * <p>Reflects whether Soundbar mode is currently enabled on the playback device.
+     * If enabled, an audio system local device will be allocated and try to establish an ARC
+     * connection with the TV. If disabled, the ARC connection will be terminated and the audio
+     * system local device will be removed from the network.
+     *
+     * @see HdmiControlManager#CEC_SETTING_NAME_SOUNDBAR_MODE
+     */
+    @SoundbarMode
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public int getSoundbarMode() {
+        if (mService == null) {
+            Log.e(TAG, "getSoundbarMode: HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingIntValue(CEC_SETTING_NAME_SOUNDBAR_MODE);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

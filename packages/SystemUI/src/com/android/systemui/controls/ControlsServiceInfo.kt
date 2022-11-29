@@ -30,6 +30,7 @@ import android.os.UserHandle
 import android.service.controls.ControlsProviderService
 import androidx.annotation.WorkerThread
 import com.android.settingslib.applications.DefaultAppInfo
+import com.android.systemui.R
 import java.util.Objects
 
 class ControlsServiceInfo(
@@ -59,7 +60,8 @@ class ControlsServiceInfo(
      * instead of using the controls rendered by SystemUI.
      *
      * The activity must be in the same package, exported, enabled and protected by the
-     * [Manifest.permission.BIND_CONTROLS] permission.
+     * [Manifest.permission.BIND_CONTROLS] permission. Additionally, only packages declared in
+     * [R.array.config_controlsPreferredPackages] can declare activities for use as a panel.
      */
     var panelActivity: ComponentName? = null
         private set
@@ -70,6 +72,9 @@ class ControlsServiceInfo(
     fun resolvePanelActivity() {
         if (resolved) return
         resolved = true
+        val validPackages = context.resources
+                .getStringArray(R.array.config_controlsPreferredPackages)
+        if (componentName.packageName !in validPackages) return
         panelActivity = _panelActivity?.let {
             val resolveInfos = mPm.queryIntentActivitiesAsUser(
                     Intent().setComponent(it),

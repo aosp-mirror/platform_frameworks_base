@@ -1050,12 +1050,28 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         TelephonyTimeZoneAlgorithmStatus telephonyAlgorithmStatus =
                 createTelephonyAlgorithmStatus(currentConfigurationInternal);
 
-        LocationTimeZoneAlgorithmStatus locationAlgorithmStatus =
-                latestLocationAlgorithmEvent == null ? LocationTimeZoneAlgorithmStatus.UNKNOWN
-                        : latestLocationAlgorithmEvent.getAlgorithmStatus();
+        LocationTimeZoneAlgorithmStatus locationAlgorithmStatus = createLocationAlgorithmStatus(
+                currentConfigurationInternal, latestLocationAlgorithmEvent);
 
         return new TimeZoneDetectorStatus(
                 detectorStatus, telephonyAlgorithmStatus, locationAlgorithmStatus);
+    }
+
+    @NonNull
+    private static LocationTimeZoneAlgorithmStatus createLocationAlgorithmStatus(
+            ConfigurationInternal currentConfigurationInternal,
+            LocationAlgorithmEvent latestLocationAlgorithmEvent) {
+        LocationTimeZoneAlgorithmStatus locationAlgorithmStatus;
+        if (latestLocationAlgorithmEvent != null) {
+            locationAlgorithmStatus = latestLocationAlgorithmEvent.getAlgorithmStatus();
+        } else if (!currentConfigurationInternal.isGeoDetectionSupported()) {
+            locationAlgorithmStatus = LocationTimeZoneAlgorithmStatus.NOT_SUPPORTED;
+        } else if (currentConfigurationInternal.isGeoDetectionExecutionEnabled()) {
+            locationAlgorithmStatus = LocationTimeZoneAlgorithmStatus.RUNNING_NOT_REPORTED;
+        } else {
+            locationAlgorithmStatus = LocationTimeZoneAlgorithmStatus.NOT_RUNNING;
+        }
+        return locationAlgorithmStatus;
     }
 
     @NonNull

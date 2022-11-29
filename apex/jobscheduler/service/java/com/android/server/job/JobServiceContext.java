@@ -21,6 +21,7 @@ import static android.app.job.JobInfo.getPriorityString;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
+import android.annotation.BytesLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.job.IJobCallback;
@@ -187,6 +188,18 @@ public final class JobServiceContext implements ServiceConnection {
         public long mStoppedTime;
 
         @Override
+        public void acknowledgeGetTransferredDownloadBytesMessage(int jobId, int workId,
+                @BytesLong long transferredBytes) {
+            doAcknowledgeGetTransferredDownloadBytesMessage(this, jobId, workId, transferredBytes);
+        }
+
+        @Override
+        public void acknowledgeGetTransferredUploadBytesMessage(int jobId, int workId,
+                @BytesLong long transferredBytes) {
+            doAcknowledgeGetTransferredUploadBytesMessage(this, jobId, workId, transferredBytes);
+        }
+
+        @Override
         public void acknowledgeStartMessage(int jobId, boolean ongoing) {
             doAcknowledgeStartMessage(this, jobId, ongoing);
         }
@@ -209,6 +222,18 @@ public final class JobServiceContext implements ServiceConnection {
         @Override
         public void jobFinished(int jobId, boolean reschedule) {
             doJobFinished(this, jobId, reschedule);
+        }
+
+        @Override
+        public void updateEstimatedNetworkBytes(int jobId, JobWorkItem item,
+                long downloadBytes, long uploadBytes) {
+            doUpdateEstimatedNetworkBytes(this, jobId, item, downloadBytes, uploadBytes);
+        }
+
+        @Override
+        public void updateTransferredNetworkBytes(int jobId, JobWorkItem item,
+                long downloadBytes, long uploadBytes) {
+            doUpdateTransferredNetworkBytes(this, jobId, item, downloadBytes, uploadBytes);
         }
     }
 
@@ -506,6 +531,16 @@ public final class JobServiceContext implements ServiceConnection {
         }
     }
 
+    private void doAcknowledgeGetTransferredDownloadBytesMessage(JobCallback jobCallback, int jobId,
+            int workId, @BytesLong long transferredBytes) {
+        // TODO(255393346): Make sure apps call this appropriately and monitor for abuse
+    }
+
+    private void doAcknowledgeGetTransferredUploadBytesMessage(JobCallback jobCallback, int jobId,
+            int workId, @BytesLong long transferredBytes) {
+        // TODO(255393346): Make sure apps call this appropriately and monitor for abuse
+    }
+
     void doAcknowledgeStopMessage(JobCallback cb, int jobId, boolean reschedule) {
         doCallback(cb, reschedule, null);
     }
@@ -556,6 +591,16 @@ public final class JobServiceContext implements ServiceConnection {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    private void doUpdateTransferredNetworkBytes(JobCallback jobCallback, int jobId,
+            @Nullable JobWorkItem item, long downloadBytes, long uploadBytes) {
+        // TODO(255393346): Make sure apps call this appropriately and monitor for abuse
+    }
+
+    private void doUpdateEstimatedNetworkBytes(JobCallback jobCallback, int jobId,
+            @Nullable JobWorkItem item, long downloadBytes, long uploadBytes) {
+        // TODO(255393346): Make sure apps call this appropriately and monitor for abuse
     }
 
     /**

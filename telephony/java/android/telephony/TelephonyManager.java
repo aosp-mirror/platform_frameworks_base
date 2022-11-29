@@ -71,6 +71,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.carrier.CarrierIdentifier;
@@ -11934,8 +11935,9 @@ public class TelephonyManager {
     }
 
     /**
-     * Gets the default Respond Via Message application, updating the cache if there is no
-     * respond-via-message application currently configured.
+     * Get the component name of the default app to direct respond-via-message intent for the
+     * user associated with this subscription, update the cache if there is no respond-via-message
+     * application currently configured for this user.
      * @return component name of the app and class to direct Respond Via Message intent to, or
      * {@code null} if the functionality is not supported.
      * @hide
@@ -11944,11 +11946,20 @@ public class TelephonyManager {
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public @Nullable ComponentName getAndUpdateDefaultRespondViaMessageApplication() {
-        return SmsApplication.getDefaultRespondViaMessageApplication(mContext, true);
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getDefaultRespondViaMessageApplication(getSubId(), true);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in getAndUpdateDefaultRespondViaMessageApplication: " + e);
+        }
+        return null;
     }
 
     /**
-     * Gets the default Respond Via Message application.
+     * Get the component name of the default app to direct respond-via-message intent for the
+     * user associated with this subscription.
      * @return component name of the app and class to direct Respond Via Message intent to, or
      * {@code null} if the functionality is not supported.
      * @hide
@@ -11957,7 +11968,15 @@ public class TelephonyManager {
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public @Nullable ComponentName getDefaultRespondViaMessageApplication() {
-        return SmsApplication.getDefaultRespondViaMessageApplication(mContext, false);
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getDefaultRespondViaMessageApplication(getSubId(), false);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in getDefaultRespondViaMessageApplication: " + e);
+        }
+        return null;
     }
 
     /**

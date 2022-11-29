@@ -327,8 +327,10 @@ public class CachedBluetoothDeviceManagerTest {
         when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
-        cachedDevice1.setHiSyncId(HISYNCID1);
-        cachedDevice2.setHiSyncId(HISYNCID1);
+        cachedDevice1.setHearingAidInfo(
+                new HearingAidInfo.Builder().setHiSyncId(HISYNCID1).build());
+        cachedDevice2.setHearingAidInfo(
+                new HearingAidInfo.Builder().setHiSyncId(HISYNCID1).build());
         cachedDevice1.setSubDevice(cachedDevice2);
 
         // Call onDeviceUnpaired for the one in mCachedDevices.
