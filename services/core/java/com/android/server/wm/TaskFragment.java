@@ -1165,8 +1165,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
 
         next.delayedResume = false;
-        final TaskDisplayArea taskDisplayArea = getDisplayArea();
 
+        // If we are currently pausing an activity, then don't do anything until that is done.
+        final boolean allPausedComplete = mRootWindowContainer.allPausedActivitiesComplete();
+        if (!allPausedComplete) {
+            ProtoLog.v(WM_DEBUG_STATES,
+                    "resumeTopActivity: Skip resume: some activity pausing.");
+            return false;
+        }
+
+        final TaskDisplayArea taskDisplayArea = getDisplayArea();
         // If the top activity is the resumed one, nothing to do.
         if (mResumedActivity == next && next.isState(RESUMED)
                 && taskDisplayArea.allResumedActivitiesComplete()) {
@@ -1186,14 +1194,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             }
             ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivity: Top activity "
                     + "resumed %s", next);
-            return false;
-        }
-
-        // If we are currently pausing an activity, then don't do anything until that is done.
-        final boolean allPausedComplete = mRootWindowContainer.allPausedActivitiesComplete();
-        if (!allPausedComplete) {
-            ProtoLog.v(WM_DEBUG_STATES,
-                    "resumeTopActivity: Skip resume: some activity pausing.");
             return false;
         }
 
