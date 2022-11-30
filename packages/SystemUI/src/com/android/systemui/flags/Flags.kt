@@ -377,7 +377,7 @@ object Flags {
     // TODO(b/255854141): Tracking Bug
     @JvmField
     val WM_ENABLE_PREDICTIVE_BACK_SYSUI =
-        unreleasedFlag(1204, "persist.wm.debug.predictive_back_sysui_enable", teamfood = false)
+        unreleasedFlag(1204, "persist.wm.debug.predictive_back_sysui_enable", teamfood = true)
 
     // 1300 - screenshots
     // TODO(b/254512719): Tracking Bug
