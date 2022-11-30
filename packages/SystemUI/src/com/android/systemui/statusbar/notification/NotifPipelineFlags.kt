@@ -44,4 +44,8 @@ class NotifPipelineFlags @Inject constructor(
     val shouldFilterUnseenNotifsOnKeyguard: Boolean by lazy {
         featureFlags.isEnabled(Flags.FILTER_UNSEEN_NOTIFS_ON_KEYGUARD)
     }
+
+    val isNoHunForOldWhenEnabled: Boolean by lazy {
+        featureFlags.isEnabled(Flags.NO_HUN_FOR_OLD_WHEN)
+    }
 }
