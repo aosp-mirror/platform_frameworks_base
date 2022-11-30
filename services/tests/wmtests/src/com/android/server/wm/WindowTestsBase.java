@@ -1746,7 +1746,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         void startTransition() {
-            mOrganizer.startTransition(mLastTransit, null);
+            mOrganizer.startTransition(mLastTransit.getToken(), null);
         }
 
         void onTransactionReady(SurfaceControl.Transaction t) {
@@ -1759,7 +1759,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         public void finish() {
-            mController.finishTransition(mLastTransit);
+            mController.finishTransition(mLastTransit.getToken());
         }
     }
 }
