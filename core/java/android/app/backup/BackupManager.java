@@ -1018,6 +1018,29 @@ public class BackupManager {
         }
     }
 
+    /**
+     * Get an instance of {@link BackupRestoreEventLogger} to report B&R related events during an
+     * ongoing backup or restore operation.
+     *
+     * @param backupAgent the agent currently running a B&R operation.
+     *
+     * @return an instance of {@code BackupRestoreEventLogger} or {@code null} if the agent has not
+     *         finished initialisation, i.e. {@link BackupAgent#onCreate()} has not been called yet.
+     * @throws IllegalStateException if called before the agent has finished initialisation.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    public BackupRestoreEventLogger getBackupRestoreEventLogger(@NonNull BackupAgent backupAgent) {
+        BackupRestoreEventLogger logger = backupAgent.getBackupRestoreEventLogger();
+        if (logger == null) {
+            throw new IllegalStateException("Attempting to get logger on an uninitialised "
+                    + "BackupAgent");
+        }
+        return backupAgent.getBackupRestoreEventLogger();
+    }
+
     /*
      * We wrap incoming binder calls with a private class implementation that
      * redirects them into main-thread actions.  This serializes the backup

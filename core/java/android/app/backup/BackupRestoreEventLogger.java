@@ -18,6 +18,7 @@ package android.app.backup;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -35,7 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// TODO(b/244436184): Make this @SystemApi
 /**
  * Class to log B&R stats for each data type that is backed up and restored by the calling app.
  *
@@ -46,12 +46,15 @@ import java.util.Map;
  *
  * @hide
  */
+@SystemApi
 public class BackupRestoreEventLogger {
     private static final String TAG = "BackupRestoreEventLogger";
 
     /**
      * Max number of unique data types for which an instance of this logger can store info. Attempts
      * to use more distinct data type values will be rejected.
+     *
+     * @hide
      */
     public static final int DATA_TYPES_ALLOWED = 15;
 
@@ -301,7 +304,7 @@ public class BackupRestoreEventLogger {
     /**
      * Encapsulate logging results for a single data type.
      */
-    public static class DataTypeResult implements Parcelable {
+    public static final class DataTypeResult implements Parcelable {
         @BackupRestoreDataType
         private final String mDataType;
         private int mSuccessCount;
@@ -309,7 +312,7 @@ public class BackupRestoreEventLogger {
         private final Map<String, Integer> mErrors = new HashMap<>();
         private byte[] mMetadataHash;
 
-        public DataTypeResult(String dataType) {
+        public DataTypeResult(@NonNull String dataType) {
             mDataType = dataType;
         }
 
@@ -358,7 +361,7 @@ public class BackupRestoreEventLogger {
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeString(mDataType);
 
             dest.writeInt(mSuccessCount);
@@ -374,6 +377,7 @@ public class BackupRestoreEventLogger {
             dest.writeByteArray(mMetadataHash);
         }
 
+        @NonNull
         public static final Parcelable.Creator<DataTypeResult> CREATOR =
                 new Parcelable.Creator<>() {
                     public DataTypeResult createFromParcel(Parcel in) {

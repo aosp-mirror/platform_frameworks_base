@@ -1474,6 +1474,7 @@ package android.app.backup {
     method @RequiresPermission(android.Manifest.permission.BACKUP) public void cancelBackups();
     method @RequiresPermission(android.Manifest.permission.BACKUP) public void excludeKeysFromRestore(@NonNull String, @NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public long getAvailableRestoreToken(String);
+    method @NonNull public android.app.backup.BackupRestoreEventLogger getBackupRestoreEventLogger(@NonNull android.app.backup.BackupAgent);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public android.content.Intent getConfigurationIntent(String);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public String getCurrentTransport();
     method @Nullable @RequiresPermission(android.Manifest.permission.BACKUP) public android.content.ComponentName getCurrentTransportComponent();
@@ -1590,6 +1591,33 @@ package android.app.backup {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.backup.BackupProgress> CREATOR;
     field public final long bytesExpected;
     field public final long bytesTransferred;
+  }
+
+  public class BackupRestoreEventLogger {
+    method public void logBackupMetaData(@android.app.backup.BackupRestoreEventLogger.BackupRestoreDataType @NonNull String, @NonNull String);
+    method public void logItemsBackedUp(@android.app.backup.BackupRestoreEventLogger.BackupRestoreDataType @NonNull String, int);
+    method public void logItemsBackupFailed(@android.app.backup.BackupRestoreEventLogger.BackupRestoreDataType @NonNull String, int, @android.app.backup.BackupRestoreEventLogger.BackupRestoreError @Nullable String);
+    method public void logItemsRestoreFailed(@android.app.backup.BackupRestoreEventLogger.BackupRestoreDataType @NonNull String, int, @android.app.backup.BackupRestoreEventLogger.BackupRestoreError @Nullable String);
+    method public void logItemsRestored(@android.app.backup.BackupRestoreEventLogger.BackupRestoreDataType @NonNull String, int);
+    method public void logRestoreMetadata(@android.app.backup.BackupRestoreEventLogger.BackupRestoreDataType @NonNull String, @NonNull String);
+  }
+
+  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface BackupRestoreEventLogger.BackupRestoreDataType {
+  }
+
+  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface BackupRestoreEventLogger.BackupRestoreError {
+  }
+
+  public static final class BackupRestoreEventLogger.DataTypeResult implements android.os.Parcelable {
+    ctor public BackupRestoreEventLogger.DataTypeResult(@NonNull String);
+    method public int describeContents();
+    method @android.app.backup.BackupRestoreEventLogger.BackupRestoreDataType @NonNull public String getDataType();
+    method @NonNull public java.util.Map<java.lang.String,java.lang.Integer> getErrors();
+    method public int getFailCount();
+    method @Nullable public byte[] getMetadataHash();
+    method public int getSuccessCount();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.backup.BackupRestoreEventLogger.DataTypeResult> CREATOR;
   }
 
   public class BackupTransport {
