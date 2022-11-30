@@ -40,9 +40,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 final class AttributedOp {
-    private final @NonNull AppOpsService mAppOpsService;
+    private final @NonNull AppOpsServiceImpl mAppOpsService;
     public final @Nullable String tag;
-    public final @NonNull AppOpsService.Op parent;
+    public final @NonNull AppOpsServiceImpl.Op parent;
 
     /**
      * Last successful accesses (noteOp + finished startOp) for each uidState/opFlag combination
@@ -80,8 +80,8 @@ final class AttributedOp {
     // @GuardedBy("mAppOpsService")
     @Nullable ArrayMap<IBinder, InProgressStartOpEvent> mPausedInProgressEvents;
 
-    AttributedOp(@NonNull AppOpsService appOpsService, @Nullable String tag,
-            @NonNull AppOpsService.Op parent) {
+    AttributedOp(@NonNull AppOpsServiceImpl appOpsService, @Nullable String tag,
+                 @NonNull AppOpsServiceImpl.Op parent) {
         mAppOpsService = appOpsService;
         this.tag = tag;
         this.parent = parent;
@@ -131,8 +131,8 @@ final class AttributedOp {
 
         AppOpsManager.OpEventProxyInfo proxyInfo = null;
         if (proxyUid != Process.INVALID_UID) {
-            proxyInfo = mAppOpsService.mOpEventProxyInfoPool.acquire(proxyUid, proxyPackageName,
-                    proxyAttributionTag);
+            proxyInfo = mAppOpsService.mOpEventProxyInfoPool.acquire(proxyUid,
+                    proxyPackageName, proxyAttributionTag);
         }
 
         AppOpsManager.NoteOpEvent existingEvent = mAccessEvents.get(key);
@@ -238,7 +238,7 @@ final class AttributedOp {
         if (event == null) {
             event = mAppOpsService.mInProgressStartOpEventPool.acquire(startTime,
                     SystemClock.elapsedRealtime(), clientId, tag,
-                    PooledLambda.obtainRunnable(AppOpsService::onClientDeath, this, clientId),
+                    PooledLambda.obtainRunnable(AppOpsServiceImpl::onClientDeath, this, clientId),
                     proxyUid, proxyPackageName, proxyAttributionTag, uidState, flags,
                     attributionFlags, attributionChainId);
             events.put(clientId, event);
@@ -251,9 +251,9 @@ final class AttributedOp {
         event.mNumUnfinishedStarts++;
 
         if (isStarted) {
-            mAppOpsService.mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
-                    parent.packageName, tag, uidState, flags, startTime, attributionFlags,
-                    attributionChainId);
+            mAppOpsService.mHistoricalRegistry.incrementOpAccessedCount(parent.op,
+                    parent.uid, parent.packageName, tag, uidState, flags, startTime,
+                    attributionFlags, attributionChainId);
         }
     }
 
@@ -309,8 +309,8 @@ final class AttributedOp {
             mAccessEvents.put(makeKey(event.getUidState(), event.getFlags()),
                     finishedEvent);
 
-            mAppOpsService.mHistoricalRegistry.increaseOpAccessDuration(parent.op, parent.uid,
-                    parent.packageName, tag, event.getUidState(),
+            mAppOpsService.mHistoricalRegistry.increaseOpAccessDuration(parent.op,
+                    parent.uid, parent.packageName, tag, event.getUidState(),
                     event.getFlags(), finishedEvent.getNoteTime(), finishedEvent.getDuration(),
                     event.getAttributionFlags(), event.getAttributionChainId());
 
@@ -334,13 +334,13 @@ final class AttributedOp {
     @SuppressWarnings("GuardedBy") // Lock is held on mAppOpsService
     private void finishPossiblyPaused(@NonNull IBinder clientId, boolean isPausing) {
         if (!isPaused()) {
-            Slog.wtf(AppOpsService.TAG, "No ops running or paused");
+            Slog.wtf(AppOpsServiceImpl.TAG, "No ops running or paused");
             return;
         }
 
         int indexOfToken = mPausedInProgressEvents.indexOfKey(clientId);
         if (indexOfToken < 0) {
-            Slog.wtf(AppOpsService.TAG, "No op running or paused for the client");
+            Slog.wtf(AppOpsServiceImpl.TAG, "No op running or paused for the client");
             return;
         } else if (isPausing) {
             // already paused
@@ -416,9 +416,9 @@ final class AttributedOp {
             mInProgressEvents.put(event.getClientId(), event);
             event.setStartElapsedTime(SystemClock.elapsedRealtime());
             event.setStartTime(startTime);
-            mAppOpsService.mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
-                    parent.packageName, tag, event.getUidState(), event.getFlags(), startTime,
-                    event.getAttributionFlags(), event.getAttributionChainId());
+            mAppOpsService.mHistoricalRegistry.incrementOpAccessedCount(parent.op,
+                    parent.uid, parent.packageName, tag, event.getUidState(), event.getFlags(),
+                    startTime, event.getAttributionFlags(), event.getAttributionChainId());
             if (shouldSendActive) {
                 mAppOpsService.scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
                         parent.packageName, tag, true, event.getAttributionFlags(),
@@ -503,8 +503,8 @@ final class AttributedOp {
                         newEvent.mNumUnfinishedStarts += numPreviousUnfinishedStarts - 1;
                     }
                 } catch (RemoteException e) {
-                    if (AppOpsService.DEBUG) {
-                        Slog.e(AppOpsService.TAG,
+                    if (AppOpsServiceImpl.DEBUG) {
+                        Slog.e(AppOpsServiceImpl.TAG,
                                 "Cannot switch to new uidState " + newState);
                     }
                 }
@@ -555,8 +555,8 @@ final class AttributedOp {
             ArrayMap<IBinder, InProgressStartOpEvent> ignoredEvents =
                     opToAdd.isRunning()
                             ? opToAdd.mInProgressEvents : opToAdd.mPausedInProgressEvents;
-            Slog.w(AppOpsService.TAG, "Ignoring " + ignoredEvents.size() + " app-ops, running: "
-                    + opToAdd.isRunning());
+            Slog.w(AppOpsServiceImpl.TAG, "Ignoring " + ignoredEvents.size()
+                    + " app-ops, running: " + opToAdd.isRunning());
 
             int numInProgressEvents = ignoredEvents.size();
             for (int i = 0; i < numInProgressEvents; i++) {
@@ -668,16 +668,22 @@ final class AttributedOp {
         /**
          * Create a new {@link InProgressStartOpEvent}.
          *
-         * @param startTime          The time {@link #startOperation} was called
-         * @param startElapsedTime   The elapsed time when {@link #startOperation} was called
-         * @param clientId           The client id of the caller of {@link #startOperation}
+         * @param startTime          The time {@link AppOpCheckingServiceInterface#startOperation}
+         *                          was called
+         * @param startElapsedTime   The elapsed time whe
+         *                          {@link AppOpCheckingServiceInterface#startOperation} was called
+         * @param clientId           The client id of the caller of
+         *                          {@link AppOpCheckingServiceInterface#startOperation}
          * @param attributionTag     The attribution tag for the operation.
          * @param onDeath            The code to execute on client death
-         * @param uidState           The uidstate of the app {@link #startOperation} was called for
+         * @param uidState           The uidstate of the app
+         *                          {@link AppOpCheckingServiceInterface#startOperation} was called
+         *                          for
          * @param attributionFlags   the attribution flags for this operation.
          * @param attributionChainId the unique id of the attribution chain this op is a part of.
-         * @param proxy              The proxy information, if {@link #startProxyOperation} was
-         *                           called
+         * @param proxy              The proxy information, if
+         *                          {@link AppOpCheckingServiceInterface#startProxyOperation} was
+         *                          called
          * @param flags              The trusted/nontrusted/self flags.
          * @throws RemoteException If the client is dying
          */
@@ -718,15 +724,21 @@ final class AttributedOp {
         /**
          * Reinit existing object with new state.
          *
-         * @param startTime          The time {@link #startOperation} was called
-         * @param startElapsedTime   The elapsed time when {@link #startOperation} was called
-         * @param clientId           The client id of the caller of {@link #startOperation}
+         * @param startTime          The time {@link AppOpCheckingServiceInterface#startOperation}
+         *                          was called
+         * @param startElapsedTime   The elapsed time when
+         *                          {@link AppOpCheckingServiceInterface#startOperation} was called
+         * @param clientId           The client id of the caller of
+         *                          {@link AppOpCheckingServiceInterface#startOperation}
          * @param attributionTag     The attribution tag for this operation.
          * @param onDeath            The code to execute on client death
-         * @param uidState           The uidstate of the app {@link #startOperation} was called for
+         * @param uidState           The uidstate of the app
+         *                          {@link AppOpCheckingServiceInterface#startOperation} was called
+         *                          for
          * @param flags              The flags relating to the proxy
-         * @param proxy              The proxy information, if {@link #startProxyOperation}
-         *                           was called
+         * @param proxy              The proxy information, if
+         *                          {@link AppOpCheckingServiceInterface#startProxyOperation was
+         *                          called
          * @param attributionFlags   the attribution flags for this operation.
          * @param attributionChainId the unique id of the attribution chain this op is a part of.
          * @param proxyPool          The pool to release

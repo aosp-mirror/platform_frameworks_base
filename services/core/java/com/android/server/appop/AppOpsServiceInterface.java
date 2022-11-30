@@ -13,197 +13,482 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.server.appop;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
-import android.app.AppOpsManager.Mode;
-import android.util.ArraySet;
-import android.util.SparseBooleanArray;
+import android.app.ActivityManager;
+import android.app.AppOpsManager;
+import android.content.AttributionSource;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.os.PackageTagsList;
+import android.os.RemoteCallback;
+import android.os.RemoteException;
+import android.os.UserHandle;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 
+import com.android.internal.app.IAppOpsActiveCallback;
+import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.app.IAppOpsNotedCallback;
+import com.android.internal.app.IAppOpsStartedCallback;
+
+import dalvik.annotation.optimization.NeverCompile;
+
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
- * Interface for accessing and modifying modes for app-ops i.e. package and uid modes.
- * This interface also includes functions for added and removing op mode watchers.
- * In the future this interface will also include op restrictions.
+ *
  */
-public interface AppOpsServiceInterface {
-    /**
-     * Returns a copy of non-default app-ops with op as keys and their modes as values for a uid.
-     * Returns an empty SparseIntArray if nothing is set.
-     * @param uid for which we need the app-ops and their modes.
-     */
-    SparseIntArray getNonDefaultUidModes(int uid);
+public interface AppOpsServiceInterface extends PersistenceScheduler {
 
     /**
-     * Returns the app-op mode for a particular app-op of a uid.
-     * Returns default op mode if the op mode for particular uid and op is not set.
-     * @param uid user id for which we need the mode.
-     * @param op app-op for which we need the mode.
-     * @return mode of the app-op.
-     */
-    int getUidMode(int uid, int op);
-
-    /**
-     * Set the app-op mode for a particular uid and op.
-     * The mode is not set if the mode is the same as the default mode for the op.
-     * @param uid user id for which we want to set the mode.
-     * @param op app-op for which we want to set the mode.
-     * @param mode mode for the app-op.
-     * @return true if op mode is changed.
-     */
-    boolean setUidMode(int uid, int op, @Mode int mode);
-
-    /**
-     * Gets the app-op mode for a particular package.
-     * Returns default op mode if the op mode for the particular package is not set.
-     * @param packageName package name for which we need the op mode.
-     * @param op app-op for which we need the mode.
-     * @param userId user id associated with the package.
-     * @return the mode of the app-op.
-     */
-    int getPackageMode(@NonNull String packageName, int op, @UserIdInt int userId);
-
-    /**
-     * Sets the app-op mode for a particular package.
-     * @param packageName package name for which we need to set the op mode.
-     * @param op app-op for which we need to set the mode.
-     * @param mode the mode of the app-op.
-     * @param userId user id associated with the package.
      *
      */
-    void setPackageMode(@NonNull String packageName, int op, @Mode int mode, @UserIdInt int userId);
+    void systemReady();
 
     /**
-     * Stop tracking any app-op modes for a package.
-     * @param packageName Name of the package for which we want to remove all mode tracking.
-     * @param userId user id associated with the package.
+     *
      */
-    boolean removePackage(@NonNull String packageName,  @UserIdInt int userId);
+    void shutdown();
 
     /**
-     * Stop tracking any app-op modes for this uid.
-     * @param uid user id for which we want to remove all tracking.
+     *
+     * @param uid
+     * @param packageName
      */
-    void removeUid(int uid);
+    void verifyPackage(int uid, String packageName);
 
     /**
-     * Returns true if all uid modes for this uid are
-     * in default state.
-     * @param uid user id
+     *
+     * @param op
+     * @param packageName
+     * @param flags
+     * @param callback
      */
-    boolean areUidModesDefault(int uid);
+    void startWatchingModeWithFlags(int op, String packageName, int flags,
+            IAppOpsCallback callback);
 
     /**
-     * Returns true if all package modes for this package name are
-     * in default state.
-     * @param packageName package name.
-     * @param userId user id associated with the package.
+     *
+     * @param callback
      */
-    boolean arePackageModesDefault(String packageName, @UserIdInt int userId);
+    void stopWatchingMode(IAppOpsCallback callback);
 
     /**
-     * Stop tracking app-op modes for all uid and packages.
+     *
+     * @param ops
+     * @param callback
      */
-    void clearAllModes();
+    void startWatchingActive(int[] ops, IAppOpsActiveCallback callback);
 
     /**
-     * Registers changedListener to listen to op's mode change.
-     * @param changedListener the listener that must be trigger on the op's mode change.
-     * @param op op representing the app-op whose mode change needs to be listened to.
+     *
+     * @param callback
      */
-    void startWatchingOpModeChanged(@NonNull OnOpModeChangedListener changedListener, int op);
+    void stopWatchingActive(IAppOpsActiveCallback callback);
 
     /**
-     * Registers changedListener to listen to package's app-op's mode change.
-     * @param changedListener the listener that must be trigger on the mode change.
-     * @param packageName of the package whose app-op's mode change needs to be listened to.
+     *
+     * @param ops
+     * @param callback
      */
-    void startWatchingPackageModeChanged(@NonNull OnOpModeChangedListener changedListener,
-            @NonNull String packageName);
+    void startWatchingStarted(int[] ops, @NonNull IAppOpsStartedCallback callback);
 
     /**
-     * Stop the changedListener from triggering on any mode change.
-     * @param changedListener the listener that needs to be removed.
+     *
+     * @param callback
      */
-    void removeListener(@NonNull OnOpModeChangedListener changedListener);
+    void stopWatchingStarted(IAppOpsStartedCallback callback);
 
     /**
-     * Temporary API which will be removed once we can safely untangle the methods that use this.
-     * Returns a set of OnOpModeChangedListener that are listening for op's mode changes.
-     * @param op app-op whose mode change is being listened to.
+     *
+     * @param ops
+     * @param callback
      */
-    ArraySet<OnOpModeChangedListener> getOpModeChangedListeners(int op);
+    void startWatchingNoted(@NonNull int[] ops, @NonNull IAppOpsNotedCallback callback);
 
     /**
-     * Temporary API which will be removed once we can safely untangle the methods that use this.
-     * Returns a set of OnOpModeChangedListener that are listening for package's op's mode changes.
-     * @param packageName of package whose app-op's mode change is being listened to.
+     *
+     * @param callback
      */
-    ArraySet<OnOpModeChangedListener> getPackageModeChangedListeners(@NonNull String packageName);
+    void stopWatchingNoted(IAppOpsNotedCallback callback);
 
     /**
-     * Temporary API which will be removed once we can safely untangle the methods that use this.
-     * Notify that the app-op's mode is changed by triggering the change listener.
-     * @param op App-op whose mode has changed
-     * @param uid user id associated with the app-op (or, if UID_ANY, notifies all users)
+     * @param clientId
+     * @param code
+     * @param uid
+     * @param packageName
+     * @param attributionTag
+     * @param startIfModeDefault
+     * @param message
+     * @param attributionFlags
+     * @param attributionChainId
+     * @return
      */
-    void notifyWatchersOfChange(int op, int uid);
+    int startOperation(@NonNull IBinder clientId, int code, int uid,
+            @Nullable String packageName, @Nullable String attributionTag,
+            boolean startIfModeDefault, @NonNull String message,
+            @AppOpsManager.AttributionFlags int attributionFlags,
+            int attributionChainId);
+
+
+    int startOperationUnchecked(IBinder clientId, int code, int uid, @NonNull String packageName,
+            @Nullable String attributionTag, int proxyUid, String proxyPackageName,
+            @Nullable String proxyAttributionTag, @AppOpsManager.OpFlags int flags,
+            boolean startIfModeDefault, @AppOpsManager.AttributionFlags int attributionFlags,
+            int attributionChainId, boolean dryRun);
 
     /**
-     * Temporary API which will be removed once we can safely untangle the methods that use this.
-     * Notify that the app-op's mode is changed by triggering the change listener.
-     * @param changedListener the change listener.
-     * @param op App-op whose mode has changed
-     * @param uid user id associated with the app-op
-     * @param packageName package name that is associated with the app-op
+     *
+     * @param clientId
+     * @param code
+     * @param uid
+     * @param packageName
+     * @param attributionTag
      */
-    void notifyOpChanged(@NonNull OnOpModeChangedListener changedListener, int op, int uid,
-            @Nullable String packageName);
+    void finishOperation(IBinder clientId, int code, int uid, String packageName,
+            String attributionTag);
 
     /**
-     * Temporary API which will be removed once we can safely untangle the methods that use this.
-     * Notify that the app-op's mode is changed to all packages associated with the uid by
-     * triggering the appropriate change listener.
-     * @param op App-op whose mode has changed
-     * @param uid user id associated with the app-op
-     * @param onlyForeground true if only watchers that
-     * @param callbackToIgnore callback that should be ignored.
+     *
+     * @param clientId
+     * @param code
+     * @param uid
+     * @param packageName
+     * @param attributionTag
      */
-    void notifyOpChangedForAllPkgsInUid(int op, int uid, boolean onlyForeground,
-            @Nullable OnOpModeChangedListener callbackToIgnore);
+    void finishOperationUnchecked(IBinder clientId, int code, int uid, String packageName,
+            String attributionTag);
 
     /**
-     * TODO: Move hasForegroundWatchers and foregroundOps into this.
-     * Go over the list of app-ops for the uid and mark app-ops with MODE_FOREGROUND in
-     * foregroundOps.
-     * @param uid for which the app-op's mode needs to be marked.
-     * @param foregroundOps boolean array where app-ops that have MODE_FOREGROUND are marked true.
-     * @return  foregroundOps.
+     *
+     * @param uidPackageNames
+     * @param visible
      */
-    SparseBooleanArray evalForegroundUidOps(int uid, SparseBooleanArray foregroundOps);
+    void updateAppWidgetVisibility(SparseArray<String> uidPackageNames, boolean visible);
 
     /**
-     * Go over the list of app-ops for the package name and mark app-ops with MODE_FOREGROUND in
-     * foregroundOps.
-     * @param packageName for which the app-op's mode needs to be marked.
-     * @param foregroundOps boolean array where app-ops that have MODE_FOREGROUND are marked true.
-     * @param userId user id associated with the package.
-     * @return foregroundOps.
+     *
      */
-    SparseBooleanArray evalForegroundPackageOps(String packageName,
-            SparseBooleanArray foregroundOps, @UserIdInt int userId);
+    void readState();
 
     /**
-     * Dump op mode and package mode listeners and their details.
-     * @param dumpOp if -1 then op mode listeners for all app-ops are dumped. If it's set to an
-     *               app-op, only the watchers for that app-op are dumped.
-     * @param dumpUid uid for which we want to dump op mode watchers.
-     * @param dumpPackage if not null and if dumpOp is -1, dumps watchers for the package name.
-     * @param printWriter writer to dump to.
+     *
      */
-    boolean dumpListeners(int dumpOp, int dumpUid, String dumpPackage, PrintWriter printWriter);
+    void writeState();
+
+    /**
+     *
+     * @param uid
+     * @param packageName
+     */
+    void packageRemoved(int uid, String packageName);
+
+    /**
+     *
+     * @param uid
+     */
+    void uidRemoved(int uid);
+
+    /**
+     *
+     * @param uid
+     * @param procState
+     * @param capability
+     */
+    void updateUidProcState(int uid, int procState,
+            @ActivityManager.ProcessCapability int capability);
+
+    /**
+     *
+     * @param ops
+     * @return
+     */
+    List<AppOpsManager.PackageOps> getPackagesForOps(int[] ops);
+
+    /**
+     *
+     * @param uid
+     * @param packageName
+     * @param ops
+     * @return
+     */
+    List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName,
+            int[] ops);
+
+    /**
+     *
+     * @param uid
+     * @param packageName
+     * @param attributionTag
+     * @param opNames
+     * @param dataType
+     * @param filter
+     * @param beginTimeMillis
+     * @param endTimeMillis
+     * @param flags
+     * @param callback
+     */
+    void getHistoricalOps(int uid, String packageName, String attributionTag,
+            List<String> opNames, int dataType, int filter, long beginTimeMillis,
+            long endTimeMillis, int flags, RemoteCallback callback);
+
+    /**
+     *
+     * @param uid
+     * @param packageName
+     * @param attributionTag
+     * @param opNames
+     * @param dataType
+     * @param filter
+     * @param beginTimeMillis
+     * @param endTimeMillis
+     * @param flags
+     * @param callback
+     */
+    void getHistoricalOpsFromDiskRaw(int uid, String packageName, String attributionTag,
+            List<String> opNames, int dataType, int filter, long beginTimeMillis,
+            long endTimeMillis, int flags, RemoteCallback callback);
+
+    /**
+     *
+     */
+    void reloadNonHistoricalState();
+
+    /**
+     *
+     * @param uid
+     * @param ops
+     * @return
+     */
+    List<AppOpsManager.PackageOps> getUidOps(int uid, int[] ops);
+
+    /**
+     *
+     * @param owners
+     */
+    void setDeviceAndProfileOwners(SparseIntArray owners);
+
+    // used in audio restriction calls, might just copy the logic to avoid having this call.
+    /**
+     *
+     * @param callingPid
+     * @param callingUid
+     * @param targetUid
+     */
+    void enforceManageAppOpsModes(int callingPid, int callingUid, int targetUid);
+
+    /**
+     *
+     * @param code
+     * @param uid
+     * @param mode
+     * @param permissionPolicyCallback
+     */
+    void setUidMode(int code, int uid, int mode,
+            @Nullable IAppOpsCallback permissionPolicyCallback);
+
+    /**
+     *
+     * @param code
+     * @param uid
+     * @param packageName
+     * @param mode
+     * @param permissionPolicyCallback
+     */
+    void setMode(int code, int uid, @NonNull String packageName, int mode,
+            @Nullable IAppOpsCallback permissionPolicyCallback);
+
+    /**
+     *
+     * @param reqUserId
+     * @param reqPackageName
+     */
+    void resetAllModes(int reqUserId, String reqPackageName);
+
+    /**
+     *
+     * @param code
+     * @param uid
+     * @param packageName
+     * @param attributionTag
+     * @param raw
+     * @return
+     */
+    int checkOperation(int code, int uid, String packageName,
+            @Nullable String attributionTag, boolean raw);
+
+    /**
+     *
+     * @param uid
+     * @param packageName
+     * @return
+     */
+    int checkPackage(int uid, String packageName);
+
+    /**
+     *
+     * @param code
+     * @param uid
+     * @param packageName
+     * @param attributionTag
+     * @param message
+     * @return
+     */
+    int noteOperation(int code, int uid, @Nullable String packageName,
+            @Nullable String attributionTag, @Nullable String message);
+
+    /**
+     *
+     * @param code
+     * @param uid
+     * @param packageName
+     * @param attributionTag
+     * @param proxyUid
+     * @param proxyPackageName
+     * @param proxyAttributionTag
+     * @param flags
+     * @return
+     */
+    @AppOpsManager.Mode
+    int noteOperationUnchecked(int code, int uid, @NonNull String packageName,
+            @Nullable String attributionTag, int proxyUid, String proxyPackageName,
+            @Nullable String proxyAttributionTag, @AppOpsManager.OpFlags int flags);
+
+    boolean isAttributionTagValid(int uid, @NonNull String packageName,
+            @Nullable String attributionTag, @Nullable String proxyPackageName);
+
+    /**
+     *
+     * @param fd
+     * @param pw
+     * @param args
+     */
+    @NeverCompile
+        // Avoid size overhead of debugging code.
+    void dump(FileDescriptor fd, PrintWriter pw, String[] args);
+
+    /**
+     *
+     * @param restrictions
+     * @param token
+     * @param userHandle
+     */
+    void setUserRestrictions(Bundle restrictions, IBinder token, int userHandle);
+
+    /**
+     *
+     * @param code
+     * @param restricted
+     * @param token
+     * @param userHandle
+     * @param excludedPackageTags
+     */
+    void setUserRestriction(int code, boolean restricted, IBinder token, int userHandle,
+            PackageTagsList excludedPackageTags);
+
+    /**
+     *
+     * @param code
+     * @param restricted
+     * @param token
+     */
+    void setGlobalRestriction(int code, boolean restricted, IBinder token);
+
+    /**
+     *
+     * @param code
+     * @param user
+     * @param pkg
+     * @param attributionTag
+     * @return
+     */
+    int getOpRestrictionCount(int code, UserHandle user, String pkg,
+            String attributionTag);
+
+    /**
+     *
+     * @param code
+     * @param uid
+     */
+    // added to interface for audio restriction stuff
+    void notifyWatchersOfChange(int code, int uid);
+
+    /**
+     *
+     * @param userHandle
+     * @throws RemoteException
+     */
+    void removeUser(int userHandle) throws RemoteException;
+
+    /**
+     *
+     * @param code
+     * @param uid
+     * @param packageName
+     * @return
+     */
+    boolean isOperationActive(int code, int uid, String packageName);
+
+    /**
+     *
+     * @param op
+     * @param proxyPackageName
+     * @param proxyAttributionTag
+     * @param proxiedUid
+     * @param proxiedPackageName
+     * @return
+     */
+    // TODO this one might not need to be in the interface
+    boolean isProxying(int op, @NonNull String proxyPackageName,
+            @NonNull String proxyAttributionTag, int proxiedUid,
+            @NonNull String proxiedPackageName);
+
+    /**
+     *
+     * @param packageName
+     */
+    void resetPackageOpsNoHistory(@NonNull String packageName);
+
+    /**
+     *
+     * @param mode
+     * @param baseSnapshotInterval
+     * @param compressionStep
+     */
+    void setHistoryParameters(@AppOpsManager.HistoricalMode int mode,
+            long baseSnapshotInterval, int compressionStep);
+
+    /**
+     *
+     * @param offsetMillis
+     */
+    void offsetHistory(long offsetMillis);
+
+    /**
+     *
+     * @param ops
+     */
+    void addHistoricalOps(AppOpsManager.HistoricalOps ops);
+
+    /**
+     *
+     */
+    void resetHistoryParameters();
+
+    /**
+     *
+     */
+    void clearHistory();
+
+    /**
+     *
+     * @param offlineDurationMillis
+     */
+    void rebootHistory(long offlineDurationMillis);
 }

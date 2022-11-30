@@ -22,6 +22,8 @@ import static android.app.AppOpsManager.OP_FLAGS_ALL;
 import static android.app.AppOpsManager.OP_READ_SMS;
 import static android.app.AppOpsManager.OP_WIFI_SCAN;
 import static android.app.AppOpsManager.OP_WRITE_SMS;
+import static android.app.AppOpsManager.resolvePackageName;
+import static android.os.Process.INVALID_UID;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -39,6 +41,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 
+import android.app.AppOpsManager;
 import android.app.AppOpsManager.OpEntry;
 import android.app.AppOpsManager.PackageOps;
 import android.content.ContentResolver;
@@ -86,13 +89,13 @@ public class AppOpsServiceTest {
 
     private File mAppOpsFile;
     private Handler mHandler;
-    private AppOpsService mAppOpsService;
+    private AppOpsServiceImpl mAppOpsService;
     private int mMyUid;
     private long mTestStartMillis;
     private StaticMockitoSession mMockingSession;
 
     private void setupAppOpsService() {
-        mAppOpsService = new AppOpsService(mAppOpsFile, mHandler, spy(sContext));
+        mAppOpsService = new AppOpsServiceImpl(mAppOpsFile, mHandler, spy(sContext));
         mAppOpsService.mHistoricalRegistry.systemReady(sContext.getContentResolver());
 
         // Always approve all permission checks
@@ -161,17 +164,20 @@ public class AppOpsServiceTest {
 
     @Test
     public void testNoteOperationAndGetOpsForPackage() {
-        mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
-        mAppOpsService.setMode(OP_WRITE_SMS, mMyUid, sMyPackageName, MODE_ERRORED);
+        mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED, null);
+        mAppOpsService.setMode(OP_WRITE_SMS, mMyUid, sMyPackageName, MODE_ERRORED, null);
 
         // Note an op that's allowed.
-        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
+        mAppOpsService.noteOperationUnchecked(OP_READ_SMS, mMyUid,
+                resolvePackageName(mMyUid, sMyPackageName), null,
+                INVALID_UID, null, null, AppOpsManager.OP_FLAG_SELF);
         List<PackageOps> loggedOps = getLoggedOps();
         assertContainsOp(loggedOps, OP_READ_SMS, mTestStartMillis, -1, MODE_ALLOWED);
 
         // Note another op that's not allowed.
-        mAppOpsService.noteOperation(OP_WRITE_SMS, mMyUid, sMyPackageName, null, false, null,
-                false);
+        mAppOpsService.noteOperationUnchecked(OP_WRITE_SMS, mMyUid,
+                resolvePackageName(mMyUid, sMyPackageName), null,
+                INVALID_UID, null, null, AppOpsManager.OP_FLAG_SELF);
         loggedOps = getLoggedOps();
         assertContainsOp(loggedOps, OP_READ_SMS, mTestStartMillis, -1, MODE_ALLOWED);
         assertContainsOp(loggedOps, OP_WRITE_SMS, -1, mTestStartMillis, MODE_ERRORED);
@@ -185,18 +191,20 @@ public class AppOpsServiceTest {
     @Test
     public void testNoteOperationAndGetOpsForPackage_controlledByDifferentOp() {
         // This op controls WIFI_SCAN
-        mAppOpsService.setMode(OP_COARSE_LOCATION, mMyUid, sMyPackageName, MODE_ALLOWED);
+        mAppOpsService.setMode(OP_COARSE_LOCATION, mMyUid, sMyPackageName, MODE_ALLOWED, null);
 
-        assertThat(mAppOpsService.noteOperation(OP_WIFI_SCAN, mMyUid, sMyPackageName, null, false,
-                null, false).getOpMode()).isEqualTo(MODE_ALLOWED);
+        assertThat(mAppOpsService.noteOperationUnchecked(OP_WIFI_SCAN, mMyUid,
+                resolvePackageName(mMyUid, sMyPackageName), null,
+                INVALID_UID, null, null, AppOpsManager.OP_FLAG_SELF)).isEqualTo(MODE_ALLOWED);
 
         assertContainsOp(getLoggedOps(), OP_WIFI_SCAN, mTestStartMillis, -1,
                 MODE_ALLOWED /* default for WIFI_SCAN; this is not changed or used in this test */);
 
         // Now set COARSE_LOCATION to ERRORED -> this will make WIFI_SCAN disabled as well.
-        mAppOpsService.setMode(OP_COARSE_LOCATION, mMyUid, sMyPackageName, MODE_ERRORED);
-        assertThat(mAppOpsService.noteOperation(OP_WIFI_SCAN, mMyUid, sMyPackageName, null, false,
-                null, false).getOpMode()).isEqualTo(MODE_ERRORED);
+        mAppOpsService.setMode(OP_COARSE_LOCATION, mMyUid, sMyPackageName, MODE_ERRORED, null);
+        assertThat(mAppOpsService.noteOperationUnchecked(OP_WIFI_SCAN, mMyUid,
+                resolvePackageName(mMyUid, sMyPackageName), null,
+                INVALID_UID, null, null, AppOpsManager.OP_FLAG_SELF)).isEqualTo(MODE_ERRORED);
 
         assertContainsOp(getLoggedOps(), OP_WIFI_SCAN, mTestStartMillis, mTestStartMillis,
                 MODE_ALLOWED /* default for WIFI_SCAN; this is not changed or used in this test */);
@@ -205,11 +213,14 @@ public class AppOpsServiceTest {
     // Tests the dumping and restoring of the in-memory state to/from XML.
     @Test
     public void testStatePersistence() {
-        mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
-        mAppOpsService.setMode(OP_WRITE_SMS, mMyUid, sMyPackageName, MODE_ERRORED);
-        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
-        mAppOpsService.noteOperation(OP_WRITE_SMS, mMyUid, sMyPackageName, null, false, null,
-                false);
+        mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED, null);
+        mAppOpsService.setMode(OP_WRITE_SMS, mMyUid, sMyPackageName, MODE_ERRORED, null);
+        mAppOpsService.noteOperationUnchecked(OP_READ_SMS, mMyUid,
+                resolvePackageName(mMyUid, sMyPackageName), null,
+                INVALID_UID, null, null, AppOpsManager.OP_FLAG_SELF);
+        mAppOpsService.noteOperationUnchecked(OP_WRITE_SMS, mMyUid,
+                resolvePackageName(mMyUid, sMyPackageName), null,
+                INVALID_UID, null, null, AppOpsManager.OP_FLAG_SELF);
         mAppOpsService.writeState();
 
         // Create a new app ops service which will initialize its state from XML.
@@ -224,8 +235,10 @@ public class AppOpsServiceTest {
     // Tests that ops are persisted during shutdown.
     @Test
     public void testShutdown() {
-        mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
-        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
+        mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED, null);
+        mAppOpsService.noteOperationUnchecked(OP_READ_SMS, mMyUid,
+                resolvePackageName(mMyUid, sMyPackageName), null,
+                INVALID_UID, null, null, AppOpsManager.OP_FLAG_SELF);
         mAppOpsService.shutdown();
 
         // Create a new app ops service which will initialize its state from XML.
@@ -238,8 +251,10 @@ public class AppOpsServiceTest {
 
     @Test
     public void testGetOpsForPackage() {
-        mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
-        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
+        mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED, null);
+        mAppOpsService.noteOperationUnchecked(OP_READ_SMS, mMyUid,
+                resolvePackageName(mMyUid, sMyPackageName), null,
+                INVALID_UID, null, null, AppOpsManager.OP_FLAG_SELF);
 
         // Query all ops
         List<PackageOps> loggedOps = mAppOpsService.getOpsForPackage(
@@ -267,8 +282,10 @@ public class AppOpsServiceTest {
 
     @Test
     public void testPackageRemoved() {
-        mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
-        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
+        mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED, null);
+        mAppOpsService.noteOperationUnchecked(OP_READ_SMS, mMyUid,
+                resolvePackageName(mMyUid, sMyPackageName), null,
+                INVALID_UID, null, null, AppOpsManager.OP_FLAG_SELF);
 
         List<PackageOps> loggedOps = getLoggedOps();
         assertContainsOp(loggedOps, OP_READ_SMS, mTestStartMillis, -1, MODE_ALLOWED);
@@ -322,8 +339,10 @@ public class AppOpsServiceTest {
 
     @Test
     public void testUidRemoved() {
-        mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
-        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
+        mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED, null);
+        mAppOpsService.noteOperationUnchecked(OP_READ_SMS, mMyUid,
+                resolvePackageName(mMyUid, sMyPackageName), null,
+                INVALID_UID, null, null, AppOpsManager.OP_FLAG_SELF);
 
         List<PackageOps> loggedOps = getLoggedOps();
         assertContainsOp(loggedOps, OP_READ_SMS, mTestStartMillis, -1, MODE_ALLOWED);
