@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Remover do armazenamento"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"A app pode não funcionar com o ecrã dividido."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"A app não é compatível com o ecrã dividido."</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5242868470666346929) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Esta app só pode ser aberta em 1 janela."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"A app pode não funcionar num ecrã secundário."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"A app não é compatível com o início em ecrãs secundários."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Divisor do ecrã dividido"</string>
