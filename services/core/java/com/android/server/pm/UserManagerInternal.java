@@ -441,4 +441,12 @@ public abstract class UserManagerInternal {
     /** Return the integer types of the given user IDs. Only used for reporting metrics to statsd.
      */
     public abstract int[] getUserTypesForStatsd(@UserIdInt int[] userIds);
+
+    /**
+     * Returns the user id of the main user, or {@link android.os.UserHandle#USER_NULL} if there is
+     * no main user.
+     *
+     * @see UserManager#isMainUser()
+     */
+    public abstract @UserIdInt int getMainUserId();
 }
