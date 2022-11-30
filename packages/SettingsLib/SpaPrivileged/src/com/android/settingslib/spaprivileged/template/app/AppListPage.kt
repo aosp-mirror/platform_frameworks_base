@@ -47,7 +47,23 @@ fun <T : AppRecord> AppListPage(
     primaryUserOnly: Boolean = false,
     moreOptions: @Composable MoreOptionsScope.() -> Unit = {},
     header: @Composable () -> Unit = {},
-    appItem: @Composable (itemState: AppListItemModel<T>) -> Unit,
+    appItem: @Composable AppListItemModel<T>.() -> Unit,
+) {
+    AppListPageImpl(
+        title, listModel, showInstantApps, primaryUserOnly, moreOptions, header, appItem,
+    ) { it.AppList() }
+}
+
+@Composable
+internal fun <T : AppRecord> AppListPageImpl(
+    title: String,
+    listModel: AppListModel<T>,
+    showInstantApps: Boolean = false,
+    primaryUserOnly: Boolean = false,
+    moreOptions: @Composable MoreOptionsScope.() -> Unit = {},
+    header: @Composable () -> Unit = {},
+    appItem: @Composable AppListItemModel<T>.() -> Unit,
+    appList: @Composable (input: AppListInput<T>) -> Unit,
 ) {
     val showSystem = rememberSaveable { mutableStateOf(false) }
     SearchScaffold(
@@ -64,7 +80,7 @@ fun <T : AppRecord> AppListPage(
                 val options = remember { listModel.getSpinnerOptions() }
                 val selectedOption = rememberSaveable { mutableStateOf(0) }
                 Spinner(options, selectedOption.value) { selectedOption.value = it }
-                AppList(
+                val appListInput = AppListInput(
                     config = AppListConfig(
                         userId = userInfo.id,
                         showInstantApps = showInstantApps,
@@ -79,6 +95,7 @@ fun <T : AppRecord> AppListPage(
                     appItem = appItem,
                     bottomPadding = bottomPadding,
                 )
+                appList(appListInput)
             }
         }
     }

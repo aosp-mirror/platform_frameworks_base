@@ -91,12 +91,11 @@ internal class TogglePermissionAppListPageProvider(
         AppListPage(
             title = stringResource(listModel.pageTitleResId),
             listModel = internalListModel,
-        ) { itemModel ->
+        ) {
             AppListItem(
-                itemModel = itemModel,
                 onClick = TogglePermissionAppInfoPageProvider.navigator(
                     permissionType = permissionType,
-                    app = itemModel.record.app,
+                    app = record.app,
                 ),
             )
         }

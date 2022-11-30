@@ -40,8 +40,7 @@ import org.mockito.Mockito.`when` as whenever
 
 @RunWith(AndroidJUnit4::class)
 class PackageManagerExtTest {
-    @JvmField
-    @Rule
+    @get:Rule
     val mockito: MockitoRule = MockitoJUnit.rule()
 
     @Mock
