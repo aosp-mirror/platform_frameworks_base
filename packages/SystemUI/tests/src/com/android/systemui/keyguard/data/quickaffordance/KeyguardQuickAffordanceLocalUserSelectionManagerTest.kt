@@ -52,11 +52,11 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
-class KeyguardQuickAffordanceSelectionManagerTest : SysuiTestCase() {
+class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
 
     @Mock private lateinit var userFileManager: UserFileManager
 
-    private lateinit var underTest: KeyguardQuickAffordanceSelectionManager
+    private lateinit var underTest: KeyguardQuickAffordanceLocalUserSelectionManager
 
     private lateinit var userTracker: FakeUserTracker
     private lateinit var sharedPrefs: MutableMap<Int, SharedPreferences>
@@ -74,7 +74,7 @@ class KeyguardQuickAffordanceSelectionManagerTest : SysuiTestCase() {
         Dispatchers.setMain(dispatcher)
 
         underTest =
-            KeyguardQuickAffordanceSelectionManager(
+            KeyguardQuickAffordanceLocalUserSelectionManager(
                 context = context,
                 userFileManager = userFileManager,
                 userTracker = userTracker,
