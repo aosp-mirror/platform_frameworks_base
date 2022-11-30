@@ -234,13 +234,13 @@ public class DesktopModeControllerTest extends ShellTestCase {
 
     @Test
     public void testShowDesktopApps() {
-        // Set up two active tasks on desktop
+        // Set up two active tasks on desktop, task2 is on top of task1.
         RunningTaskInfo freeformTask1 = createFreeformTask();
-        freeformTask1.lastActiveTime = 100;
-        RunningTaskInfo freeformTask2 = createFreeformTask();
-        freeformTask2.lastActiveTime = 200;
         mDesktopModeTaskRepository.addActiveTask(freeformTask1.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(freeformTask1.taskId);
+        RunningTaskInfo freeformTask2 = createFreeformTask();
         mDesktopModeTaskRepository.addActiveTask(freeformTask2.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(freeformTask2.taskId);
         when(mShellTaskOrganizer.getRunningTaskInfo(freeformTask1.taskId)).thenReturn(
                 freeformTask1);
         when(mShellTaskOrganizer.getRunningTaskInfo(freeformTask2.taskId)).thenReturn(
@@ -260,15 +260,15 @@ public class DesktopModeControllerTest extends ShellTestCase {
         // Check wct has reorder calls
         assertThat(wct.getHierarchyOps()).hasSize(2);
 
-        // Task 2 has activity later, must be first
+        // Task 1 appeared first, must be first reorder to top.
         WindowContainerTransaction.HierarchyOp op1 = wct.getHierarchyOps().get(0);
         assertThat(op1.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
-        assertThat(op1.getContainer()).isEqualTo(freeformTask2.token.asBinder());
+        assertThat(op1.getContainer()).isEqualTo(freeformTask1.token.asBinder());
 
-        // Task 1 should be second
+        // Task 2 appeared last, must be last reorder to top.
         WindowContainerTransaction.HierarchyOp op2 = wct.getHierarchyOps().get(1);
         assertThat(op2.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
-        assertThat(op2.getContainer()).isEqualTo(freeformTask1.token.asBinder());
+        assertThat(op2.getContainer()).isEqualTo(freeformTask2.token.asBinder());
     }
 
     @Test

@@ -64,6 +64,7 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -267,9 +268,12 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
                 taskInfos.add(taskInfo);
             }
         }
-        // Order by lastActiveTime, descending
-        taskInfos.sort(Comparator.comparingLong(task -> -task.lastActiveTime));
-        WindowContainerTransaction wct = new WindowContainerTransaction();
+        final List<Integer> allTasksInZOrder =
+                mDesktopModeTaskRepository.getFreeformTasksInZOrder();
+        // Sort by z-order, bottom to top, so that the top-most task is reordered to the top last
+        // in the WCT.
+        taskInfos.sort(Comparator.comparingInt(task -> -allTasksInZOrder.indexOf(task.taskId)));
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
         for (RunningTaskInfo task : taskInfos) {
             wct.reorder(task.token, true);
         }
