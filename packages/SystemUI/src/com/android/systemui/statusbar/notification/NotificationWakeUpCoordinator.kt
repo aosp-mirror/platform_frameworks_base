@@ -38,6 +38,7 @@ import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.min
 
+
 @SysUISingleton
 class NotificationWakeUpCoordinator @Inject constructor(
     dumpManager: DumpManager,
@@ -45,7 +46,8 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private val statusBarStateController: StatusBarStateController,
     private val bypassController: KeyguardBypassController,
     private val dozeParameters: DozeParameters,
-    private val screenOffAnimationController: ScreenOffAnimationController
+    private val screenOffAnimationController: ScreenOffAnimationController,
+    private val logger: NotificationWakeUpCoordinatorLogger,
 ) : OnHeadsUpChangedListener, StatusBarStateController.StateListener, ShadeExpansionListener,
     Dumpable {
 
@@ -242,6 +244,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     override fun onDozeAmountChanged(linear: Float, eased: Float) {
+        logger.logOnDozeAmountChanged(linear, eased)
         if (overrideDozeAmountIfAnimatingScreenOff(linear)) {
             return
         }
@@ -273,6 +276,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     override fun onStateChanged(newState: Int) {
+        logger.logOnStateChanged(newState)
         if (state == StatusBarState.SHADE && newState == StatusBarState.SHADE) {
             // The SHADE -> SHADE transition is only possible as part of cancelling the screen-off
             // animation (e.g. by fingerprint unlock).  This is done because the system is in an
@@ -320,8 +324,12 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private fun overrideDozeAmountIfBypass(): Boolean {
         if (bypassController.bypassEnabled) {
             if (statusBarStateController.state == StatusBarState.KEYGUARD) {
+                logger.logSetDozeAmount("1.0", "1.0",
+                        "Override: bypass (keyguard)", StatusBarState.KEYGUARD)
                 setDozeAmount(1f, 1f, source = "Override: bypass (keyguard)")
             } else {
+                logger.logSetDozeAmount("0.0", "0.0",
+                        "Override: bypass (shade)", statusBarStateController.state)
                 setDozeAmount(0f, 0f, source = "Override: bypass (shade)")
             }
             return true
