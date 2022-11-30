@@ -199,9 +199,14 @@ final class InputMethodUtils {
     }
 
     /**
-     * Utility class for putting and getting settings for InputMethod
+     * Utility class for putting and getting settings for InputMethod.
+     *
+     * This is used in two ways:
+     * - Singleton instance in {@link InputMethodManagerService}, which is updated on user-switch to
+     * follow the current user.
+     * - On-demand instances when we need settings for non-current users.
+     *
      * TODO: Move all putters and getters of settings to this class.
-     * TODO(b/235661780): Make the setting supports multi-users.
      */
     @UserHandleAware
     public static class InputMethodSettings {
