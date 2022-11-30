@@ -92,6 +92,7 @@ object Flags {
         unreleasedFlag(259217907, "notification_group_dismissal_animation", teamfood = true)
 
     // TODO(b/257506350): Tracking Bug
+    @JvmField
     val FSI_CHROME = unreleasedFlag(117, "fsi_chrome")
 
     @JvmField
