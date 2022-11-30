@@ -39,6 +39,8 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Slog;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.fuelgauge.Estimate;
 import com.android.settingslib.utils.ThreadUtils;
@@ -47,6 +49,7 @@ import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
@@ -80,6 +83,7 @@ public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
     private final PowerManager mPowerManager;
     private final WarningsUI mWarnings;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
+    private final UserTracker mUserTracker;
     private InattentiveSleepWarningView mOverlayView;
     private final Configuration mLastConfiguration = new Configuration();
     private int mPlugType = 0;
@@ -122,12 +126,21 @@ public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
                 }
             };
 
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    mWarnings.userSwitched();
+                }
+            };
+
     @Inject
     public PowerUI(Context context, BroadcastDispatcher broadcastDispatcher,
             CommandQueue commandQueue, Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             WarningsUI warningsUI, EnhancedEstimates enhancedEstimates,
             WakefulnessLifecycle wakefulnessLifecycle,
-            PowerManager powerManager) {
+            PowerManager powerManager,
+            UserTracker userTracker) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
@@ -136,6 +149,7 @@ public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
         mEnhancedEstimates = enhancedEstimates;
         mPowerManager = powerManager;
         mWakefulnessLifecycle = wakefulnessLifecycle;
+        mUserTracker = userTracker;
     }
 
     public void start() {
@@ -154,6 +168,7 @@ public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
                 false, obs, UserHandle.USER_ALL);
         updateBatteryWarningLevels();
         mReceiver.init();
+        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());
         mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
 
         // Check to see if we need to let the user know that the phone previously shut down due
@@ -250,7 +265,6 @@ public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
             IntentFilter filter = new IntentFilter();
             filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
             filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-            filter.addAction(Intent.ACTION_USER_SWITCHED);
             mBroadcastDispatcher.registerReceiverWithHandler(this, filter, mHandler);
             // Force get initial values. Relying on Sticky behavior until API for getting info.
             if (!mHasReceivedBattery) {
@@ -332,8 +346,6 @@ public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
                             plugged, bucket);
                 });
 
-            } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                mWarnings.userSwitched();
             } else {
                 Slog.w(TAG, "unknown intent: " + intent);
             }
