@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotSame;
 
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 import android.view.WindowManager;
@@ -30,6 +31,8 @@ import androidx.test.filters.SmallTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Locale;
+
 /**
  * Class for testing {@link AccessibilityWindowAttributes}.
  */
@@ -37,11 +40,13 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityWindowAttributesTest {
     private static final String TEST_WINDOW_TITLE = "test window title";
+    private static final LocaleList TEST_LOCALES = new LocaleList(Locale.ROOT);
 
     @SmallTest
     @Test
     public void testParceling() {
-        final AccessibilityWindowAttributes windowAttributes = createInstance(TEST_WINDOW_TITLE);
+        final AccessibilityWindowAttributes windowAttributes = createInstance(
+                TEST_WINDOW_TITLE, TEST_LOCALES);
         Parcel parcel = Parcel.obtain();
         windowAttributes.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);
@@ -56,14 +61,21 @@ public class AccessibilityWindowAttributesTest {
     @SmallTest
     @Test
     public void testNonequality() {
-        final AccessibilityWindowAttributes windowAttributes = createInstance(null);
-        final AccessibilityWindowAttributes windowAttributes2 = createInstance(TEST_WINDOW_TITLE);
+        final AccessibilityWindowAttributes windowAttributes = createInstance(
+                null, TEST_LOCALES);
+        final AccessibilityWindowAttributes windowAttributes1 = createInstance(
+                TEST_WINDOW_TITLE, TEST_LOCALES);
+        final AccessibilityWindowAttributes windowAttributes2 = createInstance(
+                TEST_WINDOW_TITLE, null);
+        assertNotEquals(windowAttributes, windowAttributes1);
         assertNotEquals(windowAttributes, windowAttributes2);
+        assertNotEquals(windowAttributes1, windowAttributes2);
     }
 
-    private static AccessibilityWindowAttributes createInstance(String windowTitle) {
+    private static AccessibilityWindowAttributes createInstance(
+            String windowTitle, LocaleList locales) {
         final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
         layoutParams.accessibilityTitle = windowTitle;
-        return new AccessibilityWindowAttributes(layoutParams);
+        return new AccessibilityWindowAttributes(layoutParams, locales);
     }
 }

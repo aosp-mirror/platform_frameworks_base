@@ -53773,6 +53773,7 @@ package android.view.accessibility {
     method public int getDisplayId();
     method public int getId();
     method public int getLayer();
+    method @NonNull public android.os.LocaleList getLocales();
     method public android.view.accessibility.AccessibilityWindowInfo getParent();
     method public void getRegionInScreen(@NonNull android.graphics.Region);
     method public android.view.accessibility.AccessibilityNodeInfo getRoot();
