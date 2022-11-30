@@ -240,6 +240,7 @@ message UsbPortProto {
     // ID of the port. A device (eg: Chromebooks) might have multiple ports.
     optional string id = 1;
     repeated Mode supported_modes = 2;
+    optional bool supports_compliance_warnings = 3;
 }
 
 message UsbPortStatusProto {
@@ -268,6 +269,7 @@ message UsbPortStatusProto {
     optional string usb_data_status = 7;
     optional bool is_power_transfer_limited = 8;
     optional string usb_power_brick_status = 9;
+    optional string compliance_warnings_string = 10;
 }
 
 message UsbPortStatusRoleCombinationProto {

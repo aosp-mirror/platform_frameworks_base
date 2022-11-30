@@ -34,9 +34,12 @@ import android.hardware.usb.Status;
 import android.hardware.usb.IUsbCallback;
 import android.hardware.usb.PortRole;
 import android.hardware.usb.PortStatus;
+import android.hardware.usb.ComplianceWarning;
+import android.os.Build;
 import android.os.ServiceManager;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
@@ -46,6 +49,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.usb.UsbPortManager;
 import com.android.server.usb.hal.port.RawPortInfo;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.NoSuchElementException;
@@ -551,6 +555,24 @@ public final class UsbPortAidl implements UsbPortHal {
             return usbDataStatus;
         }
 
+        private int[] formatComplianceWarnings(int[] complianceWarnings) {
+            Objects.requireNonNull(complianceWarnings);
+            IntArray newComplianceWarnings = new IntArray();
+            Arrays.sort(complianceWarnings);
+            for (int warning : complianceWarnings) {
+                if (newComplianceWarnings.indexOf(warning) == -1
+                        && warning >= UsbPortStatus.COMPLIANCE_WARNING_OTHER) {
+                    // ComplianceWarnings range from [1, 4] in Android U
+                    if (warning > UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP) {
+                        newComplianceWarnings.add(UsbPortStatus.COMPLIANCE_WARNING_OTHER);
+                    } else {
+                        newComplianceWarnings.add(warning);
+                    }
+                }
+            }
+            return newComplianceWarnings.toArray();
+        }
+
         @Override
         public void notifyPortStatusChange(
                android.hardware.usb.PortStatus[] currentPortStatus, int retval) {
@@ -584,7 +606,9 @@ public final class UsbPortAidl implements UsbPortHal {
                         current.contaminantDetectionStatus,
                         toUsbDataStatusInt(current.usbDataStatus),
                         current.powerTransferLimited,
-                        current.powerBrickStatus);
+                        current.powerBrickStatus,
+                        current.supportsComplianceWarnings,
+                        formatComplianceWarnings(current.complianceWarnings));
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback AIDL V1: "
                         + current.portName);

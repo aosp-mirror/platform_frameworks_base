@@ -40,6 +40,8 @@ public final class RawPortInfo implements Parcelable {
     public int usbDataStatus;
     public boolean powerTransferLimited;
     public int powerBrickConnectionStatus;
+    public final boolean supportsComplianceWarnings;
+    public int[] complianceWarnings;
 
     public RawPortInfo(String portId, int supportedModes) {
         this.portId = portId;
@@ -50,9 +52,10 @@ public final class RawPortInfo implements Parcelable {
         this.supportsEnableContaminantPresenceDetection = false;
         this.contaminantDetectionStatus = UsbPortStatus.CONTAMINANT_DETECTION_NOT_SUPPORTED;
         this.usbDataStatus = UsbPortStatus.DATA_STATUS_UNKNOWN;
-
         this.powerTransferLimited = false;
         this.powerBrickConnectionStatus = UsbPortStatus.POWER_BRICK_STATUS_UNKNOWN;
+        this.supportsComplianceWarnings = false;
+        this.complianceWarnings = new int[] {};
     }
 
     public RawPortInfo(String portId, int supportedModes, int supportedContaminantProtectionModes,
@@ -66,6 +69,29 @@ public final class RawPortInfo implements Parcelable {
             int usbDataStatus,
             boolean powerTransferLimited,
             int powerBrickConnectionStatus) {
+        this(portId, supportedModes, supportedContaminantProtectionModes,
+                    currentMode, canChangeMode,
+                    currentPowerRole, canChangePowerRole,
+                    currentDataRole, canChangeDataRole,
+                    supportsEnableContaminantPresenceProtection, contaminantProtectionStatus,
+                    supportsEnableContaminantPresenceDetection, contaminantDetectionStatus,
+                    usbDataStatus, powerTransferLimited, powerBrickConnectionStatus,
+                    false, new int[] {});
+    }
+
+    public RawPortInfo(String portId, int supportedModes, int supportedContaminantProtectionModes,
+            int currentMode, boolean canChangeMode,
+            int currentPowerRole, boolean canChangePowerRole,
+            int currentDataRole, boolean canChangeDataRole,
+            boolean supportsEnableContaminantPresenceProtection,
+            int contaminantProtectionStatus,
+            boolean supportsEnableContaminantPresenceDetection,
+            int contaminantDetectionStatus,
+            int usbDataStatus,
+            boolean powerTransferLimited,
+            int powerBrickConnectionStatus,
+            boolean supportsComplianceWarnings,
+            int[] complianceWarnings) {
         this.portId = portId;
         this.supportedModes = supportedModes;
         this.supportedContaminantProtectionModes = supportedContaminantProtectionModes;
@@ -84,6 +110,8 @@ public final class RawPortInfo implements Parcelable {
         this.usbDataStatus = usbDataStatus;
         this.powerTransferLimited = powerTransferLimited;
         this.powerBrickConnectionStatus = powerBrickConnectionStatus;
+        this.supportsComplianceWarnings = supportsComplianceWarnings;
+        this.complianceWarnings = complianceWarnings;
     }
 
     @Override
@@ -109,6 +137,8 @@ public final class RawPortInfo implements Parcelable {
         dest.writeInt(usbDataStatus);
         dest.writeBoolean(powerTransferLimited);
         dest.writeInt(powerBrickConnectionStatus);
+        dest.writeBoolean(supportsComplianceWarnings);
+        dest.writeIntArray(complianceWarnings);
     }
 
     public static final Parcelable.Creator<RawPortInfo> CREATOR =
@@ -131,6 +161,8 @@ public final class RawPortInfo implements Parcelable {
             int usbDataStatus = in.readInt();
             boolean powerTransferLimited = in.readBoolean();
             int powerBrickConnectionStatus = in.readInt();
+            boolean supportsComplianceWarnings = in.readBoolean();
+            int[] complianceWarnings = in.createIntArray();
             return new RawPortInfo(id, supportedModes,
                     supportedContaminantProtectionModes, currentMode, canChangeMode,
                     currentPowerRole, canChangePowerRole,
@@ -139,7 +171,8 @@ public final class RawPortInfo implements Parcelable {
                     contaminantProtectionStatus,
                     supportsEnableContaminantPresenceDetection,
                     contaminantDetectionStatus, usbDataStatus,
-                    powerTransferLimited, powerBrickConnectionStatus);
+                    powerTransferLimited, powerBrickConnectionStatus,
+                    supportsComplianceWarnings, complianceWarnings);
         }
 
         @Override
