@@ -805,6 +805,12 @@
       "group": "WM_DEBUG_CONTENT_RECORDING",
       "at": "com\/android\/server\/wm\/ContentRecorder.java"
     },
+    "-1323783276": {
+      "message": "performEnableScreen: bootFinished() failed.",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "-1318478129": {
       "message": "applyAnimation: win=%s anim=%d attr=0x%x a=%s transit=%d type=%d isEntrance=%b Callers %s",
       "level": "VERBOSE",
@@ -1603,6 +1609,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-576580969": {
+      "message": "viewServerWindowCommand: bootFinished() failed.",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "-576070986": {
       "message": "Performing post-rotate rotation after seamless rotation",
       "level": "INFO",
@@ -2112,12 +2124,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
-    "-87703044": {
-      "message": "Boot completed: SurfaceFlinger is dead!",
-      "level": "ERROR",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "-86763148": {
       "message": "  KILL SURFACE SESSION %s",
@@ -2910,12 +2916,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONTENT_RECORDING",
       "at": "com\/android\/server\/wm\/ContentRecorder.java"
-    },
-    "620368427": {
-      "message": "******* TELLING SURFACE FLINGER WE ARE BOOTED!",
-      "level": "INFO",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "620519522": {
       "message": "findFocusedWindow: No focusable windows, display=%d",

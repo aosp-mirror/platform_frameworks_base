@@ -168,7 +168,6 @@ import android.app.IActivityManager;
 import android.app.IAssistDataReceiver;
 import android.app.WindowConfiguration;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -178,7 +177,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.TestUtilityService;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -3718,19 +3716,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            try {
-                // TODO(b/221898546): remove the following and convert to jni
-                IBinder surfaceFlinger = ServiceManager.getService("SurfaceFlingerAIDL");
-                if (surfaceFlinger != null) {
-                    ProtoLog.i(WM_ERROR, "******* TELLING SURFACE FLINGER WE ARE BOOTED!");
-                    Parcel data = Parcel.obtain();
-                    data.writeInterfaceToken("android.gui.ISurfaceComposer");
-                    surfaceFlinger.transact(IBinder.FIRST_CALL_TRANSACTION, // BOOT_FINISHED
-                            data, null, 0);
-                    data.recycle();
-                }
-            } catch (RemoteException ex) {
-                ProtoLog.e(WM_ERROR, "Boot completed: SurfaceFlinger is dead!");
+            if (!SurfaceControl.bootFinished()) {
+                ProtoLog.w(WM_ERROR, "performEnableScreen: bootFinished() failed.");
+                return;
             }
 
             EventLogTags.writeWmBootAnimationDone(SystemClock.uptimeMillis());
