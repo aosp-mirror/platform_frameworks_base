@@ -17,6 +17,7 @@
 package com.android.server.audio;
 
 import static android.Manifest.permission.REMOTE_AUDIO_PLAYBACK;
+import static android.app.BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
@@ -45,6 +46,7 @@ import android.app.ActivityThread;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.app.IUidObserver;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -177,6 +179,7 @@ import android.widget.Toast;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
@@ -4410,7 +4413,7 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    private void sendBroadcastToAll(Intent intent) {
+    private void sendBroadcastToAll(Intent intent, Bundle options) {
         if (!mSystemServer.isPrivileged()) {
             return;
         }
@@ -4418,7 +4421,8 @@ public class AudioService extends IAudioService.Stub
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         final long ident = Binder.clearCallingIdentity();
         try {
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+                    null /* receiverPermission */, options);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -6704,7 +6708,7 @@ public class AudioService extends IAudioService.Stub
             Intent broadcast = new Intent(AudioManager.VIBRATE_SETTING_CHANGED_ACTION);
             broadcast.putExtra(AudioManager.EXTRA_VIBRATE_TYPE, vibrateType);
             broadcast.putExtra(AudioManager.EXTRA_VIBRATE_SETTING, getVibrateSetting(vibrateType));
-            sendBroadcastToAll(broadcast);
+            sendBroadcastToAll(broadcast, null /* options */);
         }
     }
 
@@ -7729,7 +7733,9 @@ public class AudioService extends IAudioService.Stub
             }
         };
         private final Intent mVolumeChanged;
+        private final Bundle mVolumeChangedOptions;
         private final Intent mStreamDevicesChanged;
+        private final Bundle mStreamDevicesChangedOptions;
 
         private VolumeStreamState(String settingName, int streamType) {
             mVolumeIndexSettingName = settingName;
@@ -7751,8 +7757,21 @@ public class AudioService extends IAudioService.Stub
             readSettings();
             mVolumeChanged = new Intent(AudioManager.VOLUME_CHANGED_ACTION);
             mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, mStreamType);
+            final BroadcastOptions volumeChangedOptions = BroadcastOptions.makeBasic();
+            // This allows us to discard older broadcasts still waiting to be delivered
+            // which have the same namespace (VOLUME_CHANGED_ACTION) and key (mStreamType).
+            volumeChangedOptions.setDeliveryGroupPolicy(DELIVERY_GROUP_POLICY_MOST_RECENT);
+            volumeChangedOptions.setDeliveryGroupMatchingKey(
+                    AudioManager.VOLUME_CHANGED_ACTION, String.valueOf(mStreamType));
+            mVolumeChangedOptions = volumeChangedOptions.toBundle();
+
             mStreamDevicesChanged = new Intent(AudioManager.STREAM_DEVICES_CHANGED_ACTION);
             mStreamDevicesChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, mStreamType);
+            final BroadcastOptions streamDevicesChangedOptions = BroadcastOptions.makeBasic();
+            streamDevicesChangedOptions.setDeliveryGroupPolicy(DELIVERY_GROUP_POLICY_MOST_RECENT);
+            streamDevicesChangedOptions.setDeliveryGroupMatchingKey(
+                    AudioManager.STREAM_DEVICES_CHANGED_ACTION, String.valueOf(mStreamType));
+            mStreamDevicesChangedOptions = streamDevicesChangedOptions.toBundle();
         }
 
         /**
@@ -7801,11 +7820,14 @@ public class AudioService extends IAudioService.Stub
             }
             // send STREAM_DEVICES_CHANGED_ACTION on the message handler so it is scheduled after
             // the postObserveDevicesForStreams is handled
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = mStreamDevicesChanged;
+            args.arg2 = mStreamDevicesChangedOptions;
             sendMsg(mAudioHandler,
                     MSG_STREAM_DEVICES_CHANGED,
                     SENDMSG_QUEUE, prevDevices /*arg1*/, devices /*arg2*/,
                     // ok to send reference to this object, it is final
-                    mStreamDevicesChanged /*obj*/, 0 /*delay*/);
+                    args /*obj*/, 0 /*delay*/);
             return mObservedDeviceSet;
         }
 
@@ -8030,7 +8052,7 @@ public class AudioService extends IAudioService.Stub
                     mVolumeChanged.putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, oldIndex);
                     mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE_ALIAS,
                             mStreamVolumeAlias[mStreamType]);
-                    sendBroadcastToAll(mVolumeChanged);
+                    sendBroadcastToAll(mVolumeChanged, mVolumeChangedOptions);
                 }
             }
             return changed;
@@ -8158,7 +8180,7 @@ public class AudioService extends IAudioService.Stub
                 Intent intent = new Intent(AudioManager.STREAM_MUTE_CHANGED_ACTION);
                 intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, mStreamType);
                 intent.putExtra(AudioManager.EXTRA_STREAM_VOLUME_MUTED, state);
-                sendBroadcastToAll(intent);
+                sendBroadcastToAll(intent, null /* options */);
             }
             return changed;
         }
@@ -8661,9 +8683,14 @@ public class AudioService extends IAudioService.Stub
                     break;
 
                 case MSG_STREAM_DEVICES_CHANGED:
-                    sendBroadcastToAll(((Intent) msg.obj)
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final Intent intent = (Intent) args.arg1;
+                    final Bundle options = (Bundle) args.arg2;
+                    args.recycle();
+                    sendBroadcastToAll(intent
                             .putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_DEVICES, msg.arg1)
-                            .putExtra(AudioManager.EXTRA_VOLUME_STREAM_DEVICES, msg.arg2));
+                            .putExtra(AudioManager.EXTRA_VOLUME_STREAM_DEVICES, msg.arg2),
+                            options);
                     break;
 
                 case MSG_UPDATE_VOLUME_STATES_FOR_DEVICE:
