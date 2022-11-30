@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static android.os.Process.INVALID_UID;
+
 import android.annotation.IntDef;
 import android.content.pm.PackageManager;
 import android.content.pm.parsing.ApkLiteParseUtils;
@@ -208,5 +210,36 @@ final class PackageMetrics {
                 info.mUid, removedUsers, removedUserTypes, originalUsers, originalUserTypes,
                 deleteFlags, PackageManager.DELETE_SUCCEEDED, info.mIsRemovedPackageSystemUpdate,
                 !info.mRemovedForAllUsers);
+    }
+
+    public static void onVerificationFailed(VerifyingSession verifyingSession) {
+        FrameworkStatsLog.write(FrameworkStatsLog.PACKAGE_INSTALLATION_SESSION_REPORTED,
+                verifyingSession.getSessionId() /* session_id */,
+                null /* package_name */,
+                INVALID_UID /* uid */,
+                null /* user_ids */,
+                null /* user_types */,
+                null /* original_user_ids */,
+                null /* original_user_types */,
+                verifyingSession.getRet() /* public_return_code */,
+                0 /* internal_error_code */,
+                0 /* apks_size_bytes */,
+                0 /* version_code */,
+                null /* install_steps */,
+                null /* step_duration_millis */,
+                0 /* total_duration_millis */,
+                0 /* install_flags */,
+                verifyingSession.getInstallerPackageUid() /* installer_package_uid */,
+                INVALID_UID /* original_installer_package_uid */,
+                verifyingSession.getDataLoaderType() /* data_loader_type */,
+                verifyingSession.getUserActionRequiredType() /* user_action_required_type */,
+                verifyingSession.isInstant() /* is_instant */,
+                false /* is_replace */,
+                false /* is_system */,
+                verifyingSession.isInherit() /* is_inherit */,
+                false /* is_installing_existing_as_user */,
+                false /* is_move_install */,
+                verifyingSession.isStaged() /* is_staged */
+        );
     }
 }
