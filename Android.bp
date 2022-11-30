@@ -100,7 +100,7 @@ filegroup {
         ":android.hardware.gnss-V2-java-source",
         ":android.hardware.graphics.common-V3-java-source",
         ":android.hardware.keymaster-V4-java-source",
-        ":android.hardware.security.keymint-V2-java-source",
+        ":android.hardware.security.keymint-V3-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
         ":android.hardware.tv.tuner-V1-java-source",
         ":android.security.apc-java-source",
