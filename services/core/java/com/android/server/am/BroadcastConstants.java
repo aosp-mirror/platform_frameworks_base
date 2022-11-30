@@ -153,6 +153,11 @@ public class BroadcastConstants {
             "bcast_extra_running_urgent_process_queues";
     private static final int DEFAULT_EXTRA_RUNNING_URGENT_PROCESS_QUEUES = 1;
 
+    public int MAX_CONSECUTIVE_URGENT_DISPATCHES = DEFAULT_MAX_CONSECUTIVE_URGENT_DISPATCHES;
+    private static final String KEY_MAX_CONSECUTIVE_URGENT_DISPATCHES =
+            "bcast_max_consecutive_urgent_dispatches";
+    private static final int DEFAULT_MAX_CONSECUTIVE_URGENT_DISPATCHES = 3;
+
     /**
      * For {@link BroadcastQueueModernImpl}: Maximum number of active broadcasts
      * to dispatch to a "running" process queue before we retire them back to
@@ -333,6 +338,9 @@ public class BroadcastConstants {
             EXTRA_RUNNING_URGENT_PROCESS_QUEUES = getDeviceConfigInt(
                     KEY_EXTRA_RUNNING_URGENT_PROCESS_QUEUES,
                     DEFAULT_EXTRA_RUNNING_URGENT_PROCESS_QUEUES);
+            MAX_CONSECUTIVE_URGENT_DISPATCHES = getDeviceConfigInt(
+                    KEY_MAX_CONSECUTIVE_URGENT_DISPATCHES,
+                    DEFAULT_MAX_CONSECUTIVE_URGENT_DISPATCHES);
             MAX_RUNNING_ACTIVE_BROADCASTS = getDeviceConfigInt(KEY_MAX_RUNNING_ACTIVE_BROADCASTS,
                     DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS);
             MAX_PENDING_BROADCASTS = getDeviceConfigInt(KEY_MAX_PENDING_BROADCASTS,
