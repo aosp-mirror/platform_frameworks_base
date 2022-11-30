@@ -3322,7 +3322,9 @@
          <p>Protection level: normal
          -->
     <permission android:name="android.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND"
-        android:protectionLevel="normal"/>
+                android:label="@string/permlab_startForegroundServicesFromBackground"
+                android:description="@string/permdesc_startForegroundServicesFromBackground"
+                android:protectionLevel="normal"/>
 
     <!-- Allows a companion app to use data in the background.
          <p>Protection level: normal
@@ -3338,6 +3340,8 @@
          <p>Protection level: normal
      -->
     <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_WATCH"
+                android:label="@string/permlab_companionProfileWatch"
+                android:description="@string/permdesc_companionProfileWatch"
                 android:protectionLevel="normal" />
 
     <!-- Allows application to request to be associated with a virtual display capable of streaming
@@ -4914,11 +4918,15 @@
          of their associated companion device
          -->
     <permission android:name="android.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE"
+                android:label="@string/permlab_observeCompanionDevicePresence"
+                android:description="@string/permdesc_observeCompanionDevicePresence"
                 android:protectionLevel="normal" />
 
     <!-- Allows an application to deliver companion messages to system
          -->
     <permission android:name="android.permission.DELIVER_COMPANION_MESSAGES"
+                android:label="@string/permlab_deliverCompanionMessages"
+                android:description="@string/permdesc_deliverCompanionMessages"
                 android:protectionLevel="normal" />
 
     <!-- Allows an application to create new companion device associations.
