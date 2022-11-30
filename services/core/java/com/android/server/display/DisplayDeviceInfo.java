@@ -158,6 +158,19 @@ final class DisplayDeviceInfo {
     public static final int FLAG_TOUCH_FEEDBACK_DISABLED = 1 << 16;
 
     /**
+     * Flag: Indicates that the display maintains its own focus and touch mode.
+     *
+     * This flag is similar to {@link com.android.internal.R.bool.config_perDisplayFocusEnabled} in
+     * behavior, but only applies to the specific display instead of system-wide to all displays.
+     *
+     * Note: The display must be trusted in order to have its own focus.
+     *
+     * @see #FLAG_TRUSTED
+     * @hide
+     */
+    public static final int FLAG_OWN_FOCUS = 1 << 17;
+
+    /**
      * Touch attachment: Display does not receive touch.
      */
     public static final int TOUCH_NONE = 0;
@@ -584,8 +597,29 @@ final class DisplayDeviceInfo {
         if ((flags & FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0) {
             msg.append(", FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD");
         }
+        if ((flags & FLAG_DESTROY_CONTENT_ON_REMOVAL) != 0) {
+            msg.append(", FLAG_DESTROY_CONTENT_ON_REMOVAL");
+        }
         if ((flags & FLAG_MASK_DISPLAY_CUTOUT) != 0) {
             msg.append(", FLAG_MASK_DISPLAY_CUTOUT");
+        }
+        if ((flags & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0) {
+            msg.append(", FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS");
+        }
+        if ((flags & FLAG_TRUSTED) != 0) {
+            msg.append(", FLAG_TRUSTED");
+        }
+        if ((flags & FLAG_OWN_DISPLAY_GROUP) != 0) {
+            msg.append(", FLAG_OWN_DISPLAY_GROUP");
+        }
+        if ((flags & FLAG_ALWAYS_UNLOCKED) != 0) {
+            msg.append(", FLAG_ALWAYS_UNLOCKED");
+        }
+        if ((flags & FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
+            msg.append(", FLAG_TOUCH_FEEDBACK_DISABLED");
+        }
+        if ((flags & FLAG_OWN_FOCUS) != 0) {
+            msg.append(", FLAG_OWN_FOCUS");
         }
         return msg.toString();
     }

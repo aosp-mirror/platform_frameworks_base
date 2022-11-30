@@ -3683,7 +3683,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @return The focused window or null if there isn't any or no need to seek.
      */
     WindowState findFocusedWindowIfNeeded(int topFocusedDisplayId) {
-        return (mWmService.mPerDisplayFocusEnabled || topFocusedDisplayId == INVALID_DISPLAY)
+        return (hasOwnFocus() || topFocusedDisplayId == INVALID_DISPLAY)
                     ? findFocusedWindow() : null;
     }
 
@@ -6312,6 +6312,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     boolean isAodShowing() {
         return mRootWindowContainer.mTaskSupervisor
                 .getKeyguardController().isAodShowing(mDisplayId);
+    }
+
+    /**
+     * @return whether this display maintains its own focus and touch mode.
+     */
+    boolean hasOwnFocus() {
+        return mWmService.mPerDisplayFocusEnabled
+                || (mDisplayInfo.flags & Display.FLAG_OWN_FOCUS) != 0;
     }
 
     /**

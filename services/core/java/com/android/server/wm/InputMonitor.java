@@ -270,7 +270,7 @@ final class InputMonitor {
                 InputConfigAdapter.getMask());
 
         final boolean focusable = w.canReceiveKeys()
-                && (mService.mPerDisplayFocusEnabled || mDisplayContent.isOnTop());
+                && (mDisplayContent.hasOwnFocus() || mDisplayContent.isOnTop());
         inputWindowHandle.setFocusable(focusable);
 
         final boolean hasWallpaper = mDisplayContent.mWallpaperController.isWallpaperTarget(w)
