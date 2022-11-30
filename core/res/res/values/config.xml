@@ -4164,11 +4164,33 @@
    -->
     <string name="config_defaultAmbientContextDetectionService" translatable="false"></string>
 
+    <!-- The component names for the system's AmbientContextEvent detection services.
+      These services must be trusted, as it can be activated without explicit consent of the user.
+      See android.service.ambientcontext.AmbientContextDetectionService and
+      android.service.wearable.WearableSensingService.
+      -->
+    <string-array name="config_defaultAmbientContextServices">
+        <item>@string/config_defaultAmbientContextDetectionService</item>
+        <item>@string/config_defaultWearableSensingService</item>
+    </string-array>
+
     <!-- The component name for the default system wearable sensing service.
         This service must be trusted, as it can be activated without explicit consent of the user.
         See android.service.wearable.WearableSensingService.
    -->
     <string name="config_defaultWearableSensingService" translatable="false"></string>
+
+    <!-- Component name that accepts ACTION_SEND intents for requesting ambient context consent for
+         wearable sensing. -->
+    <string translatable="false" name="config_defaultWearableSensingConsentComponent"></string>
+
+    <!-- Intent extra key for the caller's package name while requesting
+          ambient context consent for wearable sensing. -->
+    <string translatable="false" name="config_wearableAmbientContextPackageNameExtraKey"></string>
+
+    <!-- Intent extra key for the event code int array while requesting
+          ambient context consent for wearable sensing. -->
+    <string translatable="false" name="config_wearableAmbientContextEventArrayExtraKey"></string>
 
     <!-- Component name that accepts ACTION_SEND intents for requesting ambient context consent. -->
     <string translatable="false" name="config_defaultAmbientContextConsentComponent"></string>
