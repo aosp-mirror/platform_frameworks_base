@@ -192,7 +192,7 @@ public class OverlayManagerImpl {
      * @param name the non-check overlay name
      * @return the valid overlay name
      */
-    private static String checkOverlayNameValid(@NonNull String name) {
+    public static String checkOverlayNameValid(@NonNull String name) {
         final String overlayName =
                 Preconditions.checkStringNotEmpty(
                         name, "overlayName should be neither empty nor null string");
