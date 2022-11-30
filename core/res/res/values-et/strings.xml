@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Kõnepost"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Ühendusprobleem või kehtetu MMI-kood."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funktsiooni ei toetata."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Toiming on ainult fikseeritud valimisnumbritele."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Kõne suunamise seadeid ei saa rändluse ajal teie telefonis muuta."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Teenus on lubatud."</string>

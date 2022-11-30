@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"語音留言"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"連線發生問題或錯誤的 MMI 碼。"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"不支援的功能。"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"僅限對固定撥號號碼執行此作業。"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"漫遊時無法透過你的手機變更來電轉接設定。"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"服務已啟用。"</string>

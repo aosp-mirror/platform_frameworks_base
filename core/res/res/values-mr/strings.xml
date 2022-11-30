@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"व्हॉइसमेल"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"कनेक्शन समस्या किंवा अवैध MMI कोड."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"वैशिष्ट्याला सपोर्ट नाही."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"कार्य फक्त निश्चित डायलिंग नंबरसाठी प्रतिबंधित आहे."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"तुम्ही रोमिंगमध्ये असताना आपल्या फोनवरील कॉल फॉरवर्डिंग सेटिंंग्ज बदलू शकत नाही."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"सेवा सक्षम केली."</string>

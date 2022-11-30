@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Үн почтасы"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Туташууда көйгөй чыкты же MMI коду жараксыз."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Функция колдоого алынбайт."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Иш-аракет туруктуу терүү номерлери менен гана чектелет."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Роуминг учурунда чалууну башка номерге багыттоонун жөндөөлөрүн телефонуңуздан өзгөртүү мүмкүн эмес."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Кызмат иштетилди."</string>

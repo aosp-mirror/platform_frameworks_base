@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"음성사서함"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"연결에 문제가 있거나 MMI 코드가 잘못되었습니다."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"기능이 지원되지 않습니다."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"발신 허용 번호에서만 수행할 수 있는 작업입니다."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"로밍 중에는 착신 전환 설정을 변경할 수 없습니다."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"서비스를 사용하도록 설정했습니다."</string>

@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Голосовая почта"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Неполадки подключения или неверный код MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Функция не поддерживается."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Операция возможна только для разрешенных номеров."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Вы не можете изменить настройки переадресации вызовов, поскольку находитесь в роуминге."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Служба включена."</string>
@@ -89,7 +90,7 @@
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Оповещения"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Переадресация вызовов"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Режим экстренных обратных вызовов"</string>
-    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Состояние мобильного Интернета"</string>
+    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Состояние мобильного интернета"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Голосовые сообщения"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"Звонки по Wi-Fi"</string>

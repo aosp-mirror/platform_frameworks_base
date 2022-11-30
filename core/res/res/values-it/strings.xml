@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Segreteria"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problema di connessione o codice MMI non valido."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funzionalità non supportata."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Operazione limitata solo ai numeri di selezione fissa."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Impossibile modificare le impostazioni di deviazione chiamate dal telefono durante il roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Il servizio è stato attivato."</string>

@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"వాయిస్ మెయిల్"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"కనెక్షన్ సమస్య లేదా చెల్లని MMI కోడ్."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ప్రస్తుత మొబైల్ నెట్‌వర్క్‌లో ఫీచర్ సపోర్ట్ చేయడం లేదు."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"చర్య స్థిరమైన డయలింగ్ నంబర్‌లకు మాత్రమే పరిమితం చేయబడింది."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"మీరు రోమింగ్‌లో ఉన్నప్పుడు మీ ఫోన్‌ నుండి కాల్ ఫార్వార్డింగ్ సెట్టింగ్‌లను మార్చలేరు."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"సేవ ప్రారంభించబడింది."</string>

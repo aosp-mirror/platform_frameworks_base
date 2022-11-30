@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"भ्वाइस मेल"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN१"</string>
     <string name="mmiError" msgid="2862759606579822246">"जडान समस्या वा अमान्य MMI कोड।"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"यो सुविधा प्रयोग गर्न मिल्दैन।"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"अपरेशन निश्चित डायल नम्बरहरूको लागि मात्र प्रतिबन्धित छ।"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"तपाईं रोमिङमा हुनुहुँदा तपाईंको फोनबाट कल फर्वार्ड गर्ने सम्बन्धी सेटिङहरू परिवर्तन गर्न सकिँदैन।"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"सेवा सक्षम पारियो।"</string>

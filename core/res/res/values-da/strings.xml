@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Telefonsvarer"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Forbindelsesproblemer eller ugyldigt MMI-nummer."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funktionen understøttes ikke."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Du kan kun foretage handlinger med dine numre til begrænset opkald."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Det er ikke muligt at ændre indstillingerne for viderestilling af opkald fra din telefon, mens du bruger roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Tjenesten blev aktiveret."</string>

@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Poczta głosowa"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problem z połączeniem lub błędny kod MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funkcja nie jest obsługiwana."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Operacja jest ograniczona wyłącznie do numerów ustalonych."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Podczas roamingu nie można zmienić ustawień przekazywania połączeń z telefonu."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Usługa została włączona."</string>
@@ -397,54 +398,30 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Pozwala aplikacji na trwałe zapisywanie swoich fragmentów w pamięci. Może to zmniejszyć ilość pamięci dostępnej dla innych aplikacji i spowolnić działanie telefonu."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"uruchom usługę na pierwszym planie"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Zezwala na korzystanie przez aplikację z usług na pierwszym planie."</string>
-    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
-    <skip />
+    <string name="permlab_foregroundServiceCamera" msgid="7814751737955715297">"uruchamianie usług działających na pierwszym planie typu „camera”"</string>
+    <string name="permdesc_foregroundServiceCamera" msgid="6973701931250595727">"Zezwala na wykorzystywanie przez aplikację usług działających na pierwszym planie typu „camera”"</string>
+    <string name="permlab_foregroundServiceConnectedDevice" msgid="3019650546176872501">"uruchamianie usług działających na pierwszym planie typu „connectedDevice”"</string>
+    <string name="permdesc_foregroundServiceConnectedDevice" msgid="1067457315741352963">"Zezwala na wykorzystywanie przez aplikację usług działających na pierwszym planie typu „connectedDevice”"</string>
+    <string name="permlab_foregroundServiceDataSync" msgid="5847463514326881076">"uruchamianie usług działających na pierwszym planie typu „dataSync”"</string>
+    <string name="permdesc_foregroundServiceDataSync" msgid="2267140263423973050">"Zezwala na wykorzystywanie przez aplikację usług działających na pierwszym planie typu „dataSync”"</string>
+    <string name="permlab_foregroundServiceLocation" msgid="3745428302378535690">"uruchamianie usług działających na pierwszym planie typu „location”"</string>
+    <string name="permdesc_foregroundServiceLocation" msgid="118894034365177183">"Zezwala na wykorzystywanie przez aplikację usług działających na pierwszym planie typu „location”"</string>
+    <string name="permlab_foregroundServiceMediaPlayback" msgid="4002687983891935514">"uruchamianie usług działających na pierwszym planie typu „mediaPlayback”"</string>
+    <string name="permdesc_foregroundServiceMediaPlayback" msgid="3638032446063968043">"Zezwala na wykorzystywanie przez aplikację usług działających na pierwszym planie typu „mediaPlayback”"</string>
+    <string name="permlab_foregroundServiceMediaProjection" msgid="2630868915733312527">"uruchamianie usług działających na pierwszym planie typu „mediaProjection”"</string>
+    <string name="permdesc_foregroundServiceMediaProjection" msgid="4805677128082002298">"Zezwala na wykorzystywanie przez aplikację usług działających na pierwszym planie typu „mediaProjection”"</string>
+    <string name="permlab_foregroundServiceMicrophone" msgid="7390033424890545399">"uruchamianie usług działających na pierwszym planie typu „microphone”"</string>
+    <string name="permdesc_foregroundServiceMicrophone" msgid="1206041516173483201">"Zezwala na wykorzystywanie przez aplikację usług działających na pierwszym planie typu „microphone”"</string>
+    <string name="permlab_foregroundServicePhoneCall" msgid="627937743867697892">"uruchamianie usług działających na pierwszym planie typu „phoneCall”"</string>
+    <string name="permdesc_foregroundServicePhoneCall" msgid="5941660252587015147">"Zezwala na wykorzystywanie przez aplikację usług działających na pierwszym planie typu „phoneCall”"</string>
+    <string name="permlab_foregroundServiceHealth" msgid="3675776442080928184">"uruchamianie usług działających na pierwszym planie typu „health”"</string>
+    <string name="permdesc_foregroundServiceHealth" msgid="2024586220562667185">"Zezwala na wykorzystywanie przez aplikację usług działających na pierwszym planie typu „health”"</string>
+    <string name="permlab_foregroundServiceRemoteMessaging" msgid="105670277002780950">"uruchamianie usług działających na pierwszym planie typu „remoteMessaging”"</string>
+    <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Zezwala na wykorzystywanie przez aplikację usług działających na pierwszym planie typu „remoteMessaging”"</string>
+    <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"uruchamianie usług działających na pierwszym planie typu „systemExempted”"</string>
+    <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Zezwala na wykorzystywanie przez aplikację usług działających na pierwszym planie typu „systemExempted”"</string>
+    <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"uruchamianie usług działających na pierwszym planie typu „specialUse”"</string>
+    <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Zezwala na wykorzystywanie przez aplikację usług działających na pierwszym planie typu „specialUse”"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"mierzenie rozmiaru pamięci aplikacji"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Pozwala aplikacji na pobieranie własnego kodu, danych oraz rozmiarów pamięci podręcznej."</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"modyfikowanie ustawień systemu"</string>
