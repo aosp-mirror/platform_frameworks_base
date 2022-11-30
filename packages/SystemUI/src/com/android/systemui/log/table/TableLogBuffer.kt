@@ -113,6 +113,20 @@ class TableLogBuffer(
         newVal.logDiffs(prevVal, row)
     }
 
+    /**
+     * Logs change(s) to the buffer using [rowInitializer].
+     *
+     * @param rowInitializer a function that will be called immediately to store relevant data on
+     * the row.
+     */
+    @Synchronized
+    fun logChange(columnPrefix: String, rowInitializer: (TableRowLogger) -> Unit) {
+        val row = tempRow
+        row.timestamp = systemClock.currentTimeMillis()
+        row.columnPrefix = columnPrefix
+        rowInitializer(row)
+    }
+
     // Keep these individual [logChange] methods private (don't let clients give us their own
     // timestamps.)
 

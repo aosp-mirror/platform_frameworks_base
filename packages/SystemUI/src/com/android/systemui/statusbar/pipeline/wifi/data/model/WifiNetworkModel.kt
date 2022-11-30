@@ -31,15 +31,19 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             if (prevVal is Inactive) {
                 return
             }
-            row.logChange(COL_NETWORK_TYPE, TYPE_INACTIVE)
 
             if (prevVal is CarrierMerged) {
                 // The only difference between CarrierMerged and Inactive is the type
+                row.logChange(COL_NETWORK_TYPE, TYPE_INACTIVE)
                 return
             }
 
             // When changing from Active to Inactive, we need to log diffs to all the fields.
-            logDiffsFromActiveToNotActive(prevVal as Active, row)
+            logFullNonActiveNetwork(TYPE_INACTIVE, row)
+        }
+
+        override fun logFull(row: TableRowLogger) {
+            logFullNonActiveNetwork(TYPE_INACTIVE, row)
         }
     }
 
@@ -56,15 +60,15 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             if (prevVal is CarrierMerged) {
                 return
             }
-            row.logChange(COL_NETWORK_TYPE, TYPE_CARRIER_MERGED)
 
             if (prevVal is Inactive) {
                 // The only difference between CarrierMerged and Inactive is the type.
+                row.logChange(COL_NETWORK_TYPE, TYPE_CARRIER_MERGED)
                 return
             }
 
             // When changing from Active to CarrierMerged, we need to log diffs to all the fields.
-            logDiffsFromActiveToNotActive(prevVal as Active, row)
+            logFullNonActiveNetwork(TYPE_CARRIER_MERGED, row)
         }
     }
 
@@ -147,7 +151,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             }
         }
 
-
         override fun toString(): String {
             // Only include the passpoint-related values in the string if we have them. (Most
             // networks won't have them so they'll be mostly clutter.)
@@ -174,21 +177,15 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
         }
     }
 
-    internal fun logDiffsFromActiveToNotActive(prevActive: Active, row: TableRowLogger) {
+    internal fun logFullNonActiveNetwork(type: String, row: TableRowLogger) {
+        row.logChange(COL_NETWORK_TYPE, type)
         row.logChange(COL_NETWORK_ID, NETWORK_ID_DEFAULT)
         row.logChange(COL_VALIDATED, false)
         row.logChange(COL_LEVEL, LEVEL_DEFAULT)
         row.logChange(COL_SSID, null)
-
-        if (prevActive.isPasspointAccessPoint) {
-            row.logChange(COL_PASSPOINT_ACCESS_POINT, false)
-        }
-        if (prevActive.isOnlineSignUpForPasspointAccessPoint) {
-            row.logChange(COL_ONLINE_SIGN_UP, false)
-        }
-        if (prevActive.passpointProviderFriendlyName != null) {
-            row.logChange(COL_PASSPOINT_NAME, null)
-        }
+        row.logChange(COL_PASSPOINT_ACCESS_POINT, false)
+        row.logChange(COL_ONLINE_SIGN_UP, false)
+        row.logChange(COL_PASSPOINT_NAME, null)
     }
 }
 

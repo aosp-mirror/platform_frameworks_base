@@ -337,6 +337,68 @@ class TableLogBufferTest : SysuiTestCase() {
     }
 
     @Test
+    fun logChange_rowInitializer_dumpsCorrectly() {
+        systemClock.setCurrentTimeMillis(100L)
+
+        underTest.logChange("") { row ->
+            row.logChange("column1", "val1")
+            row.logChange("column2", 2)
+            row.logChange("column3", true)
+        }
+
+        val dumpedString = dumpChanges()
+
+        val timestamp = TABLE_LOG_DATE_FORMAT.format(100L)
+        val expected1 = timestamp + SEPARATOR + "column1" + SEPARATOR + "val1"
+        val expected2 = timestamp + SEPARATOR + "column2" + SEPARATOR + "2"
+        val expected3 = timestamp + SEPARATOR + "column3" + SEPARATOR + "true"
+        assertThat(dumpedString).contains(expected1)
+        assertThat(dumpedString).contains(expected2)
+        assertThat(dumpedString).contains(expected3)
+    }
+
+    @Test
+    fun logChangeAndLogDiffs_bothLogged() {
+        systemClock.setCurrentTimeMillis(100L)
+
+        underTest.logChange("") { row ->
+            row.logChange("column1", "val1")
+            row.logChange("column2", 2)
+            row.logChange("column3", true)
+        }
+
+        systemClock.setCurrentTimeMillis(200L)
+        val prevDiffable = object : TestDiffable() {}
+        val nextDiffable =
+            object : TestDiffable() {
+                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
+                    row.logChange("column1", "newVal1")
+                    row.logChange("column2", 222)
+                    row.logChange("column3", false)
+                }
+            }
+
+        underTest.logDiffs(columnPrefix = "", prevDiffable, nextDiffable)
+
+        val dumpedString = dumpChanges()
+
+        val timestamp1 = TABLE_LOG_DATE_FORMAT.format(100L)
+        val expected1 = timestamp1 + SEPARATOR + "column1" + SEPARATOR + "val1"
+        val expected2 = timestamp1 + SEPARATOR + "column2" + SEPARATOR + "2"
+        val expected3 = timestamp1 + SEPARATOR + "column3" + SEPARATOR + "true"
+        val timestamp2 = TABLE_LOG_DATE_FORMAT.format(200L)
+        val expected4 = timestamp2 + SEPARATOR + "column1" + SEPARATOR + "newVal1"
+        val expected5 = timestamp2 + SEPARATOR + "column2" + SEPARATOR + "222"
+        val expected6 = timestamp2 + SEPARATOR + "column3" + SEPARATOR + "false"
+        assertThat(dumpedString).contains(expected1)
+        assertThat(dumpedString).contains(expected2)
+        assertThat(dumpedString).contains(expected3)
+        assertThat(dumpedString).contains(expected4)
+        assertThat(dumpedString).contains(expected5)
+        assertThat(dumpedString).contains(expected6)
+    }
+
+    @Test
     fun dumpChanges_rotatesIfBufferIsFull() {
         lateinit var valToDump: String
 
