@@ -62,8 +62,14 @@ public final class GameModeConfiguration implements Parcelable {
      */
     @SystemApi
     public static final class Builder {
-        /** Constructs a new Builder for a game mode’s configuration */
+        /** Constructs a new Builder for a game mode’s configuration. */
         public Builder() {
+        }
+
+        /** Constructs a new builder by copying from an existing game mode configuration. */
+        public Builder(@NonNull GameModeConfiguration configuration) {
+            mFpsOverride = configuration.mFpsOverride;
+            mScalingFactor = configuration.mScalingFactor;
         }
 
         /**
@@ -154,16 +160,6 @@ public final class GameModeConfiguration implements Parcelable {
      */
     public int getFpsOverride() {
         return mFpsOverride;
-    }
-
-    /**
-     * Converts and returns the game mode config as a new builder.
-     */
-    @NonNull
-    public GameModeConfiguration.Builder toBuilder() {
-        return new GameModeConfiguration.Builder()
-                .setFpsOverride(mFpsOverride)
-                .setScalingFactor(mScalingFactor);
     }
 
     @Override

@@ -287,6 +287,7 @@ public final class GameManager {
      * <p>
      * The caller must have {@link android.Manifest.permission#MANAGE_GAME_MODE}.
      *
+     * @param packageName The package name of the game to update
      * @param gameModeConfig The configuration to use for game mode interventions
      * @hide
      */

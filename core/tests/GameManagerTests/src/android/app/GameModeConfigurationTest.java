@@ -77,10 +77,10 @@ public class GameModeConfigurationTest {
     }
 
     @Test
-    public void testToBuilder() {
+    public void testBuilderConstructor() {
         GameModeConfiguration config = new GameModeConfiguration
                 .Builder().setFpsOverride(40).setScalingFactor(0.5f).build();
-        GameModeConfiguration newConfig = config.toBuilder().build();
+        GameModeConfiguration newConfig = new GameModeConfiguration.Builder(config).build();
         assertEquals(config, newConfig);
     }
 
