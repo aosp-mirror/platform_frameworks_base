@@ -4205,7 +4205,7 @@ public final class ProcessList {
                     total - mLruProcessServiceStart);
             writeProcessOomListToProto(proto,
                     ActivityManagerServiceDumpProcessesProto.LruProcesses.LIST, mService,
-                    mLruProcesses, false, dumpPackage);
+                    mLruProcesses, true, dumpPackage);
             proto.end(lruToken);
         }
 

@@ -12981,6 +12981,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public boolean shouldServiceTimeOut(ComponentName className, IBinder token) {
+        synchronized (this) {
+            return mServices.shouldServiceTimeOutLocked(className, token);
+        }
+    }
+
+    @Override
     public int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,
             boolean requireFull, String name, String callerPackage) {
         return mUserController.handleIncomingUser(callingPid, callingUid, userId, allowAll,

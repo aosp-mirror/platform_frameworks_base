@@ -1119,10 +1119,21 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
 
     /** @hide */
     public final void callOnTimeout(int startId) {
-        // TODO(short-service): Do we need any check here, to avoid races?
-        // e.g. if the service is already stopped, but ActivityThread.handleTimeoutService() is
-        // already scheduled, then we'll call this method anyway. It should be doable to prevent
-        // that if we keep track of startForeground, stopForeground, and onDestroy.
+        // Note, because all the service callbacks (and other similar callbacks, e.g. activity
+        // callbacks) are delivered using the main handler, it's possible the service is already
+        // stopped when before this method is called, so we do a double check here.
+        if (mToken == null) {
+            Log.w(TAG, "Service already destroyed, skipping onTimeout()");
+            return;
+        }
+        try {
+            if (!mActivityManager.shouldServiceTimeOut(
+                    new ComponentName(this, mClassName), mToken)) {
+                Log.w(TAG, "Service no longer relevant, skipping onTimeout()");
+                return;
+            }
+        } catch (RemoteException ex) {
+        }
         onTimeout(startId);
     }
 

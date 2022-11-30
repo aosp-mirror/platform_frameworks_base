@@ -4763,14 +4763,16 @@ public final class ActivityThread extends ClientTransactionHandler
         if (s != null) {
             try {
                 if (localLOGV) Slog.v(TAG, "Timeout short service " + s);
-                s.callOnTimeout(startId);
 
-                // TODO(short-service): Do we need "service executing" for timeout?
-                // (see handleStopService())
+                // Unlike other service callbacks, we don't do serviceDoneExecuting() here.
+                // "service executing" state is used to boost the procstate / oom-adj, but
+                // for short-FGS timeout, we have a specific control for them anyway, so
+                // we don't have to do that.
+                s.callOnTimeout(startId);
             } catch (Exception e) {
                 if (!mInstrumentation.onException(s, e)) {
                     throw new RuntimeException(
-                            "Unable to timeout service " + s
+                            "Unable to call onTimeout on service " + s
                                     + ": " + e.toString(), e);
                 }
                 Slog.i(TAG, "handleTimeoutService: exception for " + token, e);
