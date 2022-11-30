@@ -102,7 +102,6 @@ import com.android.server.LocalServices;
 import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.parsing.PackageInfoUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.permission.LegacyPermissionSettings;
 import com.android.server.pm.permission.LegacyPermissionState;
@@ -2900,7 +2899,7 @@ public final class Settings implements Watchable, Snappable {
                 sb.append(isDebug ? " 1 " : " 0 ");
                 sb.append(dataPath);
                 sb.append(" ");
-                sb.append(AndroidPackageUtils.getSeInfo(pkg.getPkg(), pkg));
+                sb.append(pkg.getSeInfo());
                 sb.append(" ");
                 final int gidsSize = gids.size();
                 if (gids != null && gids.size() > 0) {
@@ -4359,7 +4358,7 @@ public final class Settings implements Watchable, Snappable {
                     // (CE storage is not ready yet; the CE data directories will be created later,
                     // when the user is "unlocked".)  Accumulate all required args, and call the
                     // installer after the mPackages lock has been released.
-                    final String seInfo = AndroidPackageUtils.getSeInfo(ps.getPkg(), ps);
+                    final String seInfo = ps.getSeInfo();
                     final boolean usesSdk = !ps.getPkg().getUsesSdkLibraries().isEmpty();
                     final CreateAppDataArgs args = Installer.buildCreateAppDataArgs(
                             ps.getVolumeUuid(), ps.getPackageName(), userHandle,

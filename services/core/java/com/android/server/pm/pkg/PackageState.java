@@ -131,6 +131,14 @@ public interface PackageState {
     String getSecondaryCpuAbi();
 
     /**
+     * @see ApplicationInfo#seInfo
+     * @return The SE info for this package, which may be overridden by a system configured value,
+     * or null if the package isn't available.
+     */
+    @Nullable
+    String getSeInfo();
+
+    /**
      * @see AndroidPackage#isPrivileged()
      */
     boolean isPrivileged();

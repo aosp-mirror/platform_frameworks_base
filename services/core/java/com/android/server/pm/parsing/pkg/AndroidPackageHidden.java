@@ -40,13 +40,6 @@ interface AndroidPackageHidden {
     String getPrimaryCpuAbi();
 
     /**
-     * @see ApplicationInfo#seInfo
-     * TODO: This field is deriveable and might not have to be cached here.
-     */
-    @Nullable
-    String getSeInfo();
-
-    /**
      * @see ApplicationInfo#secondaryCpuAbi
      */
     @Nullable
