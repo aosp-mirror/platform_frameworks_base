@@ -133,16 +133,9 @@ public class InsetsControllerTest {
                         private boolean mImeRequestedShow;
 
                         @Override
-                        public void show(boolean fromIme) {
-                            super.show(fromIme);
-                            if (fromIme) {
-                                mImeRequestedShow = true;
-                            }
-                        }
-
-                        @Override
                         public int requestShow(boolean fromController) {
                             if (fromController || mImeRequestedShow) {
+                                mImeRequestedShow = true;
                                 return SHOW_IMMEDIATELY;
                             } else {
                                 return IME_SHOW_DELAYED;
@@ -815,10 +808,10 @@ public class InsetsControllerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             prepareControls();
 
-            // Hiding visible system bars should only causes insets change once for each bar.
+            // Calling to hide system bars once should only cause insets change once.
             clearInvocations(mTestHost);
             mController.hide(statusBars() | navigationBars());
-            verify(mTestHost, times(2)).notifyInsetsChanged();
+            verify(mTestHost, times(1)).notifyInsetsChanged();
 
             // Sending the same insets state should not cause insets change.
             // This simulates the callback from server after hiding system bars.
@@ -826,10 +819,10 @@ public class InsetsControllerTest {
             mController.onStateChanged(mController.getState());
             verify(mTestHost, never()).notifyInsetsChanged();
 
-            // Showing invisible system bars should only causes insets change once for each bar.
+            // Calling to show system bars once should only cause insets change once.
             clearInvocations(mTestHost);
             mController.show(statusBars() | navigationBars());
-            verify(mTestHost, times(2)).notifyInsetsChanged();
+            verify(mTestHost, times(1)).notifyInsetsChanged();
 
             // Sending the same insets state should not cause insets change.
             // This simulates the callback from server after showing system bars.
@@ -912,7 +905,7 @@ public class InsetsControllerTest {
             assertNull(imeInsetsConsumer.getControl());
 
             // Verify IME requested visibility should be updated to IME consumer from controller.
-            mController.show(ime());
+            mController.show(ime(), true /* fromIme */, null /* statsToken */);
             assertTrue(isRequestedVisible(mController, ime()));
 
             mController.hide(ime());

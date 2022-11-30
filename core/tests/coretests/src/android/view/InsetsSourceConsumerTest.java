@@ -29,7 +29,6 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -119,30 +118,33 @@ public class InsetsSourceConsumerTest {
     }
 
     @Test
-    public void testHide() {
+    public void testOnAnimationStateChanged_requestedInvisible() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            mConsumer.hide();
+            mController.setRequestedVisibleTypes(0 /* visibleTypes */, mSpyInsetsSource.getType());
+            mConsumer.onAnimationStateChanged(false /* running */);
             verify(mSpyInsetsSource).setVisible(eq(false));
         });
-
     }
 
     @Test
-    public void testShow() {
+    public void testOnAnimationStateChanged_requestedVisible() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             // Insets source starts out visible
-            mConsumer.hide();
-            mConsumer.show(false /* fromIme */);
+            final int type = mSpyInsetsSource.getType();
+            mController.setRequestedVisibleTypes(0 /* visibleTypes */, type);
+            mConsumer.onAnimationStateChanged(false /* running */);
+            mController.setRequestedVisibleTypes(type, type);
+            mConsumer.onAnimationStateChanged(false /* running */);
             verify(mSpyInsetsSource).setVisible(eq(false));
             verify(mSpyInsetsSource).setVisible(eq(true));
         });
-
     }
 
     @Test
     public void testPendingStates() {
         InsetsState state = new InsetsState();
-        InsetsController controller = mock(InsetsController.class);
+        InsetsController controller = new InsetsController(new ViewRootInsetsControllerHost(
+                mViewRoot));
         InsetsSourceConsumer consumer = new InsetsSourceConsumer(
                 ITYPE_IME, state, null, controller);
 
@@ -156,7 +158,7 @@ public class InsetsSourceConsumerTest {
         assertEquals(new Rect(0, 1, 2, 3), state.peekSource(ITYPE_IME).getFrame());
 
         // Finish the animation, now the pending frame should be applied
-        assertTrue(consumer.notifyAnimationFinished());
+        assertTrue(consumer.onAnimationStateChanged(false /* running */));
         assertEquals(new Rect(4, 5, 6, 7), state.peekSource(ITYPE_IME).getFrame());
 
         // Animating again, updates are delayed
@@ -169,7 +171,7 @@ public class InsetsSourceConsumerTest {
         source.setFrame(4, 5, 6, 7);
         consumer.updateSource(new InsetsSource(source), ANIMATION_TYPE_USER);
 
-        assertFalse(consumer.notifyAnimationFinished());
+        assertFalse(consumer.onAnimationStateChanged(false /* running */));
         assertEquals(new Rect(4, 5, 6, 7), state.peekSource(ITYPE_IME).getFrame());
     }
 
@@ -178,7 +180,7 @@ public class InsetsSourceConsumerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mConsumer.setControl(null, new int[1], new int[1]);
             reset(mMockTransaction);
-            mConsumer.hide();
+            mController.setRequestedVisibleTypes(0 /* visibleTypes */, statusBars());
             verifyZeroInteractions(mMockTransaction);
             int[] hideTypes = new int[1];
             mConsumer.setControl(
@@ -193,7 +195,7 @@ public class InsetsSourceConsumerTest {
     @Test
     public void testRestore_noAnimation() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            mConsumer.hide();
+            mController.setRequestedVisibleTypes(0 /* visibleTypes */, statusBars());
             mConsumer.setControl(null, new int[1], new int[1]);
             reset(mMockTransaction);
             verifyZeroInteractions(mMockTransaction);

@@ -102,7 +102,8 @@ public class InsetsAnimationControlImplTest {
                 new InsetsSourceControl(ITYPE_NAVIGATION_BAR, WindowInsets.Type.navigationBars(),
                         mNavLeash, true, new Point(400, 0), Insets.of(0, 0, 100, 0)),
                 new int[1], new int[1]);
-        navConsumer.hide();
+        mMockController.setRequestedVisibleTypes(0, WindowInsets.Type.navigationBars());
+        navConsumer.applyLocalVisibilityOverride();
 
         SparseArray<InsetsSourceControl> controls = new SparseArray<>();
         controls.put(ITYPE_STATUS_BAR, topConsumer.getControl());
