@@ -98,6 +98,7 @@ import com.android.server.wm.utils.RotationAnimationUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -107,7 +108,7 @@ import java.util.function.Predicate;
  * Represents a logical transition.
  * @see TransitionController
  */
-class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListener {
+class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private static final String TAG = "Transition";
     private static final String TRACE_NAME_PLAY_TRANSITION = "PlayTransition";
 
@@ -158,6 +159,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private @TransitionFlags int mFlags;
     private final TransitionController mController;
     private final BLASTSyncEngine mSyncEngine;
+    private final Token mToken;
     private RemoteTransition mRemoteTransition = null;
 
     /** Only use for clean-up after binder death! */
@@ -220,8 +222,24 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         mFlags = flags;
         mController = controller;
         mSyncEngine = syncEngine;
+        mToken = new Token(this);
 
         controller.mTransitionTracer.logState(this);
+    }
+
+    @Nullable
+    static Transition fromBinder(@NonNull IBinder token) {
+        try {
+            return ((Token) token).mTransition.get();
+        } catch (ClassCastException e) {
+            Slog.w(TAG, "Invalid transition token: " + token, e);
+            return null;
+        }
+    }
+
+    @NonNull
+    IBinder getToken() {
+        return mToken;
     }
 
     void addFlag(int flag) {
@@ -733,6 +751,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, TRACE_NAME_PLAY_TRANSITION,
                     System.identityHashCode(this));
         }
+        // Close the transactions now. They were originally copied to Shell in case we needed to
+        // apply them due to a remote failure. Since we don't need to apply them anymore, free them
+        // immediately.
+        if (mStartTransaction != null) mStartTransaction.close();
+        if (mFinishTransaction != null) mFinishTransaction.close();
         mStartTransaction = mFinishTransaction = null;
         if (mState < STATE_PLAYING) {
             throw new IllegalStateException("Can't finish a non-playing transition " + mSyncId);
@@ -874,6 +897,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             mController.mAtm.mWindowManager.updateRotation(false /* alwaysSendConfiguration */,
                     false /* forceRelayout */);
         }
+        cleanUpInternal();
     }
 
     void abort() {
@@ -916,6 +940,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             dc.getPendingTransaction().merge(transaction);
             mSyncId = -1;
             mOverrideOptions = null;
+            cleanUpInternal();
             return;
         }
         // Ensure that wallpaper visibility is updated with the latest wallpaper target.
@@ -1034,7 +1059,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "Calling onTransitionReady: %s", info);
                 mController.getTransitionPlayer().onTransitionReady(
-                        this, info, transaction, mFinishTransaction);
+                        mToken, info, transaction, mFinishTransaction);
+                // Since we created root-leash but no longer reference it from core, release it now
+                info.releaseAnimSurfaces();
                 if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
                     Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, TRACE_NAME_PLAY_TRANSITION,
                             System.identityHashCode(this));
@@ -1067,7 +1094,17 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         if (mFinishTransaction != null) {
             mFinishTransaction.apply();
         }
-        mController.finishTransition(this);
+        mController.finishTransition(mToken);
+    }
+
+    private void cleanUpInternal() {
+        // Clean-up any native references.
+        for (int i = 0; i < mChanges.size(); ++i) {
+            final ChangeInfo ci = mChanges.valueAt(i);
+            if (ci.mSnapshot != null) {
+                ci.mSnapshot.release();
+            }
+        }
     }
 
     /** @see RecentsAnimationController#attachNavigationBarToApp */
@@ -1850,10 +1887,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         return isCollecting() && mSyncId >= 0;
     }
 
-    static Transition fromBinder(IBinder binder) {
-        return (Transition) binder;
-    }
-
     @VisibleForTesting
     static class ChangeInfo {
         private static final int FLAG_NONE = 0;
@@ -2343,6 +2376,20 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 if (snap == null) continue;
                 t.reparent(snap, null /* newParent */);
             }
+        }
+    }
+
+    private static class Token extends Binder {
+        final WeakReference<Transition> mTransition;
+
+        Token(Transition transition) {
+            mTransition = new WeakReference<>(transition);
+        }
+
+        @Override
+        public String toString() {
+            return "Token{" + Integer.toHexString(System.identityHashCode(this)) + " "
+                    + mTransition.get() + "}";
         }
     }
 }

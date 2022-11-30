@@ -392,10 +392,21 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
             return null;
         }).when(mNotificationShadeWindowController).batchApplyWindowLayoutParams(any());
 
-        mShadeController = spy(new ShadeControllerImpl(mCommandQueue,
-                mStatusBarStateController, mNotificationShadeWindowController,
-                mStatusBarKeyguardViewManager, mContext.getSystemService(WindowManager.class),
-                () -> Optional.of(mCentralSurfaces), () -> mAssistManager));
+        mShadeController = spy(new ShadeControllerImpl(
+                mCommandQueue,
+                mKeyguardStateController,
+                mStatusBarStateController,
+                mStatusBarKeyguardViewManager,
+                mStatusBarWindowController,
+                mNotificationShadeWindowController,
+                mContext.getSystemService(WindowManager.class),
+                () -> mAssistManager,
+                () -> mNotificationGutsManager
+        ));
+        mShadeController.setNotificationPanelViewController(mNotificationPanelViewController);
+        mShadeController.setNotificationShadeWindowViewController(
+                mNotificationShadeWindowViewController);
+        mShadeController.setNotificationPresenter(mNotificationPresenter);
 
         when(mOperatorNameViewControllerFactory.create(any()))
                 .thenReturn(mOperatorNameViewController);
@@ -492,6 +503,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 return mViewRootImpl;
             }
         };
+        mCentralSurfaces.initShadeVisibilityListener();
         when(mViewRootImpl.getOnBackInvokedDispatcher())
                 .thenReturn(mOnBackInvokedDispatcher);
         when(mKeyguardViewMediator.registerCentralSurfaces(
@@ -807,7 +819,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         when(mNotificationPanelViewController.canPanelBeCollapsed()).thenReturn(true);
         mOnBackInvokedCallback.getValue().onBackInvoked();
-        verify(mShadeController).animateCollapsePanels();
+        verify(mShadeController).animateCollapseShade();
     }
 
     @Test
@@ -1030,7 +1042,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void collapseShade_callsAnimateCollapsePanels_whenExpanded() {
+    public void collapseShade_callsanimateCollapseShade_whenExpanded() {
         // GIVEN the shade is expanded
         mCentralSurfaces.onShadeExpansionFullyChanged(true);
         mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
@@ -1038,12 +1050,12 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // WHEN collapseShade is called
         mCentralSurfaces.collapseShade();
 
-        // VERIFY that animateCollapsePanels is called
-        verify(mShadeController).animateCollapsePanels();
+        // VERIFY that animateCollapseShade is called
+        verify(mShadeController).animateCollapseShade();
     }
 
     @Test
-    public void collapseShade_doesNotCallAnimateCollapsePanels_whenCollapsed() {
+    public void collapseShade_doesNotCallanimateCollapseShade_whenCollapsed() {
         // GIVEN the shade is collapsed
         mCentralSurfaces.onShadeExpansionFullyChanged(false);
         mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
@@ -1051,12 +1063,12 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // WHEN collapseShade is called
         mCentralSurfaces.collapseShade();
 
-        // VERIFY that animateCollapsePanels is NOT called
-        verify(mShadeController, never()).animateCollapsePanels();
+        // VERIFY that animateCollapseShade is NOT called
+        verify(mShadeController, never()).animateCollapseShade();
     }
 
     @Test
-    public void collapseShadeForBugReport_callsAnimateCollapsePanels_whenFlagDisabled() {
+    public void collapseShadeForBugReport_callsanimateCollapseShade_whenFlagDisabled() {
         // GIVEN the shade is expanded & flag enabled
         mCentralSurfaces.onShadeExpansionFullyChanged(true);
         mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
@@ -1065,12 +1077,12 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // WHEN collapseShadeForBugreport is called
         mCentralSurfaces.collapseShadeForBugreport();
 
-        // VERIFY that animateCollapsePanels is called
-        verify(mShadeController).animateCollapsePanels();
+        // VERIFY that animateCollapseShade is called
+        verify(mShadeController).animateCollapseShade();
     }
 
     @Test
-    public void collapseShadeForBugReport_doesNotCallAnimateCollapsePanels_whenFlagEnabled() {
+    public void collapseShadeForBugReport_doesNotCallanimateCollapseShade_whenFlagEnabled() {
         // GIVEN the shade is expanded & flag enabled
         mCentralSurfaces.onShadeExpansionFullyChanged(true);
         mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
@@ -1079,8 +1091,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // WHEN collapseShadeForBugreport is called
         mCentralSurfaces.collapseShadeForBugreport();
 
-        // VERIFY that animateCollapsePanels is called
-        verify(mShadeController, never()).animateCollapsePanels();
+        // VERIFY that animateCollapseShade is called
+        verify(mShadeController, never()).animateCollapseShade();
     }
 
     @Test

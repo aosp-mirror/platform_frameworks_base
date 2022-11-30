@@ -135,7 +135,7 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
             mPowerManager.userActivity(SystemClock.uptimeMillis(), true);
         }
         mActivityTaskManager.stopSystemLockTaskMode();
-        mShadeController.collapsePanel(false);
+        mShadeController.collapseShade(false);
         if (mTelecomManager != null && mTelecomManager.isInCall()) {
             mTelecomManager.showInCallScreen(false);
             if (mEmergencyButtonCallback != null) {

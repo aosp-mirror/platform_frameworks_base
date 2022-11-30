@@ -469,6 +469,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             // Don't expand to the bouncer. Instead transition back to the lock screen (see
             // CentralSurfaces#showBouncerOrLockScreenIfKeyguard)
             return;
+        } else if (mKeyguardStateController.isOccluded()
+                && !mDreamOverlayStateController.isOverlayActive()) {
+            return;
         } else if (needsFullscreenBouncer()) {
             if (mPrimaryBouncer != null) {
                 mPrimaryBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);

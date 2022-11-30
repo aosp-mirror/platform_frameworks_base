@@ -126,15 +126,18 @@ public class RemoteTransitionCompat {
             public void mergeAnimation(IBinder transition, TransitionInfo info,
                     SurfaceControl.Transaction t, IBinder mergeTarget,
                     IRemoteTransitionFinishedCallback finishedCallback) {
-                if (!mergeTarget.equals(mToken)) return;
-                if (!mRecentsSession.merge(info, t, recents)) return;
-                try {
-                    finishedCallback.onTransitionFinished(null /* wct */, null /* sct */);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error merging transition.", e);
+                if (mergeTarget.equals(mToken) && mRecentsSession.merge(info, t, recents)) {
+                    try {
+                        finishedCallback.onTransitionFinished(null /* wct */, null /* sct */);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Error merging transition.", e);
+                    }
+                    // commit taskAppeared after merge transition finished.
+                    mRecentsSession.commitTasksAppearedIfNeeded(recents);
+                } else {
+                    t.close();
+                    info.releaseAllSurfaces();
                 }
-                // commit taskAppeared after merge transition finished.
-                mRecentsSession.commitTasksAppearedIfNeeded(recents);
             }
         };
         return new RemoteTransition(remote, appThread);
@@ -248,6 +251,8 @@ public class RemoteTransitionCompat {
                 }
                 // In this case, we are "returning" to an already running app, so just consume
                 // the merge and do nothing.
+                info.releaseAllSurfaces();
+                t.close();
                 return true;
             }
             final int layer = mInfo.getChanges().size() * 3;
@@ -264,6 +269,8 @@ public class RemoteTransitionCompat {
                 t.setLayer(targets[i].leash, layer);
             }
             t.apply();
+            // not using the incoming anim-only surfaces
+            info.releaseAnimSurfaces();
             mAppearedTargets = targets;
             return true;
         }
@@ -380,9 +387,7 @@ public class RemoteTransitionCompat {
             }
             // Only release the non-local created surface references. The animator is responsible
             // for releasing the leashes created by local.
-            for (int i = 0; i < mInfo.getChanges().size(); ++i) {
-                mInfo.getChanges().get(i).getLeash().release();
-            }
+            mInfo.releaseAllSurfaces();
             // Reset all members.
             mWrapped = null;
             mFinishCB = null;
