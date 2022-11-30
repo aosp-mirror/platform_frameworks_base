@@ -122,6 +122,13 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_NEW_KEYBOARD_TRACKPAD = "settings_new_keyboard_trackpad";
 
     /**
+     * Enable trackpad gesture settings UI
+     * @hide
+     */
+    public static final String SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE =
+            "settings_new_keyboard_trackpad_gesture";
+
+    /**
      * Enable the new pages which is implemented with SPA.
      * @hide
      */
@@ -171,6 +178,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_SHORTCUT, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_MODIFIER_KEY, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD, "false");
+        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA, "false");
         DEFAULT_FLAGS.put(SETTINGS_ADB_METRICS_WRITER, "false");
         DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_ENROLLMENT, "false");
@@ -190,6 +198,7 @@ public class FeatureFlagUtils {
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_SHORTCUT);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_MODIFIER_KEY);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_TRACKPAD);
+        PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE);
     }
 
     /**
