@@ -348,6 +348,12 @@ object Flags {
     // TODO(b/256873975): Tracking Bug
     @JvmField @Keep val WM_BUBBLE_BAR = unreleasedFlag(1111, "wm_bubble_bar")
 
+    // TODO(b/260271148): Tracking bug
+    @Keep
+    @JvmField
+    val WM_DESKTOP_WINDOWING_2 =
+        sysPropBooleanFlag(1112, "persist.wm.debug.desktop_mode_2", default = false)
+
     // 1200 - predictive back
     @Keep
     @JvmField
