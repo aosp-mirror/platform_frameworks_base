@@ -49,35 +49,30 @@ object SwitchPreferencePageProvider : SettingsPageProvider {
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
             SettingsEntryBuilder.create( "SwitchPreference", owner)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     SampleSwitchPreference()
                 }.build()
         )
         entryList.add(
             SettingsEntryBuilder.create( "SwitchPreference with summary", owner)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     SampleSwitchPreferenceWithSummary()
                 }.build()
         )
         entryList.add(
             SettingsEntryBuilder.create( "SwitchPreference with async summary", owner)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     SampleSwitchPreferenceWithAsyncSummary()
                 }.build()
         )
         entryList.add(
             SettingsEntryBuilder.create( "SwitchPreference not changeable", owner)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     SampleNotChangeableSwitchPreference()
                 }.build()
         )
         entryList.add(
             SettingsEntryBuilder.create( "SwitchPreference with icon", owner)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     SampleSwitchPreferenceWithIcon()
                 }.build()
@@ -88,7 +83,6 @@ object SwitchPreferencePageProvider : SettingsPageProvider {
 
     fun buildInjectEntry(): SettingsEntryBuilder {
         return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
-            .setIsAllowSearch(true)
             .setUiLayoutFn {
                 Preference(object : PreferenceModel {
                     override val title = TITLE

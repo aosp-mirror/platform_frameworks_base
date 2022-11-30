@@ -20,6 +20,7 @@ import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
+import com.android.settingslib.spa.framework.common.EntrySearchData
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPage
@@ -42,7 +43,7 @@ object FooterPageProvider : SettingsPageProvider {
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
             SettingsEntryBuilder.create( "Some Preference", owner)
-                .setIsAllowSearch(true)
+                .setSearchDataFn { EntrySearchData(title = "Some Preference") }
                 .setUiLayoutFn {
                     Preference(remember {
                         object : PreferenceModel {
@@ -58,7 +59,6 @@ object FooterPageProvider : SettingsPageProvider {
 
     fun buildInjectEntry(): SettingsEntryBuilder {
         return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
-            .setIsAllowSearch(true)
             .setUiLayoutFn {
                 Preference(object : PreferenceModel {
                     override val title = TITLE

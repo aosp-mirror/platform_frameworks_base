@@ -26,12 +26,10 @@ import java.util.Objects;
 /**
  * Response from a credential provider, containing credential entries and other associated
  * data to be shown on the account selector UI.
- *
- * @hide
  */
 public final class GetCredentialsResponse implements Parcelable {
     /** Content to be used for the UI. */
-    private final @Nullable CredentialsDisplayContent mCredentialsDisplayContent;
+    private final @Nullable CredentialsResponseContent mCredentialsResponseContent;
 
     /**
      * Authentication action that must be launched and completed before showing any content
@@ -40,11 +38,17 @@ public final class GetCredentialsResponse implements Parcelable {
     private final @Nullable Action mAuthenticationAction;
 
     /**
-     * Creates a {@link GetCredentialsRequest} instance with an authentication action set.
+     * Creates a {@link GetCredentialsResponse} instance with an authentication {@link Action} set.
      * Providers must use this method when no content can be shown before authentication.
      *
-     * Once the authentication action activity is launched, and the user is authenticated, providers
-     * should create another response with {@link CredentialsDisplayContent} using
+     * <p> When the user selects this {@code authenticationAction}, the system invokes the
+     * corresponding {@code pendingIntent}. Once the authentication flow is complete,
+     * the {@link android.app.Activity} result should be set
+     * to {@link android.app.Activity#RESULT_OK} and the
+     * {@link CredentialProviderService#EXTRA_GET_CREDENTIALS_CONTENT_RESULT} extra should be set
+     * with a fully populated {@link CredentialsResponseContent} object.
+     * the authentication action activity is launched, and the user is authenticated, providers
+     * should create another response with {@link CredentialsResponseContent} using
      * {@code createWithDisplayContent}, and add that response to the result of the authentication
      * activity.
      *
@@ -58,27 +62,27 @@ public final class GetCredentialsResponse implements Parcelable {
     }
 
     /**
-     * Creates a {@link GetCredentialsRequest} instance with display content to be shown on the UI.
+     * Creates a {@link GetCredentialsRequest} instance with content to be shown on the UI.
      * Providers must use this method when there is content to be shown without top level
-     * authentication required.
+     * authentication required, including credential entries, action entries or a remote entry,
      *
-     * @throws NullPointerException If {@code credentialsDisplayContent} is null.
+     * @throws NullPointerException If {@code credentialsResponseContent} is null.
      */
-    public static @NonNull GetCredentialsResponse createWithDisplayContent(
-            @NonNull CredentialsDisplayContent credentialsDisplayContent) {
-        Objects.requireNonNull(credentialsDisplayContent,
-                "credentialsDisplayContent must not be null");
-        return new GetCredentialsResponse(credentialsDisplayContent, null);
+    public static @NonNull GetCredentialsResponse createWithResponseContent(
+            @NonNull CredentialsResponseContent credentialsResponseContent) {
+        Objects.requireNonNull(credentialsResponseContent,
+                "credentialsResponseContent must not be null");
+        return new GetCredentialsResponse(credentialsResponseContent, null);
     }
 
-    private GetCredentialsResponse(@Nullable CredentialsDisplayContent credentialsDisplayContent,
+    private GetCredentialsResponse(@Nullable CredentialsResponseContent credentialsResponseContent,
             @Nullable Action authenticationAction) {
-        mCredentialsDisplayContent = credentialsDisplayContent;
+        mCredentialsResponseContent = credentialsResponseContent;
         mAuthenticationAction = authenticationAction;
     }
 
     private GetCredentialsResponse(@NonNull Parcel in) {
-        mCredentialsDisplayContent = in.readTypedObject(CredentialsDisplayContent.CREATOR);
+        mCredentialsResponseContent = in.readTypedObject(CredentialsResponseContent.CREATOR);
         mAuthenticationAction = in.readTypedObject(Action.CREATOR);
     }
 
@@ -102,23 +106,23 @@ public final class GetCredentialsResponse implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeTypedObject(mCredentialsDisplayContent, flags);
+        dest.writeTypedObject(mCredentialsResponseContent, flags);
         dest.writeTypedObject(mAuthenticationAction, flags);
     }
 
     /**
-     * Returns the authentication action to be invoked before any other content
-     * can be shown to the user.
+     * If this response represents a top level authentication action, returns the authentication
+     * action to be invoked before any other content can be shown to the user.
      */
     public @Nullable Action getAuthenticationAction() {
         return mAuthenticationAction;
     }
 
     /**
-     * Returns the credentialDisplayContent that does not require authentication, and
-     * can be shown to the user on the account selector UI.
+     * Returns the actual content to be displayed on the selector, if this response does not
+     * require any top level authentication.
      */
-    public @Nullable CredentialsDisplayContent getCredentialsDisplayContent() {
-        return mCredentialsDisplayContent;
+    public @Nullable CredentialsResponseContent getCredentialsResponseContent() {
+        return mCredentialsResponseContent;
     }
 }

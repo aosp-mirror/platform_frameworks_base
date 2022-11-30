@@ -48,7 +48,6 @@ object SliderPageProvider : SettingsPageProvider {
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
             SettingsEntryBuilder.create("Simple Slider", owner)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     SliderPreference(object : SliderPreferenceModel {
                         override val title = "Simple Slider"
@@ -58,7 +57,6 @@ object SliderPageProvider : SettingsPageProvider {
         )
         entryList.add(
             SettingsEntryBuilder.create("Slider with icon", owner)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     SliderPreference(object : SliderPreferenceModel {
                         override val title = "Slider with icon"
@@ -72,7 +70,6 @@ object SliderPageProvider : SettingsPageProvider {
         )
         entryList.add(
             SettingsEntryBuilder.create("Slider with changeable icon", owner)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     val initValue = 0
                     var icon by remember { mutableStateOf(Icons.Outlined.MusicOff) }
@@ -93,7 +90,6 @@ object SliderPageProvider : SettingsPageProvider {
         )
         entryList.add(
             SettingsEntryBuilder.create("Slider with steps", owner)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     SliderPreference(object : SliderPreferenceModel {
                         override val title = "Slider with steps"
@@ -109,7 +105,6 @@ object SliderPageProvider : SettingsPageProvider {
 
     fun buildInjectEntry(): SettingsEntryBuilder {
         return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
-            .setIsAllowSearch(true)
             .setUiLayoutFn {
                 Preference(object : PreferenceModel {
                     override val title = TITLE

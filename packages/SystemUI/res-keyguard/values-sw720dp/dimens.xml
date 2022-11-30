@@ -17,10 +17,5 @@
 */
 -->
 <resources>
-
-    <!-- Height of the sliding KeyguardSecurityContainer
-         (includes 2x keyguard_security_view_top_margin) -->
-    <dimen name="keyguard_security_height">470dp</dimen>
-
     <dimen name="widget_big_font_size">100dp</dimen>
 </resources>

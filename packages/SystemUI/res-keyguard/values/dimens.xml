@@ -29,9 +29,6 @@
          (includes 2x keyguard_security_view_top_margin) -->
     <dimen name="keyguard_security_height">420dp</dimen>
 
-    <!-- Max Height of the sliding KeyguardSecurityContainer
-         (includes 2x keyguard_security_view_top_margin) -->
-
     <!-- pin/password field max height -->
     <dimen name="keyguard_password_height">80dp</dimen>
 

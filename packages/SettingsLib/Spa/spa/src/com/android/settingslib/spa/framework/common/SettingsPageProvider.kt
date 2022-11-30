@@ -51,12 +51,3 @@ interface SettingsPageProvider {
         }
     }
 }
-
-fun SettingsPageProvider.createSettingsPage(arguments: Bundle? = null): SettingsPage {
-    return SettingsPage.create(
-        name = name,
-        displayName = displayName,
-        parameter = parameter,
-        arguments = arguments
-    )
-}

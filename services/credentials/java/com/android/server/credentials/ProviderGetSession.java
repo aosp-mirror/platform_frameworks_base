@@ -29,7 +29,7 @@ import android.credentials.ui.ProviderPendingIntentResponse;
 import android.service.credentials.Action;
 import android.service.credentials.CredentialEntry;
 import android.service.credentials.CredentialProviderInfo;
-import android.service.credentials.CredentialsDisplayContent;
+import android.service.credentials.CredentialsResponseContent;
 import android.service.credentials.GetCredentialsRequest;
 import android.service.credentials.GetCredentialsResponse;
 import android.util.Log;
@@ -211,20 +211,20 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsRequ
                     prepareUiAuthenticationAction(mProviderResponse.getAuthenticationAction()),
                     /*remoteEntry=*/null);
         }
-        if (mProviderResponse.getCredentialsDisplayContent() != null) {
-            Log.i(TAG, "In prepareUiData displayContent not null");
+        if (mProviderResponse.getCredentialsResponseContent() != null) {
+            Log.i(TAG, "In prepareUiData credentialsResponseContent not null");
             return prepareUiProviderData(prepareUiActionEntries(
-                            mProviderResponse.getCredentialsDisplayContent().getActions()),
-                    prepareUiCredentialEntries(mProviderResponse.getCredentialsDisplayContent()
+                            mProviderResponse.getCredentialsResponseContent().getActions()),
+                    prepareUiCredentialEntries(mProviderResponse.getCredentialsResponseContent()
                             .getCredentialEntries()),
                     /*authenticationAction=*/null,
                     prepareUiRemoteEntry(mProviderResponse
-                            .getCredentialsDisplayContent().getRemoteCredentialEntry()));
+                            .getCredentialsResponseContent().getRemoteCredentialEntry()));
         }
         return null;
     }
 
-    private Entry prepareUiRemoteEntry(Action remoteCredentialEntry) {
+    private Entry prepareUiRemoteEntry(CredentialEntry remoteCredentialEntry) {
         if (remoteCredentialEntry == null) {
             return null;
         }
@@ -316,11 +316,11 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsRequ
             @Nullable ProviderPendingIntentResponse providerPendingIntentResponse) {
         if (providerPendingIntentResponse != null) {
             if (PendingIntentResultHandler.isSuccessfulResponse(providerPendingIntentResponse)) {
-                CredentialsDisplayContent content = PendingIntentResultHandler
-                        .extractCredentialsDisplayContent(providerPendingIntentResponse
+                CredentialsResponseContent content = PendingIntentResultHandler
+                        .extractResponseContent(providerPendingIntentResponse
                                 .getResultData());
                 if (content != null) {
-                    onUpdateResponse(GetCredentialsResponse.createWithDisplayContent(content));
+                    onUpdateResponse(GetCredentialsResponse.createWithResponseContent(content));
                     return;
                 }
             }
@@ -342,7 +342,7 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsRequ
         if (response.getAuthenticationAction() != null) {
             Log.i(TAG , "updateResponse with authentication entry");
             updateStatusAndInvokeCallback(Status.REQUIRES_AUTHENTICATION);
-        } else if (response.getCredentialsDisplayContent() != null) {
+        } else if (response.getCredentialsResponseContent() != null) {
             Log.i(TAG , "updateResponse with credentialEntries");
             // TODO validate response
             updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED);

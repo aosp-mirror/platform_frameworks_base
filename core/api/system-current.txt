@@ -7269,6 +7269,7 @@ package android.media.tv.tuner {
     method @NonNull public java.util.List<android.media.tv.tuner.frontend.FrontendStatusReadiness> getFrontendStatusReadiness(@NonNull int[]);
     method @IntRange(from=0xffffffff) public int getMaxNumberOfFrontends(int);
     method @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public boolean hasUnusedFrontend(int);
+    method public boolean isLnaSupported();
     method public boolean isLowestPriority(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_DESCRAMBLER) public android.media.tv.tuner.Descrambler openDescrambler();
     method @Nullable public android.media.tv.tuner.dvr.DvrPlayback openDvrPlayback(long, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.dvr.OnPlaybackStatusChangedListener);
@@ -12818,14 +12819,14 @@ package android.telephony {
     method @NonNull public android.telephony.BarringInfo createLocationInfoSanitizedCopy();
   }
 
-  @Deprecated public final class CallAttributes implements android.os.Parcelable {
-    ctor @Deprecated public CallAttributes(@NonNull android.telephony.PreciseCallState, int, @NonNull android.telephony.CallQuality);
-    method @Deprecated public int describeContents();
-    method @Deprecated @NonNull public android.telephony.CallQuality getCallQuality();
-    method @Deprecated public int getNetworkType();
-    method @Deprecated @NonNull public android.telephony.PreciseCallState getPreciseCallState();
-    method @Deprecated public void writeToParcel(android.os.Parcel, int);
-    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallAttributes> CREATOR;
+  public final class CallAttributes implements android.os.Parcelable {
+    ctor public CallAttributes(@NonNull android.telephony.PreciseCallState, int, @NonNull android.telephony.CallQuality);
+    method public int describeContents();
+    method @NonNull public android.telephony.CallQuality getCallQuality();
+    method public int getNetworkType();
+    method @NonNull public android.telephony.PreciseCallState getPreciseCallState();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallAttributes> CREATOR;
   }
 
   public final class CallForwardingInfo implements android.os.Parcelable {
@@ -12903,28 +12904,6 @@ package android.telephony {
     method @NonNull public android.telephony.CallQuality.Builder setOutgoingSilenceDetectedAtCallSetup(boolean);
     method @NonNull public android.telephony.CallQuality.Builder setRtpInactivityDetected(boolean);
     method @NonNull public android.telephony.CallQuality.Builder setUplinkCallQualityLevel(int);
-  }
-
-  public final class CallState implements android.os.Parcelable {
-    method public int describeContents();
-    method @Nullable public android.telephony.CallQuality getCallQuality();
-    method public int getCallState();
-    method public int getImsCallServiceType();
-    method @Nullable public String getImsCallSessionId();
-    method public int getImsCallType();
-    method public int getNetworkType();
-    method public void writeToParcel(@Nullable android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallState> CREATOR;
-  }
-
-  public static final class CallState.Builder {
-    ctor public CallState.Builder(int);
-    method @NonNull public android.telephony.CallState build();
-    method @NonNull public android.telephony.CallState.Builder setCallQuality(@Nullable android.telephony.CallQuality);
-    method @NonNull public android.telephony.CallState.Builder setImsCallServiceType(int);
-    method @NonNull public android.telephony.CallState.Builder setImsCallSessionId(@Nullable String);
-    method @NonNull public android.telephony.CallState.Builder setImsCallType(int);
-    method @NonNull public android.telephony.CallState.Builder setNetworkType(int);
   }
 
   public class CarrierConfigManager {
@@ -13677,8 +13656,7 @@ package android.telephony {
   }
 
   public static interface TelephonyCallback.CallAttributesListener {
-    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public default void onCallAttributesChanged(@NonNull android.telephony.CallAttributes);
-    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public default void onCallStatesChanged(@NonNull java.util.List<android.telephony.CallState>);
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onCallAttributesChanged(@NonNull android.telephony.CallAttributes);
   }
 
   public static interface TelephonyCallback.DataEnabledListener {
@@ -14779,7 +14757,6 @@ package android.telephony.ims {
     field public static final int CALL_RESTRICT_CAUSE_HD = 3; // 0x3
     field public static final int CALL_RESTRICT_CAUSE_NONE = 0; // 0x0
     field public static final int CALL_RESTRICT_CAUSE_RAT = 1; // 0x1
-    field public static final int CALL_TYPE_NONE = 0; // 0x0
     field public static final int CALL_TYPE_VIDEO_N_VOICE = 3; // 0x3
     field public static final int CALL_TYPE_VOICE = 2; // 0x2
     field public static final int CALL_TYPE_VOICE_N_VIDEO = 1; // 0x1
@@ -16144,6 +16121,12 @@ package android.view.accessibility {
   public abstract class AccessibilityDisplayProxy {
     ctor public AccessibilityDisplayProxy(int, @NonNull java.util.concurrent.Executor, @NonNull java.util.List<android.accessibilityservice.AccessibilityServiceInfo>);
     method public int getDisplayId();
+    method @NonNull public final java.util.List<android.accessibilityservice.AccessibilityServiceInfo> getInstalledAndEnabledServices();
+    method @NonNull public java.util.List<android.view.accessibility.AccessibilityWindowInfo> getWindows();
+    method public void interrupt();
+    method public void onAccessibilityEvent(@NonNull android.view.accessibility.AccessibilityEvent);
+    method public void onProxyConnected();
+    method public void setInstalledAndEnabledServices(@NonNull java.util.List<android.accessibilityservice.AccessibilityServiceInfo>);
   }
 
   public final class AccessibilityManager {

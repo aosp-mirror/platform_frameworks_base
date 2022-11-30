@@ -156,6 +156,15 @@ data class SettingsPage(
     }
 }
 
+fun SettingsPageProvider.createSettingsPage(arguments: Bundle? = null): SettingsPage {
+    return SettingsPage.create(
+        name = name,
+        displayName = displayName,
+        parameter = parameter,
+        arguments = arguments
+    )
+}
+
 fun String.toHashId(): String {
     return this.hashCode().toUInt().toString(36)
 }

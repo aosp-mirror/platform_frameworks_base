@@ -29,6 +29,7 @@ import static android.view.WindowInsets.Type.STATUS_BARS;
 import static android.view.WindowInsets.Type.SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.TAPPABLE_ELEMENT;
 import static android.view.WindowInsets.Type.all;
+import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.indexOf;
 import static android.view.WindowInsets.Type.systemBars;
@@ -597,7 +598,10 @@ public final class WindowInsets {
         return new WindowInsets(null, null,
                 mTypeVisibilityMap,
                 mIsRound, mAlwaysConsumeSystemBars,
-                displayCutoutCopyConstructorArgument(this),
+                // If the system window insets types contain displayCutout, we should also consume
+                // it.
+                (mCompatInsetsTypes & displayCutout()) != 0
+                        ? null : displayCutoutCopyConstructorArgument(this),
                 mRoundedCorners, mPrivacyIndicatorBounds, mCompatInsetsTypes,
                 mCompatIgnoreVisibility);
     }

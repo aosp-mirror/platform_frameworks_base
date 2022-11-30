@@ -358,13 +358,37 @@ public class WallpaperManager {
         }
     }
 
+    /**
+     * Convenience class representing a cached wallpaper bitmap and associated data.
+     */
+    private static class CachedWallpaper {
+        final Bitmap mCachedWallpaper;
+        final int mCachedWallpaperUserId;
+        @SetWallpaperFlags final int mWhich;
+
+        CachedWallpaper(Bitmap cachedWallpaper, int cachedWallpaperUserId,
+                @SetWallpaperFlags int which) {
+            mCachedWallpaper = cachedWallpaper;
+            mCachedWallpaperUserId = cachedWallpaperUserId;
+            mWhich = which;
+        }
+
+        /**
+         * Returns true if this object represents a valid cached bitmap for the given parameters,
+         * otherwise false.
+         */
+        boolean isValid(int userId, @SetWallpaperFlags int which) {
+            return userId == mCachedWallpaperUserId && which == mWhich
+                    && !mCachedWallpaper.isRecycled();
+        }
+    }
+
     private static class Globals extends IWallpaperManagerCallback.Stub {
         private final IWallpaperManager mService;
         private boolean mColorCallbackRegistered;
         private final ArrayList<Pair<OnColorsChangedListener, Handler>> mColorListeners =
                 new ArrayList<>();
-        private Bitmap mCachedWallpaper;
-        private int mCachedWallpaperUserId;
+        private CachedWallpaper mCachedWallpaper;
         private Bitmap mDefaultWallpaper;
         private Handler mMainLooperHandler;
         private ArrayMap<LocalWallpaperColorConsumer, ArraySet<RectF>> mLocalColorCallbackAreas =
@@ -536,6 +560,15 @@ public class WallpaperManager {
                     false /* hardware */, cmProxy);
         }
 
+        /**
+         * Retrieves the current wallpaper Bitmap, caching the result. If this fails and
+         * `returnDefault` is set, returns the Bitmap for the default wallpaper; otherwise returns
+         * null.
+         *
+         * More sophisticated caching might a) store and compare the wallpaper ID so that
+         * consecutive calls for FLAG_SYSTEM and FLAG_LOCK could return the cached wallpaper if
+         * no lock screen wallpaper is set, or b) separately cache home and lock screen wallpaper.
+         */
         public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault,
                 @SetWallpaperFlags int which, int userId, boolean hardware,
                 ColorManagementProxy cmProxy) {
@@ -549,16 +582,14 @@ public class WallpaperManager {
                 }
             }
             synchronized (this) {
-                if (mCachedWallpaper != null && mCachedWallpaperUserId == userId
-                        && !mCachedWallpaper.isRecycled()) {
-                    return mCachedWallpaper;
+                if (mCachedWallpaper != null && mCachedWallpaper.isValid(userId, which)) {
+                    return mCachedWallpaper.mCachedWallpaper;
                 }
                 mCachedWallpaper = null;
-                mCachedWallpaperUserId = 0;
+                Bitmap currentWallpaper = null;
                 try {
-                    mCachedWallpaper = getCurrentWallpaperLocked(
-                            context, userId, hardware, cmProxy);
-                    mCachedWallpaperUserId = userId;
+                    currentWallpaper = getCurrentWallpaperLocked(
+                            context, which, userId, hardware, cmProxy);
                 } catch (OutOfMemoryError e) {
                     Log.w(TAG, "Out of memory loading the current wallpaper: " + e);
                 } catch (SecurityException e) {
@@ -570,8 +601,9 @@ public class WallpaperManager {
                         throw e;
                     }
                 }
-                if (mCachedWallpaper != null) {
-                    return mCachedWallpaper;
+                if (currentWallpaper != null) {
+                    mCachedWallpaper = new CachedWallpaper(currentWallpaper, userId, which);
+                    return currentWallpaper;
                 }
             }
             if (returnDefault) {
@@ -587,7 +619,9 @@ public class WallpaperManager {
             return null;
         }
 
-        public Rect peekWallpaperDimensions(Context context, boolean returnDefault, int userId) {
+        @Nullable
+        public Rect peekWallpaperDimensions(Context context, boolean returnDefault,
+                @SetWallpaperFlags int which, int userId) {
             if (mService != null) {
                 try {
                     if (!mService.isWallpaperSupported(context.getOpPackageName())) {
@@ -600,11 +634,10 @@ public class WallpaperManager {
 
             Rect dimensions = null;
             synchronized (this) {
-                ParcelFileDescriptor pfd = null;
-                try {
-                    Bundle params = new Bundle();
-                    pfd = mService.getWallpaperWithFeature(context.getOpPackageName(),
-                            context.getAttributionTag(), this, FLAG_SYSTEM, params, userId);
+                Bundle params = new Bundle();
+                try (ParcelFileDescriptor pfd = mService.getWallpaperWithFeature(
+                        context.getOpPackageName(), context.getAttributionTag(), this, which,
+                        params, userId)) {
                     // Let's peek user wallpaper first.
                     if (pfd != null) {
                         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -614,19 +647,14 @@ public class WallpaperManager {
                     }
                 } catch (RemoteException ex) {
                     Log.w(TAG, "peek wallpaper dimensions failed", ex);
-                } finally {
-                    if (pfd != null) {
-                        try {
-                            pfd.close();
-                        } catch (IOException ignored) {
-                        }
-                    }
+                } catch (IOException ignored) {
+                    // This is only thrown on close and can be safely ignored.
                 }
             }
             // If user wallpaper is unavailable, may be the default one instead.
             if ((dimensions == null || dimensions.width() == 0 || dimensions.height() == 0)
                     && returnDefault) {
-                InputStream is = openDefaultWallpaper(context, FLAG_SYSTEM);
+                InputStream is = openDefaultWallpaper(context, which);
                 if (is != null) {
                     try {
                         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -644,13 +672,12 @@ public class WallpaperManager {
         void forgetLoadedWallpaper() {
             synchronized (this) {
                 mCachedWallpaper = null;
-                mCachedWallpaperUserId = 0;
                 mDefaultWallpaper = null;
             }
         }
 
-        private Bitmap getCurrentWallpaperLocked(Context context, int userId, boolean hardware,
-                ColorManagementProxy cmProxy) {
+        private Bitmap getCurrentWallpaperLocked(Context context, @SetWallpaperFlags int which,
+                int userId, boolean hardware, ColorManagementProxy cmProxy) {
             if (mService == null) {
                 Log.w(TAG, "WallpaperService not running");
                 return null;
@@ -659,7 +686,7 @@ public class WallpaperManager {
             try {
                 Bundle params = new Bundle();
                 ParcelFileDescriptor pfd = mService.getWallpaperWithFeature(
-                        context.getOpPackageName(), context.getAttributionTag(), this, FLAG_SYSTEM,
+                        context.getOpPackageName(), context.getAttributionTag(), this, which,
                         params, userId);
 
                 if (pfd != null) {
@@ -1148,10 +1175,10 @@ public class WallpaperManager {
      * @return the dimensions of system wallpaper
      * @hide
      */
+    @TestApi
     @Nullable
     public Rect peekBitmapDimensions() {
-        return sGlobals.peekWallpaperDimensions(
-                mContext, true /* returnDefault */, mContext.getUserId());
+        return peekBitmapDimensions(FLAG_SYSTEM);
     }
 
     /**
@@ -1162,9 +1189,12 @@ public class WallpaperManager {
      * @return the dimensions of system wallpaper
      * @hide
      */
+    @TestApi
     @Nullable
     public Rect peekBitmapDimensions(@SetWallpaperFlags int which) {
-        return peekBitmapDimensions();
+        checkExactlyOneWallpaperFlagSet(which);
+        return sGlobals.peekWallpaperDimensions(mContext, true /* returnDefault */, which,
+                mContext.getUserId());
     }
 
     /**

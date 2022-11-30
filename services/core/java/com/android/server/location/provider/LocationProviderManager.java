@@ -661,6 +661,8 @@ public class LocationProviderManager extends
                 if (!GPS_PROVIDER.equals(mName)) {
                     Log.e(TAG, "adas gnss bypass request received in non-gps provider");
                     adasGnssBypass = false;
+                } else if (!mUserHelper.isCurrentUserId(getIdentity().getUserId())) {
+                    adasGnssBypass = false;
                 } else if (!mLocationSettings.getUserSettings(
                         getIdentity().getUserId()).isAdasGnssLocationEnabled()) {
                     adasGnssBypass = false;
@@ -1712,6 +1714,8 @@ public class LocationProviderManager extends
             if (!GPS_PROVIDER.equals(mName)) {
                 Log.e(TAG, "adas gnss bypass request received in non-gps provider");
                 adasGnssBypass = false;
+            } else if (!mUserHelper.isCurrentUserId(identity.getUserId())) {
+                adasGnssBypass = false;
             } else if (!mLocationSettings.getUserSettings(
                     identity.getUserId()).isAdasGnssLocationEnabled()) {
                 adasGnssBypass = false;
@@ -2193,7 +2197,7 @@ public class LocationProviderManager extends
                 if (!isEnabled(identity.getUserId())) {
                     return false;
                 }
-                if (!mUserHelper.isCurrentUserId(identity.getUserId())) {
+                if (!mUserHelper.isVisibleUserId(identity.getUserId())) {
                     return false;
                 }
             }
@@ -2322,6 +2326,10 @@ public class LocationProviderManager extends
 
             switch (change) {
                 case UserListener.CURRENT_USER_CHANGED:
+                    // current user changes affect whether system server location requests are
+                    // allowed to access location, and visibility changes affect whether any given
+                    // user may access location.
+                case UserListener.USER_VISIBILITY_CHANGED:
                     updateRegistrations(
                             registration -> registration.getIdentity().getUserId() == userId);
                     break;
