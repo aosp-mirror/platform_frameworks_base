@@ -704,7 +704,9 @@ public class OomAdjuster {
                 ConnectionRecord cr = psr.getConnectionAt(i);
                 ProcessRecord service = (cr.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0
                         ? cr.binding.service.isolationHostProc : cr.binding.service.app;
-                if (service == null || service == pr) {
+                if (service == null || service == pr
+                        || ((service.mState.getMaxAdj() >= ProcessList.SYSTEM_ADJ)
+                                && (service.mState.getMaxAdj() < FOREGROUND_APP_ADJ))) {
                     continue;
                 }
                 containsCycle |= service.mState.isReachable();
@@ -724,7 +726,9 @@ public class OomAdjuster {
             for (int i = ppr.numberOfProviderConnections() - 1; i >= 0; i--) {
                 ContentProviderConnection cpc = ppr.getProviderConnectionAt(i);
                 ProcessRecord provider = cpc.provider.proc;
-                if (provider == null || provider == pr) {
+                if (provider == null || provider == pr
+                        || ((provider.mState.getMaxAdj() >= ProcessList.SYSTEM_ADJ)
+                                && (provider.mState.getMaxAdj() < FOREGROUND_APP_ADJ))) {
                     continue;
                 }
                 containsCycle |= provider.mState.isReachable();
