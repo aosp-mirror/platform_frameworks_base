@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.ui
 
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.phone.StatusBarIconController
@@ -29,9 +30,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * This class is intended to provide a context to collect on the
@@ -50,9 +52,9 @@ constructor(
     interactor: MobileIconsInteractor,
     private val iconController: StatusBarIconController,
     private val iconsViewModelFactory: MobileIconsViewModel.Factory,
-    @Application scope: CoroutineScope,
+    @Application private val scope: CoroutineScope,
     private val statusBarPipelineFlags: StatusBarPipelineFlags,
-) {
+) : CoreStartable {
     private val mobileSubIds: Flow<List<Int>> =
         interactor.filteredSubscriptions.mapLatest { infos ->
             infos.map { subscriptionInfo -> subscriptionInfo.subscriptionId }
@@ -66,18 +68,19 @@ constructor(
      * NOTE: this should go away as the view presenter learns more about this data pipeline
      */
     private val mobileSubIdsState: StateFlow<List<Int>> =
-        mobileSubIds
-            .onEach {
-                // Only notify the icon controller if we want to *render* the new icons.
-                // Note that this flow may still run if
-                // [statusBarPipelineFlags.runNewMobileIconsBackend] is true because we may want to
-                // get the logging data without rendering.
-                if (statusBarPipelineFlags.useNewMobileIcons()) {
-                    // Notify the icon controller here so that it knows to add icons
-                    iconController.setNewMobileIconSubIds(it)
-                }
+        mobileSubIds.stateIn(scope, SharingStarted.WhileSubscribed(), listOf())
+
+    override fun start() {
+        // Only notify the icon controller if we want to *render* the new icons.
+        // Note that this flow may still run if
+        // [statusBarPipelineFlags.runNewMobileIconsBackend] is true because we may want to
+        // get the logging data without rendering.
+        if (statusBarPipelineFlags.useNewMobileIcons()) {
+            scope.launch {
+                mobileSubIds.collectLatest { iconController.setNewMobileIconSubIds(it) }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), listOf())
+        }
+    }
 
     /**
      * Create a MobileIconsViewModel for a given [IconManager], and bind it to to the manager's
