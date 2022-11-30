@@ -41,13 +41,17 @@ import platform.test.screenshot.matchers.BitmapMatcher
 /** A rule for View screenshot diff unit tests. */
 class ViewScreenshotTestRule(
     emulationSpec: DeviceEmulationSpec,
-    private val matcher: BitmapMatcher = UnitTestBitmapMatcher
+    private val matcher: BitmapMatcher = UnitTestBitmapMatcher,
+    assetsPathRelativeToBuildRoot: String
 ) : TestRule {
     private val colorsRule = MaterialYouColorsRule()
     private val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
     private val screenshotRule =
         ScreenshotTestRule(
-            SystemUIGoldenImagePathManager(getEmulatedDevicePathConfig(emulationSpec))
+            SystemUIGoldenImagePathManager(
+                getEmulatedDevicePathConfig(emulationSpec),
+                assetsPathRelativeToBuildRoot
+            )
         )
     private val activityRule = ActivityScenarioRule(ScreenshotActivity::class.java)
     private val delegateRule =

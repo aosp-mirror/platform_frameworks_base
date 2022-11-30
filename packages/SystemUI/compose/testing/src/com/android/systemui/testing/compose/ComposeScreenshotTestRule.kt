@@ -38,12 +38,18 @@ import platform.test.screenshot.ScreenshotTestRule
 import platform.test.screenshot.getEmulatedDevicePathConfig
 
 /** A rule for Compose screenshot diff tests. */
-class ComposeScreenshotTestRule(emulationSpec: DeviceEmulationSpec) : TestRule {
+class ComposeScreenshotTestRule(
+    emulationSpec: DeviceEmulationSpec,
+    assetPathRelativeToBuildRoot: String
+) : TestRule {
     private val colorsRule = MaterialYouColorsRule()
     private val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
     private val screenshotRule =
         ScreenshotTestRule(
-            SystemUIGoldenImagePathManager(getEmulatedDevicePathConfig(emulationSpec))
+            SystemUIGoldenImagePathManager(
+                getEmulatedDevicePathConfig(emulationSpec),
+                assetPathRelativeToBuildRoot
+            )
         )
     private val composeRule = createAndroidComposeRule<ScreenshotActivity>()
     private val delegateRule =
