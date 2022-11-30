@@ -104,12 +104,15 @@ std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(std::string path,
   }
 
   struct stat sb{.st_mtime = -1};
-  if ((released_fd < 0 ? stat(path.c_str(), &sb) : fstat(released_fd, &sb)) < 0) {
-    // Stat requires execute permissions on all directories path to the file. If the process does
-    // not have execute permissions on this file, allow the zip to be opened but IsUpToDate() will
-    // always have to return true.
-    LOG(WARNING) << "Failed to stat file '" << path << "': "
-                 << base::SystemErrorCodeToString(errno);
+  // Skip all up-to-date checks if the file won't ever change.
+  if (!isReadonlyFilesystem(path.c_str())) {
+    if ((released_fd < 0 ? stat(path.c_str(), &sb) : fstat(released_fd, &sb)) < 0) {
+      // Stat requires execute permissions on all directories path to the file. If the process does
+      // not have execute permissions on this file, allow the zip to be opened but IsUpToDate() will
+      // always have to return true.
+      LOG(WARNING) << "Failed to stat file '" << path << "': "
+                   << base::SystemErrorCodeToString(errno);
+    }
   }
 
   return std::unique_ptr<ZipAssetsProvider>(
@@ -136,12 +139,15 @@ std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(base::unique_fd fd,
   }
 
   struct stat sb{.st_mtime = -1};
-  if (fstat(released_fd, &sb) < 0) {
-    // Stat requires execute permissions on all directories path to the file. If the process does
-    // not have execute permissions on this file, allow the zip to be opened but IsUpToDate() will
-    // always have to return true.
-    LOG(WARNING) << "Failed to fstat file '" << friendly_name << "': "
-                 << base::SystemErrorCodeToString(errno);
+  // Skip all up-to-date checks if the file won't ever change.
+  if (!isReadonlyFilesystem(released_fd)) {
+    if (fstat(released_fd, &sb) < 0) {
+      // Stat requires execute permissions on all directories path to the file. If the process does
+      // not have execute permissions on this file, allow the zip to be opened but IsUpToDate() will
+      // always have to return true.
+      LOG(WARNING) << "Failed to fstat file '" << friendly_name
+                   << "': " << base::SystemErrorCodeToString(errno);
+    }
   }
 
   return std::unique_ptr<ZipAssetsProvider>(
@@ -278,6 +284,9 @@ const std::string& ZipAssetsProvider::GetDebugName() const {
 }
 
 bool ZipAssetsProvider::IsUpToDate() const {
+  if (last_mod_time_ == -1) {
+    return true;
+  }
   struct stat sb{};
   if (fstat(GetFileDescriptor(zip_handle_.get()), &sb) < 0) {
     // If fstat fails on the zip archive, return true so the zip archive the resource system does
@@ -291,7 +300,7 @@ DirectoryAssetsProvider::DirectoryAssetsProvider(std::string&& path, time_t last
     : dir_(std::forward<std::string>(path)), last_mod_time_(last_mod_time) {}
 
 std::unique_ptr<DirectoryAssetsProvider> DirectoryAssetsProvider::Create(std::string path) {
-  struct stat sb{};
+  struct stat sb;
   const int result = stat(path.c_str(), &sb);
   if (result == -1) {
     LOG(ERROR) << "Failed to find directory '" << path << "'.";
@@ -307,8 +316,9 @@ std::unique_ptr<DirectoryAssetsProvider> DirectoryAssetsProvider::Create(std::st
     path += OS_PATH_SEPARATOR;
   }
 
-  return std::unique_ptr<DirectoryAssetsProvider>(new DirectoryAssetsProvider(std::move(path),
-                                                                              sb.st_mtime));
+  const bool isReadonly = isReadonlyFilesystem(path.c_str());
+  return std::unique_ptr<DirectoryAssetsProvider>(
+      new DirectoryAssetsProvider(std::move(path), isReadonly ? -1 : sb.st_mtime));
 }
 
 std::unique_ptr<Asset> DirectoryAssetsProvider::OpenInternal(const std::string& path,
@@ -338,7 +348,10 @@ const std::string& DirectoryAssetsProvider::GetDebugName() const {
 }
 
 bool DirectoryAssetsProvider::IsUpToDate() const {
-  struct stat sb{};
+  if (last_mod_time_ == -1) {
+    return true;
+  }
+  struct stat sb;
   if (stat(dir_.c_str(), &sb) < 0) {
     // If stat fails on the zip archive, return true so the zip archive the resource system does
     // attempt to refresh the ApkAsset.
