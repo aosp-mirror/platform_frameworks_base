@@ -761,7 +761,7 @@ class UserInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `users - secondary user - no guest user`() =
+    fun `users - secondary user - guest user can be switched to`() =
         runBlocking(IMMEDIATE) {
             val userInfos = createUserInfos(count = 3, includeGuest = true)
             userRepository.setUserInfos(userInfos)
@@ -770,8 +770,8 @@ class UserInteractorTest : SysuiTestCase() {
 
             var res: List<UserModel>? = null
             val job = underTest.users.onEach { res = it }.launchIn(this)
-            assertThat(res?.size == 2).isTrue()
-            assertThat(res?.find { it.isGuest }).isNull()
+            assertThat(res?.size == 3).isTrue()
+            assertThat(res?.find { it.isGuest }).isNotNull()
             job.cancel()
         }
 
