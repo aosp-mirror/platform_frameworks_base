@@ -110,7 +110,7 @@ fun CreateCredentialScreen(
         )
       }
     },
-    scrimColor = MaterialTheme.colorScheme.scrim,
+    scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.8f),
     sheetShape = EntryShape.TopRoundedCorner,
   ) {}
   LaunchedEffect(state.currentValue) {
