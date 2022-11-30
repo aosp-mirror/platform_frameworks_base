@@ -1959,6 +1959,14 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_MISSING_SPLIT = -28;
 
     /**
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package targets a deprecated SDK version.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FAILED_DEPRECATED_SDK_VERSION = -29;
+
+    /**
      * Installation parse return code: this is passed in the
      * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the parser was given a path that is not a
      * file, or does not end with the expected '.apk' extension.
@@ -9618,6 +9626,7 @@ public abstract class PackageManager {
             case INSTALL_FAILED_ABORTED: return "INSTALL_FAILED_ABORTED";
             case INSTALL_FAILED_BAD_DEX_METADATA: return "INSTALL_FAILED_BAD_DEX_METADATA";
             case INSTALL_FAILED_MISSING_SPLIT: return "INSTALL_FAILED_MISSING_SPLIT";
+            case INSTALL_FAILED_DEPRECATED_SDK_VERSION: return "INSTALL_FAILED_DEPRECATED_SDK_VERSION";
             case INSTALL_FAILED_BAD_SIGNATURE: return "INSTALL_FAILED_BAD_SIGNATURE";
             case INSTALL_FAILED_WRONG_INSTALLED_VERSION: return "INSTALL_FAILED_WRONG_INSTALLED_VERSION";
             case INSTALL_FAILED_PROCESS_NOT_DEFINED: return "INSTALL_FAILED_PROCESS_NOT_DEFINED";
@@ -9675,6 +9684,7 @@ public abstract class PackageManager {
             case INSTALL_FAILED_ABORTED: return PackageInstaller.STATUS_FAILURE_ABORTED;
             case INSTALL_FAILED_MISSING_SPLIT: return PackageInstaller.STATUS_FAILURE_INCOMPATIBLE;
             case INSTALL_FAILED_PRE_APPROVAL_NOT_AVAILABLE: return PackageInstaller.STATUS_FAILURE_BLOCKED;
+            case INSTALL_FAILED_DEPRECATED_SDK_VERSION: return PackageInstaller.STATUS_FAILURE_INCOMPATIBLE;
             default: return PackageInstaller.STATUS_FAILURE;
         }
     }
