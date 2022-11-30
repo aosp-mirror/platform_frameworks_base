@@ -369,7 +369,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
         final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
         token.finishSync(t, false /* cancel */);
         transit.onTransactionReady(transit.getSyncId(), t);
-        dc.mTransitionController.finishTransition(transit);
+        dc.mTransitionController.finishTransition(transit.getToken());
         assertFalse(wallpaperWindow.isVisible());
         assertFalse(token.isVisible());
 

@@ -87,10 +87,6 @@ final class LetterboxUiController {
     private final LetterboxConfiguration mLetterboxConfiguration;
     private final ActivityRecord mActivityRecord;
 
-    // Taskbar expanded height. Used to determine whether to crop an app window to display rounded
-    // corners above the taskbar.
-    private final float mExpandedTaskBarHeight;
-
     private boolean mShowWallpaperForLetterboxBackground;
 
     @Nullable
@@ -102,8 +98,6 @@ final class LetterboxUiController {
         // is created in its constructor. It shouldn't be used in this constructor but it's safe
         // to use it after since controller is only used in ActivityRecord.
         mActivityRecord = activityRecord;
-        mExpandedTaskBarHeight =
-                getResources().getDimensionPixelSize(R.dimen.taskbar_frame_height);
     }
 
     /** Cleans up {@link Letterbox} if it exists.*/
@@ -285,14 +279,17 @@ final class LetterboxUiController {
     }
 
     float getSplitScreenAspectRatio() {
+        // Getting the same aspect ratio that apps get in split screen.
+        final DisplayContent displayContent = mActivityRecord.getDisplayContent();
+        if (displayContent == null) {
+            return getDefaultMinAspectRatioForUnresizableApps();
+        }
         int dividerWindowWidth =
                 getResources().getDimensionPixelSize(R.dimen.docked_stack_divider_thickness);
         int dividerInsets =
                 getResources().getDimensionPixelSize(R.dimen.docked_stack_divider_insets);
         int dividerSize = dividerWindowWidth - dividerInsets * 2;
-
-        // Getting the same aspect ratio that apps get in split screen.
-        Rect bounds = new Rect(mActivityRecord.getDisplayContent().getBounds());
+        final Rect bounds = new Rect(displayContent.getBounds());
         if (bounds.width() >= bounds.height()) {
             bounds.inset(/* dx */ dividerSize / 2, /* dy */ 0);
             bounds.right = bounds.centerX();
@@ -555,7 +552,6 @@ final class LetterboxUiController {
         final InsetsSource taskbarInsetsSource = getTaskbarInsetsSource(mainWindow);
 
         return taskbarInsetsSource != null
-                && taskbarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight
                 && taskbarInsetsSource.isVisible();
     }
 
