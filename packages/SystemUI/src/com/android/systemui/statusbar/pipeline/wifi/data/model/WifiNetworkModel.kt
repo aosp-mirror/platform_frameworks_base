@@ -121,7 +121,11 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
                 row.logChange(COL_VALIDATED, isValidated)
             }
             if (prevVal !is Active || prevVal.level != level) {
-                row.logChange(COL_LEVEL, level ?: LEVEL_DEFAULT)
+                if (level != null) {
+                    row.logChange(COL_LEVEL, level)
+                } else {
+                    row.logChange(COL_LEVEL, LEVEL_DEFAULT)
+                }
             }
             if (prevVal !is Active || prevVal.ssid != ssid) {
                 row.logChange(COL_SSID, ssid)
@@ -201,5 +205,5 @@ const val COL_PASSPOINT_ACCESS_POINT = "isPasspointAccessPoint"
 const val COL_ONLINE_SIGN_UP = "isOnlineSignUpForPasspointAccessPoint"
 const val COL_PASSPOINT_NAME = "passpointProviderFriendlyName"
 
-const val LEVEL_DEFAULT = -1
-const val NETWORK_ID_DEFAULT = -1
+val LEVEL_DEFAULT: String? = null
+val NETWORK_ID_DEFAULT: String? = null
