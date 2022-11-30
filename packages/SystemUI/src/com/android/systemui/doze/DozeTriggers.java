@@ -29,11 +29,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.text.format.Formatter;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.view.Display;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
@@ -100,6 +101,7 @@ public class DozeTriggers implements DozeMachine.Part {
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final AuthController mAuthController;
     private final KeyguardStateController mKeyguardStateController;
+    private final UserTracker mUserTracker;
     private final UiEventLogger mUiEventLogger;
 
     private long mNotificationPulseTime;
@@ -109,6 +111,14 @@ public class DozeTriggers implements DozeMachine.Part {
     private boolean mWantProxSensor;
     private boolean mWantTouchScreenSensors;
     private boolean mWantSensors;
+
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    mDozeSensors.onUserSwitched();
+                }
+            };
 
     @VisibleForTesting
     public enum DozingUpdateUiEvent implements UiEventLogger.UiEventEnum {
@@ -210,6 +220,7 @@ public class DozeTriggers implements DozeMachine.Part {
         mAuthController = authController;
         mUiEventLogger = uiEventLogger;
         mKeyguardStateController = keyguardStateController;
+        mUserTracker = userTracker;
     }
 
     @Override
@@ -234,7 +245,7 @@ public class DozeTriggers implements DozeMachine.Part {
             return;
         }
         mNotificationPulseTime = SystemClock.elapsedRealtime();
-        if (!mConfig.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) {
+        if (!mConfig.pulseOnNotificationEnabled(mUserTracker.getUserId())) {
             runIfNotNull(onPulseSuppressedListener);
             mDozeLog.tracePulseDropped("pulseOnNotificationsDisabled");
             return;
@@ -490,12 +501,14 @@ public class DozeTriggers implements DozeMachine.Part {
         mBroadcastReceiver.register(mBroadcastDispatcher);
         mDockManager.addListener(mDockEventListener);
         mDozeHost.addCallback(mHostCallback);
+        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());
     }
 
     private void unregisterCallbacks() {
         mBroadcastReceiver.unregister(mBroadcastDispatcher);
         mDozeHost.removeCallback(mHostCallback);
         mDockManager.removeListener(mDockEventListener);
+        mUserTracker.removeCallback(mUserChangedCallback);
     }
 
     private void stopListeningToAllTriggers() {
@@ -620,9 +633,6 @@ public class DozeTriggers implements DozeMachine.Part {
                 requestPulse(DozeLog.PULSE_REASON_INTENT, false, /* performedProxCheck */
                         null /* onPulseSuppressedListener */);
             }
-            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
-                mDozeSensors.onUserSwitched();
-            }
         }
 
         public void register(BroadcastDispatcher broadcastDispatcher) {
@@ -630,7 +640,6 @@ public class DozeTriggers implements DozeMachine.Part {
                 return;
             }
             IntentFilter filter = new IntentFilter(PULSE_ACTION);
-            filter.addAction(Intent.ACTION_USER_SWITCHED);
             broadcastDispatcher.registerReceiver(this, filter);
             mRegistered = true;
         }
