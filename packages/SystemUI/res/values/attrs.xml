@@ -209,5 +209,15 @@
         <attr name="permissionGrantButtonTopStyle" format="reference"/>
         <attr name="permissionGrantButtonBottomStyle" format="reference"/>
     </declare-styleable>
+
+    <declare-styleable name="BiometricsEnrollView">
+        <attr name="biometricsEnrollStyle" format="reference" />
+        <attr name="biometricsEnrollIcon" format="reference|color" />
+        <attr name="biometricsMovingTargetFill" format="reference|color" />
+        <attr name="biometricsMovingTargetFillError" format="reference|color" />
+        <attr name="biometricsEnrollProgress" format="reference|color" />
+        <attr name="biometricsEnrollProgressHelp" format="reference|color" />
+        <attr name="biometricsEnrollProgressHelpWithTalkback" format="reference|color" />
+    </declare-styleable>
 </resources>
 

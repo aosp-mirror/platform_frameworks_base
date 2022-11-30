@@ -22,6 +22,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.IntentSender;
@@ -65,17 +66,20 @@ public final class CredentialManager {
      * credential, display a picker when multiple credentials exist, etc.
      *
      * @param request the request specifying type(s) of credentials to get from the user
+     * @param activity the activity used to launch any UI needed
      * @param cancellationSignal an optional signal that allows for cancelling this call
      * @param executor the callback will take place on this {@link Executor}
      * @param callback the callback invoked when the request succeeds or fails
      */
     public void executeGetCredential(
             @NonNull GetCredentialRequest request,
+            @NonNull Activity activity,
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<
                     GetCredentialResponse, CredentialManagerException> callback) {
         requireNonNull(request, "request must not be null");
+        requireNonNull(activity, "activity must not be null");
         requireNonNull(executor, "executor must not be null");
         requireNonNull(callback, "callback must not be null");
 
@@ -88,8 +92,7 @@ public final class CredentialManager {
         try {
             cancelRemote = mService.executeGetCredential(
                     request,
-                    // TODO: use a real activity instead of context.
-                    new GetCredentialTransport(mContext, executor, callback),
+                    new GetCredentialTransport(activity, executor, callback),
                     mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -107,17 +110,20 @@ public final class CredentialManager {
      * or storing the new credential, etc.
      *
      * @param request the request specifying type(s) of credentials to get from the user
+     * @param activity the activity used to launch any UI needed
      * @param cancellationSignal an optional signal that allows for cancelling this call
      * @param executor the callback will take place on this {@link Executor}
      * @param callback the callback invoked when the request succeeds or fails
      */
     public void executeCreateCredential(
             @NonNull CreateCredentialRequest request,
+            @NonNull Activity activity,
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<
                     CreateCredentialResponse, CredentialManagerException> callback) {
         requireNonNull(request, "request must not be null");
+        requireNonNull(activity, "activity must not be null");
         requireNonNull(executor, "executor must not be null");
         requireNonNull(callback, "callback must not be null");
 
@@ -129,8 +135,7 @@ public final class CredentialManager {
         ICancellationSignal cancelRemote = null;
         try {
             cancelRemote = mService.executeCreateCredential(request,
-                    // TODO: use a real activity instead of context.
-                    new CreateCredentialTransport(mContext, executor, callback),
+                    new CreateCredentialTransport(activity, executor, callback),
                     mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -142,18 +147,24 @@ public final class CredentialManager {
     }
 
     /**
-     * Clears the current user credential session from all credential providers.
+     * Clears the current user credential state from all credential providers.
      *
-     * <p>Usually invoked after your user signs out of your app so that they will not be
-     * automatically signed in the next time.
+     * You should invoked this api after your user signs out of your app to notify all credential
+     * providers that any stored credential session for the given app should be cleared.
      *
+     * A credential provider may have stored an active credential session and use it to limit
+     * sign-in options for future get-credential calls. For example, it may prioritize the active
+     * credential over any other available credential. When your user explicitly signs out of your
+     * app and in order to get the holistic sign-in options the next time, you should call this API
+     * to let the provider clear any stored credential session.
+     *
+     * @param request the request data
      * @param cancellationSignal an optional signal that allows for cancelling this call
      * @param executor the callback will take place on this {@link Executor}
      * @param callback the callback invoked when the request succeeds or fails
-     *
-     * @hide
      */
-    public void clearCredentialSession(
+    public void clearCredentialState(
+            @NonNull ClearCredentialStateRequest request,
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<Void, CredentialManagerException> callback) {
@@ -167,8 +178,8 @@ public final class CredentialManager {
 
         ICancellationSignal cancelRemote = null;
         try {
-            cancelRemote = mService.clearCredentialSession(
-                    new ClearCredentialSessionTransport(executor, callback),
+            cancelRemote = mService.clearCredentialState(request,
+                    new ClearCredentialStateTransport(executor, callback),
                     mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -182,14 +193,14 @@ public final class CredentialManager {
     private static class GetCredentialTransport extends IGetCredentialCallback.Stub {
         // TODO: listen for cancellation to release callback.
 
-        private final Context mActivityContext;
+        private final Activity mActivity;
         private final Executor mExecutor;
         private final OutcomeReceiver<
                 GetCredentialResponse, CredentialManagerException> mCallback;
 
-        private GetCredentialTransport(Context activityContext, Executor executor,
+        private GetCredentialTransport(Activity activity, Executor executor,
                 OutcomeReceiver<GetCredentialResponse, CredentialManagerException> callback) {
-            mActivityContext = activityContext;
+            mActivity = activity;
             mExecutor = executor;
             mCallback = callback;
         }
@@ -197,7 +208,7 @@ public final class CredentialManager {
         @Override
         public void onPendingIntent(PendingIntent pendingIntent) {
             try {
-                mActivityContext.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
+                mActivity.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
             } catch (IntentSender.SendIntentException e) {
                 Log.e(TAG, "startIntentSender() failed for intent:"
                         + pendingIntent.getIntentSender(), e);
@@ -220,14 +231,14 @@ public final class CredentialManager {
     private static class CreateCredentialTransport extends ICreateCredentialCallback.Stub {
         // TODO: listen for cancellation to release callback.
 
-        private final Context mActivityContext;
+        private final Activity mActivity;
         private final Executor mExecutor;
         private final OutcomeReceiver<
                 CreateCredentialResponse, CredentialManagerException> mCallback;
 
-        private CreateCredentialTransport(Context activityContext, Executor executor,
+        private CreateCredentialTransport(Activity activity, Executor executor,
                 OutcomeReceiver<CreateCredentialResponse, CredentialManagerException> callback) {
-            mActivityContext = activityContext;
+            mActivity = activity;
             mExecutor = executor;
             mCallback = callback;
         }
@@ -235,7 +246,7 @@ public final class CredentialManager {
         @Override
         public void onPendingIntent(PendingIntent pendingIntent) {
             try {
-                mActivityContext.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
+                mActivity.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
             } catch (IntentSender.SendIntentException e) {
                 Log.e(TAG, "startIntentSender() failed for intent:"
                         + pendingIntent.getIntentSender(), e);
@@ -255,14 +266,14 @@ public final class CredentialManager {
         }
     }
 
-    private static class ClearCredentialSessionTransport
-            extends IClearCredentialSessionCallback.Stub {
+    private static class ClearCredentialStateTransport
+            extends IClearCredentialStateCallback.Stub {
         // TODO: listen for cancellation to release callback.
 
         private final Executor mExecutor;
         private final OutcomeReceiver<Void, CredentialManagerException> mCallback;
 
-        private ClearCredentialSessionTransport(Executor executor,
+        private ClearCredentialStateTransport(Executor executor,
                 OutcomeReceiver<Void, CredentialManagerException> callback) {
             mExecutor = executor;
             mCallback = callback;

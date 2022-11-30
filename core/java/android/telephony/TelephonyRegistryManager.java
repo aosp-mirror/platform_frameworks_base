@@ -32,13 +32,13 @@ import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.DataActivityType;
 import android.telephony.Annotation.DisconnectCauses;
 import android.telephony.Annotation.NetworkType;
+import android.telephony.Annotation.PreciseCallStates;
 import android.telephony.Annotation.PreciseDisconnectCauses;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
 import android.telephony.Annotation.SrvccState;
 import android.telephony.TelephonyManager.CarrierPrivilegesCallback;
 import android.telephony.emergency.EmergencyNumber;
-import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
 import android.util.ArraySet;
 import android.util.Log;
@@ -741,20 +741,17 @@ public class TelephonyRegistryManager {
      * @param slotIndex for which precise call state changed. Can be derived from subId except when
      * subId is invalid.
      * @param subId for which precise call state changed.
-     * @param callStates Array of PreciseCallState of foreground, background & ringing calls.
-     * @param imsCallIds Array of IMS call session ID{@link ImsCallSession#getCallId} for
-     *                   ringing, foreground & background calls.
-     * @param imsServiceTypes Array of IMS call service type for ringing, foreground &
-     *                        background calls.
-     * @param imsCallTypes Array of IMS call type for ringing, foreground & background calls.
+     * @param ringCallPreciseState ringCall state.
+     * @param foregroundCallPreciseState foreground call state.
+     * @param backgroundCallPreciseState background call state.
      */
     public void notifyPreciseCallState(int slotIndex, int subId,
-            @Annotation.PreciseCallStates int[] callStates, String[] imsCallIds,
-            @Annotation.ImsCallServiceType int[] imsServiceTypes,
-            @Annotation.ImsCallType int[] imsCallTypes) {
+            @PreciseCallStates int ringCallPreciseState,
+            @PreciseCallStates int foregroundCallPreciseState,
+            @PreciseCallStates int backgroundCallPreciseState) {
         try {
-            sRegistry.notifyPreciseCallState(slotIndex, subId, callStates,
-                    imsCallIds, imsServiceTypes, imsCallTypes);
+            sRegistry.notifyPreciseCallState(slotIndex, subId, ringCallPreciseState,
+                foregroundCallPreciseState, backgroundCallPreciseState);
         } catch (RemoteException ex) {
             // system process is dead
             throw ex.rethrowFromSystemServer();

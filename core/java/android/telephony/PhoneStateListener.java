@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
+import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.DisconnectCauses;
 import android.telephony.Annotation.PreciseDisconnectCauses;
 import android.telephony.Annotation.RadioPowerState;
@@ -725,7 +726,7 @@ public class PhoneStateListener {
      */
     @Deprecated
     @RequiresPermission(value = android.Manifest.permission.READ_PHONE_STATE, conditional = true)
-    public void onCallStateChanged(@Annotation.CallState int state, String phoneNumber) {
+    public void onCallStateChanged(@CallState int state, String phoneNumber) {
         // default implementation empty
     }
 
@@ -1568,48 +1569,12 @@ public class PhoneStateListener {
                     () -> mExecutor.execute(() -> psl.onRadioPowerStateChanged(state)));
         }
 
-        public void onCallStatesChanged(List<CallState> callStateList) {
+        public void onCallAttributesChanged(CallAttributes callAttributes) {
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;
 
-            if (callStateList == null) return;
-            CallAttributes ca;
-            if (callStateList.isEmpty()) {
-                ca = new CallAttributes(
-                        new PreciseCallState(PreciseCallState.PRECISE_CALL_STATE_IDLE,
-                                PreciseCallState.PRECISE_CALL_STATE_IDLE,
-                                PreciseCallState.PRECISE_CALL_STATE_IDLE,
-                                DisconnectCause.NOT_VALID, PreciseDisconnectCause.NOT_VALID),
-                        TelephonyManager.NETWORK_TYPE_UNKNOWN, new CallQuality());
-            } else {
-                int foregroundCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
-                int backgroundCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
-                int ringingCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
-                for (CallState cs : callStateList) {
-                    switch (cs.getCallClassification()) {
-                        case CallState.CALL_CLASSIFICATION_FOREGROUND:
-                            foregroundCallState = cs.getCallState();
-                            break;
-                        case CallState.CALL_CLASSIFICATION_BACKGROUND:
-                            backgroundCallState = cs.getCallState();
-                            break;
-                        case CallState.CALL_CLASSIFICATION_RINGING:
-                            ringingCallState = cs.getCallState();
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                ca = new CallAttributes(
-                        new PreciseCallState(
-                                foregroundCallState, backgroundCallState, ringingCallState,
-                                DisconnectCause.NOT_VALID, PreciseDisconnectCause.NOT_VALID),
-                        callStateList.get(0).getNetworkType(),
-                        callStateList.get(0).getCallQuality());
-            }
             Binder.withCleanCallingIdentity(
-                    () -> mExecutor.execute(
-                            () -> psl.onCallAttributesChanged(ca)));
+                    () -> mExecutor.execute(() -> psl.onCallAttributesChanged(callAttributes)));
         }
 
         public void onActiveDataSubIdChanged(int subId) {

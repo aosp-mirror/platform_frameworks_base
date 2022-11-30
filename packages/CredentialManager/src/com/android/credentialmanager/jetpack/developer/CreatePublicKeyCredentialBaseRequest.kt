@@ -47,7 +47,7 @@ abstract class CreatePublicKeyCredentialBaseRequest constructor(
             return when (data.getString(BUNDLE_KEY_SUBTYPE)) {
                 CreatePublicKeyCredentialRequest
                         .BUNDLE_VALUE_SUBTYPE_CREATE_PUBLIC_KEY_CREDENTIAL_REQUEST ->
-                    CreatePublicKeyCredentialRequestPrivileged.createFrom(data)
+                    CreatePublicKeyCredentialRequest.createFrom(data)
                 CreatePublicKeyCredentialRequestPrivileged
                         .BUNDLE_VALUE_SUBTYPE_CREATE_PUBLIC_KEY_CREDENTIAL_REQUEST_PRIVILEGED ->
                     CreatePublicKeyCredentialRequestPrivileged.createFrom(data)

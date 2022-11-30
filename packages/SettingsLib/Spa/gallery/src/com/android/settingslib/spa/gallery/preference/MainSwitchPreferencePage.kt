@@ -44,14 +44,12 @@ object MainSwitchPreferencePageProvider : SettingsPageProvider {
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
             SettingsEntryBuilder.create( "MainSwitchPreference", owner)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     SampleMainSwitchPreference()
                 }.build()
         )
         entryList.add(
             SettingsEntryBuilder.create( "MainSwitchPreference not changeable", owner)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     SampleNotChangeableMainSwitchPreference()
                 }.build()
@@ -62,7 +60,6 @@ object MainSwitchPreferencePageProvider : SettingsPageProvider {
 
     fun buildInjectEntry(): SettingsEntryBuilder {
         return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
-            .setIsAllowSearch(true)
             .setUiLayoutFn {
                 Preference(object : PreferenceModel {
                     override val title = TITLE

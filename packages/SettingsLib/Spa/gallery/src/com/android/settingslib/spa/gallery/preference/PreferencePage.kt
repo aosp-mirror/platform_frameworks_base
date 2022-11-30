@@ -87,7 +87,6 @@ object PreferencePageProvider : SettingsPageProvider {
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
             createEntry(EntryEnum.SIMPLE_PREFERENCE)
-                .setIsAllowSearch(true)
                 .setMacro {
                     spaLogger.message(TAG, "create macro for ${EntryEnum.SIMPLE_PREFERENCE}")
                     SimplePreferenceMacro(title = SIMPLE_PREFERENCE_TITLE)
@@ -96,7 +95,6 @@ object PreferencePageProvider : SettingsPageProvider {
         )
         entryList.add(
             createEntry(EntryEnum.SUMMARY_PREFERENCE)
-                .setIsAllowSearch(true)
                 .setMacro {
                     spaLogger.message(TAG, "create macro for ${EntryEnum.SUMMARY_PREFERENCE}")
                     SimplePreferenceMacro(
@@ -110,7 +108,6 @@ object PreferencePageProvider : SettingsPageProvider {
         entryList.add(singleLineSummaryEntry())
         entryList.add(
             createEntry(EntryEnum.DISABLED_PREFERENCE)
-                .setIsAllowSearch(true)
                 .setHasMutableStatus(true)
                 .setMacro {
                     spaLogger.message(TAG, "create macro for ${EntryEnum.DISABLED_PREFERENCE}")
@@ -126,7 +123,6 @@ object PreferencePageProvider : SettingsPageProvider {
         )
         entryList.add(
             createEntry(EntryEnum.ASYNC_SUMMARY_PREFERENCE)
-                .setIsAllowSearch(true)
                 .setHasMutableStatus(true)
                 .setSearchDataFn {
                     EntrySearchData(title = ASYNC_PREFERENCE_TITLE)
@@ -165,7 +161,6 @@ object PreferencePageProvider : SettingsPageProvider {
         )
         entryList.add(
             createEntry(EntryEnum.MANUAL_UPDATE_PREFERENCE)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     val model = PreferencePageModel.create()
                     val manualUpdaterSummary = remember { model.getManualUpdaterSummary() }
@@ -179,7 +174,8 @@ object PreferencePageProvider : SettingsPageProvider {
                             }
                         }
                     )
-                }.setSliceDataFn { sliceUri, args ->
+                }
+                .setSliceDataFn { sliceUri, args ->
                     val createSliceImpl = { v: Int ->
                         createDemoActionSlice(
                             sliceUri = sliceUri,
@@ -204,7 +200,6 @@ object PreferencePageProvider : SettingsPageProvider {
         )
         entryList.add(
             createEntry(EntryEnum.AUTO_UPDATE_PREFERENCE)
-                .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     val model = PreferencePageModel.create()
                     val autoUpdaterSummary = remember { model.getAutoUpdaterSummary() }
@@ -251,7 +246,6 @@ object PreferencePageProvider : SettingsPageProvider {
     }
 
     private fun singleLineSummaryEntry() = createEntry(EntryEnum.SINGLE_LINE_SUMMARY_PREFERENCE)
-        .setIsAllowSearch(true)
         .setUiLayoutFn {
             Preference(
                 model = object : PreferenceModel {
@@ -267,7 +261,6 @@ object PreferencePageProvider : SettingsPageProvider {
 
     fun buildInjectEntry(): SettingsEntryBuilder {
         return SettingsEntryBuilder.createInject(owner = owner)
-            .setIsAllowSearch(true)
             .setMacro {
                 spaLogger.message(TAG, "create macro for INJECT entry")
                 SimplePreferenceMacro(

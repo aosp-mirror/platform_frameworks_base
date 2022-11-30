@@ -54,6 +54,7 @@ import android.content.pm.ServiceInfo.ForegroundServiceType;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.healthconnect.HealthConnectManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.ArraySet;
@@ -66,8 +67,10 @@ import com.android.internal.util.ArrayUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * This class enforces the policies around the foreground service types.
@@ -655,11 +658,12 @@ public abstract class ForegroundServiceTypePolicy {
          *
          * For test only.
          */
-        public @NonNull Optional<String[]> getRequiredAllOfPermissionsForTest() {
+        public @NonNull Optional<String[]> getRequiredAllOfPermissionsForTest(
+                @NonNull Context context) {
             if (mAllOfPermissions == null) {
                 return Optional.empty();
             }
-            return Optional.of(mAllOfPermissions.toStringArray());
+            return Optional.of(mAllOfPermissions.toStringArray(context));
         }
 
         /**
@@ -668,11 +672,12 @@ public abstract class ForegroundServiceTypePolicy {
          *
          * For test only.
          */
-        public @NonNull Optional<String[]> getRequiredAnyOfPermissionsForTest() {
+        public @NonNull Optional<String[]> getRequiredAnyOfPermissionsForTest(
+                @NonNull Context context) {
             if (mAnyOfPermissions == null) {
                 return Optional.empty();
             }
-            return Optional.of(mAnyOfPermissions.toStringArray());
+            return Optional.of(mAnyOfPermissions.toStringArray(context));
         }
 
         /**
@@ -808,12 +813,12 @@ public abstract class ForegroundServiceTypePolicy {
             return sb.toString();
         }
 
-        @NonNull String[] toStringArray() {
-            final String[] names = new String[mPermissions.length];
+        @NonNull String[] toStringArray(Context context) {
+            final ArrayList<String> list = new ArrayList<>();
             for (int i = 0; i < mPermissions.length; i++) {
-                names[i] = mPermissions[i].mName;
+                mPermissions[i].addToList(context, list);
             }
-            return names;
+            return list.toArray(new String[list.size()]);
         }
     }
 
@@ -826,7 +831,7 @@ public abstract class ForegroundServiceTypePolicy {
         /**
          * The name of this permission.
          */
-        final @NonNull String mName;
+        protected final @NonNull String mName;
 
         /**
          * Constructor.
@@ -846,6 +851,10 @@ public abstract class ForegroundServiceTypePolicy {
         public String toString() {
             return mName;
         }
+
+        void addToList(@NonNull Context context, @NonNull ArrayList<String> list) {
+            list.add(mName);
+        }
     }
 
     /**
@@ -859,15 +868,23 @@ public abstract class ForegroundServiceTypePolicy {
         @Override
         @SuppressLint("AndroidFrameworkRequiresPermission")
         @PackageManager.PermissionResult
-        public int checkPermission(Context context, int callerUid, int callerPid,
+        public int checkPermission(@NonNull Context context, int callerUid, int callerPid,
                 String packageName, boolean allowWhileInUse) {
+            return checkPermission(context, mName, callerUid, callerPid, packageName,
+                    allowWhileInUse);
+        }
+
+        @SuppressLint("AndroidFrameworkRequiresPermission")
+        @PackageManager.PermissionResult
+        int checkPermission(@NonNull Context context, @NonNull String name, int callerUid,
+                int callerPid, String packageName, boolean allowWhileInUse) {
             // Simple case, check if it's already granted.
-            if (context.checkPermission(mName, callerPid, callerUid) == PERMISSION_GRANTED) {
+            if (context.checkPermission(name, callerPid, callerUid) == PERMISSION_GRANTED) {
                 return PERMISSION_GRANTED;
             }
             if (allowWhileInUse) {
                 // Check its appops
-                final int opCode = AppOpsManager.permissionToOpCode(mName);
+                final int opCode = AppOpsManager.permissionToOpCode(name);
                 final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
                 if (opCode != AppOpsManager.OP_NONE) {
                     final int currentMode = appOpsManager.unsafeCheckOpRawNoThrow(opCode, callerUid,
@@ -895,7 +912,7 @@ public abstract class ForegroundServiceTypePolicy {
 
         @Override
         @PackageManager.PermissionResult
-        public int checkPermission(Context context, int callerUid, int callerPid,
+        public int checkPermission(@NonNull Context context, int callerUid, int callerPid,
                 String packageName, boolean allowWhileInUse) {
             final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
             final int mode = appOpsManager.unsafeCheckOpRawNoThrow(mOpCode, callerUid, packageName);
@@ -915,7 +932,7 @@ public abstract class ForegroundServiceTypePolicy {
         @Override
         @SuppressLint("AndroidFrameworkRequiresPermission")
         @PackageManager.PermissionResult
-        public int checkPermission(Context context, int callerUid, int callerPid,
+        public int checkPermission(@NonNull Context context, int callerUid, int callerPid,
                 String packageName, boolean allowWhileInUse) {
             final UsbManager usbManager = context.getSystemService(UsbManager.class);
             final HashMap<String, UsbDevice> devices = usbManager.getDeviceList();
@@ -941,7 +958,7 @@ public abstract class ForegroundServiceTypePolicy {
         @Override
         @SuppressLint("AndroidFrameworkRequiresPermission")
         @PackageManager.PermissionResult
-        public int checkPermission(Context context, int callerUid, int callerPid,
+        public int checkPermission(@NonNull Context context, int callerUid, int callerPid,
                 String packageName, boolean allowWhileInUse) {
             final UsbManager usbManager = context.getSystemService(UsbManager.class);
             final UsbAccessory[] accessories = usbManager.getAccessoryList();
@@ -953,6 +970,45 @@ public abstract class ForegroundServiceTypePolicy {
                 }
             }
             return PERMISSION_DENIED;
+        }
+    }
+
+    static class HealthConnectPermission extends RegularPermission {
+        private @Nullable String[] mPermissionNames;
+
+        HealthConnectPermission() {
+            super("Health Connect");
+        }
+
+        @Override
+        @SuppressLint("AndroidFrameworkRequiresPermission")
+        @PackageManager.PermissionResult
+        public int checkPermission(@NonNull Context context, int callerUid, int callerPid,
+                String packageName, boolean allowWhileInUse) {
+            final String[] perms = getPermissions(context);
+            for (String perm : perms) {
+                if (checkPermission(context, perm, callerUid, callerPid,
+                        packageName, allowWhileInUse) == PERMISSION_GRANTED) {
+                    return PERMISSION_GRANTED;
+                }
+            }
+            return PERMISSION_DENIED;
+        }
+
+        @Override
+        void addToList(@NonNull Context context, @NonNull ArrayList<String> list) {
+            final String[] perms = getPermissions(context);
+            for (String perm : perms) {
+                list.add(perm);
+            }
+        }
+
+        private @NonNull String[] getPermissions(@NonNull Context context) {
+            if (mPermissionNames != null) {
+                return mPermissionNames;
+            }
+            final Set<String> healthPerms = HealthConnectManager.getHealthPermissions(context);
+            return mPermissionNames = healthPerms.toArray(new String[healthPerms.size()]);
         }
     }
 

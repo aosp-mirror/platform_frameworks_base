@@ -17,4 +17,14 @@
 <resources>
     <color name="mycolor">#ff112233</color>
     <string name="mystring">hello</string>
+
+    <color name="public_overlayable_color">#000</color>
+    <color name="signature_overlayable_color">#000</color>
+    <color name="system_app_overlayable_color">#000</color>
+    <color name="odm_overlayable_color">#000</color>
+    <color name="oem_overlayable_color">#000</color>
+    <color name="vendor_overlayable_color">#000</color>
+    <color name="product_overlayable_color">#000</color>
+    <color name="actor_overlayable_color">#000</color>
+    <color name="config_overlayable_color">#000</color>
 </resources>

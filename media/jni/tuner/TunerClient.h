@@ -148,6 +148,11 @@ public:
      */
     int getMaxNumberOfFrontends(FrontendType frontendType);
 
+    /**
+     * Is Low Noise Amplifier (LNA) supported.
+     */
+    bool isLnaSupported();
+
 private:
     /**
      * An AIDL Tuner Service assigned at the first time the Tuner Client connects with

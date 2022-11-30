@@ -3783,10 +3783,10 @@ public class UserManagerService extends IUserManager.Stub {
     private UserInfo getEarliestCreatedFullUser() {
         final List<UserInfo> users = getUsersInternal(true, true, true);
         UserInfo earliestUser = users.get(0);
-        long earliestCreationTime = earliestUser.creationTime;
+        long earliestCreationTime = Long.MAX_VALUE;
         for (int i = 0; i < users.size(); i++) {
             final UserInfo info = users.get(i);
-            if (info.isFull() && info.isAdmin() && info.creationTime > 0
+            if (info.isFull() && info.isAdmin() && info.creationTime >= 0
                     && info.creationTime < earliestCreationTime) {
                 earliestCreationTime = info.creationTime;
                 earliestUser = info;

@@ -286,7 +286,7 @@ class Agent {
 
         for (int i = 0; i < pkgNames.size(); ++i) {
             final String pkgName = pkgNames.valueAt(i);
-            final boolean isVip = mIrs.isVip(userId, pkgName);
+            final boolean isVip = mIrs.isVip(userId, pkgName, nowElapsed);
             SparseArrayMap<String, OngoingEvent> ongoingEvents =
                     mCurrentOngoingEvents.get(userId, pkgName);
             if (ongoingEvents != null) {
@@ -321,7 +321,7 @@ class Agent {
         final long nowElapsed = SystemClock.elapsedRealtime();
         final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
 
-        final boolean isVip = mIrs.isVip(userId, pkgName);
+        final boolean isVip = mIrs.isVip(userId, pkgName, nowElapsed);
         SparseArrayMap<String, OngoingEvent> ongoingEvents =
                 mCurrentOngoingEvents.get(userId, pkgName);
         if (ongoingEvents != null) {
@@ -397,7 +397,7 @@ class Agent {
                 if (actionAffordabilityNotes != null) {
                     final int size = actionAffordabilityNotes.size();
                     final long newBalance = getBalanceLocked(userId, pkgName);
-                    final boolean isVip = mIrs.isVip(userId, pkgName);
+                    final boolean isVip = mIrs.isVip(userId, pkgName, nowElapsed);
                     for (int n = 0; n < size; ++n) {
                         final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(n);
                         note.recalculateCosts(economicPolicy, userId, pkgName);
@@ -503,7 +503,8 @@ class Agent {
                     "Tried to adjust system balance for " + appToString(userId, pkgName));
             return;
         }
-        if (mIrs.isVip(userId, pkgName)) {
+        final boolean isVip = mIrs.isVip(userId, pkgName);
+        if (isVip) {
             // This could happen if the app was made a VIP after it started performing actions.
             // Continue recording the transaction for debugging purposes, but don't let it change
             // any numbers.
@@ -536,7 +537,6 @@ class Agent {
                     mActionAffordabilityNotes.get(userId, pkgName);
             if (actionAffordabilityNotes != null) {
                 final long newBalance = ledger.getCurrentBalance();
-                final boolean isVip = mIrs.isVip(userId, pkgName);
                 for (int i = 0; i < actionAffordabilityNotes.size(); ++i) {
                     final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(i);
                     final boolean isAffordable = isVip
@@ -830,7 +830,6 @@ class Agent {
 
     @GuardedBy("mLock")
     void onUserRemovedLocked(final int userId) {
-        mScribe.discardLedgersLocked(userId);
         mCurrentOngoingEvents.delete(userId);
         mBalanceThresholdAlarmQueue.removeAlarmsForUserId(userId);
     }

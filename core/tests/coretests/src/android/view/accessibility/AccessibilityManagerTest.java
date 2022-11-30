@@ -263,10 +263,24 @@ public class AccessibilityManagerTest {
     }
 
     private class MyAccessibilityProxy extends AccessibilityDisplayProxy {
-        // TODO(241429275): Will override A11yProxy methods in the future.
         MyAccessibilityProxy(int displayId,
                 @NonNull List<AccessibilityServiceInfo> serviceInfos) {
             super(displayId, Executors.newSingleThreadExecutor(), serviceInfos);
+        }
+
+        @Override
+        public void onAccessibilityEvent(@NonNull AccessibilityEvent event) {
+
+        }
+
+        @Override
+        public void onProxyConnected() {
+
+        }
+
+        @Override
+        public void interrupt() {
+
         }
     }
 }

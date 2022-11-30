@@ -191,13 +191,12 @@ fun ProviderSelectionCard(
 ) {
   Card() {
     Column() {
-      // TODO: Change the icon for create passwords and sign-ins
       Icon(
-        painter = painterResource(R.drawable.ic_passkey),
+        bitmap = requestDisplayInfo.typeIcon.toBitmap().asImageBitmap(),
         contentDescription = null,
         tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
         modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-          .padding(top = 24.dp, bottom = 16.dp)
+          .padding(top = 24.dp, bottom = 16.dp).size(32.dp)
       )
       Text(
         text = stringResource(
@@ -567,35 +566,52 @@ fun PrimaryCreateOptionRow(
   Entry(
     onClick = {onOptionSelected(createOptionInfo)},
     icon = {
-      // TODO: Upload the other two types icons and change it according to request types
       Icon(
-        painter = painterResource(R.drawable.ic_passkey),
+        bitmap = createOptionInfo.profileIcon.toBitmap().asImageBitmap(),
         contentDescription = null,
         tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
-        modifier = Modifier.padding(start = 18.dp)
+        modifier = Modifier.padding(start = 18.dp).size(32.dp)
       )
     },
     label = {
       Column() {
         // TODO: Add the function to hide/view password when the type is create password
-        if (requestDisplayInfo.type == TYPE_PUBLIC_KEY_CREDENTIAL ||
-          requestDisplayInfo.type == TYPE_PASSWORD_CREDENTIAL) {
-          Text(
-            text = requestDisplayInfo.title,
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(top = 16.dp)
-          )
-          Text(
-            text = requestDisplayInfo.subtitle,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
-          )
-        } else {
-          Text(
-            text = requestDisplayInfo.title,
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
-          )
+        when (requestDisplayInfo.type) {
+            TYPE_PUBLIC_KEY_CREDENTIAL -> {
+              Text(
+                text = requestDisplayInfo.title,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 16.dp)
+              )
+              Text(
+                text = if (requestDisplayInfo.subtitle != null) {
+                  stringResource(
+                    R.string.passkey_before_subtitle) + " - " + requestDisplayInfo.subtitle
+                } else {stringResource(R.string.passkey_before_subtitle)},
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
+              )
+            }
+            TYPE_PASSWORD_CREDENTIAL -> {
+              Text(
+                text = requestDisplayInfo.title,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 16.dp)
+              )
+              Text(
+                // This subtitle would never be null for create password
+                text = requestDisplayInfo.subtitle ?: "",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
+              )
+            }
+            else -> {
+              Text(
+                text = requestDisplayInfo.title,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
+              )
+            }
         }
       }
     }

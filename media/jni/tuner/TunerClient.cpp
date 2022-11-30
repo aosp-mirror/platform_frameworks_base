@@ -210,4 +210,17 @@ int TunerClient::getMaxNumberOfFrontends(FrontendType frontendType) {
     return -1;
 }
 
+bool TunerClient::isLnaSupported() {
+    if (mTunerService != nullptr) {
+        bool lnaSupported;
+        Status s = mTunerService->isLnaSupported(&lnaSupported);
+        if (!s.isOk()) {
+            return false;
+        }
+        return lnaSupported;
+    }
+
+    return false;
+}
+
 }  // namespace android

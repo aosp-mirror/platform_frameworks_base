@@ -27,8 +27,6 @@ import java.util.Objects;
 
 /**
  * Request for creating a credential.
- *
- * @hide
  */
 public final class CreateCredentialRequest implements Parcelable {
     private final @NonNull String mCallingPackage;

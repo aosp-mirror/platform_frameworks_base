@@ -16,9 +16,10 @@
 
 package android.credentials;
 
+import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CreateCredentialRequest;
 import android.credentials.GetCredentialRequest;
-import android.credentials.IClearCredentialSessionCallback;
+import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ICreateCredentialCallback;
 import android.credentials.IGetCredentialCallback;
 import android.os.ICancellationSignal;
@@ -34,5 +35,5 @@ interface ICredentialManager {
 
     @nullable ICancellationSignal executeCreateCredential(in CreateCredentialRequest request, in ICreateCredentialCallback callback, String callingPackage);
 
-    @nullable ICancellationSignal clearCredentialSession(in IClearCredentialSessionCallback callback, String callingPackage);
+    @nullable ICancellationSignal clearCredentialState(in ClearCredentialStateRequest request, in IClearCredentialStateCallback callback, String callingPackage);
 }

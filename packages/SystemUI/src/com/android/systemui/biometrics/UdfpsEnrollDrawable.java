@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
@@ -28,6 +29,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.AttributeSet;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import androidx.annotation.NonNull;
@@ -68,25 +70,29 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
     private boolean mShouldShowTipHint = false;
     private boolean mShouldShowEdgeHint = false;
 
-    UdfpsEnrollDrawable(@NonNull Context context) {
+    private int mEnrollIcon;
+    private int mMovingTargetFill;
+
+    UdfpsEnrollDrawable(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context);
 
+        loadResources(context, attrs);
         mSensorOutlinePaint = new Paint(0 /* flags */);
         mSensorOutlinePaint.setAntiAlias(true);
-        mSensorOutlinePaint.setColor(context.getColor(R.color.udfps_moving_target_fill));
+        mSensorOutlinePaint.setColor(mMovingTargetFill);
         mSensorOutlinePaint.setStyle(Paint.Style.FILL);
 
         mBlueFill = new Paint(0 /* flags */);
         mBlueFill.setAntiAlias(true);
-        mBlueFill.setColor(context.getColor(R.color.udfps_moving_target_fill));
+        mBlueFill.setColor(mMovingTargetFill);
         mBlueFill.setStyle(Paint.Style.FILL);
 
         mMovingTargetFpIcon = context.getResources()
                 .getDrawable(R.drawable.ic_kg_fingerprint, null);
-        mMovingTargetFpIcon.setTint(context.getColor(R.color.udfps_enroll_icon));
+        mMovingTargetFpIcon.setTint(mEnrollIcon);
         mMovingTargetFpIcon.mutate();
 
-        getFingerprintDrawable().setTint(context.getColor(R.color.udfps_enroll_icon));
+        getFingerprintDrawable().setTint(mEnrollIcon);
 
         mTargetAnimListener = new Animator.AnimatorListener() {
             @Override
@@ -103,6 +109,16 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
             @Override
             public void onAnimationRepeat(Animator animation) {}
         };
+    }
+
+    void loadResources(Context context, @Nullable AttributeSet attrs) {
+        final TypedArray ta = context.obtainStyledAttributes(attrs,
+                R.styleable.BiometricsEnrollView, R.attr.biometricsEnrollStyle,
+                R.style.BiometricsEnrollStyle);
+        mEnrollIcon = ta.getColor(R.styleable.BiometricsEnrollView_biometricsEnrollIcon, 0);
+        mMovingTargetFill = ta.getColor(
+                R.styleable.BiometricsEnrollView_biometricsMovingTargetFill, 0);
+        ta.recycle();
     }
 
     void setEnrollHelper(@NonNull UdfpsEnrollHelper helper) {

@@ -40,6 +40,10 @@
     <dimen name="biometric_dialog_button_negative_max_width">140dp</dimen>
     <dimen name="biometric_dialog_button_positive_max_width">116dp</dimen>
 
+    <!-- Lock pattern view size, align sysui biometric_auth_pattern_view_size -->
+    <dimen name="biometric_auth_pattern_view_size">248dp</dimen>
+    <dimen name="biometric_auth_pattern_view_max_size">348dp</dimen>
+
     <dimen name="global_actions_power_dialog_item_height">130dp</dimen>
     <dimen name="global_actions_power_dialog_item_bottom_margin">35dp</dimen>
 

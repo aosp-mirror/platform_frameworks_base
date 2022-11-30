@@ -58,7 +58,6 @@ import android.view.Display;
 import android.view.DisplayAdjustments;
 import android.view.DisplayInfo;
 import android.view.WindowManager;
-import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityWindowAttributes;
 
 import androidx.test.InstrumentationRegistry;
@@ -106,8 +105,6 @@ public class AccessibilityManagerServiceTest {
             LABEL,
             DESCRIPTION,
             TEST_PENDING_INTENT);
-    private static final AccessibilityAction NEW_ACCESSIBILITY_ACTION =
-            new AccessibilityAction(ACTION_ID, LABEL);
 
     private static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY + 1;
 
@@ -282,9 +279,11 @@ public class AccessibilityManagerServiceTest {
     @Test
     public void testRegisterProxy() throws Exception {
         mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY);
-        verify(mProxyManager).registerProxy(mMockServiceClient, TEST_DISPLAY);
+        verify(mProxyManager).registerProxy(eq(mMockServiceClient), eq(TEST_DISPLAY),
+                eq(mTestableContext), anyInt(), any(), eq(mMockSecurityPolicy),
+                eq(mA11yms), eq(mA11yms.getTraceManager()),
+                eq(mMockWindowManagerService), eq(mMockA11yWindowManager));
     }
-
 
     @SmallTest
     @Test
@@ -296,7 +295,8 @@ public class AccessibilityManagerServiceTest {
             Assert.fail();
         } catch (SecurityException expected) {
         }
-        verify(mProxyManager, never()).registerProxy(mMockServiceClient, TEST_DISPLAY);
+        verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
+                any(), any(), any(), any());
     }
 
     @SmallTest
@@ -307,7 +307,8 @@ public class AccessibilityManagerServiceTest {
             Assert.fail();
         } catch (IllegalArgumentException expected) {
         }
-        verify(mProxyManager, never()).registerProxy(mMockServiceClient, Display.DEFAULT_DISPLAY);
+        verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
+                any(), any(), any(), any());
     }
 
     @SmallTest
@@ -318,7 +319,30 @@ public class AccessibilityManagerServiceTest {
             Assert.fail();
         } catch (IllegalArgumentException expected) {
         }
-        verify(mProxyManager, never()).registerProxy(mMockServiceClient, Display.INVALID_DISPLAY);
+        verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
+                any(), any(), any(), any());
+    }
+
+    @SmallTest
+    @Test
+    public void testUnRegisterProxyWithPermission() throws Exception {
+        mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY);
+        mA11yms.unregisterProxyForDisplay(TEST_DISPLAY);
+
+        verify(mProxyManager).unregisterProxy(TEST_DISPLAY);
+    }
+
+    @SmallTest
+    @Test
+    public void testUnRegisterProxyWithoutPermission() throws Exception {
+        doThrow(SecurityException.class).when(mMockSecurityPolicy)
+                .enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+        try {
+            mA11yms.unregisterProxyForDisplay(TEST_DISPLAY);
+            Assert.fail();
+        } catch (SecurityException expected) {
+        }
+        verify(mProxyManager, never()).unregisterProxy(TEST_DISPLAY);
     }
 
     @SmallTest
@@ -417,6 +441,8 @@ public class AccessibilityManagerServiceTest {
     @SmallTest
     @Test
     public void testOnClientChange_magnificationEnabledAndCapabilityAll_requestConnection() {
+        when(mProxyManager.canRetrieveInteractiveWindowsLocked()).thenReturn(false);
+
         final AccessibilityUserState userState = mA11yms.mUserStates.get(
                 mA11yms.getCurrentUserIdLocked());
         userState.mAccessibilityShortcutKeyTargets.add(MAGNIFICATION_CONTROLLER_NAME);
@@ -432,6 +458,8 @@ public class AccessibilityManagerServiceTest {
     @SmallTest
     @Test
     public void testOnClientChange_boundServiceCanControlMagnification_requestConnection() {
+        when(mProxyManager.canRetrieveInteractiveWindowsLocked()).thenReturn(false);
+
         setupAccessibilityServiceConnection(0);
         when(mMockSecurityPolicy.canControlMagnification(any())).thenReturn(true);
 

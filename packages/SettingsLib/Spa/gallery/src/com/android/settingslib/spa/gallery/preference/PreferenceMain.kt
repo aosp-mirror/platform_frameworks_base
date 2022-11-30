@@ -43,7 +43,6 @@ object PreferenceMainPageProvider : SettingsPageProvider {
 
     fun buildInjectEntry(): SettingsEntryBuilder {
         return SettingsEntryBuilder.createInject(owner = owner)
-            .setIsAllowSearch(true)
             .setUiLayoutFn {
                 Preference(object : PreferenceModel {
                     override val title = TITLE

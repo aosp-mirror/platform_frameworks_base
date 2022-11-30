@@ -26,11 +26,12 @@ import android.credentials.ui.CreateCredentialProviderData;
 import android.credentials.ui.Entry;
 import android.credentials.ui.ProviderPendingIntentResponse;
 import android.os.Bundle;
+import android.service.credentials.BeginCreateCredentialRequest;
+import android.service.credentials.BeginCreateCredentialResponse;
 import android.service.credentials.CreateCredentialRequest;
-import android.service.credentials.CreateCredentialResponse;
+import android.service.credentials.CreateEntry;
 import android.service.credentials.CredentialProviderInfo;
 import android.service.credentials.CredentialProviderService;
-import android.service.credentials.SaveEntry;
 import android.util.Log;
 import android.util.Slog;
 
@@ -44,14 +45,14 @@ import java.util.Map;
  * Will likely split this into remote response state and UI state.
  */
 public final class ProviderCreateSession extends ProviderSession<
-        CreateCredentialRequest, CreateCredentialResponse> {
+        BeginCreateCredentialRequest, BeginCreateCredentialResponse> {
     private static final String TAG = "ProviderCreateSession";
 
     // Key to be used as an entry key for a save entry
     private static final String SAVE_ENTRY_KEY = "save_entry_key";
 
     @NonNull
-    private final Map<String, SaveEntry> mUiSaveEntries = new HashMap<>();
+    private final Map<String, CreateEntry> mUiSaveEntries = new HashMap<>();
     /** The complete request to be used in the second round. */
     private final CreateCredentialRequest mCompleteRequest;
 
@@ -62,13 +63,19 @@ public final class ProviderCreateSession extends ProviderSession<
             CredentialProviderInfo providerInfo,
             CreateRequestSession createRequestSession,
             RemoteCredentialService remoteCredentialService) {
-        CreateCredentialRequest providerRequest =
+        CreateCredentialRequest providerCreateRequest =
                 createProviderRequest(providerInfo.getCapabilities(),
                         createRequestSession.mClientRequest,
                         createRequestSession.mClientCallingPackage);
-        if (providerRequest != null) {
+        if (providerCreateRequest != null) {
+            // TODO : Replace with proper splitting of request
+            BeginCreateCredentialRequest providerBeginCreateRequest =
+                    new BeginCreateCredentialRequest(
+                            providerCreateRequest.getCallingPackage(),
+                            providerCreateRequest.getType(),
+                            new Bundle());
             return new ProviderCreateSession(context, providerInfo, createRequestSession, userId,
-                    remoteCredentialService, providerRequest);
+                    remoteCredentialService, providerBeginCreateRequest, providerCreateRequest);
         }
         Log.i(TAG, "Unable to create provider session");
         return null;
@@ -87,36 +94,28 @@ public final class ProviderCreateSession extends ProviderSession<
         return null;
     }
 
-    private static CreateCredentialRequest getFirstRoundRequest(CreateCredentialRequest request) {
-        // TODO: Replace with first round bundle from request when ready
-        return new CreateCredentialRequest(
-                request.getCallingPackage(),
-                request.getType(),
-                new Bundle());
-    }
-
     private ProviderCreateSession(
             @NonNull Context context,
             @NonNull CredentialProviderInfo info,
             @NonNull ProviderInternalCallback callbacks,
             @UserIdInt int userId,
             @NonNull RemoteCredentialService remoteCredentialService,
-            @NonNull CreateCredentialRequest request) {
-        super(context, info, getFirstRoundRequest(request), callbacks, userId,
+            @NonNull BeginCreateCredentialRequest beginCreateRequest,
+            @NonNull CreateCredentialRequest completeCreateRequest) {
+        super(context, info, beginCreateRequest, callbacks, userId,
                 remoteCredentialService);
-        // TODO : Replace with proper splitting of request
-        mCompleteRequest = request;
+        mCompleteRequest = completeCreateRequest;
         setStatus(Status.PENDING);
     }
 
     /** Returns the save entry maintained in state by this provider session. */
-    public SaveEntry getUiSaveEntry(String entryId) {
+    public CreateEntry getUiSaveEntry(String entryId) {
         return mUiSaveEntries.get(entryId);
     }
 
     @Override
     public void onProviderResponseSuccess(
-            @Nullable CreateCredentialResponse response) {
+            @Nullable BeginCreateCredentialResponse response) {
         Log.i(TAG, "in onProviderResponseSuccess");
         onUpdateResponse(response);
     }
@@ -138,7 +137,7 @@ public final class ProviderCreateSession extends ProviderSession<
         }
     }
 
-    private void onUpdateResponse(CreateCredentialResponse response) {
+    private void onUpdateResponse(BeginCreateCredentialResponse response) {
         Log.i(TAG, "updateResponse with save entries");
         mProviderResponse = response;
         updateStatusAndInvokeCallback(Status.SAVE_ENTRIES_RECEIVED);
@@ -152,15 +151,15 @@ public final class ProviderCreateSession extends ProviderSession<
             Log.i(TAG, "In prepareUiData not in uiInvokingStatus");
             return null;
         }
-        final CreateCredentialResponse response = getProviderResponse();
+        final BeginCreateCredentialResponse response = getProviderResponse();
         if (response == null) {
             Log.i(TAG, "In prepareUiData response null");
             throw new IllegalStateException("Response must be in completion mode");
         }
-        if (response.getSaveEntries() != null) {
+        if (response.getCreateEntries() != null) {
             Log.i(TAG, "In prepareUiData save entries not null");
             return prepareUiProviderData(
-                    prepareUiSaveEntries(response.getSaveEntries()),
+                    prepareUiSaveEntries(response.getCreateEntries()),
                     null,
                     /*isDefaultProvider=*/false);
         }
@@ -192,24 +191,25 @@ public final class ProviderCreateSession extends ProviderSession<
         }
     }
 
-    private List<Entry> prepareUiSaveEntries(@NonNull List<SaveEntry> saveEntries) {
+    private List<Entry> prepareUiSaveEntries(@NonNull List<CreateEntry> saveEntries) {
         Log.i(TAG, "in populateUiSaveEntries");
         List<Entry> uiSaveEntries = new ArrayList<>();
 
         // Populate the save entries
-        for (SaveEntry saveEntry : saveEntries) {
+        for (CreateEntry createEntry : saveEntries) {
             String entryId = generateEntryId();
-            mUiSaveEntries.put(entryId, saveEntry);
+            mUiSaveEntries.put(entryId, createEntry);
             Log.i(TAG, "in prepareUiProviderData creating ui entry with id " + entryId);
-            uiSaveEntries.add(new Entry(SAVE_ENTRY_KEY, entryId, saveEntry.getSlice(),
-                    saveEntry.getPendingIntent(), setUpFillInIntent(saveEntry.getPendingIntent())));
+            uiSaveEntries.add(new Entry(SAVE_ENTRY_KEY, entryId, createEntry.getSlice(),
+                    createEntry.getPendingIntent(), setUpFillInIntent(
+                            createEntry.getPendingIntent())));
         }
         return uiSaveEntries;
     }
 
     private Intent setUpFillInIntent(PendingIntent pendingIntent) {
         Intent intent = pendingIntent.getIntent();
-        intent.putExtra(CredentialProviderService.EXTRA_CREATE_CREDENTIAL_REQUEST_PARAMS,
+        intent.putExtra(CredentialProviderService.EXTRA_CREATE_CREDENTIAL_REQUEST,
                 mCompleteRequest);
         return intent;
     }
