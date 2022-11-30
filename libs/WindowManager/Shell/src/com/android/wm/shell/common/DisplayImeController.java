@@ -16,6 +16,12 @@
 
 package com.android.wm.shell.common;
 
+import static android.view.EventLogTags.IMF_IME_REMOTE_ANIM_CANCEL;
+import static android.view.EventLogTags.IMF_IME_REMOTE_ANIM_END;
+import static android.view.EventLogTags.IMF_IME_REMOTE_ANIM_START;
+import static android.view.inputmethod.ImeTracker.DEBUG_IME_VISIBILITY;
+import static android.view.inputmethod.ImeTracker.TOKEN_NONE;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -26,6 +32,7 @@ import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.RemoteException;
+import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.IDisplayWindowInsetsController;
@@ -47,6 +54,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -469,6 +477,15 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                                 ImeTracker.PHASE_WM_ANIMATION_RUNNING);
                         t.show(mImeSourceControl.getLeash());
                     }
+                    if (DEBUG_IME_VISIBILITY) {
+                        EventLog.writeEvent(IMF_IME_REMOTE_ANIM_START,
+                                statsToken != null ? statsToken.getTag() : TOKEN_NONE,
+                                mDisplayId, mAnimationDirection, alpha, startY , endY,
+                                Objects.toString(mImeSourceControl.getLeash()),
+                                Objects.toString(mImeSourceControl.getInsetsHint()),
+                                Objects.toString(mImeSourceControl.getSurfacePosition()),
+                                Objects.toString(mImeFrame));
+                    }
                     t.apply();
                     mTransactionPool.release(t);
                 }
@@ -476,6 +493,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 @Override
                 public void onAnimationCancel(Animator animation) {
                     mCancelled = true;
+                    if (DEBUG_IME_VISIBILITY) {
+                        EventLog.writeEvent(IMF_IME_REMOTE_ANIM_CANCEL,
+                                statsToken != null ? statsToken.getTag() : TOKEN_NONE, mDisplayId,
+                                Objects.toString(mImeSourceControl.getInsetsHint()));
+                    }
                 }
 
                 @Override
@@ -498,6 +520,15 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     } else if (mCancelled) {
                         ImeTracker.get().onCancelled(mStatsToken,
                                 ImeTracker.PHASE_WM_ANIMATION_RUNNING);
+                    }
+                    if (DEBUG_IME_VISIBILITY) {
+                        EventLog.writeEvent(IMF_IME_REMOTE_ANIM_END,
+                                statsToken != null ? statsToken.getTag() : TOKEN_NONE,
+                                mDisplayId, mAnimationDirection, endY,
+                                Objects.toString(mImeSourceControl.getLeash()),
+                                Objects.toString(mImeSourceControl.getInsetsHint()),
+                                Objects.toString(mImeSourceControl.getSurfacePosition()),
+                                Objects.toString(mImeFrame));
                     }
                     t.apply();
                     mTransactionPool.release(t);
