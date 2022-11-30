@@ -7099,9 +7099,10 @@ public class AudioService extends IAudioService.Stub
 
     private @AudioManager.DeviceVolumeBehavior
             int getDeviceVolumeBehaviorInt(@NonNull AudioDeviceAttributes device) {
-        // translate Java device type to native device type (for the devices masks for full / fixed)
-        final int audioSystemDeviceOut = AudioDeviceInfo.convertDeviceTypeToInternalDevice(
-                device.getType());
+        // Get the internal type set by the AudioDeviceAttributes constructor which is always more
+        // exact (avoids double conversions) than a conversion from SDK type via
+        // AudioDeviceInfo.convertDeviceTypeToInternalDevice()
+        final int audioSystemDeviceOut = device.getInternalType();
 
         int setDeviceVolumeBehavior = retrieveStoredDeviceVolumeBehavior(audioSystemDeviceOut);
         if (setDeviceVolumeBehavior != AudioManager.DEVICE_VOLUME_BEHAVIOR_UNSET) {
