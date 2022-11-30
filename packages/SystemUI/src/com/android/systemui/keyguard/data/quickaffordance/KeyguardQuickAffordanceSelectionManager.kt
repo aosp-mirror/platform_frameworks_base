@@ -18,9 +18,11 @@
 package com.android.systemui.keyguard.data.quickaffordance
 
 import android.content.Context
+import android.content.IntentFilter
 import android.content.SharedPreferences
-import androidx.annotation.VisibleForTesting
 import com.android.systemui.R
+import com.android.systemui.backup.BackupHelper
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -28,14 +30,18 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.onStart
 
 /**
  * Manages and provides access to the current "selections" of keyguard quick affordances, answering
  * the question "which affordances should the keyguard show?".
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class KeyguardQuickAffordanceSelectionManager
 @Inject
@@ -43,15 +49,10 @@ constructor(
     @Application context: Context,
     private val userFileManager: UserFileManager,
     private val userTracker: UserTracker,
+    broadcastDispatcher: BroadcastDispatcher,
 ) {
 
-    private val sharedPrefs: SharedPreferences
-        get() =
-            userFileManager.getSharedPreferences(
-                FILE_NAME,
-                Context.MODE_PRIVATE,
-                userTracker.userId,
-            )
+    private var sharedPrefs: SharedPreferences = instantiateSharedPrefs()
 
     private val userId: Flow<Int> = conflatedCallbackFlow {
         val callback =
@@ -78,21 +79,54 @@ constructor(
             }
     }
 
+    /**
+     * Emits an event each time a Backup & Restore restoration job is completed. Does not emit an
+     * initial value.
+     */
+    private val backupRestorationEvents: Flow<Unit> =
+        broadcastDispatcher.broadcastFlow(
+            filter = IntentFilter(BackupHelper.ACTION_RESTORE_FINISHED),
+            flags = Context.RECEIVER_NOT_EXPORTED,
+            permission = BackupHelper.PERMISSION_SELF,
+        )
+
     /** IDs of affordances to show, indexed by slot ID, and sorted in descending priority order. */
     val selections: Flow<Map<String, List<String>>> =
-        userId.flatMapLatest {
-            conflatedCallbackFlow {
-                val listener =
-                    SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
-                        trySend(getSelections())
-                    }
-
-                sharedPrefs.registerOnSharedPreferenceChangeListener(listener)
-                send(getSelections())
-
-                awaitClose { sharedPrefs.unregisterOnSharedPreferenceChangeListener(listener) }
+        combine(
+                userId,
+                backupRestorationEvents.onStart {
+                    // We emit an initial event to make sure that the combine emits at least once,
+                    // even
+                    // if we never get a Backup & Restore restoration event (which is the most
+                    // common
+                    // case anyway as restoration really only happens on initial device setup).
+                    emit(Unit)
+                }
+            ) { _, _ ->
             }
-        }
+            .flatMapLatest {
+                conflatedCallbackFlow {
+                    // We want to instantiate a new SharedPreferences instance each time either the
+                    // user
+                    // ID changes or we have a backup & restore restoration event. The reason is
+                    // that
+                    // our sharedPrefs instance needs to be replaced with a new one as it depends on
+                    // the
+                    // user ID and when the B&R job completes, the backing file is replaced but the
+                    // existing instance still has a stale in-memory cache.
+                    sharedPrefs = instantiateSharedPrefs()
+
+                    val listener =
+                        SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
+                            trySend(getSelections())
+                        }
+
+                    sharedPrefs.registerOnSharedPreferenceChangeListener(listener)
+                    send(getSelections())
+
+                    awaitClose { sharedPrefs.unregisterOnSharedPreferenceChangeListener(listener) }
+                }
+            }
 
     /**
      * Returns a snapshot of the IDs of affordances to show, indexed by slot ID, and sorted in
@@ -144,9 +178,17 @@ constructor(
         sharedPrefs.edit().putString(key, value).apply()
     }
 
+    private fun instantiateSharedPrefs(): SharedPreferences {
+        return userFileManager.getSharedPreferences(
+            FILE_NAME,
+            Context.MODE_PRIVATE,
+            userTracker.userId,
+        )
+    }
+
     companion object {
         private const val TAG = "KeyguardQuickAffordanceSelectionManager"
-        @VisibleForTesting const val FILE_NAME = "quick_affordance_selections"
+        const val FILE_NAME = "quick_affordance_selections"
         private const val KEY_PREFIX_SLOT = "slot_"
         private const val SLOT_AFFORDANCES_DELIMITER = ":"
         private const val AFFORDANCE_DELIMITER = ","
