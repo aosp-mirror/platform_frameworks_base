@@ -27,6 +27,7 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.broadcastradio.hal2.AnnouncementAggregator;
 
@@ -51,15 +52,17 @@ final class IRadioServiceHidlImpl extends IRadioService.Stub {
     private final Object mLock = new Object();
 
     private final BroadcastRadioService mService;
+
+    @GuardedBy("mLock")
     private final List<RadioManager.ModuleProperties> mV1Modules;
 
     IRadioServiceHidlImpl(BroadcastRadioService service) {
         mService = Objects.requireNonNull(service, "broadcast radio service cannot be null");
-        mHal1 = new com.android.server.broadcastradio.hal1.BroadcastRadioService(mLock);
+        mHal1 = new com.android.server.broadcastradio.hal1.BroadcastRadioService();
         mV1Modules = mHal1.loadModules();
         OptionalInt max = mV1Modules.stream().mapToInt(RadioManager.ModuleProperties::getId).max();
         mHal2 = new com.android.server.broadcastradio.hal2.BroadcastRadioService(
-                max.isPresent() ? max.getAsInt() + 1 : 0, mLock);
+                max.isPresent() ? max.getAsInt() + 1 : 0);
     }
 
     @VisibleForTesting
@@ -78,9 +81,11 @@ final class IRadioServiceHidlImpl extends IRadioService.Stub {
     public List<RadioManager.ModuleProperties> listModules() {
         mService.enforcePolicyAccess();
         Collection<RadioManager.ModuleProperties> v2Modules = mHal2.listModules();
-        List<RadioManager.ModuleProperties> modules = new ArrayList<>(
-                mV1Modules.size() + v2Modules.size());
-        modules.addAll(mV1Modules);
+        List<RadioManager.ModuleProperties> modules;
+        synchronized (mLock) {
+            modules = new ArrayList<>(mV1Modules.size() + v2Modules.size());
+            modules.addAll(mV1Modules);
+        }
         modules.addAll(v2Modules);
         return modules;
     }
@@ -131,7 +136,9 @@ final class IRadioServiceHidlImpl extends IRadioService.Stub {
         radioPw.printf("HAL1: %s\n", mHal1);
 
         radioPw.increaseIndent();
-        radioPw.printf("Modules of HAL1: %s\n", mV1Modules);
+        synchronized (mLock) {
+            radioPw.printf("Modules of HAL1: %s\n", mV1Modules);
+        }
         radioPw.decreaseIndent();
 
         radioPw.printf("HAL2:\n");

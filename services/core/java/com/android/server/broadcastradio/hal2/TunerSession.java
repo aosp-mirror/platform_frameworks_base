@@ -33,6 +33,7 @@ import android.util.MutableBoolean;
 import android.util.MutableInt;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.broadcastradio.RadioServiceUserController;
 import com.android.server.utils.Slogf;
 
@@ -46,26 +47,28 @@ class TunerSession extends ITuner.Stub {
     private static final String kAudioDeviceName = "Radio tuner source";
     private static final int TUNER_EVENT_LOGGER_QUEUE_SIZE = 25;
 
-    private final Object mLock;
+    private final Object mLock = new Object();
     @NonNull private final RadioEventLogger mEventLogger;
 
     private final RadioModule mModule;
     private final ITunerSession mHwSession;
     final android.hardware.radio.ITunerCallback mCallback;
+
+    @GuardedBy("mLock")
     private boolean mIsClosed = false;
+    @GuardedBy("mLock")
     private boolean mIsMuted = false;
+    @GuardedBy("mLock")
     private ProgramInfoCache mProgramInfoCache = null;
 
     // necessary only for older APIs compatibility
     private RadioManager.BandConfig mDummyConfig = null;
 
     TunerSession(@NonNull RadioModule module, @NonNull ITunerSession hwSession,
-            @NonNull android.hardware.radio.ITunerCallback callback,
-            @NonNull Object lock) {
+            @NonNull android.hardware.radio.ITunerCallback callback) {
         mModule = Objects.requireNonNull(module);
         mHwSession = Objects.requireNonNull(hwSession);
         mCallback = Objects.requireNonNull(callback);
-        mLock = Objects.requireNonNull(lock);
         mEventLogger = new RadioEventLogger(TAG, TUNER_EVENT_LOGGER_QUEUE_SIZE);
     }
 
@@ -86,23 +89,26 @@ class TunerSession extends ITuner.Stub {
         mEventLogger.logRadioEvent("Close on error %d", error);
         synchronized (mLock) {
             if (mIsClosed) return;
-            if (error != null) {
-                try {
-                    mCallback.onError(error);
-                } catch (RemoteException ex) {
-                    Slog.w(TAG, "mCallback.onError() failed: ", ex);
-                }
-            }
             mIsClosed = true;
-            mModule.onTunerSessionClosed(this);
         }
+        if (error != null) {
+            try {
+                mCallback.onError(error);
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "mCallback.onError() failed: ", ex);
+            }
+        }
+        mModule.onTunerSessionClosed(this);
     }
 
     @Override
     public boolean isClosed() {
-        return mIsClosed;
+        synchronized (mLock) {
+            return mIsClosed;
+        }
     }
 
+    @GuardedBy("mLock")
     private void checkNotClosedLocked() {
         if (mIsClosed) {
             throw new IllegalStateException("Tuner is closed, no further operations are allowed");
@@ -118,9 +124,9 @@ class TunerSession extends ITuner.Stub {
         synchronized (mLock) {
             checkNotClosedLocked();
             mDummyConfig = Objects.requireNonNull(config);
-            Slog.i(TAG, "Ignoring setConfiguration - not applicable for broadcastradio HAL 2.0");
-            mModule.fanoutAidlCallback(cb -> cb.onConfigurationChanged(config));
         }
+        Slog.i(TAG, "Ignoring setConfiguration - not applicable for broadcastradio HAL 2.0");
+        mModule.fanoutAidlCallback(cb -> cb.onConfigurationChanged(config));
     }
 
     @Override
@@ -137,8 +143,8 @@ class TunerSession extends ITuner.Stub {
             checkNotClosedLocked();
             if (mIsMuted == mute) return;
             mIsMuted = mute;
-            Slog.w(TAG, "Mute via RadioService is not implemented - please handle it via app");
         }
+        Slog.w(TAG, "Mute via RadioService is not implemented - please handle it via app");
     }
 
     @Override
@@ -383,8 +389,8 @@ class TunerSession extends ITuner.Stub {
     void dumpInfo(IndentingPrintWriter pw) {
         pw.printf("TunerSession\n");
         pw.increaseIndent();
+        pw.printf("HIDL HAL Session: %s\n", mHwSession);
         synchronized (mLock) {
-            pw.printf("HIDL HAL Session: %s\n", mHwSession);
             pw.printf("Is session closed? %s\n", mIsClosed ? "Yes" : "No");
             pw.printf("Is muted? %s\n", mIsMuted ? "Yes" : "No");
             pw.printf("ProgramInfoCache: %s\n", mProgramInfoCache);
