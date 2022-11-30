@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,11 +28,18 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
 import android.os.PowerExemptionManager.TempAllowListType;
+
+import com.android.internal.util.Preconditions;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Helper class for building an options Bundle that can be used with
@@ -55,6 +63,9 @@ public class BroadcastOptions extends ComponentOptions {
     private boolean mRequireCompatChangeEnabled = true;
     private boolean mIsAlarmBroadcast = false;
     private long mIdForResponseEvent;
+    private @DeliveryGroupPolicy int mDeliveryGroupPolicy;
+    private @Nullable String mDeliveryGroupMatchingKey;
+    private @Nullable IntentFilter mDeliveryGroupMatchingFilter;
 
     /**
      * Change ID which is invalid.
@@ -179,6 +190,36 @@ public class BroadcastOptions extends ComponentOptions {
      */
     private static final String KEY_ID_FOR_RESPONSE_EVENT =
             "android:broadcast.idForResponseEvent";
+
+    /**
+     * The list of delivery group policies which specify how multiple broadcasts belonging to
+     * the same delivery group has to be handled.
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "DELIVERY_GROUP_POLICY_" }, value = {
+            DELIVERY_GROUP_POLICY_ALL,
+            DELIVERY_GROUP_POLICY_MOST_RECENT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DeliveryGroupPolicy {}
+
+    /**
+     * Delivery group policy that indicates that all the broadcasts in the delivery group
+     * need to be delivered as is.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int DELIVERY_GROUP_POLICY_ALL = 0;
+
+    /**
+     * Delivery group policy that indicates that only the most recent broadcast in the delivery
+     * group need to be delivered and the rest can be dropped.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int DELIVERY_GROUP_POLICY_MOST_RECENT = 1;
 
     public static BroadcastOptions makeBasic() {
         BroadcastOptions opts = new BroadcastOptions();
@@ -593,6 +634,57 @@ public class BroadcastOptions extends ComponentOptions {
     @IntRange(from = 0)
     public long getIdForResponseEvent() {
         return mIdForResponseEvent;
+    }
+
+    /**
+     * Set delivery group policy for this broadcast to specify how multiple broadcasts belonging to
+     * the same delivery group has to be handled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void setDeliveryGroupPolicy(@DeliveryGroupPolicy int policy) {
+        mDeliveryGroupPolicy = policy;
+    }
+
+    /**
+     * Set namespace and key to identify the delivery group that this broadcast belongs to.
+     *
+     * <p> If {@code namespace} and {@code key} are specified, then another broadcast will be
+     * considered to be in the same delivery group as this iff it has the same {@code namespace}
+     * and {@code key}.
+     *
+     * <p> If neither matching key using this API nor matching filter using
+     * {@link #setDeliveryGroupMatchingFilter(IntentFilter)} is specified, then by default
+     * {@link Intent#filterEquals(Intent)} will be used to identify the delivery group.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void setDeliveryGroupMatchingKey(@NonNull String namespace, @NonNull String key) {
+        Preconditions.checkArgument(!namespace.contains("/"),
+                "namespace should not contain '/'");
+        Preconditions.checkArgument(!key.contains("/"),
+                "key should not contain '/'");
+        mDeliveryGroupMatchingKey = namespace + "/" + key;
+    }
+
+    /**
+     * Set the {@link IntentFilter} object to identify the delivery group that this broadcast
+     * belongs to.
+     *
+     * <p> If a {@code matchingFilter} is specified, then another broadcast will be considered
+     * to be in the same delivery group as this iff the {@code matchingFilter} matches it's intent.
+     *
+     * <p> If neither matching key using {@link #setDeliveryGroupMatchingKey(String, String)} nor
+     * matching filter using this API is specified, then by default
+     * {@link Intent#filterEquals(Intent)} will be used to identify the delivery group.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void setDeliveryGroupMatchingFilter(@NonNull IntentFilter matchingFilter) {
+        mDeliveryGroupMatchingFilter = Objects.requireNonNull(matchingFilter);
     }
 
     /**
