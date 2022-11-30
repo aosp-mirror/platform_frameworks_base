@@ -127,6 +127,11 @@ class TableLogBuffer(
         rowInitializer(row)
     }
 
+    /** Logs a boolean change. */
+    fun logChange(prefix: String, columnName: String, value: Boolean) {
+        logChange(systemClock.currentTimeMillis(), prefix, columnName, value)
+    }
+
     // Keep these individual [logChange] methods private (don't let clients give us their own
     // timestamps.)
 

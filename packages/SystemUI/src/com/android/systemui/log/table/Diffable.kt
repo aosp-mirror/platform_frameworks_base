@@ -78,3 +78,25 @@ fun <T : Diffable<T>> Flow<T>.logDiffsForTable(
         newVal
     }
 }
+
+/**
+ * Each time the boolean flow is updated with a new value that's different from the previous value,
+ * logs the new value to the given [tableLogBuffer].
+ */
+fun Flow<Boolean>.logDiffsForTable(
+    tableLogBuffer: TableLogBuffer,
+    columnPrefix: String,
+    columnName: String,
+    initialValue: Boolean,
+): Flow<Boolean> {
+    val initialValueFun = {
+        tableLogBuffer.logChange(columnPrefix, columnName, initialValue)
+        initialValue
+    }
+    return this.pairwiseBy(initialValueFun) { prevVal, newVal: Boolean ->
+        if (prevVal != newVal) {
+            tableLogBuffer.logChange(columnPrefix, columnName, newVal)
+        }
+        newVal
+    }
+}
