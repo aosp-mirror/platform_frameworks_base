@@ -2044,7 +2044,8 @@ final class InstallPackageHelper {
                         Slog.d(TAG, "Implicitly enabling system package on upgrade: " + pkgName);
                     }
                     // Enable system package for requested users
-                    if (installedForUsers != null) {
+                    if (installedForUsers != null
+                            && !installRequest.isKeepApplicationEnabledSetting()) {
                         for (int origUserId : installedForUsers) {
                             if (userId == UserHandle.USER_ALL || userId == origUserId) {
                                 ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT,
@@ -2094,16 +2095,22 @@ final class InstallPackageHelper {
 
                 if (userId != UserHandle.USER_ALL) {
                     // It's implied that when a user requests installation, they want the app to
-                    // be installed and enabled.
+                    // be installed and enabled. The caller, however, can explicitly specify to
+                    // keep the existing enabled state.
                     ps.setInstalled(true, userId);
-                    ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId, installerPackageName);
+                    if (!installRequest.isKeepApplicationEnabledSetting()) {
+                        ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId,
+                                installerPackageName);
+                    }
                 } else if (allUsers != null) {
                     // The caller explicitly specified INSTALL_ALL_USERS flag.
                     // Thus, updating the settings to install the app for all users.
                     for (int currentUserId : allUsers) {
                         ps.setInstalled(true, currentUserId);
-                        ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId,
-                                installerPackageName);
+                        if (!installRequest.isKeepApplicationEnabledSetting()) {
+                            ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, currentUserId,
+                                    installerPackageName);
+                        }
                     }
                 }
 

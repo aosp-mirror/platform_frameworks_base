@@ -61,4 +61,6 @@ interface IPackageInstallerSession {
     int getInstallFlags();
 
     void requestUserPreapproval(in PackageInstaller.PreapprovalDetails details, in IntentSender statusReceiver);
+
+    boolean isKeepApplicationEnabledSetting();
 }

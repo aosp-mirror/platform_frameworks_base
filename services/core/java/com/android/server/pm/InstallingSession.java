@@ -98,6 +98,7 @@ class InstallingSession {
     final boolean mIsInherit;
     final int mSessionId;
     final int mRequireUserAction;
+    final boolean mKeepApplicationEnabledSetting;
 
     // For move install
     InstallingSession(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
@@ -130,6 +131,7 @@ class InstallingSession {
         mIsInherit = false;
         mSessionId = -1;
         mRequireUserAction = USER_ACTION_UNSPECIFIED;
+        mKeepApplicationEnabledSetting = false;
     }
 
     InstallingSession(int sessionId, File stagedDir, IPackageInstallObserver2 observer,
@@ -163,6 +165,7 @@ class InstallingSession {
         mIsInherit = sessionParams.mode == MODE_INHERIT_EXISTING;
         mSessionId = sessionId;
         mRequireUserAction = sessionParams.requireUserAction;
+        mKeepApplicationEnabledSetting = sessionParams.keepApplicationEnabledSetting;
     }
 
     @Override

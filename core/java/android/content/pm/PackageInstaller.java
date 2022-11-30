@@ -1717,6 +1717,18 @@ public class PackageInstaller {
                 e.rethrowFromSystemServer();
             }
         }
+
+        /**
+         * @return {@code true} if this session will keep the existing application enabled setting
+         * after installation.
+         */
+        public boolean isKeepApplicationEnabledSetting() {
+            try {
+                return mSession.isKeepApplicationEnabledSetting();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -1855,6 +1867,8 @@ public class PackageInstaller {
         public boolean forceQueryableOverride;
         /** {@hide} */
         public int requireUserAction = USER_ACTION_UNSPECIFIED;
+        /** {@hide} */
+        public boolean keepApplicationEnabledSetting = false;
 
         /**
          * Construct parameters for a new package install session.
@@ -1899,6 +1913,7 @@ public class PackageInstaller {
             rollbackDataPolicy = source.readInt();
             requireUserAction = source.readInt();
             packageSource = source.readInt();
+            keepApplicationEnabledSetting = source.readBoolean();
         }
 
         /** {@hide} */
@@ -1929,6 +1944,7 @@ public class PackageInstaller {
             ret.rollbackDataPolicy = rollbackDataPolicy;
             ret.requireUserAction = requireUserAction;
             ret.packageSource = packageSource;
+            ret.keepApplicationEnabledSetting = keepApplicationEnabledSetting;
             return ret;
         }
 
@@ -2415,6 +2431,14 @@ public class PackageInstaller {
             this.installScenario = installScenario;
         }
 
+        /**
+         * Request to keep the original application enabled setting. This will prevent the
+         * application from being enabled if it was previously in a disabled state.
+         */
+        public void setKeepApplicationEnabledSetting() {
+            this.keepApplicationEnabledSetting = true;
+        }
+
         /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
@@ -2443,6 +2467,7 @@ public class PackageInstaller {
             pw.printPair("requiredInstalledVersionCode", requiredInstalledVersionCode);
             pw.printPair("dataLoaderParams", dataLoaderParams);
             pw.printPair("rollbackDataPolicy", rollbackDataPolicy);
+            pw.printPair("keepApplicationEnabledSetting", keepApplicationEnabledSetting);
             pw.println();
         }
 
@@ -2483,6 +2508,7 @@ public class PackageInstaller {
             dest.writeInt(rollbackDataPolicy);
             dest.writeInt(requireUserAction);
             dest.writeInt(packageSource);
+            dest.writeBoolean(keepApplicationEnabledSetting);
         }
 
         public static final Parcelable.Creator<SessionParams>
@@ -2684,6 +2710,9 @@ public class PackageInstaller {
         /** @hide */
         public boolean isPreapprovalRequested;
 
+        /** @hide */
+        public boolean keepApplicationEnabledSetting;
+
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public SessionInfo() {
@@ -2737,6 +2766,7 @@ public class PackageInstaller {
             requireUserAction = source.readInt();
             installerUid = source.readInt();
             packageSource = source.readInt();
+            keepApplicationEnabledSetting = source.readBoolean();
         }
 
         /**
@@ -3268,6 +3298,14 @@ public class PackageInstaller {
             return installerUid;
         }
 
+        /**
+         * Returns {@code true} if this session will keep the existing application enabled setting
+         * after installation.
+         */
+        public boolean isKeepApplicationEnabledSetting() {
+            return keepApplicationEnabledSetting;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -3317,6 +3355,7 @@ public class PackageInstaller {
             dest.writeInt(requireUserAction);
             dest.writeInt(installerUid);
             dest.writeInt(packageSource);
+            dest.writeBoolean(keepApplicationEnabledSetting);
         }
 
         public static final Parcelable.Creator<SessionInfo>
