@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
@@ -107,12 +108,16 @@ public final class BackgroundDexOptServiceUnitTest {
     @Mock
     private BackgroundDexOptJobService mJobServiceForIdle;
 
-    private final JobParameters mJobParametersForPostBoot = new JobParameters(null,
-            BackgroundDexOptService.JOB_POST_BOOT_UPDATE, null, null, null,
-            0, false, false, null, null, null);
-    private final JobParameters mJobParametersForIdle = new JobParameters(null,
-            BackgroundDexOptService.JOB_IDLE_OPTIMIZE, null, null, null,
-            0, false, false, null, null, null);
+    private final JobParameters mJobParametersForPostBoot =
+            createJobParameters(BackgroundDexOptService.JOB_POST_BOOT_UPDATE);
+    private final JobParameters mJobParametersForIdle =
+            createJobParameters(BackgroundDexOptService.JOB_IDLE_OPTIMIZE);
+
+    private static JobParameters createJobParameters(int jobId) {
+        JobParameters params = mock(JobParameters.class);
+        when(params.getJobId()).thenReturn(jobId);
+        return params;
+    }
 
     private BackgroundDexOptService mService;
 
