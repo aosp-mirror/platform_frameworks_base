@@ -382,9 +382,9 @@ public final class PixelCopy {
             }
 
             /**
-             * Creates a PixelCopy request for the given {@link Window}
+             * Creates a PixelCopy Builder for the given {@link Window}
              * @param source The Window to copy from
-             * @return A {@link Builder} builder to set the optional params & execute the request
+             * @return A {@link Builder} builder to set the optional params & build the request
              */
             @SuppressLint("BuilderSetStyle")
             public static @NonNull Builder ofWindow(@NonNull Window source) {
@@ -394,7 +394,7 @@ public final class PixelCopy {
             }
 
             /**
-             * Creates a PixelCopy request for the {@link Window} that the given {@link View} is
+             * Creates a PixelCopy Builder for the {@link Window} that the given {@link View} is
              * attached to.
              *
              * Note that this copy request is not cropped to the area the View occupies by default.
@@ -404,7 +404,7 @@ public final class PixelCopy {
              *
              * @param source A View that {@link View#isAttachedToWindow() is attached} to a window
              *               that will be used to retrieve the window to copy from.
-             * @return A {@link Builder} builder to set the optional params & execute the request
+             * @return A {@link Builder} builder to set the optional params & build the request
              */
             @SuppressLint("BuilderSetStyle")
             public static @NonNull Builder ofWindow(@NonNull View source) {
@@ -427,10 +427,10 @@ public final class PixelCopy {
             }
 
             /**
-             * Creates a PixelCopy request for the given {@link Surface}
+             * Creates a PixelCopy Builder for the given {@link Surface}
              *
              * @param source The Surface to copy from. Must be {@link Surface#isValid() valid}.
-             * @return A {@link Builder} builder to set the optional params & execute the request
+             * @return A {@link Builder} builder to set the optional params & build the request
              */
             @SuppressLint("BuilderSetStyle")
             public static @NonNull Builder ofSurface(@NonNull Surface source) {
@@ -441,12 +441,12 @@ public final class PixelCopy {
             }
 
             /**
-             * Creates a PixelCopy request for the {@link Surface} belonging to the
+             * Creates a PixelCopy Builder for the {@link Surface} belonging to the
              * given {@link SurfaceView}
              *
              * @param source The SurfaceView to copy from. The backing surface must be
              *               {@link Surface#isValid() valid}
-             * @return A {@link Builder} builder to set the optional params & execute the request
+             * @return A {@link Builder} builder to set the optional params & build the request
              */
             @SuppressLint("BuilderSetStyle")
             public static @NonNull Builder ofSurface(@NonNull SurfaceView source) {
