@@ -61,6 +61,8 @@ public class IllustrationPreferenceTest {
     private PreferenceViewHolder mViewHolder;
     private FrameLayout mMiddleGroundLayout;
     private final Context mContext = ApplicationProvider.getApplicationContext();
+    private IllustrationPreference.OnBindListener mOnBindListener;
+    private LottieAnimationView mOnBindListenerAnimationView;
 
     @Before
     public void setUp() {
@@ -82,6 +84,12 @@ public class IllustrationPreferenceTest {
 
         final AttributeSet attributeSet = Robolectric.buildAttributeSet().build();
         mPreference = new IllustrationPreference(mContext, attributeSet);
+        mOnBindListener = new IllustrationPreference.OnBindListener() {
+            @Override
+            public void onBind(LottieAnimationView animationView) {
+                mOnBindListenerAnimationView = animationView;
+            }
+        };
     }
 
     @Test
@@ -185,5 +193,26 @@ public class IllustrationPreferenceTest {
 
         assertThat(mBackgroundView.getMaxHeight()).isEqualTo(restrictedHeight);
         assertThat(mAnimationView.getMaxHeight()).isEqualTo(restrictedHeight);
+    }
+
+    @Test
+    public void setOnBindListener_isNotified() {
+        mOnBindListenerAnimationView = null;
+        mPreference.setOnBindListener(mOnBindListener);
+
+        mPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mOnBindListenerAnimationView).isNotNull();
+        assertThat(mOnBindListenerAnimationView).isEqualTo(mAnimationView);
+    }
+
+    @Test
+    public void setOnBindListener_notNotified() {
+        mOnBindListenerAnimationView = null;
+        mPreference.setOnBindListener(null);
+
+        mPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mOnBindListenerAnimationView).isNull();
     }
 }
