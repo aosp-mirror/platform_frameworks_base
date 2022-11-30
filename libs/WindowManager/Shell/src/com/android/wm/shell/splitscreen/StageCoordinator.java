@@ -1035,7 +1035,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mIsDividerRemoteAnimating = false;
 
         mSplitLayout.getInvisibleBounds(mTempRect1);
-        if (childrenToTop == null) {
+        if (childrenToTop == null || childrenToTop.getTopVisibleChildTaskId() == INVALID_TASK_ID) {
             mSideStage.removeAllTasks(wct, false /* toTop */);
             mMainStage.deactivate(wct, false /* toTop */);
             wct.reorder(mRootTaskInfo.token, false /* onTop */);
@@ -1292,13 +1292,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onTaskStageChanged(taskId, stage, visible);
         }
-    }
-
-    private void onStageChildTaskEnterPip() {
-        // When the exit split-screen is caused by one of the task enters auto pip,
-        // we want both tasks to be put to bottom instead of top, otherwise it will end up
-        // a fullscreen plus a pinned task instead of pinned only at the end of the transition.
-        exitSplitScreen(null, EXIT_REASON_CHILD_TASK_ENTER_PIP);
     }
 
     private void updateRecentTasksSplitPair() {
@@ -2063,7 +2056,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Update divider state after animation so that it is still around and positioned
             // properly for the animation itself.
             mSplitLayout.release();
-            mSplitLayout.resetDividerPosition();
             mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
         }
     }
@@ -2337,11 +2329,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         @Override
         public void onChildTaskStatusChanged(int taskId, boolean present, boolean visible) {
             StageCoordinator.this.onStageChildTaskStatusChanged(this, taskId, present, visible);
-        }
-
-        @Override
-        public void onChildTaskEnterPip() {
-            StageCoordinator.this.onStageChildTaskEnterPip();
         }
 
         @Override
