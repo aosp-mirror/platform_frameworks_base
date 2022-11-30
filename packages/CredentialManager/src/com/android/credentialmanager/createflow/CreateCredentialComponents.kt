@@ -60,7 +60,7 @@ fun CreateCredentialScreen(
     viewModel.onEntrySelected(it, providerActivityLauncher)
   }
   val confirmEntryCallback: () -> Unit = {
-    viewModel.onConfirmCreationSelected(providerActivityLauncher)
+    viewModel.onConfirmEntrySelected(providerActivityLauncher)
   }
   val state = rememberModalBottomSheetState(
     initialValue = ModalBottomSheetValue.Expanded,
@@ -107,6 +107,13 @@ fun CreateCredentialScreen(
         CreateScreenState.MORE_OPTIONS_ROW_INTRO -> MoreOptionsRowIntroCard(
           providerInfo = uiState.activeEntry?.activeProvider!!,
           onDefaultOrNotSelected = viewModel::onDefaultOrNotSelected
+        )
+        CreateScreenState.EXTERNAL_ONLY_SELECTION -> ExternalOnlySelectionCard(
+          requestDisplayInfo = uiState.requestDisplayInfo,
+          activeRemoteEntry = uiState.activeEntry?.activeEntryInfo!!,
+          onOptionSelected = selectEntryCallback,
+          onConfirm = confirmEntryCallback,
+          onCancel = viewModel::onCancel,
         )
       }
     },
@@ -489,7 +496,7 @@ fun CreationSelectionCard(
       ) {
         PrimaryCreateOptionRow(
           requestDisplayInfo = requestDisplayInfo,
-          createOptionInfo = createOptionInfo,
+          entryInfo = createOptionInfo,
           onOptionSelected = onOptionSelected
         )
       }
@@ -562,16 +569,85 @@ fun CreationSelectionCard(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun ExternalOnlySelectionCard(
+  requestDisplayInfo: RequestDisplayInfo,
+  activeRemoteEntry: EntryInfo,
+  onOptionSelected: (EntryInfo) -> Unit,
+  onConfirm: () -> Unit,
+  onCancel: () -> Unit,
+) {
+  Card() {
+    Column() {
+      Icon(
+        painter = painterResource(R.drawable.ic_other_devices),
+        contentDescription = null,
+        tint = Color.Unspecified,
+        modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+          .padding(all = 24.dp).size(32.dp)
+      )
+      Text(
+        text = stringResource(R.string.create_passkey_in_other_device_title),
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(horizontal = 24.dp)
+          .align(alignment = Alignment.CenterHorizontally),
+        textAlign = TextAlign.Center,
+      )
+      Divider(
+        thickness = 24.dp,
+        color = Color.Transparent
+      )
+      Card(
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier
+          .padding(horizontal = 24.dp)
+          .align(alignment = Alignment.CenterHorizontally),
+      ) {
+        PrimaryCreateOptionRow(
+          requestDisplayInfo = requestDisplayInfo,
+          entryInfo = activeRemoteEntry,
+          onOptionSelected = onOptionSelected
+        )
+      }
+      Divider(
+        thickness = 24.dp,
+        color = Color.Transparent
+      )
+      Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+      ) {
+        CancelButton(
+          stringResource(R.string.string_cancel),
+          onClick = onCancel
+        )
+        ConfirmButton(
+          stringResource(R.string.string_continue),
+          onClick = onConfirm
+        )
+      }
+      Divider(
+        thickness = 18.dp,
+        color = Color.Transparent,
+        modifier = Modifier.padding(bottom = 16.dp)
+      )
+    }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun PrimaryCreateOptionRow(
   requestDisplayInfo: RequestDisplayInfo,
-  createOptionInfo: CreateOptionInfo,
+  entryInfo: EntryInfo,
   onOptionSelected: (EntryInfo) -> Unit
 ) {
   Entry(
-    onClick = {onOptionSelected(createOptionInfo)},
+    onClick = {onOptionSelected(entryInfo)},
     icon = {
       Icon(
-        bitmap = createOptionInfo.profileIcon.toBitmap().asImageBitmap(),
+        bitmap = if (entryInfo is CreateOptionInfo) {
+          entryInfo.profileIcon.toBitmap().asImageBitmap()
+        } else {requestDisplayInfo.typeIcon.toBitmap().asImageBitmap()},
         contentDescription = null,
         tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
         modifier = Modifier.padding(start = 18.dp).size(32.dp)
