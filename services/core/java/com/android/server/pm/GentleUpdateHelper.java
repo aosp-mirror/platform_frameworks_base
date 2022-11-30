@@ -16,7 +16,12 @@
 
 package com.android.server.pm;
 
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
+
 import android.annotation.WorkerThread;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityThread;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -28,6 +33,7 @@ import android.content.pm.PackageInstaller.InstallConstraints;
 import android.content.pm.PackageInstaller.InstallConstraintsResult;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.Slog;
@@ -109,6 +115,14 @@ public class GentleUpdateHelper {
         mAppStateHelper = appStateHelper;
     }
 
+    void systemReady() {
+        var am = mContext.getSystemService(ActivityManager.class);
+        // Monitor top-visible apps
+        am.addOnUidImportanceListener(this::onUidImportance, IMPORTANCE_FOREGROUND);
+        // Monitor foreground apps
+        am.addOnUidImportanceListener(this::onUidImportance, IMPORTANCE_FOREGROUND_SERVICE);
+    }
+
     /**
      * Checks if install constraints are satisfied for the given packages.
      */
@@ -137,9 +151,6 @@ public class GentleUpdateHelper {
                         PENDING_CHECK_MILLIS);
             } else if (!processPendingCheck(pendingCheck, false)) {
                 // Not resolved. Schedule a job for re-check
-                // TODO(b/235306967): Listen to OnUidImportanceListener for package
-                //  importance changes. This will resolve pending checks as soon as
-                //  top-visible or foreground constraints are satisfied.
                 mPendingChecks.add(pendingCheck);
                 scheduleIdleJob();
             }
@@ -220,6 +231,34 @@ public class GentleUpdateHelper {
         if (!mPendingChecks.isEmpty()) {
             // Schedule a job for remaining pending checks
             scheduleIdleJob();
+        }
+    }
+
+    @WorkerThread
+    private void onUidImportance(String packageName,
+            @RunningAppProcessInfo.Importance int importance) {
+        int size = mPendingChecks.size();
+        for (int i = 0; i < size; ++i) {
+            var pendingCheck = mPendingChecks.remove();
+            var dependencyPackages =
+                    mAppStateHelper.getDependencyPackages(pendingCheck.packageNames);
+            if (!dependencyPackages.contains(packageName)
+                    || !processPendingCheck(pendingCheck, false)) {
+                mPendingChecks.add(pendingCheck);
+            }
+        }
+        if (!mPendingChecks.isEmpty()) {
+            // Schedule a job for remaining pending checks
+            scheduleIdleJob();
+        }
+    }
+
+    private void onUidImportance(int uid, @RunningAppProcessInfo.Importance int importance) {
+        var pm = ActivityThread.getPackageManager();
+        try {
+            var packageName = pm.getNameForUid(uid);
+            mHandler.post(() -> onUidImportance(packageName, importance));
+        } catch (RemoteException ignore) {
         }
     }
 }
