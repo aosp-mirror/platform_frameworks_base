@@ -2956,6 +2956,7 @@ package android.companion.virtual {
   public static class VirtualDeviceManager.VirtualDevice implements java.lang.AutoCloseable {
     method public void addActivityListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
+    method @NonNull public android.content.Context createContext();
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.companion.virtual.audio.VirtualAudioDevice createVirtualAudioDevice(@NonNull android.hardware.display.VirtualDisplay, @Nullable java.util.concurrent.Executor, @Nullable android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChangeCallback);
     method @Nullable public android.hardware.display.VirtualDisplay createVirtualDisplay(@IntRange(from=1) int, @IntRange(from=1) int, @IntRange(from=1) int, @Nullable android.view.Surface, int, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.display.VirtualDisplay.Callback);
     method @Nullable public android.hardware.display.VirtualDisplay createVirtualDisplay(@IntRange(from=1) int, @IntRange(from=1) int, @IntRange(from=1) int, @NonNull java.util.List<java.lang.String>, @Nullable android.view.Surface, int, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.display.VirtualDisplay.Callback);
