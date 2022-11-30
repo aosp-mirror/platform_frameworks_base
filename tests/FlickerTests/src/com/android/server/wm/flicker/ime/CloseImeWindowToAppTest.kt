@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
@@ -99,6 +100,16 @@ class CloseImeWindowToAppTest(testSpec: FlickerTestParameter) : BaseTest(testSpe
     @Test
     fun imeAppWindowIsAlwaysVisible() {
         testSpec.assertWm { this.isAppWindowOnTop(testApp) }
+    }
+
+    @Test
+    @IwTest(focusArea = "ime")
+    override fun cujCompleted() {
+        super.cujCompleted()
+        navBarLayerPositionAtStartAndEnd()
+        imeLayerBecomesInvisible()
+        imeAppLayerIsAlwaysVisible()
+        imeAppWindowIsAlwaysVisible()
     }
 
     companion object {
