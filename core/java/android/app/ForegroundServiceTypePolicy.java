@@ -48,6 +48,7 @@ import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.Overridable;
 import android.content.Context;
+import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.pm.ServiceInfo.ForegroundServiceType;
@@ -879,7 +880,8 @@ public abstract class ForegroundServiceTypePolicy {
         int checkPermission(@NonNull Context context, @NonNull String name, int callerUid,
                 int callerPid, String packageName, boolean allowWhileInUse) {
             // Simple case, check if it's already granted.
-            if (context.checkPermission(name, callerPid, callerUid) == PERMISSION_GRANTED) {
+            if (PermissionChecker.checkPermissionForPreflight(context, name,
+                    callerPid, callerUid, packageName) == PERMISSION_GRANTED) {
                 return PERMISSION_GRANTED;
             }
             if (allowWhileInUse) {
