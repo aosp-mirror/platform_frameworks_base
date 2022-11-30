@@ -77,10 +77,10 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
                 if (mRemote.asBinder() != null) {
                     mRemote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
                 }
+                if (sct != null) {
+                    finishTransaction.merge(sct);
+                }
                 mMainExecutor.execute(() -> {
-                    if (sct != null) {
-                        finishTransaction.merge(sct);
-                    }
                     finishCallback.onTransitionFinished(wct, null /* wctCB */);
                 });
             }
@@ -90,7 +90,13 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
             if (mRemote.asBinder() != null) {
                 mRemote.asBinder().linkToDeath(remoteDied, 0 /* flags */);
             }
-            mRemote.getRemoteTransition().startAnimation(transition, info, startTransaction, cb);
+            // If the remote is actually in the same process, then make a copy of parameters since
+            // remote impls assume that they have to clean-up native references.
+            final SurfaceControl.Transaction remoteStartT = RemoteTransitionHandler.copyIfLocal(
+                    startTransaction, mRemote.getRemoteTransition());
+            final TransitionInfo remoteInfo =
+                    remoteStartT == startTransaction ? info : info.localRemoteCopy();
+            mRemote.getRemoteTransition().startAnimation(transition, remoteInfo, remoteStartT, cb);
             // assume that remote will apply the start transaction.
             startTransaction.clear();
         } catch (RemoteException e) {
@@ -124,7 +130,13 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
             }
         };
         try {
-            mRemote.getRemoteTransition().mergeAnimation(transition, info, t, mergeTarget, cb);
+            // If the remote is actually in the same process, then make a copy of parameters since
+            // remote impls assume that they have to clean-up native references.
+            final SurfaceControl.Transaction remoteT =
+                    RemoteTransitionHandler.copyIfLocal(t, mRemote.getRemoteTransition());
+            final TransitionInfo remoteInfo = remoteT == t ? info : info.localRemoteCopy();
+            mRemote.getRemoteTransition().mergeAnimation(
+                    transition, remoteInfo, remoteT, mergeTarget, cb);
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error merging remote transition.", e);
         }

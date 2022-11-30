@@ -503,6 +503,7 @@ public class Transitions implements RemoteCallable<Transitions> {
             // Treat this as an abort since we are bypassing any merge logic and effectively
             // finishing immediately.
             onAbort(transitionToken);
+            releaseSurfaces(info);
             return;
         }
 
@@ -607,6 +608,15 @@ public class Transitions implements RemoteCallable<Transitions> {
         onFinish(transition, wct, wctCB, false /* abort */);
     }
 
+    /**
+     * Releases an info's animation-surfaces. These don't need to persist and we need to release
+     * them asap so that SF can free memory sooner.
+     */
+    private void releaseSurfaces(@Nullable TransitionInfo info) {
+        if (info == null) return;
+        info.releaseAnimSurfaces();
+    }
+
     private void onFinish(IBinder transition,
             @Nullable WindowContainerTransaction wct,
             @Nullable WindowContainerTransactionCallback wctCB,
@@ -645,6 +655,11 @@ public class Transitions implements RemoteCallable<Transitions> {
         }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                 "Transition animation finished (abort=%b), notifying core %s", abort, transition);
+        if (active.mStartT != null) {
+            // Applied by now, so close immediately. Do not set to null yet, though, since nullness
+            // is used later to disambiguate malformed transitions.
+            active.mStartT.close();
+        }
         // Merge all relevant transactions together
         SurfaceControl.Transaction fullFinish = active.mFinishT;
         for (int iA = activeIdx + 1; iA < mActiveTransitions.size(); ++iA) {
@@ -664,12 +679,14 @@ public class Transitions implements RemoteCallable<Transitions> {
             fullFinish.apply();
         }
         // Now perform all the finishes.
+        releaseSurfaces(active.mInfo);
         mActiveTransitions.remove(activeIdx);
         mOrganizer.finishTransition(transition, wct, wctCB);
         while (activeIdx < mActiveTransitions.size()) {
             if (!mActiveTransitions.get(activeIdx).mMerged) break;
             ActiveTransition merged = mActiveTransitions.remove(activeIdx);
             mOrganizer.finishTransition(merged.mToken, null /* wct */, null /* wctCB */);
+            releaseSurfaces(merged.mInfo);
         }
         // sift through aborted transitions
         while (mActiveTransitions.size() > activeIdx
@@ -682,8 +699,9 @@ public class Transitions implements RemoteCallable<Transitions> {
             }
             mOrganizer.finishTransition(aborted.mToken, null /* wct */, null /* wctCB */);
             for (int i = 0; i < mObservers.size(); ++i) {
-                mObservers.get(i).onTransitionFinished(active.mToken, true);
+                mObservers.get(i).onTransitionFinished(aborted.mToken, true);
             }
+            releaseSurfaces(aborted.mInfo);
         }
         if (mActiveTransitions.size() <= activeIdx) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "All active transition animations "
