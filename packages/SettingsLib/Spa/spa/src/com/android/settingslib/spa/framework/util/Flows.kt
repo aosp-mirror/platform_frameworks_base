@@ -27,6 +27,13 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 
 /**
+ * Returns a [Flow] whose values are a list which containing the results of applying the given
+ * [transform] function to each element in the original flow's list.
+ */
+inline fun <T, R> Flow<List<T>>.mapItem(crossinline transform: (T) -> R): Flow<List<R>> =
+    map { list -> list.map(transform) }
+
+/**
  * Returns a [Flow] whose values are a list which containing the results of asynchronously applying
  * the given [transform] function to each element in the original flow's list.
  */

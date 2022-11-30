@@ -33,7 +33,8 @@ interface AppListModel<T : AppRecord> {
      *
      * @return the [AppRecord] list which will be displayed.
      */
-    fun filter(userIdFlow: Flow<Int>, option: Int, recordListFlow: Flow<List<T>>): Flow<List<T>>
+    fun filter(userIdFlow: Flow<Int>, option: Int, recordListFlow: Flow<List<T>>): Flow<List<T>> =
+        recordListFlow
 
     /**
      * This function is called when the App List's loading is finished and displayed to the user.
@@ -67,5 +68,5 @@ interface AppListModel<T : AppRecord> {
      * @return null if no summary should be displayed.
      */
     @Composable
-    fun getSummary(option: Int, record: T): State<String>?
+    fun getSummary(option: Int, record: T): State<String>? = null
 }
