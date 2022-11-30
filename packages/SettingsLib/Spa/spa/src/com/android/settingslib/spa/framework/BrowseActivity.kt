@@ -42,6 +42,9 @@ import com.android.settingslib.spa.framework.compose.NavControllerWrapperImpl
 import com.android.settingslib.spa.framework.compose.localNavController
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.util.PageEvent
+import com.android.settingslib.spa.framework.util.getDestination
+import com.android.settingslib.spa.framework.util.getEntryId
+import com.android.settingslib.spa.framework.util.getSessionName
 import com.android.settingslib.spa.framework.util.navRoute
 
 private const val TAG = "BrowseActivity"
@@ -77,12 +80,6 @@ open class BrowseActivity : ComponentActivity() {
                 BrowseContent(sppRepository, intent)
             }
         }
-    }
-
-    companion object {
-        const val KEY_DESTINATION = "spaActivityDestination"
-        const val KEY_HIGHLIGHT_ENTRY = "highlightEntry"
-        const val KEY_SESSION_SOURCE_NAME = "sessionSource"
     }
 }
 
@@ -126,11 +123,10 @@ private fun NavControllerWrapperImpl.InitialDestination(
     if (destinationNavigated.value) return
     destinationNavigated.value = true
 
-    val initialDestination = initialIntent?.getStringExtra(BrowseActivity.KEY_DESTINATION)
-        ?: defaultDestination
+    val initialDestination = initialIntent?.getDestination() ?: defaultDestination
     if (initialDestination.isEmpty()) return
-    val initialEntryId = initialIntent?.getStringExtra(BrowseActivity.KEY_HIGHLIGHT_ENTRY)
-    val sessionSourceName = initialIntent?.getStringExtra(BrowseActivity.KEY_SESSION_SOURCE_NAME)
+    val initialEntryId = initialIntent?.getEntryId()
+    val sessionSourceName = initialIntent?.getSessionName()
 
     LaunchedEffect(Unit) {
         highlightId = initialEntryId

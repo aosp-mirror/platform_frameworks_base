@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.framework.common
+package com.android.settingslib.spa.tests.testutils
 
 import android.os.Bundle
 import androidx.navigation.NamedNavArgument
+import com.android.settingslib.spa.framework.common.SettingsPage
+import com.android.settingslib.spa.framework.common.toHashId
 import com.android.settingslib.spa.framework.util.normalize
 
 fun getUniquePageId(

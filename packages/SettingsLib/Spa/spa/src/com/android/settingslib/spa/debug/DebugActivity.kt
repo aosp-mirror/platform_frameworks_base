@@ -39,7 +39,10 @@ import com.android.settingslib.spa.framework.compose.localNavController
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsTheme
-import com.android.settingslib.spa.slice.appendSliceParams
+import com.android.settingslib.spa.framework.util.SESSION_BROWSE
+import com.android.settingslib.spa.framework.util.SESSION_SEARCH
+import com.android.settingslib.spa.framework.util.createIntent
+import com.android.settingslib.spa.slice.fromEntry
 import com.android.settingslib.spa.slice.presenter.SliceDemo
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
@@ -158,14 +161,13 @@ class DebugActivity : ComponentActivity() {
             remember { entryRepository.getAllEntries().filter { it.hasSliceSupport } }
         RegularScaffold(title = "All Slices (${allSliceEntry.size})") {
             for (entry in allSliceEntry) {
-                SliceDemo(sliceUri = entry.createSliceUri(authority))
+                SliceDemo(sliceUri = Uri.Builder().fromEntry(entry, authority).build())
             }
         }
     }
 
     @Composable
     fun OnePage(arguments: Bundle?) {
-        val context = LocalContext.current
         val entryRepository by spaEnvironment.entryRepository
         val id = arguments!!.getString(PARAM_NAME_PAGE_ID, "")
         val pageWithEntry = entryRepository.getPageWithEntry(id)!!
@@ -176,8 +178,8 @@ class DebugActivity : ComponentActivity() {
             Text(text = "Entry size: ${pageWithEntry.entries.size}")
             Preference(model = object : PreferenceModel {
                 override val title = "open page"
-                override val enabled =
-                    page.isBrowsable(context, spaEnvironment.browseActivityClass).toState()
+                override val enabled = (spaEnvironment.browseActivityClass != null &&
+                    page.isBrowsable()).toState()
                 override val onClick = openPage(page)
             })
             EntryList(pageWithEntry.entries)
@@ -186,7 +188,6 @@ class DebugActivity : ComponentActivity() {
 
     @Composable
     fun OneEntry(arguments: Bundle?) {
-        val context = LocalContext.current
         val entryRepository by spaEnvironment.entryRepository
         val id = arguments!!.getString(PARAM_NAME_ENTRY_ID, "")
         val entry = entryRepository.getEntry(id)!!
@@ -194,9 +195,9 @@ class DebugActivity : ComponentActivity() {
         RegularScaffold(title = "Entry - ${entry.debugBrief()}") {
             Preference(model = object : PreferenceModel {
                 override val title = "open entry"
-                override val enabled =
-                    entry.containerPage().isBrowsable(context, spaEnvironment.browseActivityClass)
-                        .toState()
+                override val enabled = (spaEnvironment.browseActivityClass != null &&
+                    entry.containerPage().isBrowsable())
+                    .toState()
                 override val onClick = openEntry(entry)
             })
             Text(text = entryContent)
@@ -219,7 +220,7 @@ class DebugActivity : ComponentActivity() {
     private fun openPage(page: SettingsPage): (() -> Unit)? {
         val context = LocalContext.current
         val intent =
-            page.createBrowseIntent(context, spaEnvironment.browseActivityClass) ?: return null
+            page.createIntent(SESSION_BROWSE) ?: return null
         val route = page.buildRoute()
         return {
             spaEnvironment.logger.message(
@@ -232,8 +233,7 @@ class DebugActivity : ComponentActivity() {
     @Composable
     private fun openEntry(entry: SettingsEntry): (() -> Unit)? {
         val context = LocalContext.current
-        val intent = entry.containerPage()
-            .createBrowseIntent(context, spaEnvironment.browseActivityClass, entry.id)
+        val intent = entry.createIntent(SESSION_SEARCH)
             ?: return null
         val route = entry.containerPage().buildRoute()
         return {
@@ -243,18 +243,6 @@ class DebugActivity : ComponentActivity() {
             context.startActivity(intent)
         }
     }
-}
-
-private fun SettingsEntry.createSliceUri(
-    authority: String?,
-    runtimeArguments: Bundle? = null
-): Uri {
-    if (authority == null) return Uri.EMPTY
-    return Uri.Builder().scheme("content").authority(authority).appendSliceParams(
-        route = this.containerPage().buildRoute(),
-        entryId = this.id,
-        runtimeArguments = runtimeArguments,
-    ).build()
 }
 
 /**

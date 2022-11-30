@@ -23,11 +23,11 @@ import androidx.slice.Slice
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.framework.common.createSettingsPage
-import com.android.settingslib.spa.framework.common.getUniqueEntryId
 import com.android.settingslib.spa.testutils.InstantTaskExecutorRule
 import com.android.settingslib.spa.tests.testutils.SpaEnvironmentForTest
 import com.android.settingslib.spa.tests.testutils.SppHome
 import com.android.settingslib.spa.tests.testutils.SppLayer2
+import com.android.settingslib.spa.tests.testutils.getUniqueEntryId
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -50,7 +50,7 @@ class SettingsSliceDataRepositoryTest {
         // Slice supported
         val page = SppLayer2.createSettingsPage()
         val entryId = getUniqueEntryId("Layer2Entry1", page)
-        val sliceUri = Uri.Builder().appendSliceParams(page.buildRoute(), entryId).build()
+        val sliceUri = Uri.Builder().appendSpaParams(page.buildRoute(), entryId).build()
         assertThat(sliceUri.getDestination()).isEqualTo("SppLayer2")
         assertThat(sliceUri.getSliceId()).isEqualTo("${entryId}_Bundle[{}]")
         val sliceData = sliceDataRepository.getOrBuildSliceData(sliceUri)
@@ -59,7 +59,7 @@ class SettingsSliceDataRepositoryTest {
 
         // Slice unsupported
         val entryId2 = getUniqueEntryId("Layer2Entry2", page)
-        val sliceUri2 = Uri.Builder().appendSliceParams(page.buildRoute(), entryId2).build()
+        val sliceUri2 = Uri.Builder().appendSpaParams(page.buildRoute(), entryId2).build()
         assertThat(sliceUri2.getDestination()).isEqualTo("SppLayer2")
         assertThat(sliceUri2.getSliceId()).isEqualTo("${entryId2}_Bundle[{}]")
         assertThat(sliceDataRepository.getOrBuildSliceData(sliceUri2)).isNull()
@@ -69,7 +69,7 @@ class SettingsSliceDataRepositoryTest {
     fun getActiveSliceDataTest() {
         val page = SppLayer2.createSettingsPage()
         val entryId = getUniqueEntryId("Layer2Entry1", page)
-        val sliceUri = Uri.Builder().appendSliceParams(page.buildRoute(), entryId).build()
+        val sliceUri = Uri.Builder().appendSpaParams(page.buildRoute(), entryId).build()
 
         // build slice data first
         val sliceData = sliceDataRepository.getOrBuildSliceData(sliceUri)
