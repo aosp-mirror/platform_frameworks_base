@@ -61,7 +61,7 @@ import com.android.wm.shell.common.annotations.ShellMainThread;
  */
 @ShellMainThread
 class CrossTaskBackAnimation {
-    private static final float[] BACKGROUNDCOLOR = {0.263f, 0.263f, 0.227f};
+    private static final int BACKGROUNDCOLOR = 0x43433A;
 
     /**
      * Minimum scale of the entering window.
@@ -106,7 +106,6 @@ class CrossTaskBackAnimation {
 
     private RemoteAnimationTarget mEnteringTarget;
     private RemoteAnimationTarget mClosingTarget;
-    private SurfaceControl mBackgroundSurface;
     private SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
 
     private boolean mBackInProgress = false;
@@ -115,56 +114,15 @@ class CrossTaskBackAnimation {
     private float mProgress = 0;
     private PointF mTouchPos = new PointF();
     private IRemoteAnimationFinishedCallback mFinishCallback;
-
     private BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
+    final BackAnimationRunner mBackAnimationRunner;
 
-    final IOnBackInvokedCallback mCallback = new IOnBackInvokedCallback.Default() {
-        @Override
-        public void onBackStarted(BackEvent backEvent) {
-            mProgressAnimator.onBackStarted(backEvent,
-                    CrossTaskBackAnimation.this::onGestureProgress);
-        }
+    private final BackAnimationBackground mBackground;
 
-        @Override
-        public void onBackProgressed(@NonNull BackEvent backEvent) {
-            mProgressAnimator.onBackProgressed(backEvent);
-        }
-
-        @Override
-        public void onBackCancelled() {
-            mProgressAnimator.reset();
-            finishAnimation();
-        }
-
-        @Override
-        public void onBackInvoked() {
-            mProgressAnimator.reset();
-            onGestureCommitted();
-        }
-    };
-
-    final IRemoteAnimationRunner mRunner = new IRemoteAnimationRunner.Default() {
-        @Override
-        public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
-                RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
-                IRemoteAnimationFinishedCallback finishedCallback) {
-            ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Start back to task animation.");
-            for (RemoteAnimationTarget a : apps) {
-                if (a.mode == MODE_CLOSING) {
-                    mClosingTarget = a;
-                }
-                if (a.mode == MODE_OPENING) {
-                    mEnteringTarget = a;
-                }
-            }
-
-            startBackAnimation();
-            mFinishCallback = finishedCallback;
-        }
-    };
-
-    CrossTaskBackAnimation(Context context) {
+    CrossTaskBackAnimation(Context context, BackAnimationBackground background) {
         mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context);
+        mBackAnimationRunner = new BackAnimationRunner(new Callback(), new Runner());
+        mBackground = background;
     }
 
     private float getInterpolatedProgress(float backProgress) {
@@ -182,14 +140,7 @@ class CrossTaskBackAnimation {
         mStartTaskRect.offsetTo(0, 0);
 
         // Draw background.
-        mBackgroundSurface = new SurfaceControl.Builder()
-                .setName("Background of Back Navigation")
-                .setColorLayer()
-                .setHidden(false)
-                .build();
-        mTransaction.setColor(mBackgroundSurface, BACKGROUNDCOLOR)
-                .setLayer(mBackgroundSurface, -1);
-        mTransaction.apply();
+        mBackground.ensureBackground(BACKGROUNDCOLOR, mTransaction);
     }
 
     private void updateGestureBackProgress(float progress, BackEvent event) {
@@ -300,11 +251,11 @@ class CrossTaskBackAnimation {
             mClosingTarget = null;
         }
 
-        if (mBackgroundSurface != null) {
-            mBackgroundSurface.release();
-            mBackgroundSurface = null;
+        if (mBackground != null) {
+            mBackground.removeBackground(mTransaction);
         }
 
+        mTransaction.apply();
         mBackInProgress = false;
         mTransformMatrix.reset();
         mClosingCurrentRect.setEmpty();
@@ -362,4 +313,49 @@ class CrossTaskBackAnimation {
     private static float mapRange(float value, float min, float max) {
         return min + (value * (max - min));
     }
+
+    private final class Callback extends IOnBackInvokedCallback.Default  {
+        @Override
+        public void onBackStarted(BackEvent backEvent) {
+            mProgressAnimator.onBackStarted(backEvent,
+                    CrossTaskBackAnimation.this::onGestureProgress);
+        }
+
+        @Override
+        public void onBackProgressed(@NonNull BackEvent backEvent) {
+            mProgressAnimator.onBackProgressed(backEvent);
+        }
+
+        @Override
+        public void onBackCancelled() {
+            mProgressAnimator.reset();
+            finishAnimation();
+        }
+
+        @Override
+        public void onBackInvoked() {
+            mProgressAnimator.reset();
+            onGestureCommitted();
+        }
+    };
+
+    private final class Runner extends IRemoteAnimationRunner.Default {
+        @Override
+        public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
+                RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
+                IRemoteAnimationFinishedCallback finishedCallback) {
+            ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Start back to task animation.");
+            for (RemoteAnimationTarget a : apps) {
+                if (a.mode == MODE_CLOSING) {
+                    mClosingTarget = a;
+                }
+                if (a.mode == MODE_OPENING) {
+                    mEnteringTarget = a;
+                }
+            }
+
+            startBackAnimation();
+            mFinishCallback = finishedCallback;
+        }
+    };
 }

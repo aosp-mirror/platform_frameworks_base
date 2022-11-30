@@ -138,14 +138,18 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
     };
 
+    private final BackAnimationBackground mAnimationBackground;
+
     public BackAnimationController(
             @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
             @NonNull @ShellMainThread ShellExecutor shellExecutor,
             @NonNull @ShellBackgroundThread Handler backgroundHandler,
-            Context context) {
+            Context context,
+            @NonNull BackAnimationBackground backAnimationBackground) {
         this(shellInit, shellController, shellExecutor, backgroundHandler,
-                ActivityTaskManager.getService(), context, context.getContentResolver());
+                ActivityTaskManager.getService(), context, context.getContentResolver(),
+                backAnimationBackground);
     }
 
     @VisibleForTesting
@@ -155,7 +159,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             @NonNull @ShellMainThread ShellExecutor shellExecutor,
             @NonNull @ShellBackgroundThread Handler bgHandler,
             @NonNull IActivityTaskManager activityTaskManager,
-            Context context, ContentResolver contentResolver) {
+            Context context, ContentResolver contentResolver,
+            @NonNull BackAnimationBackground backAnimationBackground) {
         mShellController = shellController;
         mShellExecutor = shellExecutor;
         mActivityTaskManager = activityTaskManager;
@@ -163,6 +168,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mContentResolver = contentResolver;
         mBgHandler = bgHandler;
         shellInit.addInitCallback(this::onInit, this);
+        mAnimationBackground = backAnimationBackground;
     }
 
     @VisibleForTesting
@@ -184,10 +190,14 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             return;
         }
 
-        final CrossTaskBackAnimation crossTaskAnimation = new CrossTaskBackAnimation(mContext);
+        final CrossTaskBackAnimation crossTaskAnimation =
+                new CrossTaskBackAnimation(mContext, mAnimationBackground);
         mAnimationDefinition.set(BackNavigationInfo.TYPE_CROSS_TASK,
-                new BackAnimationRunner(crossTaskAnimation.mCallback, crossTaskAnimation.mRunner));
-        // TODO (238474994): register cross activity animation when it's completed.
+                crossTaskAnimation.mBackAnimationRunner);
+        final CrossActivityAnimation crossActivityAnimation =
+                new CrossActivityAnimation(mContext, mAnimationBackground);
+        mAnimationDefinition.set(BackNavigationInfo.TYPE_CROSS_ACTIVITY,
+                crossActivityAnimation.mBackAnimationRunner);
         // TODO (236760237): register dialog close animation when it's completed.
     }
 
@@ -275,7 +285,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         @Override
         public void clearBackToLauncherCallback() {
             executeRemoteCallWithTaskPermission(mController, "clearBackToLauncherCallback",
-                    (controller) -> controller.clearBackToLauncherCallback());
+                    (controller) -> controller.unregisterAnimation(
+                            BackNavigationInfo.TYPE_RETURN_TO_HOME));
         }
 
         @Override
@@ -289,8 +300,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mAnimationDefinition.set(type, runner);
     }
 
-    private void clearBackToLauncherCallback() {
-        mAnimationDefinition.remove(BackNavigationInfo.TYPE_RETURN_TO_HOME);
+    void unregisterAnimation(@BackNavigationInfo.BackTargetType int type) {
+        mAnimationDefinition.remove(type);
     }
 
     /**

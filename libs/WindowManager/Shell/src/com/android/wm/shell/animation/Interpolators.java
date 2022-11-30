@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.animation;
 
+import android.graphics.Path;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
@@ -53,6 +54,11 @@ public class Interpolators {
     public static final Interpolator LINEAR_OUT_SLOW_IN = new PathInterpolator(0f, 0f, 0.2f, 1f);
 
     /**
+     * The default emphasized interpolator. Used for hero / emphasized movement of content.
+     */
+    public static final Interpolator EMPHASIZED = createEmphasizedInterpolator();
+
+    /**
      * The accelerated emphasized interpolator. Used for hero / emphasized movement of content that
      * is disappearing e.g. when moving off screen.
      */
@@ -81,4 +87,14 @@ public class Interpolators {
 
     public static final PathInterpolator DIM_INTERPOLATOR =
             new PathInterpolator(.23f, .87f, .52f, -0.11f);
+
+    // Create the default emphasized interpolator
+    private static PathInterpolator createEmphasizedInterpolator() {
+        Path path = new Path();
+        // Doing the same as fast_out_extra_slow_in
+        path.moveTo(0f, 0f);
+        path.cubicTo(0.05f, 0f, 0.133333f, 0.06f, 0.166666f, 0.4f);
+        path.cubicTo(0.208333f, 0.82f, 0.25f, 1f, 1f, 1f);
+        return new PathInterpolator(path);
+    }
 }
