@@ -549,7 +549,7 @@ public class BubblesManager {
         } catch (RemoteException e) {
             Log.e(TAG, e.getMessage());
         }
-        mShadeController.collapsePanel(true);
+        mShadeController.collapseShade(true);
         if (entry.getRow() != null) {
             entry.getRow().updateBubbleButton();
         }
@@ -597,7 +597,7 @@ public class BubblesManager {
         }
 
         if (shouldBubble) {
-            mShadeController.collapsePanel(true);
+            mShadeController.collapseShade(true);
             if (entry.getRow() != null) {
                 entry.getRow().updateBubbleButton();
             }

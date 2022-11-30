@@ -193,8 +193,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void animateExpandSettingsPanel(@Nullable String subpanel);
 
-    void animateCollapsePanels(int flags, boolean force);
-
     void collapsePanelOnMainThread();
 
     void togglePanel();
@@ -281,8 +279,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     void postAnimateForceCollapsePanels();
 
     void postAnimateOpenPanels();
-
-    boolean isExpandedVisible();
 
     boolean isPanelExpanded();
 
@@ -495,11 +491,12 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void updateNotificationPanelTouchState();
 
+    /**
+     * TODO(b/257041702) delete this
+     * @deprecated Use ShadeController#makeExpandedVisible
+     */
+    @Deprecated
     void makeExpandedVisible(boolean force);
-
-    void instantCollapseNotificationPanel();
-
-    void visibilityChanged(boolean visible);
 
     int getDisplayId();
 

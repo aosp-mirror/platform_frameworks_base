@@ -118,13 +118,6 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCollapsePanels() {
-        mCommandQueue.animateCollapsePanels();
-        waitForIdleSync();
-        verify(mCallbacks).animateCollapsePanels(eq(0), eq(false));
-    }
-
-    @Test
     public void testExpandSettings() {
         String panel = "some_panel";
         mCommandQueue.animateExpandSettingsPanel(panel);

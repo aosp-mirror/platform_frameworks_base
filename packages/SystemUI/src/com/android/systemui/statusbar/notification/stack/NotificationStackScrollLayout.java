@@ -4236,7 +4236,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 mShadeNeedsToClose = false;
                 postDelayed(
                         () -> {
-                            mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
+                            mShadeController.animateCollapseShade(CommandQueue.FLAG_EXCLUDE_NONE);
                         },
                         DELAY_BEFORE_SHADE_CLOSE /* delayMillis */);
             }
