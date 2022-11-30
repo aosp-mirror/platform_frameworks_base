@@ -26,14 +26,17 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import dagger.Lazy
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import javax.inject.Inject
 
 @SysUISingleton
-class CameraQuickAffordanceConfig @Inject constructor(
-        @Application private val context: Context,
-        private val cameraGestureHelper: CameraGestureHelper,
+class CameraQuickAffordanceConfig
+@Inject
+constructor(
+    @Application private val context: Context,
+    private val cameraGestureHelper: Lazy<CameraGestureHelper>,
 ) : KeyguardQuickAffordanceConfig {
 
     override val key: String
@@ -46,17 +49,23 @@ class CameraQuickAffordanceConfig @Inject constructor(
         get() = com.android.internal.R.drawable.perm_group_camera
 
     override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState>
-        get() = flowOf(
-            KeyguardQuickAffordanceConfig.LockScreenState.Visible(
-                    icon = Icon.Resource(
+        get() =
+            flowOf(
+                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
+                    icon =
+                        Icon.Resource(
                             com.android.internal.R.drawable.perm_group_camera,
                             ContentDescription.Resource(R.string.accessibility_camera_button)
-                    )
+                        )
+                )
             )
-        )
 
-    override fun onTriggered(expandable: Expandable?): KeyguardQuickAffordanceConfig.OnTriggeredResult {
-        cameraGestureHelper.launchCamera(StatusBarManager.CAMERA_LAUNCH_SOURCE_QUICK_AFFORDANCE)
+    override fun onTriggered(
+        expandable: Expandable?
+    ): KeyguardQuickAffordanceConfig.OnTriggeredResult {
+        cameraGestureHelper
+            .get()
+            .launchCamera(StatusBarManager.CAMERA_LAUNCH_SOURCE_QUICK_AFFORDANCE)
         return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
     }
 }

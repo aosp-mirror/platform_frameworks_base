@@ -64,8 +64,9 @@ private const val TAG = "BroadcastDispatcher"
  * from SystemUI. That way the number of calls to [BroadcastReceiver.onReceive] can be reduced for
  * a given broadcast.
  *
- * Use only for IntentFilters with actions and optionally categories. It does not support,
- * permissions, schemes, data types, data authorities or priority different than 0.
+ * Use only for IntentFilters with actions and optionally categories. It does not support schemes,
+ * data types, data authorities or priority different than 0.
+ *
  * Cannot be used for getting sticky broadcasts (either as return of registering or as re-delivery).
  * Broadcast handling may be asynchronous *without* calling goAsync(), as it's running within sysui
  * and doesn't need to worry about being killed.

@@ -37,25 +37,29 @@ class CameraQuickAffordanceConfigTest : SysuiTestCase() {
 
     @Mock private lateinit var cameraGestureHelper: CameraGestureHelper
     @Mock private lateinit var context: Context
+
     private lateinit var underTest: CameraQuickAffordanceConfig
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        underTest = CameraQuickAffordanceConfig(
+
+        underTest =
+            CameraQuickAffordanceConfig(
                 context,
-                cameraGestureHelper,
-        )
+            ) {
+                cameraGestureHelper
+            }
     }
 
     @Test
     fun `affordance triggered -- camera launch called`() {
-        //when
+        // When
         val result = underTest.onTriggered(null)
 
-        //then
+        // Then
         verify(cameraGestureHelper)
-                .launchCamera(StatusBarManager.CAMERA_LAUNCH_SOURCE_QUICK_AFFORDANCE)
+            .launchCamera(StatusBarManager.CAMERA_LAUNCH_SOURCE_QUICK_AFFORDANCE)
         assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled, result)
     }
 }
