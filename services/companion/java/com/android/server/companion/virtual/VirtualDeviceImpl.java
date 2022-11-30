@@ -38,6 +38,8 @@ import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
+import android.companion.virtual.sensor.VirtualSensorConfig;
+import android.companion.virtual.sensor.VirtualSensorEvent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -76,6 +78,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -98,6 +101,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final int mOwnerUid;
     private final int mDeviceId;
     private final InputController mInputController;
+    private final SensorController mSensorController;
     private VirtualAudioController mVirtualAudioController;
     @VisibleForTesting
     final Set<Integer> mVirtualDisplayIds = new ArraySet<>();
@@ -160,6 +164,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 ownerUid,
                 deviceId,
                 /* inputController= */ null,
+                /* sensorController= */ null,
                 listener,
                 pendingTrampolineCallback,
                 activityListener,
@@ -175,6 +180,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             int ownerUid,
             int deviceId,
             InputController inputController,
+            SensorController sensorController,
             OnDeviceCloseListener listener,
             PendingTrampolineCallback pendingTrampolineCallback,
             IVirtualDeviceActivityListener activityListener,
@@ -197,6 +203,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     context.getSystemService(WindowManager.class));
         } else {
             mInputController = inputController;
+        }
+        if (sensorController == null) {
+            mSensorController = new SensorController(mVirtualDeviceLock, mDeviceId);
+        } else {
+            mSensorController = sensorController;
         }
         mListener = listener;
         try {
@@ -319,11 +330,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mListener.onClose(mAssociationInfo.getId());
         mAppToken.unlinkToDeath(this, 0);
 
-        final long token = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.close();
+            mSensorController.close();
         } finally {
-            Binder.restoreCallingIdentity(token);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -403,12 +415,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                                 + "this virtual device");
             }
         }
-        final long token = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.createDpad(deviceName, vendorId, productId, deviceToken,
                     displayId);
         } finally {
-            Binder.restoreCallingIdentity(token);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -430,12 +442,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                                 + "this virtual device");
             }
         }
-        final long token = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.createKeyboard(deviceName, vendorId, productId, deviceToken,
                     displayId);
         } finally {
-            Binder.restoreCallingIdentity(token);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -457,11 +469,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                                 + "virtual device");
             }
         }
-        final long token = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.createMouse(deviceName, vendorId, productId, deviceToken, displayId);
         } finally {
-            Binder.restoreCallingIdentity(token);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -491,12 +503,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                             + screenSize);
         }
 
-        final long token = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.createTouchscreen(deviceName, vendorId, productId,
                     deviceToken, displayId, screenSize);
         } finally {
-            Binder.restoreCallingIdentity(token);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -506,92 +518,92 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
                 "Permission required to unregister this input device");
 
-        final long binderToken = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.unregisterInputDevice(token);
         } finally {
-            Binder.restoreCallingIdentity(binderToken);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
     @Override // Binder call
     public int getInputDeviceId(IBinder token) {
-        final long binderToken = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.getInputDeviceId(token);
         } finally {
-            Binder.restoreCallingIdentity(binderToken);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
 
     @Override // Binder call
     public boolean sendDpadKeyEvent(IBinder token, VirtualKeyEvent event) {
-        final long binderToken = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.sendDpadKeyEvent(token, event);
         } finally {
-            Binder.restoreCallingIdentity(binderToken);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
     @Override // Binder call
     public boolean sendKeyEvent(IBinder token, VirtualKeyEvent event) {
-        final long binderToken = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.sendKeyEvent(token, event);
         } finally {
-            Binder.restoreCallingIdentity(binderToken);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
     @Override // Binder call
     public boolean sendButtonEvent(IBinder token, VirtualMouseButtonEvent event) {
-        final long binderToken = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.sendButtonEvent(token, event);
         } finally {
-            Binder.restoreCallingIdentity(binderToken);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
     @Override // Binder call
     public boolean sendTouchEvent(IBinder token, VirtualTouchEvent event) {
-        final long binderToken = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.sendTouchEvent(token, event);
         } finally {
-            Binder.restoreCallingIdentity(binderToken);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
     @Override // Binder call
     public boolean sendRelativeEvent(IBinder token, VirtualMouseRelativeEvent event) {
-        final long binderToken = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.sendRelativeEvent(token, event);
         } finally {
-            Binder.restoreCallingIdentity(binderToken);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
     @Override // Binder call
     public boolean sendScrollEvent(IBinder token, VirtualMouseScrollEvent event) {
-        final long binderToken = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.sendScrollEvent(token, event);
         } finally {
-            Binder.restoreCallingIdentity(binderToken);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
     @Override // Binder call
     public PointF getCursorPosition(IBinder token) {
-        final long binderToken = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.getCursorPosition(token);
         } finally {
-            Binder.restoreCallingIdentity(binderToken);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -601,7 +613,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
                 "Permission required to unregister this input device");
 
-        final long binderToken = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mVirtualDeviceLock) {
                 mDefaultShowPointerIcon = showPointerIcon;
@@ -610,7 +622,50 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 }
             }
         } finally {
-            Binder.restoreCallingIdentity(binderToken);
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    public void createVirtualSensor(
+            @NonNull IBinder deviceToken,
+            @NonNull VirtualSensorConfig config) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
+                "Permission required to create a virtual sensor");
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(deviceToken);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mSensorController.createSensor(deviceToken, config);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    public void unregisterSensor(@NonNull IBinder token) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
+                "Permission required to unregister a virtual sensor");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mSensorController.unregisterSensor(token);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    public boolean sendSensorEvent(@NonNull IBinder token, @NonNull VirtualSensorEvent event) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
+                "Permission required to send a virtual sensor event");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mSensorController.sendSensorEvent(token, event);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -627,6 +682,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             fout.println("    mDefaultShowPointerIcon: " + mDefaultShowPointerIcon);
         }
         mInputController.dump(fout);
+        mSensorController.dump(fout);
     }
 
     GenericWindowPolicyController createWindowPolicyController(

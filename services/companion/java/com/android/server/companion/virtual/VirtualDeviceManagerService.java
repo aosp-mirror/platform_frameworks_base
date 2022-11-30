@@ -32,6 +32,7 @@ import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
@@ -280,7 +281,22 @@ public class VirtualDeviceManagerService extends SystemService {
                             @Override
                             public void onClose(int associationId) {
                                 synchronized (mVirtualDeviceManagerLock) {
-                                    mVirtualDevices.remove(associationId);
+                                    VirtualDeviceImpl removedDevice =
+                                            mVirtualDevices.removeReturnOld(associationId);
+                                    if (removedDevice != null) {
+                                        Intent i = new Intent(
+                                                VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED);
+                                        i.putExtra(
+                                                VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID,
+                                                removedDevice.getDeviceId());
+                                        i.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                                        final long identity = Binder.clearCallingIdentity();
+                                        try {
+                                            getContext().sendBroadcastAsUser(i, UserHandle.ALL);
+                                        } finally {
+                                            Binder.restoreCallingIdentity(identity);
+                                        }
+                                    }
                                     mAppsOnVirtualDevices.remove(associationId);
                                     if (cameraAccessController != null) {
                                         cameraAccessController.stopObservingIfNeeded();

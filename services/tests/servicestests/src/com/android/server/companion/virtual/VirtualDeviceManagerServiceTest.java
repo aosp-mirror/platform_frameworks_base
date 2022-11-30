@@ -51,6 +51,7 @@ import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
+import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -58,6 +59,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Point;
+import android.hardware.Sensor;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.IInputManager;
 import android.hardware.input.VirtualKeyEvent;
@@ -88,6 +90,7 @@ import androidx.test.InstrumentationRegistry;
 import com.android.internal.app.BlockedAppStreamingActivity;
 import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
+import com.android.server.sensors.SensorManagerInternal;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -126,16 +129,19 @@ public class VirtualDeviceManagerServiceTest {
     private static final int VENDOR_ID = 5;
     private static final String UNIQUE_ID = "uniqueid";
     private static final String PHYS = "phys";
-    private static final int DEVICE_ID = 42;
+    private static final int DEVICE_ID = 53;
     private static final int HEIGHT = 1800;
     private static final int WIDTH = 900;
+    private static final int SENSOR_HANDLE = 64;
     private static final Binder BINDER = new Binder("binder");
     private static final int FLAG_CANNOT_DISPLAY_ON_REMOTE_DEVICES = 0x00000;
+    private static final int VIRTUAL_DEVICE_ID =  42;
 
     private Context mContext;
     private InputManagerMockHelper mInputManagerMockHelper;
     private VirtualDeviceImpl mDeviceImpl;
     private InputController mInputController;
+    private SensorController mSensorController;
     private AssociationInfo mAssociationInfo;
     private VirtualDeviceManagerService mVdms;
     private VirtualDeviceManagerInternal mLocalService;
@@ -149,6 +155,8 @@ public class VirtualDeviceManagerServiceTest {
     private DevicePolicyManager mDevicePolicyManagerMock;
     @Mock
     private InputManagerInternal mInputManagerInternalMock;
+    @Mock
+    private SensorManagerInternal mSensorManagerInternalMock;
     @Mock
     private IVirtualDeviceActivityListener mActivityListener;
     @Mock
@@ -228,6 +236,9 @@ public class VirtualDeviceManagerServiceTest {
         LocalServices.removeServiceForTest(InputManagerInternal.class);
         LocalServices.addService(InputManagerInternal.class, mInputManagerInternalMock);
 
+        LocalServices.removeServiceForTest(SensorManagerInternal.class);
+        LocalServices.addService(SensorManagerInternal.class, mSensorManagerInternalMock);
+
         final DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.uniqueId = UNIQUE_ID;
         doReturn(displayInfo).when(mDisplayManagerInternalMock).getDisplayInfo(anyInt());
@@ -252,6 +263,7 @@ public class VirtualDeviceManagerServiceTest {
         mInputController = new InputController(new Object(), mNativeWrapperMock,
                 new Handler(TestableLooper.get(this).getLooper()),
                 mContext.getSystemService(WindowManager.class), threadVerifier);
+        mSensorController = new SensorController(new Object(), VIRTUAL_DEVICE_ID);
 
         mAssociationInfo = new AssociationInfo(1, 0, null,
                 MacAddress.BROADCAST_ADDRESS, "", null, null, true, false, false, 0, 0);
@@ -264,9 +276,9 @@ public class VirtualDeviceManagerServiceTest {
                 .setBlockedActivities(getBlockedActivities())
                 .build();
         mDeviceImpl = new VirtualDeviceImpl(mContext,
-                mAssociationInfo, new Binder(), /* ownerUid */ 0, /* uniqueId */ 1,
-                mInputController, (int associationId) -> {}, mPendingTrampolineCallback,
-                mActivityListener, mRunningAppsChangedCallback, params);
+                mAssociationInfo, new Binder(), /* ownerUid */ 0, VIRTUAL_DEVICE_ID,
+                mInputController, mSensorController, (int associationId) -> {},
+                mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback, params);
         mVdms.addVirtualDevice(mDeviceImpl);
     }
 
@@ -308,9 +320,9 @@ public class VirtualDeviceManagerServiceTest {
                 .addDevicePolicy(POLICY_TYPE_SENSORS, DEVICE_POLICY_CUSTOM)
                 .build();
         mDeviceImpl = new VirtualDeviceImpl(mContext,
-                mAssociationInfo, new Binder(), /* ownerUid */ 0, /* uniqueId */ 1,
-                mInputController, (int associationId) -> {}, mPendingTrampolineCallback,
-                mActivityListener, mRunningAppsChangedCallback, params);
+                mAssociationInfo, new Binder(), /* ownerUid */ 0, VIRTUAL_DEVICE_ID,
+                mInputController, mSensorController, (int associationId) -> {},
+                mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback, params);
         mVdms.addVirtualDevice(mDeviceImpl);
 
         assertThat(
@@ -576,6 +588,18 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void createVirtualSensor_noPermission_failsSecurityException() {
+        doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
+                eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
+        assertThrows(
+                SecurityException.class,
+                () -> mDeviceImpl.createVirtualSensor(
+                        BINDER,
+                        new VirtualSensorConfig.Builder(
+                                Sensor.TYPE_ACCELEROMETER, DEVICE_NAME).build()));
+    }
+
+    @Test
     public void onAudioSessionStarting_noPermission_failsSecurityException() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
         doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
@@ -676,6 +700,17 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl.close();
 
         assertThat(mDeviceImpl.getVirtualAudioControllerForTesting()).isNull();
+    }
+
+    @Test
+    public void close_cleanSensorController() {
+        mSensorController.addSensorForTesting(
+                BINDER, SENSOR_HANDLE, Sensor.TYPE_ACCELEROMETER, DEVICE_NAME);
+
+        mDeviceImpl.close();
+
+        assertThat(mSensorController.getSensorDescriptors()).isEmpty();
+        verify(mSensorManagerInternalMock).removeRuntimeSensor(SENSOR_HANDLE);
     }
 
     @Test
