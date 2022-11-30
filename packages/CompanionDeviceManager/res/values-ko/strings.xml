@@ -20,10 +20,8 @@
     <string name="confirmation_title" msgid="3785000297483688997">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;에서 내 &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; 기기에 액세스하도록 허용"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"시계"</string>
     <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;에서 관리할 <xliff:g id="PROFILE_NAME">%1$s</xliff:g>을(를) 선택"</string>
-    <!-- no translation found for summary_watch (4085794790142204006) -->
-    <skip />
-    <!-- no translation found for summary_watch_single_device (1523091550243476756) -->
-    <skip />
+    <string name="summary_watch" msgid="4085794790142204006">"이 앱은 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 기기를 관리하는 데 필요합니다. <xliff:g id="APP_NAME">%2$s</xliff:g>에서 알림과 상호작용하고 내 전화, SMS, 연락처, Calendar, 통화 기록, 근처 기기에 대한 권한을 갖게 됩니다."</string>
+    <string name="summary_watch_single_device" msgid="1523091550243476756">"이 앱은 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 기기를 관리하는 데 필요합니다. <xliff:g id="APP_NAME">%2$s</xliff:g>에서 다음 권한과 상호작용할 수 있습니다."</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;이 휴대전화의 이 정보에 액세스하도록 허용합니다."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"교차 기기 서비스"</string>
     <string name="helper_summary_app_streaming" msgid="5977509499890099">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> 대신 기기 간에 앱을 스트리밍할 수 있는 권한을 요청하고 있습니다."</string>
@@ -42,29 +40,20 @@
     <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;여기에는 &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;에서 허용했던 마이크, 카메라, 위치 정보 액세스 권한 및 기타 민감한 권한이 포함될 수 있습니다.&lt;/p&gt; &lt;p&gt;언제든지 &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;의 설정에서 이러한 권한을 변경할 수 있습니다.&lt;/p&gt;"</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"앱 아이콘"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"추가 정보 버튼"</string>
-    <!-- no translation found for permission_phone (2661081078692784919) -->
-    <skip />
-    <!-- no translation found for permission_sms (6337141296535774786) -->
-    <skip />
-    <!-- no translation found for permission_contacts (3858319347208004438) -->
-    <skip />
-    <!-- no translation found for permission_calendar (6805668388691290395) -->
-    <skip />
-    <!-- no translation found for permission_nearby_devices (7530973297737123481) -->
-    <skip />
+    <string name="permission_phone" msgid="2661081078692784919">"전화"</string>
+    <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
+    <string name="permission_contacts" msgid="3858319347208004438">"연락처"</string>
+    <string name="permission_calendar" msgid="6805668388691290395">"캘린더"</string>
+    <string name="permission_nearby_devices" msgid="7530973297737123481">"근처 기기"</string>
     <string name="permission_storage" msgid="6831099350839392343">"사진 및 미디어"</string>
     <string name="permission_notification" msgid="693762568127741203">"알림"</string>
-    <!-- no translation found for permission_app_streaming (6009695219091526422) -->
-    <skip />
-    <!-- no translation found for permission_phone_summary (6154198036705702389) -->
-    <skip />
+    <string name="permission_app_streaming" msgid="6009695219091526422">"앱"</string>
+    <string name="permission_phone_summary" msgid="6154198036705702389">"전화번호 및 네트워크 정보에 액세스할 수 있습니다. 전화 걸기 및 VoIP, 음성사서함, 통화 리디렉션, 통화 기록 수정 시 필요합니다."</string>
     <string name="permission_sms_summary" msgid="5107174184224165570"></string>
-    <!-- no translation found for permission_contacts_summary (7850901746005070792) -->
-    <skip />
+    <string name="permission_contacts_summary" msgid="7850901746005070792">"연락처 목록을 읽고, 만들고, 수정할 수 있으며 기기에서 사용되는 모든 계정의 목록에도 액세스할 수 있습니다."</string>
     <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
     <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
     <string name="permission_notification_summary" msgid="884075314530071011">"연락처, 메시지, 사진 등의 정보를 포함한 모든 알림을 읽을 수 있습니다."</string>
-    <!-- no translation found for permission_app_streaming_summary (606923325679670624) -->
-    <skip />
+    <string name="permission_app_streaming_summary" msgid="606923325679670624">"휴대전화의 앱을 스트리밍합니다."</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
 </resources>
