@@ -423,6 +423,12 @@ public interface ImeTracker {
             mTag = tag;
         }
 
+        /** Returns the {@link Token#mTag} */
+        @NonNull
+        public String getTag() {
+            return mTag;
+        }
+
         /** For Parcelable, no special marshalled objects. */
         @Override
         public int describeContents() {
