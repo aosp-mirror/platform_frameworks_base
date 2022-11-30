@@ -26,7 +26,7 @@ using ::android::StringPiece;
 namespace aapt {
 namespace text {
 
-Printer& Printer::Println(const StringPiece& str) {
+Printer& Printer::Println(StringPiece str) {
   Print(str);
   return Print("\n");
 }
@@ -35,7 +35,7 @@ Printer& Printer::Println() {
   return Print("\n");
 }
 
-Printer& Printer::Print(const StringPiece& str) {
+Printer& Printer::Print(StringPiece str) {
   if (error_) {
     return *this;
   }
@@ -47,7 +47,7 @@ Printer& Printer::Print(const StringPiece& str) {
     const auto new_line_iter = std::find(remaining_str_begin, remaining_str_end, '\n');
 
     // We will copy the string up until the next new-line (or end of string).
-    const StringPiece str_to_copy = str.substr(remaining_str_begin, new_line_iter);
+    const StringPiece str_to_copy(remaining_str_begin, new_line_iter - remaining_str_begin);
     if (!str_to_copy.empty()) {
       if (needs_indent_) {
         for (int i = 0; i < indent_level_; i++) {

@@ -637,7 +637,7 @@ static bool parseVersion(const char* name, ResTable_config* out) {
   return true;
 }
 
-bool ConfigDescription::Parse(const StringPiece& str, ConfigDescription* out) {
+bool ConfigDescription::Parse(StringPiece str, ConfigDescription* out) {
   std::vector<std::string> parts = util::SplitAndLowercase(str, '-');
 
   ConfigDescription config;

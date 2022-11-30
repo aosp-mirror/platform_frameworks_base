@@ -138,13 +138,12 @@ struct ConfiguredArtifact {
   std::optional<std::string> gl_texture_group;
 
   /** Convert an artifact name template into a name string based on configuration contents. */
-  std::optional<std::string> ToArtifactName(const android::StringPiece& format,
-                                            const android::StringPiece& apk_name,
+  std::optional<std::string> ToArtifactName(android::StringPiece format,
+                                            android::StringPiece apk_name,
                                             android::IDiagnostics* diag) const;
 
   /** Convert an artifact name template into a name string based on configuration contents. */
-  std::optional<std::string> Name(const android::StringPiece& apk_name,
-                                  android::IDiagnostics* diag) const;
+  std::optional<std::string> Name(android::StringPiece apk_name, android::IDiagnostics* diag) const;
 };
 
 /** AAPT2 XML configuration file binary representation. */

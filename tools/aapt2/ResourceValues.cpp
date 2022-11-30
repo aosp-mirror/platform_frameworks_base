@@ -206,7 +206,7 @@ void Reference::PrettyPrint(Printer* printer) const {
   PrettyPrintReferenceImpl(*this, true /*print_package*/, printer);
 }
 
-void Reference::PrettyPrint(const StringPiece& package, Printer* printer) const {
+void Reference::PrettyPrint(StringPiece package, Printer* printer) const {
   const bool print_package = name ? package != name.value().package : true;
   PrettyPrintReferenceImpl(*this, print_package, printer);
 }

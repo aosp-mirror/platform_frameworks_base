@@ -387,7 +387,7 @@ int ConvertCommand::Action(const std::vector<std::string>& args) {
   }
 
   Context context;
-  const StringPiece& path = args[0];
+  StringPiece path = args[0];
   unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(path, context.GetDiagnostics());
   if (apk == nullptr) {
     context.GetDiagnostics()->Error(android::DiagMessage(path) << "failed to load APK");

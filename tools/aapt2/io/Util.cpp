@@ -26,7 +26,7 @@ using ::google::protobuf::io::ZeroCopyOutputStream;
 namespace aapt {
 namespace io {
 
-bool CopyInputStreamToArchive(IAaptContext* context, InputStream* in, const std::string& out_path,
+bool CopyInputStreamToArchive(IAaptContext* context, InputStream* in, std::string_view out_path,
                               uint32_t compression_flags, IArchiveWriter* writer) {
   TRACE_CALL();
   if (context->IsVerbose()) {
@@ -43,7 +43,7 @@ bool CopyInputStreamToArchive(IAaptContext* context, InputStream* in, const std:
   return true;
 }
 
-bool CopyFileToArchive(IAaptContext* context, io::IFile* file, const std::string& out_path,
+bool CopyFileToArchive(IAaptContext* context, io::IFile* file, std::string_view out_path,
                        uint32_t compression_flags, IArchiveWriter* writer) {
   TRACE_CALL();
   std::unique_ptr<io::IData> data = file->OpenAsData();
@@ -56,13 +56,13 @@ bool CopyFileToArchive(IAaptContext* context, io::IFile* file, const std::string
 }
 
 bool CopyFileToArchivePreserveCompression(IAaptContext* context, io::IFile* file,
-                                          const std::string& out_path, IArchiveWriter* writer) {
+                                          std::string_view out_path, IArchiveWriter* writer) {
   uint32_t compression_flags = file->WasCompressed() ? ArchiveEntry::kCompress : 0u;
   return CopyFileToArchive(context, file, out_path, compression_flags, writer);
 }
 
 bool CopyProtoToArchive(IAaptContext* context, ::google::protobuf::Message* proto_msg,
-                        const std::string& out_path, uint32_t compression_flags,
+                        std::string_view out_path, uint32_t compression_flags,
                         IArchiveWriter* writer) {
   TRACE_CALL();
   if (context->IsVerbose()) {
@@ -110,7 +110,7 @@ bool Copy(OutputStream* out, InputStream* in) {
   return !in->HadError();
 }
 
-bool Copy(OutputStream* out, const StringPiece& in) {
+bool Copy(OutputStream* out, StringPiece in) {
   const char* in_buffer = in.data();
   size_t in_len = in.size();
   while (in_len != 0) {

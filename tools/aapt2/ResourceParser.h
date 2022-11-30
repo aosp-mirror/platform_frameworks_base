@@ -122,7 +122,7 @@ class ResourceParser {
   bool ParseAttr(xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParseAttrImpl(xml::XmlPullParser* parser, ParsedResource* out_resource, bool weak);
   std::optional<Attribute::Symbol> ParseEnumOrFlagItem(xml::XmlPullParser* parser,
-                                                       const android::StringPiece& tag);
+                                                       android::StringPiece tag);
   bool ParseStyle(ResourceType type, xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParseStyleItem(xml::XmlPullParser* parser, Style* style);
   bool ParseDeclareStyleable(xml::XmlPullParser* parser, ParsedResource* out_resource);

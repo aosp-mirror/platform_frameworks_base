@@ -72,7 +72,7 @@ static ApkFormat DetermineApkFormat(io::IFileCollection* apk) {
   }
 }
 
-std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(const StringPiece& path,
+std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(StringPiece path,
                                                       android::IDiagnostics* diag) {
   android::Source source(path);
   std::string error;

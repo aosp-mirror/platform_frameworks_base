@@ -124,8 +124,7 @@ class AssetManager2 {
   uint8_t GetAssignedPackageId(const LoadedPackage* package) const;
 
   // Returns a string representation of the overlayable API of a package.
-  bool GetOverlayablesToString(const android::StringPiece& package_name,
-                               std::string* out) const;
+  bool GetOverlayablesToString(android::StringPiece package_name, std::string* out) const;
 
   const std::unordered_map<std::string, std::string>* GetOverlayableMapForPackage(
       uint32_t package_id) const;

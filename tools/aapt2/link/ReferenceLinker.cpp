@@ -189,8 +189,7 @@ class EmptyDeclStack : public xml::IPackageDeclStack {
  public:
   EmptyDeclStack() = default;
 
-  std::optional<xml::ExtractedPackage> TransformPackageAlias(
-      const StringPiece& alias) const override {
+  std::optional<xml::ExtractedPackage> TransformPackageAlias(StringPiece alias) const override {
     if (alias.empty()) {
       return xml::ExtractedPackage{{}, true /*private*/};
     }
@@ -206,8 +205,7 @@ struct MacroDeclStack : public xml::IPackageDeclStack {
       : alias_namespaces_(std::move(namespaces)) {
   }
 
-  std::optional<xml::ExtractedPackage> TransformPackageAlias(
-      const StringPiece& alias) const override {
+  std::optional<xml::ExtractedPackage> TransformPackageAlias(StringPiece alias) const override {
     if (alias.empty()) {
       return xml::ExtractedPackage{{}, true /*private*/};
     }

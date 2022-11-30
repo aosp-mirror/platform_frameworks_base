@@ -59,8 +59,7 @@ std::optional<ExtractedPackage> ExtractPackageFromNamespace(const std::string& n
 //
 // If privateReference == true, the package will be of the form:
 //   http://schemas.android.com/apk/prv/res/<package>
-std::string BuildPackageNamespace(const android::StringPiece& package,
-                                  bool private_reference = false);
+std::string BuildPackageNamespace(android::StringPiece package, bool private_reference = false);
 
 // Interface representing a stack of XML namespace declarations. When looking up the package for a
 // namespace prefix, the stack is checked from top to bottom.
@@ -69,7 +68,7 @@ struct IPackageDeclStack {
 
   // Returns an ExtractedPackage struct if the alias given corresponds with a package declaration.
   virtual std::optional<ExtractedPackage> TransformPackageAlias(
-      const android::StringPiece& alias) const = 0;
+      android::StringPiece alias) const = 0;
 };
 
 // Helper function for transforming the original Reference inRef to a fully qualified reference

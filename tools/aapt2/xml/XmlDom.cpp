@@ -169,7 +169,7 @@ static void XMLCALL CharacterDataHandler(void* user_data, const char* s, int len
   stack->last_text_node = util::make_unique<Text>();
   stack->last_text_node->line_number = XML_GetCurrentLineNumber(parser);
   stack->last_text_node->column_number = XML_GetCurrentColumnNumber(parser);
-  stack->last_text_node->text = str.to_string();
+  stack->last_text_node->text.assign(str);
 }
 
 static void XMLCALL CommentDataHandler(void* user_data, const char* comment) {
@@ -417,11 +417,11 @@ void Element::InsertChild(size_t index, std::unique_ptr<Node> child) {
   children.insert(children.begin() + index, std::move(child));
 }
 
-Attribute* Element::FindAttribute(const StringPiece& ns, const StringPiece& name) {
+Attribute* Element::FindAttribute(StringPiece ns, StringPiece name) {
   return const_cast<Attribute*>(static_cast<const Element*>(this)->FindAttribute(ns, name));
 }
 
-const Attribute* Element::FindAttribute(const StringPiece& ns, const StringPiece& name) const {
+const Attribute* Element::FindAttribute(StringPiece ns, StringPiece name) const {
   for (const auto& attr : attributes) {
     if (ns == attr.namespace_uri && name == attr.name) {
       return &attr;
@@ -430,7 +430,7 @@ const Attribute* Element::FindAttribute(const StringPiece& ns, const StringPiece
   return nullptr;
 }
 
-void Element::RemoveAttribute(const StringPiece& ns, const StringPiece& name) {
+void Element::RemoveAttribute(StringPiece ns, StringPiece name) {
   auto new_attr_end = std::remove_if(attributes.begin(), attributes.end(),
     [&](const Attribute& attr) -> bool {
       return ns == attr.namespace_uri && name == attr.name;
@@ -439,34 +439,32 @@ void Element::RemoveAttribute(const StringPiece& ns, const StringPiece& name) {
   attributes.erase(new_attr_end, attributes.end());
 }
 
-Attribute* Element::FindOrCreateAttribute(const StringPiece& ns, const StringPiece& name) {
+Attribute* Element::FindOrCreateAttribute(StringPiece ns, StringPiece name) {
   Attribute* attr = FindAttribute(ns, name);
   if (attr == nullptr) {
-    attributes.push_back(Attribute{ns.to_string(), name.to_string()});
+    attributes.push_back(Attribute{std::string(ns), std::string(name)});
     attr = &attributes.back();
   }
   return attr;
 }
 
-Element* Element::FindChild(const StringPiece& ns, const StringPiece& name) {
+Element* Element::FindChild(StringPiece ns, StringPiece name) {
   return FindChildWithAttribute(ns, name, {}, {}, {});
 }
 
-const Element* Element::FindChild(const StringPiece& ns, const StringPiece& name) const {
+const Element* Element::FindChild(StringPiece ns, StringPiece name) const {
   return FindChildWithAttribute(ns, name, {}, {}, {});
 }
 
-Element* Element::FindChildWithAttribute(const StringPiece& ns, const StringPiece& name,
-                                         const StringPiece& attr_ns, const StringPiece& attr_name,
-                                         const StringPiece& attr_value) {
+Element* Element::FindChildWithAttribute(StringPiece ns, StringPiece name, StringPiece attr_ns,
+                                         StringPiece attr_name, StringPiece attr_value) {
   return const_cast<Element*>(static_cast<const Element*>(this)->FindChildWithAttribute(
       ns, name, attr_ns, attr_name, attr_value));
 }
 
-const Element* Element::FindChildWithAttribute(const StringPiece& ns, const StringPiece& name,
-                                               const StringPiece& attr_ns,
-                                               const StringPiece& attr_name,
-                                               const StringPiece& attr_value) const {
+const Element* Element::FindChildWithAttribute(StringPiece ns, StringPiece name,
+                                               StringPiece attr_ns, StringPiece attr_name,
+                                               StringPiece attr_value) const {
   for (const auto& child : children) {
     if (const Element* el = NodeCast<Element>(child.get())) {
       if (ns == el->namespace_uri && name == el->name) {
@@ -559,7 +557,7 @@ void PackageAwareVisitor::AfterVisitElement(Element* el) {
 }
 
 std::optional<ExtractedPackage> PackageAwareVisitor::TransformPackageAlias(
-    const StringPiece& alias) const {
+    StringPiece alias) const {
   if (alias.empty()) {
     return ExtractedPackage{{}, false /*private*/};
   }

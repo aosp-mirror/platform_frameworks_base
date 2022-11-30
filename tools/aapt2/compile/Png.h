@@ -59,7 +59,7 @@ class Png {
  */
 class PngChunkFilter : public io::InputStream {
  public:
-  explicit PngChunkFilter(const android::StringPiece& data);
+  explicit PngChunkFilter(android::StringPiece data);
   virtual ~PngChunkFilter() = default;
 
   bool Next(const void** buffer, size_t* len) override;

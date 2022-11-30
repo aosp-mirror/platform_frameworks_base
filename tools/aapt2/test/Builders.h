@@ -38,40 +38,35 @@ class ResourceTableBuilder {
  public:
   ResourceTableBuilder() = default;
 
-  ResourceTableBuilder& AddSimple(const android::StringPiece& name, const ResourceId& id = {});
-  ResourceTableBuilder& AddSimple(const android::StringPiece& name,
+  ResourceTableBuilder& AddSimple(android::StringPiece name, const ResourceId& id = {});
+  ResourceTableBuilder& AddSimple(android::StringPiece name,
                                   const android::ConfigDescription& config,
                                   const ResourceId& id = {});
-  ResourceTableBuilder& AddReference(const android::StringPiece& name,
-                                     const android::StringPiece& ref);
-  ResourceTableBuilder& AddReference(const android::StringPiece& name, const ResourceId& id,
-                                     const android::StringPiece& ref);
-  ResourceTableBuilder& AddString(const android::StringPiece& name,
-                                  const android::StringPiece& str);
-  ResourceTableBuilder& AddString(const android::StringPiece& name, const ResourceId& id,
-                                  const android::StringPiece& str);
-  ResourceTableBuilder& AddString(const android::StringPiece& name, const ResourceId& id,
+  ResourceTableBuilder& AddReference(android::StringPiece name, android::StringPiece ref);
+  ResourceTableBuilder& AddReference(android::StringPiece name, const ResourceId& id,
+                                     android::StringPiece ref);
+  ResourceTableBuilder& AddString(android::StringPiece name, android::StringPiece str);
+  ResourceTableBuilder& AddString(android::StringPiece name, const ResourceId& id,
+                                  android::StringPiece str);
+  ResourceTableBuilder& AddString(android::StringPiece name, const ResourceId& id,
                                   const android::ConfigDescription& config,
-                                  const android::StringPiece& str);
-  ResourceTableBuilder& AddFileReference(const android::StringPiece& name,
-                                         const android::StringPiece& path,
+                                  android::StringPiece str);
+  ResourceTableBuilder& AddFileReference(android::StringPiece name, android::StringPiece path,
                                          io::IFile* file = nullptr);
-  ResourceTableBuilder& AddFileReference(const android::StringPiece& name, const ResourceId& id,
-                                         const android::StringPiece& path,
-                                         io::IFile* file = nullptr);
-  ResourceTableBuilder& AddFileReference(const android::StringPiece& name,
-                                         const android::StringPiece& path,
+  ResourceTableBuilder& AddFileReference(android::StringPiece name, const ResourceId& id,
+                                         android::StringPiece path, io::IFile* file = nullptr);
+  ResourceTableBuilder& AddFileReference(android::StringPiece name, android::StringPiece path,
                                          const android::ConfigDescription& config,
                                          io::IFile* file = nullptr);
-  ResourceTableBuilder& AddValue(const android::StringPiece& name, std::unique_ptr<Value> value);
-  ResourceTableBuilder& AddValue(const android::StringPiece& name, const ResourceId& id,
+  ResourceTableBuilder& AddValue(android::StringPiece name, std::unique_ptr<Value> value);
+  ResourceTableBuilder& AddValue(android::StringPiece name, const ResourceId& id,
                                  std::unique_ptr<Value> value);
-  ResourceTableBuilder& AddValue(const android::StringPiece& name,
-                                 const android::ConfigDescription& config,
-                                 const ResourceId& id, std::unique_ptr<Value> value);
-  ResourceTableBuilder& SetSymbolState(const android::StringPiece& name, const ResourceId& id,
+  ResourceTableBuilder& AddValue(android::StringPiece name,
+                                 const android::ConfigDescription& config, const ResourceId& id,
+                                 std::unique_ptr<Value> value);
+  ResourceTableBuilder& SetSymbolState(android::StringPiece name, const ResourceId& id,
                                        Visibility::Level level, bool allow_new = false);
-  ResourceTableBuilder& SetOverlayable(const android::StringPiece& name,
+  ResourceTableBuilder& SetOverlayable(android::StringPiece name,
                                        const OverlayableItem& overlayable);
   ResourceTableBuilder& Add(NewResource&& res);
 
@@ -84,7 +79,7 @@ class ResourceTableBuilder {
   std::unique_ptr<ResourceTable> table_ = util::make_unique<ResourceTable>();
 };
 
-std::unique_ptr<Reference> BuildReference(const android::StringPiece& ref,
+std::unique_ptr<Reference> BuildReference(android::StringPiece ref,
                                           const std::optional<ResourceId>& id = {});
 std::unique_ptr<BinaryPrimitive> BuildPrimitive(uint8_t type, uint32_t data);
 
@@ -101,7 +96,7 @@ class ValueBuilder {
     return *this;
   }
 
-  ValueBuilder& SetComment(const android::StringPiece& str) {
+  ValueBuilder& SetComment(android::StringPiece str) {
     value_->SetComment(str);
     return *this;
   }
@@ -121,7 +116,7 @@ class AttributeBuilder {
   AttributeBuilder();
   AttributeBuilder& SetTypeMask(uint32_t typeMask);
   AttributeBuilder& SetWeak(bool weak);
-  AttributeBuilder& AddItem(const android::StringPiece& name, uint32_t value);
+  AttributeBuilder& AddItem(android::StringPiece name, uint32_t value);
   std::unique_ptr<Attribute> Build();
 
  private:
@@ -133,9 +128,9 @@ class AttributeBuilder {
 class StyleBuilder {
  public:
   StyleBuilder() = default;
-  StyleBuilder& SetParent(const android::StringPiece& str);
-  StyleBuilder& AddItem(const android::StringPiece& str, std::unique_ptr<Item> value);
-  StyleBuilder& AddItem(const android::StringPiece& str, const ResourceId& id,
+  StyleBuilder& SetParent(android::StringPiece str);
+  StyleBuilder& AddItem(android::StringPiece str, std::unique_ptr<Item> value);
+  StyleBuilder& AddItem(android::StringPiece str, const ResourceId& id,
                         std::unique_ptr<Item> value);
   std::unique_ptr<Style> Build();
 
@@ -148,8 +143,7 @@ class StyleBuilder {
 class StyleableBuilder {
  public:
   StyleableBuilder() = default;
-  StyleableBuilder& AddItem(const android::StringPiece& str,
-                            const std::optional<ResourceId>& id = {});
+  StyleableBuilder& AddItem(android::StringPiece str, const std::optional<ResourceId>& id = {});
   std::unique_ptr<Styleable> Build();
 
  private:
@@ -158,9 +152,9 @@ class StyleableBuilder {
   std::unique_ptr<Styleable> styleable_ = util::make_unique<Styleable>();
 };
 
-std::unique_ptr<xml::XmlResource> BuildXmlDom(const android::StringPiece& str);
+std::unique_ptr<xml::XmlResource> BuildXmlDom(android::StringPiece str);
 std::unique_ptr<xml::XmlResource> BuildXmlDomForPackageName(IAaptContext* context,
-                                                            const android::StringPiece& str);
+                                                            android::StringPiece str);
 
 class ArtifactBuilder {
  public:

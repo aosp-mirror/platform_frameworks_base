@@ -61,12 +61,12 @@ struct ManifestFixerTest : public ::testing::Test {
             .Build();
   }
 
-  std::unique_ptr<xml::XmlResource> Verify(const StringPiece& str) {
+  std::unique_ptr<xml::XmlResource> Verify(StringPiece str) {
     return VerifyWithOptions(str, {});
   }
 
-  std::unique_ptr<xml::XmlResource> VerifyWithOptions(
-      const StringPiece& str, const ManifestFixerOptions& options) {
+  std::unique_ptr<xml::XmlResource> VerifyWithOptions(StringPiece str,
+                                                      const ManifestFixerOptions& options) {
     std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(str);
     ManifestFixer fixer(options);
     if (fixer.Consume(mContext.get(), doc.get())) {

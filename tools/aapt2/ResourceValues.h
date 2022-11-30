@@ -83,8 +83,8 @@ class Value {
     return comment_;
   }
 
-  void SetComment(const android::StringPiece& str) {
-    comment_ = str.to_string();
+  void SetComment(android::StringPiece str) {
+    comment_.assign(str);
   }
 
   void SetComment(std::string&& str) {
@@ -176,7 +176,7 @@ struct Reference : public TransformableItem<Reference, BaseItem<Reference>> {
   void PrettyPrint(text::Printer* printer) const override;
 
   // Prints the reference without a package name if the package name matches the one given.
-  void PrettyPrint(const android::StringPiece& package, text::Printer* printer) const;
+  void PrettyPrint(android::StringPiece package, text::Printer* printer) const;
 };
 
 bool operator<(const Reference&, const Reference&);

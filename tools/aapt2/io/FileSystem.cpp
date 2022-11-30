@@ -67,8 +67,8 @@ IFile* FileCollectionIterator::Next() {
   return result;
 }
 
-std::unique_ptr<FileCollection> FileCollection::Create(const android::StringPiece& root,
-                                                        std::string* outError) {
+std::unique_ptr<FileCollection> FileCollection::Create(android::StringPiece root,
+                                                       std::string* outError) {
   std::unique_ptr<FileCollection> collection =
       std::unique_ptr<FileCollection>(new FileCollection());
 
@@ -80,7 +80,7 @@ std::unique_ptr<FileCollection> FileCollection::Create(const android::StringPiec
 
   std::vector<std::string> sorted_files;
   while (struct dirent *entry = readdir(d.get())) {
-    std::string prefix_path = root.to_string();
+    std::string prefix_path(root);
     file::AppendPath(&prefix_path, entry->d_name);
 
     // The directory to iterate over looking for files
@@ -117,12 +117,19 @@ std::unique_ptr<FileCollection> FileCollection::Create(const android::StringPiec
   return collection;
 }
 
-IFile* FileCollection::InsertFile(const StringPiece& path) {
-  return (files_[path.to_string()] = util::make_unique<RegularFile>(android::Source(path))).get();
+IFile* FileCollection::InsertFile(StringPiece path) {
+  auto file = util::make_unique<RegularFile>(android::Source(path));
+  auto it = files_.lower_bound(path);
+  if (it != files_.end() && it->first == path) {
+    it->second = std::move(file);
+  } else {
+    it = files_.emplace_hint(it, path, std::move(file));
+  }
+  return it->second.get();
 }
 
-IFile* FileCollection::FindFile(const StringPiece& path) {
-  auto iter = files_.find(path.to_string());
+IFile* FileCollection::FindFile(StringPiece path) {
+  auto iter = files_.find(path);
   if (iter != files_.end()) {
     return iter->second.get();
   }

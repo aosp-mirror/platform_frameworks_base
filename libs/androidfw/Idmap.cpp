@@ -274,8 +274,7 @@ LoadedIdmap::LoadedIdmap(std::string&& idmap_path,
        target_apk_path_(target_apk_path),
        idmap_last_mod_time_(getFileModDate(idmap_path_.data())) {}
 
-std::unique_ptr<LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_path,
-                                               const StringPiece& idmap_data) {
+std::unique_ptr<LoadedIdmap> LoadedIdmap::Load(StringPiece idmap_path, StringPiece idmap_data) {
   ATRACE_CALL();
   size_t data_size = idmap_data.size();
   auto data_ptr = reinterpret_cast<const uint8_t*>(idmap_data.data());
@@ -365,7 +364,7 @@ std::unique_ptr<LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_path,
 
   // Can't use make_unique because LoadedIdmap constructor is private.
   return std::unique_ptr<LoadedIdmap>(
-      new LoadedIdmap(idmap_path.to_string(), header, data_header, target_entries,
+      new LoadedIdmap(std::string(idmap_path), header, data_header, target_entries,
                       target_inline_entries, target_inline_entry_values, configurations,
                       overlay_entries, std::move(idmap_string_pool), *target_path, *overlay_path));
 }

@@ -49,21 +49,21 @@ bool less_than_type(const std::unique_ptr<ResourceTableType>& lhs,
 }
 
 template <typename T>
-bool less_than_struct_with_name(const std::unique_ptr<T>& lhs, const StringPiece& rhs) {
+bool less_than_struct_with_name(const std::unique_ptr<T>& lhs, StringPiece rhs) {
   return lhs->name.compare(0, lhs->name.size(), rhs.data(), rhs.size()) < 0;
 }
 
 template <typename T>
-bool greater_than_struct_with_name(const StringPiece& lhs, const std::unique_ptr<T>& rhs) {
+bool greater_than_struct_with_name(StringPiece lhs, const std::unique_ptr<T>& rhs) {
   return rhs->name.compare(0, rhs->name.size(), lhs.data(), lhs.size()) > 0;
 }
 
 template <typename T>
 struct NameEqualRange {
-  bool operator()(const std::unique_ptr<T>& lhs, const StringPiece& rhs) const {
+  bool operator()(const std::unique_ptr<T>& lhs, StringPiece rhs) const {
     return less_than_struct_with_name<T>(lhs, rhs);
   }
-  bool operator()(const StringPiece& lhs, const std::unique_ptr<T>& rhs) const {
+  bool operator()(StringPiece lhs, const std::unique_ptr<T>& rhs) const {
     return greater_than_struct_with_name<T>(lhs, rhs);
   }
 };
@@ -78,7 +78,7 @@ bool less_than_struct_with_name_and_id(const T& lhs,
 }
 
 template <typename T, typename Func, typename Elements>
-T* FindElementsRunAction(const android::StringPiece& name, Elements& entries, Func action) {
+T* FindElementsRunAction(android::StringPiece name, Elements& entries, Func action) {
   const auto iter =
       std::lower_bound(entries.begin(), entries.end(), name, less_than_struct_with_name<T>);
   const bool found = iter != entries.end() && name == (*iter)->name;
@@ -87,7 +87,7 @@ T* FindElementsRunAction(const android::StringPiece& name, Elements& entries, Fu
 
 struct ConfigKey {
   const ConfigDescription* config;
-  const StringPiece& product;
+  StringPiece product;
 };
 
 template <typename T>
@@ -104,12 +104,12 @@ bool lt_config_key_ref(const T& lhs, const ConfigKey& rhs) {
 ResourceTable::ResourceTable(ResourceTable::Validation validation) : validation_(validation) {
 }
 
-ResourceTablePackage* ResourceTable::FindPackage(const android::StringPiece& name) const {
+ResourceTablePackage* ResourceTable::FindPackage(android::StringPiece name) const {
   return FindElementsRunAction<ResourceTablePackage>(
       name, packages, [&](bool found, auto& iter) { return found ? iter->get() : nullptr; });
 }
 
-ResourceTablePackage* ResourceTable::FindOrCreatePackage(const android::StringPiece& name) {
+ResourceTablePackage* ResourceTable::FindOrCreatePackage(android::StringPiece name) {
   return FindElementsRunAction<ResourceTablePackage>(name, packages, [&](bool found, auto& iter) {
     return found ? iter->get() : packages.emplace(iter, new ResourceTablePackage(name))->get();
   });
@@ -139,18 +139,18 @@ ResourceTableType* ResourceTablePackage::FindOrCreateType(const ResourceNamedTyp
   });
 }
 
-ResourceEntry* ResourceTableType::CreateEntry(const android::StringPiece& name) {
+ResourceEntry* ResourceTableType::CreateEntry(android::StringPiece name) {
   return FindElementsRunAction<ResourceEntry>(name, entries, [&](bool found, auto& iter) {
     return entries.emplace(iter, new ResourceEntry(name))->get();
   });
 }
 
-ResourceEntry* ResourceTableType::FindEntry(const android::StringPiece& name) const {
+ResourceEntry* ResourceTableType::FindEntry(android::StringPiece name) const {
   return FindElementsRunAction<ResourceEntry>(
       name, entries, [&](bool found, auto& iter) { return found ? iter->get() : nullptr; });
 }
 
-ResourceEntry* ResourceTableType::FindOrCreateEntry(const android::StringPiece& name) {
+ResourceEntry* ResourceTableType::FindOrCreateEntry(android::StringPiece name) {
   return FindElementsRunAction<ResourceEntry>(name, entries, [&](bool found, auto& iter) {
     return found ? iter->get() : entries.emplace(iter, new ResourceEntry(name))->get();
   });
@@ -183,7 +183,7 @@ const ResourceConfigValue* ResourceEntry::FindValue(const android::ConfigDescrip
 }
 
 ResourceConfigValue* ResourceEntry::FindOrCreateValue(const ConfigDescription& config,
-                                                      const StringPiece& product) {
+                                                      StringPiece product) {
   auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
                                lt_config_key_ref<std::unique_ptr<ResourceConfigValue>>);
   if (iter != values.end()) {
