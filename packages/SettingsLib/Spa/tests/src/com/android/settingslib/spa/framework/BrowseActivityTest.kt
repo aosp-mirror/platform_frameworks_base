@@ -60,13 +60,7 @@ class BrowseActivityTest {
         val sppLayer1 = sppRepository.getProviderOrNull("SppLayer1")!!
         val pageLayer1 = sppLayer1.createSettingsPage()
 
-        composeTestRule.setContent {
-            BrowseContent(
-                allProviders = listOf(sppHome, sppLayer1),
-                initialDestination = pageHome.buildRoute(),
-                initialEntryId = null
-            )
-        }
+        composeTestRule.setContent { BrowseContent(sppRepository) }
 
         composeTestRule.onNodeWithText(sppHome.getTitle(null)).assertIsDisplayed()
         spaLogger.verifyPageEvent(pageHome.id, 1, 0)

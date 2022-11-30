@@ -24,7 +24,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.tests.testutils.BlankActivity
 import com.android.settingslib.spa.tests.testutils.SpaEnvironmentForTest
-import com.android.settingslib.spa.tests.testutils.SpaLoggerForTest
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,8 +31,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SettingsPageTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val spaLogger = SpaLoggerForTest()
-    private val spaEnvironment = SpaEnvironmentForTest(context, logger = spaLogger)
+    private val spaEnvironment = SpaEnvironmentForTest(context)
 
     @Test
     fun testNullPage() {
@@ -119,20 +117,5 @@ class SettingsPageTest {
         assertThat(page.isBrowsable(context, BlankActivity::class.java)).isFalse()
         assertThat(page.createBrowseIntent(context, BlankActivity::class.java)).isNull()
         assertThat(page.createBrowseAdbCommand(context, BlankActivity::class.java)).isNull()
-    }
-
-    @Test
-    fun testPageEvent() {
-        spaLogger.reset()
-        SpaEnvironmentFactory.reset(spaEnvironment)
-        val page = spaEnvironment.createPage("SppHome")
-        page.enterPage()
-        page.leavePage()
-        page.enterPage()
-        assertThat(page.createBrowseIntent()).isNotNull()
-        assertThat(spaLogger.getEventCount(page.id, LogEvent.PAGE_ENTER, LogCategory.FRAMEWORK))
-            .isEqualTo(2)
-        assertThat(spaLogger.getEventCount(page.id, LogEvent.PAGE_LEAVE, LogCategory.FRAMEWORK))
-            .isEqualTo(1)
     }
 }
