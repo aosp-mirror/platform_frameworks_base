@@ -55,6 +55,7 @@ import com.android.systemui.theme.ThemeOverlayController
 import com.android.systemui.toast.ToastUI
 import com.android.systemui.usb.StorageNotification
 import com.android.systemui.util.NotificationChannels
+import com.android.systemui.util.StartBinderLoggerModule
 import com.android.systemui.volume.VolumeUI
 import com.android.systemui.wmshell.WMShell
 import dagger.Binds
@@ -68,6 +69,7 @@ import dagger.multibindings.IntoMap
 @Module(includes = [
     MultiUserUtilsModule::class,
     StartControlsStartableModule::class,
+    StartBinderLoggerModule::class,
 ])
 abstract class SystemUICoreStartableModule {
     /** Inject into AuthController.  */
