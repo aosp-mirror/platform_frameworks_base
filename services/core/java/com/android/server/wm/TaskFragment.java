@@ -2605,6 +2605,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return false;
     }
 
+    @Override
+    boolean canCustomizeAppTransition() {
+        // This is only called when the app transition is going to be played by system server. In
+        // this case, we should allow custom app transition for fullscreen embedded TaskFragment
+        // just like Activity.
+        return isEmbedded() && matchParentBounds();
+    }
+
     /** Clear {@link #mLastPausedActivity} for all {@link TaskFragment} children */
     void clearLastPausedActivity() {
         forAllTaskFragments(taskFragment -> taskFragment.mLastPausedActivity = null);
