@@ -53,7 +53,9 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.content.pm.ActivityInfo.launchModeToString;
 import static android.os.Process.INVALID_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
@@ -2121,6 +2123,11 @@ class ActivityStarter {
                 if (actuallyMoved) {
                     // Only record if the activity actually moved.
                     mMovedToTopActivity = act;
+                    if (mNoAnimation) {
+                        act.mDisplayContent.prepareAppTransition(TRANSIT_NONE);
+                    } else {
+                        act.mDisplayContent.prepareAppTransition(TRANSIT_TO_FRONT);
+                    }
                 }
                 act.updateOptionsLocked(mOptions);
                 deliverNewIntent(act, intentGrants);
