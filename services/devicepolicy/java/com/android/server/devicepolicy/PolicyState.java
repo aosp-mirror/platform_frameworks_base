@@ -40,7 +40,7 @@ final class PolicyState<V> {
     private static final String ATTR_RESOLVED_POLICY = "resolved-policy";
 
     private final PolicyDefinition<V> mPolicyDefinition;
-    private final LinkedHashMap<EnforcingAdmin, V> mAdminsPolicy = new LinkedHashMap<>();
+    private final LinkedHashMap<EnforcingAdmin, V> mPoliciesSetByAdmins = new LinkedHashMap<>();
     private V mCurrentResolvedPolicy;
 
     PolicyState(@NonNull PolicyDefinition<V> policyDefinition) {
@@ -49,13 +49,13 @@ final class PolicyState<V> {
 
     private PolicyState(
             @NonNull PolicyDefinition<V> policyDefinition,
-            @NonNull LinkedHashMap<EnforcingAdmin, V> adminsPolicy,
+            @NonNull LinkedHashMap<EnforcingAdmin, V> policiesSetByAdmins,
             V currentEnforcedPolicy) {
         Objects.requireNonNull(policyDefinition);
-        Objects.requireNonNull(adminsPolicy);
+        Objects.requireNonNull(policiesSetByAdmins);
 
         mPolicyDefinition = policyDefinition;
-        mAdminsPolicy.putAll(adminsPolicy);
+        mPoliciesSetByAdmins.putAll(policiesSetByAdmins);
         mCurrentResolvedPolicy = currentEnforcedPolicy;
     }
 
@@ -63,7 +63,7 @@ final class PolicyState<V> {
      * Returns {@code true} if the resolved policy has changed, {@code false} otherwise.
      */
     boolean setPolicy(@NonNull EnforcingAdmin admin, @NonNull V value) {
-        mAdminsPolicy.put(Objects.requireNonNull(admin), Objects.requireNonNull(value));
+        mPoliciesSetByAdmins.put(Objects.requireNonNull(admin), Objects.requireNonNull(value));
 
         return resolvePolicy();
     }
@@ -71,15 +71,19 @@ final class PolicyState<V> {
     boolean removePolicy(@NonNull EnforcingAdmin admin) {
         Objects.requireNonNull(admin);
 
-        if (mAdminsPolicy.remove(admin) == null) {
+        if (mPoliciesSetByAdmins.remove(admin) == null) {
             return false;
         }
 
         return resolvePolicy();
     }
 
+    LinkedHashMap<EnforcingAdmin, V> getPoliciesSetByAdmins() {
+        return mPoliciesSetByAdmins;
+    }
+
     private boolean resolvePolicy() {
-        V resolvedPolicy = mPolicyDefinition.resolvePolicy(mAdminsPolicy);
+        V resolvedPolicy = mPolicyDefinition.resolvePolicy(mPoliciesSetByAdmins);
         boolean policyChanged = !Objects.equals(resolvedPolicy, mCurrentResolvedPolicy);
         mCurrentResolvedPolicy = resolvedPolicy;
 
@@ -94,14 +98,16 @@ final class PolicyState<V> {
     void saveToXml(TypedXmlSerializer serializer) throws IOException {
         mPolicyDefinition.saveToXml(serializer);
 
-        mPolicyDefinition.savePolicyValueToXml(
-                serializer, ATTR_RESOLVED_POLICY, mCurrentResolvedPolicy);
+        if (mCurrentResolvedPolicy != null) {
+            mPolicyDefinition.savePolicyValueToXml(
+                    serializer, ATTR_RESOLVED_POLICY, mCurrentResolvedPolicy);
+        }
 
-        for (EnforcingAdmin admin : mAdminsPolicy.keySet()) {
+        for (EnforcingAdmin admin : mPoliciesSetByAdmins.keySet()) {
             serializer.startTag(/* namespace= */ null, TAG_ADMIN_POLICY_ENTRY);
 
             mPolicyDefinition.savePolicyValueToXml(
-                    serializer, ATTR_POLICY_VALUE, mAdminsPolicy.get(admin));
+                    serializer, ATTR_POLICY_VALUE, mPoliciesSetByAdmins.get(admin));
 
             serializer.startTag(/* namespace= */ null, TAG_ENFORCING_ADMIN_ENTRY);
             admin.saveToXml(serializer);

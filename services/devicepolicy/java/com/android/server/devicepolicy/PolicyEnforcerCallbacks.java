@@ -29,6 +29,7 @@ import android.provider.Settings;
 
 import com.android.server.utils.Slogf;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
@@ -53,7 +54,7 @@ final class PolicyEnforcerCallbacks {
     static boolean setPermissionGrantState(
             @Nullable Integer grantState, @NonNull Context context, int userId,
             @NonNull String[] args) {
-        Binder.withCleanCallingIdentity(() -> {
+        return Boolean.TRUE.equals(Binder.withCleanCallingIdentity(() -> {
             if (args == null || args.length < 2) {
                 throw new IllegalArgumentException("Package name and permission name must be "
                         + "provided as arguments");
@@ -84,8 +85,7 @@ final class PolicyEnforcerCallbacks {
                 // TODO: add logging
                 return false;
             }
-        });
-        return true;
+        }));
     }
 
     @NonNull
@@ -106,9 +106,14 @@ final class PolicyEnforcerCallbacks {
 
     static boolean setLockTask(
             @Nullable LockTaskPolicy policy, @NonNull Context context, int userId) {
-        DevicePolicyManagerService.updateLockTaskPackagesLocked(
-                context, List.copyOf(policy.getPackages()), userId);
-        DevicePolicyManagerService.updateLockTaskFeaturesLocked(policy.getFlags(), userId);
+        List<String> packages = Collections.emptyList();
+        int flags = LockTaskPolicy.DEFAULT_LOCK_TASK_FLAG;
+        if (policy != null) {
+            packages = List.copyOf(policy.getPackages());
+            flags = policy.getFlags();
+        }
+        DevicePolicyManagerService.updateLockTaskPackagesLocked(context, packages, userId);
+        DevicePolicyManagerService.updateLockTaskFeaturesLocked(flags, userId);
         return true;
     }
 
