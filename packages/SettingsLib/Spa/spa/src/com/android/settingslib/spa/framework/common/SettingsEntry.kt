@@ -219,11 +219,6 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
         return this
     }
 
-    fun setIsAllowSearch(isAllowSearch: Boolean): SettingsEntryBuilder {
-        this.isAllowSearch = isAllowSearch
-        return this
-    }
-
     fun setIsSearchDataDynamic(isDynamic: Boolean): SettingsEntryBuilder {
         this.isSearchDataDynamic = isDynamic
         return this
@@ -251,6 +246,13 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
 
     fun setSearchDataFn(fn: SearchDataGetter): SettingsEntryBuilder {
         this.searchDataFn = fn
+        this.isAllowSearch = true
+        return this
+    }
+
+    fun clearSearchDataFn(): SettingsEntryBuilder {
+        this.searchDataFn = { null }
+        this.isAllowSearch = false
         return this
     }
 
