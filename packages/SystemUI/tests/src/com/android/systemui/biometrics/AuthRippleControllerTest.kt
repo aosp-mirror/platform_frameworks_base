@@ -26,6 +26,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.LightRevealScrim
@@ -77,6 +78,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Mock private lateinit var udfpsControllerProvider: Provider<UdfpsController>
     @Mock private lateinit var udfpsController: UdfpsController
     @Mock private lateinit var statusBarStateController: StatusBarStateController
+    @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var lightRevealScrim: LightRevealScrim
     @Mock private lateinit var fpSensorProp: FingerprintSensorPropertiesInternal
 
@@ -106,6 +108,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
             biometricUnlockController,
             udfpsControllerProvider,
             statusBarStateController,
+            featureFlags,
             rippleView
         )
         controller.init()
