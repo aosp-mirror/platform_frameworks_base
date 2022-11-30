@@ -18,30 +18,24 @@ package com.android.systemui.controls.ui
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.database.ContentObserver
-import android.net.Uri
-import android.os.Handler
-import android.os.UserHandle
-import android.provider.Settings
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.controls.ControlsMetricsLogger
+import com.android.systemui.controls.FakeControlsSettingsRepository
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.settings.SecureSettings
 import com.android.wm.shell.TaskViewFactory
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
@@ -79,8 +73,6 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
     @Mock
     private lateinit var secureSettings: SecureSettings
     @Mock
-    private lateinit var mainHandler: Handler
-    @Mock
     private lateinit var userContextProvider: UserContextProvider
 
     companion object {
@@ -91,17 +83,15 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
 
     private lateinit var coordinator: ControlActionCoordinatorImpl
     private lateinit var action: ControlActionCoordinatorImpl.Action
+    private lateinit var controlsSettingsRepository: FakeControlsSettingsRepository
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(secureSettings.getUriFor(Settings.Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS))
-                .thenReturn(Settings.Secure
-                        .getUriFor(Settings.Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS))
-        `when`(secureSettings.getIntForUser(Settings.Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
-                0, UserHandle.USER_CURRENT))
-                .thenReturn(1)
+        controlsSettingsRepository = FakeControlsSettingsRepository()
+        controlsSettingsRepository.setAllowActionOnTrivialControlsInLockscreen(true)
+        controlsSettingsRepository.setCanShowControlsInLockscreen(true)
 
         coordinator = spy(ControlActionCoordinatorImpl(
                 mContext,
@@ -115,7 +105,7 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
                 vibratorHelper,
                 secureSettings,
                 userContextProvider,
-                mainHandler
+                controlsSettingsRepository
         ))
 
         val userContext = mock(Context::class.java)
@@ -127,9 +117,6 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
         // Just return 2 so we don't test any Dialog logic which requires a launched activity.
         `when`(pref.getInt(DeviceControlsControllerImpl.PREFS_SETTINGS_DIALOG_ATTEMPTS, 0))
                 .thenReturn(2)
-
-        verify(secureSettings).registerContentObserverForUser(any(Uri::class.java),
-                anyBoolean(), any(ContentObserver::class.java), anyInt())
 
         `when`(cvh.cws.ci.controlId).thenReturn(ID)
         `when`(cvh.cws.control?.isAuthRequired()).thenReturn(true)
