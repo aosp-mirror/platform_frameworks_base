@@ -7074,7 +7074,7 @@ void DynamicRefTable::addMapping(uint8_t buildPackageId, uint8_t runtimePackageI
 }
 
 void DynamicRefTable::addAlias(uint32_t stagedId, uint32_t finalizedId) {
-  mAliasId[stagedId] = finalizedId;
+    mAliasId[stagedId] = finalizedId;
 }
 
 status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
