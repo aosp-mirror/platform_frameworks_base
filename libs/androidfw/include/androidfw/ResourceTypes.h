@@ -21,6 +21,7 @@
 #define _LIBS_UTILS_RESOURCE_TYPES_H
 
 #include <android-base/expected.h>
+#include <android-base/unique_fd.h>
 
 #include <androidfw/Asset.h>
 #include <androidfw/Errors.h>
@@ -58,6 +59,8 @@ constexpr const uint32_t kFabricatedOverlayCurrentVersion = 3;
 
 // Returns whether or not the path represents a fabricated overlay.
 bool IsFabricatedOverlay(const std::string& path);
+bool IsFabricatedOverlay(const char* path);
+bool IsFabricatedOverlay(android::base::borrowed_fd fd);
 
 /**
  * In C++11, char16_t is defined as *at least* 16 bits. We do a lot of

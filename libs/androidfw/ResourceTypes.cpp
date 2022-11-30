@@ -33,7 +33,9 @@
 #include <type_traits>
 #include <vector>
 
+#include <android-base/file.h>
 #include <android-base/macros.h>
+#include <android-base/utf8.h>
 #include <androidfw/ByteBucketArray.h>
 #include <androidfw/ResourceTypes.h>
 #include <androidfw/TypeWrappers.h>
@@ -236,12 +238,23 @@ void Res_png_9patch::serialize(const Res_png_9patch& patch, const int32_t* xDivs
 }
 
 bool IsFabricatedOverlay(const std::string& path) {
-  std::ifstream fin(path);
-  uint32_t magic;
-  if (fin.read(reinterpret_cast<char*>(&magic), sizeof(uint32_t))) {
-    return magic == kFabricatedOverlayMagic;
+  return IsFabricatedOverlay(path.c_str());
+}
+
+bool IsFabricatedOverlay(const char* path) {
+  auto fd = base::unique_fd(base::utf8::open(path, O_RDONLY|O_CLOEXEC));
+  if (fd < 0) {
+    return false;
   }
-  return false;
+  return IsFabricatedOverlay(fd);
+}
+
+bool IsFabricatedOverlay(base::borrowed_fd fd) {
+  uint32_t magic;
+  if (!base::ReadFullyAtOffset(fd, &magic, sizeof(magic), 0)) {
+    return false;
+  }
+  return magic == kFabricatedOverlayMagic;
 }
 
 static bool assertIdmapHeader(const void* idmap, size_t size) {
