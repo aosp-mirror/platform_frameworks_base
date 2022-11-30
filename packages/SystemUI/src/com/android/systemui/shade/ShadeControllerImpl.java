@@ -227,6 +227,16 @@ public final class ShadeControllerImpl implements ShadeController {
     }
 
     @Override
+    public void onClosingFinished() {
+        runPostCollapseRunnables();
+        if (!mPresenter.isPresenterFullyCollapsed()) {
+            // if we set it not to be focusable when collapsing, we have to undo it when we aborted
+            // the closing
+            mNotificationShadeWindowController.setNotificationShadeFocusable(true);
+        }
+    }
+
+    @Override
     public void instantCollapseShade() {
         mNotificationPanelViewController.instantCollapse();
         runPostCollapseRunnables();
@@ -329,5 +339,18 @@ public final class ShadeControllerImpl implements ShadeController {
     public void setNotificationPanelViewController(
             NotificationPanelViewController notificationPanelViewController) {
         mNotificationPanelViewController = notificationPanelViewController;
+        mNotificationPanelViewController.setTrackingStartedListener(this::runPostCollapseRunnables);
+        mNotificationPanelViewController.setOpenCloseListener(
+                new NotificationPanelViewController.OpenCloseListener() {
+                    @Override
+                    public void onClosingFinished() {
+                        ShadeControllerImpl.this.onClosingFinished();
+                    }
+
+                    @Override
+                    public void onOpenStarted() {
+                        makeExpandedVisible(false);
+                    }
+                });
     }
 }
