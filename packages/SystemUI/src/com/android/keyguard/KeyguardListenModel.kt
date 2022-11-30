@@ -26,7 +26,6 @@ data class KeyguardFingerprintListenModel(
     val credentialAttempted: Boolean,
     val deviceInteractive: Boolean,
     val dreaming: Boolean,
-    val encryptedOrLockdown: Boolean,
     val fingerprintDisabled: Boolean,
     val fingerprintLockedOut: Boolean,
     val goingToSleep: Boolean,
@@ -37,6 +36,7 @@ data class KeyguardFingerprintListenModel(
     val primaryUser: Boolean,
     val shouldListenSfpsState: Boolean,
     val shouldListenForFingerprintAssistant: Boolean,
+    val strongerAuthRequired: Boolean,
     val switchingUser: Boolean,
     val udfps: Boolean,
     val userDoesNotHaveTrust: Boolean
