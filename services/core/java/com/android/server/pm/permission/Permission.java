@@ -322,6 +322,10 @@ public final class Permission {
         return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_COMPANION) != 0;
     }
 
+    public boolean isModule() {
+        return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_MODULE) != 0;
+    }
+
     public boolean isRetailDemo() {
         return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_RETAIL_DEMO) != 0;
     }

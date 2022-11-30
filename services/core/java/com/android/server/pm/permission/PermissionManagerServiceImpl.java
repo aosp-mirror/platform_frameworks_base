@@ -238,6 +238,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         NOTIFICATION_PERMISSIONS.add(Manifest.permission.POST_NOTIFICATIONS);
     }
 
+    @NonNull private final ApexManager mApexManager;
+
     /** Set of source package names for Privileged Permission Allowlist */
     private final ArraySet<String> mPrivilegedPermissionAllowlistSourcePackageNames =
             new ArraySet<>();
@@ -421,6 +423,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
         mUserManagerInt = LocalServices.getService(UserManagerInternal.class);
         mIsLeanback = availableFeatures.containsKey(PackageManager.FEATURE_LEANBACK);
+        mApexManager = ApexManager.getInstance();
 
         mPrivilegedPermissionAllowlistSourcePackageNames.add(PLATFORM_PACKAGE_NAME);
         // PackageManager.hasSystemFeature() is not used here because PackageManagerService
@@ -3309,9 +3312,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             return true;
         }
         final String permissionName = permission.getName();
-        final ApexManager apexManager = ApexManager.getInstance();
         final String containingApexPackageName =
-                apexManager.getActiveApexPackageNameContainingPackage(packageName);
+                mApexManager.getActiveApexPackageNameContainingPackage(packageName);
         if (isInSystemConfigPrivAppPermissions(pkg, permissionName,
                 containingApexPackageName)) {
             return true;
@@ -3365,8 +3367,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         } else if (pkg.isSystemExt()) {
             permissions = systemConfig.getSystemExtPrivAppPermissions(pkg.getPackageName());
         } else if (containingApexPackageName != null) {
-            final ApexManager apexManager = ApexManager.getInstance();
-            final String apexName = apexManager.getApexModuleNameForPackageName(
+            final String apexName = mApexManager.getApexModuleNameForPackageName(
                     containingApexPackageName);
             final Set<String> privAppPermissions = systemConfig.getPrivAppPermissions(
                     pkg.getPackageName());
@@ -3580,6 +3581,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                         KnownPackages.PACKAGE_RECENTS, UserHandle.USER_SYSTEM),
                 pkg.getPackageName())) {
             // Special permission for the recents app.
+            allowed = true;
+        }
+        if (!allowed && bp.isModule() && mApexManager.getActiveApexPackageNameContainingPackage(
+                pkg.getPackageName()) != null) {
+            // Special permission granted for APKs inside APEX modules.
             allowed = true;
         }
         return allowed;
