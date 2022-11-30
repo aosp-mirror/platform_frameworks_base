@@ -263,7 +263,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         while (!runnables.isEmpty()) runnables.remove(0).run();
 
         // Then
-        verify(mShadeController, atLeastOnce()).collapsePanel();
+        verify(mShadeController, atLeastOnce()).collapseShade();
 
         verify(mActivityLaunchAnimator).startPendingIntentWithAnimation(any(),
                 eq(false) /* animate */, any(), any());
@@ -296,7 +296,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         verify(mBubblesManager).expandStackAndSelectBubble(eq(mBubbleNotificationRow.getEntry()));
 
         // This is called regardless, and simply short circuits when there is nothing to do.
-        verify(mShadeController, atLeastOnce()).collapsePanel();
+        verify(mShadeController, atLeastOnce()).collapseShade();
 
         verify(mAssistManager).hideAssist();
 
@@ -329,7 +329,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Then
         verify(mBubblesManager).expandStackAndSelectBubble(eq(mBubbleNotificationRow.getEntry()));
 
-        verify(mShadeController, atLeastOnce()).collapsePanel();
+        verify(mShadeController, atLeastOnce()).collapseShade();
 
         verify(mAssistManager).hideAssist();
 
@@ -357,7 +357,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Then
         verify(mBubblesManager).expandStackAndSelectBubble(mBubbleNotificationRow.getEntry());
 
-        verify(mShadeController, atLeastOnce()).collapsePanel();
+        verify(mShadeController, atLeastOnce()).collapseShade();
 
         verify(mAssistManager).hideAssist();
 

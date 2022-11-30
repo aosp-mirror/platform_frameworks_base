@@ -302,6 +302,7 @@ final class DockObserver extends SystemService {
                                     getContext(), soundUri);
                             if (sfx != null) {
                                 sfx.setStreamType(AudioManager.STREAM_SYSTEM);
+                                sfx.preferBuiltinDevice(true);
                                 sfx.play();
                             }
                         }

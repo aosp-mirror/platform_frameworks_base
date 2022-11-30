@@ -107,6 +107,8 @@ open class AuthBiometricFingerprintIconController(
         if (shouldAnimateForTransition(lastState, newState)) {
             iconView.playAnimation()
             iconViewOverlay.playAnimation()
+        } else if (lastState == STATE_IDLE && newState == STATE_AUTHENTICATING_ANIMATING_IN) {
+            iconView.playAnimation()
         }
         LottieColorUtils.applyDynamicColors(context, iconView)
         LottieColorUtils.applyDynamicColors(context, iconViewOverlay)

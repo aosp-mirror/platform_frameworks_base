@@ -166,15 +166,14 @@ public abstract class RemoteAnimationRunnerCompat extends IRemoteAnimationRunner
                     counterLauncher.cleanUp(finishTransaction);
                     counterWallpaper.cleanUp(finishTransaction);
                     // Release surface references now. This is apparently to free GPU memory
-                    // while doing quick operations (eg. during CTS).
-                    for (int i = info.getChanges().size() - 1; i >= 0; --i) {
-                        info.getChanges().get(i).getLeash().release();
-                    }
+                    // before GC would.
+                    info.releaseAllSurfaces();
                     // Don't release here since launcher might still be using them. Instead
                     // let launcher release them (eg. via RemoteAnimationTargets)
                     leashMap.clear();
                     try {
                         finishCallback.onTransitionFinished(null /* wct */, finishTransaction);
+                        finishTransaction.close();
                     } catch (RemoteException e) {
                         Log.e("ActivityOptionsCompat", "Failed to call app controlled animation"
                                 + " finished callback", e);
@@ -203,6 +202,9 @@ public abstract class RemoteAnimationRunnerCompat extends IRemoteAnimationRunner
                 synchronized (mFinishRunnables) {
                     finishRunnable = mFinishRunnables.remove(mergeTarget);
                 }
+                // Since we're not actually animating, release native memory now
+                t.close();
+                info.releaseAllSurfaces();
                 if (finishRunnable == null) return;
                 onAnimationCancelled(false /* isKeyguardOccluded */);
                 finishRunnable.run();

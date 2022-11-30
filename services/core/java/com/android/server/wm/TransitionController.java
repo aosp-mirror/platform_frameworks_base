@@ -458,8 +458,9 @@ class TransitionController {
                 info = new ActivityManager.RunningTaskInfo();
                 startTask.fillTaskInfo(info);
             }
-            mTransitionPlayer.requestStartTransition(transition, new TransitionRequestInfo(
-                    transition.mType, info, remoteTransition, displayChange));
+            mTransitionPlayer.requestStartTransition(transition.getToken(),
+                    new TransitionRequestInfo(transition.mType, info, remoteTransition,
+                            displayChange));
             transition.setRemoteTransition(remoteTransition);
         } catch (RemoteException e) {
             Slog.e(TAG, "Error requesting transition", e);
