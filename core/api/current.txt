@@ -11663,6 +11663,7 @@ package android.content.pm {
 
   public class PackageInstaller {
     method public void abandonSession(int);
+    method public void checkInstallConstraints(@NonNull java.util.List<java.lang.String>, @NonNull android.content.pm.PackageInstaller.InstallConstraints, @NonNull java.util.function.Consumer<android.content.pm.PackageInstaller.InstallConstraintsResult>);
     method public int createSession(@NonNull android.content.pm.PackageInstaller.SessionParams) throws java.io.IOException;
     method @Deprecated @Nullable public android.content.pm.PackageInstaller.SessionInfo getActiveStagedSession();
     method @NonNull public java.util.List<android.content.pm.PackageInstaller.SessionInfo> getActiveStagedSessions();
@@ -11705,6 +11706,35 @@ package android.content.pm {
     field public static final int STATUS_FAILURE_STORAGE = 6; // 0x6
     field public static final int STATUS_PENDING_USER_ACTION = -1; // 0xffffffff
     field public static final int STATUS_SUCCESS = 0; // 0x0
+  }
+
+  public static final class PackageInstaller.InstallConstraints implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean isRequireAppNotForeground();
+    method public boolean isRequireAppNotInteracting();
+    method public boolean isRequireAppNotTopVisible();
+    method public boolean isRequireDeviceIdle();
+    method public boolean isRequireNotInCall();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.PackageInstaller.InstallConstraints> CREATOR;
+    field @NonNull public static final android.content.pm.PackageInstaller.InstallConstraints GENTLE_UPDATE;
+  }
+
+  public static final class PackageInstaller.InstallConstraints.Builder {
+    ctor public PackageInstaller.InstallConstraints.Builder();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints build();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotForeground();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotInteracting();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotTopVisible();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder requireDeviceIdle();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder requireNotInCall();
+  }
+
+  public static final class PackageInstaller.InstallConstraintsResult implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean isAllConstraintsSatisfied();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.PackageInstaller.InstallConstraintsResult> CREATOR;
   }
 
   public static final class PackageInstaller.PreapprovalDetails implements android.os.Parcelable {

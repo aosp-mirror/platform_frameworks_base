@@ -44,6 +44,7 @@ import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageInstaller.InstallConstraints;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageItemInfo;
@@ -54,12 +55,14 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
+import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SELinux;
@@ -88,6 +91,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ImageUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.IoThread;
@@ -186,6 +190,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     private final InternalCallback mInternalCallback = new InternalCallback();
     private final PackageSessionVerifier mSessionVerifier;
+    private final GentleUpdateHelper mGentleUpdateHelper;
 
     /**
      * Used for generating session IDs. Since this is created at boot time,
@@ -272,6 +277,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mStagingManager = new StagingManager(context);
         mSessionVerifier = new PackageSessionVerifier(context, mPm, mApexManager,
                 apexParserSupplier, mInstallThread.getLooper());
+        mGentleUpdateHelper = new GentleUpdateHelper(
+                context, mInstallThread.getLooper(), new AppStateHelper(context));
 
         LocalServices.getService(SystemServiceManager.class).startService(
                 new Lifecycle(context, this));
@@ -1233,6 +1240,33 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     @Override
+    public void checkInstallConstraints(String installerPackageName, List<String> packageNames,
+            InstallConstraints constraints, RemoteCallback callback) {
+        Preconditions.checkArgument(packageNames != null);
+        Preconditions.checkArgument(constraints != null);
+        Preconditions.checkArgument(callback != null);
+
+        final var snapshot = mPm.snapshotComputer();
+        final int callingUid = Binder.getCallingUid();
+        if (!isCalledBySystemOrShell(callingUid)) {
+            for (var packageName : packageNames) {
+                var ps = snapshot.getPackageStateInternal(packageName);
+                if (ps == null || !TextUtils.equals(
+                        ps.getInstallSource().mInstallerPackageName, installerPackageName)) {
+                    throw new SecurityException("Caller has no access to package " + packageName);
+                }
+            }
+        }
+
+        var future = mGentleUpdateHelper.checkInstallConstraints(packageNames, constraints);
+        future.thenAccept(result -> {
+            var b = new Bundle();
+            b.putParcelable("result", result);
+            callback.sendResult(b);
+        });
+    }
+
+    @Override
     public void registerCallback(IPackageInstallerCallback callback, int userId) {
         final Computer snapshot = mPm.snapshotComputer();
         snapshot.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
@@ -1262,6 +1296,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     @Override
     public PackageSessionVerifier getSessionVerifier() {
         return mSessionVerifier;
+    }
+
+    @Override
+    public GentleUpdateHelper getGentleUpdateHelper() {
+        return mGentleUpdateHelper;
     }
 
     @Override
