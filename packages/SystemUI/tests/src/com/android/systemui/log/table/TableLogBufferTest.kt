@@ -133,6 +133,22 @@ class TableLogBufferTest : SysuiTestCase() {
     }
 
     @Test
+    fun logChange_bool_dumpsCorrectly() {
+        systemClock.setCurrentTimeMillis(4000L)
+
+        underTest.logChange("prefix", "columnName", true)
+
+        val dumpedString = dumpChanges()
+        val expected =
+            TABLE_LOG_DATE_FORMAT.format(4000L) +
+                SEPARATOR +
+                "prefix.columnName" +
+                SEPARATOR +
+                "true"
+        assertThat(dumpedString).contains(expected)
+    }
+
+    @Test
     fun dumpChanges_strChange_logsFromNext() {
         systemClock.setCurrentTimeMillis(100L)
 
