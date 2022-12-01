@@ -154,8 +154,8 @@ class Optimizer {
       return 1;
     }
 
-    if (options_.shorten_resource_paths) {
-      Obfuscator obfuscator(options_.table_flattener_options.shortened_path_map);
+    Obfuscator obfuscator(options_);
+    if (obfuscator.IsEnabled()) {
       if (!obfuscator.Consume(context_, apk->GetResourceTable())) {
         context_->GetDiagnostics()->Error(android::DiagMessage()
                                           << "failed shortening resource paths");
