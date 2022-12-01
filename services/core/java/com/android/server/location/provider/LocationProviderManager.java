@@ -19,6 +19,7 @@ package com.android.server.location.provider;
 import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
 import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
 import static android.app.compat.CompatChanges.isChangeEnabled;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.location.LocationManager.DELIVER_HISTORICAL_LOCATIONS;
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.KEY_FLUSH_COMPLETE;
@@ -48,6 +49,7 @@ import static java.lang.Math.min;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.AlarmManager.OnAlarmListener;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
@@ -124,6 +126,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -1362,6 +1365,10 @@ public class LocationProviderManager extends
     @GuardedBy("mMultiplexerLock")
     private final ArrayList<ProviderEnabledListener> mEnabledListeners;
 
+    // Extra permissions required to use this provider (on top of the usual location permissions).
+    // Not guarded because it's read only.
+    private final Collection<String> mRequiredPermissions;
+
     private final CopyOnWriteArrayList<IProviderRequestListener> mProviderRequestListeners;
 
     protected final LocationManagerInternal mLocationManagerInternal;
@@ -1435,12 +1442,34 @@ public class LocationProviderManager extends
 
     public LocationProviderManager(Context context, Injector injector,
             String name, @Nullable PassiveLocationProviderManager passiveManager) {
+        this(context, injector, name, passiveManager, Collections.emptyList());
+    }
+
+    /**
+     * Creates a manager for a location provider (the two have a 1:1 correspondence).
+     *
+     * @param context Context in which the manager is running.
+     * @param injector Injector to retrieve system components (useful to override in testing)
+     * @param name Name of this provider (used in LocationManager APIs by client apps).
+     * @param passiveManager The "passive" manager (special case provider that returns locations
+     *     from all other providers).
+     * @param requiredPermissions Required permissions for accessing this provider. All of the given
+     *     permissions are required to access the provider. If a caller doesn't hold the correct
+     *     permission, the provider will be invisible to it.
+     */
+    public LocationProviderManager(
+            Context context,
+            Injector injector,
+            String name,
+            @Nullable PassiveLocationProviderManager passiveManager,
+            Collection<String> requiredPermissions) {
         mContext = context;
         mName = Objects.requireNonNull(name);
         mPassiveManager = passiveManager;
         mState = STATE_STOPPED;
         mEnabled = new SparseBooleanArray(2);
         mLastLocations = new SparseArray<>(2);
+        mRequiredPermissions = requiredPermissions;
 
         mEnabledListeners = new ArrayList<>();
         mProviderRequestListeners = new CopyOnWriteArrayList<>();
@@ -1557,6 +1586,24 @@ public class LocationProviderManager extends
 
             return mEnabled.valueAt(index);
         }
+    }
+
+    /**
+     * Returns true if this provider is visible to the current caller (whether called from a binder
+     * thread or not). If a provider isn't visible, then all APIs return the same data they would if
+     * the provider didn't exist (i.e. the caller can't see or use the provider).
+     *
+     * <p>This method doesn't require any permissions, but uses permissions to determine which
+     * subset of providers are visible.
+     */
+    @SuppressLint("AndroidFrameworkRequiresPermission")
+    public boolean isVisibleToCaller() {
+        for (String permission : mRequiredPermissions) {
+            if (mContext.checkCallingOrSelfPermission(permission) != PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void addEnabledListener(ProviderEnabledListener listener) {

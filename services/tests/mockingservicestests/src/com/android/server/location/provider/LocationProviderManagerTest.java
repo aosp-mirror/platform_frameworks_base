@@ -102,6 +102,7 @@ import org.mockito.Mock;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -133,6 +134,7 @@ public class LocationProviderManagerTest {
     private static final CallerIdentity IDENTITY = CallerIdentity.forTest(CURRENT_USER, 1,
             "mypackage", "attribution", "listener");
     private static final WorkSource WORK_SOURCE = new WorkSource(IDENTITY.getUid());
+    private static final String MISSING_PERMISSION = "missing_permission";
 
     private Random mRandom;
 
@@ -173,6 +175,9 @@ public class LocationProviderManagerTest {
         doReturn(mPackageManager).when(mContext).getPackageManager();
         doReturn(mPowerManager).when(mContext).getSystemService(PowerManager.class);
         doReturn(mWakeLock).when(mPowerManager).newWakeLock(anyInt(), anyString());
+        doReturn(PackageManager.PERMISSION_DENIED)
+                .when(mContext)
+                .checkCallingOrSelfPermission(MISSING_PERMISSION);
 
         mInjector = new TestInjector(mContext);
         mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, true);
@@ -187,12 +192,18 @@ public class LocationProviderManagerTest {
     }
 
     private void createManager(String name) {
+        createManager(name, Collections.emptyList());
+    }
+
+    private void createManager(String name, Collection<String> requiredPermissions) {
         mStateChangedListener = mock(LocationProviderManager.StateChangedListener.class);
 
         mProvider = new TestProvider(PROPERTIES, PROVIDER_IDENTITY);
         mProvider.setProviderAllowed(true);
 
-        mManager = new LocationProviderManager(mContext, mInjector, name, mPassive);
+        mManager =
+                new LocationProviderManager(
+                        mContext, mInjector, name, mPassive, requiredPermissions);
         mManager.startManager(mStateChangedListener);
         mManager.setRealProvider(mProvider);
     }
@@ -1315,6 +1326,17 @@ public class LocationProviderManagerTest {
         mInjector.getPackageResetHelper().reset("mypackage");
         assertThat(mProvider.getRequest().isActive()).isFalse();
         assertThat(mInjector.getPackageResetHelper().isResetableForPackage("mypackage")).isFalse();
+    }
+
+    @Test
+    public void testIsVisibleToCaller() {
+        assertThat(mManager.isVisibleToCaller()).isTrue();
+    }
+
+    @Test
+    public void testIsVisibleToCaller_noPermissions() {
+        createManager("any_name", Collections.singletonList(MISSING_PERMISSION));
+        assertThat(mManager.isVisibleToCaller()).isFalse();
     }
 
     private ILocationListener createMockLocationListener() {
