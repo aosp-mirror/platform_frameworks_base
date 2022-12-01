@@ -423,6 +423,12 @@ object Flags {
     // 2300 - stylus
     @JvmField val TRACK_STYLUS_EVER_USED = unreleasedFlag(2300, "track_stylus_ever_used")
 
+    // 2400 - performance tools and debugging info
+    // TODO(b/238923086): Tracking Bug
+    @JvmField
+    val WARN_ON_BLOCKING_BINDER_TRANSACTIONS =
+        unreleasedFlag(2400, "warn_on_blocking_binder_transactions")
+
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag(2, "exp_flag_release")
 }
