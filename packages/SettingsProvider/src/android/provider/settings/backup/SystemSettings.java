@@ -91,6 +91,7 @@ public class SystemSettings {
         Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED,
         Settings.System.CLOCKWORK_BLUETOOTH_SETTINGS_PREF,
         Settings.System.UNREAD_NOTIFICATION_DOT_INDICATOR,
-        Settings.System.AUTO_LAUNCH_MEDIA_CONTROLS
+        Settings.System.AUTO_LAUNCH_MEDIA_CONTROLS,
+        Settings.System.LOCALE_PREFERENCES
     };
 }

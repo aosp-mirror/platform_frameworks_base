@@ -5589,6 +5589,19 @@ public final class Settings {
         public static final String DESKTOP_MODE = "desktop_mode";
 
         /**
+         * The information of locale preference. This records user's preference to avoid
+         * unsynchronized and existing locale preference in
+         * {@link Locale#getDefault(Locale.Category)}.
+         *
+         * <p><b>Note:</b> The format follow the
+         * <a href="https://www.rfc-editor.org/rfc/bcp/bcp47.txt">IETF BCP47 expression</a>
+         *
+         * E.g. : und-u-ca-gregorian-hc-h23
+         * @hide
+         */
+        public static final String LOCALE_PREFERENCES = "locale_preferences";
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5716,6 +5729,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE);
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE_VENDOR_HINT);
             PRIVATE_SETTINGS.add(DESKTOP_MODE);
+            PRIVATE_SETTINGS.add(LOCALE_PREFERENCES);
         }
 
         /**
