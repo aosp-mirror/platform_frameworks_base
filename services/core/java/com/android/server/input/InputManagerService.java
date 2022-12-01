@@ -98,6 +98,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.VerifiedInputEvent;
 import android.view.ViewConfiguration;
+import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.R;
@@ -1183,6 +1184,33 @@ public class InputManagerService extends IInputManager.Stub
         mKeyboardLayoutManager.removeKeyboardLayoutForInputDevice(identifier,
                 keyboardLayoutDescriptor);
     }
+
+    @Override // Binder call
+    public String getKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
+            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
+            @NonNull InputMethodSubtype imeSubtype) {
+        return mKeyboardLayoutManager.getKeyboardLayoutForInputDevice(identifier, userId,
+                imeInfo, imeSubtype);
+    }
+
+    @EnforcePermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
+    @Override // Binder call
+    public void setKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
+            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
+            @NonNull InputMethodSubtype imeSubtype, String keyboardLayoutDescriptor) {
+        super.setKeyboardLayoutForInputDevice_enforcePermission();
+        mKeyboardLayoutManager.setKeyboardLayoutForInputDevice(identifier, userId, imeInfo,
+                imeSubtype, keyboardLayoutDescriptor);
+    }
+
+    @Override // Binder call
+    public String[] getKeyboardLayoutListForInputDevice(InputDeviceIdentifier identifier,
+            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
+            @NonNull InputMethodSubtype imeSubtype) {
+        return mKeyboardLayoutManager.getKeyboardLayoutListForInputDevice(identifier, userId,
+                imeInfo, imeSubtype);
+    }
+
 
     public void switchKeyboardLayout(int deviceId, int direction) {
         mKeyboardLayoutManager.switchKeyboardLayout(deviceId, direction);
