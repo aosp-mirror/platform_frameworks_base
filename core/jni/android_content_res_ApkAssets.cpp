@@ -96,7 +96,7 @@ class LoaderAssetsProvider : public AssetsProvider {
   }
 
   bool ForEachFile(const std::string& /* root_path */,
-                   const std::function<void(StringPiece, FileType)>& /* f */) const {
+                   android::base::function_ref<void(StringPiece, FileType)> /* f */) const {
     return true;
   }
 
