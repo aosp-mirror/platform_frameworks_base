@@ -652,6 +652,7 @@ public class SpeechRecognizer {
         try {
             mService.checkRecognitionSupport(
                     recognizerIntent,
+                    mContext.getAttributionSource(),
                     new InternalSupportCallback(callbackExecutor, recognitionSupportCallback));
             if (DBG) Log.d(TAG, "service support command succeeded");
         } catch (final RemoteException e) {
@@ -665,7 +666,7 @@ public class SpeechRecognizer {
             return;
         }
         try {
-            mService.triggerModelDownload(recognizerIntent);
+            mService.triggerModelDownload(recognizerIntent, mContext.getAttributionSource());
         } catch (final RemoteException e) {
             Log.e(TAG, "downloadModel() failed", e);
             mListener.onError(ERROR_CLIENT);

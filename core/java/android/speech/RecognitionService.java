@@ -110,13 +110,14 @@ public abstract class RecognitionService extends Service {
                     dispatchClearCallback((IRecognitionListener) msg.obj);
                     break;
                 case MSG_CHECK_RECOGNITION_SUPPORT:
-                    Pair<Intent, IRecognitionSupportCallback> intentAndListener =
-                            (Pair<Intent, IRecognitionSupportCallback>) msg.obj;
+                    CheckRecognitionSupportArgs checkArgs = (CheckRecognitionSupportArgs) msg.obj;
                     dispatchCheckRecognitionSupport(
-                            intentAndListener.first, intentAndListener.second);
+                            checkArgs.mIntent, checkArgs.callback, checkArgs.mAttributionSource);
                     break;
                 case MSG_TRIGGER_MODEL_DOWNLOAD:
-                    dispatchTriggerModelDownload((Intent) msg.obj);
+                    Pair<Intent, AttributionSource> params =
+                            (Pair<Intent, AttributionSource>) msg.obj;
+                    dispatchTriggerModelDownload(params.first, params.second);
                     break;
             }
         }
@@ -211,12 +212,18 @@ public abstract class RecognitionService extends Service {
     }
 
     private void dispatchCheckRecognitionSupport(
-            Intent intent, IRecognitionSupportCallback callback) {
-        RecognitionService.this.onCheckRecognitionSupport(intent, new SupportCallback(callback));
+            Intent intent, IRecognitionSupportCallback callback,
+            AttributionSource attributionSource) {
+        RecognitionService.this.onCheckRecognitionSupport(
+                intent,
+                attributionSource,
+                new SupportCallback(callback));
     }
 
-    private void dispatchTriggerModelDownload(Intent intent) {
-        RecognitionService.this.onTriggerModelDownload(intent);
+    private void dispatchTriggerModelDownload(
+            Intent intent,
+            AttributionSource attributionSource) {
+        RecognitionService.this.onTriggerModelDownload(intent, attributionSource);
     }
 
     private static class StartListeningArgs {
@@ -229,6 +236,21 @@ public abstract class RecognitionService extends Service {
                 @NonNull AttributionSource attributionSource) {
             this.mIntent = intent;
             this.mListener = listener;
+            this.mAttributionSource = attributionSource;
+        }
+    }
+
+    private static class CheckRecognitionSupportArgs {
+        public final Intent mIntent;
+        public final IRecognitionSupportCallback callback;
+        public final AttributionSource mAttributionSource;
+
+        private CheckRecognitionSupportArgs(
+                Intent intent,
+                IRecognitionSupportCallback callback,
+                AttributionSource attributionSource) {
+            this.mIntent = intent;
+            this.callback = callback;
             this.mAttributionSource = attributionSource;
         }
     }
@@ -298,12 +320,44 @@ public abstract class RecognitionService extends Service {
     }
 
     /**
+     * Queries the service on whether it would support a {@link #onStartListening(Intent, Callback)}
+     * for the same {@code recognizerIntent}.
+     *
+     * <p>The service will notify the caller about the level of support or error via
+     * {@link SupportCallback}.
+     *
+     * <p>If the service does not offer the support check it will notify the caller with
+     * {@link SpeechRecognizer#ERROR_CANNOT_CHECK_SUPPORT}.
+     *
+     * <p>Provides the calling AttributionSource to the service implementation so that permissions
+     * and bandwidth could be correctly blamed.</p>
+     */
+    public void onCheckRecognitionSupport(
+            @NonNull Intent recognizerIntent,
+            @NonNull AttributionSource attributionSource,
+            @NonNull SupportCallback supportCallback) {
+        onCheckRecognitionSupport(recognizerIntent, supportCallback);
+    }
+
+    /**
      * Requests the download of the recognizer support for {@code recognizerIntent}.
      */
     public void onTriggerModelDownload(@NonNull Intent recognizerIntent) {
         if (DBG) {
             Log.i(TAG, String.format("#downloadModel [%s]", recognizerIntent));
         }
+    }
+
+    /**
+     * Requests the download of the recognizer support for {@code recognizerIntent}.
+     *
+     * <p>Provides the calling AttributionSource to the service implementation so that permissions
+     * and bandwidth could be correctly blamed.</p>
+     */
+    public void onTriggerModelDownload(
+            @NonNull Intent recognizerIntent,
+            @NonNull AttributionSource attributionSource) {
+        onTriggerModelDownload(recognizerIntent);
     }
 
     @Override
@@ -524,7 +578,8 @@ public abstract class RecognitionService extends Service {
     public static class SupportCallback {
         private final IRecognitionSupportCallback mCallback;
 
-        private SupportCallback(IRecognitionSupportCallback callback) {
+        private SupportCallback(
+                IRecognitionSupportCallback callback) {
             this.mCallback = callback;
         }
 
@@ -596,22 +651,27 @@ public abstract class RecognitionService extends Service {
 
         @Override
         public void checkRecognitionSupport(
-                Intent recognizerIntent, IRecognitionSupportCallback callback) {
+                Intent recognizerIntent,
+                @NonNull AttributionSource attributionSource,
+                IRecognitionSupportCallback callback) {
             final RecognitionService service = mServiceRef.get();
             if (service != null) {
                 service.mHandler.sendMessage(
                         Message.obtain(service.mHandler, MSG_CHECK_RECOGNITION_SUPPORT,
-                                Pair.create(recognizerIntent, callback)));
+                                new CheckRecognitionSupportArgs(
+                                        recognizerIntent, callback, attributionSource)));
             }
         }
 
         @Override
-        public void triggerModelDownload(Intent recognizerIntent) {
+        public void triggerModelDownload(
+                Intent recognizerIntent, @NonNull AttributionSource attributionSource) {
             final RecognitionService service = mServiceRef.get();
             if (service != null) {
                 service.mHandler.sendMessage(
                         Message.obtain(
-                                service.mHandler, MSG_TRIGGER_MODEL_DOWNLOAD, recognizerIntent));
+                                service.mHandler, MSG_TRIGGER_MODEL_DOWNLOAD,
+                                Pair.create(recognizerIntent, attributionSource)));
             }
         }
 

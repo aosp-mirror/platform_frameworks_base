@@ -40804,9 +40804,11 @@ package android.speech {
     method public final android.os.IBinder onBind(android.content.Intent);
     method protected abstract void onCancel(android.speech.RecognitionService.Callback);
     method public void onCheckRecognitionSupport(@NonNull android.content.Intent, @NonNull android.speech.RecognitionService.SupportCallback);
+    method public void onCheckRecognitionSupport(@NonNull android.content.Intent, @NonNull android.content.AttributionSource, @NonNull android.speech.RecognitionService.SupportCallback);
     method protected abstract void onStartListening(android.content.Intent, android.speech.RecognitionService.Callback);
     method protected abstract void onStopListening(android.speech.RecognitionService.Callback);
     method public void onTriggerModelDownload(@NonNull android.content.Intent);
+    method public void onTriggerModelDownload(@NonNull android.content.Intent, @NonNull android.content.AttributionSource);
     field public static final String SERVICE_INTERFACE = "android.speech.RecognitionService";
     field public static final String SERVICE_META_DATA = "android.speech";
   }
