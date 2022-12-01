@@ -310,27 +310,27 @@ public class BinaryTransparencyService extends SystemService {
                 Bundle packageMeasurement = measurePackage(packageInfo);
                 results.add(packageMeasurement);
 
-                if (record) {
+                if (record && (mba_status == MBA_STATUS_UPDATED_PRELOAD)) {
                     // compute digests of signing info
                     String[] signerDigestHexStrings = computePackageSignerSha256Digests(
                             packageInfo.signingInfo);
 
                     // now we should have all the bits for the atom
-                    /*  TODO: Uncomment and test after merging new atom definition.
+                    byte[] cDigest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
                     FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
                             packageInfo.packageName,
                             packageInfo.getLongVersionCode(),
-                            HexEncoding.encodeToString(packageMeasurement.getByteArray(
-                                    BUNDLE_CONTENT_DIGEST), false),
+                            (cDigest != null) ? HexEncoding.encodeToString(
+                                    packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST),
+                                    false) : null,
                             packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
                             signerDigestHexStrings, // signer_cert_digest
-                            mba_status,                 // mba_status
+                            mba_status,             // mba_status
                             null,                   // initiator
                             null,                   // initiator_signer_digest
                             null,                   // installer
                             null                    // originator
                     );
-                     */
                 }
             }
             if (DEBUG) {
@@ -377,12 +377,13 @@ public class BinaryTransparencyService extends SystemService {
                     }
 
                     // we should now have all the info needed for the atom
-                    /*  TODO: Uncomment and test after merging new atom definition.
+                    byte[] cDigest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
                     FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
                             packageInfo.packageName,
                             packageInfo.getLongVersionCode(),
-                            HexEncoding.encodeToString(packageMeasurement.getByteArray(
-                                    BUNDLE_CONTENT_DIGEST), false),
+                            (cDigest != null) ? HexEncoding.encodeToString(
+                                    packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST),
+                                    false) : null,
                             packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
                             signerDigestHexStrings,
                             MBA_STATUS_NEW_INSTALL,   // mba_status
@@ -391,7 +392,6 @@ public class BinaryTransparencyService extends SystemService {
                             installer,
                             originator
                     );
-                     */
                 }
             }
             if (DEBUG) {
