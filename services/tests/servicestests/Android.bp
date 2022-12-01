@@ -114,6 +114,7 @@ android_test {
         ":SimpleServiceTestApp3",
         ":StubTestApp",
         ":SuspendTestApp",
+        ":MediaButtonReceiverHolderTestHelperApp",
     ],
 
     java_resources: [
