@@ -59,7 +59,7 @@ class CredentialManagerRepo(
 ) {
   val requestInfo: RequestInfo
   private val providerEnabledList: List<ProviderData>
-  private val providerDisabledList: List<DisabledProviderData>
+  private val providerDisabledList: List<DisabledProviderData>?
   // TODO: require non-null.
   val resultReceiver: ResultReceiver?
 
@@ -143,7 +143,7 @@ class CredentialManagerRepo(
       providerEnabledList as List<CreateCredentialProviderData>, requestDisplayInfo, context)
     val providerDisabledList = CreateFlowUtils.toDisabledProviderList(
       // Handle runtime cast error
-      providerDisabledList as List<DisabledProviderData>, context)
+      providerDisabledList, context)
     var defaultProvider: EnabledProviderInfo? = null
     var remoteEntry: RemoteInfo? = null
     providerEnabledList.forEach{providerInfo -> providerInfo.createOptions =
@@ -209,7 +209,7 @@ class CredentialManagerRepo(
     )
   }
 
-  private fun testDisabledProviderList(): List<DisabledProviderData> {
+  private fun testDisabledProviderList(): List<DisabledProviderData>? {
     return listOf(
       DisabledProviderData("com.lastpass.lpandroid"),
       DisabledProviderData("com.google.android.youtube")
