@@ -18,12 +18,12 @@ package com.android.settingslib.spa.slice
 
 import android.content.Context
 import android.net.Uri
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import androidx.slice.Slice
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.framework.common.createSettingsPage
-import com.android.settingslib.spa.testutils.InstantTaskExecutorRule
 import com.android.settingslib.spa.tests.testutils.SpaEnvironmentForTest
 import com.android.settingslib.spa.tests.testutils.SppHome
 import com.android.settingslib.spa.tests.testutils.SppLayer2
