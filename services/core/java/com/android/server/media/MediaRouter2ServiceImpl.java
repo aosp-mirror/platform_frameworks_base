@@ -153,6 +153,21 @@ class MediaRouter2ServiceImpl {
     // Start of methods that implement MediaRouter2 operations.
 
     @NonNull
+    public boolean verifyPackageName(@NonNull String clientPackageName) {
+        final long token = Binder.clearCallingIdentity();
+
+        try {
+            PackageManager pm = mContext.getPackageManager();
+            pm.getPackageInfo(clientPackageName, PackageManager.PackageInfoFlags.of(0));
+            return true;
+        } catch (PackageManager.NameNotFoundException ex) {
+            return false;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @NonNull
     public void enforceMediaContentControlPermission() {
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
