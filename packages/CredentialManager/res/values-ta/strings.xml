@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for app_name (4539824758261855508) -->
+    <skip />
+    <string name="string_cancel" msgid="6369133483981306063">"ரத்துசெய்"</string>
+    <string name="string_continue" msgid="1346732695941131882">"தொடர்க"</string>
+    <string name="string_create_in_another_place" msgid="1033635365843437603">"மற்றொரு இடத்தில் உருவாக்கவும்"</string>
+    <string name="string_save_to_another_place" msgid="7590325934591079193">"மற்றொரு இடத்தில் சேமிக்கவும்"</string>
+    <string name="string_use_another_device" msgid="8754514926121520445">"மற்றொரு சாதனத்தைப் பயன்படுத்தவும்"</string>
+    <string name="string_save_to_another_device" msgid="1959562542075194458">"வேறொரு சாதனத்தில் சேமியுங்கள்"</string>
+    <string name="passkey_creation_intro_title" msgid="402553911484409884">"பாதுகாப்பாக உள்நுழைவதற்கான எளிய வழி"</string>
+    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"தனித்துவமான கடவுக்குறியீடு (மறக்காதவை அல்லது திருடமுடியாதவை) மூலம் உள்நுழைய, உங்கள் கைரேகை, முகம் அல்லது திரைப்பூட்டைப் பயன்படுத்தி உள்நுழையவும். மேலும் அறிக"</string>
+    <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> எங்கே காட்டப்பட வேண்டும் என்பதைத் தேர்வுசெய்தல்"</string>
+    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <skip />
+    <string name="save_your_password" msgid="6597736507991704307">"உங்கள் கடவுச்சொல்லைச் சேமிக்கவும்"</string>
+    <string name="save_your_sign_in_info" msgid="7213978049817076882">"உங்கள் உள்நுழைவு தகவலைச் சேமிக்கவும்"</string>
+    <!-- no translation found for choose_provider_body (8045759834416308059) -->
+    <skip />
+    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ல் கடவுக்குறியீட்டை உருவாக்க வேண்டுமா?"</string>
+    <string name="choose_create_option_password_title" msgid="8812546498357380545">"உங்கள் கடவுச்சொல்லை <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ல் சேமிக்க வேண்டுமா?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"உங்கள் உள்நுழைவுத் தகவலை <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ல் சேமிக்க வேண்டுமா?"</string>
+    <string name="choose_create_option_description" msgid="4419171903963100257">"உங்கள் <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> ஐ எந்தச் சாதனத்தில் வேண்டுமானாலும் பயன்படுத்தலாம். <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>ல் <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>க்காகச் சேமிக்கப்பட்டது"</string>
+    <string name="passkey" msgid="632353688396759522">"கடவுக்குறியீடு"</string>
+    <string name="password" msgid="6738570945182936667">"கடவுச்சொல்"</string>
+    <string name="sign_ins" msgid="4710739369149469208">"உள்நுழைவுகள்"</string>
+    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
+    <skip />
+    <!-- no translation found for save_password_to_title (3450480045270186421) -->
+    <skip />
+    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
+    <skip />
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"உங்கள் அனைத்து உள்நுழைவுகளுக்கும் <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ஐப் பயன்படுத்தவா?"</string>
+    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
+    <skip />
+    <string name="set_as_default" msgid="4415328591568654603">"இயல்பானதாக அமை"</string>
+    <string name="use_once" msgid="9027366575315399714">"ஒருமுறை பயன்படுத்தவும்"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> கடவுச்சொற்கள், <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> கடவுக்குறியீடுகள்"</string>
+    <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> கடவுச்சொற்கள்"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> கடவுக்குறியீடுகள்"</string>
+    <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
+    <skip />
+    <string name="another_device" msgid="5147276802037801217">"மற்றொரு சாதனம்"</string>
+    <string name="other_password_manager" msgid="565790221427004141">"பிற கடவுச்சொல் நிர்வாகிகள்"</string>
+    <string name="close_sheet" msgid="1393792015338908262">"ஷீட்டை மூடும்"</string>
+    <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"முந்தைய பக்கத்திற்குச் செல்லும்"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கு ஏற்கெனவே சேமிக்கப்பட்ட கடவுக்குறியீட்டைப் பயன்படுத்தவா?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கு ஏற்கெனவே சேமிக்கப்பட்ட உள்நுழைவுத் தகவலைப் பயன்படுத்தவா?"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கு ஏற்கெனவே சேமிக்கப்பட்ட உள்நுழைவுத் தகவலைத் தேர்வுசெய்யவும்"</string>
+    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"வேறு முறையில் உள்நுழைக"</string>
+    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"வேண்டாம்"</string>
+    <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"தொடர்க"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"உள்நுழைவு விருப்பங்கள்"</string>
+    <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g>க்கு"</string>
+    <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"பூட்டப்பட்ட கடவுச்சொல் நிர்வாகிகள்"</string>
+    <string name="locked_credential_entry_label_subtext" msgid="9213450912991988691">"அன்லாக் செய்ய தட்டவும்"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"உள்நுழைவுகளை நிர்வகித்தல்"</string>
+    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"மற்றொரு சாதனத்திலிருந்து பயன்படுத்து"</string>
+    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"வேறு சாதனத்தைப் பயன்படுத்து"</string>
+</resources>

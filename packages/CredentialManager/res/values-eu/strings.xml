@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for app_name (4539824758261855508) -->
+    <skip />
+    <string name="string_cancel" msgid="6369133483981306063">"Utzi"</string>
+    <string name="string_continue" msgid="1346732695941131882">"Egin aurrera"</string>
+    <string name="string_create_in_another_place" msgid="1033635365843437603">"Sortu beste toki batean"</string>
+    <string name="string_save_to_another_place" msgid="7590325934591079193">"Gorde beste toki batean"</string>
+    <string name="string_use_another_device" msgid="8754514926121520445">"Erabili beste gailu bat"</string>
+    <string name="string_save_to_another_device" msgid="1959562542075194458">"Gorde beste gailu batean"</string>
+    <string name="passkey_creation_intro_title" msgid="402553911484409884">"Segurtasun osoz saioa hasteko modu erraza"</string>
+    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Erabili hatz-marka, aurpegia edo pantailaren blokeoa ahaztu edo lapurtu ezin den sarbide-gako baten bidez saioa hasteko. Lortu informazio gehiago"</string>
+    <string name="choose_provider_title" msgid="7245243990139698508">"Aukeratu non <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <skip />
+    <string name="save_your_password" msgid="6597736507991704307">"gorde pasahitza"</string>
+    <string name="save_your_sign_in_info" msgid="7213978049817076882">"gorde kredentzialei buruzko informazioa"</string>
+    <!-- no translation found for choose_provider_body (8045759834416308059) -->
+    <skip />
+    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Sarbide-gako bat sortu nahi duzu <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> aplikazioan?"</string>
+    <string name="choose_create_option_password_title" msgid="8812546498357380545">"Pasahitza <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> aplikazioan gorde nahi duzu?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Kredentzialei buruzko informazioa <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> aplikazioan gorde nahi duzu?"</string>
+    <string name="choose_create_option_description" msgid="4419171903963100257">"<xliff:g id="APPDOMAINNAME">%1$s</xliff:g> aplikazioko <xliff:g id="TYPE">%2$s</xliff:g> edozein gailutan erabil dezakezu. <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> aplikazioan dago gordeta (<xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>)."</string>
+    <string name="passkey" msgid="632353688396759522">"sarbide-gakoa"</string>
+    <string name="password" msgid="6738570945182936667">"pasahitza"</string>
+    <string name="sign_ins" msgid="4710739369149469208">"kredentzialak"</string>
+    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
+    <skip />
+    <!-- no translation found for save_password_to_title (3450480045270186421) -->
+    <skip />
+    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
+    <skip />
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> erabili nahi duzu kredentzial guztietarako?"</string>
+    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
+    <skip />
+    <string name="set_as_default" msgid="4415328591568654603">"Ezarri lehenetsi gisa"</string>
+    <string name="use_once" msgid="9027366575315399714">"Erabili behin"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> pasahitz eta <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> sarbide-gako"</string>
+    <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> pasahitz"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> sarbide-gako"</string>
+    <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
+    <skip />
+    <string name="another_device" msgid="5147276802037801217">"Beste gailu bat"</string>
+    <string name="other_password_manager" msgid="565790221427004141">"Beste pasahitz-kudeatzaile batzuk"</string>
+    <string name="close_sheet" msgid="1393792015338908262">"Itxi orria"</string>
+    <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Itzuli aurreko orrira"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gorde duzun sarbide-gakoa erabili nahi duzu?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gorde dituzun kredentzialak erabili nahi dituzu?"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Aukeratu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gorde dituzun kredentzialak"</string>
+    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Hasi saioa beste modu batean"</string>
+    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"Ez, eskerrik asko"</string>
+    <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Egin aurrera"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Saioa hasteko aukerak"</string>
+    <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> erabiltzailearenak"</string>
+    <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Blokeatutako pasahitz-kudeatzaileak"</string>
+    <string name="locked_credential_entry_label_subtext" msgid="9213450912991988691">"Desblokeatzeko, sakatu hau"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Kudeatu kredentzialak"</string>
+    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Beste gailu batean gordetakoak"</string>
+    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Erabili beste gailu bat"</string>
+</resources>

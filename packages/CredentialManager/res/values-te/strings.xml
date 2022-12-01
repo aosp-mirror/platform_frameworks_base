@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for app_name (4539824758261855508) -->
+    <skip />
+    <string name="string_cancel" msgid="6369133483981306063">"రద్దు చేయండి"</string>
+    <string name="string_continue" msgid="1346732695941131882">"కొనసాగించండి"</string>
+    <string name="string_create_in_another_place" msgid="1033635365843437603">"మరొక స్థలంలో క్రియేట్ చేయండి"</string>
+    <string name="string_save_to_another_place" msgid="7590325934591079193">"మరొక స్థలంలో సేవ్ చేయండి"</string>
+    <string name="string_use_another_device" msgid="8754514926121520445">"మరొక పరికరాన్ని ఉపయోగించండి"</string>
+    <string name="string_save_to_another_device" msgid="1959562542075194458">"మరొక పరికరంలో సేవ్ చేయండి"</string>
+    <string name="passkey_creation_intro_title" msgid="402553911484409884">"సురక్షితంగా సైన్ ఇన్ చేయడానికి సులభమైన మార్గం"</string>
+    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"మర్చిపోలేని లేదా దొంగిలించలేని ప్రత్యేకమైన పాస్-కీతో సైన్ ఇన్ చేయడానికి మీ వేలిముద్ర, ముఖం లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి. మరింత తెలుసుకోండి"</string>
+    <string name="choose_provider_title" msgid="7245243990139698508">"ఎక్కడ <xliff:g id="CREATETYPES">%1$s</xliff:g> చేయాలో ఎంచుకోండి"</string>
+    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <skip />
+    <string name="save_your_password" msgid="6597736507991704307">"మీ పాస్‌వర్డ్‌ను సేవ్ చేయండి"</string>
+    <string name="save_your_sign_in_info" msgid="7213978049817076882">"మీ సైన్ ఇన్ సమాచారాన్ని సేవ్ చేయండి"</string>
+    <!-- no translation found for choose_provider_body (8045759834416308059) -->
+    <skip />
+    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>లో పాస్-కీని క్రియేట్ చేయాలా?"</string>
+    <string name="choose_create_option_password_title" msgid="8812546498357380545">"మీ పాస్‌వర్డ్‌ను <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>కు సేవ్ చేయాలా?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"మీ సైన్ ఇన్ సమాచారాన్ని <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>కు సేవ్ చేయాలా?"</string>
+    <string name="choose_create_option_description" msgid="4419171903963100257">"మీరు మీ <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g>ని ఏ పరికరంలోనైనా ఉపయోగించవచ్చు. ఇది <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> కోసం <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>లో సేవ్ చేయబడింది"</string>
+    <string name="passkey" msgid="632353688396759522">"పాస్-కీ"</string>
+    <string name="password" msgid="6738570945182936667">"పాస్‌వర్డ్"</string>
+    <string name="sign_ins" msgid="4710739369149469208">"సైన్‌ ఇన్‌లు"</string>
+    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
+    <skip />
+    <!-- no translation found for save_password_to_title (3450480045270186421) -->
+    <skip />
+    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
+    <skip />
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"మీ అన్ని సైన్-ఇన్ వివరాల కోసం <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ను ఉపయోగించాలా?"</string>
+    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
+    <skip />
+    <string name="set_as_default" msgid="4415328591568654603">"ఆటోమేటిక్ సెట్టింగ్‌గా సెట్ చేయండి"</string>
+    <string name="use_once" msgid="9027366575315399714">"ఒకసారి ఉపయోగించండి"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> పాస్‌వర్డ్‌లు, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> పాస్-కీలు"</string>
+    <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> పాస్‌వర్డ్‌లు"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> పాస్-కీలు"</string>
+    <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
+    <skip />
+    <string name="another_device" msgid="5147276802037801217">"మరొక పరికరం"</string>
+    <string name="other_password_manager" msgid="565790221427004141">"ఇతర పాస్‌వర్డ్ మేనేజర్‌లు"</string>
+    <string name="close_sheet" msgid="1393792015338908262">"షీట్‌ను మూసివేయండి"</string>
+    <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"మునుపటి పేజీకి తిరిగి వెళ్లండి"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం మీ సేవ్ చేసిన పాస్-కీ వివరాలను ఉపయోగించాలా?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం మీరు సేవ్ చేసిన సైన్ ఇన్ వివరాలను ఉపయోగించాలా?"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం సేవ్ చేసిన సైన్ ఇన్ వివరాలను ఎంచుకోండి"</string>
+    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"మరొక పద్ధతిలో సైన్ ఇన్ చేయండి"</string>
+    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"వద్దు, థ్యాంక్స్"</string>
+    <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"కొనసాగించండి"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"సైన్ ఇన్ ఆప్షన్‌లు"</string>
+    <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> కోసం"</string>
+    <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"లాక్ చేయబడిన పాస్‌వర్డ్ మేనేజర్‌లు"</string>
+    <string name="locked_credential_entry_label_subtext" msgid="9213450912991988691">"అన్‌లాక్ చేయడానికి ట్యాప్ చేయండి"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"సైన్‌ ఇన్‌లను మేనేజ్ చేయండి"</string>
+    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"మరొక పరికరం నుండి"</string>
+    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"వేరే పరికరాన్ని ఉపయోగించండి"</string>
+</resources>
