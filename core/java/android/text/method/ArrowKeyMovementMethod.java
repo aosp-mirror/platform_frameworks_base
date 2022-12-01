@@ -68,6 +68,9 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
 
     @Override
     protected boolean left(TextView widget, Spannable buffer) {
+        if (widget.isOffsetMappingAvailable()) {
+            return false;
+        }
         final Layout layout = widget.getLayout();
         if (isSelecting(buffer)) {
             return Selection.extendLeft(buffer, layout);
@@ -78,6 +81,9 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
 
     @Override
     protected boolean right(TextView widget, Spannable buffer) {
+        if (widget.isOffsetMappingAvailable()) {
+            return false;
+        }
         final Layout layout = widget.getLayout();
         if (isSelecting(buffer)) {
             return Selection.extendRight(buffer, layout);
@@ -88,6 +94,9 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
 
     @Override
     protected boolean up(TextView widget, Spannable buffer) {
+        if (widget.isOffsetMappingAvailable()) {
+            return false;
+        }
         final Layout layout = widget.getLayout();
         if (isSelecting(buffer)) {
             return Selection.extendUp(buffer, layout);
@@ -98,6 +107,9 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
 
     @Override
     protected boolean down(TextView widget, Spannable buffer) {
+        if (widget.isOffsetMappingAvailable()) {
+            return false;
+        }
         final Layout layout = widget.getLayout();
         if (isSelecting(buffer)) {
             return Selection.extendDown(buffer, layout);
@@ -108,6 +120,9 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
 
     @Override
     protected boolean pageUp(TextView widget, Spannable buffer) {
+        if (widget.isOffsetMappingAvailable()) {
+            return false;
+        }
         final Layout layout = widget.getLayout();
         final boolean selecting = isSelecting(buffer);
         final int targetY = getCurrentLineTop(buffer, layout) - getPageHeight(widget);
@@ -132,6 +147,9 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
 
     @Override
     protected boolean pageDown(TextView widget, Spannable buffer) {
+        if (widget.isOffsetMappingAvailable()) {
+            return false;
+        }
         final Layout layout = widget.getLayout();
         final boolean selecting = isSelecting(buffer);
         final int targetY = getCurrentLineTop(buffer, layout) + getPageHeight(widget);
@@ -176,6 +194,9 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
 
     @Override
     protected boolean lineStart(TextView widget, Spannable buffer) {
+        if (widget.isOffsetMappingAvailable()) {
+            return false;
+        }
         final Layout layout = widget.getLayout();
         if (isSelecting(buffer)) {
             return Selection.extendToLeftEdge(buffer, layout);
@@ -186,6 +207,9 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
 
     @Override
     protected boolean lineEnd(TextView widget, Spannable buffer) {
+        if (widget.isOffsetMappingAvailable()) {
+            return false;
+        }
         final Layout layout = widget.getLayout();
         if (isSelecting(buffer)) {
             return Selection.extendToRightEdge(buffer, layout);
@@ -224,6 +248,9 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
 
     @Override
     public boolean previousParagraph(@NonNull TextView widget, @NonNull Spannable buffer) {
+        if (widget.isOffsetMappingAvailable()) {
+            return false;
+        }
         final Layout layout = widget.getLayout();
         if (isSelecting(buffer)) {
             return Selection.extendToParagraphStart(buffer);
@@ -234,6 +261,9 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
 
     @Override
     public boolean nextParagraph(@NonNull TextView widget, @NonNull  Spannable buffer) {
+        if (widget.isOffsetMappingAvailable()) {
+            return false;
+        }
         final Layout layout = widget.getLayout();
         if (isSelecting(buffer)) {
             return Selection.extendToParagraphEnd(buffer);

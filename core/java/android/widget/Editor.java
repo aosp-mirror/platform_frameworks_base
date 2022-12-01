@@ -76,6 +76,7 @@ import android.text.TextUtils;
 import android.text.method.KeyListener;
 import android.text.method.MetaKeyKeyListener;
 import android.text.method.MovementMethod;
+import android.text.method.OffsetMapping;
 import android.text.method.WordIterator;
 import android.text.style.EasyEditSpan;
 import android.text.style.SuggestionRangeSpan;
@@ -571,7 +572,7 @@ public class Editor {
                 mTextView.getContext().getResources().getDisplayMetrics());
 
         final Layout layout = mTextView.getLayout();
-        final int line = layout.getLineForOffset(mTextView.getSelectionStart());
+        final int line = layout.getLineForOffset(mTextView.getSelectionStartTransformed());
         final int sourceHeight = layout.getLineBottom(line, /* includeLineSpacing= */ false)
                 - layout.getLineTop(line);
         final int height = (int)(sourceHeight * zoom);
@@ -1279,12 +1280,16 @@ public class Editor {
      * Get the minimum range of paragraphs that contains startOffset and endOffset.
      */
     private long getParagraphsRange(int startOffset, int endOffset) {
+        final int startOffsetTransformed = mTextView.originalToTransformed(startOffset,
+                OffsetMapping.MAP_STRATEGY_CURSOR);
+        final int endOffsetTransformed = mTextView.originalToTransformed(endOffset,
+                OffsetMapping.MAP_STRATEGY_CURSOR);
         final Layout layout = mTextView.getLayout();
         if (layout == null) {
             return TextUtils.packRangeInLong(-1, -1);
         }
-        final CharSequence text = mTextView.getText();
-        int minLine = layout.getLineForOffset(startOffset);
+        final CharSequence text = layout.getText();
+        int minLine = layout.getLineForOffset(startOffsetTransformed);
         // Search paragraph start.
         while (minLine > 0) {
             final int prevLineEndOffset = layout.getLineEnd(minLine - 1);
@@ -1293,7 +1298,7 @@ public class Editor {
             }
             minLine--;
         }
-        int maxLine = layout.getLineForOffset(endOffset);
+        int maxLine = layout.getLineForOffset(endOffsetTransformed);
         // Search paragraph end.
         while (maxLine < layout.getLineCount() - 1) {
             final int lineEndOffset = layout.getLineEnd(maxLine);
@@ -1302,7 +1307,11 @@ public class Editor {
             }
             maxLine++;
         }
-        return TextUtils.packRangeInLong(layout.getLineStart(minLine), layout.getLineEnd(maxLine));
+        final int paragraphStart = mTextView.transformedToOriginal(layout.getLineStart(minLine),
+                OffsetMapping.MAP_STRATEGY_CURSOR);
+        final int paragraphEnd = mTextView.transformedToOriginal(layout.getLineEnd(maxLine),
+                OffsetMapping.MAP_STRATEGY_CURSOR);
+        return TextUtils.packRangeInLong(paragraphStart, paragraphEnd);
     }
 
     void onLocaleChanged() {
@@ -1339,8 +1348,16 @@ public class Editor {
     private int getNextCursorOffset(int offset, boolean findAfterGivenOffset) {
         final Layout layout = mTextView.getLayout();
         if (layout == null) return offset;
-        return findAfterGivenOffset == layout.isRtlCharAt(offset)
-                ? layout.getOffsetToLeftOf(offset) : layout.getOffsetToRightOf(offset);
+        final int offsetTransformed =
+                mTextView.originalToTransformed(offset, OffsetMapping.MAP_STRATEGY_CURSOR);
+        final int nextCursor;
+        if (findAfterGivenOffset == layout.isRtlCharAt(offsetTransformed)) {
+            nextCursor = layout.getOffsetToLeftOf(offsetTransformed);
+        } else {
+            nextCursor = layout.getOffsetToRightOf(offsetTransformed);
+        }
+
+        return mTextView.transformedToOriginal(nextCursor, OffsetMapping.MAP_STRATEGY_CURSOR);
     }
 
     private long getCharClusterRange(int offset) {
@@ -1396,9 +1413,11 @@ public class Editor {
         Layout layout = mTextView.getLayout();
         if (layout == null) return false;
 
-        final int line = layout.getLineForOffset(offset);
+        final int offsetTransformed =
+                mTextView.originalToTransformed(offset, OffsetMapping.MAP_STRATEGY_CURSOR);
+        final int line = layout.getLineForOffset(offsetTransformed);
         final int lineBottom = layout.getLineBottom(line);
-        final int primaryHorizontal = (int) layout.getPrimaryHorizontal(offset);
+        final int primaryHorizontal = (int) layout.getPrimaryHorizontal(offsetTransformed);
         return mTextView.isPositionVisible(
                 primaryHorizontal + mTextView.viewportToContentHorizontalOffset(),
                 lineBottom + mTextView.viewportToContentVerticalOffset());
@@ -2300,8 +2319,12 @@ public class Editor {
      */
     void invalidateTextDisplayList(Layout layout, int start, int end) {
         if (mTextRenderNodes != null && layout instanceof DynamicLayout) {
-            final int firstLine = layout.getLineForOffset(start);
-            final int lastLine = layout.getLineForOffset(end);
+            final int startTransformed =
+                    mTextView.originalToTransformed(start, OffsetMapping.MAP_STRATEGY_CHARACTER);
+            final int endTransformed =
+                    mTextView.originalToTransformed(end, OffsetMapping.MAP_STRATEGY_CHARACTER);
+            final int firstLine = layout.getLineForOffset(startTransformed);
+            final int lastLine = layout.getLineForOffset(endTransformed);
 
             DynamicLayout dynamicLayout = (DynamicLayout) layout;
             int[] blockEndLines = dynamicLayout.getBlockEndLines();
@@ -2344,12 +2367,14 @@ public class Editor {
 
         final Layout layout = mTextView.getLayout();
         final int offset = mTextView.getSelectionStart();
-        final int line = layout.getLineForOffset(offset);
+        final int transformedOffset = mTextView.originalToTransformed(offset,
+                OffsetMapping.MAP_STRATEGY_CURSOR);
+        final int line = layout.getLineForOffset(transformedOffset);
         final int top = layout.getLineTop(line);
         final int bottom = layout.getLineBottom(line, /* includeLineSpacing= */ false);
 
         final boolean clamped = layout.shouldClampCursor(line);
-        updateCursorPosition(top, bottom, layout.getPrimaryHorizontal(offset, clamped));
+        updateCursorPosition(top, bottom, layout.getPrimaryHorizontal(transformedOffset, clamped));
     }
 
     void refreshTextActionMode() {
@@ -3628,10 +3653,14 @@ public class Editor {
             measureContent();
             final int width = mContentView.getMeasuredWidth();
             final int offset = getTextOffset();
-            mPositionX = (int) (mTextView.getLayout().getPrimaryHorizontal(offset) - width / 2.0f);
+            final int transformedOffset = mTextView.originalToTransformed(offset,
+                    OffsetMapping.MAP_STRATEGY_CURSOR);
+            final Layout layout = mTextView.getLayout();
+
+            mPositionX = (int) (layout.getPrimaryHorizontal(transformedOffset) - width / 2.0f);
             mPositionX += mTextView.viewportToContentHorizontalOffset();
 
-            final int line = mTextView.getLayout().getLineForOffset(offset);
+            final int line = layout.getLineForOffset(transformedOffset);
             mPositionY = getVerticalLocalPosition(line);
             mPositionY += mTextView.viewportToContentVerticalOffset();
         }
@@ -4564,19 +4593,20 @@ public class Editor {
                 super.onGetContentRect(mode, view, outRect);
                 return;
             }
-            if (mTextView.getSelectionStart() != mTextView.getSelectionEnd()) {
+            final int selectionStart = mTextView.getSelectionStartTransformed();
+            final int selectionEnd = mTextView.getSelectionEndTransformed();
+            final Layout layout = mTextView.getLayout();
+            if (selectionStart != selectionEnd) {
                 // We have a selection.
                 mSelectionPath.reset();
-                mTextView.getLayout().getSelectionPath(
-                        mTextView.getSelectionStart(), mTextView.getSelectionEnd(), mSelectionPath);
+                layout.getSelectionPath(selectionStart, selectionEnd, mSelectionPath);
                 mSelectionPath.computeBounds(mSelectionBounds, true);
                 mSelectionBounds.bottom += mHandleHeight;
             } else {
                 // We have a cursor.
-                Layout layout = mTextView.getLayout();
-                int line = layout.getLineForOffset(mTextView.getSelectionStart());
-                float primaryHorizontal = clampHorizontalPosition(null,
-                        layout.getPrimaryHorizontal(mTextView.getSelectionStart()));
+                int line = layout.getLineForOffset(selectionStart);
+                float primaryHorizontal =
+                        clampHorizontalPosition(null, layout.getPrimaryHorizontal(selectionEnd));
                 mSelectionBounds.set(
                         primaryHorizontal,
                         layout.getLineTop(line),
@@ -4679,8 +4709,9 @@ public class Editor {
                         mTextView.viewportToContentHorizontalOffset();
                 final float viewportToContentVerticalOffset =
                         mTextView.viewportToContentVerticalOffset();
-
-                if (includeCharacterBounds) {
+                final boolean isTextTransformed = (mTextView.getTransformationMethod() != null
+                        && mTextView.getTransformed() instanceof OffsetMapping);
+                if (includeCharacterBounds && !isTextTransformed) {
                     final CharSequence text = mTextView.getText();
                     if (text instanceof Spannable) {
                         final Spannable sp = (Spannable) text;
@@ -4708,10 +4739,12 @@ public class Editor {
                 if (includeInsertionMarker) {
                     // Treat selectionStart as the insertion point.
                     if (0 <= selectionStart) {
-                        final int offset = selectionStart;
-                        final int line = layout.getLineForOffset(offset);
-                        final float insertionMarkerX = layout.getPrimaryHorizontal(offset)
-                                + viewportToContentHorizontalOffset;
+                        final int offsetTransformed = mTextView.originalToTransformed(
+                                selectionStart, OffsetMapping.MAP_STRATEGY_CURSOR);
+                        final int line = layout.getLineForOffset(offsetTransformed);
+                        final float insertionMarkerX =
+                                layout.getPrimaryHorizontal(offsetTransformed)
+                                        + viewportToContentHorizontalOffset;
                         final float insertionMarkerTop = layout.getLineTop(line)
                                 + viewportToContentVerticalOffset;
                         final float insertionMarkerBaseline = layout.getLineBaseline(line)
@@ -4730,7 +4763,7 @@ public class Editor {
                         if (!isTopVisible || !isBottomVisible) {
                             insertionMarkerFlags |= CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
                         }
-                        if (layout.isRtlCharAt(offset)) {
+                        if (layout.isRtlCharAt(offsetTransformed)) {
                             insertionMarkerFlags |= CursorAnchorInfo.FLAG_IS_RTL;
                         }
                         builder.setInsertionMarkerLocation(insertionMarkerX, insertionMarkerTop,
@@ -5107,12 +5140,28 @@ public class Editor {
         protected abstract int getMagnifierHandleTrigger();
 
         protected boolean isAtRtlRun(@NonNull Layout layout, int offset) {
-            return layout.isRtlCharAt(offset);
+            final int transformedOffset =
+                    mTextView.originalToTransformed(offset, OffsetMapping.MAP_STRATEGY_CURSOR);
+            return layout.isRtlCharAt(transformedOffset);
         }
 
         @VisibleForTesting
         public float getHorizontal(@NonNull Layout layout, int offset) {
-            return layout.getPrimaryHorizontal(offset);
+            final int transformedOffset =
+                    mTextView.originalToTransformed(offset, OffsetMapping.MAP_STRATEGY_CURSOR);
+            return layout.getPrimaryHorizontal(transformedOffset);
+        }
+
+        /**
+         * Return the line number for a given offset.
+         * @param layout the {@link Layout} to query.
+         * @param offset the index of the character to query.
+         * @return the index of the line the given offset belongs to.
+         */
+        public int getLineForOffset(@NonNull Layout layout, int offset) {
+            final int transformedOffset =
+                    mTextView.originalToTransformed(offset, OffsetMapping.MAP_STRATEGY_CURSOR);
+            return layout.getLineForOffset(transformedOffset);
         }
 
         protected int getOffsetAtCoordinate(@NonNull Layout layout, int line, float x) {
@@ -5129,13 +5178,12 @@ public class Editor {
         protected void positionAtCursorOffset(int offset, boolean forceUpdatePosition,
                 boolean fromTouchScreen) {
             // A HandleView relies on the layout, which may be nulled by external methods
-            Layout layout = mTextView.getLayout();
+            final Layout layout = mTextView.getLayout();
             if (layout == null) {
                 // Will update controllers' state, hiding them and stopping selection mode if needed
                 prepareCursorControllers();
                 return;
             }
-            layout = mTextView.getLayout();
 
             boolean offsetChanged = offset != mPreviousOffset;
             if (offsetChanged || forceUpdatePosition) {
@@ -5146,7 +5194,7 @@ public class Editor {
                     }
                     addPositionToTouchUpFilter(offset);
                 }
-                final int line = layout.getLineForOffset(offset);
+                final int line = getLineForOffset(layout, offset);
                 mPrevLine = line;
 
                 mPositionX = getCursorHorizontalPosition(layout, offset) - mHotspotX
@@ -5246,7 +5294,7 @@ public class Editor {
         private boolean tooLargeTextForMagnifier() {
             if (mNewMagnifierEnabled) {
                 Layout layout = mTextView.getLayout();
-                final int line = layout.getLineForOffset(getCurrentCursorOffset());
+                final int line = getLineForOffset(layout, getCurrentCursorOffset());
                 return layout.getLineBottom(line, /* includeLineSpacing= */ false)
                         - layout.getLineTop(line) >= mMaxLineHeightForMagnifier;
             }
@@ -5337,11 +5385,11 @@ public class Editor {
             }
 
             final Layout layout = mTextView.getLayout();
-            final int lineNumber = layout.getLineForOffset(offset);
+            final int lineNumber = getLineForOffset(layout, offset);
             // Compute whether the selection handles are currently on the same line, and,
             // in this particular case, whether the selected text is right to left.
             final boolean sameLineSelection = otherHandleOffset != -1
-                    && lineNumber == layout.getLineForOffset(otherHandleOffset);
+                    && lineNumber == getLineForOffset(layout, offset);
             final boolean rtl = sameLineSelection
                     && (offset < otherHandleOffset)
                         != (getHorizontal(mTextView.getLayout(), offset)
@@ -5468,7 +5516,7 @@ public class Editor {
                 if (mNewMagnifierEnabled) {
                     // Calculates the line bounds as the content source bounds to the magnifier.
                     Layout layout = mTextView.getLayout();
-                    int line = layout.getLineForOffset(getCurrentCursorOffset());
+                    int line = getLineForOffset(layout, getCurrentCursorOffset());
                     int lineLeft = (int) layout.getLineLeft(line);
                     lineLeft += mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
                     int lineRight = (int) layout.getLineRight(line);
@@ -5838,7 +5886,7 @@ public class Editor {
 
         private MotionEvent transformEventForTouchThrough(MotionEvent ev) {
             final Layout layout = mTextView.getLayout();
-            final int line = layout.getLineForOffset(getCurrentCursorOffset());
+            final int line = getLineForOffset(layout, getCurrentCursorOffset());
             final int textHeight = layout.getLineBottom(line, /* includeLineSpacing= */ false)
                     - layout.getLineTop(line);
             // Transforms the touch events to screen coordinates.
@@ -6050,7 +6098,7 @@ public class Editor {
                     || !isStartHandle() && initialOffset <= anotherHandleOffset) {
                 // Handles have crossed, bound it to the first selected line and
                 // adjust by word / char as normal.
-                currLine = layout.getLineForOffset(anotherHandleOffset);
+                currLine = getLineForOffset(layout, anotherHandleOffset);
                 initialOffset = getOffsetAtCoordinate(layout, currLine, x);
             }
 
@@ -6065,7 +6113,8 @@ public class Editor {
             final int currentOffset = getCurrentCursorOffset();
             final boolean rtlAtCurrentOffset = isAtRtlRun(layout, currentOffset);
             final boolean atRtl = isAtRtlRun(layout, offset);
-            final boolean isLvlBoundary = layout.isLevelBoundary(offset);
+            final boolean isLvlBoundary = layout.isLevelBoundary(
+                    mTextView.originalToTransformed(offset, OffsetMapping.MAP_STRATEGY_CURSOR));
 
             // We can't determine if the user is expanding or shrinking the selection if they're
             // on a bi-di boundary, so until they've moved past the boundary we'll just place
@@ -6077,7 +6126,9 @@ public class Editor {
                 mTouchWordDelta = 0.0f;
                 positionAndAdjustForCrossingHandles(offset, fromTouchScreen);
                 return;
-            } else if (mLanguageDirectionChanged && !isLvlBoundary) {
+            }
+
+            if (mLanguageDirectionChanged) {
                 // We've just moved past the boundary so update the position. After this we can
                 // figure out if the user is expanding or shrinking to go by word or character.
                 positionAndAdjustForCrossingHandles(offset, fromTouchScreen);
@@ -6129,7 +6180,7 @@ public class Editor {
                     // Sometimes words can be broken across lines (Chinese, hyphenation).
                     // We still snap to the word boundary but we only use the letters on the
                     // current line to determine if the user is far enough into the word to snap.
-                    if (layout.getLineForOffset(wordBoundary) != currLine) {
+                    if (getLineForOffset(layout, wordBoundary) != currLine) {
                         wordBoundary = isStartHandle()
                                 ? layout.getLineStart(currLine) : layout.getLineEnd(currLine);
                     }
@@ -6253,12 +6304,15 @@ public class Editor {
                         final int currentOffset = getCurrentCursorOffset();
                         final int offsetToGetRunRange = isStartHandle()
                                 ? currentOffset : Math.max(currentOffset - 1, 0);
-                        final long range = layout.getRunRange(offsetToGetRunRange);
+                        final long range = layout.getRunRange(mTextView.originalToTransformed(
+                                offsetToGetRunRange, OffsetMapping.MAP_STRATEGY_CURSOR));
                         if (isStartHandle()) {
                             offset = TextUtils.unpackRangeStartFromLong(range);
                         } else {
                             offset = TextUtils.unpackRangeEndFromLong(range);
                         }
+                        offset = mTextView.transformedToOriginal(offset,
+                                OffsetMapping.MAP_STRATEGY_CURSOR);
                         positionAtCursorOffset(offset, false, fromTouchScreen);
                         return;
                     }
@@ -6285,7 +6339,10 @@ public class Editor {
 
         @Override
         protected boolean isAtRtlRun(@NonNull Layout layout, int offset) {
-            final int offsetToCheck = isStartHandle() ? offset : Math.max(offset - 1, 0);
+            final int transformedOffset =
+                    mTextView.transformedToOriginal(offset, OffsetMapping.MAP_STRATEGY_CHARACTER);
+            final int offsetToCheck = isStartHandle() ? transformedOffset
+                    : Math.max(transformedOffset - 1, 0);
             return layout.isRtlCharAt(offsetToCheck);
         }
 
@@ -6295,12 +6352,17 @@ public class Editor {
         }
 
         private float getHorizontal(@NonNull Layout layout, int offset, boolean startHandle) {
-            final int line = layout.getLineForOffset(offset);
-            final int offsetToCheck = startHandle ? offset : Math.max(offset - 1, 0);
+            final int offsetTransformed = mTextView.originalToTransformed(offset,
+                    OffsetMapping.MAP_STRATEGY_CURSOR);
+            final int line = layout.getLineForOffset(offsetTransformed);
+            final int offsetToCheck =
+                    startHandle ? offsetTransformed : Math.max(offsetTransformed - 1, 0);
             final boolean isRtlChar = layout.isRtlCharAt(offsetToCheck);
             final boolean isRtlParagraph = layout.getParagraphDirection(line) == -1;
-            return (isRtlChar == isRtlParagraph)
-                    ? layout.getPrimaryHorizontal(offset) : layout.getSecondaryHorizontal(offset);
+            if  (isRtlChar != isRtlParagraph) {
+                return layout.getSecondaryHorizontal(offsetTransformed);
+            }
+            return layout.getPrimaryHorizontal(offsetTransformed);
         }
 
         @Override
@@ -6308,23 +6370,27 @@ public class Editor {
             final float localX = mTextView.convertToLocalHorizontalCoordinate(x);
             final int primaryOffset = layout.getOffsetForHorizontal(line, localX, true);
             if (!layout.isLevelBoundary(primaryOffset)) {
-                return primaryOffset;
+                return mTextView.transformedToOriginal(primaryOffset,
+                        OffsetMapping.MAP_STRATEGY_CURSOR);
             }
             final int secondaryOffset = layout.getOffsetForHorizontal(line, localX, false);
-            final int currentOffset = getCurrentCursorOffset();
+            final int currentOffset = mTextView.originalToTransformed(getCurrentCursorOffset(),
+                    OffsetMapping.MAP_STRATEGY_CURSOR);
             final int primaryDiff = Math.abs(primaryOffset - currentOffset);
             final int secondaryDiff = Math.abs(secondaryOffset - currentOffset);
+            final int offset;
             if (primaryDiff < secondaryDiff) {
-                return primaryOffset;
+                offset = primaryOffset;
             } else if (primaryDiff > secondaryDiff) {
-                return secondaryOffset;
+                offset = secondaryOffset;
             } else {
                 final int offsetToCheck = isStartHandle()
                         ? currentOffset : Math.max(currentOffset - 1, 0);
                 final boolean isRtlChar = layout.isRtlCharAt(offsetToCheck);
                 final boolean isRtlParagraph = layout.getParagraphDirection(line) == -1;
-                return isRtlChar == isRtlParagraph ? primaryOffset : secondaryOffset;
+                offset = (isRtlChar == isRtlParagraph) ? primaryOffset : secondaryOffset;
             }
+            return mTextView.transformedToOriginal(offset, OffsetMapping.MAP_STRATEGY_CURSOR);
         }
 
         @MagnifierHandleTrigger
@@ -7165,7 +7231,10 @@ public class Editor {
             int end = Math.min(length, mEnd);
 
             mPath.reset();
-            layout.getSelectionPath(start, end, mPath);
+            layout.getSelectionPath(
+                    mTextView.originalToTransformed(start, OffsetMapping.MAP_STRATEGY_CHARACTER),
+                    mTextView.originalToTransformed(end, OffsetMapping.MAP_STRATEGY_CHARACTER),
+                    mPath);
             return true;
         }
 

@@ -33,6 +33,7 @@ import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextUtils;
+import android.text.method.OffsetMapping;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.view.ActionMode;
@@ -329,8 +330,6 @@ public final class SelectionActionModeHelper {
 
     private void startSelectionActionModeWithSmartSelectAnimation(
             @Nullable SelectionResult result) {
-        final Layout layout = mTextView.getLayout();
-
         final Runnable onAnimationEndCallback = () -> {
             final SelectionResult startSelectionResult;
             if (result != null && result.mStart >= 0 && result.mEnd <= getText(mTextView).length()
@@ -352,7 +351,7 @@ public final class SelectionActionModeHelper {
         }
 
         final List<SmartSelectSprite.RectangleWithTextSelectionLayout> selectionRectangles =
-                convertSelectionToRectangles(layout, result.mStart, result.mEnd);
+                convertSelectionToRectangles(mTextView, result.mStart, result.mEnd);
 
         final PointF touchPoint = new PointF(
                 mEditor.getLastUpPositionX(),
@@ -369,7 +368,7 @@ public final class SelectionActionModeHelper {
     }
 
     private List<SmartSelectSprite.RectangleWithTextSelectionLayout> convertSelectionToRectangles(
-            final Layout layout, final int start, final int end) {
+            final TextView textView, final int start, final int end) {
         final List<SmartSelectSprite.RectangleWithTextSelectionLayout> result = new ArrayList<>();
 
         final Layout.SelectionRectangleConsumer consumer =
@@ -381,7 +380,11 @@ public final class SelectionActionModeHelper {
                                 textSelectionLayout)
                 );
 
-        layout.getSelection(start, end, consumer);
+        final int startTransformed =
+                textView.originalToTransformed(start, OffsetMapping.MAP_STRATEGY_CURSOR);
+        final int endTransformed =
+                textView.originalToTransformed(end, OffsetMapping.MAP_STRATEGY_CURSOR);
+        textView.getLayout().getSelection(startTransformed, endTransformed, consumer);
 
         result.sort(Comparator.comparing(
                 SmartSelectSprite.RectangleWithTextSelectionLayout::getRectangle,
