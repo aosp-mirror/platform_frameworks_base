@@ -475,8 +475,13 @@ public class BubbleController implements ConfigurationChangeListener {
 
     @VisibleForTesting
     public void onStatusBarStateChanged(boolean isShade) {
+        boolean didChange = mIsStatusBarShade != isShade;
+        if (DEBUG_BUBBLE_CONTROLLER) {
+            Log.d(TAG, "onStatusBarStateChanged isShade=" + isShade + " didChange=" + didChange);
+        }
         mIsStatusBarShade = isShade;
-        if (!mIsStatusBarShade) {
+        if (!mIsStatusBarShade && didChange) {
+            // Only collapse stack on change
             collapseStack();
         }
 
