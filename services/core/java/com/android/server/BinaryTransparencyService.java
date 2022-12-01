@@ -476,6 +476,7 @@ public class BinaryTransparencyService extends SystemService {
                 }
 
                 private void printPackageMeasurements(PackageInfo packageInfo,
+                                                      boolean useSha256,
                                                       final PrintWriter pw) {
                     Map<Integer, byte[]> contentDigests = computeApkContentDigest(
                             packageInfo.applicationInfo.sourceDir);
@@ -483,6 +484,14 @@ public class BinaryTransparencyService extends SystemService {
                         pw.println("ERROR: Failed to compute package content digest for "
                                 + packageInfo.applicationInfo.sourceDir);
                         return;
+                    }
+
+                    if (useSha256) {
+                        byte[] fileBuff = PackageUtils.createLargeFileBuffer();
+                        String hexEncodedSha256Digest =
+                                PackageUtils.computeSha256DigestForLargeFile(
+                                        packageInfo.applicationInfo.sourceDir, fileBuff);
+                        pw.print(hexEncodedSha256Digest + ",");
                     }
 
                     for (Map.Entry<Integer, byte[]> entry : contentDigests.entrySet()) {
@@ -497,6 +506,7 @@ public class BinaryTransparencyService extends SystemService {
                 }
 
                 private void printPackageInstallationInfo(PackageInfo packageInfo,
+                                                          boolean useSha256,
                                                           final PrintWriter pw) {
                     pw.println("--- Package Installation Info ---");
                     pw.println("Current install location: "
@@ -507,11 +517,13 @@ public class BinaryTransparencyService extends SystemService {
                         pw.println("|--> Pre-installed package install location: "
                                 + origPackageFilepath);
 
-                        // TODO(b/259347186): revive this with the proper cmd options.
-                        /*
-                        String digest = PackageUtils.computeSha256DigestForLargeFile(
-                        origPackageFilepath, PackageUtils.createLargeFileBuffer());
-                         */
+                        if (useSha256) {
+                            String sha256Digest = PackageUtils.computeSha256DigestForLargeFile(
+                                    origPackageFilepath, PackageUtils.createLargeFileBuffer());
+                            pw.println("|--> Pre-installed package SHA-256 digest: "
+                                    + sha256Digest);
+                        }
+
 
                         Map<Integer, byte[]> contentDigests = computeApkContentDigest(
                                 origPackageFilepath);
@@ -531,6 +543,8 @@ public class BinaryTransparencyService extends SystemService {
                     }
                     pw.println("First install time (ms): " + packageInfo.firstInstallTime);
                     pw.println("Last update time (ms): " + packageInfo.lastUpdateTime);
+                    // TODO(b/261493591): Determination of whether a package is preinstalled can be
+                    // made more robust
                     boolean isPreloaded = (packageInfo.firstInstallTime
                             == packageInfo.lastUpdateTime);
                     pw.println("Is preloaded: " + isPreloaded);
@@ -560,6 +574,7 @@ public class BinaryTransparencyService extends SystemService {
                         pw.println("ERROR: Package's signingInfo is null.");
                         return;
                     }
+                    // TODO(b/261501773): Handle printing of lineage of rotated keys.
                     pw.println("--- Package Signer Info ---");
                     pw.println("Has multiple signers: " + signerInfo.hasMultipleSigners());
                     Signature[] packageSigners = signerInfo.getApkContentsSigners();
@@ -669,14 +684,34 @@ public class BinaryTransparencyService extends SystemService {
 
                 }
 
+                private void printHeadersHelper(@NonNull String packageType,
+                                          boolean useSha256,
+                                          @NonNull final PrintWriter pw) {
+                    pw.print(packageType + " Info [Format: package_name,package_version,");
+                    if (useSha256) {
+                        pw.print("package_sha256_digest,");
+                    }
+                    pw.print("content_digest_algorithm:content_digest]:\n");
+                }
+
                 private int printAllApexs() {
                     final PrintWriter pw = getOutPrintWriter();
                     boolean verbose = false;
+                    boolean useSha256 = false;
+                    boolean printHeaders = true;
                     String opt;
                     while ((opt = getNextOption()) != null) {
                         switch (opt) {
                             case "-v":
+                            case "--verbose":
                                 verbose = true;
+                                break;
+                            case "-o":
+                            case "--old":
+                                useSha256 = true;
+                                break;
+                            case "--no-headers":
+                                printHeaders = false;
                                 break;
                             default:
                                 pw.println("ERROR: Unknown option: " + opt);
@@ -690,23 +725,17 @@ public class BinaryTransparencyService extends SystemService {
                         return -1;
                     }
 
-                    if (!verbose) {
-                        pw.println("APEX Info [Format: package_name,package_version,"
-                                // TODO(b/259347186): revive via special cmd line option
-                                //+ "package_sha256_digest,"
-                                + "content_digest_algorithm:content_digest]:");
+                    if (!verbose && printHeaders) {
+                        printHeadersHelper("APEX", useSha256, pw);
                     }
                     for (PackageInfo packageInfo : getCurrentInstalledApexs()) {
-                        if (verbose) {
-                            pw.println("APEX Info [Format: package_name,package_version,"
-                                    // TODO(b/259347186): revive via special cmd line option
-                                    //+ "package_sha256_digest,"
-                                    + "content_digest_algorithm:content_digest]:");
+                        if (verbose && printHeaders) {
+                            printHeadersHelper("APEX", useSha256, pw);
                         }
                         String packageName = packageInfo.packageName;
                         pw.print(packageName + ","
                                 + packageInfo.getLongVersionCode() + ",");
-                        printPackageMeasurements(packageInfo, pw);
+                        printPackageMeasurements(packageInfo, useSha256, pw);
 
                         if (verbose) {
                             ModuleInfo moduleInfo;
@@ -718,7 +747,7 @@ public class BinaryTransparencyService extends SystemService {
                                 pw.println("Is a module: false");
                             }
 
-                            printPackageInstallationInfo(packageInfo, pw);
+                            printPackageInstallationInfo(packageInfo, useSha256, pw);
                             printPackageSignerDetails(packageInfo.signingInfo, pw);
                             pw.println("");
                         }
@@ -729,11 +758,21 @@ public class BinaryTransparencyService extends SystemService {
                 private int printAllModules() {
                     final PrintWriter pw = getOutPrintWriter();
                     boolean verbose = false;
+                    boolean useSha256 = false;
+                    boolean printHeaders = true;
                     String opt;
                     while ((opt = getNextOption()) != null) {
                         switch (opt) {
                             case "-v":
+                            case "--verbose":
                                 verbose = true;
+                                break;
+                            case "-o":
+                            case "--old":
+                                useSha256 = true;
+                                break;
+                            case "--no-headers":
+                                printHeaders = false;
                                 break;
                             default:
                                 pw.println("ERROR: Unknown option: " + opt);
@@ -747,32 +786,25 @@ public class BinaryTransparencyService extends SystemService {
                         return -1;
                     }
 
-                    if (!verbose) {
-                        pw.println("Module Info [Format: package_name,package_version,"
-                                // TODO(b/259347186): revive via special cmd line option
-                                //+ "package_sha256_digest,"
-                                + "content_digest_algorithm:content_digest]:");
+                    if (!verbose && printHeaders) {
+                        printHeadersHelper("Module", useSha256, pw);
                     }
                     for (ModuleInfo module : pm.getInstalledModules(PackageManager.MATCH_ALL)) {
                         String packageName = module.getPackageName();
-                        if (verbose) {
-                            pw.println("Module Info [Format: package_name,package_version,"
-                                    // TODO(b/259347186): revive via special cmd line option
-                                    //+ "package_sha256_digest,"
-                                    + "content_digest_algorithm:content_digest]:");
+                        if (verbose && printHeaders) {
+                            printHeadersHelper("Module", useSha256, pw);
                         }
                         try {
                             PackageInfo packageInfo = pm.getPackageInfo(packageName,
                                     PackageManager.MATCH_APEX
                                             | PackageManager.GET_SIGNING_CERTIFICATES);
-                            //pw.print("package:");
                             pw.print(packageInfo.packageName + ",");
                             pw.print(packageInfo.getLongVersionCode() + ",");
-                            printPackageMeasurements(packageInfo, pw);
+                            printPackageMeasurements(packageInfo, useSha256, pw);
 
                             if (verbose) {
                                 printModuleDetails(module, pw);
-                                printPackageInstallationInfo(packageInfo, pw);
+                                printPackageInstallationInfo(packageInfo, useSha256, pw);
                                 printPackageSignerDetails(packageInfo.signingInfo, pw);
                                 pw.println("");
                             }
@@ -793,14 +825,24 @@ public class BinaryTransparencyService extends SystemService {
                     final PrintWriter pw = getOutPrintWriter();
                     boolean verbose = false;
                     boolean printLibraries = false;
+                    boolean useSha256 = false;
+                    boolean printHeaders = true;
                     String opt;
                     while ((opt = getNextOption()) != null) {
                         switch (opt) {
                             case "-v":
+                            case "--verbose":
                                 verbose = true;
                                 break;
                             case "-l":
                                 printLibraries = true;
+                                break;
+                            case "-o":
+                            case "--old":
+                                useSha256 = true;
+                                break;
+                            case "--no-headers":
+                                printHeaders = false;
                                 break;
                             default:
                                 pw.println("ERROR: Unknown option: " + opt);
@@ -808,26 +850,20 @@ public class BinaryTransparencyService extends SystemService {
                         }
                     }
 
-                    if (!verbose) {
-                        pw.println("MBA Info [Format: package_name,package_version,"
-                                // TODO(b/259347186): revive via special cmd line option
-                                //+ "package_sha256_digest,"
-                                + "content_digest_algorithm:content_digest]:");
+                    if (!verbose && printHeaders) {
+                        printHeadersHelper("MBA", useSha256, pw);
                     }
                     for (PackageInfo packageInfo : getNewlyInstalledMbas()) {
-                        if (verbose) {
-                            pw.println("MBA Info [Format: package_name,package_version,"
-                                    // TODO(b/259347186): revive via special cmd line option
-                                    //+ "package_sha256_digest,"
-                                    + "content_digest_algorithm:content_digest]:");
+                        if (verbose && printHeaders) {
+                            printHeadersHelper("MBA", useSha256, pw);
                         }
                         pw.print(packageInfo.packageName + ",");
                         pw.print(packageInfo.getLongVersionCode() + ",");
-                        printPackageMeasurements(packageInfo, pw);
+                        printPackageMeasurements(packageInfo, useSha256, pw);
 
                         if (verbose) {
                             printAppDetails(packageInfo, printLibraries, pw);
-                            printPackageInstallationInfo(packageInfo, pw);
+                            printPackageInstallationInfo(packageInfo, useSha256, pw);
                             printPackageSignerDetails(packageInfo.signingInfo, pw);
                             pw.println("");
                         }
@@ -894,27 +930,39 @@ public class BinaryTransparencyService extends SystemService {
                 private void printHelpMenu() {
                     final PrintWriter pw = getOutPrintWriter();
                     pw.println("Transparency manager (transparency) commands:");
-                    pw.println("    help");
-                    pw.println("        Print this help text.");
+                    pw.println("  help");
+                    pw.println("    Print this help text.");
                     pw.println("");
-                    pw.println("    get image_info [-a]");
-                    pw.println("        Print information about loaded image (firmware). Options:");
-                    pw.println("            -a: lists all other identifiable partitions.");
+                    pw.println("  get image_info [-a]");
+                    pw.println("    Print information about loaded image (firmware). Options:");
+                    pw.println("        -a: lists all other identifiable partitions.");
                     pw.println("");
-                    pw.println("    get apex_info [-v]");
-                    pw.println("        Print information about installed APEXs on device.");
-                    pw.println("            -v: lists more verbose information about each APEX.");
+                    pw.println("  get apex_info [-o] [-v] [--no-headers]");
+                    pw.println("    Print information about installed APEXs on device.");
+                    pw.println("      -o: also uses the old digest scheme (SHA256) to compute "
+                               + "APEX hashes. WARNING: This can be a very slow and CPU-intensive "
+                               + "computation.");
+                    pw.println("      -v: lists more verbose information about each APEX.");
+                    pw.println("      --no-headers: does not print the header if specified");
                     pw.println("");
-                    pw.println("    get module_info [-v]");
-                    pw.println("        Print information about installed modules on device.");
-                    pw.println("            -v: lists more verbose information about each module.");
+                    pw.println("  get module_info [-o] [-v] [--no-headers]");
+                    pw.println("    Print information about installed modules on device.");
+                    pw.println("      -o: also uses the old digest scheme (SHA256) to compute "
+                               + "module hashes. WARNING: This can be a very slow and "
+                               + "CPU-intensive computation.");
+                    pw.println("      -v: lists more verbose information about each module.");
+                    pw.println("      --no-headers: does not print the header if specified");
                     pw.println("");
-                    pw.println("    get mba_info [-v] [-l]");
-                    pw.println("        Print information about installed mobile bundle apps "
+                    pw.println("  get mba_info [-o] [-v] [-l] [--no-headers]");
+                    pw.println("    Print information about installed mobile bundle apps "
                                + "(MBAs on device).");
-                    pw.println("            -v: lists more verbose information about each app.");
-                    pw.println("            -l: lists shared library info. This will only be "
-                               + "listed with -v");
+                    pw.println("      -o: also uses the old digest scheme (SHA256) to compute "
+                               + "MBA hashes. WARNING: This can be a very slow and CPU-intensive "
+                               + "computation.");
+                    pw.println("      -v: lists more verbose information about each app.");
+                    pw.println("      -l: lists shared library info. (This option only works "
+                               + "when -v option is also specified)");
+                    pw.println("      --no-headers: does not print the header if specified");
                     pw.println("");
                 }
 
