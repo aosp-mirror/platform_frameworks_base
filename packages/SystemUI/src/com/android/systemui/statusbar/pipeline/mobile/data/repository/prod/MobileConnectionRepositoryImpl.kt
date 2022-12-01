@@ -58,7 +58,7 @@ import kotlinx.coroutines.flow.stateIn
 @OptIn(ExperimentalCoroutinesApi::class)
 class MobileConnectionRepositoryImpl(
     private val context: Context,
-    private val subId: Int,
+    override val subId: Int,
     private val telephonyManager: TelephonyManager,
     private val globalSettings: GlobalSettings,
     defaultDataSubId: StateFlow<Int>,

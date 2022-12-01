@@ -263,12 +263,12 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         private const val SUB_1_ID = 1
         private val SUB_1 =
             mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_1_ID) }
-        private val CONNECTION_1 = FakeMobileConnectionRepository()
+        private val CONNECTION_1 = FakeMobileConnectionRepository(SUB_1_ID)
 
         private const val SUB_2_ID = 2
         private val SUB_2 =
             mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_2_ID) }
-        private val CONNECTION_2 = FakeMobileConnectionRepository()
+        private val CONNECTION_2 = FakeMobileConnectionRepository(SUB_2_ID)
 
         private const val SUB_3_ID = 3
         private val SUB_3_OPP =
@@ -276,7 +276,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 whenever(it.subscriptionId).thenReturn(SUB_3_ID)
                 whenever(it.isOpportunistic).thenReturn(true)
             }
-        private val CONNECTION_3 = FakeMobileConnectionRepository()
+        private val CONNECTION_3 = FakeMobileConnectionRepository(SUB_3_ID)
 
         private const val SUB_4_ID = 4
         private val SUB_4_OPP =
@@ -284,6 +284,6 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 whenever(it.subscriptionId).thenReturn(SUB_4_ID)
                 whenever(it.isOpportunistic).thenReturn(true)
             }
-        private val CONNECTION_4 = FakeMobileConnectionRepository()
+        private val CONNECTION_4 = FakeMobileConnectionRepository(SUB_4_ID)
     }
 }

@@ -268,7 +268,7 @@ private fun SignalIcon.MobileIconGroup?.toResolvedNetworkType(): ResolvedNetwork
         else -> DefaultNetworkType(toNetworkType())
     }
 
-class DemoMobileConnectionRepository(val subId: Int) : MobileConnectionRepository {
+class DemoMobileConnectionRepository(override val subId: Int) : MobileConnectionRepository {
     override val subscriptionModelFlow = MutableStateFlow(MobileSubscriptionModel())
 
     override val dataEnabled = MutableStateFlow(true)

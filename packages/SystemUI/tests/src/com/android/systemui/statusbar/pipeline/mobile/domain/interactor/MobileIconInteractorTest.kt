@@ -49,7 +49,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconInteractor
     private val mobileMappingsProxy = FakeMobileMappingsProxy()
     private val mobileIconsInteractor = FakeMobileIconsInteractor(mobileMappingsProxy)
-    private val connectionRepository = FakeMobileConnectionRepository()
+    private val connectionRepository = FakeMobileConnectionRepository(SUB_1_ID)
 
     private val scope = CoroutineScope(IMMEDIATE)
 

@@ -36,6 +36,8 @@ import kotlinx.coroutines.flow.StateFlow
  * eventually becomes a single icon in the status bar.
  */
 interface MobileConnectionRepository {
+    /** The subscriptionId that this connection represents */
+    val subId: Int
     /**
      * A flow that aggregates all necessary callbacks from [TelephonyCallback] into a single
      * listener + model.

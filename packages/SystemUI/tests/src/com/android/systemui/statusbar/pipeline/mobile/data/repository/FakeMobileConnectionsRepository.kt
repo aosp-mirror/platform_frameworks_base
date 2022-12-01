@@ -20,12 +20,11 @@ import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import com.android.settingslib.mobile.MobileMappings.Config
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakeMobileConnectionsRepository : MobileConnectionsRepository {
     private val _subscriptionsFlow = MutableStateFlow<List<SubscriptionInfo>>(listOf())
-    override val subscriptionsFlow: Flow<List<SubscriptionInfo>> = _subscriptionsFlow
+    override val subscriptionsFlow = _subscriptionsFlow
 
     private val _activeMobileDataSubscriptionId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
     override val activeMobileDataSubscriptionId = _activeMobileDataSubscriptionId
@@ -41,7 +40,8 @@ class FakeMobileConnectionsRepository : MobileConnectionsRepository {
 
     private val subIdRepos = mutableMapOf<Int, MobileConnectionRepository>()
     override fun getRepoForSubId(subId: Int): MobileConnectionRepository {
-        return subIdRepos[subId] ?: FakeMobileConnectionRepository().also { subIdRepos[subId] = it }
+        return subIdRepos[subId]
+            ?: FakeMobileConnectionRepository(subId).also { subIdRepos[subId] = it }
     }
 
     private val _globalMobileDataSettingChangedEvent = MutableStateFlow(Unit)

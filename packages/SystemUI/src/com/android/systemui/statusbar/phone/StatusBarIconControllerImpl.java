@@ -276,6 +276,11 @@ public class StatusBarIconControllerImpl implements Tunable,
         String slotName = mContext.getString(com.android.internal.R.string.status_bar_mobile);
         Slot mobileSlot = mStatusBarIconList.getSlot(slotName);
 
+        // Because of the way we cache the icon holders, we need to remove everything any time
+        // we get a new set of subscriptions. This might change in the future, but is required
+        // to support demo mode for now
+        removeAllIconsForSlot(slotName);
+
         Collections.reverse(subIds);
 
         for (Integer subId : subIds) {

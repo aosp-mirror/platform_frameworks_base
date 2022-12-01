@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.StateFlow
  */
 interface MobileConnectionsRepository {
     /** Observable list of current mobile subscriptions */
-    val subscriptionsFlow: Flow<List<SubscriptionInfo>>
+    val subscriptionsFlow: StateFlow<List<SubscriptionInfo>>
 
     /** Observable for the subscriptionId of the current mobile data connection */
     val activeMobileDataSubscriptionId: StateFlow<Int>
