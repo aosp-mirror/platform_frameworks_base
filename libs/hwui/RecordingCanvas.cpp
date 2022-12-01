@@ -22,6 +22,7 @@
 #include <experimental/type_traits>
 
 #include "SkAndroidFrameworkUtils.h"
+#include "SkBlendMode.h"
 #include "SkCanvas.h"
 #include "SkCanvasPriv.h"
 #include "SkColor.h"

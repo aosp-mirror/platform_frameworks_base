@@ -17,6 +17,8 @@
 #include "TestSceneBase.h"
 #include "hwui/Paint.h"
 
+#include <SkBlendMode.h>
+
 class TextAnimation;
 
 static TestScene::Registrar _Text(TestScene::Info{"text", "Draws a bunch of text.",

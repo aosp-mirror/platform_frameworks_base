@@ -19,6 +19,7 @@
 #include <GLES2/gl2.h>
 #include <utils/Blur.h>
 
+#include <SkBlendMode.h>
 #include <SkColorFilter.h>
 #include <SkPaint.h>
 #include <SkShader.h>

@@ -23,6 +23,7 @@
 
 #include <tests/common/CallCountingCanvas.h>
 
+#include "SkBlendMode.h"
 #include "SkBitmap.h"
 #include "SkCanvas.h"
 #include "SkColor.h"

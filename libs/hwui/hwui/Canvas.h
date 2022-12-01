@@ -30,6 +30,7 @@
 #include <SkMatrix.h>
 
 class SkAnimatedImage;
+enum class SkBlendMode;
 class SkCanvasState;
 class SkRRect;
 class SkRuntimeShaderBuilder;

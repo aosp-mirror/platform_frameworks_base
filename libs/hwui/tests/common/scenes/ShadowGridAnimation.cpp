@@ -16,6 +16,8 @@
 
 #include "TestSceneBase.h"
 
+#include <SkBlendMode.h>
+
 class ShadowGridAnimation;
 
 static TestScene::Registrar _ShadowGrid(TestScene::Info{
