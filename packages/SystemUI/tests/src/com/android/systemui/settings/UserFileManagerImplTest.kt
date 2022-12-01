@@ -50,24 +50,20 @@ class UserFileManagerImplTest : SysuiTestCase() {
 
     lateinit var userFileManager: UserFileManagerImpl
     lateinit var backgroundExecutor: FakeExecutor
-    @Mock
-    lateinit var userManager: UserManager
-    @Mock
-    lateinit var broadcastDispatcher: BroadcastDispatcher
+    @Mock lateinit var userManager: UserManager
+    @Mock lateinit var broadcastDispatcher: BroadcastDispatcher
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         backgroundExecutor = FakeExecutor(FakeSystemClock())
-        userFileManager = UserFileManagerImpl(context, userManager,
-            broadcastDispatcher, backgroundExecutor)
+        userFileManager =
+            UserFileManagerImpl(context, userManager, broadcastDispatcher, backgroundExecutor)
     }
 
     @After
     fun end() {
-        val dir = Environment.buildPath(
-            context.filesDir,
-            UserFileManagerImpl.ID)
+        val dir = Environment.buildPath(context.filesDir, UserFileManagerImpl.ID)
         dir.deleteRecursively()
     }
 
@@ -82,13 +78,14 @@ class UserFileManagerImplTest : SysuiTestCase() {
     @Test
     fun testGetSharedPreferences() {
         val secondarySharedPref = userFileManager.getSharedPreferences(TEST_FILE_NAME, 0, 11)
-        val secondaryUserDir = Environment.buildPath(
-            context.filesDir,
-            UserFileManagerImpl.ID,
-            "11",
-            UserFileManagerImpl.SHARED_PREFS,
-            TEST_FILE_NAME
-        )
+        val secondaryUserDir =
+            Environment.buildPath(
+                context.filesDir,
+                UserFileManagerImpl.ID,
+                "11",
+                UserFileManagerImpl.SHARED_PREFS,
+                TEST_FILE_NAME
+            )
 
         assertThat(secondarySharedPref).isNotNull()
         assertThat(secondaryUserDir.exists())
@@ -101,32 +98,35 @@ class UserFileManagerImplTest : SysuiTestCase() {
         val userFileManager = spy(userFileManager)
         userFileManager.start()
         verify(userFileManager).clearDeletedUserData()
-        verify(broadcastDispatcher).registerReceiver(any(BroadcastReceiver::class.java),
-            any(IntentFilter::class.java),
-            any(Executor::class.java), isNull(), eq(Context.RECEIVER_EXPORTED), isNull())
+        verify(broadcastDispatcher)
+            .registerReceiver(
+                any(BroadcastReceiver::class.java),
+                any(IntentFilter::class.java),
+                any(Executor::class.java),
+                isNull(),
+                eq(Context.RECEIVER_EXPORTED),
+                isNull()
+            )
     }
 
     @Test
     fun testClearDeletedUserData() {
-        val dir = Environment.buildPath(
-            context.filesDir,
-            UserFileManagerImpl.ID,
-            "11",
-            "files"
-        )
+        val dir = Environment.buildPath(context.filesDir, UserFileManagerImpl.ID, "11", "files")
         dir.mkdirs()
-        val file = Environment.buildPath(
-            context.filesDir,
-            UserFileManagerImpl.ID,
-            "11",
-            "files",
-            TEST_FILE_NAME
-        )
-        val secondaryUserDir = Environment.buildPath(
-            context.filesDir,
-            UserFileManagerImpl.ID,
-            "11",
-        )
+        val file =
+            Environment.buildPath(
+                context.filesDir,
+                UserFileManagerImpl.ID,
+                "11",
+                "files",
+                TEST_FILE_NAME
+            )
+        val secondaryUserDir =
+            Environment.buildPath(
+                context.filesDir,
+                UserFileManagerImpl.ID,
+                "11",
+            )
         file.createNewFile()
         assertThat(secondaryUserDir.exists()).isTrue()
         assertThat(file.exists()).isTrue()
@@ -139,15 +139,16 @@ class UserFileManagerImplTest : SysuiTestCase() {
 
     @Test
     fun testEnsureParentDirExists() {
-        val file = Environment.buildPath(
-            context.filesDir,
-            UserFileManagerImpl.ID,
-            "11",
-            "files",
-            TEST_FILE_NAME
-        )
+        val file =
+            Environment.buildPath(
+                context.filesDir,
+                UserFileManagerImpl.ID,
+                "11",
+                "files",
+                TEST_FILE_NAME
+            )
         assertThat(file.parentFile.exists()).isFalse()
-        userFileManager.ensureParentDirExists(file)
+        UserFileManagerImpl.ensureParentDirExists(file)
         assertThat(file.parentFile.exists()).isTrue()
     }
 }

@@ -456,9 +456,8 @@ public final class DeviceStateProviderImplTest {
                         new DeviceState(1, "CLOSED", 0 /* flags */),
                         new DeviceState(2, "HALF_OPENED", 0 /* flags */)
                 }, mDeviceStateArrayCaptor.getValue());
-        // onStateChanged() should be called because the provider could not find the sensor.
-        verify(listener).onStateChanged(mIntegerCaptor.capture());
-        assertEquals(1, mIntegerCaptor.getValue().intValue());
+        // onStateChanged() should not be called because the provider could not find the sensor.
+        verify(listener, never()).onStateChanged(mIntegerCaptor.capture());
     }
 
     private static Sensor newSensor(String name, String type) throws Exception {

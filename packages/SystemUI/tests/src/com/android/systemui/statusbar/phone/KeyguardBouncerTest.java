@@ -39,6 +39,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.hardware.biometrics.BiometricSourceType;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -398,6 +399,8 @@ public class KeyguardBouncerTest extends SysuiTestCase {
 
     @Test
     public void testShow_delaysIfFaceAuthIsRunning() {
+        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE))
+                .thenReturn(true);
         when(mKeyguardStateController.isFaceAuthEnabled()).thenReturn(true);
         mBouncer.show(true /* reset */);
 
@@ -410,9 +413,10 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShow_doesNotDelaysIfFaceAuthIsLockedOut() {
+    public void testShow_doesNotDelaysIfFaceAuthIsNotAllowed() {
         when(mKeyguardStateController.isFaceAuthEnabled()).thenReturn(true);
-        when(mKeyguardUpdateMonitor.isFaceLockedOut()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE))
+                .thenReturn(false);
         mBouncer.show(true /* reset */);
 
         verify(mHandler, never()).postDelayed(any(), anyLong());

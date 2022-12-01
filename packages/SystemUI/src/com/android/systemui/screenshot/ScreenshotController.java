@@ -579,9 +579,16 @@ public class ScreenshotController {
 
     private void saveScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect,
             Insets screenInsets, ComponentName topComponent, boolean showFlash, UserHandle owner) {
-        withWindowAttached(() ->
+        withWindowAttached(() -> {
+            if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)
+                    && mUserManager.isManagedProfile(owner.getIdentifier())) {
+                mScreenshotView.announceForAccessibility(mContext.getResources().getString(
+                        R.string.screenshot_saving_work_profile_title));
+            } else {
                 mScreenshotView.announceForAccessibility(
-                        mContext.getResources().getString(R.string.screenshot_saving_title)));
+                        mContext.getResources().getString(R.string.screenshot_saving_title));
+            }
+        });
 
         mScreenshotView.reset();
 
