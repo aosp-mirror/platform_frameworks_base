@@ -2888,6 +2888,10 @@ package android.view {
     method @NonNull public android.view.Display.Mode.Builder setResolution(int, int);
   }
 
+  public final class DisplayShape implements android.os.Parcelable {
+    method @NonNull public static android.view.DisplayShape fromSpecString(@NonNull String, float, int, int);
+  }
+
   public class FocusFinder {
     method public static void sort(android.view.View[], int, int, android.view.ViewGroup, boolean);
   }

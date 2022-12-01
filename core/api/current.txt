@@ -48692,6 +48692,7 @@ package android.view {
     method public float getRefreshRate();
     method public int getRotation();
     method @Nullable public android.view.RoundedCorner getRoundedCorner(int);
+    method @NonNull public android.view.DisplayShape getShape();
     method @Deprecated public void getSize(android.graphics.Point);
     method public int getState();
     method public android.view.Display.Mode[] getSupportedModes();
@@ -48770,6 +48771,13 @@ package android.view {
     method @NonNull public android.view.DisplayCutout.Builder setCutoutPath(@NonNull android.graphics.Path);
     method @NonNull public android.view.DisplayCutout.Builder setSafeInsets(@NonNull android.graphics.Insets);
     method @NonNull public android.view.DisplayCutout.Builder setWaterfallInsets(@NonNull android.graphics.Insets);
+  }
+
+  public final class DisplayShape implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.graphics.Path getPath();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.DisplayShape> CREATOR;
   }
 
   public final class DragAndDropPermissions implements android.os.Parcelable {
@@ -52153,6 +52161,7 @@ package android.view {
     method @Deprecated @NonNull public android.view.WindowInsets consumeStableInsets();
     method @Deprecated @NonNull public android.view.WindowInsets consumeSystemWindowInsets();
     method @Nullable public android.view.DisplayCutout getDisplayCutout();
+    method @Nullable public android.view.DisplayShape getDisplayShape();
     method @NonNull public android.graphics.Insets getInsets(int);
     method @NonNull public android.graphics.Insets getInsetsIgnoringVisibility(int);
     method @Deprecated @NonNull public android.graphics.Insets getMandatorySystemGestureInsets();
@@ -52188,6 +52197,7 @@ package android.view {
     ctor public WindowInsets.Builder(@NonNull android.view.WindowInsets);
     method @NonNull public android.view.WindowInsets build();
     method @NonNull public android.view.WindowInsets.Builder setDisplayCutout(@Nullable android.view.DisplayCutout);
+    method @NonNull public android.view.WindowInsets.Builder setDisplayShape(@NonNull android.view.DisplayShape);
     method @NonNull public android.view.WindowInsets.Builder setInsets(int, @NonNull android.graphics.Insets);
     method @NonNull public android.view.WindowInsets.Builder setInsetsIgnoringVisibility(int, @NonNull android.graphics.Insets) throws java.lang.IllegalArgumentException;
     method @Deprecated @NonNull public android.view.WindowInsets.Builder setMandatorySystemGestureInsets(@NonNull android.graphics.Insets);

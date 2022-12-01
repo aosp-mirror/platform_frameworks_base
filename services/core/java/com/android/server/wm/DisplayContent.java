@@ -207,6 +207,7 @@ import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
+import android.view.DisplayShape;
 import android.view.Gravity;
 import android.view.IDisplayWindowInsetsController;
 import android.view.ISystemGestureExclusionListener;
@@ -390,6 +391,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private final RotationCache<PrivacyIndicatorBounds, PrivacyIndicatorBounds>
             mPrivacyIndicatorBoundsCache = new
             RotationCache<>(this::calculatePrivacyIndicatorBoundsForRotationUncached);
+
+    DisplayShape mInitialDisplayShape;
+    private final RotationCache<DisplayShape, DisplayShape> mDisplayShapeCache =
+            new RotationCache<>(this::calculateDisplayShapeForRotationUncached);
 
     /**
      * Overridden display size. Initialized with {@link #mInitialDisplayWidth}
@@ -1095,7 +1100,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mDisplayFrames = new DisplayFrames(mInsetsStateController.getRawInsetsState(),
                 mDisplayInfo, calculateDisplayCutoutForRotation(mDisplayInfo.rotation),
                 calculateRoundedCornersForRotation(mDisplayInfo.rotation),
-                calculatePrivacyIndicatorBoundsForRotation(mDisplayInfo.rotation));
+                calculatePrivacyIndicatorBoundsForRotation(mDisplayInfo.rotation),
+                calculateDisplayShapeForRotation(mDisplayInfo.rotation));
         initializeDisplayBaseInfo();
 
         mHoldScreenWakeLock = mWmService.mPowerManager.newWakeLock(
@@ -1969,8 +1975,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final RoundedCorners roundedCorners = calculateRoundedCornersForRotation(rotation);
         final PrivacyIndicatorBounds indicatorBounds =
                 calculatePrivacyIndicatorBoundsForRotation(rotation);
+        final DisplayShape displayShape = calculateDisplayShapeForRotation(rotation);
         final DisplayFrames displayFrames = new DisplayFrames(new InsetsState(), info,
-                cutout, roundedCorners, indicatorBounds);
+                cutout, roundedCorners, indicatorBounds, displayShape);
         token.applyFixedRotationTransform(info, displayFrames, mTmpConfiguration);
     }
 
@@ -2178,6 +2185,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Update application display metrics.
         final DisplayCutout displayCutout = calculateDisplayCutoutForRotation(rotation);
         final RoundedCorners roundedCorners = calculateRoundedCornersForRotation(rotation);
+        final DisplayShape displayShape = calculateDisplayShapeForRotation(rotation);
 
         final Rect appFrame = mDisplayPolicy.getDecorInsetsInfo(rotation, dw, dh).mNonDecorFrame;
         mDisplayInfo.rotation = rotation;
@@ -2194,6 +2202,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         mDisplayInfo.displayCutout = displayCutout.isEmpty() ? null : displayCutout;
         mDisplayInfo.roundedCorners = roundedCorners;
+        mDisplayInfo.displayShape = displayShape;
         mDisplayInfo.getAppMetrics(mDisplayMetrics);
         if (mDisplayScalingDisabled) {
             mDisplayInfo.flags |= Display.FLAG_SCALING_DISABLED;
@@ -2278,6 +2287,23 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         return bounds.rotate(rotation);
+    }
+
+    DisplayShape calculateDisplayShapeForRotation(int rotation) {
+        return mDisplayShapeCache.getOrCompute(mInitialDisplayShape, rotation);
+    }
+
+    private DisplayShape calculateDisplayShapeForRotationUncached(
+            DisplayShape displayShape, int rotation) {
+        if (displayShape == null) {
+            return DisplayShape.NONE;
+        }
+
+        if (rotation == ROTATION_0) {
+            return displayShape;
+        }
+
+        return displayShape.setRotation(rotation);
     }
 
     /**
@@ -2781,7 +2807,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return displayFrames.update(rotation, w, h,
                 calculateDisplayCutoutForRotation(rotation),
                 calculateRoundedCornersForRotation(rotation),
-                calculatePrivacyIndicatorBoundsForRotation(rotation));
+                calculatePrivacyIndicatorBoundsForRotation(rotation),
+                calculateDisplayShapeForRotation(rotation));
     }
 
     @Override
@@ -2821,6 +2848,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mInitialRoundedCorners = mDisplayInfo.roundedCorners;
         mCurrentPrivacyIndicatorBounds = new PrivacyIndicatorBounds(new Rect[4],
                 mDisplayInfo.rotation);
+        mInitialDisplayShape = mDisplayInfo.displayShape;
         final Display.Mode maxDisplayMode =
                 DisplayUtils.getMaximumResolutionDisplayMode(mDisplayInfo.supportedModes);
         mPhysicalDisplaySize = new Point(
@@ -2848,6 +2876,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 ? DisplayCutout.NO_CUTOUT : mDisplayInfo.displayCutout;
         final String newUniqueId = mDisplayInfo.uniqueId;
         final RoundedCorners newRoundedCorners = mDisplayInfo.roundedCorners;
+        final DisplayShape newDisplayShape = mDisplayInfo.displayShape;
 
         final boolean displayMetricsChanged = mInitialDisplayWidth != newWidth
                 || mInitialDisplayHeight != newHeight
@@ -2855,7 +2884,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 || mInitialPhysicalXDpi != newXDpi
                 || mInitialPhysicalYDpi != newYDpi
                 || !Objects.equals(mInitialDisplayCutout, newCutout)
-                || !Objects.equals(mInitialRoundedCorners, newRoundedCorners);
+                || !Objects.equals(mInitialRoundedCorners, newRoundedCorners)
+                || !Objects.equals(mInitialDisplayShape, newDisplayShape);
         final boolean physicalDisplayChanged = !newUniqueId.equals(mCurrentUniqueDisplayId);
 
         if (displayMetricsChanged || physicalDisplayChanged) {
@@ -2893,6 +2923,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mInitialPhysicalYDpi = newYDpi;
             mInitialDisplayCutout = newCutout;
             mInitialRoundedCorners = newRoundedCorners;
+            mInitialDisplayShape = newDisplayShape;
             mCurrentUniqueDisplayId = newUniqueId;
             reconfigureDisplayLocked();
 

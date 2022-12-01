@@ -1009,6 +1009,28 @@ public final class Display {
     }
 
     /**
+     * Returns the {@link DisplayShape} which is based on display coordinates.
+     *
+     * To get the {@link DisplayShape} based on the window frame, use
+     * {@link WindowInsets#getDisplayShape()} instead.
+     *
+     * @see DisplayShape
+     */
+    @SuppressLint("VisiblySynchronized")
+    @NonNull
+    public DisplayShape getShape() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            final DisplayShape displayShape = mDisplayInfo.displayShape;
+            final @Surface.Rotation int rotation = getLocalRotation();
+            if (displayShape != null && rotation != mDisplayInfo.rotation) {
+                return displayShape.setRotation(rotation);
+            }
+            return displayShape;
+        }
+    }
+
+    /**
      * Gets the pixel format of the display.
      * @return One of the constants defined in {@link android.graphics.PixelFormat}.
      *
