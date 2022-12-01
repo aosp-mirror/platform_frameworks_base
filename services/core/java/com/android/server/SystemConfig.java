@@ -321,6 +321,7 @@ public class SystemConfig {
     private ArrayMap<String, Set<String>> mPackageToUserTypeBlacklist = new ArrayMap<>();
 
     private final ArraySet<String> mRollbackWhitelistedPackages = new ArraySet<>();
+    private final ArraySet<String> mAutomaticRollbackDenylistedPackages = new ArraySet<>();
     private final ArraySet<String> mWhitelistedStagedInstallers = new ArraySet<>();
     // A map from package name of vendor APEXes that can be updated to an installer package name
     // allowed to install updates for it.
@@ -459,6 +460,10 @@ public class SystemConfig {
 
     public Set<String> getRollbackWhitelistedPackages() {
         return mRollbackWhitelistedPackages;
+    }
+
+    public Set<String> getAutomaticRollbackDenylistedPackages() {
+        return mAutomaticRollbackDenylistedPackages;
     }
 
     public Set<String> getWhitelistedStagedInstallers() {
@@ -1353,6 +1358,16 @@ public class SystemConfig {
                                     + " at " + parser.getPositionDescription());
                         } else {
                             mRollbackWhitelistedPackages.add(pkgname);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "automatic-rollback-denylisted-app": {
+                        String pkgname = parser.getAttributeValue(null, "package");
+                        if (pkgname == null) {
+                            Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else {
+                            mAutomaticRollbackDenylistedPackages.add(pkgname);
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;
