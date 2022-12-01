@@ -32,6 +32,12 @@ import com.android.settingslib.spa.framework.common.QueryEnum
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.addUri
 import com.android.settingslib.spa.framework.common.getColumns
+import com.android.settingslib.spa.framework.util.KEY_DESTINATION
+import com.android.settingslib.spa.framework.util.KEY_HIGHLIGHT_ENTRY
+import com.android.settingslib.spa.framework.util.KEY_SESSION_SOURCE_NAME
+import com.android.settingslib.spa.framework.util.SESSION_BROWSE
+import com.android.settingslib.spa.framework.util.SESSION_SEARCH
+import com.android.settingslib.spa.framework.util.createIntent
 
 private const val TAG = "DebugProvider"
 
@@ -116,9 +122,11 @@ class DebugProvider : ContentProvider() {
         val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.PAGE_DEBUG_QUERY.getColumns())
         for (pageWithEntry in entryRepository.getAllPageWithEntry()) {
-            val command = pageWithEntry.page.createBrowseAdbCommand(
-                context,
-                spaEnvironment.browseActivityClass
+            val page = pageWithEntry.page
+            if (!page.isBrowsable()) continue
+            val command = createBrowseAdbCommand(
+                destination = page.buildRoute(),
+                sessionName = SESSION_BROWSE
             )
             if (command != null) {
                 cursor.newRow().add(ColumnEnum.PAGE_START_ADB.id, command)
@@ -131,8 +139,13 @@ class DebugProvider : ContentProvider() {
         val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.ENTRY_DEBUG_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
-            val command = entry.containerPage()
-                .createBrowseAdbCommand(context, spaEnvironment.browseActivityClass, entry.id)
+            val page = entry.containerPage()
+            if (!page.isBrowsable()) continue
+            val command = createBrowseAdbCommand(
+                destination = page.buildRoute(),
+                entryId = entry.id,
+                sessionName = SESSION_SEARCH
+            )
             if (command != null) {
                 cursor.newRow().add(ColumnEnum.ENTRY_START_ADB.id, command)
             }
@@ -145,8 +158,7 @@ class DebugProvider : ContentProvider() {
         val cursor = MatrixCursor(QueryEnum.PAGE_INFO_QUERY.getColumns())
         for (pageWithEntry in entryRepository.getAllPageWithEntry()) {
             val page = pageWithEntry.page
-            val intent =
-                page.createBrowseIntent(context, spaEnvironment.browseActivityClass) ?: Intent()
+            val intent = page.createIntent(SESSION_BROWSE) ?: Intent()
             cursor.newRow()
                 .add(ColumnEnum.PAGE_ID.id, page.id)
                 .add(ColumnEnum.PAGE_NAME.id, page.displayName)
@@ -162,17 +174,36 @@ class DebugProvider : ContentProvider() {
         val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.ENTRY_INFO_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
-            val intent = entry.containerPage()
-                .createBrowseIntent(context, spaEnvironment.browseActivityClass, entry.id)
-                ?: Intent()
+            val intent = entry.createIntent(SESSION_SEARCH) ?: Intent()
             cursor.newRow()
                 .add(ColumnEnum.ENTRY_ID.id, entry.id)
                 .add(ColumnEnum.ENTRY_NAME.id, entry.displayName)
                 .add(ColumnEnum.ENTRY_ROUTE.id, entry.containerPage().buildRoute())
                 .add(ColumnEnum.ENTRY_INTENT_URI.id, intent.toUri(URI_INTENT_SCHEME))
-                .add(ColumnEnum.ENTRY_HIERARCHY_PATH.id,
-                    entryRepository.getEntryPathWithDisplayName(entry.id))
+                .add(
+                    ColumnEnum.ENTRY_HIERARCHY_PATH.id,
+                    entryRepository.getEntryPathWithDisplayName(entry.id)
+                )
         }
         return cursor
     }
+}
+
+private fun createBrowseAdbCommand(
+    destination: String? = null,
+    entryId: String? = null,
+    sessionName: String? = null,
+): String? {
+    val context = SpaEnvironmentFactory.instance.appContext
+    val browseActivityClass = SpaEnvironmentFactory.instance.browseActivityClass ?: return null
+    val packageName = context.packageName
+    val activityName = browseActivityClass.name.replace(packageName, "")
+    val destinationParam =
+        if (destination != null) " -e $KEY_DESTINATION $destination" else ""
+    val highlightParam =
+        if (entryId != null) " -e $KEY_HIGHLIGHT_ENTRY $entryId" else ""
+    val sessionParam =
+        if (sessionName != null) " -e $KEY_SESSION_SOURCE_NAME $sessionName" else ""
+    return "adb shell am start -n $packageName/$activityName" +
+        "$destinationParam$highlightParam$sessionParam"
 }

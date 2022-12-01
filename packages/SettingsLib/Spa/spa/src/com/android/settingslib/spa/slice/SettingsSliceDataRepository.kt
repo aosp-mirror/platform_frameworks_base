@@ -20,6 +20,7 @@ import android.net.Uri
 import android.util.Log
 import com.android.settingslib.spa.framework.common.EntrySliceData
 import com.android.settingslib.spa.framework.common.SettingsEntryRepository
+import com.android.settingslib.spa.framework.util.getEntryId
 
 private const val TAG = "SliceDataRepository"
 
