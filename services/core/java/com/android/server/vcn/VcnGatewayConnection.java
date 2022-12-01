@@ -26,6 +26,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.ipsec.ike.exceptions.IkeProtocolException.ERROR_TYPE_AUTHENTICATION_FAILED;
+import static android.net.vcn.VcnGatewayConnectionConfig.VCN_GATEWAY_OPTION_ENABLE_DATA_STALL_RECOVERY_WITH_MOBILITY;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_CONFIG_ERROR;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_INTERNAL_ERROR;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_NETWORK_ERROR;
@@ -36,6 +37,8 @@ import static com.android.server.VcnManagementService.VDBG;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.net.ConnectivityDiagnosticsManager;
+import android.net.ConnectivityDiagnosticsManager.ConnectivityDiagnosticsCallback;
 import android.net.ConnectivityManager;
 import android.net.InetAddresses;
 import android.net.IpPrefix;
@@ -50,6 +53,7 @@ import android.net.NetworkAgent;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkProvider;
+import android.net.NetworkRequest;
 import android.net.NetworkScore;
 import android.net.RouteInfo;
 import android.net.TelephonyNetworkSpecifier;
@@ -546,6 +550,39 @@ public class VcnGatewayConnection extends StateMachine {
         }
     }
 
+    /**
+     * Sent when there is a suspected data stall on a network
+     *
+     * <p>Only relevant in the Connected state.
+     *
+     * @param arg1 The "all" token; this signal is always honored.
+     * @param obj @NonNull An EventDataStallSuspectedInfo instance with relevant data.
+     */
+    private static final int EVENT_DATA_STALL_SUSPECTED = 13;
+
+    private static class EventDataStallSuspectedInfo implements EventInfo {
+        @NonNull public final Network network;
+
+        EventDataStallSuspectedInfo(@NonNull Network network) {
+            this.network = network;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(network);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            if (!(other instanceof EventDataStallSuspectedInfo)) {
+                return false;
+            }
+
+            final EventDataStallSuspectedInfo rhs = (EventDataStallSuspectedInfo) other;
+            return Objects.equals(network, rhs.network);
+        }
+    }
+
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     @NonNull
     final DisconnectedState mDisconnectedState = new DisconnectedState();
@@ -578,10 +615,13 @@ public class VcnGatewayConnection extends StateMachine {
     @NonNull
     private final VcnUnderlyingNetworkControllerCallback mUnderlyingNetworkControllerCallback;
 
+    @NonNull private final VcnConnectivityDiagnosticsCallback mConnectivityDiagnosticsCallback;
+
     private final boolean mIsMobileDataEnabled;
 
     @NonNull private final IpSecManager mIpSecManager;
     @NonNull private final ConnectivityManager mConnectivityManager;
+    @NonNull private final ConnectivityDiagnosticsManager mConnectivityDiagnosticsManager;
 
     @Nullable private IpSecTunnelInterface mTunnelIface = null;
 
@@ -748,6 +788,20 @@ public class VcnGatewayConnection extends StateMachine {
                         mUnderlyingNetworkControllerCallback);
         mIpSecManager = mVcnContext.getContext().getSystemService(IpSecManager.class);
         mConnectivityManager = mVcnContext.getContext().getSystemService(ConnectivityManager.class);
+        mConnectivityDiagnosticsManager =
+                mVcnContext.getContext().getSystemService(ConnectivityDiagnosticsManager.class);
+
+        mConnectivityDiagnosticsCallback = new VcnConnectivityDiagnosticsCallback();
+
+        if (mConnectionConfig.hasGatewayOption(
+                VCN_GATEWAY_OPTION_ENABLE_DATA_STALL_RECOVERY_WITH_MOBILITY)) {
+            final NetworkRequest diagRequest =
+                    new NetworkRequest.Builder().addTransportType(TRANSPORT_CELLULAR).build();
+            mConnectivityDiagnosticsManager.registerConnectivityDiagnosticsCallback(
+                    diagRequest,
+                    new HandlerExecutor(new Handler(vcnContext.getLooper())),
+                    mConnectivityDiagnosticsCallback);
+        }
 
         addState(mDisconnectedState);
         addState(mDisconnectingState);
@@ -810,6 +864,9 @@ public class VcnGatewayConnection extends StateMachine {
         mUnderlyingNetworkController.teardown();
 
         mGatewayStatusCallback.onQuit();
+
+        mConnectivityDiagnosticsManager.unregisterConnectivityDiagnosticsCallback(
+                mConnectivityDiagnosticsCallback);
     }
 
     /**
@@ -826,6 +883,20 @@ public class VcnGatewayConnection extends StateMachine {
         mUnderlyingNetworkController.updateSubscriptionSnapshot(mLastSnapshot);
 
         sendMessageAndAcquireWakeLock(EVENT_SUBSCRIPTIONS_CHANGED, TOKEN_ALL);
+    }
+
+    private class VcnConnectivityDiagnosticsCallback extends ConnectivityDiagnosticsCallback {
+        @Override
+        public void onDataStallSuspected(ConnectivityDiagnosticsManager.DataStallReport report) {
+            mVcnContext.ensureRunningOnLooperThread();
+
+            final Network network = report.getNetwork();
+            logInfo("Data stall suspected on " + network);
+            sendMessageAndAcquireWakeLock(
+                    EVENT_DATA_STALL_SUSPECTED,
+                    TOKEN_ALL,
+                    new EventDataStallSuspectedInfo(network));
+        }
     }
 
     private class VcnUnderlyingNetworkControllerCallback
@@ -1367,7 +1438,8 @@ public class VcnGatewayConnection extends StateMachine {
                 case EVENT_SUBSCRIPTIONS_CHANGED: // Fallthrough
                 case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED: // Fallthrough
                 case EVENT_MIGRATION_COMPLETED: // Fallthrough
-                case EVENT_IKE_CONNECTION_INFO_CHANGED:
+                case EVENT_IKE_CONNECTION_INFO_CHANGED: // Fallthrough
+                case EVENT_DATA_STALL_SUSPECTED:
                     logUnexpectedEvent(msg.what);
                     break;
                 default:
@@ -1925,6 +1997,11 @@ public class VcnGatewayConnection extends StateMachine {
                     mIkeConnectionInfo =
                             ((EventIkeConnectionInfoChangedInfo) msg.obj).ikeConnectionInfo;
                     break;
+                case EVENT_DATA_STALL_SUSPECTED:
+                    final Network networkWithDataStall =
+                            ((EventDataStallSuspectedInfo) msg.obj).network;
+                    handleDataStallSuspected(networkWithDataStall);
+                    break;
                 default:
                     logUnhandledMessage(msg);
                     break;
@@ -1982,6 +2059,15 @@ public class VcnGatewayConnection extends StateMachine {
                     updateNetworkAgent(
                             mTunnelIface, mNetworkAgent, mChildConfig, mIkeConnectionInfo);
                 }
+            }
+        }
+
+        private void handleDataStallSuspected(Network networkWithDataStall) {
+            if (mUnderlying != null
+                    && mNetworkAgent != null
+                    && mNetworkAgent.getNetwork().equals(networkWithDataStall)) {
+                logInfo("Perform Mobility update to recover from suspected data stall");
+                mIkeSession.setNetwork(mUnderlying.network);
             }
         }
 
@@ -2421,6 +2507,11 @@ public class VcnGatewayConnection extends StateMachine {
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     UnderlyingNetworkControllerCallback getUnderlyingNetworkControllerCallback() {
         return mUnderlyingNetworkControllerCallback;
+    }
+
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    ConnectivityDiagnosticsCallback getConnectivityDiagnosticsCallback() {
+        return mConnectivityDiagnosticsCallback;
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)

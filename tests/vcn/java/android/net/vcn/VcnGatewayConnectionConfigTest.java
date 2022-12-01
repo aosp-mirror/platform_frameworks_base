@@ -149,7 +149,8 @@ public class VcnGatewayConnectionConfigTest {
         return buildTestConfigWithExposedCapsAndOptions(builder, gatewayOptions, EXPOSED_CAPS);
     }
 
-    private static VcnGatewayConnectionConfig buildTestConfigWithGatewayOptions(
+    // Public for use in VcnGatewayConnectionTest
+    public static VcnGatewayConnectionConfig buildTestConfigWithGatewayOptions(
             Set<Integer> gatewayOptions) {
         return buildTestConfigWithExposedCapsAndOptions(newBuilder(), gatewayOptions, EXPOSED_CAPS);
     }
