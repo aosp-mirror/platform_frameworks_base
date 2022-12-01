@@ -4300,6 +4300,43 @@ public class UserManager {
     }
 
     /**
+     * Returns the user who was last in the foreground, not including the current user and not
+     * including profiles.
+     *
+     * <p>Returns {@code null} if there is no previous user, for example if there
+     * is only one full user (i.e. only one user which is not a profile) on the device.
+     *
+     * <p>This method may be used for example to find the user to switch back to if the
+     * current user is removed, or if creating a new user is aborted.
+     *
+     * <p>Note that reboots do not interrupt this calculation; the previous user need not have
+     * used the device since it rebooted.
+     *
+     * <p>Note also that on devices that support multiple users on multiple displays, it is possible
+     * that the returned user will be visible on a secondary display, as the foreground user is the
+     * one associated with the main display.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS,
+            android.Manifest.permission.QUERY_USERS
+    })
+    public @Nullable UserHandle getPreviousForegroundUser() {
+        try {
+            final int previousUser = mService.getPreviousFullUserToEnterForeground();
+            if (previousUser == UserHandle.USER_NULL) {
+                return null;
+            }
+            return UserHandle.of(previousUser);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Checks whether it's possible to add more users.
      *
      * @return true if more users can be added, false if limit has been reached.
