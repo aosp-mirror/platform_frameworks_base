@@ -6815,6 +6815,16 @@
                 android:protectionLevel="normal" />
     <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION"/>
 
+    <!-- Allows an application to indicate via {@link
+         android.content.pm.PackageInstaller.SessionParams#setRequestUpdateOwnership}
+         that it has the intention of becoming the update owner.
+         <p>Protection level: normal
+         -->
+    <permission android:name="android.permission.ENFORCE_UPDATE_OWNERSHIP"
+                android:protectionLevel="normal" />
+    <uses-permission android:name="android.permission.ENFORCE_UPDATE_OWNERSHIP" />
+
+
     <!-- Allows an application to take screenshots of layers that normally would be blacked out when
          a screenshot is taken. Specifically, layers that have the flag
          {@link android.view.SurfaceControl#SECURE} will be screenshot if the caller requests to

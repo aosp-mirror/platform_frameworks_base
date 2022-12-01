@@ -226,6 +226,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_USER_ID = "userId";
     private static final String ATTR_INSTALLER_PACKAGE_NAME = "installerPackageName";
     private static final String ATTR_INSTALLER_PACKAGE_UID = "installerPackageUid";
+    private static final String ATTR_UPDATE_OWNER_PACKAGE_NAME = "updateOwnererPackageName";
     private static final String ATTR_INSTALLER_ATTRIBUTION_TAG = "installerAttributionTag";
     private static final String ATTR_INSTALLER_UID = "installerUid";
     private static final String ATTR_INITIATING_PACKAGE_NAME =
@@ -2205,8 +2206,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             mInstallerUid = newOwnerAppInfo.uid;
-            mInstallSource = InstallSource.create(packageName, null, packageName,
-                    mInstallerUid, null, params.packageSource);
+            mInstallSource = InstallSource.create(packageName, null /* originatingPackageName */,
+                    packageName, mInstallerUid, packageName, null /* installerAttributionTag */,
+                    params.packageSource);
         }
     }
 
@@ -4438,6 +4440,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return params.keepApplicationEnabledSetting;
     }
 
+    @Override
+    public boolean isRequestUpdateOwnership() {
+        return (params.installFlags & PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP) != 0;
+    }
+
     void setSessionReady() {
         synchronized (mLock) {
             // Do not allow destroyed/failed session to change state
@@ -4774,6 +4781,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             writeStringAttribute(out, ATTR_INSTALLER_PACKAGE_NAME,
                     mInstallSource.mInstallerPackageName);
             out.attributeInt(null, ATTR_INSTALLER_PACKAGE_UID, mInstallSource.mInstallerPackageUid);
+            writeStringAttribute(out, ATTR_UPDATE_OWNER_PACKAGE_NAME,
+                    mInstallSource.mUpdateOwnerPackageName);
             writeStringAttribute(out, ATTR_INSTALLER_ATTRIBUTION_TAG,
                     mInstallSource.mInstallerAttributionTag);
             out.attributeInt(null, ATTR_INSTALLER_UID, mInstallerUid);
@@ -4941,6 +4950,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final String installerPackageName = readStringAttribute(in, ATTR_INSTALLER_PACKAGE_NAME);
         final int installPackageUid = in.getAttributeInt(null, ATTR_INSTALLER_PACKAGE_UID,
                 INVALID_UID);
+        final String updateOwnerPackageName = readStringAttribute(in,
+                ATTR_UPDATE_OWNER_PACKAGE_NAME);
         final String installerAttributionTag = readStringAttribute(in,
                 ATTR_INSTALLER_ATTRIBUTION_TAG);
         final int installerUid = in.getAttributeInt(null, ATTR_INSTALLER_UID, pm.snapshotComputer()
@@ -5113,7 +5124,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         InstallSource installSource = InstallSource.create(installInitiatingPackageName,
                 installOriginatingPackageName, installerPackageName, installPackageUid,
-                installerAttributionTag, params.packageSource);
+                updateOwnerPackageName, installerAttributionTag, params.packageSource);
         return new PackageInstallerSession(callback, context, pm, sessionProvider,
                 silentUpdatePolicy, installerThread, stagingManager, sessionId, userId,
                 installerUid, installSource, params, createdMillis, committedMillis, stageDir,

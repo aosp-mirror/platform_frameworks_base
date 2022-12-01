@@ -34,12 +34,18 @@ public final class InstallSource {
      * An instance of InstallSource representing an absence of knowledge of the source of
      * a package. Used in preference to null.
      */
-    static final InstallSource EMPTY = new InstallSource(null, null, null, INVALID_UID, null,
-            false, false, null, PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
+    static final InstallSource EMPTY = new InstallSource(null /* initiatingPackageName */,
+            null /* originatingPackageName */, null /* installerPackageName */, INVALID_UID,
+            null /* updateOwnerPackageName */, null /* installerAttributionTag */,
+            false /* isOrphaned */, false /* isInitiatingPackageUninstalled */,
+            null /* initiatingPackageSignatures */, PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
 
     /** We also memoize this case because it is common - all un-updated system apps. */
     private static final InstallSource EMPTY_ORPHANED = new InstallSource(
-            null, null, null, INVALID_UID, null, true, false, null,
+            null /* initiatingPackageName */, null /* originatingPackageName */,
+            null /* installerPackageName */, INVALID_UID, null /* updateOwnerPackageName */,
+            null /* installerAttributionTag */, true /* isOrphaned */,
+            false /* isInitiatingPackageUninstalled */, null /* initiatingPackageSignatures */,
             PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
 
     /**
@@ -73,6 +79,13 @@ public final class InstallSource {
     final String mInstallerPackageName;
 
     /**
+     * Package name of the app that requested the installer ownership. Note that this may be
+     * modified.
+     */
+    @Nullable
+    final String mUpdateOwnerPackageName;
+
+    /**
      * UID of the installer package, corresponding to the {@link #mInstallerPackageName}.
      */
     final int mInstallerPackageUid;
@@ -96,55 +109,64 @@ public final class InstallSource {
 
     static InstallSource create(@Nullable String initiatingPackageName,
             @Nullable String originatingPackageName, @Nullable String installerPackageName,
-            int installerPackageUid, @Nullable String installerAttributionTag, boolean isOrphaned,
+            int installerPackageUid, @Nullable String updateOwnerPackageName,
+            @Nullable String installerAttributionTag, boolean isOrphaned,
             boolean isInitiatingPackageUninstalled) {
         return create(initiatingPackageName, originatingPackageName, installerPackageName,
-                installerPackageUid, installerAttributionTag,
+                installerPackageUid, updateOwnerPackageName, installerAttributionTag,
                 PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED, isOrphaned,
                 isInitiatingPackageUninstalled);
     }
 
     static InstallSource create(@Nullable String initiatingPackageName,
             @Nullable String originatingPackageName, @Nullable String installerPackageName,
-            int installerPackageUid, @Nullable String installerAttributionTag, int packageSource) {
+            int installerPackageUid, @Nullable String updateOwnerPackageName,
+            @Nullable String installerAttributionTag, int packageSource) {
         return create(initiatingPackageName, originatingPackageName, installerPackageName,
-                installerPackageUid, installerAttributionTag, packageSource, false, false);
+                installerPackageUid, updateOwnerPackageName, installerAttributionTag,
+                packageSource, false /* isOrphaned */, false /* isInitiatingPackageUninstalled */);
     }
 
     static InstallSource create(@Nullable String initiatingPackageName,
             @Nullable String originatingPackageName, @Nullable String installerPackageName,
-            int installerPackageUid, @Nullable String installerAttributionTag, int packageSource,
-            boolean isOrphaned, boolean isInitiatingPackageUninstalled) {
+            int installerPackageUid, @Nullable String updateOwnerPackageName,
+            @Nullable String installerAttributionTag, int packageSource, boolean isOrphaned,
+            boolean isInitiatingPackageUninstalled) {
         return createInternal(
                 intern(initiatingPackageName),
                 intern(originatingPackageName),
                 intern(installerPackageName),
                 installerPackageUid,
+                intern(updateOwnerPackageName),
                 installerAttributionTag,
                 packageSource,
-                isOrphaned, isInitiatingPackageUninstalled, null);
+                isOrphaned, isInitiatingPackageUninstalled,
+                null /* initiatingPackageSignatures */);
     }
 
     private static InstallSource createInternal(@Nullable String initiatingPackageName,
             @Nullable String originatingPackageName, @Nullable String installerPackageName,
-            int installerPackageUid, @Nullable String installerAttributionTag, int packageSource,
-            boolean isOrphaned, boolean isInitiatingPackageUninstalled,
+            int installerPackageUid, @Nullable String updateOwnerPackageName,
+            @Nullable String installerAttributionTag, int packageSource, boolean isOrphaned,
+            boolean isInitiatingPackageUninstalled,
             @Nullable PackageSignatures initiatingPackageSignatures) {
         if (initiatingPackageName == null && originatingPackageName == null
-                && installerPackageName == null && initiatingPackageSignatures == null
+                && installerPackageName == null && updateOwnerPackageName == null
+                && initiatingPackageSignatures == null
                 && !isInitiatingPackageUninstalled
                 && packageSource == PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED) {
             return isOrphaned ? EMPTY_ORPHANED : EMPTY;
         }
         return new InstallSource(initiatingPackageName, originatingPackageName,
-                installerPackageName, installerPackageUid, installerAttributionTag, isOrphaned,
-                isInitiatingPackageUninstalled, initiatingPackageSignatures, packageSource
+                installerPackageName, installerPackageUid, updateOwnerPackageName,
+                installerAttributionTag, isOrphaned, isInitiatingPackageUninstalled,
+                initiatingPackageSignatures, packageSource
         );
     }
 
     private InstallSource(@Nullable String initiatingPackageName,
             @Nullable String originatingPackageName, @Nullable String installerPackageName,
-            int installerPackageUid,
+            int installerPackageUid, @Nullable String updateOwnerPackageName,
             @Nullable String installerAttributionTag, boolean isOrphaned,
             boolean isInitiatingPackageUninstalled,
             @Nullable PackageSignatures initiatingPackageSignatures,
@@ -157,6 +179,7 @@ public final class InstallSource {
         mOriginatingPackageName = originatingPackageName;
         mInstallerPackageName = installerPackageName;
         mInstallerPackageUid = installerPackageUid;
+        mUpdateOwnerPackageName = updateOwnerPackageName;
         mInstallerAttributionTag = installerAttributionTag;
         mIsOrphaned = isOrphaned;
         mIsInitiatingPackageUninstalled = isInitiatingPackageUninstalled;
@@ -174,9 +197,23 @@ public final class InstallSource {
             return this;
         }
         return createInternal(mInitiatingPackageName, mOriginatingPackageName,
-                intern(installerPackageName), installerPackageUid, mInstallerAttributionTag,
-                mPackageSource, mIsOrphaned, mIsInitiatingPackageUninstalled,
-                mInitiatingPackageSignatures);
+                intern(installerPackageName), installerPackageUid, mUpdateOwnerPackageName,
+                mInstallerAttributionTag, mPackageSource, mIsOrphaned,
+                mIsInitiatingPackageUninstalled, mInitiatingPackageSignatures);
+    }
+
+    /**
+     * Return an InstallSource the same as this one except with the specified
+     * {@link #mUpdateOwnerPackageName}.
+     */
+    InstallSource setUpdateOwnerPackageName(@Nullable String updateOwnerPackageName) {
+        if (Objects.equals(updateOwnerPackageName, mUpdateOwnerPackageName)) {
+            return this;
+        }
+        return createInternal(mInitiatingPackageName, mOriginatingPackageName,
+                mInstallerPackageName, mInstallerPackageUid, intern(updateOwnerPackageName),
+                mInstallerAttributionTag, mPackageSource, mIsOrphaned,
+                mIsInitiatingPackageUninstalled, mInitiatingPackageSignatures);
     }
 
     /**
@@ -188,8 +225,8 @@ public final class InstallSource {
             return this;
         }
         return createInternal(mInitiatingPackageName, mOriginatingPackageName,
-                mInstallerPackageName,
-                mInstallerPackageUid, mInstallerAttributionTag, mPackageSource, isOrphaned,
+                mInstallerPackageName, mInstallerPackageUid, mUpdateOwnerPackageName,
+                mInstallerAttributionTag, mPackageSource, isOrphaned,
                 mIsInitiatingPackageUninstalled, mInitiatingPackageSignatures);
     }
 
@@ -202,8 +239,8 @@ public final class InstallSource {
             return this;
         }
         return createInternal(mInitiatingPackageName, mOriginatingPackageName,
-                mInstallerPackageName,
-                mInstallerPackageUid, mInstallerAttributionTag, mPackageSource, mIsOrphaned,
+                mInstallerPackageName, mInstallerPackageUid, mUpdateOwnerPackageName,
+                mInstallerAttributionTag, mPackageSource, mIsOrphaned,
                 mIsInitiatingPackageUninstalled, signatures);
     }
 
@@ -220,6 +257,7 @@ public final class InstallSource {
         boolean isInitiatingPackageUninstalled = mIsInitiatingPackageUninstalled;
         String originatingPackageName = mOriginatingPackageName;
         String installerPackageName = mInstallerPackageName;
+        String updateOwnerPackageName = mUpdateOwnerPackageName;
         int installerPackageUid = mInstallerPackageUid;
         boolean isOrphaned = mIsOrphaned;
 
@@ -242,13 +280,18 @@ public final class InstallSource {
             isOrphaned = true;
             modified = true;
         }
+        if (packageName.equals(updateOwnerPackageName)) {
+            updateOwnerPackageName = null;
+            modified = true;
+        }
 
         if (!modified) {
             return this;
         }
 
         return createInternal(mInitiatingPackageName, originatingPackageName, installerPackageName,
-                installerPackageUid, null, mPackageSource, isOrphaned,
+                installerPackageUid, updateOwnerPackageName,
+                null /* installerAttributionTag */, mPackageSource, isOrphaned,
                 isInitiatingPackageUninstalled, mInitiatingPackageSignatures);
     }
 

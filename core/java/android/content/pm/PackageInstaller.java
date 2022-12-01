@@ -1910,6 +1910,20 @@ public class PackageInstaller {
                 throw e.rethrowFromSystemServer();
             }
         }
+
+        /**
+         * @return {@code true} if the installer requested the update ownership enforcement
+         * for the packages in this session.
+         *
+         * @see PackageInstaller.SessionParams#setRequestUpdateOwnership
+         */
+        public boolean isRequestUpdateOwnership() {
+            try {
+                return mSession.isRequestUpdateOwnership();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -2711,6 +2725,30 @@ public class PackageInstaller {
          */
         public void setKeepApplicationEnabledSetting() {
             this.keepApplicationEnabledSetting = true;
+        }
+
+        /**
+         * Optionally indicate whether the package being installed needs the update ownership
+         * enforcement. Once the update ownership enforcement is enabled, the other installers
+         * will need the user action to update the package even if the installers have been
+         * granted the {@link android.Manifest.permission#INSTALL_PACKAGES INSTALL_PACKAGES}
+         * permission. Default to {@code false}.
+         *
+         * The update ownership enforcement can only be enabled on initial installation. Set
+         * this to {@code true} on package update indicates the installer package wants to be
+         * the update owner if the update ownership enforcement has enabled.
+         *
+         * Note: To enable the update ownership enforcement, the installer must have the
+         * {@link android.Manifest.permission#ENFORCE_UPDATE_OWNERSHIP ENFORCE_UPDATE_OWNERSHIP}
+         * permission.
+         */
+        @RequiresPermission(Manifest.permission.ENFORCE_UPDATE_OWNERSHIP)
+        public void setRequestUpdateOwnership(boolean enable) {
+            if (enable) {
+                this.installFlags |= PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP;
+            } else {
+                this.installFlags &= ~PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP;
+            }
         }
 
         /** {@hide} */
@@ -3583,6 +3621,16 @@ public class PackageInstaller {
          */
         public @NonNull boolean getIsPreApprovalRequested() {
             return isPreapprovalRequested;
+        }
+
+        /**
+         * @return {@code true} if the installer requested the update ownership enforcement
+         * for the packages in this session.
+         *
+         * @see PackageInstaller.SessionParams#setRequestUpdateOwnership
+         */
+        public boolean isRequestUpdateOwnership() {
+            return (installFlags & PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP) != 0;
         }
 
         @Override

@@ -1355,6 +1355,7 @@ public abstract class PackageManager {
             INSTALL_ENABLE_ROLLBACK,
             INSTALL_ALLOW_DOWNGRADE,
             INSTALL_STAGED,
+            INSTALL_REQUEST_UPDATE_OWNERSHIP,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallFlags {}
@@ -1552,6 +1553,13 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK = 0x00800000;
+
+    /**
+     * Flag parameter for {@link PackageInstaller.SessionParams} to indicate that the
+     * update ownership enforcement is requested.
+     * @hide
+     */
+    public static final int INSTALL_REQUEST_UPDATE_OWNERSHIP = 1 << 25;
 
     /** @hide */
     @IntDef(flag = true, value = {
