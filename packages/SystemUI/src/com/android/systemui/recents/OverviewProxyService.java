@@ -565,12 +565,24 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         statusBarWinController.registerCallback(mStatusBarWindowCallback);
         mScreenshotHelper = new ScreenshotHelper(context);
 
-        // Listen for tracing state changes
         commandQueue.addCallback(new CommandQueue.Callbacks() {
+
+            // Listen for tracing state changes
             @Override
             public void onTracingStateChanged(boolean enabled) {
                 mSysUiState.setFlag(SYSUI_STATE_TRACING_ENABLED, enabled)
                         .commitUpdate(mContext.getDisplayId());
+            }
+
+            @Override
+            public void enterStageSplitFromRunningApp(boolean leftOrTop) {
+                if (mOverviewProxy != null) {
+                    try {
+                        mOverviewProxy.enterStageSplitFromRunningApp(leftOrTop);
+                    } catch (RemoteException e) {
+                        Log.w(TAG_OPS, "Unable to enter stage split from the current running app");
+                    }
+                }
             }
         });
         mCommandQueue = commandQueue;
