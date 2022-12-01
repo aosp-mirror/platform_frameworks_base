@@ -1705,8 +1705,7 @@
         -->
         <flag name="systemExempted" value="0x400" />
         <!-- "Short service" foreground service type. See
-           TODO: Change it to a real link
-           {@code android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}.
+           {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}.
            for more details.
         -->
         <flag name="shortService" value="0x800" />
