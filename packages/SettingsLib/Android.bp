@@ -50,6 +50,7 @@ android_library {
         "SettingsLibTwoTargetPreference",
         "SettingsLibSettingsTransition",
         "SettingsLibButtonPreference",
+        "SettingsLibProfileSelector",
         "setupdesign",
         "zxing-core-1.7",
     ],

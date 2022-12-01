@@ -940,14 +940,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         @Override
         public void setMediaButtonReceiver(PendingIntent pi, String sessionPackageName)
                 throws RemoteException {
-            //mPackageName has been verified in MediaSessionService.enforcePackageName().
-            if (!TextUtils.equals(sessionPackageName, mPackageName)) {
-                EventLog.writeEvent(0x534e4554, "238177121", -1, ""); // SafetyNet logging
-                throw new IllegalArgumentException("sessionPackageName name does not match "
-                        + "package name provided to MediaSessionRecord. sessionPackageName = "
-                        + sessionPackageName + ", pkg = "
-                        + mPackageName);
-            }
             final long token = Binder.clearCallingIdentity();
             try {
                 if ((mPolicies & MediaSessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_RECEIVER)
@@ -969,12 +961,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                 //mPackageName has been verified in MediaSessionService.enforcePackageName().
                 if (receiver != null && !TextUtils.equals(
                         mPackageName, receiver.getPackageName())) {
-                    EventLog.writeEvent(0x534e4554, "238177121", -1, ""); // SafetyNet logging
+                    EventLog.writeEvent(0x534e4554, "238177121", -1, ""); // SafetyNet logging.
                     throw new IllegalArgumentException("receiver does not belong to "
                             + "package name provided to MediaSessionRecord. Pkg = " + mPackageName
                             + ", Receiver Pkg = " + receiver.getPackageName());
                 }
-
                 if ((mPolicies & MediaSessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_RECEIVER)
                         != 0) {
                     return;

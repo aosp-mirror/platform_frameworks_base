@@ -630,10 +630,11 @@ public class PackageParserLegacyCoreTest {
         assertEquals(0, minExtVers.get(31, -1));
 
         Map<Pair<String, Integer>, Integer> appToError = new HashMap<>();
-        appToError.put(Pair.create("install_uses_sdk.apk_r5", R.raw.install_uses_sdk_r5),
+        appToError.put(Pair.create("install_uses_sdk.apk_r1000", R.raw.install_uses_sdk_r1000),
                        PackageManager.INSTALL_FAILED_OLDER_SDK);
-        appToError.put(Pair.create("install_uses_sdk.apk_r0_s5", R.raw.install_uses_sdk_r0_s5),
-                       PackageManager.INSTALL_FAILED_OLDER_SDK);
+        appToError.put(
+                Pair.create("install_uses_sdk.apk_r0_s1000", R.raw.install_uses_sdk_r0_s1000),
+                PackageManager.INSTALL_FAILED_OLDER_SDK);
 
         appToError.put(Pair.create("install_uses_sdk.apk_q0", R.raw.install_uses_sdk_q0),
                        PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED);
@@ -650,7 +651,7 @@ public class PackageParserLegacyCoreTest {
             int result = entry.getValue();
             try {
                 parsePackage(filename, resId, x -> x);
-                expect.withMessage("Expected parsing error %d from %s", result, filename).fail();
+                expect.withMessage("Expected parsing error %s from %s", result, filename).fail();
             } catch (PackageManagerException expected) {
                 expect.that(expected.error).isEqualTo(result);
             }
