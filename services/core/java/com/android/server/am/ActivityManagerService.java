@@ -5149,8 +5149,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ApplicationExitInfo.REASON_INITIALIZATION_FAILURE,
                     ApplicationExitInfo.SUBREASON_UNKNOWN,
                     "wrong startSeq");
-            app.killLocked("unexpected process record",
-                    ApplicationExitInfo.REASON_OTHER, true);
+            synchronized (this) {
+                app.killLocked("unexpected process record",
+                        ApplicationExitInfo.REASON_OTHER, true);
+            }
             return;
         }
 
