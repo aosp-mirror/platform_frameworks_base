@@ -131,6 +131,7 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinatorLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -383,7 +384,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                                 mInteractionJankMonitor, mShadeExpansionStateManager),
                         mKeyguardBypassController,
                         mDozeParameters,
-                        mScreenOffAnimationController);
+                        mScreenOffAnimationController,
+                        mock(NotificationWakeUpCoordinatorLogger.class));
         mConfigurationController = new ConfigurationControllerImpl(mContext);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(
                 mContext,
@@ -499,8 +501,18 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mDumpManager);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
+                null,
                 () -> {},
                 mNotificationShelfController);
+        mNotificationPanelViewController.setTrackingStartedListener(() -> {});
+        mNotificationPanelViewController.setOpenCloseListener(
+                new NotificationPanelViewController.OpenCloseListener() {
+                    @Override
+                    public void onClosingFinished() {}
+
+                    @Override
+                    public void onOpenStarted() {}
+                });
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
         ArgumentCaptor<View.OnAttachStateChangeListener> onAttachStateChangeListenerArgumentCaptor =
                 ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);

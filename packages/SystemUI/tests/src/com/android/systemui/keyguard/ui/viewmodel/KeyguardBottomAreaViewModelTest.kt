@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.Intent
+import android.os.UserHandle
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
@@ -27,9 +28,11 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceProviderClientFactory
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceSelectionManager
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLocalUserSelectionManager
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
@@ -121,8 +124,8 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         whenever(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED)
         val scope = CoroutineScope(IMMEDIATE)
-        val selectionManager =
-            KeyguardQuickAffordanceSelectionManager(
+        val localUserSelectionManager =
+            KeyguardQuickAffordanceLocalUserSelectionManager(
                 context = context,
                 userFileManager =
                     mock<UserFileManager>().apply {
@@ -136,18 +139,28 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
+                broadcastDispatcher = fakeBroadcastDispatcher,
+            )
+        val remoteUserSelectionManager =
+            KeyguardQuickAffordanceRemoteUserSelectionManager(
+                scope = scope,
+                userTracker = userTracker,
+                clientFactory = FakeKeyguardQuickAffordanceProviderClientFactory(userTracker),
+                userHandle = UserHandle.SYSTEM,
             )
         val quickAffordanceRepository =
             KeyguardQuickAffordanceRepository(
                 appContext = context,
                 scope = scope,
-                selectionManager = selectionManager,
+                localUserSelectionManager = localUserSelectionManager,
+                remoteUserSelectionManager = remoteUserSelectionManager,
+                userTracker = userTracker,
                 legacySettingSyncer =
                     KeyguardQuickAffordanceLegacySettingSyncer(
                         scope = scope,
                         backgroundDispatcher = IMMEDIATE,
                         secureSettings = FakeSettings(),
-                        selectionsManager = selectionManager,
+                        selectionsManager = localUserSelectionManager,
                     ),
                 configs =
                     setOf(
@@ -156,6 +169,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                         qrCodeScannerAffordanceConfig,
                     ),
                 dumpManager = mock(),
+                userHandle = UserHandle.SYSTEM,
             )
         underTest =
             KeyguardBottomAreaViewModel(

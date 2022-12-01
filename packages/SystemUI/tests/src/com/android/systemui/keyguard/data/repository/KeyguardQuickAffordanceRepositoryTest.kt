@@ -17,17 +17,23 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import android.content.pm.UserInfo
+import android.os.UserHandle
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceProviderClientFactory
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceSelectionManager
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLocalUserSelectionManager
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.UserFileManager
+import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
+import com.android.systemui.shared.quickaffordance.data.content.FakeKeyguardQuickAffordanceProviderClient
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -39,6 +45,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,14 +62,24 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
 
     private lateinit var config1: FakeKeyguardQuickAffordanceConfig
     private lateinit var config2: FakeKeyguardQuickAffordanceConfig
+    private lateinit var userTracker: FakeUserTracker
+    private lateinit var client1: FakeKeyguardQuickAffordanceProviderClient
+    private lateinit var client2: FakeKeyguardQuickAffordanceProviderClient
 
     @Before
     fun setUp() {
-        config1 = FakeKeyguardQuickAffordanceConfig("built_in:1")
-        config2 = FakeKeyguardQuickAffordanceConfig("built_in:2")
+        config1 =
+            FakeKeyguardQuickAffordanceConfig(
+                FakeKeyguardQuickAffordanceProviderClient.AFFORDANCE_1
+            )
+        config2 =
+            FakeKeyguardQuickAffordanceConfig(
+                FakeKeyguardQuickAffordanceProviderClient.AFFORDANCE_2
+            )
         val scope = CoroutineScope(IMMEDIATE)
-        val selectionManager =
-            KeyguardQuickAffordanceSelectionManager(
+        userTracker = FakeUserTracker()
+        val localUserSelectionManager =
+            KeyguardQuickAffordanceLocalUserSelectionManager(
                 context = context,
                 userFileManager =
                     mock<UserFileManager>().apply {
@@ -75,23 +92,45 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                             )
                             .thenReturn(FakeSharedPreferences())
                     },
-                userTracker = FakeUserTracker(),
+                userTracker = userTracker,
+                broadcastDispatcher = fakeBroadcastDispatcher,
+            )
+        client1 = FakeKeyguardQuickAffordanceProviderClient()
+        client2 = FakeKeyguardQuickAffordanceProviderClient()
+        val remoteUserSelectionManager =
+            KeyguardQuickAffordanceRemoteUserSelectionManager(
+                scope = scope,
+                userTracker = userTracker,
+                clientFactory =
+                    FakeKeyguardQuickAffordanceProviderClientFactory(
+                        userTracker,
+                    ) { selectedUserId ->
+                        when (selectedUserId) {
+                            SECONDARY_USER_1 -> client1
+                            SECONDARY_USER_2 -> client2
+                            else -> error("No set-up client for user $selectedUserId!")
+                        }
+                    },
+                userHandle = UserHandle.SYSTEM,
             )
 
         underTest =
             KeyguardQuickAffordanceRepository(
                 appContext = context,
                 scope = scope,
-                selectionManager = selectionManager,
+                localUserSelectionManager = localUserSelectionManager,
+                remoteUserSelectionManager = remoteUserSelectionManager,
+                userTracker = userTracker,
                 legacySettingSyncer =
                     KeyguardQuickAffordanceLegacySettingSyncer(
                         scope = scope,
                         backgroundDispatcher = IMMEDIATE,
                         secureSettings = FakeSettings(),
-                        selectionsManager = selectionManager,
+                        selectionsManager = localUserSelectionManager,
                     ),
                 configs = setOf(config1, config2),
                 dumpManager = mock(),
+                userHandle = UserHandle.SYSTEM,
             )
     }
 
@@ -186,7 +225,53 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
             )
     }
 
-    private suspend fun assertSelections(
+    @Test
+    fun `selections for secondary user`() =
+        runBlocking(IMMEDIATE) {
+            userTracker.set(
+                userInfos =
+                    listOf(
+                        UserInfo(
+                            UserHandle.USER_SYSTEM,
+                            "Primary",
+                            /* flags= */ 0,
+                        ),
+                        UserInfo(
+                            SECONDARY_USER_1,
+                            "Secondary 1",
+                            /* flags= */ 0,
+                        ),
+                        UserInfo(
+                            SECONDARY_USER_2,
+                            "Secondary 2",
+                            /* flags= */ 0,
+                        ),
+                    ),
+                selectedUserIndex = 2,
+            )
+            client2.insertSelection(
+                slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
+                affordanceId = FakeKeyguardQuickAffordanceProviderClient.AFFORDANCE_2,
+            )
+            val observed = mutableListOf<Map<String, List<KeyguardQuickAffordanceConfig>>>()
+            val job = underTest.selections.onEach { observed.add(it) }.launchIn(this)
+            yield()
+
+            assertSelections(
+                observed = observed.last(),
+                expected =
+                    mapOf(
+                        KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START to
+                            listOf(
+                                config2,
+                            ),
+                    )
+            )
+
+            job.cancel()
+        }
+
+    private fun assertSelections(
         observed: Map<String, List<KeyguardQuickAffordanceConfig>>?,
         expected: Map<String, List<KeyguardQuickAffordanceConfig>>,
     ) {
@@ -200,5 +285,7 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
 
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate
+        private const val SECONDARY_USER_1 = UserHandle.MIN_SECONDARY_USER_ID + 1
+        private const val SECONDARY_USER_2 = UserHandle.MIN_SECONDARY_USER_ID + 2
     }
 }

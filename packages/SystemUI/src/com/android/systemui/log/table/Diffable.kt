@@ -30,10 +30,11 @@ import kotlinx.coroutines.flow.Flow
  */
 interface Diffable<T> {
     /**
-     * Finds the differences between [prevVal] and [this] and logs those diffs to [row].
+     * Finds the differences between [prevVal] and this object and logs those diffs to [row].
      *
      * Each implementer should determine which individual fields have changed between [prevVal] and
-     * [this], and only log the fields that have actually changed. This helps save buffer space.
+     * this object, and only log the fields that have actually changed. This helps save buffer
+     * space.
      *
      * For example, if:
      * - prevVal = Object(val1=100, val2=200, val3=300)
@@ -42,6 +43,16 @@ interface Diffable<T> {
      * Then only the val3 change should be logged.
      */
     fun logDiffs(prevVal: T, row: TableRowLogger)
+
+    /**
+     * Logs all the relevant fields of this object to [row].
+     *
+     * As opposed to [logDiffs], this method should log *all* fields.
+     *
+     * Implementation is optional. This method will only be used with [logDiffsForTable] in order to
+     * fully log the initial value of the flow.
+     */
+    fun logFull(row: TableRowLogger) {}
 }
 
 /**
@@ -57,8 +68,35 @@ fun <T : Diffable<T>> Flow<T>.logDiffsForTable(
     columnPrefix: String,
     initialValue: T,
 ): Flow<T> {
-    return this.pairwiseBy(initialValue) { prevVal, newVal ->
+    // Fully log the initial value to the table.
+    val getInitialValue = {
+        tableLogBuffer.logChange(columnPrefix) { row -> initialValue.logFull(row) }
+        initialValue
+    }
+    return this.pairwiseBy(getInitialValue) { prevVal: T, newVal: T ->
         tableLogBuffer.logDiffs(columnPrefix, prevVal, newVal)
+        newVal
+    }
+}
+
+/**
+ * Each time the boolean flow is updated with a new value that's different from the previous value,
+ * logs the new value to the given [tableLogBuffer].
+ */
+fun Flow<Boolean>.logDiffsForTable(
+    tableLogBuffer: TableLogBuffer,
+    columnPrefix: String,
+    columnName: String,
+    initialValue: Boolean,
+): Flow<Boolean> {
+    val initialValueFun = {
+        tableLogBuffer.logChange(columnPrefix, columnName, initialValue)
+        initialValue
+    }
+    return this.pairwiseBy(initialValueFun) { prevVal, newVal: Boolean ->
+        if (prevVal != newVal) {
+            tableLogBuffer.logChange(columnPrefix, columnName, newVal)
+        }
         newVal
     }
 }
