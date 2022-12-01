@@ -65,41 +65,14 @@ class MediaTttUtilsTest : SysuiTestCase() {
     }
 
     @Test
-    fun getIconFromPackageName_nullPackageName_returnsDefault() {
-        val icon = MediaTttUtils.getIconFromPackageName(context, appPackageName = null, logger)
-
-        val expectedDesc =
-            ContentDescription.Resource(R.string.media_output_dialog_unknown_launch_app_name)
-                .loadContentDescription(context)
-        assertThat(icon.contentDescription.loadContentDescription(context)).isEqualTo(expectedDesc)
-    }
-
-    @Test
-    fun getIconFromPackageName_invalidPackageName_returnsDefault() {
-        val icon = MediaTttUtils.getIconFromPackageName(context, "fakePackageName", logger)
-
-        val expectedDesc =
-            ContentDescription.Resource(R.string.media_output_dialog_unknown_launch_app_name)
-                .loadContentDescription(context)
-        assertThat(icon.contentDescription.loadContentDescription(context)).isEqualTo(expectedDesc)
-    }
-
-    @Test
-    fun getIconFromPackageName_validPackageName_returnsAppInfo() {
-        val icon = MediaTttUtils.getIconFromPackageName(context, PACKAGE_NAME, logger)
-
-        assertThat(icon)
-            .isEqualTo(Icon.Loaded(appIconFromPackageName, ContentDescription.Loaded(APP_NAME)))
-    }
-
-    @Test
     fun getIconInfoFromPackageName_nullPackageName_returnsDefault() {
         val iconInfo =
             MediaTttUtils.getIconInfoFromPackageName(context, appPackageName = null, logger)
 
         assertThat(iconInfo.isAppIcon).isFalse()
-        assertThat(iconInfo.contentDescription)
+        assertThat(iconInfo.contentDescription.loadContentDescription(context))
             .isEqualTo(context.getString(R.string.media_output_dialog_unknown_launch_app_name))
+        assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Resource(R.drawable.ic_cast))
     }
 
     @Test
@@ -107,8 +80,9 @@ class MediaTttUtilsTest : SysuiTestCase() {
         val iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, "fakePackageName", logger)
 
         assertThat(iconInfo.isAppIcon).isFalse()
-        assertThat(iconInfo.contentDescription)
+        assertThat(iconInfo.contentDescription.loadContentDescription(context))
             .isEqualTo(context.getString(R.string.media_output_dialog_unknown_launch_app_name))
+        assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Resource(R.drawable.ic_cast))
     }
 
     @Test
@@ -116,8 +90,48 @@ class MediaTttUtilsTest : SysuiTestCase() {
         val iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, PACKAGE_NAME, logger)
 
         assertThat(iconInfo.isAppIcon).isTrue()
-        assertThat(iconInfo.drawable).isEqualTo(appIconFromPackageName)
-        assertThat(iconInfo.contentDescription).isEqualTo(APP_NAME)
+        assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Loaded(appIconFromPackageName))
+        assertThat(iconInfo.contentDescription.loadContentDescription(context)).isEqualTo(APP_NAME)
+    }
+
+    @Test
+    fun iconInfo_toTintedIcon_loaded() {
+        val contentDescription = ContentDescription.Loaded("test")
+        val drawable = context.getDrawable(R.drawable.ic_cake)!!
+        val tintAttr = android.R.attr.textColorTertiary
+
+        val iconInfo =
+            IconInfo(
+                contentDescription,
+                MediaTttIcon.Loaded(drawable),
+                tintAttr,
+                isAppIcon = false,
+            )
+
+        val tinted = iconInfo.toTintedIcon()
+
+        assertThat(tinted.icon).isEqualTo(Icon.Loaded(drawable, contentDescription))
+        assertThat(tinted.tintAttr).isEqualTo(tintAttr)
+    }
+
+    @Test
+    fun iconInfo_toTintedIcon_resource() {
+        val contentDescription = ContentDescription.Loaded("test")
+        val drawableRes = R.drawable.ic_cake
+        val tintAttr = android.R.attr.textColorTertiary
+
+        val iconInfo =
+            IconInfo(
+                contentDescription,
+                MediaTttIcon.Resource(drawableRes),
+                tintAttr,
+                isAppIcon = false
+            )
+
+        val tinted = iconInfo.toTintedIcon()
+
+        assertThat(tinted.icon).isEqualTo(Icon.Resource(drawableRes, contentDescription))
+        assertThat(tinted.tintAttr).isEqualTo(tintAttr)
     }
 }
 

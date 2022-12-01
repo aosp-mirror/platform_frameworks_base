@@ -35,6 +35,7 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -370,7 +371,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
         vibrationEffect: VibrationEffect? = null,
     ): ChipbarInfo {
         return ChipbarInfo(
-            startIcon,
+            TintedIcon(startIcon, tintAttr = null),
             text,
             endItem,
             vibrationEffect,

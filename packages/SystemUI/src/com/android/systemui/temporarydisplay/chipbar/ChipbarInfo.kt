@@ -18,8 +18,9 @@ package com.android.systemui.temporarydisplay.chipbar
 
 import android.os.VibrationEffect
 import android.view.View
-import com.android.systemui.common.shared.model.Icon
+import androidx.annotation.AttrRes
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.temporarydisplay.TemporaryViewInfo
 
 /**
@@ -33,7 +34,7 @@ import com.android.systemui.temporarydisplay.TemporaryViewInfo
  * @property vibrationEffect an optional vibration effect when the chipbar is displayed
  */
 data class ChipbarInfo(
-    val startIcon: Icon,
+    val startIcon: TintedIcon,
     val text: Text,
     val endItem: ChipbarEndItem?,
     val vibrationEffect: VibrationEffect? = null,
@@ -41,7 +42,11 @@ data class ChipbarInfo(
     override val wakeReason: String,
     override val timeoutMs: Int,
     override val id: String,
-) : TemporaryViewInfo()
+) : TemporaryViewInfo() {
+    companion object {
+        @AttrRes const val DEFAULT_ICON_TINT_ATTR = android.R.attr.textColorPrimary
+    }
+}
 
 /** The possible items to display at the end of the chipbar. */
 sealed class ChipbarEndItem {
