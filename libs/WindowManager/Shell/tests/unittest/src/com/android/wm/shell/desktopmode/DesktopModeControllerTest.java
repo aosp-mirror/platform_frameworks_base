@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
@@ -334,10 +335,10 @@ public class DesktopModeControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void testHandleTransitionRequest_notTransitOpen_returnsNull() {
+    public void testHandleTransitionRequest_unsupportedTransit_returnsNull() {
         WindowContainerTransaction wct = mController.handleRequest(
                 new Binder(),
-                new TransitionRequestInfo(TRANSIT_TO_FRONT, null /* trigger */, null /* remote */));
+                new TransitionRequestInfo(TRANSIT_CLOSE, null /* trigger */, null /* remote */));
         assertThat(wct).isNull();
     }
 
@@ -352,13 +353,24 @@ public class DesktopModeControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void testHandleTransitionRequest_returnsWct() {
+    public void testHandleTransitionRequest_taskOpen_returnsWct() {
         RunningTaskInfo trigger = new RunningTaskInfo();
         trigger.token = new MockToken().mToken;
         trigger.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
         WindowContainerTransaction wct = mController.handleRequest(
                 mock(IBinder.class),
                 new TransitionRequestInfo(TRANSIT_OPEN, trigger, null /* remote */));
+        assertThat(wct).isNotNull();
+    }
+
+    @Test
+    public void testHandleTransitionRequest_taskToFront_returnsWct() {
+        RunningTaskInfo trigger = new RunningTaskInfo();
+        trigger.token = new MockToken().mToken;
+        trigger.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        WindowContainerTransaction wct = mController.handleRequest(
+                mock(IBinder.class),
+                new TransitionRequestInfo(TRANSIT_TO_FRONT, trigger, null /* remote */));
         assertThat(wct).isNotNull();
     }
 

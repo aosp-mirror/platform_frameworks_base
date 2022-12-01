@@ -40,6 +40,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 import android.window.DisplayAreaInfo;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
@@ -329,15 +330,17 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
-        // Only do anything if we are in desktop mode and opening a task/app in freeform
+        // Only do anything if we are in desktop mode and opening/moving-to-front a task/app in
+        // freeform
         if (!DesktopModeStatus.isActive(mContext)) {
             ProtoLog.d(WM_SHELL_DESKTOP_MODE,
                     "skip shell transition request: desktop mode not active");
             return null;
         }
-        if (request.getType() != TRANSIT_OPEN) {
+        if (request.getType() != TRANSIT_OPEN && request.getType() != TRANSIT_TO_FRONT) {
             ProtoLog.d(WM_SHELL_DESKTOP_MODE,
-                    "skip shell transition request: only supports TRANSIT_OPEN");
+                    "skip shell transition request: unsupported type %s",
+                    WindowManager.transitTypeToString(request.getType()));
             return null;
         }
         if (request.getTriggerTask() == null
