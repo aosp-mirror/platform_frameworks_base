@@ -3837,13 +3837,20 @@ final class InstallPackageHelper {
                 && !pkgSetting.getPathString().equals(parsedPackage.getPath());
         final boolean newPkgVersionGreater = pkgAlreadyExists
                 && parsedPackage.getLongVersionCode() > pkgSetting.getVersionCode();
+        final boolean newSharedUserSetting = pkgAlreadyExists
+                && (initialScanRequest.mOldSharedUserSetting
+                != initialScanRequest.mSharedUserSetting);
         final boolean isSystemPkgBetter = scanSystemPartition && isSystemPkgUpdated
-                && newPkgChangedPaths && newPkgVersionGreater;
+                && newPkgChangedPaths && (newPkgVersionGreater || newSharedUserSetting);
         if (isSystemPkgBetter) {
             // The version of the application on /system is greater than the version on
             // /data. Switch back to the application on /system.
             // It's safe to assume the application on /system will correctly scan. If not,
             // there won't be a working copy of the application.
+            // Also, if the sharedUserSetting of the application on /system is different
+            // from the sharedUserSetting on /data, switch back to the application on /system.
+            // We should trust the sharedUserSetting on /system, even if the application
+            // version on /system is smaller than the version on /data.
             synchronized (mPm.mLock) {
                 // just remove the loaded entries from package lists
                 mPm.mPackages.remove(pkgSetting.getPackageName());
