@@ -28,6 +28,7 @@ import android.content.Context;
 import android.hardware.vibrator.V1_0.EffectStrength;
 import android.hardware.vibrator.V1_3.Effect;
 import android.net.Uri;
+import android.os.Vibrator;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
@@ -515,6 +516,16 @@ public abstract class VibrationEffect implements Parcelable {
     public abstract long getDuration();
 
     /**
+     * Checks if a given {@link Vibrator} can play this effect as intended.
+     *
+     * <p>See @link Vibrator#areVibrationFeaturesSupported(VibrationEffect)} for more information
+     * about what counts as supported by a vibrator, and what counts as not.
+     *
+     * @hide
+     */
+    public abstract boolean areVibrationFeaturesSupported(@NonNull Vibrator vibrator);
+
+    /**
      * Returns true if this effect could represent a touch haptic feedback.
      *
      * <p>It is strongly recommended that an instance of {@link VibrationAttributes} is specified
@@ -754,6 +765,17 @@ public abstract class VibrationEffect implements Parcelable {
                 totalDuration += segmentDuration;
             }
             return totalDuration;
+        }
+
+        /** @hide */
+        @Override
+        public boolean areVibrationFeaturesSupported(@NonNull Vibrator vibrator) {
+            for (VibrationEffectSegment segment : mSegments) {
+                if (!segment.areVibrationFeaturesSupported(vibrator)) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         /** @hide */
