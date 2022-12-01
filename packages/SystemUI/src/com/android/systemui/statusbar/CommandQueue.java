@@ -165,6 +165,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_TILE_SERVICE_REQUEST_LISTENING_STATE = 68 << MSG_SHIFT;
     private static final int MSG_SHOW_REAR_DISPLAY_DIALOG = 69 << MSG_SHIFT;
     private static final int MSG_GO_TO_FULLSCREEN_FROM_SPLIT = 70 << MSG_SHIFT;
+    private static final int MSG_ENTER_STAGE_SPLIT_FROM_RUNNING_APP = 71 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -484,6 +485,11 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @see IStatusBar#goToFullscreenFromSplit
          */
         default void goToFullscreenFromSplit() {}
+
+        /**
+         * @see IStatusBar#enterStageSplitFromRunningApp
+         */
+        default void enterStageSplitFromRunningApp(boolean leftOrTop) {}
     }
 
     public CommandQueue(Context context) {
@@ -1245,6 +1251,14 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
+    public void enterStageSplitFromRunningApp(boolean leftOrTop) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_ENTER_STAGE_SPLIT_FROM_RUNNING_APP,
+                    leftOrTop).sendToTarget();
+        }
+    }
+
+    @Override
     public void requestAddTile(
             @NonNull ComponentName componentName,
             @NonNull CharSequence appName,
@@ -1753,6 +1767,11 @@ public class CommandQueue extends IStatusBar.Stub implements
                 case MSG_GO_TO_FULLSCREEN_FROM_SPLIT:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).goToFullscreenFromSplit();
+                    }
+                    break;
+                case MSG_ENTER_STAGE_SPLIT_FROM_RUNNING_APP:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).enterStageSplitFromRunningApp((Boolean) msg.obj);
                     }
                     break;
             }
