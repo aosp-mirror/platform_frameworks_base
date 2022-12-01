@@ -979,6 +979,39 @@ public final class DisplayManagerGlobal {
     }
 
     /**
+     * Sets the {@link HdrConversionMode} for the device.
+     */
+    public void setHdrConversionMode(@NonNull HdrConversionMode hdrConversionMode) {
+        try {
+            mDm.setHdrConversionMode(hdrConversionMode);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the {@link HdrConversionMode} of the device.
+     */
+    public HdrConversionMode getHdrConversionMode() {
+        try {
+            return mDm.getHdrConversionMode();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the HDR output types supported by the device.
+     */
+    public @HdrType int[] getSupportedHdrOutputTypes() {
+        try {
+            return mDm.getSupportedHdrOutputTypes();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * When enabled the app requested display resolution and refresh rate is always selected
      * in DisplayModeDirector regardless of user settings and policies for low brightness, low
      * battery etc.

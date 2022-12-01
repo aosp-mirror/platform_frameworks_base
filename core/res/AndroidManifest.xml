@@ -5244,6 +5244,12 @@
     <permission android:name="android.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE"
                 android:protectionLevel="signature" />
 
+    <!-- Allows an application to modify the HDR conversion mode.
+         @hide
+         @TestApi -->
+    <permission android:name="android.permission.MODIFY_HDR_CONVERSION_MODE"
+                android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows an application to control VPN.
          <p>Not for use by third-party applications.</p>
          @hide -->

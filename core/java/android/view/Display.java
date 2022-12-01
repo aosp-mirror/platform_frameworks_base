@@ -2323,6 +2323,10 @@ public final class Display {
          */
         public static final float INVALID_LUMINANCE = -1;
         /**
+         * Invalid HDR type value.
+         */
+        public static final int HDR_TYPE_INVALID = -1;
+        /**
          * Dolby Vision high dynamic range (HDR) display.
          */
         public static final int HDR_TYPE_DOLBY_VISION = 1;
@@ -2350,6 +2354,7 @@ public final class Display {
 
         /** @hide */
         @IntDef(prefix = { "HDR_TYPE_" }, value = {
+                HDR_TYPE_INVALID,
                 HDR_TYPE_DOLBY_VISION,
                 HDR_TYPE_HDR10,
                 HDR_TYPE_HLG,
