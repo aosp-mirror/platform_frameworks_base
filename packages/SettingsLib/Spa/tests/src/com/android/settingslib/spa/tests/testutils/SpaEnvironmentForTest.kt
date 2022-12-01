@@ -51,7 +51,7 @@ class SpaLoggerForTest : SpaLogger {
         messageCount[key] = (messageCount[key] ?: 0) + 1
     }
 
-    override fun event(id: String, event: LogEvent, category: LogCategory, details: String?) {
+    override fun event(id: String, event: LogEvent, category: LogCategory, extraData: Bundle) {
         val key = EventCountKey(id, event, category)
         eventCount[key] = (eventCount[key] ?: 0) + 1
     }
