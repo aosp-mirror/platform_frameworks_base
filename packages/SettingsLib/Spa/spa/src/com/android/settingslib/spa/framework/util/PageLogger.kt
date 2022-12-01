@@ -21,8 +21,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.core.os.bundleOf
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.android.settingslib.spa.framework.common.LOG_DATA_DISPLAY_NAME
+import com.android.settingslib.spa.framework.common.LOG_DATA_SESSION_NAME
 import com.android.settingslib.spa.framework.common.LogCategory
 import com.android.settingslib.spa.framework.common.LogEvent
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
@@ -37,21 +40,21 @@ internal fun SettingsPageProvider.PageEvent(arguments: Bundle? = null) {
     val navController = LocalNavController.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            val spaLogger = SpaEnvironmentFactory.instance.logger
+            val logPageEvent: (event: LogEvent) -> Unit = {
+                SpaEnvironmentFactory.instance.logger.event(
+                    id = page.id,
+                    event = it,
+                    category = LogCategory.FRAMEWORK,
+                    extraData = bundleOf(
+                        LOG_DATA_DISPLAY_NAME to page.displayName,
+                        LOG_DATA_SESSION_NAME to navController.sessionSourceName,
+                    )
+                )
+            }
             if (event == Lifecycle.Event.ON_START) {
-                spaLogger.event(
-                    page.id,
-                    LogEvent.PAGE_ENTER,
-                    category = LogCategory.FRAMEWORK,
-                    details = navController.sessionSourceName ?: page.displayName,
-                )
+                logPageEvent(LogEvent.PAGE_ENTER)
             } else if (event == Lifecycle.Event.ON_STOP) {
-                spaLogger.event(
-                    page.id,
-                    LogEvent.PAGE_LEAVE,
-                    category = LogCategory.FRAMEWORK,
-                    details = navController.sessionSourceName ?: page.displayName,
-                )
+                logPageEvent(LogEvent.PAGE_LEAVE)
             }
         }
 
