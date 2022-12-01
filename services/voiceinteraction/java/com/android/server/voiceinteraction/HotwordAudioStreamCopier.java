@@ -17,16 +17,16 @@
 package com.android.server.voiceinteraction;
 
 import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.service.voice.HotwordAudioStream.KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES;
 
 import static com.android.server.voiceinteraction.HotwordDetectionConnection.DEBUG;
 
 import android.annotation.NonNull;
 import android.app.AppOpsManager;
-import android.media.permission.Identity;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.service.voice.HotwordAudioStream;
 import android.service.voice.HotwordDetectedResult;
-import android.util.Pair;
 import android.util.Slog;
 
 import java.io.IOException;
@@ -39,21 +39,38 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-final class HotwordAudioStreamManager {
+/**
+ * Copies the audio streams in {@link HotwordDetectedResult}s. This allows the system to manage the
+ * lifetime of the {@link ParcelFileDescriptor}s and ensures that the flow of data is in the right
+ * direction from the {@link android.service.voice.HotwordDetectionService} to the client (i.e., the
+ * voice interactor).
+ *
+ * @hide
+ */
+final class HotwordAudioStreamCopier {
 
-    private static final String TAG = "HotwordAudioStreamManager";
+    private static final String TAG = "HotwordAudioStreamCopier";
     private static final String OP_MESSAGE = "Streaming hotword audio to VoiceInteractionService";
     private static final String TASK_ID_PREFIX = "HotwordDetectedResult@";
     private static final String THREAD_NAME_PREFIX = "Copy-";
+    private static final int DEFAULT_COPY_BUFFER_LENGTH_BYTES = 2_560;
+
+    // Corresponds to the OS pipe capacity in bytes
+    private static final int MAX_COPY_BUFFER_LENGTH_BYTES = 65_536;
 
     private final AppOpsManager mAppOpsManager;
-    private final Identity mVoiceInteractorIdentity;
+    private final int mVoiceInteractorUid;
+    private final String mVoiceInteractorPackageName;
+    private final String mVoiceInteractorAttributionTag;
     private final ExecutorService mExecutorService = Executors.newCachedThreadPool();
 
-    HotwordAudioStreamManager(@NonNull AppOpsManager appOpsManager,
-            @NonNull Identity voiceInteractorIdentity) {
+    HotwordAudioStreamCopier(@NonNull AppOpsManager appOpsManager,
+            int voiceInteractorUid, @NonNull String voiceInteractorPackageName,
+            @NonNull String voiceInteractorAttributionTag) {
         mAppOpsManager = appOpsManager;
-        mVoiceInteractorIdentity = voiceInteractorIdentity;
+        mVoiceInteractorUid = voiceInteractorUid;
+        mVoiceInteractorPackageName = voiceInteractorPackageName;
+        mVoiceInteractorAttributionTag = voiceInteractorAttributionTag;
     }
 
     /**
@@ -61,7 +78,7 @@ final class HotwordAudioStreamManager {
      * <p>
      * The returned {@link HotwordDetectedResult} is identical the one that was passed in, except
      * that the {@link ParcelFileDescriptor}s within {@link HotwordDetectedResult#getAudioStreams()}
-     * are replaced with descriptors from pipes managed by {@link HotwordAudioStreamManager}. The
+     * are replaced with descriptors from pipes managed by {@link HotwordAudioStreamCopier}. The
      * returned value should be passed on to the client (i.e., the voice interactor).
      * </p>
      *
@@ -76,8 +93,7 @@ final class HotwordAudioStreamManager {
         }
 
         List<HotwordAudioStream> newAudioStreams = new ArrayList<>(audioStreams.size());
-        List<Pair<ParcelFileDescriptor, ParcelFileDescriptor>> sourcesAndSinks = new ArrayList<>(
-                audioStreams.size());
+        List<CopyTaskInfo> copyTaskInfos = new ArrayList<>(audioStreams.size());
         for (HotwordAudioStream audioStream : audioStreams) {
             ParcelFileDescriptor[] clientPipe = ParcelFileDescriptor.createReliablePipe();
             ParcelFileDescriptor clientAudioSource = clientPipe[0];
@@ -87,46 +103,69 @@ final class HotwordAudioStreamManager {
                             clientAudioSource).build();
             newAudioStreams.add(newAudioStream);
 
+            int copyBufferLength = DEFAULT_COPY_BUFFER_LENGTH_BYTES;
+            PersistableBundle metadata = audioStream.getMetadata();
+            if (metadata.containsKey(KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES)) {
+                copyBufferLength = metadata.getInt(KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES, -1);
+                if (copyBufferLength < 1 || copyBufferLength > MAX_COPY_BUFFER_LENGTH_BYTES) {
+                    Slog.w(TAG, "Attempted to set an invalid copy buffer length ("
+                            + copyBufferLength + ") for: " + audioStream);
+                    copyBufferLength = DEFAULT_COPY_BUFFER_LENGTH_BYTES;
+                } else if (DEBUG) {
+                    Slog.i(TAG, "Copy buffer length set to " + copyBufferLength + " for: "
+                            + audioStream);
+                }
+            }
+
             ParcelFileDescriptor serviceAudioSource =
                     audioStream.getAudioStreamParcelFileDescriptor();
-            sourcesAndSinks.add(new Pair<>(serviceAudioSource, clientAudioSink));
+            copyTaskInfos.add(new CopyTaskInfo(serviceAudioSource, clientAudioSink,
+                    copyBufferLength));
         }
 
         String resultTaskId = TASK_ID_PREFIX + System.identityHashCode(result);
-        mExecutorService.execute(new HotwordDetectedResultCopyTask(resultTaskId, sourcesAndSinks));
+        mExecutorService.execute(new HotwordDetectedResultCopyTask(resultTaskId, copyTaskInfos));
 
         return result.buildUpon().setAudioStreams(newAudioStreams).build();
     }
 
+    private static class CopyTaskInfo {
+        private final ParcelFileDescriptor mSource;
+        private final ParcelFileDescriptor mSink;
+        private final int mCopyBufferLength;
+
+        CopyTaskInfo(ParcelFileDescriptor source, ParcelFileDescriptor sink, int copyBufferLength) {
+            mSource = source;
+            mSink = sink;
+            mCopyBufferLength = copyBufferLength;
+        }
+    }
+
     private class HotwordDetectedResultCopyTask implements Runnable {
         private final String mResultTaskId;
-        private final List<Pair<ParcelFileDescriptor, ParcelFileDescriptor>> mSourcesAndSinks;
+        private final List<CopyTaskInfo> mCopyTaskInfos;
         private final ExecutorService mExecutorService = Executors.newCachedThreadPool();
 
-        HotwordDetectedResultCopyTask(String resultTaskId,
-                List<Pair<ParcelFileDescriptor, ParcelFileDescriptor>> sourcesAndSinks) {
+        HotwordDetectedResultCopyTask(String resultTaskId, List<CopyTaskInfo> copyTaskInfos) {
             mResultTaskId = resultTaskId;
-            mSourcesAndSinks = sourcesAndSinks;
+            mCopyTaskInfos = copyTaskInfos;
         }
 
         @Override
         public void run() {
             Thread.currentThread().setName(THREAD_NAME_PREFIX + mResultTaskId);
-            int size = mSourcesAndSinks.size();
+            int size = mCopyTaskInfos.size();
             List<SingleAudioStreamCopyTask> tasks = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
-                Pair<ParcelFileDescriptor, ParcelFileDescriptor> sourceAndSink =
-                        mSourcesAndSinks.get(i);
-                ParcelFileDescriptor serviceAudioSource = sourceAndSink.first;
-                ParcelFileDescriptor clientAudioSink = sourceAndSink.second;
+                CopyTaskInfo copyTaskInfo = mCopyTaskInfos.get(i);
                 String streamTaskId = mResultTaskId + "@" + i;
-                tasks.add(new SingleAudioStreamCopyTask(streamTaskId, serviceAudioSource,
-                        clientAudioSink));
+                tasks.add(new SingleAudioStreamCopyTask(streamTaskId, copyTaskInfo.mSource,
+                        copyTaskInfo.mSink, copyTaskInfo.mCopyBufferLength));
             }
 
             if (mAppOpsManager.startOpNoThrow(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD,
-                    mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
-                    mVoiceInteractorIdentity.attributionTag, OP_MESSAGE) == MODE_ALLOWED) {
+                    mVoiceInteractorUid, mVoiceInteractorPackageName,
+                    mVoiceInteractorAttributionTag, OP_MESSAGE) == MODE_ALLOWED) {
                 try {
                     // TODO(b/244599891): Set timeout, close after inactivity
                     mExecutorService.invokeAll(tasks);
@@ -135,25 +174,23 @@ final class HotwordAudioStreamManager {
                     bestEffortPropagateError(e.getMessage());
                 } finally {
                     mAppOpsManager.finishOp(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD,
-                            mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
-                            mVoiceInteractorIdentity.attributionTag);
+                            mVoiceInteractorUid, mVoiceInteractorPackageName,
+                            mVoiceInteractorAttributionTag);
                 }
             } else {
                 bestEffortPropagateError(
-                        "Failed to obtain RECORD_AUDIO_HOTWORD permission for "
-                                + SoundTriggerSessionPermissionsDecorator.toString(
-                                mVoiceInteractorIdentity));
+                        "Failed to obtain RECORD_AUDIO_HOTWORD permission for voice interactor with"
+                                + " uid=" + mVoiceInteractorUid
+                                + " packageName=" + mVoiceInteractorPackageName
+                                + " attributionTag=" + mVoiceInteractorAttributionTag);
             }
         }
 
         private void bestEffortPropagateError(@NonNull String errorMessage) {
             try {
-                for (Pair<ParcelFileDescriptor, ParcelFileDescriptor> sourceAndSink :
-                        mSourcesAndSinks) {
-                    ParcelFileDescriptor serviceAudioSource = sourceAndSink.first;
-                    ParcelFileDescriptor clientAudioSink = sourceAndSink.second;
-                    serviceAudioSource.closeWithError(errorMessage);
-                    clientAudioSink.closeWithError(errorMessage);
+                for (CopyTaskInfo copyTaskInfo : mCopyTaskInfos) {
+                    copyTaskInfo.mSource.closeWithError(errorMessage);
+                    copyTaskInfo.mSink.closeWithError(errorMessage);
                 }
             } catch (IOException e) {
                 Slog.e(TAG, mResultTaskId + ": Failed to propagate error", e);
@@ -162,18 +199,17 @@ final class HotwordAudioStreamManager {
     }
 
     private static class SingleAudioStreamCopyTask implements Callable<Void> {
-        // TODO: Make this buffer size customizable from updateState()
-        private static final int COPY_BUFFER_LENGTH = 2_560;
-
         private final String mStreamTaskId;
         private final ParcelFileDescriptor mAudioSource;
         private final ParcelFileDescriptor mAudioSink;
+        private final int mCopyBufferLength;
 
         SingleAudioStreamCopyTask(String streamTaskId, ParcelFileDescriptor audioSource,
-                ParcelFileDescriptor audioSink) {
+                ParcelFileDescriptor audioSink, int copyBufferLength) {
             mStreamTaskId = streamTaskId;
             mAudioSource = audioSource;
             mAudioSink = audioSink;
+            mCopyBufferLength = copyBufferLength;
         }
 
         @Override
@@ -189,7 +225,7 @@ final class HotwordAudioStreamManager {
             try {
                 fis = new ParcelFileDescriptor.AutoCloseInputStream(mAudioSource);
                 fos = new ParcelFileDescriptor.AutoCloseOutputStream(mAudioSink);
-                byte[] buffer = new byte[COPY_BUFFER_LENGTH];
+                byte[] buffer = new byte[mCopyBufferLength];
                 while (true) {
                     if (Thread.interrupted()) {
                         Slog.e(TAG,
