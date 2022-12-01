@@ -3358,13 +3358,13 @@ public class UserManagerService extends IUserManager.Stub {
                     Slogf.wtf(LOG_TAG, "emulateSystemUserModeIfNeeded(): no system user data");
                     return;
                 }
+                final int oldMainUserId = getMainUserIdUnchecked();
                 final int oldFlags = systemUserData.info.flags;
                 final int newFlags;
                 final String newUserType;
-                // TODO(b/256624031): Also handle FLAG_MAIN
                 if (newHeadlessSystemUserMode) {
                     newUserType = UserManager.USER_TYPE_SYSTEM_HEADLESS;
-                    newFlags = oldFlags & ~UserInfo.FLAG_FULL;
+                    newFlags = oldFlags & ~UserInfo.FLAG_FULL & ~UserInfo.FLAG_MAIN;
                 } else {
                     newUserType = UserManager.USER_TYPE_FULL_SYSTEM;
                     newFlags = oldFlags | UserInfo.FLAG_FULL;
@@ -3379,9 +3379,38 @@ public class UserManagerService extends IUserManager.Stub {
                         + "%s, flags changed from %s to %s",
                         systemUserData.info.userType, newUserType,
                         UserInfo.flagsToString(oldFlags), UserInfo.flagsToString(newFlags));
+
                 systemUserData.info.userType = newUserType;
                 systemUserData.info.flags = newFlags;
                 writeUserLP(systemUserData);
+
+                // Switch the MainUser to a reasonable choice if needed.
+                // (But if there was no MainUser, we deliberately continue to have no MainUser.)
+                final UserData oldMain = getUserDataNoChecks(oldMainUserId);
+                if (newHeadlessSystemUserMode) {
+                    if (oldMain != null && (oldMain.info.flags & UserInfo.FLAG_SYSTEM) != 0) {
+                        // System was MainUser. So we need a new choice for Main. Pick the oldest.
+                        // If no oldest, don't set any. Let the BootUserInitializer do that later.
+                        final UserInfo newMainUser = getEarliestCreatedFullUser();
+                        if (newMainUser != null) {
+                            Slogf.i(LOG_TAG, "Designating user " + newMainUser.id + " to be Main");
+                            newMainUser.flags |= UserInfo.FLAG_MAIN;
+                            writeUserLP(getUserDataNoChecks(newMainUser.id));
+                        }
+                    }
+                } else {
+                    // TODO(b/256624031): For now, we demand the Main user (if there is one) is
+                    //  always the system in non-HSUM. In the future, when we relax this, change how
+                    //  we handle MAIN.
+                    if (oldMain != null && (oldMain.info.flags & UserInfo.FLAG_SYSTEM) == 0) {
+                        // Someone else was the MainUser; transfer it to System.
+                        Slogf.i(LOG_TAG, "Transferring Main to user 0 from " + oldMain.info.id);
+                        oldMain.info.flags &= ~UserInfo.FLAG_MAIN;
+                        systemUserData.info.flags |= UserInfo.FLAG_MAIN;
+                        writeUserLP(oldMain);
+                        writeUserLP(systemUserData);
+                    }
+                }
             }
         }
 
@@ -3658,8 +3687,10 @@ public class UserManagerService extends IUserManager.Stub {
             // Add FLAG_MAIN
             if (isHeadlessSystemUserMode()) {
                 final UserInfo earliestCreatedUser = getEarliestCreatedFullUser();
-                earliestCreatedUser.flags |= UserInfo.FLAG_MAIN;
-                userIdsToWrite.add(earliestCreatedUser.id);
+                if (earliestCreatedUser != null) {
+                    earliestCreatedUser.flags |= UserInfo.FLAG_MAIN;
+                    userIdsToWrite.add(earliestCreatedUser.id);
+                }
             } else {
                 synchronized (mUsersLock) {
                     final UserData userData = mUsers.get(UserHandle.USER_SYSTEM);
@@ -3799,9 +3830,10 @@ public class UserManagerService extends IUserManager.Stub {
         userInfo.profileBadge = getFreeProfileBadgeLU(userInfo.profileGroupId, userInfo.userType);
     }
 
-    private UserInfo getEarliestCreatedFullUser() {
+    /** Returns the oldest Full Admin user, or null is if there none. */
+    private @Nullable UserInfo getEarliestCreatedFullUser() {
         final List<UserInfo> users = getUsersInternal(true, true, true);
-        UserInfo earliestUser = users.get(0);
+        UserInfo earliestUser = null;
         long earliestCreationTime = Long.MAX_VALUE;
         for (int i = 0; i < users.size(); i++) {
             final UserInfo info = users.get(i);
