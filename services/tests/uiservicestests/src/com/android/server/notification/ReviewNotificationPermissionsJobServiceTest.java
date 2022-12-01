@@ -44,9 +44,9 @@ import org.mockito.Mock;
 @RunWith(AndroidTestingRunner.class)
 public class ReviewNotificationPermissionsJobServiceTest extends UiServiceTestCase {
     private ReviewNotificationPermissionsJobService mJobService;
-    private JobParameters mJobParams = new JobParameters(null,
-            ReviewNotificationPermissionsJobService.JOB_ID, null, null, null,
-            0, false, false, null, null, null);
+
+    @Mock
+    private JobParameters mJobParams;
 
     @Captor
     ArgumentCaptor<JobInfo> mJobInfoCaptor;
