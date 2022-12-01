@@ -31,6 +31,8 @@ import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ICreateCredentialCallback;
 import android.credentials.ICredentialManager;
 import android.credentials.IGetCredentialCallback;
+import android.credentials.IListEnabledProvidersCallback;
+import android.credentials.ListEnabledProvidersResponse;
 import android.credentials.ISetEnabledProvidersCallback;
 import android.os.Binder;
 import android.os.CancellationSignal;
@@ -55,20 +57,23 @@ import java.util.stream.Collectors;
 /**
  * Entry point service for credential management.
  *
- * <p>This service provides the {@link ICredentialManager} implementation and keeps a list of
- * {@link CredentialManagerServiceImpl} per user; the real work is done by
- * {@link CredentialManagerServiceImpl} itself.
+ * <p>This service provides the {@link ICredentialManager} implementation and keeps a list of {@link
+ * CredentialManagerServiceImpl} per user; the real work is done by {@link
+ * CredentialManagerServiceImpl} itself.
  */
-public final class CredentialManagerService extends
-        AbstractMasterSystemService<CredentialManagerService, CredentialManagerServiceImpl> {
+public final class CredentialManagerService
+        extends AbstractMasterSystemService<
+                CredentialManagerService, CredentialManagerServiceImpl> {
 
     private static final String TAG = "CredManSysService";
 
     public CredentialManagerService(@NonNull Context context) {
-        super(context,
-                new SecureSettingsServiceNameResolver(context, Settings.Secure.CREDENTIAL_SERVICE,
-                        /*isMultipleMode=*/true),
-                null, PACKAGE_UPDATE_POLICY_REFRESH_EAGER);
+        super(
+                context,
+                new SecureSettingsServiceNameResolver(
+                        context, Settings.Secure.CREDENTIAL_SERVICE, /* isMultipleMode= */ true),
+                null,
+                PACKAGE_UPDATE_POLICY_REFRESH_EAGER);
     }
 
     @Override
@@ -77,12 +82,14 @@ public final class CredentialManagerService extends
     }
 
     @Override // from AbstractMasterSystemService
-    protected CredentialManagerServiceImpl newServiceLocked(@UserIdInt int resolvedUserId,
-            boolean disabled) {
+    protected CredentialManagerServiceImpl newServiceLocked(
+            @UserIdInt int resolvedUserId, boolean disabled) {
         // This method should not be called for CredentialManagerService as it is configured to use
         // multiple services.
-        Slog.w(TAG, "Should not be here - CredentialManagerService is configured to use "
-                + "multiple services");
+        Slog.w(
+                TAG,
+                "Should not be here - CredentialManagerService is configured to use "
+                        + "multiple services");
         return null;
     }
 
@@ -92,8 +99,8 @@ public final class CredentialManagerService extends
     }
 
     @Override // from AbstractMasterSystemService
-    protected List<CredentialManagerServiceImpl> newServiceListLocked(int resolvedUserId,
-            boolean disabled, String[] serviceNames) {
+    protected List<CredentialManagerServiceImpl> newServiceListLocked(
+            int resolvedUserId, boolean disabled, String[] serviceNames) {
         if (serviceNames == null || serviceNames.length == 0) {
             Slog.i(TAG, "serviceNames sent in newServiceListLocked is null, or empty");
             return new ArrayList<>();
@@ -105,8 +112,8 @@ public final class CredentialManagerService extends
                 continue;
             }
             try {
-                serviceList.add(new CredentialManagerServiceImpl(this, mLock, resolvedUserId,
-                        serviceName));
+                serviceList.add(
+                        new CredentialManagerServiceImpl(this, mLock, resolvedUserId, serviceName));
             } catch (PackageManager.NameNotFoundException | SecurityException e) {
                 Log.i(TAG, "Unable to add serviceInfo : " + e.getMessage());
             }
@@ -130,19 +137,20 @@ public final class CredentialManagerService extends
         }
     }
 
-    private List<ProviderSession> initiateProviderSessions(RequestSession session,
-            List<String> requestOptions) {
+    private List<ProviderSession> initiateProviderSessions(
+            RequestSession session, List<String> requestOptions) {
         List<ProviderSession> providerSessions = new ArrayList<>();
         // Invoke all services of a user to initiate a provider session
-        runForUser((service) -> {
-            if (service.isServiceCapable(requestOptions)) {
-                ProviderSession providerSession = service
-                        .initiateProviderSessionForRequest(session);
-                if (providerSession != null) {
-                    providerSessions.add(providerSession);
-                }
-            }
-        });
+        runForUser(
+                (service) -> {
+                    if (service.isServiceCapable(requestOptions)) {
+                        ProviderSession providerSession =
+                                service.initiateProviderSessionForRequest(session);
+                        if (providerSession != null) {
+                            providerSessions.add(providerSession);
+                        }
+                    }
+                });
         return providerSessions;
     }
 
@@ -157,25 +165,33 @@ public final class CredentialManagerService extends
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
             // New request session, scoped for this request only.
-            final GetRequestSession session = new GetRequestSession(getContext(),
-                    UserHandle.getCallingUserId(),
-                    callback,
-                    request,
-                    callingPackage);
+            final GetRequestSession session =
+                    new GetRequestSession(
+                            getContext(),
+                            UserHandle.getCallingUserId(),
+                            callback,
+                            request,
+                            callingPackage);
 
             // Initiate all provider sessions
             List<ProviderSession> providerSessions =
-                    initiateProviderSessions(session, request.getGetCredentialOptions()
-                            .stream().map(GetCredentialOption::getType)
-                            .collect(Collectors.toList()));
+                    initiateProviderSessions(
+                            session,
+                            request.getGetCredentialOptions().stream()
+                                    .map(GetCredentialOption::getType)
+                                    .collect(Collectors.toList()));
             // TODO : Return error when no providers available
 
             // Iterate over all provider sessions and invoke the request
-            providerSessions.forEach(providerGetSession -> {
-                providerGetSession.getRemoteCredentialService().onBeginGetCredentials(
-                        (BeginGetCredentialsRequest) providerGetSession.getProviderRequest(),
-                        /*callback=*/providerGetSession);
-            });
+            providerSessions.forEach(
+                    providerGetSession -> {
+                        providerGetSession
+                                .getRemoteCredentialService()
+                                .onBeginGetCredentials(
+                                        (BeginGetCredentialsRequest)
+                                                providerGetSession.getProviderRequest(),
+                                        /* callback= */ providerGetSession);
+                    });
             return cancelTransport;
         }
 
@@ -189,11 +205,13 @@ public final class CredentialManagerService extends
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
             // New request session, scoped for this request only.
-            final CreateRequestSession session = new CreateRequestSession(getContext(),
-                    UserHandle.getCallingUserId(),
-                    request,
-                    callback,
-                    callingPackage);
+            final CreateRequestSession session =
+                    new CreateRequestSession(
+                            getContext(),
+                            UserHandle.getCallingUserId(),
+                            request,
+                            callback,
+                            callingPackage);
 
             // Initiate all provider sessions
             List<ProviderSession> providerSessions =
@@ -201,12 +219,38 @@ public final class CredentialManagerService extends
             // TODO : Return error when no providers available
 
             // Iterate over all provider sessions and invoke the request
-            providerSessions.forEach(providerCreateSession -> {
-                providerCreateSession.getRemoteCredentialService().onCreateCredential(
-                        (BeginCreateCredentialRequest)
-                                providerCreateSession.getProviderRequest(),
-                        /*callback=*/providerCreateSession);
-            });
+            providerSessions.forEach(
+                    providerCreateSession -> {
+                        providerCreateSession
+                                .getRemoteCredentialService()
+                                .onCreateCredential(
+                                        (BeginCreateCredentialRequest)
+                                                providerCreateSession.getProviderRequest(),
+                                        /* callback= */ providerCreateSession);
+                    });
+            return cancelTransport;
+        }
+
+        @Override
+        public ICancellationSignal listEnabledProviders(IListEnabledProvidersCallback callback) {
+            Log.i(TAG, "listEnabledProviders");
+            ICancellationSignal cancelTransport = CancellationSignal.createTransport();
+
+            List<String> enabledProviders = new ArrayList<>();
+            runForUser(
+                    (service) -> {
+                        enabledProviders.add(
+                                service.getServiceInfo().getComponentName().flattenToString());
+                    });
+
+            // Call the callback.
+            try {
+                callback.onResponse(ListEnabledProvidersResponse.create(enabledProviders));
+            } catch (RemoteException e) {
+                Log.i(TAG, "Issue with invoking response: " + e.getMessage());
+                // TODO: Propagate failure
+            }
+
             return cancelTransport;
         }
 
