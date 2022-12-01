@@ -34,7 +34,6 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.notification.NotificationAccessConfirmationActivityContract.EXTRA_USER_ID
 import com.android.systemui.Dumpable
 import com.android.systemui.backup.BackupHelper
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.management.ControlsListingController
@@ -62,11 +61,10 @@ class ControlsControllerImpl @Inject constructor (
     private val uiController: ControlsUiController,
     private val bindingController: ControlsBindingController,
     private val listingController: ControlsListingController,
-    private val broadcastDispatcher: BroadcastDispatcher,
     private val userFileManager: UserFileManager,
+    private val userTracker: UserTracker,
     optionalWrapper: Optional<ControlsFavoritePersistenceWrapper>,
     dumpManager: DumpManager,
-    userTracker: UserTracker
 ) : Dumpable, ControlsController {
 
     companion object {
@@ -123,18 +121,15 @@ class ControlsControllerImpl @Inject constructor (
         userChanging = false
     }
 
-    private val userSwitchReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == Intent.ACTION_USER_SWITCHED) {
-                userChanging = true
-                val newUser =
-                        UserHandle.of(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, sendingUserId))
-                if (currentUser == newUser) {
-                    userChanging = false
-                    return
-                }
-                setValuesForUser(newUser)
+    private val userTrackerCallback = object : UserTracker.Callback {
+        override fun onUserChanged(newUser: Int, userContext: Context) {
+            userChanging = true
+            val newUserHandle = UserHandle.of(newUser)
+            if (currentUser == newUserHandle) {
+                userChanging = false
+                return
             }
+            setValuesForUser(newUserHandle)
         }
     }
 
@@ -236,12 +231,7 @@ class ControlsControllerImpl @Inject constructor (
         dumpManager.registerDumpable(javaClass.name, this)
         resetFavorites()
         userChanging = false
-        broadcastDispatcher.registerReceiver(
-                userSwitchReceiver,
-                IntentFilter(Intent.ACTION_USER_SWITCHED),
-                executor,
-                UserHandle.ALL
-        )
+        userTracker.addCallback(userTrackerCallback, executor)
         context.registerReceiver(
             restoreFinishedReceiver,
             IntentFilter(BackupHelper.ACTION_RESTORE_FINISHED),
@@ -253,7 +243,7 @@ class ControlsControllerImpl @Inject constructor (
     }
 
     fun destroy() {
-        broadcastDispatcher.unregisterReceiver(userSwitchReceiver)
+        userTracker.removeCallback(userTrackerCallback)
         context.unregisterReceiver(restoreFinishedReceiver)
         listingController.removeCallback(listingCallback)
     }

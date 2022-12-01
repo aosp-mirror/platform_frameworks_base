@@ -15,23 +15,21 @@
 package com.android.systemui.statusbar.phone;
 
 import android.app.StatusBarManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.UserTracker;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -43,9 +41,9 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
     private final List<Callback> mCallbacks = new ArrayList<>();
 
     private final Context mContext;
+    private final Executor mMainExecutor;
     private final UserManager mUserManager;
     private final UserTracker mUserTracker;
-    private final BroadcastDispatcher mBroadcastDispatcher;
     private final LinkedList<UserInfo> mProfiles;
     private boolean mListening;
     private int mCurrentUser;
@@ -53,12 +51,12 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
     /**
      */
     @Inject
-    public ManagedProfileControllerImpl(Context context, UserTracker userTracker,
-            BroadcastDispatcher broadcastDispatcher) {
+    public ManagedProfileControllerImpl(Context context, @Main Executor mainExecutor,
+            UserTracker userTracker) {
         mContext = context;
+        mMainExecutor = mainExecutor;
         mUserManager = UserManager.get(mContext);
         mUserTracker = userTracker;
-        mBroadcastDispatcher = broadcastDispatcher;
         mProfiles = new LinkedList<UserInfo>();
     }
 
@@ -130,30 +128,34 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
     }
 
     private void setListening(boolean listening) {
+        if (mListening == listening) {
+            return;
+        }
         mListening = listening;
         if (listening) {
             reloadManagedProfiles();
-
-            final IntentFilter filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_USER_SWITCHED);
-            filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
-            filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
-            filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
-            filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
-            mBroadcastDispatcher.registerReceiver(
-                    mReceiver, filter, null /* handler */, UserHandle.ALL);
+            mUserTracker.addCallback(mUserChangedCallback, mMainExecutor);
         } else {
-            mBroadcastDispatcher.unregisterReceiver(mReceiver);
+            mUserTracker.removeCallback(mUserChangedCallback);
         }
     }
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            reloadManagedProfiles();
-            for (Callback callback : mCallbacks) {
-                callback.onManagedProfileChanged();
-            }
-        }
-    };
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    reloadManagedProfiles();
+                    for (Callback callback : mCallbacks) {
+                        callback.onManagedProfileChanged();
+                    }
+                }
+
+                @Override
+                public void onProfilesChanged(@NonNull List<UserInfo> profiles) {
+                    reloadManagedProfiles();
+                    for (Callback callback : mCallbacks) {
+                        callback.onManagedProfileChanged();
+                    }
+                }
+            };
 }
