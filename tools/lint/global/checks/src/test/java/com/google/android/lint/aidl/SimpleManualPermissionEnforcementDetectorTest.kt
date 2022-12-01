@@ -18,7 +18,6 @@ package com.google.android.lint.aidl
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
 import com.android.tools.lint.checks.infrastructure.TestLintTask
-import com.android.tools.lint.checks.infrastructure.TestMode
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 
@@ -27,7 +26,7 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
     override fun getDetector(): Detector = SimpleManualPermissionEnforcementDetector()
     override fun getIssues(): List<Issue> = listOf(
             SimpleManualPermissionEnforcementDetector
-            .ISSUE_USE_ENFORCE_PERMISSION_ANNOTATION
+            .ISSUE_SIMPLE_MANUAL_PERMISSION_ENFORCEMENT
     )
 
     override fun lint(): TestLintTask = super.lint().allowMissingSdk()
@@ -36,15 +35,15 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
         lint().files(
             java(
                 """
-                    import android.content.Context;
-                    import android.test.ITest;
-                    public class Foo extends ITest.Stub {
-                        private Context mContext;
-                        @Override
-                        public void test() throws android.os.RemoteException {
-                            mContext.enforceCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo");
-                        }
+                import android.content.Context;
+                import android.test.ITest;
+                public class Foo extends ITest.Stub {
+                    private Context mContext;
+                    @Override
+                    public void test() throws android.os.RemoteException {
+                        mContext.enforceCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo");
                     }
+                }
                 """
             ).indented(),
             *stubs
@@ -73,18 +72,18 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
         lint().files(
             java(
                 """
-                    import android.content.Context;
-                    import android.test.ITest;
-                    public class Foo {
-                        private Context mContext;
-                        private ITest itest = new ITest.Stub() {
-                            @Override
-                            public void test() throws android.os.RemoteException {
-                                mContext.enforceCallingOrSelfPermission(
-                                    "android.permission.READ_CONTACTS", "foo");
-                            }
-                        };
-                    }
+                import android.content.Context;
+                import android.test.ITest;
+                public class Foo {
+                    private Context mContext;
+                    private ITest itest = new ITest.Stub() {
+                        @Override
+                        public void test() throws android.os.RemoteException {
+                            mContext.enforceCallingOrSelfPermission(
+                                "android.permission.READ_CONTACTS", "foo");
+                        }
+                    };
+                }
                 """
             ).indented(),
             *stubs
@@ -114,16 +113,16 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
         lint().files(
             java(
                 """
-                    import android.content.Context;
-                    import android.test.ITest;
+                import android.content.Context;
+                import android.test.ITest;
 
-                    public class Foo extends ITest.Stub {
-                        private Context mContext;
-                        @Override
-                        public void test() throws android.os.RemoteException {
-                            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.READ_CONTACTS, "foo");
-                        }
+                public class Foo extends ITest.Stub {
+                    private Context mContext;
+                    @Override
+                    public void test() throws android.os.RemoteException {
+                        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.READ_CONTACTS, "foo");
                     }
+                }
                 """
             ).indented(),
             *stubs,
@@ -153,20 +152,20 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
         lint().files(
             java(
                 """
-                    import android.content.Context;
-                    import android.test.ITest;
-                    public class Foo {
-                        private Context mContext;
-                        private ITest itest = new ITest.Stub() {
-                            @Override
-                            public void test() throws android.os.RemoteException {
-                                mContext.enforceCallingOrSelfPermission(
-                                    "android.permission.READ_CONTACTS", "foo");
-                                mContext.enforceCallingOrSelfPermission(
-                                    "android.permission.WRITE_CONTACTS", "foo");
-                            }
-                        };
-                    }
+                import android.content.Context;
+                import android.test.ITest;
+                public class Foo {
+                    private Context mContext;
+                    private ITest itest = new ITest.Stub() {
+                        @Override
+                        public void test() throws android.os.RemoteException {
+                            mContext.enforceCallingOrSelfPermission(
+                                "android.permission.READ_CONTACTS", "foo");
+                            mContext.enforceCallingOrSelfPermission(
+                                "android.permission.WRITE_CONTACTS", "foo");
+                        }
+                    };
+                }
                 """
             ).indented(),
             *stubs
@@ -198,16 +197,16 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
         lint().files(
             java(
                 """
-                    import android.os.Binder;
-                    import android.test.ITest;
-                    public class Foo extends ITest.Stub {
-                        private mContext Context;
-                        @Override
-                        public void test() throws android.os.RemoteException {
-                            long uid = Binder.getCallingUid();
-                            mContext.enforceCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo");
-                        }
+                import android.os.Binder;
+                import android.test.ITest;
+                public class Foo extends ITest.Stub {
+                    private mContext Context;
+                    @Override
+                    public void test() throws android.os.RemoteException {
+                        long uid = Binder.getCallingUid();
+                        mContext.enforceCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo");
                     }
+                }
                 """
             ).indented(),
             *stubs
@@ -217,25 +216,25 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
     }
 
     fun testPermissionHelper() {
-        lint().skipTestModes(TestMode.PARENTHESIZED).files(
+        lint().files(
             java(
                 """
-                    import android.content.Context;
-                    import android.test.ITest;
+                import android.content.Context;
+                import android.test.ITest;
 
-                    public class Foo extends ITest.Stub {
-                        private Context mContext;
+                public class Foo extends ITest.Stub {
+                    private Context mContext;
 
-                        @android.content.pm.PermissionMethod
-                        private void helper() {
-                            mContext.enforceCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo");
-                        }
-
-                        @Override
-                        public void test() throws android.os.RemoteException {
-                            helper();
-                        }
+                    @android.content.pm.PermissionMethod
+                    private void helper() {
+                        mContext.enforceCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo");
                     }
+
+                    @Override
+                    public void test() throws android.os.RemoteException {
+                        helper();
+                    }
+                }
                 """
             ).indented(),
             *stubs
@@ -261,7 +260,7 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
     }
 
     fun testPermissionHelperAllOf() {
-        lint().skipTestModes(TestMode.PARENTHESIZED).files(
+        lint().files(
             java(
                 """
                 import android.content.Context;
@@ -309,7 +308,7 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
 
 
     fun testPermissionHelperNested() {
-        lint().skipTestModes(TestMode.PARENTHESIZED).files(
+        lint().files(
             java(
                 """
                 import android.content.Context;
