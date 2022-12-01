@@ -527,10 +527,24 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
             InstanceId instanceId) {
         Intent fillInIntent = null;
-        if (launchSameComponentAdjacently(pendingIntent, splitPosition, taskId)
-                && supportMultiInstancesSplit(pendingIntent.getIntent().getComponent())) {
-            fillInIntent = new Intent();
-            fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+        if (launchSameComponentAdjacently(pendingIntent, splitPosition, taskId)) {
+            if (supportMultiInstancesSplit(pendingIntent.getIntent().getComponent())) {
+                fillInIntent = new Intent();
+                fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
+            } else {
+                try {
+                    adapter.getRunner().onAnimationCancelled(false /* isKeyguardOccluded */);
+                    ActivityTaskManager.getService().startActivityFromRecents(taskId, options2);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error starting remote animation", e);
+                }
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                        "Cancel entering split as not supporting multi-instances");
+                Toast.makeText(mContext, R.string.dock_multi_instances_not_supported_text,
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
         mStageCoordinator.startIntentAndTaskWithLegacyTransition(pendingIntent, fillInIntent,
                 options1, taskId, options2, splitPosition, splitRatio, adapter, instanceId);
@@ -540,10 +554,17 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             int taskId, @Nullable Bundle options2, @SplitPosition int splitPosition,
             float splitRatio, @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         Intent fillInIntent = null;
-        if (launchSameComponentAdjacently(pendingIntent, splitPosition, taskId)
-                && supportMultiInstancesSplit(pendingIntent.getIntent().getComponent())) {
-            fillInIntent = new Intent();
-            fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+        if (launchSameComponentAdjacently(pendingIntent, splitPosition, taskId)) {
+            if (supportMultiInstancesSplit(pendingIntent.getIntent().getComponent())) {
+                fillInIntent = new Intent();
+                fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
+            } else {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                        "Cancel entering split as not supporting multi-instances");
+                Toast.makeText(mContext, R.string.dock_multi_instances_not_supported_text,
+                        Toast.LENGTH_SHORT).show();
+            }
         }
         mStageCoordinator.startIntentAndTask(pendingIntent, fillInIntent, options1, taskId,
                 options2, splitPosition, splitRatio, remoteTransition, instanceId);
@@ -555,12 +576,26 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             float splitRatio, RemoteAnimationAdapter adapter, InstanceId instanceId) {
         Intent fillInIntent1 = null;
         Intent fillInIntent2 = null;
-        if (launchSameComponentAdjacently(pendingIntent1, pendingIntent2)
-                && supportMultiInstancesSplit(pendingIntent1.getIntent().getComponent())) {
-            fillInIntent1 = new Intent();
-            fillInIntent1.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
-            fillInIntent2 = new Intent();
-            fillInIntent2.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+        if (launchSameComponentAdjacently(pendingIntent1, pendingIntent2)) {
+            if (supportMultiInstancesSplit(pendingIntent1.getIntent().getComponent())) {
+                fillInIntent1 = new Intent();
+                fillInIntent1.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                fillInIntent2 = new Intent();
+                fillInIntent2.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
+            } else {
+                try {
+                    adapter.getRunner().onAnimationCancelled(false /* isKeyguardOccluded */);
+                    pendingIntent1.send();
+                } catch (RemoteException | PendingIntent.CanceledException e) {
+                    Slog.e(TAG, "Error starting remote animation", e);
+                }
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                        "Cancel entering split as not supporting multi-instances");
+                Toast.makeText(mContext, R.string.dock_multi_instances_not_supported_text,
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
         mStageCoordinator.startIntentsWithLegacyTransition(pendingIntent1, fillInIntent1, options1,
                 pendingIntent2, fillInIntent2, options2, splitPosition, splitRatio, adapter,
@@ -599,6 +634,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 mStageCoordinator.switchSplitPosition("startIntent");
                 return;
             } else {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                        "Cancel entering split as not supporting multi-instances");
                 Toast.makeText(mContext, R.string.dock_multi_instances_not_supported_text,
                         Toast.LENGTH_SHORT).show();
                 return;
