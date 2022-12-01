@@ -31,6 +31,7 @@ import com.android.systemui.unfold.updates.FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE
 import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
+import com.android.systemui.unfold.updates.name
 
 /** Maps fold updates to unfold transition progress using DynamicAnimation. */
 class PhysicsBasedUnfoldTransitionProgressProvider(
@@ -117,7 +118,7 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
         }
 
         if (DEBUG) {
-            Log.d(TAG, "onFoldUpdate = $update")
+            Log.d(TAG, "onFoldUpdate = ${update.name()}")
             Trace.traceCounter(Trace.TRACE_TAG_APP, "fold_update", update)
         }
     }
