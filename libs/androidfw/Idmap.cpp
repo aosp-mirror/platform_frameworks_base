@@ -201,7 +201,7 @@ IdmapResMap::Result IdmapResMap::Lookup(uint32_t target_res_id) const {
       const auto& config = configurations_[value.config_index];
       values_map[config] = value.value;
     }
-    return Result(values_map);
+    return Result(std::move(values_map));
   }
   return {};
 }
@@ -250,8 +250,7 @@ std::optional<std::string_view> ReadString(const uint8_t** in_out_data_ptr, size
 }
 } // namespace
 
-LoadedIdmap::LoadedIdmap(std::string&& idmap_path,
-                         const Idmap_header* header,
+LoadedIdmap::LoadedIdmap(std::string&& idmap_path, const Idmap_header* header,
                          const Idmap_data_header* data_header,
                          const Idmap_target_entry* target_entries,
                          const Idmap_target_entry_inline* target_inline_entries,
@@ -259,20 +258,19 @@ LoadedIdmap::LoadedIdmap(std::string&& idmap_path,
                          const ConfigDescription* configs,
                          const Idmap_overlay_entry* overlay_entries,
                          std::unique_ptr<ResStringPool>&& string_pool,
-                         std::string_view overlay_apk_path,
-                         std::string_view target_apk_path)
-     : header_(header),
-       data_header_(data_header),
-       target_entries_(target_entries),
-       target_inline_entries_(target_inline_entries),
-       inline_entry_values_(inline_entry_values),
-       configurations_(configs),
-       overlay_entries_(overlay_entries),
-       string_pool_(std::move(string_pool)),
-       idmap_path_(std::move(idmap_path)),
-       overlay_apk_path_(overlay_apk_path),
-       target_apk_path_(target_apk_path),
-       idmap_last_mod_time_(getFileModDate(idmap_path_.data())) {}
+                         std::string_view overlay_apk_path, std::string_view target_apk_path)
+    : header_(header),
+      data_header_(data_header),
+      target_entries_(target_entries),
+      target_inline_entries_(target_inline_entries),
+      inline_entry_values_(inline_entry_values),
+      configurations_(configs),
+      overlay_entries_(overlay_entries),
+      string_pool_(std::move(string_pool)),
+      idmap_path_(std::move(idmap_path)),
+      overlay_apk_path_(overlay_apk_path),
+      target_apk_path_(target_apk_path),
+      idmap_last_mod_time_(getFileModDate(idmap_path_.data())) {}
 
 std::unique_ptr<LoadedIdmap> LoadedIdmap::Load(StringPiece idmap_path, StringPiece idmap_data) {
   ATRACE_CALL();

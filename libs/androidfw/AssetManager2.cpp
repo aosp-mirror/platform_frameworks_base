@@ -1562,11 +1562,11 @@ base::expected<std::monostate, IOError> Theme::SetTo(const Theme& source) {
     std::unordered_map<ApkAssetsCookie, SourceToDestinationRuntimePackageMap> src_asset_cookie_id_map;
 
     // Determine which ApkAssets are loaded in both theme AssetManagers.
-    const auto src_assets = source.asset_manager_->GetApkAssets();
+    const auto& src_assets = source.asset_manager_->GetApkAssets();
     for (size_t i = 0; i < src_assets.size(); i++) {
       const ApkAssets* src_asset = src_assets[i];
 
-      const auto dest_assets = asset_manager_->GetApkAssets();
+      const auto& dest_assets = asset_manager_->GetApkAssets();
       for (size_t j = 0; j < dest_assets.size(); j++) {
         const ApkAssets* dest_asset = dest_assets[j];
         if (src_asset != dest_asset) {

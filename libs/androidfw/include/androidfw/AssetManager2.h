@@ -105,7 +105,7 @@ class AssetManager2 {
   // new resource IDs.
   bool SetApkAssets(std::vector<const ApkAssets*> apk_assets, bool invalidate_caches = true);
 
-  inline const std::vector<const ApkAssets*> GetApkAssets() const {
+  inline const std::vector<const ApkAssets*>& GetApkAssets() const {
     return apk_assets_;
   }
 

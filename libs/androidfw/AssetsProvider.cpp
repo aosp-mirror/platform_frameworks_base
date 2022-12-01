@@ -73,9 +73,6 @@ std::unique_ptr<Asset> AssetsProvider::CreateAssetFromFd(base::unique_fd fd,
                                           (path != nullptr) ? base::unique_fd(-1) : std::move(fd));
 }
 
-ZipAssetsProvider::PathOrDebugName::PathOrDebugName(std::string&& value, bool is_path)
-    : value_(std::forward<std::string>(value)), is_path_(is_path) {}
-
 const std::string* ZipAssetsProvider::PathOrDebugName::GetPath() const {
   return is_path_ ? &value_ : nullptr;
 }
@@ -84,10 +81,14 @@ const std::string& ZipAssetsProvider::PathOrDebugName::GetDebugName() const {
   return value_;
 }
 
+void ZipAssetsProvider::ZipCloser::operator()(ZipArchive* a) const {
+  ::CloseArchive(a);
+}
+
 ZipAssetsProvider::ZipAssetsProvider(ZipArchiveHandle handle, PathOrDebugName&& path,
                                      package_property_t flags, time_t last_mod_time)
-    : zip_handle_(handle, ::CloseArchive),
-      name_(std::forward<PathOrDebugName>(path)),
+    : zip_handle_(handle),
+      name_(std::move(path)),
       flags_(flags),
       last_mod_time_(last_mod_time) {}
 
@@ -110,14 +111,12 @@ std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(std::string path,
       // Stat requires execute permissions on all directories path to the file. If the process does
       // not have execute permissions on this file, allow the zip to be opened but IsUpToDate() will
       // always have to return true.
-      LOG(WARNING) << "Failed to stat file '" << path << "': "
-                   << base::SystemErrorCodeToString(errno);
+      PLOG(WARNING) << "Failed to stat file '" << path << "'";
     }
   }
 
   return std::unique_ptr<ZipAssetsProvider>(
-      new ZipAssetsProvider(handle, PathOrDebugName{std::move(path),
-                                                    true /* is_path */}, flags, sb.st_mtime));
+      new ZipAssetsProvider(handle, PathOrDebugName::Path(std::move(path)), flags, sb.st_mtime));
 }
 
 std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(base::unique_fd fd,
@@ -150,9 +149,8 @@ std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(base::unique_fd fd,
     }
   }
 
-  return std::unique_ptr<ZipAssetsProvider>(
-      new ZipAssetsProvider(handle, PathOrDebugName{std::move(friendly_name),
-                                                    false /* is_path */}, flags, sb.st_mtime));
+  return std::unique_ptr<ZipAssetsProvider>(new ZipAssetsProvider(
+      handle, PathOrDebugName::DebugName(std::move(friendly_name)), flags, sb.st_mtime));
 }
 
 std::unique_ptr<Asset> ZipAssetsProvider::OpenInternal(const std::string& path,
@@ -219,8 +217,9 @@ std::unique_ptr<Asset> ZipAssetsProvider::OpenInternal(const std::string& path,
     return asset;
 }
 
-bool ZipAssetsProvider::ForEachFile(const std::string& root_path,
-                                    const std::function<void(StringPiece, FileType)>& f) const {
+bool ZipAssetsProvider::ForEachFile(
+    const std::string& root_path,
+    base::function_ref<void(StringPiece, FileType)> f) const {
     std::string root_path_full = root_path;
     if (root_path_full.back() != '/') {
       root_path_full += '/';
@@ -297,7 +296,7 @@ bool ZipAssetsProvider::IsUpToDate() const {
 }
 
 DirectoryAssetsProvider::DirectoryAssetsProvider(std::string&& path, time_t last_mod_time)
-    : dir_(std::forward<std::string>(path)), last_mod_time_(last_mod_time) {}
+    : dir_(std::move(path)), last_mod_time_(last_mod_time) {}
 
 std::unique_ptr<DirectoryAssetsProvider> DirectoryAssetsProvider::Create(std::string path) {
   struct stat sb;
@@ -312,7 +311,7 @@ std::unique_ptr<DirectoryAssetsProvider> DirectoryAssetsProvider::Create(std::st
     return nullptr;
   }
 
-  if (path[path.size() - 1] != OS_PATH_SEPARATOR) {
+  if (path.back() != OS_PATH_SEPARATOR) {
     path += OS_PATH_SEPARATOR;
   }
 
@@ -335,7 +334,7 @@ std::unique_ptr<Asset> DirectoryAssetsProvider::OpenInternal(const std::string& 
 
 bool DirectoryAssetsProvider::ForEachFile(
     const std::string& /* root_path */,
-    const std::function<void(StringPiece, FileType)>& /* f */) const {
+    base::function_ref<void(StringPiece, FileType)> /* f */) const {
   return true;
 }
 
@@ -362,8 +361,7 @@ bool DirectoryAssetsProvider::IsUpToDate() const {
 
 MultiAssetsProvider::MultiAssetsProvider(std::unique_ptr<AssetsProvider>&& primary,
                                          std::unique_ptr<AssetsProvider>&& secondary)
-                      : primary_(std::forward<std::unique_ptr<AssetsProvider>>(primary)),
-                        secondary_(std::forward<std::unique_ptr<AssetsProvider>>(secondary)) {
+    : primary_(std::move(primary)), secondary_(std::move(secondary)) {
   debug_name_ = primary_->GetDebugName() + " and " + secondary_->GetDebugName();
   path_ = (primary_->GetDebugName() != kEmptyDebugString) ? primary_->GetPath()
                                                           : secondary_->GetPath();
@@ -385,8 +383,9 @@ std::unique_ptr<Asset> MultiAssetsProvider::OpenInternal(const std::string& path
   return (asset) ? std::move(asset) : secondary_->Open(path, mode, file_exists);
 }
 
-bool MultiAssetsProvider::ForEachFile(const std::string& root_path,
-                                      const std::function<void(StringPiece, FileType)>& f) const {
+bool MultiAssetsProvider::ForEachFile(
+    const std::string& root_path,
+    base::function_ref<void(StringPiece, FileType)> f) const {
   return primary_->ForEachFile(root_path, f) && secondary_->ForEachFile(root_path, f);
 }
 
@@ -424,7 +423,7 @@ std::unique_ptr<Asset> EmptyAssetsProvider::OpenInternal(const std::string& /* p
 
 bool EmptyAssetsProvider::ForEachFile(
     const std::string& /* root_path */,
-    const std::function<void(StringPiece, FileType)>& /* f */) const {
+    base::function_ref<void(StringPiece, FileType)> /* f */) const {
   return true;
 }
 
@@ -447,4 +446,4 @@ bool EmptyAssetsProvider::IsUpToDate() const {
   return true;
 }
 
-} // namespace android
+}  // namespace android
