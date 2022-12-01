@@ -17,6 +17,9 @@
 package com.android.server.cpu;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
+import android.system.Os;
+import android.system.OsConstants;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
@@ -30,6 +33,9 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** Reader to read CPU information from proc and sys fs files exposed by the Kernel. */
 public final class CpuInfoReader {
@@ -47,6 +53,14 @@ public final class CpuInfoReader {
     private static final String CPUSET_BACKGROUND_DIR = "background";
     private static final String CPUS_FILE = "cpus";
     private static final String PROC_STAT_FILE_PATH = "/proc/stat";
+    private static final Pattern PROC_STAT_PATTERN =
+            Pattern.compile("cpu(?<core>[0-9]+)\\s(?<userClockTicks>[0-9]+)\\s"
+                    + "(?<niceClockTicks>[0-9]+)\\s(?<sysClockTicks>[0-9]+)\\s"
+                    + "(?<idleClockTicks>[0-9]+)\\s(?<iowaitClockTicks>[0-9]+)\\s"
+                    + "(?<irqClockTicks>[0-9]+)\\s(?<softirqClockTicks>[0-9]+)\\s"
+                    + "(?<stealClockTicks>[0-9]+)\\s(?<guestClockTicks>[0-9]+)\\s"
+                    + "(?<guestNiceClockTicks>[0-9]+)");
+    private static final long MILLIS_PER_JIFFY = 1000L / Os.sysconf(OsConstants._SC_CLK_TCK);
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"FLAG_CPUSET_CATEGORY_"}, flag = true, value = {
@@ -62,6 +76,8 @@ public final class CpuInfoReader {
     private final SparseArray<Long> mMaxCpuFrequenciesByCpus = new SparseArray<>();
 
     private File[] mCpuFreqPolicyDirs;
+    private SparseArray<CpuUsageStats> mCumulativeCpuUsageStats = new SparseArray<>();
+    private boolean mIsEnabled;
 
     public CpuInfoReader() {
         this(new File(CPUSET_DIR_PATH), new File(CPUFREQ_DIR_PATH), new File(PROC_STAT_FILE_PATH));
@@ -99,7 +115,22 @@ public final class CpuInfoReader {
                     mCpuFreqDir.getAbsolutePath());
             return false;
         }
+        mIsEnabled = true;
         return true;
+    }
+
+    /** Reads CPU information from proc and sys fs files exposed by the Kernel. */
+    public List<CpuInfo> readCpuInfos() {
+        if (!mIsEnabled) {
+            return Collections.emptyList();
+        }
+        SparseArray<CpuUsageStats> latestCpuUsageStats = readLatestCpuUsageStats();
+        if (latestCpuUsageStats == null) {
+            Slogf.e(TAG, "Failed to read latest CPU usage stats");
+            return Collections.emptyList();
+        }
+        // TODO(b/217422127): Read current CPU frequencies and populate the CpuInfo.
+        return Collections.emptyList();
     }
 
     private void readCpusetCategories() {
@@ -222,5 +253,201 @@ public final class CpuInfoReader {
             Slogf.e(TAG, e, "Failed to read CPU cores from %s", file.getAbsolutePath());
         }
         return Collections.emptyList();
+    }
+
+    @Nullable
+    private SparseArray<CpuUsageStats> readLatestCpuUsageStats() {
+        SparseArray<CpuUsageStats> cumulativeCpuUsageStats = readCumulativeCpuUsageStats();
+        if (cumulativeCpuUsageStats.size() == 0) {
+            Slogf.e(TAG, "Failed to read cumulative CPU usage stats");
+            return null;
+        }
+        SparseArray<CpuUsageStats> deltaCpuUsageStats = new SparseArray();
+        for (int i = 0; i < cumulativeCpuUsageStats.size(); i++) {
+            int cpu = cumulativeCpuUsageStats.keyAt(i);
+            CpuUsageStats newStats = cumulativeCpuUsageStats.valueAt(i);
+            CpuUsageStats oldStats = mCumulativeCpuUsageStats.get(cpu);
+            deltaCpuUsageStats.append(cpu, oldStats == null ? newStats : newStats.delta(oldStats));
+        }
+        mCumulativeCpuUsageStats = cumulativeCpuUsageStats;
+        return deltaCpuUsageStats;
+    }
+
+    private SparseArray<CpuUsageStats> readCumulativeCpuUsageStats() {
+        SparseArray<CpuUsageStats> cpuUsageStats = new SparseArray<>();
+        try {
+            List<String> lines = Files.readAllLines(mProcStatFile.toPath());
+            for (int i = 0; i < lines.size(); i++) {
+                Matcher m = PROC_STAT_PATTERN.matcher(lines.get(i).trim());
+                if (!m.find()) {
+                    continue;
+                }
+                cpuUsageStats.append(Integer.parseInt(Objects.requireNonNull(m.group("core"))),
+                        new CpuUsageStats(jiffyStrToMillis(m.group("userClockTicks")),
+                                jiffyStrToMillis(m.group("niceClockTicks")),
+                                jiffyStrToMillis(m.group("sysClockTicks")),
+                                jiffyStrToMillis(m.group("idleClockTicks")),
+                                jiffyStrToMillis(m.group("iowaitClockTicks")),
+                                jiffyStrToMillis(m.group("irqClockTicks")),
+                                jiffyStrToMillis(m.group("softirqClockTicks")),
+                                jiffyStrToMillis(m.group("stealClockTicks")),
+                                jiffyStrToMillis(m.group("guestClockTicks")),
+                                jiffyStrToMillis(m.group("guestNiceClockTicks"))));
+            }
+        } catch (Exception e) {
+            Slogf.e(TAG, e, "Failed to read cpu usage stats from %s",
+                    mProcStatFile.getAbsolutePath());
+        }
+        return cpuUsageStats;
+    }
+
+    private static long jiffyStrToMillis(String jiffyStr) {
+        return Long.parseLong(Objects.requireNonNull(jiffyStr)) * MILLIS_PER_JIFFY;
+    }
+
+    /** Contains information for each CPU core on the system. */
+    public static final class CpuInfo {
+        public final int cpuCore;
+        public final @CpusetCategory int cpusetCategories;
+        public final long curCpuFreqKHz;
+        public final long maxCpuFreqKHz;
+        public final CpuUsageStats latestCpuUsageStats;
+
+        CpuInfo(int cpuCore, @CpusetCategory int cpusetCategories, long curCpuFreqKHz,
+                long maxCpuFreqKHz, CpuUsageStats latestCpuUsageStats) {
+            this.cpuCore = cpuCore;
+            this.cpusetCategories = cpusetCategories;
+            this.curCpuFreqKHz = curCpuFreqKHz;
+            this.maxCpuFreqKHz = maxCpuFreqKHz;
+            this.latestCpuUsageStats = latestCpuUsageStats;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("CpuInfo{ cpuCore = ").append(cpuCore)
+                    .append(", cpusetCategories = ").append(cpusetCategories)
+                    .append(", curCpuFreqKHz = ").append(curCpuFreqKHz)
+                    .append(", maxCpuFreqKHz = ").append(maxCpuFreqKHz)
+                    .append(", latestCpuUsageStats = ").append(latestCpuUsageStats)
+                    .append(" }").toString();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof CpuInfo)) {
+                return false;
+            }
+            CpuInfo other = (CpuInfo) obj;
+            return cpuCore == other.cpuCore && cpusetCategories == other.cpusetCategories
+                    && curCpuFreqKHz == other.curCpuFreqKHz
+                    && maxCpuFreqKHz == other.maxCpuFreqKHz
+                    && latestCpuUsageStats.equals(other.latestCpuUsageStats);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(cpuCore, cpusetCategories, curCpuFreqKHz, maxCpuFreqKHz,
+                    latestCpuUsageStats);
+        }
+    }
+
+    /** CPU time spent in different modes. */
+    public static final class CpuUsageStats {
+        public final long userTimeMillis;
+        public final long niceTimeMillis;
+        public final long systemTimeMillis;
+        public final long idleTimeMillis;
+        public final long iowaitTimeMillis;
+        public final long irqTimeMillis;
+        public final long softirqTimeMillis;
+        public final long stealTimeMillis;
+        public final long guestTimeMillis;
+        public final long guestNiceTimeMillis;
+
+        public CpuUsageStats(long userTimeMillis, long niceTimeMillis, long systemTimeMillis,
+                long idleTimeMillis, long iowaitTimeMillis, long irqTimeMillis,
+                long softirqTimeMillis, long stealTimeMillis, long guestTimeMillis,
+                long guestNiceTimeMillis) {
+            this.userTimeMillis = userTimeMillis;
+            this.niceTimeMillis = niceTimeMillis;
+            this.systemTimeMillis = systemTimeMillis;
+            this.idleTimeMillis = idleTimeMillis;
+            this.iowaitTimeMillis = iowaitTimeMillis;
+            this.irqTimeMillis = irqTimeMillis;
+            this.softirqTimeMillis = softirqTimeMillis;
+            this.stealTimeMillis = stealTimeMillis;
+            this.guestTimeMillis = guestTimeMillis;
+            this.guestNiceTimeMillis = guestNiceTimeMillis;
+        }
+
+        public long getTotalTime() {
+            return userTimeMillis + niceTimeMillis + systemTimeMillis + idleTimeMillis
+                    + iowaitTimeMillis + irqTimeMillis + softirqTimeMillis + stealTimeMillis
+                    + guestTimeMillis + guestNiceTimeMillis;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("CpuUsageStats{ userTimeMillis = ")
+                    .append(userTimeMillis)
+                    .append(", niceTimeMillis = ").append(niceTimeMillis)
+                    .append(", systemTimeMillis = ").append(systemTimeMillis)
+                    .append(", idleTimeMillis = ").append(idleTimeMillis)
+                    .append(", iowaitTimeMillis = ").append(iowaitTimeMillis)
+                    .append(", irqTimeMillis = ").append(irqTimeMillis)
+                    .append(", softirqTimeMillis = ").append(softirqTimeMillis)
+                    .append(", stealTimeMillis = ").append(stealTimeMillis)
+                    .append(", guestTimeMillis = ").append(guestTimeMillis)
+                    .append(", guestNiceTimeMillis = ").append(guestNiceTimeMillis)
+                    .append(" }").toString();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof CpuUsageStats)) {
+                return false;
+            }
+            CpuUsageStats other = (CpuUsageStats) obj;
+            return userTimeMillis == other.userTimeMillis && niceTimeMillis == other.niceTimeMillis
+                    && systemTimeMillis == other.systemTimeMillis
+                    && idleTimeMillis == other.idleTimeMillis
+                    && iowaitTimeMillis == other.iowaitTimeMillis
+                    && irqTimeMillis == other.irqTimeMillis
+                    && softirqTimeMillis == other.softirqTimeMillis
+                    && stealTimeMillis == other.stealTimeMillis
+                    && guestTimeMillis == other.guestTimeMillis
+                    && guestNiceTimeMillis == other.guestNiceTimeMillis;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(userTimeMillis, niceTimeMillis, systemTimeMillis, idleTimeMillis,
+                    iowaitTimeMillis, irqTimeMillis, softirqTimeMillis, stealTimeMillis,
+                    guestTimeMillis,
+                    guestNiceTimeMillis);
+        }
+
+        CpuUsageStats delta(CpuUsageStats rhs) {
+            return new CpuUsageStats(diff(userTimeMillis, rhs.userTimeMillis),
+                    diff(niceTimeMillis, rhs.niceTimeMillis),
+                    diff(systemTimeMillis, rhs.systemTimeMillis),
+                    diff(idleTimeMillis, rhs.idleTimeMillis),
+                    diff(iowaitTimeMillis, rhs.iowaitTimeMillis),
+                    diff(irqTimeMillis, rhs.irqTimeMillis),
+                    diff(softirqTimeMillis, rhs.softirqTimeMillis),
+                    diff(stealTimeMillis, rhs.stealTimeMillis),
+                    diff(guestTimeMillis, rhs.guestTimeMillis),
+                    diff(guestNiceTimeMillis, rhs.guestNiceTimeMillis));
+        }
+
+        private static long diff(long lhs, long rhs) {
+            return lhs > rhs ? lhs - rhs : 0;
+        }
     }
 }
