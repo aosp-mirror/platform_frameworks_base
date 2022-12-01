@@ -80,8 +80,8 @@ struct AssetsProvider {
 
 // Supplies assets from a zip archive.
 struct ZipAssetsProvider : public AssetsProvider {
-  static std::unique_ptr<ZipAssetsProvider> Create(std::string path,
-                                                   package_property_t flags);
+  static std::unique_ptr<ZipAssetsProvider> Create(std::string path, package_property_t flags,
+                                                   base::unique_fd fd = {});
 
   static std::unique_ptr<ZipAssetsProvider> Create(base::unique_fd fd,
                                                    std::string friendly_name,
