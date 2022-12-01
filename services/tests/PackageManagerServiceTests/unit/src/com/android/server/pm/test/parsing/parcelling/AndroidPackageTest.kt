@@ -48,10 +48,15 @@ import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import java.security.KeyPairGenerator
 import java.security.PublicKey
+import java.util.UUID
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
 class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, PackageImpl::class) {
+
+    companion object {
+        private val TEST_UUID = UUID.fromString("57554103-df3e-4475-ae7a-8feba49353ac")
+    }
 
     override val defaultImpl = PackageImpl.forTesting("com.example.test")
     override val creator = PackageImpl.CREATOR
@@ -88,8 +93,6 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         "getLongVersionCode",
         // Tested through constructor
         "getManifestPackageName",
-        // Utility methods
-        "getStorageUuid",
         // Removal not tested, irrelevant for parcelling concerns
         "removeUsesOptionalLibrary",
         "clearAdoptPermissions",
@@ -101,6 +104,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         // Tested manually
         "getMimeGroups",
         "getRequestedPermissions",
+        "getStorageUuid",
         // Tested through asSplit
         "asSplit",
         "getSplits",
@@ -256,7 +260,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
     )
 
     override fun extraParams() = listOf(
-        getter(AndroidPackage::getVolumeUuid, "57554103-df3e-4475-ae7a-8feba49353ac"),
+        getter(AndroidPackage::getVolumeUuid, TEST_UUID.toString()),
         getter(AndroidPackage::isProfileable, true),
         getter(PackageImpl::getVersionCode, 3),
         getter(PackageImpl::getVersionCodeMajor, 9),
@@ -617,6 +621,8 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         expect.that(after.usesStaticLibrariesCertDigests!!.size).isEqualTo(1)
         expect.that(after.usesStaticLibrariesCertDigests!![0]).asList()
                 .containsExactly("testCertDigest2")
+
+        expect.that(after.storageUuid).isEqualTo(TEST_UUID)
     }
 
     private fun testKey() = KeyPairGenerator.getInstance("RSA")
