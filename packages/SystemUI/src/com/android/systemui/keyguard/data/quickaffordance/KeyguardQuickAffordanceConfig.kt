@@ -21,7 +21,7 @@ import android.content.Intent
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
-import com.android.systemui.shared.keyguard.data.content.KeyguardQuickAffordanceProviderContract as Contract
+import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderContract as Contract
 import kotlinx.coroutines.flow.Flow
 
 /** Defines interface that can act as data source for a single quick affordance model. */

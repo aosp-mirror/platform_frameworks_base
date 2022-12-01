@@ -77,7 +77,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.biometrics.AuthController;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.decor.CornerDecorProvider;
 import com.android.systemui.decor.CutoutDecorProviderFactory;
 import com.android.systemui.decor.CutoutDecorProviderImpl;
@@ -131,8 +130,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private Display mDisplay;
     @Mock
     private TunerService mTunerService;
-    @Mock
-    private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private UserTracker mUserTracker;
     @Mock
@@ -223,8 +220,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mExecutor));
 
         mScreenDecorations = spy(new ScreenDecorations(mContext, mExecutor, mSecureSettings,
-                mBroadcastDispatcher, mTunerService, mUserTracker, mDotViewController,
-                mThreadFactory, mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory) {
+                mTunerService, mUserTracker, mDotViewController, mThreadFactory,
+                mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory) {
             @Override
             public void start() {
                 super.start();

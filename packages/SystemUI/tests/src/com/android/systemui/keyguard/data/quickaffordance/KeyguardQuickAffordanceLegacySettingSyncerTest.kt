@@ -57,7 +57,7 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
 
     private lateinit var testScope: TestScope
     private lateinit var testDispatcher: TestDispatcher
-    private lateinit var selectionManager: KeyguardQuickAffordanceSelectionManager
+    private lateinit var selectionManager: KeyguardQuickAffordanceLocalUserSelectionManager
     private lateinit var settings: FakeSettings
 
     @Before
@@ -75,7 +75,7 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
         testDispatcher = UnconfinedTestDispatcher()
         testScope = TestScope(testDispatcher)
         selectionManager =
-            KeyguardQuickAffordanceSelectionManager(
+            KeyguardQuickAffordanceLocalUserSelectionManager(
                 context = context,
                 userFileManager =
                     mock {
@@ -89,6 +89,7 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = FakeUserTracker(),
+                broadcastDispatcher = fakeBroadcastDispatcher,
             )
         settings = FakeSettings()
         settings.putInt(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS, 0)

@@ -379,9 +379,9 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onBouncerVisibilityChanged_needsStrongAuth_sideFpsHintHidden() {
+    public void onBouncerVisibilityChanged_unlockingWithFingerprintNotAllowed_sideFpsHintHidden() {
         setupConditionsToEnableSideFpsHint();
-        setNeedsStrongAuth(true);
+        setUnlockingWithFingerprintAllowed(false);
         reset(mSideFpsController);
 
         mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
@@ -574,7 +574,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         attachView();
         setSideFpsHintEnabledFromResources(true);
         setFingerprintDetectionRunning(true);
-        setNeedsStrongAuth(false);
+        setUnlockingWithFingerprintAllowed(true);
     }
 
     private void attachView() {
@@ -593,9 +593,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 enabled);
     }
 
-    private void setNeedsStrongAuth(boolean needed) {
-        when(mKeyguardUpdateMonitor.userNeedsStrongAuth()).thenReturn(needed);
-        mKeyguardUpdateMonitorCallback.getValue().onStrongAuthStateChanged(/* userId= */ 0);
+    private void setUnlockingWithFingerprintAllowed(boolean allowed) {
+        when(mKeyguardUpdateMonitor.isUnlockingWithFingerprintAllowed()).thenReturn(allowed);
     }
 
     private void setupGetSecurityView() {

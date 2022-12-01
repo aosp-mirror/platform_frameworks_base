@@ -71,5 +71,13 @@ abstract class StatusBarPipelineModule {
         fun provideWifiTableLogBuffer(factory: TableLogBufferFactory): TableLogBuffer {
             return factory.create("WifiTableLog", 100)
         }
+
+        @JvmStatic
+        @Provides
+        @SysUISingleton
+        @AirplaneTableLog
+        fun provideAirplaneTableLogBuffer(factory: TableLogBufferFactory): TableLogBuffer {
+            return factory.create("AirplaneTableLog", 30)
+        }
     }
 }

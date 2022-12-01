@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.content.res.ColorStateList
+import android.hardware.biometrics.BiometricSourceType
 import android.os.Handler
 import android.os.Trace
 import android.os.UserHandle
@@ -71,7 +72,7 @@ constructor(
                 KeyguardUpdateMonitor.getCurrentUser()
             ) &&
             !needsFullscreenBouncer() &&
-            !keyguardUpdateMonitor.userNeedsStrongAuth() &&
+            keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE) &&
             !keyguardBypassController.bypassEnabled
 
     /** Runnable to show the primary bouncer. */

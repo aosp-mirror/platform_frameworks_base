@@ -26,10 +26,7 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import android.annotation.IdRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -45,7 +42,6 @@ import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.os.Handler;
 import android.os.SystemProperties;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.util.DisplayUtils;
 import android.util.Log;
@@ -68,7 +64,6 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.util.Preconditions;
 import com.android.settingslib.Utils;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.decor.CutoutDecorProviderFactory;
@@ -128,7 +123,6 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
     private DisplayManager mDisplayManager;
     @VisibleForTesting
     protected boolean mIsRegistered;
-    private final BroadcastDispatcher mBroadcastDispatcher;
     private final Context mContext;
     private final Executor mMainExecutor;
     private final TunerService mTunerService;
@@ -302,7 +296,6 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
     public ScreenDecorations(Context context,
             @Main Executor mainExecutor,
             SecureSettings secureSettings,
-            BroadcastDispatcher broadcastDispatcher,
             TunerService tunerService,
             UserTracker userTracker,
             PrivacyDotViewController dotViewController,
@@ -312,7 +305,6 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
         mContext = context;
         mMainExecutor = mainExecutor;
         mSecureSettings = secureSettings;
-        mBroadcastDispatcher = broadcastDispatcher;
         mTunerService = tunerService;
         mUserTracker = userTracker;
         mDotViewController = dotViewController;
@@ -598,10 +590,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             mColorInversionSetting.onChange(false);
             updateColorInversion(mColorInversionSetting.getValue());
 
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_USER_SWITCHED);
-            mBroadcastDispatcher.registerReceiver(mUserSwitchIntentReceiver, filter,
-                    mExecutor, UserHandle.ALL);
+            mUserTracker.addCallback(mUserChangedCallback, mExecutor);
             mIsRegistered = true;
         } else {
             mMainExecutor.execute(() -> mTunerService.removeTunable(this));
@@ -610,7 +599,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
                 mColorInversionSetting.setListening(false);
             }
 
-            mBroadcastDispatcher.unregisterReceiver(mUserSwitchIntentReceiver);
+            mUserTracker.removeCallback(mUserChangedCallback);
             mIsRegistered = false;
         }
     }
@@ -897,18 +886,18 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
         }
     }
 
-    private final BroadcastReceiver mUserSwitchIntentReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int newUserId = mUserTracker.getUserId();
-            if (DEBUG) {
-                Log.d(TAG, "UserSwitched newUserId=" + newUserId);
-            }
-            // update color inversion setting to the new user
-            mColorInversionSetting.setUserId(newUserId);
-            updateColorInversion(mColorInversionSetting.getValue());
-        }
-    };
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    if (DEBUG) {
+                        Log.d(TAG, "UserSwitched newUserId=" + newUser);
+                    }
+                    // update color inversion setting to the new user
+                    mColorInversionSetting.setUserId(newUser);
+                    updateColorInversion(mColorInversionSetting.getValue());
+                }
+            };
 
     private void updateColorInversion(int colorsInvertedValue) {
         mTintColor = colorsInvertedValue != 0 ? Color.WHITE : Color.BLACK;

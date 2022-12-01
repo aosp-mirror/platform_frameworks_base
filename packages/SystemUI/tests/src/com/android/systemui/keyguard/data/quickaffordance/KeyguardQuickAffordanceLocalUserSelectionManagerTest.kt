@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.data.quickaffordance
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.UserInfo
 import androidx.test.filters.SmallTest
@@ -27,10 +28,15 @@ import com.android.systemui.settings.UserFileManager
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,15 +44,19 @@ import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
+import org.mockito.Mockito.atLeastOnce
+import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
-class KeyguardQuickAffordanceSelectionManagerTest : SysuiTestCase() {
+class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
 
     @Mock private lateinit var userFileManager: UserFileManager
 
-    private lateinit var underTest: KeyguardQuickAffordanceSelectionManager
+    private lateinit var underTest: KeyguardQuickAffordanceLocalUserSelectionManager
 
     private lateinit var userTracker: FakeUserTracker
     private lateinit var sharedPrefs: MutableMap<Int, SharedPreferences>
@@ -60,13 +70,21 @@ class KeyguardQuickAffordanceSelectionManagerTest : SysuiTestCase() {
             sharedPrefs.getOrPut(userId) { FakeSharedPreferences() }
         }
         userTracker = FakeUserTracker()
+        val dispatcher = UnconfinedTestDispatcher()
+        Dispatchers.setMain(dispatcher)
 
         underTest =
-            KeyguardQuickAffordanceSelectionManager(
+            KeyguardQuickAffordanceLocalUserSelectionManager(
                 context = context,
                 userFileManager = userFileManager,
                 userTracker = userTracker,
+                broadcastDispatcher = fakeBroadcastDispatcher,
             )
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test
@@ -315,6 +333,22 @@ class KeyguardQuickAffordanceSelectionManagerTest : SysuiTestCase() {
             ),
         )
 
+        job.cancel()
+    }
+
+    @Test
+    fun `responds to backup and restore by reloading the selections from disk`() = runTest {
+        overrideResource(R.array.config_keyguardQuickAffordanceDefaults, arrayOf<String>())
+        val affordanceIdsBySlotId = mutableListOf<Map<String, List<String>>>()
+        val job =
+            launch(UnconfinedTestDispatcher()) {
+                underTest.selections.toList(affordanceIdsBySlotId)
+            }
+        clearInvocations(userFileManager)
+
+        fakeBroadcastDispatcher.registeredReceivers.firstOrNull()?.onReceive(context, Intent())
+
+        verify(userFileManager, atLeastOnce()).getSharedPreferences(anyString(), anyInt(), anyInt())
         job.cancel()
     }
 

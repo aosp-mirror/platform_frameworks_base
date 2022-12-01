@@ -120,6 +120,7 @@ public class Clock extends TextView implements
                 @Override
                 public void onUserChanged(int newUser, @NonNull Context userContext) {
                     mCurrentUserId = newUser;
+                    updateClock();
                 }
             };
 
@@ -190,7 +191,6 @@ public class Clock extends TextView implements
             filter.addAction(Intent.ACTION_TIME_CHANGED);
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-            filter.addAction(Intent.ACTION_USER_SWITCHED);
 
             // NOTE: This receiver could run before this method returns, as it's not dispatching
             // on the main thread and BroadcastDispatcher may not need to register with Context.

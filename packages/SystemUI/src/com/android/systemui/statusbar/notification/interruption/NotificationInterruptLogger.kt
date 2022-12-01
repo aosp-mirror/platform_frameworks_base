@@ -106,6 +106,36 @@ class NotificationInterruptLogger @Inject constructor(
         })
     }
 
+    fun logNoHeadsUpOldWhen(
+        entry: NotificationEntry,
+        notifWhen: Long,
+        notifAge: Long
+    ) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+            long1 = notifWhen
+            long2 = notifAge
+        }, {
+            "No heads up: old when $long1 (age=$long2 ms): $str1"
+        })
+    }
+
+    fun logMaybeHeadsUpDespiteOldWhen(
+        entry: NotificationEntry,
+        notifWhen: Long,
+        notifAge: Long,
+        reason: String
+    ) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+            str2 = reason
+            long1 = notifWhen
+            long2 = notifAge
+        }, {
+            "Maybe heads up: old when $long1 (age=$long2 ms) but $str2: $str1"
+        })
+    }
+
     fun logNoHeadsUpSuppressedBy(
         entry: NotificationEntry,
         suppressor: NotificationInterruptSuppressor

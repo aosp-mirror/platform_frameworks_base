@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onStart
@@ -56,6 +55,22 @@ fun <T, R> Flow<T>.pairwiseBy(
     transform: suspend (previousValue: T, newValue: T) -> R,
 ): Flow<R> =
     onStart { emit(initialValue) }.pairwiseBy(transform)
+
+/**
+ * Returns a new [Flow] that combines the two most recent emissions from [this] using [transform].
+ *
+ *
+ * The output of [getInitialValue] will be used as the "old" value for the first emission. As
+ * opposed to the initial value in the above [pairwiseBy], [getInitialValue] can do some work before
+ * returning the initial value.
+ *
+ * Useful for code that needs to compare the current value to the previous value.
+ */
+fun <T, R> Flow<T>.pairwiseBy(
+    getInitialValue: suspend () -> T,
+    transform: suspend (previousValue: T, newValue: T) -> R,
+): Flow<R> =
+    onStart { emit(getInitialValue()) }.pairwiseBy(transform)
 
 /**
  * Returns a new [Flow] that produces the two most recent emissions from [this]. Note that the new

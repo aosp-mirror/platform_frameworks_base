@@ -116,9 +116,9 @@ class AuthRippleController @Inject constructor(
         notificationShadeWindowController.setForcePluginOpen(false, this)
     }
 
-    fun showUnlockRipple(biometricSourceType: BiometricSourceType?) {
+    fun showUnlockRipple(biometricSourceType: BiometricSourceType) {
         if (!keyguardStateController.isShowing ||
-            keyguardUpdateMonitor.userNeedsStrongAuth()) {
+                !keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(biometricSourceType)) {
             return
         }
 
@@ -246,7 +246,7 @@ class AuthRippleController @Inject constructor(
         object : KeyguardUpdateMonitorCallback() {
             override fun onBiometricAuthenticated(
                 userId: Int,
-                biometricSourceType: BiometricSourceType?,
+                biometricSourceType: BiometricSourceType,
                 isStrongBiometric: Boolean
             ) {
                 if (biometricSourceType == BiometricSourceType.FINGERPRINT) {
@@ -255,14 +255,14 @@ class AuthRippleController @Inject constructor(
                 showUnlockRipple(biometricSourceType)
             }
 
-        override fun onBiometricAuthFailed(biometricSourceType: BiometricSourceType?) {
+        override fun onBiometricAuthFailed(biometricSourceType: BiometricSourceType) {
             if (biometricSourceType == BiometricSourceType.FINGERPRINT) {
                 mView.retractDwellRipple()
             }
         }
 
         override fun onBiometricAcquired(
-            biometricSourceType: BiometricSourceType?,
+            biometricSourceType: BiometricSourceType,
             acquireInfo: Int
         ) {
             if (biometricSourceType == BiometricSourceType.FINGERPRINT &&

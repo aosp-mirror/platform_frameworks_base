@@ -29,7 +29,7 @@ import android.util.Log
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SystemUIAppComponentFactoryBase.ContextAvailableCallback
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
-import com.android.systemui.shared.keyguard.data.content.KeyguardQuickAffordanceProviderContract as Contract
+import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderContract as Contract
 import javax.inject.Inject
 import kotlinx.coroutines.runBlocking
 
