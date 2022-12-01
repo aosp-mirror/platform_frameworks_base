@@ -28,6 +28,7 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -275,8 +276,57 @@ public class ActivityStartInterceptorTest {
         // THEN calling intercept returns true
         mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null);
 
-        // THEN the returned intent is the quiet mode intent
+        // THEN the returned intent is the confirm credentials intent
         assertTrue(CONFIRM_CREDENTIALS_INTENT.filterEquals(mInterceptor.mIntent));
+    }
+
+    @Test
+    public void testLockedManagedProfileShowWhenLocked() {
+        Intent originalIntent = new Intent();
+        // GIVEN that the user is locked but its storage is unlocked and the activity has
+        // showWhenLocked flag
+        when(mAmInternal.shouldConfirmCredentials(TEST_USER_ID)).thenReturn(true);
+        when(mUserManager.isUserUnlocked(eq(TEST_USER_ID))).thenReturn(true);
+        mAInfo.flags |= ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
+
+        // THEN calling intercept returns true
+        mInterceptor.intercept(originalIntent, null, mAInfo, null, null, null, 0, 0, null);
+
+        // THEN the returned intent is original intent
+        assertSame(originalIntent, mInterceptor.mIntent);
+    }
+
+    @Test
+    public void testLockedManagedProfileShowWhenLockedEncryptedStorage() {
+        // GIVEN that the user storage is locked, activity has showWhenLocked flag but no
+        // directBootAware flag
+        when(mAmInternal.shouldConfirmCredentials(TEST_USER_ID)).thenReturn(true);
+        when(mUserManager.isUserUnlocked(eq(TEST_USER_ID))).thenReturn(false);
+        mAInfo.flags |= ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
+        mAInfo.directBootAware = false;
+
+        // THEN calling intercept returns true
+        mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null);
+
+        // THEN the returned intent is the confirm credentials intent
+        assertTrue(CONFIRM_CREDENTIALS_INTENT.filterEquals(mInterceptor.mIntent));
+    }
+
+    @Test
+    public void testLockedManagedProfileShowWhenLockedEncryptedStorageDirectBootAware() {
+        Intent originalIntent = new Intent();
+        // GIVEN that the user storage is locked, activity has showWhenLocked flag and
+        // directBootAware flag
+        when(mAmInternal.shouldConfirmCredentials(TEST_USER_ID)).thenReturn(true);
+        when(mUserManager.isUserUnlocked(eq(TEST_USER_ID))).thenReturn(false);
+        mAInfo.flags |= ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
+        mAInfo.directBootAware = true;
+
+        // THEN calling intercept returns true
+        mInterceptor.intercept(originalIntent, null, mAInfo, null, null, null, 0, 0, null);
+
+        // THEN the returned intent is original intent
+        assertSame(originalIntent, mInterceptor.mIntent);
     }
 
     @Test
