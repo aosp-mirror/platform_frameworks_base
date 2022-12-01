@@ -5613,8 +5613,7 @@ public final class Settings implements Watchable, Snappable {
 
         // Low-priority handlers running on SystemBg thread.
         private final Handler mAsyncHandler = new MyHandler();
-        private final Handler mPersistenceHandler = new Handler(
-                BackgroundThread.getHandler().getLooper());
+        private final Handler mPersistenceHandler = new PersistenceHandler();
 
         private final Object mLock = new Object();
 
@@ -5761,20 +5760,22 @@ public final class Settings implements Watchable, Snappable {
                 @NonNull WatchedArrayMap<String, SharedUserSetting> sharedUsers,
                 @Nullable Handler pmHandler, @NonNull Object pmLock,
                 boolean sync) {
-            final int version;
-            final String fingerprint;
-            final boolean isLegacyPermissionStateStale;
             synchronized (mLock) {
                 mAsyncHandler.removeMessages(userId);
                 mWriteScheduled.delete(userId);
-
-                version = mVersions.get(userId, INITIAL_VERSION);
-                fingerprint = mFingerprints.get(userId);
-                isLegacyPermissionStateStale = mIsLegacyPermissionStateStale;
-                mIsLegacyPermissionStateStale = false;
             }
 
             Runnable writer = () -> {
+                final int version;
+                final String fingerprint;
+                final boolean isLegacyPermissionStateStale;
+                synchronized (mLock) {
+                    version = mVersions.get(userId, INITIAL_VERSION);
+                    fingerprint = mFingerprints.get(userId);
+                    isLegacyPermissionStateStale = mIsLegacyPermissionStateStale;
+                    mIsLegacyPermissionStateStale = false;
+                }
+
                 final RuntimePermissionsState runtimePermissions;
                 synchronized (pmLock) {
                     if (sync || isLegacyPermissionStateStale) {
@@ -5823,7 +5824,7 @@ public final class Settings implements Watchable, Snappable {
                 }
                 if (pmHandler != null) {
                     // Async version.
-                    mPersistenceHandler.post(() -> writePendingStates());
+                    mPersistenceHandler.obtainMessage(userId).sendToTarget();
                 } else {
                     // Sync version.
                     writePendingStates();
@@ -6097,6 +6098,17 @@ public final class Settings implements Watchable, Snappable {
                 if (callback != null) {
                     callback.run();
                 }
+            }
+        }
+
+        private final class PersistenceHandler extends Handler {
+            PersistenceHandler() {
+                super(BackgroundThread.getHandler().getLooper());
+            }
+
+            @Override
+            public void handleMessage(Message message) {
+                writePendingStates();
             }
         }
     }
