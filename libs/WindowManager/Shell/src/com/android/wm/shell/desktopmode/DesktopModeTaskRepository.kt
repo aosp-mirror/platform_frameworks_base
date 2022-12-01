@@ -103,6 +103,13 @@ class DesktopModeTaskRepository {
     }
 
     /**
+     * Whether a task is visible.
+     */
+    fun isVisibleTask(taskId: Int): Boolean {
+        return visibleTasks.contains(taskId)
+    }
+
+    /**
      * Get a set of the active tasks
      */
     fun getActiveTasks(): ArraySet<Int> {
