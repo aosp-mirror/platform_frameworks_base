@@ -425,6 +425,16 @@ filegroup {
     ],
 }
 
+// This file group is used by service fuzzer
+filegroup {
+    name: "framework-core-sources-for-fuzzers",
+    srcs: [
+        "android/os/IInterface.java",
+        "android/os/Binder.java",
+        "android/os/IBinder.java",
+    ],
+}
+
 aidl_interface {
     name: "android.os.statsbootstrap_aidl",
     unstable: true,
