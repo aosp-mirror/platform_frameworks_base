@@ -20,6 +20,7 @@ import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.LintFix
 import com.android.tools.lint.detector.api.Location
 import com.android.tools.lint.detector.api.UastLintUtils.Companion.getAnnotationBooleanValue
+import com.android.tools.lint.detector.api.UastLintUtils.Companion.getAnnotationStringValues
 import com.android.tools.lint.detector.api.findSelector
 import com.android.tools.lint.detector.api.getUMethod
 import com.google.android.lint.findCallExpression
@@ -32,6 +33,8 @@ import org.jetbrains.kotlin.psi.psiUtil.parameterIndex
 import org.jetbrains.uast.UBinaryExpression
 import org.jetbrains.uast.UBlockExpression
 import org.jetbrains.uast.UCallExpression
+import org.jetbrains.uast.UExpression
+import org.jetbrains.uast.UExpressionList
 import org.jetbrains.uast.UIfExpression
 import org.jetbrains.uast.UThrowExpression
 import org.jetbrains.uast.UastBinaryOperator
@@ -41,16 +44,12 @@ import org.jetbrains.uast.visitor.AbstractUastVisitor
 
 /**
  * Helper class that facilitates the creation of lint auto fixes
- *
- * Handles "Single" permission checks that should be migrated to @EnforcePermission(...), as well as consecutive checks
- * that should be migrated to @EnforcePermission(allOf={...})
- *
- * TODO: handle anyOf style annotations
  */
 data class EnforcePermissionFix(
     val locations: List<Location>,
     val permissionNames: List<String>,
     val errorLevel: Boolean,
+    val anyOf: Boolean,
 ) {
     fun toLintFix(annotationLocation: Location): LintFix {
         val removeFixes = this.locations.map {
@@ -76,8 +75,13 @@ data class EnforcePermissionFix(
         get() {
             val quotedPermissions = permissionNames.joinToString(", ") { """"$it"""" }
 
+            val attributeName =
+                if (permissionNames.size > 1) {
+                    if (anyOf) "anyOf" else "allOf"
+                } else null
+
             val annotationParameter =
-                if (permissionNames.size > 1) "allOf={$quotedPermissions}"
+                if (attributeName != null) "$attributeName={$quotedPermissions}"
                 else quotedPermissions
 
             return "@$ANNOTATION_ENFORCE_PERMISSION($annotationParameter)"
@@ -96,10 +100,12 @@ data class EnforcePermissionFix(
             val annotation = getPermissionMethodAnnotation(method) ?: return null
             val returnsVoid = method.returnType == PsiType.VOID
             val orSelf = getAnnotationBooleanValue(annotation, "orSelf") ?: false
+            val anyOf = getAnnotationBooleanValue(annotation, "anyOf") ?: false
             return EnforcePermissionFix(
                     listOf(getPermissionCheckLocation(context, callExpression)),
                     getPermissionCheckValues(callExpression),
-                    errorLevel = isErrorLevel(throws = returnsVoid, orSelf = orSelf)
+                    errorLevel = isErrorLevel(throws = returnsVoid, orSelf = orSelf),
+                    anyOf,
             )
         }
 
@@ -155,21 +161,31 @@ data class EnforcePermissionFix(
             }
 
             val orSelf = getAnnotationBooleanValue(permissionMethodAnnotation, "orSelf") ?: false
+            val anyOf = getAnnotationBooleanValue(permissionMethodAnnotation, "anyOf") ?: false
 
             return EnforcePermissionFix(
                     listOf(context.getLocation(ifExpression)),
                     getPermissionCheckValues(callExpression),
                     errorLevel = isErrorLevel(throws = true, orSelf = orSelf),
+                    anyOf = anyOf
             )
         }
 
 
-        fun compose(individuals: List<EnforcePermissionFix>): EnforcePermissionFix =
-            EnforcePermissionFix(
-                individuals.flatMap { it.locations },
-                individuals.flatMap { it.permissionNames },
-                errorLevel = individuals.all(EnforcePermissionFix::errorLevel)
+        fun compose(individuals: List<EnforcePermissionFix>): EnforcePermissionFix {
+            val anyOfs = individuals.filter(EnforcePermissionFix::anyOf)
+            // anyOf/allOf should be consistent.  If we encounter some @PermissionMethods that are anyOf
+            // and others that aren't, we don't know what to do.
+            if (anyOfs.isNotEmpty() && anyOfs.size < individuals.size) {
+                throw AnyOfAllOfException()
+            }
+            return EnforcePermissionFix(
+                    individuals.flatMap(EnforcePermissionFix::locations),
+                    individuals.flatMap(EnforcePermissionFix::permissionNames),
+                    errorLevel = individuals.all(EnforcePermissionFix::errorLevel),
+                    anyOf = anyOfs.isNotEmpty()
             )
+        }
 
         /**
          * Given a permission check, get its proper location
@@ -195,6 +211,7 @@ data class EnforcePermissionFix(
          * and pull out the permission value(s) being used.  Also evaluates nested calls
          * to @PermissionMethod(s) in the given method's body.
          */
+        @Throws(AnyOfAllOfException::class)
         private fun getPermissionCheckValues(
             callExpression: UCallExpression
         ): List<String> {
@@ -204,38 +221,94 @@ data class EnforcePermissionFix(
             val visitedCalls = mutableSetOf<UCallExpression>() // don't visit the same call twice
             val bfsQueue = ArrayDeque(listOf(callExpression))
 
-            // Breadth First Search - evalutaing nested @PermissionMethod(s) in the available
+            var anyOfAllOfState: AnyOfAllOfState = AnyOfAllOfState.INITIAL
+
+            // Bread First Search - evaluating nested @PermissionMethod(s) in the available
             // source code for @PermissionName(s).
             while (bfsQueue.isNotEmpty()) {
-                val current = bfsQueue.removeFirst()
-                visitedCalls.add(current)
-                result.addAll(findPermissions(current))
+                val currentCallExpression = bfsQueue.removeFirst()
+                visitedCalls.add(currentCallExpression)
+                val currentPermissions = findPermissions(currentCallExpression)
+                result.addAll(currentPermissions)
 
-                current.resolve()?.getUMethod()?.accept(object : AbstractUastVisitor() {
-                    override fun visitCallExpression(node: UCallExpression): Boolean {
-                        if (isPermissionMethodCall(node) && node !in visitedCalls) {
-                            bfsQueue.add(node)
-                        }
-                        return false
-                    }
-                })
+                val currentAnnotation = getPermissionMethodAnnotation(
+                        currentCallExpression.resolve()?.getUMethod())
+                val currentAnyOf = getAnnotationBooleanValue(currentAnnotation, "anyOf") ?: false
+
+                // anyOf/allOf should be consistent.  If we encounter a nesting of @PermissionMethods
+                // where we start in an anyOf state and switch to allOf, or vice versa,
+                // we don't know what to do.
+                if (anyOfAllOfState == AnyOfAllOfState.INITIAL) {
+                    if (currentAnyOf) anyOfAllOfState = AnyOfAllOfState.ANY_OF
+                    else if (result.isNotEmpty()) anyOfAllOfState = AnyOfAllOfState.ALL_OF
+                }
+
+                if (anyOfAllOfState == AnyOfAllOfState.ALL_OF && currentAnyOf) {
+                    throw AnyOfAllOfException()
+                }
+
+                if (anyOfAllOfState == AnyOfAllOfState.ANY_OF &&
+                        !currentAnyOf && currentPermissions.size > 1) {
+                    throw AnyOfAllOfException()
+                }
+
+                currentCallExpression.resolve()?.getUMethod()
+                        ?.accept(PermissionCheckValuesVisitor(visitedCalls, bfsQueue))
             }
 
             return result.toList()
         }
 
+        private enum class AnyOfAllOfState {
+            INITIAL,
+            ANY_OF,
+            ALL_OF
+        }
+
+        /**
+         * Adds visited permission method calls to the provided
+         * queue in support of the BFS traversal happening while
+         * this is used
+         */
+        private class PermissionCheckValuesVisitor(
+                val visitedCalls: Set<UCallExpression>,
+                val bfsQueue: ArrayDeque<UCallExpression>
+        ) : AbstractUastVisitor() {
+            override fun visitCallExpression(node: UCallExpression): Boolean {
+                if (isPermissionMethodCall(node) && node !in visitedCalls) {
+                    bfsQueue.add(node)
+                }
+                return false
+            }
+        }
+
         private fun findPermissions(
             callExpression: UCallExpression,
         ): List<String> {
-            val indices = callExpression.resolve()?.getUMethod()
-                ?.uastParameters
-                ?.filter(::hasPermissionNameAnnotation)
-                ?.mapNotNull { it.sourcePsi?.parameterIndex() }
-                ?: emptyList()
+            val annotation = getPermissionMethodAnnotation(callExpression.resolve()?.getUMethod())
 
-            return indices.mapNotNull {
-                callExpression.getArgumentForParameter(it)?.evaluateString()
-            }
+            val hardCodedPermissions = (getAnnotationStringValues(annotation, "value")
+                    ?: emptyArray())
+                    .toList()
+
+            val indices = callExpression.resolve()?.getUMethod()
+                    ?.uastParameters
+                    ?.filter(::hasPermissionNameAnnotation)
+                    ?.mapNotNull { it.sourcePsi?.parameterIndex() }
+                    ?: emptyList()
+
+            val argPermissions = indices
+                    .flatMap { i ->
+                        when (val argument = callExpression.getArgumentForParameter(i)) {
+                            null -> listOf(null)
+                            is UExpressionList -> // varargs e.g. someMethod(String...)
+                                argument.expressions.map(UExpression::evaluateString)
+                            else -> listOf(argument.evaluateString())
+                        }
+                    }
+                    .filterNotNull()
+
+            return hardCodedPermissions + argPermissions
         }
 
         /**
@@ -246,4 +319,12 @@ data class EnforcePermissionFix(
          */
         private fun isErrorLevel(throws: Boolean, orSelf: Boolean): Boolean = throws && orSelf
     }
+}
+/**
+ * anyOf/allOf @PermissionMethods must be consistent to apply @EnforcePermission -
+ * meaning if we encounter some @PermissionMethods that are anyOf, and others are allOf,
+ * we don't know which to apply.
+ */
+class AnyOfAllOfException : Exception() {
+    override val message: String = "anyOf/allOf permission methods cannot be mixed"
 }

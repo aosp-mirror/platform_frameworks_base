@@ -79,21 +79,27 @@ class SimpleManualPermissionEnforcementDetector : AidlImplementationDetector() {
      * as some other business logic is happening that prevents an automated fix.
      */
     private fun accumulateSimplePermissionCheckFixes(
-            methodBody: UBlockExpression,
-            context: JavaContext
-    ):
-            EnforcePermissionFix? {
-        val singleFixes = mutableListOf<EnforcePermissionFix>()
-        for (expression in methodBody.expressions) {
-            singleFixes.add(getPermissionCheckFix(expression.skipParenthesizedExprDown(), context)
-                    ?: break)
-        }
-        return when (singleFixes.size) {
-            0 -> null
-            1 -> singleFixes[0]
-            else -> EnforcePermissionFix.compose(singleFixes)
+                methodBody: UBlockExpression,
+                context: JavaContext
+        ): EnforcePermissionFix? {
+        try {
+            val singleFixes = mutableListOf<EnforcePermissionFix>()
+            for (expression in methodBody.expressions) {
+                val fix = getPermissionCheckFix(
+                        expression.skipParenthesizedExprDown(),
+                        context) ?: break
+                singleFixes.add(fix)
+            }
+            return when (singleFixes.size) {
+                0 -> null
+                1 -> singleFixes[0]
+                else -> EnforcePermissionFix.compose(singleFixes)
+            }
+        } catch (e: AnyOfAllOfException) {
+            return null
         }
     }
+
 
     /**
      * If an expression boils down to a permission check, return
