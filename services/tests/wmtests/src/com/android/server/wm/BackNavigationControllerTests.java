@@ -150,6 +150,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         WindowState window = createWindow(null, WindowManager.LayoutParams.TYPE_WALLPAPER,
                 "Wallpaper");
         addToWindowMap(window, true);
+        makeWindowVisibleAndDrawn(window);
 
         IOnBackInvokedCallback callback = createOnBackInvokedCallback();
         window.setOnBackInvokedCallbackInfo(
@@ -236,6 +237,20 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 1, appLatch.getCount());
     }
 
+    @Test
+    public void backInfoWindowWithoutDrawn() {
+        WindowState window = createWindow(null, WindowManager.LayoutParams.TYPE_APPLICATION,
+                "TestWindow");
+        addToWindowMap(window, true);
+
+        IOnBackInvokedCallback callback = createOnBackInvokedCallback();
+        window.setOnBackInvokedCallbackInfo(
+                new OnBackInvokedCallbackInfo(callback, OnBackInvokedDispatcher.PRIORITY_DEFAULT));
+
+        BackNavigationInfo backNavigationInfo = startBackNavigation();
+        assertThat(backNavigationInfo).isNull();
+    }
+
     private IOnBackInvokedCallback withSystemCallback(Task task) {
         IOnBackInvokedCallback callback = createOnBackInvokedCallback();
         task.getTopMostActivity().getTopChild().setOnBackInvokedCallbackInfo(
@@ -309,6 +324,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         Mockito.doNothing().when(task).reparentSurfaceControl(any(), any());
         mAtm.setFocusedTask(task.mTaskId, record);
         addToWindowMap(window, true);
+        makeWindowVisibleAndDrawn(window);
         return task;
     }
 
@@ -332,6 +348,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         mAtm.setFocusedTask(task.mTaskId, record2);
         addToWindowMap(window1, true);
         addToWindowMap(window2, true);
+
+        makeWindowVisibleAndDrawn(window2);
 
         CrossActivityTestCase testCase = new CrossActivityTestCase();
         testCase.task = task;
