@@ -1073,9 +1073,6 @@ class UserController implements Handler.Callback {
             uss.setState(UserState.STATE_STOPPING);
             UserManagerInternal userManagerInternal = mInjector.getUserManagerInternal();
             userManagerInternal.setUserState(userId, uss.state);
-            // TODO(b/239982558): for now we're just updating the user's visibility, but most likely
-            // we'll need to remove this call and handle that as part of the user state workflow
-            // instead.
             userManagerInternal.unassignUserFromDisplayOnStop(userId);
 
             updateStartedUserArrayLU();
@@ -1505,13 +1502,32 @@ class UserController implements Handler.Callback {
         return startUserNoChecks(userId, Display.DEFAULT_DISPLAY, foreground, unlockListener);
     }
 
-    // TODO(b/239982558): add javadoc (need to wait until the intents / SystemService callbacks are
-    // defined
+    /**
+     * Starts a user in background and make it visible in the given display.
+     *
+     * <p>This call will trigger the usual "user started" lifecycle events (i.e., `SystemService`
+     * callbacks and app intents), plus a call to
+     * {@link UserManagerInternal.UserVisibilityListener#onUserVisibilityChanged(int, boolean)} if
+     * the user visibility changed. Notice that the visibility change is independent of the user
+     * workflow state, and they can mismatch in some corner events (for example, if the user was
+     * already running in the background but not associated with a display, this call for that user
+     * would not trigger any lifecycle event but would trigger {@code onUserVisibilityChanged}).
+     *
+     * <p>See {@link ActivityManager#startUserInBackgroundOnSecondaryDisplay(int, int)} for more
+     * semantics.
+     *
+     * @param userId user to be started
+     * @param displayId display where the user will be visible
+     *
+     * @return whether the user was started
+     */
     boolean startUserOnSecondaryDisplay(@UserIdInt int userId, int displayId) {
         checkCallingHasOneOfThosePermissions("startUserOnSecondaryDisplay",
                 MANAGE_USERS, INTERACT_ACROSS_USERS);
 
         // DEFAULT_DISPLAY is used for the current foreground user only
+        // TODO(b/245939659): might need to move this check to UserVisibilityMediator to support
+        // passenger-only screens
         Preconditions.checkArgument(displayId != Display.DEFAULT_DISPLAY,
                 "Cannot use DEFAULT_DISPLAY");
 
@@ -1519,7 +1535,7 @@ class UserController implements Handler.Callback {
             return startUserNoChecks(userId, displayId, /* foreground= */ false,
                     /* unlockListener= */ null);
         } catch (RuntimeException e) {
-            Slogf.w(TAG, "startUserOnSecondaryDisplay(%d, %d) failed: %s", userId, displayId, e);
+            Slogf.e(TAG, "startUserOnSecondaryDisplay(%d, %d) failed: %s", userId, displayId, e);
             return false;
         }
     }
@@ -1618,7 +1634,6 @@ class UserController implements Handler.Callback {
                 return false;
             }
 
-            // TODO(b/239982558): might need something similar for bg users on secondary display
             if (foreground && isUserSwitchUiEnabled()) {
                 t.traceBegin("startFreezingScreen");
                 mInjector.getWindowManager().startFreezingScreen(
@@ -1674,9 +1689,9 @@ class UserController implements Handler.Callback {
                     userSwitchUiEnabled = mUserSwitchUiEnabled;
                 }
                 mInjector.updateUserConfiguration();
-                // TODO(b/244644281): updateProfileRelatedCaches() is called on both if and else
-                // parts, ideally it should be moved outside, but for now it's not as there are many
-                // calls to external components here afterwards
+                // NOTE: updateProfileRelatedCaches() is called on both if and else parts, ideally
+                // it should be moved outside, but for now it's not as there are many calls to
+                // external components here afterwards
                 updateProfileRelatedCaches();
                 mInjector.getWindowManager().setCurrentUser(userId);
                 mInjector.reportCurWakefulnessUsageEvent();
