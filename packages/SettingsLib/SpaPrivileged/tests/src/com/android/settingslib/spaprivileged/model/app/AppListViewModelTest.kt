@@ -21,7 +21,7 @@ import android.content.pm.ApplicationInfo
 import androidx.compose.runtime.Composable
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.framework.compose.stateOf
-import com.android.settingslib.spa.framework.util.asyncMapItem
+import com.android.settingslib.spa.framework.util.mapItem
 import com.android.settingslib.spa.testutils.waitUntil
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -116,16 +116,7 @@ private class TestAppListModel : AppListModel<TestAppRecord> {
     var onFirstLoadedCalled = false
 
     override fun transform(userIdFlow: Flow<Int>, appListFlow: Flow<List<ApplicationInfo>>) =
-        appListFlow.asyncMapItem { TestAppRecord(it) }
-
-    @Composable
-    override fun getSummary(option: Int, record: TestAppRecord) = null
-
-    override fun filter(
-        userIdFlow: Flow<Int>,
-        option: Int,
-        recordListFlow: Flow<List<TestAppRecord>>,
-    ) = recordListFlow
+        appListFlow.mapItem(::TestAppRecord)
 
     override suspend fun onFirstLoaded(recordList: List<TestAppRecord>) {
         onFirstLoadedCalled = true
