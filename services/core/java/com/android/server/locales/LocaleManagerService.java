@@ -38,6 +38,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -59,6 +60,10 @@ import java.io.FileDescriptor;
  */
 public class LocaleManagerService extends SystemService {
     private static final String TAG = "LocaleManagerService";
+    // The feature flag control that allows the active IME to query the locales of the foreground
+    // app.
+    private static final String PROP_ALLOW_IME_QUERY_APP_LOCALE =
+            "i18n.feature.allow_ime_query_app_locale";
     final Context mContext;
     private final LocaleManagerService.LocaleManagerBinderService mBinderService;
     private ActivityTaskManagerInternal mActivityTaskManagerInternal;
@@ -431,6 +436,10 @@ public class LocaleManagerService extends SystemService {
      * Checks if the calling app is the current input method.
      */
     private boolean isCallerFromCurrentInputMethod(int userId) {
+        if (!SystemProperties.getBoolean(PROP_ALLOW_IME_QUERY_APP_LOCALE, true)) {
+            return false;
+        }
+
         String currentInputMethod = Settings.Secure.getStringForUser(
                 mContext.getContentResolver(),
                 Settings.Secure.DEFAULT_INPUT_METHOD,
