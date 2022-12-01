@@ -15481,7 +15481,6 @@ package android.graphics {
   }
 
   public static class PathIterator.Segment {
-    ctor public PathIterator.Segment(@NonNull int, @NonNull float[], float);
     method public float getConicWeight();
     method @NonNull public float[] getPoints();
     method @NonNull public int getVerb();
