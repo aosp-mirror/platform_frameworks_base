@@ -137,6 +137,8 @@ import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_
 import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_SYSTEM;
 import static com.android.server.net.NetworkPolicyManagerInternal.updateBlockedReasonsWithProcState;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.pm.UserManagerInternal.USER_START_MODE_BACKGROUND;
+import static com.android.server.pm.UserManagerInternal.USER_START_MODE_FOREGROUND;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
@@ -16566,14 +16568,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public boolean startUserInBackgroundWithListener(final int userId,
                 @Nullable IProgressListener unlockListener) {
-        return mUserController.startUser(userId, /* foreground */ false, unlockListener);
+        return mUserController.startUser(userId, USER_START_MODE_BACKGROUND, unlockListener);
     }
 
     @Override
     public boolean startUserInForegroundWithListener(final int userId,
             @Nullable IProgressListener unlockListener) {
         // Permission check done inside UserController.
-        return mUserController.startUser(userId, /* foreground */ true, unlockListener);
+        return mUserController.startUser(userId, USER_START_MODE_FOREGROUND, unlockListener);
     }
 
     @Override
@@ -18495,7 +18497,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public int restartUserInBackground(final int userId) {
-        return mUserController.restartUser(userId, /* foreground */ false);
+        return mUserController.restartUser(userId, USER_START_MODE_BACKGROUND);
     }
 
     @Override

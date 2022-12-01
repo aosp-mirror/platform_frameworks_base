@@ -46,6 +46,11 @@ import static com.android.server.am.UserState.STATE_BOOTING;
 import static com.android.server.am.UserState.STATE_RUNNING_LOCKED;
 import static com.android.server.am.UserState.STATE_RUNNING_UNLOCKED;
 import static com.android.server.am.UserState.STATE_RUNNING_UNLOCKING;
+import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE;
+import static com.android.server.pm.UserManagerInternal.USER_START_MODE_BACKGROUND_VISIBLE;
+import static com.android.server.pm.UserManagerInternal.USER_START_MODE_FOREGROUND;
+import static com.android.server.pm.UserManagerInternal.userAssignmentResultToString;
+import static com.android.server.pm.UserManagerInternal.userStartModeToString;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -119,6 +124,7 @@ import com.android.server.SystemServiceManager;
 import com.android.server.am.UserState.KeyEvictedCallback;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerInternal.UserLifecycleListener;
+import com.android.server.pm.UserManagerInternal.UserStartMode;
 import com.android.server.pm.UserManagerService;
 import com.android.server.utils.Slogf;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -903,14 +909,14 @@ class UserController implements Handler.Callback {
         });
     }
 
-    int restartUser(final int userId, final boolean foreground) {
+    int restartUser(final int userId, @UserStartMode int userStartMode) {
         return stopUser(userId, /* force= */ true, /* allowDelayedLocking= */ false,
                 /* stopUserCallback= */ null, new KeyEvictedCallback() {
                     @Override
                     public void keyEvicted(@UserIdInt int userId) {
                         // Post to the same handler that this callback is called from to ensure
                         // the user cleanup is complete before restarting.
-                        mHandler.post(() -> UserController.this.startUser(userId, foreground));
+                        mHandler.post(() -> UserController.this.startUser(userId, userStartMode));
                     }
                 });
     }
@@ -1267,7 +1273,7 @@ class UserController implements Handler.Callback {
                 if (userStart.userId == userId) {
                     Slogf.i(TAG, "resumePendingUserStart for" + userStart);
                     mHandler.post(() -> startUser(userStart.userId,
-                            userStart.isForeground, userStart.unlockListener));
+                            userStart.userStartMode, userStart.unlockListener));
 
                     handledUserStarts.add(userStart);
                 }
@@ -1450,7 +1456,7 @@ class UserController implements Handler.Callback {
         for (; i < profilesToStartSize && i < (getMaxRunningUsers() - 1); ++i) {
             // NOTE: this method is setting the profiles of the current user - which is always
             // assigned to the default display
-            startUser(profilesToStart.get(i).id, /* foreground= */ false);
+            startUser(profilesToStart.get(i).id, USER_START_MODE_BACKGROUND_VISIBLE);
         }
         if (i < profilesToStartSize) {
             Slogf.w(TAG, "More profiles than MAX_RUNNING_USERS");
@@ -1492,18 +1498,20 @@ class UserController implements Handler.Callback {
             return false;
         }
 
-        return startUserNoChecks(userId, Display.DEFAULT_DISPLAY, /* foreground= */ false,
-                /* unlockListener= */ null);
+        return startUserNoChecks(userId, Display.DEFAULT_DISPLAY,
+                USER_START_MODE_BACKGROUND_VISIBLE, /* unlockListener= */ null);
     }
 
     @VisibleForTesting
-    boolean startUser(final @UserIdInt int userId, final boolean foreground) {
-        return startUser(userId, foreground, null);
+    boolean startUser(@UserIdInt int userId, @UserStartMode int userStartMode) {
+        return startUser(userId, userStartMode, /* unlockListener= */ null);
     }
 
     /**
      * Start user, if its not already running.
-     * <p>The user will be brought to the foreground, if {@code foreground} parameter is set.
+     *
+     * <p>The user will be brought to the foreground, if {@code userStartMode} parameter is
+     * set to {@link UserManagerInternal#USER_START_MODE_FOREGROUND}
      * When starting the user, multiple intents will be broadcast in the following order:</p>
      * <ul>
      *     <li>{@link Intent#ACTION_USER_STARTED} - sent to registered receivers of the new user
@@ -1529,17 +1537,15 @@ class UserController implements Handler.Callback {
      * </ul>
      *
      * @param userId ID of the user to start
-     * @param foreground true if user should be brought to the foreground
+     * @param userStartMode user starting mode
      * @param unlockListener Listener to be informed when the user has started and unlocked.
      * @return true if the user has been successfully started
      */
-    boolean startUser(
-            final @UserIdInt int userId,
-            final boolean foreground,
+    boolean startUser(@UserIdInt int userId, @UserStartMode int userStartMode,
             @Nullable IProgressListener unlockListener) {
         checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "startUser");
 
-        return startUserNoChecks(userId, Display.DEFAULT_DISPLAY, foreground, unlockListener);
+        return startUserNoChecks(userId, Display.DEFAULT_DISPLAY, userStartMode, unlockListener);
     }
 
     /**
@@ -1572,7 +1578,7 @@ class UserController implements Handler.Callback {
                 "Cannot use DEFAULT_DISPLAY");
 
         try {
-            return startUserNoChecks(userId, displayId, /* foreground= */ false,
+            return startUserNoChecks(userId, displayId, USER_START_MODE_BACKGROUND_VISIBLE,
                     /* unlockListener= */ null);
         } catch (RuntimeException e) {
             Slogf.e(TAG, "startUserOnSecondaryDisplay(%d, %d) failed: %s", userId, displayId, e);
@@ -1580,26 +1586,29 @@ class UserController implements Handler.Callback {
         }
     }
 
-    private boolean startUserNoChecks(@UserIdInt int userId, int displayId, boolean foreground,
-            @Nullable IProgressListener unlockListener) {
+    private boolean startUserNoChecks(@UserIdInt int userId, int displayId,
+            @UserStartMode int userStartMode, @Nullable IProgressListener unlockListener) {
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
 
         t.traceBegin("UserController.startUser-" + userId
                 + (displayId == Display.DEFAULT_DISPLAY ? "" : "-display-" + displayId)
-                + "-" + (foreground ? "fg" : "bg"));
+                + "-" + (userStartMode == USER_START_MODE_FOREGROUND ? "fg" : "bg")
+                + "-start-mode-" + userStartMode);
         try {
-            return startUserInternal(userId, displayId, foreground, unlockListener, t);
+            return startUserInternal(userId, displayId, userStartMode, unlockListener, t);
         } finally {
             t.traceEnd();
         }
     }
 
-    private boolean startUserInternal(@UserIdInt int userId, int displayId, boolean foreground,
-            @Nullable IProgressListener unlockListener, @NonNull TimingsTraceAndSlog t) {
+    private boolean startUserInternal(@UserIdInt int userId, int displayId,
+            @UserStartMode int userStartMode, @Nullable IProgressListener unlockListener,
+            TimingsTraceAndSlog t) {
         if (DEBUG_MU) {
-            Slogf.i(TAG, "Starting user %d on display %d%s", userId, displayId,
-                    foreground ? " in foreground" : "");
+            Slogf.i(TAG, "Starting user %d on display %d with mode  %s", userId, displayId,
+                    userStartModeToString(userStartMode));
         }
+        boolean foreground = userStartMode == USER_START_MODE_FOREGROUND;
 
         boolean onSecondaryDisplay = displayId != Display.DEFAULT_DISPLAY;
         if (onSecondaryDisplay) {
@@ -1664,13 +1673,13 @@ class UserController implements Handler.Callback {
 
             t.traceBegin("assignUserToDisplayOnStart");
             int result = mInjector.getUserManagerInternal().assignUserToDisplayOnStart(userId,
-                    userInfo.profileGroupId, foreground, displayId);
+                    userInfo.profileGroupId, userStartMode, displayId);
             t.traceEnd();
 
-            if (result == UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE) {
+            if (result == USER_ASSIGNMENT_RESULT_FAILURE) {
                 Slogf.e(TAG, "%s user(%d) / display (%d) assignment failed: %s",
-                        (foreground ? "fg" : "bg"), userId, displayId,
-                        UserManagerInternal.userAssignmentResultToString(result));
+                        userStartModeToString(userStartMode), userId, displayId,
+                        userAssignmentResultToString(result));
                 return false;
             }
 
@@ -1700,8 +1709,8 @@ class UserController implements Handler.Callback {
                 } else if (uss.state == UserState.STATE_SHUTDOWN) {
                     Slogf.i(TAG, "User #" + userId
                             + " is shutting down - will start after full shutdown");
-                    mPendingUserStarts.add(new PendingUserStart(userId,
-                            foreground, unlockListener));
+                    mPendingUserStarts.add(new PendingUserStart(userId, userStartMode,
+                            unlockListener));
                     t.traceEnd(); // updateStartedUserArrayStarting
                     return true;
                 }
@@ -1862,8 +1871,8 @@ class UserController implements Handler.Callback {
     /**
      * Start user, if its not already running, and bring it to foreground.
      */
-    void startUserInForeground(final int targetUserId) {
-        boolean success = startUser(targetUserId, /* foreground */ true);
+    void startUserInForeground(@UserIdInt int targetUserId) {
+        boolean success = startUser(targetUserId, USER_START_MODE_FOREGROUND);
         if (!success) {
             mInjector.getWindowManager().setSwitchingUser(false);
         }
@@ -3433,13 +3442,13 @@ class UserController implements Handler.Callback {
      */
     private static class PendingUserStart {
         public final @UserIdInt int userId;
-        public final boolean isForeground;
+        public final @UserStartMode int userStartMode;
         public final IProgressListener unlockListener;
 
-        PendingUserStart(int userId, boolean foreground,
+        PendingUserStart(int userId, @UserStartMode int userStartMode,
                 IProgressListener unlockListener) {
             this.userId = userId;
-            this.isForeground = foreground;
+            this.userStartMode = userStartMode;
             this.unlockListener = unlockListener;
         }
 
@@ -3447,7 +3456,7 @@ class UserController implements Handler.Callback {
         public String toString() {
             return "PendingUserStart{"
                     + "userId=" + userId
-                    + ", isForeground=" + isForeground
+                    + ", userStartMode=" + userStartModeToString(userStartMode)
                     + ", unlockListener=" + unlockListener
                     + '}';
         }

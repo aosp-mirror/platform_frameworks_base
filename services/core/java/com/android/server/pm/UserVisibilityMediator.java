@@ -139,7 +139,7 @@ public final class UserVisibilityMediator implements Dumpable {
     }
 
     /**
-     * See {@link UserManagerInternal#assignUserToDisplayOnStart(int, int, boolean, int)}.
+     * See {@link UserManagerInternal#assignUserToDisplayOnStart(int, int, int, int)}.
      */
     public @UserAssignmentResult int assignUserToDisplayOnStart(@UserIdInt int userId,
             @UserIdInt int unResolvedProfileGroupId, boolean foreground, int displayId) {
