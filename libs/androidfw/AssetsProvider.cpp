@@ -92,16 +92,19 @@ ZipAssetsProvider::ZipAssetsProvider(ZipArchiveHandle handle, PathOrDebugName&& 
       last_mod_time_(last_mod_time) {}
 
 std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(std::string path,
-                                                             package_property_t flags) {
+                                                             package_property_t flags,
+                                                             base::unique_fd fd) {
+  const auto released_fd = fd.ok() ? fd.release() : -1;
   ZipArchiveHandle handle;
-  if (int32_t result = OpenArchive(path.c_str(), &handle); result != 0) {
+  if (int32_t result = released_fd < 0 ? OpenArchive(path.c_str(), &handle)
+                                       : OpenArchiveFd(released_fd, path.c_str(), &handle)) {
     LOG(ERROR) << "Failed to open APK '" << path << "': " << ::ErrorCodeString(result);
     CloseArchive(handle);
     return {};
   }
 
   struct stat sb{.st_mtime = -1};
-  if (stat(path.c_str(), &sb) < 0) {
+  if ((released_fd < 0 ? stat(path.c_str(), &sb) : fstat(released_fd, &sb)) < 0) {
     // Stat requires execute permissions on all directories path to the file. If the process does
     // not have execute permissions on this file, allow the zip to be opened but IsUpToDate() will
     // always have to return true.
