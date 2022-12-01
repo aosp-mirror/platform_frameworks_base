@@ -2587,12 +2587,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         && win.mSyncSeqId > lastSyncSeqId) {
                     maybeSyncSeqId = win.shouldSyncWithBuffers() ? win.mSyncSeqId : -1;
                     win.markRedrawForSyncReported();
-                    if (win.mSyncState == WindowContainer.SYNC_STATE_WAITING_FOR_DRAW
-                            && winAnimator.mDrawState == WindowStateAnimator.HAS_DRAWN
-                            && maybeSyncSeqId < 0) {
-                        // Do not wait for a drawn window which won't report draw.
-                        win.onSyncFinishedDrawing();
-                    }
                 } else {
                     maybeSyncSeqId = -1;
                 }
