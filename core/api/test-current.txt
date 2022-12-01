@@ -1908,6 +1908,7 @@ package android.os {
   }
 
   public abstract class VibrationEffect implements android.os.Parcelable {
+    method @Nullable public abstract long[] computeCreateWaveformOffOnTimingsOrNull();
     method public static android.os.VibrationEffect get(int);
     method public static android.os.VibrationEffect get(int, boolean);
     method @Nullable public static android.os.VibrationEffect get(android.net.Uri, android.content.Context);
@@ -1922,6 +1923,7 @@ package android.os {
   }
 
   public static final class VibrationEffect.Composed extends android.os.VibrationEffect {
+    method @Nullable public long[] computeCreateWaveformOffOnTimingsOrNull();
     method public long getDuration();
     method public int getRepeatIndex();
     method @NonNull public java.util.List<android.os.vibrator.VibrationEffectSegment> getSegments();
