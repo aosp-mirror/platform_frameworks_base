@@ -16,16 +16,6 @@
 
 #include "Readback.h"
 
-#include <sync/sync.h>
-#include <system/window.h>
-
-#include <gui/TraceUtils.h>
-#include "DeferredLayerUpdater.h"
-#include "Properties.h"
-#include "hwui/Bitmap.h"
-#include "pipeline/skia/LayerDrawable.h"
-#include "renderthread/EglManager.h"
-#include "renderthread/VulkanManager.h"
 #include <SkBitmap.h>
 #include <SkBlendMode.h>
 #include <SkCanvas.h>
@@ -38,6 +28,19 @@
 #include <SkRefCnt.h>
 #include <SkSamplingOptions.h>
 #include <SkSurface.h>
+#include <gui/TraceUtils.h>
+#include <private/android/AHardwareBufferHelpers.h>
+#include <shaders/shaders.h>
+#include <sync/sync.h>
+#include <system/window.h>
+
+#include "DeferredLayerUpdater.h"
+#include "Properties.h"
+#include "Tonemapper.h"
+#include "hwui/Bitmap.h"
+#include "pipeline/skia/LayerDrawable.h"
+#include "renderthread/EglManager.h"
+#include "renderthread/VulkanManager.h"
 #include "utils/Color.h"
 #include "utils/MathUtils.h"
 #include "utils/NdkUtils.h"
@@ -91,8 +94,18 @@ void Readback::copySurfaceInto(ANativeWindow* window, const std::shared_ptr<Copy
         }
     }
 
-    sk_sp<SkColorSpace> colorSpace = DataSpaceToColorSpace(
-            static_cast<android_dataspace>(ANativeWindow_getBuffersDataSpace(window)));
+    int32_t dataspace = ANativeWindow_getBuffersDataSpace(window);
+
+    // If the application is not updating the Surface themselves, e.g., another
+    // process is producing buffers for the application to display, then
+    // ANativeWindow_getBuffersDataSpace will return an unknown answer, so grab
+    // the dataspace from buffer metadata instead, if it exists.
+    if (dataspace == 0) {
+        dataspace = AHardwareBuffer_getDataSpace(sourceBuffer.get());
+    }
+
+    sk_sp<SkColorSpace> colorSpace =
+            DataSpaceToColorSpace(static_cast<android_dataspace>(dataspace));
     sk_sp<SkImage> image =
             SkImage::MakeFromAHardwareBuffer(sourceBuffer.get(), kPremul_SkAlphaType, colorSpace);
 
@@ -227,6 +240,10 @@ void Readback::copySurfaceInto(ANativeWindow* window, const std::shared_ptr<Copy
     const bool hasBufferCrop = cropRect.left < cropRect.right && cropRect.top < cropRect.bottom;
     auto constraint =
             hasBufferCrop ? SkCanvas::kStrict_SrcRectConstraint : SkCanvas::kFast_SrcRectConstraint;
+
+    static constexpr float kMaxLuminanceNits = 4000.f;
+    tonemapPaint(image->imageInfo(), canvas->imageInfo(), kMaxLuminanceNits, paint);
+
     canvas->drawImageRect(image, imageSrcRect, imageDstRect, sampling, &paint, constraint);
     canvas->restore();
 
