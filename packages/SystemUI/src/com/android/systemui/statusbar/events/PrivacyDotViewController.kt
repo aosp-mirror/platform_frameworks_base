@@ -94,7 +94,11 @@ open class PrivacyDotViewController @Inject constructor(
     private val views: Sequence<View>
         get() = if (!this::tl.isInitialized) sequenceOf() else sequenceOf(tl, tr, br, bl)
 
-    private var showingListener: ShowingListener? = null
+    var showingListener: ShowingListener? = null
+        set(value) {
+            field = value
+        }
+        get() = field
 
     init {
         contentInsetsProvider.addCallback(object : StatusBarContentInsetsChangedListener {
@@ -145,10 +149,6 @@ open class PrivacyDotViewController @Inject constructor(
 
     fun getUiExecutor(): DelayableExecutor? {
         return uiExecutor
-    }
-
-    fun setShowingListener(l: ShowingListener?) {
-        showingListener = l
     }
 
     @UiThread
@@ -219,7 +219,7 @@ open class PrivacyDotViewController @Inject constructor(
 
     // Update the gravity and margins of the privacy views
     @UiThread
-    private fun updateRotations(rotation: Int, paddingTop: Int) {
+    open fun updateRotations(rotation: Int, paddingTop: Int) {
         // To keep a view in the corner, its gravity is always the description of its current corner
         // Therefore, just figure out which view is in which corner. This turns out to be something
         // like (myCorner - rot) mod 4, where topLeft = 0, topRight = 1, etc. and portrait = 0, and
@@ -250,7 +250,7 @@ open class PrivacyDotViewController @Inject constructor(
     }
 
     @UiThread
-    private fun setCornerSizes(state: ViewState) {
+    open fun setCornerSizes(state: ViewState) {
         // StatusBarContentInsetsProvider can tell us the location of the privacy indicator dot
         // in every rotation. The only thing we need to check is rtl
         val rtl = state.layoutRtl

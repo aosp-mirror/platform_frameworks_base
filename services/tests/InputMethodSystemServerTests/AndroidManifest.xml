@@ -18,6 +18,11 @@
           package="com.android.frameworks.inputmethodtests">
 
     <uses-sdk android:targetSdkVersion="31" />
+    <queries>
+        <intent>
+            <action android:name="android.view.InputMethod" />
+        </intent>
+    </queries>
 
     <!-- Permissions required for granting and logging -->
     <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE"/>
@@ -29,9 +34,23 @@
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
+    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_TASKS"/>
+    <uses-permission android:name="android.permission.BIND_INPUT_METHOD" />
+
     <application android:testOnly="true"
                  android:debuggable="true">
         <uses-library android:name="android.test.runner" />
+        <service android:name="com.android.server.inputmethod.InputMethodBindingControllerTest$EmptyInputMethodService"
+                 android:label="Empty IME"
+                 android:permission="android.permission.BIND_INPUT_METHOD"
+                 android:process=":service"
+                 android:exported="true">
+            <intent-filter>
+                <action android:name="android.view.InputMethod"/>
+            </intent-filter>
+            <meta-data android:name="android.view.im"
+                       android:resource="@xml/method"/>
+        </service>
     </application>
 
     <instrumentation

@@ -31,8 +31,8 @@ class Printer {
   explicit Printer(::aapt::io::OutputStream* out) : out_(out) {
   }
 
-  Printer& Print(const ::android::StringPiece& str);
-  Printer& Println(const ::android::StringPiece& str);
+  Printer& Print(android::StringPiece str);
+  Printer& Println(android::StringPiece str);
   Printer& Println();
 
   void Indent();

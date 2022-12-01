@@ -147,6 +147,12 @@ class BroadcastProcessQueue {
     private boolean mActiveViaColdStart;
 
     /**
+     * Number of consecutive urgent broadcasts that have been dispatched
+     * since the last non-urgent dispatch.
+     */
+    private int mActiveCountConsecutiveUrgent;
+
+    /**
      * Count of pending broadcasts of these various flavors.
      */
     private int mCountForeground;
@@ -546,19 +552,47 @@ class BroadcastProcessQueue {
      * {@link #isEmpty()} being false.
      */
     SomeArgs removeNextBroadcast() {
-        ArrayDeque<SomeArgs> queue = queueForNextBroadcast();
+        final ArrayDeque<SomeArgs> queue = queueForNextBroadcast();
+        if (queue == mPendingUrgent) {
+            mActiveCountConsecutiveUrgent++;
+        } else {
+            mActiveCountConsecutiveUrgent = 0;
+        }
         return queue.removeFirst();
     }
 
     @Nullable ArrayDeque<SomeArgs> queueForNextBroadcast() {
-        if (!mPendingUrgent.isEmpty()) {
-            return mPendingUrgent;
-        } else if (!mPending.isEmpty()) {
-            return mPending;
+        ArrayDeque<SomeArgs> nextUrgent = mPendingUrgent.isEmpty() ? null : mPendingUrgent;
+        ArrayDeque<SomeArgs> nextNormal = null;
+        if (!mPending.isEmpty()) {
+            nextNormal = mPending;
         } else if (!mPendingOffload.isEmpty()) {
-            return mPendingOffload;
+            nextNormal = mPendingOffload;
         }
-        return null;
+        // nothing urgent pending, no further decisionmaking
+        if (nextUrgent == null) {
+            return nextNormal;
+        }
+        // nothing but urgent pending, also no further decisionmaking
+        if (nextNormal == null) {
+            return nextUrgent;
+        }
+
+        // Starvation mitigation: although we prioritize urgent broadcasts by default,
+        // we allow non-urgent deliveries to make steady progress even if urgent
+        // broadcasts are arriving faster than they can be dispatched.
+        //
+        // We do not try to defer to the next non-urgent broadcast if that broadcast
+        // is ordered and still blocked on delivery to other recipients.
+        final SomeArgs nextNormalArgs = nextNormal.peekFirst();
+        final BroadcastRecord rNormal = (BroadcastRecord) nextNormalArgs.arg1;
+        final int nextNormalIndex = nextNormalArgs.argi1;
+        final BroadcastRecord rUrgent = (BroadcastRecord) nextUrgent.peekFirst().arg1;
+        final boolean canTakeNormal =
+                mActiveCountConsecutiveUrgent >= constants.MAX_CONSECUTIVE_URGENT_DISPATCHES
+                        && rNormal.enqueueTime <= rUrgent.enqueueTime
+                        && !blockedOnOrderedDispatch(rNormal, nextNormalIndex);
+        return canTakeNormal ? nextNormal : nextUrgent;
     }
 
     /**
@@ -710,6 +744,18 @@ class BroadcastProcessQueue {
         }
     }
 
+    private boolean blockedOnOrderedDispatch(BroadcastRecord r, int index) {
+        final int blockedUntilTerminalCount = r.blockedUntilTerminalCount[index];
+
+        // We might be blocked waiting for other receivers to finish,
+        // typically for an ordered broadcast or priority traunches
+        if (r.terminalCount < blockedUntilTerminalCount
+                && !isDeliveryStateTerminal(r.getDeliveryState(index))) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Update {@link #getRunnableAt()} if it's currently invalidated.
      */
@@ -718,13 +764,11 @@ class BroadcastProcessQueue {
         if (next != null) {
             final BroadcastRecord r = (BroadcastRecord) next.arg1;
             final int index = next.argi1;
-            final int blockedUntilTerminalCount = r.blockedUntilTerminalCount[index];
             final long runnableAt = r.enqueueTime;
 
-            // We might be blocked waiting for other receivers to finish,
-            // typically for an ordered broadcast or priority traunches
-            if (r.terminalCount < blockedUntilTerminalCount
-                    && !isDeliveryStateTerminal(r.getDeliveryState(index))) {
+            // If we're specifically queued behind other ordered dispatch activity,
+            // we aren't runnable yet
+            if (blockedOnOrderedDispatch(r, index)) {
                 mRunnableAt = Long.MAX_VALUE;
                 mRunnableAtReason = REASON_BLOCKED;
                 return;

@@ -307,6 +307,17 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onPanelExpansionChanged_neverTranslatesBouncerWhenOccluded() {
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+        mStatusBarKeyguardViewManager.onPanelExpansionChanged(
+                expansionEvent(
+                        /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,
+                        /* expanded= */ true,
+                        /* tracking= */ false));
+        verify(mPrimaryBouncer, never()).setExpansion(anyFloat());
+    }
+
+    @Test
     public void onPanelExpansionChanged_neverTranslatesBouncerWhenShowBouncer() {
         // Since KeyguardBouncer.EXPANSION_VISIBLE = 0 panel expansion, if the unlock is dismissing
         // the bouncer, there may be an onPanelExpansionChanged(0) call to collapse the panel

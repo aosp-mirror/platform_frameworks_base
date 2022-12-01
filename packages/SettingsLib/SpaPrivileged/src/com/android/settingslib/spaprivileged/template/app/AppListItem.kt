@@ -35,16 +35,13 @@ class AppListItemModel<T : AppRecord>(
 )
 
 @Composable
-fun <T : AppRecord> AppListItem(
-    itemModel: AppListItemModel<T>,
-    onClick: () -> Unit,
-) {
+fun <T : AppRecord> AppListItemModel<T>.AppListItem(onClick: () -> Unit) {
     Preference(remember {
         object : PreferenceModel {
-            override val title = itemModel.label
-            override val summary = itemModel.summary
+            override val title = label
+            override val summary = this@AppListItem.summary
             override val icon = @Composable {
-                AppIcon(app = itemModel.record.app, size = SettingsDimension.appIconItemSize)
+                AppIcon(app = record.app, size = SettingsDimension.appIconItemSize)
             }
             override val onClick = onClick
         }
@@ -58,7 +55,6 @@ private fun AppListItemPreview() {
         val record = object : AppRecord {
             override val app = LocalContext.current.applicationInfo
         }
-        val itemModel = AppListItemModel<AppRecord>(record, "Chrome", "Allowed".toState())
-        AppListItem(itemModel) {}
+        AppListItemModel<AppRecord>(record, "Chrome", "Allowed".toState()).AppListItem {}
     }
 }

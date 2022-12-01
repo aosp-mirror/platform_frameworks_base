@@ -3234,6 +3234,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--skip-verification":
                     sessionParams.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
                     break;
+                case "--skip-enable":
+                    sessionParams.setKeepApplicationEnabledSetting();
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
             }

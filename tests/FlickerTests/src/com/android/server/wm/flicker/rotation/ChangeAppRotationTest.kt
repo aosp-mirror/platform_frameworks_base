@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.rotation
 
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -124,6 +125,14 @@ class ChangeAppRotationTest(testSpec: FlickerTestParameter) : RotationTransition
     @FlakyTest(bugId = 206753786)
     @Test
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
+
+    @Test
+    @IwTest(focusArea = "ime")
+    override fun cujCompleted() {
+        super.cujCompleted()
+        focusChanges()
+        rotationLayerAppearsAndVanishes()
+    }
 
     companion object {
         /**

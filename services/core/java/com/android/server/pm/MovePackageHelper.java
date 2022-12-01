@@ -129,7 +129,7 @@ public final class MovePackageHelper {
         final InstallSource installSource = packageState.getInstallSource();
         final String packageAbiOverride = packageState.getCpuAbiOverride();
         final int appId = UserHandle.getAppId(pkg.getUid());
-        final String seinfo = AndroidPackageUtils.getSeInfo(pkg, packageState);
+        final String seinfo = packageState.getSeInfo();
         final String label = String.valueOf(pm.getApplicationLabel(
                 AndroidPackageUtils.generateAppInfoWithoutState(pkg)));
         final int targetSdkVersion = pkg.getTargetSdkVersion();

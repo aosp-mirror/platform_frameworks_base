@@ -47,29 +47,6 @@ public class EnvironmentTest {
         return InstrumentationRegistry.getContext();
     }
 
-    /**
-     * Sets {@code mode} for the given {@code ops} and the given {@code uid}.
-     *
-     * <p>This method drops shell permission identity.
-     */
-    private static void setAppOpsModeForUid(int uid, int mode, String... ops) {
-        if (ops == null) {
-            return;
-        }
-        InstrumentationRegistry.getInstrumentation()
-                .getUiAutomation()
-                .adoptShellPermissionIdentity();
-        try {
-            for (String op : ops) {
-                getContext().getSystemService(AppOpsManager.class).setUidMode(op, uid, mode);
-            }
-        } finally {
-            InstrumentationRegistry.getInstrumentation()
-                    .getUiAutomation()
-                    .dropShellPermissionIdentity();
-        }
-    }
-
     @Before
     public void setUp() throws Exception {
         dir = getContext().getDir("testing", Context.MODE_PRIVATE);
@@ -126,18 +103,5 @@ public class EnvironmentTest {
     public void testClassify_otherRoot() throws Exception {
         Environment.buildPath(dir, "Taxes.pdf").createNewFile();
         assertEquals(HAS_OTHER, classifyExternalStorageDirectory(dir));
-    }
-
-    @Test
-    public void testIsExternalStorageManager() throws Exception {
-        assertFalse(Environment.isExternalStorageManager());
-        try {
-            setAppOpsModeForUid(Process.myUid(), AppOpsManager.MODE_ALLOWED,
-                    AppOpsManager.OPSTR_MANAGE_EXTERNAL_STORAGE);
-            assertTrue(Environment.isExternalStorageManager());
-        } finally {
-            setAppOpsModeForUid(Process.myUid(), AppOpsManager.MODE_DEFAULT,
-                    AppOpsManager.OPSTR_MANAGE_EXTERNAL_STORAGE);
-        }
     }
 }

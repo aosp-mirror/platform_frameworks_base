@@ -29,6 +29,9 @@ import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.MATCH_TYP
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_MULTIPLE_ZONES_WITH_DIFFERENT_OFFSETS;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_SINGLE_ZONE;
+import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_BLOCKED_BY_SETTINGS;
+import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_UNKNOWN;
+import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_UNKNOWN;
 
 import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
 import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_LOW;
@@ -65,6 +68,7 @@ import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion.MatchType;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion.Quality;
 import android.os.HandlerThread;
+import android.service.timezone.TimeZoneProviderStatus;
 
 import com.android.server.SystemTimeZone.TimeZoneConfidence;
 import com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.QualifiedTelephonyTimeZoneSuggestion;
@@ -1148,7 +1152,7 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     @Test
-    public void testTelephonyFallback() {
+    public void testTelephonyFallback_enableTelephonyTimeZoneFallbackCalled() {
         ConfigurationInternal config = new ConfigurationInternal.Builder(
                 CONFIG_AUTO_ENABLED_GEO_ENABLED)
                 .setTelephonyFallbackSupported(true)
@@ -1178,19 +1182,21 @@ public class TimeZoneDetectorStrategyImplTest {
 
         // Receiving an "uncertain" geolocation suggestion should have no effect.
         {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
             LocationAlgorithmEvent locationAlgorithmEvent = createUncertainLocationAlgorithmEvent();
-            script.simulateIncrementClock()
-                    .simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
                     .verifyTimeZoneNotChanged()
                     .verifyTelephonyFallbackIsEnabled(true);
         }
 
         // Receiving a "certain" geolocation suggestion should disable telephony fallback mode.
         {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
             LocationAlgorithmEvent locationAlgorithmEvent =
                     createCertainLocationAlgorithmEvent("Europe/London");
-            script.simulateIncrementClock()
-                    .simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
                     .verifyTimeZoneChangedAndReset(locationAlgorithmEvent)
                     .verifyTelephonyFallbackIsEnabled(false);
         }
@@ -1214,17 +1220,19 @@ public class TimeZoneDetectorStrategyImplTest {
         // Geolocation suggestions should continue to be used as normal (previous telephony
         // suggestions are not used, even when the geolocation suggestion is uncertain).
         {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
             LocationAlgorithmEvent certainLocationAlgorithmEvent =
                     createCertainLocationAlgorithmEvent("Europe/Rome");
-            script.simulateIncrementClock()
-                    .simulateLocationAlgorithmEvent(certainLocationAlgorithmEvent)
+            script.simulateLocationAlgorithmEvent(certainLocationAlgorithmEvent)
                     .verifyTimeZoneChangedAndReset(certainLocationAlgorithmEvent)
                     .verifyTelephonyFallbackIsEnabled(false);
 
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
             LocationAlgorithmEvent uncertainLocationAlgorithmEvent =
                     createUncertainLocationAlgorithmEvent();
-            script.simulateIncrementClock()
-                    .simulateLocationAlgorithmEvent(uncertainLocationAlgorithmEvent)
+            script.simulateLocationAlgorithmEvent(uncertainLocationAlgorithmEvent)
                     .verifyTimeZoneNotChanged()
                     .verifyTelephonyFallbackIsEnabled(false);
 
@@ -1246,19 +1254,21 @@ public class TimeZoneDetectorStrategyImplTest {
 
         // Make the geolocation algorithm uncertain.
         {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
             LocationAlgorithmEvent locationAlgorithmEvent = createUncertainLocationAlgorithmEvent();
-            script.simulateIncrementClock()
-                    .simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
                     .verifyTimeZoneChangedAndReset(lastTelephonySuggestion)
                     .verifyTelephonyFallbackIsEnabled(true);
         }
 
         // Make the geolocation algorithm certain, disabling telephony fallback.
         {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
             LocationAlgorithmEvent locationAlgorithmEvent =
                     createCertainLocationAlgorithmEvent("Europe/Lisbon");
-            script.simulateIncrementClock()
-                    .simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
                     .verifyTimeZoneChangedAndReset(locationAlgorithmEvent)
                     .verifyTelephonyFallbackIsEnabled(false);
 
@@ -1267,14 +1277,141 @@ public class TimeZoneDetectorStrategyImplTest {
         // Demonstrate what happens when geolocation is uncertain when telephony fallback is
         // enabled.
         {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
             LocationAlgorithmEvent locationAlgorithmEvent = createUncertainLocationAlgorithmEvent();
-            script.simulateIncrementClock()
-                    .simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
                     .verifyTimeZoneNotChanged()
                     .verifyTelephonyFallbackIsEnabled(false)
                     .simulateEnableTelephonyFallback()
                     .verifyTimeZoneChangedAndReset(lastTelephonySuggestion)
                     .verifyTelephonyFallbackIsEnabled(true);
+        }
+    }
+
+    @Test
+    public void testTelephonyFallback_locationAlgorithmEventSuggestsFallback() {
+        ConfigurationInternal config = new ConfigurationInternal.Builder(
+                CONFIG_AUTO_ENABLED_GEO_ENABLED)
+                .setTelephonyFallbackSupported(true)
+                .build();
+
+        Script script = new Script()
+                .initializeClock(ARBITRARY_ELAPSED_REALTIME_MILLIS)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
+                .simulateConfigurationInternalChange(config)
+                .resetConfigurationTracking();
+
+        // Confirm initial state is as expected.
+        script.verifyTelephonyFallbackIsEnabled(true)
+                .verifyTimeZoneNotChanged();
+
+        // Although geolocation detection is enabled, telephony fallback should be used initially
+        // and until a suitable "certain" geolocation suggestion is received.
+        {
+            TelephonyTimeZoneSuggestion telephonySuggestion = createTelephonySuggestion(
+                    SLOT_INDEX1, MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE,
+                    "Europe/Paris");
+            script.simulateIncrementClock()
+                    .simulateTelephonyTimeZoneSuggestion(telephonySuggestion)
+                    .verifyTimeZoneChangedAndReset(telephonySuggestion)
+                    .verifyTelephonyFallbackIsEnabled(true);
+        }
+
+        // Receiving an "uncertain" geolocation suggestion without a status should have no effect.
+        {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent locationAlgorithmEvent = createUncertainLocationAlgorithmEvent();
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(true);
+        }
+
+        // Receiving a "certain" geolocation suggestion should disable telephony fallback mode.
+        {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent locationAlgorithmEvent =
+                    createCertainLocationAlgorithmEvent("Europe/London");
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                    .verifyTimeZoneChangedAndReset(locationAlgorithmEvent)
+                    .verifyTelephonyFallbackIsEnabled(false);
+        }
+
+        // Used to record the last telephony suggestion received, which will be used when fallback
+        // takes place.
+        TelephonyTimeZoneSuggestion lastTelephonySuggestion;
+
+        // Telephony suggestions should now be ignored and geolocation detection is "in control".
+        {
+            TelephonyTimeZoneSuggestion telephonySuggestion = createTelephonySuggestion(
+                    SLOT_INDEX1, MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE,
+                    "Europe/Berlin");
+            script.simulateIncrementClock()
+                    .simulateTelephonyTimeZoneSuggestion(telephonySuggestion)
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(false);
+            lastTelephonySuggestion = telephonySuggestion;
+        }
+
+        // Geolocation suggestions should continue to be used as normal (previous telephony
+        // suggestions are not used, even when the geolocation suggestion is uncertain).
+        {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent certainLocationAlgorithmEvent =
+                    createCertainLocationAlgorithmEvent("Europe/Rome");
+            script.simulateLocationAlgorithmEvent(certainLocationAlgorithmEvent)
+                    .verifyTimeZoneChangedAndReset(certainLocationAlgorithmEvent)
+                    .verifyTelephonyFallbackIsEnabled(false);
+
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent uncertainLocationAlgorithmEvent =
+                    createUncertainLocationAlgorithmEvent();
+            script.simulateLocationAlgorithmEvent(uncertainLocationAlgorithmEvent)
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(false);
+
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent certainLocationAlgorithmEvent2 =
+                    createCertainLocationAlgorithmEvent("Europe/Rome");
+            script.simulateLocationAlgorithmEvent(certainLocationAlgorithmEvent2)
+                    // No change needed, device will already be set to Europe/Rome.
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(false);
+        }
+
+        // Enable telephony fallback via a LocationAlgorithmEvent containing an "uncertain"
+        // suggestion.
+        {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            TimeZoneProviderStatus primaryProviderReportedStatus =
+                    new TimeZoneProviderStatus.Builder()
+                            .setLocationDetectionDependencyStatus(
+                                    DEPENDENCY_STATUS_BLOCKED_BY_SETTINGS)
+                            .setConnectivityDependencyStatus(DEPENDENCY_STATUS_UNKNOWN)
+                            .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_UNKNOWN)
+                            .build();
+            LocationAlgorithmEvent uncertainEventBlockedBySettings =
+                    createUncertainLocationAlgorithmEvent(primaryProviderReportedStatus);
+            script.simulateLocationAlgorithmEvent(uncertainEventBlockedBySettings)
+                    .verifyTimeZoneChangedAndReset(lastTelephonySuggestion)
+                    .verifyTelephonyFallbackIsEnabled(true);
+        }
+
+        // Make the geolocation algorithm certain, disabling telephony fallback.
+        {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent locationAlgorithmEvent =
+                    createCertainLocationAlgorithmEvent("Europe/Lisbon");
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                    .verifyTimeZoneChangedAndReset(locationAlgorithmEvent)
+                    .verifyTelephonyFallbackIsEnabled(false);
         }
     }
 
@@ -1297,9 +1434,10 @@ public class TimeZoneDetectorStrategyImplTest {
 
         // Receiving an "uncertain" geolocation suggestion should have no effect.
         {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
             LocationAlgorithmEvent locationAlgorithmEvent = createUncertainLocationAlgorithmEvent();
-            script.simulateIncrementClock()
-                    .simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
                     .verifyTimeZoneNotChanged()
                     .verifyTelephonyFallbackIsEnabled(true);
         }
@@ -1307,9 +1445,10 @@ public class TimeZoneDetectorStrategyImplTest {
         // Make an uncertain geolocation suggestion, there is no telephony suggestion to fall back
         // to
         {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
             LocationAlgorithmEvent locationAlgorithmEvent = createUncertainLocationAlgorithmEvent();
-            script.simulateIncrementClock()
-                    .simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
                     .verifyTimeZoneNotChanged()
                     .verifyTelephonyFallbackIsEnabled(true);
         }
@@ -1319,16 +1458,18 @@ public class TimeZoneDetectorStrategyImplTest {
         // Geolocation suggestions should continue to be used as normal (previous telephony
         // suggestions are not used, even when the geolocation suggestion is uncertain).
         {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
             LocationAlgorithmEvent certainEvent =
                     createCertainLocationAlgorithmEvent("Europe/Rome");
-            script.simulateIncrementClock()
-                    .simulateLocationAlgorithmEvent(certainEvent)
+            script.simulateLocationAlgorithmEvent(certainEvent)
                     .verifyTimeZoneChangedAndReset(certainEvent)
                     .verifyTelephonyFallbackIsEnabled(false);
 
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
             LocationAlgorithmEvent uncertainEvent = createUncertainLocationAlgorithmEvent();
-            script.simulateIncrementClock()
-                    .simulateLocationAlgorithmEvent(uncertainEvent)
+            script.simulateLocationAlgorithmEvent(uncertainEvent)
                     .verifyTimeZoneNotChanged()
                     .verifyTelephonyFallbackIsEnabled(false);
 
@@ -1549,9 +1690,16 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     private LocationAlgorithmEvent createUncertainLocationAlgorithmEvent() {
+        TimeZoneProviderStatus primaryProviderReportedStatus = null;
+        return createUncertainLocationAlgorithmEvent(primaryProviderReportedStatus);
+    }
+
+    private LocationAlgorithmEvent createUncertainLocationAlgorithmEvent(
+            TimeZoneProviderStatus primaryProviderReportedStatus) {
         GeolocationTimeZoneSuggestion suggestion = createUncertainGeolocationSuggestion();
         LocationTimeZoneAlgorithmStatus algorithmStatus = new LocationTimeZoneAlgorithmStatus(
-                DETECTION_ALGORITHM_STATUS_RUNNING, PROVIDER_STATUS_IS_UNCERTAIN, null,
+                DETECTION_ALGORITHM_STATUS_RUNNING,
+                PROVIDER_STATUS_IS_UNCERTAIN, primaryProviderReportedStatus,
                 PROVIDER_STATUS_NOT_PRESENT, null);
         LocationAlgorithmEvent event = new LocationAlgorithmEvent(algorithmStatus, suggestion);
         event.addDebugInfo("Test uncertain event");
@@ -1744,11 +1892,12 @@ public class TimeZoneDetectorStrategyImplTest {
         }
 
         /**
-         * Simulates the time zone detection strategty receiving a signal that allows it to do
+         * Simulates the time zone detection strategy receiving a signal that allows it to do
          * telephony fallback.
          */
         Script simulateEnableTelephonyFallback() {
-            mTimeZoneDetectorStrategy.enableTelephonyTimeZoneFallback();
+            mTimeZoneDetectorStrategy.enableTelephonyTimeZoneFallback(
+                    "simulateEnableTelephonyFallback()");
             return this;
         }
 

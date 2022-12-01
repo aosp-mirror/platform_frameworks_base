@@ -33,7 +33,9 @@
 #include <type_traits>
 #include <vector>
 
+#include <android-base/file.h>
 #include <android-base/macros.h>
+#include <android-base/utf8.h>
 #include <androidfw/ByteBucketArray.h>
 #include <androidfw/ResourceTypes.h>
 #include <androidfw/TypeWrappers.h>
@@ -236,12 +238,23 @@ void Res_png_9patch::serialize(const Res_png_9patch& patch, const int32_t* xDivs
 }
 
 bool IsFabricatedOverlay(const std::string& path) {
-  std::ifstream fin(path);
-  uint32_t magic;
-  if (fin.read(reinterpret_cast<char*>(&magic), sizeof(uint32_t))) {
-    return magic == kFabricatedOverlayMagic;
+  return IsFabricatedOverlay(path.c_str());
+}
+
+bool IsFabricatedOverlay(const char* path) {
+  auto fd = base::unique_fd(base::utf8::open(path, O_RDONLY|O_CLOEXEC));
+  if (fd < 0) {
+    return false;
   }
-  return false;
+  return IsFabricatedOverlay(fd);
+}
+
+bool IsFabricatedOverlay(base::borrowed_fd fd) {
+  uint32_t magic;
+  if (!base::ReadFullyAtOffset(fd, &magic, sizeof(magic), 0)) {
+    return false;
+  }
+  return magic == kFabricatedOverlayMagic;
 }
 
 static bool assertIdmapHeader(const void* idmap, size_t size) {
@@ -6988,11 +7001,10 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
 DynamicRefTable::DynamicRefTable() : DynamicRefTable(0, false) {}
 
 DynamicRefTable::DynamicRefTable(uint8_t packageId, bool appAsLib)
-    : mAssignedPackageId(packageId)
+    : mLookupTable()
+    , mAssignedPackageId(packageId)
     , mAppAsLib(appAsLib)
 {
-    memset(mLookupTable, 0, sizeof(mLookupTable));
-
     // Reserved package ids
     mLookupTable[APP_PACKAGE_ID] = APP_PACKAGE_ID;
     mLookupTable[SYS_PACKAGE_ID] = SYS_PACKAGE_ID;
@@ -7073,10 +7085,6 @@ void DynamicRefTable::addMapping(uint8_t buildPackageId, uint8_t runtimePackageI
     mLookupTable[buildPackageId] = runtimePackageId;
 }
 
-void DynamicRefTable::addAlias(uint32_t stagedId, uint32_t finalizedId) {
-  mAliasId[stagedId] = finalizedId;
-}
-
 status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
     uint32_t res = *resId;
     size_t packageId = Res_GETPACKAGE(res) + 1;
@@ -7086,11 +7094,12 @@ status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
         return NO_ERROR;
     }
 
-    auto alias_id = mAliasId.find(res);
-    if (alias_id != mAliasId.end()) {
+    const auto alias_it = std::lower_bound(mAliasId.begin(), mAliasId.end(), res,
+        [](const AliasMap::value_type& pair, uint32_t val) { return pair.first < val; });
+    if (alias_it != mAliasId.end() && alias_it->first == res) {
       // Rewrite the resource id to its alias resource id. Since the alias resource id is a
       // compile-time id, it still needs to be resolved further.
-      res = alias_id->second;
+      res = alias_it->second;
     }
 
     if (packageId == SYS_PACKAGE_ID || (packageId == APP_PACKAGE_ID && !mAppAsLib)) {

@@ -187,7 +187,7 @@ static StringPiece LevelToString(Visibility::Level level) {
 static ::testing::AssertionResult VisibilityOfResource(const ResourceTable& table,
                                                        const ResourceNameRef& name,
                                                        Visibility::Level level,
-                                                       const StringPiece& comment) {
+                                                       StringPiece comment) {
   std::optional<ResourceTable::SearchResult> result = table.FindResource(name);
   if (!result) {
     return ::testing::AssertionFailure() << "no resource '" << name << "' found in table";

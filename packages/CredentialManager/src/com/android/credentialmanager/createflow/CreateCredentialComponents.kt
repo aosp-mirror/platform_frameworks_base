@@ -202,7 +202,7 @@ fun ProviderSelectionCard(
         text = stringResource(
           R.string.choose_provider_title,
           when (requestDisplayInfo.type) {
-            TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(R.string.create_your_passkey)
+            TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(R.string.create_your_passkeys)
             TYPE_PASSWORD_CREDENTIAL -> stringResource(R.string.save_your_password)
             else -> stringResource(R.string.save_your_sign_in_info)
           },
@@ -273,6 +273,10 @@ fun ProviderSelectionCard(
           }
         }
       }
+      Divider(
+        thickness = 24.dp,
+        color = Color.Transparent
+      )
       Row(
         horizontalArrangement = Arrangement.Start,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
@@ -305,9 +309,9 @@ fun MoreOptionsSelectionCard(
         title = {
           Text(
             text = when (requestDisplayInfo.type) {
-              TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(R.string.create_passkey_in)
-              TYPE_PASSWORD_CREDENTIAL -> stringResource(R.string.save_password_to)
-              else -> stringResource(R.string.save_sign_in_to)
+              TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(R.string.create_passkey_in_title)
+              TYPE_PASSWORD_CREDENTIAL -> stringResource(R.string.save_password_to_title)
+              else -> stringResource(R.string.save_sign_in_to_title)
             },
             style = MaterialTheme.typography.titleMedium
           )
@@ -398,7 +402,7 @@ fun MoreOptionsRowIntroCard(
         textAlign = TextAlign.Center,
       )
       Text(
-        text = stringResource(R.string.confirm_default_or_use_once_description),
+        text = stringResource(R.string.use_provider_for_all_description),
         style = MaterialTheme.typography.bodyLarge,
         modifier = Modifier.padding(all = 24.dp).align(alignment = Alignment.CenterHorizontally)
       )

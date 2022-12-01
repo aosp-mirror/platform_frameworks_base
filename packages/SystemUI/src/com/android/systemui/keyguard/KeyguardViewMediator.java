@@ -870,7 +870,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 @Override
                 public void onLaunchAnimationEnd(boolean launchIsFullScreen) {
                     if (launchIsFullScreen) {
-                        mCentralSurfaces.instantCollapseNotificationPanel();
+                        mShadeController.get().instantCollapseShade();
                     }
 
                     mOccludeAnimationPlaying = false;

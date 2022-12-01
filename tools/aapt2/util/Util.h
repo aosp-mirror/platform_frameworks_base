@@ -48,44 +48,44 @@ struct Range {
   T end;
 };
 
-std::vector<std::string> Split(const android::StringPiece& str, char sep);
-std::vector<std::string> SplitAndLowercase(const android::StringPiece& str, char sep);
+std::vector<std::string> Split(android::StringPiece str, char sep);
+std::vector<std::string> SplitAndLowercase(android::StringPiece str, char sep);
 
 // Returns true if the string starts with prefix.
-bool StartsWith(const android::StringPiece& str, const android::StringPiece& prefix);
+bool StartsWith(android::StringPiece str, android::StringPiece prefix);
 
 // Returns true if the string ends with suffix.
-bool EndsWith(const android::StringPiece& str, const android::StringPiece& suffix);
+bool EndsWith(android::StringPiece str, android::StringPiece suffix);
 
 // Creates a new StringPiece that points to a substring of the original string without leading
 // whitespace.
-android::StringPiece TrimLeadingWhitespace(const android::StringPiece& str);
+android::StringPiece TrimLeadingWhitespace(android::StringPiece str);
 
 // Creates a new StringPiece that points to a substring of the original string without trailing
 // whitespace.
-android::StringPiece TrimTrailingWhitespace(const android::StringPiece& str);
+android::StringPiece TrimTrailingWhitespace(android::StringPiece str);
 
 // Creates a new StringPiece that points to a substring of the original string without leading or
 // trailing whitespace.
-android::StringPiece TrimWhitespace(const android::StringPiece& str);
+android::StringPiece TrimWhitespace(android::StringPiece str);
 
 // Tests that the string is a valid Java class name.
-bool IsJavaClassName(const android::StringPiece& str);
+bool IsJavaClassName(android::StringPiece str);
 
 // Tests that the string is a valid Java package name.
-bool IsJavaPackageName(const android::StringPiece& str);
+bool IsJavaPackageName(android::StringPiece str);
 
 // Tests that the string is a valid Android package name. More strict than a Java package name.
 // - First character of each component (separated by '.') must be an ASCII letter.
 // - Subsequent characters of a component can be ASCII alphanumeric or an underscore.
 // - Package must contain at least two components, unless it is 'android'.
 // - The maximum package name length is 223.
-bool IsAndroidPackageName(const android::StringPiece& str);
+bool IsAndroidPackageName(android::StringPiece str);
 
 // Tests that the string is a valid Android split name.
 // - First character of each component (separated by '.') must be an ASCII letter.
 // - Subsequent characters of a component can be ASCII alphanumeric or an underscore.
-bool IsAndroidSplitName(const android::StringPiece& str);
+bool IsAndroidSplitName(android::StringPiece str);
 
 // Tests that the string is a valid Android shared user id.
 // - First character of each component (separated by '.') must be an ASCII letter.
@@ -93,8 +93,7 @@ bool IsAndroidSplitName(const android::StringPiece& str);
 // - Must contain at least two components, unless package name is 'android'.
 // - The maximum shared user id length is 223.
 // - Treat empty string as valid, it's the case of no shared user id.
-bool IsAndroidSharedUserId(const android::StringPiece& package_name,
-                           const android::StringPiece& shared_user_id);
+bool IsAndroidSharedUserId(android::StringPiece package_name, android::StringPiece shared_user_id);
 
 // Converts the class name to a fully qualified class name from the given
 // `package`. Ex:
@@ -103,8 +102,8 @@ bool IsAndroidSharedUserId(const android::StringPiece& package_name,
 // .asdf        --> package.asdf
 // .a.b         --> package.a.b
 // asdf.adsf    --> asdf.adsf
-std::optional<std::string> GetFullyQualifiedClassName(const android::StringPiece& package,
-                                                      const android::StringPiece& class_name);
+std::optional<std::string> GetFullyQualifiedClassName(android::StringPiece package,
+                                                      android::StringPiece class_name);
 
 // Retrieves the formatted name of aapt2.
 const char* GetToolName();
@@ -152,16 +151,16 @@ template <typename Container>
 // explicitly specifying an index) when there are more than one argument. This is an error
 // because translations may rearrange the order of the arguments in the string, which will
 // break the string interpolation.
-bool VerifyJavaStringFormat(const android::StringPiece& str);
+bool VerifyJavaStringFormat(android::StringPiece str);
 
-bool AppendStyledString(const android::StringPiece& input, bool preserve_spaces,
-                        std::string* out_str, std::string* out_error);
+bool AppendStyledString(android::StringPiece input, bool preserve_spaces, std::string* out_str,
+                        std::string* out_error);
 
 class StringBuilder {
  public:
   StringBuilder() = default;
 
-  StringBuilder& Append(const android::StringPiece& str);
+  StringBuilder& Append(android::StringPiece str);
   const std::string& ToString() const;
   const std::string& Error() const;
   bool IsEmpty() const;
@@ -229,7 +228,7 @@ class Tokenizer {
    private:
     friend class Tokenizer;
 
-    iterator(const android::StringPiece& s, char sep, const android::StringPiece& tok, bool end);
+    iterator(android::StringPiece s, char sep, android::StringPiece tok, bool end);
 
     android::StringPiece str_;
     char separator_;
@@ -237,7 +236,7 @@ class Tokenizer {
     bool end_;
   };
 
-  Tokenizer(const android::StringPiece& str, char sep);
+  Tokenizer(android::StringPiece str, char sep);
 
   iterator begin() const {
     return begin_;
@@ -252,7 +251,7 @@ class Tokenizer {
   const iterator end_;
 };
 
-inline Tokenizer Tokenize(const android::StringPiece& str, char sep) {
+inline Tokenizer Tokenize(android::StringPiece str, char sep) {
   return Tokenizer(str, sep);
 }
 
@@ -263,7 +262,7 @@ inline Tokenizer Tokenize(const android::StringPiece& str, char sep) {
 // Extracts ".xml" into outSuffix.
 //
 // Returns true if successful.
-bool ExtractResFilePathParts(const android::StringPiece& path, android::StringPiece* out_prefix,
+bool ExtractResFilePathParts(android::StringPiece path, android::StringPiece* out_prefix,
                              android::StringPiece* out_entry, android::StringPiece* out_suffix);
 
 }  // namespace util

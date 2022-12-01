@@ -189,7 +189,7 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
     }
 
     private int runEnableTelephonyFallback() {
-        mInterface.enableTelephonyFallback();
+        mInterface.enableTelephonyFallback("Command line");
         return 0;
     }
 

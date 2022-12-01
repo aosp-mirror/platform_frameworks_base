@@ -66,7 +66,7 @@ internal class TogglePermissionAppInfoPageProvider(
         val owner = SettingsPage.create(name, parameter = parameter, arguments = arguments)
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
-            SettingsEntryBuilder.create(ENTRY_NAME, owner).setIsAllowSearch(false).build()
+            SettingsEntryBuilder.create(ENTRY_NAME, owner).build()
         )
         return entryList
     }

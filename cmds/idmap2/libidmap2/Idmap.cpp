@@ -317,7 +317,7 @@ Result<std::unique_ptr<const IdmapData>> IdmapData::FromResourceMapping(
   }
 
   std::unique_ptr<IdmapData> data(new IdmapData());
-  data->string_pool_data_ = resource_mapping.GetStringPoolData().to_string();
+  data->string_pool_data_ = std::string(resource_mapping.GetStringPoolData());
   uint32_t inline_value_count = 0;
   std::set<std::string> config_set;
   for (const auto& mapping : resource_mapping.GetTargetToOverlayMap()) {

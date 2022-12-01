@@ -2183,6 +2183,17 @@ public abstract class WallpaperService extends Service {
         }
     }
 
+    /**
+     * Returns a Looper which messages such as {@link WallpaperService#DO_ATTACH},
+     * {@link WallpaperService#DO_DETACH} etc. are sent to.
+     * By default, returns the process's main looper.
+     * @hide
+     */
+    @NonNull
+    public Looper onProvideEngineLooper() {
+        return super.getMainLooper();
+    }
+
     private boolean isValid(RectF area) {
         if (area == null) return false;
         boolean valid = area.bottom > area.top && area.left < area.right
@@ -2215,12 +2226,12 @@ public abstract class WallpaperService extends Service {
         Engine mEngine;
         @SetWallpaperFlags int mWhich;
 
-        IWallpaperEngineWrapper(WallpaperService context,
+        IWallpaperEngineWrapper(WallpaperService service,
                 IWallpaperConnection conn, IBinder windowToken,
                 int windowType, boolean isPreview, int reqWidth, int reqHeight, Rect padding,
                 int displayId, @SetWallpaperFlags int which) {
             mWallpaperManager = getSystemService(WallpaperManager.class);
-            mCaller = new HandlerCaller(context, context.getMainLooper(), this, true);
+            mCaller = new HandlerCaller(service, service.onProvideEngineLooper(), this, true);
             mConnection = conn;
             mWindowToken = windowToken;
             mWindowType = windowType;

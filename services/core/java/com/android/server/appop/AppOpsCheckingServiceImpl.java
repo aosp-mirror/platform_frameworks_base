@@ -20,7 +20,7 @@ import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.WATCH_FOREGROUND_CHANGES;
 import static android.app.AppOpsManager.opRestrictsRead;
 
-import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
+import static com.android.server.appop.AppOpsServiceImpl.ModeCallback.ALL_OPS;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -56,7 +56,7 @@ import java.util.Objects;
  * Legacy implementation for App-ops service's app-op mode (uid and package) storage and access.
  * In the future this class will also include mode callbacks and op restrictions.
  */
-public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface {
+public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface {
 
     static final String TAG = "LegacyAppOpsServiceInterfaceImpl";
 
@@ -84,9 +84,9 @@ public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface 
     private static final int UID_ANY = -2;
 
 
-    LegacyAppOpsServiceInterfaceImpl(PersistenceScheduler persistenceScheduler,
-            @NonNull Object lock, Handler handler, Context context,
-            SparseArray<int[]> switchedOps) {
+    AppOpsCheckingServiceImpl(PersistenceScheduler persistenceScheduler,
+                              @NonNull Object lock, Handler handler, Context context,
+                              SparseArray<int[]> switchedOps) {
         this.mPersistenceScheduler = persistenceScheduler;
         this.mLock = lock;
         this.mHandler = handler;
@@ -456,7 +456,7 @@ public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface 
             final ArraySet<String> reportedPackageNames = callbackSpecs.valueAt(i);
             if (reportedPackageNames == null) {
                 mHandler.sendMessage(PooledLambda.obtainMessage(
-                        LegacyAppOpsServiceInterfaceImpl::notifyOpChanged,
+                        AppOpsCheckingServiceImpl::notifyOpChanged,
                         this, callback, code, uid, (String) null));
 
             } else {
@@ -464,7 +464,7 @@ public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface 
                 for (int j = 0; j < reportedPackageCount; j++) {
                     final String reportedPackageName = reportedPackageNames.valueAt(j);
                     mHandler.sendMessage(PooledLambda.obtainMessage(
-                            LegacyAppOpsServiceInterfaceImpl::notifyOpChanged,
+                            AppOpsCheckingServiceImpl::notifyOpChanged,
                             this, callback, code, uid, reportedPackageName));
                 }
             }

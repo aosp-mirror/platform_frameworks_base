@@ -452,7 +452,7 @@ public class PackageInfoUtils {
             info.category = pkgSetting.getCategoryOverride();
         }
 
-        info.seInfo = AndroidPackageUtils.getSeInfo(pkg, pkgSetting);
+        info.seInfo = pkgSetting.getSeInfo();
         info.primaryCpuAbi = pkgSetting.getPrimaryCpuAbi();
         info.secondaryCpuAbi = pkgSetting.getSecondaryCpuAbi();
 

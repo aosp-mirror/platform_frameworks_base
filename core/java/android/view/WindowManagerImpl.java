@@ -366,7 +366,7 @@ public final class WindowManagerImpl implements WindowManager {
         List<DisplayInfo> possibleDisplayInfos;
         try {
             possibleDisplayInfos = WindowManagerGlobal.getWindowManagerService()
-                    .getPossibleDisplayInfo(displayId, mContext.getPackageName());
+                    .getPossibleDisplayInfo(displayId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

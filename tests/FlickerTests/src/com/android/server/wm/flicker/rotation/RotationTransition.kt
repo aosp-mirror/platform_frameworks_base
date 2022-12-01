@@ -73,4 +73,10 @@ abstract class RotationTransition(testSpec: FlickerTestParameter) : BaseTest(tes
             }
         }
     }
+
+    override fun cujCompleted() {
+        super.cujCompleted()
+        appLayerRotates_StartingPos()
+        appLayerRotates_EndingPos()
+    }
 }

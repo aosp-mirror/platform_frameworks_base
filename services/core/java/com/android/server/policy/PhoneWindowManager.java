@@ -4208,11 +4208,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             wakeUpFromWakeKey(event);
         }
 
-        if ((result & ACTION_PASS_TO_USER) != 0) {
+        if ((result & ACTION_PASS_TO_USER) != 0 && !mPerDisplayFocusEnabled
+                && displayId != INVALID_DISPLAY && displayId != mTopFocusedDisplayId) {
             // If the key event is targeted to a specific display, then the user is interacting with
-            // that display. Therefore, give focus to the display that the user is interacting with.
-            if (!mPerDisplayFocusEnabled
-                    && displayId != INVALID_DISPLAY && displayId != mTopFocusedDisplayId) {
+            // that display. Therefore, give focus to the display that the user is interacting with,
+            // unless that display maintains its own focus.
+            Display display = mDisplayManager.getDisplay(displayId);
+            if ((display.getFlags() & Display.FLAG_OWN_FOCUS) == 0) {
                 // An event is targeting a non-focused display. Move the display to top so that
                 // it can become the focused display to interact with the user.
                 // This should be done asynchronously, once the focus logic is fully moved to input

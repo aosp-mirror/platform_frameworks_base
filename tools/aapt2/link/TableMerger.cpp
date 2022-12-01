@@ -66,7 +66,7 @@ bool TableMerger::MergeImpl(const android::Source& src, ResourceTable* table, bo
 
 // This will merge and mangle resources from a static library. It is assumed that all FileReferences
 // have correctly set their io::IFile*.
-bool TableMerger::MergeAndMangle(const android::Source& src, const StringPiece& package_name,
+bool TableMerger::MergeAndMangle(const android::Source& src, StringPiece package_name,
                                  ResourceTable* table) {
   bool error = false;
   for (auto& package : table->packages) {
@@ -326,8 +326,8 @@ std::unique_ptr<FileReference> TableMerger::CloneAndMangleFile(
     const std::string& package, const FileReference& file_ref) {
   StringPiece prefix, entry, suffix;
   if (util::ExtractResFilePathParts(*file_ref.path, &prefix, &entry, &suffix)) {
-    std::string mangled_entry = NameMangler::MangleEntry(package, entry.to_string());
-    std::string newPath = prefix.to_string() + mangled_entry + suffix.to_string();
+    std::string mangled_entry = NameMangler::MangleEntry(package, entry);
+    std::string newPath = (std::string(prefix) += mangled_entry) += suffix;
     std::unique_ptr<FileReference> new_file_ref =
         util::make_unique<FileReference>(main_table_->string_pool.MakeRef(newPath));
     new_file_ref->SetComment(file_ref.GetComment());

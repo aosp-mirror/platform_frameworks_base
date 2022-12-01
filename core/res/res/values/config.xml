@@ -1828,6 +1828,14 @@
          config_enableFusedLocationOverlay is false. -->
     <string name="config_fusedLocationProviderPackageName" translatable="false">com.android.location.fused</string>
 
+    <!-- If true will use the GNSS hardware implementation to service the GPS_PROVIDER. If false
+         will allow the GPS_PROVIDER to be replaced by an app at run-time (restricted to the package
+         specified by config_gnssLocationProviderPackageName). -->
+    <bool name="config_useGnssHardwareProvider" translatable="false">true</bool>
+    <!-- Package name providing GNSS location support. Used only when
+         config_useGnssHardwareProvider is false. -->
+    <string name="config_gnssLocationProviderPackageName" translatable="false">@null</string>
+
     <!-- Default value for the ADAS GNSS Location Enabled setting if this setting has never been
          set before. -->
     <bool name="config_defaultAdasGnssLocationEnabled" translatable="false">false</bool>

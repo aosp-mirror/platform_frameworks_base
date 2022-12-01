@@ -16,9 +16,11 @@
 
 package android.hardware.usb;
 
+import android.Manifest;
+import android.annotation.CheckResult;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -46,6 +48,7 @@ public final class UsbPortStatus implements Parcelable {
     private final boolean mPowerTransferLimited;
     private final @UsbDataStatus int mUsbDataStatus;
     private final @PowerBrickConnectionStatus int mPowerBrickConnectionStatus;
+    private final @NonNull @ComplianceWarning int[] mComplianceWarnings;
 
     /**
      * Power role: This USB port does not have a power role.
@@ -246,6 +249,41 @@ public final class UsbPortStatus implements Parcelable {
      */
     public static final int POWER_BRICK_STATUS_DISCONNECTED = 2;
 
+    /**
+     * Used to indicate attached sources/cables/accessories/ports
+     * that do not match the other warnings below and do not meet the
+     * requirements of specifications including but not limited to
+     * USB Type-C Cable and Connector, Universal Serial Bus
+     * Power Delivery, and Universal Serial Bus 1.x/2.0/3.x/4.0.
+     * In addition, constants introduced after the target sdk will be
+     * remapped into COMPLIANCE_WARNING_OTHER.
+     */
+    public static final int COMPLIANCE_WARNING_OTHER = 1;
+
+    /**
+     * Used to indicate Type-C port partner
+     * (cable/accessory/source) that identifies itself as debug
+     * accessory source as defined in USB Type-C Cable and
+     * Connector Specification. However, the specification states
+     * that this is meant for debug only and shall not be used for
+     * with commercial products.
+     */
+    public static final int COMPLIANCE_WARNING_DEBUG_ACCESSORY = 2;
+
+    /**
+     * Used to indicate USB ports that does not
+     * identify itself as one of the charging port types (SDP/CDP
+     * DCP etc) as defined by Battery Charging v1.2 Specification.
+     */
+    public static final int COMPLIANCE_WARNING_BC_1_2 = 3;
+
+    /**
+     * Used to indicate Type-C sources/cables that are missing pull
+     * up resistors on the CC pins as required by USB Type-C Cable
+     * and Connector Specification.
+     */
+    public static final int COMPLIANCE_WARNING_MISSING_RP = 4;
+
     @IntDef(prefix = { "CONTAMINANT_DETECTION_" }, value = {
             CONTAMINANT_DETECTION_NOT_SUPPORTED,
             CONTAMINANT_DETECTION_DISABLED,
@@ -275,6 +313,15 @@ public final class UsbPortStatus implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @interface UsbPortMode{}
 
+    @IntDef(prefix = { "COMPLIANCE_WARNING_" }, value = {
+            COMPLIANCE_WARNING_OTHER,
+            COMPLIANCE_WARNING_DEBUG_ACCESSORY,
+            COMPLIANCE_WARNING_BC_1_2,
+            COMPLIANCE_WARNING_MISSING_RP,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ComplianceWarning{}
+
     /** @hide */
     @IntDef(prefix = { "DATA_STATUS_" }, flag = true, value = {
             DATA_STATUS_UNKNOWN,
@@ -302,7 +349,8 @@ public final class UsbPortStatus implements Parcelable {
             int supportedRoleCombinations, int contaminantProtectionStatus,
             int contaminantDetectionStatus, @UsbDataStatus int usbDataStatus,
             boolean powerTransferLimited,
-            @PowerBrickConnectionStatus int powerBrickConnectionStatus) {
+            @PowerBrickConnectionStatus int powerBrickConnectionStatus,
+            @NonNull @ComplianceWarning int[] complianceWarnings) {
         mCurrentMode = currentMode;
         mCurrentPowerRole = currentPowerRole;
         mCurrentDataRole = currentDataRole;
@@ -312,21 +360,29 @@ public final class UsbPortStatus implements Parcelable {
         mUsbDataStatus = usbDataStatus;
         mPowerTransferLimited = powerTransferLimited;
         mPowerBrickConnectionStatus = powerBrickConnectionStatus;
+        mComplianceWarnings = complianceWarnings;
+    }
+
+    /** @hide */
+    public UsbPortStatus(int currentMode, int currentPowerRole, int currentDataRole,
+            int supportedRoleCombinations, int contaminantProtectionStatus,
+            int contaminantDetectionStatus, @UsbDataStatus int usbDataStatus,
+            boolean powerTransferLimited,
+            @PowerBrickConnectionStatus int powerBrickConnectionStatus) {
+        this(currentMode, currentPowerRole, currentDataRole, supportedRoleCombinations,
+                contaminantProtectionStatus, contaminantDetectionStatus,
+                usbDataStatus, powerTransferLimited, powerBrickConnectionStatus,
+                new int[] {});
     }
 
     /** @hide */
     public UsbPortStatus(int currentMode, int currentPowerRole, int currentDataRole,
             int supportedRoleCombinations, int contaminantProtectionStatus,
             int contaminantDetectionStatus) {
-        mCurrentMode = currentMode;
-        mCurrentPowerRole = currentPowerRole;
-        mCurrentDataRole = currentDataRole;
-        mSupportedRoleCombinations = supportedRoleCombinations;
-        mContaminantProtectionStatus = contaminantProtectionStatus;
-        mContaminantDetectionStatus = contaminantDetectionStatus;
-        mUsbDataStatus = DATA_STATUS_UNKNOWN;
-        mPowerBrickConnectionStatus = POWER_BRICK_STATUS_UNKNOWN;
-        mPowerTransferLimited = false;
+        this(currentMode, currentPowerRole, currentDataRole, supportedRoleCombinations,
+                contaminantProtectionStatus, contaminantDetectionStatus,
+                DATA_STATUS_UNKNOWN, false, POWER_BRICK_STATUS_UNKNOWN,
+                new int[] {});
     }
 
     /**
@@ -443,6 +499,21 @@ public final class UsbPortStatus implements Parcelable {
         return mPowerBrickConnectionStatus;
     }
 
+    /**
+     * Returns non compliant reasons, if any, for the connected
+     * charger/cable/accessory/USB port.
+     *
+     * @return array including {@link #NON_COMPLIANT_REASON_DEBUG_ACCESSORY},
+     *         {@link #NON_COMPLIANT_REASON_BC12},
+     *         {@link #NON_COMPLIANT_REASON_MISSING_RP},
+     *         or {@link #NON_COMPLIANT_REASON_TYPEC}
+     */
+    @CheckResult
+    @NonNull
+    public @ComplianceWarning int[] getComplianceWarnings() {
+        return mComplianceWarnings;
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -460,9 +531,11 @@ public final class UsbPortStatus implements Parcelable {
                         + UsbPort.usbDataStatusToString(getUsbDataStatus())
                 + ", isPowerTransferLimited="
                         + isPowerTransferLimited()
-                +", powerBrickConnectionStatus="
+                + ", powerBrickConnectionStatus="
                         + UsbPort
                             .powerBrickConnectionStatusToString(getPowerBrickConnectionStatus())
+                + ", complianceWarnings="
+                        + UsbPort.complianceWarningsToString(getComplianceWarnings())
                 + "}";
     }
 
@@ -482,6 +555,7 @@ public final class UsbPortStatus implements Parcelable {
         dest.writeInt(mUsbDataStatus);
         dest.writeBoolean(mPowerTransferLimited);
         dest.writeInt(mPowerBrickConnectionStatus);
+        dest.writeIntArray(mComplianceWarnings);
     }
 
     public static final @NonNull Parcelable.Creator<UsbPortStatus> CREATOR =
@@ -497,10 +571,12 @@ public final class UsbPortStatus implements Parcelable {
             int usbDataStatus = in.readInt();
             boolean powerTransferLimited = in.readBoolean();
             int powerBrickConnectionStatus = in.readInt();
+            @ComplianceWarning int[] complianceWarnings = in.createIntArray();
             return new UsbPortStatus(currentMode, currentPowerRole, currentDataRole,
                     supportedRoleCombinations, contaminantProtectionStatus,
                     contaminantDetectionStatus, usbDataStatus, powerTransferLimited,
-                    powerBrickConnectionStatus);
+                    powerBrickConnectionStatus,
+                    complianceWarnings);
         }
 
         @Override
@@ -524,6 +600,7 @@ public final class UsbPortStatus implements Parcelable {
         private boolean mPowerTransferLimited;
         private @UsbDataStatus int mUsbDataStatus;
         private @PowerBrickConnectionStatus int mPowerBrickConnectionStatus;
+        private @ComplianceWarning int[] mComplianceWarnings;
 
         public Builder() {
             mCurrentMode = MODE_NONE;
@@ -533,6 +610,7 @@ public final class UsbPortStatus implements Parcelable {
             mContaminantDetectionStatus = CONTAMINANT_DETECTION_NOT_SUPPORTED;
             mUsbDataStatus = DATA_STATUS_UNKNOWN;
             mPowerBrickConnectionStatus = POWER_BRICK_STATUS_UNKNOWN;
+            mComplianceWarnings = new int[] {};
         }
 
         /**
@@ -619,6 +697,20 @@ public final class UsbPortStatus implements Parcelable {
         }
 
         /**
+         * Sets the non-compliant charger reasons of {@link UsbPortStatus}
+         *
+         * @return Instance of {@link Builder}
+         */
+        @NonNull
+        public Builder setComplianceWarnings(
+                @NonNull int[] complianceWarnings) {
+            mComplianceWarnings = complianceWarnings == null ? new int[] {} :
+                    complianceWarnings;
+            return this;
+        }
+
+
+        /**
          * Creates the {@link UsbPortStatus} object.
          */
         @NonNull
@@ -626,7 +718,7 @@ public final class UsbPortStatus implements Parcelable {
             UsbPortStatus status = new UsbPortStatus(mCurrentMode, mCurrentPowerRole,
                     mCurrentDataRole, mSupportedRoleCombinations, mContaminantProtectionStatus,
                     mContaminantDetectionStatus, mUsbDataStatus, mPowerTransferLimited,
-                    mPowerBrickConnectionStatus);
+                    mPowerBrickConnectionStatus, mComplianceWarnings);
             return status;
         }
     };

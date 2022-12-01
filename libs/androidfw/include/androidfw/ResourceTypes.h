@@ -21,6 +21,7 @@
 #define _LIBS_UTILS_RESOURCE_TYPES_H
 
 #include <android-base/expected.h>
+#include <android-base/unique_fd.h>
 
 #include <androidfw/Asset.h>
 #include <androidfw/Errors.h>
@@ -58,6 +59,8 @@ constexpr const uint32_t kFabricatedOverlayCurrentVersion = 3;
 
 // Returns whether or not the path represents a fabricated overlay.
 bool IsFabricatedOverlay(const std::string& path);
+bool IsFabricatedOverlay(const char* path);
+bool IsFabricatedOverlay(android::base::borrowed_fd fd);
 
 /**
  * In C++11, char16_t is defined as *at least* 16 bits. We do a lot of
@@ -1882,7 +1885,10 @@ public:
 
     void addMapping(uint8_t buildPackageId, uint8_t runtimePackageId);
 
-    void addAlias(uint32_t stagedId, uint32_t finalizedId);
+    using AliasMap = std::vector<std::pair<uint32_t, uint32_t>>;
+    void setAliases(AliasMap aliases) {
+        mAliasId = std::move(aliases);
+    }
 
     // Returns whether or not the value must be looked up.
     bool requiresLookup(const Res_value* value) const;
@@ -1896,12 +1902,12 @@ public:
         return mEntries;
     }
 
-private:
-    uint8_t                         mAssignedPackageId;
-    uint8_t                         mLookupTable[256];
-    KeyedVector<String16, uint8_t>  mEntries;
-    bool                            mAppAsLib;
-    std::map<uint32_t, uint32_t>    mAliasId;
+   private:
+    uint8_t mLookupTable[256];
+    uint8_t mAssignedPackageId;
+    bool mAppAsLib;
+    KeyedVector<String16, uint8_t> mEntries;
+    AliasMap mAliasId;
 };
 
 bool U16StringToInt(const char16_t* s, size_t len, Res_value* outValue);

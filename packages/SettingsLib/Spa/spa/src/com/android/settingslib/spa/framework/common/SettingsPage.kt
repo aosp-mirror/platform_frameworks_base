@@ -95,24 +95,6 @@ data class SettingsPage(
         return false
     }
 
-    fun enterPage() {
-        SpaEnvironmentFactory.instance.logger.event(
-            id,
-            LogEvent.PAGE_ENTER,
-            category = LogCategory.FRAMEWORK,
-            details = displayName,
-        )
-    }
-
-    fun leavePage() {
-        SpaEnvironmentFactory.instance.logger.event(
-            id,
-            LogEvent.PAGE_LEAVE,
-            category = LogCategory.FRAMEWORK,
-            details = displayName,
-        )
-    }
-
     fun createBrowseIntent(entryId: String? = null): Intent? {
         val context = SpaEnvironmentFactory.instance.appContext
         val browseActivityClass = SpaEnvironmentFactory.instance.browseActivityClass

@@ -48,7 +48,7 @@ public class AppOpsLegacyRestrictionsTest {
     StaticMockitoSession mSession;
 
     @Mock
-    AppOpsService.Constants mConstants;
+    AppOpsServiceImpl.Constants mConstants;
 
     @Mock
     Context mContext;
@@ -57,7 +57,7 @@ public class AppOpsLegacyRestrictionsTest {
     Handler mHandler;
 
     @Mock
-    AppOpsServiceInterface mLegacyAppOpsService;
+    AppOpsCheckingServiceInterface mLegacyAppOpsService;
 
     AppOpsRestrictions mAppOpsRestrictions;
 

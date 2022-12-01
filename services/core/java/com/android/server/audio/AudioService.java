@@ -5863,6 +5863,9 @@ public class AudioService extends IAudioService.Stub
     };
 
     private boolean isValidCommunicationDevice(AudioDeviceInfo device) {
+        if (!device.isSink()) {
+            return false;
+        }
         for (int type : VALID_COMMUNICATION_DEVICE_TYPES) {
             if (device.getType() == type) {
                 return true;
@@ -5897,7 +5900,11 @@ public class AudioService extends IAudioService.Stub
                 throw new IllegalArgumentException("invalid portID " + portId);
             }
             if (!isValidCommunicationDevice(device)) {
-                throw new IllegalArgumentException("invalid device type " + device.getType());
+                if (!device.isSink()) {
+                    throw new IllegalArgumentException("device must have sink role");
+                } else {
+                    throw new IllegalArgumentException("invalid device type: " + device.getType());
+                }
             }
         }
         final String eventSource = new StringBuilder()
@@ -7092,9 +7099,10 @@ public class AudioService extends IAudioService.Stub
 
     private @AudioManager.DeviceVolumeBehavior
             int getDeviceVolumeBehaviorInt(@NonNull AudioDeviceAttributes device) {
-        // translate Java device type to native device type (for the devices masks for full / fixed)
-        final int audioSystemDeviceOut = AudioDeviceInfo.convertDeviceTypeToInternalDevice(
-                device.getType());
+        // Get the internal type set by the AudioDeviceAttributes constructor which is always more
+        // exact (avoids double conversions) than a conversion from SDK type via
+        // AudioDeviceInfo.convertDeviceTypeToInternalDevice()
+        final int audioSystemDeviceOut = device.getInternalType();
 
         int setDeviceVolumeBehavior = retrieveStoredDeviceVolumeBehavior(audioSystemDeviceOut);
         if (setDeviceVolumeBehavior != AudioManager.DEVICE_VOLUME_BEHAVIOR_UNSET) {

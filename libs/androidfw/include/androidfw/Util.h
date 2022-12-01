@@ -123,16 +123,16 @@ class unique_cptr {
 void ReadUtf16StringFromDevice(const uint16_t* src, size_t len, std::string* out);
 
 // Converts a UTF-8 string to a UTF-16 string.
-std::u16string Utf8ToUtf16(const StringPiece& utf8);
+std::u16string Utf8ToUtf16(StringPiece utf8);
 
 // Converts a UTF-16 string to a UTF-8 string.
-std::string Utf16ToUtf8(const StringPiece16& utf16);
+std::string Utf16ToUtf8(StringPiece16 utf16);
 
 // Converts a UTF8 string into Modified UTF8
-std::string Utf8ToModifiedUtf8(const std::string& utf8);
+std::string Utf8ToModifiedUtf8(std::string_view utf8);
 
 // Converts a Modified UTF8 string into a UTF8 string
-std::string ModifiedUtf8ToUtf8(const std::string& modified_utf8);
+std::string ModifiedUtf8ToUtf8(std::string_view modified_utf8);
 
 inline uint16_t HostToDevice16(uint16_t value) {
   return htods(value);
@@ -150,7 +150,7 @@ inline uint32_t DeviceToHost32(uint32_t value) {
   return dtohl(value);
 }
 
-std::vector<std::string> SplitAndLowercase(const android::StringPiece& str, char sep);
+std::vector<std::string> SplitAndLowercase(android::StringPiece str, char sep);
 
 template <typename T>
 inline bool IsFourByteAligned(const incfs::map_ptr<T>& data) {

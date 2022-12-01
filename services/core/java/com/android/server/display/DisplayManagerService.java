@@ -105,7 +105,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
-import android.sysprop.DisplayProperties;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.EventLog;
@@ -451,8 +450,6 @@ public final class DisplayManagerService extends SystemService {
         }
     };
 
-    private final boolean mAllowNonNativeRefreshRateOverride;
-
     private final BrightnessSynchronizer mBrightnessSynchronizer;
 
     /**
@@ -506,7 +503,6 @@ public final class DisplayManagerService extends SystemService {
         ColorSpace[] colorSpaces = SurfaceControl.getCompositionColorSpaces();
         mWideColorSpace = colorSpaces[1];
         mOverlayProperties = SurfaceControl.getOverlaySupport();
-        mAllowNonNativeRefreshRateOverride = mInjector.getAllowNonNativeRefreshRateOverride();
         mSystemReady = false;
     }
 
@@ -930,24 +926,20 @@ public final class DisplayManagerService extends SystemService {
             }
         }
 
-        if (mAllowNonNativeRefreshRateOverride) {
-            overriddenInfo.refreshRateOverride = frameRateHz;
-            if (!CompatChanges.isChangeEnabled(DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE,
-                    callingUid)) {
-                overriddenInfo.supportedModes = Arrays.copyOf(info.supportedModes,
-                        info.supportedModes.length + 1);
-                overriddenInfo.supportedModes[overriddenInfo.supportedModes.length - 1] =
-                        new Display.Mode(Display.DISPLAY_MODE_ID_FOR_FRAME_RATE_OVERRIDE,
-                                currentMode.getPhysicalWidth(), currentMode.getPhysicalHeight(),
-                                overriddenInfo.refreshRateOverride);
-                overriddenInfo.modeId =
-                        overriddenInfo.supportedModes[overriddenInfo.supportedModes.length - 1]
-                                .getModeId();
-            }
-            return overriddenInfo;
+        overriddenInfo.refreshRateOverride = frameRateHz;
+        if (!CompatChanges.isChangeEnabled(DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE,
+                callingUid)) {
+            overriddenInfo.supportedModes = Arrays.copyOf(info.supportedModes,
+                    info.supportedModes.length + 1);
+            overriddenInfo.supportedModes[overriddenInfo.supportedModes.length - 1] =
+                    new Display.Mode(Display.DISPLAY_MODE_ID_FOR_FRAME_RATE_OVERRIDE,
+                            currentMode.getPhysicalWidth(), currentMode.getPhysicalHeight(),
+                            overriddenInfo.refreshRateOverride);
+            overriddenInfo.modeId =
+                    overriddenInfo.supportedModes[overriddenInfo.supportedModes.length - 1]
+                            .getModeId();
         }
-
-        return info;
+        return overriddenInfo;
     }
 
     private DisplayInfo getDisplayInfoInternal(int displayId, int callingUid) {
@@ -2601,11 +2593,6 @@ public final class DisplayManagerService extends SystemService {
 
         long getDefaultDisplayDelayTimeout() {
             return WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT;
-        }
-
-        boolean getAllowNonNativeRefreshRateOverride() {
-            return DisplayProperties
-                    .debug_allow_non_native_refresh_rate_override().orElse(true);
         }
     }
 

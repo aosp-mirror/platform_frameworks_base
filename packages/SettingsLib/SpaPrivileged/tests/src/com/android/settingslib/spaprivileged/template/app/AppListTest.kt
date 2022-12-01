@@ -29,14 +29,12 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.compose.toState
-import com.android.settingslib.spa.framework.util.asyncMapItem
 import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.model.app.AppEntry
 import com.android.settingslib.spaprivileged.model.app.AppListConfig
 import com.android.settingslib.spaprivileged.model.app.AppListData
-import com.android.settingslib.spaprivileged.model.app.AppListModel
-import com.android.settingslib.spaprivileged.model.app.AppRecord
-import kotlinx.coroutines.flow.Flow
+import com.android.settingslib.spaprivileged.tests.testutils.TestAppListModel
+import com.android.settingslib.spaprivileged.tests.testutils.TestAppRecord
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -92,21 +90,19 @@ class AppListTest {
         enableGrouping: Boolean = false,
     ) {
         composeTestRule.setContent {
-            AppList(
+            val appListInput = AppListInput(
                 config = AppListConfig(userId = USER_ID, showInstantApps = false),
-                listModel = TestAppListModel(enableGrouping),
+                listModel = TestAppListModel(enableGrouping = enableGrouping),
                 state = AppListState(
                     showSystem = false.toState(),
                     option = 0.toState(),
                     searchQuery = "".toState(),
                 ),
                 header = header,
-                appItem = { AppListItem(it) {} },
+                appItem = { AppListItem {} },
                 bottomPadding = 0.dp,
-                appListDataSupplier = {
-                    stateOf(AppListData(appEntries, option = 0))
-                }
             )
+            appListInput.AppList { stateOf(AppListData(appEntries, option = 0)) }
         }
     }
 
@@ -136,26 +132,4 @@ class AppListTest {
             labelCollationKey = CollationKey("", byteArrayOf()),
         )
     }
-}
-
-private data class TestAppRecord(
-    override val app: ApplicationInfo,
-    val group: String? = null,
-) : AppRecord
-
-private class TestAppListModel(val enableGrouping: Boolean) : AppListModel<TestAppRecord> {
-    override fun transform(userIdFlow: Flow<Int>, appListFlow: Flow<List<ApplicationInfo>>) =
-        appListFlow.asyncMapItem { TestAppRecord(it) }
-
-    @Composable
-    override fun getSummary(option: Int, record: TestAppRecord) = null
-
-    override fun filter(
-        userIdFlow: Flow<Int>,
-        option: Int,
-        recordListFlow: Flow<List<TestAppRecord>>,
-    ) = recordListFlow
-
-    override fun getGroupTitle(option: Int, record: TestAppRecord) =
-        if (enableGrouping) record.group else null
 }

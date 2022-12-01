@@ -35,7 +35,7 @@ namespace aapt {
 
 class MockFileCollection : public io::IFileCollection {
  public:
-  MOCK_METHOD1(FindFile, io::IFile*(const StringPiece& path));
+  MOCK_METHOD1(FindFile, io::IFile*(StringPiece path));
   MOCK_METHOD0(Iterator, std::unique_ptr<io::IFileCollectionIterator>());
   MOCK_METHOD0(GetDirSeparator, char());
 };
@@ -491,7 +491,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializePrimitives) {
   EXPECT_THAT(bp->value.data, Eq(ResourceUtils::MakeEmpty()->value.data));
 }
 
-static void ExpectConfigSerializes(const StringPiece& config_str) {
+static void ExpectConfigSerializes(StringPiece config_str) {
   const ConfigDescription expected_config = test::ParseConfigOrDie(config_str);
   pb::Configuration pb_config;
   SerializeConfig(expected_config, &pb_config);

@@ -52,6 +52,7 @@ import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -183,15 +184,18 @@ public class SystemActions implements CoreStartable {
     private final AccessibilityManager mA11yManager;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final NotificationShadeWindowController mNotificationShadeController;
+    private final ShadeController mShadeController;
     private final StatusBarWindowCallback mNotificationShadeCallback;
     private boolean mDismissNotificationShadeActionRegistered;
 
     @Inject
     public SystemActions(Context context,
             NotificationShadeWindowController notificationShadeController,
+            ShadeController shadeController,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Optional<Recents> recentsOptional) {
         mContext = context;
+        mShadeController = shadeController;
         mRecentsOptional = recentsOptional;
         mReceiver = new SystemActionsBroadcastReceiver();
         mLocale = mContext.getResources().getConfiguration().getLocales().get(0);
@@ -529,9 +533,7 @@ public class SystemActions implements CoreStartable {
     }
 
     private void handleAccessibilityDismissNotificationShade() {
-        mCentralSurfacesOptionalLazy.get().ifPresent(
-                centralSurfaces -> centralSurfaces.animateCollapsePanels(
-                        CommandQueue.FLAG_EXCLUDE_NONE, false /* force */));
+        mShadeController.animateCollapseShade(CommandQueue.FLAG_EXCLUDE_NONE);
     }
 
     private void handleDpadUp() {

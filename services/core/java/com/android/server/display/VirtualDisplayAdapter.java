@@ -21,6 +21,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT;
@@ -495,12 +496,24 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 if ((mFlags & VIRTUAL_DISPLAY_FLAG_TRUSTED) != 0) {
                     mInfo.flags |= FLAG_TRUSTED;
                 }
-                if ((mFlags & VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED) != 0
-                        && (mInfo.flags & DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP) != 0) {
-                    mInfo.flags |= FLAG_ALWAYS_UNLOCKED;
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED) != 0) {
+                    if ((mFlags & VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP) != 0) {
+                        mInfo.flags |= FLAG_ALWAYS_UNLOCKED;
+                    } else {
+                        Slog.w(TAG, "Ignoring VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED as it "
+                                + "requires VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP.");
+                    }
                 }
                 if ((mFlags & VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
                     mInfo.flags |= FLAG_TOUCH_FEEDBACK_DISABLED;
+                }
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_OWN_FOCUS) != 0) {
+                    if ((mFlags & VIRTUAL_DISPLAY_FLAG_TRUSTED) != 0) {
+                        mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_FOCUS;
+                    } else {
+                        Slog.w(TAG, "Ignoring VIRTUAL_DISPLAY_FLAG_OWN_FOCUS as it requires "
+                                + "VIRTUAL_DISPLAY_FLAG_TRUSTED.");
+                    }
                 }
 
                 mInfo.type = Display.TYPE_VIRTUAL;

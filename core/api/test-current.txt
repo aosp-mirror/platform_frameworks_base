@@ -1251,6 +1251,7 @@ package android.hardware.display {
     field public static final int SWITCHING_TYPE_NONE = 0; // 0x0
     field public static final int SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY = 3; // 0x3
     field public static final int SWITCHING_TYPE_WITHIN_GROUPS = 1; // 0x1
+    field public static final int VIRTUAL_DISPLAY_FLAG_OWN_FOCUS = 16384; // 0x4000
     field public static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 512; // 0x200
   }
 

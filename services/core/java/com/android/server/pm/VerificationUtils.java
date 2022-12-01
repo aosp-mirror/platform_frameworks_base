@@ -112,7 +112,7 @@ final class VerificationUtils {
 
         VerificationUtils.broadcastPackageVerified(verificationId, originUri,
                 verificationCode, null,
-                verifyingSession.mDataLoaderType, verifyingSession.getUser(),
+                verifyingSession.getDataLoaderType(), verifyingSession.getUser(),
                 pms.mContext);
 
         if (state.isInstallAllowed()) {

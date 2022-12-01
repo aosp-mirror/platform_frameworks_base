@@ -306,7 +306,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                                         nextTransition.setAllReady();
                                     }
                                 });
-                        return nextTransition;
+                        return nextTransition.getToken();
                     }
                     transition = mTransitionController.createTransition(type);
                 }
@@ -315,7 +315,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (needsSetReady) {
                     transition.setAllReady();
                 }
-                return transition;
+                return transition.getToken();
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

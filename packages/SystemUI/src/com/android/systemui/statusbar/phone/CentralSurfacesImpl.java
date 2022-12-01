@@ -58,7 +58,6 @@ import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -406,12 +405,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     /** */
     @Override
-    public void animateCollapsePanels(int flags, boolean force) {
-        mCommandQueueCallbacks.animateCollapsePanels(flags, force);
-    }
-
-    /** */
-    @Override
     public void togglePanel() {
         mCommandQueueCallbacks.togglePanel();
     }
@@ -492,8 +485,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     KeyguardIndicationController mKeyguardIndicationController;
 
     private View mReportRejectedTouch;
-
-    private boolean mExpandedVisible;
 
     private final NotificationGutsManager mGutsManager;
     private final NotificationLogger mNotificationLogger;
@@ -893,6 +884,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         updateDisplaySize();
         mStatusBarHideIconsForBouncerManager.setDisplayId(mDisplayId);
 
+        initShadeVisibilityListener();
+
         // start old BaseStatusBar.start().
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
         mDevicePolicyManager = (DevicePolicyManager) mContext.getSystemService(
@@ -1083,6 +1076,25 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                                 requestTopUi, componentTag))));
     }
 
+    @VisibleForTesting
+    void initShadeVisibilityListener() {
+        mShadeController.setVisibilityListener(new ShadeController.ShadeVisibilityListener() {
+            @Override
+            public void visibilityChanged(boolean visible) {
+                onShadeVisibilityChanged(visible);
+            }
+
+            @Override
+            public void expandedVisibleChanged(boolean expandedVisible) {
+                if (expandedVisible) {
+                    setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
+                } else {
+                    onExpandedInvisible();
+                }
+            }
+        });
+    }
+
     private void onFoldedStateChanged(boolean isFolded, boolean willGoToSleep) {
         Trace.beginSection("CentralSurfaces#onFoldedStateChanged");
         onFoldedStateChangedInternal(isFolded, willGoToSleep);
@@ -1228,7 +1240,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         mNotificationPanelViewController.initDependencies(
                 this,
-                this::makeExpandedInvisible,
+                mShadeController::makeExpandedInvisible,
                 mNotificationShelfController);
 
         BackDropView backdrop = mNotificationShadeWindowView.findViewById(R.id.backdrop);
@@ -1431,6 +1443,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mRemoteInputManager.addControllerCallback(mNotificationShadeWindowController);
         mStackScrollerController.setNotificationActivityStarter(mNotificationActivityStarter);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
+        mShadeController.setNotificationPresenter(mPresenter);
         mNotificationsController.initialize(
                 this,
                 mPresenter,
@@ -1480,11 +1493,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return (v, event) -> {
             mAutoHideController.checkUserAutoHide(event);
             mRemoteInputManager.checkRemoteInputOutside(event);
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                if (mExpandedVisible) {
-                    mShadeController.animateCollapsePanels();
-                }
-            }
+            mShadeController.onStatusBarTouch(event);
             return mNotificationShadeWindowView.onTouchEvent(event);
         };
     }
@@ -1506,6 +1515,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mNotificationShadeWindowViewController.setupExpandedStatusBar();
         mNotificationPanelViewController =
                 mCentralSurfacesComponent.getNotificationPanelViewController();
+        mShadeController.setNotificationPanelViewController(mNotificationPanelViewController);
+        mShadeController.setNotificationShadeWindowViewController(
+                mNotificationShadeWindowViewController);
         mCentralSurfacesComponent.getLockIconViewController().init();
         mStackScrollerController =
                 mCentralSurfacesComponent.getNotificationStackScrollLayoutController();
@@ -1827,7 +1839,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 && isLaunchForActivity) {
             onClosingFinished();
         } else {
-            mShadeController.collapsePanel(true /* animate */);
+            mShadeController.collapseShade(true /* animate */);
         }
     }
 
@@ -1838,7 +1850,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             onClosingFinished();
         }
         if (launchIsFullScreen) {
-            instantCollapseNotificationPanel();
+            mShadeController.instantCollapseShade();
         }
     }
 
@@ -1928,43 +1940,18 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
-    public void makeExpandedVisible(boolean force) {
-        if (SPEW) Log.d(TAG, "Make expanded visible: expanded visible=" + mExpandedVisible);
-        if (!force && (mExpandedVisible || !mCommandQueue.panelsEnabled())) {
-            return;
-        }
-
-        mExpandedVisible = true;
-
-        // Expand the window to encompass the full screen in anticipation of the drag.
-        // This is only possible to do atomically because the status bar is at the top of the screen!
-        mNotificationShadeWindowController.setPanelVisible(true);
-
-        visibilityChanged(true);
-        mCommandQueue.recomputeDisableFlags(mDisplayId, !force /* animate */);
-        setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
-    }
-
-    @Override
     public void postAnimateCollapsePanels() {
-        mMainExecutor.execute(mShadeController::animateCollapsePanels);
+        mMainExecutor.execute(mShadeController::animateCollapseShade);
     }
 
     @Override
     public void postAnimateForceCollapsePanels() {
-        mMainExecutor.execute(
-                () -> mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE,
-                true /* force */));
+        mMainExecutor.execute(mShadeController::animateCollapseShadeForced);
     }
 
     @Override
     public void postAnimateOpenPanels() {
         mMessageRouter.sendMessage(MSG_OPEN_SETTINGS_PANEL);
-    }
-
-    @Override
-    public boolean isExpandedVisible() {
-        return mExpandedVisible;
     }
 
     @Override
@@ -1996,45 +1983,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
     }
 
-    void makeExpandedInvisible() {
-        if (SPEW) Log.d(TAG, "makeExpandedInvisible: mExpandedVisible=" + mExpandedVisible);
-
-        if (!mExpandedVisible || mNotificationShadeWindowView == null) {
-            return;
-        }
-
-        // Ensure the panel is fully collapsed (just in case; bug 6765842, 7260868)
-        mNotificationPanelViewController.collapsePanel(/*animate=*/ false, false /* delayed*/,
-                1.0f /* speedUpFactor */);
-
-        mNotificationPanelViewController.closeQs();
-
-        mExpandedVisible = false;
-        visibilityChanged(false);
-
-        // Update the visibility of notification shade and status bar window.
-        mNotificationShadeWindowController.setPanelVisible(false);
-        mStatusBarWindowController.setForceStatusBarVisible(false);
-
-        // Close any guts that might be visible
-        mGutsManager.closeAndSaveGuts(true /* removeLeavebehind */, true /* force */,
-                true /* removeControls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
-
-        mShadeController.runPostCollapseRunnables();
+    private void onExpandedInvisible() {
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
         if (!mNotificationActivityStarter.isCollapsingToShowActivityOverLockscreen()) {
             showBouncerOrLockScreenIfKeyguard();
         } else if (DEBUG) {
             Log.d(TAG, "Not showing bouncer due to activity showing over lockscreen");
-        }
-        mCommandQueue.recomputeDisableFlags(
-                mDisplayId,
-                mNotificationPanelViewController.hideStatusBarIconsWhenExpanded() /* animate */);
-
-        // Trimming will happen later if Keyguard is showing - doing it here might cause a jank in
-        // the bouncer appear animation.
-        if (!mKeyguardStateController.isShowing()) {
-            WindowManagerGlobal.getInstance().trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
         }
     }
 
@@ -2072,7 +2026,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             final boolean upOrCancel =
                     event.getAction() == MotionEvent.ACTION_UP ||
                     event.getAction() == MotionEvent.ACTION_CANCEL;
-            setInteracting(StatusBarManager.WINDOW_STATUS_BAR, !upOrCancel || mExpandedVisible);
+            setInteracting(StatusBarManager.WINDOW_STATUS_BAR,
+                    !upOrCancel || mShadeController.isExpandedVisible());
         }
     }
 
@@ -2221,7 +2176,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         synchronized (mQueueLock) {
             pw.println("Current Status Bar state:");
-            pw.println("  mExpandedVisible=" + mExpandedVisible);
+            pw.println("  mExpandedVisible=" + mShadeController.isExpandedVisible());
             pw.println("  mDisplayMetrics=" + mDisplayMetrics);
             pw.println("  mStackScroller: " + CentralSurfaces.viewInfo(mStackScroller));
             pw.println("  mStackScroller: " + CentralSurfaces.viewInfo(mStackScroller)
@@ -2536,10 +2491,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     }
                 }
                 if (dismissShade) {
-                    if (mExpandedVisible && !mBouncerShowing) {
-                        mShadeController.animateCollapsePanels(
-                                CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
-                                true /* force */, true /* delayed*/);
+                    if (mShadeController.isExpandedVisible() && !mBouncerShowing) {
+                        mShadeController.animateCollapseShadeDelayed();
                     } else {
                         // Do it after DismissAction has been processed to conserve the needed
                         // ordering.
@@ -2581,7 +2534,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                             flags |= CommandQueue.FLAG_EXCLUDE_NOTIFICATION_PANEL;
                         }
                     }
-                    mShadeController.animateCollapsePanels(flags);
+                    mShadeController.animateCollapseShade(flags);
                 }
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 if (mNotificationShadeWindowController != null) {
@@ -2696,10 +2649,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 com.android.systemui.R.dimen.physical_power_button_center_screen_location_y));
     }
 
-    // Visibility reporting
     protected void handleVisibleToUserChanged(boolean visibleToUser) {
         if (visibleToUser) {
-            handleVisibleToUserChangedImpl(visibleToUser);
+            onVisibleToUser();
             mNotificationLogger.startNotificationLogging();
 
             if (!mIsBackCallbackRegistered) {
@@ -2716,7 +2668,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
         } else {
             mNotificationLogger.stopNotificationLogging();
-            handleVisibleToUserChangedImpl(visibleToUser);
+            onInvisibleToUser();
 
             if (mIsBackCallbackRegistered) {
                 ViewRootImpl viewRootImpl = getViewRootImpl();
@@ -2736,41 +2688,38 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
     }
 
-    // Visibility reporting
-    void handleVisibleToUserChangedImpl(boolean visibleToUser) {
-        if (visibleToUser) {
-            /* The LEDs are turned off when the notification panel is shown, even just a little bit.
-             * See also CentralSurfaces.setPanelExpanded for another place where we attempt to do
-             * this.
-             */
-            boolean pinnedHeadsUp = mHeadsUpManager.hasPinnedHeadsUp();
-            boolean clearNotificationEffects =
-                    !mPresenter.isPresenterFullyCollapsed() &&
-                            (mState == StatusBarState.SHADE
-                                    || mState == StatusBarState.SHADE_LOCKED);
-            int notificationLoad = mNotificationsController.getActiveNotificationsCount();
-            if (pinnedHeadsUp && mPresenter.isPresenterFullyCollapsed()) {
-                notificationLoad = 1;
-            }
-            final int finalNotificationLoad = notificationLoad;
-            mUiBgExecutor.execute(() -> {
-                try {
-                    mBarService.onPanelRevealed(clearNotificationEffects,
-                            finalNotificationLoad);
-                } catch (RemoteException ex) {
-                    // Won't fail unless the world has ended.
-                }
-            });
-        } else {
-            mUiBgExecutor.execute(() -> {
-                try {
-                    mBarService.onPanelHidden();
-                } catch (RemoteException ex) {
-                    // Won't fail unless the world has ended.
-                }
-            });
+    void onVisibleToUser() {
+        /* The LEDs are turned off when the notification panel is shown, even just a little bit.
+         * See also CentralSurfaces.setPanelExpanded for another place where we attempt to do
+         * this.
+         */
+        boolean pinnedHeadsUp = mHeadsUpManager.hasPinnedHeadsUp();
+        boolean clearNotificationEffects =
+                !mPresenter.isPresenterFullyCollapsed() && (mState == StatusBarState.SHADE
+                        || mState == StatusBarState.SHADE_LOCKED);
+        int notificationLoad = mNotificationsController.getActiveNotificationsCount();
+        if (pinnedHeadsUp && mPresenter.isPresenterFullyCollapsed()) {
+            notificationLoad = 1;
         }
+        final int finalNotificationLoad = notificationLoad;
+        mUiBgExecutor.execute(() -> {
+            try {
+                mBarService.onPanelRevealed(clearNotificationEffects,
+                        finalNotificationLoad);
+            } catch (RemoteException ex) {
+                // Won't fail unless the world has ended.
+            }
+        });
+    }
 
+    void onInvisibleToUser() {
+        mUiBgExecutor.execute(() -> {
+            try {
+                mBarService.onPanelHidden();
+            } catch (RemoteException ex) {
+                // Won't fail unless the world has ended.
+            }
+        });
     }
 
     private void logStateToEventlog() {
@@ -2948,7 +2897,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private void updatePanelExpansionForKeyguard() {
         if (mState == StatusBarState.KEYGUARD && mBiometricUnlockController.getMode()
                 != BiometricUnlockController.MODE_WAKE_AND_UNLOCK && !mBouncerShowing) {
-            mShadeController.instantExpandNotificationsPanel();
+            mShadeController.instantExpandShade();
         }
     }
 
@@ -3067,7 +3016,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             // too heavy for the CPU and GPU on any device.
             mNavigationBarController.disableAnimationsDuringHide(mDisplayId, delay);
         } else if (!mNotificationPanelViewController.isCollapsing()) {
-            instantCollapseNotificationPanel();
+            mShadeController.instantCollapseShade();
         }
 
         // Keyguard state has changed, but QS is not listening anymore. Make sure to update the tile
@@ -3225,8 +3174,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public boolean onMenuPressed() {
         if (shouldUnlockOnMenuPressed()) {
-            mShadeController.animateCollapsePanels(
-                    CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL /* flags */, true /* force */);
+            mShadeController.animateCollapseShadeForced();
             return true;
         }
         return false;
@@ -3271,7 +3219,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (mState != StatusBarState.KEYGUARD && mState != StatusBarState.SHADE_LOCKED
                 && !isBouncerShowingOverDream()) {
             if (mNotificationPanelViewController.canPanelBeCollapsed()) {
-                mShadeController.animateCollapsePanels();
+                mShadeController.animateCollapseShade();
             }
             return true;
         }
@@ -3281,8 +3229,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public boolean onSpacePressed() {
         if (mDeviceInteractive && mState != StatusBarState.SHADE) {
-            mShadeController.animateCollapsePanels(
-                    CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL /* flags */, true /* force */);
+            mShadeController.animateCollapseShadeForced();
             return true;
         }
         return false;
@@ -3322,12 +3269,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
     }
 
-    @Override
-    public void instantCollapseNotificationPanel() {
-        mNotificationPanelViewController.instantCollapse();
-        mShadeController.runPostCollapseRunnables();
-    }
-
     /**
      * Collapse the panel directly if we are on the main thread, post the collapsing on the main
      * thread if we are not.
@@ -3335,9 +3276,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void collapsePanelOnMainThread() {
         if (Looper.getMainLooper().isCurrentThread()) {
-            mShadeController.collapsePanel();
+            mShadeController.collapseShade();
         } else {
-            mContext.getMainExecutor().execute(mShadeController::collapsePanel);
+            mContext.getMainExecutor().execute(mShadeController::collapseShade);
         }
     }
 
@@ -3477,7 +3418,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             mNotificationShadeWindowViewController.cancelCurrentTouch();
         }
         if (mPanelExpanded && mState == StatusBarState.SHADE) {
-            mShadeController.animateCollapsePanels();
+            mShadeController.animateCollapseShade();
         }
     }
 
@@ -3540,7 +3481,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             // The unlocked screen off and fold to aod animations might use our LightRevealScrim -
             // we need to be expanded for it to be visible.
             if (mDozeParameters.shouldShowLightRevealScrim()) {
-                makeExpandedVisible(true);
+                mShadeController.makeExpandedVisible(true);
             }
 
             DejankUtils.stopDetectingBlockingIpcs(tag);
@@ -3569,7 +3510,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 // If we are waking up during the screen off animation, we should undo making the
                 // expanded visible (we did that so the LightRevealScrim would be visible).
                 if (mScreenOffAnimationController.shouldHideLightRevealScrimOnWakeUp()) {
-                    makeExpandedInvisible();
+                    mShadeController.makeExpandedInvisible();
                 }
 
             });
@@ -3622,6 +3563,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 || goingToSleepWithoutAnimation;
         mNotificationPanelViewController.setTouchAndAnimationDisabled(disabled);
         mNotificationIconAreaController.setAnimationsEnabled(!disabled);
+    }
+
+    //TODO(b/257041702) delete
+    @Override
+    public void makeExpandedVisible(boolean force) {
+        mShadeController.makeExpandedVisible(force);
     }
 
     final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
@@ -3904,8 +3851,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 Settings.Secure.putInt(mContext.getContentResolver(),
                         Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 0);
                 if (BANNER_ACTION_SETUP.equals(action)) {
-                    mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
-                            true /* force */);
+                    mShadeController.animateCollapseShadeForced();
                     mContext.startActivity(new Intent(Settings.ACTION_APP_NOTIFICATION_REDACTION)
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
@@ -3967,7 +3913,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     action.run();
                 }).start();
 
-                return collapsePanel ? mShadeController.collapsePanel() : willAnimateOnKeyguard;
+                return collapsePanel ? mShadeController.collapseShade() : willAnimateOnKeyguard;
             }
 
             @Override
@@ -4062,8 +4008,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mMainExecutor.execute(runnable);
     }
 
-    @Override
-    public void visibilityChanged(boolean visible) {
+    private void onShadeVisibilityChanged(boolean visible) {
         if (mVisible != visible) {
             mVisible = visible;
             if (!visible) {

@@ -46,12 +46,12 @@ class IArchiveWriter : public ::google::protobuf::io::CopyingOutputStream {
  public:
   virtual ~IArchiveWriter() = default;
 
-  virtual bool WriteFile(const android::StringPiece& path, uint32_t flags, io::InputStream* in) = 0;
+  virtual bool WriteFile(android::StringPiece path, uint32_t flags, io::InputStream* in) = 0;
 
   // Starts a new entry and allows caller to write bytes to it sequentially.
   // Only use StartEntry if code you do not control needs to write to a CopyingOutputStream.
   // Prefer WriteFile instead of manually calling StartEntry/FinishEntry.
-  virtual bool StartEntry(const android::StringPiece& path, uint32_t flags) = 0;
+  virtual bool StartEntry(android::StringPiece path, uint32_t flags) = 0;
 
   // Called to finish writing an entry previously started by StartEntry.
   // Prefer WriteFile instead of manually calling StartEntry/FinishEntry.
@@ -70,10 +70,10 @@ class IArchiveWriter : public ::google::protobuf::io::CopyingOutputStream {
 };
 
 std::unique_ptr<IArchiveWriter> CreateDirectoryArchiveWriter(android::IDiagnostics* diag,
-                                                             const android::StringPiece& path);
+                                                             android::StringPiece path);
 
 std::unique_ptr<IArchiveWriter> CreateZipFileArchiveWriter(android::IDiagnostics* diag,
-                                                           const android::StringPiece& path);
+                                                           android::StringPiece path);
 
 }  // namespace aapt
 

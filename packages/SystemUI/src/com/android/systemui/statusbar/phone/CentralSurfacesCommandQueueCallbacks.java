@@ -209,7 +209,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     public void animateExpandNotificationsPanel() {
         if (CentralSurfaces.SPEW) {
             Log.d(CentralSurfaces.TAG,
-                    "animateExpand: mExpandedVisible=" + mCentralSurfaces.isExpandedVisible());
+                    "animateExpand: mExpandedVisible=" + mShadeController.isExpandedVisible());
         }
         if (!mCommandQueue.panelsEnabled()) {
             return;
@@ -222,7 +222,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     public void animateExpandSettingsPanel(@Nullable String subPanel) {
         if (CentralSurfaces.SPEW) {
             Log.d(CentralSurfaces.TAG,
-                    "animateExpand: mExpandedVisible=" + mCentralSurfaces.isExpandedVisible());
+                    "animateExpand: mExpandedVisible=" + mShadeController.isExpandedVisible());
         }
         if (!mCommandQueue.panelsEnabled()) {
             return;
@@ -276,7 +276,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
         if ((diff1 & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state1 & StatusBarManager.DISABLE_EXPAND) != 0) {
-                mShadeController.animateCollapsePanels();
+                mShadeController.animateCollapseShade();
             }
         }
 
@@ -293,7 +293,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         if ((diff2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
             mCentralSurfaces.updateQsExpansionEnabled();
             if ((state2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
-                mShadeController.animateCollapsePanels();
+                mShadeController.animateCollapseShade();
             }
         }
 
@@ -550,7 +550,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     @Override
     public void togglePanel() {
         if (mCentralSurfaces.isPanelExpanded()) {
-            mShadeController.animateCollapsePanels();
+            mShadeController.animateCollapseShade();
         } else {
             animateExpandNotificationsPanel();
         }

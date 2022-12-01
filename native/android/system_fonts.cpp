@@ -66,9 +66,6 @@ struct AFont {
         return mFilePath == o.mFilePath && mLocale == o.mLocale && mWeight == o.mWeight &&
                 mItalic == o.mItalic && mCollectionIndex == o.mCollectionIndex && mAxes == o.mAxes;
     }
-
-    AFont() = default;
-    AFont(const AFont&) = default;
 };
 
 struct FontHasher {

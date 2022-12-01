@@ -44,17 +44,16 @@ class ViewScreenshotTestRule(
     emulationSpec: DeviceEmulationSpec,
     private val matcher: BitmapMatcher = UnitTestBitmapMatcher,
     pathConfig: PathConfig = getEmulatedDevicePathConfig(emulationSpec),
-    assetsPathRelativeToRepo: String = ""
+    assetsPathRelativeToBuildRoot: String
 ) : TestRule {
     private val colorsRule = MaterialYouColorsRule()
     private val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
     private val screenshotRule =
         ScreenshotTestRule(
-            if (assetsPathRelativeToRepo.isBlank()) {
-                SystemUIGoldenImagePathManager(pathConfig)
-            } else {
-                SystemUIGoldenImagePathManager(pathConfig, assetsPathRelativeToRepo)
-            }
+            SystemUIGoldenImagePathManager(
+                getEmulatedDevicePathConfig(emulationSpec),
+                assetsPathRelativeToBuildRoot
+            )
         )
     private val activityRule = ActivityScenarioRule(ScreenshotActivity::class.java)
     private val delegateRule =

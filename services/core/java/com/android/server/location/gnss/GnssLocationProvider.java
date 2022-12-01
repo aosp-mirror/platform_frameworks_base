@@ -81,6 +81,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.WorkSource;
 import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
@@ -930,9 +931,15 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     private void updateEnabled() {
-        // Generally follow location setting for current user
-        boolean enabled = mContext.getSystemService(LocationManager.class)
-                .isLocationEnabledForUser(UserHandle.CURRENT);
+        boolean enabled = false;
+
+        // Generally follow location setting for visible users
+        LocationManager locationManager = mContext.getSystemService(LocationManager.class);
+        Set<UserHandle> visibleUserHandles =
+                mContext.getSystemService(UserManager.class).getVisibleUsers();
+        for (UserHandle visibleUserHandle : visibleUserHandles) {
+            enabled |= locationManager.isLocationEnabledForUser(visibleUserHandle);
+        }
 
         // .. but enable anyway, if there's an active bypass request (e.g. ELS or ADAS)
         enabled |= (mProviderRequest != null

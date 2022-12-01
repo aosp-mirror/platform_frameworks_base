@@ -78,7 +78,7 @@ class DiffContext : public IAaptContext {
   SymbolTable symbol_table_;
 };
 
-static void EmitDiffLine(const android::Source& source, const StringPiece& message) {
+static void EmitDiffLine(const android::Source& source, StringPiece message) {
   std::cerr << source << ": " << message << "\n";
 }
 

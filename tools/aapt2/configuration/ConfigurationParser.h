@@ -43,7 +43,7 @@ enum class Abi {
 };
 
 /** Helper method to convert an ABI to a string representing the path within the APK. */
-const android::StringPiece& AbiToString(Abi abi);
+android::StringPiece AbiToString(Abi abi);
 
 /**
  * Represents an individual locale. When a locale is included, it must be
@@ -150,8 +150,7 @@ class ConfigurationParser {
    * Parses the configuration file and returns the results. If the configuration could not be parsed
    * the result is empty and any errors will be displayed with the provided diagnostics context.
    */
-  std::optional<std::vector<configuration::OutputArtifact>> Parse(
-      const android::StringPiece& apk_path);
+  std::optional<std::vector<configuration::OutputArtifact>> Parse(android::StringPiece apk_path);
 
  protected:
   /**

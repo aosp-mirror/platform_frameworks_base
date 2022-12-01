@@ -901,6 +901,25 @@ public class UserManagerService extends IUserManager.Stub {
         return null;
     }
 
+    @Override
+    public @UserIdInt int getMainUserId() {
+        checkQueryOrCreateUsersPermission("get main user id");
+        return getMainUserIdUnchecked();
+    }
+
+    private @UserIdInt int getMainUserIdUnchecked() {
+        synchronized (mUsersLock) {
+            final int userSize = mUsers.size();
+            for (int i = 0; i < userSize; i++) {
+                final UserInfo user = mUsers.valueAt(i).info;
+                if (user.isMain() && !mRemovingUserIds.get(user.id)) {
+                    return user.id;
+                }
+            }
+        }
+        return UserHandle.USER_NULL;
+    }
+
     public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
         return getUsers(/*excludePartial= */ true, excludeDying, /* excludePreCreated= */
                 true);
@@ -6898,6 +6917,12 @@ public class UserManagerService extends IUserManager.Stub {
             }
             return userTypes;
         }
+
+        @Override
+        public @UserIdInt int getMainUserId() {
+            return getMainUserIdUnchecked();
+        }
+
     } // class LocalService
 
 

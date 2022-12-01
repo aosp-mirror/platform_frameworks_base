@@ -421,6 +421,53 @@ public final class TransitionInfo implements Parcelable {
         return false;
     }
 
+    /**
+     * Releases temporary-for-animation surfaces referenced by this to potentially free up memory.
+     * This includes root-leash and snapshots.
+     */
+    public void releaseAnimSurfaces() {
+        for (int i = mChanges.size() - 1; i >= 0; --i) {
+            final Change c = mChanges.get(i);
+            if (c.mSnapshot != null) {
+                c.mSnapshot.release();
+                c.mSnapshot = null;
+            }
+        }
+        if (mRootLeash != null) {
+            mRootLeash.release();
+        }
+    }
+
+    /**
+     * Releases ALL the surfaces referenced by this to potentially free up memory. Do NOT use this
+     * if the surface-controls get stored and used elsewhere in the process. To just release
+     * temporary-for-animation surfaces, use {@link #releaseAnimSurfaces}.
+     */
+    public void releaseAllSurfaces() {
+        releaseAnimSurfaces();
+        for (int i = mChanges.size() - 1; i >= 0; --i) {
+            mChanges.get(i).getLeash().release();
+        }
+    }
+
+    /**
+     * Makes a copy of this as if it were parcel'd and unparcel'd. This implies that surfacecontrol
+     * refcounts are incremented which allows the "remote" receiver to release them without breaking
+     * the caller's references. Use this only if you need to "send" this to a local function which
+     * assumes it is being called from a remote caller.
+     */
+    public TransitionInfo localRemoteCopy() {
+        final TransitionInfo out = new TransitionInfo(mType, mFlags);
+        for (int i = 0; i < mChanges.size(); ++i) {
+            out.mChanges.add(mChanges.get(i).localRemoteCopy());
+        }
+        out.mRootLeash = mRootLeash != null ? new SurfaceControl(mRootLeash, "localRemote") : null;
+        // Doesn't have any native stuff, so no need for actual copy
+        out.mOptions = mOptions;
+        out.mRootOffset.set(mRootOffset);
+        return out;
+    }
+
     /** Represents the change a WindowContainer undergoes during a transition */
     public static final class Change implements Parcelable {
         private final WindowContainerToken mContainer;
@@ -471,6 +518,27 @@ public final class TransitionInfo implements Parcelable {
             mBackgroundColor = in.readInt();
             mSnapshot = in.readTypedObject(SurfaceControl.CREATOR);
             mSnapshotLuma = in.readFloat();
+        }
+
+        private Change localRemoteCopy() {
+            final Change out = new Change(mContainer, new SurfaceControl(mLeash, "localRemote"));
+            out.mParent = mParent;
+            out.mLastParent = mLastParent;
+            out.mMode = mMode;
+            out.mFlags = mFlags;
+            out.mStartAbsBounds.set(mStartAbsBounds);
+            out.mEndAbsBounds.set(mEndAbsBounds);
+            out.mEndRelOffset.set(mEndRelOffset);
+            out.mTaskInfo = mTaskInfo;
+            out.mAllowEnterPip = mAllowEnterPip;
+            out.mStartRotation = mStartRotation;
+            out.mEndRotation = mEndRotation;
+            out.mEndFixedRotation = mEndFixedRotation;
+            out.mRotationAnimation = mRotationAnimation;
+            out.mBackgroundColor = mBackgroundColor;
+            out.mSnapshot = mSnapshot != null ? new SurfaceControl(mSnapshot, "localRemote") : null;
+            out.mSnapshotLuma = mSnapshotLuma;
+            return out;
         }
 
         /** Sets the parent of this change's container. The parent must be a participant or null. */

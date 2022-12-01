@@ -41,7 +41,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger;
-import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerFake;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import org.junit.Before;

@@ -84,7 +84,7 @@ bool XmlNodeAction::Execute(XmlActionExecutorPolicy policy, std::vector<StringPi
         error_msg << "unexpected element ";
         PrintElementToDiagMessage(child_el, &error_msg);
         error_msg << " found in ";
-        for (const StringPiece& element : *bread_crumb) {
+        for (StringPiece element : *bread_crumb) {
           error_msg << "<" << element << ">";
         }
         if (policy == XmlActionExecutorPolicy::kAllowListWarning) {

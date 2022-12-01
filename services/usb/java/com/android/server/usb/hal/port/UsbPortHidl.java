@@ -421,7 +421,8 @@ public final class UsbPortHidl implements UsbPortHal {
                         current.currentDataRole, current.canChangeDataRole,
                         false, CONTAMINANT_PROTECTION_NONE,
                         false, CONTAMINANT_DETECTION_NOT_SUPPORTED, sUsbDataStatus,
-                        false, POWER_BRICK_STATUS_UNKNOWN);
+                        false, POWER_BRICK_STATUS_UNKNOWN,
+                        false, new int[] {});
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback V1_0: "
                         + current.portName);
@@ -455,7 +456,8 @@ public final class UsbPortHidl implements UsbPortHal {
                         current.status.currentDataRole, current.status.canChangeDataRole,
                         false, CONTAMINANT_PROTECTION_NONE,
                         false, CONTAMINANT_DETECTION_NOT_SUPPORTED, sUsbDataStatus,
-                        false, POWER_BRICK_STATUS_UNKNOWN);
+                        false, POWER_BRICK_STATUS_UNKNOWN,
+                        false, new int[] {});
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback V1_1: "
                         + current.status.portName);
@@ -493,7 +495,8 @@ public final class UsbPortHidl implements UsbPortHal {
                         current.supportsEnableContaminantPresenceDetection,
                         current.contaminantDetectionStatus,
                         sUsbDataStatus,
-                        false, POWER_BRICK_STATUS_UNKNOWN);
+                        false, POWER_BRICK_STATUS_UNKNOWN,
+                        false, new int[] {});
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback V1_2: "
                         + current.status_1_1.status.portName);

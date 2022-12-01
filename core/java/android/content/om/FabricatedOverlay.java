@@ -16,15 +16,21 @@
 
 package android.content.om;
 
+import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.FabricatedOverlayInternal;
 import android.os.FabricatedOverlayInternalEntry;
 import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
+import android.util.TypedValue;
 
+import com.android.internal.content.om.OverlayManagerImpl;
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -82,8 +88,24 @@ public class FabricatedOverlay {
         }
 
         /**
+         * Constructs a builder for building a fabricated overlay.
+         *
+         * @param name a name used to uniquely identify the fabricated overlay owned by the caller
+         *             itself.
+         * @param targetPackage the name of the package to overlay
+         */
+        public Builder(@NonNull String name, @NonNull String targetPackage) {
+            mName = OverlayManagerImpl.checkOverlayNameValid(name);
+            mTargetPackage =
+                    Preconditions.checkStringNotEmpty(
+                            targetPackage, "'targetPackage' must not be empty nor null");
+            mOwningPackage = ""; // The package name is filled in OverlayManager.commit
+        }
+
+        /**
          * Sets the name of the overlayable resources to overlay (can be null).
          */
+        @NonNull
         public Builder setTargetOverlayable(@Nullable String targetOverlayable) {
             mTargetOverlayable = TextUtils.emptyIfNull(targetOverlayable);
             return this;
@@ -111,45 +133,110 @@ public class FabricatedOverlay {
         }
 
         /**
-         * Sets the value of the fabricated overlay
+         * Sets the value of the fabricated overlay for the integer-like types.
          *
          * @param resourceName name of the target resource to overlay (in the form
-         *                     [package]:type/entry)
+         *     [package]:type/entry)
          * @param dataType the data type of the new value
          * @param value the unsigned 32 bit integer representing the new value
-         *
+         * @return the builder itself
+         * @see #setResourceValue(String, int, int, String)
          * @see android.util.TypedValue#type
          */
-        public Builder setResourceValue(@NonNull String resourceName, int dataType, int value) {
+        @NonNull
+        public Builder setResourceValue(
+                @NonNull String resourceName,
+                @IntRange(from = TypedValue.TYPE_FIRST_INT, to = TypedValue.TYPE_LAST_INT)
+                        int dataType,
+                int value) {
+            return setResourceValue(resourceName, dataType, value, null /* configuration */);
+        }
+
+        /**
+         * Sets the value of the fabricated overlay for the integer-like types with the
+         * configuration.
+         *
+         * @param resourceName name of the target resource to overlay (in the form
+         *     [package]:type/entry)
+         * @param dataType the data type of the new value
+         * @param value the unsigned 32 bit integer representing the new value
+         * @param configuration The string representation of the config this overlay is enabled for
+         * @see android.util.TypedValue#type
+         */
+        @NonNull
+        public Builder setResourceValue(
+                @NonNull String resourceName,
+                @IntRange(from = TypedValue.TYPE_FIRST_INT, to = TypedValue.TYPE_LAST_INT)
+                        int dataType,
+                int value,
+                @Nullable String configuration) {
             ensureValidResourceName(resourceName);
 
             final FabricatedOverlayInternalEntry entry = new FabricatedOverlayInternalEntry();
             entry.resourceName = resourceName;
-            entry.dataType = dataType;
+            entry.dataType =
+                    Preconditions.checkArgumentInRange(
+                            dataType,
+                            TypedValue.TYPE_FIRST_INT,
+                            TypedValue.TYPE_LAST_INT,
+                            "dataType");
             entry.data = value;
+            entry.configuration = configuration;
             mEntries.add(entry);
             return this;
         }
 
+        /** @hide */
+        @IntDef(
+                prefix = {"OVERLAY_TYPE"},
+                value = {
+                    TypedValue.TYPE_STRING,
+                })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface StringTypeOverlayResource {}
+
         /**
-         * Sets the value of the fabricated overlay
+         * Sets the value of the fabricated overlay for the string-like type.
          *
          * @param resourceName name of the target resource to overlay (in the form
-         *                     [package]:type/entry)
+         *     [package]:type/entry)
          * @param dataType the data type of the new value
-         * @param value the unsigned 32 bit integer representing the new value
-         * @param configuration The string representation of the config this overlay is enabled for
-         *
+         * @param value the string representing the new value
+         * @return the builder itself
          * @see android.util.TypedValue#type
          */
-        public Builder setResourceValue(@NonNull String resourceName, int dataType, int value,
-                String configuration) {
+        @NonNull
+        public Builder setResourceValue(
+                @NonNull String resourceName,
+                @StringTypeOverlayResource int dataType,
+                @NonNull String value) {
+            return setResourceValue(resourceName, dataType, value, null /* configuration */);
+        }
+
+        /**
+         * Sets the value of the fabricated overlay for the string-like type with the configuration.
+         *
+         * @param resourceName name of the target resource to overlay (in the form
+         *     [package]:type/entry)
+         * @param dataType the data type of the new value
+         * @param value the string representing the new value
+         * @param configuration The string representation of the config this overlay is enabled for
+         * @see android.util.TypedValue#type
+         */
+        @NonNull
+        public Builder setResourceValue(
+                @NonNull String resourceName,
+                @StringTypeOverlayResource int dataType,
+                @NonNull String value,
+                @Nullable String configuration) {
             ensureValidResourceName(resourceName);
 
             final FabricatedOverlayInternalEntry entry = new FabricatedOverlayInternalEntry();
             entry.resourceName = resourceName;
-            entry.dataType = dataType;
-            entry.data = value;
+            entry.dataType =
+                    Preconditions.checkArgumentInRange(
+                            dataType, TypedValue.TYPE_STRING, TypedValue.TYPE_FRACTION, "dataType");
+            entry.stringData = Objects.requireNonNull(value);
             entry.configuration = configuration;
             mEntries.add(entry);
             return this;
@@ -159,68 +246,32 @@ public class FabricatedOverlay {
          * Sets the value of the fabricated overlay
          *
          * @param resourceName name of the target resource to overlay (in the form
-         *                     [package]:type/entry)
-         * @param dataType the data type of the new value
-         * @param value the string representing the new value
-         *
-         * @see android.util.TypedValue#type
-         */
-        public Builder setResourceValue(@NonNull String resourceName, int dataType, String value) {
-            ensureValidResourceName(resourceName);
-
-            final FabricatedOverlayInternalEntry entry = new FabricatedOverlayInternalEntry();
-            entry.resourceName = resourceName;
-            entry.dataType = dataType;
-            entry.stringData = value;
-            mEntries.add(entry);
-            return this;
-        }
-
-        /**
-         * Sets the value of the fabricated overlay
-         *
-         * @param resourceName name of the target resource to overlay (in the form
-         *                     [package]:type/entry)
-         * @param dataType the data type of the new value
-         * @param value the string representing the new value
-         * @param configuration The string representation of the config this overlay is enabled for
-         *
-         * @see android.util.TypedValue#type
-         */
-        public Builder setResourceValue(@NonNull String resourceName, int dataType, String value,
-                String configuration) {
-            ensureValidResourceName(resourceName);
-
-            final FabricatedOverlayInternalEntry entry = new FabricatedOverlayInternalEntry();
-            entry.resourceName = resourceName;
-            entry.dataType = dataType;
-            entry.stringData = value;
-            entry.configuration = configuration;
-            mEntries.add(entry);
-            return this;
-        }
-
-        /**
-         * Sets the value of the fabricated overlay
-         *
-         * @param resourceName name of the target resource to overlay (in the form
-         *                     [package]:type/entry)
+         *     [package]:type/entry)
          * @param value the file descriptor whose contents are the value of the frro
          * @param configuration The string representation of the config this overlay is enabled for
+         * @return the builder itself
          */
-        public Builder setResourceValue(@NonNull String resourceName, ParcelFileDescriptor value,
-                String configuration) {
+        @NonNull
+        public Builder setResourceValue(
+                @NonNull String resourceName,
+                @NonNull ParcelFileDescriptor value,
+                @Nullable String configuration) {
             ensureValidResourceName(resourceName);
 
             final FabricatedOverlayInternalEntry entry = new FabricatedOverlayInternalEntry();
             entry.resourceName = resourceName;
-            entry.binaryData = value;
+            entry.binaryData = Objects.requireNonNull(value);
             entry.configuration = configuration;
             mEntries.add(entry);
             return this;
         }
 
-        /** Builds an immutable fabricated overlay. */
+        /**
+         * Builds an immutable fabricated overlay.
+         *
+         * @return the fabricated overlay
+         */
+        @NonNull
         public FabricatedOverlay build() {
             final FabricatedOverlayInternal overlay = new FabricatedOverlayInternal();
             overlay.packageName = mOwningPackage;
