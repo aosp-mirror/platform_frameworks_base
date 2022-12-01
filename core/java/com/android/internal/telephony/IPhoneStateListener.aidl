@@ -17,7 +17,7 @@
 package com.android.internal.telephony;
 
 import android.telephony.BarringInfo;
-import android.telephony.CallAttributes;
+import android.telephony.CallState;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
 import android.telephony.DataConnectionRealTimeInfo;
@@ -62,7 +62,7 @@ oneway interface IPhoneStateListener {
     void onPhoneCapabilityChanged(in PhoneCapability capability);
     void onActiveDataSubIdChanged(in int subId);
     void onRadioPowerStateChanged(in int state);
-    void onCallAttributesChanged(in CallAttributes callAttributes);
+    void onCallStatesChanged(in List<CallState> callStateList);
     @SuppressWarnings(value={"untyped-collection"})
     void onEmergencyNumberListChanged(in Map emergencyNumberList);
     void onOutgoingEmergencyCall(in EmergencyNumber placedEmergencyNumber, int subscriptionId);
