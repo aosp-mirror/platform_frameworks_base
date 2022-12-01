@@ -15,7 +15,7 @@
  *
  */
 
-package com.android.systemui.shared.keyguard.data.content
+package com.android.systemui.shared.quickaffordance.data.content
 
 import android.content.ContentResolver
 import android.net.Uri

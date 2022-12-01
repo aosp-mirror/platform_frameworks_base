@@ -34,8 +34,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentati
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.shared.keyguard.data.content.KeyguardQuickAffordanceProviderContract
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
+import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderContract
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
 import javax.inject.Inject
@@ -190,8 +190,6 @@ constructor(
 
     /** Returns affordance IDs indexed by slot ID, for all known slots. */
     suspend fun getSelections(): Map<String, List<KeyguardQuickAffordancePickerRepresentation>> {
-        check(isUsingRepository)
-
         val slots = repository.get().getSlotPickerRepresentations()
         val selections = repository.get().getSelections()
         val affordanceById =
@@ -312,8 +310,6 @@ constructor(
 
     suspend fun getAffordancePickerRepresentations():
         List<KeyguardQuickAffordancePickerRepresentation> {
-        check(isUsingRepository)
-
         return repository.get().getAffordancePickerRepresentations()
     }
 

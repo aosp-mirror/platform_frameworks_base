@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Intent;
 import android.os.Looper;
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
@@ -72,6 +73,11 @@ public class DockObserverTest {
         assertThat(updateExtconDockState(observer, "DOCK=0")
                 .get().getIntExtra(Intent.EXTRA_DOCK_STATE, -1))
                 .isEqualTo(Intent.EXTRA_DOCK_STATE_UNDOCKED);
+    }
+
+    void setDeviceProvisioned(boolean provisioned) {
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED,
+                provisioned ? 1 : 0);
     }
 
     @Before
@@ -130,5 +136,26 @@ public class DockObserverTest {
         observer.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
         assertDockEventIntentWithExtraThenUndock(observer, "DOCK=1\nKEY5=5",
                 Intent.EXTRA_DOCK_STATE_HE_DESK);
+    }
+
+    @Test
+    public void testDockIntentBroadcast_deviceNotProvisioned()
+            throws ExecutionException, InterruptedException {
+        DockObserver observer = new DockObserver(mInterceptingContext);
+        // Set the device as not provisioned.
+        setDeviceProvisioned(false);
+        observer.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
+
+        BroadcastInterceptingContext.FutureIntent futureIntent =
+                updateExtconDockState(observer, "DOCK=1");
+        TestableLooper.get(this).processAllMessages();
+        // Verify no broadcast was sent as device was not provisioned.
+        futureIntent.assertNotReceived();
+
+        // Ensure we send the broadcast when the device is provisioned.
+        setDeviceProvisioned(true);
+        TestableLooper.get(this).processAllMessages();
+        assertThat(futureIntent.get().getIntExtra(Intent.EXTRA_DOCK_STATE, -1))
+                .isEqualTo(Intent.EXTRA_DOCK_STATE_DESK);
     }
 }

@@ -167,9 +167,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private SurfaceControl.Transaction mFinishTransaction = null;
 
     /**
-     * Contains change infos for both participants and all ancestors. We have to track ancestors
-     * because they are all promotion candidates and thus we need their start-states
-     * to be captured.
+     * Contains change infos for both participants and all remote-animatable ancestors. The
+     * ancestors can be the promotion candidates so their start-states need to be captured.
+     * @see #getAnimatableParent
      */
     final ArrayMap<WindowContainer, ChangeInfo> mChanges = new ArrayMap<>();
 
@@ -417,8 +417,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 mSyncId, wc);
         // "snapshot" all parents (as potential promotion targets). Do this before checking
         // if this is already a participant in case it has since been re-parented.
-        for (WindowContainer curr = wc.getParent(); curr != null && !mChanges.containsKey(curr);
-                curr = curr.getParent()) {
+        for (WindowContainer<?> curr = getAnimatableParent(wc);
+                curr != null && !mChanges.containsKey(curr);
+                curr = getAnimatableParent(curr)) {
             mChanges.put(curr, new ChangeInfo(curr));
             if (isReadyGroup(curr)) {
                 mReadyTracker.addGroup(curr);
@@ -943,13 +944,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             cleanUpInternal();
             return;
         }
-        // Ensure that wallpaper visibility is updated with the latest wallpaper target.
-        for (int i = mParticipants.size() - 1; i >= 0; --i) {
-            final WindowContainer<?> wc = mParticipants.valueAt(i);
-            if (isWallpaper(wc) && wc.getDisplayContent() != null) {
-                wc.getDisplayContent().mWallpaperController.adjustWallpaperWindows();
-            }
-        }
 
         mState = STATE_PLAYING;
         mStartTransaction = transaction;
@@ -1306,6 +1300,16 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return sb.toString();
     }
 
+    /** Returns the parent that the remote animator can animate or control. */
+    private static WindowContainer<?> getAnimatableParent(WindowContainer<?> wc) {
+        WindowContainer<?> parent = wc.getParent();
+        while (parent != null
+                && (!parent.canCreateRemoteAnimationTarget() && !parent.isOrganized())) {
+            parent = parent.getParent();
+        }
+        return parent;
+    }
+
     private static boolean reportIfNotTop(WindowContainer wc) {
         // Organized tasks need to be reported anyways because Core won't show() their surfaces
         // and we can't rely on onTaskAppeared because it isn't in sync.
@@ -1529,7 +1533,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             intermediates.clear();
             boolean foundParentInTargets = false;
             // Collect the intermediate parents between target and top changed parent.
-            for (WindowContainer<?> p = wc.getParent(); p != null; p = p.getParent()) {
+            for (WindowContainer<?> p = getAnimatableParent(wc); p != null;
+                    p = getAnimatableParent(p)) {
                 final ChangeInfo parentChange = changes.get(p);
                 if (parentChange == null || !parentChange.hasChanged(p)) break;
                 if (p.mRemoteToken == null) {
