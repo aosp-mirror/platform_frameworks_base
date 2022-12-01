@@ -1,0 +1,28 @@
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+java_library {
+    name: "random_parcel_lib",
+    srcs: ["FuzzBinder.java"],
+}
+
+cc_library_shared {
+    name: "librandom_parcel_jni",
+    defaults: ["service_fuzzer_defaults"],
+    srcs: [
+        "random_parcel_jni.cpp",
+    ],
+    shared_libs: [
+        "libandroid_runtime",
+        "libbase",
+        "liblog",
+    ],
+    static_libs: [
+        "libnativehelper_lazy",
+        "libbinder_random_parcel",
+    ],
+    cflags: [
+        "-Wno-unused-parameter",
+    ],
+}
