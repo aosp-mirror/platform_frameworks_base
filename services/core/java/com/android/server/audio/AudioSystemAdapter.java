@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
+import android.media.AudioMixerAttributes;
 import android.media.AudioSystem;
 import android.media.ISoundDoseCallback;
 import android.media.audiopolicy.AudioMix;
@@ -502,6 +503,36 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
      */
     public int registerSoundDoseCallback(ISoundDoseCallback callback) {
         return AudioSystem.registerSoundDoseCallback(callback);
+    }
+
+    /**
+     * Same as
+     * {@link AudioSystem#setPreferredMixerAttributes(
+     *        AudioAttributes, int, int, AudioMixerAttributes)}
+     * @param attributes
+     * @param mixerAttributes
+     * @param uid
+     * @param portId
+     * @return
+     */
+    public int setPreferredMixerAttributes(
+            @NonNull AudioAttributes attributes,
+            int portId,
+            int uid,
+            @NonNull AudioMixerAttributes mixerAttributes) {
+        return AudioSystem.setPreferredMixerAttributes(attributes, portId, uid, mixerAttributes);
+    }
+
+    /**
+     * Same as {@link AudioSystem#clearPreferredMixerAttributes(AudioAttributes, int, int)}
+     * @param attributes
+     * @param uid
+     * @param portId
+     * @return
+     */
+    public int clearPreferredMixerAttributes(
+            @NonNull AudioAttributes attributes, int portId, int uid) {
+        return AudioSystem.clearPreferredMixerAttributes(attributes, portId, uid);
     }
 
     /**

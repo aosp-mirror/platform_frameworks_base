@@ -2434,4 +2434,40 @@ public class AudioSystem
      * Keep in sync with core/jni/android_media_DeviceCallback.h.
      */
     final static int NATIVE_EVENT_ROUTING_CHANGE = 1000;
+
+    /**
+     * @hide
+     * Query the mixer attributes that can be set as preferred mixer attributes for the given
+     * device.
+     */
+    public static native int getSupportedMixerAttributes(
+            int deviceId, @NonNull List<AudioMixerAttributes> mixerAttrs);
+
+    /**
+     * @hide
+     * Set preferred mixer attributes for a given device when playing particular
+     * audio attributes.
+     */
+    public static native int setPreferredMixerAttributes(
+            @NonNull AudioAttributes attributes,
+            int portId,
+            int uid,
+            @NonNull AudioMixerAttributes mixerAttributes);
+
+    /**
+     * @hide
+     * Get preferred mixer attributes that is previously set via
+     * {link #setPreferredMixerAttributes}.
+     */
+    public static native int getPreferredMixerAttributes(
+            @NonNull AudioAttributes attributes, int portId,
+            List<AudioMixerAttributes> mixerAttributesList);
+
+    /**
+     * @hide
+     * Clear preferred mixer attributes that is previously set via
+     * {@link #setPreferredMixerAttributes}
+     */
+    public static native int clearPreferredMixerAttributes(
+            @NonNull AudioAttributes attributes, int portId, int uid);
 }

@@ -88,6 +88,7 @@ import android.media.AudioFormat;
 import android.media.AudioHalVersionInfo;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
+import android.media.AudioMixerAttributes;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
@@ -104,6 +105,7 @@ import android.media.ICommunicationDeviceDispatcher;
 import android.media.IDeviceVolumeBehaviorDispatcher;
 import android.media.IMuteAwaitConnectionCallback;
 import android.media.IPlaybackConfigDispatcher;
+import android.media.IPreferredMixerAttributesDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.ISpatializerCallback;
@@ -376,6 +378,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_FOLD_UPDATE = 49;
     private static final int MSG_RESET_SPATIALIZER = 50;
     private static final int MSG_NO_LOG_FOR_PLAYER_I = 51;
+    private static final int MSG_DISPATCH_PREFERRED_MIXER_ATTRIBUTES = 52;
 
     /** Messages handled by the {@link SoundDoseHelper}. */
     /*package*/ static final int SAFE_MEDIA_VOLUME_MSG_START = 1000;
@@ -6566,6 +6569,20 @@ public class AudioService extends IAudioService.Stub
         handler.sendMessageAtTime(handler.obtainMessage(msg, arg1, arg2, obj), time);
     }
 
+    private static void sendBundleMsg(Handler handler, int msg,
+            int existingMsgPolicy, int arg1, int arg2, Object obj, Bundle bundle, int delay) {
+        if (existingMsgPolicy == SENDMSG_REPLACE) {
+            handler.removeMessages(msg);
+        } else if (existingMsgPolicy == SENDMSG_NOOP && handler.hasMessages(msg)) {
+            return;
+        }
+
+        final long time = SystemClock.uptimeMillis() + delay;
+        Message message = handler.obtainMessage(msg, arg1, arg2, obj);
+        message.setData(bundle);
+        handler.sendMessageAtTime(message, time);
+    }
+
     boolean checkAudioSettingsPermission(String method) {
         if (callingOrSelfHasAudioSettingsPermission()) {
             return true;
@@ -8529,6 +8546,10 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_NO_LOG_FOR_PLAYER_I:
                     mPlaybackMonitor.ignorePlayerIId(msg.arg1);
+                    break;
+
+                case MSG_DISPATCH_PREFERRED_MIXER_ATTRIBUTES:
+                    onDispatchPreferredMixerAttributesChanged(msg.getData(), msg.arg1);
                     break;
 
                 default:
@@ -10993,6 +11014,125 @@ public class AudioService extends IAudioService.Stub
         synchronized (mAudioPolicies) {
             return !mAudioPolicies.isEmpty();
         }
+    }
+
+    /**
+     * @see AudioManager#setPreferredMixerAttributes(
+     *      AudioAttributes, AudioDeviceInfo, AudioMixerAttributes)
+     */
+    public int setPreferredMixerAttributes(AudioAttributes attributes,
+            int portId, AudioMixerAttributes mixerAttributes) {
+        Objects.requireNonNull(attributes);
+        Objects.requireNonNull(mixerAttributes);
+        if (!checkAudioSettingsPermission("setPreferredMixerAttributes()")) {
+            return AudioSystem.PERMISSION_DENIED;
+        }
+        final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
+        int status = AudioSystem.SUCCESS;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final String logString = TextUtils.formatSimple(
+                    "setPreferredMixerAttributes u/pid:%d/%d attr:%s mixerAttributes:%s portId:%d",
+                    uid, pid, attributes.toString(), mixerAttributes.toString(), portId);
+            sDeviceLogger.enqueue(new EventLogger.StringEvent(logString).printLog(TAG));
+
+            status = mAudioSystem.setPreferredMixerAttributes(
+                    attributes, portId, uid, mixerAttributes);
+            if (status == AudioSystem.SUCCESS) {
+                dispatchPreferredMixerAttributesChanged(attributes, portId, mixerAttributes);
+            } else {
+                Log.e(TAG, TextUtils.formatSimple("Error %d in %s)", status, logString));
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return status;
+    }
+
+    /**
+     * @see AudioManager#clearPreferredMixerAttributes(AudioAttributes, AudioDeviceInfo)
+     */
+    public int clearPreferredMixerAttributes(AudioAttributes attributes, int portId) {
+        Objects.requireNonNull(attributes);
+        if (!checkAudioSettingsPermission("clearPreferredMixerAttributes()")) {
+            return AudioSystem.PERMISSION_DENIED;
+        }
+        final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
+        int status = AudioSystem.SUCCESS;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final String logString = TextUtils.formatSimple(
+                    "clearPreferredMixerAttributes u/pid:%d/%d attr:%s",
+                    uid, pid, attributes.toString());
+            sDeviceLogger.enqueue(new EventLogger.StringEvent(logString).printLog(TAG));
+
+            status = mAudioSystem.clearPreferredMixerAttributes(attributes, portId, uid);
+            if (status == AudioSystem.SUCCESS) {
+                dispatchPreferredMixerAttributesChanged(attributes, portId, null /*mixerAttr*/);
+            } else {
+                Log.e(TAG, TextUtils.formatSimple("Error %d in %s)", status, logString));
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return status;
+    }
+
+    void dispatchPreferredMixerAttributesChanged(
+            AudioAttributes attr, int deviceId, AudioMixerAttributes mixerAttr) {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(KEY_AUDIO_ATTRIBUTES, attr);
+        bundle.putParcelable(KEY_AUDIO_MIXER_ATTRIBUTES, mixerAttr);
+        sendBundleMsg(mAudioHandler, MSG_DISPATCH_PREFERRED_MIXER_ATTRIBUTES, SENDMSG_QUEUE,
+                deviceId, 0, null, bundle, 0);
+    }
+
+    final RemoteCallbackList<IPreferredMixerAttributesDispatcher> mPrefMixerAttrDispatcher =
+            new RemoteCallbackList<IPreferredMixerAttributesDispatcher>();
+    private static final String KEY_AUDIO_ATTRIBUTES = "audio_attributes";
+    private static final String KEY_AUDIO_MIXER_ATTRIBUTES = "audio_mixer_attributes";
+
+    /** @see AudioManager#addOnPreferredMixerAttributesChangedListener(
+     *       Executor, AudioManager.OnPreferredMixerAttributesChangedListener)
+     */
+    public void registerPreferredMixerAttributesDispatcher(
+            @Nullable IPreferredMixerAttributesDispatcher dispatcher) {
+        if (dispatcher == null) {
+            return;
+        }
+        mPrefMixerAttrDispatcher.register(dispatcher);
+    }
+
+    /** @see AudioManager#removeOnPreferredMixerAttributesChangedListener(
+     *       AudioManager.OnPreferredMixerAttributesChangedListener)
+     */
+    public void unregisterPreferredMixerAttributesDispatcher(
+            @Nullable IPreferredMixerAttributesDispatcher dispatcher) {
+        if (dispatcher == null) {
+            return;
+        }
+        mPrefMixerAttrDispatcher.unregister(dispatcher);
+    }
+
+    protected void onDispatchPreferredMixerAttributesChanged(Bundle data, int deviceId) {
+        final int nbDispathers = mPrefMixerAttrDispatcher.beginBroadcast();
+        final AudioAttributes attr = data.getParcelable(
+                KEY_AUDIO_ATTRIBUTES, AudioAttributes.class);
+        final AudioMixerAttributes mixerAttr = data.getParcelable(
+                KEY_AUDIO_MIXER_ATTRIBUTES, AudioMixerAttributes.class);
+        for (int i = 0; i < nbDispathers; i++) {
+            try {
+                mPrefMixerAttrDispatcher.getBroadcastItem(i)
+                        .dispatchPrefMixerAttributesChanged(attr, deviceId, mixerAttr);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Can't call dispatchPrefMixerAttributesChanged() "
+                        + "IPreferredMixerAttributesDispatcher "
+                        + mPrefMixerAttrDispatcher.getBroadcastItem(i).asBinder(), e);
+            }
+        }
+        mPrefMixerAttrDispatcher.finishBroadcast();
     }
 
     private final Object mExtVolumeControllerLock = new Object();
