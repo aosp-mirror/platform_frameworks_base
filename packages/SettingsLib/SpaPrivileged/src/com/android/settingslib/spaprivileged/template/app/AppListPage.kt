@@ -45,6 +45,7 @@ fun <T : AppRecord> AppListPage(
     listModel: AppListModel<T>,
     showInstantApps: Boolean = false,
     primaryUserOnly: Boolean = false,
+    noItemMessage: String? = null,
     moreOptions: @Composable MoreOptionsScope.() -> Unit = {},
     header: @Composable () -> Unit = {},
     appList: @Composable AppListInput<T>.() -> Unit = { AppList() },
@@ -77,6 +78,7 @@ fun <T : AppRecord> AppListPage(
                     ),
                     header = header,
                     bottomPadding = bottomPadding,
+                    noItemMessage = noItemMessage,
                 )
                 appList(appListInput)
             }
