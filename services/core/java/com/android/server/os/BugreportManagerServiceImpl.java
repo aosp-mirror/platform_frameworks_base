@@ -33,8 +33,8 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -189,10 +189,10 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     }
 
     /**
-     * Validates that the current user is the primary user or when bugreport is requested remotely
-     * and current user is affiliated user.
+     * Validates that the current user is an admin user or, when bugreport is requested remotely
+     * that the current user is an affiliated user.
      *
-     * @throws IllegalArgumentException if the current user is not the primary user
+     * @throws IllegalArgumentException if the current user is not an admin user
      */
     private void ensureUserCanTakeBugReport(int bugreportMode) {
         UserInfo currentUser = null;
@@ -202,20 +202,17 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             // Impossible to get RemoteException for an in-process call.
         }
 
-        UserInfo primaryUser = UserManager.get(mContext).getPrimaryUser();
         if (currentUser == null) {
-            logAndThrow("No current user. Only primary user is allowed to take bugreports.");
+            logAndThrow("There is no current user, so no bugreport can be requested.");
         }
-        if (primaryUser == null) {
-            logAndThrow("No primary user. Only primary user is allowed to take bugreports.");
-        }
-        if (primaryUser.id != currentUser.id) {
+
+        if (!currentUser.isAdmin()) {
             if (bugreportMode == BugreportParams.BUGREPORT_MODE_REMOTE
                     && isCurrentUserAffiliated(currentUser.id)) {
                 return;
             }
-            logAndThrow("Current user not primary user. Only primary user"
-                    + " is allowed to take bugreports.");
+            logAndThrow(TextUtils.formatSimple("Current user %s is not an admin user."
+                    + " Only admin users are allowed to take bugreport.", currentUser.id));
         }
     }
 
