@@ -72,7 +72,7 @@ struct ConfigDescription : public ResTable_config {
    * The resulting configuration has the appropriate sdkVersion defined
    * for backwards compatibility.
    */
-  static bool Parse(const android::StringPiece& str, ConfigDescription* out = nullptr);
+  static bool Parse(android::StringPiece str, ConfigDescription* out = nullptr);
 
   /**
    * If the configuration uses an axis that was added after

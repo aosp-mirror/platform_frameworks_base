@@ -92,6 +92,21 @@ public class OverlayManager {
     private static final long THROW_SECURITY_EXCEPTIONS = 147340954;
 
     /**
+     * Applications can use OverlayManager to create overlays to overlay on itself resources. The
+     * overlay target is itself and the work range is only in caller application.
+     *
+     * <p>In {@link android.content.Context#getSystemService(String)}, it crashes because of {@link
+     * java.lang.NullPointerException} if the parameter is OverlayManager. if the self-targeting is
+     * enabled, the caller application can get the OverlayManager instance to use self-targeting
+     * functionality.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long SELF_TARGETING_OVERLAY = 205919743;
+
+    /**
      * Creates a new instance.
      *
      * @param context The current context in which to operate.

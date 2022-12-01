@@ -42,11 +42,14 @@ import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.IInputMethod;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.server.EventLogTags;
 import com.android.server.wm.WindowManagerInternal;
+
+import java.util.concurrent.CountDownLatch;
 
 /**
  * A controller managing the state of the input method binding.
@@ -77,19 +80,26 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class") private boolean mVisibleBound;
     @GuardedBy("ImfLock.class") private boolean mSupportsStylusHw;
 
+    @Nullable private CountDownLatch mLatchForTesting;
+
     /**
      * Binding flags for establishing connection to the {@link InputMethodService}.
      */
-    private static final int IME_CONNECTION_BIND_FLAGS =
+    @VisibleForTesting
+    static final int IME_CONNECTION_BIND_FLAGS =
             Context.BIND_AUTO_CREATE
                     | Context.BIND_NOT_VISIBLE
                     | Context.BIND_NOT_FOREGROUND
                     | Context.BIND_IMPORTANT_BACKGROUND
                     | Context.BIND_SCHEDULE_LIKE_TOP_APP;
+
+    private final int mImeConnectionBindFlags;
+
     /**
      * Binding flags used only while the {@link InputMethodService} is showing window.
      */
-    private static final int IME_VISIBLE_BIND_FLAGS =
+    @VisibleForTesting
+    static final int IME_VISIBLE_BIND_FLAGS =
             Context.BIND_AUTO_CREATE
                     | Context.BIND_TREAT_LIKE_ACTIVITY
                     | Context.BIND_FOREGROUND_SERVICE
@@ -97,12 +107,19 @@ final class InputMethodBindingController {
                     | Context.BIND_SHOWING_UI;
 
     InputMethodBindingController(@NonNull InputMethodManagerService service) {
+        this(service, IME_CONNECTION_BIND_FLAGS, null /* latchForTesting */);
+    }
+
+    InputMethodBindingController(@NonNull InputMethodManagerService service,
+            int imeConnectionBindFlags, CountDownLatch latchForTesting) {
         mService = service;
         mContext = mService.mContext;
         mMethodMap = mService.mMethodMap;
         mSettings = mService.mSettings;
         mPackageManagerInternal = mService.mPackageManagerInternal;
         mWindowManagerInternal = mService.mWindowManagerInternal;
+        mImeConnectionBindFlags = imeConnectionBindFlags;
+        mLatchForTesting = latchForTesting;
     }
 
     /**
@@ -242,7 +259,7 @@ final class InputMethodBindingController {
         @Override public void onBindingDied(ComponentName name) {
             synchronized (ImfLock.class) {
                 mService.invalidateAutofillSessionLocked();
-                if (mVisibleBound) {
+                if (isVisibleBound()) {
                     unbindVisibleConnection();
                 }
             }
@@ -291,6 +308,10 @@ final class InputMethodBindingController {
                 mService.scheduleResetStylusHandwriting();
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+
+            if (mLatchForTesting != null) {
+                mLatchForTesting.countDown(); // Notify the finish to tests
+            }
         }
 
         @GuardedBy("ImfLock.class")
@@ -338,15 +359,15 @@ final class InputMethodBindingController {
 
     @GuardedBy("ImfLock.class")
     void unbindCurrentMethod() {
-        if (mVisibleBound) {
+        if (isVisibleBound()) {
             unbindVisibleConnection();
         }
 
-        if (mHasConnection) {
+        if (hasConnection()) {
             unbindMainConnection();
         }
 
-        if (mCurToken != null) {
+        if (getCurToken() != null) {
             removeCurrentToken();
             mService.resetSystemUiLocked();
         }
@@ -448,17 +469,17 @@ final class InputMethodBindingController {
 
     @GuardedBy("ImfLock.class")
     private boolean bindCurrentInputMethodService(ServiceConnection conn, int flags) {
-        if (mCurIntent == null || conn == null) {
+        if (getCurIntent() == null || conn == null) {
             Slog.e(TAG, "--- bind failed: service = " + mCurIntent + ", conn = " + conn);
             return false;
         }
-        return mContext.bindServiceAsUser(mCurIntent, conn, flags,
+        return mContext.bindServiceAsUser(getCurIntent(), conn, flags,
                 new UserHandle(mSettings.getCurrentUserId()));
     }
 
     @GuardedBy("ImfLock.class")
     private boolean bindCurrentInputMethodServiceMainConnection() {
-        mHasConnection = bindCurrentInputMethodService(mMainConnection, IME_CONNECTION_BIND_FLAGS);
+        mHasConnection = bindCurrentInputMethodService(mMainConnection, mImeConnectionBindFlags);
         return mHasConnection;
     }
 
@@ -472,7 +493,7 @@ final class InputMethodBindingController {
     void setCurrentMethodVisible() {
         if (mCurMethod != null) {
             if (DEBUG) Slog.d(TAG, "setCurrentMethodVisible: mCurToken=" + mCurToken);
-            if (mHasConnection && !mVisibleBound) {
+            if (hasConnection() && !isVisibleBound()) {
                 mVisibleBound = bindCurrentInputMethodService(mVisibleConnection,
                         IME_VISIBLE_BIND_FLAGS);
             }
@@ -480,7 +501,7 @@ final class InputMethodBindingController {
         }
 
         // No IME is currently connected. Reestablish the main connection.
-        if (!mHasConnection) {
+        if (!hasConnection()) {
             if (DEBUG) {
                 Slog.d(TAG, "Cannot show input: no IME bound. Rebinding.");
             }
@@ -512,7 +533,7 @@ final class InputMethodBindingController {
      */
     @GuardedBy("ImfLock.class")
     void setCurrentMethodNotVisible() {
-        if (mVisibleBound) {
+        if (isVisibleBound()) {
             unbindVisibleConnection();
         }
     }

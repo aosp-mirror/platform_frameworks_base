@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothStatusCodes;
 import android.content.Context;
@@ -444,6 +445,26 @@ public class CachedBluetoothDeviceTest {
         // Act & Assert:
         //   Get "Active, 10% battery" result with Battery Level 10.
         assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, 10% battery");
+    }
+
+    @Test
+    public void getConnectionSummary_testActiveDeviceLeAudioHearingAid() {
+        // Test without battery level
+        // Set HAP Client and LE Audio profile to be connected and test connection state summary
+        when(mProfileManager.getHapClientProfile()).thenReturn(mHapClientProfile);
+        updateProfileStatus(mHapClientProfile, BluetoothProfile.STATE_CONNECTED);
+        updateProfileStatus(mLeAudioProfile, BluetoothProfile.STATE_CONNECTED);
+        assertThat(mCachedDevice.getConnectionSummary()).isNull();
+
+        // Set device as Active for LE Audio and test connection state summary
+        mCachedDevice.setHearingAidInfo(getLeftLeAudioHearingAidInfo());
+        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.LE_AUDIO);
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, left only");
+
+        // Set LE Audio profile to be disconnected and test connection state summary
+        mCachedDevice.onActiveDeviceChanged(false, BluetoothProfile.LE_AUDIO);
+        mCachedDevice.onProfileStateChanged(mLeAudioProfile, BluetoothProfile.STATE_DISCONNECTED);
+        assertThat(mCachedDevice.getConnectionSummary()).isNull();
     }
 
     @Test
@@ -1110,9 +1131,16 @@ public class CachedBluetoothDeviceTest {
                 .setAshaDeviceSide(HearingAidProfile.DeviceSide.SIDE_LEFT)
                 .build();
     }
+
     private HearingAidInfo getRightAshaHearingAidInfo() {
         return new HearingAidInfo.Builder()
                 .setAshaDeviceSide(HearingAidProfile.DeviceSide.SIDE_RIGHT)
+                .build();
+    }
+
+    private HearingAidInfo getLeftLeAudioHearingAidInfo() {
+        return new HearingAidInfo.Builder()
+                .setLeAudioLocation(BluetoothLeAudio.AUDIO_LOCATION_SIDE_LEFT)
                 .build();
     }
 }

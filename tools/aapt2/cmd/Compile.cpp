@@ -125,8 +125,12 @@ static std::optional<ResourcePathData> ExtractResourcePathData(const std::string
   const android::Source res_path =
       options.source_path ? StringPiece(options.source_path.value()) : StringPiece(path);
 
-  return ResourcePathData{res_path, dir_str.to_string(), name.to_string(),
-                          extension.to_string(), config_str.to_string(), config};
+  return ResourcePathData{res_path,
+                          std::string(dir_str),
+                          std::string(name),
+                          std::string(extension),
+                          std::string(config_str),
+                          config};
 }
 
 static std::string BuildIntermediateContainerFilename(const ResourcePathData& data) {
@@ -279,7 +283,7 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
   return true;
 }
 
-static bool WriteHeaderAndDataToWriter(const StringPiece& output_path, const ResourceFile& file,
+static bool WriteHeaderAndDataToWriter(StringPiece output_path, const ResourceFile& file,
                                        io::KnownSizeInputStream* in, IArchiveWriter* writer,
                                        android::IDiagnostics* diag) {
   TRACE_CALL();
@@ -311,7 +315,7 @@ static bool WriteHeaderAndDataToWriter(const StringPiece& output_path, const Res
   return true;
 }
 
-static bool FlattenXmlToOutStream(const StringPiece& output_path, const xml::XmlResource& xmlres,
+static bool FlattenXmlToOutStream(StringPiece output_path, const xml::XmlResource& xmlres,
                                   ContainerWriter* container_writer, android::IDiagnostics* diag) {
   pb::internal::CompiledFile pb_compiled_file;
   SerializeCompiledFileToPb(xmlres.file, &pb_compiled_file);
@@ -538,7 +542,7 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
     if (context->IsVerbose()) {
       // For debugging only, use the legacy PNG cruncher and compare the resulting file sizes.
       // This will help catch exotic cases where the new code may generate larger PNGs.
-      std::stringstream legacy_stream(content.to_string());
+      std::stringstream legacy_stream{std::string(content)};
       android::BigBuffer legacy_buffer(4096);
       Png png(context->GetDiagnostics());
       if (!png.process(path_data.source, &legacy_stream, &legacy_buffer, {})) {

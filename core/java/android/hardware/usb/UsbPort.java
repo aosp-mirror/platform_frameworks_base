@@ -46,6 +46,10 @@ import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_CONTAMINAN
 import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_DOCK;
 import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_FORCE;
 import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_DEBUG;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_BC_1_2;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_OTHER;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
@@ -83,6 +87,7 @@ public final class UsbPort {
     private final int mSupportedContaminantProtectionModes;
     private final boolean mSupportsEnableContaminantPresenceProtection;
     private final boolean mSupportsEnableContaminantPresenceDetection;
+    private final boolean mSupportsComplianceWarnings;
 
     private static final int NUM_DATA_ROLES = Constants.PortDataRole.NUM_DATA_ROLES;
     /**
@@ -250,6 +255,18 @@ public final class UsbPort {
             int supportedContaminantProtectionModes,
             boolean supportsEnableContaminantPresenceProtection,
             boolean supportsEnableContaminantPresenceDetection) {
+        this(usbManager, id, supportedModes, supportedContaminantProtectionModes,
+                supportsEnableContaminantPresenceProtection,
+                supportsEnableContaminantPresenceDetection,
+                false);
+    }
+
+    /** @hide */
+    public UsbPort(@NonNull UsbManager usbManager, @NonNull String id, int supportedModes,
+            int supportedContaminantProtectionModes,
+            boolean supportsEnableContaminantPresenceProtection,
+            boolean supportsEnableContaminantPresenceDetection,
+            boolean supportsComplianceWarnings) {
         Objects.requireNonNull(id);
         Preconditions.checkFlagsArgument(supportedModes,
                 MODE_DFP | MODE_UFP | MODE_AUDIO_ACCESSORY | MODE_DEBUG_ACCESSORY);
@@ -262,6 +279,7 @@ public final class UsbPort {
                 supportsEnableContaminantPresenceProtection;
         mSupportsEnableContaminantPresenceDetection =
                 supportsEnableContaminantPresenceDetection;
+        mSupportsComplianceWarnings = supportsComplianceWarnings;
     }
 
     /**
@@ -328,6 +346,21 @@ public final class UsbPort {
     @RequiresPermission(Manifest.permission.MANAGE_USB)
     public @Nullable UsbPortStatus getStatus() {
         return mUsbManager.getPortStatus(this);
+    }
+
+    /**
+     * Queries USB Port to see if the port is capable of identifying
+     * non compliant USB power source/cable/accessory.
+     *
+     * @return true when the UsbPort is capable of identifying
+     *             non compliant USB power
+     *             source/cable/accessory.
+     * @return false otherwise.
+     */
+    @CheckResult
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public boolean supportsComplianceWarnings() {
+        return mSupportsComplianceWarnings;
     }
 
     /**
@@ -686,6 +719,37 @@ public final class UsbPort {
     }
 
     /** @hide */
+    public static String complianceWarningsToString(@NonNull int[] complianceWarnings) {
+        StringBuilder complianceWarningString = new StringBuilder();
+        complianceWarningString.append("[");
+
+        if (complianceWarnings != null) {
+            for (int warning : complianceWarnings) {
+                switch (warning) {
+                    case UsbPortStatus.COMPLIANCE_WARNING_OTHER:
+                        complianceWarningString.append("other, ");
+                        break;
+                    case UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY:
+                        complianceWarningString.append("debug accessory, ");
+                        break;
+                    case UsbPortStatus.COMPLIANCE_WARNING_BC_1_2:
+                        complianceWarningString.append("bc12, ");
+                        break;
+                    case UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP:
+                        complianceWarningString.append("missing rp, ");
+                        break;
+                    default:
+                        complianceWarningString.append(String.format("Unknown(%d), ", warning));
+                        break;
+                }
+            }
+        }
+
+        complianceWarningString.append("]");
+        return complianceWarningString.toString().replaceAll(", ]$", "]");
+    }
+
+    /** @hide */
     public static void checkMode(int powerRole) {
         Preconditions.checkArgumentInRange(powerRole, Constants.PortMode.NONE,
                 Constants.PortMode.NUM_MODES - 1, "portMode");
@@ -720,10 +784,12 @@ public final class UsbPort {
     @Override
     public String toString() {
         return "UsbPort{id=" + mId + ", supportedModes=" + modeToString(mSupportedModes)
-                + "supportedContaminantProtectionModes=" + mSupportedContaminantProtectionModes
-                + "supportsEnableContaminantPresenceProtection="
+                + ", supportedContaminantProtectionModes=" + mSupportedContaminantProtectionModes
+                + ", supportsEnableContaminantPresenceProtection="
                 + mSupportsEnableContaminantPresenceProtection
-                + "supportsEnableContaminantPresenceDetection="
-                + mSupportsEnableContaminantPresenceDetection;
+                + ", supportsEnableContaminantPresenceDetection="
+                + mSupportsEnableContaminantPresenceDetection
+                + ", supportsComplianceWarnings="
+                + mSupportsComplianceWarnings;
     }
 }

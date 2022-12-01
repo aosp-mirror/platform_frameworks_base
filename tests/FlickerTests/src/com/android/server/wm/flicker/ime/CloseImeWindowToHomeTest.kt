@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.ime
 
+import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
@@ -98,6 +99,17 @@ class CloseImeWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     @Test
     fun imeAppLayerBecomesInvisible() {
         testSpec.assertLayers { this.isVisible(testApp).then().isInvisible(testApp) }
+    }
+
+    @Test
+    @IwTest(focusArea = "ime")
+    override fun cujCompleted() {
+        super.cujCompleted()
+        navBarLayerPositionAtStartAndEnd()
+        imeLayerBecomesInvisible()
+        imeAppWindowBecomesInvisible()
+        imeWindowBecomesInvisible()
+        imeLayerBecomesInvisible()
     }
 
     companion object {

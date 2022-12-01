@@ -64,7 +64,7 @@ int ApkInfoCommand::Action(const std::vector<std::string>& args) {
     Usage(&std::cerr);
     return 1;
   }
-  const StringPiece& path = args[0];
+  StringPiece path = args[0];
   std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(path, diag_);
   if (!apk) {
     return 1;

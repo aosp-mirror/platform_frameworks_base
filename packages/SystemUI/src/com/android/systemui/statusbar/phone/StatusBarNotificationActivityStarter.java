@@ -260,11 +260,11 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
 
         if (showOverLockscreen) {
             mShadeController.addPostCollapseAction(runnable);
-            mShadeController.collapsePanel(true /* animate */);
+            mShadeController.collapseShade(true /* animate */);
         } else if (mKeyguardStateController.isShowing()
                 && mCentralSurfaces.isOccluded()) {
             mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(runnable);
-            mShadeController.collapsePanel();
+            mShadeController.collapseShade();
         } else {
             runnable.run();
         }
@@ -406,7 +406,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
 
     private void expandBubbleStack(NotificationEntry entry) {
         mBubblesManagerOptional.get().expandStackAndSelectBubble(entry);
-        mShadeController.collapsePanel();
+        mShadeController.collapseShade();
     }
 
     private void startNotificationIntent(
@@ -593,9 +593,9 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
 
     private void collapseOnMainThread() {
         if (Looper.getMainLooper().isCurrentThread()) {
-            mShadeController.collapsePanel();
+            mShadeController.collapseShade();
         } else {
-            mMainThreadHandler.post(mShadeController::collapsePanel);
+            mMainThreadHandler.post(mShadeController::collapseShade);
         }
     }
 }

@@ -48,7 +48,7 @@ class TestDirectoryFixture : public ::testing::Test {
   // Retrieves the absolute path of the specified relative path in the test directory. Directories
   // should be separated using forward slashes ('/'), and these slashes will be translated to
   // backslashes when running Windows tests.
-  std::string GetTestPath(const android::StringPiece& path) {
+  std::string GetTestPath(android::StringPiece path) {
     std::string base = temp_dir_;
     for (android::StringPiece part : util::Split(path, '/')) {
       file::AppendPath(&base, part);
@@ -73,22 +73,21 @@ class CommandTestFixture : public TestDirectoryFixture {
   // Wries the contents of the file to the specified path. The file is compiled and the flattened
   // file is written to the out directory.
   bool CompileFile(const std::string& path, const std::string& contents,
-                   const android::StringPiece& flat_out_dir, android::IDiagnostics* diag);
+                   android::StringPiece flat_out_dir, android::IDiagnostics* diag);
 
   // Executes the link command with the specified arguments.
   bool Link(const std::vector<std::string>& args, android::IDiagnostics* diag);
 
   // Executes the link command with the specified arguments. The flattened files residing in the
   // flat directory will be added to the link command as file arguments.
-  bool Link(const std::vector<std::string>& args, const android::StringPiece& flat_dir,
+  bool Link(const std::vector<std::string>& args, android::StringPiece flat_dir,
             android::IDiagnostics* diag);
 
   // Creates a minimal android manifest within the test directory and returns the file path.
   std::string GetDefaultManifest(const char* package_name = kDefaultPackageName);
 
   // Returns pointer to data inside APK files
-  std::unique_ptr<io::IData> OpenFileAsData(LoadedApk* apk,
-                                            const android::StringPiece& path);
+  std::unique_ptr<io::IData> OpenFileAsData(LoadedApk* apk, android::StringPiece path);
 
   // Asserts that loading the tree from the specified file in the apk succeeds.
   void AssertLoadXml(LoadedApk* apk, const io::IData* data,

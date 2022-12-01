@@ -320,9 +320,7 @@ class RemoteTransitionAdapter {
                                 counterWallpaper.cleanUp(finishTransaction)
                                 // Release surface references now. This is apparently to free GPU
                                 // memory while doing quick operations (eg. during CTS).
-                                for (i in info.changes.indices.reversed()) {
-                                    info.changes[i].leash.release()
-                                }
+                                info.releaseAllSurfaces()
                                 for (i in leashMap.size - 1 downTo 0) {
                                     leashMap.valueAt(i).release()
                                 }
@@ -331,6 +329,7 @@ class RemoteTransitionAdapter {
                                         null /* wct */,
                                         finishTransaction
                                     )
+                                    finishTransaction.close()
                                 } catch (e: RemoteException) {
                                     Log.e(
                                         "ActivityOptionsCompat",
@@ -364,6 +363,9 @@ class RemoteTransitionAdapter {
                 ) {
                     // TODO: hook up merge to recents onTaskAppeared if applicable. Until then,
                     //       ignore any incoming merges.
+                    // Clean up stuff though cuz GC takes too long for benchmark tests.
+                    t.close()
+                    info.releaseAllSurfaces()
                 }
             }
         }

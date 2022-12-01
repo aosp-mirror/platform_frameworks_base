@@ -25,8 +25,8 @@
 
 namespace android {
 
-static ::testing::AssertionResult TestParse(
-    const StringPiece& input, ConfigDescription* config = nullptr) {
+static ::testing::AssertionResult TestParse(StringPiece input,
+                                            ConfigDescription* config = nullptr) {
   if (ConfigDescription::Parse(input, config)) {
     return ::testing::AssertionSuccess() << input << " was successfully parsed";
   }
@@ -138,7 +138,7 @@ TEST(ConfigDescriptionTest, ParseVrAttribute) {
   EXPECT_EQ(std::string("vrheadset-v26"), config.toString().string());
 }
 
-static inline ConfigDescription ParseConfigOrDie(const android::StringPiece& str) {
+static inline ConfigDescription ParseConfigOrDie(android::StringPiece str) {
   ConfigDescription config;
   CHECK(ConfigDescription::Parse(str, &config)) << "invalid configuration: " << str;
   return config;

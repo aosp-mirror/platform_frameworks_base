@@ -563,6 +563,9 @@ public class CompatibilityInfo implements Parcelable {
         if (applyToSize) {
             inoutDm.widthPixels = (int) (inoutDm.widthPixels * invertedRatio + 0.5f);
             inoutDm.heightPixels = (int) (inoutDm.heightPixels * invertedRatio + 0.5f);
+
+            float fontScale = inoutDm.scaledDensity / inoutDm.density;
+            inoutDm.fontScaleConverter = FontScaleConverterFactory.forScale(fontScale);
         }
     }
 

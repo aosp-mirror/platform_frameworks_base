@@ -174,6 +174,9 @@ public class DumpUtils {
         } else {
             dump.write("supported_modes", UsbPortProto.SUPPORTED_MODES, UsbPort.modeToString(mode));
         }
+        dump.write("supports_compliance_warnings",
+                UsbPortProto.SUPPORTS_COMPLIANCE_WARNINGS,
+                port.supportsComplianceWarnings());
 
         dump.end(token);
     }
@@ -250,6 +253,8 @@ public class DumpUtils {
                 status.isPowerTransferLimited());
         dump.write("usb_power_brick_status", UsbPortStatusProto.USB_POWER_BRICK_STATUS,
                 UsbPort.powerBrickConnectionStatusToString(status.getPowerBrickConnectionStatus()));
+        dump.write("compliance_warning_status", UsbPortStatusProto.COMPLIANCE_WARNINGS_STRING,
+                UsbPort.complianceWarningsToString(status.getComplianceWarnings()));
         dump.end(token);
     }
 }

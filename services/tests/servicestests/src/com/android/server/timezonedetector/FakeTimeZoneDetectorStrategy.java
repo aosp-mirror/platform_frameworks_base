@@ -111,7 +111,7 @@ public class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
     }
 
     @Override
-    public void enableTelephonyTimeZoneFallback() {
+    public void enableTelephonyTimeZoneFallback(String reason) {
         throw new UnsupportedOperationException();
     }
 

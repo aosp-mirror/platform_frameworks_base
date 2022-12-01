@@ -9,8 +9,7 @@ import com.android.settingslib.spa.widget.preference.TwoTargetSwitchPreference
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 
 @Composable
-fun <T : AppRecord> AppListSwitchItem(
-    itemModel: AppListItemModel<T>,
+fun <T : AppRecord> AppListItemModel<T>.AppListSwitchItem(
     onClick: () -> Unit,
     checked: State<Boolean?>,
     changeable: State<Boolean>,
@@ -19,14 +18,14 @@ fun <T : AppRecord> AppListSwitchItem(
     TwoTargetSwitchPreference(
         model = remember {
             object : SwitchPreferenceModel {
-                override val title = itemModel.label
-                override val summary = itemModel.summary
+                override val title = label
+                override val summary = this@AppListSwitchItem.summary
                 override val checked = checked
                 override val changeable = changeable
                 override val onCheckedChange = onCheckedChange
             }
         },
-        icon = { AppIcon(itemModel.record.app, SettingsDimension.appIconItemSize) },
+        icon = { AppIcon(record.app, SettingsDimension.appIconItemSize) },
         onClick = onClick,
     )
 }

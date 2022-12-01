@@ -1053,18 +1053,9 @@ constructor(
                     rootOverlay!!.add(mediaFrame)
                 } else {
                     val targetHost = getHost(newLocation)!!.hostView
-                    // When adding back to the host, let's make sure to reset the bounds.
-                    // Usually adding the view will trigger a layout that does this automatically,
-                    // but we sometimes suppress this.
+                    // This will either do a full layout pass and remeasure, or it will bypass
+                    // that and directly set the mediaFrame's bounds within the premeasured host.
                     targetHost.addView(mediaFrame)
-                    val left = targetHost.paddingLeft
-                    val top = targetHost.paddingTop
-                    mediaFrame.setLeftTopRightBottom(
-                        left,
-                        top,
-                        left + currentBounds.width(),
-                        top + currentBounds.height()
-                    )
 
                     if (mediaFrame.childCount > 0) {
                         val child = mediaFrame.getChildAt(0)

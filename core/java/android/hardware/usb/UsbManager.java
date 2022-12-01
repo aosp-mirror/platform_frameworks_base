@@ -113,6 +113,19 @@ public class UsbManager {
     public static final String ACTION_USB_PORT_CHANGED =
             "android.hardware.usb.action.USB_PORT_CHANGED";
 
+     /**
+     * Broadcast Action: A broadcast for USB compliance warning changes.
+     *
+     * This intent is sent when a port partner's
+     * (USB power source/cable/accessory) compliance warnings change state.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public static final String ACTION_USB_PORT_COMPLIANCE_CHANGED =
+            "android.hardware.usb.action.USB_PORT_COMPLIANCE_CHANGED";
+
    /**
      * Activity intent sent when user attaches a USB device.
      *

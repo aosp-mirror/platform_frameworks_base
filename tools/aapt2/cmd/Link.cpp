@@ -126,8 +126,8 @@ class LinkContext : public IAaptContext {
     return compilation_package_;
   }
 
-  void SetCompilationPackage(const StringPiece& package_name) {
-    compilation_package_ = package_name.to_string();
+  void SetCompilationPackage(StringPiece package_name) {
+    compilation_package_ = std::string(package_name);
   }
 
   uint8_t GetPackageId() override {
@@ -240,9 +240,9 @@ class FeatureSplitSymbolTableDelegate : public DefaultSymbolTableDelegate {
   IAaptContext* context_;
 };
 
-static bool FlattenXml(IAaptContext* context, const xml::XmlResource& xml_res,
-                       const StringPiece& path, bool keep_raw_values, bool utf16,
-                       OutputFormat format, IArchiveWriter* writer) {
+static bool FlattenXml(IAaptContext* context, const xml::XmlResource& xml_res, StringPiece path,
+                       bool keep_raw_values, bool utf16, OutputFormat format,
+                       IArchiveWriter* writer) {
   TRACE_CALL();
   if (context->IsVerbose()) {
     context->GetDiagnostics()->Note(android::DiagMessage(path)
@@ -262,8 +262,8 @@ static bool FlattenXml(IAaptContext* context, const xml::XmlResource& xml_res,
       }
 
       io::BigBufferInputStream input_stream(&buffer);
-      return io::CopyInputStreamToArchive(context, &input_stream, path.to_string(),
-                                          ArchiveEntry::kCompress, writer);
+      return io::CopyInputStreamToArchive(context, &input_stream, path, ArchiveEntry::kCompress,
+                                          writer);
     } break;
 
     case OutputFormat::kProto: {
@@ -272,8 +272,7 @@ static bool FlattenXml(IAaptContext* context, const xml::XmlResource& xml_res,
       SerializeXmlOptions options;
       options.remove_empty_text_nodes = (path == kAndroidManifestPath);
       SerializeXmlResourceToPb(xml_res, &pb_node);
-      return io::CopyProtoToArchive(context, &pb_node, path.to_string(), ArchiveEntry::kCompress,
-                                    writer);
+      return io::CopyProtoToArchive(context, &pb_node, path, ArchiveEntry::kCompress, writer);
     } break;
   }
   return false;
@@ -329,13 +328,13 @@ struct R {
 };
 
 template <typename T>
-uint32_t GetCompressionFlags(const StringPiece& str, T options) {
+uint32_t GetCompressionFlags(StringPiece str, T options) {
   if (options.do_not_compress_anything) {
     return 0;
   }
 
-  if (options.regex_to_not_compress
-      && std::regex_search(str.to_string(), options.regex_to_not_compress.value())) {
+  if (options.regex_to_not_compress &&
+      std::regex_search(str.begin(), str.end(), options.regex_to_not_compress.value())) {
     return 0;
   }
 
@@ -1176,7 +1175,7 @@ class Linker {
     return bcp47tag;
   }
 
-  std::unique_ptr<IArchiveWriter> MakeArchiveWriter(const StringPiece& out) {
+  std::unique_ptr<IArchiveWriter> MakeArchiveWriter(StringPiece out) {
     if (options_.output_to_directory) {
       return CreateDirectoryArchiveWriter(context_->GetDiagnostics(), out);
     } else {
@@ -1212,8 +1211,8 @@ class Linker {
     return false;
   }
 
-  bool WriteJavaFile(ResourceTable* table, const StringPiece& package_name_to_generate,
-                     const StringPiece& out_package, const JavaClassGeneratorOptions& java_options,
+  bool WriteJavaFile(ResourceTable* table, StringPiece package_name_to_generate,
+                     StringPiece out_package, const JavaClassGeneratorOptions& java_options,
                      const std::optional<std::string>& out_text_symbols_path = {}) {
     if (!options_.generate_java_class_path && !out_text_symbols_path) {
       return true;
@@ -2473,14 +2472,14 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
   for (std::string& extra_package : extra_java_packages_) {
     // A given package can actually be a colon separated list of packages.
     for (StringPiece package : util::Split(extra_package, ':')) {
-      options_.extra_java_packages.insert(package.to_string());
+      options_.extra_java_packages.emplace(package);
     }
   }
 
   if (product_list_) {
     for (StringPiece product : util::Tokenize(product_list_.value(), ',')) {
       if (product != "" && product != "default") {
-        options_.products.insert(product.to_string());
+        options_.products.emplace(product);
       }
     }
   }

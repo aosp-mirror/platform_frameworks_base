@@ -91,8 +91,8 @@ IFile* ZipFileCollectionIterator::Next() {
 
 ZipFileCollection::ZipFileCollection() : handle_(nullptr) {}
 
-std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
-    const StringPiece& path, std::string* out_error) {
+std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(StringPiece path,
+                                                             std::string* out_error) {
   TRACE_CALL();
   constexpr static const int32_t kEmptyArchive = -6;
 
@@ -130,8 +130,8 @@ std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
       continue;
     }
 
-    std::unique_ptr<IFile> file = util::make_unique<ZipFile>(
-        collection->handle_, zip_data, android::Source(zip_entry_path, path.to_string()));
+    std::unique_ptr<IFile> file = util::make_unique<ZipFile>(collection->handle_, zip_data,
+                                                             android::Source(zip_entry_path, path));
     collection->files_by_name_[zip_entry_path] = file.get();
     collection->files_.push_back(std::move(file));
   }
@@ -144,8 +144,8 @@ std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
   return collection;
 }
 
-IFile* ZipFileCollection::FindFile(const StringPiece& path) {
-  auto iter = files_by_name_.find(path.to_string());
+IFile* ZipFileCollection::FindFile(StringPiece path) {
+  auto iter = files_by_name_.find(path);
   if (iter != files_by_name_.end()) {
     return iter->second;
   }

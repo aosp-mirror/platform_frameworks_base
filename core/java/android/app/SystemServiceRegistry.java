@@ -58,6 +58,7 @@ import android.companion.CompanionDeviceManager;
 import android.companion.ICompanionDeviceManager;
 import android.companion.virtual.IVirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceManager;
+import android.compat.Compatibility;
 import android.content.ClipboardManager;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
@@ -1092,7 +1093,10 @@ public final class SystemServiceRegistry {
                 new CachedServiceFetcher<OverlayManager>() {
             @Override
             public OverlayManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getServiceOrThrow(Context.OVERLAY_SERVICE);
+                final IBinder b =
+                        (Compatibility.isChangeEnabled(OverlayManager.SELF_TARGETING_OVERLAY))
+                                ? ServiceManager.getService(Context.OVERLAY_SERVICE)
+                                : ServiceManager.getServiceOrThrow(Context.OVERLAY_SERVICE);
                 return new OverlayManager(ctx, IOverlayManager.Stub.asInterface(b));
             }});
 

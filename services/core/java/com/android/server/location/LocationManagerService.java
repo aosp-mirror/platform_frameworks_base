@@ -28,6 +28,7 @@ import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 import static android.location.LocationRequest.LOW_POWER_EXCEPTIONS;
 import static android.location.provider.LocationProviderBase.ACTION_FUSED_PROVIDER;
+import static android.location.provider.LocationProviderBase.ACTION_GNSS_PROVIDER;
 import static android.location.provider.LocationProviderBase.ACTION_NETWORK_PROVIDER;
 
 import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
@@ -439,9 +440,24 @@ public class LocationManagerService extends ILocationManager.Stub implements
             mGnssManagerService = new GnssManagerService(mContext, mInjector, gnssNative);
             mGnssManagerService.onSystemReady();
 
+            boolean useGnssHardwareProvider = mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_useGnssHardwareProvider);
+            AbstractLocationProvider gnssProvider = null;
+            if (!useGnssHardwareProvider) {
+                gnssProvider = ProxyLocationProvider.create(
+                        mContext,
+                        GPS_PROVIDER,
+                        ACTION_GNSS_PROVIDER,
+                        com.android.internal.R.bool.config_useGnssHardwareProvider,
+                        com.android.internal.R.string.config_gnssLocationProviderPackageName);
+            }
+            if (gnssProvider == null) {
+                gnssProvider = mGnssManagerService.getGnssLocationProvider();
+            }
+
             LocationProviderManager gnssManager = new LocationProviderManager(mContext, mInjector,
                     GPS_PROVIDER, mPassiveManager);
-            addLocationProviderManager(gnssManager, mGnssManagerService.getGnssLocationProvider());
+            addLocationProviderManager(gnssManager, gnssProvider);
         }
 
         // bind to geocoder provider

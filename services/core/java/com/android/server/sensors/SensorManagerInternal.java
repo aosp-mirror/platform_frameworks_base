@@ -43,6 +43,43 @@ public abstract class SensorManagerInternal {
     public abstract void removeProximityActiveListener(@NonNull ProximityActiveListener listener);
 
     /**
+     * Creates a sensor that is registered at runtime by the system with the sensor service.
+     *
+     * The runtime sensors created here are different from the
+     * <a href="https://source.android.com/docs/core/interaction/sensors/sensors-hal2#dynamic-sensors">
+     * dynamic sensor support in the HAL</a>. These sensors have no HAL dependency and correspond to
+     * sensors that belong to an external (virtual) device.
+     *
+     * @param deviceId The identifier of the device this sensor is associated with.
+     * @param type The generic type of the sensor.
+     * @param name The name of the sensor.
+     * @param vendor The vendor string of the sensor.
+     * @param callback The callback to get notified when the sensor listeners have changed.
+     * @return The sensor handle.
+     */
+    public abstract int createRuntimeSensor(int deviceId, int type, @NonNull String name,
+            @NonNull String vendor, @NonNull RuntimeSensorStateChangeCallback callback);
+
+    /**
+     * Unregisters the sensor with the given handle from the framework.
+     */
+    public abstract void removeRuntimeSensor(int handle);
+
+    /**
+     * Sends an event for the runtime sensor with the given handle to the framework.
+     *
+     * Only relevant for sending runtime sensor events. @see #createRuntimeSensor.
+     *
+     * @param handle The sensor handle.
+     * @param type The type of the sensor.
+     * @param timestampNanos When the event occurred.
+     * @param values The values of the event.
+     * @return Whether the event injection was successful.
+     */
+    public abstract boolean sendSensorEvent(int handle, int type, long timestampNanos,
+            @NonNull float[] values);
+
+    /**
      * Listener for proximity sensor state changes.
      */
     public interface ProximityActiveListener {
@@ -51,5 +88,18 @@ public abstract class SensorManagerInternal {
          * @param isActive whether the sensor is being enabled or disabled.
          */
         void onProximityActive(boolean isActive);
+    }
+
+    /**
+     * Callback for runtime sensor state changes. Only relevant to sensors created via
+     * {@link #createRuntimeSensor}, i.e. the dynamic sensors created via the dynamic sensor HAL are
+     * not covered.
+     */
+    public interface RuntimeSensorStateChangeCallback {
+        /**
+         * Invoked when the listeners of the runtime sensor have changed.
+         */
+        void onStateChanged(boolean enabled, int samplingPeriodMicros,
+                int batchReportLatencyMicros);
     }
 }

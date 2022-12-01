@@ -38,7 +38,7 @@ void BinaryStreamVisitor::Write32(uint32_t value) {
   stream_.write(reinterpret_cast<char*>(&x), sizeof(uint32_t));
 }
 
-void BinaryStreamVisitor::WriteString(const StringPiece& value) {
+void BinaryStreamVisitor::WriteString(StringPiece value) {
   // pad with null to nearest word boundary;
   size_t padding_size = CalculatePadding(value.size());
   Write32(value.size());

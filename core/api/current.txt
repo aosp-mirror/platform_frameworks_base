@@ -1041,6 +1041,7 @@ package android {
     field public static final int max = 16843062; // 0x1010136
     field public static final int maxAspectRatio = 16844128; // 0x1010560
     field public static final int maxButtonHeight = 16844029; // 0x10104fd
+    field public static final int maxConcurrentSessionsCount;
     field public static final int maxDate = 16843584; // 0x1010340
     field public static final int maxEms = 16843095; // 0x1010157
     field public static final int maxHeight = 16843040; // 0x1010120
@@ -11663,6 +11664,7 @@ package android.content.pm {
 
   public class PackageInstaller {
     method public void abandonSession(int);
+    method public void checkInstallConstraints(@NonNull java.util.List<java.lang.String>, @NonNull android.content.pm.PackageInstaller.InstallConstraints, @NonNull java.util.function.Consumer<android.content.pm.PackageInstaller.InstallConstraintsResult>);
     method public int createSession(@NonNull android.content.pm.PackageInstaller.SessionParams) throws java.io.IOException;
     method @Deprecated @Nullable public android.content.pm.PackageInstaller.SessionInfo getActiveStagedSession();
     method @NonNull public java.util.List<android.content.pm.PackageInstaller.SessionInfo> getActiveStagedSessions();
@@ -11707,6 +11709,35 @@ package android.content.pm {
     field public static final int STATUS_SUCCESS = 0; // 0x0
   }
 
+  public static final class PackageInstaller.InstallConstraints implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean isRequireAppNotForeground();
+    method public boolean isRequireAppNotInteracting();
+    method public boolean isRequireAppNotTopVisible();
+    method public boolean isRequireDeviceIdle();
+    method public boolean isRequireNotInCall();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.PackageInstaller.InstallConstraints> CREATOR;
+    field @NonNull public static final android.content.pm.PackageInstaller.InstallConstraints GENTLE_UPDATE;
+  }
+
+  public static final class PackageInstaller.InstallConstraints.Builder {
+    ctor public PackageInstaller.InstallConstraints.Builder();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints build();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotForeground();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotInteracting();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotTopVisible();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder requireDeviceIdle();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder requireNotInCall();
+  }
+
+  public static final class PackageInstaller.InstallConstraintsResult implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean isAllConstraintsSatisfied();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.PackageInstaller.InstallConstraintsResult> CREATOR;
+  }
+
   public static final class PackageInstaller.PreapprovalDetails implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.graphics.Bitmap getIcon();
@@ -11735,6 +11766,7 @@ package android.content.pm {
     method @NonNull public int[] getChildSessionIds();
     method @NonNull public String[] getNames() throws java.io.IOException;
     method public int getParentSessionId();
+    method public boolean isKeepApplicationEnabledSetting();
     method public boolean isMultiPackage();
     method public boolean isStaged();
     method @NonNull public java.io.InputStream openRead(@NonNull String) throws java.io.IOException;
@@ -11786,6 +11818,7 @@ package android.content.pm {
     method public boolean hasParentSessionId();
     method public boolean isActive();
     method public boolean isCommitted();
+    method public boolean isKeepApplicationEnabledSetting();
     method public boolean isMultiPackage();
     method public boolean isSealed();
     method public boolean isStaged();
@@ -11818,6 +11851,7 @@ package android.content.pm {
     method public void setInstallLocation(int);
     method public void setInstallReason(int);
     method public void setInstallScenario(int);
+    method public void setKeepApplicationEnabledSetting();
     method public void setMultiPackage();
     method public void setOriginatingUid(int);
     method public void setOriginatingUri(@Nullable android.net.Uri);
@@ -35877,6 +35911,7 @@ package android.provider {
     method public static boolean canDrawOverlays(android.content.Context);
     field public static final String ACTION_ACCESSIBILITY_SETTINGS = "android.settings.ACCESSIBILITY_SETTINGS";
     field public static final String ACTION_ADD_ACCOUNT = "android.settings.ADD_ACCOUNT_SETTINGS";
+    field public static final String ACTION_ADVANCED_MEMORY_PROTECTION_SETTINGS = "android.settings.ADVANCED_MEMORY_PROTECTION_SETTINGS";
     field public static final String ACTION_AIRPLANE_MODE_SETTINGS = "android.settings.AIRPLANE_MODE_SETTINGS";
     field public static final String ACTION_ALL_APPS_NOTIFICATION_SETTINGS = "android.settings.ALL_APPS_NOTIFICATION_SETTINGS";
     field public static final String ACTION_APN_SETTINGS = "android.settings.APN_SETTINGS";
@@ -35925,7 +35960,6 @@ package android.provider {
     field public static final String ACTION_MANAGE_UNKNOWN_APP_SOURCES = "android.settings.MANAGE_UNKNOWN_APP_SOURCES";
     field public static final String ACTION_MANAGE_WRITE_SETTINGS = "android.settings.action.MANAGE_WRITE_SETTINGS";
     field public static final String ACTION_MEMORY_CARD_SETTINGS = "android.settings.MEMORY_CARD_SETTINGS";
-    field public static final String ACTION_MEMTAG_SETTINGS = "android.settings.MEMTAG_SETTINGS";
     field public static final String ACTION_NETWORK_OPERATOR_SETTINGS = "android.settings.NETWORK_OPERATOR_SETTINGS";
     field public static final String ACTION_NFCSHARING_SETTINGS = "android.settings.NFCSHARING_SETTINGS";
     field public static final String ACTION_NFC_PAYMENT_SETTINGS = "android.settings.NFC_PAYMENT_SETTINGS";
@@ -42007,6 +42041,7 @@ package android.telephony {
     field public static final String KEY_IGNORE_SIM_NETWORK_LOCKED_EVENTS_BOOL = "ignore_sim_network_locked_events_bool";
     field public static final String KEY_IMS_CONFERENCE_SIZE_LIMIT_INT = "ims_conference_size_limit_int";
     field public static final String KEY_IMS_DTMF_TONE_DELAY_INT = "ims_dtmf_tone_delay_int";
+    field public static final String KEY_INCLUDE_LTE_FOR_NR_ADVANCED_THRESHOLD_BANDWIDTH_BOOL = "include_lte_for_nr_advanced_threshold_bandwidth_bool";
     field public static final String KEY_IS_IMS_CONFERENCE_SIZE_ENFORCED_BOOL = "is_ims_conference_size_enforced_bool";
     field public static final String KEY_IS_OPPORTUNISTIC_SUBSCRIPTION_BOOL = "is_opportunistic_subscription_bool";
     field public static final String KEY_LTE_ENABLED_BOOL = "lte_enabled_bool";

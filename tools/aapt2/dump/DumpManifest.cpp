@@ -1076,7 +1076,7 @@ class FeatureGroup : public ManifestExtractor::Element {
 
   /** Adds a feature to the feature group. */
   void AddFeature(const std::string& name, bool required = true, int32_t version = -1) {
-    features_.insert(std::make_pair(name, Feature{ required, version }));
+    features_.insert_or_assign(name, Feature{required, version});
     if (required) {
       if (name == "android.hardware.camera.autofocus" ||
           name == "android.hardware.camera.flash") {
@@ -1348,6 +1348,11 @@ class UsesPermission : public ManifestExtractor::Element {
   std::string impliedReason;
 
   void Extract(xml::Element* element) override {
+    const auto parent_stack = extractor()->parent_stack();
+    if (!extractor()->options_.only_permissions &&
+        (parent_stack.size() != 1 || !ElementCast<Manifest>(parent_stack[0]))) {
+      return;
+    }
     name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
     std::string feature =
         GetAttributeStringDefault(FindAttribute(element, REQUIRED_FEATURE_ATTR), "");
@@ -1472,6 +1477,11 @@ class UsesPermissionSdk23 : public ManifestExtractor::Element {
   const int32_t* maxSdkVersion = nullptr;
 
   void Extract(xml::Element* element) override {
+    const auto parent_stack = extractor()->parent_stack();
+    if (!extractor()->options_.only_permissions &&
+        (parent_stack.size() != 1 || !ElementCast<Manifest>(parent_stack[0]))) {
+      return;
+    }
     name = GetAttributeString(FindAttribute(element, NAME_ATTR));
     maxSdkVersion = GetAttributeInteger(FindAttribute(element, MAX_SDK_VERSION_ATTR));
 

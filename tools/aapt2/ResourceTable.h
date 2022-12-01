@@ -71,12 +71,11 @@ struct StagedId {
 
 struct Overlayable {
   Overlayable() = default;
-   Overlayable(const android::StringPiece& name, const android::StringPiece& actor)
-       : name(name.to_string()), actor(actor.to_string()) {}
-   Overlayable(const android::StringPiece& name, const android::StringPiece& actor,
-               const android::Source& source)
-       : name(name.to_string()), actor(actor.to_string()), source(source) {
-   }
+  Overlayable(android::StringPiece name, android::StringPiece actor) : name(name), actor(actor) {
+  }
+  Overlayable(android::StringPiece name, android::StringPiece actor, const android::Source& source)
+      : name(name), actor(actor), source(source) {
+  }
 
   static const char* kActorScheme;
   std::string name;
@@ -105,8 +104,9 @@ class ResourceConfigValue {
   // The actual Value.
   std::unique_ptr<Value> value;
 
-  ResourceConfigValue(const android::ConfigDescription& config, const android::StringPiece& product)
-      : config(config), product(product.to_string()) {}
+  ResourceConfigValue(const android::ConfigDescription& config, android::StringPiece product)
+      : config(config), product(product) {
+  }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceConfigValue);
@@ -136,7 +136,8 @@ class ResourceEntry {
   // The resource's values for each configuration.
   std::vector<std::unique_ptr<ResourceConfigValue>> values;
 
-  explicit ResourceEntry(const android::StringPiece& name) : name(name.to_string()) {}
+  explicit ResourceEntry(android::StringPiece name) : name(name) {
+  }
 
   ResourceConfigValue* FindValue(const android::ConfigDescription& config,
                                  android::StringPiece product = {});
@@ -144,7 +145,7 @@ class ResourceEntry {
                                        android::StringPiece product = {}) const;
 
   ResourceConfigValue* FindOrCreateValue(const android::ConfigDescription& config,
-                                         const android::StringPiece& product);
+                                         android::StringPiece product);
   std::vector<ResourceConfigValue*> FindAllValues(const android::ConfigDescription& config);
 
   template <typename Func>
@@ -180,9 +181,9 @@ class ResourceTableType {
       : named_type(type.ToResourceNamedType()) {
   }
 
-  ResourceEntry* CreateEntry(const android::StringPiece& name);
-  ResourceEntry* FindEntry(const android::StringPiece& name) const;
-  ResourceEntry* FindOrCreateEntry(const android::StringPiece& name);
+  ResourceEntry* CreateEntry(android::StringPiece name);
+  ResourceEntry* FindEntry(android::StringPiece name) const;
+  ResourceEntry* FindOrCreateEntry(android::StringPiece name);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceTableType);
@@ -194,7 +195,7 @@ class ResourceTablePackage {
 
   std::vector<std::unique_ptr<ResourceTableType>> types;
 
-  explicit ResourceTablePackage(const android::StringPiece& name) : name(name.to_string()) {
+  explicit ResourceTablePackage(android::StringPiece name) : name(name) {
   }
 
   ResourceTablePackage() = default;
@@ -319,8 +320,8 @@ class ResourceTable {
   // Returns the package struct with the given name, or nullptr if such a package does not
   // exist. The empty string is a valid package and typically is used to represent the
   // 'current' package before it is known to the ResourceTable.
-  ResourceTablePackage* FindPackage(const android::StringPiece& name) const;
-  ResourceTablePackage* FindOrCreatePackage(const android::StringPiece& name);
+  ResourceTablePackage* FindPackage(android::StringPiece name) const;
+  ResourceTablePackage* FindOrCreatePackage(android::StringPiece name);
 
   std::unique_ptr<ResourceTable> Clone() const;
 

@@ -57,14 +57,14 @@ static const std::set<StringPiece> sJavaIdentifiers = {
     "transient",  "try",          "void",      "volatile",   "while",
     "true",       "false",        "null"};
 
-static bool IsValidSymbol(const StringPiece& symbol) {
+static bool IsValidSymbol(StringPiece symbol) {
   return sJavaIdentifiers.find(symbol) == sJavaIdentifiers.end();
 }
 
 // Java symbols can not contain . or -, but those are valid in a resource name.
 // Replace those with '_'.
-std::string JavaClassGenerator::TransformToFieldName(const StringPiece& symbol) {
-  std::string output = symbol.to_string();
+std::string JavaClassGenerator::TransformToFieldName(StringPiece symbol) {
+  std::string output(symbol);
   for (char& c : output) {
     if (c == '.' || c == '-') {
       c = '_';
@@ -84,7 +84,7 @@ std::string JavaClassGenerator::TransformToFieldName(const StringPiece& symbol) 
 // Foo_bar
 static std::string TransformNestedAttr(const ResourceNameRef& attr_name,
                                        const std::string& styleable_class_name,
-                                       const StringPiece& package_name_to_generate) {
+                                       StringPiece package_name_to_generate) {
   std::string output = styleable_class_name;
 
   // We may reference IDs from other packages, so prefix the entry name with
@@ -226,16 +226,15 @@ static bool operator<(const StyleableAttr& lhs, const StyleableAttr& rhs) {
 
 static FieldReference GetRFieldReference(const ResourceName& name,
                                          StringPiece fallback_package_name) {
-  const std::string package_name =
-      name.package.empty() ? fallback_package_name.to_string() : name.package;
+  const std::string_view package_name = name.package.empty() ? fallback_package_name : name.package;
   const std::string entry = JavaClassGenerator::TransformToFieldName(name.entry);
-  return FieldReference(StringPrintf("%s.R.%s.%s", package_name.c_str(),
-                                     name.type.to_string().data(), entry.c_str()));
+  return FieldReference(
+      StringPrintf("%s.R.%s.%s", package_name.data(), name.type.to_string().data(), entry.c_str()));
 }
 
 bool JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const ResourceId& id,
                                           const Styleable& styleable,
-                                          const StringPiece& package_name_to_generate,
+                                          StringPiece package_name_to_generate,
                                           ClassDefinition* out_class_def,
                                           MethodDefinition* out_rewrite_method,
                                           Printer* r_txt_printer) {
@@ -314,7 +313,8 @@ bool JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
         return true;
       }
       const StringPiece attr_comment_line = entry.symbol.value().attribute->GetComment();
-      return attr_comment_line.contains("@removed") || attr_comment_line.contains("@hide");
+      return attr_comment_line.find("@removed") != std::string::npos ||
+             attr_comment_line.find("@hide") != std::string::npos;
     });
     documentation_attrs.erase(documentation_remove_iter, documentation_attrs.end());
 
@@ -397,7 +397,7 @@ bool JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
         comment = styleable_attr.symbol.value().attribute->GetComment();
       }
 
-      if (comment.contains("@removed")) {
+      if (comment.find("@removed") != std::string::npos) {
         // Removed attributes are public but hidden from the documentation, so
         // don't emit them as part of the class documentation.
         continue;
@@ -497,7 +497,7 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
   }
 
   if (out_rewrite_method != nullptr) {
-    const std::string type_str = name.type.to_string();
+    const auto type_str = name.type.to_string();
     out_rewrite_method->AppendStatement(
         StringPrintf("%s.%s = (%s.%s & 0x00ffffff) | packageIdBits;", type_str.data(),
                      field_name.data(), type_str.data(), field_name.data()));
@@ -505,8 +505,7 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
 }
 
 std::optional<std::string> JavaClassGenerator::UnmangleResource(
-    const StringPiece& package_name, const StringPiece& package_name_to_generate,
-    const ResourceEntry& entry) {
+    StringPiece package_name, StringPiece package_name_to_generate, const ResourceEntry& entry) {
   if (SkipSymbol(entry.visibility.level)) {
     return {};
   }
@@ -528,7 +527,7 @@ std::optional<std::string> JavaClassGenerator::UnmangleResource(
   return {std::move(unmangled_name)};
 }
 
-bool JavaClassGenerator::ProcessType(const StringPiece& package_name_to_generate,
+bool JavaClassGenerator::ProcessType(StringPiece package_name_to_generate,
                                      const ResourceTablePackage& package,
                                      const ResourceTableType& type,
                                      ClassDefinition* out_type_class_def,
@@ -577,7 +576,7 @@ bool JavaClassGenerator::ProcessType(const StringPiece& package_name_to_generate
   return true;
 }
 
-bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate, OutputStream* out,
+bool JavaClassGenerator::Generate(StringPiece package_name_to_generate, OutputStream* out,
                                   OutputStream* out_r_txt) {
   return Generate(package_name_to_generate, package_name_to_generate, out, out_r_txt);
 }
@@ -591,8 +590,8 @@ static void AppendJavaDocAnnotations(const std::vector<std::string>& annotations
   }
 }
 
-bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
-                                  const StringPiece& out_package_name, OutputStream* out,
+bool JavaClassGenerator::Generate(StringPiece package_name_to_generate,
+                                  StringPiece out_package_name, OutputStream* out,
                                   OutputStream* out_r_txt) {
   ClassDefinition r_class("R", ClassQualifier::kNone, true);
   std::unique_ptr<MethodDefinition> rewrite_method;

@@ -96,27 +96,22 @@ class Element : public Node {
   void AppendChild(std::unique_ptr<Node> child);
   void InsertChild(size_t index, std::unique_ptr<Node> child);
 
-  Attribute* FindAttribute(const android::StringPiece& ns, const android::StringPiece& name);
-  const Attribute* FindAttribute(const android::StringPiece& ns,
-                                 const android::StringPiece& name) const;
-  Attribute* FindOrCreateAttribute(const android::StringPiece& ns,
-                                   const android::StringPiece& name);
-  void RemoveAttribute(const android::StringPiece& ns,
-                       const android::StringPiece& name);
+  Attribute* FindAttribute(android::StringPiece ns, android::StringPiece name);
+  const Attribute* FindAttribute(android::StringPiece ns, android::StringPiece name) const;
+  Attribute* FindOrCreateAttribute(android::StringPiece ns, android::StringPiece name);
+  void RemoveAttribute(android::StringPiece ns, android::StringPiece name);
 
-  Element* FindChild(const android::StringPiece& ns, const android::StringPiece& name);
-  const Element* FindChild(const android::StringPiece& ns, const android::StringPiece& name) const;
+  Element* FindChild(android::StringPiece ns, android::StringPiece name);
+  const Element* FindChild(android::StringPiece ns, android::StringPiece name) const;
 
-  Element* FindChildWithAttribute(const android::StringPiece& ns, const android::StringPiece& name,
-                                  const android::StringPiece& attr_ns,
-                                  const android::StringPiece& attr_name,
-                                  const android::StringPiece& attr_value);
+  Element* FindChildWithAttribute(android::StringPiece ns, android::StringPiece name,
+                                  android::StringPiece attr_ns, android::StringPiece attr_name,
+                                  android::StringPiece attr_value);
 
-  const Element* FindChildWithAttribute(const android::StringPiece& ns,
-                                        const android::StringPiece& name,
-                                        const android::StringPiece& attr_ns,
-                                        const android::StringPiece& attr_name,
-                                        const android::StringPiece& attr_value) const;
+  const Element* FindChildWithAttribute(android::StringPiece ns, android::StringPiece name,
+                                        android::StringPiece attr_ns,
+                                        android::StringPiece attr_name,
+                                        android::StringPiece attr_value) const;
 
   std::vector<Element*> GetChildElements();
 
@@ -235,8 +230,7 @@ class PackageAwareVisitor : public Visitor, public IPackageDeclStack {
  public:
   using Visitor::Visit;
 
-  std::optional<ExtractedPackage> TransformPackageAlias(
-      const android::StringPiece& alias) const override;
+  std::optional<ExtractedPackage> TransformPackageAlias(android::StringPiece alias) const override;
 
  protected:
   PackageAwareVisitor() = default;

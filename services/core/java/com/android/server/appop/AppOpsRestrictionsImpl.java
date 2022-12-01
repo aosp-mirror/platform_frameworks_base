@@ -42,7 +42,7 @@ public class AppOpsRestrictionsImpl implements AppOpsRestrictions {
 
     private Context mContext;
     private Handler mHandler;
-    private AppOpsServiceInterface mAppOpsServiceInterface;
+    private AppOpsCheckingServiceInterface mAppOpsServiceInterface;
 
     // Map from (Object token) to (int code) to (boolean restricted)
     private final ArrayMap<Object, SparseBooleanArray> mGlobalRestrictions = new ArrayMap<>();
@@ -56,7 +56,7 @@ public class AppOpsRestrictionsImpl implements AppOpsRestrictions {
             mUserRestrictionExcludedPackageTags = new ArrayMap<>();
 
     public AppOpsRestrictionsImpl(Context context, Handler handler,
-            AppOpsServiceInterface appOpsServiceInterface) {
+            AppOpsCheckingServiceInterface appOpsServiceInterface) {
         mContext = context;
         mHandler = handler;
         mAppOpsServiceInterface = appOpsServiceInterface;

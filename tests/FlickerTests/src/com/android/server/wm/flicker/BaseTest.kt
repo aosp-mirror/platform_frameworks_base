@@ -172,4 +172,17 @@ constructor(
     open fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         testSpec.assertWm { this.visibleWindowsShownMoreThanOneConsecutiveEntry() }
     }
+
+    open fun cujCompleted() {
+        entireScreenCovered()
+        navBarLayerIsVisibleAtStartAndEnd()
+        navBarWindowIsAlwaysVisible()
+        taskBarLayerIsVisibleAtStartAndEnd()
+        taskBarWindowIsAlwaysVisible()
+        statusBarLayerIsVisibleAtStartAndEnd()
+        statusBarLayerPositionAtStartAndEnd()
+        statusBarWindowIsAlwaysVisible()
+        visibleLayersShownMoreThanOneConsecutiveEntry()
+        visibleWindowsShownMoreThanOneConsecutiveEntry()
+    }
 }

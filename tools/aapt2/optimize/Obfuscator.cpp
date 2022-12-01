@@ -35,7 +35,7 @@ namespace aapt {
 Obfuscator::Obfuscator(std::map<std::string, std::string>& path_map_out) : path_map_(path_map_out) {
 }
 
-std::string ShortenFileName(const android::StringPiece& file_path, int output_length) {
+std::string ShortenFileName(android::StringPiece file_path, int output_length) {
   std::size_t hash_num = std::hash<android::StringPiece>{}(file_path);
   std::string result = "";
   // Convert to (modified) base64 so that it is a proper file path.
@@ -58,9 +58,9 @@ int OptimalShortenedLength(int num_resources) {
   }
 }
 
-std::string GetShortenedPath(const android::StringPiece& shortened_filename,
-                             const android::StringPiece& extension, int collision_count) {
-  std::string shortened_path = "res/" + shortened_filename.to_string();
+std::string GetShortenedPath(android::StringPiece shortened_filename,
+                             android::StringPiece extension, int collision_count) {
+  std::string shortened_path = std::string("res/") += shortened_filename;
   if (collision_count > 0) {
     shortened_path += std::to_string(collision_count);
   }

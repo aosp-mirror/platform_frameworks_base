@@ -44,10 +44,9 @@ android::IDiagnostics* GetDiagnostics() {
 }
 
 template <>
-Value* GetValueForConfigAndProduct<Value>(ResourceTable* table,
-                                          const android::StringPiece& res_name,
+Value* GetValueForConfigAndProduct<Value>(ResourceTable* table, android::StringPiece res_name,
                                           const ConfigDescription& config,
-                                          const android::StringPiece& product) {
+                                          android::StringPiece product) {
   std::optional<ResourceTable::SearchResult> result = table->FindResource(ParseNameOrDie(res_name));
   if (result) {
     ResourceConfigValue* config_value = result.value().entry->FindValue(config, product);

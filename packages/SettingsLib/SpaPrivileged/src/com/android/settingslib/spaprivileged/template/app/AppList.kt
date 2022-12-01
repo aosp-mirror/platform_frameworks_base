@@ -55,19 +55,22 @@ internal data class AppListState(
     val searchQuery: State<String>,
 )
 
+internal data class AppListInput<T : AppRecord>(
+    val config: AppListConfig,
+    val listModel: AppListModel<T>,
+    val state: AppListState,
+    val header: @Composable () -> Unit,
+    val appItem: @Composable AppListItemModel<T>.() -> Unit,
+    val bottomPadding: Dp,
+)
+
 /**
  * The template to render an App List.
  *
  * This UI element will take the remaining space on the screen to show the App List.
  */
 @Composable
-internal fun <T : AppRecord> AppList(
-    config: AppListConfig,
-    listModel: AppListModel<T>,
-    state: AppListState,
-    header: @Composable () -> Unit,
-    appItem: @Composable (itemState: AppListItemModel<T>) -> Unit,
-    bottomPadding: Dp,
+internal fun <T : AppRecord> AppListInput<T>.AppList(
     appListDataSupplier: @Composable () -> State<AppListData<T>?> = {
         loadAppListData(config, listModel, state)
     },

@@ -103,8 +103,6 @@ public interface ParsedPackage extends AndroidPackage {
 
     ParsedPackage setRestrictUpdateHash(byte[] restrictUpdateHash);
 
-    ParsedPackage setSeInfo(String seInfo);
-
     ParsedPackage setSecondaryNativeLibraryDir(String secondaryNativeLibraryDir);
 
     /**

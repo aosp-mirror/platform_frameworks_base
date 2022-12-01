@@ -152,7 +152,7 @@ bool CopyXmlReferences(const std::optional<std::string>& name, const Group<T>& g
  * success, or false if the either the placeholder is not found in the name, or the value is not
  * present and the placeholder was.
  */
-bool ReplacePlaceholder(const StringPiece& placeholder, const std::optional<StringPiece>& value,
+bool ReplacePlaceholder(StringPiece placeholder, const std::optional<StringPiece>& value,
                         std::string* name, android::IDiagnostics* diag) {
   size_t offset = name->find(placeholder.data());
   bool found = (offset != std::string::npos);
@@ -338,17 +338,17 @@ std::optional<PostProcessingConfiguration> ExtractConfiguration(const std::strin
   return {config};
 }
 
-const StringPiece& AbiToString(Abi abi) {
+StringPiece AbiToString(Abi abi) {
   return kAbiToStringMap.at(static_cast<size_t>(abi));
 }
 
 /**
  * Returns the common artifact base name from a template string.
  */
-std::optional<std::string> ToBaseName(std::string result, const StringPiece& apk_name,
+std::optional<std::string> ToBaseName(std::string result, StringPiece apk_name,
                                       android::IDiagnostics* diag) {
   const StringPiece ext = file::GetExtension(apk_name);
-  size_t end_index = apk_name.to_string().rfind(ext.to_string());
+  size_t end_index = apk_name.rfind(ext);
   const std::string base_name =
       (end_index != std::string::npos) ? std::string{apk_name.begin(), end_index} : "";
 
@@ -371,17 +371,17 @@ std::optional<std::string> ToBaseName(std::string result, const StringPiece& apk
     // If no extension is specified, and the name template does not end in the current extension,
     // add the existing extension.
     if (!util::EndsWith(result, ext)) {
-      result.append(ext.to_string());
+      result.append(ext);
     }
   }
 
   return result;
 }
 
-std::optional<std::string> ConfiguredArtifact::ToArtifactName(const StringPiece& format,
-                                                              const StringPiece& apk_name,
+std::optional<std::string> ConfiguredArtifact::ToArtifactName(StringPiece format,
+                                                              StringPiece apk_name,
                                                               android::IDiagnostics* diag) const {
-  std::optional<std::string> base = ToBaseName(format.to_string(), apk_name, diag);
+  std::optional<std::string> base = ToBaseName(std::string(format), apk_name, diag);
   if (!base) {
     return {};
   }
@@ -414,7 +414,7 @@ std::optional<std::string> ConfiguredArtifact::ToArtifactName(const StringPiece&
   return result;
 }
 
-std::optional<std::string> ConfiguredArtifact::Name(const StringPiece& apk_name,
+std::optional<std::string> ConfiguredArtifact::Name(StringPiece apk_name,
                                                     android::IDiagnostics* diag) const {
   if (!name) {
     return {};
@@ -439,7 +439,7 @@ ConfigurationParser::ConfigurationParser(std::string contents, const std::string
 }
 
 std::optional<std::vector<OutputArtifact>> ConfigurationParser::Parse(
-    const android::StringPiece& apk_path) {
+    android::StringPiece apk_path) {
   std::optional<PostProcessingConfiguration> maybe_config =
       ExtractConfiguration(contents_, config_path_, diag_);
   if (!maybe_config) {
@@ -447,7 +447,7 @@ std::optional<std::vector<OutputArtifact>> ConfigurationParser::Parse(
   }
 
   // Convert from a parsed configuration to a list of artifacts for processing.
-  const std::string& apk_name = file::GetFilename(apk_path).to_string();
+  const std::string apk_name(file::GetFilename(apk_path));
   std::vector<OutputArtifact> output_artifacts;
 
   PostProcessingConfiguration& config = maybe_config.value();
@@ -519,7 +519,7 @@ bool ArtifactFormatTagHandler(PostProcessingConfiguration* config, Element* root
   for (auto& node : root_element->children) {
     xml::Text* t;
     if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
-      config->artifact_format = TrimWhitespace(t->text).to_string();
+      config->artifact_format.emplace(TrimWhitespace(t->text));
       break;
     }
   }
@@ -561,7 +561,7 @@ bool AbiGroupTagHandler(PostProcessingConfiguration* config, Element* root_eleme
       for (auto& node : child->children) {
         xml::Text* t;
         if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
-          auto abi = kStringToAbiMap.find(TrimWhitespace(t->text).to_string());
+          auto abi = kStringToAbiMap.find(TrimWhitespace(t->text));
           if (abi != kStringToAbiMap.end()) {
             group.push_back(abi->second);
           } else {
@@ -622,7 +622,7 @@ bool ScreenDensityGroupTagHandler(PostProcessingConfiguration* config, Element* 
         xml::Text* t;
         if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
           ConfigDescription config_descriptor;
-          const android::StringPiece& text = TrimWhitespace(t->text);
+          android::StringPiece text = TrimWhitespace(t->text);
           bool parsed = ConfigDescription::Parse(text, &config_descriptor);
           if (parsed &&
               (config_descriptor.CopyWithoutSdkVersion().diff(ConfigDescription::DefaultConfig()) ==
@@ -688,7 +688,7 @@ bool LocaleGroupTagHandler(PostProcessingConfiguration* config, Element* root_el
         xml::Text* t;
         if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
           ConfigDescription config_descriptor;
-          const android::StringPiece& text = TrimWhitespace(t->text);
+          android::StringPiece text = TrimWhitespace(t->text);
           bool parsed = ConfigDescription::Parse(text, &config_descriptor);
           if (parsed &&
               (config_descriptor.CopyWithoutSdkVersion().diff(ConfigDescription::DefaultConfig()) ==
@@ -806,7 +806,7 @@ bool GlTextureGroupTagHandler(PostProcessingConfiguration* config, Element* root
         for (auto& node : element->children) {
           xml::Text* t;
           if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
-            result.texture_paths.push_back(TrimWhitespace(t->text).to_string());
+            result.texture_paths.emplace_back(TrimWhitespace(t->text));
           }
         }
       }
@@ -843,7 +843,7 @@ bool DeviceFeatureGroupTagHandler(PostProcessingConfiguration* config, Element* 
       for (auto& node : child->children) {
         xml::Text* t;
         if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
-          group.push_back(TrimWhitespace(t->text).to_string());
+          group.emplace_back(TrimWhitespace(t->text));
           break;
         }
       }

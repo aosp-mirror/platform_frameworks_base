@@ -161,16 +161,15 @@ const StringPool::Context& StringPool::StyleRef::GetContext() const {
   return entry_->context;
 }
 
-StringPool::Ref StringPool::MakeRef(const StringPiece& str) {
+StringPool::Ref StringPool::MakeRef(StringPiece str) {
   return MakeRefImpl(str, Context{}, true);
 }
 
-StringPool::Ref StringPool::MakeRef(const StringPiece& str, const Context& context) {
+StringPool::Ref StringPool::MakeRef(StringPiece str, const Context& context) {
   return MakeRefImpl(str, context, true);
 }
 
-StringPool::Ref StringPool::MakeRefImpl(const StringPiece& str, const Context& context,
-                                        bool unique) {
+StringPool::Ref StringPool::MakeRefImpl(StringPiece str, const Context& context, bool unique) {
   if (unique) {
     auto range = indexed_strings_.equal_range(str);
     for (auto iter = range.first; iter != range.second; ++iter) {
@@ -181,7 +180,7 @@ StringPool::Ref StringPool::MakeRefImpl(const StringPiece& str, const Context& c
   }
 
   std::unique_ptr<Entry> entry(new Entry());
-  entry->value = str.to_string();
+  entry->value = std::string(str);
   entry->context = context;
   entry->index_ = strings_.size();
   entry->ref_ = 0;

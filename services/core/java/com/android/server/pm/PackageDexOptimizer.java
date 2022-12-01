@@ -493,7 +493,7 @@ public class PackageDexOptimizer {
             // TODO: Consider adding 2 different APIs for primary and secondary dexopt.
             // installd only uses downgrade flag for secondary dex files and ignores it for
             // primary dex files.
-            String seInfo = AndroidPackageUtils.getSeInfo(pkg, pkgSetting);
+            String seInfo = pkgSetting.getSeInfo();
             boolean completed = getInstallerLI().dexopt(path, uid, pkg.getPackageName(), isa,
                     dexoptNeeded, oatDir, dexoptFlags, compilerFilter, pkg.getVolumeUuid(),
                     classLoaderContext, seInfo, /* downgrade= */ false ,

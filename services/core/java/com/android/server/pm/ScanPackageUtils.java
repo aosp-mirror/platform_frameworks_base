@@ -265,8 +265,8 @@ final class ScanPackageUtils {
             pkgSetting.getPkgState().setUpdatedSystemApp(true);
         }
 
-        parsedPackage.setSeInfo(SELinuxMMAC.getSeInfo(parsedPackage, sharedUserSetting,
-                injector.getCompatibility()));
+        pkgSetting.getTransientState().setSeInfo(SELinuxMMAC.getSeInfo(parsedPackage,
+                sharedUserSetting, injector.getCompatibility()));
 
         if (parsedPackage.isSystem()) {
             configurePackageComponents(parsedPackage);

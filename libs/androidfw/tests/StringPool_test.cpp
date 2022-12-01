@@ -321,15 +321,15 @@ TEST(StringPoolTest, ModifiedUTF8) {
   ASSERT_EQ(test.setTo(data.get(), buffer.size()), NO_ERROR);
   auto str = test.string8At(0);
   ASSERT_TRUE(str.has_value());
-  EXPECT_THAT(str->to_string(), Eq("\xED\xA0\x81\xED\xB0\x80"));
+  EXPECT_THAT(*str, Eq("\xED\xA0\x81\xED\xB0\x80"));
 
   str = test.string8At(1);
   ASSERT_TRUE(str.has_value());
-  EXPECT_THAT(str->to_string(), Eq("foo \xED\xA0\x81\xED\xB0\xB7 bar"));
+  EXPECT_THAT(*str, Eq("foo \xED\xA0\x81\xED\xB0\xB7 bar"));
 
   str = test.string8At(2);
   ASSERT_TRUE(str.has_value());
-  EXPECT_THAT(str->to_string(), Eq("\xED\xA0\x81\xED\xB0\x80\xED\xA0\x81\xED\xB0\xB7"));
+  EXPECT_THAT(*str, Eq("\xED\xA0\x81\xED\xB0\x80\xED\xA0\x81\xED\xB0\xB7"));
 
   // Check that retrieving the strings returns the original UTF-8 character bytes
   EXPECT_THAT(android::util::GetString(test, 0), Eq("\xF0\x90\x90\x80"));

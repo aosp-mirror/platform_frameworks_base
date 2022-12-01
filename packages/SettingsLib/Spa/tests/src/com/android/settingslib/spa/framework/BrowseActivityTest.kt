@@ -30,6 +30,7 @@ import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.tests.testutils.SpaEnvironmentForTest
 import com.android.settingslib.spa.tests.testutils.SpaLoggerForTest
+import com.android.settingslib.spa.tests.testutils.SppHome
 import com.android.settingslib.spa.testutils.waitUntil
 import com.google.common.truth.Truth
 import org.junit.Rule
@@ -45,7 +46,8 @@ class BrowseActivityTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val spaLogger = SpaLoggerForTest()
-    private val spaEnvironment = SpaEnvironmentForTest(context, logger = spaLogger)
+    private val spaEnvironment =
+        SpaEnvironmentForTest(context, listOf(SppHome.createSettingsPage()), logger = spaLogger)
 
     @Test
     fun testBrowsePage() {
@@ -58,13 +60,7 @@ class BrowseActivityTest {
         val sppLayer1 = sppRepository.getProviderOrNull("SppLayer1")!!
         val pageLayer1 = sppLayer1.createSettingsPage()
 
-        composeTestRule.setContent {
-            BrowseContent(
-                allProviders = listOf(sppHome, sppLayer1),
-                initialDestination = pageHome.buildRoute(),
-                initialEntryId = null
-            )
-        }
+        composeTestRule.setContent { BrowseContent(sppRepository) }
 
         composeTestRule.onNodeWithText(sppHome.getTitle(null)).assertIsDisplayed()
         spaLogger.verifyPageEvent(pageHome.id, 1, 0)

@@ -40,9 +40,7 @@ import org.mockito.Mockito.`when` as whenever
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class AppListRepositoryTest {
-
-    @JvmField
-    @Rule
+    @get:Rule
     val mockito: MockitoRule = MockitoJUnit.rule()
 
     @Mock

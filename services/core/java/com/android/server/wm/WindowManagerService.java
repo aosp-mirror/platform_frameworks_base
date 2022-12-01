@@ -3847,6 +3847,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     || displayContent.isInTouchMode() == inTouch)) {
                 return;
             }
+            final boolean displayHasOwnTouchMode =
+                    displayContent != null && displayContent.hasOwnFocus();
+            if (displayHasOwnTouchMode && displayContent.isInTouchMode() == inTouch) {
+                return;
+            }
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final boolean hasPermission =
@@ -3855,17 +3860,17 @@ public class WindowManagerService extends IWindowManager.Stub
                             /* printlog= */ false);
             final long token = Binder.clearCallingIdentity();
             try {
-                // If perDisplayFocusEnabled is set, then just update the display pointed by
-                // displayId
-                if (perDisplayFocusEnabled) {
+                // If perDisplayFocusEnabled is set or the display maintains its own touch mode,
+                // then just update the display pointed by displayId
+                if (perDisplayFocusEnabled || displayHasOwnTouchMode) {
                     if (mInputManager.setInTouchMode(inTouch, pid, uid, hasPermission, displayId)) {
                         displayContent.setInTouchMode(inTouch);
                     }
-                } else {  // Otherwise update all displays
+                } else {  // Otherwise update all displays that do not maintain their own touch mode
                     final int displayCount = mRoot.mChildren.size();
                     for (int i = 0; i < displayCount; ++i) {
                         DisplayContent dc = mRoot.mChildren.get(i);
-                        if (dc.isInTouchMode() == inTouch) {
+                        if (dc.isInTouchMode() == inTouch || dc.hasOwnFocus()) {
                             continue;
                         }
                         if (mInputManager.setInTouchMode(inTouch, pid, uid, hasPermission,
@@ -8935,14 +8940,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public List<DisplayInfo> getPossibleDisplayInfo(int displayId, String packageName) {
+    public List<DisplayInfo> getPossibleDisplayInfo(int displayId) {
         final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                if (packageName == null || !isRecentsComponent(packageName, callingUid)) {
-                    Slog.e(TAG, "Unable to verify uid for package " + packageName
-                            + " for getPossibleMaximumWindowMetrics");
+                if (!mAtmService.isCallerRecents(callingUid)) {
+                    Slog.e(TAG, "Unable to verify uid for getPossibleDisplayInfo"
+                            + " on uid " + callingUid);
                     return new ArrayList<>();
                 }
 
@@ -8958,31 +8963,6 @@ public class WindowManagerService extends IWindowManager.Stub
         // Retrieve the DisplayInfo for all possible rotations across all possible display
         // layouts.
         return mPossibleDisplayInfoMapper.getPossibleDisplayInfos(displayId);
-    }
-
-    /**
-     * Returns {@code true} when the calling package is the recents component.
-     */
-    boolean isRecentsComponent(@NonNull String callingPackageName, int callingUid) {
-        String recentsPackage;
-        try {
-            String recentsComponent = mContext.getResources().getString(
-                    R.string.config_recentsComponentName);
-            if (recentsComponent == null) {
-                return false;
-            }
-            recentsPackage = ComponentName.unflattenFromString(recentsComponent).getPackageName();
-        } catch (Resources.NotFoundException e) {
-            Slog.e(TAG, "Unable to verify if recents component", e);
-            return false;
-        }
-        try {
-            return callingUid == mContext.getPackageManager().getPackageUid(callingPackageName, 0)
-                    && callingPackageName.equals(recentsPackage);
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(TAG, "Unable to verify if recents component", e);
-            return false;
-        }
     }
 
     void grantEmbeddedWindowFocus(Session session, IBinder focusToken, boolean grantFocus) {

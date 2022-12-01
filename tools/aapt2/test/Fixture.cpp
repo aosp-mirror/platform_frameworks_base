@@ -38,8 +38,8 @@ namespace aapt {
 
 const char* CommandTestFixture::kDefaultPackageName = "com.aapt.command.test";
 
-void ClearDirectory(const android::StringPiece& path) {
-  const std::string root_dir = path.to_string();
+void ClearDirectory(android::StringPiece path) {
+  const std::string root_dir(path);
   std::unique_ptr<DIR, decltype(closedir)*> dir(opendir(root_dir.data()), closedir);
   if (!dir) {
     StdErrDiagnostics().Error(android::DiagMessage()
@@ -91,8 +91,7 @@ void TestDirectoryFixture::WriteFile(const std::string& path, const std::string&
 }
 
 bool CommandTestFixture::CompileFile(const std::string& path, const std::string& contents,
-                                     const android::StringPiece& out_dir,
-                                     android::IDiagnostics* diag) {
+                                     android::StringPiece out_dir, android::IDiagnostics* diag) {
   WriteFile(path, contents);
   CHECK(file::mkdirs(out_dir.data()));
   return CompileCommand(diag).Execute({path, "-o", out_dir, "-v"}, &std::cerr) == 0;
@@ -113,8 +112,8 @@ bool CommandTestFixture::Link(const std::vector<std::string>& args, android::IDi
   return LinkCommand(diag).Execute(link_args, &std::cerr) == 0;
 }
 
-bool CommandTestFixture::Link(const std::vector<std::string>& args,
-                              const android::StringPiece& flat_dir, android::IDiagnostics* diag) {
+bool CommandTestFixture::Link(const std::vector<std::string>& args, android::StringPiece flat_dir,
+                              android::IDiagnostics* diag) {
   std::vector<android::StringPiece> link_args;
   for(const std::string& arg : args) {
     link_args.emplace_back(arg);
@@ -148,7 +147,7 @@ std::string CommandTestFixture::GetDefaultManifest(const char* package_name) {
 }
 
 std::unique_ptr<io::IData> CommandTestFixture::OpenFileAsData(LoadedApk* apk,
-                                                              const android::StringPiece& path) {
+                                                              android::StringPiece path) {
   return apk
       ->GetFileCollection()
       ->FindFile(path)

@@ -1963,6 +1963,7 @@
   <java-symbol type="bool" name="config_enableActivityRecognitionHardwareOverlay" />
   <java-symbol type="bool" name="config_defaultAdasGnssLocationEnabled" />
   <java-symbol type="bool" name="config_enableFusedLocationOverlay" />
+  <java-symbol type="bool" name="config_useGnssHardwareProvider" />
   <java-symbol type="bool" name="config_enableGeocoderOverlay" />
   <java-symbol type="bool" name="config_enableGeofenceOverlay" />
   <java-symbol type="bool" name="config_enableNetworkLocationOverlay" />
@@ -2125,6 +2126,7 @@
   <java-symbol type="string" name="config_datause_iface" />
   <java-symbol type="string" name="config_activityRecognitionHardwarePackageName" />
   <java-symbol type="string" name="config_fusedLocationProviderPackageName" />
+  <java-symbol type="string" name="config_gnssLocationProviderPackageName" />
   <java-symbol type="string" name="config_geocoderProviderPackageName" />
   <java-symbol type="string" name="config_geofenceProviderPackageName" />
   <java-symbol type="string" name="config_networkLocationProviderPackageName" />

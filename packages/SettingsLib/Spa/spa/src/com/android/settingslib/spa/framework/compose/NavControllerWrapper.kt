@@ -29,7 +29,10 @@ interface NavControllerWrapper {
     fun navigateBack()
 
     val highlightEntryId: String?
-      get() = null
+        get() = null
+
+    val sessionSourceName: String?
+        get() = null
 }
 
 @Composable
@@ -63,6 +66,7 @@ internal class NavControllerWrapperImpl(
     private val onBackPressedDispatcher: OnBackPressedDispatcher?,
 ) : NavControllerWrapper {
     var highlightId: String? = null
+    var sessionName: String? = null
 
     override fun navigate(route: String) {
         navController.navigate(route)
@@ -73,5 +77,8 @@ internal class NavControllerWrapperImpl(
     }
 
     override val highlightEntryId: String?
-      get() = highlightId
+        get() = highlightId
+
+    override val sessionSourceName: String?
+        get() = sessionName
 }

@@ -70,7 +70,7 @@ static bool IsPngChunkAllowed(uint32_t type) {
   }
 }
 
-PngChunkFilter::PngChunkFilter(const StringPiece& data) : data_(data) {
+PngChunkFilter::PngChunkFilter(StringPiece data) : data_(data) {
   if (util::StartsWith(data_, kPngSignature)) {
     window_start_ = 0;
     window_end_ = kPngSignatureSize;

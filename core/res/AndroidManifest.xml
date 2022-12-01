@@ -293,6 +293,7 @@
 
     <protected-broadcast android:name="android.hardware.usb.action.USB_STATE" />
     <protected-broadcast android:name="android.hardware.usb.action.USB_PORT_CHANGED" />
+    <protected-broadcast android:name="android.hardware.usb.action.USB_PORT_COMPLIANCE_CHANGED" />
     <protected-broadcast android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
     <protected-broadcast android:name="android.hardware.usb.action.USB_ACCESSORY_DETACHED" />
     <protected-broadcast android:name="android.hardware.usb.action.USB_ACCESSORY_HANDSHAKE" />
@@ -6286,12 +6287,12 @@
 
     <!-- Allows a regular application to use {@link android.app.Service#startForeground
          Service.startForeground} with the type "specialUse".
-         <p>Protection level: signature|appop|instant
+         <p>Protection level: normal|appop|instant
     -->
     <permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
         android:description="@string/permdesc_foregroundServiceSpecialUse"
         android:label="@string/permlab_foregroundServiceSpecialUse"
-        android:protectionLevel="signature|appop|instant" />
+        android:protectionLevel="normal|appop|instant" />
 
     <!-- @SystemApi Allows to access all app shortcuts.
          @hide -->
@@ -7288,6 +7289,10 @@
 
         <service android:name="com.android.server.profcollect.ProfcollectForwardingService$ProfcollectBGJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
+
+        <service android:name="com.android.server.pm.GentleUpdateHelper$Service"
+            android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
         <service

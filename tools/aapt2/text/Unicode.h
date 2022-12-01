@@ -46,11 +46,11 @@ bool IsWhitespace(char32_t codepoint);
 
 // Returns true if the UTF8 string can be used as a Java identifier.
 // NOTE: This does not check against the set of reserved Java keywords.
-bool IsJavaIdentifier(const android::StringPiece& str);
+bool IsJavaIdentifier(android::StringPiece str);
 
 // Returns true if the UTF8 string can be used as the entry name of a resource name.
 // This is the `entry` part of package:type/entry.
-bool IsValidResourceEntryName(const android::StringPiece& str);
+bool IsValidResourceEntryName(android::StringPiece str);
 
 }  // namespace text
 }  // namespace aapt

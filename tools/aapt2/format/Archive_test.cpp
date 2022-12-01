@@ -50,7 +50,7 @@ std::unique_ptr<IArchiveWriter> MakeDirectoryWriter(const std::string& output_pa
 }
 
 std::unique_ptr<IArchiveWriter> MakeZipFileWriter(const std::string& output_path) {
-  file::mkdirs(file::GetStem(output_path).to_string());
+  file::mkdirs(std::string(file::GetStem(output_path)));
   std::remove(output_path.c_str());
 
   StdErrDiagnostics diag;

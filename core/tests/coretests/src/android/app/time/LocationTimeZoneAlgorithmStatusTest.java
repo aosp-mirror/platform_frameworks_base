@@ -17,19 +17,26 @@
 package android.app.time;
 
 import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_NOT_RUNNING;
+import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_NOT_SUPPORTED;
 import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_RUNNING;
+import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_UNKNOWN;
 import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_IS_CERTAIN;
 import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_IS_UNCERTAIN;
 import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_NOT_PRESENT;
 import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_NOT_READY;
 import static android.app.time.ParcelableTestSupport.assertEqualsAndHashCode;
 import static android.app.time.ParcelableTestSupport.assertRoundTripParcelable;
+import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT;
+import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_NOT_APPLICABLE;
 import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_OK;
+import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_NOT_APPLICABLE;
 import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_OK;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import android.app.time.LocationTimeZoneAlgorithmStatus.ProviderStatus;
 import android.service.timezone.TimeZoneProviderStatus;
@@ -206,5 +213,115 @@ public class LocationTimeZoneAlgorithmStatusTest {
                 PROVIDER_STATUS_IS_UNCERTAIN, null);
         assertEquals(status,
                 LocationTimeZoneAlgorithmStatus.parseCommandlineArg(status.toString()));
+    }
+
+    @Test
+    public void testCouldEnableTelephonyFallback_notRunning() {
+        LocationTimeZoneAlgorithmStatus notRunning =
+                new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_NOT_RUNNING,
+                        PROVIDER_STATUS_NOT_READY, null, PROVIDER_STATUS_NOT_READY, null);
+        assertFalse(notRunning.couldEnableTelephonyFallback());
+    }
+
+    @Test
+    public void testCouldEnableTelephonyFallback_unknown() {
+        // DETECTION_ALGORITHM_STATUS_UNKNOWN must never allow fallback
+        LocationTimeZoneAlgorithmStatus unknown =
+                new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_UNKNOWN,
+                        PROVIDER_STATUS_NOT_READY, null, PROVIDER_STATUS_NOT_READY, null);
+        assertFalse(unknown.couldEnableTelephonyFallback());
+    }
+
+    @Test
+    public void testCouldEnableTelephonyFallback_notSupported() {
+        // DETECTION_ALGORITHM_STATUS_NOT_SUPPORTED must never allow fallback
+        LocationTimeZoneAlgorithmStatus notSupported =
+                new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_NOT_SUPPORTED,
+                        PROVIDER_STATUS_NOT_READY, null, PROVIDER_STATUS_NOT_READY, null);
+        assertFalse(notSupported.couldEnableTelephonyFallback());
+    }
+
+    @Test
+    public void testCouldEnableTelephonyFallback_running() {
+        // DETECTION_ALGORITHM_STATUS_RUNNING may allow fallback
+
+        // Sample provider-reported statuses that do / do not enable fallback.
+        TimeZoneProviderStatus enableTelephonyFallbackProviderStatus =
+                new TimeZoneProviderStatus.Builder()
+                        .setLocationDetectionDependencyStatus(
+                                DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT)
+                        .setConnectivityDependencyStatus(DEPENDENCY_STATUS_NOT_APPLICABLE)
+                        .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_NOT_APPLICABLE)
+                        .build();
+        assertTrue(enableTelephonyFallbackProviderStatus.couldEnableTelephonyFallback());
+
+        TimeZoneProviderStatus notEnableTelephonyFallbackProviderStatus =
+                new TimeZoneProviderStatus.Builder()
+                        .setLocationDetectionDependencyStatus(DEPENDENCY_STATUS_NOT_APPLICABLE)
+                        .setConnectivityDependencyStatus(DEPENDENCY_STATUS_NOT_APPLICABLE)
+                        .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_NOT_APPLICABLE)
+                        .build();
+        assertFalse(notEnableTelephonyFallbackProviderStatus.couldEnableTelephonyFallback());
+
+        // Provider not ready: Never enable fallback
+        {
+            LocationTimeZoneAlgorithmStatus status =
+                    new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_RUNNING,
+                            PROVIDER_STATUS_NOT_READY, null, PROVIDER_STATUS_NOT_READY, null);
+            assertFalse(status.couldEnableTelephonyFallback());
+        }
+
+        // Provider uncertain without reported status: Never enable fallback
+        {
+            LocationTimeZoneAlgorithmStatus status =
+                    new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_RUNNING,
+                            PROVIDER_STATUS_IS_UNCERTAIN, null, PROVIDER_STATUS_NOT_READY, null);
+            assertFalse(status.couldEnableTelephonyFallback());
+        }
+        {
+            LocationTimeZoneAlgorithmStatus status =
+                    new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_RUNNING,
+                            PROVIDER_STATUS_IS_UNCERTAIN, null, PROVIDER_STATUS_NOT_PRESENT, null);
+            assertFalse(status.couldEnableTelephonyFallback());
+        }
+
+        // Provider uncertain with reported status: Fallback is based on the status for present
+        // providers that report their status. All present providers must have reported status and
+        // agree that fallback is a good idea.
+        {
+            LocationTimeZoneAlgorithmStatus status =
+                    new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_RUNNING,
+                            PROVIDER_STATUS_IS_UNCERTAIN, enableTelephonyFallbackProviderStatus,
+                            PROVIDER_STATUS_NOT_READY, null);
+            assertFalse(status.couldEnableTelephonyFallback());
+        }
+        {
+            LocationTimeZoneAlgorithmStatus status =
+                    new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_RUNNING,
+                            PROVIDER_STATUS_IS_UNCERTAIN, enableTelephonyFallbackProviderStatus,
+                            PROVIDER_STATUS_NOT_PRESENT, null);
+            assertTrue(status.couldEnableTelephonyFallback());
+        }
+        {
+            LocationTimeZoneAlgorithmStatus status =
+                    new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_RUNNING,
+                            PROVIDER_STATUS_IS_UNCERTAIN, enableTelephonyFallbackProviderStatus,
+                            PROVIDER_STATUS_IS_UNCERTAIN, enableTelephonyFallbackProviderStatus);
+            assertTrue(status.couldEnableTelephonyFallback());
+        }
+        {
+            LocationTimeZoneAlgorithmStatus status =
+                    new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_RUNNING,
+                            PROVIDER_STATUS_IS_UNCERTAIN, enableTelephonyFallbackProviderStatus,
+                            PROVIDER_STATUS_IS_UNCERTAIN, notEnableTelephonyFallbackProviderStatus);
+            assertFalse(status.couldEnableTelephonyFallback());
+        }
+        {
+            LocationTimeZoneAlgorithmStatus status =
+                    new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_RUNNING,
+                            PROVIDER_STATUS_NOT_PRESENT, null,
+                            PROVIDER_STATUS_IS_UNCERTAIN, enableTelephonyFallbackProviderStatus);
+            assertTrue(status.couldEnableTelephonyFallback());
+        }
     }
 }

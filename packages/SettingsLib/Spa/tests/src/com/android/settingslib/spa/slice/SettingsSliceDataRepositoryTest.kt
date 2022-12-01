@@ -26,6 +26,7 @@ import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.common.getUniqueEntryId
 import com.android.settingslib.spa.testutils.InstantTaskExecutorRule
 import com.android.settingslib.spa.tests.testutils.SpaEnvironmentForTest
+import com.android.settingslib.spa.tests.testutils.SppHome
 import com.android.settingslib.spa.tests.testutils.SppLayer2
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -37,7 +38,8 @@ class SettingsSliceDataRepositoryTest {
     @get:Rule val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val spaEnvironment = SpaEnvironmentForTest(context)
+    private val spaEnvironment =
+        SpaEnvironmentForTest(context, listOf(SppHome.createSettingsPage()))
     private val sliceDataRepository by spaEnvironment.sliceDataRepository
 
     @Test

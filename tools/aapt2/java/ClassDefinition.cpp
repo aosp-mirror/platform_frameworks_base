@@ -27,8 +27,8 @@ void ClassMember::Print(bool /*final*/, Printer* printer, bool strip_api_annotat
   processor_.Print(printer, strip_api_annotations);
 }
 
-void MethodDefinition::AppendStatement(const StringPiece& statement) {
-  statements_.push_back(statement.to_string());
+void MethodDefinition::AppendStatement(StringPiece statement) {
+  statements_.emplace_back(statement);
 }
 
 void MethodDefinition::Print(bool final, Printer* printer, bool) const {
@@ -110,8 +110,8 @@ constexpr static const char* sWarningHeader =
     " * should not be modified by hand.\n"
     " */\n\n";
 
-void ClassDefinition::WriteJavaFile(const ClassDefinition* def, const StringPiece& package,
-                                    bool final, bool strip_api_annotations, io::OutputStream* out) {
+void ClassDefinition::WriteJavaFile(const ClassDefinition* def, StringPiece package, bool final,
+                                    bool strip_api_annotations, io::OutputStream* out) {
   Printer printer(out);
   printer.Print(sWarningHeader).Print("package ").Print(package).Println(";");
   printer.Println();

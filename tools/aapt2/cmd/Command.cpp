@@ -33,7 +33,7 @@ using android::StringPiece;
 
 namespace aapt {
 
-std::string GetSafePath(const StringPiece& arg) {
+std::string GetSafePath(StringPiece arg) {
 #ifdef _WIN32
   // If the path exceeds the maximum path length for Windows, encode the path using the
   // extended-length prefix
@@ -47,63 +47,62 @@ std::string GetSafePath(const StringPiece& arg) {
 
   return path8;
 #else
-  return arg.to_string();
+  return std::string(arg);
 #endif
 }
 
-void Command::AddRequiredFlag(const StringPiece& name, const StringPiece& description,
-                              std::string* value, uint32_t flags) {
-  auto func = [value, flags](const StringPiece& arg) -> bool {
-    *value = (flags & Command::kPath) ? GetSafePath(arg) : arg.to_string();
+void Command::AddRequiredFlag(StringPiece name, StringPiece description, std::string* value,
+                              uint32_t flags) {
+  auto func = [value, flags](StringPiece arg) -> bool {
+    *value = (flags & Command::kPath) ? GetSafePath(arg) : std::string(arg);
     return true;
   };
 
   flags_.emplace_back(Flag(name, description, /* required */ true, /* num_args */ 1, func));
 }
 
-void Command::AddRequiredFlagList(const StringPiece& name, const StringPiece& description,
+void Command::AddRequiredFlagList(StringPiece name, StringPiece description,
                                   std::vector<std::string>* value, uint32_t flags) {
-  auto func = [value, flags](const StringPiece& arg) -> bool {
-    value->push_back((flags & Command::kPath) ? GetSafePath(arg) : arg.to_string());
+  auto func = [value, flags](StringPiece arg) -> bool {
+    value->push_back((flags & Command::kPath) ? GetSafePath(arg) : std::string(arg));
     return true;
   };
 
   flags_.emplace_back(Flag(name, description, /* required */ true, /* num_args */ 1, func));
 }
 
-void Command::AddOptionalFlag(const StringPiece& name, const StringPiece& description,
+void Command::AddOptionalFlag(StringPiece name, StringPiece description,
                               std::optional<std::string>* value, uint32_t flags) {
-  auto func = [value, flags](const StringPiece& arg) -> bool {
-    *value = (flags & Command::kPath) ? GetSafePath(arg) : arg.to_string();
+  auto func = [value, flags](StringPiece arg) -> bool {
+    *value = (flags & Command::kPath) ? GetSafePath(arg) : std::string(arg);
     return true;
   };
 
   flags_.emplace_back(Flag(name, description, /* required */ false, /* num_args */ 1, func));
 }
 
-void Command::AddOptionalFlagList(const StringPiece& name, const StringPiece& description,
+void Command::AddOptionalFlagList(StringPiece name, StringPiece description,
                                   std::vector<std::string>* value, uint32_t flags) {
-  auto func = [value, flags](const StringPiece& arg) -> bool {
-    value->push_back((flags & Command::kPath) ? GetSafePath(arg) : arg.to_string());
+  auto func = [value, flags](StringPiece arg) -> bool {
+    value->push_back((flags & Command::kPath) ? GetSafePath(arg) : std::string(arg));
     return true;
   };
 
   flags_.emplace_back(Flag(name, description, /* required */ false, /* num_args */ 1, func));
 }
 
-void Command::AddOptionalFlagList(const StringPiece& name, const StringPiece& description,
+void Command::AddOptionalFlagList(StringPiece name, StringPiece description,
                                   std::unordered_set<std::string>* value) {
-  auto func = [value](const StringPiece& arg) -> bool {
-    value->insert(arg.to_string());
+  auto func = [value](StringPiece arg) -> bool {
+    value->emplace(arg);
     return true;
   };
 
   flags_.emplace_back(Flag(name, description, /* required */ false, /* num_args */ 1, func));
 }
 
-void Command::AddOptionalSwitch(const StringPiece& name, const StringPiece& description,
-                                bool* value) {
-  auto func = [value](const StringPiece& arg) -> bool {
+void Command::AddOptionalSwitch(StringPiece name, StringPiece description, bool* value) {
+  auto func = [value](StringPiece arg) -> bool {
     *value = true;
     return true;
   };
@@ -120,8 +119,8 @@ void Command::AddOptionalSubcommand(std::unique_ptr<Command>&& subcommand, bool 
   }
 }
 
-void Command::SetDescription(const StringPiece& description) {
-  description_ = description.to_string();
+void Command::SetDescription(StringPiece description) {
+  description_ = std::string(description);
 }
 
 void Command::Usage(std::ostream* out) {
@@ -183,7 +182,7 @@ int Command::Execute(const std::vector<StringPiece>& args, std::ostream* out_err
   std::vector<std::string> file_args;
 
   for (size_t i = 0; i < args.size(); i++) {
-    const StringPiece& arg = args[i];
+    StringPiece arg = args[i];
     if (*(arg.data()) != '-') {
       // Continue parsing as the subcommand if the first argument matches one of the subcommands
       if (i == 0) {

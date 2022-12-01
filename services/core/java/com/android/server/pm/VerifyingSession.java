@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static android.content.Intent.EXTRA_LONG_VERSION_CODE;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.Intent.EXTRA_VERSION_CODE;
+import static android.content.pm.PackageInstaller.SessionParams.MODE_INHERIT_EXISTING;
 import static android.content.pm.PackageManager.EXTRA_VERIFICATION_ID;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
@@ -114,30 +115,32 @@ final class VerifyingSession {
 
     final OriginInfo mOriginInfo;
     final IPackageInstallObserver2 mObserver;
-    final int mInstallFlags;
+    private final int mInstallFlags;
     @NonNull
-    final InstallSource mInstallSource;
-    final String mPackageAbiOverride;
-    final VerificationInfo mVerificationInfo;
-    final SigningDetails mSigningDetails;
+    private final InstallSource mInstallSource;
+    private final String mPackageAbiOverride;
+    private final VerificationInfo mVerificationInfo;
+    private final SigningDetails mSigningDetails;
     @Nullable
     MultiPackageVerifyingSession mParentVerifyingSession;
-    final long mRequiredInstalledVersionCode;
-    final int mDataLoaderType;
-    final int mSessionId;
-    final boolean mUserActionRequired;
-
+    private final long mRequiredInstalledVersionCode;
+    private final int mDataLoaderType;
+    private final int mSessionId;
+    private final boolean mUserActionRequired;
+    private final int mUserActionRequiredType;
     private boolean mWaitForVerificationToComplete;
     private boolean mWaitForIntegrityVerificationToComplete;
     private boolean mWaitForEnableRollbackToComplete;
     private int mRet = PackageManager.INSTALL_SUCCEEDED;
     private String mErrorMessage = null;
+    private final boolean mIsInherit;
+    private final boolean mIsStaged;
 
-    final PackageLite mPackageLite;
+    private final PackageLite mPackageLite;
     private final UserHandle mUser;
     @NonNull
-    final PackageManagerService mPm;
-    final InstallPackageHelper mInstallPackageHelper;
+    private final PackageManagerService mPm;
+    private final InstallPackageHelper mInstallPackageHelper;
 
     VerifyingSession(UserHandle user, File stagedDir, IPackageInstallObserver2 observer,
             PackageInstaller.SessionParams sessionParams, InstallSource installSource,
@@ -164,6 +167,9 @@ final class VerifyingSession {
         mSessionId = sessionId;
         mPackageLite = lite;
         mUserActionRequired = userActionRequired;
+        mUserActionRequiredType = sessionParams.requireUserAction;
+        mIsInherit = sessionParams.mode == MODE_INHERIT_EXISTING;
+        mIsStaged = sessionParams.isStaged;
     }
 
     @Override
@@ -186,7 +192,7 @@ final class VerifyingSession {
         // Perform package verification and enable rollback (unless we are simply moving the
         // package).
         if (!mOriginInfo.mExisting) {
-            if ((mInstallFlags & PackageManager.INSTALL_APEX) == 0) {
+            if (!isApex()) {
                 // TODO(b/182426975): treat APEX as APK when APK verification is concerned
                 sendApkVerificationRequest(pkgLite);
             }
@@ -674,10 +680,9 @@ final class VerifyingSession {
         }
 
         final int installerUid = mVerificationInfo == null ? -1 : mVerificationInfo.mInstallerUid;
-        final int installFlags = mInstallFlags;
 
         // Check if installing from ADB
-        if ((installFlags & PackageManager.INSTALL_FROM_ADB) != 0) {
+        if ((mInstallFlags & PackageManager.INSTALL_FROM_ADB) != 0) {
             boolean requestedDisableVerification =
                     (mInstallFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0;
             return isAdbVerificationEnabled(pkgInfoLite, userId, requestedDisableVerification);
@@ -685,8 +690,7 @@ final class VerifyingSession {
 
         // only when not installed from ADB, skip verification for instant apps when
         // the installer and verifier are the same.
-        if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0
-                && mPm.mInstantAppInstallerActivity != null) {
+        if (isInstant() && mPm.mInstantAppInstallerActivity != null) {
             String installerPackage = mPm.mInstantAppInstallerActivity.packageName;
             for (String requiredVerifierPackage : requiredVerifierPackages) {
                 if (installerPackage.equals(requiredVerifierPackage)) {
@@ -818,6 +822,9 @@ final class VerifyingSession {
             return;
         }
         sendVerificationCompleteNotification();
+        if (mRet != INSTALL_SUCCEEDED) {
+            PackageMetrics.onVerificationFailed(this);
+        }
     }
 
     private void sendVerificationCompleteNotification() {
@@ -864,5 +871,29 @@ final class VerifyingSession {
     }
     public UserHandle getUser() {
         return mUser;
+    }
+    public int getSessionId() {
+        return mSessionId;
+    }
+    public int getDataLoaderType() {
+        return mDataLoaderType;
+    }
+    public int getUserActionRequiredType() {
+        return mUserActionRequiredType;
+    }
+    public boolean isInstant() {
+        return (mInstallFlags & PackageManager.INSTALL_INSTANT_APP) != 0;
+    }
+    public boolean isInherit() {
+        return mIsInherit;
+    }
+    public int getInstallerPackageUid() {
+        return mInstallSource.mInstallerPackageUid;
+    }
+    public boolean isApex() {
+        return (mInstallFlags & PackageManager.INSTALL_APEX) != 0;
+    }
+    public boolean isStaged() {
+        return mIsStaged;
     }
 }

@@ -103,7 +103,7 @@ Trace::Trace(const std::string& tag, const std::vector<android::StringPiece>& ar
   s << tag;
   s << " ";
   for (auto& arg : args) {
-    s << arg.to_string();
+    s << arg;
     s << " ";
   }
   tracebuffer::Add(s.str(), tracebuffer::kBegin);
@@ -124,7 +124,7 @@ FlushTrace::FlushTrace(const std::string& basepath, const std::string& tag,
   s << tag;
   s << " ";
   for (auto& arg : args) {
-    s << arg.to_string();
+    s << arg;
     s << " ";
   }
   tracebuffer::Add(s.str(), tracebuffer::kBegin);

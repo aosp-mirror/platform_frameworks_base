@@ -171,22 +171,6 @@ public class DisplayManagerServiceTest {
 
     private final DisplayManagerService.Injector mBasicInjector = new BasicInjector();
 
-    private final DisplayManagerService.Injector mAllowNonNativeRefreshRateOverrideInjector =
-            new BasicInjector() {
-                @Override
-                boolean getAllowNonNativeRefreshRateOverride() {
-                    return true;
-                }
-            };
-
-    private final DisplayManagerService.Injector mDenyNonNativeRefreshRateOverrideInjector =
-            new BasicInjector() {
-                @Override
-                boolean getAllowNonNativeRefreshRateOverride() {
-                    return false;
-                }
-            };
-
     @Mock InputManagerInternal mMockInputManagerInternal;
     @Mock VirtualDeviceManagerInternal mMockVirtualDeviceManagerInternal;
     @Mock IVirtualDisplayCallback.Stub mMockAppToken;
@@ -406,6 +390,75 @@ public class DisplayManagerServiceTest {
         DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(displayId);
         assertNotNull(ddi);
         assertTrue((ddi.flags & DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT) != 0);
+    }
+
+    @Test
+    public void testCreateVirtualDisplayOwnFocus() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        registerDefaultDisplays(displayManager);
+
+        // This is effectively the DisplayManager service published to ServiceManager.
+        DisplayManagerService.BinderService bs = displayManager.new BinderService();
+
+        String uniqueId = "uniqueId --- Own Focus Test";
+        int width = 600;
+        int height = 800;
+        int dpi = 320;
+        int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS
+                | DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
+
+        when(mContext.checkCallingPermission(ADD_TRUSTED_DISPLAY)).thenReturn(
+                PackageManager.PERMISSION_GRANTED);
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
+                VIRTUAL_DISPLAY_NAME, width, height, dpi);
+        builder.setFlags(flags);
+        builder.setUniqueId(uniqueId);
+        int displayId = bs.createVirtualDisplay(builder.build(), /* callback= */ mMockAppToken,
+                /* projection= */ null, PACKAGE_NAME);
+
+        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+
+        // flush the handler
+        displayManager.getDisplayHandler().runWithScissors(() -> {}, /* now= */ 0);
+
+        DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(displayId);
+        assertNotNull(ddi);
+        assertTrue((ddi.flags & DisplayDeviceInfo.FLAG_OWN_FOCUS) != 0);
+    }
+
+    @Test
+    public void testCreateVirtualDisplayOwnFocus_nonTrustedDisplay() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        registerDefaultDisplays(displayManager);
+
+        // This is effectively the DisplayManager service published to ServiceManager.
+        DisplayManagerService.BinderService bs = displayManager.new BinderService();
+
+        String uniqueId = "uniqueId --- Own Focus Test -- nonTrustedDisplay";
+        int width = 600;
+        int height = 800;
+        int dpi = 320;
+        int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
+
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
+                VIRTUAL_DISPLAY_NAME, width, height, dpi);
+        builder.setFlags(flags);
+        builder.setUniqueId(uniqueId);
+        int displayId = bs.createVirtualDisplay(builder.build(), /* callback= */ mMockAppToken,
+                /* projection= */ null, PACKAGE_NAME);
+
+        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+
+        // flush the handler
+        displayManager.getDisplayHandler().runWithScissors(() -> {}, /* now= */ 0);
+
+        DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(displayId);
+        assertNotNull(ddi);
+        assertTrue((ddi.flags & DisplayDeviceInfo.FLAG_OWN_FOCUS) == 0);
     }
 
     /**
@@ -1044,13 +1097,32 @@ public class DisplayManagerServiceTest {
     }
 
     /**
-     * Tests that the frame rate override is updated accordingly to the
-     * allowNonNativeRefreshRateOverride policy.
+     * Tests that the frame rate override is returning the correct value from
+     * DisplayInfo#getRefreshRate
      */
     @Test
     public void testDisplayInfoNonNativeFrameRateOverride() throws Exception {
-        testDisplayInfoNonNativeFrameRateOverride(mDenyNonNativeRefreshRateOverrideInjector);
-        testDisplayInfoNonNativeFrameRateOverride(mAllowNonNativeRefreshRateOverrideInjector);
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        registerDefaultDisplays(displayManager);
+        displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+
+        FakeDisplayDevice displayDevice = createFakeDisplayDevice(displayManager,
+                new float[]{60f});
+        int displayId = getDisplayIdForDisplayDevice(displayManager, displayManagerBinderService,
+                displayDevice);
+        DisplayInfo displayInfo = displayManagerBinderService.getDisplayInfo(displayId);
+        assertEquals(60f, displayInfo.getRefreshRate(), 0.01f);
+
+        updateFrameRateOverride(displayManager, displayDevice,
+                new DisplayEventReceiver.FrameRateOverride[]{
+                        new DisplayEventReceiver.FrameRateOverride(
+                                Process.myUid(), 20f)
+                });
+        displayInfo = displayManagerBinderService.getDisplayInfo(displayId);
+        assertEquals(20f, displayInfo.getRefreshRate(), 0.01f);
     }
 
     /**
@@ -1078,10 +1150,7 @@ public class DisplayManagerServiceTest {
     @Test
     @DisableCompatChanges({DisplayManagerService.DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE})
     public void testDisplayInfoNonNativeFrameRateOverrideModeCompat() throws Exception {
-        testDisplayInfoNonNativeFrameRateOverrideMode(mDenyNonNativeRefreshRateOverrideInjector,
-                /*compatChangeEnabled*/ false);
-        testDisplayInfoNonNativeFrameRateOverrideMode(mAllowNonNativeRefreshRateOverrideInjector,
-                /*compatChangeEnabled*/  false);
+        testDisplayInfoNonNativeFrameRateOverrideMode(/*compatChangeEnabled*/ false);
     }
 
     /**
@@ -1090,10 +1159,7 @@ public class DisplayManagerServiceTest {
     @Test
     @EnableCompatChanges({DisplayManagerService.DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE})
     public void testDisplayInfoNonNativeFrameRateOverrideMode() throws Exception {
-        testDisplayInfoNonNativeFrameRateOverrideMode(mDenyNonNativeRefreshRateOverrideInjector,
-                /*compatChangeEnabled*/  true);
-        testDisplayInfoNonNativeFrameRateOverrideMode(mAllowNonNativeRefreshRateOverrideInjector,
-                /*compatChangeEnabled*/  true);
+        testDisplayInfoNonNativeFrameRateOverrideMode(/*compatChangeEnabled*/ true);
     }
 
     /**
@@ -1316,10 +1382,9 @@ public class DisplayManagerServiceTest {
         assertEquals(expectedMode, displayInfo.getMode());
     }
 
-    private void testDisplayInfoNonNativeFrameRateOverrideMode(
-            DisplayManagerService.Injector injector, boolean compatChangeEnabled) {
+    private void testDisplayInfoNonNativeFrameRateOverrideMode(boolean compatChangeEnabled) {
         DisplayManagerService displayManager =
-                new DisplayManagerService(mContext, injector);
+                new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerService.BinderService displayManagerBinderService =
                 displayManager.new BinderService();
         registerDefaultDisplays(displayManager);
@@ -1341,38 +1406,10 @@ public class DisplayManagerServiceTest {
         Display.Mode expectedMode;
         if (compatChangeEnabled) {
             expectedMode = new Display.Mode(1, 100, 200, 60f);
-        } else if (injector.getAllowNonNativeRefreshRateOverride()) {
-            expectedMode = new Display.Mode(255, 100, 200, 20f);
         } else {
-            expectedMode = new Display.Mode(1, 100, 200, 60f);
+            expectedMode = new Display.Mode(255, 100, 200, 20f);
         }
         assertEquals(expectedMode, displayInfo.getMode());
-    }
-
-    private void testDisplayInfoNonNativeFrameRateOverride(
-            DisplayManagerService.Injector injector) {
-        DisplayManagerService displayManager =
-                new DisplayManagerService(mContext, injector);
-        DisplayManagerService.BinderService displayManagerBinderService =
-                displayManager.new BinderService();
-        registerDefaultDisplays(displayManager);
-        displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
-
-        FakeDisplayDevice displayDevice = createFakeDisplayDevice(displayManager,
-                new float[]{60f});
-        int displayId = getDisplayIdForDisplayDevice(displayManager, displayManagerBinderService,
-                displayDevice);
-        DisplayInfo displayInfo = displayManagerBinderService.getDisplayInfo(displayId);
-        assertEquals(60f, displayInfo.getRefreshRate(), 0.01f);
-
-        updateFrameRateOverride(displayManager, displayDevice,
-                new DisplayEventReceiver.FrameRateOverride[]{
-                        new DisplayEventReceiver.FrameRateOverride(
-                                Process.myUid(), 20f)
-                });
-        displayInfo = displayManagerBinderService.getDisplayInfo(displayId);
-        float expectedRefreshRate = injector.getAllowNonNativeRefreshRateOverride() ? 20f : 60f;
-        assertEquals(expectedRefreshRate, displayInfo.getRefreshRate(), 0.01f);
     }
 
     private int getDisplayIdForDisplayDevice(

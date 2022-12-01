@@ -201,6 +201,23 @@
             "file_patterns": [
                 "(/|^)PropertyInvalidatedCache.java"
             ]
+        },
+        {
+            "name": "FrameworksCoreGameManagerTests",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.app"
+                }
+            ],
+            "file_patterns": [
+                "(/|^)GameManager[^/]*", "(/|^)GameMode[^/]*"
+            ]
         }
     ],
     "presubmit-large": [

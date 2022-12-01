@@ -370,8 +370,8 @@ int OptimizeCommand::Action(const std::vector<std::string>& args) {
 
     if (!kept_artifacts_.empty()) {
       for (const std::string& artifact_str : kept_artifacts_) {
-        for (const StringPiece& artifact : util::Tokenize(artifact_str, ',')) {
-          options_.kept_artifacts.insert(artifact.to_string());
+        for (StringPiece artifact : util::Tokenize(artifact_str, ',')) {
+          options_.kept_artifacts.emplace(artifact);
         }
       }
     }
@@ -403,7 +403,7 @@ int OptimizeCommand::Action(const std::vector<std::string>& args) {
 
   if (target_densities_) {
     // Parse the target screen densities.
-    for (const StringPiece& config_str : util::Tokenize(target_densities_.value(), ',')) {
+    for (StringPiece config_str : util::Tokenize(target_densities_.value(), ',')) {
       std::optional<uint16_t> target_density = ParseTargetDensityParameter(config_str, diag);
       if (!target_density) {
         return 1;

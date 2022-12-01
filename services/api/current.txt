@@ -99,6 +99,7 @@ package com.android.server.pm.pkg {
     method public int getAppId();
     method @NonNull public String getPackageName();
     method @Nullable public String getPrimaryCpuAbi();
+    method @Nullable public String getSeInfo();
     method @Nullable public String getSecondaryCpuAbi();
     method @NonNull public com.android.server.pm.pkg.PackageUserState getStateForUser(@NonNull android.os.UserHandle);
     method @NonNull public java.util.List<com.android.server.pm.pkg.SharedLibrary> getUsesLibraries();
