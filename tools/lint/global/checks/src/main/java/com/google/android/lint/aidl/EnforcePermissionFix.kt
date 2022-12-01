@@ -20,14 +20,23 @@ import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.LintFix
 import com.android.tools.lint.detector.api.Location
 import com.android.tools.lint.detector.api.UastLintUtils.Companion.getAnnotationBooleanValue
+import com.android.tools.lint.detector.api.findSelector
 import com.android.tools.lint.detector.api.getUMethod
+import com.google.android.lint.findCallExpression
 import com.google.android.lint.getPermissionMethodAnnotation
 import com.google.android.lint.hasPermissionNameAnnotation
 import com.google.android.lint.isPermissionMethodCall
+import com.intellij.psi.PsiClassType
 import com.intellij.psi.PsiType
 import org.jetbrains.kotlin.psi.psiUtil.parameterIndex
+import org.jetbrains.uast.UBinaryExpression
+import org.jetbrains.uast.UBlockExpression
 import org.jetbrains.uast.UCallExpression
+import org.jetbrains.uast.UIfExpression
+import org.jetbrains.uast.UThrowExpression
+import org.jetbrains.uast.UastBinaryOperator
 import org.jetbrains.uast.evaluateString
+import org.jetbrains.uast.skipParenthesizedExprDown
 import org.jetbrains.uast.visitor.AbstractUastVisitor
 
 /**
@@ -76,7 +85,7 @@ data class EnforcePermissionFix(
 
     companion object {
         /**
-         * conditionally constructs EnforcePermissionFix from a UCallExpression
+         * Conditionally constructs EnforcePermissionFix from a UCallExpression
          * @return EnforcePermissionFix if the called method is annotated with @PermissionMethod, else null
          */
         fun fromCallExpression(
@@ -85,16 +94,72 @@ data class EnforcePermissionFix(
         ): EnforcePermissionFix? {
             val method = callExpression.resolve()?.getUMethod() ?: return null
             val annotation = getPermissionMethodAnnotation(method) ?: return null
-            val enforces = method.returnType == PsiType.VOID
+            val returnsVoid = method.returnType == PsiType.VOID
             val orSelf = getAnnotationBooleanValue(annotation, "orSelf") ?: false
             return EnforcePermissionFix(
                     listOf(getPermissionCheckLocation(context, callExpression)),
                     getPermissionCheckValues(callExpression),
-                    // If we detect that the PermissionMethod enforces that permission is granted,
-                    // AND is of the "orSelf" variety, we are very confident that this is a behavior
-                    // preserving migration to @EnforcePermission.  Thus, the incident should be ERROR
-                    // level.
-                    errorLevel = enforces && orSelf
+                    errorLevel = isErrorLevel(throws = returnsVoid, orSelf = orSelf)
+            )
+        }
+
+        /**
+         * Conditionally constructs EnforcePermissionFix from a UCallExpression
+         * @return EnforcePermissionFix IF AND ONLY IF:
+         * * The condition of the if statement compares the return value of a
+         *   PermissionMethod to one of the PackageManager.PermissionResult values
+         * * The expression inside the if statement does nothing but throw SecurityException
+         */
+        fun fromIfExpression(
+            context: JavaContext,
+            ifExpression: UIfExpression
+        ): EnforcePermissionFix? {
+            val condition = ifExpression.condition.skipParenthesizedExprDown()
+            if (condition !is UBinaryExpression) return null
+
+            val maybeLeftCall = findCallExpression(condition.leftOperand)
+            val maybeRightCall = findCallExpression(condition.rightOperand)
+
+            val (callExpression, comparison) =
+                    if (maybeLeftCall is UCallExpression) {
+                        Pair(maybeLeftCall, condition.rightOperand)
+                    } else if (maybeRightCall is UCallExpression) {
+                        Pair(maybeRightCall, condition.leftOperand)
+                    } else return null
+
+            val permissionMethodAnnotation = getPermissionMethodAnnotation(
+                    callExpression.resolve()?.getUMethod()) ?: return null
+
+            val equalityCheck =
+                    when (comparison.findSelector().asSourceString()
+                            .filterNot(Char::isWhitespace)) {
+                        "PERMISSION_GRANTED" -> UastBinaryOperator.IDENTITY_NOT_EQUALS
+                        "PERMISSION_DENIED" -> UastBinaryOperator.IDENTITY_EQUALS
+                        else -> return null
+                    }
+
+            if (condition.operator != equalityCheck) return null
+
+            val throwExpression: UThrowExpression? =
+                    ifExpression.thenExpression as? UThrowExpression
+                            ?: (ifExpression.thenExpression as? UBlockExpression)
+                                    ?.expressions?.firstOrNull()
+                                    as? UThrowExpression
+
+
+            val thrownClass = (throwExpression?.thrownExpression?.getExpressionType()
+                    as? PsiClassType)?.resolve() ?: return null
+            if (!context.evaluator.inheritsFrom(
+                            thrownClass, "java.lang.SecurityException")){
+                return null
+            }
+
+            val orSelf = getAnnotationBooleanValue(permissionMethodAnnotation, "orSelf") ?: false
+
+            return EnforcePermissionFix(
+                    listOf(context.getLocation(ifExpression)),
+                    getPermissionCheckValues(callExpression),
+                    errorLevel = isErrorLevel(throws = true, orSelf = orSelf),
             )
         }
 
@@ -172,5 +237,13 @@ data class EnforcePermissionFix(
                 callExpression.getArgumentForParameter(it)?.evaluateString()
             }
         }
+
+        /**
+         * If we detect that the PermissionMethod enforces that permission is granted,
+         * AND is of the "orSelf" variety, we are very confident that this is a behavior
+         * preserving migration to @EnforcePermission.  Thus, the incident should be ERROR
+         * level.
+         */
+        private fun isErrorLevel(throws: Boolean, orSelf: Boolean): Boolean = throws && orSelf
     }
 }

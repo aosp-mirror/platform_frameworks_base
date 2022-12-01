@@ -564,7 +564,116 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
             )
     }
 
+    fun testIfExpression() {
+        lint().files(
+                java(
+                    """
+                    import android.content.Context;
+                    import android.test.ITest;
+                    public class Foo extends ITest.Stub {
+                        private Context mContext;
+                        @Override
+                        public void test() throws android.os.RemoteException {
+                            if (mContext.checkCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo")
+                                    != PackageManager.PERMISSION_GRANTED) {
+                                throw new SecurityException("yikes!");
+                            }
+                        }
+                    }
+                    """
+                ).indented(),
+                *stubs
+        )
+                .run()
+                .expect(
+                    """
+                    src/Foo.java:7: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                            if (mContext.checkCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo")
+                            ^
+                    1 errors, 0 warnings
+                    """
+                )
+                .expectFixDiffs(
+                    """
+                    Fix for src/Foo.java line 7: Annotate with @EnforcePermission:
+                    @@ -5 +5
+                    +     @android.annotation.EnforcePermission("android.permission.READ_CONTACTS")
+                    @@ -7 +8
+                    -         if (mContext.checkCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo")
+                    -                 != PackageManager.PERMISSION_GRANTED) {
+                    -             throw new SecurityException("yikes!");
+                    -         }
+                    """
+                )
+    }
 
+    fun testIfExpression_orSelfFalse_warning() {
+        lint().files(
+                java(
+                    """
+                    import android.content.Context;
+                    import android.test.ITest;
+                    public class Foo extends ITest.Stub {
+                        private Context mContext;
+                        @Override
+                        public void test() throws android.os.RemoteException {
+                            if (mContext.checkCallingPermission("android.permission.READ_CONTACTS", "foo")
+                                    != PackageManager.PERMISSION_GRANTED) {
+                                throw new SecurityException("yikes!");
+                            }
+                        }
+                    }
+                    """
+                ).indented(),
+                *stubs
+        )
+                .run()
+                .expect(
+                    """
+                    src/Foo.java:7: Warning: ITest permission check can be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                            if (mContext.checkCallingPermission("android.permission.READ_CONTACTS", "foo")
+                            ^
+                    0 errors, 1 warnings
+                    """
+                )
+                .expectFixDiffs(
+                    """
+                    Fix for src/Foo.java line 7: Annotate with @EnforcePermission:
+                    @@ -5 +5
+                    +     @android.annotation.EnforcePermission("android.permission.READ_CONTACTS")
+                    @@ -7 +8
+                    -         if (mContext.checkCallingPermission("android.permission.READ_CONTACTS", "foo")
+                    -                 != PackageManager.PERMISSION_GRANTED) {
+                    -             throw new SecurityException("yikes!");
+                    -         }
+                    """
+                )
+    }
+
+    fun testIfExpression_otherSideEffect_ignored() {
+        lint().files(
+                java(
+                    """
+                    import android.content.Context;
+                    import android.test.ITest;
+                    public class Foo extends ITest.Stub {
+                        private Context mContext;
+                        @Override
+                        public void test() throws android.os.RemoteException {
+                            if (mContext.checkCallingPermission("android.permission.READ_CONTACTS", "foo")
+                                    != PackageManager.PERMISSION_GRANTED) {
+                                doSomethingElse();
+                                throw new SecurityException("yikes!");
+                            }
+                        }
+                    }
+                    """
+                ).indented(),
+                *stubs
+        )
+                .run()
+                .expectClean()
+    }
 
     companion object {
         val stubs = arrayOf(
