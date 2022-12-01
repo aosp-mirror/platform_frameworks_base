@@ -161,10 +161,7 @@ public class LocalMediaManager implements BluetoothCallback {
      * @return {@code true} if successfully call, otherwise return {@code false}
      */
     public boolean connectDevice(MediaDevice connectDevice) {
-        MediaDevice device = null;
-        synchronized (mMediaDevicesLock) {
-            device = getMediaDeviceById(mMediaDevices, connectDevice.getId());
-        }
+        MediaDevice device = getMediaDeviceById(connectDevice.getId());
         if (device == null) {
             Log.w(TAG, "connectDevice() connectDevice not in the list!");
             return false;
@@ -277,23 +274,6 @@ public class LocalMediaManager implements BluetoothCallback {
     /**
      * Find the MediaDevice through id.
      *
-     * @param devices the list of MediaDevice
-     * @param id the unique id of MediaDevice
-     * @return MediaDevice
-     */
-    public MediaDevice getMediaDeviceById(List<MediaDevice> devices, String id) {
-        for (MediaDevice mediaDevice : devices) {
-            if (TextUtils.equals(mediaDevice.getId(), id)) {
-                return mediaDevice;
-            }
-        }
-        Log.i(TAG, "getMediaDeviceById() can't found device");
-        return null;
-    }
-
-    /**
-     * Find the MediaDevice from all media devices by id.
-     *
      * @param id the unique id of MediaDevice
      * @return MediaDevice
      */
@@ -305,7 +285,7 @@ public class LocalMediaManager implements BluetoothCallback {
                 }
             }
         }
-        Log.i(TAG, "Unable to find device " + id);
+        Log.i(TAG, "getMediaDeviceById() failed to find device with id: " + id);
         return null;
     }
 
@@ -672,10 +652,7 @@ public class LocalMediaManager implements BluetoothCallback {
 
         @Override
         public void onConnectedDeviceChanged(String id) {
-            MediaDevice connectDevice = null;
-            synchronized (mMediaDevicesLock) {
-                connectDevice = getMediaDeviceById(mMediaDevices, id);
-            }
+            MediaDevice connectDevice = getMediaDeviceById(id);
             connectDevice = connectDevice != null
                     ? connectDevice : updateCurrentConnectedDevice();
 
