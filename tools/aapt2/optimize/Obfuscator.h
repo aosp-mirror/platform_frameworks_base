@@ -20,6 +20,7 @@
 #include <set>
 #include <string>
 
+#include "ResourceMetadata.pb.h"
 #include "ResourceTable.h"
 #include "android-base/function_ref.h"
 #include "android-base/macros.h"
@@ -37,6 +38,8 @@ class Obfuscator : public IResourceTableConsumer {
   explicit Obfuscator(OptimizeOptions& optimizeOptions);
 
   bool Consume(IAaptContext* context, ResourceTable* table) override;
+
+  bool WriteObfuscationMap(const std::string& file_path) const;
 
   bool IsEnabled() const;
 
