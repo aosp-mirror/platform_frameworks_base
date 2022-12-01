@@ -35,7 +35,6 @@ import com.android.internal.widget.LockPatternView.Cell;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.keyguard.EmergencyButtonController.EmergencyButtonCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingClassifier;
 import com.android.systemui.classifier.FalsingCollector;
@@ -269,16 +268,6 @@ public class KeyguardPatternViewController
         } else {
             displayDefaultSecurityMessage();
         }
-    }
-
-    @Override
-    public void reloadColors() {
-        super.reloadColors();
-        mMessageAreaController.reloadColors();
-        int textColor = Utils.getColorAttr(mLockPatternView.getContext(),
-                android.R.attr.textColorSecondary).getDefaultColor();
-        int errorColor = Utils.getColorError(mLockPatternView.getContext()).getDefaultColor();
-        mLockPatternView.setColors(textColor, textColor, errorColor);
     }
 
     @Override
