@@ -50,7 +50,6 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfigInterface;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
 import android.util.Slog;
@@ -68,6 +67,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.display.utils.AmbientFilter;
 import com.android.server.display.utils.AmbientFilterFactory;
+import com.android.server.display.utils.SensorUtils;
 import com.android.server.sensors.SensorManagerInternal;
 import com.android.server.sensors.SensorManagerInternal.ProximityActiveListener;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -520,14 +520,20 @@ public class DisplayModeDirector {
     }
 
     /**
-     * A utility to make this class aware of the new display configs whenever the default display is
-     * changed
+     * Called when the underlying display device of the default display is changed.
+     * Some data in this class relates to the physical display of the device, and so we need to
+     * reload the configurations based on this.
+     * E.g. the brightness sensors and refresh rate capabilities depend on the physical display
+     * device that is being used, so will be reloaded.
+     *
+     * @param displayDeviceConfig configurations relating to the underlying display device.
      */
     public void defaultDisplayDeviceUpdated(DisplayDeviceConfig displayDeviceConfig) {
         mSettingsObserver.setRefreshRates(displayDeviceConfig,
             /* attemptLoadingFromDeviceConfig= */ true);
         mBrightnessObserver.updateBlockingZoneThresholds(displayDeviceConfig,
             /* attemptLoadingFromDeviceConfig= */ true);
+        mBrightnessObserver.reloadLightSensor(displayDeviceConfig);
     }
 
     /**
@@ -1541,6 +1547,9 @@ public class DisplayModeDirector {
 
         private SensorManager mSensorManager;
         private Sensor mLightSensor;
+        private Sensor mRegisteredLightSensor;
+        private String mLightSensorType;
+        private String mLightSensorName;
         private final LightSensorEventListener mLightSensorListener =
                 new LightSensorEventListener();
         // Take it as low brightness before valid sensor data comes
@@ -1701,17 +1710,8 @@ public class DisplayModeDirector {
             return mLowAmbientBrightnessThresholds;
         }
 
-        public void registerLightSensor(SensorManager sensorManager, Sensor lightSensor) {
-            mSensorManager = sensorManager;
-            mLightSensor = lightSensor;
-
-            mSensorManager.registerListener(mLightSensorListener,
-                    mLightSensor, LIGHT_SENSOR_RATE_MS * 1000, mHandler);
-        }
-
         public void observe(SensorManager sensorManager) {
             mSensorManager = sensorManager;
-            final ContentResolver cr = mContext.getContentResolver();
             mBrightness = getBrightness(Display.DEFAULT_DISPLAY);
 
             // DeviceConfig is accessible after system ready.
@@ -1855,6 +1855,10 @@ public class DisplayModeDirector {
                 pw.println("    mAmbientHighBrightnessThresholds: " + d);
             }
 
+            pw.println("    mLightSensor: " + mLightSensor);
+            pw.println("    mRegisteredLightSensor: " + mRegisteredLightSensor);
+            pw.println("    mLightSensorName: " + mLightSensorName);
+            pw.println("    mLightSensorType: " + mLightSensorType);
             mLightSensorListener.dumpLocked(pw);
 
             if (mAmbientFilter != null) {
@@ -1908,27 +1912,9 @@ public class DisplayModeDirector {
             }
 
             if (mShouldObserveAmbientLowChange || mShouldObserveAmbientHighChange) {
-                Resources resources = mContext.getResources();
-                String lightSensorType = resources.getString(
-                        com.android.internal.R.string.config_displayLightSensorType);
+                Sensor lightSensor = getLightSensor();
 
-                Sensor lightSensor = null;
-                if (!TextUtils.isEmpty(lightSensorType)) {
-                    List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
-                    for (int i = 0; i < sensors.size(); i++) {
-                        Sensor sensor = sensors.get(i);
-                        if (lightSensorType.equals(sensor.getStringType())) {
-                            lightSensor = sensor;
-                            break;
-                        }
-                    }
-                }
-
-                if (lightSensor == null) {
-                    lightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-                }
-
-                if (lightSensor != null) {
+                if (lightSensor != null && lightSensor != mLightSensor) {
                     final Resources res = mContext.getResources();
 
                     mAmbientFilter = AmbientFilterFactory.createBrightnessFilter(TAG, res);
@@ -1938,13 +1924,38 @@ public class DisplayModeDirector {
                 mAmbientFilter = null;
                 mLightSensor = null;
             }
-
+            updateSensorStatus();
             if (mRefreshRateChangeable) {
-                updateSensorStatus();
                 synchronized (mLock) {
                     onBrightnessChangedLocked();
                 }
             }
+        }
+
+        private void reloadLightSensor(DisplayDeviceConfig displayDeviceConfig) {
+            reloadLightSensorData(displayDeviceConfig);
+            restartObserver();
+        }
+
+        private void reloadLightSensorData(DisplayDeviceConfig displayDeviceConfig) {
+            // The displayDeviceConfig (ddc) contains display specific preferences. When loaded,
+            // it naturally falls back to the global config.xml.
+            if (displayDeviceConfig != null
+                    && displayDeviceConfig.getAmbientLightSensor() != null) {
+                // This covers both the ddc and the config.xml fallback
+                mLightSensorType = displayDeviceConfig.getAmbientLightSensor().type;
+                mLightSensorName = displayDeviceConfig.getAmbientLightSensor().name;
+            } else if (mLightSensorName == null && mLightSensorType == null) {
+                Resources resources = mContext.getResources();
+                mLightSensorType = resources.getString(
+                        com.android.internal.R.string.config_displayLightSensorType);
+                mLightSensorName = "";
+            }
+        }
+
+        private Sensor getLightSensor() {
+            return SensorUtils.findSensor(mSensorManager, mLightSensorType,
+                    mLightSensorName, Sensor.TYPE_LIGHT);
         }
 
         /**
@@ -2088,17 +2099,36 @@ public class DisplayModeDirector {
 
             if ((mShouldObserveAmbientLowChange || mShouldObserveAmbientHighChange)
                      && isDeviceActive() && !mLowPowerModeEnabled && mRefreshRateChangeable) {
-                mSensorManager.registerListener(mLightSensorListener,
-                        mLightSensor, LIGHT_SENSOR_RATE_MS * 1000, mHandler);
-                if (mLoggingEnabled) {
-                    Slog.d(TAG, "updateSensorStatus: registerListener");
-                }
+                registerLightSensor();
+
             } else {
-                mLightSensorListener.removeCallbacks();
-                mSensorManager.unregisterListener(mLightSensorListener);
-                if (mLoggingEnabled) {
-                    Slog.d(TAG, "updateSensorStatus: unregisterListener");
-                }
+                unregisterSensorListener();
+            }
+        }
+
+        private void registerLightSensor() {
+            if (mRegisteredLightSensor == mLightSensor) {
+                return;
+            }
+
+            if (mRegisteredLightSensor != null) {
+                unregisterSensorListener();
+            }
+
+            mSensorManager.registerListener(mLightSensorListener,
+                    mLightSensor, LIGHT_SENSOR_RATE_MS * 1000, mHandler);
+            mRegisteredLightSensor = mLightSensor;
+            if (mLoggingEnabled) {
+                Slog.d(TAG, "updateSensorStatus: registerListener");
+            }
+        }
+
+        private void unregisterSensorListener() {
+            mLightSensorListener.removeCallbacks();
+            mSensorManager.unregisterListener(mLightSensorListener);
+            mRegisteredLightSensor = null;
+            if (mLoggingEnabled) {
+                Slog.d(TAG, "updateSensorStatus: unregisterListener");
             }
         }
 
