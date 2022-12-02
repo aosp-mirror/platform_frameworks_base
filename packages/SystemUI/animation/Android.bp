@@ -34,10 +34,7 @@ android_library {
         "res",
     ],
 
-    static_libs: [
-        "PluginCoreLib",
-        "androidx.core_core-animation-nodeps",
-    ],
+    static_libs: ["androidx.core_core-animation-nodeps"],
 
     manifest: "AndroidManifest.xml",
     kotlincflags: ["-Xjvm-default=all"],
