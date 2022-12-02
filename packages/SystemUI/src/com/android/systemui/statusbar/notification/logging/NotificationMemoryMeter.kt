@@ -1,12 +1,20 @@
 package com.android.systemui.statusbar.notification.logging
 
 import android.app.Notification
+import android.app.Notification.BigPictureStyle
+import android.app.Notification.BigTextStyle
+import android.app.Notification.CallStyle
+import android.app.Notification.DecoratedCustomViewStyle
+import android.app.Notification.InboxStyle
+import android.app.Notification.MediaStyle
+import android.app.Notification.MessagingStyle
 import android.app.Person
 import android.graphics.Bitmap
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
+import android.stats.sysui.NotificationEnums
 import androidx.annotation.WorkerThread
 import com.android.systemui.statusbar.notification.NotificationUtils
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -19,6 +27,7 @@ internal object NotificationMemoryMeter {
     private const val TV_EXTENSIONS = "android.tv.EXTENSIONS"
     private const val WEARABLE_EXTENSIONS = "android.wearable.EXTENSIONS"
     private const val WEARABLE_EXTENSIONS_BACKGROUND = "background"
+    private const val AUTOGROUP_KEY = "ranker_group"
 
     /** Returns a list of memory use entries for currently shown notifications. */
     @WorkerThread
@@ -29,12 +38,15 @@ internal object NotificationMemoryMeter {
             .asSequence()
             .map { entry ->
                 val packageName = entry.sbn.packageName
+                val uid = entry.sbn.uid
                 val notificationObjectUsage =
                     notificationMemoryUse(entry.sbn.notification, hashSetOf())
                 val notificationViewUsage = NotificationMemoryViewWalker.getViewUsage(entry.row)
                 NotificationMemoryUsage(
                     packageName,
+                    uid,
                     NotificationUtils.logKey(entry.sbn.key),
+                    entry.sbn.notification,
                     notificationObjectUsage,
                     notificationViewUsage
                 )
@@ -49,7 +61,9 @@ internal object NotificationMemoryMeter {
     ): NotificationMemoryUsage {
         return NotificationMemoryUsage(
             entry.sbn.packageName,
+            entry.sbn.uid,
             NotificationUtils.logKey(entry.sbn.key),
+            entry.sbn.notification,
             notificationMemoryUse(entry.sbn.notification, seenBitmaps),
             NotificationMemoryViewWalker.getViewUsage(entry.row)
         )
@@ -116,7 +130,13 @@ internal object NotificationMemoryMeter {
         val wearExtenderBackground =
             computeParcelableUse(wearExtender, WEARABLE_EXTENSIONS_BACKGROUND, seenBitmaps)
 
-        val style = notification.notificationStyle
+        val style =
+            if (notification.group == AUTOGROUP_KEY) {
+                NotificationEnums.STYLE_RANKER_GROUP
+            } else {
+                styleEnum(notification.notificationStyle)
+            }
+
         val hasCustomView = notification.contentView != null || notification.bigContentView != null
         val extrasSize = computeBundleSize(extras)
 
@@ -124,7 +144,7 @@ internal object NotificationMemoryMeter {
             smallIcon = smallIconUse,
             largeIcon = largeIconUse,
             extras = extrasSize,
-            style = style?.simpleName,
+            style = style,
             styleIcon =
                 bigPictureIconUse +
                     peopleUse +
@@ -142,6 +162,25 @@ internal object NotificationMemoryMeter {
             hasCustomView = hasCustomView
         )
     }
+
+    /**
+     * Returns logging style enum based on current style class.
+     *
+     * @return style value in [NotificationEnums]
+     */
+    private fun styleEnum(style: Class<out Notification.Style>?): Int =
+        when (style?.name) {
+            null -> NotificationEnums.STYLE_NONE
+            BigTextStyle::class.java.name -> NotificationEnums.STYLE_BIG_TEXT
+            BigPictureStyle::class.java.name -> NotificationEnums.STYLE_BIG_PICTURE
+            InboxStyle::class.java.name -> NotificationEnums.STYLE_INBOX
+            MediaStyle::class.java.name -> NotificationEnums.STYLE_MEDIA
+            DecoratedCustomViewStyle::class.java.name ->
+                NotificationEnums.STYLE_DECORATED_CUSTOM_VIEW
+            MessagingStyle::class.java.name -> NotificationEnums.STYLE_MESSAGING
+            CallStyle::class.java.name -> NotificationEnums.STYLE_CALL
+            else -> NotificationEnums.STYLE_UNSPECIFIED
+        }
 
     /**
      * Calculates size of the bundle data (excluding FDs and other shared objects like ashmem
@@ -176,7 +215,7 @@ internal object NotificationMemoryMeter {
      *
      * @return memory usage in bytes or 0 if the icon is Uri/Resource based
      */
-    private fun computeIconUse(icon: Icon?, seenBitmaps: HashSet<Int>) =
+    private fun computeIconUse(icon: Icon?, seenBitmaps: HashSet<Int>): Int =
         when (icon?.type) {
             Icon.TYPE_BITMAP -> computeBitmapUse(icon.bitmap, seenBitmaps)
             Icon.TYPE_ADAPTIVE_BITMAP -> computeBitmapUse(icon.bitmap, seenBitmaps)
