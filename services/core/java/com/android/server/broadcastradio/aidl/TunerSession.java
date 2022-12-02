@@ -42,7 +42,7 @@ final class TunerSession extends ITuner.Stub {
     private static final String TAG = "BcRadioAidlSrv.session";
     private static final int TUNER_EVENT_LOGGER_QUEUE_SIZE = 25;
 
-    private final Object mLock;
+    private final Object mLock = new Object();
 
     private final RadioLogger mLogger;
     private final RadioModule mModule;
@@ -61,12 +61,10 @@ final class TunerSession extends ITuner.Stub {
     private RadioManager.BandConfig mPlaceHolderConfig;
 
     TunerSession(RadioModule radioModule, IBroadcastRadio service,
-            android.hardware.radio.ITunerCallback callback,
-            Object lock) {
+            android.hardware.radio.ITunerCallback callback) {
         mModule = Objects.requireNonNull(radioModule, "radioModule cannot be null");
         mService = Objects.requireNonNull(service, "service cannot be null");
         mCallback = Objects.requireNonNull(callback, "callback cannot be null");
-        mLock = Objects.requireNonNull(lock, "lock cannot be null");
         mLogger = new RadioLogger(TAG, TUNER_EVENT_LOGGER_QUEUE_SIZE);
     }
 
@@ -91,17 +89,19 @@ final class TunerSession extends ITuner.Stub {
             mLogger.logRadioEvent("Close tuner session on error %d", error);
         }
         synchronized (mLock) {
-            if (mIsClosed) return;
-            if (error != null) {
-                try {
-                    mCallback.onError(error);
-                } catch (RemoteException ex) {
-                    Slogf.w(TAG, ex, "mCallback.onError(%s) failed", error);
-                }
+            if (mIsClosed) {
+                return;
             }
             mIsClosed = true;
-            mModule.onTunerSessionClosed(this);
         }
+        if (error != null) {
+            try {
+                mCallback.onError(error);
+            } catch (RemoteException ex) {
+                Slogf.w(TAG, ex, "mCallback.onError(%s) failed", error);
+            }
+        }
+        mModule.onTunerSessionClosed(this);
     }
 
     @Override

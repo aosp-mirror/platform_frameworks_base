@@ -58,14 +58,13 @@ public final class RadioModuleTest {
     @Mock
     private android.hardware.broadcastradio.ICloseHandle mHalCloseHandleMock;
 
-    private final Object mLock = new Object();
     // RadioModule under test
     private RadioModule mRadioModule;
     private android.hardware.broadcastradio.IAnnouncementListener mHalListener;
 
     @Before
     public void setup() throws RemoteException {
-        mRadioModule = new RadioModule(mBroadcastRadioMock, TEST_MODULE_PROPERTIES, mLock);
+        mRadioModule = new RadioModule(mBroadcastRadioMock, TEST_MODULE_PROPERTIES);
 
         // TODO(b/241118988): test non-null image for getImage method
         when(mBroadcastRadioMock.getImage(anyInt())).thenReturn(null);
