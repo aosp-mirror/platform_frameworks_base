@@ -42,7 +42,8 @@ import com.android.wm.shell.desktopmode.DesktopModeStatus;
 
 /**
  * Defines visuals and behaviors of a window decoration of a caption bar and shadows. It works with
- * {@link CaptionWindowDecorViewModel}. The caption bar contains a handle, back button, and close button.
+ * {@link CaptionWindowDecorViewModel}. The caption bar contains a handle, back button, and close
+ * button.
  *
  * The shadow's thickness is 20dp when the window is in focus and 5dp when the window isn't.
  */
@@ -181,12 +182,12 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         if (oldDecorationSurface != mDecorationContainerSurface || mDragResizeListener == null) {
             closeDragResizeListener();
             mDragResizeListener = new DragResizeInputListener(
-                        mContext,
-                        mHandler,
-                        mChoreographer,
-                        mDisplay.getDisplayId(),
-                        mDecorationContainerSurface,
-                        mDragResizeCallback);
+                    mContext,
+                    mHandler,
+                    mChoreographer,
+                    mDisplay.getDisplayId(),
+                    mDecorationContainerSurface,
+                    mDragResizeCallback);
         }
 
         int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext()).getScaledTouchSlop();
@@ -242,7 +243,6 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
     /**
      * Sets the visibility of buttons and color of caption based on desktop mode status
-     *
      */
     void setButtonVisibility() {
         mDesktopActive = DesktopModeStatus.isActive(mContext);
@@ -313,6 +313,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
     /**
      * Close an open handle menu if input is outside of menu coordinates
+     *
      * @param ev the tapped point to compare against
      */
     void closeHandleMenuIfNeeded(MotionEvent ev) {
@@ -329,6 +330,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
     /**
      * Offset the coordinates of a {@link MotionEvent} to be in the same coordinate space as caption
+     *
      * @param ev the {@link MotionEvent} to offset
      * @return the point of the input in local space
      */
@@ -343,7 +345,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
     /**
      * Determine if a passed MotionEvent is in a view in caption
-     * @param ev the {@link MotionEvent} to check
+     *
+     * @param ev       the {@link MotionEvent} to check
      * @param layoutId the id of the view
      * @return {@code true} if event is inside the specified view, {@code false} if not
      */
@@ -363,6 +366,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
      * Check a passed MotionEvent if a click has occurred on any button on this caption
      * Note this should only be called when a regular onClick is not possible
      * (i.e. the button was clicked through status bar layer)
+     *
      * @param ev the MotionEvent to compare
      */
     void checkClickEvent(MotionEvent ev) {
@@ -398,5 +402,28 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         closeDragResizeListener();
         closeHandleMenu();
         super.close();
+    }
+
+    static class Factory {
+
+        CaptionWindowDecoration create(
+                Context context,
+                DisplayController displayController,
+                ShellTaskOrganizer taskOrganizer,
+                ActivityManager.RunningTaskInfo taskInfo,
+                SurfaceControl taskSurface,
+                Handler handler,
+                Choreographer choreographer,
+                SyncTransactionQueue syncQueue) {
+            return new CaptionWindowDecoration(
+                    context,
+                    displayController,
+                    taskOrganizer,
+                    taskInfo,
+                    taskSurface,
+                    handler,
+                    choreographer,
+                    syncQueue);
+        }
     }
 }

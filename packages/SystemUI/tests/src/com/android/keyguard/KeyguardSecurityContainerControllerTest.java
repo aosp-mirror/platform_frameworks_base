@@ -558,11 +558,40 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         configurationListenerArgumentCaptor.getValue().onDensityOrFontScaleChanged();
 
         verify(mView).onDensityOrFontScaleChanged();
-        verify(mKeyguardSecurityViewFlipperController).onDensityOrFontScaleChanged();
+        verify(mKeyguardSecurityViewFlipperController).clearViews();
         verify(mKeyguardSecurityViewFlipperController).getSecurityView(any(SecurityMode.class),
                 any(KeyguardSecurityCallback.class));
     }
 
+    @Test
+    public void onThemeChanged() {
+        ArgumentCaptor<ConfigurationController.ConfigurationListener>
+                configurationListenerArgumentCaptor = ArgumentCaptor.forClass(
+                ConfigurationController.ConfigurationListener.class);
+        mKeyguardSecurityContainerController.onViewAttached();
+        verify(mConfigurationController).addCallback(configurationListenerArgumentCaptor.capture());
+        configurationListenerArgumentCaptor.getValue().onThemeChanged();
+
+        verify(mView).reloadColors();
+        verify(mKeyguardSecurityViewFlipperController).clearViews();
+        verify(mKeyguardSecurityViewFlipperController).getSecurityView(any(SecurityMode.class),
+                any(KeyguardSecurityCallback.class));
+    }
+
+    @Test
+    public void onUiModeChanged() {
+        ArgumentCaptor<ConfigurationController.ConfigurationListener>
+                configurationListenerArgumentCaptor = ArgumentCaptor.forClass(
+                ConfigurationController.ConfigurationListener.class);
+        mKeyguardSecurityContainerController.onViewAttached();
+        verify(mConfigurationController).addCallback(configurationListenerArgumentCaptor.capture());
+        configurationListenerArgumentCaptor.getValue().onUiModeChanged();
+
+        verify(mView).reloadColors();
+        verify(mKeyguardSecurityViewFlipperController).clearViews();
+        verify(mKeyguardSecurityViewFlipperController).getSecurityView(any(SecurityMode.class),
+                any(KeyguardSecurityCallback.class));
+    }
 
     private KeyguardSecurityContainer.SwipeListener getRegisteredSwipeListener() {
         mKeyguardSecurityContainerController.onViewAttached();

@@ -207,15 +207,6 @@ object Flags {
         unreleasedFlag(508, "qs_secondary_data_sub_info", teamfood = true)
 
     // 600- status bar
-    // TODO(b/254512623): Tracking Bug
-    @Deprecated("Replaced by mobile and wifi specific flags.")
-    val NEW_STATUS_BAR_PIPELINE_BACKEND =
-        unreleasedFlag(604, "new_status_bar_pipeline_backend", teamfood = false)
-
-    // TODO(b/254512660): Tracking Bug
-    @Deprecated("Replaced by mobile and wifi specific flags.")
-    val NEW_STATUS_BAR_PIPELINE_FRONTEND =
-        unreleasedFlag(605, "new_status_bar_pipeline_frontend", teamfood = false)
 
     // TODO(b/256614753): Tracking Bug
     val NEW_STATUS_BAR_MOBILE_ICONS = unreleasedFlag(606, "new_status_bar_mobile_icons")
@@ -232,6 +223,10 @@ object Flags {
 
     // TODO(b/256623670): Tracking Bug
     @JvmField val BATTERY_SHIELD_ICON = unreleasedFlag(610, "battery_shield_icon")
+
+    // TODO(b/260881289): Tracking Bug
+    val NEW_STATUS_BAR_ICONS_DEBUG_COLORING =
+        unreleasedFlag(611, "new_status_bar_icons_debug_coloring")
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
@@ -427,6 +422,12 @@ object Flags {
 
     // 2300 - stylus
     @JvmField val TRACK_STYLUS_EVER_USED = unreleasedFlag(2300, "track_stylus_ever_used")
+
+    // 2400 - performance tools and debugging info
+    // TODO(b/238923086): Tracking Bug
+    @JvmField
+    val WARN_ON_BLOCKING_BINDER_TRANSACTIONS =
+        unreleasedFlag(2400, "warn_on_blocking_binder_transactions")
 
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag(2, "exp_flag_release")
