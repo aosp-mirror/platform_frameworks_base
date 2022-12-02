@@ -16,13 +16,21 @@
 
 package com.android.credentialmanager.common.ui
 
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
 @Composable
 fun ConfirmButton(text: String, onClick: () -> Unit) {
-    FilledTonalButton(onClick = onClick) {
+    FilledTonalButton(
+        onClick = onClick,
+        colors = ButtonDefaults.filledTonalButtonColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+    ) {
         Text(text = text)
     }
 }
