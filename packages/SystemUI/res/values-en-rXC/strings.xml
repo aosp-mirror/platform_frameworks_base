@@ -168,8 +168,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‏‎‎‏‏‏‏‎‎‎‏‎‎‏‎‎‏‏‏‎‎‏‏‎‎‎‎‏‎‎‎‎‏‏‎‎‎‏‎‏‏‏‎‎‎‎‏‏‏‏‏‎Can’t recognize face‎‏‎‎‏‎"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‎‏‎‎‎‏‏‏‏‎‎‎‎‏‎‎‏‏‎‎‏‏‎‏‎‎‎‎‎‏‏‎‎‏‎‏‎‎‏‏‏‎‏‎‎‎‎‏‏‏‎‎‎‎‎Use fingerprint instead‎‏‎‎‏‎"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
-    <skip />
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‏‏‏‏‎‏‎‎‎‎‏‏‎‏‏‎‎‏‎‎‎‏‏‎‎‎‏‎‏‏‏‏‏‏‏‎‏‎‏‎‏‏‎‏‏‏‎‏‏‏‏‏‎‎‎‎‎Face Unlock unavailable‎‏‎‎‏‎"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‏‏‎‏‏‎‏‎‎‏‎‏‎‎‏‏‎‏‏‎‏‎‏‎‏‎‎‏‎‎‎‎‏‏‏‎‏‎‎‏‏‎‏‏‏‏‎‏‏‏‎‎‎‏‎‏‎Bluetooth connected.‎‏‎‎‏‎"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‏‎‎‎‏‎‏‏‎‏‎‎‎‏‏‏‏‎‎‎‎‎‏‎‏‏‎‎‏‎‏‏‏‏‎‏‎‏‎‏‎‏‎‎‎‎‏‏‎‎‏‏‏‏‎‎‎‎Battery percentage unknown.‎‏‎‎‏‎"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‏‎‏‎‏‎‎‏‎‎‏‎‎‎‏‎‎‎‏‏‏‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‏‎‏‏‏‎‏‏‎‏‎‏‏‏‎‏‏‏‏‎‎Connected to ‎‏‎‎‏‏‎<xliff:g id="BLUETOOTH">%s</xliff:g>‎‏‎‎‏‏‏‎.‎‏‎‎‏‎"</string>
@@ -180,13 +179,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‎‏‎‏‏‏‎‎‎‏‏‏‏‎‏‏‏‏‎‎‎‎‎‏‏‎‎‎‏‎‏‏‏‎‏‏‎‎‎‎‎‏‎‎‏‏‎‏‏‎‏‎‏‎‎‏‎Airplane mode.‎‏‎‎‏‎"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‎‎‏‎‏‏‎‎‎‏‏‏‎‎‏‏‎‏‏‏‎‏‎‎‏‎‎‎‏‎‎‎‎‎‏‎‏‏‎‎‏‎‏‎‎‎‎‎‎‏‏‎‏‏‎VPN on.‎‏‎‎‏‎"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‏‎‏‏‎‎‎‏‎‎‎‏‎‎‏‎‏‏‏‏‎‏‎‎‎‏‎‎‏‎‎‏‏‎‎‎‏‏‎‏‎‎‎‏‏‏‏‏‎‏‎‎‎‎‏‏‎‎Battery ‎‏‎‎‏‏‎<xliff:g id="NUMBER">%d</xliff:g>‎‏‎‎‏‏‏‎ percent.‎‏‎‎‏‎"</string>
-    <!-- no translation found for accessibility_battery_level_with_estimate (6548654589315074529) -->
-    <skip />
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‏‏‎‎‎‎‏‎‏‏‏‏‏‏‎‏‎‏‎‎‏‏‏‎‎‎‏‏‎‎‎‏‏‎‏‏‎‏‏‎‏‎‎‏‎‎‏‏‏‏‎‎‎‎‏‎Battery ‎‏‎‎‏‏‎<xliff:g id="PERCENTAGE">%1$d</xliff:g>‎‏‎‎‏‏‏‎ percent, ‎‏‎‎‏‏‎<xliff:g id="TIME">%2$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‎‏‏‏‎‏‏‎‏‎‎‎‏‏‎‎‎‎‏‏‎‏‏‎‏‎‏‎‎‎‎‏‎‏‎‏‎‏‎‏‎‎‏‎‎‏‏‎‎‏‎‎‎Battery charging, ‎‏‎‎‏‏‎<xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>‎‏‎‎‏‏‏‎ percent.‎‏‎‎‏‎"</string>
-    <!-- no translation found for accessibility_battery_level_charging_paused (3560711496775146763) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (2223541217743647858) -->
-    <skip />
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‎‏‏‎‏‎‏‎‎‎‏‏‎‎‎‎‎‎‏‏‏‏‎‏‏‎‏‎‏‎‎‎‏‏‏‎‏‏‏‎‏‎‎‏‏‏‎‏‎‎‎‎‏‎‏‏‎Battery ‎‏‎‎‏‏‎<xliff:g id="PERCENTAGE">%d</xliff:g>‎‏‎‎‏‏‏‎ percent, charging paused for battery protection.‎‏‎‎‏‎"</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‏‏‎‏‏‎‏‏‏‎‎‏‏‎‏‎‏‏‏‏‎‏‎‎‏‏‏‎‏‎‏‏‎‎‎‎‏‏‎‎‏‎‏‏‎‏‎‎‎‏‏‏‎‎‏‎‎Battery ‎‏‎‎‏‏‎<xliff:g id="PERCENTAGE">%1$d</xliff:g>‎‏‎‎‏‏‏‎ percent, ‎‏‎‎‏‏‎<xliff:g id="TIME">%2$s</xliff:g>‎‏‎‎‏‏‏‎, charging paused for battery protection.‎‏‎‎‏‎"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‏‏‏‎‎‎‏‏‎‏‏‏‏‎‏‎‏‏‎‏‎‏‏‎‏‏‏‏‏‎‏‏‎‎‎‎‎‏‏‏‎‎‏‏‎‎‎‏‏‎‎‎‎‎See all notifications‎‏‎‎‏‎"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‏‎‎‏‎‏‏‎‎‏‎‏‎‏‏‎‏‎‎‏‏‏‎‎‏‏‎‏‏‏‏‎‏‎‎‎‎‎‎‎‏‎‏‏‎‏‎‎‎‏‏‏‏‏‏‎‎TeleTypewriter enabled.‎‏‎‎‏‎"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‎‏‏‏‎‎‏‏‎‏‎‎‎‎‏‏‏‎‏‎‏‏‏‏‎‎‏‎‎‎‏‏‏‎‎‏‏‎‏‎‎‏‎‏‎‎‏‎‎‏‏‎‏‎‏‎‎‎Ringer vibrate.‎‏‎‎‏‎"</string>
@@ -501,6 +497,7 @@
     <string name="wallet_error_generic" msgid="257704570182963611">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‏‏‎‎‏‎‎‏‏‏‎‎‎‏‏‎‎‏‏‏‏‎‎‎‎‏‏‏‏‎‎‏‎‏‏‎‎‎‎‎‎‎‎‎‏‎‎‎‏‏‎‎‏‏‎‏‏‎There was a problem getting your cards, please try again later‎‏‎‎‏‎"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‎‎‎‏‏‏‎‏‎‏‏‎‏‏‎‏‏‎‎‎‎‏‎‏‎‎‏‎‏‎‎‏‎‎‎‏‎‏‎‎‏‏‎‎‎‏‏‏‏‏‎‏‎‎‏‎‎Lock screen settings‎‏‎‎‏‎"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‏‏‏‎‎‏‎‏‏‎‏‏‎‏‏‎‎‏‎‏‎‏‎‎‏‎‎‎‎‎‎‏‏‏‏‎‎‏‏‎‏‏‎‎‏‎‏‎‏‎‏‏‏‏‏‎‎QR code scanner‎‏‎‎‏‎"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‎‏‏‎‏‏‏‏‏‎‏‏‏‏‎‏‎‏‏‏‏‎‏‎‏‎‏‎‏‎‎‏‎‏‏‏‎‏‏‏‏‏‎‎‏‎‎‎‎‎‎‎‎‎Updating‎‏‎‎‏‎"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‎‏‏‎‎‏‏‎‏‏‎‎‏‎‏‎‎‎‏‏‎‎‏‎‎‎‎‏‏‎‏‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‏‏‏‏‎‎‎‎‎Work profile‎‏‎‎‏‎"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‏‎‎‏‎‏‎‎‎‎‎‏‏‎‏‎‎‏‏‏‏‎‏‏‏‏‏‏‎‏‏‏‎‏‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‎‎‏‎Airplane mode‎‏‎‎‏‎"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‎‏‏‏‎‎‏‎‎‏‎‎‎‎‎‎‏‏‏‏‎‎‎‎‎‎‏‎‎‎‎‏‏‏‎‏‎‎‎‏‏‏‎‏‏‏‏‏‎‏‏‏‏‏‎You won\'t hear your next alarm ‎‏‎‎‏‏‎<xliff:g id="WHEN">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
@@ -994,4 +991,17 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‏‎‏‏‎‏‎‎‎‏‎‏‎‎‎‎‎‏‎‎‏‎‎‏‏‎‎‏‏‎‎‎‏‏‏‎‏‎‎‎‏‏‏‏‏‎‎‎‎‎‏‎‎‎‎EEE, MMM d‎‏‎‎‏‎"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‎‎‏‏‎‏‎‎‏‏‏‏‎‏‏‎‏‎‎‎‎‏‎‎‏‎‏‎‏‎‏‎‏‏‎‎‎‎‏‎‏‎‎‏‏‏‏‎‏‎‎‏‎‎‏‎h:mm‎‏‎‎‏‎"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‎‏‎‏‏‎‏‏‎‎‏‎‏‏‎‏‎‎‎‏‏‎‏‎‏‏‎‏‏‎‏‎‎‏‎‏‎‎‏‎‏‎‏‎‎‏‏‏‎‎‏‏‎‏‏‎‏‎kk:mm‎‏‎‎‏‎"</string>
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‎‏‏‏‏‎‏‏‎‎‏‏‎‏‏‏‏‎‏‏‏‏‎‎‏‎‏‏‏‏‏‎‏‎‏‎‏‏‎‏‎‎‏‎‎‎‎‏‎‏‎‎‎‎Open ‎‏‎‎‏‏‎<xliff:g id="APPNAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
+    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‏‎‏‏‏‎‏‏‎‏‎‎‏‏‏‎‎‏‏‏‎‏‎‏‎‏‏‏‏‎‎‎‎‏‏‎‏‏‏‏‏‏‎‎‏‏‏‏‏‎‎‎‎‏‎‏‎To add the ‎‏‎‎‏‏‎<xliff:g id="APPNAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ app as a shortcut, make sure‎‏‎‎‏‎"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‏‏‎‎‎‏‏‎‏‎‏‎‎‏‏‏‎‏‏‎‎‏‏‏‏‏‎‎‏‎‎‏‏‎‎‎‎‏‏‏‎‎• The app is set up‎‏‎‎‏‎"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‏‏‏‏‏‎‏‏‏‏‎‎‏‎‏‏‏‏‏‎‎‎‏‏‏‏‎‎‎‎‎‏‎‏‎‎‎‎‏‏‏‎‏‏‎‎‏‎‏‏‏‎‎‏‎‏‏‎• At least one card has been added to Wallet‎‏‎‎‏‎"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‏‎‏‎‎‏‏‏‏‎‎‎‎‏‏‎‏‎‎‎‏‎‎‎‎‎‏‏‏‏‏‏‏‎‎‏‎‎‏‎‎‏‎‎‎‏‏‏‏‏‎‏‏‏‏‎• Install a camera app‎‏‎‎‏‎"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‏‏‎‏‎‏‏‏‎‎‏‏‏‎‏‎‎‏‏‎‏‎‏‏‏‏‎‎‎‎‏‏‎‎‏‏‏‎‎‏‎‎‎‏‎‏‎‏‏‏‎‎‏‎• The app is set up‎‏‎‎‏‎"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎‎‏‏‎‏‏‏‎‎‏‏‏‏‏‏‎‏‎‎‎‏‎‏‏‎‏‎‎‏‎‎‏‏‏‎‏‎‏‏‏‏‏‏‏‎‏‏‎‏‎‏‎‎‎• At least one device is available‎‏‎‎‏‎"</string>
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‎‎‎‎‏‎‎‏‏‎‎‏‏‎‏‏‏‎‎‏‎‏‎‏‏‎‎‏‏‏‎‎‏‏‎‎‎‎‏‎‎‏‏‎‏‏‏‎‏‏‎‎‎‎‎‎‎Cancel‎‏‎‎‏‎"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‎‏‏‎‏‎‏‎‎‏‏‎‎‏‏‏‏‏‎‎‎‏‏‎‏‏‎‏‎‏‎‎‎‎‏‏‎‏‏‎‏‎‏‏‏‏‏‎‎‏‎‎‏‎‏‏‎‎Flip now‎‏‎‎‏‎"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‏‏‎‎‏‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‎‏‎‏‏‏‎‏‎‎‎‎‎‏‏‏‎‎‎‏‏‏‎‏‏‎‎‎‎‎‎‏‏‎‎‎Unfold phone for a better selfie‎‏‎‎‏‎"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‏‏‎‏‎‏‎‎‏‏‎‎‏‎‏‎‏‎‏‏‎‏‏‏‏‎‎‏‏‎‎‎‏‎‎‎‎‎‏‏‎‎‎‎‎‎‎‎‎‎‏‎‎‎‏‎‏‎Flip to front display for a better selfie?‎‏‎‎‏‎"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‏‏‎‏‏‎‏‎‏‏‏‏‏‏‎‏‏‎‎‏‎‏‎‏‎‏‏‎‎‎‎‏‏‎‏‎‎‏‏‏‏‏‏‎‎‎‏‎‏‎‏‏‏‎‎‎‎‎Use the rear-facing camera for a wider photo with higher resolution.‎‏‎‎‏‎"</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‎‎‏‏‏‎‏‏‎‏‏‎‏‎‏‏‎‎‎‏‎‏‏‏‎‎‎‎‎‏‏‏‏‎‎‏‏‏‎‎‏‏‎‎‎‏‎‏‏‎‏‎‎‏‎‎‎‏‎‎‏‏‎"<b>"‎‏‎‎‏‏‏‎✱ This screen will turn off‎‏‎‎‏‏‎"</b>"‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
 </resources>
