@@ -23,7 +23,6 @@ import android.view.ViewGroup;
 
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.LifecycleRegistry;
 
 import com.android.internal.util.Preconditions;
 import com.android.systemui.R;
@@ -36,7 +35,6 @@ import com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponen
 import com.android.systemui.dreams.touch.DreamTouchHandler;
 import com.android.systemui.touch.TouchInsetManager;
 
-import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
@@ -252,18 +250,6 @@ public abstract class DreamOverlayModule {
     @DreamOverlayComponent.DreamOverlayScope
     static long providesDreamOutBlurDuration(@Main Resources resources) {
         return (long) resources.getInteger(R.integer.config_dreamOverlayOutBlurDurationMs);
-    }
-
-    @Provides
-    @DreamOverlayComponent.DreamOverlayScope
-    static LifecycleOwner providesLifecycleOwner(Lazy<LifecycleRegistry> lifecycleRegistryLazy) {
-        return () -> lifecycleRegistryLazy.get();
-    }
-
-    @Provides
-    @DreamOverlayComponent.DreamOverlayScope
-    static LifecycleRegistry providesLifecycleRegistry(LifecycleOwner lifecycleOwner) {
-        return new LifecycleRegistry(lifecycleOwner);
     }
 
     @Provides

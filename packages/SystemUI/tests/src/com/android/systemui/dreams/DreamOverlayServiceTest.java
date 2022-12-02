@@ -39,7 +39,6 @@ import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 
 import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 import androidx.test.filters.SmallTest;
 
@@ -72,7 +71,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     private final FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
 
     @Mock
-    LifecycleOwner mLifecycleOwner;
+    DreamOverlayLifecycleOwner mLifecycleOwner;
 
     @Mock
     LifecycleRegistry mLifecycleRegistry;
@@ -132,9 +131,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
         when(mDreamOverlayComponent.getDreamOverlayContainerViewController())
                 .thenReturn(mDreamOverlayContainerViewController);
-        when(mDreamOverlayComponent.getLifecycleOwner())
-                .thenReturn(mLifecycleOwner);
-        when(mDreamOverlayComponent.getLifecycleRegistry())
+        when(mLifecycleOwner.getRegistry())
                 .thenReturn(mLifecycleRegistry);
         when(mDreamOverlayComponent.getDreamOverlayTouchMonitor())
                 .thenReturn(mDreamOverlayTouchMonitor);
@@ -144,12 +141,15 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         // TODO(b/261781069): A touch handler should be passed in from the complication component
         // when the complication component is introduced.
         when(mDreamOverlayComponentFactory
-                .create(any(), any(), isNull()))
+                .create(any(), any(), any(), isNull()))
                 .thenReturn(mDreamOverlayComponent);
         when(mDreamOverlayContainerViewController.getContainerView())
                 .thenReturn(mDreamOverlayContainerView);
 
-        mService = new DreamOverlayService(mContext, mMainExecutor, mWindowManager,
+        mService = new DreamOverlayService(mContext,
+                mMainExecutor,
+                mLifecycleOwner,
+                mWindowManager,
                 mComplicationComponentFactory,
                 mDreamOverlayComponentFactory,
                 mStateController,
