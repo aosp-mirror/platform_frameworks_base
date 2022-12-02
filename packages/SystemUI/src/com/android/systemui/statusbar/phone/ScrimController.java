@@ -352,6 +352,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 .getBoolean(R.bool.notification_scrim_transparent);
         updateScrims();
         mKeyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
+
+        // prepare() sets proper initial values for most states
+        for (ScrimState state : ScrimState.values()) {
+            state.prepare(state);
+        }
     }
 
     /**
@@ -641,10 +646,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private void setTransitionToFullShade(boolean transitioning) {
         if (transitioning != mTransitioningToFullShade) {
             mTransitioningToFullShade = transitioning;
-            if (transitioning) {
-                // Let's make sure the shade locked is ready
-                ScrimState.SHADE_LOCKED.prepare(mState);
-            }
         }
     }
 
