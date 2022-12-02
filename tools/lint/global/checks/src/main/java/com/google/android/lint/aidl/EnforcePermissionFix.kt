@@ -17,6 +17,7 @@
 package com.google.android.lint.aidl
 
 import com.android.tools.lint.detector.api.JavaContext
+import com.android.tools.lint.detector.api.LintFix
 import com.android.tools.lint.detector.api.Location
 import com.android.tools.lint.detector.api.getUMethod
 import com.google.android.lint.hasPermissionNameAnnotation
@@ -38,11 +39,34 @@ data class EnforcePermissionFix(
     val locations: List<Location>,
     val permissionNames: List<String>
 ) {
-    val annotation: String
+    fun toLintFix(annotationLocation: Location): LintFix {
+        val removeFixes = this.locations.map {
+            LintFix.create()
+                .replace()
+                .reformat(true)
+                .range(it)
+                .with("")
+                .autoFix()
+                .build()
+        }
+
+        val annotateFix = LintFix.create()
+            .annotate(this.annotation)
+            .range(annotationLocation)
+            .autoFix()
+            .build()
+
+        return LintFix.create().composite(annotateFix, *removeFixes.toTypedArray())
+    }
+
+    private val annotation: String
         get() {
             val quotedPermissions = permissionNames.joinToString(", ") { """"$it"""" }
+
             val annotationParameter =
-                if (permissionNames.size > 1) "allOf={$quotedPermissions}" else quotedPermissions
+                if (permissionNames.size > 1) "allOf={$quotedPermissions}"
+                else quotedPermissions
+
             return "@$ANNOTATION_ENFORCE_PERMISSION($annotationParameter)"
         }
 
