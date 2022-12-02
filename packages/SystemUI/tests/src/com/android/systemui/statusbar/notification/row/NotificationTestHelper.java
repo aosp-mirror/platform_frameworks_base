@@ -301,7 +301,8 @@ public class NotificationTestHelper {
     public ExpandableNotificationRow createBubble()
             throws Exception {
         Notification n = createNotification(false /* isGroupSummary */,
-                null /* groupKey */, makeBubbleMetadata(null));
+                null /* groupKey */,
+                makeBubbleMetadata(null /* deleteIntent */, false /* autoExpand */));
         n.flags |= FLAG_BUBBLE;
         ExpandableNotificationRow row = generateRow(n, PKG, UID, USER_HANDLE,
                 mDefaultInflationFlags, IMPORTANCE_HIGH);
@@ -334,7 +335,8 @@ public class NotificationTestHelper {
     public ExpandableNotificationRow createBubbleInGroup()
             throws Exception {
         Notification n = createNotification(false /* isGroupSummary */,
-                GROUP_KEY /* groupKey */, makeBubbleMetadata(null));
+                GROUP_KEY /* groupKey */,
+                makeBubbleMetadata(null /* deleteIntent */, false /* autoExpand */));
         n.flags |= FLAG_BUBBLE;
         ExpandableNotificationRow row = generateRow(n, PKG, UID, USER_HANDLE,
                 mDefaultInflationFlags, IMPORTANCE_HIGH);
@@ -350,7 +352,7 @@ public class NotificationTestHelper {
      * @param deleteIntent the intent to assign to {@link BubbleMetadata#deleteIntent}
      */
     public NotificationEntry createBubble(@Nullable PendingIntent deleteIntent) {
-        return createBubble(makeBubbleMetadata(deleteIntent), USER_HANDLE);
+        return createBubble(makeBubbleMetadata(deleteIntent, false /* autoExpand */), USER_HANDLE);
     }
 
     /**
@@ -359,7 +361,16 @@ public class NotificationTestHelper {
      * @param handle the user to associate with this bubble.
      */
     public NotificationEntry createBubble(UserHandle handle) {
-        return createBubble(makeBubbleMetadata(null), handle);
+        return createBubble(makeBubbleMetadata(null /* deleteIntent */, false /* autoExpand */),
+                handle);
+    }
+
+    /**
+     * Returns an {@link NotificationEntry} that should be shown as a auto-expanded bubble.
+     */
+    public NotificationEntry createAutoExpandedBubble() {
+        return createBubble(makeBubbleMetadata(null /* deleteIntent */, true /* autoExpand */),
+                USER_HANDLE);
     }
 
     /**
@@ -567,7 +578,7 @@ public class NotificationTestHelper {
         assertTrue(countDownLatch.await(500, TimeUnit.MILLISECONDS));
     }
 
-    private BubbleMetadata makeBubbleMetadata(PendingIntent deleteIntent) {
+    private BubbleMetadata makeBubbleMetadata(PendingIntent deleteIntent, boolean autoExpand) {
         Intent target = new Intent(mContext, BubblesTestActivity.class);
         PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, 0, target,
                 PendingIntent.FLAG_MUTABLE);
@@ -576,6 +587,7 @@ public class NotificationTestHelper {
                         Icon.createWithResource(mContext, R.drawable.android))
                 .setDeleteIntent(deleteIntent)
                 .setDesiredHeight(314)
+                .setAutoExpandBubble(autoExpand)
                 .build();
     }
 
