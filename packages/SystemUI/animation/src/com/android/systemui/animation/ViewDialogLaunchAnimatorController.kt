@@ -28,7 +28,7 @@ internal constructor(
     private val source: View,
     override val cuj: DialogCuj?,
 ) : DialogLaunchAnimator.Controller {
-    override val viewRoot: ViewRootImpl
+    override val viewRoot: ViewRootImpl?
         get() = source.viewRootImpl
 
     override val sourceIdentity: Any = source
