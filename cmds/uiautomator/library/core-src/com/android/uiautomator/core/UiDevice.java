@@ -380,7 +380,7 @@ public class UiDevice {
         Tracer.trace();
         Display display = getAutomatorBridge().getDefaultDisplay();
         Point p = new Point();
-        display.getSize(p);
+        display.getRealSize(p);
         return p.x;
     }
 
@@ -394,7 +394,7 @@ public class UiDevice {
         Tracer.trace();
         Display display = getAutomatorBridge().getDefaultDisplay();
         Point p = new Point();
-        display.getSize(p);
+        display.getRealSize(p);
         return p.y;
     }
 
@@ -767,7 +767,7 @@ public class UiDevice {
         if(root != null) {
             Display display = getAutomatorBridge().getDefaultDisplay();
             Point size = new Point();
-            display.getSize(size);
+            display.getRealSize(size);
             AccessibilityNodeInfoDumper.dumpWindowToFile(root,
                     new File(new File(Environment.getDataDirectory(), "local/tmp"), fileName),
                     display.getRotation(), size.x, size.y);

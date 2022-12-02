@@ -580,7 +580,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
 
   // Retrieve the package group from the package id of the resource id.
   if (UNLIKELY(!is_valid_resid(resid))) {
-    LOG(ERROR) << base::StringPrintf("Invalid ID 0x%08x.", resid);
+    LOG(ERROR) << base::StringPrintf("Invalid resource ID 0x%08x.", resid);
     return base::unexpected(std::nullopt);
   }
 
@@ -589,7 +589,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
   const uint16_t entry_idx = get_entry_id(resid);
   uint8_t package_idx = package_ids_[package_id];
   if (UNLIKELY(package_idx == 0xff)) {
-    ANDROID_LOG(ERROR) << base::StringPrintf("No package ID %02x found for ID 0x%08x.",
+    ANDROID_LOG(ERROR) << base::StringPrintf("No package ID %02x found for resource ID 0x%08x.",
                                              package_id, resid);
     return base::unexpected(std::nullopt);
   }

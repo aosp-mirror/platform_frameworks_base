@@ -342,22 +342,6 @@
     <!-- Mask to use when checking skb mark defined in config_networkWakeupPacketMark above. -->
     <integer name="config_networkWakeupPacketMask">0</integer>
 
-    <!-- Whether the APF Filter in the device should filter out IEEE 802.3 Frames
-         Those frames are identified by the field Eth-type having values
-         less than 0x600 -->
-    <bool translatable="false" name="config_apfDrop802_3Frames">true</bool>
-
-    <!-- An array of Denylisted EtherType, packets with EtherTypes within this array
-         will be dropped
-         TODO: need to put proper values, these are for testing purposes only -->
-    <integer-array translatable="false" name="config_apfEthTypeBlackList">
-        <item>0x88A2</item>
-        <item>0x88A4</item>
-        <item>0x88B8</item>
-        <item>0x88CD</item>
-        <item>0x88E3</item>
-    </integer-array>
-
     <!-- Default value for ConnectivityManager.getMultipathPreference() on metered networks. Actual
          device behaviour is controlled by Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE.
          This is the default value of that setting. -->
@@ -1649,6 +1633,11 @@
          darkening hysteresis constraint value is the n-th element of
          config_screenDarkeningThresholds.
 
+         Historically, it has been assumed that this will be an integer array with values in the
+         range of [0, 255]. However, it is now assumed to be a float array with values in the
+         range of [0, 1]. To accommodate both the possibilities, we internally check the scale on
+         which the thresholds are defined, and calibrate it accordingly.
+
          The (zero-based) index is calculated as follows: (MAX is the largest index of the array)
          condition                       calculated index
          value < level[0]                0
@@ -1987,9 +1976,16 @@
          STREAM_MUSIC as if it's on TV platform. -->
     <bool name="config_single_volume">false</bool>
 
+    <!-- The default value for whether head tracking for
+         spatial audio is enabled for a newly connected audio device -->
+    <bool name="config_spatial_audio_head_tracking_enabled_default">false</bool>
+
     <!-- Flag indicating whether platform level volume adjustments are enabled for remote sessions
          on grouped devices. -->
     <bool name="config_volumeAdjustmentForRemoteGroupSessions">true</bool>
+
+    <!-- Flag indicating current media Output Switcher version. -->
+    <integer name="config_mediaOutputSwitchDialogVersion">1</integer>
 
     <!-- Flag indicating that an outbound call must have a call capable phone account
          that has declared it can process the call's handle. -->
@@ -3577,6 +3573,12 @@
          experience while the device is non-interactive. -->
     <bool name="config_emergencyGestureEnabled">true</bool>
 
+    <!-- Default value for Use Emergency SOS in Settings false = disabled, true = enabled -->
+    <bool name="config_defaultEmergencyGestureEnabled">true</bool>
+
+    <!-- Default value for Use Play countdown alarm in Settings false = disabled, true = enabled -->
+    <bool name="config_defaultEmergencyGestureSoundEnabled">false</bool>
+
     <!-- Allow the gesture power + volume up to change the ringer mode while the device
          is interactive. -->
     <bool name="config_volumeHushGestureEnabled">true</bool>
@@ -4308,13 +4310,13 @@
     <string name="config_mediaProjectionPermissionDialogComponent" translatable="false">com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity</string>
 
     <!-- Corner radius of system dialogs -->
-    <dimen name="config_dialogCornerRadius">2dp</dimen>
+    <dimen name="config_dialogCornerRadius">28dp</dimen>
     <!-- Corner radius of system buttons -->
-    <dimen name="config_buttonCornerRadius">@dimen/control_corner_material</dimen>
+    <dimen name="config_buttonCornerRadius">4dp</dimen>
     <!-- Corner radius for bottom sheet system dialogs -->
-    <dimen name="config_bottomDialogCornerRadius">@dimen/config_dialogCornerRadius</dimen>
+    <dimen name="config_bottomDialogCornerRadius">16dp</dimen>
     <!-- Corner radius of system progress bars -->
-    <dimen name="config_progressBarCornerRadius">@dimen/progress_bar_corner_material</dimen>
+    <dimen name="config_progressBarCornerRadius">1000dp</dimen>
     <!-- Controls whether system buttons use all caps for text -->
     <bool name="config_buttonTextAllCaps">true</bool>
     <!-- Name of the font family used for system surfaces where the font should use medium weight -->

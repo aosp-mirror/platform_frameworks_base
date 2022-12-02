@@ -90,6 +90,7 @@ public class SettingsToPropertiesMapper {
         DeviceConfig.NAMESPACE_NETD_NATIVE,
         DeviceConfig.NAMESPACE_NNAPI_NATIVE,
         DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT,
+        DeviceConfig.NAMESPACE_REMOTE_KEY_PROVISIONING_NATIVE,
         DeviceConfig.NAMESPACE_RUNTIME_NATIVE,
         DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
         DeviceConfig.NAMESPACE_STATSD_NATIVE,

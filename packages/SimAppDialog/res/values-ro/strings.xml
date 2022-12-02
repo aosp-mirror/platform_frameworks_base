@@ -18,9 +18,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="8898068901680117589">"Sim App Dialog"</string>
-    <string name="install_carrier_app_title" msgid="334729104862562585">"Activați serviciul mobil"</string>
-    <string name="install_carrier_app_description" msgid="4014303558674923797">"Pentru ca noul card SIM să funcționeze corect, va trebui să instalați aplicația <xliff:g id="ID_1">%1$s</xliff:g>"</string>
-    <string name="install_carrier_app_description_default" msgid="7356830245205847840">"Pentru ca noul card SIM să funcționeze corect, va trebui să instalați aplicația operatorului"</string>
+    <string name="install_carrier_app_title" msgid="334729104862562585">"Activează serviciul mobil"</string>
+    <string name="install_carrier_app_description" msgid="4014303558674923797">"Pentru ca noul card SIM să funcționeze corect, va trebui să instalezi aplicația <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="install_carrier_app_description_default" msgid="7356830245205847840">"Pentru ca noul card SIM să funcționeze corect, va trebui să instalezi aplicația operatorului"</string>
     <string name="install_carrier_app_defer_action" msgid="2558576736886876209">"Nu acum"</string>
-    <string name="install_carrier_app_download_action" msgid="7859229305958538064">"Descărcați aplicația"</string>
+    <string name="install_carrier_app_download_action" msgid="7859229305958538064">"Descarcă aplicația"</string>
 </resources>

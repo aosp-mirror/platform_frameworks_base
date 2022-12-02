@@ -18,7 +18,9 @@ package android.security.keystore2;
 
 import android.annotation.NonNull;
 import android.security.KeyStoreSecurityLevel;
+import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyProperties;
+import android.system.keystore2.Authorization;
 import android.system.keystore2.KeyDescriptor;
 import android.system.keystore2.KeyMetadata;
 
@@ -58,9 +60,22 @@ public class AndroidKeyStoreECPublicKey extends AndroidKeyStorePublicKey impleme
 
     @Override
     public AndroidKeyStorePrivateKey getPrivateKey() {
+        ECParameterSpec params = mParams;
+        for (Authorization a : getAuthorizations()) {
+            try {
+                if (a.keyParameter.tag == KeymasterDefs.KM_TAG_EC_CURVE) {
+                    params = KeymasterUtils.getCurveSpec(KeymasterUtils.getEcCurveFromKeymaster(
+                            a.keyParameter.value.getEcCurve()));
+                    break;
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to parse EC curve "
+                        + a.keyParameter.value.getEcCurve());
+            }
+        }
         return new AndroidKeyStoreECPrivateKey(
                 getUserKeyDescriptor(), getKeyIdDescriptor().nspace, getAuthorizations(),
-                getSecurityLevel(), mParams);
+                getSecurityLevel(), params);
     }
 
     @Override

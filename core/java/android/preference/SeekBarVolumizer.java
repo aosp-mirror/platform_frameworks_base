@@ -541,7 +541,8 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         }
 
         public void postUpdateSlider(int volume, int lastAudibleVolume, boolean mute) {
-            obtainMessage(UPDATE_SLIDER, volume, lastAudibleVolume, new Boolean(mute)).sendToTarget();
+            obtainMessage(UPDATE_SLIDER, volume, lastAudibleVolume, Boolean.valueOf(mute))
+                    .sendToTarget();
         }
     }
 

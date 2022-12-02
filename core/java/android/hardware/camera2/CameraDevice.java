@@ -826,7 +826,9 @@ public abstract class CameraDevice implements AutoCloseable {
      * <p> Here, SC Map, refers to the {@link StreamConfigurationMap}, the target stream sizes must
      * be chosen from. {@code DEFAULT} refers to the default sensor pixel mode {@link
      * StreamConfigurationMap} and {@code MAX_RES} refers to the maximum resolution {@link
-     * StreamConfigurationMap}. The same capture request must not mix targets from
+     * StreamConfigurationMap}. For {@code MAX_RES} streams, {@code MAX} in the {@code Max size} column refers to the maximum size from
+     * {@link StreamConfigurationMap#getOutputSizes} and {@link StreamConfigurationMap#getHighResolutionOutputSizes}.
+     * Note: The same capture request must not mix targets from
      * {@link StreamConfigurationMap}s corresponding to different sensor pixel modes. </p>
      *
      * <p> 10-bit output capable

@@ -269,6 +269,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         }
 
         private void onGroupActionTriggered(boolean isChecked, MediaDevice device) {
+            disableSeekBar();
             if (isChecked && isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
                 mController.addDeviceToPlayMedia(device);
             } else if (!isChecked && isDeviceIncluded(mController.getDeselectableMediaDevice(),

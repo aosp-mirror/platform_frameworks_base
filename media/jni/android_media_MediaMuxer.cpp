@@ -165,7 +165,11 @@ static jlong android_media_MediaMuxer_native_setup(
 
     MediaMuxer::OutputFormat fileFormat =
         static_cast<MediaMuxer::OutputFormat>(format);
-    sp<MediaMuxer> muxer = new MediaMuxer(fd, fileFormat);
+    sp<MediaMuxer> muxer = MediaMuxer::create(fd, fileFormat);
+    if (muxer == nullptr) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", "Muxer creation failed");
+        return 0;
+    }
     muxer->incStrong(clazz);
     return reinterpret_cast<jlong>(muxer.get());
 }

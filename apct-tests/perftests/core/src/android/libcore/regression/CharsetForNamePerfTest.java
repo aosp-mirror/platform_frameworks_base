@@ -20,44 +20,40 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Collection;
 
-@RunWith(Parameterized.class)
+@RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class CharsetForNamePerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameterized.Parameters(name = "mCharsetName({0})")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[][] {
-                    {"UTF-16"},
-                    {"UTF-8"},
-                    {"UTF8"},
-                    {"ISO-8859-1"},
-                    {"8859_1"},
-                    {"ISO-8859-2"},
-                    {"8859_2"},
-                    {"US-ASCII"},
-                    {"ASCII"},
-                });
+    public static String[] charsetNames() {
+        return new String[] {
+            "UTF-16",
+            "UTF-8",
+            "UTF8",
+            "ISO-8859-1",
+            "8859_1",
+            "ISO-8859-2",
+            "8859_2",
+            "US-ASCII",
+            "ASCII",
+        };
     }
 
-    @Parameterized.Parameter(0)
-    public String mCharsetName;
-
     @Test
-    public void timeCharsetForName() throws Exception {
+    @Parameters(method = "charsetNames")
+    public void timeCharsetForName(String charsetName) throws Exception {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            Charset.forName(mCharsetName);
+            Charset.forName(charsetName);
         }
     }
 }

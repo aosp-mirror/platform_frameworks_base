@@ -1613,29 +1613,26 @@ public final class DataFailCause {
                 // If we are not able to find the configuration from carrier config, use the default
                 // ones.
                 if (permanentFailureSet == null) {
-                    permanentFailureSet = new HashSet<Integer>() {
-                        {
-                            add(OPERATOR_BARRED);
-                            add(MISSING_UNKNOWN_APN);
-                            add(UNKNOWN_PDP_ADDRESS_TYPE);
-                            add(USER_AUTHENTICATION);
-                            add(ACTIVATION_REJECT_GGSN);
-                            add(SERVICE_OPTION_NOT_SUPPORTED);
-                            add(SERVICE_OPTION_NOT_SUBSCRIBED);
-                            add(NSAPI_IN_USE);
-                            add(ONLY_IPV4_ALLOWED);
-                            add(ONLY_IPV6_ALLOWED);
-                            add(PROTOCOL_ERRORS);
-                            add(RADIO_POWER_OFF);
-                            add(TETHERED_CALL_ACTIVE);
-                            add(RADIO_NOT_AVAILABLE);
-                            add(UNACCEPTABLE_NETWORK_PARAMETER);
-                            add(SIGNAL_LOST);
-                            add(DUPLICATE_CID);
-                            add(MATCH_ALL_RULE_NOT_ALLOWED);
-                            add(ALL_MATCHING_RULES_FAILED);
-                        }
-                    };
+                    permanentFailureSet = new HashSet<Integer>();
+                    permanentFailureSet.add(OPERATOR_BARRED);
+                    permanentFailureSet.add(MISSING_UNKNOWN_APN);
+                    permanentFailureSet.add(UNKNOWN_PDP_ADDRESS_TYPE);
+                    permanentFailureSet.add(USER_AUTHENTICATION);
+                    permanentFailureSet.add(ACTIVATION_REJECT_GGSN);
+                    permanentFailureSet.add(SERVICE_OPTION_NOT_SUPPORTED);
+                    permanentFailureSet.add(SERVICE_OPTION_NOT_SUBSCRIBED);
+                    permanentFailureSet.add(NSAPI_IN_USE);
+                    permanentFailureSet.add(ONLY_IPV4_ALLOWED);
+                    permanentFailureSet.add(ONLY_IPV6_ALLOWED);
+                    permanentFailureSet.add(PROTOCOL_ERRORS);
+                    permanentFailureSet.add(RADIO_POWER_OFF);
+                    permanentFailureSet.add(TETHERED_CALL_ACTIVE);
+                    permanentFailureSet.add(RADIO_NOT_AVAILABLE);
+                    permanentFailureSet.add(UNACCEPTABLE_NETWORK_PARAMETER);
+                    permanentFailureSet.add(SIGNAL_LOST);
+                    permanentFailureSet.add(DUPLICATE_CID);
+                    permanentFailureSet.add(MATCH_ALL_RULE_NOT_ALLOWED);
+                    permanentFailureSet.add(ALL_MATCHING_RULES_FAILED);
                 }
 
                 permanentFailureSet.add(NO_RETRY_FAILURE);

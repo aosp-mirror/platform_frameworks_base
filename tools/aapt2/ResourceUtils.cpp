@@ -51,8 +51,10 @@ std::optional<ResourceName> ToResourceName(const android::ResTable::resource_nam
       util::Utf16ToUtf8(StringPiece16(name_in.package, name_in.packageLen));
 
   std::optional<ResourceNamedTypeRef> type;
+  std::string converted;
   if (name_in.type) {
-    type = ParseResourceNamedType(util::Utf16ToUtf8(StringPiece16(name_in.type, name_in.typeLen)));
+    converted = util::Utf16ToUtf8(StringPiece16(name_in.type, name_in.typeLen));
+    type = ParseResourceNamedType(converted);
   } else if (name_in.type8) {
     type = ParseResourceNamedType(StringPiece(name_in.type8, name_in.typeLen));
   } else {
@@ -85,9 +87,10 @@ std::optional<ResourceName> ToResourceName(const android::AssetManager2::Resourc
   name_out.package = std::string(name_in.package, name_in.package_len);
 
   std::optional<ResourceNamedTypeRef> type;
+  std::string converted;
   if (name_in.type16) {
-    type =
-        ParseResourceNamedType(util::Utf16ToUtf8(StringPiece16(name_in.type16, name_in.type_len)));
+    converted = util::Utf16ToUtf8(StringPiece16(name_in.type16, name_in.type_len));
+    type = ParseResourceNamedType(converted);
   } else if (name_in.type) {
     type = ParseResourceNamedType(StringPiece(name_in.type, name_in.type_len));
   } else {

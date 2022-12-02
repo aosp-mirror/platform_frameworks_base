@@ -1,1 +1,4 @@
 include platform/frameworks/base:/services/core/java/com/android/server/am/OWNERS
+
+per-file BinderTest.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ParcelTest.java = file:platform/frameworks/native:/libs/binder/OWNERS

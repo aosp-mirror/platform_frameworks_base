@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"O teu operador desactivou este servizo temporalmente para a SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Non se puido conectar coa rede de telefonía móbil"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Proba a cambiar a rede preferida. Toca para cambiar."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"As chamadas de emerxencia non están dispoñibles"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Non se poden realizar chamadas de emerxencia por wifi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"É posible que as chamadas de emerxencia non estean dispoñibles"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> non permite realizar chamadas de emerxencia por wifi. Toca para obter información."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertas"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Desvío de chamadas"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Modo de devolución de chamadas de emerxencia"</string>
@@ -1600,7 +1600,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Televisión"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Teléfono"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Conectar altofalantes á base"</string>
-    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
+    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Dispositivo externo"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Auriculares"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Sistema"</string>
@@ -2076,7 +2076,7 @@
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"A tableta non ten suficiente batería. Xa non se restrinxirán as funcións."</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"O dispositivo non ten suficiente batería. Xa non se restrinxirán as funcións."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Cartafol"</string>
-    <string name="mime_type_apk" msgid="3168784749499623902">"Aplicación Android"</string>
+    <string name="mime_type_apk" msgid="3168784749499623902">"Aplicación para Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Ficheiro"</string>
     <string name="mime_type_generic_ext" msgid="9220220924380909486">"Ficheiro <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="mime_type_audio" msgid="4933450584432509875">"Audio"</string>

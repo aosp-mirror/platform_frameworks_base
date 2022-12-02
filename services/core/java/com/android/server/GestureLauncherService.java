@@ -466,7 +466,8 @@ public class GestureLauncherService extends SystemService {
     public static boolean isEmergencyGestureSettingEnabled(Context context, int userId) {
         return isEmergencyGestureEnabled(context.getResources())
                 && Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.EMERGENCY_GESTURE_ENABLED, 1, userId) != 0;
+                Settings.Secure.EMERGENCY_GESTURE_ENABLED,
+                isDefaultEmergencyGestureEnabled(context.getResources()) ? 1 : 0, userId) != 0;
     }
 
     /**
@@ -511,6 +512,11 @@ public class GestureLauncherService extends SystemService {
      */
     private static boolean isEmergencyGestureEnabled(Resources resources) {
         return resources.getBoolean(com.android.internal.R.bool.config_emergencyGestureEnabled);
+    }
+
+    private static boolean isDefaultEmergencyGestureEnabled(Resources resources) {
+        return resources.getBoolean(
+                com.android.internal.R.bool.config_defaultEmergencyGestureEnabled);
     }
 
     /**

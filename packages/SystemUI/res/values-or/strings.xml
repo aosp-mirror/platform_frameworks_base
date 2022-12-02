@@ -176,7 +176,7 @@
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"ସମସ୍ତ ବିଜ୍ଞପ୍ତି ଦେଖନ୍ତୁ"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"ଟେଲି-ଟାଇପରାଇଟର୍ ସକ୍ଷମ ଅଛି।"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"ରିଙ୍ଗର୍‌ କମ୍ପନରେ ଅଛି।"</string>
-    <string name="accessibility_ringer_silent" msgid="8994620163934249882">"ରିଙ୍ଗର୍‌ ସାଇଲେଣ୍ଟରେ ଅଛି।"</string>
+    <string name="accessibility_ringer_silent" msgid="8994620163934249882">"ରିଂଗର ସାଇଲେଣ୍ଟରେ ଅଛି।"</string>
     <!-- no translation found for accessibility_casting (8708751252897282313) -->
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"ବିଜ୍ଞପ୍ତି ଶେଡ୍‍।"</string>

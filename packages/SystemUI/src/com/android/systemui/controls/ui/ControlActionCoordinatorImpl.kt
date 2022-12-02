@@ -18,6 +18,7 @@ package com.android.systemui.controls.ui
 
 import android.annotation.AnyThread
 import android.annotation.MainThread
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.app.PendingIntent
@@ -119,8 +120,16 @@ class ControlActionCoordinatorImpl @Inject constructor(
     }
 
     override fun closeDialogs() {
-        dialog?.dismiss()
-        dialog = null
+        val isActivityFinishing =
+            (activityContext as? Activity)?.let { it.isFinishing || it.isDestroyed }
+        if (isActivityFinishing == true) {
+            dialog = null
+            return
+        }
+        if (dialog?.isShowing == true) {
+            dialog?.dismiss()
+            dialog = null
+        }
     }
 
     override fun toggle(cvh: ControlViewHolder, templateId: String, isChecked: Boolean) {

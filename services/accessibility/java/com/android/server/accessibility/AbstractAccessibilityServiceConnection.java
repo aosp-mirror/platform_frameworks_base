@@ -176,6 +176,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     private boolean mSendMotionEvents;
 
+    private SparseArray<Boolean> mServiceDetectsGestures = new SparseArray<>(0);
     boolean mRequestFilterKeyEvents;
 
     boolean mRetrieveInteractiveWindows;
@@ -2344,7 +2345,15 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     public void setServiceDetectsGesturesEnabled(int displayId, boolean mode) {
+        mServiceDetectsGestures.put(displayId, mode);
         mSystemSupport.setServiceDetectsGesturesEnabled(displayId, mode);
+    }
+
+    public boolean isServiceDetectsGesturesEnabled(int displayId) {
+        if (mServiceDetectsGestures.contains(displayId)) {
+            return mServiceDetectsGestures.get(displayId);
+        }
+        return false;
     }
 
     public void requestTouchExploration(int displayId) {

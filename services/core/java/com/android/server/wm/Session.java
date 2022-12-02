@@ -322,7 +322,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         final int callingPid = Binder.getCallingPid();
         // Validate and resolve ClipDescription data before clearing the calling identity
         validateAndResolveDragMimeTypeExtras(data, callingUid, callingPid, mPackageName);
-        validateDragFlags(flags, callingUid);
+        validateDragFlags(flags);
         final long ident = Binder.clearCallingIdentity();
         try {
             return mDragDropController.performDrag(mPid, mUid, window, flags, surface, touchSource,
@@ -347,11 +347,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
      * Validates the given drag flags.
      */
     @VisibleForTesting
-    void validateDragFlags(int flags, int callingUid) {
-        if (callingUid == Process.SYSTEM_UID) {
-            throw new IllegalStateException("Need to validate before calling identify is cleared");
-        }
-
+    void validateDragFlags(int flags) {
         if ((flags & View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION) != 0) {
             if (!mCanStartTasksFromRecents) {
                 throw new SecurityException("Requires START_TASKS_FROM_RECENTS permission");
@@ -365,9 +361,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @VisibleForTesting
     void validateAndResolveDragMimeTypeExtras(ClipData data, int callingUid, int callingPid,
             String callingPackage) {
-        if (callingUid == Process.SYSTEM_UID) {
-            throw new IllegalStateException("Need to validate before calling identify is cleared");
-        }
         final ClipDescription desc = data != null ? data.getDescription() : null;
         if (desc == null) {
             return;

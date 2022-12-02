@@ -197,8 +197,11 @@ public final class StorageEventHelper extends StorageEventListener {
                     appDataHelper.reconcileAppsDataLI(volumeUuid, user.id, flags,
                             true /* migrateAppData */);
                 }
-            } catch (IllegalStateException e) {
-                // Device was probably ejected, and we'll process that event momentarily
+            } catch (RuntimeException e) {
+                // The volume was probably already unmounted.  We'll probably process the unmount
+                // event momentarily.  TODO(b/256909937): ignoring errors from prepareUserStorage()
+                // is very dangerous.  Instead, we should fix the race condition that allows this
+                // code to run on an unmounted volume in the first place.
                 Slog.w(TAG, "Failed to prepare storage: " + e);
             }
         }

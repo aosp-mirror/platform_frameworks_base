@@ -82,8 +82,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM kortelėje <xliff:g id="SIMNUMBER">%d</xliff:g> laikinai išjungė operatorius"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Nepavyko pasiekti mobiliojo ryšio tinklo"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Pabandykite pakeisti pageidaujamą tinklą. Palieskite, kad pakeistumėte."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Skambučių pagalbos numeriu paslauga nepasiekiama"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Negalima skambinti pagalbos numeriu naudojant „Wi‑Fi“"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Skambučiai pagalbos numeriu gali būti nepasiekiami"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"„<xliff:g id="SPN">%s</xliff:g>“ nepalaiko skambučių pagalbos numeriu „Wi-Fi“ ryšiu. Palieskite, jei reikia išsamios informacijos."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Įspėjimai"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Skambučio peradresavimas"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Atskambinimo pagalbos numeriu režimas"</string>
@@ -1602,7 +1602,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefonas"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Doko garsiakalbiai"</string>
-    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
+    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Išorinis įrenginys"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Ausinės"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Sistema"</string>

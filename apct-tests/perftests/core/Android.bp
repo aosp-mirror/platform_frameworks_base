@@ -43,6 +43,9 @@ android_test {
         "apct-perftests-resources-manager-apps",
         "apct-perftests-utils",
         "collector-device-lib",
+        "compatibility-device-util-axt",
+        "junit",
+        "junit-params",
         "core-tests-support",
         "guava",
     ],
@@ -59,4 +62,10 @@ android_test {
 
     test_suites: ["device-tests"],
     certificate: "platform",
+
+    errorprone: {
+        javacflags: [
+            "-Xep:ReturnValueIgnored:WARN",
+        ],
+    },
 }

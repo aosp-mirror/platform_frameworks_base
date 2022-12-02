@@ -20,12 +20,12 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import org.junit.Before;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,13 +35,12 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Random;
 
-@RunWith(Parameterized.class)
+@RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class PriorityQueuePerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameters(name = "mQueueSize={0}, mHitRate={1}")
-    public static Collection<Object[]> data() {
+    public static Collection<Object[]> getData() {
         return Arrays.asList(
                 new Object[][] {
                     {100, 0},
@@ -62,26 +61,19 @@ public class PriorityQueuePerfTest {
                 });
     }
 
-    @Parameterized.Parameter(0)
-    public int mQueueSize;
-
-    @Parameterized.Parameter(1)
-    public int mHitRate;
-
     private PriorityQueue<Integer> mPq;
     private PriorityQueue<Integer> mUsepq;
     private List<Integer> mSeekElements;
     private Random mRandom = new Random(189279387L);
 
-    @Before
-    public void setUp() throws Exception {
+    public void setUp(int queueSize, int hitRate) throws Exception {
         mPq = new PriorityQueue<Integer>();
         mUsepq = new PriorityQueue<Integer>();
         mSeekElements = new ArrayList<Integer>();
         List<Integer> allElements = new ArrayList<Integer>();
-        int numShared = (int) (mQueueSize * ((double) mHitRate / 100));
-        // the total number of elements we require to engineer a hit rate of mHitRate%
-        int totalElements = 2 * mQueueSize - numShared;
+        int numShared = (int) (queueSize * ((double) hitRate / 100));
+        // the total number of elements we require to engineer a hit rate of hitRate%
+        int totalElements = 2 * queueSize - numShared;
         for (int i = 0; i < totalElements; i++) {
             allElements.add(i);
         }
@@ -93,11 +85,11 @@ public class PriorityQueuePerfTest {
             mSeekElements.add(allElements.get(i));
         }
         // add priority queue only elements (these won't be touched)
-        for (int i = numShared; i < mQueueSize; i++) {
+        for (int i = numShared; i < queueSize; i++) {
             mPq.add(allElements.get(i));
         }
         // add non-priority queue elements (these will be misses)
-        for (int i = mQueueSize; i < totalElements; i++) {
+        for (int i = queueSize; i < totalElements; i++) {
             mSeekElements.add(allElements.get(i));
         }
         mUsepq = new PriorityQueue<Integer>(mPq);
@@ -107,16 +99,18 @@ public class PriorityQueuePerfTest {
     }
 
     @Test
-    public void timeRemove() {
+    @Parameters(method = "getData")
+    public void timeRemove(int queueSize, int hitRate) throws Exception {
+        setUp(queueSize, hitRate);
         boolean fake = false;
         int elementsSize = mSeekElements.size();
         // At most allow the queue to empty 10%.
-        int resizingThreshold = mQueueSize / 10;
+        int resizingThreshold = queueSize / 10;
         int i = 0;
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             // Reset queue every so often. This will be called more often for smaller
-            // mQueueSizes, but since a copy is linear, it will also cost proportionally
+            // queueSizes, but since a copy is linear, it will also cost proportionally
             // less, and hopefully it will approximately balance out.
             if (++i % resizingThreshold == 0) {
                 mUsepq = new PriorityQueue<Integer>(mPq);

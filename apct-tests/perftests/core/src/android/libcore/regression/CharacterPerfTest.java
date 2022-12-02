@@ -20,12 +20,12 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import org.junit.Before;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,13 +34,12 @@ import java.util.Collection;
  * Tests various Character methods, intended for testing multiple implementations against each
  * other.
  */
-@RunWith(Parameterized.class)
+@RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class CharacterPerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameters(name = "mCharacterSet({0}), mOverload({1})")
-    public static Collection<Object[]> data() {
+    public static Collection<Object[]> getData() {
         return Arrays.asList(
                 new Object[][] {
                     {CharacterSet.ASCII, Overload.CHAR},
@@ -50,17 +49,10 @@ public class CharacterPerfTest {
                 });
     }
 
-    @Parameterized.Parameter(0)
-    public CharacterSet mCharacterSet;
-
-    @Parameterized.Parameter(1)
-    public Overload mOverload;
-
     private char[] mChars;
 
-    @Before
-    public void setUp() throws Exception {
-        this.mChars = mCharacterSet.mChars;
+    public void setUp(CharacterSet characterSet) {
+        this.mChars = characterSet.mChars;
     }
 
     public enum Overload {
@@ -87,10 +79,12 @@ public class CharacterPerfTest {
 
     // A fake benchmark to give us a baseline.
     @Test
-    public void timeIsSpace() {
+    @Parameters(method = "getData")
+    public void timeIsSpace(CharacterSet characterSet, Overload overload) {
+        setUp(characterSet);
         boolean fake = false;
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        if (mOverload == Overload.CHAR) {
+        if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
                     fake ^= ((char) ch == ' ');
@@ -106,9 +100,11 @@ public class CharacterPerfTest {
     }
 
     @Test
-    public void timeDigit() {
+    @Parameters(method = "getData")
+    public void timeDigit(CharacterSet characterSet, Overload overload) {
+        setUp(characterSet);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        if (mOverload == Overload.CHAR) {
+        if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
                     Character.digit(mChars[ch], 10);
@@ -124,9 +120,11 @@ public class CharacterPerfTest {
     }
 
     @Test
-    public void timeGetNumericValue() {
+    @Parameters(method = "getData")
+    public void timeGetNumericValue(CharacterSet characterSet, Overload overload) {
+        setUp(characterSet);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        if (mOverload == Overload.CHAR) {
+        if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
                     Character.getNumericValue(mChars[ch]);
@@ -142,9 +140,11 @@ public class CharacterPerfTest {
     }
 
     @Test
-    public void timeIsDigit() {
+    @Parameters(method = "getData")
+    public void timeIsDigit(CharacterSet characterSet, Overload overload) {
+        setUp(characterSet);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        if (mOverload == Overload.CHAR) {
+        if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
                     Character.isDigit(mChars[ch]);
@@ -160,9 +160,11 @@ public class CharacterPerfTest {
     }
 
     @Test
-    public void timeIsIdentifierIgnorable() {
+    @Parameters(method = "getData")
+    public void timeIsIdentifierIgnorable(CharacterSet characterSet, Overload overload) {
+        setUp(characterSet);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        if (mOverload == Overload.CHAR) {
+        if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
                     Character.isIdentifierIgnorable(mChars[ch]);
@@ -178,9 +180,11 @@ public class CharacterPerfTest {
     }
 
     @Test
-    public void timeIsJavaIdentifierPart() {
+    @Parameters(method = "getData")
+    public void timeIsJavaIdentifierPart(CharacterSet characterSet, Overload overload) {
+        setUp(characterSet);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        if (mOverload == Overload.CHAR) {
+        if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
                     Character.isJavaIdentifierPart(mChars[ch]);
@@ -196,9 +200,11 @@ public class CharacterPerfTest {
     }
 
     @Test
-    public void timeIsJavaIdentifierStart() {
+    @Parameters(method = "getData")
+    public void timeIsJavaIdentifierStart(CharacterSet characterSet, Overload overload) {
+        setUp(characterSet);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        if (mOverload == Overload.CHAR) {
+        if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
                     Character.isJavaIdentifierStart(mChars[ch]);
@@ -214,9 +220,11 @@ public class CharacterPerfTest {
     }
 
     @Test
-    public void timeIsLetter() {
+    @Parameters(method = "getData")
+    public void timeIsLetter(CharacterSet characterSet, Overload overload) {
+        setUp(characterSet);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        if (mOverload == Overload.CHAR) {
+        if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
                     Character.isLetter(mChars[ch]);
@@ -232,9 +240,11 @@ public class CharacterPerfTest {
     }
 
     @Test
-    public void timeIsLetterOrDigit() {
+    @Parameters(method = "getData")
+    public void timeIsLetterOrDigit(CharacterSet characterSet, Overload overload) {
+        setUp(characterSet);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        if (mOverload == Overload.CHAR) {
+        if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
                     Character.isLetterOrDigit(mChars[ch]);
@@ -250,9 +260,11 @@ public class CharacterPerfTest {
     }
 
     @Test
-    public void timeIsLowerCase() {
+    @Parameters(method = "getData")
+    public void timeIsLowerCase(CharacterSet characterSet, Overload overload) {
+        setUp(characterSet);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        if (mOverload == Overload.CHAR) {
+        if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
                     Character.isLowerCase(mChars[ch]);
@@ -268,9 +280,11 @@ public class CharacterPerfTest {
     }
 
     @Test
-    public void timeIsSpaceChar() {
+    @Parameters(method = "getData")
+    public void timeIsSpaceChar(CharacterSet characterSet, Overload overload) {
+        setUp(characterSet);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        if (mOverload == Overload.CHAR) {
+        if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
                     Character.isSpaceChar(mChars[ch]);
@@ -286,9 +300,11 @@ public class CharacterPerfTest {
     }
 
     @Test
-    public void timeIsUpperCase() {
+    @Parameters(method = "getData")
+    public void timeIsUpperCase(CharacterSet characterSet, Overload overload) {
+        setUp(characterSet);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        if (mOverload == Overload.CHAR) {
+        if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
                     Character.isUpperCase(mChars[ch]);
@@ -304,9 +320,11 @@ public class CharacterPerfTest {
     }
 
     @Test
-    public void timeIsWhitespace() {
+    @Parameters(method = "getData")
+    public void timeIsWhitespace(CharacterSet characterSet, Overload overload) {
+        setUp(characterSet);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        if (mOverload == Overload.CHAR) {
+        if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
                     Character.isWhitespace(mChars[ch]);
@@ -322,9 +340,11 @@ public class CharacterPerfTest {
     }
 
     @Test
-    public void timeToLowerCase() {
+    @Parameters(method = "getData")
+    public void timeToLowerCase(CharacterSet characterSet, Overload overload) {
+        setUp(characterSet);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        if (mOverload == Overload.CHAR) {
+        if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
                     Character.toLowerCase(mChars[ch]);
@@ -340,9 +360,11 @@ public class CharacterPerfTest {
     }
 
     @Test
-    public void timeToUpperCase() {
+    @Parameters(method = "getData")
+    public void timeToUpperCase(CharacterSet characterSet, Overload overload) {
+        setUp(characterSet);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        if (mOverload == Overload.CHAR) {
+        if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
                     Character.toUpperCase(mChars[ch]);

@@ -1,6 +1,17 @@
 {
   "presubmit": [
     {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "com.android.internal.security."
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        }
+      ]
+    },
+    {
       "name": "ApkVerityTest",
       "file_patterns": ["VerityUtils\\.java"]
     }

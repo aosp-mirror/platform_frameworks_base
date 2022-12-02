@@ -1641,7 +1641,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 try {
                     callback.onKeyguardExitResult(true);
                 } catch (RemoteException e) {
-                    Slog.w(TAG, "Failed to call onKeyguardExitResult(false)", e);
+                    Slog.w(TAG, "Failed to call onKeyguardExitResult(true)", e);
                 }
             } else {
 

@@ -34,9 +34,13 @@ cc_library_shared {
         "-Wno-error=deprecated-declarations",
         "-Wunused",
         "-Wunreachable-code",
+
+        "-DNAMESPACE_FOR_HASH_FUNCTIONS=farmhash",
     ],
 
     cppflags: ["-Wno-conversion-null"],
+
+    cpp_std: "gnu++20",
 
     srcs: [
         "android_animation_PropertyValuesHolder.cpp",
@@ -211,6 +215,7 @@ cc_library_shared {
                 "android_content_res_Configuration.cpp",
                 "android_security_Scrypt.cpp",
                 "com_android_internal_content_om_OverlayConfig.cpp",
+                "com_android_internal_expresslog_Counter.cpp",
                 "com_android_internal_net_NetworkUtilsInternal.cpp",
                 "com_android_internal_os_ClassLoaderFactory.cpp",
                 "com_android_internal_os_FuseAppLoop.cpp",
@@ -244,6 +249,7 @@ cc_library_shared {
                 "libscrypt_static",
                 "libstatssocket_lazy",
                 "libskia",
+                "libtextclassifier_hash_static",
             ],
 
             shared_libs: [
@@ -326,7 +332,7 @@ cc_library_shared {
             header_libs: [
                 "bionic_libc_platform_headers",
                 "dnsproxyd_protocol_headers",
-                "libandroid_runtime_vm_headers",
+                "libtextclassifier_hash_headers",
             ],
         },
         host: {
@@ -414,25 +420,4 @@ cc_library_shared {
     lto: {
         never: true,
     },
-}
-
-cc_library_headers {
-    name: "libandroid_runtime_vm_headers",
-    host_supported: true,
-    vendor_available: true,
-    // TODO(b/153609531): remove when libbinder is not native_bridge_supported
-    native_bridge_supported: true,
-    // Allow only modules from the following list to create threads that can be
-    // attached to the JVM. This list should be a subset of the dependencies of
-    // libandroid_runtime.
-    visibility: [
-        "//frameworks/native/libs/binder",
-    ],
-    export_include_dirs: ["include_vm"],
-    header_libs: [
-        "jni_headers",
-    ],
-    export_header_lib_headers: [
-        "jni_headers",
-    ],
 }

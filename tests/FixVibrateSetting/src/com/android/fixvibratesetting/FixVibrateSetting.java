@@ -110,7 +110,7 @@ public class FixVibrateSetting extends Activity implements View.OnClickListener
 
     private void test() {
         Intent intent = new Intent(this, FixVibrateSetting.class);
-        PendingIntent pending = PendingIntent.getActivity(this, 0, intent, 0);
+        PendingIntent pending = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
         Notification n = new Notification.Builder(this)
                 .setSmallIcon(R.drawable.stat_sys_warning)

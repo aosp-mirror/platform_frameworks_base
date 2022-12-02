@@ -39,6 +39,7 @@ public class OdsignStatsLogger {
     // These need to be kept in sync with system/security/ondevice-signing/StatsReporter.{h, cpp}.
     private static final String METRICS_FILE = "/data/misc/odsign/metrics/odsign-metrics.txt";
     private static final String COMPOS_METRIC_NAME = "comp_os_artifacts_check_record";
+    private static final String ODSIGN_METRIC_NAME = "odsign_record";
 
     /**
      * Arrange for stats to be uploaded in the background.
@@ -64,18 +65,45 @@ public class OdsignStatsLogger {
             for (String line : lines.split("\n")) {
                 String[] metrics = line.split(" ");
 
-                if (metrics.length != 4 || !metrics[0].equals(COMPOS_METRIC_NAME)) {
-                    Slog.w(TAG, "Malformed metrics file");
-                    break;
+                if (line.isEmpty() || metrics.length < 1) {
+                    Slog.w(TAG, "Empty metrics line");
+                    continue;
                 }
 
-                boolean currentArtifactsOk = metrics[1].equals("1");
-                boolean compOsPendingArtifactsExists = metrics[2].equals("1");
-                boolean useCompOsGeneratedArtifacts = metrics[3].equals("1");
+                switch (metrics[0]) {
+                    case COMPOS_METRIC_NAME: {
+                        if (metrics.length != 4) {
+                            Slog.w(TAG, "Malformed CompOS metrics line '" + line + "'");
+                            continue;
+                        }
 
-                ArtStatsLog.write(ArtStatsLog.EARLY_BOOT_COMP_OS_ARTIFACTS_CHECK_REPORTED,
-                        currentArtifactsOk, compOsPendingArtifactsExists,
-                        useCompOsGeneratedArtifacts);
+                        boolean currentArtifactsOk = metrics[1].equals("1");
+                        boolean compOsPendingArtifactsExists = metrics[2].equals("1");
+                        boolean useCompOsGeneratedArtifacts = metrics[3].equals("1");
+
+                        ArtStatsLog.write(ArtStatsLog.EARLY_BOOT_COMP_OS_ARTIFACTS_CHECK_REPORTED,
+                                currentArtifactsOk, compOsPendingArtifactsExists,
+                                useCompOsGeneratedArtifacts);
+                        break;
+                    }
+                    case ODSIGN_METRIC_NAME: {
+                        if (metrics.length != 2) {
+                            Slog.w(TAG, "Malformed odsign metrics line '" + line + "'");
+                            continue;
+                        }
+
+                        try {
+                            int status = Integer.parseInt(metrics[1]);
+                            ArtStatsLog.write(ArtStatsLog.ODSIGN_REPORTED, status);
+                        } catch (NumberFormatException e) {
+                            Slog.w(TAG, "Malformed odsign metrics line '" + line + "'");
+                        }
+
+                        break;
+                    }
+                    default:
+                        Slog.w(TAG, "Malformed metrics line '" + line + "'");
+                }
             }
         } catch (FileNotFoundException e) {
             // This is normal and probably means no new metrics have been generated.

@@ -251,7 +251,7 @@
     <string name="quick_settings_connecting" msgid="2381969772953268809">"S\'està connectant..."</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Punt d\'accés Wi-Fi"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"S\'està activant…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Economitzador activat"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Estalvi dades activat"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="other">%d dispositius</item>
       <item quantity="one">%d dispositiu</item>
@@ -593,8 +593,8 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Obre la configuració"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Auriculars connectats"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Auriculars connectats"</string>
-    <string name="data_saver" msgid="3484013368530820763">"Economitzador de dades"</string>
-    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"L\'Economitzador de dades està activat"</string>
+    <string name="data_saver" msgid="3484013368530820763">"Estalvi de dades"</string>
+    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"L\'Estalvi de dades està activat"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Activat"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Desactivat"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"No disponible"</string>
@@ -623,7 +623,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"Codi de tecla de la dreta"</string>
     <string name="left_icon" msgid="5036278531966897006">"Icona de l\'esquerra"</string>
     <string name="right_icon" msgid="1103955040645237425">"Icona de la dreta"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantén premut i arrossega per afegir mosaics"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantén premut i arrossega per afegir icones"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén premut i arrossega per reorganitzar els mosaics"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arrossega aquí per suprimir"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Necessites com a mínim <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> mosaics"</string>

@@ -31,6 +31,7 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.expresslog.Counter;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
 
@@ -88,6 +89,8 @@ public final class TimeController extends StateController {
             // will never be unsatisfied (our time base can not go backwards).
             final long nowElapsedMillis = sElapsedRealtimeClock.millis();
             if (job.hasDeadlineConstraint() && evaluateDeadlineConstraint(job, nowElapsedMillis)) {
+                // We're intentionally excluding jobs whose deadlines have passed
+                // (mostly like deadlines of 0) when the job was scheduled.
                 return;
             } else if (job.hasTimingDelayConstraint() && evaluateTimingDelayConstraint(job,
                     nowElapsedMillis)) {
@@ -159,6 +162,8 @@ public final class TimeController extends StateController {
                     // Scheduler.
                     mStateChangedListener.onRunJobNow(job);
                 }
+                Counter.logIncrement(
+                        "job_scheduler.value_job_scheduler_job_deadline_expired_counter");
             } else if (wouldBeReadyWithConstraintLocked(job, JobStatus.CONSTRAINT_DEADLINE)) {
                 // This job's deadline is earlier than the current set alarm. Update the alarm.
                 setDeadlineExpiredAlarmLocked(job.getLatestRunTimeElapsed(),
@@ -229,6 +234,8 @@ public final class TimeController extends StateController {
                         // Scheduler.
                         mStateChangedListener.onRunJobNow(job);
                     }
+                    Counter.logIncrement(
+                            "job_scheduler.value_job_scheduler_job_deadline_expired_counter");
                     it.remove();
                 } else {  // Sorted by expiry time, so take the next one and stop.
                     if (!wouldBeReadyWithConstraintLocked(job, JobStatus.CONSTRAINT_DEADLINE)) {

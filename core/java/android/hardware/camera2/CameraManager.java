@@ -133,9 +133,6 @@ public final class CameraManager {
     private HandlerThread mHandlerThread;
     private Handler mHandler;
     private FoldStateListener mFoldStateListener;
-    @GuardedBy("mLock")
-    private ArrayList<WeakReference<DeviceStateListener>> mDeviceStateListeners = new ArrayList<>();
-    private boolean mFoldedDeviceState;
 
     /**
      * @hide
@@ -144,31 +141,39 @@ public final class CameraManager {
         void onDeviceStateChanged(boolean folded);
     }
 
-    private final class FoldStateListener implements DeviceStateManager.DeviceStateCallback {
+    private static final class FoldStateListener implements DeviceStateManager.DeviceStateCallback {
         private final int[] mFoldedDeviceStates;
+
+        private ArrayList<WeakReference<DeviceStateListener>> mDeviceStateListeners =
+                new ArrayList<>();
+        private boolean mFoldedDeviceState;
 
         public FoldStateListener(Context context) {
             mFoldedDeviceStates = context.getResources().getIntArray(
                     com.android.internal.R.array.config_foldedDeviceStates);
         }
 
-        private void handleStateChange(int state) {
+        private synchronized void handleStateChange(int state) {
             boolean folded = ArrayUtils.contains(mFoldedDeviceStates, state);
-            synchronized (mLock) {
-                mFoldedDeviceState = folded;
-                ArrayList<WeakReference<DeviceStateListener>> invalidListeners = new ArrayList<>();
-                for (WeakReference<DeviceStateListener> listener : mDeviceStateListeners) {
-                    DeviceStateListener callback = listener.get();
-                    if (callback != null) {
-                        callback.onDeviceStateChanged(folded);
-                    } else {
-                        invalidListeners.add(listener);
-                    }
-                }
-                if (!invalidListeners.isEmpty()) {
-                    mDeviceStateListeners.removeAll(invalidListeners);
+
+            mFoldedDeviceState = folded;
+            ArrayList<WeakReference<DeviceStateListener>> invalidListeners = new ArrayList<>();
+            for (WeakReference<DeviceStateListener> listener : mDeviceStateListeners) {
+                DeviceStateListener callback = listener.get();
+                if (callback != null) {
+                    callback.onDeviceStateChanged(folded);
+                } else {
+                    invalidListeners.add(listener);
                 }
             }
+            if (!invalidListeners.isEmpty()) {
+                mDeviceStateListeners.removeAll(invalidListeners);
+            }
+        }
+
+        public synchronized void addDeviceStateListener(DeviceStateListener listener) {
+            listener.onDeviceStateChanged(mFoldedDeviceState);
+            mDeviceStateListeners.add(new WeakReference<>(listener));
         }
 
         @Override
@@ -192,9 +197,8 @@ public final class CameraManager {
     public void registerDeviceStateListener(@NonNull CameraCharacteristics chars) {
         synchronized (mLock) {
             DeviceStateListener listener = chars.getDeviceStateListener();
-            listener.onDeviceStateChanged(mFoldedDeviceState);
             if (mFoldStateListener != null) {
-                mDeviceStateListeners.add(new WeakReference<>(listener));
+                mFoldStateListener.addDeviceStateListener(listener);
             }
         }
     }
@@ -241,11 +245,13 @@ public final class CameraManager {
      * applications is not guaranteed to be supported, however.</p>
      *
      * <p>For concurrent operation, in chronological order :
-     * - Applications must first close any open cameras that have sessions configured, using
-     *   {@link CameraDevice#close}.
-     * - All camera devices intended to be operated concurrently, must be opened using
-     *   {@link #openCamera}, before configuring sessions on any of the camera devices.</p>
-     *
+     * <ul>
+     * <li> Applications must first close any open cameras that have sessions configured, using
+     *   {@link CameraDevice#close}. </li>
+     * <li> All camera devices intended to be operated concurrently, must be opened using
+     *   {@link #openCamera}, before configuring sessions on any of the camera devices.</li>
+     *</ul>
+     *</p>
      * <p>Each device in a combination, is guaranteed to support stream combinations which may be
      * obtained by querying {@link #getCameraCharacteristics} for the key
      * {@link android.hardware.camera2.CameraCharacteristics#SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS}.</p>

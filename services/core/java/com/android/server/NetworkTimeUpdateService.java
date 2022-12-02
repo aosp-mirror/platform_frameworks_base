@@ -165,9 +165,14 @@ public class NetworkTimeUpdateService extends Binder {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.SET_TIME, "clear latest network time");
 
-        mTime.clearCachedTimeResult();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mTime.clearCachedTimeResult();
 
-        mLocalLog.log("clearTimeForTests");
+            mLocalLog.log("clearTimeForTests");
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**
@@ -181,15 +186,19 @@ public class NetworkTimeUpdateService extends Binder {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.SET_TIME, "force network time refresh");
 
-        boolean success = mTime.forceRefresh();
-        mLocalLog.log("forceRefreshForTests: success=" + success);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            boolean success = mTime.forceRefresh();
+            mLocalLog.log("forceRefreshForTests: success=" + success);
 
-        if (success) {
-            makeNetworkTimeSuggestion(mTime.getCachedTimeResult(),
-                    "Origin: NetworkTimeUpdateService: forceRefreshForTests");
+            if (success) {
+                makeNetworkTimeSuggestion(mTime.getCachedTimeResult(),
+                        "Origin: NetworkTimeUpdateService: forceRefreshForTests");
+            }
+            return success;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
-
-        return success;
     }
 
     /**
@@ -201,10 +210,15 @@ public class NetworkTimeUpdateService extends Binder {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.SET_TIME, "set NTP server config for tests");
 
-        mLocalLog.log("Setting server config for tests: hostname=" + hostname
-                + ", port=" + port
-                + ", timeout=" + timeout);
-        mTime.setServerConfigForTests(hostname, port, timeout);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mLocalLog.log("Setting server config for tests: hostname=" + hostname
+                    + ", port=" + port
+                    + ", timeout=" + timeout);
+            mTime.setServerConfigForTests(hostname, port, timeout);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private void onPollNetworkTime(int event) {

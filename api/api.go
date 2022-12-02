@@ -27,8 +27,16 @@ import (
 const art = "art.module.public.api"
 const conscrypt = "conscrypt.module.public.api"
 const i18n = "i18n.module.public.api"
+const virtualization = "framework-virtualization"
 
 var core_libraries_modules = []string{art, conscrypt, i18n}
+// List of modules that are not yet updatable, and hence they can still compile
+// against hidden APIs. These modules are filtered out when building the
+// updatable-framework-module-impl (because updatable-framework-module-impl is
+// built against module_current SDK). Instead they are directly statically
+// linked into the all-framework-module-lib, which is building against hidden
+// APIs.
+var non_updatable_modules = []string{virtualization}
 
 // The intention behind this soong plugin is to generate a number of "merged"
 // API-related modules that would otherwise require a large amount of very
@@ -148,18 +156,35 @@ func createMergedStubsSrcjar(ctx android.LoadHookContext, modules []string) {
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }
 
-func createMergedPublicAnnotationsFilegroup(ctx android.LoadHookContext, modules []string) {
-	props := fgProps{}
-	props.Name = proptools.StringPtr("all-modules-public-annotations")
-	props.Srcs = createSrcs(modules, "{.public.annotations.zip}")
-	ctx.CreateModule(android.FileGroupFactory, &props)
-}
-
-func createMergedSystemAnnotationsFilegroup(ctx android.LoadHookContext, modules []string) {
-	props := fgProps{}
-	props.Name = proptools.StringPtr("all-modules-system-annotations")
-	props.Srcs = createSrcs(modules, "{.system.annotations.zip}")
-	ctx.CreateModule(android.FileGroupFactory, &props)
+func createMergedAnnotationsFilegroups(ctx android.LoadHookContext, modules, system_server_modules []string) {
+	for _, i := range []struct{
+		name    string
+		tag     string
+		modules []string
+	}{
+		{
+			name: "all-modules-public-annotations",
+			tag:  "{.public.annotations.zip}",
+			modules: modules,
+		}, {
+			name: "all-modules-system-annotations",
+			tag:  "{.system.annotations.zip}",
+			modules: modules,
+		}, {
+			name: "all-modules-module-lib-annotations",
+			tag:  "{.module-lib.annotations.zip}",
+			modules: modules,
+		}, {
+			name: "all-modules-system-server-annotations",
+			tag:  "{.system-server.annotations.zip}",
+			modules: system_server_modules,
+		},
+	} {
+		props := fgProps{}
+		props.Name = proptools.StringPtr(i.name)
+		props.Srcs = createSrcs(i.modules, i.tag)
+		ctx.CreateModule(android.FileGroupFactory, &props)
+	}
 }
 
 func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
@@ -172,17 +197,43 @@ func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
 	//    difficult to achieve.
 	modules = remove(modules, art)
 
-	props := genruleProps{}
-	props.Name = proptools.StringPtr("api-versions-xml-public-filtered")
-	props.Tools = []string{"api_versions_trimmer"}
-	props.Out = []string{"api-versions-public-filtered.xml"}
-	props.Cmd = proptools.StringPtr("$(location api_versions_trimmer) $(out) $(in)")
-	// Note: order matters: first parameter is the full api-versions.xml
-	// after that the stubs files in any order
-	// stubs files are all modules that export API surfaces EXCEPT ART
-	props.Srcs = append([]string{":api_versions_public{.api_versions.xml}"}, createSrcs(modules, ".stubs{.jar}")...)
-	props.Dists = []android.Dist{{Targets: []string{"sdk"}}}
-	ctx.CreateModule(genrule.GenRuleFactory, &props)
+	for _, i := range []struct{
+		name string
+		out  string
+		in   string
+	}{
+		{
+			// We shouldn't need public-filtered or system-filtered.
+			// public-filtered is currently used to lint things that
+			// use the module sdk or the system server sdk, but those
+			// should be switched over to module-filtered and
+			// system-server-filtered, and then public-filtered can
+			// be removed.
+			name: "api-versions-xml-public-filtered",
+			out:  "api-versions-public-filtered.xml",
+			in:   ":api_versions_public{.api_versions.xml}",
+		}, {
+			name: "api-versions-xml-module-lib-filtered",
+			out:  "api-versions-module-lib-filtered.xml",
+			in:   ":api_versions_module_lib{.api_versions.xml}",
+		}, {
+			name: "api-versions-xml-system-server-filtered",
+			out:  "api-versions-system-server-filtered.xml",
+			in:   ":api_versions_system_server{.api_versions.xml}",
+		},
+	} {
+		props := genruleProps{}
+		props.Name = proptools.StringPtr(i.name)
+		props.Out = []string{i.out}
+		// Note: order matters: first parameter is the full api-versions.xml
+		// after that the stubs files in any order
+		// stubs files are all modules that export API surfaces EXCEPT ART
+		props.Srcs = append([]string{i.in}, createSrcs(modules, ".stubs{.jar}")...)
+		props.Tools = []string{"api_versions_trimmer"}
+		props.Cmd = proptools.StringPtr("$(location api_versions_trimmer) $(out) $(in)")
+		props.Dists = []android.Dist{{Targets: []string{"sdk"}}}
+		ctx.CreateModule(genrule.GenRuleFactory, &props)
+	}
 }
 
 func createMergedPublicStubs(ctx android.LoadHookContext, modules []string) {
@@ -206,12 +257,31 @@ func createMergedSystemStubs(ctx android.LoadHookContext, modules []string) {
 func createMergedFrameworkImpl(ctx android.LoadHookContext, modules []string) {
 	// This module is for the "framework-all" module, which should not include the core libraries.
 	modules = removeAll(modules, core_libraries_modules)
-	props := libraryProps{}
-	props.Name = proptools.StringPtr("all-framework-module-impl")
-	props.Static_libs = transformArray(modules, "", ".impl")
-	props.Sdk_version = proptools.StringPtr("module_current")
-	props.Visibility = []string{"//frameworks/base"}
-	ctx.CreateModule(java.LibraryFactory, &props)
+	// Remove the modules that belong to non-updatable APEXes since those are allowed to compile
+	// against unstable APIs.
+	modules = removeAll(modules, non_updatable_modules)
+	// First create updatable-framework-module-impl, which contains all updatable modules.
+	// This module compiles against module_lib SDK.
+	{
+		props := libraryProps{}
+		props.Name = proptools.StringPtr("updatable-framework-module-impl")
+		props.Static_libs = transformArray(modules, "", ".impl")
+		props.Sdk_version = proptools.StringPtr("module_current")
+		props.Visibility = []string{"//frameworks/base"}
+		ctx.CreateModule(java.LibraryFactory, &props)
+	}
+
+	// Now create all-framework-module-impl, which contains updatable-framework-module-impl
+	// and all non-updatable modules. This module compiles against hidden APIs.
+	{
+		props := libraryProps{}
+		props.Name = proptools.StringPtr("all-framework-module-impl")
+		props.Static_libs = transformArray(non_updatable_modules, "", ".impl")
+		props.Static_libs = append(props.Static_libs, "updatable-framework-module-impl")
+		props.Sdk_version = proptools.StringPtr("core_platform")
+		props.Visibility = []string{"//frameworks/base"}
+		ctx.CreateModule(java.LibraryFactory, &props)
+	}
 }
 
 func createMergedFrameworkModuleLibStubs(ctx android.LoadHookContext, modules []string) {
@@ -279,11 +349,12 @@ func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_
 
 func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	bootclasspath := a.properties.Bootclasspath
+	system_server_classpath := a.properties.System_server_classpath
 	if ctx.Config().VendorConfig("ANDROID").Bool("include_nonpublic_framework_api") {
 		bootclasspath = append(bootclasspath, a.properties.Conditional_bootclasspath...)
 		sort.Strings(bootclasspath)
 	}
-	createMergedTxts(ctx, bootclasspath, a.properties.System_server_classpath)
+	createMergedTxts(ctx, bootclasspath, system_server_classpath)
 
 	createMergedStubsSrcjar(ctx, bootclasspath)
 
@@ -292,8 +363,7 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	createMergedFrameworkModuleLibStubs(ctx, bootclasspath)
 	createMergedFrameworkImpl(ctx, bootclasspath)
 
-	createMergedPublicAnnotationsFilegroup(ctx, bootclasspath)
-	createMergedSystemAnnotationsFilegroup(ctx, bootclasspath)
+	createMergedAnnotationsFilegroups(ctx, bootclasspath, system_server_classpath)
 
 	createFilteredApiVersions(ctx, bootclasspath)
 

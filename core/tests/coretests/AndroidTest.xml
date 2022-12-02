@@ -25,6 +25,11 @@
         <option name="test-file-name" value="BinderDeathRecipientHelperApp2.apk" />
     </target_preparer>
 
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <!-- TODO(b/254155965): Design a mechanism to finally remove this command. -->
+        <option name="run-command" value="settings put global device_config_sync_disabled 0" />
+    </target_preparer>
+
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.DeviceInteractionHelperInstaller" />
 
     <option name="test-tag" value="FrameworksCoreTests" />

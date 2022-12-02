@@ -4415,6 +4415,7 @@ package android.app {
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.ActivityManager.MemoryInfo> CREATOR;
+    field public long advertisedMem;
     field public long availMem;
     field public boolean lowMemory;
     field public long threshold;
@@ -20015,7 +20016,10 @@ package android.media {
     field public static final int ENCODING_DRA = 28; // 0x1c
     field public static final int ENCODING_DTS = 7; // 0x7
     field public static final int ENCODING_DTS_HD = 8; // 0x8
-    field public static final int ENCODING_DTS_UHD = 27; // 0x1b
+    field public static final int ENCODING_DTS_HD_MA = 29; // 0x1d
+    field @Deprecated public static final int ENCODING_DTS_UHD = 27; // 0x1b
+    field public static final int ENCODING_DTS_UHD_P1 = 27; // 0x1b
+    field public static final int ENCODING_DTS_UHD_P2 = 30; // 0x1e
     field public static final int ENCODING_E_AC3 = 6; // 0x6
     field public static final int ENCODING_E_AC3_JOC = 18; // 0x12
     field public static final int ENCODING_IEC61937 = 13; // 0xd
@@ -27353,6 +27357,15 @@ package android.net.vcn {
 
 package android.nfc {
 
+  public final class AvailableNfcAntenna implements android.os.Parcelable {
+    ctor public AvailableNfcAntenna(int, int);
+    method public int describeContents();
+    method public int getLocationX();
+    method public int getLocationY();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.nfc.AvailableNfcAntenna> CREATOR;
+  }
+
   public class FormatException extends java.lang.Exception {
     ctor public FormatException();
     ctor public FormatException(String);
@@ -27414,6 +27427,7 @@ package android.nfc {
     method @Deprecated public void enableForegroundNdefPush(android.app.Activity, android.nfc.NdefMessage);
     method public void enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle);
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
+    method @Nullable public android.nfc.NfcAntennaInfo getNfcAntennaInfo();
     method public boolean ignore(android.nfc.Tag, int, android.nfc.NfcAdapter.OnTagRemovedListener, android.os.Handler);
     method @Deprecated public boolean invokeBeam(android.app.Activity);
     method public boolean isEnabled();
@@ -27474,6 +27488,17 @@ package android.nfc {
 
   public static interface NfcAdapter.ReaderCallback {
     method public void onTagDiscovered(android.nfc.Tag);
+  }
+
+  public final class NfcAntennaInfo implements android.os.Parcelable {
+    ctor public NfcAntennaInfo(int, int, boolean, @NonNull java.util.List<android.nfc.AvailableNfcAntenna>);
+    method public int describeContents();
+    method @NonNull public java.util.List<android.nfc.AvailableNfcAntenna> getAvailableNfcAntennas();
+    method public int getDeviceHeight();
+    method public int getDeviceWidth();
+    method public boolean isDeviceFoldable();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.nfc.NfcAntennaInfo> CREATOR;
   }
 
   public final class NfcEvent {
@@ -31932,6 +31957,7 @@ package android.os {
     method public static final boolean is64Bit();
     method public static boolean isApplicationUid(int);
     method public static final boolean isIsolated();
+    method public static final boolean isIsolatedUid(int);
     method public static final boolean isSdkSandbox();
     method public static final void killProcess(int);
     method public static final int myPid();
@@ -32237,6 +32263,7 @@ package android.os {
     field public static final String DISALLOW_BLUETOOTH = "no_bluetooth";
     field public static final String DISALLOW_BLUETOOTH_SHARING = "no_bluetooth_sharing";
     field public static final String DISALLOW_CAMERA_TOGGLE = "disallow_camera_toggle";
+    field public static final String DISALLOW_CELLULAR_2G = "no_cellular_2g";
     field public static final String DISALLOW_CHANGE_WIFI_STATE = "no_change_wifi_state";
     field public static final String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
     field public static final String DISALLOW_CONFIG_BRIGHTNESS = "no_config_brightness";
@@ -41225,7 +41252,7 @@ package android.telephony {
     field public static final String KEY_CARRIER_CONFIG_APPLIED_BOOL = "carrier_config_applied_bool";
     field public static final String KEY_CARRIER_CONFIG_VERSION_STRING = "carrier_config_version_string";
     field public static final String KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL = "carrier_cross_sim_ims_available_bool";
-    field public static final String KEY_CARRIER_DATA_CALL_PERMANENT_FAILURE_STRINGS = "carrier_data_call_permanent_failure_strings";
+    field @Deprecated public static final String KEY_CARRIER_DATA_CALL_PERMANENT_FAILURE_STRINGS = "carrier_data_call_permanent_failure_strings";
     field public static final String KEY_CARRIER_DEFAULT_ACTIONS_ON_DCFAILURE_STRING_ARRAY = "carrier_default_actions_on_dcfailure_string_array";
     field public static final String KEY_CARRIER_DEFAULT_ACTIONS_ON_DEFAULT_NETWORK_AVAILABLE = "carrier_default_actions_on_default_network_available_string_array";
     field public static final String KEY_CARRIER_DEFAULT_ACTIONS_ON_REDIRECTION_STRING_ARRAY = "carrier_default_actions_on_redirection_string_array";
@@ -41321,7 +41348,7 @@ package android.telephony {
     field public static final String KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY = "gsm_roaming_networks_string_array";
     field public static final String KEY_HAS_IN_CALL_NOISE_SUPPRESSION_BOOL = "has_in_call_noise_suppression_bool";
     field public static final String KEY_HIDE_CARRIER_NETWORK_SETTINGS_BOOL = "hide_carrier_network_settings_bool";
-    field public static final String KEY_HIDE_ENABLE_2G = "hide_enable_2g_bool";
+    field @Deprecated public static final String KEY_HIDE_ENABLE_2G = "hide_enable_2g_bool";
     field public static final String KEY_HIDE_ENHANCED_4G_LTE_BOOL = "hide_enhanced_4g_lte_bool";
     field public static final String KEY_HIDE_IMS_APN_BOOL = "hide_ims_apn_bool";
     field public static final String KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL = "hide_lte_plus_data_icon_bool";
@@ -41451,6 +41478,8 @@ package android.telephony {
     field public static final String KEY_VOICEMAIL_NOTIFICATION_PERSISTENT_BOOL = "voicemail_notification_persistent_bool";
     field public static final String KEY_VOICE_PRIVACY_DISABLE_UI_BOOL = "voice_privacy_disable_ui_bool";
     field public static final String KEY_VOLTE_REPLACEMENT_RAT_INT = "volte_replacement_rat_int";
+    field public static final String KEY_VONR_ENABLED_BOOL = "vonr_enabled_bool";
+    field public static final String KEY_VONR_SETTING_VISIBILITY_BOOL = "vonr_setting_visibility_bool";
     field public static final String KEY_VT_UPGRADE_SUPPORTED_FOR_DOWNGRADED_RTT_CALL_BOOL = "vt_upgrade_supported_for_downgraded_rtt_call";
     field public static final String KEY_VVM_CELLULAR_DATA_REQUIRED_BOOL = "vvm_cellular_data_required_bool";
     field public static final String KEY_VVM_CLIENT_PREFIX_STRING = "vvm_client_prefix_string";
@@ -43490,7 +43519,7 @@ package android.telephony {
     method public void registerTelephonyCallback(int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyCallback);
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void requestCellInfoUpdate(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CellInfoCallback);
     method @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.telephony.NetworkScan requestNetworkScan(android.telephony.NetworkScanRequest, java.util.concurrent.Executor, android.telephony.TelephonyScanManager.NetworkScanCallback);
-    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.telephony.NetworkScan requestNetworkScan(int, @NonNull android.telephony.NetworkScanRequest, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyScanManager.NetworkScanCallback);
+    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE}) public android.telephony.NetworkScan requestNetworkScan(int, @NonNull android.telephony.NetworkScanRequest, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyScanManager.NetworkScanCallback);
     method public void sendDialerSpecialCode(String);
     method public String sendEnvelopeWithStatus(String);
     method @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void sendUssdRequest(String, android.telephony.TelephonyManager.UssdResponseCallback, android.os.Handler);

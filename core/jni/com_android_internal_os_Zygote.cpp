@@ -343,6 +343,7 @@ enum MountExternalKind {
 // Must match values in com.android.internal.os.Zygote.
 enum RuntimeFlags : uint32_t {
     DEBUG_ENABLE_JDWP = 1,
+    PROFILE_SYSTEM_SERVER = 1 << 14,
     PROFILE_FROM_SHELL = 1 << 15,
     MEMORY_TAG_LEVEL_MASK = (1 << 19) | (1 << 20),
     MEMORY_TAG_LEVEL_TBI = 1 << 19,
@@ -1634,9 +1635,11 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
                                            instruction_set.value().c_str());
     }
 
-    if (is_system_server) {
+    if (is_system_server && !(runtime_flags & RuntimeFlags::PROFILE_SYSTEM_SERVER)) {
         // Prefetch the classloader for the system server. This is done early to
         // allow a tie-down of the proper system server selinux domain.
+        // We don't prefetch when the system server is being profiled to avoid
+        // loading AOT code.
         env->CallStaticObjectMethod(gZygoteInitClass, gGetOrCreateSystemServerClassLoader);
         if (env->ExceptionCheck()) {
             // Be robust here. The Java code will attempt to create the classloader

@@ -1,4 +1,4 @@
-#Rollback Manager
+# Rollback Manager
 
 ## Introduction
 
@@ -7,9 +7,9 @@ updatability efforts. RollbackManager adds support for rolling back an APK or
 APEX update to the previous version installed on the device, and reverting any
 APK or APEX data to the state it was in at the time of install.
 
-##Rollback Basics
+## Rollback Basics
 
-###How Rollbacks Work
+### How Rollbacks Work
 
 A new install parameter ENABLE_ROLLBACK can be specified to enable rollback when
 updating an application. For example:
@@ -42,27 +42,27 @@ data taken when FooV2.apk was first installed.
 
 See below for more details of shell commands for rollback.
 
-###Rollback Triggers
+### Rollback Triggers
 
-####Manually Triggered Rollback
+#### Manually Triggered Rollback
 
 As mentioned above, it is possible to trigger rollback on device using a shell
 command. This is for testing purposes only. We do not expect this mechanism to
 be used in production in practice.
 
-####Watchdog Triggered Rollback
+#### Watchdog Triggered Rollback
 
 Watchdog triggered rollback is intended to address severe issues with the
 device. The platform provides several different watchdogs that can trigger
 rollback.
 
-#####Package Watchdog
+##### Package Watchdog
 
 There is a package watchdog service running on device that will trigger rollback
 of an update if there are 5 ANRs or process crashes within a 1 minute window for
 a package in the update.
 
-#####Native Watchdog
+##### Native Watchdog
 
 If a native service crashes repeatedly after an update is installed, rollback
 will be triggered. This particularly applies to updates that include APEXes
@@ -70,25 +70,25 @@ that may update native services, but note that as it is difficult to tell which
 native services have been affected by an update, *any* crashing native service
 will cause the rollback to be triggered.
 
-#####Explicit Health Check
+##### Explicit Health Check
 
 There is an explicit check to verify the network stack is functional after an
 update. If there is no network connectivity within a certain time period after
 an update, rollback is triggered.
 
-####Server Triggered Rollback
+#### Server Triggered Rollback
 The RollbackManager API may be used by the installer to roll back an update
 based on a request from the server.
 
-##Rollback Details
+## Rollback Details
 
-###RollbackManager API
+### RollbackManager API
 
 The RollbackManager API is an @SystemAPI guarded by the MANAGE_ROLLBACKS and
 TEST_MANAGE_ROLLBACKS permissions. See RollbackManager.java for details about
 the RollbackManager API.
 
-###Rollback of APEX modules
+### Rollback of APEX modules
 
 Rollback is supported for APEX modules in addition to APK modules. In Q, there
 was no concept of data associated with an APEX, so only the APEX itself is
@@ -100,7 +100,7 @@ terms of any state they persist on the system (outside of the APEX data
 directories). For example, FooV2.apex must not change the file format of some
 state stored on the device in such a way that FooV1.apex cannot read the file.
 
-###Rollback of MultiPackage Installs
+### Rollback of MultiPackage Installs
 
 Rollback can be enabled for multi-package installs. This requires that all
 packages in the install session, including the parent session, have the
@@ -119,7 +119,7 @@ If there is a problem enabling rollback for any package in the multi-package
 install session, rollback will not be enabled for any package in the
 multi-package install session.
 
-###Rollback of Staged Installs
+### Rollback of Staged Installs
 
 Rollback can be enabled for staged installs, which require reboot to take
 effect. If reboot was required when the package was updated, then reboot is
@@ -127,21 +127,21 @@ required when the package is rolled back. If no reboot was required when the
 package was updated, then no reboot is required when the package is rolled back.
 
 
-###Rollbacks on Multi User Devices
+### Rollbacks on Multi User Devices
 
 Rollbacks should work properly on devices with multiple users. There is special
 handling of user data backup to ensure app user data is properly backed up and
 restored for all users, even for credential encrypted users that have not been
 unlocked at various points during the flow.
 
-###Rollback whitelist
+### Rollback whitelist
 
 Outside of testing, rollback may only be enabled for packages listed in the
 sysconfig rollback whitelist - see
 `SystemConfig#getRollbackWhitelistedPackages`. Attempts to enable rollback for
 non-whitelisted packages will fail.
 
-###Failure to Enable Rollback
+### Failure to Enable Rollback
 
 There are a number of reasons why we may be unable to enable rollback for a
 package, including:
@@ -158,13 +158,13 @@ If we are unable to enable rollback, the installation will proceed without
 rollback enabled. Failing to enable rollback does not cause the installation to
 fail.
 
-###Failure to Commit Rollback
+### Failure to Commit Rollback
 
 For the most part, a rollback will remain available after failure to commit it.
 This allows the caller to retry the rollback if they have reason to believe it
 will not fail again the next time the commit of the rollback is attempted.
 
-###Installing Previously Rolled Back Packages
+### Installing Previously Rolled Back Packages
 There is no logic in the platform itself to prevent installing a version of a
 package that was previously rolled back.
 
@@ -175,7 +175,7 @@ package versions believed to be the main source of the bad update. The list of
 installer to prevent reinstall of a previously rolled back package version if so
 desired.
 
-###Rollback Expiration
+### Rollback Expiration
 
 An available rollback is expired if the rollback lifetime has been exceeded or
 if there is a new update to package associated with the rollback. When an
@@ -183,9 +183,9 @@ available rollback is expired, the backed up apk and userdata associated with
 the rollback are deleted. Once a rollback is expired, it can no longer be
 executed.
 
-##Shell Commands for Rollback
+## Shell Commands for Rollback
 
-###Installing an App with Rollback Enabled
+### Installing an App with Rollback Enabled
 
 The `adb install` command accepts the `--enable-rollback` flag to install an app
 with rollback enabled. For example:
@@ -194,7 +194,7 @@ with rollback enabled. For example:
 $ adb install --enable-rollback FooV2.apk
 ```
 
-###Triggering Rollback Manually
+### Triggering Rollback Manually
 
 If rollback is available for an application, the pm command can be used to
 trigger rollback manually on device:
@@ -206,7 +206,7 @@ $ adb shell pm rollback-app com.example.foo
 For rollback of staged installs, you have to manually reboot the device for the
 rollback to take effect after running the 'pm rollback-app' command.
 
-###Listing the Status of Rollbacks on Device
+### Listing the Status of Rollbacks on Device
 
 You can get a list with details about available and recently committed rollbacks
 using dumpsys. For example:
@@ -246,9 +246,9 @@ committed.
 The list of rollbacks is also included in bug reports. Search for "DUMP OF
 SERVICE rollback".
 
-##Configuration Properties
+## Configuration Properties
 
-###Rollback Lifetime
+### Rollback Lifetime
 
 Rollback lifetime refers to the maximum duration of time after the rollback is
 first enabled that it will be available. The default is for rollbacks to be
@@ -263,7 +263,7 @@ $ adb shell device_config put rollback_boot rollback_lifetime_in_millis 17280000
 
 The update will not take effect until after system server has been restarted.
 
-###Enable Rollback Timeout
+### Enable Rollback Timeout
 
 The enable rollback timeout is how long RollbackManager is allowed to take to
 enable rollback when performing an update. This includes the time needed to make
@@ -279,7 +279,7 @@ $ adb shell device_config put rollback enable_rollback_timeout 10000
 
 The update will take effect for the next install with rollback enabled.
 
-##Limitations
+## Limitations
 
 * You cannot enable rollback for the first version of an application installed
 on the device. Only updates to a package previously installed on the device can

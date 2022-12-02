@@ -16,7 +16,7 @@
 
 package com.android.server.pm;
 
-import android.annotation.NonNull;;
+import android.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.android.internal.util.HexDump;

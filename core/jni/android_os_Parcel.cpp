@@ -101,10 +101,24 @@ static void android_os_Parcel_markSensitive(jlong nativePtr)
 static void android_os_Parcel_markForBinder(JNIEnv* env, jclass clazz, jlong nativePtr,
                                             jobject binder)
 {
+    LOG_ALWAYS_FATAL_IF(binder == nullptr, "Null binder specified for markForBinder");
+
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
     if (parcel) {
-        parcel->markForBinder(ibinderForJavaObject(env, binder));
+        sp<IBinder> nBinder = ibinderForJavaObject(env, binder);
+
+        if (nBinder == nullptr) {
+            ALOGE("Native binder in markForBinder is null for non-null jobject");
+            return;
+        }
+
+        parcel->markForBinder(nBinder);
     }
+}
+
+static jboolean android_os_Parcel_isForRpc(jlong nativePtr) {
+    Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
+    return parcel ? parcel->isForRpc() : false;
 }
 
 static jint android_os_Parcel_dataSize(jlong nativePtr)
@@ -798,6 +812,8 @@ static const JNINativeMethod gParcelMethods[] = {
     {"nativeMarkSensitive",       "(J)V", (void*)android_os_Parcel_markSensitive},
     // @FastNative
     {"nativeMarkForBinder",       "(JLandroid/os/IBinder;)V", (void*)android_os_Parcel_markForBinder},
+    // @CriticalNative
+    {"nativeIsForRpc",            "(J)Z", (void*)android_os_Parcel_isForRpc},
     // @CriticalNative
     {"nativeDataSize",            "(J)I", (void*)android_os_Parcel_dataSize},
     // @CriticalNative

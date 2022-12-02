@@ -111,7 +111,7 @@ public class AppWidgetXmlUtil {
         info.minWidth = parser.getAttributeInt(null, ATTR_MIN_WIDTH, 0);
         info.minHeight = parser.getAttributeInt(null, ATTR_MIN_HEIGHT, 0);
         info.minResizeWidth = parser.getAttributeInt(null, ATTR_MIN_RESIZE_WIDTH, 0);
-        info.minResizeWidth = parser.getAttributeInt(null, ATTR_MIN_RESIZE_HEIGHT, 0);
+        info.minResizeHeight = parser.getAttributeInt(null, ATTR_MIN_RESIZE_HEIGHT, 0);
         info.maxResizeWidth = parser.getAttributeInt(null, ATTR_MAX_RESIZE_WIDTH, 0);
         info.maxResizeHeight = parser.getAttributeInt(null, ATTR_MAX_RESIZE_HEIGHT, 0);
         info.targetCellWidth = parser.getAttributeInt(null, ATTR_TARGET_CELL_WIDTH, 0);

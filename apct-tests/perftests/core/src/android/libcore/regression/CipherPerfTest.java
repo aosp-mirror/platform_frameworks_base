@@ -20,11 +20,12 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import org.junit.Before;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.ArrayList;
@@ -42,17 +43,13 @@ import javax.crypto.spec.IvParameterSpec;
  * Cipher benchmarks. Only runs on AES currently because of the combinatorial explosion of the test
  * as it stands.
  */
-@RunWith(Parameterized.class)
+@RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class CipherPerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameterized.Parameters(
-            name =
-                    "mMode({0}), mPadding({1}), mKeySize({2}), mInputSize({3}),"
-                            + " mImplementation({4})")
-    public static Collection cases() {
-        int[] mKeySizes = new int[] {128, 192, 256};
+    public static Collection getCases() {
+        int[] keySizes = new int[] {128, 192, 256};
         int[] inputSizes = new int[] {16, 32, 64, 128, 1024, 8192};
         final List<Object[]> params = new ArrayList<>();
         for (Mode mode : Mode.values()) {
@@ -71,11 +68,11 @@ public class CipherPerfTest {
                             && implementation == Implementation.OpenSSL) {
                         continue;
                     }
-                    for (int mKeySize : mKeySizes) {
+                    for (int keySize : keySizes) {
                         for (int inputSize : inputSizes) {
                             params.add(
                                     new Object[] {
-                                        mode, padding, mKeySize, inputSize, implementation
+                                        mode, padding, keySize, inputSize, implementation
                                     });
                         }
                     }
@@ -107,9 +104,6 @@ public class CipherPerfTest {
         AES,
     };
 
-    @Parameterized.Parameter(0)
-    public Mode mMode;
-
     public enum Mode {
         CBC,
         CFB,
@@ -118,22 +112,10 @@ public class CipherPerfTest {
         OFB,
     };
 
-    @Parameterized.Parameter(1)
-    public Padding mPadding;
-
     public enum Padding {
         NOPADDING,
         PKCS1PADDING,
     };
-
-    @Parameterized.Parameter(2)
-    public int mKeySize;
-
-    @Parameterized.Parameter(3)
-    public int mInputSize;
-
-    @Parameterized.Parameter(4)
-    public Implementation mImplementation;
 
     public enum Implementation {
         OpenSSL,
@@ -156,21 +138,20 @@ public class CipherPerfTest {
 
     private AlgorithmParameterSpec mSpec;
 
-    @Before
-    public void setUp() throws Exception {
-        mCipherAlgorithm =
-                mAlgorithm.toString() + "/" + mMode.toString() + "/" + mPadding.toString();
+    public void setUp(Mode mode, Padding padding, int keySize, Implementation implementation)
+            throws Exception {
+        mCipherAlgorithm = mAlgorithm.toString() + "/" + mode.toString() + "/" + padding.toString();
 
         String mKeyAlgorithm = mAlgorithm.toString();
-        mKey = sKeySizes.get(mKeySize);
+        mKey = sKeySizes.get(keySize);
         if (mKey == null) {
             KeyGenerator generator = KeyGenerator.getInstance(mKeyAlgorithm);
-            generator.init(mKeySize);
+            generator.init(keySize);
             mKey = generator.generateKey();
-            sKeySizes.put(mKeySize, mKey);
+            sKeySizes.put(keySize, mKey);
         }
 
-        switch (mImplementation) {
+        switch (implementation) {
             case OpenSSL:
                 mProviderName = "AndroidOpenSSL";
                 break;
@@ -178,10 +159,10 @@ public class CipherPerfTest {
                 mProviderName = "BC";
                 break;
             default:
-                throw new RuntimeException(mImplementation.toString());
+                throw new RuntimeException(implementation.toString());
         }
 
-        if (mMode != Mode.ECB) {
+        if (mode != Mode.ECB) {
             mSpec = new IvParameterSpec(IV);
         }
 
@@ -193,18 +174,26 @@ public class CipherPerfTest {
     }
 
     @Test
-    public void timeEncrypt() throws Exception {
+    @Parameters(method = "getCases")
+    public void timeEncrypt(
+            Mode mode, Padding padding, int keySize, int inputSize, Implementation implementation)
+            throws Exception {
+        setUp(mode, padding, keySize, implementation);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            mCipherEncrypt.doFinal(DATA, 0, mInputSize, mOutput);
+            mCipherEncrypt.doFinal(DATA, 0, inputSize, mOutput);
         }
     }
 
     @Test
-    public void timeDecrypt() throws Exception {
+    @Parameters(method = "getCases")
+    public void timeDecrypt(
+            Mode mode, Padding padding, int keySize, int inputSize, Implementation implementation)
+            throws Exception {
+        setUp(mode, padding, keySize, implementation);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            mCipherDecrypt.doFinal(DATA, 0, mInputSize, mOutput);
+            mCipherDecrypt.doFinal(DATA, 0, inputSize, mOutput);
         }
     }
 }

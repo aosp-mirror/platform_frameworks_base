@@ -24,12 +24,7 @@ package {
 python_defaults {
     name: "fonts_python_defaults",
     version: {
-        py2: {
-            enabled: false,
-            embedded_launcher: false,
-        },
         py3: {
-            enabled: true,
             embedded_launcher: true,
         },
     },

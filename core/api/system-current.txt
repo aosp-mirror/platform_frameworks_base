@@ -238,7 +238,7 @@ package android {
     field public static final String PROVIDE_TRUST_AGENT = "android.permission.PROVIDE_TRUST_AGENT";
     field public static final String PROVISION_DEMO_DEVICE = "android.permission.PROVISION_DEMO_DEVICE";
     field public static final String QUERY_ADMIN_POLICY = "android.permission.QUERY_ADMIN_POLICY";
-    field public static final String QUERY_TIME_ZONE_RULES = "android.permission.QUERY_TIME_ZONE_RULES";
+    field @Deprecated public static final String QUERY_TIME_ZONE_RULES = "android.permission.QUERY_TIME_ZONE_RULES";
     field public static final String QUERY_USERS = "android.permission.QUERY_USERS";
     field public static final String RADIO_SCAN_WITHOUT_LOCATION = "android.permission.RADIO_SCAN_WITHOUT_LOCATION";
     field public static final String READ_ACTIVE_EMERGENCY_SESSION = "android.permission.READ_ACTIVE_EMERGENCY_SESSION";
@@ -340,7 +340,7 @@ package android {
     field public static final String UPDATE_DOMAIN_VERIFICATION_USER_SELECTION = "android.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION";
     field public static final String UPDATE_FONTS = "android.permission.UPDATE_FONTS";
     field public static final String UPDATE_LOCK = "android.permission.UPDATE_LOCK";
-    field public static final String UPDATE_TIME_ZONE_RULES = "android.permission.UPDATE_TIME_ZONE_RULES";
+    field @Deprecated public static final String UPDATE_TIME_ZONE_RULES = "android.permission.UPDATE_TIME_ZONE_RULES";
     field public static final String UPGRADE_RUNTIME_PERMISSIONS = "android.permission.UPGRADE_RUNTIME_PERMISSIONS";
     field public static final String USER_ACTIVITY = "android.permission.USER_ACTIVITY";
     field public static final String USE_COLORIZED_NOTIFICATIONS = "android.permission.USE_COLORIZED_NOTIFICATIONS";
@@ -764,6 +764,9 @@ package android.app {
     method public static android.app.BroadcastOptions makeBasic();
     method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS) public void recordResponseEventWhileInBackground(@IntRange(from=0) long);
     method @RequiresPermission(android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND) public void setBackgroundActivityStartsAllowed(boolean);
+    method public void setDeliveryGroupMatchingFilter(@NonNull android.content.IntentFilter);
+    method public void setDeliveryGroupMatchingKey(@NonNull String, @NonNull String);
+    method public void setDeliveryGroupPolicy(int);
     method public void setDontSendToRestrictedApps(boolean);
     method public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
     method public void setRequireAllOfPermissions(@Nullable String[]);
@@ -772,6 +775,8 @@ package android.app {
     method @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppAllowlist(long, int, int, @Nullable String);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppWhitelistDuration(long);
     method public android.os.Bundle toBundle();
+    field public static final int DELIVERY_GROUP_POLICY_ALL = 0; // 0x0
+    field public static final int DELIVERY_GROUP_POLICY_MOST_RECENT = 1; // 0x1
   }
 
   public class DownloadManager {
@@ -2977,6 +2982,7 @@ package android.content {
     field public static final String TRANSLATION_MANAGER_SERVICE = "translation";
     field public static final String UI_TRANSLATION_SERVICE = "ui_translation";
     field public static final String UWB_SERVICE = "uwb";
+    field public static final String VIRTUALIZATION_SERVICE = "virtualization";
     field public static final String VR_SERVICE = "vrmanager";
     field public static final String WALLPAPER_EFFECTS_GENERATION_SERVICE = "wallpaper_effects_generation";
     field public static final String WIFI_NL80211_SERVICE = "wifinl80211";
@@ -3406,6 +3412,7 @@ package android.content.pm {
     field public static final String FEATURE_REBOOT_ESCROW = "android.hardware.reboot_escrow";
     field public static final String FEATURE_TELEPHONY_CARRIERLOCK = "android.hardware.telephony.carrierlock";
     field public static final String FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION = "android.hardware.telephony.ims.singlereg";
+    field public static final String FEATURE_VIRTUALIZATION_FRAMEWORK = "android.software.virtualization_framework";
     field public static final int FLAGS_PERMISSION_RESERVED_PERMISSION_CONTROLLER = -268435456; // 0xf0000000
     field public static final int FLAG_PERMISSION_APPLY_RESTRICTION = 16384; // 0x4000
     field public static final int FLAG_PERMISSION_AUTO_REVOKED = 131072; // 0x20000
@@ -5956,7 +5963,7 @@ package android.location {
     method public int getEphemerisSource();
     method @FloatRange public double getIonoDelayMeters();
     method @IntRange(from=0, to=1023) public int getIssueOfDataClock();
-    method @IntRange(from=0, to=255) public int getIssueOfDataEphemeris();
+    method @IntRange(from=0, to=1023) public int getIssueOfDataEphemeris();
     method @Nullable public android.location.SatellitePvt.PositionEcef getPositionEcef();
     method @IntRange(from=0) public long getTimeOfClockSeconds();
     method @IntRange(from=0) public long getTimeOfEphemerisSeconds();
@@ -5984,7 +5991,7 @@ package android.location {
     method @NonNull public android.location.SatellitePvt.Builder setEphemerisSource(int);
     method @NonNull public android.location.SatellitePvt.Builder setIonoDelayMeters(@FloatRange(from=0.0f, to=100.0f) double);
     method @NonNull public android.location.SatellitePvt.Builder setIssueOfDataClock(@IntRange(from=0, to=1023) int);
-    method @NonNull public android.location.SatellitePvt.Builder setIssueOfDataEphemeris(@IntRange(from=0, to=255) int);
+    method @NonNull public android.location.SatellitePvt.Builder setIssueOfDataEphemeris(@IntRange(from=0, to=1023) int);
     method @NonNull public android.location.SatellitePvt.Builder setPositionEcef(@NonNull android.location.SatellitePvt.PositionEcef);
     method @NonNull public android.location.SatellitePvt.Builder setTimeOfClockSeconds(@IntRange(from=0) long);
     method @NonNull public android.location.SatellitePvt.Builder setTimeOfEphemerisSeconds(@IntRange(from=0) long);
@@ -9239,6 +9246,7 @@ package android.os {
 
   public class Binder implements android.os.IBinder {
     method public int handleShellCommand(@NonNull android.os.ParcelFileDescriptor, @NonNull android.os.ParcelFileDescriptor, @NonNull android.os.ParcelFileDescriptor, @NonNull String[]);
+    method public final void markVintfStability();
     method public static void setProxyTransactListener(@Nullable android.os.Binder.ProxyTransactListener);
   }
 
@@ -9553,6 +9561,7 @@ package android.os {
   }
 
   public interface Parcelable {
+    method public default int getStability();
     field public static final int PARCELABLE_STABILITY_LOCAL = 0; // 0x0
     field public static final int PARCELABLE_STABILITY_VINTF = 1; // 0x1
   }
@@ -9561,7 +9570,6 @@ package android.os {
     ctor public ParcelableHolder(int);
     method public int describeContents();
     method @Nullable public <T extends android.os.Parcelable> T getParcelable(@NonNull Class<T>);
-    method public int getStability();
     method public void readFromParcel(@NonNull android.os.Parcel);
     method public void setParcelable(@Nullable android.os.Parcelable);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -9711,6 +9719,10 @@ package android.os {
     field public static final int STATUS_WAITING_DOWNLOAD = 2; // 0x2
     field public static final int STATUS_WAITING_INSTALL = 4; // 0x4
     field public static final int STATUS_WAITING_REBOOT = 5; // 0x5
+  }
+
+  public final class Trace {
+    field public static final long TRACE_TAG_AIDL = 16777216L; // 0x1000000L
   }
 
   public class UpdateEngine {
@@ -10327,6 +10339,7 @@ package android.provider {
     field public static final String NAMESPACE_LOCATION = "location";
     field public static final String NAMESPACE_MEDIA = "media";
     field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
+    field public static final String NAMESPACE_NEARBY = "nearby";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
     field public static final String NAMESPACE_NNAPI_NATIVE = "nnapi_native";
     field public static final String NAMESPACE_ON_DEVICE_PERSONALIZATION = "on_device_personalization";
@@ -13551,6 +13564,7 @@ package android.telephony {
     field public static final String ACTION_SIM_SLOT_STATUS_CHANGED = "android.telephony.action.SIM_SLOT_STATUS_CHANGED";
     field public static final int ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G = 3; // 0x3
     field public static final int ALLOWED_NETWORK_TYPES_REASON_POWER = 1; // 0x1
+    field public static final int ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS = 4; // 0x4
     field public static final int CALL_WAITING_STATUS_DISABLED = 2; // 0x2
     field public static final int CALL_WAITING_STATUS_ENABLED = 1; // 0x1
     field public static final int CALL_WAITING_STATUS_FDN_CHECK_FAILURE = 5; // 0x5

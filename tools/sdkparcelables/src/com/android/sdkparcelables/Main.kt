@@ -39,7 +39,7 @@ fun main(args: Array<String>) {
         kotlin.system.exitProcess(2)
     }
 
-    val ancestorCollector = AncestorCollector(Opcodes.ASM7, null)
+    val ancestorCollector = AncestorCollector(Opcodes.ASM9, null)
 
     for (entry in zipFile.entries()) {
         if (entry.name.endsWith(".class")) {
