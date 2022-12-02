@@ -164,6 +164,13 @@ object Flags {
     // TODO(b/256513609): Tracking Bug
     @JvmField val ACTIVE_UNLOCK_CHIPBAR = releasedFlag(217, "active_unlock_chipbar")
 
+    /**
+     * Migrates control of the LightRevealScrim's reveal effect and amount from legacy code to the
+     * new KeyguardTransitionRepository.
+     */
+    @JvmField
+    val LIGHT_REVEAL_MIGRATION = unreleasedFlag(218, "light_reveal_migration", teamfood = true)
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")

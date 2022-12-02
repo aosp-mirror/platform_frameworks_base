@@ -16,10 +16,13 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import android.graphics.Point
+import android.hardware.biometrics.BiometricSourceType
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.AuthController
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.doze.DozeHost
 import com.android.systemui.doze.DozeMachine
@@ -27,9 +30,11 @@ import com.android.systemui.doze.DozeTransitionCallback
 import com.android.systemui.doze.DozeTransitionListener
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
+import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -57,9 +62,10 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var dozeHost: DozeHost
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
-    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var biometricUnlockController: BiometricUnlockController
     @Mock private lateinit var dozeTransitionListener: DozeTransitionListener
+    @Mock private lateinit var authController: AuthController
+    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
     private lateinit var underTest: KeyguardRepositoryImpl
 
@@ -76,6 +82,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 keyguardStateController,
                 keyguardUpdateMonitor,
                 dozeTransitionListener,
+                authController,
             )
     }
 
@@ -198,7 +205,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     fun dozeAmount() =
         runTest(UnconfinedTestDispatcher()) {
             val values = mutableListOf<Float>()
-            val job = underTest.dozeAmount.onEach(values::add).launchIn(this)
+            val job = underTest.linearDozeAmount.onEach(values::add).launchIn(this)
 
             val captor = argumentCaptor<StatusBarStateController.StateListener>()
             verify(statusBarStateController).addCallback(captor.capture())
@@ -207,7 +214,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             captor.value.onDozeAmountChanged(0.498f, 0.5f)
             captor.value.onDozeAmountChanged(0.661f, 0.65f)
 
-            assertThat(values).isEqualTo(listOf(0f, 0.4f, 0.5f, 0.65f))
+            assertThat(values).isEqualTo(listOf(0f, 0.433f, 0.498f, 0.661f))
 
             job.cancel()
             verify(statusBarStateController).removeCallback(captor.value)
@@ -217,25 +224,36 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     fun wakefulness() =
         runTest(UnconfinedTestDispatcher()) {
             val values = mutableListOf<WakefulnessModel>()
-            val job = underTest.wakefulnessState.onEach(values::add).launchIn(this)
+            val job = underTest.wakefulness.onEach(values::add).launchIn(this)
 
             val captor = argumentCaptor<WakefulnessLifecycle.Observer>()
             verify(wakefulnessLifecycle).addObserver(captor.capture())
 
+            whenever(wakefulnessLifecycle.wakefulness)
+                .thenReturn(WakefulnessLifecycle.WAKEFULNESS_WAKING)
             captor.value.onStartedWakingUp()
+
+            whenever(wakefulnessLifecycle.wakefulness)
+                .thenReturn(WakefulnessLifecycle.WAKEFULNESS_AWAKE)
             captor.value.onFinishedWakingUp()
+
+            whenever(wakefulnessLifecycle.wakefulness)
+                .thenReturn(WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP)
             captor.value.onStartedGoingToSleep()
+
+            whenever(wakefulnessLifecycle.wakefulness)
+                .thenReturn(WakefulnessLifecycle.WAKEFULNESS_ASLEEP)
             captor.value.onFinishedGoingToSleep()
 
-            assertThat(values)
+            assertThat(values.map { it.state })
                 .isEqualTo(
                     listOf(
                         // Initial value will be ASLEEP
-                        WakefulnessModel.ASLEEP,
-                        WakefulnessModel.STARTING_TO_WAKE,
-                        WakefulnessModel.AWAKE,
-                        WakefulnessModel.STARTING_TO_SLEEP,
-                        WakefulnessModel.ASLEEP,
+                        WakefulnessState.ASLEEP,
+                        WakefulnessState.STARTING_TO_WAKE,
+                        WakefulnessState.AWAKE,
+                        WakefulnessState.STARTING_TO_SLEEP,
+                        WakefulnessState.ASLEEP,
                     )
                 )
 
@@ -329,14 +347,20 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             val captor = argumentCaptor<BiometricUnlockController.BiometricModeListener>()
             verify(biometricUnlockController).addBiometricModeListener(captor.capture())
 
-            captor.value.onModeChanged(BiometricUnlockController.MODE_NONE)
-            captor.value.onModeChanged(BiometricUnlockController.MODE_WAKE_AND_UNLOCK)
-            captor.value.onModeChanged(BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING)
-            captor.value.onModeChanged(BiometricUnlockController.MODE_SHOW_BOUNCER)
-            captor.value.onModeChanged(BiometricUnlockController.MODE_ONLY_WAKE)
-            captor.value.onModeChanged(BiometricUnlockController.MODE_UNLOCK_COLLAPSING)
-            captor.value.onModeChanged(BiometricUnlockController.MODE_DISMISS_BOUNCER)
-            captor.value.onModeChanged(BiometricUnlockController.MODE_WAKE_AND_UNLOCK_FROM_DREAM)
+            listOf(
+                    BiometricUnlockController.MODE_NONE,
+                    BiometricUnlockController.MODE_WAKE_AND_UNLOCK,
+                    BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING,
+                    BiometricUnlockController.MODE_SHOW_BOUNCER,
+                    BiometricUnlockController.MODE_ONLY_WAKE,
+                    BiometricUnlockController.MODE_UNLOCK_COLLAPSING,
+                    BiometricUnlockController.MODE_DISMISS_BOUNCER,
+                    BiometricUnlockController.MODE_WAKE_AND_UNLOCK_FROM_DREAM,
+                )
+                .forEach {
+                    whenever(biometricUnlockController.mode).thenReturn(it)
+                    captor.value.onModeChanged(it)
+                }
 
             assertThat(values)
                 .isEqualTo(
@@ -419,5 +443,105 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
             job.cancel()
             verify(dozeTransitionListener).removeCallback(listener)
+        }
+
+    @Test
+    fun fingerprintSensorLocation() =
+        runTest(UnconfinedTestDispatcher()) {
+            val values = mutableListOf<Point?>()
+            val job = underTest.fingerprintSensorLocation.onEach(values::add).launchIn(this)
+
+            val captor = argumentCaptor<AuthController.Callback>()
+            verify(authController).addCallback(captor.capture())
+
+            // An initial, null value should be initially emitted so that flows combined with this
+            // one
+            // emit values immediately. The sensor location is expected to be nullable, so anyone
+            // consuming it should handle that properly.
+            assertThat(values).isEqualTo(listOf(null))
+
+            listOf(Point(500, 500), Point(0, 0), null, Point(250, 250))
+                .onEach {
+                    whenever(authController.fingerprintSensorLocation).thenReturn(it)
+                    captor.value.onFingerprintLocationChanged()
+                }
+                .also { dispatchedSensorLocations ->
+                    assertThat(values).isEqualTo(listOf(null) + dispatchedSensorLocations)
+                }
+
+            job.cancel()
+        }
+
+    @Test
+    fun faceSensorLocation() =
+        runTest(UnconfinedTestDispatcher()) {
+            val values = mutableListOf<Point?>()
+            val job = underTest.faceSensorLocation.onEach(values::add).launchIn(this)
+
+            val captor = argumentCaptor<AuthController.Callback>()
+            verify(authController).addCallback(captor.capture())
+
+            // An initial, null value should be initially emitted so that flows combined with this
+            // one
+            // emit values immediately. The sensor location is expected to be nullable, so anyone
+            // consuming it should handle that properly.
+            assertThat(values).isEqualTo(listOf(null))
+
+            listOf(
+                    Point(500, 500),
+                    Point(0, 0),
+                    null,
+                    Point(250, 250),
+                )
+                .onEach {
+                    whenever(authController.faceSensorLocation).thenReturn(it)
+                    captor.value.onFaceSensorLocationChanged()
+                }
+                .also { dispatchedSensorLocations ->
+                    assertThat(values).isEqualTo(listOf(null) + dispatchedSensorLocations)
+                }
+
+            job.cancel()
+        }
+
+    @Test
+    fun biometricUnlockSource() =
+        runTest(UnconfinedTestDispatcher()) {
+            val values = mutableListOf<BiometricUnlockSource?>()
+            val job = underTest.biometricUnlockSource.onEach(values::add).launchIn(this)
+
+            val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
+            verify(keyguardUpdateMonitor).registerCallback(captor.capture())
+
+            // An initial, null value should be initially emitted so that flows combined with this
+            // one
+            // emit values immediately. The biometric unlock source is expected to be nullable, so
+            // anyone consuming it should handle that properly.
+            assertThat(values).isEqualTo(listOf(null))
+
+            listOf(
+                    BiometricSourceType.FINGERPRINT,
+                    BiometricSourceType.IRIS,
+                    null,
+                    BiometricSourceType.FACE,
+                    BiometricSourceType.FINGERPRINT,
+                )
+                .onEach { biometricSourceType ->
+                    captor.value.onBiometricAuthenticated(0, biometricSourceType, false)
+                }
+
+            assertThat(values)
+                .isEqualTo(
+                    listOf(
+                        null,
+                        BiometricUnlockSource.FINGERPRINT_SENSOR,
+                        BiometricUnlockSource.FACE_SENSOR,
+                        null,
+                        BiometricUnlockSource.FACE_SENSOR,
+                        BiometricUnlockSource.FINGERPRINT_SENSOR,
+                    )
+                )
+
+            job.cancel()
         }
 }
