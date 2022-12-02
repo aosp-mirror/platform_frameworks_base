@@ -939,10 +939,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             setFingerprintRunningState(BIOMETRIC_STATE_STOPPED);
         }
 
-        if (msgId == FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE
-                || msgId == FingerprintManager.BIOMETRIC_ERROR_POWER_PRESSED) {
-            mLogger.logRetryAfterFpError(msgId, errString);
+        if (msgId == FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE) {
+            mLogger.logRetryAfterFpErrorWithDelay(msgId, errString, HAL_ERROR_RETRY_TIMEOUT);
             mHandler.postDelayed(mRetryFingerprintAuthentication, HAL_ERROR_RETRY_TIMEOUT);
+        }
+
+        if (msgId == FingerprintManager.BIOMETRIC_ERROR_POWER_PRESSED) {
+            mLogger.logRetryAfterFpErrorWithDelay(msgId, errString, 0);
+            updateFingerprintListeningState(BIOMETRIC_ACTION_START);
         }
 
         boolean lockedOutStateChanged = false;
