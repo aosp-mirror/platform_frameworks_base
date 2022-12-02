@@ -475,6 +475,7 @@ void CanvasContext::stopDrawing() {
 void CanvasContext::notifyFramePending() {
     ATRACE_CALL();
     mRenderThread.pushBackFrameCallback(this);
+    sendLoadResetHint();
 }
 
 void CanvasContext::draw() {

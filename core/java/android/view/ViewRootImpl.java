@@ -2323,7 +2323,6 @@ public final class ViewRootImpl implements ViewParent,
      */
     void notifyRendererOfFramePending() {
         if (mAttachInfo.mThreadedRenderer != null) {
-            mAttachInfo.mThreadedRenderer.notifyCallbackPending();
             mAttachInfo.mThreadedRenderer.notifyFramePending();
         }
     }
