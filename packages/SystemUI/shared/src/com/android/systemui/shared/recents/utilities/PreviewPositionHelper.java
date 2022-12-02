@@ -39,6 +39,7 @@ public class PreviewPositionHelper {
     private boolean mIsOrientationChanged;
     private SplitBounds mSplitBounds;
     private int mDesiredStagePosition;
+    private boolean mTaskbarInApp;
 
     public Matrix getMatrix() {
         return mMatrix;
@@ -55,6 +56,10 @@ public class PreviewPositionHelper {
     public void setSplitBounds(SplitBounds splitBounds, int desiredStagePosition) {
         mSplitBounds = splitBounds;
         mDesiredStagePosition = desiredStagePosition;
+    }
+
+    public void setTaskbarInApp(boolean taskbarInApp) {
+        mTaskbarInApp = taskbarInApp;
     }
 
     /**
@@ -83,8 +88,18 @@ public class PreviewPositionHelper {
                         ? mSplitBounds.topTaskPercent
                         : (1 - (mSplitBounds.topTaskPercent + mSplitBounds.dividerHeightPercent));
                 // Scale portrait height to that of (actual screen - taskbar inset)
-                fullscreenTaskHeight = (screenHeightPx - taskbarSize) * taskPercent;
-                canvasScreenRatio = canvasHeight / fullscreenTaskHeight;
+                fullscreenTaskHeight = (screenHeightPx) * taskPercent;
+                if (mTaskbarInApp) {
+                    canvasScreenRatio = canvasHeight / fullscreenTaskHeight;
+                } else {
+                    if (mDesiredStagePosition == STAGE_POSITION_TOP_OR_LEFT) {
+                        // Top app isn't cropped at all by taskbar
+                        canvasScreenRatio = 0;
+                    } else {
+                        // Same as fullscreen ratio
+                        canvasScreenRatio = (float) canvasWidth / screenWidthPx;
+                    }
+                }
             } else {
                 // For landscape, scale the width
                 taskPercent = mDesiredStagePosition == STAGE_POSITION_TOP_OR_LEFT

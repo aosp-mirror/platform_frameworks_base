@@ -74,7 +74,7 @@
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Bewerking met pincode voor simkaart is mislukt."</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Bewerking met pukcode voor simkaart is mislukt."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Invoermethode wijzigen"</string>
-    <string name="airplane_mode" msgid="2528005343938497866">"Vliegtuigmodus"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"Vliegtuig­modus"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Patroon vereist nadat het apparaat opnieuw is opgestart"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Pincode vereist nadat het apparaat opnieuw is opgestart"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Wachtwoord vereist nadat het apparaat opnieuw is opgestart"</string>
