@@ -3891,6 +3891,14 @@ package android.content.pm {
     method @NonNull public android.content.pm.SuspendDialogInfo.Builder setTitle(@NonNull String);
   }
 
+  public final class UserProperties implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean getIsCredentialSharableWithParent();
+    method public boolean getIsMediaSharedWithParent();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.UserProperties> CREATOR;
+  }
+
 }
 
 package android.content.pm.dex {
@@ -10382,6 +10390,7 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public long[] getSerialNumbersOfUsers(boolean);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public java.util.List<android.os.UserHandle> getUserHandles(boolean);
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED}) public android.graphics.Bitmap getUserIcon();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public android.content.pm.UserProperties getUserProperties(@NonNull android.os.UserHandle);
     method @Deprecated @android.os.UserManager.UserRestrictionSource @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS}) public int getUserRestrictionSource(String, android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS}) public java.util.List<android.os.UserManager.EnforcingUser> getUserRestrictionSources(String, android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public int getUserSwitchability();
@@ -10390,11 +10399,11 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean hasUserRestrictionForUser(@NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isAdminUser();
     method public boolean isCloneProfile();
-    method public boolean isCredentialSharableWithParent();
+    method @Deprecated public boolean isCredentialSharableWithParent();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isGuestUser();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isMainUser();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean isManagedProfile(int);
-    method public boolean isMediaSharedWithParent();
+    method @Deprecated public boolean isMediaSharedWithParent();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isPrimaryUser();
     method public static boolean isRemoveResultSuccessful(int);
     method public boolean isRestrictedProfile();

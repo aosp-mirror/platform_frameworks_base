@@ -12856,16 +12856,6 @@ package android.content.pm {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.SigningInfo> CREATOR;
   }
 
-  public final class UserProperties implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getShowInLauncher();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.UserProperties> CREATOR;
-    field public static final int SHOW_IN_LAUNCHER_NO = 2; // 0x2
-    field public static final int SHOW_IN_LAUNCHER_SEPARATE = 1; // 0x1
-    field public static final int SHOW_IN_LAUNCHER_WITH_PARENT = 0; // 0x0
-  }
-
   public final class VersionedPackage implements android.os.Parcelable {
     ctor public VersionedPackage(@NonNull String, int);
     ctor public VersionedPackage(@NonNull String, long);
@@ -33185,7 +33175,6 @@ package android.os {
     method public android.os.UserHandle getUserForSerialNumber(long);
     method @NonNull @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.CREATE_USERS", "android.permission.QUERY_USERS", android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED}) public String getUserName();
     method public java.util.List<android.os.UserHandle> getUserProfiles();
-    method @NonNull @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.QUERY_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public android.content.pm.UserProperties getUserProperties(@NonNull android.os.UserHandle);
     method public android.os.Bundle getUserRestrictions();
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public android.os.Bundle getUserRestrictions(android.os.UserHandle);
     method public boolean hasUserRestriction(String);

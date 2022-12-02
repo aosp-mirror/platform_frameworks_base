@@ -3242,7 +3242,10 @@ public class UserManager {
      * @param userHandle the user handle of the user whose information is being requested.
      * @return a UserProperties object for a specific user.
      * @throws IllegalArgumentException if {@code userHandle} doesn't correspond to an existing user
+     *
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.QUERY_USERS,
@@ -5159,19 +5162,25 @@ public class UserManager {
      * Returns false for any other type of user.
      *
      * @return true if the user shares media with its parent user, false otherwise.
+     *
+     * @deprecated use {@link #getUserProperties(UserHandle)} with
+     *            {@link UserProperties#getIsMediaSharedWithParent()} instead.
      * @hide
      */
     @SystemApi
+    @Deprecated
     @UserHandleAware(
             requiresAnyOfPermissionsIfNotCallerProfileGroup = {
                     Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.QUERY_USERS,
                     Manifest.permission.INTERACT_ACROSS_USERS})
     @SuppressAutoDoc
     public boolean isMediaSharedWithParent() {
         try {
-            return mService.isMediaSharedWithParent(mUserId);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
+            return getUserProperties(UserHandle.of(mUserId)).getIsMediaSharedWithParent();
+        } catch (IllegalArgumentException e) {
+            // If the user doesn't exist, return false (for historical reasons)
+            return false;
         }
     }
 
@@ -5181,19 +5190,24 @@ public class UserManager {
      * This API only works for {@link UserManager#isProfile() profiles}
      * and will always return false for any other user type.
      *
+     * @deprecated use {@link #getUserProperties(UserHandle)} with
+     *            {@link UserProperties#getIsMediaSharedWithParent()} instead.
      * @hide
      */
     @SystemApi
+    @Deprecated
     @UserHandleAware(
             requiresAnyOfPermissionsIfNotCallerProfileGroup = {
                     Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.QUERY_USERS,
                     Manifest.permission.INTERACT_ACROSS_USERS})
     @SuppressAutoDoc
     public boolean isCredentialSharableWithParent() {
         try {
-            return mService.isCredentialSharableWithParent(mUserId);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
+            return getUserProperties(UserHandle.of(mUserId)).getIsCredentialSharableWithParent();
+        } catch (IllegalArgumentException e) {
+            // If the user doesn't exist, return false (for historical reasons)
+            return false;
         }
     }
 

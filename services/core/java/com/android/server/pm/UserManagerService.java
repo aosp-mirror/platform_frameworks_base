@@ -1744,28 +1744,6 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean isMediaSharedWithParent(@UserIdInt int userId) {
-        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
-                "isMediaSharedWithParent");
-        synchronized (mUsersLock) {
-            UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
-            return userTypeDetails != null ? userTypeDetails.isProfile()
-                    && userTypeDetails.isMediaSharedWithParent() : false;
-        }
-    }
-
-    @Override
-    public boolean isCredentialSharableWithParent(@UserIdInt int userId) {
-        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
-                "isCredentialSharableWithParent");
-        synchronized (mUsersLock) {
-            UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
-            return userTypeDetails != null && userTypeDetails.isProfile()
-                    && userTypeDetails.isCredentialSharableWithParent();
-        }
-    }
-
-    @Override
     public boolean isUserUnlockingOrUnlocked(@UserIdInt int userId) {
         checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
                 "isUserUnlockingOrUnlocked");

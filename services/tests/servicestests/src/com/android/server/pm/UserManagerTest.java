@@ -19,7 +19,6 @@ package com.android.server.pm;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.testng.Assert.assertThrows;
@@ -210,6 +209,10 @@ public final class UserManagerTest {
                 cloneUserProperties::getCrossProfileIntentFilterAccessControl);
         assertThrows(SecurityException.class,
                 cloneUserProperties::getCrossProfileIntentResolutionStrategy);
+        assertThat(typeProps.getIsMediaSharedWithParent())
+                .isEqualTo(cloneUserProperties.getIsMediaSharedWithParent());
+        assertThat(typeProps.getIsCredentialSharableWithParent())
+                .isEqualTo(cloneUserProperties.getIsCredentialSharableWithParent());
 
         // Verify clone user parent
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
@@ -749,11 +752,13 @@ public final class UserManagerTest {
         // provided that the test caller has the necessary permissions.
         assertThat(userProps.getShowInLauncher()).isEqualTo(typeProps.getShowInLauncher());
         assertThat(userProps.getShowInSettings()).isEqualTo(typeProps.getShowInSettings());
-        assertFalse(userProps.getUseParentsContacts());
+        assertThat(userProps.getUseParentsContacts()).isFalse();
         assertThrows(SecurityException.class, userProps::getCrossProfileIntentFilterAccessControl);
         assertThrows(SecurityException.class, userProps::getCrossProfileIntentResolutionStrategy);
         assertThrows(SecurityException.class, userProps::getStartWithParent);
         assertThrows(SecurityException.class, userProps::getInheritDevicePolicy);
+        assertThat(userProps.getIsMediaSharedWithParent()).isFalse();
+        assertThat(userProps.getIsCredentialSharableWithParent()).isTrue();
     }
 
     // Make sure only max managed profiles can be created

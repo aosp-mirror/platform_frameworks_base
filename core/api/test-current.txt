@@ -945,6 +945,13 @@ package android.content.pm {
     field public String userType;
   }
 
+  public final class UserProperties implements android.os.Parcelable {
+    method public int getShowInLauncher();
+    field public static final int SHOW_IN_LAUNCHER_NO = 2; // 0x2
+    field public static final int SHOW_IN_LAUNCHER_SEPARATE = 1; // 0x1
+    field public static final int SHOW_IN_LAUNCHER_WITH_PARENT = 0; // 0x0
+  }
+
 }
 
 package android.content.res {

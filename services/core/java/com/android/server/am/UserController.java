@@ -1464,8 +1464,7 @@ class UserController implements Handler.Callback {
     }
 
     private boolean shouldStartWithParent(UserInfo user) {
-        final UserProperties properties = mInjector.getUserManagerInternal()
-                .getUserProperties(user.id);
+        final UserProperties properties = getUserProperties(user.id);
         return (properties != null && properties.getStartWithParent())
                 && !user.isQuietModeEnabled();
     }
@@ -2767,6 +2766,10 @@ class UserController implements Handler.Callback {
         return mInjector.getUserManager().getUserInfo(userId);
     }
 
+    private @Nullable UserProperties getUserProperties(@UserIdInt int userId) {
+        return mInjector.getUserManagerInternal().getUserProperties(userId);
+    }
+
     int[] getUserIds() {
         return mInjector.getUserManager().getUserIds();
     }
@@ -2897,7 +2900,8 @@ class UserController implements Handler.Callback {
         if (getStartedUserState(userId) == null) {
             return false;
         }
-        if (!mInjector.getUserManager().isCredentialSharableWithParent(userId)) {
+        final UserProperties properties = getUserProperties(userId);
+        if (properties == null || !properties.getIsCredentialSharableWithParent()) {
             return false;
         }
         if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
