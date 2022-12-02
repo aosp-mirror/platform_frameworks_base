@@ -24,6 +24,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -963,6 +964,34 @@ public final class ContextHubManager {
     @NonNull public ContextHubClient createClient(
             @NonNull ContextHubInfo hubInfo, @NonNull PendingIntent pendingIntent, long nanoAppId) {
         return createClient(null /* context */, hubInfo, pendingIntent, nanoAppId);
+    }
+
+    /**
+     * Queries for the list of preloaded nanoapp IDs on the system.
+     *
+     * @param hubInfo The Context Hub to query a list of nanoapp IDs from.
+     *
+     * @return The list of 64-bit IDs of the preloaded nanoapps.
+     *
+     * @throws NullPointerException if hubInfo is null
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @NonNull public long[] getPreloadedNanoAppIds(@NonNull ContextHubInfo hubInfo) {
+        Objects.requireNonNull(hubInfo, "hubInfo cannot be null");
+
+        long[] nanoappIds = null;
+        try {
+            nanoappIds = mService.getPreloadedNanoAppIds(hubInfo);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        if (nanoappIds == null) {
+            nanoappIds = new long[0];
+        }
+        return nanoappIds;
     }
 
     /**
