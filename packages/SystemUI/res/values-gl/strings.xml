@@ -499,7 +499,7 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automática"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sen son nin vibración"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sen son nin vibración, e aparecen máis abaixo na sección de conversas"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Poderían facer que o teléfono soe ou vibre en función da súa configuración"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"O teléfono pode soar ou vibrar en función da súa configuración"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Poderían facer que o teléfono soe ou vibre en función da súa configuración. Conversas desde a burbulla da aplicación <xliff:g id="APP_NAME">%1$s</xliff:g> de forma predeterminada."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Fai que o sistema determine se a notificación debe emitir un son ou unha vibración"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Estado:&lt;/b&gt; ascendeuse a Predeterminada"</string>
