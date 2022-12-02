@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for app_name (4539824758261855508) -->
+    <skip />
+    <!-- no translation found for string_cancel (6369133483981306063) -->
+    <skip />
+    <!-- no translation found for string_continue (1346732695941131882) -->
+    <skip />
+    <!-- no translation found for string_create_in_another_place (1033635365843437603) -->
+    <skip />
+    <!-- no translation found for string_save_to_another_place (7590325934591079193) -->
+    <skip />
+    <!-- no translation found for string_use_another_device (8754514926121520445) -->
+    <skip />
+    <string name="string_save_to_another_device" msgid="1959562542075194458">"ወደ ሌላ መሣሪያ ያስቀምጡ"</string>
+    <!-- no translation found for passkey_creation_intro_title (402553911484409884) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body (7493320456005579290) -->
+    <skip />
+    <!-- no translation found for choose_provider_title (7245243990139698508) -->
+    <skip />
+    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <skip />
+    <!-- no translation found for save_your_password (6597736507991704307) -->
+    <skip />
+    <!-- no translation found for save_your_sign_in_info (7213978049817076882) -->
+    <skip />
+    <!-- no translation found for choose_provider_body (8045759834416308059) -->
+    <skip />
+    <!-- no translation found for choose_create_option_passkey_title (4146408187146573131) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (8812546498357380545) -->
+    <skip />
+    <!-- no translation found for choose_create_option_sign_in_title (6318246378475961834) -->
+    <skip />
+    <!-- no translation found for choose_create_option_description (4419171903963100257) -->
+    <skip />
+    <!-- no translation found for passkey (632353688396759522) -->
+    <skip />
+    <!-- no translation found for password (6738570945182936667) -->
+    <skip />
+    <!-- no translation found for sign_ins (4710739369149469208) -->
+    <skip />
+    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
+    <skip />
+    <!-- no translation found for save_password_to_title (3450480045270186421) -->
+    <skip />
+    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
+    <skip />
+    <!-- no translation found for use_provider_for_all_title (4201020195058980757) -->
+    <skip />
+    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
+    <skip />
+    <!-- no translation found for set_as_default (4415328591568654603) -->
+    <skip />
+    <!-- no translation found for use_once (9027366575315399714) -->
+    <skip />
+    <!-- no translation found for more_options_usage_passwords_passkeys (4794903978126339473) -->
+    <skip />
+    <!-- no translation found for more_options_usage_passwords (1632047277723187813) -->
+    <skip />
+    <!-- no translation found for more_options_usage_passkeys (5390320437243042237) -->
+    <skip />
+    <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
+    <skip />
+    <!-- no translation found for another_device (5147276802037801217) -->
+    <skip />
+    <!-- no translation found for other_password_manager (565790221427004141) -->
+    <skip />
+    <!-- no translation found for close_sheet (1393792015338908262) -->
+    <skip />
+    <!-- no translation found for accessibility_back_arrow_button (3233198183497842492) -->
+    <skip />
+    <!-- no translation found for get_dialog_title_use_passkey_for (6236608872708021767) -->
+    <skip />
+    <!-- no translation found for get_dialog_title_use_sign_in_for (5283099528915572980) -->
+    <skip />
+    <!-- no translation found for get_dialog_title_choose_sign_in_for (1361715440877613701) -->
+    <skip />
+    <!-- no translation found for get_dialog_use_saved_passkey_for (4618100798664888512) -->
+    <skip />
+    <!-- no translation found for get_dialog_button_label_no_thanks (8114363019023838533) -->
+    <skip />
+    <!-- no translation found for get_dialog_button_label_continue (6446201694794283870) -->
+    <skip />
+    <!-- no translation found for get_dialog_title_sign_in_options (2092876443114893618) -->
+    <skip />
+    <!-- no translation found for get_dialog_heading_for_username (3456868514554204776) -->
+    <skip />
+    <!-- no translation found for get_dialog_heading_locked_password_managers (8911514851762862180) -->
+    <skip />
+    <!-- no translation found for locked_credential_entry_label_subtext (9213450912991988691) -->
+    <skip />
+    <!-- no translation found for get_dialog_heading_manage_sign_ins (3522556476480676782) -->
+    <skip />
+    <!-- no translation found for get_dialog_heading_from_another_device (1166697017046724072) -->
+    <skip />
+    <!-- no translation found for get_dialog_option_headline_use_a_different_device (8201578814988047549) -->
+    <skip />
+</resources>

@@ -155,7 +155,7 @@ class CreateCredentialViewModel(
     }
   }
 
-  fun onConfirmCreationSelected(
+  fun onConfirmEntrySelected(
     launcher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
   ) {
     val selectedEntry = uiState.activeEntry?.activeEntryInfo

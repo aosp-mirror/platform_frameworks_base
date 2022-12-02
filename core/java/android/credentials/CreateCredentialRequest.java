@@ -39,10 +39,17 @@ public final class CreateCredentialRequest implements Parcelable {
     private final String mType;
 
     /**
-     * The request data.
+     * The full credential creation request data.
      */
     @NonNull
-    private final Bundle mData;
+    private final Bundle mCredentialData;
+
+    /**
+     * The partial request data that will be sent to the provider during the initial creation
+     * candidate query stage.
+     */
+    @NonNull
+    private final Bundle mCandidateQueryData;
 
     /**
      * Determines whether or not the request must only be fulfilled by a system provider.
@@ -58,18 +65,39 @@ public final class CreateCredentialRequest implements Parcelable {
     }
 
     /**
-     * Returns the request data.
+     * Returns the full credential creation request data.
+     *
+     * For security reason, a provider will receive the request data in two stages. First it gets
+     * a partial request, {@link #getCandidateQueryData()} that do not contain sensitive user
+     * information; it uses this information to provide credential creation candidates that the
+     * [@code CredentialManager] will show to the user. Next, this full request data will be sent to
+     * a provider only if the user further grants the consent by choosing a candidate from the
+     * provider.
      */
     @NonNull
-    public Bundle getData() {
-        return mData;
+    public Bundle getCredentialData() {
+        return mCredentialData;
+    }
+
+    /**
+     * Returns the partial request data that will be sent to the provider during the initial
+     * creation candidate query stage.
+     *
+     * For security reason, a provider will receive the request data in two stages. First it gets
+     * this partial request that do not contain sensitive user information; it uses this information
+     * to provide credential creation candidates that the [@code CredentialManager] will show to
+     * the user. Next, the full request data, {@link #getCredentialData()}, will be sent to a
+     * provider only if the user further grants the consent by choosing a candidate from the
+     * provider.
+     */
+    @NonNull
+    public Bundle getCandidateQueryData() {
+        return mCandidateQueryData;
     }
 
     /**
      * Returns true if the request must only be fulfilled by a system provider, and false
      * otherwise.
-     *
-     * @hide
      */
     public boolean requireSystemProvider() {
         return mRequireSystemProvider;
@@ -78,7 +106,8 @@ public final class CreateCredentialRequest implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mType);
-        dest.writeBundle(mData);
+        dest.writeBundle(mCredentialData);
+        dest.writeBundle(mCandidateQueryData);
         dest.writeBoolean(mRequireSystemProvider);
     }
 
@@ -91,7 +120,8 @@ public final class CreateCredentialRequest implements Parcelable {
     public String toString() {
         return "CreateCredentialRequest {"
                 + "type=" + mType
-                + ", data=" + mData
+                + ", credentialData=" + mCredentialData
+                + ", candidateQueryData=" + mCandidateQueryData
                 + ", requireSystemProvider=" + mRequireSystemProvider
                 + "}";
     }
@@ -100,44 +130,37 @@ public final class CreateCredentialRequest implements Parcelable {
      * Constructs a {@link CreateCredentialRequest}.
      *
      * @param type the requested credential type
-     * @param data the request data
-     *
-     * @throws IllegalArgumentException If type is empty
-     */
-    public CreateCredentialRequest(@NonNull String type, @NonNull Bundle data) {
-        this(type, data, /*requireSystemProvider=*/ false);
-    }
-
-    /**
-     * Constructs a {@link CreateCredentialRequest}.
-     *
-     * @param type the requested credential type
-     * @param data the request data
-     * @param requireSystemProvider whether or not the request must only be fulfilled by a system
-     *                              provider
+     * @param credentialData the full credential creation request data
+     * @param candidateQueryData the partial request data that will be sent to the provider
+     *                           during the initial creation candidate query stage
+     * @param requireSystemProvider whether the request must only be fulfilled by a system provider
      *
      * @throws IllegalArgumentException If type is empty.
-     *
-     * @hide
      */
     public CreateCredentialRequest(
             @NonNull String type,
-            @NonNull Bundle data,
+            @NonNull Bundle credentialData,
+            @NonNull Bundle candidateQueryData,
             boolean requireSystemProvider) {
         mType = Preconditions.checkStringNotEmpty(type, "type must not be empty");
-        mData = requireNonNull(data, "data must not be null");
+        mCredentialData = requireNonNull(credentialData, "credentialData must not be null");
+        mCandidateQueryData = requireNonNull(candidateQueryData,
+                "candidateQueryData must not be null");
         mRequireSystemProvider = requireSystemProvider;
     }
 
     private CreateCredentialRequest(@NonNull Parcel in) {
         String type = in.readString8();
-        Bundle data = in.readBundle();
+        Bundle credentialData = in.readBundle();
+        Bundle candidateQueryData = in.readBundle();
         boolean requireSystemProvider = in.readBoolean();
 
         mType = type;
         AnnotationValidations.validate(NonNull.class, null, mType);
-        mData = data;
-        AnnotationValidations.validate(NonNull.class, null, mData);
+        mCredentialData = credentialData;
+        AnnotationValidations.validate(NonNull.class, null, mCredentialData);
+        mCandidateQueryData = candidateQueryData;
+        AnnotationValidations.validate(NonNull.class, null, mCandidateQueryData);
         mRequireSystemProvider = requireSystemProvider;
     }
 

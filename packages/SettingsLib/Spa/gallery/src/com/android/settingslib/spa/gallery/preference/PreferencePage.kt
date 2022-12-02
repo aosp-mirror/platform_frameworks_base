@@ -36,6 +36,7 @@ import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.util.createIntent
 import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
 import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.ASYNC_PREFERENCE_SUMMARY
@@ -91,6 +92,7 @@ object PreferencePageProvider : SettingsPageProvider {
                     spaLogger.message(TAG, "create macro for ${EntryEnum.SIMPLE_PREFERENCE}")
                     SimplePreferenceMacro(title = SIMPLE_PREFERENCE_TITLE)
                 }
+                .setStatusDataFn { EntryStatusData(isDisabled = false) }
                 .build()
         )
         entryList.add(
@@ -103,6 +105,7 @@ object PreferencePageProvider : SettingsPageProvider {
                         searchKeywords = SIMPLE_PREFERENCE_KEYWORDS,
                     )
                 }
+                .setStatusDataFn { EntryStatusData(isDisabled = true) }
                 .build()
         )
         entryList.add(singleLineSummaryEntry())
@@ -269,7 +272,7 @@ object PreferencePageProvider : SettingsPageProvider {
                 )
             }
             .setSliceDataFn { sliceUri, _ ->
-                val intent = owner.createBrowseIntent()?.createBrowsePendingIntent()
+                val intent = owner.createIntent()?.createBrowsePendingIntent()
                     ?: return@setSliceDataFn null
                 return@setSliceDataFn object : EntrySliceData() {
                     init {

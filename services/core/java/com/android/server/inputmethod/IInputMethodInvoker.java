@@ -110,11 +110,10 @@ final class IInputMethodInvoker {
 
     @AnyThread
     void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privilegedOperations,
-            int configChanges, @InputMethodNavButtonFlags int navigationBarFlags) {
+            @InputMethodNavButtonFlags int navigationBarFlags) {
         final IInputMethod.InitParams params = new IInputMethod.InitParams();
         params.token = token;
         params.privilegedOperations = privilegedOperations;
-        params.configChanges = configChanges;
         params.navigationBarFlags = navigationBarFlags;
         try {
             mTarget.initializeInternal(params);

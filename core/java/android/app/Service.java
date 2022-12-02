@@ -1128,12 +1128,10 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
 
     /**
      * Callback called on timeout for {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}.
+     * See {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE} for more details.
      *
-     * TODO Implement it
-     * TODO Javadoc
-     *
-     * @param startId
-     * @hide
+     * @param startId the startId passed to {@link #onStartCommand(Intent, int, int)} when
+     * the service started.
      */
     public void onTimeout(int startId) {
     }

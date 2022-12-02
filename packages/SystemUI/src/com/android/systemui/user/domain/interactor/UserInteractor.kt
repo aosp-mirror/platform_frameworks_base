@@ -493,7 +493,7 @@ constructor(
 
     fun showUserSwitcher(context: Context, expandable: Expandable) {
         if (!featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)) {
-            showDialog(ShowDialogRequestModel.ShowUserSwitcherDialog)
+            showDialog(ShowDialogRequestModel.ShowUserSwitcherDialog(expandable))
             return
         }
 

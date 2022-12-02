@@ -58,6 +58,7 @@ struct OptimizeOptions {
   bool shorten_resource_paths = false;
 
   // Path to the output map of original resource paths to shortened paths.
+  // TODO(b/246489170): keep the old option and format until transform to the new one
   std::optional<std::string> shortened_paths_map_path;
 
   // Whether sparse encoding should be used for O+ resources.
@@ -65,6 +66,9 @@ struct OptimizeOptions {
 
   // Whether sparse encoding should be used for all resources.
   bool force_sparse_encoding = false;
+
+  // Path to the output map of original resource paths/names to obfuscated paths/names.
+  std::optional<std::string> obfuscation_map_path;
 };
 
 class OptimizeCommand : public Command {
@@ -120,9 +124,13 @@ class OptimizeCommand : public Command {
     AddOptionalSwitch("--shorten-resource-paths",
         "Shortens the paths of resources inside the APK.",
         &options_.shorten_resource_paths);
+    // TODO(b/246489170): keep the old option and format until transform to the new one
     AddOptionalFlag("--resource-path-shortening-map",
-        "Path to output the map of old resource paths to shortened paths.",
-        &options_.shortened_paths_map_path);
+                    "[Deprecated]Path to output the map of old resource paths to shortened paths.",
+                    &options_.shortened_paths_map_path);
+    AddOptionalFlag("--save-obfuscation-map",
+                    "Path to output the map of original paths/names to obfuscated paths/names.",
+                    &options_.obfuscation_map_path);
     AddOptionalSwitch(
         "--deduplicate-entry-values",
         "Whether to deduplicate pairs of resource entry and value for simple resources.\n"

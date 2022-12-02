@@ -323,6 +323,9 @@ public final class DisplayInfo implements Parcelable {
     @Surface.Rotation
     public int installOrientation;
 
+    @Nullable
+    public DisplayShape displayShape;
+
     public static final @android.annotation.NonNull Creator<DisplayInfo> CREATOR = new Creator<DisplayInfo>() {
         @Override
         public DisplayInfo createFromParcel(Parcel source) {
@@ -395,7 +398,8 @@ public final class DisplayInfo implements Parcelable {
                 && brightnessMaximum == other.brightnessMaximum
                 && brightnessDefault == other.brightnessDefault
                 && Objects.equals(roundedCorners, other.roundedCorners)
-                && installOrientation == other.installOrientation;
+                && installOrientation == other.installOrientation
+                && Objects.equals(displayShape, other.displayShape);
     }
 
     @Override
@@ -448,6 +452,7 @@ public final class DisplayInfo implements Parcelable {
         brightnessDefault = other.brightnessDefault;
         roundedCorners = other.roundedCorners;
         installOrientation = other.installOrientation;
+        displayShape = other.displayShape;
     }
 
     public void readFromParcel(Parcel source) {
@@ -506,6 +511,7 @@ public final class DisplayInfo implements Parcelable {
             userDisabledHdrTypes[i] = source.readInt();
         }
         installOrientation = source.readInt();
+        displayShape = source.readTypedObject(DisplayShape.CREATOR);
     }
 
     @Override
@@ -562,6 +568,7 @@ public final class DisplayInfo implements Parcelable {
             dest.writeInt(userDisabledHdrTypes[i]);
         }
         dest.writeInt(installOrientation);
+        dest.writeTypedObject(displayShape, flags);
     }
 
     @Override

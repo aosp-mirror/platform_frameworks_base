@@ -252,6 +252,7 @@ public class RescuePartyTest {
         noteBoot(4);
         assertTrue(RescueParty.isRebootPropertySet());
 
+        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
         noteBoot(5);
         assertTrue(RescueParty.isFactoryResetPropertySet());
     }
@@ -276,6 +277,7 @@ public class RescuePartyTest {
         noteAppCrash(4, true);
         assertTrue(RescueParty.isRebootPropertySet());
 
+        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
         noteAppCrash(5, true);
         assertTrue(RescueParty.isFactoryResetPropertySet());
     }
@@ -429,6 +431,27 @@ public class RescuePartyTest {
         for (int i = 0; i < LEVEL_FACTORY_RESET; i++) {
             noteBoot(i + 1);
         }
+        assertFalse(RescueParty.isFactoryResetPropertySet());
+        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        noteBoot(LEVEL_FACTORY_RESET + 1);
+        assertTrue(RescueParty.isAttemptingFactoryReset());
+        assertTrue(RescueParty.isFactoryResetPropertySet());
+    }
+
+    @Test
+    public void testIsAttemptingFactoryResetOnlyAfterRebootCompleted() {
+        for (int i = 0; i < LEVEL_FACTORY_RESET; i++) {
+            noteBoot(i + 1);
+        }
+        int mitigationCount = LEVEL_FACTORY_RESET + 1;
+        assertFalse(RescueParty.isFactoryResetPropertySet());
+        noteBoot(mitigationCount++);
+        assertFalse(RescueParty.isFactoryResetPropertySet());
+        noteBoot(mitigationCount++);
+        assertFalse(RescueParty.isFactoryResetPropertySet());
+        noteBoot(mitigationCount++);
+        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        noteBoot(mitigationCount + 1);
         assertTrue(RescueParty.isAttemptingFactoryReset());
         assertTrue(RescueParty.isFactoryResetPropertySet());
     }

@@ -29,6 +29,7 @@ import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
+import android.app.BroadcastOptions;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -314,7 +315,9 @@ public class DeviceIdleController extends SystemService
     private Sensor mMotionSensor;
     private LocationRequest mLocationRequest;
     private Intent mIdleIntent;
+    private Bundle mIdleIntentOptions;
     private Intent mLightIdleIntent;
+    private Bundle mLightIdleIntentOptions;
     private AnyMotionDetector mAnyMotionDetector;
     private final AppStateTrackerImpl mAppStateTracker;
     @GuardedBy("this")
@@ -1798,10 +1801,12 @@ public class DeviceIdleController extends SystemService
                     } catch (RemoteException e) {
                     }
                     if (deepChanged) {
-                        getContext().sendBroadcastAsUser(mIdleIntent, UserHandle.ALL);
+                        getContext().sendBroadcastAsUser(mIdleIntent, UserHandle.ALL,
+                                null /* receiverPermission */, mIdleIntentOptions);
                     }
                     if (lightChanged) {
-                        getContext().sendBroadcastAsUser(mLightIdleIntent, UserHandle.ALL);
+                        getContext().sendBroadcastAsUser(mLightIdleIntent, UserHandle.ALL,
+                                null /* receiverPermission */, mLightIdleIntentOptions);
                     }
                     EventLogTags.writeDeviceIdleOnComplete();
                     mGoingIdleWakeLock.release();
@@ -1821,13 +1826,13 @@ public class DeviceIdleController extends SystemService
                         incActiveIdleOps();
                         mLocalActivityManager.broadcastIntentWithCallback(mIdleIntent,
                                 mIdleStartedDoneReceiver, null, UserHandle.USER_ALL,
-                                null, null, null);
+                                null, null, mIdleIntentOptions);
                     }
                     if (lightChanged) {
                         incActiveIdleOps();
                         mLocalActivityManager.broadcastIntentWithCallback(mLightIdleIntent,
                                 mIdleStartedDoneReceiver, null, UserHandle.USER_ALL,
-                                null, null, null);
+                                null, null, mLightIdleIntentOptions);
                     }
                     // Always start with one active op for the message being sent here.
                     // Now we are done!
@@ -1849,10 +1854,12 @@ public class DeviceIdleController extends SystemService
                     } catch (RemoteException e) {
                     }
                     if (deepChanged) {
-                        getContext().sendBroadcastAsUser(mIdleIntent, UserHandle.ALL);
+                        getContext().sendBroadcastAsUser(mIdleIntent, UserHandle.ALL,
+                                null /* receiverPermission */, mIdleIntentOptions);
                     }
                     if (lightChanged) {
-                        getContext().sendBroadcastAsUser(mLightIdleIntent, UserHandle.ALL);
+                        getContext().sendBroadcastAsUser(mLightIdleIntent, UserHandle.ALL,
+                                null /* receiverPermission */, mLightIdleIntentOptions);
                     }
                     EventLogTags.writeDeviceIdleOffComplete();
                 } break;
@@ -2531,6 +2538,9 @@ public class DeviceIdleController extends SystemService
                 mLightIdleIntent = new Intent(PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED);
                 mLightIdleIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                         | Intent.FLAG_RECEIVER_FOREGROUND);
+                final BroadcastOptions options = BroadcastOptions.makeBasic();
+                options.setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
+                mIdleIntentOptions = mLightIdleIntentOptions = options.toBundle();
 
                 IntentFilter filter = new IntentFilter();
                 filter.addAction(Intent.ACTION_BATTERY_CHANGED);

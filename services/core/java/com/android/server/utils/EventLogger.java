@@ -36,8 +36,11 @@ import java.util.Locale;
  */
 public class EventLogger {
 
+    /** Prefix for the title added at the beginning of a {@link #dump(PrintWriter)} operation */
+    private static final String DUMP_TITLE_PREFIX = "Events log: ";
+
     /** Identifies the source of events. */
-    private final String mTag;
+    @Nullable private final String mTag;
 
     /** Stores the events using a ring buffer. */
     private final ArrayDeque<Event> mEvents;
@@ -55,7 +58,7 @@ public class EventLogger {
      * @param size the maximum number of events to keep in log
      * @param tag the string displayed before the recorded log
      */
-    public EventLogger(int size, String tag) {
+    public EventLogger(int size, @Nullable String tag) {
         mEvents = new ArrayDeque<>(size);
         mMemSize = size;
         mTag = tag;
@@ -64,10 +67,10 @@ public class EventLogger {
     /** Enqueues {@code event} to be logged. */
     public synchronized void enqueue(Event event) {
         if (mEvents.size() >= mMemSize) {
-            mEvents.removeLast();
+            mEvents.removeFirst();
         }
 
-        mEvents.addFirst(event);
+        mEvents.addLast(event);
     }
 
     /**
@@ -91,13 +94,19 @@ public class EventLogger {
         dump(pw, "" /* prefix */);
     }
 
+    protected String getDumpTitle() {
+        if (mTag == null) {
+            return DUMP_TITLE_PREFIX;
+        }
+        return DUMP_TITLE_PREFIX + mTag;
+    }
+
     /** Dumps events using {@link PrintWriter} with a certain indent. */
     public synchronized void dump(PrintWriter pw, String indent) {
-        pw.println(indent + "Events log: " + mTag);
+        pw.println(getDumpTitle());
 
-        String childrenIndention = indent + "  ";
         for (Event evt : mEvents) {
-            pw.println(childrenIndention + evt.toString());
+            pw.println(indent + evt.toString());
         }
     }
 

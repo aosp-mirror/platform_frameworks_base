@@ -46,7 +46,7 @@ public class VirtualDeviceParamsTest {
         VirtualDeviceParams originalParams = new VirtualDeviceParams.Builder()
                 .setLockState(VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED)
                 .setUsersWithMatchingAccounts(Set.of(UserHandle.of(123), UserHandle.of(456)))
-                .addDevicePolicy(POLICY_TYPE_SENSORS, DEVICE_POLICY_CUSTOM)
+                .setDevicePolicy(POLICY_TYPE_SENSORS, DEVICE_POLICY_CUSTOM)
                 .addVirtualSensorConfig(
                         new VirtualSensorConfig.Builder(TYPE_ACCELEROMETER, SENSOR_NAME)
                                 .setVendor(SENSOR_VENDOR)

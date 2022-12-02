@@ -38,6 +38,7 @@ import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayCutout;
 import android.view.DisplayEventReceiver;
+import android.view.DisplayShape;
 import android.view.RoundedCorners;
 import android.view.SurfaceControl;
 
@@ -685,6 +686,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.roundedCorners = RoundedCorners.fromResources(
                         res, mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
                 mInfo.installOrientation = mStaticDisplayInfo.installOrientation;
+
+                mInfo.displayShape = DisplayShape.fromResources(
+                        res, mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
 
                 if (mStaticDisplayInfo.isInternal) {
                     mInfo.type = Display.TYPE_INTERNAL;

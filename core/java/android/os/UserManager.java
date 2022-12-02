@@ -2976,8 +2976,15 @@ public class UserManager {
      * </ol>
      *
      * @return whether the user is visible at the moment, as defined above.
+     *
+     * @hide
      */
+    @SystemApi
     @UserHandleAware
+    @RequiresPermission(anyOf = {
+            "android.permission.INTERACT_ACROSS_USERS",
+            "android.permission.MANAGE_USERS"
+    })
     public boolean isUserVisible() {
         try {
             return mService.isUserVisible(mUserId);
@@ -2990,9 +2997,14 @@ public class UserManager {
      * Gets the visible users (as defined by {@link #isUserVisible()}.
      *
      * @return visible users at the moment.
+     *
+     * @hide
      */
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.INTERACT_ACROSS_USERS})
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            "android.permission.INTERACT_ACROSS_USERS",
+            "android.permission.MANAGE_USERS"
+    })
     public @NonNull Set<UserHandle> getVisibleUsers() {
         ArraySet<UserHandle> result = new ArraySet<>();
         try {
@@ -4294,6 +4306,43 @@ public class UserManager {
     public @Nullable UserInfo getPrimaryUser() {
         try {
             return mService.getPrimaryUser();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the user who was last in the foreground, not including the current user and not
+     * including profiles.
+     *
+     * <p>Returns {@code null} if there is no previous user, for example if there
+     * is only one full user (i.e. only one user which is not a profile) on the device.
+     *
+     * <p>This method may be used for example to find the user to switch back to if the
+     * current user is removed, or if creating a new user is aborted.
+     *
+     * <p>Note that reboots do not interrupt this calculation; the previous user need not have
+     * used the device since it rebooted.
+     *
+     * <p>Note also that on devices that support multiple users on multiple displays, it is possible
+     * that the returned user will be visible on a secondary display, as the foreground user is the
+     * one associated with the main display.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS,
+            android.Manifest.permission.QUERY_USERS
+    })
+    public @Nullable UserHandle getPreviousForegroundUser() {
+        try {
+            final int previousUser = mService.getPreviousFullUserToEnterForeground();
+            if (previousUser == UserHandle.USER_NULL) {
+                return null;
+            }
+            return UserHandle.of(previousUser);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

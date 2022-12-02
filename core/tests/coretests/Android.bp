@@ -43,6 +43,7 @@ android_test {
         "mockwebserver",
         "guava",
         "androidx.core_core",
+        "androidx.core_core-ktx",
         "androidx.test.espresso.core",
         "androidx.test.ext.junit",
         "androidx.test.runner",

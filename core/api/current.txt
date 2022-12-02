@@ -6969,6 +6969,7 @@ package android.app {
     method @Deprecated public void onStart(android.content.Intent, int);
     method public int onStartCommand(android.content.Intent, int, int);
     method public void onTaskRemoved(android.content.Intent);
+    method public void onTimeout(int);
     method public void onTrimMemory(int);
     method public boolean onUnbind(android.content.Intent);
     method public final void startForeground(int, android.app.Notification);
@@ -12475,6 +12476,7 @@ package android.content.pm {
     field @Deprecated public static final int FOREGROUND_SERVICE_TYPE_NONE = 0; // 0x0
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_PHONE_CALL}, anyOf={android.Manifest.permission.MANAGE_OWN_CALLS}, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_PHONE_CALL = 4; // 0x4
     field @RequiresPermission(value=android.Manifest.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING = 512; // 0x200
+    field public static final int FOREGROUND_SERVICE_TYPE_SHORT_SERVICE = 2048; // 0x800
     field @RequiresPermission(value=android.Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_SPECIAL_USE = 1073741824; // 0x40000000
     field @RequiresPermission(value=android.Manifest.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED = 1024; // 0x400
     field public int flags;
@@ -13025,10 +13027,12 @@ package android.credentials {
   }
 
   public final class CreateCredentialRequest implements android.os.Parcelable {
-    ctor public CreateCredentialRequest(@NonNull String, @NonNull android.os.Bundle);
+    ctor public CreateCredentialRequest(@NonNull String, @NonNull android.os.Bundle, @NonNull android.os.Bundle, boolean);
     method public int describeContents();
-    method @NonNull public android.os.Bundle getData();
+    method @NonNull public android.os.Bundle getCandidateQueryData();
+    method @NonNull public android.os.Bundle getCredentialData();
     method @NonNull public String getType();
+    method public boolean requireSystemProvider();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.CreateCredentialRequest> CREATOR;
   }
@@ -13066,10 +13070,11 @@ package android.credentials {
   }
 
   public final class GetCredentialOption implements android.os.Parcelable {
-    ctor public GetCredentialOption(@NonNull String, @NonNull android.os.Bundle);
+    ctor public GetCredentialOption(@NonNull String, @NonNull android.os.Bundle, boolean);
     method public int describeContents();
     method @NonNull public android.os.Bundle getData();
     method @NonNull public String getType();
+    method public boolean requireSystemProvider();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.GetCredentialOption> CREATOR;
   }
@@ -15481,7 +15486,6 @@ package android.graphics {
   }
 
   public static class PathIterator.Segment {
-    ctor public PathIterator.Segment(@NonNull int, @NonNull float[], float);
     method public float getConicWeight();
     method @NonNull public float[] getPoints();
     method @NonNull public int getVerb();
@@ -32698,7 +32702,6 @@ package android.os {
     method @NonNull @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.QUERY_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public android.content.pm.UserProperties getUserProperties(@NonNull android.os.UserHandle);
     method public android.os.Bundle getUserRestrictions();
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public android.os.Bundle getUserRestrictions(android.os.UserHandle);
-    method @NonNull @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.INTERACT_ACROSS_USERS"}) public java.util.Set<android.os.UserHandle> getVisibleUsers();
     method public boolean hasUserRestriction(String);
     method public boolean isDemoUser();
     method public static boolean isHeadlessSystemUserMode();
@@ -32712,7 +32715,6 @@ package android.os {
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public boolean isUserRunningOrStopping(android.os.UserHandle);
     method public boolean isUserUnlocked();
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public boolean isUserUnlocked(android.os.UserHandle);
-    method public boolean isUserVisible();
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.MODIFY_QUIET_MODE"}, conditional=true) public boolean requestQuietModeEnabled(boolean, @NonNull android.os.UserHandle);
     method public boolean requestQuietModeEnabled(boolean, @NonNull android.os.UserHandle, int);
     method @Deprecated public boolean setRestrictionsChallenge(String);
@@ -48693,6 +48695,7 @@ package android.view {
     method public float getRefreshRate();
     method public int getRotation();
     method @Nullable public android.view.RoundedCorner getRoundedCorner(int);
+    method @NonNull public android.view.DisplayShape getShape();
     method @Deprecated public void getSize(android.graphics.Point);
     method public int getState();
     method public android.view.Display.Mode[] getSupportedModes();
@@ -48771,6 +48774,13 @@ package android.view {
     method @NonNull public android.view.DisplayCutout.Builder setCutoutPath(@NonNull android.graphics.Path);
     method @NonNull public android.view.DisplayCutout.Builder setSafeInsets(@NonNull android.graphics.Insets);
     method @NonNull public android.view.DisplayCutout.Builder setWaterfallInsets(@NonNull android.graphics.Insets);
+  }
+
+  public final class DisplayShape implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.graphics.Path getPath();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.DisplayShape> CREATOR;
   }
 
   public final class DragAndDropPermissions implements android.os.Parcelable {
@@ -52154,6 +52164,7 @@ package android.view {
     method @Deprecated @NonNull public android.view.WindowInsets consumeStableInsets();
     method @Deprecated @NonNull public android.view.WindowInsets consumeSystemWindowInsets();
     method @Nullable public android.view.DisplayCutout getDisplayCutout();
+    method @Nullable public android.view.DisplayShape getDisplayShape();
     method @NonNull public android.graphics.Insets getInsets(int);
     method @NonNull public android.graphics.Insets getInsetsIgnoringVisibility(int);
     method @Deprecated @NonNull public android.graphics.Insets getMandatorySystemGestureInsets();
@@ -52189,6 +52200,7 @@ package android.view {
     ctor public WindowInsets.Builder(@NonNull android.view.WindowInsets);
     method @NonNull public android.view.WindowInsets build();
     method @NonNull public android.view.WindowInsets.Builder setDisplayCutout(@Nullable android.view.DisplayCutout);
+    method @NonNull public android.view.WindowInsets.Builder setDisplayShape(@NonNull android.view.DisplayShape);
     method @NonNull public android.view.WindowInsets.Builder setInsets(int, @NonNull android.graphics.Insets);
     method @NonNull public android.view.WindowInsets.Builder setInsetsIgnoringVisibility(int, @NonNull android.graphics.Insets) throws java.lang.IllegalArgumentException;
     method @Deprecated @NonNull public android.view.WindowInsets.Builder setMandatorySystemGestureInsets(@NonNull android.graphics.Insets);

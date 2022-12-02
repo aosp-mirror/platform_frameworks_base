@@ -399,8 +399,11 @@ class ActivityStartInterceptor {
      * @return The intercepting intent if needed.
      */
     private Intent interceptWithConfirmCredentialsIfNeeded(ActivityInfo aInfo, int userId) {
+        if (!mService.mAmInternal.shouldConfirmCredentials(userId)) {
+            return null;
+        }
         if ((aInfo.flags & ActivityInfo.FLAG_SHOW_WHEN_LOCKED) != 0
-                || !mService.mAmInternal.shouldConfirmCredentials(userId)) {
+                && (mUserManager.isUserUnlocked(userId) || aInfo.directBootAware)) {
             return null;
         }
         final IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,

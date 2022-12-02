@@ -1039,6 +1039,7 @@ package android.graphics {
     method @NonNull public static android.util.Pair<java.util.List<android.graphics.Typeface>,java.util.List<android.graphics.Typeface>> changeDefaultFontForTest(@NonNull java.util.List<android.graphics.Typeface>, @NonNull java.util.List<android.graphics.Typeface>);
     method @NonNull public static long[] deserializeFontMap(@NonNull java.nio.ByteBuffer, @NonNull java.util.Map<java.lang.String,android.graphics.Typeface>) throws java.io.IOException;
     method @Nullable public static android.os.SharedMemory getSystemFontMapSharedMemory();
+    method public void releaseNativeObjectForTest();
     method @NonNull public static android.os.SharedMemory serializeFontMap(@NonNull java.util.Map<java.lang.String,android.graphics.Typeface>) throws android.system.ErrnoException, java.io.IOException;
   }
 
@@ -1908,6 +1909,7 @@ package android.os {
   }
 
   public abstract class VibrationEffect implements android.os.Parcelable {
+    method @Nullable public abstract long[] computeCreateWaveformOffOnTimingsOrNull();
     method public static android.os.VibrationEffect get(int);
     method public static android.os.VibrationEffect get(int, boolean);
     method @Nullable public static android.os.VibrationEffect get(android.net.Uri, android.content.Context);
@@ -1922,6 +1924,7 @@ package android.os {
   }
 
   public static final class VibrationEffect.Composed extends android.os.VibrationEffect {
+    method @Nullable public long[] computeCreateWaveformOffOnTimingsOrNull();
     method public long getDuration();
     method public int getRepeatIndex();
     method @NonNull public java.util.List<android.os.vibrator.VibrationEffectSegment> getSegments();
@@ -2885,6 +2888,10 @@ package android.view {
     method @NonNull public android.view.Display.Mode.Builder setResolution(int, int);
   }
 
+  public final class DisplayShape implements android.os.Parcelable {
+    method @NonNull public static android.view.DisplayShape fromSpecString(@NonNull String, float, int, int);
+  }
+
   public class FocusFinder {
     method public static void sort(android.view.View[], int, int, android.view.ViewGroup, boolean);
   }
@@ -3267,6 +3274,7 @@ package android.widget {
 
   public class Spinner extends android.widget.AbsSpinner implements android.content.DialogInterface.OnClickListener {
     method public boolean isPopupShowing();
+    method public void onClick(int);
   }
 
   @android.widget.RemoteViews.RemoteView public class TextClock extends android.widget.TextView {

@@ -2259,26 +2259,20 @@ final class InstallPackageHelper {
                 incrementalStorages.add(storage);
             }
 
-            // Enabling fs-verity is a blocking operation. To reduce the impact to the install time,
-            // run in a background thread.
-            new Thread("fsverity-setup") {
-                @Override public void run() {
-                    try {
-                        if (!VerityUtils.hasFsverity(pkg.getBaseApkPath())) {
-                            VerityUtils.setUpFsverity(pkg.getBaseApkPath(), (byte[]) null);
-                        }
-                        for (String path : pkg.getSplitCodePaths()) {
-                            if (!VerityUtils.hasFsverity(path)) {
-                                VerityUtils.setUpFsverity(path, (byte[]) null);
-                            }
-                        }
-                    } catch (IOException e) {
-                        // There's nothing we can do if the setup failed. Since fs-verity is
-                        // optional, just ignore the error for now.
-                        Slog.e(TAG, "Failed to fully enable fs-verity to " + packageName);
+            try {
+                if (!VerityUtils.hasFsverity(pkg.getBaseApkPath())) {
+                    VerityUtils.setUpFsverity(pkg.getBaseApkPath(), (byte[]) null);
+                }
+                for (String path : pkg.getSplitCodePaths()) {
+                    if (!VerityUtils.hasFsverity(path)) {
+                        VerityUtils.setUpFsverity(path, (byte[]) null);
                     }
                 }
-            }.start();
+            } catch (IOException e) {
+                // There's nothing we can do if the setup failed. Since fs-verity is
+                // optional, just ignore the error for now.
+                Slog.e(TAG, "Failed to fully enable fs-verity to " + packageName);
+            }
 
             // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
             mAppDataHelper.prepareAppDataPostCommitLIF(pkg, 0);

@@ -78,7 +78,6 @@ import static com.android.server.wm.Task.REPARENT_MOVE_ROOT_TASK_TO_FRONT;
 import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_MIN_DIMENSION_VIOLATION;
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_NEW_TASK;
-import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_NEW_TASK_FRAGMENT;
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_UNTRUSTED_HOST;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -2775,11 +2774,6 @@ class ActivityStarter {
             }
             case EMBEDDING_DISALLOWED_UNTRUSTED_HOST: {
                 errMsg = "The app:" + mCallingUid + "is not trusted to " + mStartActivity;
-                break;
-            }
-            case EMBEDDING_DISALLOWED_NEW_TASK_FRAGMENT: {
-                errMsg = "Cannot embed activity across TaskFragments for result, resultTo: "
-                        + mStartActivity.resultTo;
                 break;
             }
             default:

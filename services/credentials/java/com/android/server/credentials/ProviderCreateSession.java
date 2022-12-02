@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.credentials.ui.CreateCredentialProviderData;
 import android.credentials.ui.Entry;
 import android.credentials.ui.ProviderPendingIntentResponse;
-import android.os.Bundle;
 import android.service.credentials.BeginCreateCredentialRequest;
 import android.service.credentials.BeginCreateCredentialResponse;
 import android.service.credentials.CreateCredentialRequest;
@@ -68,12 +67,11 @@ public final class ProviderCreateSession extends ProviderSession<
                         createRequestSession.mClientRequest,
                         createRequestSession.mClientCallingPackage);
         if (providerCreateRequest != null) {
-            // TODO : Replace with proper splitting of request
             BeginCreateCredentialRequest providerBeginCreateRequest =
                     new BeginCreateCredentialRequest(
                             providerCreateRequest.getCallingPackage(),
                             providerCreateRequest.getType(),
-                            new Bundle());
+                            createRequestSession.mClientRequest.getCandidateQueryData());
             return new ProviderCreateSession(context, providerInfo, createRequestSession, userId,
                     remoteCredentialService, providerBeginCreateRequest, providerCreateRequest);
         }
@@ -88,7 +86,7 @@ public final class ProviderCreateSession extends ProviderSession<
         String capability = clientRequest.getType();
         if (providerCapabilities.contains(capability)) {
             return new CreateCredentialRequest(clientCallingPackage, capability,
-                    clientRequest.getData());
+                    clientRequest.getCredentialData());
         }
         Log.i(TAG, "Unable to create provider request - capabilities do not match");
         return null;

@@ -33,6 +33,8 @@ import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.addUri
 import com.android.settingslib.spa.framework.common.getColumns
+import com.android.settingslib.spa.framework.util.SESSION_SEARCH
+import com.android.settingslib.spa.framework.util.createIntent
 
 private const val TAG = "SpaSearchProvider"
 
@@ -162,20 +164,19 @@ class SpaSearchProvider : ContentProvider() {
 
     private fun fetchSearchData(entry: SettingsEntry, cursor: MatrixCursor) {
         val entryRepository by spaEnvironment.entryRepository
-        val browseActivityClass = spaEnvironment.browseActivityClass
 
         // Fetch search data. We can add runtime arguments later if necessary
         val searchData = entry.getSearchData() ?: return
-        val intent = entry.containerPage()
-            .createBrowseIntent(context, browseActivityClass, entry.id)
-            ?: Intent()
+        val intent = entry.createIntent(SESSION_SEARCH) ?: Intent()
         cursor.newRow()
             .add(ColumnEnum.ENTRY_ID.id, entry.id)
             .add(ColumnEnum.ENTRY_INTENT_URI.id, intent.toUri(Intent.URI_INTENT_SCHEME))
             .add(ColumnEnum.SEARCH_TITLE.id, searchData.title)
             .add(ColumnEnum.SEARCH_KEYWORD.id, searchData.keyword)
-            .add(ColumnEnum.SEARCH_PATH.id,
-                entryRepository.getEntryPathWithTitle(entry.id, searchData.title))
+            .add(
+                ColumnEnum.SEARCH_PATH.id,
+                entryRepository.getEntryPathWithTitle(entry.id, searchData.title)
+            )
     }
 
     private fun fetchStatusData(entry: SettingsEntry, cursor: MatrixCursor) {

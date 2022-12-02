@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for app_name (4539824758261855508) -->
+    <skip />
+    <string name="string_cancel" msgid="6369133483981306063">"Annuler"</string>
+    <string name="string_continue" msgid="1346732695941131882">"Continuer"</string>
+    <string name="string_create_in_another_place" msgid="1033635365843437603">"Créer à un autre emplacement"</string>
+    <string name="string_save_to_another_place" msgid="7590325934591079193">"Enregistrer à un autre emplacement"</string>
+    <string name="string_use_another_device" msgid="8754514926121520445">"Utiliser un autre appareil"</string>
+    <string name="string_save_to_another_device" msgid="1959562542075194458">"Enregistrer sur un autre appareil"</string>
+    <string name="passkey_creation_intro_title" msgid="402553911484409884">"Une manière simple de se connecter en toute sécurité"</string>
+    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Utilisez vos empreintes digitales, votre visage ou un écran de verrouillage pour vous connecter avec une clé d\'accès unique qui ne peut pas être oubliée ou volée. En savoir plus"</string>
+    <string name="choose_provider_title" msgid="7245243990139698508">"Choisir où <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <skip />
+    <string name="save_your_password" msgid="6597736507991704307">"enregistrer votre mot de passe"</string>
+    <string name="save_your_sign_in_info" msgid="7213978049817076882">"enregistrer vos données de connexion"</string>
+    <!-- no translation found for choose_provider_body (8045759834416308059) -->
+    <skip />
+    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Créer une clé d\'accès dans <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="8812546498357380545">"Enregistrer votre mot de passe dans <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Enregistrer vos données de connexion dans <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_description" msgid="4419171903963100257">"Vous pouvez utiliser votre <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> sur n\'importe quel appareil. Il est enregistré sur <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> pour <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
+    <string name="passkey" msgid="632353688396759522">"clé d\'accès"</string>
+    <string name="password" msgid="6738570945182936667">"mot de passe"</string>
+    <string name="sign_ins" msgid="4710739369149469208">"connexions"</string>
+    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
+    <skip />
+    <!-- no translation found for save_password_to_title (3450480045270186421) -->
+    <skip />
+    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
+    <skip />
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"Utiliser <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> pour toutes vos connexions?"</string>
+    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
+    <skip />
+    <string name="set_as_default" msgid="4415328591568654603">"Définir par défaut"</string>
+    <string name="use_once" msgid="9027366575315399714">"Utiliser une fois"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> mots de passe, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> clés d\'accès"</string>
+    <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> mots de passe"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> clés d\'accès"</string>
+    <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
+    <skip />
+    <string name="another_device" msgid="5147276802037801217">"Un autre appareil"</string>
+    <string name="other_password_manager" msgid="565790221427004141">"Autres gestionnaires de mots de passe"</string>
+    <string name="close_sheet" msgid="1393792015338908262">"Fermer la feuille"</string>
+    <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Retourner à la page précédente"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Utiliser votre clé d\'accès enregistrée pour <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Utiliser votre connexion enregistrée pour <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Choisir une connexion enregistrée pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Se connecter d\'une autre manière"</string>
+    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"Non merci"</string>
+    <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Continuer"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Options de connexion"</string>
+    <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Pour <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Gestionnaires de mots de passe verrouillés"</string>
+    <string name="locked_credential_entry_label_subtext" msgid="9213450912991988691">"Toucher pour déverrouiller"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Gérer les connexions"</string>
+    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"À partir d\'un autre appareil"</string>
+    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Utiliser un autre appareil"</string>
+</resources>

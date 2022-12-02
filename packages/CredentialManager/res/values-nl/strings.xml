@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for app_name (4539824758261855508) -->
+    <skip />
+    <string name="string_cancel" msgid="6369133483981306063">"Annuleren"</string>
+    <string name="string_continue" msgid="1346732695941131882">"Doorgaan"</string>
+    <string name="string_create_in_another_place" msgid="1033635365843437603">"Op een andere locatie maken"</string>
+    <string name="string_save_to_another_place" msgid="7590325934591079193">"Op een andere locatie opslaan"</string>
+    <string name="string_use_another_device" msgid="8754514926121520445">"Een ander apparaat gebruiken"</string>
+    <!-- no translation found for string_save_to_another_device (1959562542075194458) -->
+    <skip />
+    <string name="passkey_creation_intro_title" msgid="402553911484409884">"Een makkelijke manier om beveiligd in te loggen"</string>
+    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Gebruik je vingerafdruk, gezichtsvergrendeling of schermvergrendeling om in te loggen met een unieke toegangssleutel die je niet kunt vergeten en die anderen niet kunnen stelen. Meer informatie"</string>
+    <string name="choose_provider_title" msgid="7245243990139698508">"Een locatie kiezen voor <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <skip />
+    <string name="save_your_password" msgid="6597736507991704307">"je wachtwoord opslaan"</string>
+    <string name="save_your_sign_in_info" msgid="7213978049817076882">"je inloggegevens opslaan"</string>
+    <!-- no translation found for choose_provider_body (8045759834416308059) -->
+    <skip />
+    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Een toegangssleutel maken in <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="8812546498357380545">"Je wachtwoord opslaan in <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Je inloggegevens opslaan in <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_description" msgid="4419171903963100257">"Je kunt je <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> op elk apparaat gebruiken. Het wordt opgeslagen in <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> voor <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
+    <string name="passkey" msgid="632353688396759522">"toegangssleutel"</string>
+    <string name="password" msgid="6738570945182936667">"wachtwoord"</string>
+    <string name="sign_ins" msgid="4710739369149469208">"inloggegevens"</string>
+    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
+    <skip />
+    <!-- no translation found for save_password_to_title (3450480045270186421) -->
+    <skip />
+    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
+    <skip />
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> elke keer gebruiken als je inlogt?"</string>
+    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
+    <skip />
+    <string name="set_as_default" msgid="4415328591568654603">"Instellen als standaard"</string>
+    <string name="use_once" msgid="9027366575315399714">"Eén keer gebruiken"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> wachtwoorden, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> toegangssleutels"</string>
+    <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> wachtwoorden"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> toegangssleutels"</string>
+    <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
+    <skip />
+    <string name="another_device" msgid="5147276802037801217">"Een ander apparaat"</string>
+    <string name="other_password_manager" msgid="565790221427004141">"Andere wachtwoordmanagers"</string>
+    <string name="close_sheet" msgid="1393792015338908262">"Blad sluiten"</string>
+    <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Ga terug naar de vorige pagina"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Je opgeslagen toegangssleutel voor <xliff:g id="APP_NAME">%1$s</xliff:g> gebruiken?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Je opgeslagen inloggegevens voor <xliff:g id="APP_NAME">%1$s</xliff:g> gebruiken?"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Opgeslagen inloggegevens kiezen voor <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Inloggen via een andere methode"</string>
+    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"Nee, bedankt"</string>
+    <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Doorgaan"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Opties voor inloggen"</string>
+    <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Voor <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Vergrendelde wachtwoordmanagers"</string>
+    <string name="locked_credential_entry_label_subtext" msgid="9213450912991988691">"Tik om te ontgrendelen"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Inloggegevens beheren"</string>
+    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Via een ander apparaat"</string>
+    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Een ander apparaat gebruiken"</string>
+</resources>

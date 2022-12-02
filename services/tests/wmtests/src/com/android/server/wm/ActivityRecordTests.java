@@ -1206,6 +1206,25 @@ public class ActivityRecordTests extends WindowTestsBase {
         }
     }
 
+    @Test
+    public void testFinishActivityIfPossible_sendResultImmediatelyIfResumed() {
+        final Task task = new TaskBuilder(mSupervisor).build();
+        final TaskFragment taskFragment1 = createTaskFragmentWithActivity(task);
+        final TaskFragment taskFragment2 = createTaskFragmentWithActivity(task);
+        final ActivityRecord resultToActivity = taskFragment1.getTopMostActivity();
+        final ActivityRecord targetActivity = taskFragment2.getTopMostActivity();
+        resultToActivity.setState(RESUMED, "test");
+        targetActivity.setState(RESUMED, "test");
+        targetActivity.resultTo = resultToActivity;
+
+        clearInvocations(mAtm.getLifecycleManager());
+        targetActivity.finishIfPossible(0, new Intent(), null, "test", false /* oomAdj */);
+        waitUntilHandlersIdle();
+
+        verify(resultToActivity).sendResult(anyInt(), eq(null), anyInt(), anyInt(), any(), eq(null),
+                anyBoolean());
+    }
+
     /**
      * Verify that complete finish request for non-finishing activity is invalid.
      */

@@ -40,7 +40,6 @@ oneway interface IInputMethod {
     parcelable InitParams {
         IBinder token;
         IInputMethodPrivilegedOperations privilegedOperations;
-        int configChanges;
         int navigationBarFlags;
     }
 

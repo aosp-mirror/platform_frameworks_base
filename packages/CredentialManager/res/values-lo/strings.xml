@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for app_name (4539824758261855508) -->
+    <skip />
+    <string name="string_cancel" msgid="6369133483981306063">"ຍົກເລີກ"</string>
+    <string name="string_continue" msgid="1346732695941131882">"ສືບຕໍ່"</string>
+    <string name="string_create_in_another_place" msgid="1033635365843437603">"ສ້າງໃນບ່ອນອື່ນ"</string>
+    <string name="string_save_to_another_place" msgid="7590325934591079193">"ບັນທຶກໃສ່ບ່ອນອື່ນ"</string>
+    <string name="string_use_another_device" msgid="8754514926121520445">"ໃຊ້ອຸປະກອນອື່ນ"</string>
+    <string name="string_save_to_another_device" msgid="1959562542075194458">"ບັນທຶກໃສ່ອຸປະກອນອື່ນ"</string>
+    <string name="passkey_creation_intro_title" msgid="402553911484409884">"ວິທີງ່າຍໆໃນການເຂົ້າສູ່ລະບົບຢ່າງປອດໄພ"</string>
+    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"ໃຊ້ລາຍນິ້ວມື, ໃບໜ້າ ຫຼື ລັອກໜ້າຈໍຂອງທ່ານເພື່ອເຂົ້າສູ່ລະບົບດ້ວຍກະແຈຜ່ານທີ່ບໍ່ຊ້ຳກັນເພື່ອບໍ່ໃຫ້ລືມ ຫຼື ຖືກລັກໄດ້. ສຶກສາເພີ່ມເຕີມ"</string>
+    <string name="choose_provider_title" msgid="7245243990139698508">"ເລືອກບ່ອນທີ່ຈະ <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <skip />
+    <string name="save_your_password" msgid="6597736507991704307">"ບັນທຶກລະຫັດຜ່ານຂອງທ່ານ"</string>
+    <string name="save_your_sign_in_info" msgid="7213978049817076882">"ບັນທຶກຂໍ້ມູນການເຂົ້າສູ່ລະບົບຂອງທ່ານ"</string>
+    <!-- no translation found for choose_provider_body (8045759834416308059) -->
+    <skip />
+    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"ສ້າງກະແຈຜ່ານໃນ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="choose_create_option_password_title" msgid="8812546498357380545">"ບັນທຶກລະຫັດຜ່ານຂອງທ່ານໃສ່ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"ບັນທຶກຂໍ້ມູນການເຂົ້າສູ່ລະບົບຂອງທ່ານໃສ່ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="choose_create_option_description" msgid="4419171903963100257">"ທ່ານສາມາດໃຊ້ <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> ຂອງທ່ານຢູ່ອຸປະກອນໃດກໍໄດ້. ມັນຈະຖືກບັນທຶກໃສ່ <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> ສຳລັບ <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
+    <string name="passkey" msgid="632353688396759522">"ກະແຈຜ່ານ"</string>
+    <string name="password" msgid="6738570945182936667">"ລະຫັດຜ່ານ"</string>
+    <string name="sign_ins" msgid="4710739369149469208">"ການເຂົ້າສູ່ລະບົບ"</string>
+    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
+    <skip />
+    <!-- no translation found for save_password_to_title (3450480045270186421) -->
+    <skip />
+    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
+    <skip />
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"ໃຊ້ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ສຳລັບການເຂົ້າສູ່ລະບົບທັງໝົດຂອງທ່ານບໍ?"</string>
+    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
+    <skip />
+    <string name="set_as_default" msgid="4415328591568654603">"ຕັ້ງເປັນຄ່າເລີ່ມຕົ້ນ"</string>
+    <string name="use_once" msgid="9027366575315399714">"ໃຊ້ເທື່ອດຽວ"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ລະຫັດຜ່ານ, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> ກະແຈຜ່ານ"</string>
+    <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ລະຫັດຜ່ານ"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> ກະແຈຜ່ານ"</string>
+    <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
+    <skip />
+    <string name="another_device" msgid="5147276802037801217">"ອຸປະກອນອື່ນ"</string>
+    <string name="other_password_manager" msgid="565790221427004141">"ຕົວຈັດການລະຫັດຜ່ານອື່ນໆ"</string>
+    <string name="close_sheet" msgid="1393792015338908262">"ປິດຊີດ"</string>
+    <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"ກັບຄືນໄປຫາໜ້າກ່ອນໜ້ານີ້"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"ໃຊ້ກະແຈຜ່ານທີ່ບັນທຶກໄວ້ຂອງທ່ານສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"ໃຊ້ການເຂົ້າສູ່ລະບົບທີ່ບັນທຶກໄວ້ຂອງທ່ານສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"ເລືອກການເຂົ້າສູ່ລະບົບທີ່ບັນທຶກໄວ້ສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ເຂົ້າສູ່ລະບົບດ້ວຍວິທີອື່ນ"</string>
+    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"ບໍ່, ຂອບໃຈ"</string>
+    <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ສືບຕໍ່"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"ຕົວເລືອກການເຂົ້າສູ່ລະບົບ"</string>
+    <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"ສຳລັບ <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"ຕົວຈັດການລະຫັດຜ່ານທີ່ລັອກໄວ້"</string>
+    <string name="locked_credential_entry_label_subtext" msgid="9213450912991988691">"ແຕະເພື່ອປົດລັອກ"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"ຈັດການການເຂົ້າສູ່ລະບົບ"</string>
+    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"ຈາກອຸປະກອນອື່ນ"</string>
+    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"ໃຊ້ອຸປະກອນອື່ນ"</string>
+</resources>

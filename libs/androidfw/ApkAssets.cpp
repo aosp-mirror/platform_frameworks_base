@@ -18,6 +18,7 @@
 
 #include "android-base/errors.h"
 #include "android-base/logging.h"
+#include "android-base/utf8.h"
 
 namespace android {
 
@@ -84,7 +85,7 @@ std::unique_ptr<ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap_path,
   }
 
   std::string overlay_path(loaded_idmap->OverlayApkPath());
-  auto fd = unique_fd(::open(overlay_path.c_str(), O_RDONLY|O_CLOEXEC));
+  auto fd = unique_fd(base::utf8::open(overlay_path.c_str(), O_RDONLY | O_CLOEXEC));
   std::unique_ptr<AssetsProvider> overlay_assets;
   if (IsFabricatedOverlay(fd)) {
     // Fabricated overlays do not contain resource definitions. All of the overlay resource values
@@ -92,7 +93,7 @@ std::unique_ptr<ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap_path,
     overlay_assets = EmptyAssetsProvider::Create(std::move(overlay_path));
   } else {
     // The overlay should be an APK.
-    overlay_assets = ZipAssetsProvider::Create(std::move(fd), std::move(overlay_path), flags);
+    overlay_assets = ZipAssetsProvider::Create(std::move(overlay_path), flags, std::move(fd));
   }
   if (overlay_assets == nullptr) {
     return {};

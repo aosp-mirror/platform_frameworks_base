@@ -209,12 +209,12 @@ class CreateFlowUtils {
     }
 
     fun toDisabledProviderList(
-      providerDataList: List<DisabledProviderData>,
+      providerDataList: List<DisabledProviderData>?,
       context: Context,
-    ): List<com.android.credentialmanager.createflow.DisabledProviderInfo> {
+    ): List<com.android.credentialmanager.createflow.DisabledProviderInfo>? {
       // TODO: get from the actual service info
       val packageManager = context.packageManager
-      return providerDataList.map {
+      return providerDataList?.map {
         val pkgInfo = packageManager
           .getPackageInfo(it.providerFlattenedComponentName,
             PackageManager.PackageInfoFlags.of(0))

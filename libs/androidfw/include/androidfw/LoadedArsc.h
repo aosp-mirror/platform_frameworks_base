@@ -99,8 +99,8 @@ enum : package_property_t {
 };
 
 struct OverlayableInfo {
-  std::string name;
-  std::string actor;
+  std::string_view name;
+  std::string_view actor;
   uint32_t policy_flags;
 };
 
@@ -275,7 +275,7 @@ class LoadedPackage {
     return overlayable_map_;
   }
 
-  const std::map<uint32_t, uint32_t>& GetAliasResourceIdMap() const {
+  const std::vector<std::pair<uint32_t, uint32_t>>& GetAliasResourceIdMap() const {
     return alias_id_map_;
   }
 
@@ -295,8 +295,8 @@ class LoadedPackage {
   std::unordered_map<uint8_t, TypeSpec> type_specs_;
   ByteBucketArray<uint32_t> resource_ids_;
   std::vector<DynamicPackageEntry> dynamic_package_map_;
-  std::vector<const std::pair<OverlayableInfo, std::unordered_set<uint32_t>>> overlayable_infos_;
-  std::map<uint32_t, uint32_t> alias_id_map_;
+  std::vector<std::pair<OverlayableInfo, std::unordered_set<uint32_t>>> overlayable_infos_;
+  std::vector<std::pair<uint32_t, uint32_t>> alias_id_map_;
 
   // A map of overlayable name to actor
   std::unordered_map<std::string, std::string> overlayable_map_;

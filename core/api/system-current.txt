@@ -2998,13 +2998,13 @@ package android.companion.virtual {
 
   public static final class VirtualDeviceParams.Builder {
     ctor public VirtualDeviceParams.Builder();
-    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder addDevicePolicy(int, int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder addVirtualSensorConfig(@NonNull android.companion.virtual.sensor.VirtualSensorConfig);
     method @NonNull public android.companion.virtual.VirtualDeviceParams build();
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAllowedActivities(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAllowedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedActivities(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
+    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setDevicePolicy(int, int);
     method @NonNull @RequiresPermission(value=android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY, conditional=true) public android.companion.virtual.VirtualDeviceParams.Builder setLockState(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setName(@NonNull String);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setUsersWithMatchingAccounts(@NonNull java.util.Set<android.os.UserHandle>);
@@ -10097,6 +10097,7 @@ package android.os {
     method @NonNull public java.util.List<android.os.UserHandle> getAllProfiles();
     method @NonNull public java.util.List<android.os.UserHandle> getEnabledProfiles();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public android.os.UserHandle getMainUser();
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public android.os.UserHandle getPreviousForegroundUser();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public android.os.UserHandle getProfileParent(@NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public int getRemainingCreatableProfileCount(@NonNull String);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public int getRemainingCreatableUserCount(@NonNull String);
@@ -10110,6 +10111,7 @@ package android.os {
     method @Deprecated @android.os.UserManager.UserRestrictionSource @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS}) public int getUserRestrictionSource(String, android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS}) public java.util.List<android.os.UserManager.EnforcingUser> getUserRestrictionSources(String, android.os.UserHandle);
     method @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public int getUserSwitchability();
+    method @NonNull @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.MANAGE_USERS"}) public java.util.Set<android.os.UserHandle> getVisibleUsers();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean hasRestrictedProfiles();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean hasUserRestrictionForUser(@NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isAdminUser();
@@ -10127,6 +10129,7 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS, android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED}) public boolean isUserNameSet();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isUserOfType(@NonNull String);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean isUserUnlockingOrUnlocked(@NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.MANAGE_USERS"}) public boolean isUserVisible();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean removeUser(@NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public int removeUserWhenPossible(@NonNull android.os.UserHandle, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setUserIcon(@NonNull android.graphics.Bitmap) throws android.os.UserManager.UserOperationException;
@@ -12873,14 +12876,14 @@ package android.telephony {
     method @NonNull public android.telephony.BarringInfo createLocationInfoSanitizedCopy();
   }
 
-  public final class CallAttributes implements android.os.Parcelable {
-    ctor public CallAttributes(@NonNull android.telephony.PreciseCallState, int, @NonNull android.telephony.CallQuality);
-    method public int describeContents();
-    method @NonNull public android.telephony.CallQuality getCallQuality();
-    method public int getNetworkType();
-    method @NonNull public android.telephony.PreciseCallState getPreciseCallState();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallAttributes> CREATOR;
+  @Deprecated public final class CallAttributes implements android.os.Parcelable {
+    ctor @Deprecated public CallAttributes(@NonNull android.telephony.PreciseCallState, int, @NonNull android.telephony.CallQuality);
+    method @Deprecated public int describeContents();
+    method @Deprecated @NonNull public android.telephony.CallQuality getCallQuality();
+    method @Deprecated public int getNetworkType();
+    method @Deprecated @NonNull public android.telephony.PreciseCallState getPreciseCallState();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallAttributes> CREATOR;
   }
 
   public final class CallForwardingInfo implements android.os.Parcelable {
@@ -12958,6 +12961,28 @@ package android.telephony {
     method @NonNull public android.telephony.CallQuality.Builder setOutgoingSilenceDetectedAtCallSetup(boolean);
     method @NonNull public android.telephony.CallQuality.Builder setRtpInactivityDetected(boolean);
     method @NonNull public android.telephony.CallQuality.Builder setUplinkCallQualityLevel(int);
+  }
+
+  public final class CallState implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.telephony.CallQuality getCallQuality();
+    method public int getCallState();
+    method public int getImsCallServiceType();
+    method @Nullable public String getImsCallSessionId();
+    method public int getImsCallType();
+    method public int getNetworkType();
+    method public void writeToParcel(@Nullable android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallState> CREATOR;
+  }
+
+  public static final class CallState.Builder {
+    ctor public CallState.Builder(int);
+    method @NonNull public android.telephony.CallState build();
+    method @NonNull public android.telephony.CallState.Builder setCallQuality(@Nullable android.telephony.CallQuality);
+    method @NonNull public android.telephony.CallState.Builder setImsCallServiceType(int);
+    method @NonNull public android.telephony.CallState.Builder setImsCallSessionId(@Nullable String);
+    method @NonNull public android.telephony.CallState.Builder setImsCallType(int);
+    method @NonNull public android.telephony.CallState.Builder setNetworkType(int);
   }
 
   public class CarrierConfigManager {
@@ -13710,7 +13735,8 @@ package android.telephony {
   }
 
   public static interface TelephonyCallback.CallAttributesListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onCallAttributesChanged(@NonNull android.telephony.CallAttributes);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public default void onCallAttributesChanged(@NonNull android.telephony.CallAttributes);
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public default void onCallStatesChanged(@NonNull java.util.List<android.telephony.CallState>);
   }
 
   public static interface TelephonyCallback.DataEnabledListener {
@@ -14811,6 +14837,7 @@ package android.telephony.ims {
     field public static final int CALL_RESTRICT_CAUSE_HD = 3; // 0x3
     field public static final int CALL_RESTRICT_CAUSE_NONE = 0; // 0x0
     field public static final int CALL_RESTRICT_CAUSE_RAT = 1; // 0x1
+    field public static final int CALL_TYPE_NONE = 0; // 0x0
     field public static final int CALL_TYPE_VIDEO_N_VOICE = 3; // 0x3
     field public static final int CALL_TYPE_VOICE = 2; // 0x2
     field public static final int CALL_TYPE_VOICE_N_VIDEO = 1; // 0x1

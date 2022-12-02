@@ -16,17 +16,22 @@
 
 package com.android.settingslib.spa.framework.util
 
+import android.os.Bundle
 import androidx.compose.runtime.Composable
+import androidx.core.os.bundleOf
+import com.android.settingslib.spa.framework.common.LOG_DATA_SWITCH_STATUS
 import com.android.settingslib.spa.framework.common.LocalEntryDataProvider
 import com.android.settingslib.spa.framework.common.LogCategory
 import com.android.settingslib.spa.framework.common.LogEvent
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 
 @Composable
-fun logEntryEvent(): (event: LogEvent) -> Unit {
-    val entryId = LocalEntryDataProvider.current.entryId ?: return {}
-    return {
-        SpaEnvironmentFactory.instance.logger.event(entryId, it, category = LogCategory.VIEW)
+fun logEntryEvent(): (event: LogEvent, extraData: Bundle) -> Unit {
+    val entryId = LocalEntryDataProvider.current.entryId ?: return { _, _ -> }
+    return { event, extraData ->
+        SpaEnvironmentFactory.instance.logger.event(
+            entryId, event, category = LogCategory.VIEW, extraData = extraData
+        )
     }
 }
 
@@ -35,7 +40,7 @@ fun wrapOnClickWithLog(onClick: (() -> Unit)?): (() -> Unit)? {
     if (onClick == null) return null
     val logEvent = logEntryEvent()
     return {
-        logEvent(LogEvent.ENTRY_CLICK)
+        logEvent(LogEvent.ENTRY_CLICK, Bundle.EMPTY)
         onClick()
     }
 }
@@ -45,8 +50,7 @@ fun wrapOnSwitchWithLog(onSwitch: ((checked: Boolean) -> Unit)?): ((checked: Boo
     if (onSwitch == null) return null
     val logEvent = logEntryEvent()
     return {
-        val event = if (it) LogEvent.ENTRY_SWITCH_ON else LogEvent.ENTRY_SWITCH_OFF
-        logEvent(event)
+        logEvent(LogEvent.ENTRY_SWITCH, bundleOf(LOG_DATA_SWITCH_STATUS to it))
         onSwitch(it)
     }
 }

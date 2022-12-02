@@ -76,6 +76,7 @@ package com.android.server.pm.pkg {
     method @Nullable public String getSdkLibraryName();
     method @NonNull public java.util.List<com.android.server.pm.pkg.AndroidPackageSplit> getSplits();
     method @Nullable public String getStaticSharedLibraryName();
+    method @NonNull public java.util.UUID getStorageUuid();
     method public int getTargetSdkVersion();
     method public boolean isDebuggable();
     method public boolean isIsolatedSplitLoading();

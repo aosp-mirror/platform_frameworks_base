@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 /**
  * {@link UserVisibilityListener} implementation that expects callback events to be asynchronously
  * received.

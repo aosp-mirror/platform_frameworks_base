@@ -802,6 +802,21 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         dialog.dismiss();
     }
 
+    /**
+     * Sets selection and dismisses the spinner's popup if it can be dismissed.
+     * For ease of use in tests, where publicly obtaining the spinner's popup is difficult.
+     *
+     * @param which index of the item to be selected.
+     * @hide
+     */
+    @TestApi
+    public void onClick(int which) {
+        setSelection(which);
+        if (mPopup != null && mPopup.isShowing()) {
+            mPopup.dismiss();
+        }
+    }
+
     @Override
     public CharSequence getAccessibilityClassName() {
         return Spinner.class.getName();

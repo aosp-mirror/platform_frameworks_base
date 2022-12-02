@@ -162,7 +162,7 @@ public final class Slogf {
     }
 
     /**
-     * Logs a {@link Log.VEBOSE} message with an exception
+     * Logs a {@link Log.VEBOSE} message with a throwable
      *
      * <p><strong>Note: </strong>the message will only be formatted if {@link Log#VERBOSE} logging
      * is enabled for the given {@code tag}, but the compiler will still create an intermediate
@@ -170,10 +170,10 @@ public final class Slogf {
      * you're calling this method in a critical path, make sure to explicitly do the check before
      * calling it.
      */
-    public static void v(String tag, Exception exception, String format, @Nullable Object... args) {
+    public static void v(String tag, Throwable throwable, String format, @Nullable Object... args) {
         if (!isLoggable(tag, Log.VERBOSE)) return;
 
-        v(tag, getMessage(format, args), exception);
+        v(tag, getMessage(format, args), throwable);
     }
 
     /**
@@ -192,7 +192,7 @@ public final class Slogf {
     }
 
     /**
-     * Logs a {@link Log.DEBUG} message with an exception
+     * Logs a {@link Log.DEBUG} message with a throwable
      *
      * <p><strong>Note: </strong>the message will only be formatted if {@link Log#DEBUG} logging
      * is enabled for the given {@code tag}, but the compiler will still create an intermediate
@@ -200,10 +200,10 @@ public final class Slogf {
      * you're calling this method in a critical path, make sure to explicitly do the check before
      * calling it.
      */
-    public static void d(String tag, Exception exception, String format, @Nullable Object... args) {
+    public static void d(String tag, Throwable throwable, String format, @Nullable Object... args) {
         if (!isLoggable(tag, Log.DEBUG)) return;
 
-        d(tag, getMessage(format, args), exception);
+        d(tag, getMessage(format, args), throwable);
     }
 
     /**
@@ -222,7 +222,7 @@ public final class Slogf {
     }
 
     /**
-     * Logs a {@link Log.INFO} message with an exception
+     * Logs a {@link Log.INFO} message with a throwable
      *
      * <p><strong>Note: </strong>the message will only be formatted if {@link Log#INFO} logging
      * is enabled for the given {@code tag}, but the compiler will still create an intermediate
@@ -230,10 +230,10 @@ public final class Slogf {
      * you're calling this method in a critical path, make sure to explicitly do the check before
      * calling it.
      */
-    public static void i(String tag, Exception exception, String format, @Nullable Object... args) {
+    public static void i(String tag, Throwable throwable, String format, @Nullable Object... args) {
         if (!isLoggable(tag, Log.INFO)) return;
 
-        i(tag, getMessage(format, args), exception);
+        i(tag, getMessage(format, args), throwable);
     }
 
     /**
@@ -252,7 +252,7 @@ public final class Slogf {
     }
 
     /**
-     * Logs a {@link Log.WARN} message with an exception
+     * Logs a {@link Log.WARN} message with a throwable
      *
      * <p><strong>Note: </strong>the message will only be formatted if {@link Log#WARN} logging is
      * enabled for the given {@code tag}, but the compiler will still create an intermediate array
@@ -260,10 +260,10 @@ public final class Slogf {
      * calling this method in a critical path, make sure to explicitly do the check before calling
      * it.
      */
-    public static void w(String tag, Exception exception, String format, @Nullable Object... args) {
+    public static void w(String tag, Throwable throwable, String format, @Nullable Object... args) {
         if (!isLoggable(tag, Log.WARN)) return;
 
-        w(tag, getMessage(format, args), exception);
+        w(tag, getMessage(format, args), throwable);
     }
 
     /**
@@ -282,7 +282,7 @@ public final class Slogf {
     }
 
     /**
-     * Logs a {@link Log.ERROR} message with an exception
+     * Logs a {@link Log.ERROR} message with a throwable
      *
      * <p><strong>Note: </strong>the message will only be formatted if {@link Log#ERROR} logging is
      * enabled for the given {@code tag}, but the compiler will still create an intermediate array
@@ -290,10 +290,10 @@ public final class Slogf {
      * calling this method in a critical path, make sure to explicitly do the check before calling
      * it.
      */
-    public static void e(String tag, Exception exception, String format, @Nullable Object... args) {
+    public static void e(String tag, Throwable throwable, String format, @Nullable Object... args) {
         if (!isLoggable(tag, Log.ERROR)) return;
 
-        e(tag, getMessage(format, args), exception);
+        e(tag, getMessage(format, args), throwable);
     }
 
     /**
@@ -304,11 +304,11 @@ public final class Slogf {
     }
 
     /**
-     * Logs a {@code wtf} message with an exception.
+     * Logs a {@code wtf} message with a throwable.
      */
-    public static void wtf(String tag, Exception exception, String format,
+    public static void wtf(String tag, Throwable throwable, String format,
             @Nullable Object... args) {
-        wtf(tag, getMessage(format, args), exception);
+        wtf(tag, getMessage(format, args), throwable);
     }
 
     private static String getMessage(String format, @Nullable Object... args) {
