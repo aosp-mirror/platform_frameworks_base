@@ -286,6 +286,39 @@ public class OverlayConfigTest {
     }
 
     @Test
+    public void testPartialConfigPartitionPrecedence() throws IOException {
+        createFile("/odm/overlay/config/config.xml",
+                "<config>"
+                        + "  <overlay package=\"two\" enabled=\"true\" />"
+                        + "</config>");
+
+        mScannerRule.addOverlay(createFile("/vendor/overlay/one.apk"), "one", "android", 0, true,
+                1);
+        mScannerRule.addOverlay(createFile("/odm/overlay/two.apk"), "two");
+        mScannerRule.addOverlay(createFile("/product/overlay/three.apk"), "three", "android", 0,
+                true, 0);
+
+        final OverlayConfig overlayConfig = createConfigImpl();
+        assertConfig(overlayConfig, "one", false, true, 0);
+        assertConfig(overlayConfig, "two", true, true, 1);
+        assertConfig(overlayConfig, "three", false, true, 2);
+    }
+
+    @Test
+    public void testNoConfigPartitionPrecedence() throws IOException {
+        mScannerRule.addOverlay(createFile("/vendor/overlay/one.apk"), "one", "android", 0, true,
+                1);
+        mScannerRule.addOverlay(createFile("/odm/overlay/two.apk"), "two", "android", 0, true, 2);
+        mScannerRule.addOverlay(createFile("/product/overlay/three.apk"), "three", "android", 0,
+                true, 0);
+
+        final OverlayConfig overlayConfig = createConfigImpl();
+        assertConfig(overlayConfig, "one", false, true, 0);
+        assertConfig(overlayConfig, "two", false, true, 1);
+        assertConfig(overlayConfig, "three", false, true, 2);
+    }
+
+    @Test
     public void testImmutable() throws IOException {
         createFile("/product/overlay/config/config.xml",
                 "<config>"
@@ -507,37 +540,6 @@ public class OverlayConfigTest {
     }
 
     @Test
-    public void testNoConfigsAllowPartitionReordering() throws IOException {
-        mScannerRule.addOverlay(createFile("/vendor/overlay/one.apk"), "one", "android", 0, true,
-                1);
-        mScannerRule.addOverlay(createFile("/product/overlay/two.apk"), "two", "android", 0, true,
-                0);
-
-        final OverlayConfig overlayConfig = createConfigImpl();
-        assertConfig(overlayConfig, "one", false, true, 1);
-        assertConfig(overlayConfig, "two", false, true, 0);
-    }
-
-    @Test
-    public void testConfigDisablesPartitionReordering() throws IOException {
-        createFile("/odm/overlay/config/config.xml",
-                "<config>"
-                        + "  <overlay package=\"two\" enabled=\"true\" />"
-                        + "</config>");
-
-        mScannerRule.addOverlay(createFile("/vendor/overlay/one.apk"), "one", "android", 0, true,
-                1);
-        mScannerRule.addOverlay(createFile("/odm/overlay/two.apk"), "two");
-        mScannerRule.addOverlay(createFile("/product/overlay/three.apk"), "three", "android", 0,
-                true, 0);
-
-        final OverlayConfig overlayConfig = createConfigImpl();
-        assertConfig(overlayConfig, "one", false, true, 0);
-        assertConfig(overlayConfig, "two", true, true, 1);
-        assertConfig(overlayConfig, "three", false, true, 2);
-    }
-
-    @Test
     public void testStaticOverlayOutsideOverlayDir() throws IOException {
         mScannerRule.addOverlay(createFile("/product/app/one.apk"), "one", "android", 0, true, 0);
 
@@ -550,7 +552,7 @@ public class OverlayConfigTest {
     @Test
     public void testSortStaticOverlaysDifferentTargets() throws IOException {
         mScannerRule.addOverlay(createFile("/vendor/overlay/one.apk"), "one", "other", 0, true, 0);
-        mScannerRule.addOverlay(createFile("/product/overlay/two.apk"), "two", "android", 0, true,
+        mScannerRule.addOverlay(createFile("/vendor/overlay/two.apk"), "two", "android", 0, true,
                 0);
 
         final OverlayConfig overlayConfig = createConfigImpl();
@@ -559,15 +561,33 @@ public class OverlayConfigTest {
     }
 
     @Test
+    public void testSortStaticOverlaysDifferentPartitions() throws IOException {
+        mScannerRule.addOverlay(createFile("/vendor/overlay/one.apk"), "one", "android", 0, true,
+                2);
+        mScannerRule.addOverlay(createFile("/vendor/overlay/two.apk"), "two", "android", 0, true,
+                3);
+        mScannerRule.addOverlay(createFile("/product/overlay/three.apk"), "three", "android", 0,
+                true, 0);
+        mScannerRule.addOverlay(createFile("/product/overlay/four.apk"), "four", "android", 0,
+                true, 1);
+
+        final OverlayConfig overlayConfig = createConfigImpl();
+        assertConfig(overlayConfig, "one", false, true, 0);
+        assertConfig(overlayConfig, "two", false, true, 1);
+        assertConfig(overlayConfig, "three", false, true, 2);
+        assertConfig(overlayConfig, "four", false, true, 3);
+    }
+
+    @Test
     public void testSortStaticOverlaysSamePriority() throws IOException {
         mScannerRule.addOverlay(createFile("/vendor/overlay/one.apk"), "one", "android", 0, true,
                 0);
-        mScannerRule.addOverlay(createFile("/product/overlay/two.apk"), "two", "android", 0, true,
+        mScannerRule.addOverlay(createFile("/vendor/overlay/two.apk"), "two", "android", 0, true,
                 0);
 
         final OverlayConfig overlayConfig = createConfigImpl();
-        assertConfig(overlayConfig, "one", false, true, 1);
-        assertConfig(overlayConfig, "two", false, true, 0);
+        assertConfig(overlayConfig, "one", false, true, 0);
+        assertConfig(overlayConfig, "two", false, true, 1);
     }
 
     @Test
