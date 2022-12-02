@@ -36,6 +36,7 @@
 #include <inttypes.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <linux/fs.h>
 
 #include <memory>
 
@@ -253,11 +254,28 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
         return INSTALL_FAILED_CONTAINER_ERROR;
     }
 
+    // If a filesystem like f2fs supports per-file compression, set the compression bit before data
+    // writes
+    unsigned int flags;
+    if (ioctl(fd, FS_IOC_GETFLAGS, &flags) == -1) {
+        ALOGE("Failed to call FS_IOC_GETFLAGS on %s: %s\n", localTmpFileName, strerror(errno));
+    } else if ((flags & FS_COMPR_FL) == 0) {
+        flags |= FS_COMPR_FL;
+        ioctl(fd, FS_IOC_SETFLAGS, &flags);
+    }
+
     if (!zipFile->uncompressEntry(zipEntry, fd)) {
         ALOGE("Failed uncompressing %s to %s\n", fileName, localTmpFileName);
         close(fd);
         unlink(localTmpFileName);
         return INSTALL_FAILED_CONTAINER_ERROR;
+    }
+
+    if (fsync(fd) < 0) {
+        ALOGE("Coulnd't fsync temporary file name: %s: %s\n", localTmpFileName, strerror(errno));
+        close(fd);
+        unlink(localTmpFileName);
+        return INSTALL_FAILED_INTERNAL_ERROR;
     }
 
     close(fd);

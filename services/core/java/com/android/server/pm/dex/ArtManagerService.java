@@ -52,6 +52,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageManagerServiceCompilerMapping;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
@@ -338,6 +339,11 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         // This avoids having yet another type of profiles and simplifies the processing.
         String classpath = String.join(":", Os.getenv("BOOTCLASSPATH"),
                 Os.getenv("SYSTEMSERVERCLASSPATH"));
+
+        final String standaloneSystemServerJars = Os.getenv("STANDALONE_SYSTEMSERVER_JARS");
+        if (standaloneSystemServerJars != null) {
+            classpath = String.join(":", classpath, standaloneSystemServerJars);
+        }
 
         // Create the snapshot.
         createProfileSnapshot(BOOT_IMAGE_ANDROID_PACKAGE, BOOT_IMAGE_PROFILE_NAME, classpath,
@@ -719,6 +725,13 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         @Override
         public PackageOptimizationInfo getPackageOptimizationInfo(
                 ApplicationInfo info, String abi, String activityName) {
+            if (info.packageName.equals(PackageManagerService.PLATFORM_PACKAGE_NAME)) {
+                // PackageManagerService.PLATFORM_PACKAGE_NAME in this context means that the
+                // activity is defined in bootclasspath. Currently, we don't have an API to get the
+                // correct optimization info.
+                return PackageOptimizationInfo.createWithNoInfo();
+            }
+
             String compilationReason;
             String compilationFilter;
             try {

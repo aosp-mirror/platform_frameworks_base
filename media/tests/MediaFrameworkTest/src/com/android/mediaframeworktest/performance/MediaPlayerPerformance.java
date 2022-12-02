@@ -296,7 +296,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
                 mMemWriter.write("End Memory :" + mEndMemory + "\n");
             }
         } catch (Exception e) {
-            e.toString();
+            // TODO
         }
     }
 

@@ -20,16 +20,17 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-@RunWith(Parameterized.class)
+@RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class StringReplaceAllPerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
@@ -69,8 +70,7 @@ public class StringReplaceAllPerfTest {
         return stringBuilder.toString();
     }
 
-    @Parameters(name = "mStringLengths={0}")
-    public static Collection<Object[]> data() {
+    public static Collection<Object[]> getData() {
         return Arrays.asList(
                 new Object[][] {
                     {StringLengths.BOOT_IMAGE},
@@ -82,30 +82,30 @@ public class StringReplaceAllPerfTest {
                 });
     }
 
-    @Parameterized.Parameter(0)
-    public StringLengths mStringLengths;
-
     @Test
-    public void timeReplaceAllTrivialPatternNonExistent() {
+    @Parameters(method = "getData")
+    public void timeReplaceAllTrivialPatternNonExistent(StringLengths stringLengths) {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            mStringLengths.mValue.replaceAll("fish", "0");
+            stringLengths.mValue.replaceAll("fish", "0");
         }
     }
 
     @Test
-    public void timeReplaceTrivialPatternAllRepeated() {
+    @Parameters(method = "getData")
+    public void timeReplaceTrivialPatternAllRepeated(StringLengths stringLengths) {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            mStringLengths.mValue.replaceAll("jklm", "0");
+            stringLengths.mValue.replaceAll("jklm", "0");
         }
     }
 
     @Test
-    public void timeReplaceAllTrivialPatternSingleOccurrence() {
+    @Parameters(method = "getData")
+    public void timeReplaceAllTrivialPatternSingleOccurrence(StringLengths stringLengths) {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            mStringLengths.mValue.replaceAll("qrst", "0");
+            stringLengths.mValue.replaceAll("qrst", "0");
         }
     }
 }

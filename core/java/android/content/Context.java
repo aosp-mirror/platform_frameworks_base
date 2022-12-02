@@ -3821,7 +3821,6 @@ public abstract class Context {
             STORAGE_SERVICE,
             STORAGE_STATS_SERVICE,
             WALLPAPER_SERVICE,
-            TIME_ZONE_RULES_MANAGER_SERVICE,
             VIBRATOR_MANAGER_SERVICE,
             VIBRATOR_SERVICE,
             //@hide: STATUS_BAR_SERVICE,
@@ -3932,6 +3931,7 @@ public abstract class Context {
             //@hide: ATTESTATION_VERIFICATION_SERVICE,
             //@hide: SAFETY_CENTER_SERVICE,
             DISPLAY_HASH_SERVICE,
+            VIRTUALIZATION_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -5135,6 +5135,14 @@ public abstract class Context {
     public static final String PERMISSION_CHECKER_SERVICE = "permission_checker";
 
     /**
+     * Official published name of the (internal) permission enforcer service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String PERMISSION_ENFORCER_SERVICE = "permission_enforcer";
+
+    /**
      * Use with {@link #getSystemService(String) to retrieve an
      * {@link android.apphibernation.AppHibernationManager}} for
      * communicating with the hibernation service.
@@ -5747,15 +5755,6 @@ public abstract class Context {
     public static final String VR_SERVICE = "vrmanager";
 
     /**
-     * Use with {@link #getSystemService(String)} to retrieve an
-     * {@link android.app.timezone.ITimeZoneRulesManager}.
-     * @hide
-     *
-     * @see #getSystemService(String)
-     */
-    public static final String TIME_ZONE_RULES_MANAGER_SERVICE = "timezone";
-
-    /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.content.pm.CrossProfileApps} for cross profile operations.
      *
@@ -6047,6 +6046,20 @@ public abstract class Context {
      */
     @SystemApi
     public static final String AMBIENT_CONTEXT_SERVICE = "ambient_context";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.system.virtualmachine.VirtualMachineManager}.
+     *
+     * <p>On devices without {@link PackageManager#FEATURE_VIRTUALIZATION_FRAMEWORK} system feature
+     * the {@link #getSystemService(String)} will return {@code null}.
+     *
+     * @see #getSystemService(String)
+     * @see android.system.virtualmachine.VirtualMachineManager
+     * @hide
+     */
+    @SystemApi
+    public static final String VIRTUALIZATION_SERVICE = "virtualization";
 
     /**
      * Determine whether the given permission is allowed for a particular

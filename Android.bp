@@ -97,7 +97,7 @@ filegroup {
         // AIDL sources from external directories
         ":android.hardware.gnss-V2-java-source",
         ":android.hardware.graphics.common-V3-java-source",
-        ":android.hardware.security.keymint-V2-java-source",
+        ":android.hardware.security.keymint-V3-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
         ":android.hardware.tv.tuner-V1-java-source",
         ":android.security.apc-java-source",
@@ -150,6 +150,9 @@ java_library {
     visibility: [
         // DO NOT ADD ANY MORE ENTRIES TO THIS LIST
         "//external/robolectric-shadows:__subpackages__",
+        //This will eventually replace the item above, and serves the
+        //same purpose.
+        "//external/robolectric:__subpackages__",
         "//frameworks/layoutlib:__subpackages__",
     ],
 }
@@ -288,6 +291,14 @@ java_defaults {
         "view-inspector-annotation-processor",
         "staledataclass-annotation-processor",
         "error_prone_android_framework",
+    ],
+    // Exports needed for staledataclass-annotation-processor, see b/139342589.
+    javacflags: [
+        "-J--add-modules=jdk.compiler",
+        "-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
+        "-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED",
+        "-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+        "-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
     ],
     required: [
         // TODO(b/120066492): remove default_television.xml when the build system

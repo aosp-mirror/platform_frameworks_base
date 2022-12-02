@@ -182,7 +182,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         for (int i = 1; i < mTiles.size() && mTiles.get(i) != null; i++) {
             newSpecs.add(mTiles.get(i).spec);
         }
-        host.changeTiles(mCurrentSpecs, newSpecs);
+        host.changeTilesByUser(mCurrentSpecs, newSpecs);
         mCurrentSpecs = newSpecs;
     }
 
@@ -200,7 +200,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     /** */
     public void resetTileSpecs(List<String> specs) {
         // Notify the host so the tiles get removed callbacks.
-        mHost.changeTiles(mCurrentSpecs, specs);
+        mHost.changeTilesByUser(mCurrentSpecs, specs);
         setTileSpecs(specs);
     }
 

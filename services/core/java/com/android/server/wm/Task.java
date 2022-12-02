@@ -3339,8 +3339,9 @@ class Task extends TaskFragment {
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                         "applyAnimationUnchecked, control: %s, task: %s, transit: %s",
                         control, asTask(), AppTransition.appTransitionOldToString(transit));
+                final int size = sources != null ? sources.size() : 0;
                 control.addTaskToTargets(this, (type, anim) -> {
-                    for (int i = 0; i < sources.size(); ++i) {
+                    for (int i = 0; i < size; ++i) {
                         sources.get(i).onAnimationFinished(type, anim);
                     }
                 });
@@ -5457,7 +5458,23 @@ class Task extends TaskFragment {
                     parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TASK ||
                     parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TOP ||
                     (destIntentFlags & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
-                parent.deliverNewIntentLocked(callingUid, destIntent, destGrants, srec.packageName);
+                boolean abort;
+                try {
+                    abort = !mTaskSupervisor.checkStartAnyActivityPermission(destIntent,
+                            parent.info, null /* resultWho */, -1 /* requestCode */, srec.getPid(),
+                            callingUid, srec.info.packageName, null /* callingFeatureId */,
+                            false /* ignoreTargetSecurity */, false /* launchingInTask */, srec.app,
+                            null /* resultRecord */, null /* resultRootTask */);
+                } catch (SecurityException e) {
+                    abort = true;
+                }
+                if (abort) {
+                    android.util.EventLog.writeEvent(0x534e4554, "238605611", callingUid, "");
+                    foundParentInTask = false;
+                } else {
+                    parent.deliverNewIntentLocked(callingUid, destIntent, destGrants,
+                            srec.packageName);
+                }
             } else {
                 try {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(

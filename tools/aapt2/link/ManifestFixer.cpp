@@ -449,13 +449,18 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action["attribution"]["inherit-from"];
   manifest_action["original-package"];
   manifest_action["overlay"].Action([&](xml::Element* el) -> bool {
-    if (!options_.rename_overlay_target_package) {
-      return true;
+    if (options_.rename_overlay_target_package) {
+      if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "targetPackage")) {
+        attr->value = options_.rename_overlay_target_package.value();
+      }
     }
-
-    if (xml::Attribute* attr =
-            el->FindAttribute(xml::kSchemaAndroid, "targetPackage")) {
-      attr->value = options_.rename_overlay_target_package.value();
+    if (options_.rename_overlay_category) {
+      if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "category")) {
+        attr->value = options_.rename_overlay_category.value();
+      } else {
+        el->attributes.push_back(xml::Attribute{xml::kSchemaAndroid, "category",
+                                                options_.rename_overlay_category.value()});
+      }
     }
     return true;
   });

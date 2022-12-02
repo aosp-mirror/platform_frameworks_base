@@ -975,8 +975,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     com.android.internal.R.array.config_screenBrighteningThresholds);
             int[] screenDarkeningThresholds = resources.getIntArray(
                     com.android.internal.R.array.config_screenDarkeningThresholds);
-            int[] screenThresholdLevels = resources.getIntArray(
-                    com.android.internal.R.array.config_screenThresholdLevels);
+            float[] screenThresholdLevels = BrightnessMappingStrategy.getFloatArray(resources
+                    .obtainTypedArray(com.android.internal.R.array.config_screenThresholdLevels));
             float screenDarkeningMinThreshold =
                     mDisplayDeviceConfig.getScreenDarkeningMinThreshold();
             float screenBrighteningMinThreshold =
@@ -1551,8 +1551,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             // TODO(b/216365040): The decision to prevent HBM for HDR in low power mode should be
             // done in HighBrightnessModeController.
             if (mHbmController.getHighBrightnessMode() == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR
-                    && ((mBrightnessReason.modifier & BrightnessReason.MODIFIER_DIMMED) == 0
-                    || (mBrightnessReason.modifier & BrightnessReason.MODIFIER_LOW_POWER) == 0)) {
+                    && (mBrightnessReason.modifier & BrightnessReason.MODIFIER_DIMMED) == 0
+                    && (mBrightnessReason.modifier & BrightnessReason.MODIFIER_LOW_POWER) == 0) {
                 // We want to scale HDR brightness level with the SDR level
                 animateValue = mHbmController.getHdrBrightnessValue();
             }

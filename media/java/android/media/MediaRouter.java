@@ -221,7 +221,7 @@ public class MediaRouter {
                 } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_DOCK_SPEAKERS) != 0) {
                     name = R.string.default_audio_route_name_dock_speakers;
                 } else if ((newRoutes.mainType&AudioRoutesInfo.MAIN_HDMI) != 0) {
-                    name = R.string.default_audio_route_name_hdmi;
+                    name = R.string.default_audio_route_name_external_device;
                 } else if ((newRoutes.mainType&AudioRoutesInfo.MAIN_USB) != 0) {
                     name = R.string.default_audio_route_name_usb;
                 } else {

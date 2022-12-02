@@ -20,23 +20,23 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 
-@RunWith(Parameterized.class)
+@RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class ByteBufferScalarVersusVectorPerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameters(name = "mByteOrder={0}, mAligned={1}, mBufferType={2}")
-    public static Collection<Object[]> data() {
+    public static Collection<Object[]> getData() {
         return Arrays.asList(
                 new Object[][] {
                     {
@@ -102,19 +102,15 @@ public class ByteBufferScalarVersusVectorPerfTest {
                 });
     }
 
-    @Parameterized.Parameter(0)
-    public ByteBufferPerfTest.MyByteOrder mByteOrder;
-
-    @Parameterized.Parameter(1)
-    public boolean mAligned;
-
-    @Parameterized.Parameter(2)
-    public ByteBufferPerfTest.MyBufferType mBufferType;
-
     @Test
-    public void timeManualByteBufferCopy() throws Exception {
-        ByteBuffer src = ByteBufferPerfTest.newBuffer(mByteOrder, mAligned, mBufferType);
-        ByteBuffer dst = ByteBufferPerfTest.newBuffer(mByteOrder, mAligned, mBufferType);
+    @Parameters(method = "getData")
+    public void timeManualByteBufferCopy(
+            ByteBufferPerfTest.MyByteOrder byteOrder,
+            boolean aligned,
+            ByteBufferPerfTest.MyBufferType bufferType)
+            throws Exception {
+        ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
+        ByteBuffer dst = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(0);
@@ -126,23 +122,25 @@ public class ByteBufferScalarVersusVectorPerfTest {
     }
 
     @Test
-    public void timeByteBufferBulkGet() throws Exception {
-        ByteBuffer src = ByteBuffer.allocate(mAligned ? 8192 : 8192 + 1);
+    @Parameters({"true", "false"})
+    public void timeByteBufferBulkGet(boolean aligned) throws Exception {
+        ByteBuffer src = ByteBuffer.allocate(aligned ? 8192 : 8192 + 1);
         byte[] dst = new byte[8192];
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            src.position(mAligned ? 0 : 1);
+            src.position(aligned ? 0 : 1);
             src.get(dst, 0, dst.length);
         }
     }
 
     @Test
-    public void timeDirectByteBufferBulkGet() throws Exception {
-        ByteBuffer src = ByteBuffer.allocateDirect(mAligned ? 8192 : 8192 + 1);
+    @Parameters({"true", "false"})
+    public void timeDirectByteBufferBulkGet(boolean aligned) throws Exception {
+        ByteBuffer src = ByteBuffer.allocateDirect(aligned ? 8192 : 8192 + 1);
         byte[] dst = new byte[8192];
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            src.position(mAligned ? 0 : 1);
+            src.position(aligned ? 0 : 1);
             src.get(dst, 0, dst.length);
         }
     }

@@ -20,11 +20,12 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,36 +35,34 @@ import java.util.Collection;
  *
  * @author Kevin Bourrillion
  */
-@RunWith(Parameterized.class)
+@RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class LoopingBackwardsPerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameters(name = "mMax={0}")
-    public static Collection<Object[]> data() {
+    public static Collection<Object[]> getData() {
         return Arrays.asList(new Object[][] {{2}, {20}, {2000}, {20000000}});
     }
 
-    @Parameterized.Parameter(0)
-    public int mMax;
-
     @Test
-    public void timeForwards() {
+    @Parameters(method = "getData")
+    public void timeForwards(int max) {
         int fake = 0;
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            for (int j = 0; j < mMax; j++) {
+            for (int j = 0; j < max; j++) {
                 fake += j;
             }
         }
     }
 
     @Test
-    public void timeBackwards() {
+    @Parameters(method = "getData")
+    public void timeBackwards(int max) {
         int fake = 0;
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            for (int j = mMax - 1; j >= 0; j--) {
+            for (int j = max - 1; j >= 0; j--) {
                 fake += j;
             }
         }

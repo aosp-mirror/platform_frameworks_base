@@ -68,4 +68,4 @@ public class CameraStatus implements Parcelable {
             return new CameraStatus[size];
         }
     };
-};
+}

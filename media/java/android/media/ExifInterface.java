@@ -70,6 +70,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -3750,6 +3751,11 @@ public class ExifInterface {
                 // Skip input stream to the end of the EXIF chunk
                 totalInputStream.skipBytes(WEBP_CHUNK_TYPE_BYTE_LENGTH);
                 int exifChunkLength = totalInputStream.readInt();
+                // RIFF chunks have a single padding byte at the end if the declared chunk size is
+                // odd.
+                if (exifChunkLength % 2 != 0) {
+                    exifChunkLength++;
+                }
                 totalInputStream.skipBytes(exifChunkLength);
 
                 // Write new EXIF chunk to output stream
@@ -3820,7 +3826,7 @@ public class ExifInterface {
                     int widthAndHeight = 0;
                     int width = 0;
                     int height = 0;
-                    int alpha = 0;
+                    boolean alpha = false;
                     // Save VP8 frame data for later
                     byte[] vp8Frame = new byte[3];
 
@@ -3855,7 +3861,7 @@ public class ExifInterface {
                         width = ((widthAndHeight << 18) >> 18) + 1;
                         height = ((widthAndHeight << 4) >> 18) + 1;
                         // Retrieve alpha bit
-                        alpha = widthAndHeight & (1 << 3);
+                        alpha = (widthAndHeight & (1 << 28)) != 0;
                         bytesToRead -= (1 /* VP8L signature */ + 4);
                     }
 
@@ -3863,10 +3869,12 @@ public class ExifInterface {
                     nonHeaderOutputStream.write(WEBP_CHUNK_TYPE_VP8X);
                     nonHeaderOutputStream.writeInt(WEBP_CHUNK_TYPE_VP8X_DEFAULT_LENGTH);
                     byte[] data = new byte[WEBP_CHUNK_TYPE_VP8X_DEFAULT_LENGTH];
+                    // ALPHA flag
+                    if (alpha) {
+                        data[0] = (byte) (data[0] | (1 << 4));
+                    }
                     // EXIF flag
                     data[0] = (byte) (data[0] | (1 << 3));
-                    // ALPHA flag
-                    data[0] = (byte) (data[0] | (alpha << 4));
                     // VP8X stores Width - 1 and Height - 1 values
                     width -= 1;
                     height -= 1;
@@ -4833,12 +4841,13 @@ public class ExifInterface {
             for (int i = 1; i < entryValues.length; ++i) {
                 final Pair<Integer, Integer> guessDataFormat = guessDataFormat(entryValues[i]);
                 int first = -1, second = -1;
-                if (guessDataFormat.first == dataFormat.first
-                        || guessDataFormat.second == dataFormat.first) {
+                if (Objects.equals(guessDataFormat.first, dataFormat.first)
+                        || Objects.equals(guessDataFormat.second, dataFormat.first)) {
                     first = dataFormat.first;
                 }
-                if (dataFormat.second != -1 && (guessDataFormat.first == dataFormat.second
-                        || guessDataFormat.second == dataFormat.second)) {
+                if (dataFormat.second != -1
+                        && (Objects.equals(guessDataFormat.first, dataFormat.second)
+                        || Objects.equals(guessDataFormat.second, dataFormat.second))) {
                     second = dataFormat.second;
                 }
                 if (first == -1 && second == -1) {

@@ -61,7 +61,6 @@ import "frameworks/base/core/proto/android/util/textdump.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
 import "frameworks/base/core/proto/android/section.proto";
 import "frameworks/base/proto/src/ipconnectivity.proto";
-import "packages/modules/Connectivity/framework/proto/netstats.proto";
 import "packages/modules/Permission/service/proto/role_service.proto";
 
 package android.os;
@@ -247,11 +246,7 @@ message IncidentProto {
         (section).args = "fingerprint --proto --incident"
     ];
 
-    optional android.service.NetworkStatsServiceDumpProto netstats = 3001 [
-        (section).type = SECTION_DUMPSYS,
-        (section).args = "netstats --proto",
-        (section).userdebug_and_eng_only = true
-    ];
+    reserved 3001;
 
     optional android.providers.settings.SettingsServiceDumpProto settings = 3002 [
         (section).type = SECTION_DUMPSYS,

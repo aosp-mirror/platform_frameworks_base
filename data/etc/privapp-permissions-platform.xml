@@ -483,6 +483,8 @@ applications that come with the platform
         <permission name="android.permission.NOTIFY_PENDING_SYSTEM_UPDATE" />
         <!-- Permission required for GTS test - GtsAssistIntentTestCases -->
         <permission name="android.permission.MANAGE_VOICE_KEYPHRASES" />
+        <!-- Permission required for test - CellBroadcastComplianceTest -->
+        <permission name="com.android.cellbroadcastservice.FULL_ACCESS_CELL_BROADCAST_HISTORY" />
         <!-- Permission required for ATS test - CarDevicePolicyManagerTest -->
         <permission name="android.permission.LOCK_DEVICE" />
         <!-- Permissions required for CTS test - CtsSafetyCenterTestCases -->

@@ -323,7 +323,8 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
                 return false;
             } else if (Process.isSdkSandboxUid(callingAppId)) {
                 // we only allow sdk sandbox processes access to forcequeryable packages
-                return !isForceQueryable(targetPkgSetting.getAppId());
+                return !isForceQueryable(targetPkgSetting.getAppId())
+                      && !isImplicitlyQueryable(callingAppId, targetPkgSetting.getAppId());
             }
             if (mCacheReady) { // use cache
                 if (!shouldFilterApplicationUsingCache(callingUid,

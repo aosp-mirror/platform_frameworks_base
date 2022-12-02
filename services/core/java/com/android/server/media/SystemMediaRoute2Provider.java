@@ -287,7 +287,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 name = com.android.internal.R.string.default_audio_route_name_dock_speakers;
             } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HDMI) != 0) {
                 type = TYPE_HDMI;
-                name = com.android.internal.R.string.default_audio_route_name_hdmi;
+                name = com.android.internal.R.string.default_audio_route_name_external_device;
             } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_USB) != 0) {
                 type = TYPE_USB_DEVICE;
                 name = com.android.internal.R.string.default_audio_route_name_usb;

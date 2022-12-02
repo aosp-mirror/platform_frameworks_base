@@ -8995,7 +8995,8 @@ public class TelephonyManager {
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges})
-     * and {@link android.Manifest.permission#ACCESS_FINE_LOCATION}.
+     * and {@link android.Manifest.permission#ACCESS_FINE_LOCATION} if includeLocationData is
+     * set to {@link #INCLUDE_LOCATION_DATA_FINE}.
      *
      * If the system-wide location switch is off, apps may still call this API, with the
      * following constraints:
@@ -9009,7 +9010,10 @@ public class TelephonyManager {
      * </ol>
      *
      * @param includeLocationData Specifies if the caller would like to receive
-     * location related information.
+     * location related information. If this parameter is set to
+     * {@link #INCLUDE_LOCATION_DATA_FINE} then the application will be checked for
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission and available
+     * location related information received during network scan will be sent to the caller.
      * @param request Contains all the RAT with bands/channels that need to be scanned.
      * @param executor The executor through which the callback should be invoked. Since the scan
      *        request may trigger multiple callbacks and they must be invoked in the same order as
@@ -9020,8 +9024,7 @@ public class TelephonyManager {
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(allOf = {
-            android.Manifest.permission.MODIFY_PHONE_STATE,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            android.Manifest.permission.MODIFY_PHONE_STATE
     })
     public @Nullable NetworkScan requestNetworkScan(
             @IncludeLocationData int includeLocationData,
@@ -9355,7 +9358,8 @@ public class TelephonyManager {
             ALLOWED_NETWORK_TYPES_REASON_USER,
             ALLOWED_NETWORK_TYPES_REASON_POWER,
             ALLOWED_NETWORK_TYPES_REASON_CARRIER,
-            ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G
+            ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G,
+            ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AllowedNetworkTypesReason {
@@ -9394,14 +9398,24 @@ public class TelephonyManager {
     public static final int ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G = 3;
 
     /**
+     * To indicate allowed network type change is requested by an update to the
+     * {@link android.os.UserManager.DISALLOW_CELLULAR_2G} user restriction.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS = 4;
+
+    /**
      * Set the allowed network types of the device and provide the reason triggering the allowed
      * network change.
-     * <p>Requires permission: android.Manifest.MODIFY_PHONE_STATE or
+     * <p>Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} or
      * that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * This can be called for following reasons
+     * This can be called for following reasons:
      * <ol>
-     * <li>Allowed network types control by USER {@link #ALLOWED_NETWORK_TYPES_REASON_USER}
+     * <li>Allowed network types control by USER
+     * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_USER}
      * <li>Allowed network types control by carrier {@link #ALLOWED_NETWORK_TYPES_REASON_CARRIER}
      * </ol>
      * This API will result in allowing an intersection of allowed network types for all reasons,
@@ -9411,7 +9425,13 @@ public class TelephonyManager {
      * @param allowedNetworkTypes The bitmask of allowed network type
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @throws IllegalArgumentException if invalid AllowedNetworkTypesReason is passed.
-     * @throws SecurityException if the caller does not have the required privileges
+     * @throws SecurityException if the caller does not have the required privileges or if the
+     * caller tries to use one of the following security-based reasons without
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE} permissions.
+     * <ol>
+     *     <li>{@code TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G}</li>
+     *     <li>{@code TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS}</li>
+     * </ol>
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(
@@ -9485,6 +9505,7 @@ public class TelephonyManager {
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_POWER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_CARRIER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G:
+            case ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS:
                 return true;
         }
         return false;

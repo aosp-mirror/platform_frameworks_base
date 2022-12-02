@@ -1,0 +1,153 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.app;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.fail;
+
+import android.content.ComponentName;
+import android.net.Uri;
+import android.os.Parcel;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
+
+import com.google.common.base.Strings;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.lang.reflect.Field;
+
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class AutomaticZenRuleTest {
+    private static final String CLASS = "android.app.AutomaticZenRule";
+
+    @Test
+    public void testLongFields_inConstructor() {
+        String longString = Strings.repeat("A", 65536);
+        Uri longUri = Uri.parse("uri://" + Strings.repeat("A", 65530));
+
+        // test both variants where there's an owner, and where there's a configuration activity
+        AutomaticZenRule rule1 = new AutomaticZenRule(
+                longString, // name
+                new ComponentName("pkg", longString), // owner
+                null,  // configuration activity
+                longUri, // conditionId
+                null, // zen policy
+                0, // interruption filter
+                true); // enabled
+
+        assertEquals(AutomaticZenRule.MAX_STRING_LENGTH, rule1.getName().length());
+        assertEquals(AutomaticZenRule.MAX_STRING_LENGTH,
+                rule1.getConditionId().toString().length());
+        assertEquals(AutomaticZenRule.MAX_STRING_LENGTH, rule1.getOwner().getClassName().length());
+
+        AutomaticZenRule rule2 = new AutomaticZenRule(
+                longString, // name
+                null, // owner
+                new ComponentName(longString, "SomeClassName"), // configuration activity
+                longUri, // conditionId
+                null, // zen policy
+                0, // interruption filter
+                false); // enabled
+
+        assertEquals(AutomaticZenRule.MAX_STRING_LENGTH, rule2.getName().length());
+        assertEquals(AutomaticZenRule.MAX_STRING_LENGTH,
+                rule2.getConditionId().toString().length());
+        assertEquals(AutomaticZenRule.MAX_STRING_LENGTH,
+                rule2.getConfigurationActivity().getPackageName().length());
+    }
+
+    @Test
+    public void testLongFields_inSetters() {
+        String longString = Strings.repeat("A", 65536);
+        Uri longUri = Uri.parse("uri://" + Strings.repeat("A", 65530));
+
+        AutomaticZenRule rule = new AutomaticZenRule(
+                "sensible name",
+                new ComponentName("pkg", "ShortClass"),
+                null,
+                Uri.parse("uri://short"),
+                null, 0, true);
+
+        rule.setName(longString);
+        rule.setConditionId(longUri);
+        rule.setConfigurationActivity(new ComponentName(longString, longString));
+
+        assertEquals(AutomaticZenRule.MAX_STRING_LENGTH, rule.getName().length());
+        assertEquals(AutomaticZenRule.MAX_STRING_LENGTH,
+                rule.getConditionId().toString().length());
+        assertEquals(AutomaticZenRule.MAX_STRING_LENGTH,
+                rule.getConfigurationActivity().getPackageName().length());
+        assertEquals(AutomaticZenRule.MAX_STRING_LENGTH,
+                rule.getConfigurationActivity().getClassName().length());
+    }
+
+    @Test
+    public void testLongInputsFromParcel() {
+        // Create a rule with long fields, set directly via reflection so that we can confirm that
+        // a rule with too-long fields that comes in via a parcel has its fields truncated directly.
+        AutomaticZenRule rule = new AutomaticZenRule(
+                "placeholder",
+                new ComponentName("place", "holder"),
+                null,
+                Uri.parse("uri://placeholder"),
+                null, 0, true);
+
+        try {
+            String longString = Strings.repeat("A", 65536);
+            Uri longUri = Uri.parse("uri://" + Strings.repeat("A", 65530));
+            Field name = Class.forName(CLASS).getDeclaredField("name");
+            name.setAccessible(true);
+            name.set(rule, longString);
+            Field conditionId = Class.forName(CLASS).getDeclaredField("conditionId");
+            conditionId.setAccessible(true);
+            conditionId.set(rule, longUri);
+            Field owner = Class.forName(CLASS).getDeclaredField("owner");
+            owner.setAccessible(true);
+            owner.set(rule, new ComponentName(longString, longString));
+            Field configActivity = Class.forName(CLASS).getDeclaredField("configurationActivity");
+            configActivity.setAccessible(true);
+            configActivity.set(rule, new ComponentName(longString, longString));
+        } catch (NoSuchFieldException e) {
+            fail(e.toString());
+        } catch (ClassNotFoundException e) {
+            fail(e.toString());
+        } catch (IllegalAccessException e) {
+            fail(e.toString());
+        }
+
+        Parcel parcel = Parcel.obtain();
+        rule.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+
+        AutomaticZenRule fromParcel = new AutomaticZenRule(parcel);
+        assertEquals(AutomaticZenRule.MAX_STRING_LENGTH, fromParcel.getName().length());
+        assertEquals(AutomaticZenRule.MAX_STRING_LENGTH,
+                fromParcel.getConditionId().toString().length());
+        assertEquals(AutomaticZenRule.MAX_STRING_LENGTH,
+                fromParcel.getConfigurationActivity().getPackageName().length());
+        assertEquals(AutomaticZenRule.MAX_STRING_LENGTH,
+                fromParcel.getConfigurationActivity().getClassName().length());
+        assertEquals(AutomaticZenRule.MAX_STRING_LENGTH,
+                fromParcel.getOwner().getPackageName().length());
+        assertEquals(AutomaticZenRule.MAX_STRING_LENGTH,
+                fromParcel.getOwner().getClassName().length());
+    }
+}

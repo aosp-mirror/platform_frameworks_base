@@ -147,7 +147,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_WIFI_TETHERING,
             UserManager.DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI,
             UserManager.DISALLOW_WIFI_DIRECT,
-            UserManager.DISALLOW_ADD_WIFI_CONFIG
+            UserManager.DISALLOW_ADD_WIFI_CONFIG,
+            UserManager.DISALLOW_CELLULAR_2G
     });
 
     public static final Set<String> DEPRECATED_USER_RESTRICTIONS = Sets.newArraySet(
@@ -195,7 +196,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_CHANGE_WIFI_STATE,
             UserManager.DISALLOW_WIFI_TETHERING,
             UserManager.DISALLOW_WIFI_DIRECT,
-            UserManager.DISALLOW_ADD_WIFI_CONFIG
+            UserManager.DISALLOW_ADD_WIFI_CONFIG,
+            UserManager.DISALLOW_CELLULAR_2G
     );
 
     /**
@@ -234,7 +236,8 @@ public class UserRestrictionsUtils {
                     UserManager.DISALLOW_CHANGE_WIFI_STATE,
                     UserManager.DISALLOW_WIFI_TETHERING,
                     UserManager.DISALLOW_WIFI_DIRECT,
-                    UserManager.DISALLOW_ADD_WIFI_CONFIG
+                    UserManager.DISALLOW_ADD_WIFI_CONFIG,
+                    UserManager.DISALLOW_CELLULAR_2G
     );
 
     /**

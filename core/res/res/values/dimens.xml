@@ -979,9 +979,9 @@
     <dimen name="controls_thumbnail_image_max_width">280dp</dimen>
 
     <!-- System-provided radius for the background view of app widgets. The resolved value of this resource may change at runtime. -->
-    <dimen name="system_app_widget_background_radius">16dp</dimen>
+    <dimen name="system_app_widget_background_radius">28dp</dimen>
     <!-- System-provided radius for inner views on app widgets. The resolved value of this resource may change at runtime. -->
-    <dimen name="system_app_widget_inner_radius">8dp</dimen>
+    <dimen name="system_app_widget_inner_radius">20dp</dimen>
     <!-- System-provided padding for inner views on app widgets. The resolved value of this resource may change at runtime. @removed -->
     <dimen name="__removed_system_app_widget_internal_padding">16dp</dimen>
 

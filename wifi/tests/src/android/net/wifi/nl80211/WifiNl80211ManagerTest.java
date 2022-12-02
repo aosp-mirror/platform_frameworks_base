@@ -117,13 +117,12 @@ public class WifiNl80211ManagerTest {
     private static final byte[] TEST_PSK =
             new byte[]{'T', 'e', 's', 't'};
 
-    private static final Set<Integer> SCAN_FREQ_SET =
-            new HashSet<Integer>() {{
-                add(2410);
-                add(2450);
-                add(5050);
-                add(5200);
-            }};
+    private static final Set<Integer> SCAN_FREQ_SET = Set.of(
+            2410,
+            2450,
+            5050,
+            5200);
+
     private static final String TEST_QUOTED_SSID_1 = "\"testSsid1\"";
     private static final String TEST_QUOTED_SSID_2 = "\"testSsid2\"";
     private static final int[] TEST_FREQUENCIES_1 = {};
@@ -131,13 +130,11 @@ public class WifiNl80211ManagerTest {
     private static final MacAddress TEST_RAW_MAC_BYTES = MacAddress.fromBytes(
             new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05});
 
-    private static final List<byte[]> SCAN_HIDDEN_NETWORK_SSID_LIST =
-            new ArrayList<byte[]>() {{
-                add(LocalNativeUtil.byteArrayFromArrayList(
-                        LocalNativeUtil.decodeSsid(TEST_QUOTED_SSID_1)));
-                add(LocalNativeUtil.byteArrayFromArrayList(
-                        LocalNativeUtil.decodeSsid(TEST_QUOTED_SSID_2)));
-            }};
+    private static final List<byte[]> SCAN_HIDDEN_NETWORK_SSID_LIST = List.of(
+            LocalNativeUtil.byteArrayFromArrayList(
+                    LocalNativeUtil.decodeSsid(TEST_QUOTED_SSID_1)),
+            LocalNativeUtil.byteArrayFromArrayList(
+                    LocalNativeUtil.decodeSsid(TEST_QUOTED_SSID_2)));
 
     private static final PnoSettings TEST_PNO_SETTINGS = new PnoSettings();
     static {

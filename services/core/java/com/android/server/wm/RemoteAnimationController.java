@@ -308,11 +308,11 @@ class RemoteAnimationController implements DeathRecipient {
                 mService.closeSurfaceTransaction("RemoteAnimationController#finished");
                 mIsFinishing = false;
             }
+            // Reset input for all activities when the remote animation is finished.
+            final Consumer<ActivityRecord> updateActivities =
+                    activity -> activity.setDropInputForAnimation(false);
+            mDisplayContent.forAllActivities(updateActivities);
         }
-        // Reset input for all activities when the remote animation is finished.
-        final Consumer<ActivityRecord> updateActivities =
-                activity -> activity.setDropInputForAnimation(false);
-        mDisplayContent.forAllActivities(updateActivities);
         setRunningRemoteAnimation(false);
         ProtoLog.i(WM_DEBUG_REMOTE_ANIMATIONS, "Finishing remote animation");
     }

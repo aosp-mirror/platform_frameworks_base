@@ -1092,6 +1092,11 @@ public class SmsMessage {
 
         if (!TextUtils.isEmpty(simOperator)) {
             for (NoEmsSupportConfig currentConfig : mNoEmsSupportConfigList) {
+                if (currentConfig == null) {
+                    Rlog.w("SmsMessage", "hasEmsSupport currentConfig is null");
+                    continue;
+                }
+
                 if (simOperator.startsWith(currentConfig.mOperatorNumber) &&
                         (TextUtils.isEmpty(currentConfig.mGid1) ||
                                 (!TextUtils.isEmpty(currentConfig.mGid1) &&
@@ -1155,18 +1160,21 @@ public class SmsMessage {
     private static boolean mIsNoEmsSupportConfigListLoaded = false;
 
     private static boolean isNoEmsSupportConfigListExisted() {
-        if (!mIsNoEmsSupportConfigListLoaded) {
-            Resources r = Resources.getSystem();
-            if (r != null) {
-                String[] listArray = r.getStringArray(
-                        com.android.internal.R.array.no_ems_support_sim_operators);
-                if ((listArray != null) && (listArray.length > 0)) {
-                    mNoEmsSupportConfigList = new NoEmsSupportConfig[listArray.length];
-                    for (int i=0; i<listArray.length; i++) {
-                        mNoEmsSupportConfigList[i] = new NoEmsSupportConfig(listArray[i].split(";"));
+        synchronized (SmsMessage.class) {
+            if (!mIsNoEmsSupportConfigListLoaded) {
+                Resources r = Resources.getSystem();
+                if (r != null) {
+                    String[] listArray = r.getStringArray(
+                            com.android.internal.R.array.no_ems_support_sim_operators);
+                    if ((listArray != null) && (listArray.length > 0)) {
+                        mNoEmsSupportConfigList = new NoEmsSupportConfig[listArray.length];
+                        for (int i = 0; i < listArray.length; i++) {
+                            mNoEmsSupportConfigList[i] = new NoEmsSupportConfig(
+                                    listArray[i].split(";"));
+                        }
                     }
+                    mIsNoEmsSupportConfigListLoaded = true;
                 }
-                mIsNoEmsSupportConfigListLoaded = true;
             }
         }
 

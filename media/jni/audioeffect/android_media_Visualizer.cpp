@@ -251,15 +251,15 @@ static sp<Visualizer> getVisualizer(JNIEnv* env, jobject thiz)
     Mutex::Autolock l(sLock);
     Visualizer* const v =
             (Visualizer*)env->GetLongField(thiz, fields.fidNativeVisualizer);
-    return sp<Visualizer>(v);
+    return sp<Visualizer>::fromExisting(v);
 }
 
 static sp<Visualizer> setVisualizer(JNIEnv* env, jobject thiz,
                                     const sp<Visualizer>& v)
 {
     Mutex::Autolock l(sLock);
-    sp<Visualizer> old =
-            (Visualizer*)env->GetLongField(thiz, fields.fidNativeVisualizer);
+    sp<Visualizer> old = sp<Visualizer>::fromExisting(
+            (Visualizer*)env->GetLongField(thiz, fields.fidNativeVisualizer));
     if (v.get()) {
         v->incStrong((void*)setVisualizer);
     }

@@ -300,10 +300,6 @@ package android.os {
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void reportNetworkInterfaceForTransports(@NonNull String, @NonNull int[]) throws java.lang.RuntimeException;
   }
 
-  public class Binder implements android.os.IBinder {
-    method public final void markVintfStability();
-  }
-
   public class BluetoothServiceManager {
     method @NonNull public android.os.BluetoothServiceManager.ServiceRegisterer getBluetoothManagerServiceRegisterer();
   }
@@ -343,10 +339,6 @@ package android.os {
     method public boolean shouldBypassCache(@NonNull Q);
   }
 
-  public interface Parcelable {
-    method public default int getStability();
-  }
-
   public class Process {
     method public static final int getAppUidForSdkSandboxUid(int);
     method public static final boolean isSdkSandboxUid(int);
@@ -356,6 +348,7 @@ package android.os {
   }
 
   public final class ServiceManager {
+    method @NonNull public static String[] getDeclaredInstances(@NonNull String);
     method public static boolean isDeclared(@NonNull String);
     method @Nullable public static android.os.IBinder waitForDeclaredService(@NonNull String);
   }

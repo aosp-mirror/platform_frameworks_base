@@ -20,17 +20,18 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@RunWith(Parameterized.class)
+@RunWith(JUnitParamsRunner.class)
 @LargeTest
 public final class MutableIntPerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
@@ -96,29 +97,28 @@ public final class MutableIntPerfTest {
         abstract int timeGet(BenchmarkState state);
     }
 
-    @Parameters(name = "mKind={0}")
-    public static Collection<Object[]> data() {
+    public static Collection<Object[]> getData() {
         return Arrays.asList(new Object[][] {{Kind.ARRAY}, {Kind.ATOMIC}});
     }
 
-    @Parameterized.Parameter(0)
-    public Kind mKind;
-
     @Test
-    public void timeCreate() {
+    @Parameters(method = "getData")
+    public void timeCreate(Kind kind) {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        mKind.timeCreate(state);
+        kind.timeCreate(state);
     }
 
     @Test
-    public void timeIncrement() {
+    @Parameters(method = "getData")
+    public void timeIncrement(Kind kind) {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        mKind.timeIncrement(state);
+        kind.timeIncrement(state);
     }
 
     @Test
-    public void timeGet() {
+    @Parameters(method = "getData")
+    public void timeGet(Kind kind) {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        mKind.timeGet(state);
+        kind.timeGet(state);
     }
 }

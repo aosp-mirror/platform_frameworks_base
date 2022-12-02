@@ -1820,6 +1820,14 @@ public class AccountManagerService
         if (account == null) {
             return false;
         }
+        if (account.name != null && account.name.length() > 200) {
+            Log.w(TAG, "Account cannot be added - Name longer than 200 chars");
+            return false;
+        }
+        if (account.type != null && account.type.length() > 200) {
+            Log.w(TAG, "Account cannot be added - Name longer than 200 chars");
+            return false;
+        }
         if (!isLocalUnlockedUser(accounts.userId)) {
             Log.w(TAG, "Account " + account.toSafeString() + " cannot be added - user "
                     + accounts.userId + " is locked. callingUid=" + callingUid);
@@ -2065,6 +2073,10 @@ public class AccountManagerService
                 + ", pid " + Binder.getCallingPid());
         }
         if (accountToRename == null) throw new IllegalArgumentException("account is null");
+        if (newName != null && newName.length() > 200) {
+            Log.e(TAG, "renameAccount failed - account name longer than 200");
+            throw new IllegalArgumentException("account name longer than 200");
+        }
         int userId = UserHandle.getCallingUserId();
         if (!isAccountManagedByCaller(accountToRename.type, callingUid, userId)) {
             String msg = String.format(
@@ -4782,6 +4794,7 @@ public class AccountManagerService
 
     private abstract class Session extends IAccountAuthenticatorResponse.Stub
             implements IBinder.DeathRecipient, ServiceConnection {
+        private final Object mSessionLock = new Object();
         IAccountManagerResponse mResponse;
         final String mAccountType;
         final boolean mExpectActivityLaunch;
@@ -4947,9 +4960,11 @@ public class AccountManagerService
         }
 
         private void unbind() {
-            if (mAuthenticator != null) {
-                mAuthenticator = null;
-                mContext.unbindService(this);
+            synchronized (mSessionLock) {
+                if (mAuthenticator != null) {
+                    mAuthenticator = null;
+                    mContext.unbindService(this);
+                }
             }
         }
 
@@ -4959,12 +4974,14 @@ public class AccountManagerService
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            mAuthenticator = IAccountAuthenticator.Stub.asInterface(service);
-            try {
-                run();
-            } catch (RemoteException e) {
-                onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION,
-                        "remote exception");
+            synchronized (mSessionLock) {
+                mAuthenticator = IAccountAuthenticator.Stub.asInterface(service);
+                try {
+                    run();
+                } catch (RemoteException e) {
+                    onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION,
+                            "remote exception");
+                }
             }
         }
 

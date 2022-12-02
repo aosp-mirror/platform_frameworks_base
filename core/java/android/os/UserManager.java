@@ -1485,6 +1485,22 @@ public class UserManager {
     public static final String KEY_RESTRICTIONS_PENDING = "restrictions_pending";
 
     /**
+     * Specifies if a user is not allowed to use 2g networks.
+     *
+     * <p>This restriction can only be set by a device owner or a profile owner of an
+     * organization-owned managed profile on the parent profile.
+     * In all cases, the setting applies globally on the device and will prevent the device from
+     * scanning for or connecting to 2g networks, except in the case of an emergency.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CELLULAR_2G = "no_cellular_2g";
+
+    /**
      * List of key values that can be passed into the various user restriction related methods
      * in {@link UserManager} & {@link DevicePolicyManager}.
      * Note: This is slightly different from the real set of user restrictions listed in {@link
@@ -1565,6 +1581,7 @@ public class UserManager {
             DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI,
             DISALLOW_WIFI_DIRECT,
             DISALLOW_ADD_WIFI_CONFIG,
+            DISALLOW_CELLULAR_2G,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserRestrictionKey {}

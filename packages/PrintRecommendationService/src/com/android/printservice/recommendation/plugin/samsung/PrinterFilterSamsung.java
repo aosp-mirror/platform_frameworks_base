@@ -25,7 +25,6 @@ import androidx.annotation.NonNull;
 import com.android.printservice.recommendation.util.MDNSFilteredDiscovery;
 import com.android.printservice.recommendation.util.MDNSUtils;
 
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -36,9 +35,7 @@ import java.util.Set;
 class PrinterFilterSamsung implements MDNSFilteredDiscovery.PrinterFilter {
     private static final String TAG = "PrinterFilterSamsung";
 
-    static final Set<String> SAMSUNG_MDNS_SERVICES = new HashSet<String>() {{
-        add("_pdl-datastream._tcp");
-    }};
+    static final Set<String> SAMSUNG_MDNS_SERVICES = Set.of("_pdl-datastream._tcp");
 
     private static final String[] NOT_SUPPORTED_MODELS = new String[]{
             "SCX-5x15",
@@ -57,9 +54,7 @@ class PrinterFilterSamsung implements MDNSFilteredDiscovery.PrinterFilter {
     private static final String ATTR_PRODUCT = "product";
     private static final String ATTR_TY = "ty";
 
-    private static Set<String> SAMUNG_VENDOR_SET = new HashSet<String>() {{
-        add("samsung");
-    }};
+    private static final Set<String> SAMUNG_VENDOR_SET = Set.of("samsung");
 
     @Override
     public boolean matchesCriteria(NsdServiceInfo nsdServiceInfo) {

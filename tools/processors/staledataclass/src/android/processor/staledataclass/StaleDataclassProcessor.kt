@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+@file:Suppress("JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE")
 
 package android.processor.staledataclass
 

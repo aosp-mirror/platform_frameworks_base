@@ -522,9 +522,6 @@ interface IActivityManager {
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean stopBinderTrackingAndDump(in ParcelFileDescriptor fd);
 
-    /** Enables server-side binder tracing for the calling uid. */
-    void enableBinderTracing();
-
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void suppressResizeConfigChanges(boolean suppress);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)

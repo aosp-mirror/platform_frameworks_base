@@ -1093,7 +1093,7 @@ public class PeopleTileViewHelper {
             Pair<Integer, Integer> first = emojiIndices.get(i - 1);
 
             // Check if second emoji starts right after first starts
-            if (second.first == first.second) {
+            if (Objects.equals(second.first, first.second)) {
                 // Check if emojis in sequence are the same
                 if (Objects.equals(emojiTexts.get(i), emojiTexts.get(i - 1))) {
                     if (DEBUG) {

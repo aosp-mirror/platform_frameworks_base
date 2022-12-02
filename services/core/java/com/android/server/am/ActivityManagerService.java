@@ -376,6 +376,7 @@ import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.UndecFunction;
 import com.android.server.AlarmManagerInternal;
+import com.android.server.BootReceiver;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.DisplayThread;
 import com.android.server.IntentResolver;
@@ -8785,6 +8786,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param incrementalMetrics metrics for apps installed on Incremental.
      * @param errorId a unique id to append to the dropbox headers.
      */
+    @SuppressWarnings("DoNotCall") // Ignore warning for synchronous to call to worker.run()
     public void addErrorToDropBox(String eventType,
             ProcessRecord process, String processName, String activityShortComponentName,
             String parentShortComponentName, ProcessRecord parentProcess,
@@ -16340,11 +16342,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    @Override
-    public void enableBinderTracing() {
-        Binder.enableTracingForUid(Binder.getCallingUid());
-    }
-
     @VisibleForTesting
     public final class LocalService extends ActivityManagerInternal
             implements ActivityManagerLocal {
@@ -17794,10 +17791,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * Reset the dropbox rate limiter
+     * Reset the dropbox rate limiter here and in BootReceiver
      */
     void resetDropboxRateLimiter() {
         mDropboxRateLimiter.reset();
+        BootReceiver.resetDropboxRateLimiter();
     }
 
     /**
