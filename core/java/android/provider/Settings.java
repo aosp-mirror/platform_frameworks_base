@@ -17935,6 +17935,12 @@ public final class Settings {
             public static final String WET_MODE_ON = "wet_mode_on";
 
             /*
+             * Whether the RSB wake feature is enabled.
+             * @hide
+             */
+            public static final String RSB_WAKE_ENABLED = "rsb_wake_enabled";
+
+            /*
              * Whether the screen-unlock (keyguard) sound is enabled.
              * @hide
              */
