@@ -517,7 +517,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
 
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
         if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) return true;
-        return DesktopModeStatus.IS_SUPPORTED
+        return DesktopModeStatus.isAnyEnabled()
                 && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
                 && mDisplayController.getDisplayContext(taskInfo.displayId)
                 .getResources().getConfiguration().smallestScreenWidthDp >= 600;

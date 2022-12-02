@@ -33,14 +33,35 @@ public class DesktopModeStatus {
     /**
      * Flag to indicate whether desktop mode is available on the device
      */
-    public static final boolean IS_SUPPORTED = SystemProperties.getBoolean(
+    private static final boolean IS_SUPPORTED = SystemProperties.getBoolean(
             "persist.wm.debug.desktop_mode", false);
+
+    /**
+     * Flag to indicate whether desktop mode proto 2 is available on the device
+     */
+    private static final boolean IS_PROTO2_ENABLED = SystemProperties.getBoolean(
+            "persist.wm.debug.desktop_mode_2", false);
 
     /**
      * Return {@code true} if desktop mode support is enabled
      */
-    public static boolean isSupported() {
+    public static boolean isProto1Enabled() {
         return IS_SUPPORTED;
+    }
+
+    /**
+     * Return {@code true} is desktop windowing proto 2 is enabled
+     */
+    public static boolean isProto2Enabled() {
+        return IS_PROTO2_ENABLED;
+    }
+
+    /**
+     * Return {@code true} if proto 1 or 2 is enabled.
+     * Can be used to guard logic that is common for both prototypes.
+     */
+    public static boolean isAnyEnabled() {
+        return isProto1Enabled() || isProto2Enabled();
     }
 
     /**
@@ -61,5 +82,4 @@ public class DesktopModeStatus {
             return false;
         }
     }
-
 }

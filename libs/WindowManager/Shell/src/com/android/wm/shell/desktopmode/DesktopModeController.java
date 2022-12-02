@@ -100,7 +100,7 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         mDesktopModeTaskRepository = desktopModeTaskRepository;
         mMainExecutor = mainExecutor;
         mSettingsObserver = new SettingsObserver(mContext, mainHandler);
-        if (DesktopModeStatus.isSupported()) {
+        if (DesktopModeStatus.isProto1Enabled()) {
             shellInit.addInitCallback(this::onInit, this);
         }
     }
