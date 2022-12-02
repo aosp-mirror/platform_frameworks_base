@@ -355,6 +355,26 @@ public class Binder implements IBinder {
     }
 
     /**
+     * Return the Linux UID assigned to the process that sent the transaction
+     * currently being processed.
+     *
+     * Logs WTF if the current thread is not currently
+     * executing an incoming transaction and the calling identity has not been
+     * explicitly set with {@link #clearCallingIdentity()}
+     *
+     * @hide
+     */
+    public static final int getCallingUidOrWtf() {
+        if (!isDirectlyHandlingTransaction() && !hasExplicitIdentity()) {
+            Log.wtf(TAG,
+                    "Thread is not in a binder transaction, "
+                            + "and the calling identity has not been "
+                            + "explicitly set with clearCallingIdentity");
+        }
+        return getCallingUid();
+    }
+
+    /**
      * Return the UserHandle assigned to the process that sent you the
      * current transaction that is being processed. This is the user
      * of the caller. It is distinct from {@link #getCallingUid()} in that a
