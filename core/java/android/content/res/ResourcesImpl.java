@@ -434,8 +434,6 @@ public class ResourcesImpl {
                 // Protect against an unset fontScale.
                 mMetrics.scaledDensity = mMetrics.density *
                         (mConfiguration.fontScale != 0 ? mConfiguration.fontScale : 1.0f);
-                mMetrics.fontScaleConverter =
-                        FontScaleConverterFactory.forScale(mConfiguration.fontScale);
 
                 final int width, height;
                 if (mMetrics.widthPixels >= mMetrics.heightPixels) {

@@ -18,7 +18,6 @@ package android.util;
 
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.res.FontScaleConverter;
 import android.os.SystemProperties;
 
 /**
@@ -274,15 +273,6 @@ public class DisplayMetrics {
      * increments at runtime based on a user preference for the font size.
      */
     public float scaledDensity;
-
-    /**
-     * If non-null, this will be used to calculate font sizes instead of {@link #scaledDensity}.
-     *
-     * @hide
-     */
-    @Nullable
-    public FontScaleConverter fontScaleConverter;
-
     /**
      * The exact physical pixels per inch of the screen in the X dimension.
      */
@@ -360,7 +350,6 @@ public class DisplayMetrics {
         noncompatScaledDensity = o.noncompatScaledDensity;
         noncompatXdpi = o.noncompatXdpi;
         noncompatYdpi = o.noncompatYdpi;
-        fontScaleConverter = o.fontScaleConverter;
     }
     
     public void setToDefaults() {
@@ -378,7 +367,6 @@ public class DisplayMetrics {
         noncompatScaledDensity = scaledDensity;
         noncompatXdpi = xdpi;
         noncompatYdpi = ydpi;
-        fontScaleConverter = null;
     }
 
     @Override
