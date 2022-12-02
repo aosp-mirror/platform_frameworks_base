@@ -34,7 +34,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -87,6 +86,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.util.leak.ReferenceTestUtils;
 import com.android.systemui.utils.os.FakeHandler;
+
+import com.google.common.util.concurrent.AtomicDouble;
 
 import org.junit.After;
 import org.junit.Before;
@@ -710,7 +711,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onSingleTap_enabled_scaleIsChanged() {
+    public void onSingleTap_enabled_scaleAnimates() {
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
@@ -721,14 +722,28 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         });
 
         final View mirrorView = mWindowManager.getAttachedView();
+
         final long timeout = SystemClock.uptimeMillis() + 1000;
-        while (SystemClock.uptimeMillis() < timeout) {
-            SystemClock.sleep(10);
-            if (Float.compare(1.0f, mirrorView.getScaleX()) < 0) {
-                return;
+        final AtomicDouble maxScaleX = new AtomicDouble();
+        final Runnable onAnimationFrame = new Runnable() {
+            @Override
+            public void run() {
+                // For some reason the fancy way doesn't compile...
+//                maxScaleX.getAndAccumulate(mirrorView.getScaleX(), Math::max);
+                final double oldMax = maxScaleX.get();
+                final double newMax = Math.max(mirrorView.getScaleX(), oldMax);
+                assertTrue(maxScaleX.compareAndSet(oldMax, newMax));
+
+                if (SystemClock.uptimeMillis() < timeout) {
+                    mirrorView.postOnAnimation(this);
+                }
             }
-        }
-        fail("MirrorView scale is not changed");
+        };
+        mirrorView.postOnAnimation(onAnimationFrame);
+
+        waitForIdleSync();
+
+        ReferenceTestUtils.waitForCondition(() -> maxScaleX.get() > 1.0);
     }
 
     @Test
