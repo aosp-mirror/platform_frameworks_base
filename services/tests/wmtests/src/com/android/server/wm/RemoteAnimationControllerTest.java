@@ -772,6 +772,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             // Simulating now win1 is being covered by the lockscreen which has no surface,
             // and then launching an activity win2 with the remote animation
             win1.mHasSurface = false;
+            win1.mActivityRecord.setVisibility(false);
             mDisplayContent.mOpeningApps.add(win2.mActivityRecord);
             final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
                     win2.mActivityRecord, new Point(50, 100), null,
