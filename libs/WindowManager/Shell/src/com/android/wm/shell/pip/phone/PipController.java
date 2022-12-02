@@ -612,12 +612,21 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 new DisplayInsetsController.OnInsetsChangedListener() {
                     @Override
                     public void insetsChanged(InsetsState insetsState) {
+                        DisplayLayout pendingLayout =
+                                mDisplayController.getDisplayLayout(mPipBoundsState.getDisplayId());
+                        if (mIsInFixedRotation
+                                || pendingLayout.rotation()
+                                != mPipBoundsState.getDisplayLayout().rotation()) {
+                            // bail out if there is a pending rotation or fixed rotation change
+                            return;
+                        }
                         int oldMaxMovementBound = mPipBoundsState.getMovementBounds().bottom;
                         onDisplayChanged(
                                 mDisplayController.getDisplayLayout(mPipBoundsState.getDisplayId()),
                                 false /* saveRestoreSnapFraction */);
                         int newMaxMovementBound = mPipBoundsState.getMovementBounds().bottom;
                         if (!mEnablePipKeepClearAlgorithm) {
+                            // offset PiP to adjust for bottom inset change
                             int pipTop = mPipBoundsState.getBounds().top;
                             int diff = newMaxMovementBound - oldMaxMovementBound;
                             if (diff < 0 && pipTop > newMaxMovementBound) {
