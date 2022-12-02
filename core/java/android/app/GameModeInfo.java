@@ -87,12 +87,12 @@ public final class GameModeInfo implements Parcelable {
         }
 
         /**
-         * Sets the opted-in game modes.
+         * Sets the overridden game modes.
          */
         @NonNull
-        public GameModeInfo.Builder setOptedInGameModes(
-                @NonNull @GameManager.GameMode int[] optedInGameModes) {
-            mOptedInGameModes = optedInGameModes;
+        public GameModeInfo.Builder setOverriddenGameModes(
+                @NonNull @GameManager.GameMode int[] overriddenGameModes) {
+            mOverriddenGameModes = overriddenGameModes;
             return this;
         }
 
@@ -140,12 +140,12 @@ public final class GameModeInfo implements Parcelable {
          */
         @NonNull
         public GameModeInfo build() {
-            return new GameModeInfo(mActiveGameMode, mAvailableGameModes, mOptedInGameModes,
+            return new GameModeInfo(mActiveGameMode, mAvailableGameModes, mOverriddenGameModes,
                     mIsDownscalingAllowed, mIsFpsOverrideAllowed, mConfigMap);
         }
 
         private @GameManager.GameMode int[] mAvailableGameModes = new int[]{};
-        private @GameManager.GameMode int[] mOptedInGameModes = new int[]{};
+        private @GameManager.GameMode int[] mOverriddenGameModes = new int[]{};
         private @GameManager.GameMode int mActiveGameMode;
         private boolean mIsDownscalingAllowed;
         private boolean mIsFpsOverrideAllowed;
@@ -164,11 +164,11 @@ public final class GameModeInfo implements Parcelable {
 
     private GameModeInfo(@GameManager.GameMode int activeGameMode,
             @NonNull @GameManager.GameMode int[] availableGameModes,
-            @NonNull @GameManager.GameMode int[] optedInGameModes, boolean isDownscalingAllowed,
+            @NonNull @GameManager.GameMode int[] overriddenGameModes, boolean isDownscalingAllowed,
             boolean isFpsOverrideAllowed, @NonNull Map<Integer, GameModeConfiguration> configMap) {
         mActiveGameMode = activeGameMode;
         mAvailableGameModes = Arrays.copyOf(availableGameModes, availableGameModes.length);
-        mOptedInGameModes = Arrays.copyOf(optedInGameModes, optedInGameModes.length);
+        mOverriddenGameModes = Arrays.copyOf(overriddenGameModes, overriddenGameModes.length);
         mIsDownscalingAllowed = isDownscalingAllowed;
         mIsFpsOverrideAllowed = isFpsOverrideAllowed;
         mConfigMap = configMap;
@@ -179,7 +179,7 @@ public final class GameModeInfo implements Parcelable {
     public GameModeInfo(Parcel in) {
         mActiveGameMode = in.readInt();
         mAvailableGameModes = in.createIntArray();
-        mOptedInGameModes = in.createIntArray();
+        mOverriddenGameModes = in.createIntArray();
         mIsDownscalingAllowed = in.readBoolean();
         mIsFpsOverrideAllowed = in.readBoolean();
         mConfigMap = new ArrayMap<>();
@@ -198,8 +198,8 @@ public final class GameModeInfo implements Parcelable {
      * Gets the collection of {@link GameManager.GameMode} that can be applied to the game.
      * <p>
      * Available games include all game modes that are either supported by the OEM in device
-     * config, or opted in by the game developers in game mode config XML, plus the default enabled
-     * modes for any game including {@link GameManager#GAME_MODE_STANDARD} and
+     * config, or overridden by the game developers in game mode config XML, plus the default
+     * enabled modes for any game including {@link GameManager#GAME_MODE_STANDARD} and
      * {@link GameManager#GAME_MODE_CUSTOM}.
      * <p>
      * Also see {@link GameModeInfo}.
@@ -210,19 +210,19 @@ public final class GameModeInfo implements Parcelable {
     }
 
     /**
-     * Gets the collection of {@link GameManager.GameMode} that are opted in by the game.
+     * Gets the collection of {@link GameManager.GameMode} that are overridden by the game.
      * <p>
      * Also see {@link GameModeInfo}.
      */
     @NonNull
-    public @GameManager.GameMode int[] getOptedInGameModes() {
-        return Arrays.copyOf(mOptedInGameModes, mOptedInGameModes.length);
+    public @GameManager.GameMode int[] getOverriddenGameModes() {
+        return Arrays.copyOf(mOverriddenGameModes, mOverriddenGameModes.length);
     }
 
     /**
      * Gets the current game mode configuration of a game mode.
      * <p>
-     * The game mode can be null if it's opted in by the game itself, or not configured in device
+     * The game mode can be null if it's overridden by the game itself, or not configured in device
      * config nor set by the user as custom game mode configuration.
      */
     public @Nullable GameModeConfiguration getGameModeConfiguration(
@@ -250,7 +250,7 @@ public final class GameModeInfo implements Parcelable {
 
 
     private final @GameManager.GameMode int[] mAvailableGameModes;
-    private final @GameManager.GameMode int[] mOptedInGameModes;
+    private final @GameManager.GameMode int[] mOverriddenGameModes;
     private final @GameManager.GameMode int mActiveGameMode;
     private final boolean mIsDownscalingAllowed;
     private final boolean mIsFpsOverrideAllowed;
@@ -265,7 +265,7 @@ public final class GameModeInfo implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mActiveGameMode);
         dest.writeIntArray(mAvailableGameModes);
-        dest.writeIntArray(mOptedInGameModes);
+        dest.writeIntArray(mOverriddenGameModes);
         dest.writeBoolean(mIsDownscalingAllowed);
         dest.writeBoolean(mIsFpsOverrideAllowed);
         dest.writeMap(mConfigMap);

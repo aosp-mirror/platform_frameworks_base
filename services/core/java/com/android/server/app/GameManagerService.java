@@ -516,8 +516,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
         private final ArrayMap<Integer, GameModeConfiguration> mModeConfigs = new ArrayMap<>();
         // if adding new properties or make any of the below overridable, the method
         // copyAndApplyOverride should be updated accordingly
-        private boolean mPerfModeOptedIn = false;
-        private boolean mBatteryModeOptedIn = false;
+        private boolean mPerfModeOverridden = false;
+        private boolean mBatteryModeOverridden = false;
         private boolean mAllowDownscale = true;
         private boolean mAllowAngle = true;
         private boolean mAllowFpsOverride = true;
@@ -534,8 +534,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
                         PackageManager.GET_META_DATA, userId);
                 if (!parseInterventionFromXml(packageManager, ai, packageName)
                             && ai.metaData != null) {
-                    mPerfModeOptedIn = ai.metaData.getBoolean(METADATA_PERFORMANCE_MODE_ENABLE);
-                    mBatteryModeOptedIn = ai.metaData.getBoolean(METADATA_BATTERY_MODE_ENABLE);
+                    mPerfModeOverridden = ai.metaData.getBoolean(METADATA_PERFORMANCE_MODE_ENABLE);
+                    mBatteryModeOverridden = ai.metaData.getBoolean(METADATA_BATTERY_MODE_ENABLE);
                     mAllowDownscale = ai.metaData.getBoolean(METADATA_WM_ALLOW_DOWNSCALE, true);
                     mAllowAngle = ai.metaData.getBoolean(METADATA_ANGLE_ALLOW_ANGLE, true);
                 }
@@ -587,9 +587,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     } else {
                         final TypedArray array = resources.obtainAttributes(attributeSet,
                                 com.android.internal.R.styleable.GameModeConfig);
-                        mPerfModeOptedIn = array.getBoolean(
+                        mPerfModeOverridden = array.getBoolean(
                                 GameModeConfig_supportsPerformanceGameMode, false);
-                        mBatteryModeOptedIn = array.getBoolean(
+                        mBatteryModeOverridden = array.getBoolean(
                                 GameModeConfig_supportsBatteryGameMode,
                                 false);
                         mAllowDownscale = array.getBoolean(GameModeConfig_allowGameDownscaling,
@@ -602,8 +602,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 }
             } catch (NameNotFoundException | XmlPullParserException | IOException ex) {
                 // set flag back to default values when parsing fails
-                mPerfModeOptedIn = false;
-                mBatteryModeOptedIn = false;
+                mPerfModeOverridden = false;
+                mBatteryModeOverridden = false;
                 mAllowDownscale = true;
                 mAllowAngle = true;
                 mAllowFpsOverride = true;
@@ -659,8 +659,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
             GameModeConfiguration(KeyValueListParser parser) {
                 mGameMode = parser.getInt(MODE_KEY, GameManager.GAME_MODE_UNSUPPORTED);
-                // isGameModeOptedIn() returns if an app will handle all of the changes necessary
-                // for a particular game mode. If so, the Android framework (i.e.
+                // willGamePerformOptimizations() returns if an app will handle all of the changes
+                // necessary for a particular game mode. If so, the Android framework (i.e.
                 // GameManagerService) will not do anything for the app (like window scaling or
                 // using ANGLE).
                 mScaling = !mAllowDownscale || willGamePerformOptimizations(mGameMode)
@@ -767,8 +767,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
          * "com.android.app.gamemode.battery.enabled" with a value of "true"
          */
         public boolean willGamePerformOptimizations(@GameMode int gameMode) {
-            return (mBatteryModeOptedIn && gameMode == GameManager.GAME_MODE_BATTERY)
-                    || (mPerfModeOptedIn && gameMode == GameManager.GAME_MODE_PERFORMANCE);
+            return (mBatteryModeOverridden && gameMode == GameManager.GAME_MODE_BATTERY)
+                    || (mPerfModeOverridden && gameMode == GameManager.GAME_MODE_PERFORMANCE);
         }
 
         private int getAvailableGameModesBitfield() {
@@ -779,10 +779,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     field |= modeToBitmask(mode);
                 }
             }
-            if (mBatteryModeOptedIn) {
+            if (mBatteryModeOverridden) {
                 field |= modeToBitmask(GameManager.GAME_MODE_BATTERY);
             }
-            if (mPerfModeOptedIn) {
+            if (mPerfModeOverridden) {
                 field |= modeToBitmask(GameManager.GAME_MODE_PERFORMANCE);
             }
             return field;
@@ -806,14 +806,14 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
 
         /**
-         * Get an array of a package's opted-in game modes.
+         * Get an array of a package's overridden game modes.
          */
-        public @GameMode int[] getOptedInGameModes() {
-            if (mBatteryModeOptedIn && mPerfModeOptedIn) {
+        public @GameMode int[] getOverriddenGameModes() {
+            if (mBatteryModeOverridden && mPerfModeOverridden) {
                 return new int[]{GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_PERFORMANCE};
-            } else if (mBatteryModeOptedIn) {
+            } else if (mBatteryModeOverridden) {
                 return new int[]{GameManager.GAME_MODE_BATTERY};
-            } else if (mPerfModeOptedIn) {
+            } else if (mPerfModeOverridden) {
                 return new int[]{GameManager.GAME_MODE_PERFORMANCE};
             } else {
                 return new int[]{};
@@ -856,18 +856,18 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
         public boolean isActive() {
             synchronized (mModeConfigLock) {
-                return mModeConfigs.size() > 0 || mBatteryModeOptedIn || mPerfModeOptedIn;
+                return mModeConfigs.size() > 0 || mBatteryModeOverridden || mPerfModeOverridden;
             }
         }
 
         GamePackageConfiguration copyAndApplyOverride(GamePackageConfiguration overrideConfig) {
             GamePackageConfiguration copy = new GamePackageConfiguration(mPackageName);
             // if a game mode is overridden, we treat it with the highest priority and reset any
-            // opt-in game modes so that interventions are always executed.
-            copy.mPerfModeOptedIn = mPerfModeOptedIn && !(overrideConfig != null
+            // overridden game modes so that interventions are always executed.
+            copy.mPerfModeOverridden = mPerfModeOverridden && !(overrideConfig != null
                     && overrideConfig.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE)
                     != null);
-            copy.mBatteryModeOptedIn = mBatteryModeOptedIn && !(overrideConfig != null
+            copy.mBatteryModeOverridden = mBatteryModeOverridden && !(overrideConfig != null
                     && overrideConfig.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY)
                     != null);
 
@@ -1084,12 +1084,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
         final @GameMode int activeGameMode = getGameModeFromSettingsUnchecked(packageName, userId);
         final GamePackageConfiguration config = getConfig(packageName, userId);
         if (config != null) {
-            final @GameMode int[] optedInGameModes = config.getOptedInGameModes();
+            final @GameMode int[] overriddenGameModes = config.getOverriddenGameModes();
             final @GameMode int[] availableGameModes = config.getAvailableGameModes();
             GameModeInfo.Builder gameModeInfoBuilder = new GameModeInfo.Builder()
                     .setActiveGameMode(activeGameMode)
                     .setAvailableGameModes(availableGameModes)
-                    .setOptedInGameModes(optedInGameModes)
+                    .setOverriddenGameModes(overriddenGameModes)
                     .setDownscalingAllowed(config.mAllowDownscale)
                     .setFpsOverrideAllowed(config.mAllowFpsOverride);
             for (int gameMode : availableGameModes) {
@@ -2016,7 +2016,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 if (atomTag == FrameworkStatsLog.GAME_MODE_INFO) {
                     data.add(
                             FrameworkStatsLog.buildStatsEvent(FrameworkStatsLog.GAME_MODE_INFO, uid,
-                                    gameModesToStatsdGameModes(config.getOptedInGameModes()),
+                                    gameModesToStatsdGameModes(config.getOverriddenGameModes()),
                                     gameModesToStatsdGameModes(config.getAvailableGameModes())));
                 } else if (atomTag == FrameworkStatsLog.GAME_MODE_CONFIGURATION) {
                     for (int gameMode : config.getAvailableGameModes()) {

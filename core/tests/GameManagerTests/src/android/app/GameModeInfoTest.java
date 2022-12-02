@@ -43,7 +43,7 @@ public class GameModeInfoTest {
         int[] availableGameModes =
                 new int[]{GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_PERFORMANCE,
                         GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_CUSTOM};
-        int[] optedInGameModes = new int[]{GameManager.GAME_MODE_PERFORMANCE};
+        int[] overriddenGameModes = new int[]{GameManager.GAME_MODE_PERFORMANCE};
         GameModeConfiguration batteryConfig = new GameModeConfiguration
                 .Builder().setFpsOverride(40).setScalingFactor(0.5f).build();
         GameModeConfiguration performanceConfig = new GameModeConfiguration
@@ -51,7 +51,7 @@ public class GameModeInfoTest {
         GameModeInfo gameModeInfo = new GameModeInfo.Builder()
                 .setActiveGameMode(activeGameMode)
                 .setAvailableGameModes(availableGameModes)
-                .setOptedInGameModes(optedInGameModes)
+                .setOverriddenGameModes(overriddenGameModes)
                 .setDownscalingAllowed(true)
                 .setFpsOverrideAllowed(false)
                 .setGameModeConfiguration(GameManager.GAME_MODE_BATTERY, batteryConfig)
@@ -59,7 +59,7 @@ public class GameModeInfoTest {
                 .build();
 
         assertArrayEquals(availableGameModes, gameModeInfo.getAvailableGameModes());
-        assertArrayEquals(optedInGameModes, gameModeInfo.getOptedInGameModes());
+        assertArrayEquals(overriddenGameModes, gameModeInfo.getOverriddenGameModes());
         assertEquals(activeGameMode, gameModeInfo.getActiveGameMode());
         assertTrue(gameModeInfo.isDownscalingAllowed());
         assertFalse(gameModeInfo.isFpsOverrideAllowed());
@@ -75,8 +75,8 @@ public class GameModeInfoTest {
         assertEquals(gameModeInfo.getActiveGameMode(), newGameModeInfo.getActiveGameMode());
         assertArrayEquals(gameModeInfo.getAvailableGameModes(),
                 newGameModeInfo.getAvailableGameModes());
-        assertArrayEquals(gameModeInfo.getOptedInGameModes(),
-                newGameModeInfo.getOptedInGameModes());
+        assertArrayEquals(gameModeInfo.getOverriddenGameModes(),
+                newGameModeInfo.getOverriddenGameModes());
         assertTrue(newGameModeInfo.isDownscalingAllowed());
         assertFalse(newGameModeInfo.isFpsOverrideAllowed());
         assertEquals(performanceConfig,

@@ -645,15 +645,15 @@ public class GameManagerServiceTests {
         }
     }
 
-    private void checkReportedOptedInGameModes(GameManagerService gameManagerService,
-            int... requiredOptedInModes) {
-        Arrays.sort(requiredOptedInModes);
-        // check GetModeInfo.getOptedInGameModes
+    private void checkReportedOverriddenGameModes(GameManagerService gameManagerService,
+            int... requiredOverriddenModes) {
+        Arrays.sort(requiredOverriddenModes);
+        // check GetModeInfo.getOverriddenGameModes
         GameModeInfo info = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
         assertNotNull(info);
-        int[] optedInModes = info.getOptedInGameModes();
-        Arrays.sort(optedInModes);
-        assertArrayEquals(requiredOptedInModes, optedInModes);
+        int[] overriddenModes = info.getOverriddenGameModes();
+        Arrays.sort(overriddenModes);
+        assertArrayEquals(requiredOverriddenModes, overriddenModes);
     }
 
     private void checkDownscaling(GameManagerService gameManagerService,
@@ -695,7 +695,7 @@ public class GameManagerServiceTests {
         assertEquals(fps, config.getGameModeConfiguration(gameMode).getFps());
     }
 
-    private boolean checkOptedIn(GameManagerService gameManagerService, int gameMode) {
+    private boolean checkOverridden(GameManagerService gameManagerService, int gameMode) {
         GameManagerService.GamePackageConfiguration config =
                 gameManagerService.getConfig(mPackageName, USER_ID_1);
         return config.willGamePerformOptimizations(gameMode);
@@ -868,8 +868,8 @@ public class GameManagerServiceTests {
                 mTestLooper.getLooper());
         startUser(gameManagerService, USER_ID_1);
 
-        assertFalse(checkOptedIn(gameManagerService, GameManager.GAME_MODE_PERFORMANCE));
-        assertFalse(checkOptedIn(gameManagerService, GameManager.GAME_MODE_BATTERY));
+        assertFalse(checkOverridden(gameManagerService, GameManager.GAME_MODE_PERFORMANCE));
+        assertFalse(checkOverridden(gameManagerService, GameManager.GAME_MODE_BATTERY));
         checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 0);
 
         gameManagerService.setGameModeConfigOverride(mPackageName, USER_ID_1, 3, "40",
@@ -882,9 +882,9 @@ public class GameManagerServiceTests {
         mockInterventionsDisabledAllOptInFromXml();
         gameManagerService.updateConfigsForUser(USER_ID_1, false, mPackageName);
 
-        assertTrue(checkOptedIn(gameManagerService, GameManager.GAME_MODE_PERFORMANCE));
+        assertTrue(checkOverridden(gameManagerService, GameManager.GAME_MODE_PERFORMANCE));
         // opt-in is still false for battery mode as override exists
-        assertFalse(checkOptedIn(gameManagerService, GameManager.GAME_MODE_BATTERY));
+        assertFalse(checkOverridden(gameManagerService, GameManager.GAME_MODE_BATTERY));
     }
 
     /**
@@ -1308,7 +1308,7 @@ public class GameManagerServiceTests {
         checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
                 GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD,
                 GameManager.GAME_MODE_CUSTOM);
-        checkReportedOptedInGameModes(gameManagerService);
+        checkReportedOverriddenGameModes(gameManagerService);
 
         assertEquals(new GameModeConfiguration.Builder()
                 .setFpsOverride(30)
@@ -1335,7 +1335,7 @@ public class GameManagerServiceTests {
         checkReportedAvailableGameModes(gameManagerService,
                 GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD,
                 GameManager.GAME_MODE_CUSTOM);
-        checkReportedOptedInGameModes(gameManagerService);
+        checkReportedOverriddenGameModes(gameManagerService);
 
         assertNotNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
         assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
@@ -1355,7 +1355,7 @@ public class GameManagerServiceTests {
         checkReportedAvailableGameModes(gameManagerService,
                 GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_STANDARD,
                 GameManager.GAME_MODE_CUSTOM);
-        checkReportedOptedInGameModes(gameManagerService);
+        checkReportedOverriddenGameModes(gameManagerService);
 
         assertNotNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
         assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
@@ -1380,7 +1380,7 @@ public class GameManagerServiceTests {
     }
 
     @Test
-    public void testGetGameModeInfoWithAllGameModesOptedIn_noDeviceConfig()
+    public void testGetGameModeInfoWithAllGameModesOverridden_noDeviceConfig()
             throws Exception {
         mockModifyGameModeGranted();
         mockInterventionsEnabledAllOptInFromXml();
@@ -1388,14 +1388,14 @@ public class GameManagerServiceTests {
         GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
         GameModeInfo gameModeInfo = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
         assertEquals(GameManager.GAME_MODE_STANDARD, gameModeInfo.getActiveGameMode());
-        verifyAllModesOptedInAndInterventionsAvailable(gameManagerService, gameModeInfo);
+        verifyAllModesOverriddenAndInterventionsAvailable(gameManagerService, gameModeInfo);
 
         assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
         assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
     }
 
     @Test
-    public void testGetGameModeInfoWithAllGameModesOptedIn_allDeviceConfig()
+    public void testGetGameModeInfoWithAllGameModesOverridden_allDeviceConfig()
             throws Exception {
         mockModifyGameModeGranted();
         mockInterventionsEnabledAllOptInFromXml();
@@ -1403,26 +1403,26 @@ public class GameManagerServiceTests {
         GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
         GameModeInfo gameModeInfo = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
         assertEquals(GameManager.GAME_MODE_STANDARD, gameModeInfo.getActiveGameMode());
-        verifyAllModesOptedInAndInterventionsAvailable(gameManagerService, gameModeInfo);
+        verifyAllModesOverriddenAndInterventionsAvailable(gameManagerService, gameModeInfo);
 
         assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
         assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
     }
 
-    private void verifyAllModesOptedInAndInterventionsAvailable(
+    private void verifyAllModesOverriddenAndInterventionsAvailable(
             GameManagerService gameManagerService,
             GameModeInfo gameModeInfo) {
         checkReportedAvailableGameModes(gameManagerService,
                 GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
                 GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM);
-        checkReportedOptedInGameModes(gameManagerService,
+        checkReportedOverriddenGameModes(gameManagerService,
                 GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY);
         assertTrue(gameModeInfo.isFpsOverrideAllowed());
         assertTrue(gameModeInfo.isDownscalingAllowed());
     }
 
     @Test
-    public void testGetGameModeInfoWithBatteryModeOptedIn_withBatteryDeviceConfig()
+    public void testGetGameModeInfoWithBatteryModeOverridden_withBatteryDeviceConfig()
             throws Exception {
         mockModifyGameModeGranted();
         mockInterventionsEnabledBatteryOptInFromXml();
@@ -1433,14 +1433,14 @@ public class GameManagerServiceTests {
 
         checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_BATTERY,
                 GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM);
-        checkReportedOptedInGameModes(gameManagerService, GameManager.GAME_MODE_BATTERY);
+        checkReportedOverriddenGameModes(gameManagerService, GameManager.GAME_MODE_BATTERY);
 
         assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
         assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
     }
 
     @Test
-    public void testGetGameModeInfoWithPerformanceModeOptedIn_withAllDeviceConfig()
+    public void testGetGameModeInfoWithPerformanceModeOverridden_withAllDeviceConfig()
             throws Exception {
         mockModifyGameModeGranted();
         mockInterventionsEnabledPerformanceOptInFromXml();
@@ -1452,7 +1452,7 @@ public class GameManagerServiceTests {
         checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
                 GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD,
                 GameManager.GAME_MODE_CUSTOM);
-        checkReportedOptedInGameModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE);
+        checkReportedOverriddenGameModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE);
 
         assertNotNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
         assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
@@ -1953,7 +1953,7 @@ public class GameManagerServiceTests {
     }
 
     @Test
-    public void testResetInterventions_onGameModeOptedIn() throws Exception {
+    public void testResetInterventions_onGameModeOverridden() throws Exception {
         mockModifyGameModeGranted();
         String configStringBefore =
                 "mode=2,downscaleFactor=1.0,fps=90";
