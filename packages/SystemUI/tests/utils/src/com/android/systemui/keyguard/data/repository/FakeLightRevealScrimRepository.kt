@@ -12,22 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package com.android.systemui.keyguard.data.repository
 
-import dagger.Binds
-import dagger.Module
+import com.android.systemui.statusbar.LightRevealEffect
+import kotlinx.coroutines.flow.MutableStateFlow
 
-@Module
-interface KeyguardRepositoryModule {
-    @Binds fun keyguardRepository(impl: KeyguardRepositoryImpl): KeyguardRepository
+/** Fake implementation of [LightRevealScrimRepository] */
+class FakeLightRevealScrimRepository : LightRevealScrimRepository {
 
-    @Binds
-    fun keyguardTransitionRepository(
-        impl: KeyguardTransitionRepositoryImpl
-    ): KeyguardTransitionRepository
+    private val _revealEffect: MutableStateFlow<LightRevealEffect> =
+        MutableStateFlow(DEFAULT_REVEAL_EFFECT)
+    override val revealEffect = _revealEffect
 
-    @Binds
-    fun lightRevealScrimRepository(impl: LightRevealScrimRepositoryImpl): LightRevealScrimRepository
+    fun setRevealEffect(effect: LightRevealEffect) {
+        _revealEffect.tryEmit(effect)
+    }
 }

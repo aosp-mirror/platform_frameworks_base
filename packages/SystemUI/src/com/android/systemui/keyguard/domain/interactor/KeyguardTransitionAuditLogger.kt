@@ -37,7 +37,7 @@ constructor(
 
     fun start() {
         scope.launch {
-            keyguardInteractor.wakefulnessState.collect { logger.v("WakefulnessState", it) }
+            keyguardInteractor.wakefulnessModel.collect { logger.v("WakefulnessModel", it) }
         }
 
         scope.launch {
