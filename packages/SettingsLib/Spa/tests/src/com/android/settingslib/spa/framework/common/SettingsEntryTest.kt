@@ -20,6 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.core.os.bundleOf
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.settingslib.spa.tests.testutils.getUniqueEntryId
+import com.android.settingslib.spa.tests.testutils.getUniquePageId
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test

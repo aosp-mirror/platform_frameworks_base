@@ -34,6 +34,7 @@ import android.os.UserHandle;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayAddress;
+import android.view.DisplayShape;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
@@ -655,6 +656,8 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                 mInfo.setAssumedDensityForExternalDisplay(mWidth, mHeight);
                 // The display is trusted since it is created by system.
                 mInfo.flags |= DisplayDeviceInfo.FLAG_TRUSTED;
+                mInfo.displayShape =
+                        DisplayShape.createDefaultDisplayShape(mInfo.width, mInfo.height, false);
             }
             return mInfo;
         }

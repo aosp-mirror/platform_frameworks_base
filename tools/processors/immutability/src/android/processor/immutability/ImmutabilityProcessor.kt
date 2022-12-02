@@ -54,6 +54,7 @@ class ImmutabilityProcessor : AbstractProcessor() {
             "java.lang.Short",
             "java.lang.String",
             "java.lang.Void",
+            "java.util.UUID",
             "android.os.Parcelable.Creator",
         )
 

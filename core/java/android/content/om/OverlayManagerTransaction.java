@@ -20,19 +20,22 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.NonUiContext;
 import android.annotation.Nullable;
-import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Container for a batch of requests to the OverlayManagerService.
@@ -53,13 +56,16 @@ public class OverlayManagerTransaction
     // TODO: remove @hide from this class when OverlayManager is added to the
     // SDK, but keep OverlayManagerTransaction.Request @hidden
     private final List<Request> mRequests;
+    private final OverlayManager mOverlayManager;
 
-    OverlayManagerTransaction(@NonNull final List<Request> requests) {
+    OverlayManagerTransaction(
+            @NonNull final List<Request> requests, @Nullable OverlayManager overlayManager) {
         checkNotNull(requests);
         if (requests.contains(null)) {
             throw new IllegalArgumentException("null request");
         }
         mRequests = requests;
+        mOverlayManager = overlayManager;
     }
 
     private OverlayManagerTransaction(@NonNull final Parcel source) {
@@ -72,6 +78,7 @@ public class OverlayManagerTransaction
             final Bundle extras = source.readBundle(null);
             mRequests.add(new Request(request, overlay, userId, extras));
         }
+        mOverlayManager = null;
     }
 
     @Override
@@ -156,6 +163,20 @@ public class OverlayManagerTransaction
      */
     public static class Builder {
         private final List<Request> mRequests = new ArrayList<>();
+        @Nullable private final OverlayManager mOverlayManager;
+
+        public Builder() {
+            mOverlayManager = null;
+        }
+
+        /**
+         * The transaction builder for self-targeting.
+         *
+         * @param overlayManager is not null if the transaction is for self-targeting.
+         */
+        Builder(@NonNull OverlayManager overlayManager) {
+            mOverlayManager = Objects.requireNonNull(overlayManager);
+        }
 
         /**
          * Request that an overlay package be enabled and change its loading
@@ -205,7 +226,10 @@ public class OverlayManagerTransaction
          *
          * @hide
          */
+        @NonNull
         public Builder registerFabricatedOverlay(@NonNull FabricatedOverlay overlay) {
+            Objects.requireNonNull(overlay);
+
             final Bundle extras = new Bundle();
             extras.putParcelable(Request.BUNDLE_FABRICATED_OVERLAY, overlay.mOverlay);
             mRequests.add(new Request(Request.TYPE_REGISTER_FABRICATED, overlay.getIdentifier(),
@@ -220,7 +244,10 @@ public class OverlayManagerTransaction
          *
          * @hide
          */
+        @NonNull
         public Builder unregisterFabricatedOverlay(@NonNull OverlayIdentifier overlay) {
+            Objects.requireNonNull(overlay);
+
             mRequests.add(new Request(Request.TYPE_UNREGISTER_FABRICATED, overlay,
                     UserHandle.USER_ALL));
             return this;
@@ -233,8 +260,9 @@ public class OverlayManagerTransaction
          * @see OverlayManager#commit
          * @return a new transaction
          */
+        @NonNull
         public OverlayManagerTransaction build() {
-            return new OverlayManagerTransaction(mRequests);
+            return new OverlayManagerTransaction(mRequests, mOverlayManager);
         }
     }
 
@@ -269,4 +297,23 @@ public class OverlayManagerTransaction
             return new OverlayManagerTransaction[size];
         }
     };
+
+    /**
+     * Commit the overlay manager transaction to register or unregister overlays for self-targeting.
+     *
+     * <p>Applications can register overlays and unregister the registered overlays via {@link
+     * OverlayManagerTransaction}.
+     *
+     * @throws IOException if there is a file operation error.
+     * @throws PackageManager.NameNotFoundException if the package name is not found.
+     * @hide
+     */
+    @NonUiContext
+    public void commit() throws PackageManager.NameNotFoundException, IOException {
+        mOverlayManager.commitSelfTarget(this);
+    }
+
+    boolean isSelfTargetingTransaction() {
+        return mOverlayManager != null;
+    }
 }

@@ -44,6 +44,8 @@ import com.android.credentialmanager.createflow.ActiveEntry
 import com.android.credentialmanager.createflow.CreateCredentialUiState
 import com.android.credentialmanager.createflow.CreateScreenState
 import com.android.credentialmanager.createflow.EnabledProviderInfo
+import com.android.credentialmanager.createflow.RemoteInfo
+import com.android.credentialmanager.createflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.GetScreenState
 import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest.Companion.toBundle
@@ -57,7 +59,7 @@ class CredentialManagerRepo(
 ) {
   val requestInfo: RequestInfo
   private val providerEnabledList: List<ProviderData>
-  private val providerDisabledList: List<DisabledProviderData>
+  private val providerDisabledList: List<DisabledProviderData>?
   // TODO: require non-null.
   val resultReceiver: ResultReceiver?
 
@@ -141,26 +143,23 @@ class CredentialManagerRepo(
       providerEnabledList as List<CreateCredentialProviderData>, requestDisplayInfo, context)
     val providerDisabledList = CreateFlowUtils.toDisabledProviderList(
       // Handle runtime cast error
-      providerDisabledList as List<DisabledProviderData>, context)
-    var hasDefault = false
-    var defaultProvider: EnabledProviderInfo = providerEnabledList.first()
+      providerDisabledList, context)
+    var defaultProvider: EnabledProviderInfo? = null
+    var remoteEntry: RemoteInfo? = null
     providerEnabledList.forEach{providerInfo -> providerInfo.createOptions =
       providerInfo.createOptions.sortedWith(compareBy { it.lastUsedTimeMillis }).reversed()
-      if (providerInfo.isDefault) {hasDefault = true; defaultProvider = providerInfo} }
+      if (providerInfo.isDefault) {defaultProvider = providerInfo}
+      if (providerInfo.remoteEntry != null) {
+        remoteEntry = providerInfo.remoteEntry!!
+      }
+    }
     return CreateCredentialUiState(
       enabledProviders = providerEnabledList,
       disabledProviders = providerDisabledList,
-      // TODO: Add the screen when defaultProvider has no createOption but
-      //  there's remoteInfo under other providers
-      if (!hasDefault || defaultProvider.createOptions.isEmpty()) {
-        if (requestDisplayInfo.type == TYPE_PUBLIC_KEY_CREDENTIAL)
-        {CreateScreenState.PASSKEY_INTRO} else {CreateScreenState.PROVIDER_SELECTION}
-      } else {CreateScreenState.CREATION_OPTION_SELECTION},
+      toCreateScreenState(requestDisplayInfo, defaultProvider, remoteEntry),
       requestDisplayInfo,
       false,
-      if (hasDefault) {
-        ActiveEntry(defaultProvider, defaultProvider.createOptions.first())
-      } else null
+      toActiveEntry(defaultProvider, remoteEntry),
     )
   }
 
@@ -210,7 +209,7 @@ class CredentialManagerRepo(
     )
   }
 
-  private fun testDisabledProviderList(): List<DisabledProviderData> {
+  private fun testDisabledProviderList(): List<DisabledProviderData>? {
     return listOf(
       DisabledProviderData("com.lastpass.lpandroid"),
       DisabledProviderData("com.google.android.youtube")
@@ -459,12 +458,15 @@ class CredentialManagerRepo(
             "                     \"residentKey\": \"required\",\n" +
             "                     \"requireResidentKey\": true\n" +
             "                   }}")
-    val data = request.data
+    val credentialData = request.data
     return RequestInfo.newCreateRequestInfo(
       Binder(),
       CreateCredentialRequest(
         TYPE_PUBLIC_KEY_CREDENTIAL,
-        data
+        credentialData,
+        // TODO: populate with actual data
+        /*candidateQueryData=*/ Bundle(),
+        /*requireSystemProvider=*/ false
       ),
       /*isFirstUsage=*/false,
       "tribank"
@@ -477,7 +479,10 @@ class CredentialManagerRepo(
       Binder(),
       CreateCredentialRequest(
         TYPE_PASSWORD_CREDENTIAL,
-        data
+        data,
+        // TODO: populate with actual data
+        /*candidateQueryData=*/ Bundle(),
+        /*requireSystemProvider=*/ false
       ),
       /*isFirstUsage=*/false,
       "tribank"
@@ -490,7 +495,9 @@ class CredentialManagerRepo(
       Binder(),
       CreateCredentialRequest(
         "other-sign-ins",
-        data
+        data,
+        /*candidateQueryData=*/ Bundle(),
+        /*requireSystemProvider=*/ false
       ),
       /*isFirstUsage=*/false,
       "tribank"
@@ -502,11 +509,46 @@ class CredentialManagerRepo(
       Binder(),
       GetCredentialRequest.Builder()
         .addGetCredentialOption(
-          GetCredentialOption(TYPE_PUBLIC_KEY_CREDENTIAL, Bundle())
+          GetCredentialOption(
+            TYPE_PUBLIC_KEY_CREDENTIAL, Bundle(), /*requireSystemProvider=*/ false)
         )
         .build(),
       /*isFirstUsage=*/false,
       "tribank.us"
     )
+  }
+
+  private fun toCreateScreenState(
+    requestDisplayInfo: RequestDisplayInfo,
+    defaultProvider: EnabledProviderInfo?,
+    remoteEntry: RemoteInfo?,
+  ): CreateScreenState {
+    return if (
+      defaultProvider != null && defaultProvider.createOptions.isEmpty() && remoteEntry != null
+    ){
+      CreateScreenState.EXTERNAL_ONLY_SELECTION
+    } else if (defaultProvider == null || defaultProvider.createOptions.isEmpty()) {
+      if (requestDisplayInfo.type == TYPE_PUBLIC_KEY_CREDENTIAL) {
+        CreateScreenState.PASSKEY_INTRO
+      } else {
+        CreateScreenState.PROVIDER_SELECTION
+      }
+    } else {
+      CreateScreenState.CREATION_OPTION_SELECTION
+    }
+  }
+
+  private fun toActiveEntry(
+    defaultProvider: EnabledProviderInfo?,
+    remoteEntry: RemoteInfo?,
+  ): ActiveEntry? {
+    return if (
+      defaultProvider != null && defaultProvider.createOptions.isNotEmpty()
+    ) {
+      ActiveEntry(defaultProvider, defaultProvider.createOptions.first())
+    } else if (
+      defaultProvider != null && defaultProvider.createOptions.isEmpty() && remoteEntry != null) {
+      ActiveEntry(defaultProvider, remoteEntry)
+    } else null
   }
 }

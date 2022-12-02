@@ -29,6 +29,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.Display;
+import android.view.DisplayShape;
 import android.view.Gravity;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -361,6 +362,8 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 mInfo.state = mState;
                 // The display is trusted since it is created by system.
                 mInfo.flags |= FLAG_TRUSTED;
+                mInfo.displayShape =
+                        DisplayShape.createDefaultDisplayShape(mInfo.width, mInfo.height, false);
             }
             return mInfo;
         }

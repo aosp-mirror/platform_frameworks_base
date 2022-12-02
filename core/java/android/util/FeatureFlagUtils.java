@@ -140,6 +140,13 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_ADB_METRICS_WRITER = "settings_adb_metrics_writer";
 
     /**
+     * Flag to show stylus-specific preferences in Connected Devices
+     * @hide
+     */
+    public static final String SETTINGS_SHOW_STYLUS_PREFERENCES =
+            "settings_show_stylus_preferences";
+
+    /**
      * Flag to enable/disable biometrics enrollment v2
      * @hide
      */
@@ -181,10 +188,12 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA, "false");
         DEFAULT_FLAGS.put(SETTINGS_ADB_METRICS_WRITER, "false");
+        DEFAULT_FLAGS.put(SETTINGS_SHOW_STYLUS_PREFERENCES, "false");
         DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_ENROLLMENT, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
+
     static {
         PERSISTENT_FLAGS = new HashSet<>();
         PERSISTENT_FLAGS.add(SETTINGS_ALLOW_INTENT_REDIRECTION_FOR_CLONE_PROFILE);

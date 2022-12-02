@@ -447,6 +447,13 @@ public class RescueParty {
                 thread.start();
                 break;
             case LEVEL_FACTORY_RESET:
+                // Before the completion of Reboot, if any crash happens then PackageWatchdog
+                // escalates to next level i.e. factory reset, as they happen in separate threads.
+                // Adding a check to prevent factory reset to execute before above reboot completes.
+                // Note: this reboot property is not persistent resets after reboot is completed.
+                if (isRebootPropertySet()) {
+                    break;
+                }
                 SystemProperties.set(PROP_ATTEMPTING_FACTORY_RESET, "true");
                 runnable = new Runnable() {
                     @Override

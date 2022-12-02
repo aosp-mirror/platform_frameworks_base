@@ -17,6 +17,7 @@
 #ifndef __BYTE_BUCKET_ARRAY_H
 #define __BYTE_BUCKET_ARRAY_H
 
+#include <algorithm>
 #include <cstdint>
 #include <cstring>
 
@@ -36,15 +37,11 @@ class ByteBucketArray {
   }
 
   ~ByteBucketArray() {
-    clear();
+    deleteBuckets();
   }
 
   void clear() {
-    for (size_t i = 0; i < kNumBuckets; i++) {
-      if (buckets_[i] != NULL) {
-        delete[] buckets_[i];
-      }
-    }
+    deleteBuckets();
     memset(buckets_, 0, sizeof(buckets_));
   }
 
@@ -59,7 +56,7 @@ class ByteBucketArray {
 
     uint8_t bucket_index = static_cast<uint8_t>(index) >> 4;
     T* bucket = buckets_[bucket_index];
-    if (bucket == NULL) {
+    if (bucket == nullptr) {
       return default_;
     }
     return bucket[0x0f & static_cast<uint8_t>(index)];
@@ -70,9 +67,9 @@ class ByteBucketArray {
                           << ") with size=" << size();
 
     uint8_t bucket_index = static_cast<uint8_t>(index) >> 4;
-    T* bucket = buckets_[bucket_index];
-    if (bucket == NULL) {
-      bucket = buckets_[bucket_index] = new T[kBucketSize]();
+    T*& bucket = buckets_[bucket_index];
+    if (bucket == nullptr) {
+      bucket = new T[kBucketSize]();
     }
     return bucket[0x0f & static_cast<uint8_t>(index)];
   }
@@ -86,8 +83,41 @@ class ByteBucketArray {
     return true;
   }
 
+  template <class Func>
+  void forEachItem(Func f) {
+    for (size_t i = 0; i < kNumBuckets; i++) {
+      const auto bucket = buckets_[i];
+      if (bucket != nullptr) {
+        for (size_t j = 0; j < kBucketSize; j++) {
+          f((i << 4) | j, bucket[j]);
+        }
+      }
+    }
+  }
+
+  template <class Func>
+  void trimBuckets(Func isEmptyFunc) {
+    for (size_t i = 0; i < kNumBuckets; i++) {
+      const auto bucket = buckets_[i];
+      if (bucket != nullptr) {
+        if (std::all_of(bucket, bucket + kBucketSize, isEmptyFunc)) {
+          delete[] bucket;
+          buckets_[i] = nullptr;
+        }
+      }
+    }
+  }
+
  private:
   enum { kNumBuckets = 16, kBucketSize = 16 };
+
+  void deleteBuckets() {
+    for (size_t i = 0; i < kNumBuckets; i++) {
+      if (buckets_[i] != nullptr) {
+        delete[] buckets_[i];
+      }
+    }
+  }
 
   T* buckets_[kNumBuckets];
   static inline const T default_ = {};

@@ -71,8 +71,10 @@ private:
     const int64_t mPreferredRateNanos;
     // Target duration for choosing update rate
     int64_t mTargetDurationNanos;
-    // Last update timestamp
-    int64_t mLastUpdateTimestamp;
+    // First target hit timestamp
+    int64_t mFirstTargetMetTimestamp;
+    // Last target hit timestamp
+    int64_t mLastTargetMetTimestamp;
     // Cached samples
     std::vector<int64_t> mActualDurationsNanos;
     std::vector<int64_t> mTimestampsNanos;
@@ -144,7 +146,8 @@ APerformanceHintSession::APerformanceHintSession(sp<IHintSession> session,
       : mHintSession(std::move(session)),
         mPreferredRateNanos(preferredRateNanos),
         mTargetDurationNanos(targetDurationNanos),
-        mLastUpdateTimestamp(elapsedRealtimeNano()) {}
+        mFirstTargetMetTimestamp(0),
+        mLastTargetMetTimestamp(0) {}
 
 APerformanceHintSession::~APerformanceHintSession() {
     binder::Status ret = mHintSession->close();
@@ -171,7 +174,8 @@ int APerformanceHintSession::updateTargetWorkDuration(int64_t targetDurationNano
      */
     mActualDurationsNanos.clear();
     mTimestampsNanos.clear();
-    mLastUpdateTimestamp = elapsedRealtimeNano();
+    mFirstTargetMetTimestamp = 0;
+    mLastTargetMetTimestamp = 0;
     return 0;
 }
 
@@ -184,25 +188,38 @@ int APerformanceHintSession::reportActualWorkDuration(int64_t actualDurationNano
     mActualDurationsNanos.push_back(actualDurationNanos);
     mTimestampsNanos.push_back(now);
 
-    /**
-     * Cache the hint if the hint is not overtime and the mLastUpdateTimestamp is
-     * still in the mPreferredRateNanos duration.
-     */
-    if (actualDurationNanos < mTargetDurationNanos &&
-        now - mLastUpdateTimestamp <= mPreferredRateNanos) {
-        return 0;
+    if (actualDurationNanos >= mTargetDurationNanos) {
+        // Reset timestamps if we are equal or over the target.
+        mFirstTargetMetTimestamp = 0;
+    } else {
+        // Set mFirstTargetMetTimestamp for first time meeting target.
+        if (!mFirstTargetMetTimestamp || !mLastTargetMetTimestamp ||
+            (now - mLastTargetMetTimestamp > 2 * mPreferredRateNanos)) {
+            mFirstTargetMetTimestamp = now;
+        }
+        /**
+         * Rate limit the change if the update is over mPreferredRateNanos since first
+         * meeting target and less than mPreferredRateNanos since last meeting target.
+         */
+        if (now - mFirstTargetMetTimestamp > mPreferredRateNanos &&
+            now - mLastTargetMetTimestamp <= mPreferredRateNanos) {
+            return 0;
+        }
+        mLastTargetMetTimestamp = now;
     }
 
     binder::Status ret =
             mHintSession->reportActualWorkDuration(mActualDurationsNanos, mTimestampsNanos);
-    mActualDurationsNanos.clear();
-    mTimestampsNanos.clear();
     if (!ret.isOk()) {
         ALOGE("%s: HintSession reportActualWorkDuration failed: %s", __FUNCTION__,
               ret.exceptionMessage().c_str());
+        mFirstTargetMetTimestamp = 0;
+        mLastTargetMetTimestamp = 0;
         return EPIPE;
     }
-    mLastUpdateTimestamp = now;
+    mActualDurationsNanos.clear();
+    mTimestampsNanos.clear();
+
     return 0;
 }
 

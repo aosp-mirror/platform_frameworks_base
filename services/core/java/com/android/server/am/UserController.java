@@ -100,7 +100,6 @@ import android.util.EventLog;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -177,7 +176,8 @@ class UserController implements Handler.Callback {
     static final int START_USER_SWITCH_FG_MSG = 120;
     static final int COMPLETE_USER_SWITCH_MSG = 130;
     static final int USER_COMPLETED_EVENT_MSG = 140;
-    static final int USER_VISIBILITY_CHANGED_MSG = 150;
+
+    private static final int NO_ARG2 = 0;
 
     // Message constant to clear {@link UserJourneySession} from {@link mUserIdToUserJourneyMap} if
     // the user journey, defined in the UserLifecycleJourneyReported atom for statsd, is not
@@ -436,20 +436,6 @@ class UserController implements Handler.Callback {
 
     /** @see #getLastUserUnlockingUptime */
     private volatile long mLastUserUnlockingUptime = 0;
-
-    // TODO(b/244333150) remove this array and let UserVisibilityMediator call the listeners
-    // directly, as that class should be responsible for all user visibility logic (for example,
-    // when the foreground user is switched out, its profiles also become invisible)
-    /**
-     * List of visible users (as defined by {@link UserManager#isUserVisible()}).
-     *
-     * <p>It's only used to call {@link UserManagerInternal} when the visibility is changed upon
-     * the user starting or stopping.
-     *
-     * <p>Note: only the key is used, not the value.
-     */
-    @GuardedBy("mLock")
-    private final SparseBooleanArray mVisibleUsers = new SparseBooleanArray();
 
     private final UserLifecycleListener mUserLifecycleListener = new UserLifecycleListener() {
         @Override
@@ -1092,24 +1078,11 @@ class UserController implements Handler.Callback {
             // instead.
             userManagerInternal.unassignUserFromDisplayOnStop(userId);
 
-            final boolean visibilityChanged;
-            boolean visibleBefore;
-            synchronized (mLock) {
-                visibleBefore = mVisibleUsers.get(userId);
-                if (visibleBefore) {
-                    deleteVisibleUserLocked(userId);
-                    visibilityChanged = true;
-                } else {
-                    visibilityChanged = false;
-                }
-            }
-
             updateStartedUserArrayLU();
 
             final boolean allowDelayedLockingCopied = allowDelayedLocking;
             Runnable finishUserStoppingAsync = () ->
-                    mHandler.post(() -> finishUserStopping(userId, uss, allowDelayedLockingCopied,
-                            visibilityChanged));
+                    mHandler.post(() -> finishUserStopping(userId, uss, allowDelayedLockingCopied));
 
             if (mInjector.getUserManager().isPreCreated(userId)) {
                 finishUserStoppingAsync.run();
@@ -1146,22 +1119,8 @@ class UserController implements Handler.Callback {
         }
     }
 
-    private void addVisibleUserLocked(@UserIdInt int userId) {
-        if (DEBUG_MU) {
-            Slogf.d(TAG, "adding %d to mVisibleUsers", userId);
-        }
-        mVisibleUsers.put(userId, true);
-    }
-
-    private void deleteVisibleUserLocked(@UserIdInt int userId) {
-        if (DEBUG_MU) {
-            Slogf.d(TAG, "deleting %d from mVisibleUsers", userId);
-        }
-        mVisibleUsers.delete(userId);
-    }
-
     private void finishUserStopping(final int userId, final UserState uss,
-            final boolean allowDelayedLocking, final boolean visibilityChanged) {
+            final boolean allowDelayedLocking) {
         EventLog.writeEvent(EventLogTags.UC_FINISH_USER_STOPPING, userId);
         synchronized (mLock) {
             if (uss.state != UserState.STATE_STOPPING) {
@@ -1179,9 +1138,6 @@ class UserController implements Handler.Callback {
                 BatteryStats.HistoryItem.EVENT_USER_RUNNING_FINISH,
                 Integer.toString(userId), userId);
         mInjector.getSystemServiceManager().onUserStopping(userId);
-        if (visibilityChanged) {
-            mInjector.onUserVisibilityChanged(userId, /* visible= */ false);
-        }
 
         Runnable finishUserStoppedAsync = () ->
                 mHandler.post(() -> finishUserStopped(uss, allowDelayedLocking));
@@ -1655,24 +1611,12 @@ class UserController implements Handler.Callback {
                     userInfo.profileGroupId, foreground, displayId);
             t.traceEnd();
 
-            boolean visible;
-            switch (result) {
-                case UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE:
-                    visible = true;
-                    break;
-                case UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE:
-                    visible = false;
-                    break;
-                default:
-                    Slogf.wtf(TAG, "Wrong result from assignUserToDisplayOnStart(): %d", result);
-                    // Fall through
-                case UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE:
-                    Slogf.e(TAG, "%s user(%d) / display (%d) assignment failed: %s",
-                            (foreground ? "fg" : "bg"), userId, displayId,
-                            UserManagerInternal.userAssignmentResultToString(result));
-                    return false;
+            if (result == UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE) {
+                Slogf.e(TAG, "%s user(%d) / display (%d) assignment failed: %s",
+                        (foreground ? "fg" : "bg"), userId, displayId,
+                        UserManagerInternal.userAssignmentResultToString(result));
+                return false;
             }
-
 
             // TODO(b/239982558): might need something similar for bg users on secondary display
             if (foreground && isUserSwitchUiEnabled()) {
@@ -1724,15 +1668,7 @@ class UserController implements Handler.Callback {
                 // Make sure the old user is no longer considering the display to be on.
                 mInjector.reportGlobalUsageEvent(UsageEvents.Event.SCREEN_NON_INTERACTIVE);
                 boolean userSwitchUiEnabled;
-                // TODO(b/244333150): temporary state until the callback logic is moved to
-                // UserVisibilityManager
-                int previousCurrentUserId; boolean notifyPreviousCurrentUserId;
                 synchronized (mLock) {
-                    previousCurrentUserId = mCurrentUserId;
-                    notifyPreviousCurrentUserId = mVisibleUsers.get(previousCurrentUserId);
-                    if (notifyPreviousCurrentUserId) {
-                        deleteVisibleUserLocked(previousCurrentUserId);
-                    }
                     mCurrentUserId = userId;
                     mTargetUserId = UserHandle.USER_NULL; // reset, mCurrentUserId has caught up
                     userSwitchUiEnabled = mUserSwitchUiEnabled;
@@ -1753,10 +1689,6 @@ class UserController implements Handler.Callback {
                         mInjector.getWindowManager().lockNow(null);
                     }
                 }
-                if (notifyPreviousCurrentUserId) {
-                    mHandler.sendMessage(mHandler.obtainMessage(USER_VISIBILITY_CHANGED_MSG,
-                            previousCurrentUserId, 0));
-                }
 
             } else {
                 final Integer currentUserIdInt = mCurrentUserId;
@@ -1767,12 +1699,6 @@ class UserController implements Handler.Callback {
                 }
             }
             t.traceEnd();
-
-            if (visible) {
-                synchronized (mLock) {
-                    addVisibleUserLocked(userId);
-                }
-            }
 
             // Make sure user is in the started state.  If it is currently
             // stopping, we need to knock that off.
@@ -1810,18 +1736,8 @@ class UserController implements Handler.Callback {
                 // Booting up a new user, need to tell system services about it.
                 // Note that this is on the same handler as scheduling of broadcasts,
                 // which is important because it needs to go first.
-                mHandler.sendMessage(mHandler.obtainMessage(USER_START_MSG, userId,
-                        visible ? 1 : 0));
+                mHandler.sendMessage(mHandler.obtainMessage(USER_START_MSG, userId, NO_ARG2));
                 t.traceEnd();
-            }
-
-            if (visible) {
-                // User was already running and became visible (for example, when switching to a
-                // user that was started in the background before), so it's necessary to explicitly
-                // notify the services (while when the user starts from BOOTING, USER_START_MSG
-                // takes care of that.
-                mHandler.sendMessage(
-                        mHandler.obtainMessage(USER_VISIBILITY_CHANGED_MSG, userId, 1));
             }
 
             t.traceBegin("sendMessages");
@@ -2248,11 +2164,6 @@ class UserController implements Handler.Callback {
         uss.switching = false;
         stopGuestOrEphemeralUserIfBackground(oldUserId);
         stopUserOnSwitchIfEnforced(oldUserId);
-        if (oldUserId == UserHandle.USER_SYSTEM) {
-            // System user is never stopped, but its visibility is changed (as it is brought to the
-            // background)
-            updateSystemUserVisibility(t, /* visible= */ false);
-        }
 
         t.traceEnd(); // end continueUserSwitch
     }
@@ -2614,25 +2525,8 @@ class UserController implements Handler.Callback {
             // Don't need to call on HSUM because it will be called when the system user is
             // restarted on background
             mInjector.onUserStarting(UserHandle.USER_SYSTEM);
-            mInjector.onUserVisibilityChanged(UserHandle.USER_SYSTEM, /* visible= */ true);
+            mInjector.onSystemUserVisibilityChanged(/* visible= */ true);
         }
-    }
-
-    private void updateSystemUserVisibility(TimingsTraceAndSlog t, boolean visible) {
-        t.traceBegin("update-system-userVisibility-" + visible);
-        if (DEBUG_MU) {
-            Slogf.d(TAG, "updateSystemUserVisibility(): visible=%b", visible);
-        }
-        int userId = UserHandle.USER_SYSTEM;
-        synchronized (mLock) {
-            if (visible) {
-                addVisibleUserLocked(userId);
-            } else {
-                deleteVisibleUserLocked(userId);
-            }
-        }
-        mInjector.onUserVisibilityChanged(userId, visible);
-        t.traceEnd();
     }
 
     /**
@@ -3032,9 +2926,6 @@ class UserController implements Handler.Callback {
                     proto.end(uToken);
                 }
             }
-            for (int i = 0; i < mVisibleUsers.size(); i++) {
-                proto.write(UserControllerProto.VISIBLE_USERS_ARRAY, mVisibleUsers.keyAt(i));
-            }
             proto.write(UserControllerProto.CURRENT_USER, mCurrentUserId);
             for (int i = 0; i < mCurrentProfileIds.length; i++) {
                 proto.write(UserControllerProto.CURRENT_PROFILES, mCurrentProfileIds[i]);
@@ -3094,7 +2985,6 @@ class UserController implements Handler.Callback {
                 pw.println("  mSwitchingToSystemUserMessage: " + mSwitchingToSystemUserMessage);
             }
             pw.println("  mLastUserUnlockingUptime: " + mLastUserUnlockingUptime);
-            pw.println("  mVisibleUsers: " + mVisibleUsers);
         }
     }
 
@@ -3211,10 +3101,6 @@ class UserController implements Handler.Callback {
                 break;
             case COMPLETE_USER_SWITCH_MSG:
                 completeUserSwitch(msg.arg1);
-                break;
-            case USER_VISIBILITY_CHANGED_MSG:
-                mInjector.onUserVisibilityChanged(/* userId= */ msg.arg1,
-                        /* visible= */ msg.arg2 == 1);
                 break;
         }
         return false;
@@ -3750,8 +3636,8 @@ class UserController implements Handler.Callback {
             getSystemServiceManager().onUserStarting(TimingsTraceAndSlog.newAsyncLog(), userId);
         }
 
-        void onUserVisibilityChanged(@UserIdInt int userId, boolean visible) {
-            getUserManagerInternal().onUserVisibilityChanged(userId, visible);
+        void onSystemUserVisibilityChanged(boolean visible) {
+            getUserManagerInternal().onSystemUserVisibilityChanged(visible);
         }
     }
 }

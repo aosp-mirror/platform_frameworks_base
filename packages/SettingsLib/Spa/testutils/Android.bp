@@ -24,7 +24,7 @@ android_library {
     srcs: ["src/**/*.kt"],
 
     static_libs: [
-        "androidx.arch.core_core-runtime",
+        "androidx.arch.core_core-testing",
         "androidx.compose.ui_ui-test-junit4",
         "androidx.compose.ui_ui-test-manifest",
         "mockito",

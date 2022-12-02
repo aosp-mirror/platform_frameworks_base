@@ -49,6 +49,8 @@
   <string name="save_password_to_title">Save password to</string>
   <!-- This appears as the title of the modal bottom sheet for users to choose other available places the created other credential types can be saved to. [CHAR LIMIT=200] -->
   <string name="save_sign_in_to_title">Save sign-in to</string>
+  <!-- This appears as the title of the modal bottom sheet for users to choose to create a passkey on another device. [CHAR LIMIT=200] -->
+  <string name="create_passkey_in_other_device_title">Create a passkey in another device?</string>
   <!-- This appears as the title of the modal bottom sheet for users to confirm whether they should use the selected provider as default or not. [CHAR LIMIT=200] -->
   <string name="use_provider_for_all_title">Use <xliff:g id="providerInfoDisplayName" example="Google Password Manager">%1$s</xliff:g> for all your sign-ins?</string>
   <!-- TODO: Check the wording here. -->

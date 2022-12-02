@@ -17,8 +17,7 @@
 package com.android.settingslib.spaprivileged.tests.testutils
 
 import android.content.pm.ApplicationInfo
-import androidx.compose.runtime.Composable
-import com.android.settingslib.spa.framework.util.asyncMapItem
+import com.android.settingslib.spa.framework.util.mapItem
 import com.android.settingslib.spaprivileged.model.app.AppListModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import kotlinx.coroutines.flow.Flow
@@ -35,16 +34,7 @@ class TestAppListModel(
     override fun getSpinnerOptions() = options
 
     override fun transform(userIdFlow: Flow<Int>, appListFlow: Flow<List<ApplicationInfo>>) =
-        appListFlow.asyncMapItem { TestAppRecord(it) }
-
-    @Composable
-    override fun getSummary(option: Int, record: TestAppRecord) = null
-
-    override fun filter(
-        userIdFlow: Flow<Int>,
-        option: Int,
-        recordListFlow: Flow<List<TestAppRecord>>,
-    ) = recordListFlow
+        appListFlow.mapItem(::TestAppRecord)
 
     override fun getGroupTitle(option: Int, record: TestAppRecord) =
         if (enableGrouping) record.group else null

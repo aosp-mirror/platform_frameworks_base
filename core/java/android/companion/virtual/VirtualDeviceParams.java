@@ -313,7 +313,7 @@ public final class VirtualDeviceParams implements Parcelable {
      * Returns the policy specified for this policy type, or {@link #DEVICE_POLICY_DEFAULT} if no
      * policy for this type has been explicitly specified.
      *
-     * @see Builder#addDevicePolicy
+     * @see Builder#setDevicePolicy
      */
     public @DevicePolicy int getDevicePolicy(@PolicyType int policyType) {
         return mDevicePolicies.get(policyType, DEVICE_POLICY_DEFAULT);
@@ -615,7 +615,7 @@ public final class VirtualDeviceParams implements Parcelable {
         }
 
         /**
-         * Add a policy for this virtual device.
+         * Specifies a policy for this virtual device.
          *
          * Policies define the system behavior that may be specific for this virtual device. A
          * policy can be defined for each {@code PolicyType}, but they are all optional.
@@ -624,7 +624,7 @@ public final class VirtualDeviceParams implements Parcelable {
          * @param devicePolicy the value of the policy, i.e. how to interpret the device behavior.
          */
         @NonNull
-        public Builder addDevicePolicy(@PolicyType int policyType, @DevicePolicy int devicePolicy) {
+        public Builder setDevicePolicy(@PolicyType int policyType, @DevicePolicy int devicePolicy) {
             mDevicePolicies.put(policyType, devicePolicy);
             return this;
         }
@@ -632,13 +632,13 @@ public final class VirtualDeviceParams implements Parcelable {
         /**
          * Adds a configuration for a sensor that should be created for this virtual device.
          *
-         * Device sensors must remain valid for the entire lifetime of the device, hence they are
+         * <p>Device sensors must remain valid for the entire lifetime of the device, hence they are
          * created together with the device itself, and removed when the device is removed.
          *
-         * Requires {@link #DEVICE_POLICY_CUSTOM} to be set for {@link #POLICY_TYPE_SENSORS}.
+         * <p>Requires {@link #DEVICE_POLICY_CUSTOM} to be set for {@link #POLICY_TYPE_SENSORS}.
          *
          * @see android.companion.virtual.sensor.VirtualSensor
-         * @see #addDevicePolicy
+         * @see #setDevicePolicy
          */
         @NonNull
         public Builder addVirtualSensorConfig(@NonNull VirtualSensorConfig virtualSensorConfig) {

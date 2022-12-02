@@ -61,6 +61,7 @@ import com.android.credentialmanager.common.ui.CancelButton
 import com.android.credentialmanager.common.ui.Entry
 import com.android.credentialmanager.common.ui.TransparentBackgroundEntry
 import com.android.credentialmanager.jetpack.developer.PublicKeyCredential
+import com.android.credentialmanager.ui.theme.EntryShape
 
 @Composable
 fun GetCredentialScreen(
@@ -94,8 +95,8 @@ fun GetCredentialScreen(
         )
       }
     },
-    scrimColor = Color.Transparent,
-    sheetShape = MaterialTheme.shapes.medium,
+    scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.8f),
+    sheetShape = EntryShape.TopRoundedCorner,
   ) {}
   LaunchedEffect(state.currentValue) {
     if (state.currentValue == ModalBottomSheetValue.Hidden) {

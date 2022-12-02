@@ -18,6 +18,7 @@
 
 #include "ValueVisitor.h"
 #include "androidfw/BigBuffer.h"
+#include "optimize/Obfuscator.h"
 
 using android::ConfigDescription;
 
@@ -366,21 +367,21 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
       }
       pb_type->set_name(type.named_type.to_string());
 
-      // hardcoded string uses characters which make it an invalid resource name
-      static const char* obfuscated_resource_name = "0_resource_name_obfuscated";
       for (const auto& entry : type.entries) {
         pb::Entry* pb_entry = pb_type->add_entry();
         if (entry.id) {
           pb_entry->mutable_entry_id()->set_id(entry.id.value());
         }
-        ResourceName resource_name({}, type.named_type, entry.name);
-        if (options.collapse_key_stringpool &&
-            options.name_collapse_exemptions.find(resource_name) ==
-            options.name_collapse_exemptions.end()) {
-          pb_entry->set_name(obfuscated_resource_name);
-        } else {
-          pb_entry->set_name(entry.name);
-        }
+        auto onObfuscate = [pb_entry, &entry](Obfuscator::Result obfuscatedResult,
+                                              const ResourceName& resource_name) {
+          pb_entry->set_name(obfuscatedResult == Obfuscator::Result::Obfuscated
+                                 ? Obfuscator::kObfuscatedResourceName
+                                 : entry.name);
+        };
+
+        Obfuscator::ObfuscateResourceName(options.collapse_key_stringpool,
+                                          options.name_collapse_exemptions, type.named_type, entry,
+                                          onObfuscate);
 
         // Write the Visibility struct.
         pb::Visibility* pb_visibility = pb_entry->mutable_visibility();

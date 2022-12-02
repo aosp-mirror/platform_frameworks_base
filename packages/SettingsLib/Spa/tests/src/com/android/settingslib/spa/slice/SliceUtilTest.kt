@@ -43,14 +43,14 @@ class SliceUtilTest {
         // valid slice uri
         val dest = "myRoute"
         val entryId = "myEntry"
-        val sliceUriWithoutParams = Uri.Builder().appendSliceParams(dest, entryId).build()
+        val sliceUriWithoutParams = Uri.Builder().appendSpaParams(dest, entryId).build()
         assertThat(sliceUriWithoutParams.getEntryId()).isEqualTo(entryId)
         assertThat(sliceUriWithoutParams.getDestination()).isEqualTo(dest)
         assertThat(sliceUriWithoutParams.getRuntimeArguments().size()).isEqualTo(0)
         assertThat(sliceUriWithoutParams.getSliceId()).isEqualTo("${entryId}_Bundle[{}]")
 
         val sliceUriWithParams =
-            Uri.Builder().appendSliceParams(dest, entryId, bundleOf("p1" to "v1")).build()
+            Uri.Builder().appendSpaParams(dest, entryId, bundleOf("p1" to "v1")).build()
         assertThat(sliceUriWithParams.getEntryId()).isEqualTo(entryId)
         assertThat(sliceUriWithParams.getDestination()).isEqualTo(dest)
         assertThat(sliceUriWithParams.getRuntimeArguments().size()).isEqualTo(1)
@@ -67,7 +67,7 @@ class SliceUtilTest {
         // Valid Slice Uri
         val dest = "myRoute"
         val entryId = "myEntry"
-        val sliceUriWithoutParams = Uri.Builder().appendSliceParams(dest, entryId).build()
+        val sliceUriWithoutParams = Uri.Builder().appendSpaParams(dest, entryId).build()
         val pendingIntent = sliceUriWithoutParams.createBroadcastPendingIntent()
         assertThat(pendingIntent).isNotNull()
         assertThat(pendingIntent!!.isBroadcast).isTrue()
@@ -87,7 +87,7 @@ class SliceUtilTest {
         // Valid Slice Uri
         val dest = "myRoute"
         val entryId = "myEntry"
-        val sliceUri = Uri.Builder().appendSliceParams(dest, entryId).build()
+        val sliceUri = Uri.Builder().appendSpaParams(dest, entryId).build()
         val pendingIntent = sliceUri.createBrowsePendingIntent()
         assertThat(pendingIntent).isNotNull()
         assertThat(pendingIntent!!.isActivity).isTrue()

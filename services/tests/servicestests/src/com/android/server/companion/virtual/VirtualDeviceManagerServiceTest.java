@@ -317,7 +317,7 @@ public class VirtualDeviceManagerServiceTest {
         VirtualDeviceParams params = new VirtualDeviceParams
                 .Builder()
                 .setBlockedActivities(getBlockedActivities())
-                .addDevicePolicy(POLICY_TYPE_SENSORS, DEVICE_POLICY_CUSTOM)
+                .setDevicePolicy(POLICY_TYPE_SENSORS, DEVICE_POLICY_CUSTOM)
                 .build();
         mDeviceImpl = new VirtualDeviceImpl(mContext,
                 mAssociationInfo, new Binder(), /* ownerUid */ 0, VIRTUAL_DEVICE_ID,

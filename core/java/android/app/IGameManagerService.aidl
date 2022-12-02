@@ -29,7 +29,7 @@ interface IGameManagerService {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE)")
     void setGameMode(String packageName, int gameMode, int userId);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE)")
-    int[] getAvailableGameModes(String packageName);
+    int[] getAvailableGameModes(String packageName, int userId);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE)")
     boolean isAngleEnabled(String packageName, int userId);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE)")

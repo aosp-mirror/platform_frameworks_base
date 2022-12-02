@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_FORMAT_BINARY_TABLEFLATTENER_H
-#define AAPT_FORMAT_BINARY_TABLEFLATTENER_H
+#ifndef TOOLS_AAPT2_FORMAT_BINARY_TABLEFLATTENER_H_
+#define TOOLS_AAPT2_FORMAT_BINARY_TABLEFLATTENER_H_
+
+#include <map>
+#include <set>
+#include <string>
+#include <unordered_map>
 
 #include "Resource.h"
 #include "ResourceTable.h"
@@ -71,6 +76,9 @@ struct TableFlattenerOptions {
   //
   // This applies only to simple entries (entry->flags & ResTable_entry::FLAG_COMPLEX == 0).
   bool deduplicate_entry_values = false;
+
+  // Map from original resource ids to obfuscated names.
+  std::unordered_map<uint32_t, std::string> id_resource_map;
 };
 
 class TableFlattener : public IResourceTableConsumer {
@@ -82,12 +90,12 @@ class TableFlattener : public IResourceTableConsumer {
   bool Consume(IAaptContext* context, ResourceTable* table) override;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(TableFlattener);
-
   TableFlattenerOptions options_;
   android::BigBuffer* buffer_;
+
+  DISALLOW_COPY_AND_ASSIGN(TableFlattener);
 };
 
 }  // namespace aapt
 
-#endif /* AAPT_FORMAT_BINARY_TABLEFLATTENER_H */
+#endif  // TOOLS_AAPT2_FORMAT_BINARY_TABLEFLATTENER_H_

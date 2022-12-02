@@ -310,27 +310,27 @@ public class BinaryTransparencyService extends SystemService {
                 Bundle packageMeasurement = measurePackage(packageInfo);
                 results.add(packageMeasurement);
 
-                if (record) {
+                if (record && (mba_status == MBA_STATUS_UPDATED_PRELOAD)) {
                     // compute digests of signing info
                     String[] signerDigestHexStrings = computePackageSignerSha256Digests(
                             packageInfo.signingInfo);
 
                     // now we should have all the bits for the atom
-                    /*  TODO: Uncomment and test after merging new atom definition.
+                    byte[] cDigest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
                     FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
                             packageInfo.packageName,
                             packageInfo.getLongVersionCode(),
-                            HexEncoding.encodeToString(packageMeasurement.getByteArray(
-                                    BUNDLE_CONTENT_DIGEST), false),
+                            (cDigest != null) ? HexEncoding.encodeToString(
+                                    packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST),
+                                    false) : null,
                             packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
                             signerDigestHexStrings, // signer_cert_digest
-                            mba_status,                 // mba_status
+                            mba_status,             // mba_status
                             null,                   // initiator
                             null,                   // initiator_signer_digest
                             null,                   // installer
                             null                    // originator
                     );
-                     */
                 }
             }
             if (DEBUG) {
@@ -377,12 +377,13 @@ public class BinaryTransparencyService extends SystemService {
                     }
 
                     // we should now have all the info needed for the atom
-                    /*  TODO: Uncomment and test after merging new atom definition.
+                    byte[] cDigest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
                     FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
                             packageInfo.packageName,
                             packageInfo.getLongVersionCode(),
-                            HexEncoding.encodeToString(packageMeasurement.getByteArray(
-                                    BUNDLE_CONTENT_DIGEST), false),
+                            (cDigest != null) ? HexEncoding.encodeToString(
+                                    packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST),
+                                    false) : null,
                             packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
                             signerDigestHexStrings,
                             MBA_STATUS_NEW_INSTALL,   // mba_status
@@ -391,7 +392,6 @@ public class BinaryTransparencyService extends SystemService {
                             installer,
                             originator
                     );
-                     */
                 }
             }
             if (DEBUG) {
@@ -489,24 +489,10 @@ public class BinaryTransparencyService extends SystemService {
                         Integer algorithmId = entry.getKey();
                         byte[] contentDigest = entry.getValue();
 
-                        // TODO(b/259348134): consider refactoring the following to a helper method
-                        switch (algorithmId) {
-                            case ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256:
-                                pw.print("CHUNKED_SHA256:");
-                                break;
-                            case ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512:
-                                pw.print("CHUNKED_SHA512:");
-                                break;
-                            case ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKED_SHA256:
-                                pw.print("VERITY_CHUNKED_SHA256:");
-                                break;
-                            case ApkSigningBlockUtils.CONTENT_DIGEST_SHA256:
-                                pw.print("SHA256:");
-                                break;
-                            default:
-                                pw.print("UNKNOWN_ALGO_ID(" + algorithmId + "):");
-                        }
+                        pw.print(translateContentDigestAlgorithmIdToString(algorithmId));
+                        pw.print(":");
                         pw.print(HexEncoding.encodeToString(contentDigest, false));
+                        pw.print("\n");
                     }
                 }
 
@@ -533,31 +519,13 @@ public class BinaryTransparencyService extends SystemService {
                             pw.println("ERROR: Failed to compute package content digest for "
                                     + origPackageFilepath);
                         } else {
-                            // TODO(b/259348134): consider refactoring this to a helper method
                             for (Map.Entry<Integer, byte[]> entry : contentDigests.entrySet()) {
                                 Integer algorithmId = entry.getKey();
                                 byte[] contentDigest = entry.getValue();
-                                pw.print("|--> Pre-installed package content digest algorithm: ");
-                                switch (algorithmId) {
-                                    case ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256:
-                                        pw.print("CHUNKED_SHA256");
-                                        break;
-                                    case ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512:
-                                        pw.print("CHUNKED_SHA512");
-                                        break;
-                                    case ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKED_SHA256:
-                                        pw.print("VERITY_CHUNKED_SHA256");
-                                        break;
-                                    case ApkSigningBlockUtils.CONTENT_DIGEST_SHA256:
-                                        pw.print("SHA256");
-                                        break;
-                                    default:
-                                        pw.print("UNKNOWN");
-                                }
-                                pw.print("\n");
-                                pw.print("|--> Pre-installed package content digest: ");
-                                pw.print(HexEncoding.encodeToString(contentDigest, false));
-                                pw.print("\n");
+                                pw.println("|--> Pre-installed package content digest: "
+                                        + HexEncoding.encodeToString(contentDigest, false));
+                                pw.println("|--> Pre-installed package content digest algorithm: "
+                                        + translateContentDigestAlgorithmIdToString(algorithmId));
                             }
                         }
                     }
@@ -739,7 +707,6 @@ public class BinaryTransparencyService extends SystemService {
                         pw.print(packageName + ","
                                 + packageInfo.getLongVersionCode() + ",");
                         printPackageMeasurements(packageInfo, pw);
-                        pw.print("\n");
 
                         if (verbose) {
                             ModuleInfo moduleInfo;
@@ -802,7 +769,6 @@ public class BinaryTransparencyService extends SystemService {
                             pw.print(packageInfo.packageName + ",");
                             pw.print(packageInfo.getLongVersionCode() + ",");
                             printPackageMeasurements(packageInfo, pw);
-                            pw.print("\n");
 
                             if (verbose) {
                                 printModuleDetails(module, pw);
@@ -858,7 +824,6 @@ public class BinaryTransparencyService extends SystemService {
                         pw.print(packageInfo.packageName + ",");
                         pw.print(packageInfo.getLongVersionCode() + ",");
                         printPackageMeasurements(packageInfo, pw);
-                        pw.print("\n");
 
                         if (verbose) {
                             printAppDetails(packageInfo, printLibraries, pw);
@@ -1077,6 +1042,21 @@ public class BinaryTransparencyService extends SystemService {
         mVbmetaDigest = SystemProperties.get(SYSPROP_NAME_VBETA_DIGEST, VBMETA_DIGEST_UNAVAILABLE);
         Slog.d(TAG, String.format("VBMeta Digest: %s", mVbmetaDigest));
         FrameworkStatsLog.write(FrameworkStatsLog.VBMETA_DIGEST_REPORTED, mVbmetaDigest);
+    }
+
+    private String translateContentDigestAlgorithmIdToString(int algorithmId) {
+        switch (algorithmId) {
+            case ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256:
+                return "CHUNKED_SHA256";
+            case ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512:
+                return "CHUNKED_SHA512";
+            case ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKED_SHA256:
+                return "VERITY_CHUNKED_SHA256";
+            case ApkSigningBlockUtils.CONTENT_DIGEST_SHA256:
+                return "SHA256";
+            default:
+                return "UNKNOWN_ALGO_ID(" + algorithmId + ")";
+        }
     }
 
     @NonNull

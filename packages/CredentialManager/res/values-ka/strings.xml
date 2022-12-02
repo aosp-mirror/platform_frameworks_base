@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for app_name (4539824758261855508) -->
+    <skip />
+    <string name="string_cancel" msgid="6369133483981306063">"გაუქმება"</string>
+    <string name="string_continue" msgid="1346732695941131882">"გაგრძელება"</string>
+    <string name="string_create_in_another_place" msgid="1033635365843437603">"სხვა სივრცეში შექმნა"</string>
+    <string name="string_save_to_another_place" msgid="7590325934591079193">"სხვა სივრცეში შენახვა"</string>
+    <string name="string_use_another_device" msgid="8754514926121520445">"სხვა მოწყობილობის გამოყენება"</string>
+    <string name="string_save_to_another_device" msgid="1959562542075194458">"სხვა მოწყობილობაზე შენახვა"</string>
+    <string name="passkey_creation_intro_title" msgid="402553911484409884">"უსაფრთხოდ შესვლის მარტივი გზა"</string>
+    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"გამოიყენეთ თქვენი თითის ანაბეჭდი, სახის ამოცნობა და ეკრანის დაბლოკვა სისტემაში უნიკალური წვდომის გასაღებით შესასვლელად, რომლის დავიწყება ან მოპარვა შეუძლებელია. შეიტყვეთ მეტი"</string>
+    <string name="choose_provider_title" msgid="7245243990139698508">"აირჩიეთ, სად უნდა <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <skip />
+    <string name="save_your_password" msgid="6597736507991704307">"შეინახეთ თქვენი პაროლი"</string>
+    <string name="save_your_sign_in_info" msgid="7213978049817076882">"შეინახეთ თქვენი სისტემაში შესვლის ინფორმაცია"</string>
+    <!-- no translation found for choose_provider_body (8045759834416308059) -->
+    <skip />
+    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"გსურთ წვდომის გასაღების შექმნა <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>-ში?"</string>
+    <string name="choose_create_option_password_title" msgid="8812546498357380545">"გსურთ თქვენი პაროლის შენახვა <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>-ში?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"გსურთ თქვენი სისტემაში შესვლის მონაცემების შენახვა <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>-ში?"</string>
+    <string name="choose_create_option_description" msgid="4419171903963100257">"შეგიძლიათ გამოიყენოთ თქვენი <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> ნებისმიერ მოწყობილობაზე. ის შეინახება <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>-ზე <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>-თვის"</string>
+    <string name="passkey" msgid="632353688396759522">"წვდომის გასაღები"</string>
+    <string name="password" msgid="6738570945182936667">"პაროლი"</string>
+    <string name="sign_ins" msgid="4710739369149469208">"სისტემაში შესვლა"</string>
+    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
+    <skip />
+    <!-- no translation found for save_password_to_title (3450480045270186421) -->
+    <skip />
+    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
+    <skip />
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"გსურთ, გამოიყენოთ<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> სისტემაში ყველა შესვლისთვის?"</string>
+    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
+    <skip />
+    <string name="set_as_default" msgid="4415328591568654603">"ნაგულისხმევად დაყენება"</string>
+    <string name="use_once" msgid="9027366575315399714">"ერთხელ გამოყენება"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> პაროლი, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> წვდომის გასაღები"</string>
+    <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> პაროლი"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> წვდომის გასაღები"</string>
+    <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
+    <skip />
+    <string name="another_device" msgid="5147276802037801217">"სხვა მოწყობილობა"</string>
+    <string name="other_password_manager" msgid="565790221427004141">"პაროლების სხვა მმართველები"</string>
+    <string name="close_sheet" msgid="1393792015338908262">"ფურცლის დახურვა"</string>
+    <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"წინა გვერდზე დაბრუნება"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"გსურთ თქვენი დამახსოვრებული წვდომის გასაღების გამოყენება აპისთვის: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"გსურთ თქვენი დამახსოვრებული სისტემაში შესვლის მონაცემების გამოყენება აპისთვის: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"აირჩიეთ სისტემაში შესვლის ინფორმაცია აპისთვის: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"სხვა ხერხით შესვლა"</string>
+    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"არა, გმადლობთ"</string>
+    <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"გაგრძელება"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"სისტემაში შესვლის ვარიანტები"</string>
+    <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g>-ისთვის"</string>
+    <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"ჩაკეტილი პაროლის მმართველები"</string>
+    <string name="locked_credential_entry_label_subtext" msgid="9213450912991988691">"შეეხეთ განსაბლოკად"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"სისტემაში შესვლის მონაცემების მართვა"</string>
+    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"სხვა მოწყობილობიდან"</string>
+    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"გამოიყენეთ სხვა მოწყობილობა"</string>
+</resources>

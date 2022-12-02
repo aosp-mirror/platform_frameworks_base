@@ -1335,6 +1335,11 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
+    public UUID getStorageUuid() {
+        return mStorageUuid;
+    }
+
+    @Override
     public int getTargetSandboxVersion() {
         return targetSandboxVersion;
     }

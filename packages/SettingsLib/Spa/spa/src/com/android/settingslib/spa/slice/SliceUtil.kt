@@ -24,9 +24,15 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import com.android.settingslib.spa.framework.BrowseActivity.Companion.KEY_DESTINATION
-import com.android.settingslib.spa.framework.BrowseActivity.Companion.KEY_HIGHLIGHT_ENTRY
+import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
+import com.android.settingslib.spa.framework.util.KEY_DESTINATION
+import com.android.settingslib.spa.framework.util.KEY_HIGHLIGHT_ENTRY
+import com.android.settingslib.spa.framework.util.SESSION_SLICE
+import com.android.settingslib.spa.framework.util.SPA_INTENT_RESERVED_KEYS
+import com.android.settingslib.spa.framework.util.appendSpaParams
+import com.android.settingslib.spa.framework.util.getDestination
+import com.android.settingslib.spa.framework.util.getEntryId
 
 // Defines SliceUri, which contains special query parameters:
 //  -- KEY_DESTINATION: The route that this slice is navigated to.
@@ -34,11 +40,6 @@ import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 //  Other parameters can considered as runtime parameters.
 // Use {entryId, runtimeParams} as the unique Id of this Slice.
 typealias SliceUri = Uri
-
-val RESERVED_KEYS = listOf(
-    KEY_DESTINATION,
-    KEY_HIGHLIGHT_ENTRY
-)
 
 fun SliceUri.getEntryId(): String? {
     return getQueryParameter(KEY_HIGHLIGHT_ENTRY)
@@ -51,7 +52,7 @@ fun SliceUri.getDestination(): String? {
 fun SliceUri.getRuntimeArguments(): Bundle {
     val params = Bundle()
     for (queryName in queryParameterNames) {
-        if (RESERVED_KEYS.contains(queryName)) continue
+        if (SPA_INTENT_RESERVED_KEYS.contains(queryName)) continue
         params.putString(queryName, getQueryParameter(queryName))
     }
     return params
@@ -63,12 +64,12 @@ fun SliceUri.getSliceId(): String? {
     return "${entryId}_$params"
 }
 
-fun Uri.Builder.appendSliceParams(
-    route: String? = null,
+fun Uri.Builder.appendSpaParams(
+    destination: String? = null,
     entryId: String? = null,
     runtimeArguments: Bundle? = null
 ): Uri.Builder {
-    if (route != null) appendQueryParameter(KEY_DESTINATION, route)
+    if (destination != null) appendQueryParameter(KEY_DESTINATION, destination)
     if (entryId != null) appendQueryParameter(KEY_HIGHLIGHT_ENTRY, entryId)
     if (runtimeArguments != null) {
         for (key in runtimeArguments.keySet()) {
@@ -76,6 +77,20 @@ fun Uri.Builder.appendSliceParams(
         }
     }
     return this
+}
+
+fun Uri.Builder.fromEntry(
+    entry: SettingsEntry,
+    authority: String?,
+    runtimeArguments: Bundle? = null
+): Uri.Builder {
+    if (authority == null) return this
+    val sp = entry.containerPage()
+    return scheme("content").authority(authority).appendSpaParams(
+        destination = sp.buildRoute(),
+        entryId = entry.id,
+        runtimeArguments = runtimeArguments
+    )
 }
 
 fun SliceUri.createBroadcastPendingIntent(): PendingIntent? {
@@ -97,8 +112,8 @@ fun SliceUri.createBrowsePendingIntent(): PendingIntent? {
 fun Intent.createBrowsePendingIntent(): PendingIntent? {
     val context = SpaEnvironmentFactory.instance.appContext
     val browseActivityClass = SpaEnvironmentFactory.instance.browseActivityClass ?: return null
-    val destination = getStringExtra(KEY_DESTINATION) ?: return null
-    val entryId = getStringExtra(KEY_HIGHLIGHT_ENTRY)
+    val destination = getDestination() ?: return null
+    val entryId = getEntryId()
     return createBrowsePendingIntent(context, browseActivityClass, destination, entryId)
 }
 
@@ -109,15 +124,12 @@ private fun createBrowsePendingIntent(
     entryId: String?
 ): PendingIntent {
     val intent = Intent().setComponent(ComponentName(context, browseActivityClass))
+        .appendSpaParams(destination, entryId, SESSION_SLICE)
         .apply {
             // Set both extra and data (which is a Uri) in Slice Intent:
             // 1) extra is used in SPA navigation framework
             // 2) data is used in Slice framework
-            putExtra(KEY_DESTINATION, destination)
-            if (entryId != null) {
-                putExtra(KEY_HIGHLIGHT_ENTRY, entryId)
-            }
-            data = Uri.Builder().appendSliceParams(destination, entryId).build()
+            data = Uri.Builder().appendSpaParams(destination, entryId).build()
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
 
@@ -130,7 +142,7 @@ private fun createBroadcastPendingIntent(
     entryId: String
 ): PendingIntent {
     val intent = Intent().setComponent(ComponentName(context, sliceBroadcastClass))
-        .apply { data = Uri.Builder().appendSliceParams(entryId = entryId).build() }
+        .apply { data = Uri.Builder().appendSpaParams(entryId = entryId).build() }
     return PendingIntent.getBroadcast(
         context, 0 /* requestCode */, intent,
         PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE

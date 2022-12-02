@@ -517,6 +517,19 @@ public class InsetsStateTest {
                 windowInsets.getRoundedCorner(POSITION_BOTTOM_LEFT));
     }
 
+    @Test
+    public void testCalculateRelativeDisplayShape() {
+        mState.setDisplayFrame(new Rect(0, 0, 200, 400));
+        mState.setDisplayShape(DisplayShape.createDefaultDisplayShape(200, 400, false));
+        WindowInsets windowInsets = mState.calculateInsets(new Rect(10, 20, 200, 400), null, false,
+                false, SOFT_INPUT_ADJUST_UNSPECIFIED, 0, 0, TYPE_APPLICATION,
+                WINDOWING_MODE_UNDEFINED, new SparseIntArray());
+
+        final DisplayShape expect =
+                DisplayShape.createDefaultDisplayShape(200, 400, false).setOffset(-10, -20);
+        assertEquals(expect, windowInsets.getDisplayShape());
+    }
+
     private void assertEqualsAndHashCode() {
         assertEquals(mState, mState2);
         assertEquals(mState.hashCode(), mState2.hashCode());

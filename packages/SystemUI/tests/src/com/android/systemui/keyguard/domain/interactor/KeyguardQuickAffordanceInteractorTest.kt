@@ -113,6 +113,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
+                broadcastDispatcher = fakeBroadcastDispatcher,
             )
         val quickAffordanceRepository =
             KeyguardQuickAffordanceRepository(

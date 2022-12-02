@@ -213,7 +213,7 @@ public final class GameManager {
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
     public @GameMode int[] getAvailableGameModes(@NonNull String packageName) {
         try {
-            return mService.getAvailableGameModes(packageName);
+            return mService.getAvailableGameModes(packageName, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
