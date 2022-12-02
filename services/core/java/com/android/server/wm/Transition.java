@@ -221,7 +221,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     }
 
     @Nullable
-    static Transition fromBinder(@NonNull IBinder token) {
+    static Transition fromBinder(@Nullable IBinder token) {
+        if (token == null) return null;
         try {
             return ((Token) token).mTransition.get();
         } catch (ClassCastException e) {
