@@ -17,6 +17,7 @@
 #include "CanvasTransform.h"
 
 #include <SkAndroidFrameworkUtils.h>
+#include <SkBlendMode.h>
 #include <SkColorFilter.h>
 #include <SkGradientShader.h>
 #include <SkHighContrastFilter.h>

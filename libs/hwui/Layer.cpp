@@ -20,6 +20,8 @@
 #include "utils/Color.h"
 #include "utils/MathUtils.h"
 
+#include <SkBlendMode.h>
+
 #include <log/log.h>
 
 namespace android {

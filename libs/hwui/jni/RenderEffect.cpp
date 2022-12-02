@@ -15,6 +15,7 @@
  */
 #include "Bitmap.h"
 #include "GraphicsJNI.h"
+#include "SkBlendMode.h"
 #include "SkImageFilter.h"
 #include "SkImageFilters.h"
 #include "graphics_jni_helpers.h"

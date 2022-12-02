@@ -33,6 +33,8 @@
 #include "thread/ThreadBase.h"
 #include "utils/TimeUtils.h"
 
+#include <SkBlendMode.h>
+
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
