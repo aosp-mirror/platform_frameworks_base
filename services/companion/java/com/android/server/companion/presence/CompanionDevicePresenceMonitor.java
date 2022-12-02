@@ -363,7 +363,9 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         @Override
         public void handleMessage(@NonNull Message msg) {
             final int associationId = msg.what;
-            onDeviceGone(mSimulated, associationId, /* sourceLoggingTag */ "simulated");
+            if (mSimulated.contains(associationId)) {
+                onDeviceGone(mSimulated, associationId, /* sourceLoggingTag */ "simulated");
+            }
         }
     }
 }
