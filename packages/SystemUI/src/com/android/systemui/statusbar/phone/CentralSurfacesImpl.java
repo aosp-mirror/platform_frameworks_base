@@ -1240,6 +1240,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         mNotificationPanelViewController.initDependencies(
                 this,
+                mGestureRec,
                 mShadeController::makeExpandedInvisible,
                 mNotificationShelfController);
 
@@ -1837,7 +1838,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     public void onLaunchAnimationCancelled(boolean isLaunchForActivity) {
         if (mPresenter.isPresenterFullyCollapsed() && !mPresenter.isCollapsing()
                 && isLaunchForActivity) {
-            onClosingFinished();
+            mShadeController.onClosingFinished();
         } else {
             mShadeController.collapseShade(true /* animate */);
         }
@@ -1847,7 +1848,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void onLaunchAnimationEnd(boolean launchIsFullScreen) {
         if (!mPresenter.isCollapsing()) {
-            onClosingFinished();
+            mShadeController.onClosingFinished();
         }
         if (launchIsFullScreen) {
             mShadeController.instantCollapseShade();
@@ -2029,11 +2030,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             setInteracting(StatusBarManager.WINDOW_STATUS_BAR,
                     !upOrCancel || mShadeController.isExpandedVisible());
         }
-    }
-
-    @Override
-    public GestureRecorder getGestureRecorder() {
-        return mGestureRec;
     }
 
     @Override
@@ -3319,21 +3315,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return mLightRevealScrim;
     }
 
-    @Override
-    public void onTrackingStarted() {
-        mShadeController.runPostCollapseRunnables();
-    }
-
-    @Override
-    public void onClosingFinished() {
-        mShadeController.runPostCollapseRunnables();
-        if (!mPresenter.isPresenterFullyCollapsed()) {
-            // if we set it not to be focusable when collapsing, we have to undo it when we aborted
-            // the closing
-            mNotificationShadeWindowController.setNotificationShadeFocusable(true);
-        }
-    }
-
     // TODO: Figure out way to remove these.
     @Override
     public NavigationBarView getNavigationBarView() {
@@ -3563,12 +3544,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 || goingToSleepWithoutAnimation;
         mNotificationPanelViewController.setTouchAndAnimationDisabled(disabled);
         mNotificationIconAreaController.setAnimationsEnabled(!disabled);
-    }
-
-    //TODO(b/257041702) delete
-    @Override
-    public void makeExpandedVisible(boolean force) {
-        mShadeController.makeExpandedVisible(force);
     }
 
     final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
