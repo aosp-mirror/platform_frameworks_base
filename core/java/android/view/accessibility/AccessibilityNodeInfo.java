@@ -67,6 +67,7 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -881,7 +882,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private long mTraversalBefore = UNDEFINED_NODE_ID;
     private long mTraversalAfter = UNDEFINED_NODE_ID;
 
-    private int mMinMillisBetweenContentChanges;
+    private long mMinDurationBetweenContentChanges = 0;
 
     private int mBooleanProperties;
     private final Rect mBoundsInParent = new Rect();
@@ -1797,18 +1798,21 @@ public class AccessibilityNodeInfo implements Parcelable {
      * </p>
      *
      * @see AccessibilityEvent#getContentChangeTypes for all content change types.
-     * @param minMillisBetweenContentChanges the minimum duration between content change events.
+     * @param minDurationBetweenContentChanges the minimum duration between content change events.
+     *                                         Negative duration would be treated as zero.
      */
-    public void setMinMillisBetweenContentChanges(int minMillisBetweenContentChanges) {
+    public void setMinDurationBetweenContentChanges(
+            @NonNull Duration minDurationBetweenContentChanges) {
         enforceNotSealed();
-        mMinMillisBetweenContentChanges = minMillisBetweenContentChanges;
+        mMinDurationBetweenContentChanges = minDurationBetweenContentChanges.toMillis();
     }
 
     /**
      * Gets the minimum time duration between two content change events.
      */
-    public int getMinMillisBetweenContentChanges() {
-        return mMinMillisBetweenContentChanges;
+    @NonNull
+    public Duration getMinDurationBetweenContentChanges() {
+        return Duration.ofMillis(mMinDurationBetweenContentChanges);
     }
 
     /**
@@ -4013,8 +4017,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         fieldIndex++;
         if (mTraversalAfter != DEFAULT.mTraversalAfter) nonDefaultFields |= bitAt(fieldIndex);
         fieldIndex++;
-        if (mMinMillisBetweenContentChanges
-                != DEFAULT.mMinMillisBetweenContentChanges) {
+        if (mMinDurationBetweenContentChanges
+                != DEFAULT.mMinDurationBetweenContentChanges) {
             nonDefaultFields |= bitAt(fieldIndex);
         }
         fieldIndex++;
@@ -4148,7 +4152,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeLong(mTraversalBefore);
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeLong(mTraversalAfter);
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
-            parcel.writeInt(mMinMillisBetweenContentChanges);
+            parcel.writeLong(mMinDurationBetweenContentChanges);
         }
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeInt(mConnectionId);
@@ -4305,7 +4309,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mLabeledById = other.mLabeledById;
         mTraversalBefore = other.mTraversalBefore;
         mTraversalAfter = other.mTraversalAfter;
-        mMinMillisBetweenContentChanges = other.mMinMillisBetweenContentChanges;
+        mMinDurationBetweenContentChanges = other.mMinDurationBetweenContentChanges;
         mWindowId = other.mWindowId;
         mConnectionId = other.mConnectionId;
         mUniqueId = other.mUniqueId;
@@ -4410,7 +4414,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) mTraversalBefore = parcel.readLong();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mTraversalAfter = parcel.readLong();
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
-            mMinMillisBetweenContentChanges = parcel.readInt();
+            mMinDurationBetweenContentChanges = parcel.readLong();
         }
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) mConnectionId = parcel.readInt();
@@ -4760,8 +4764,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             builder.append("; mParentNodeId: 0x").append(Long.toHexString(mParentNodeId));
             builder.append("; traversalBefore: 0x").append(Long.toHexString(mTraversalBefore));
             builder.append("; traversalAfter: 0x").append(Long.toHexString(mTraversalAfter));
-            builder.append("; minMillisBetweenContentChanges: ")
-                    .append(mMinMillisBetweenContentChanges);
+            builder.append("; minDurationBetweenContentChanges: ")
+                    .append(mMinDurationBetweenContentChanges);
 
             int granularities = mMovementGranularities;
             builder.append("; MovementGranularities: [");

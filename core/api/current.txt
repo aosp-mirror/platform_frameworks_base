@@ -52679,7 +52679,7 @@ package android.view.accessibility {
     method public android.view.accessibility.AccessibilityNodeInfo getLabeledBy();
     method public int getLiveRegion();
     method public int getMaxTextLength();
-    method public int getMinMillisBetweenContentChanges();
+    method @NonNull public java.time.Duration getMinDurationBetweenContentChanges();
     method public int getMovementGranularities();
     method public CharSequence getPackageName();
     method @Nullable public CharSequence getPaneTitle();
@@ -52768,7 +52768,7 @@ package android.view.accessibility {
     method public void setLiveRegion(int);
     method public void setLongClickable(boolean);
     method public void setMaxTextLength(int);
-    method public void setMinMillisBetweenContentChanges(int);
+    method public void setMinDurationBetweenContentChanges(@NonNull java.time.Duration);
     method public void setMovementGranularities(int);
     method public void setMultiLine(boolean);
     method public void setPackageName(CharSequence);
