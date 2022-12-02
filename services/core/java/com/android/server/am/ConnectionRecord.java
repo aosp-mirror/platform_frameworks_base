@@ -67,6 +67,7 @@ final class ConnectionRecord {
             Context.BIND_NOT_VISIBLE,
             Context.BIND_NOT_PERCEPTIBLE,
             Context.BIND_INCLUDE_CAPABILITIES,
+            Context.BIND_DENY_ACTIVITY_STARTS,
     };
     private static final int[] BIND_PROTO_ENUMS = new int[] {
             ConnectionRecordProto.AUTO_CREATE,
@@ -86,6 +87,7 @@ final class ConnectionRecord {
             ConnectionRecordProto.NOT_VISIBLE,
             ConnectionRecordProto.NOT_PERCEPTIBLE,
             ConnectionRecordProto.INCLUDE_CAPABILITIES,
+            ConnectionRecordProto.DENY_ACTIVITY_STARTS,
     };
 
     void dump(PrintWriter pw, String prefix) {
@@ -218,6 +220,9 @@ final class ConnectionRecord {
         }
         if ((flags & Context.BIND_NOT_PERCEPTIBLE) != 0) {
             sb.append("!PRCP ");
+        }
+        if ((flags & Context.BIND_DENY_ACTIVITY_STARTS) != 0) {
+            sb.append("BALFD ");
         }
         if ((flags & Context.BIND_INCLUDE_CAPABILITIES) != 0) {
             sb.append("CAPS ");
