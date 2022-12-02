@@ -27,7 +27,6 @@ import android.telephony.TelephonyCallback.ServiceStateListener
 import android.telephony.TelephonyCallback.SignalStrengthsListener
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyManager
-import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Disconnected
 
 /**
@@ -65,5 +64,5 @@ data class MobileSubscriptionModel(
      * [resolvedNetworkType] is the [TelephonyDisplayInfo.getOverrideNetworkType] if it exists or
      * [TelephonyDisplayInfo.getNetworkType]. This is used to look up the proper network type icon
      */
-    val resolvedNetworkType: ResolvedNetworkType = DefaultNetworkType(NETWORK_TYPE_UNKNOWN),
+    val resolvedNetworkType: ResolvedNetworkType = ResolvedNetworkType.UnknownNetworkType,
 )

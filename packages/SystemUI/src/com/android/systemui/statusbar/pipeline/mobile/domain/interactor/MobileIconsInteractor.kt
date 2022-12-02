@@ -27,7 +27,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
-import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -79,7 +78,6 @@ class MobileIconsInteractorImpl
 constructor(
     private val mobileConnectionsRepo: MobileConnectionsRepository,
     private val carrierConfigTracker: CarrierConfigTracker,
-    private val mobileMappingsProxy: MobileMappingsProxy,
     userSetupRepo: UserSetupRepository,
     @Application private val scope: CoroutineScope,
 ) : MobileIconsInteractor {
@@ -154,15 +152,19 @@ constructor(
      * subscription Id. This mapping is the same for every subscription.
      */
     override val defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>> =
-        mobileConnectionsRepo.defaultDataSubRatConfig
-            .mapLatest { mobileMappingsProxy.mapIconSets(it) }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue = mapOf())
+        mobileConnectionsRepo.defaultMobileIconMapping.stateIn(
+            scope,
+            SharingStarted.WhileSubscribed(),
+            initialValue = mapOf()
+        )
 
     /** If there is no mapping in [defaultMobileIconMapping], then use this default icon group */
     override val defaultMobileIconGroup: StateFlow<MobileIconGroup> =
-        mobileConnectionsRepo.defaultDataSubRatConfig
-            .mapLatest { mobileMappingsProxy.getDefaultIcons(it) }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue = TelephonyIcons.G)
+        mobileConnectionsRepo.defaultMobileIconGroup.stateIn(
+            scope,
+            SharingStarted.WhileSubscribed(),
+            initialValue = TelephonyIcons.G
+        )
 
     /**
      * We want to show an error state when cellular has actually failed to validate, but not if some
@@ -189,7 +191,6 @@ constructor(
             defaultMobileIconMapping,
             defaultMobileIconGroup,
             isDefaultConnectionFailed,
-            mobileMappingsProxy,
             mobileConnectionsRepo.getRepoForSubId(subId),
         )
 }

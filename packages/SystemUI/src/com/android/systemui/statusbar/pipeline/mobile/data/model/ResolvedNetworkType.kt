@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.model
 
 import android.telephony.Annotation.NetworkType
+import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 
 /**
@@ -26,8 +27,20 @@ import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
  */
 sealed interface ResolvedNetworkType {
     @NetworkType val type: Int
+    val lookupKey: String
+
+    object UnknownNetworkType : ResolvedNetworkType {
+        override val type: Int = NETWORK_TYPE_UNKNOWN
+        override val lookupKey: String = "unknown"
+    }
+
+    data class DefaultNetworkType(
+        @NetworkType override val type: Int,
+        override val lookupKey: String,
+    ) : ResolvedNetworkType
+
+    data class OverrideNetworkType(
+        @NetworkType override val type: Int,
+        override val lookupKey: String,
+    ) : ResolvedNetworkType
 }
-
-data class DefaultNetworkType(@NetworkType override val type: Int) : ResolvedNetworkType
-
-data class OverrideNetworkType(@NetworkType override val type: Int) : ResolvedNetworkType

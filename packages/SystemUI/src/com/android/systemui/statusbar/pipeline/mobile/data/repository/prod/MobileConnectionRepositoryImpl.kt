@@ -27,18 +27,20 @@ import android.telephony.TelephonyCallback
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE
 import android.telephony.TelephonyManager
+import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
-import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.OverrideNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.UnknownNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.toDataConnectionType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
 import com.android.systemui.util.settings.GlobalSettings
-import java.lang.IllegalStateException
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -63,6 +65,7 @@ class MobileConnectionRepositoryImpl(
     private val globalSettings: GlobalSettings,
     defaultDataSubId: StateFlow<Int>,
     globalMobileDataSettingChangedEvent: Flow<Unit>,
+    mobileMappingsProxy: MobileMappingsProxy,
     bgDispatcher: CoroutineDispatcher,
     logger: ConnectivityPipelineLogger,
     scope: CoroutineScope,
@@ -141,14 +144,27 @@ class MobileConnectionRepositoryImpl(
                         override fun onDisplayInfoChanged(
                             telephonyDisplayInfo: TelephonyDisplayInfo
                         ) {
+
                             val networkType =
-                                if (
+                                if (telephonyDisplayInfo.networkType == NETWORK_TYPE_UNKNOWN) {
+                                    UnknownNetworkType
+                                } else if (
                                     telephonyDisplayInfo.overrideNetworkType ==
                                         OVERRIDE_NETWORK_TYPE_NONE
                                 ) {
-                                    DefaultNetworkType(telephonyDisplayInfo.networkType)
+                                    DefaultNetworkType(
+                                        telephonyDisplayInfo.networkType,
+                                        mobileMappingsProxy.toIconKey(
+                                            telephonyDisplayInfo.networkType
+                                        )
+                                    )
                                 } else {
-                                    OverrideNetworkType(telephonyDisplayInfo.overrideNetworkType)
+                                    OverrideNetworkType(
+                                        telephonyDisplayInfo.overrideNetworkType,
+                                        mobileMappingsProxy.toIconKeyOverride(
+                                            telephonyDisplayInfo.overrideNetworkType
+                                        )
+                                    )
                                 }
                             state = state.copy(resolvedNetworkType = networkType)
                             trySend(state)
@@ -211,6 +227,7 @@ class MobileConnectionRepositoryImpl(
         private val telephonyManager: TelephonyManager,
         private val logger: ConnectivityPipelineLogger,
         private val globalSettings: GlobalSettings,
+        private val mobileMappingsProxy: MobileMappingsProxy,
         @Background private val bgDispatcher: CoroutineDispatcher,
         @Application private val scope: CoroutineScope,
     ) {
@@ -226,6 +243,7 @@ class MobileConnectionRepositoryImpl(
                 globalSettings,
                 defaultDataSubId,
                 globalMobileDataSettingChangedEvent,
+                mobileMappingsProxy,
                 bgDispatcher,
                 logger,
                 scope,

@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.telephony.PhoneConstants
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
+import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -65,6 +66,8 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: ConnectivityPipelineLogger
 
+    private val mobileMappings = FakeMobileMappingsProxy()
+
     private val scope = CoroutineScope(IMMEDIATE)
     private val globalSettings = FakeSettings()
 
@@ -78,6 +81,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 subscriptionManager,
                 telephonyManager,
                 logger,
+                mobileMappings,
                 fakeBroadcastDispatcher,
                 globalSettings,
                 context,

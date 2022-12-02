@@ -36,6 +36,7 @@ import android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener
 import android.telephony.TelephonyManager
 import androidx.annotation.VisibleForTesting
 import com.android.internal.telephony.PhoneConstants
+import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.MobileMappings.Config
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -46,6 +47,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
@@ -59,6 +61,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
@@ -75,6 +78,7 @@ constructor(
     private val subscriptionManager: SubscriptionManager,
     private val telephonyManager: TelephonyManager,
     private val logger: ConnectivityPipelineLogger,
+    mobileMappingsProxy: MobileMappingsProxy,
     broadcastDispatcher: BroadcastDispatcher,
     private val globalSettings: GlobalSettings,
     private val context: Context,
@@ -157,7 +161,7 @@ constructor(
      *
      * This flow will produce whenever the default data subscription or the carrier config changes.
      */
-    override val defaultDataSubRatConfig: StateFlow<Config> =
+    private val defaultDataSubRatConfig: StateFlow<Config> =
         merge(defaultDataSubIdChangeEvent, carrierConfigChangedEvent)
             .mapLatest { Config.readConfig(context) }
             .stateIn(
@@ -165,6 +169,12 @@ constructor(
                 SharingStarted.WhileSubscribed(),
                 initialValue = Config.readConfig(context)
             )
+
+    override val defaultMobileIconMapping: Flow<Map<String, MobileIconGroup>> =
+        defaultDataSubRatConfig.map { mobileMappingsProxy.mapIconSets(it) }
+
+    override val defaultMobileIconGroup: Flow<MobileIconGroup> =
+        defaultDataSubRatConfig.map { mobileMappingsProxy.getDefaultIcons(it) }
 
     override fun getRepoForSubId(subId: Int): MobileConnectionRepository {
         if (!isValidSubId(subId)) {

@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
+// TODO(b/261632894): remove this in favor of the real impl or DemoMobileConnectionRepository
 class FakeMobileConnectionRepository(override val subId: Int) : MobileConnectionRepository {
     private val _subscriptionsModelFlow = MutableStateFlow(MobileSubscriptionModel())
     override val subscriptionModelFlow = _subscriptionsModelFlow

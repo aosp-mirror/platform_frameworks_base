@@ -20,10 +20,7 @@ import android.telephony.CarrierConfigManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Connected
-import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
-import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
-import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -70,7 +67,6 @@ class MobileIconInteractorImpl(
     defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>,
     defaultMobileIconGroup: StateFlow<MobileIconGroup>,
     override val isDefaultConnectionFailed: StateFlow<Boolean>,
-    mobileMappingsProxy: MobileMappingsProxy,
     connectionRepository: MobileConnectionRepository,
 ) : MobileIconInteractor {
     private val mobileStatusInfo = connectionRepository.subscriptionModelFlow
@@ -86,13 +82,7 @@ class MobileIconInteractorImpl(
                 defaultMobileIconMapping,
                 defaultMobileIconGroup,
             ) { info, mapping, defaultGroup ->
-                val lookupKey =
-                    when (val resolved = info.resolvedNetworkType) {
-                        is DefaultNetworkType -> mobileMappingsProxy.toIconKey(resolved.type)
-                        is OverrideNetworkType ->
-                            mobileMappingsProxy.toIconKeyOverride(resolved.type)
-                    }
-                mapping[lookupKey] ?: defaultGroup
+                mapping[info.resolvedNetworkType.lookupKey] ?: defaultGroup
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), defaultMobileIconGroup.value)
 

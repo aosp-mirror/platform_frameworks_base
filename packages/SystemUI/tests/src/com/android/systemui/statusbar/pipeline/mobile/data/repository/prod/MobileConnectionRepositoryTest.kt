@@ -37,10 +37,12 @@ import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
-import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
-import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.OverrideNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.UnknownNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -72,8 +74,9 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var logger: ConnectivityPipelineLogger
 
     private val scope = CoroutineScope(IMMEDIATE)
+    private val mobileMappings = FakeMobileMappingsProxy()
     private val globalSettings = FakeSettings()
-    private val connectionsRepo = FakeMobileConnectionsRepository()
+    private val connectionsRepo = FakeMobileConnectionsRepository(mobileMappings)
 
     @Before
     fun setUp() {
@@ -89,6 +92,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                 globalSettings,
                 connectionsRepo.defaultDataSubId,
                 connectionsRepo.globalMobileDataSettingChangedEvent,
+                mobileMappings,
                 IMMEDIATE,
                 logger,
                 scope,
@@ -272,7 +276,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
 
             val type = NETWORK_TYPE_UNKNOWN
-            val expected = DefaultNetworkType(type)
+            val expected = UnknownNetworkType
 
             assertThat(latest?.resolvedNetworkType).isEqualTo(expected)
 
@@ -287,7 +291,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
             val callback = getTelephonyCallbackForType<TelephonyCallback.DisplayInfoListener>()
             val type = NETWORK_TYPE_LTE
-            val expected = DefaultNetworkType(type)
+            val expected = DefaultNetworkType(type, mobileMappings.toIconKey(type))
             val ti = mock<TelephonyDisplayInfo>().also { whenever(it.networkType).thenReturn(type) }
             callback.onDisplayInfoChanged(ti)
 
@@ -304,9 +308,10 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
             val callback = getTelephonyCallbackForType<TelephonyCallback.DisplayInfoListener>()
             val type = OVERRIDE_NETWORK_TYPE_LTE_CA
-            val expected = OverrideNetworkType(type)
+            val expected = OverrideNetworkType(type, mobileMappings.toIconKeyOverride(type))
             val ti =
                 mock<TelephonyDisplayInfo>().also {
+                    whenever(it.networkType).thenReturn(type)
                     whenever(it.overrideNetworkType).thenReturn(type)
                 }
             callback.onDisplayInfoChanged(ti)

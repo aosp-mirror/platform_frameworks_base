@@ -24,9 +24,9 @@ import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
-import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
-import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.OverrideNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.FIVE_G_OVERRIDE
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.FOUR_G
@@ -62,7 +62,6 @@ class MobileIconInteractorTest : SysuiTestCase() {
                 mobileIconsInteractor.defaultMobileIconMapping,
                 mobileIconsInteractor.defaultMobileIconGroup,
                 mobileIconsInteractor.isDefaultConnectionFailed,
-                mobileMappingsProxy,
                 connectionRepository,
             )
     }
@@ -138,7 +137,10 @@ class MobileIconInteractorTest : SysuiTestCase() {
     fun iconGroup_three_g() =
         runBlocking(IMMEDIATE) {
             connectionRepository.setMobileSubscriptionModel(
-                MobileSubscriptionModel(resolvedNetworkType = DefaultNetworkType(THREE_G)),
+                MobileSubscriptionModel(
+                    resolvedNetworkType =
+                        DefaultNetworkType(THREE_G, mobileMappingsProxy.toIconKey(THREE_G))
+                ),
             )
 
             var latest: MobileIconGroup? = null
@@ -153,7 +155,10 @@ class MobileIconInteractorTest : SysuiTestCase() {
     fun iconGroup_updates_on_change() =
         runBlocking(IMMEDIATE) {
             connectionRepository.setMobileSubscriptionModel(
-                MobileSubscriptionModel(resolvedNetworkType = DefaultNetworkType(THREE_G)),
+                MobileSubscriptionModel(
+                    resolvedNetworkType =
+                        DefaultNetworkType(THREE_G, mobileMappingsProxy.toIconKey(THREE_G))
+                ),
             )
 
             var latest: MobileIconGroup? = null
@@ -161,7 +166,11 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
             connectionRepository.setMobileSubscriptionModel(
                 MobileSubscriptionModel(
-                    resolvedNetworkType = DefaultNetworkType(FOUR_G),
+                    resolvedNetworkType =
+                        DefaultNetworkType(
+                            FOUR_G,
+                            mobileMappingsProxy.toIconKey(FOUR_G),
+                        ),
                 ),
             )
             yield()
@@ -175,7 +184,13 @@ class MobileIconInteractorTest : SysuiTestCase() {
     fun iconGroup_5g_override_type() =
         runBlocking(IMMEDIATE) {
             connectionRepository.setMobileSubscriptionModel(
-                MobileSubscriptionModel(resolvedNetworkType = OverrideNetworkType(FIVE_G_OVERRIDE)),
+                MobileSubscriptionModel(
+                    resolvedNetworkType =
+                        OverrideNetworkType(
+                            FIVE_G_OVERRIDE,
+                            mobileMappingsProxy.toIconKeyOverride(FIVE_G_OVERRIDE)
+                        )
+                ),
             )
 
             var latest: MobileIconGroup? = null
@@ -191,7 +206,11 @@ class MobileIconInteractorTest : SysuiTestCase() {
         runBlocking(IMMEDIATE) {
             connectionRepository.setMobileSubscriptionModel(
                 MobileSubscriptionModel(
-                    resolvedNetworkType = DefaultNetworkType(NETWORK_TYPE_UNKNOWN),
+                    resolvedNetworkType =
+                        DefaultNetworkType(
+                            NETWORK_TYPE_UNKNOWN,
+                            mobileMappingsProxy.toIconKey(NETWORK_TYPE_UNKNOWN)
+                        ),
                 ),
             )
 

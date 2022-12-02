@@ -19,8 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository
 import android.provider.Settings
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
-import com.android.settingslib.mobile.MobileMappings
-import com.android.settingslib.mobile.MobileMappings.Config
+import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,9 +35,6 @@ interface MobileConnectionsRepository {
     /** Observable for the subscriptionId of the current mobile data connection */
     val activeMobileDataSubscriptionId: StateFlow<Int>
 
-    /** Observable for [MobileMappings.Config] tracking the defaults */
-    val defaultDataSubRatConfig: StateFlow<Config>
-
     /** Tracks [SubscriptionManager.getDefaultDataSubscriptionId] */
     val defaultDataSubId: StateFlow<Int>
 
@@ -50,4 +46,10 @@ interface MobileConnectionsRepository {
 
     /** Observe changes to the [Settings.Global.MOBILE_DATA] setting */
     val globalMobileDataSettingChangedEvent: Flow<Unit>
+
+    /** The icon mapping from network type to [MobileIconGroup] for the default subscription */
+    val defaultMobileIconMapping: Flow<Map<String, MobileIconGroup>>
+
+    /** Fallback [MobileIconGroup] in the case where there is no icon in the mapping */
+    val defaultMobileIconGroup: Flow<MobileIconGroup>
 }

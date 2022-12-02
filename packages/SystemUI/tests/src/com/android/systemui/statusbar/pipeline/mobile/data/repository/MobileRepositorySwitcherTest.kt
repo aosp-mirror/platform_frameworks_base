@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.DemoM
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.validMobileEvent
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileConnectionsRepositoryImpl
+import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
@@ -76,6 +77,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
 
     private val globalSettings = FakeSettings()
     private val fakeNetworkEventsFlow = MutableStateFlow<FakeNetworkEventModel?>(null)
+    private val mobileMappings = FakeMobileMappingsProxy()
 
     private val scope = CoroutineScope(IMMEDIATE)
 
@@ -97,6 +99,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
                 subscriptionManager,
                 telephonyManager,
                 logger,
+                mobileMappings,
                 fakeBroadcastDispatcher,
                 globalSettings,
                 context,

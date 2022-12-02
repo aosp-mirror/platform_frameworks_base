@@ -45,8 +45,8 @@ import org.mockito.MockitoAnnotations
 class MobileIconsInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconsInteractor
     private val userSetupRepository = FakeUserSetupRepository()
-    private val connectionsRepository = FakeMobileConnectionsRepository()
     private val mobileMappingsProxy = FakeMobileMappingsProxy()
+    private val connectionsRepository = FakeMobileConnectionsRepository(mobileMappingsProxy)
     private val scope = CoroutineScope(IMMEDIATE)
 
     @Mock private lateinit var carrierConfigTracker: CarrierConfigTracker
@@ -69,7 +69,6 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             MobileIconsInteractorImpl(
                 connectionsRepository,
                 carrierConfigTracker,
-                mobileMappingsProxy,
                 userSetupRepository,
                 scope
             )
