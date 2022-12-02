@@ -893,11 +893,10 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
     }
 
     @Test
-    public void testLaunchesPortraitUnresizableOnFreeformLandscapeDisplay() {
+    public void testLaunchesPortraitUnresizableOnFreeformDisplayWithFreeformSizeCompat() {
         mAtm.mDevEnableNonResizableMultiWindow = true;
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
-        assertTrue(freeformDisplay.getBounds().width() > freeformDisplay.getBounds().height());
         final ActivityOptions options = ActivityOptions.makeBasic();
         mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
         mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
@@ -905,42 +904,12 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         assertEquals(RESULT_CONTINUE,
                 new CalculateRequestBuilder().setOptions(options).calculate());
 
-        assertEquals(WINDOWING_MODE_UNDEFINED, mResult.mWindowingMode);
-    }
-
-    @Test
-    public void testLaunchesLandscapeUnresizableOnFreeformLandscapeDisplay() {
-        mAtm.mDevEnableNonResizableMultiWindow = true;
-        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+        assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
                 WINDOWING_MODE_FREEFORM);
-        assertTrue(freeformDisplay.getBounds().width() > freeformDisplay.getBounds().height());
-        final ActivityOptions options = ActivityOptions.makeBasic();
-        mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
-        mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
-        mActivity.info.screenOrientation = SCREEN_ORIENTATION_LANDSCAPE;
-        assertEquals(RESULT_CONTINUE,
-                new CalculateRequestBuilder().setOptions(options).calculate());
-
-        assertEquals(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode);
     }
 
     @Test
-    public void testLaunchesUndefinedUnresizableOnFreeformLandscapeDisplay() {
-        mAtm.mDevEnableNonResizableMultiWindow = true;
-        final TestDisplayContent freeformDisplay = createNewDisplayContent(
-                WINDOWING_MODE_FREEFORM);
-        assertTrue(freeformDisplay.getBounds().width() > freeformDisplay.getBounds().height());
-        final ActivityOptions options = ActivityOptions.makeBasic();
-        mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
-        mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
-        assertEquals(RESULT_CONTINUE,
-                new CalculateRequestBuilder().setOptions(options).calculate());
-
-        assertEquals(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode);
-    }
-
-    @Test
-    public void testForceMaximizingAppsOnNonFreeformDisplay() {
+    public void testSkipsForceMaximizingAppsOnNonFreeformDisplay() {
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchWindowingMode(WINDOWING_MODE_FREEFORM);
         options.setLaunchBounds(new Rect(0, 0, 200, 100));
@@ -954,9 +923,8 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         assertEquals(RESULT_CONTINUE,
                 new CalculateRequestBuilder().setOptions(options).calculate());
 
-        // Non-resizable apps must be launched in fullscreen in a fullscreen display regardless of
-        // other properties.
-        assertEquals(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode);
+        assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
+                WINDOWING_MODE_FULLSCREEN);
     }
 
     @Test
