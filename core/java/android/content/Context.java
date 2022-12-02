@@ -276,7 +276,8 @@ public abstract class Context {
             BIND_IMPORTANT,
             BIND_ADJUST_WITH_ACTIVITY,
             BIND_NOT_PERCEPTIBLE,
-            BIND_INCLUDE_CAPABILITIES
+            BIND_INCLUDE_CAPABILITIES,
+            BIND_SHARED_ISOLATED_PROCESS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BindServiceFlags {}
@@ -392,6 +393,22 @@ public abstract class Context {
      * {@link android.os.Build.VERSION_CODES#R}, BIND_INCLUDE_CAPABILITIES is implicit.
      */
     public static final int BIND_INCLUDE_CAPABILITIES = 0x000001000;
+
+    /**
+     * Flag for {@link #bindIsolatedService}: Bind the service into a shared isolated process.
+     * Specifying this flag allows multiple isolated services to be running in a single shared
+     * isolated process.
+     *
+     * The shared isolated process instance is identified by the <var>instanceName</var>
+     * parameter in {@link #bindIsolatedService(Intent, int, String, Executor, ServiceConnection)}.
+     *
+     * Subsequent calls to {@link #bindIsolatedService} with the same <var>instanceName</var>
+     * will cause the isolated service to be co-located in the same shared isolated process.
+     *
+     * Note that the shared isolated process is scoped to the calling app; once created, only
+     * the calling app can bind additional isolated services into the shared process.
+     */
+    public static final int BIND_SHARED_ISOLATED_PROCESS = 0x00002000;
 
     /***********    Public flags above this line ***********/
     /***********    Hidden flags below this line ***********/

@@ -3004,6 +3004,16 @@ public final class ProcessList {
         }
     }
 
+    ProcessRecord getSharedIsolatedProcess(String processName, int uid, String packageName) {
+        for (int i = 0, size = mIsolatedProcesses.size(); i < size; i++) {
+            final ProcessRecord app = mIsolatedProcesses.valueAt(i);
+            if (app.info.uid == uid && app.info.packageName.equals(packageName)
+                    && app.processName.equals(processName)) {
+                return app;
+            }
+        }
+        return null;
+    }
     @Nullable
     @GuardedBy("mService")
     List<Integer> getIsolatedProcessesLocked(int uid) {

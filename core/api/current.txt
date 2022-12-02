@@ -9945,6 +9945,7 @@ package android.content {
     field public static final int BIND_INCLUDE_CAPABILITIES = 4096; // 0x1000
     field public static final int BIND_NOT_FOREGROUND = 4; // 0x4
     field public static final int BIND_NOT_PERCEPTIBLE = 256; // 0x100
+    field public static final int BIND_SHARED_ISOLATED_PROCESS = 8192; // 0x2000
     field public static final int BIND_WAIVE_PRIORITY = 32; // 0x20
     field public static final String BIOMETRIC_SERVICE = "biometric";
     field public static final String BLOB_STORE_SERVICE = "blob_store";
