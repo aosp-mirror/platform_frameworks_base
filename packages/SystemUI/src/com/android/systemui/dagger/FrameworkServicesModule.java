@@ -93,6 +93,8 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.CaptioningManager;
 import android.view.inputmethod.InputMethodManager;
 
+import androidx.core.app.NotificationManagerCompat;
+
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -387,6 +389,12 @@ public class FrameworkServicesModule {
     @Singleton
     static NotificationManager provideNotificationManager(Context context) {
         return context.getSystemService(NotificationManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static NotificationManagerCompat provideNotificationManagerCompat(Context context) {
+        return NotificationManagerCompat.from(context);
     }
 
     /** */
