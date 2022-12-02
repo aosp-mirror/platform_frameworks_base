@@ -42,17 +42,17 @@ class FakeKeyguardQuickAffordanceProviderClient(
             KeyguardQuickAffordanceProviderClient.Affordance(
                 id = AFFORDANCE_1,
                 name = AFFORDANCE_1,
-                iconResourceId = 0,
+                iconResourceId = 1,
             ),
             KeyguardQuickAffordanceProviderClient.Affordance(
                 id = AFFORDANCE_2,
                 name = AFFORDANCE_2,
-                iconResourceId = 0,
+                iconResourceId = 2,
             ),
             KeyguardQuickAffordanceProviderClient.Affordance(
                 id = AFFORDANCE_3,
                 name = AFFORDANCE_3,
-                iconResourceId = 0,
+                iconResourceId = 3,
             ),
         ),
     flags: List<KeyguardQuickAffordanceProviderClient.Flag> =
@@ -131,7 +131,12 @@ class FakeKeyguardQuickAffordanceProviderClient(
     }
 
     override suspend fun getAffordanceIcon(iconResourceId: Int, tintColor: Int): Drawable {
-        return BitmapDrawable()
+        return when (iconResourceId) {
+            1 -> ICON_1
+            2 -> ICON_2
+            3 -> ICON_3
+            else -> BitmapDrawable()
+        }
     }
 
     fun setFlag(
@@ -186,5 +191,8 @@ class FakeKeyguardQuickAffordanceProviderClient(
         const val AFFORDANCE_1 = "affordance_1"
         const val AFFORDANCE_2 = "affordance_2"
         const val AFFORDANCE_3 = "affordance_3"
+        val ICON_1 = BitmapDrawable()
+        val ICON_2 = BitmapDrawable()
+        val ICON_3 = BitmapDrawable()
     }
 }
