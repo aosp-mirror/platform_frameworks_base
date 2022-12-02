@@ -47,6 +47,7 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
+import android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG
 import android.view.WindowMetrics
 import androidx.test.filters.SmallTest
 import com.airbnb.lottie.LottieAnimationView
@@ -421,6 +422,21 @@ class SideFpsControllerTest : SysuiTestCase() {
 
         assertThat(fingerprintManager.hasSideFpsSensor()).isFalse()
     }
+
+    @Test
+    fun testLayoutParams_isKeyguardDialogType() =
+        testWithDisplay(deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED) {
+            sideFpsController.overlayOffsets = sensorLocation
+            sideFpsController.updateOverlayParams(windowManager.defaultDisplay, indicatorBounds)
+            overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+            executor.runAllReady()
+
+            verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
+
+            val lpType = overlayViewParamsCaptor.value.type
+
+            assertThat((lpType and TYPE_KEYGUARD_DIALOG) != 0).isTrue()
+        }
 
     @Test
     fun testLayoutParams_hasNoMoveAnimationWindowFlag() =
