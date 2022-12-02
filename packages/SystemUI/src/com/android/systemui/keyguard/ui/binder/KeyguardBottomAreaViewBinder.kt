@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.binder
 
+import android.graphics.drawable.Animatable2
 import android.util.Size
 import android.util.TypedValue
 import android.view.View
@@ -27,12 +28,11 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.keyguard.LockIconViewController
 import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewModel
@@ -73,7 +73,8 @@ object KeyguardBottomAreaViewBinder {
         fun onConfigurationChanged()
 
         /**
-         * Returns whether the keyguard bottom area should be constrained to the top of the lock icon
+         * Returns whether the keyguard bottom area should be constrained to the top of the lock
+         * icon
          */
         fun shouldConstrainToTopOfLockIcon(): Boolean
     }
@@ -217,7 +218,7 @@ object KeyguardBottomAreaViewBinder {
             }
 
             override fun shouldConstrainToTopOfLockIcon(): Boolean =
-                    viewModel.shouldConstrainToTopOfLockIcon()
+                viewModel.shouldConstrainToTopOfLockIcon()
         }
     }
 
@@ -247,6 +248,27 @@ object KeyguardBottomAreaViewBinder {
         }
 
         IconViewBinder.bind(viewModel.icon, view)
+
+        (view.drawable as? Animatable2)?.let { animatable ->
+            (viewModel.icon as? Icon.Resource)?.res?.let { iconResourceId ->
+                // Always start the animation (we do call stop() below, if we need to skip it).
+                animatable.start()
+
+                if (view.tag != iconResourceId) {
+                    // Here when we haven't run the animation on a previous update.
+                    //
+                    // Save the resource ID for next time, so we know not to re-animate the same
+                    // animation again.
+                    view.tag = iconResourceId
+                } else {
+                    // Here when we've already done this animation on a previous update and want to
+                    // skip directly to the final frame of the animation to avoid running it.
+                    //
+                    // By calling stop after start, we go to the final frame of the animation.
+                    animatable.stop()
+                }
+            }
+        }
 
         view.isActivated = viewModel.isActivated
         view.drawable.setTint(

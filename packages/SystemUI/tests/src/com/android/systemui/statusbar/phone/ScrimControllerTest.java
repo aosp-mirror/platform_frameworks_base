@@ -1442,16 +1442,30 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void testNotificationTransparency_followsTransitionToFullShade() {
+        mScrimController.setClipsQsScrim(true);
+
         mScrimController.transitionTo(SHADE_LOCKED);
         mScrimController.setRawPanelExpansionFraction(1.0f);
         finishAnimationsImmediately();
+
+        assertScrimTinted(Map.of(
+                mScrimInFront, false,
+                mScrimBehind, true,
+                mNotificationsScrim, false
+        ));
+
         float shadeLockedAlpha = mNotificationsScrim.getViewAlpha();
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         mScrimController.setRawPanelExpansionFraction(1.0f);
         finishAnimationsImmediately();
         float keyguardAlpha = mNotificationsScrim.getViewAlpha();
 
-        mScrimController.setClipsQsScrim(true);
+        assertScrimTinted(Map.of(
+                mScrimInFront, true,
+                mScrimBehind, true,
+                mNotificationsScrim, true
+        ));
+
         float progress = 0.5f;
         float lsNotifProgress = 0.3f;
         mScrimController.setTransitionToFullShadeProgress(progress, lsNotifProgress);

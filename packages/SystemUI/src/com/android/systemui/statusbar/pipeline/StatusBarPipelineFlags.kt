@@ -52,6 +52,6 @@ class StatusBarPipelineFlags @Inject constructor(private val featureFlags: Featu
      * Returns true if we should apply some coloring to the wifi icon that was rendered with the new
      * pipeline to help with debugging.
      */
-    // For now, just always apply the debug coloring if we've enabled the new icon.
-    fun useWifiDebugColoring(): Boolean = useNewWifiIcon()
+    fun useWifiDebugColoring(): Boolean =
+        featureFlags.isEnabled(Flags.NEW_STATUS_BAR_ICONS_DEBUG_COLORING)
 }

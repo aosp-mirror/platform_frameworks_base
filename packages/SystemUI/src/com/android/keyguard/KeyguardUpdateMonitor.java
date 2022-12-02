@@ -751,8 +751,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     public void requestFaceAuthOnOccludingApp(boolean request) {
         mOccludingAppRequestingFace = request;
-        updateFaceListeningState(BIOMETRIC_ACTION_UPDATE,
-                FACE_AUTH_TRIGGERED_OCCLUDING_APP_REQUESTED);
+        int action = mOccludingAppRequestingFace ? BIOMETRIC_ACTION_UPDATE : BIOMETRIC_ACTION_STOP;
+        updateFaceListeningState(action, FACE_AUTH_TRIGGERED_OCCLUDING_APP_REQUESTED);
     }
 
     /**
@@ -1394,16 +1394,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 && !mFingerprintLockedOut;
     }
 
-    private boolean isUnlockingWithFaceAllowed() {
-        return mStrongAuthTracker.isUnlockingWithBiometricAllowed(false);
-    }
-
     /**
      * Whether fingerprint is allowed ot be used for unlocking based on the strongAuthTracker
      * and temporary lockout state (tracked by FingerprintManager via error codes).
      */
     public boolean isUnlockingWithFingerprintAllowed() {
-        return isUnlockingWithBiometricAllowed(true);
+        return isUnlockingWithBiometricAllowed(FINGERPRINT);
     }
 
     /**
@@ -1413,9 +1409,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             @NonNull BiometricSourceType biometricSourceType) {
         switch (biometricSourceType) {
             case FINGERPRINT:
-                return isUnlockingWithFingerprintAllowed();
+                return isUnlockingWithBiometricAllowed(true);
             case FACE:
-                return isUnlockingWithFaceAllowed();
+                return isUnlockingWithBiometricAllowed(false);
             default:
                 return false;
         }
