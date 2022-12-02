@@ -383,7 +383,6 @@ package android.os {
     method public static void traceBegin(long, @NonNull String);
     method public static void traceCounter(long, @NonNull String, int);
     method public static void traceEnd(long);
-    field public static final long TRACE_TAG_AIDL = 16777216L; // 0x1000000L
     field public static final long TRACE_TAG_NETWORK = 2097152L; // 0x200000L
   }
 
