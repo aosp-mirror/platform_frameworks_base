@@ -3516,9 +3516,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
-        super.dump(pw, prefix, dumpAll);
         pw.print(prefix);
-        pw.println("Display: mDisplayId=" + mDisplayId + " rootTasks=" + getRootTaskCount());
+        pw.println("Display: mDisplayId=" + mDisplayId + (isOrganized() ? " (organized)" : ""));
         final String subPrefix = "  " + prefix;
         pw.print(subPrefix); pw.print("init="); pw.print(mInitialDisplayWidth); pw.print("x");
         pw.print(mInitialDisplayHeight); pw.print(" "); pw.print(mInitialDisplayDensity);
@@ -3549,6 +3548,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         pw.println(" mTouchExcludeRegion=" + mTouchExcludeRegion);
 
         pw.println();
+        super.dump(pw, prefix, dumpAll);
         pw.print(prefix); pw.print("mLayoutSeq="); pw.println(mLayoutSeq);
 
         pw.print("  mCurrentFocus="); pw.println(mCurrentFocus);
@@ -3640,6 +3640,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         pw.println();
         mInsetsStateController.dump(prefix, pw);
         mDwpcHelper.dump(prefix, pw);
+        pw.println();
     }
 
     @Override
