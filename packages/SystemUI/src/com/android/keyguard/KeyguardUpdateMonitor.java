@@ -735,8 +735,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     public void requestFaceAuthOnOccludingApp(boolean request) {
         mOccludingAppRequestingFace = request;
-        updateFaceListeningState(BIOMETRIC_ACTION_UPDATE,
-                FACE_AUTH_TRIGGERED_OCCLUDING_APP_REQUESTED);
+        int action = mOccludingAppRequestingFace ? BIOMETRIC_ACTION_UPDATE : BIOMETRIC_ACTION_STOP;
+        updateFaceListeningState(action, FACE_AUTH_TRIGGERED_OCCLUDING_APP_REQUESTED);
     }
 
     /**

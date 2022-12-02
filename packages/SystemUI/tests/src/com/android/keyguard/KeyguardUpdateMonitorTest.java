@@ -1284,6 +1284,24 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testRequestFaceAuthFromOccludingApp_whenInvoked_startsFaceAuth() {
+        mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(true);
+
+        assertThat(mKeyguardUpdateMonitor.isFaceDetectionRunning()).isTrue();
+    }
+
+    @Test
+    public void testRequestFaceAuthFromOccludingApp_whenInvoked_stopsFaceAuth() {
+        mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(true);
+
+        assertThat(mKeyguardUpdateMonitor.isFaceDetectionRunning()).isTrue();
+
+        mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
+
+        assertThat(mKeyguardUpdateMonitor.isFaceDetectionRunning()).isFalse();
+    }
+
+    @Test
     public void testRequireUnlockForNfc_Broadcast() {
         KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
         mKeyguardUpdateMonitor.registerCallback(callback);
