@@ -45670,6 +45670,19 @@ package android.text {
     method public int previousStartBoundary(@IntRange(from=0) int);
   }
 
+  public class Highlights {
+    method @NonNull public android.graphics.Paint getPaint(int);
+    method @NonNull public int[] getRanges(int);
+    method public int getSize();
+  }
+
+  public static final class Highlights.Builder {
+    ctor public Highlights.Builder();
+    method @NonNull public android.text.Highlights.Builder addRange(@NonNull android.graphics.Paint, int, int);
+    method @NonNull public android.text.Highlights.Builder addRanges(@NonNull android.graphics.Paint, @NonNull int...);
+    method @NonNull public android.text.Highlights build();
+  }
+
   public class Html {
     method public static String escapeHtml(CharSequence);
     method @Deprecated public static android.text.Spanned fromHtml(String);
@@ -45761,6 +45774,9 @@ package android.text {
     ctor protected Layout(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float);
     method public void draw(android.graphics.Canvas);
     method public void draw(android.graphics.Canvas, android.graphics.Path, android.graphics.Paint, int);
+    method public void draw(@NonNull android.graphics.Canvas, @Nullable java.util.List<android.graphics.Path>, @Nullable java.util.List<android.graphics.Paint>, @Nullable android.graphics.Path, @Nullable android.graphics.Paint, int);
+    method public void drawBackground(@NonNull android.graphics.Canvas);
+    method public void drawText(@NonNull android.graphics.Canvas);
     method public void fillCharacterBounds(@IntRange(from=0) int, @IntRange(from=0) int, @NonNull float[], @IntRange(from=0) int);
     method public final android.text.Layout.Alignment getAlignment();
     method public abstract int getBottomPadding();
@@ -58574,6 +58590,7 @@ package android.widget {
     method public boolean getFreezesText();
     method public int getGravity();
     method @ColorInt public int getHighlightColor();
+    method @Nullable public android.text.Highlights getHighlights();
     method public CharSequence getHint();
     method public final android.content.res.ColorStateList getHintTextColors();
     method public int getHyphenationFrequency();
@@ -58703,6 +58720,7 @@ package android.widget {
     method public void setGravity(int);
     method public void setHeight(int);
     method public void setHighlightColor(@ColorInt int);
+    method public void setHighlights(@Nullable android.text.Highlights);
     method public final void setHint(CharSequence);
     method public final void setHint(@StringRes int);
     method public final void setHintTextColor(@ColorInt int);
