@@ -23,7 +23,6 @@ import dagger.Module;
  */
 @Module(includes = {
             BouncerSwipeModule.class,
-            HideComplicationModule.class,
         }, subcomponents = {
             InputSessionComponent.class,
 })

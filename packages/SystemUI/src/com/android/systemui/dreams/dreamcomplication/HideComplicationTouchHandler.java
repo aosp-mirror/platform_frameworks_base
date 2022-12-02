@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.touch;
+package com.android.systemui.dreams.dreamcomplication;
 
-import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.COMPLICATIONS_FADE_OUT_DELAY;
-import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.COMPLICATIONS_RESTORE_TIMEOUT;
+import static com.android.systemui.dreams.dreamcomplication.dagger.ComplicationModule.COMPLICATIONS_FADE_OUT_DELAY;
+import static com.android.systemui.dreams.dreamcomplication.dagger.ComplicationModule.COMPLICATIONS_RESTORE_TIMEOUT;
 
 import android.util.Log;
 import android.view.MotionEvent;
@@ -28,6 +28,8 @@ import androidx.annotation.Nullable;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.complication.Complication;
+import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
+import com.android.systemui.dreams.touch.DreamTouchHandler;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;

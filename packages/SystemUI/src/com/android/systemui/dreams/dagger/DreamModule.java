@@ -25,13 +25,15 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayNotificationCountProvider;
 import com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule;
+import com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent;
+
+import dagger.Module;
+import dagger.Provides;
 
 import java.util.Optional;
 
 import javax.inject.Named;
 
-import dagger.Module;
-import dagger.Provides;
 
 /**
  * Dagger Module providing Dream-related functionality.
@@ -41,6 +43,7 @@ import dagger.Provides;
             LowLightDreamModule.class,
         },
         subcomponents = {
+            ComplicationComponent.class,
             DreamOverlayComponent.class,
         })
 public interface DreamModule {
