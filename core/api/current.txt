@@ -13096,9 +13096,10 @@ package android.credentials {
   }
 
   public final class GetCredentialOption implements android.os.Parcelable {
-    ctor public GetCredentialOption(@NonNull String, @NonNull android.os.Bundle, boolean);
+    ctor public GetCredentialOption(@NonNull String, @NonNull android.os.Bundle, @NonNull android.os.Bundle, boolean);
     method public int describeContents();
-    method @NonNull public android.os.Bundle getData();
+    method @NonNull public android.os.Bundle getCandidateQueryData();
+    method @NonNull public android.os.Bundle getCredentialRetrievalData();
     method @NonNull public String getType();
     method public boolean requireSystemProvider();
     method public void writeToParcel(@NonNull android.os.Parcel, int);

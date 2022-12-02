@@ -52,7 +52,7 @@ public final class CreateCredentialRequest implements Parcelable {
     private final Bundle mCandidateQueryData;
 
     /**
-     * Determines whether or not the request must only be fulfilled by a system provider.
+     * Determines whether the request must only be fulfilled by a system provider.
      */
     private final boolean mRequireSystemProvider;
 
