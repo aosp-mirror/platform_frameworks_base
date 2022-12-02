@@ -3272,6 +3272,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             for (UserInfo user : users) {
                 if (userOwnsFrpCredential(mContext, user)) {
                     if (!isUserSecure(user.id)) {
+                        Slogf.d(TAG, "Clearing FRP credential tied to user %d", user.id);
                         mStorage.writePersistentDataBlock(PersistentData.TYPE_NONE, user.id,
                                 0, null);
                     }

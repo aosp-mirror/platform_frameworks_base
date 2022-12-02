@@ -98,6 +98,7 @@ public class LockscreenFrpTest extends BaseLockSettingsServiceTests {
         mService.setLockCredential(newPassword("1234"), nonePassword(), PRIMARY_USER_ID);
         assertEquals(CREDENTIAL_TYPE_PASSWORD, mService.getCredentialType(USER_FRP));
 
+        setDeviceProvisioned(true);
         mService.setLockCredential(nonePassword(), newPassword("1234"), PRIMARY_USER_ID);
         assertEquals(CREDENTIAL_TYPE_NONE, mService.getCredentialType(USER_FRP));
     }
