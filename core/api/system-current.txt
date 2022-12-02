@@ -7521,6 +7521,7 @@ package android.media.tv.tuner.filter {
     field public static final int VIDEO_STREAM_TYPE_VC1 = 7; // 0x7
     field public static final int VIDEO_STREAM_TYPE_VP8 = 8; // 0x8
     field public static final int VIDEO_STREAM_TYPE_VP9 = 9; // 0x9
+    field public static final int VIDEO_STREAM_TYPE_VVC = 13; // 0xd
   }
 
   public static class AvSettings.Builder {
@@ -7713,6 +7714,7 @@ package android.media.tv.tuner.filter {
     field public static final int INDEX_TYPE_SC = 1; // 0x1
     field public static final int INDEX_TYPE_SC_AVC = 3; // 0x3
     field public static final int INDEX_TYPE_SC_HEVC = 2; // 0x2
+    field public static final int INDEX_TYPE_SC_VVC = 4; // 0x4
     field public static final int MPT_INDEX_AUDIO = 262144; // 0x40000
     field public static final int MPT_INDEX_MPT = 65536; // 0x10000
     field public static final int MPT_INDEX_TIMESTAMP_TARGET_AUDIO = 1048576; // 0x100000
@@ -7735,6 +7737,13 @@ package android.media.tv.tuner.filter {
     field public static final int SC_INDEX_SEQUENCE = 8; // 0x8
     field public static final int SC_INDEX_SI_SLICE = 128; // 0x80
     field public static final int SC_INDEX_SP_SLICE = 256; // 0x100
+    field public static final int SC_VVC_INDEX_AUD = 64; // 0x40
+    field public static final int SC_VVC_INDEX_SLICE_CRA = 4; // 0x4
+    field public static final int SC_VVC_INDEX_SLICE_GDR = 8; // 0x8
+    field public static final int SC_VVC_INDEX_SLICE_IDR_N_LP = 2; // 0x2
+    field public static final int SC_VVC_INDEX_SLICE_IDR_W_RADL = 1; // 0x1
+    field public static final int SC_VVC_INDEX_SPS = 32; // 0x20
+    field public static final int SC_VVC_INDEX_VPS = 16; // 0x10
     field public static final int TS_INDEX_ADAPTATION_EXTENSION_FLAG = 4096; // 0x1000
     field public static final int TS_INDEX_CHANGE_TO_EVEN_SCRAMBLED = 8; // 0x8
     field public static final int TS_INDEX_CHANGE_TO_NOT_SCRAMBLED = 4; // 0x4
