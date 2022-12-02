@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.row;
 import static android.app.Notification.Action.SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 
+import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.PARENT_DISMISSED;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
 
 import android.animation.Animator;
@@ -1402,6 +1403,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void setKeepInParentForDismissAnimation(boolean keepInParent) {
         mKeepInParentForDismissAnimation = keepInParent;
+    }
+
+    /** @return true if the User has dismissed this notif's parent */
+    public boolean isParentDismissed() {
+        return getEntry().getDismissState() == PARENT_DISMISSED;
     }
 
     @Override
