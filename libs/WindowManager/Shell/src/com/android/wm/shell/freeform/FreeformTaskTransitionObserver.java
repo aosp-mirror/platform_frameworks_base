@@ -120,7 +120,7 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
             TransitionInfo.Change change,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        mWindowDecorViewModel.createWindowDecoration(
+        mWindowDecorViewModel.onTaskOpening(
                 change.getTaskInfo(), change.getLeash(), startT, finishT);
     }
 
@@ -128,31 +128,23 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
             TransitionInfo.Change change,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        mWindowDecorViewModel.setupWindowDecorationForTransition(
-                change.getTaskInfo(), startT, finishT);
+        mWindowDecorViewModel.onTaskClosing(change.getTaskInfo(), startT, finishT);
     }
 
     private void onChangeTransitionReady(
             TransitionInfo.Change change,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        mWindowDecorViewModel.setupWindowDecorationForTransition(
-                change.getTaskInfo(), startT, finishT);
+        mWindowDecorViewModel.onTaskChanging(
+                change.getTaskInfo(), change.getLeash(), startT, finishT);
     }
 
     private void onToFrontTransitionReady(
             TransitionInfo.Change change,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        boolean exists = mWindowDecorViewModel.setupWindowDecorationForTransition(
-                change.getTaskInfo(),
-                startT,
-                finishT);
-        if (!exists) {
-            // Window caption does not exist, create it
-            mWindowDecorViewModel.createWindowDecoration(
-                    change.getTaskInfo(), change.getLeash(), startT, finishT);
-        }
+        mWindowDecorViewModel.onTaskChanging(
+                change.getTaskInfo(), change.getLeash(), startT, finishT);
     }
 
     @Override
