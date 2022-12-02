@@ -6715,6 +6715,13 @@ public final class ActivityThread extends ClientTransactionHandler
             ii = null;
         }
 
+        final IActivityManager mgr = ActivityManager.getService();
+        try {
+            mgr.finishAttachApplication(mStartSeq);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+
         final ContextImpl appContext = ContextImpl.createAppContext(this, data.info);
         mConfigurationController.updateLocaleListFromAppContext(appContext);
 
@@ -6782,13 +6789,6 @@ public final class ActivityThread extends ClientTransactionHandler
         Application app;
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskWrites();
         final StrictMode.ThreadPolicy writesAllowedPolicy = StrictMode.getThreadPolicy();
-
-        final IActivityManager mgr = ActivityManager.getService();
-        try {
-            mgr.finishAttachApplication(mStartSeq);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
 
         // Wait for debugger after we have notified the system to finish attach application
         if (data.debugMode != ApplicationThreadConstants.DEBUG_OFF) {
