@@ -44,7 +44,7 @@ public class LockscreenFrpTest extends BaseLockSettingsServiceTests {
     @Before
     public void setDeviceNotProvisioned() throws Exception {
         // FRP credential can only be verified prior to provisioning
-        mSettings.setDeviceProvisioned(false);
+        setDeviceProvisioned(false);
     }
 
     @Before
@@ -106,7 +106,7 @@ public class LockscreenFrpTest extends BaseLockSettingsServiceTests {
     public void testFrpCredential_cannotVerifyAfterProvsioning() {
         mService.setLockCredential(newPin("1234"), nonePassword(), PRIMARY_USER_ID);
 
-        mSettings.setDeviceProvisioned(true);
+        setDeviceProvisioned(true);
         assertEquals(VerifyCredentialResponse.RESPONSE_ERROR,
                 mService.verifyCredential(newPin("1234"), USER_FRP, 0 /* flags */)
                         .getResponseCode());
