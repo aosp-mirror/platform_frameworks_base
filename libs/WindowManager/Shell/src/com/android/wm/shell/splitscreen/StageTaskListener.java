@@ -18,7 +18,6 @@ package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
@@ -73,8 +72,6 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         void onStatusChanged(boolean visible, boolean hasChildren);
 
         void onChildTaskStatusChanged(int taskId, boolean present, boolean visible);
-
-        void onChildTaskEnterPip();
 
         void onRootTaskVanished();
 
@@ -256,9 +253,6 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             if (ENABLE_SHELL_TRANSITIONS) {
                 // Status is managed/synchronized by the transition lifecycle.
                 return;
-            }
-            if (taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
-                mCallbacks.onChildTaskEnterPip();
             }
             sendStatusChanged();
         } else {
