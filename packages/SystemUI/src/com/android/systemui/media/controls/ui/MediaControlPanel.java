@@ -458,7 +458,9 @@ public class MediaControlPanel {
         if (mMediaViewHolder == null) {
             return;
         }
-        Trace.beginSection("MediaControlPanel#bindPlayer<" + key + ">");
+        if (Trace.isEnabled()) {
+            Trace.traceBegin(Trace.TRACE_TAG_APP, "MediaControlPanel#bindPlayer<" + key + ">");
+        }
         mKey = key;
         mMediaData = data;
         MediaSession.Token token = data.getToken();
@@ -1179,8 +1181,10 @@ public class MediaControlPanel {
             return;
         }
 
-        Trace.beginSection(
-                "MediaControlPanel#bindRecommendation<" + data.getPackageName() + ">");
+        if (Trace.isEnabled()) {
+            Trace.traceBegin(Trace.TRACE_TAG_APP,
+                    "MediaControlPanel#bindRecommendation<" + data.getPackageName() + ">");
+        }
 
         mRecommendationData = data;
         mSmartspaceId = SmallHash.hash(data.getTargetId());
