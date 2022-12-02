@@ -21,5 +21,6 @@
     <uses-permission android:name="android.permission.CAPTURE_BLACKOUT_CONTENT" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.ROTATE_SURFACE_FLINGER" />
+    <uses-permission android:name="android.permission.WAKEUP_SURFACE_FLINGER" />
     <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
 </manifest>
