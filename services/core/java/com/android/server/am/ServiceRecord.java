@@ -684,7 +684,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
         // if we have a process attached, add bound client uid of this connection to it
         if (app != null) {
-            app.mServices.addBoundClientUid(c.clientUid);
+            app.mServices.addBoundClientUid(c.clientUid, c.clientPackageName, c.flags);
         }
     }
 
