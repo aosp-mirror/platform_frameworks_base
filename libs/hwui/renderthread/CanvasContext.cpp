@@ -71,16 +71,19 @@ CanvasContext* ScopedActiveContext::sActiveContext = nullptr;
 } /* namespace */
 
 CanvasContext* CanvasContext::create(RenderThread& thread, bool translucent,
-                                     RenderNode* rootRenderNode, IContextFactory* contextFactory) {
+                                     RenderNode* rootRenderNode, IContextFactory* contextFactory,
+                                     int32_t uiThreadId, int32_t renderThreadId) {
     auto renderType = Properties::getRenderPipelineType();
 
     switch (renderType) {
         case RenderPipelineType::SkiaGL:
             return new CanvasContext(thread, translucent, rootRenderNode, contextFactory,
-                                     std::make_unique<skiapipeline::SkiaOpenGLPipeline>(thread));
+                                     std::make_unique<skiapipeline::SkiaOpenGLPipeline>(thread),
+                                     uiThreadId, renderThreadId);
         case RenderPipelineType::SkiaVulkan:
             return new CanvasContext(thread, translucent, rootRenderNode, contextFactory,
-                                     std::make_unique<skiapipeline::SkiaVulkanPipeline>(thread));
+                                     std::make_unique<skiapipeline::SkiaVulkanPipeline>(thread),
+                                     uiThreadId, renderThreadId);
         default:
             LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
             break;
@@ -110,7 +113,8 @@ void CanvasContext::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
 
 CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
                              IContextFactory* contextFactory,
-                             std::unique_ptr<IRenderPipeline> renderPipeline)
+                             std::unique_ptr<IRenderPipeline> renderPipeline, pid_t uiThreadId,
+                             pid_t renderThreadId)
         : mRenderThread(thread)
         , mGenerationID(0)
         , mOpaque(!translucent)
@@ -118,7 +122,8 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode*
         , mJankTracker(&thread.globalProfileData())
         , mProfiler(mJankTracker.frames(), thread.timeLord().frameIntervalNanos())
         , mContentDrawBounds(0, 0, 0, 0)
-        , mRenderPipeline(std::move(renderPipeline)) {
+        , mRenderPipeline(std::move(renderPipeline))
+        , mHintSessionWrapper(uiThreadId, renderThreadId) {
     mRenderThread.cacheManager().registerCanvasContext(this);
     rootRenderNode->makeRoot();
     mRenderNodes.emplace_back(rootRenderNode);
@@ -472,15 +477,21 @@ void CanvasContext::notifyFramePending() {
     mRenderThread.pushBackFrameCallback(this);
 }
 
-std::optional<nsecs_t> CanvasContext::draw() {
+void CanvasContext::draw() {
     if (auto grContext = getGrContext()) {
         if (grContext->abandoned()) {
             LOG_ALWAYS_FATAL("GrContext is abandoned/device lost at start of CanvasContext::draw");
-            return std::nullopt;
+            return;
         }
     }
     SkRect dirty;
     mDamageAccumulator.finish(&dirty);
+
+    // reset syncDelayDuration each time we draw
+    nsecs_t syncDelayDuration = mSyncDelayDuration;
+    nsecs_t idleDuration = mIdleDuration;
+    mSyncDelayDuration = 0;
+    mIdleDuration = 0;
 
     if (!Properties::isDrawingEnabled() ||
         (dirty.isEmpty() && Properties::skipEmptyFrames && !surfaceRequiresRedraw())) {
@@ -498,7 +509,7 @@ std::optional<nsecs_t> CanvasContext::draw() {
             std::invoke(func, false /* didProduceBuffer */);
         }
         mFrameCommitCallbacks.clear();
-        return std::nullopt;
+        return;
     }
 
     ScopedActiveContext activeContext(this);
@@ -650,10 +661,25 @@ std::optional<nsecs_t> CanvasContext::draw() {
         }
     }
 
+    int64_t intendedVsync = mCurrentFrameInfo->get(FrameInfoIndex::IntendedVsync);
+    int64_t frameDeadline = mCurrentFrameInfo->get(FrameInfoIndex::FrameDeadline);
+    int64_t dequeueBufferDuration = mCurrentFrameInfo->get(FrameInfoIndex::DequeueBufferDuration);
+
+    mHintSessionWrapper.updateTargetWorkDuration(frameDeadline - intendedVsync);
+
+    if (didDraw) {
+        int64_t frameStartTime = mCurrentFrameInfo->get(FrameInfoIndex::FrameStartTime);
+        int64_t frameDuration = systemTime(SYSTEM_TIME_MONOTONIC) - frameStartTime;
+        int64_t actualDuration = frameDuration -
+                                 (std::min(syncDelayDuration, mLastDequeueBufferDuration)) -
+                                 dequeueBufferDuration - idleDuration;
+        mHintSessionWrapper.reportActualWorkDuration(actualDuration);
+    }
+
+    mLastDequeueBufferDuration = dequeueBufferDuration;
+
     mRenderThread.cacheManager().onFrameCompleted();
-    return didDraw ? std::make_optional(
-                             mCurrentFrameInfo->get(FrameInfoIndex::DequeueBufferDuration))
-                   : std::nullopt;
+    return;
 }
 
 void CanvasContext::reportMetricsWithPresentTime() {
@@ -766,6 +792,8 @@ void CanvasContext::onSurfaceStatsAvailable(void* context, int32_t surfaceContro
 // Called by choreographer to do an RT-driven animation
 void CanvasContext::doFrame() {
     if (!mRenderPipeline->isSurfaceReady()) return;
+    mIdleDuration =
+            systemTime(SYSTEM_TIME_MONOTONIC) - mRenderThread.timeLord().computeFrameTimeNanos();
     prepareAndDraw(nullptr);
 }
 
@@ -972,6 +1000,14 @@ void CanvasContext::prepareSurfaceControlForWebview() {
     if (mPrepareSurfaceControlForWebviewCallback) {
         std::invoke(mPrepareSurfaceControlForWebviewCallback);
     }
+}
+
+void CanvasContext::sendLoadResetHint() {
+    mHintSessionWrapper.sendLoadResetHint();
+}
+
+void CanvasContext::setSyncDelayDuration(nsecs_t duration) {
+    mSyncDelayDuration = duration;
 }
 
 } /* namespace renderthread */

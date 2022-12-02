@@ -16,7 +16,6 @@
 #ifndef DRAWFRAMETASK_H
 #define DRAWFRAMETASK_H
 
-#include <android/performance_hint.h>
 #include <utils/Condition.h>
 #include <utils/Mutex.h>
 #include <utils/StrongPointer.h>
@@ -28,7 +27,6 @@
 #include "../Rect.h"
 #include "../TreeInfo.h"
 #include "RenderTask.h"
-#include "utils/TimeUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -62,8 +60,7 @@ public:
     DrawFrameTask();
     virtual ~DrawFrameTask();
 
-    void setContext(RenderThread* thread, CanvasContext* context, RenderNode* targetNode,
-                    int32_t uiThreadId, int32_t renderThreadId);
+    void setContext(RenderThread* thread, CanvasContext* context, RenderNode* targetNode);
     void setContentDrawBounds(int left, int top, int right, int bottom) {
         mContentDrawBounds.set(left, top, right, bottom);
     }
@@ -91,22 +88,7 @@ public:
 
     void forceDrawNextFrame() { mForceDrawFrame = true; }
 
-    void sendLoadResetHint();
-
 private:
-    class HintSessionWrapper {
-    public:
-        HintSessionWrapper(int32_t uiThreadId, int32_t renderThreadId);
-        ~HintSessionWrapper();
-
-        void updateTargetWorkDuration(long targetDurationNanos);
-        void reportActualWorkDuration(long actualDurationNanos);
-        void sendHint(SessionHint hint);
-
-    private:
-        APerformanceHintSession* mHintSession = nullptr;
-    };
-
     void postAndWait();
     bool syncFrameState(TreeInfo& info);
     void unblockUiThread();
@@ -117,8 +99,6 @@ private:
     RenderThread* mRenderThread;
     CanvasContext* mContext;
     RenderNode* mTargetNode = nullptr;
-    int32_t mUiThreadId = -1;
-    int32_t mRenderThreadId = -1;
     Rect mContentDrawBounds;
 
     /*********************************************
@@ -134,13 +114,6 @@ private:
     std::function<std::function<void(bool)>(int32_t, int64_t)> mFrameCallback;
     std::function<void(bool)> mFrameCommitCallback;
     std::function<void()> mFrameCompleteCallback;
-
-    nsecs_t mLastDequeueBufferDuration = 0;
-    nsecs_t mLastTargetWorkDuration = 0;
-    std::optional<HintSessionWrapper> mHintSessionWrapper;
-
-    nsecs_t mLastFrameNotification = 0;
-    nsecs_t kResetHintTimeout = 100_ms;
 
     bool mForceDrawFrame = false;
 };

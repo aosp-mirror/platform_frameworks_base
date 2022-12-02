@@ -570,6 +570,7 @@ cc_defaults {
                 "renderthread/VulkanSurface.cpp",
                 "renderthread/RenderProxy.cpp",
                 "renderthread/RenderThread.cpp",
+                "renderthread/HintSessionWrapper.cpp",
                 "service/GraphicsStatsService.cpp",
                 "thread/CommonPool.cpp",
                 "utils/GLUtils.cpp",

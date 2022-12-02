@@ -36,7 +36,7 @@ RENDERTHREAD_TEST(CanvasContext, create) {
     auto rootNode = TestUtils::createNode(0, 0, 200, 400, nullptr);
     ContextFactory contextFactory;
     std::unique_ptr<CanvasContext> canvasContext(
-            CanvasContext::create(renderThread, false, rootNode.get(), &contextFactory));
+            CanvasContext::create(renderThread, false, rootNode.get(), &contextFactory, 0, 0));
 
     ASSERT_FALSE(canvasContext->hasSurface());
 
