@@ -113,6 +113,8 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Tests for {@link UserController}.
@@ -146,8 +148,10 @@ public class UserControllerTest {
 
     private static final List<String> START_FOREGROUND_USER_ACTIONS = newArrayList(
             Intent.ACTION_USER_STARTED,
-            Intent.ACTION_USER_SWITCHED,
             Intent.ACTION_USER_STARTING);
+
+    private static final List<String> START_FOREGROUND_USER_DEFERRED_ACTIONS = newArrayList(
+            Intent.ACTION_USER_SWITCHED);
 
     private static final List<String> START_BACKGROUND_USER_ACTIONS = newArrayList(
             Intent.ACTION_USER_STARTED,
@@ -397,11 +401,11 @@ public class UserControllerTest {
     private void continueAndCompleteUserSwitch(UserState userState, int oldUserId, int newUserId) {
         mUserController.continueUserSwitch(userState, oldUserId, newUserId);
         mInjector.mHandler.removeMessages(UserController.COMPLETE_USER_SWITCH_MSG);
-        mUserController.completeUserSwitch(newUserId);
+        mUserController.completeUserSwitch(oldUserId, newUserId);
     }
 
     @Test
-    public void testContinueUserSwitch() throws RemoteException {
+    public void testContinueUserSwitch() {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
                 /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
         // Start user -- this will update state of mUserController
@@ -416,12 +420,12 @@ public class UserControllerTest {
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
         verify(mInjector, times(0)).dismissKeyguard(any(), anyString());
         verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
-        continueUserSwitchAssertions(TEST_USER_ID, false);
+        continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false);
         verifySystemUserVisibilityChangesNeverNotified();
     }
 
     @Test
-    public void testContinueUserSwitchDismissKeyguard() throws RemoteException {
+    public void testContinueUserSwitchDismissKeyguard() {
         when(mInjector.mKeyguardManagerMock.isDeviceSecure(anyInt())).thenReturn(false);
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
                 /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
@@ -437,12 +441,12 @@ public class UserControllerTest {
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
         verify(mInjector, times(1)).dismissKeyguard(any(), anyString());
         verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
-        continueUserSwitchAssertions(TEST_USER_ID, false);
+        continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false);
         verifySystemUserVisibilityChangesNeverNotified();
     }
 
     @Test
-    public void testContinueUserSwitchUIDisabled() throws RemoteException {
+    public void testContinueUserSwitchUIDisabled() {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ false,
                 /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
 
@@ -457,11 +461,11 @@ public class UserControllerTest {
         // Verify that continueUserSwitch worked as expected
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
         verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
-        continueUserSwitchAssertions(TEST_USER_ID, false);
+        continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false);
     }
 
-    private void continueUserSwitchAssertions(int expectedUserId, boolean backgroundUserStopping)
-            throws RemoteException {
+    private void continueUserSwitchAssertions(int expectedOldUserId, int expectedNewUserId,
+            boolean backgroundUserStopping) {
         Set<Integer> expectedCodes = new LinkedHashSet<>();
         expectedCodes.add(COMPLETE_USER_SWITCH_MSG);
         expectedCodes.add(REPORT_USER_SWITCH_COMPLETE_MSG);
@@ -473,7 +477,8 @@ public class UserControllerTest {
         assertEquals("Unexpected message sent", expectedCodes, actualCodes);
         Message msg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_COMPLETE_MSG);
         assertNotNull(msg);
-        assertEquals("Unexpected userId", expectedUserId, msg.arg1);
+        assertEquals("Unexpected oldUserId", expectedOldUserId, msg.arg1);
+        assertEquals("Unexpected newUserId", expectedNewUserId, msg.arg2);
     }
 
     @Test
@@ -486,16 +491,21 @@ public class UserControllerTest {
         mUserController.startUser(TEST_USER_ID, true);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
+        int oldUserId = reportMsg.arg1;
         int newUserId = reportMsg.arg2;
         mInjector.mHandler.clearAllRecordedMessages();
         // Mockito can't reset only interactions, so just verify that this hasn't been
         // called with 'false' until after dispatchUserSwitchComplete.
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(false);
         // Call dispatchUserSwitchComplete
-        mUserController.dispatchUserSwitchComplete(newUserId);
+        mUserController.dispatchUserSwitchComplete(oldUserId, newUserId);
         verify(observer, times(1)).onUserSwitchComplete(anyInt());
         verify(observer).onUserSwitchComplete(TEST_USER_ID);
         verify(mInjector.getWindowManager(), times(1)).setSwitchingUser(false);
+        startUserAssertions(Stream.concat(
+                        START_FOREGROUND_USER_ACTIONS.stream(),
+                        START_FOREGROUND_USER_DEFERRED_ACTIONS.stream()
+                ).collect(Collectors.toList()), Collections.emptySet());
     }
 
     @Test
@@ -902,8 +912,7 @@ public class UserControllerTest {
     }
 
     private void addForegroundUserAndContinueUserSwitch(int newUserId, int expectedOldUserId,
-            int expectedNumberOfCalls, boolean expectOldUserStopping)
-            throws RemoteException {
+            int expectedNumberOfCalls, boolean expectOldUserStopping) {
         // Start user -- this will update state of mUserController
         mUserController.startUser(newUserId, true);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
@@ -918,7 +927,7 @@ public class UserControllerTest {
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
         verify(mInjector.getWindowManager(), times(expectedNumberOfCalls))
                 .stopFreezingScreen();
-        continueUserSwitchAssertions(newUserId, expectOldUserStopping);
+        continueUserSwitchAssertions(oldUserId, newUserId, expectOldUserStopping);
     }
 
     private void setUpUser(@UserIdInt int userId, @UserInfoFlag int flags) {
