@@ -18,6 +18,7 @@ package com.google.android.lint.aidl
 
 import com.android.tools.lint.detector.api.Category
 import com.android.tools.lint.detector.api.Implementation
+import com.android.tools.lint.detector.api.Incident
 import com.android.tools.lint.detector.api.Issue
 import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
@@ -48,14 +49,22 @@ class SimpleManualPermissionEnforcementDetector : AidlImplementationDetector() {
         val enforcePermissionFix = accumulateSimplePermissionCheckFixes(body, context) ?: return
         val lintFix = enforcePermissionFix.toLintFix(context.getLocation(node))
         val message =
-                "$interfaceName permission check can be converted to @EnforcePermission annotation"
+                "$interfaceName permission check ${
+                    if (enforcePermissionFix.errorLevel) "should" else "can"
+                } be converted to @EnforcePermission annotation"
 
-        context.report(
+        val incident = Incident(
                 ISSUE_SIMPLE_MANUAL_PERMISSION_ENFORCEMENT,
                 enforcePermissionFix.locations.last(),
                 message,
                 lintFix
         )
+
+        if (enforcePermissionFix.errorLevel) {
+            incident.overrideSeverity(Severity.ERROR)
+        }
+
+        context.report(incident)
     }
 
     /**
