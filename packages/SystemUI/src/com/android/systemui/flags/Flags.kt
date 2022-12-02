@@ -405,8 +405,8 @@ object Flags {
     val LEAVE_SHADE_OPEN_FOR_BUGREPORT =
         unreleasedFlag(1800, "leave_shade_open_for_bugreport", teamfood = true)
 
-    // 1900 - note task
-    @JvmField val NOTE_TASKS = sysPropBooleanFlag(1900, "persist.sysui.debug.note_tasks")
+    // 1900
+    @JvmField val NOTE_TASKS = unreleasedFlag(1900, "keycode_flag")
 
     // 2000 - device controls
     @Keep @JvmField val USE_APP_PANELS = unreleasedFlag(2000, "use_app_panels", teamfood = true)
