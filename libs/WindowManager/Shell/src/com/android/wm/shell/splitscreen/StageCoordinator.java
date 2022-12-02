@@ -669,6 +669,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSplitLayout.init();
         mSplitLayout.setDivideRatio(splitRatio);
 
+        // Apply surface bounds before animation start.
+        SurfaceControl.Transaction startT = mTransactionPool.acquire();
+        updateSurfaceBounds(mSplitLayout, startT, false /* applyResizingOffset */);
+        startT.apply();
+        mTransactionPool.release(startT);
+
         // Set false to avoid record new bounds with old task still on top;
         mShouldUpdateRecents = false;
         mIsDividerRemoteAnimating = true;
@@ -742,7 +748,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSyncQueue.queue(wct);
         mSyncQueue.runInSync(t -> {
             setDividerVisibility(true, t);
-            updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
         });
 
         setEnterInstanceId(instanceId);
