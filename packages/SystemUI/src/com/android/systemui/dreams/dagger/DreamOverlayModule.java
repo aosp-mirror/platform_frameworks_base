@@ -16,6 +16,7 @@
 
 package com.android.systemui.dreams.dagger;
 
+import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -29,19 +30,24 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayContainerView;
 import com.android.systemui.dreams.DreamOverlayStatusBarView;
+import com.android.systemui.dreams.touch.DreamTouchHandler;
 import com.android.systemui.touch.TouchInsetManager;
-
-import java.util.concurrent.Executor;
-
-import javax.inject.Named;
 
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ElementsIntoSet;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.Executor;
+
+import javax.inject.Named;
 
 /** Dagger module for {@link DreamOverlayComponent}. */
 @Module
 public abstract class DreamOverlayModule {
+    public static final String DREAM_TOUCH_HANDLERS = "dream_touch_handlers";
     public static final String DREAM_OVERLAY_CONTENT_VIEW = "dream_overlay_content_view";
     public static final String MAX_BURN_IN_OFFSET = "max_burn_in_offset";
     public static final String BURN_IN_PROTECTION_UPDATE_INTERVAL =
@@ -260,5 +266,12 @@ public abstract class DreamOverlayModule {
     @DreamOverlayComponent.DreamOverlayScope
     static Lifecycle providesLifecycle(LifecycleOwner lifecycleOwner) {
         return lifecycleOwner.getLifecycle();
+    }
+
+    @Provides
+    @ElementsIntoSet
+    static Set<DreamTouchHandler> providesDreamTouchHandlers(
+            @Named(DREAM_TOUCH_HANDLERS) @Nullable Set<DreamTouchHandler> touchHandlers) {
+        return touchHandlers != null ? touchHandlers : new HashSet<>();
     }
 }

@@ -146,7 +146,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         final ViewModelStore viewModelStore = new ViewModelStore();
         final Complication.Host host =
                 () -> mExecutor.execute(DreamOverlayService.this::requestExit);
-        mDreamOverlayComponent = dreamOverlayComponentFactory.create(viewModelStore, host);
+
+        mDreamOverlayComponent = dreamOverlayComponentFactory.create(viewModelStore, host, null);
         mLifecycleRegistry = mDreamOverlayComponent.getLifecycleRegistry();
 
         mExecutor.execute(() -> setCurrentStateLocked(Lifecycle.State.CREATED));

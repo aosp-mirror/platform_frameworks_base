@@ -19,6 +19,7 @@ package com.android.systemui.dreams;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -46,6 +47,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
+import com.android.systemui.dreams.touch.BouncerSwipeTouchHandler;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -111,6 +113,9 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     ViewGroup mDreamOverlayContainerViewParent;
 
     @Mock
+    BouncerSwipeTouchHandler mBouncerSwipeTouchHandler;
+
+    @Mock
     UiEventLogger mUiEventLogger;
 
     @Captor
@@ -130,8 +135,10 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 .thenReturn(mLifecycleRegistry);
         when(mDreamOverlayComponent.getDreamOverlayTouchMonitor())
                 .thenReturn(mDreamOverlayTouchMonitor);
+        // TODO(b/261781069): A touch handler should be passed in from the complication component
+        // when the complication component is introduced.
         when(mDreamOverlayComponentFactory
-                .create(any(), any()))
+                .create(any(), any(), isNull()))
                 .thenReturn(mDreamOverlayComponent);
         when(mDreamOverlayContainerViewController.getContainerView())
                 .thenReturn(mDreamOverlayContainerView);

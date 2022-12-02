@@ -16,7 +16,11 @@
 
 package com.android.systemui.dreams.dagger;
 
+import static com.android.systemui.dreams.dagger.DreamOverlayModule.DREAM_TOUCH_HANDLERS;
+
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import android.annotation.Nullable;
 
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
@@ -26,15 +30,18 @@ import com.android.systemui.dreams.DreamOverlayContainerViewController;
 import com.android.systemui.dreams.complication.Complication;
 import com.android.systemui.dreams.complication.dagger.ComplicationModule;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
+import com.android.systemui.dreams.touch.DreamTouchHandler;
 import com.android.systemui.dreams.touch.dagger.DreamTouchModule;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-
-import javax.inject.Scope;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.util.Set;
+
+import javax.inject.Named;
+import javax.inject.Scope;
 
 /**
  * Dagger subcomponent for {@link DreamOverlayModule}.
@@ -50,7 +57,9 @@ public interface DreamOverlayComponent {
     @Subcomponent.Factory
     interface Factory {
         DreamOverlayComponent create(@BindsInstance ViewModelStore store,
-                @BindsInstance Complication.Host host);
+                @BindsInstance Complication.Host host,
+                @BindsInstance @Named(DREAM_TOUCH_HANDLERS) @Nullable
+                        Set<DreamTouchHandler> dreamTouchHandlers);
     }
 
     /** Scope annotation for singleton items within the {@link DreamOverlayComponent}. */
