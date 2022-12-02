@@ -22,7 +22,7 @@ public class FuzzBinder {
     }
 
     // DO NOT REUSE: This API should be called from fuzzer to setup JNI dependencies from
-    // libandroid_runtime. THIS IS WORKAROUND. Please file a bug if you need to use this
+    // libandroid_runtime. THIS IS WORKAROUND. Please file a bug if you need to use this.
     public static void init() {
         System.loadLibrary("android_runtime");
         registerNatives();
