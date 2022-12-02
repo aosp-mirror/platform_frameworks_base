@@ -33,6 +33,7 @@ import com.android.systemui.assist.AssistModule;
 import com.android.systemui.biometrics.AlternateUdfpsTouchProvider;
 import com.android.systemui.biometrics.UdfpsDisplayModeProvider;
 import com.android.systemui.biometrics.dagger.BiometricsModule;
+import com.android.systemui.biometrics.dagger.UdfpsModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule;
 import com.android.systemui.controls.dagger.ControlsModule;
@@ -154,6 +155,7 @@ import dagger.Provides;
             TelephonyRepositoryModule.class,
             TemporaryDisplayModule.class,
             TunerModule.class,
+            UdfpsModule.class,
             UserModule.class,
             UtilModule.class,
             NoteTaskModule.class,
