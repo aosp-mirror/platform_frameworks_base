@@ -10069,6 +10069,7 @@ package android.content {
     field public static final String BATTERY_SERVICE = "batterymanager";
     field public static final int BIND_ABOVE_CLIENT = 8; // 0x8
     field public static final int BIND_ADJUST_WITH_ACTIVITY = 128; // 0x80
+    field public static final int BIND_ALLOW_ACTIVITY_STARTS = 512; // 0x200
     field public static final int BIND_ALLOW_OOM_MANAGEMENT = 16; // 0x10
     field public static final int BIND_AUTO_CREATE = 1; // 0x1
     field public static final int BIND_DEBUG_UNBIND = 2; // 0x2

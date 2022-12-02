@@ -543,6 +543,7 @@ message ConnectionRecordProto {
         DEAD = 15;
         NOT_PERCEPTIBLE = 16;
         INCLUDE_CAPABILITIES = 17;
+        ALLOW_ACTIVITY_STARTS = 18;
     }
     repeated Flag flags = 3;
     optional string service_name = 4;
