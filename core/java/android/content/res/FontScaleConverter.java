@@ -36,11 +36,6 @@ import java.util.Arrays;
  * @hide
  */
 public class FontScaleConverter {
-    /**
-     * How close the given SP should be to a canonical SP in the array before they are considered
-     * the same for lookup purposes.
-     */
-    private static final float THRESHOLD_FOR_MATCHING_SP = 0.02f;
 
     @VisibleForTesting
     final float[] mFromSpValues;
@@ -78,10 +73,11 @@ public class FontScaleConverter {
     public float convertSpToDp(float sp) {
         final float spPositive = Math.abs(sp);
         // TODO(b/247861374): find a match at a higher index?
-        final int spRounded = Math.round(spPositive);
         final float sign = Math.signum(sp);
-        final int index = Arrays.binarySearch(mFromSpValues, spRounded);
-        if (index >= 0 && Math.abs(spRounded - spPositive) < THRESHOLD_FOR_MATCHING_SP) {
+        // We search for exact matches only, even if it's just a little off. The interpolation will
+        // handle any non-exact matches.
+        final int index = Arrays.binarySearch(mFromSpValues, spPositive);
+        if (index >= 0) {
             // exact match, return the matching dp
             return sign * mToDpValues[index];
         } else {
