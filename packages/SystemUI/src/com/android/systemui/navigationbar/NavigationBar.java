@@ -57,13 +57,12 @@ import static com.android.systemui.statusbar.phone.CentralSurfaces.dumpBarTransi
 import static com.android.systemui.util.Utils.isGesturalModeOnDefaultDisplay;
 
 import android.annotation.IdRes;
+import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.StatusBarManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
@@ -120,7 +119,6 @@ import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -138,6 +136,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.settings.UserContextProvider;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper;
 import com.android.systemui.shared.recents.utilities.Utilities;
@@ -208,7 +207,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final NotificationRemoteInputManager mNotificationRemoteInputManager;
     private final OverviewProxyService mOverviewProxyService;
     private final NavigationModeController mNavigationModeController;
-    private final BroadcastDispatcher mBroadcastDispatcher;
+    private final UserTracker mUserTracker;
     private final CommandQueue mCommandQueue;
     private final Optional<Pip> mPipOptional;
     private final Optional<Recents> mRecentsOptional;
@@ -516,7 +515,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             StatusBarStateController statusBarStateController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             SysUiState sysUiFlagsContainer,
-            BroadcastDispatcher broadcastDispatcher,
+            UserTracker userTracker,
             CommandQueue commandQueue,
             Optional<Pip> pipOptional,
             Optional<Recents> recentsOptional,
@@ -559,7 +558,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mNotificationRemoteInputManager = notificationRemoteInputManager;
         mOverviewProxyService = overviewProxyService;
         mNavigationModeController = navigationModeController;
-        mBroadcastDispatcher = broadcastDispatcher;
+        mUserTracker = userTracker;
         mCommandQueue = commandQueue;
         mPipOptional = pipOptional;
         mRecentsOptional = recentsOptional;
@@ -745,9 +744,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         prepareNavigationBarView();
         checkNavBarModes();
 
-        IntentFilter filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
-        mBroadcastDispatcher.registerReceiverWithHandler(mBroadcastReceiver, filter,
-                Handler.getMain(), UserHandle.ALL);
+        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());
         mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
         notifyNavigationBarScreenOn();
 
@@ -798,7 +795,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mView.setUpdateActiveTouchRegionsCallback(null);
         getBarTransitions().destroy();
         mOverviewProxyService.removeCallback(mOverviewProxyListener);
-        mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
+        mUserTracker.removeCallback(mUserChangedCallback);
         mWakefulnessLifecycle.removeObserver(mWakefulnessObserver);
         if (mOrientationHandle != null) {
             resetSecondaryHandle();
@@ -1743,21 +1740,14 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         }
     };
 
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // TODO(193941146): Currently unregistering a receiver through BroadcastDispatcher is
-            // async, but we've already cleared the fields. Just return early in this case.
-            if (mView == null) {
-                return;
-            }
-            String action = intent.getAction();
-            if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                // The accessibility settings may be different for the new user
-                updateAccessibilityStateFlags();
-            }
-        }
-    };
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    // The accessibility settings may be different for the new user
+                    updateAccessibilityStateFlags();
+                }
+            };
 
     @VisibleForTesting
     int getNavigationIconHints() {
