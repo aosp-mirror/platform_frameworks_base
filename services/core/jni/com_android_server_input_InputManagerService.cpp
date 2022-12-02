@@ -310,7 +310,7 @@ public:
             const InputDeviceIdentifier& identifier) override;
     std::string getDeviceAlias(const InputDeviceIdentifier& identifier) override;
     TouchAffineTransformation getTouchAffineTransformation(const std::string& inputDeviceDescriptor,
-                                                           int32_t surfaceRotation) override;
+                                                           ui::Rotation surfaceRotation) override;
 
     TouchAffineTransformation getTouchAffineTransformation(JNIEnv* env, jfloatArray matrixArr);
     void notifyStylusGestureStarted(int32_t deviceId, nsecs_t eventTime) override;
@@ -1153,7 +1153,7 @@ TouchAffineTransformation NativeInputManager::getTouchAffineTransformation(
 }
 
 TouchAffineTransformation NativeInputManager::getTouchAffineTransformation(
-        const std::string& inputDeviceDescriptor, int32_t surfaceRotation) {
+        const std::string& inputDeviceDescriptor, ui::Rotation surfaceRotation) {
     JNIEnv* env = jniEnv();
 
     ScopedLocalRef<jstring> descriptorObj(env, env->NewStringUTF(inputDeviceDescriptor.c_str()));
