@@ -20,6 +20,7 @@ import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD;
 import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
@@ -82,7 +83,10 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR(1235),
 
         @UiEvent(doc = "FSI suppressed for requiring neither HUN nor keyguard")
-        FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD(1236);
+        FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD(1236),
+
+        @UiEvent(doc = "HUN suppressed for old when")
+        HUN_SUPPRESSED_OLD_WHEN(1237);
 
         private final int mId;
 
@@ -346,6 +350,10 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
+        if (shouldSuppressHeadsUpWhenAwakeForOldWhen(entry, log)) {
+            return false;
+        }
+
         for (int i = 0; i < mSuppressors.size(); i++) {
             if (mSuppressors.get(i).suppressAwakeHeadsUp(entry)) {
                 if (log) mLogger.logNoHeadsUpSuppressedBy(entry, mSuppressors.get(i));
@@ -470,4 +478,51 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     private boolean isSnoozedPackage(StatusBarNotification sbn) {
         return mHeadsUpManager.isSnoozed(sbn.getPackageName());
     }
+
+    private boolean shouldSuppressHeadsUpWhenAwakeForOldWhen(NotificationEntry entry, boolean log) {
+        if (!mFlags.isNoHunForOldWhenEnabled()) {
+            return false;
+        }
+
+        final Notification notification = entry.getSbn().getNotification();
+        if (notification == null) {
+            return false;
+        }
+
+        final long when = notification.when;
+        final long now = System.currentTimeMillis();
+        final long age = now - when;
+
+        if (age < MAX_HUN_WHEN_AGE_MS) {
+            return false;
+        }
+
+        if (when <= 0) {
+            // Some notifications (including many system notifications) are posted with the "when"
+            // field set to 0. Nothing in the Javadocs for Notification mentions a special meaning
+            // for a "when" of 0, but Android didn't even exist at the dawn of the Unix epoch.
+            // Therefore, assume that these notifications effectively don't have a "when" value,
+            // and don't suppress HUNs.
+            if (log) mLogger.logMaybeHeadsUpDespiteOldWhen(entry, when, age, "when <= 0");
+            return false;
+        }
+
+        if (notification.fullScreenIntent != null) {
+            if (log) mLogger.logMaybeHeadsUpDespiteOldWhen(entry, when, age, "full-screen intent");
+            return false;
+        }
+
+        if (notification.isForegroundService()) {
+            if (log) mLogger.logMaybeHeadsUpDespiteOldWhen(entry, when, age, "foreground service");
+            return false;
+        }
+
+        if (log) mLogger.logNoHeadsUpOldWhen(entry, when, age);
+        final int uid = entry.getSbn().getUid();
+        final String packageName = entry.getSbn().getPackageName();
+        mUiEventLogger.log(NotificationInterruptEvent.HUN_SUPPRESSED_OLD_WHEN, uid, packageName);
+        return true;
+    }
+
+    public static final long MAX_HUN_WHEN_AGE_MS = 24 * 60 * 60 * 1000;
 }
