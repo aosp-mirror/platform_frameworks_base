@@ -8878,14 +8878,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public List<DisplayInfo> getPossibleDisplayInfo(int displayId, String packageName) {
+    public List<DisplayInfo> getPossibleDisplayInfo(int displayId) {
         final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                if (packageName == null || !isRecentsComponent(packageName, callingUid)) {
-                    Slog.e(TAG, "Unable to verify uid for package " + packageName
-                            + " for getPossibleMaximumWindowMetrics");
+                if (!mAtmService.isCallerRecents(callingUid)) {
+                    Slog.e(TAG, "Unable to verify uid for getPossibleDisplayInfo"
+                            + " on uid " + callingUid);
                     return new ArrayList<>();
                 }
 
@@ -8901,31 +8901,6 @@ public class WindowManagerService extends IWindowManager.Stub
         // Retrieve the DisplayInfo for all possible rotations across all possible display
         // layouts.
         return mPossibleDisplayInfoMapper.getPossibleDisplayInfos(displayId);
-    }
-
-    /**
-     * Returns {@code true} when the calling package is the recents component.
-     */
-    boolean isRecentsComponent(@NonNull String callingPackageName, int callingUid) {
-        String recentsPackage;
-        try {
-            String recentsComponent = mContext.getResources().getString(
-                    R.string.config_recentsComponentName);
-            if (recentsComponent == null) {
-                return false;
-            }
-            recentsPackage = ComponentName.unflattenFromString(recentsComponent).getPackageName();
-        } catch (Resources.NotFoundException e) {
-            Slog.e(TAG, "Unable to verify if recents component", e);
-            return false;
-        }
-        try {
-            return callingUid == mContext.getPackageManager().getPackageUid(callingPackageName, 0)
-                    && callingPackageName.equals(recentsPackage);
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(TAG, "Unable to verify if recents component", e);
-            return false;
-        }
     }
 
     void grantEmbeddedWindowFocus(Session session, IBinder focusToken, boolean grantFocus) {

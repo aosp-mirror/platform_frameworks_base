@@ -16,7 +16,6 @@
 
 package com.android.keyguard;
 
-import android.annotation.CallSuper;
 import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -140,16 +139,6 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
 
     @Override
     public void showMessage(CharSequence message, ColorStateList colorState) {
-    }
-
-    /**
-     * Reload colors from resources.
-     **/
-    @CallSuper
-    public void reloadColors() {
-        if (mEmergencyButton != null) {
-            mEmergencyButton.reloadColors();
-        }
     }
 
     public void startAppearAnimation() {

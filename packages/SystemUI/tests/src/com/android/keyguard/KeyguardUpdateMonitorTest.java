@@ -609,6 +609,64 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testUnlockingWithFaceAllowed_strongAuthTrackerUnlockingWithBiometricAllowed() {
+        // GIVEN unlocking with biometric is allowed
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
+
+        // THEN unlocking with face and fp is allowed
+        Assert.assertTrue(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                BiometricSourceType.FACE));
+        Assert.assertTrue(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                BiometricSourceType.FINGERPRINT));
+    }
+
+    @Test
+    public void testUnlockingWithFaceAllowed_strongAuthTrackerUnlockingWithBiometricNotAllowed() {
+        // GIVEN unlocking with biometric is not allowed
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(false);
+
+        // THEN unlocking with face is not allowed
+        Assert.assertFalse(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                BiometricSourceType.FACE));
+    }
+
+    @Test
+    public void testUnlockingWithFaceAllowed_fingerprintLockout() {
+        // GIVEN unlocking with biometric is allowed
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
+
+        // WHEN fingerprint is locked out
+        fingerprintErrorLockedOut();
+
+        // THEN unlocking with face is not allowed
+        Assert.assertFalse(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                BiometricSourceType.FACE));
+    }
+
+    @Test
+    public void testUnlockingWithFpAllowed_strongAuthTrackerUnlockingWithBiometricNotAllowed() {
+        // GIVEN unlocking with biometric is not allowed
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(false);
+
+        // THEN unlocking with fingerprint is not allowed
+        Assert.assertFalse(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                BiometricSourceType.FINGERPRINT));
+    }
+
+    @Test
+    public void testUnlockingWithFpAllowed_fingerprintLockout() {
+        // GIVEN unlocking with biometric is allowed
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
+
+        // WHEN fingerprint is locked out
+        fingerprintErrorLockedOut();
+
+        // THEN unlocking with fingeprint is not allowed
+        Assert.assertFalse(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                BiometricSourceType.FINGERPRINT));
+    }
+
+    @Test
     public void testTriesToAuthenticate_whenBouncer() {
         setKeyguardBouncerVisibility(true);
 
@@ -1282,6 +1340,24 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // THEN face unlock is running
         assertThat(mKeyguardUpdateMonitor.isFaceDetectionRunning()).isEqualTo(true);
+    }
+
+    @Test
+    public void testRequestFaceAuthFromOccludingApp_whenInvoked_startsFaceAuth() {
+        mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(true);
+
+        assertThat(mKeyguardUpdateMonitor.isFaceDetectionRunning()).isTrue();
+    }
+
+    @Test
+    public void testRequestFaceAuthFromOccludingApp_whenInvoked_stopsFaceAuth() {
+        mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(true);
+
+        assertThat(mKeyguardUpdateMonitor.isFaceDetectionRunning()).isTrue();
+
+        mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
+
+        assertThat(mKeyguardUpdateMonitor.isFaceDetectionRunning()).isFalse();
     }
 
     @Test

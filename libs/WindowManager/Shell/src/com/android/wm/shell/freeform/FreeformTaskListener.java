@@ -82,7 +82,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener {
         mTasks.put(taskInfo.taskId, state);
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
             SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-            mWindowDecorationViewModel.createWindowDecoration(taskInfo, leash, t, t);
+            mWindowDecorationViewModel.onTaskOpening(taskInfo, leash, t, t);
             t.apply();
         }
 
