@@ -38,9 +38,9 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-class AirplaneModeViewModelTest : SysuiTestCase() {
+class AirplaneModeViewModelImplTest : SysuiTestCase() {
 
-    private lateinit var underTest: AirplaneModeViewModel
+    private lateinit var underTest: AirplaneModeViewModelImpl
 
     @Mock private lateinit var logger: ConnectivityPipelineLogger
     private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
@@ -57,7 +57,7 @@ class AirplaneModeViewModelTest : SysuiTestCase() {
         scope = CoroutineScope(IMMEDIATE)
 
         underTest =
-            AirplaneModeViewModel(
+            AirplaneModeViewModelImpl(
                 interactor,
                 logger,
                 scope,

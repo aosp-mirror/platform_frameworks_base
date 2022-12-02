@@ -34,16 +34,36 @@ import kotlinx.coroutines.flow.map
  * This interactor processes information from our data layer into information that the UI layer can
  * use.
  */
-@SysUISingleton
-class WifiInteractor @Inject constructor(
-    connectivityRepository: ConnectivityRepository,
-    wifiRepository: WifiRepository,
-) {
+interface WifiInteractor {
     /**
      * The SSID (service set identifier) of the wifi network. Null if we don't have a network, or
      * have a network but no valid SSID.
      */
-    val ssid: Flow<String?> = wifiRepository.wifiNetwork.map { info ->
+    val ssid: Flow<String?>
+
+    /** Our current enabled status. */
+    val isEnabled: Flow<Boolean>
+
+    /** Our current default status. */
+    val isDefault: Flow<Boolean>
+
+    /** Our current wifi network. See [WifiNetworkModel]. */
+    val wifiNetwork: Flow<WifiNetworkModel>
+
+    /** Our current wifi activity. See [WifiActivityModel]. */
+    val activity: StateFlow<WifiActivityModel>
+
+    /** True if we're configured to force-hide the wifi icon and false otherwise. */
+    val isForceHidden: Flow<Boolean>
+}
+
+@SysUISingleton
+class WifiInteractorImpl @Inject constructor(
+    connectivityRepository: ConnectivityRepository,
+    wifiRepository: WifiRepository,
+) : WifiInteractor {
+
+    override val ssid: Flow<String?> = wifiRepository.wifiNetwork.map { info ->
         when (info) {
             is WifiNetworkModel.Inactive -> null
             is WifiNetworkModel.CarrierMerged -> null
@@ -56,20 +76,15 @@ class WifiInteractor @Inject constructor(
         }
     }
 
-    /** Our current enabled status. */
-    val isEnabled: Flow<Boolean> = wifiRepository.isWifiEnabled
+    override val isEnabled: Flow<Boolean> = wifiRepository.isWifiEnabled
 
-    /** Our current default status. */
-    val isDefault: Flow<Boolean> = wifiRepository.isWifiDefault
+    override val isDefault: Flow<Boolean> = wifiRepository.isWifiDefault
 
-    /** Our current wifi network. See [WifiNetworkModel]. */
-    val wifiNetwork: Flow<WifiNetworkModel> = wifiRepository.wifiNetwork
+    override val wifiNetwork: Flow<WifiNetworkModel> = wifiRepository.wifiNetwork
 
-    /** Our current wifi activity. See [WifiActivityModel]. */
-    val activity: StateFlow<WifiActivityModel> = wifiRepository.wifiActivity
+    override val activity: StateFlow<WifiActivityModel> = wifiRepository.wifiActivity
 
-    /** True if we're configured to force-hide the wifi icon and false otherwise. */
-    val isForceHidden: Flow<Boolean> = connectivityRepository.forceHiddenSlots.map {
+    override val isForceHidden: Flow<Boolean> = connectivityRepository.forceHiddenSlots.map {
         it.contains(ConnectivitySlot.WIFI)
     }
 }
