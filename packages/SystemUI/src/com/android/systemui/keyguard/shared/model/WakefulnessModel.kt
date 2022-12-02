@@ -15,24 +15,34 @@
  */
 package com.android.systemui.keyguard.shared.model
 
-/** Model device wakefulness states. */
-enum class WakefulnessModel {
-    /** The device is asleep and not interactive. */
-    ASLEEP,
-    /** Received a signal that the device is beginning to wake up. */
-    STARTING_TO_WAKE,
-    /** Device is now fully awake and interactive. */
-    AWAKE,
-    /** Signal that the device is now going to sleep. */
-    STARTING_TO_SLEEP;
+import com.android.systemui.keyguard.WakefulnessLifecycle
 
+/** Model device wakefulness states. */
+data class WakefulnessModel(
+    val state: WakefulnessState,
+    val isWakingUpOrAwake: Boolean,
+    val lastWakeReason: WakeSleepReason,
+    val lastSleepReason: WakeSleepReason,
+) {
     companion object {
         fun isSleepingOrStartingToSleep(model: WakefulnessModel): Boolean {
-            return model == ASLEEP || model == STARTING_TO_SLEEP
+            return model.state == WakefulnessState.ASLEEP ||
+                model.state == WakefulnessState.STARTING_TO_SLEEP
         }
 
         fun isWakingOrStartingToWake(model: WakefulnessModel): Boolean {
-            return model == AWAKE || model == STARTING_TO_WAKE
+            return model.state == WakefulnessState.AWAKE ||
+                model.state == WakefulnessState.STARTING_TO_WAKE
+        }
+
+        fun fromWakefulnessLifecycle(wakefulnessLifecycle: WakefulnessLifecycle): WakefulnessModel {
+            return WakefulnessModel(
+                WakefulnessState.fromWakefulnessLifecycleInt(wakefulnessLifecycle.wakefulness),
+                wakefulnessLifecycle.wakefulness == WakefulnessLifecycle.WAKEFULNESS_WAKING ||
+                    wakefulnessLifecycle.wakefulness == WakefulnessLifecycle.WAKEFULNESS_AWAKE,
+                WakeSleepReason.fromPowerManagerWakeReason(wakefulnessLifecycle.lastWakeReason),
+                WakeSleepReason.fromPowerManagerSleepReason(wakefulnessLifecycle.lastSleepReason),
+            )
         }
     }
 }

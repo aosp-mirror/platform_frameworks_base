@@ -598,6 +598,10 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
                     getFingerprintSensorLocationInNaturalOrientation(),
                     mCachedDisplayInfo);
         }
+
+        for (final Callback cb : mCallbacks) {
+            cb.onFingerprintLocationChanged();
+        }
     }
 
     /**
@@ -618,6 +622,10 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
                             (int) (mFaceSensorLocationDefault.y * mScaleFactor)),
                     mCachedDisplayInfo
             );
+        }
+
+        for (final Callback cb : mCallbacks) {
+            cb.onFaceSensorLocationChanged();
         }
     }
 
@@ -1265,8 +1273,24 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         default void onBiometricPromptDismissed() {}
 
         /**
-         * The location in pixels can change due to resolution changes.
+         * Called when the location of the fingerprint sensor changes. The location in pixels can
+         * change due to resolution changes.
+         */
+        default void onFingerprintLocationChanged() {}
+
+        /**
+         * Called when the location of the under display fingerprint sensor changes. The location in
+         * pixels can change due to resolution changes.
+         *
+         * On devices with UDFPS, this is always called alongside
+         * {@link #onFingerprintLocationChanged}.
          */
         default void onUdfpsLocationChanged() {}
+
+        /**
+         * Called when the location of the face unlock sensor (typically the front facing camera)
+         * changes. The location in pixels can change due to resolution changes.
+         */
+        default void onFaceSensorLocationChanged() {}
     }
 }
