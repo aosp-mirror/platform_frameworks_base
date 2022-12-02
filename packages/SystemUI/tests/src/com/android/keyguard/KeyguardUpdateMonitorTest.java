@@ -780,6 +780,15 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testFingerprintPowerPressed_restartsFingerprintListeningStateImmediately() {
+        mKeyguardUpdateMonitor.mFingerprintAuthenticationCallback
+                .onAuthenticationError(FingerprintManager.BIOMETRIC_ERROR_POWER_PRESSED, "");
+
+        verify(mFingerprintManager).authenticate(any(), any(), any(), any(), anyInt(), anyInt(),
+                anyInt());
+    }
+
+    @Test
     public void testOnFaceAuthenticated_skipsFaceWhenAuthenticated() {
         // test whether face will be skipped if authenticated, so the value of isStrongBiometric
         // doesn't matter here
@@ -919,8 +928,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
         verify(mFingerprintManager).authenticate(any(), any(), any(), any(), anyInt(), anyInt(),
                 anyInt());
-//        resetFaceManager();
-//        resetFingerprintManager();
 
         when(mFingerprintManager.getLockoutModeForUser(eq(FINGERPRINT_SENSOR_ID), eq(newUser)))
                 .thenReturn(fingerprintLockoutMode);
