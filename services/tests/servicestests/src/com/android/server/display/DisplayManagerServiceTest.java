@@ -319,7 +319,7 @@ public class DisplayManagerServiceTest {
 
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
 
-        final int displayIds[] = bs.getDisplayIds();
+        final int[] displayIds = bs.getDisplayIds(/* includeDisabled= */ true);
         final int size = displayIds.length;
         assertTrue(size > 0);
 
@@ -1417,7 +1417,8 @@ public class DisplayManagerServiceTest {
             DisplayManagerService.BinderService displayManagerBinderService,
             FakeDisplayDevice displayDevice) {
 
-        final int[] displayIds = displayManagerBinderService.getDisplayIds();
+        final int[] displayIds = displayManagerBinderService.getDisplayIds(
+                /* includeDisabled= */ true);
         assertTrue(displayIds.length > 0);
         int displayId = Display.INVALID_DISPLAY;
         for (int i = 0; i < displayIds.length; i++) {
