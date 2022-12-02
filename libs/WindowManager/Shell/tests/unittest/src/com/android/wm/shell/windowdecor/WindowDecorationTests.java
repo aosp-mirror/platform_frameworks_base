@@ -113,6 +113,12 @@ public class WindowDecorationTests extends ShellTestCase {
         mMockSurfaceControlFinishT = createMockSurfaceControlTransaction();
         mMockSurfaceControlAddWindowT = createMockSurfaceControlTransaction();
 
+        mRelayoutParams.mLayoutResId = 0;
+        mRelayoutParams.mCaptionHeightId = R.dimen.test_freeform_decor_caption_height;
+        // Caption should have fixed width except in testLayoutResultCalculation_fullWidthCaption()
+        mRelayoutParams.mCaptionWidthId = R.dimen.test_freeform_decor_caption_width;
+        mRelayoutParams.mShadowRadiusId = R.dimen.test_window_decor_shadow_radius;
+
         doReturn(mMockSurfaceControlViewHost).when(mMockSurfaceControlViewHostFactory)
                 .create(any(), any(), any());
     }
@@ -435,6 +441,58 @@ public class WindowDecorationTests extends ShellTestCase {
         assertThat(additionalWindow.mWindowSurface).isNull();
     }
 
+    @Test
+    public void testLayoutResultCalculation_fullWidthCaption() {
+        final Display defaultDisplay = mock(Display.class);
+        doReturn(defaultDisplay).when(mMockDisplayController)
+                .getDisplay(Display.DEFAULT_DISPLAY);
+
+        final SurfaceControl decorContainerSurface = mock(SurfaceControl.class);
+        final SurfaceControl.Builder decorContainerSurfaceBuilder =
+                createMockSurfaceControlBuilder(decorContainerSurface);
+        mMockSurfaceControlBuilders.add(decorContainerSurfaceBuilder);
+        final SurfaceControl taskBackgroundSurface = mock(SurfaceControl.class);
+        final SurfaceControl.Builder taskBackgroundSurfaceBuilder =
+                createMockSurfaceControlBuilder(taskBackgroundSurface);
+        mMockSurfaceControlBuilders.add(taskBackgroundSurfaceBuilder);
+        final SurfaceControl captionContainerSurface = mock(SurfaceControl.class);
+        final SurfaceControl.Builder captionContainerSurfaceBuilder =
+                createMockSurfaceControlBuilder(captionContainerSurface);
+        mMockSurfaceControlBuilders.add(captionContainerSurfaceBuilder);
+
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        mMockSurfaceControlTransactions.add(t);
+        final ActivityManager.TaskDescription.Builder taskDescriptionBuilder =
+                new ActivityManager.TaskDescription.Builder()
+                        .setBackgroundColor(Color.YELLOW);
+        final ActivityManager.RunningTaskInfo taskInfo = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setTaskDescriptionBuilder(taskDescriptionBuilder)
+                .setBounds(TASK_BOUNDS)
+                .setPositionInParent(TASK_POSITION_IN_PARENT.x, TASK_POSITION_IN_PARENT.y)
+                .setVisible(true)
+                .build();
+        taskInfo.isFocused = true;
+        taskInfo.configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT * 2;
+        mRelayoutParams.setOutsets(
+                R.dimen.test_window_decor_left_outset,
+                R.dimen.test_window_decor_top_outset,
+                R.dimen.test_window_decor_right_outset,
+                R.dimen.test_window_decor_bottom_outset);
+        final SurfaceControl taskSurface = mock(SurfaceControl.class);
+        final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo, taskSurface);
+
+        mRelayoutParams.mCaptionWidthId = Resources.ID_NULL;
+        windowDecor.relayout(taskInfo);
+
+        verify(captionContainerSurfaceBuilder).setParent(decorContainerSurface);
+        verify(captionContainerSurfaceBuilder).setContainerLayer();
+        verify(mMockSurfaceControlStartT).setPosition(captionContainerSurface, 20, 40);
+        // Width of the captionContainerSurface should match the width of TASK_BOUNDS
+        verify(mMockSurfaceControlStartT).setWindowCrop(captionContainerSurface, 300, 64);
+        verify(mMockSurfaceControlStartT).show(captionContainerSurface);
+    }
+
     private TestWindowDecoration createWindowDecoration(
             ActivityManager.RunningTaskInfo taskInfo, SurfaceControl testSurface) {
         return new TestWindowDecoration(InstrumentationRegistry.getInstrumentation().getContext(),
@@ -490,11 +548,6 @@ public class WindowDecorationTests extends ShellTestCase {
 
         @Override
         void relayout(ActivityManager.RunningTaskInfo taskInfo) {
-            mRelayoutParams.mLayoutResId = 0;
-            mRelayoutParams.mCaptionHeightId = R.dimen.test_freeform_decor_caption_height;
-            mRelayoutParams.mCaptionWidthId = R.dimen.test_freeform_decor_caption_width;
-            mRelayoutParams.mShadowRadiusId = R.dimen.test_window_decor_shadow_radius;
-
             relayout(mRelayoutParams, mMockSurfaceControlStartT, mMockSurfaceControlFinishT,
                     mMockWindowContainerTransaction, mMockView, mRelayoutResult);
         }
