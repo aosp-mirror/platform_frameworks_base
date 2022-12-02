@@ -35,8 +35,9 @@ import org.junit.Before
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @SmallTest
-class WifiInteractorTest : SysuiTestCase() {
+class WifiInteractorImplTest : SysuiTestCase() {
 
     private lateinit var underTest: WifiInteractor
 
@@ -47,7 +48,7 @@ class WifiInteractorTest : SysuiTestCase() {
     fun setUp() {
         connectivityRepository = FakeConnectivityRepository()
         wifiRepository = FakeWifiRepository()
-        underTest = WifiInteractor(connectivityRepository, wifiRepository)
+        underTest = WifiInteractorImpl(connectivityRepository, wifiRepository)
     }
 
     @Test
