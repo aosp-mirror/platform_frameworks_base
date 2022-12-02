@@ -78,7 +78,6 @@ static jlong Make(JNIEnv* env, jobject thiz, jobjectArray attributeArray, jint v
     auto meshSpecResult = SkMeshSpecification::Make(attributes, vertexStride, varyings,
                                                     SkString(skVertexShader.c_str()),
                                                     SkString(skFragmentShader.c_str()));
-
     if (meshSpecResult.specification.get() == nullptr) {
         jniThrowException(env, "java/lang/IllegalArgumentException", meshSpecResult.error.c_str());
     }
