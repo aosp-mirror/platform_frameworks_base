@@ -341,7 +341,8 @@ public class BootReceiver extends BroadcastReceiver {
         // non-proto tombstones, even though proto tombstones do not support including the counter
         // of events dropped since rate limiting activated yet.
         DropboxRateLimiter.RateLimitResult rateLimitResult =
-                sDropboxRateLimiter.shouldRateLimit(TAG_TOMBSTONE, processName);
+                sDropboxRateLimiter.shouldRateLimit(
+                       proto ? TAG_TOMBSTONE_PROTO : TAG_TOMBSTONE, processName);
         if (rateLimitResult.shouldRateLimit()) return;
 
         HashMap<String, Long> timestamps = readTimestamps();
