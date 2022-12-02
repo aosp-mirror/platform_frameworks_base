@@ -4618,20 +4618,20 @@ public final class NotificationPanelViewController implements Dumpable {
                         return false;
                     }
 
-                    // If the view that would receive the touch is disabled, just have status bar
-                    // eat the gesture.
-                    if (event.getAction() == MotionEvent.ACTION_DOWN && !mView.isEnabled()) {
-                        Log.v(TAG,
-                                String.format(
-                                        "onTouchForwardedFromStatusBar: "
-                                                + "panel view disabled, eating touch at (%d,%d)",
-                                        (int) event.getX(),
-                                        (int) event.getY()
-                                )
-                        );
-                        return true;
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        // If the view that would receive the touch is disabled, just have status
+                        // bar eat the gesture.
+                        if (!mView.isEnabled()) {
+                            mShadeLog.logMotionEvent(event,
+                                    "onTouchForwardedFromStatusBar: panel view disabled");
+                            return true;
+                        }
+                        if (isFullyCollapsed() && event.getY() < 1f) {
+                            // b/235889526 Eat events on the top edge of the phone when collapsed
+                            mShadeLog.logMotionEvent(event, "top edge touch ignored");
+                            return true;
+                        }
                     }
-
                     return mView.dispatchTouchEvent(event);
                 }
             };

@@ -843,11 +843,22 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     public void handleTouchEventFromStatusBar_panelAndViewEnabled_viewReceivesEvent() {
         when(mCommandQueue.panelsEnabled()).thenReturn(true);
         when(mView.isEnabled()).thenReturn(true);
-        MotionEvent event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0);
+        MotionEvent event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 2f, 0);
 
         mNotificationPanelViewController.getStatusBarTouchEventHandler().handleTouchEvent(event);
 
         verify(mView).dispatchTouchEvent(event);
+    }
+
+    @Test
+    public void handleTouchEventFromStatusBar_topEdgeTouch_viewNeverReceivesEvent() {
+        when(mCommandQueue.panelsEnabled()).thenReturn(true);
+        when(mView.isEnabled()).thenReturn(true);
+        MotionEvent event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0);
+
+        mNotificationPanelViewController.getStatusBarTouchEventHandler().handleTouchEvent(event);
+
+        verify(mView, never()).dispatchTouchEvent(event);
     }
 
     @Test
