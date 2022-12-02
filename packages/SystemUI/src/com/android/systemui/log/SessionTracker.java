@@ -49,7 +49,9 @@ import javax.inject.Inject;
 @SysUISingleton
 public class SessionTracker implements CoreStartable {
     private static final String TAG = "SessionTracker";
-    private static final boolean DEBUG = false;
+
+    // To enable logs: `adb shell setprop log.tag.SessionTracker DEBUG` & restart sysui
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     // At most 20 bits: ~1m possibilities, ~0.5% probability of collision in 100 values
     private final InstanceIdSequence mInstanceIdGenerator = new InstanceIdSequence(1 << 20);
@@ -81,8 +83,8 @@ public class SessionTracker implements CoreStartable {
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mKeyguardStateController.addCallback(mKeyguardStateCallback);
 
-        mKeyguardSessionStarted = mKeyguardStateController.isShowing();
-        if (mKeyguardSessionStarted) {
+        if (mKeyguardStateController.isShowing()) {
+            mKeyguardSessionStarted = true;
             startSession(SESSION_KEYGUARD);
         }
     }
@@ -136,12 +138,11 @@ public class SessionTracker implements CoreStartable {
             new KeyguardUpdateMonitorCallback() {
         @Override
         public void onStartedGoingToSleep(int why) {
-            // we need to register to the KeyguardUpdateMonitor lifecycle b/c it gets called
-            // before the WakefulnessLifecycle
             if (mKeyguardSessionStarted) {
-                return;
+                endSession(SESSION_KEYGUARD);
             }
 
+            // Start a new session whenever the device goes to sleep
             mKeyguardSessionStarted = true;
             startSession(SESSION_KEYGUARD);
         }
@@ -154,6 +155,9 @@ public class SessionTracker implements CoreStartable {
             boolean wasSessionStarted = mKeyguardSessionStarted;
             boolean keyguardShowing = mKeyguardStateController.isShowing();
             if (keyguardShowing && !wasSessionStarted) {
+                // the keyguard can start showing without the device going to sleep (ie: lockdown
+                // from the power button), so we start a new keyguard session when the keyguard is
+                // newly shown in addition to when the device starts going to sleep
                 mKeyguardSessionStarted = true;
                 startSession(SESSION_KEYGUARD);
             } else if (!keyguardShowing && wasSessionStarted) {

@@ -234,7 +234,10 @@ public class StatusBarManager {
 
     /**
      * Session flag for {@link #registerSessionListener} indicating the listener
-     * is interested in sessions on the keygaurd
+     * is interested in sessions on the keygaurd.
+     * Keyguard Session Boundaries:
+     *     START_SESSION: device starts going to sleep OR the keyguard is newly shown
+     *     END_SESSION: device starts going to sleep OR keyguard is no longer showing
      * @hide
      */
     public static final int SESSION_KEYGUARD = 1 << 0;
