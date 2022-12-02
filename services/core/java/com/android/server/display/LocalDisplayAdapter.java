@@ -226,6 +226,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private SurfaceControl.DisplayMode[] mSfDisplayModes;
         // The active display mode in SurfaceFlinger
         private SurfaceControl.DisplayMode mActiveSfDisplayMode;
+        // The active display vsync period in SurfaceFlinger
+        private float mActiveRenderFrameRate;
 
         private DisplayEventReceiver.FrameRateOverride[] mFrameRateOverrides =
                 new DisplayEventReceiver.FrameRateOverride[0];
@@ -267,7 +269,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 SurfaceControl.DesiredDisplayModeSpecs modeSpecs) {
             boolean changed = updateDisplayModesLocked(
                     dynamicInfo.supportedDisplayModes, dynamicInfo.preferredBootDisplayMode,
-                    dynamicInfo.activeDisplayModeId, modeSpecs);
+                    dynamicInfo.activeDisplayModeId, dynamicInfo.renderFrameRate, modeSpecs);
             changed |= updateStaticInfo(staticInfo);
             changed |= updateColorModesLocked(dynamicInfo.supportedColorModes,
                     dynamicInfo.activeColorMode);
@@ -283,7 +285,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
         public boolean updateDisplayModesLocked(
                 SurfaceControl.DisplayMode[] displayModes, int preferredSfDisplayModeId,
-                int activeSfDisplayModeId, SurfaceControl.DesiredDisplayModeSpecs modeSpecs) {
+                int activeSfDisplayModeId, float renderFrameRate,
+                SurfaceControl.DesiredDisplayModeSpecs modeSpecs) {
             mSfDisplayModes = Arrays.copyOf(displayModes, displayModes.length);
             mActiveSfDisplayMode = getModeById(displayModes, activeSfDisplayModeId);
             SurfaceControl.DisplayMode preferredSfDisplayMode =
@@ -379,6 +382,16 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 sendTraversalRequestLocked();
             }
 
+            boolean renderFrameRateChanged = false;
+
+            if (mActiveRenderFrameRate > 0 &&  mActiveRenderFrameRate != renderFrameRate) {
+                Slog.d(TAG, "The render frame rate was changed from SurfaceFlinger or the display"
+                        + " device to " + renderFrameRate);
+                mActiveRenderFrameRate = renderFrameRate;
+                renderFrameRateChanged = true;
+                sendTraversalRequestLocked();
+            }
+
             // Check whether surface flinger spontaneously changed display config specs out from
             // under us. If so, schedule a traversal to reapply our display config specs.
             if (mDisplayModeSpecs.baseModeId != INVALID_MODE_ID) {
@@ -398,7 +411,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             boolean recordsChanged = records.size() != mSupportedModes.size() || modesAdded;
             // If the records haven't changed then we're done here.
             if (!recordsChanged) {
-                return activeModeChanged || preferredModeChanged;
+                return activeModeChanged || preferredModeChanged || renderFrameRateChanged;
             }
 
             mSupportedModes.clear();
@@ -410,16 +423,19 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             if (mDefaultModeId == INVALID_MODE_ID) {
                 mDefaultModeId = activeRecord.mMode.getModeId();
                 mDefaultModeGroup = mActiveSfDisplayMode.group;
+                mActiveRenderFrameRate = renderFrameRate;
             } else if (modesAdded && activeModeChanged) {
                 Slog.d(TAG, "New display modes are added and the active mode has changed, "
                         + "use active mode as default mode.");
                 mDefaultModeId = activeRecord.mMode.getModeId();
                 mDefaultModeGroup = mActiveSfDisplayMode.group;
+                mActiveRenderFrameRate = renderFrameRate;
             } else if (findSfDisplayModeIdLocked(mDefaultModeId, mDefaultModeGroup) < 0) {
                 Slog.w(TAG, "Default display mode no longer available, using currently"
                         + " active mode as default.");
                 mDefaultModeId = activeRecord.mMode.getModeId();
                 mDefaultModeGroup = mActiveSfDisplayMode.group;
+                mActiveRenderFrameRate = renderFrameRate;
             }
 
             // Determine whether the display mode specs' base mode is still there.
@@ -620,6 +636,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.width = mActiveSfDisplayMode.width;
                 mInfo.height = mActiveSfDisplayMode.height;
                 mInfo.modeId = mActiveModeId;
+                mInfo.renderFrameRate = mActiveRenderFrameRate;
                 mInfo.defaultModeId = getPreferredModeId();
                 mInfo.supportedModes = getDisplayModes(mSupportedModes);
                 mInfo.colorMode = mActiveColorMode;
@@ -995,8 +1012,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             updateDeviceInfoLocked();
         }
 
-        public void onActiveDisplayModeChangedLocked(int sfModeId) {
-            if (updateActiveModeLocked(sfModeId)) {
+        public void onActiveDisplayModeChangedLocked(int sfModeId, float renderFrameRate) {
+            if (updateActiveModeLocked(sfModeId, renderFrameRate)) {
                 updateDeviceInfoLocked();
             }
         }
@@ -1008,8 +1025,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             }
         }
 
-        public boolean updateActiveModeLocked(int activeSfModeId) {
-            if (mActiveSfDisplayMode.id == activeSfModeId) {
+        public boolean updateActiveModeLocked(int activeSfModeId, float renderFrameRate) {
+            if (mActiveSfDisplayMode.id == activeSfModeId
+                    && mActiveRenderFrameRate == renderFrameRate) {
                 return false;
             }
             mActiveSfDisplayMode = getModeById(mSfDisplayModes, activeSfModeId);
@@ -1018,6 +1036,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 Slog.w(TAG, "In unknown mode after setting allowed modes"
                         + ", activeModeId=" + activeSfModeId);
             }
+            mActiveRenderFrameRate = renderFrameRate;
             return true;
         }
 
@@ -1114,6 +1133,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 pw.println("  " + sfDisplayMode);
             }
             pw.println("mActiveSfDisplayMode=" + mActiveSfDisplayMode);
+            pw.println("mActiveRenderFrameRate=" + mActiveRenderFrameRate);
             pw.println("mSupportedModes=");
             for (int i = 0; i < mSupportedModes.size(); i++) {
                 pw.println("  " + mSupportedModes.valueAt(i));
@@ -1288,7 +1308,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     public interface DisplayEventListener {
         void onHotplug(long timestampNanos, long physicalDisplayId, boolean connected);
-        void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId);
+        void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId,
+                long renderPeriod);
         void onFrameRateOverridesChanged(long timestampNanos, long physicalDisplayId,
                 DisplayEventReceiver.FrameRateOverride[] overrides);
 
@@ -1309,8 +1330,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId) {
-            mListener.onModeChanged(timestampNanos, physicalDisplayId, modeId);
+        public void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId,
+                long renderPeriod) {
+            mListener.onModeChanged(timestampNanos, physicalDisplayId, modeId, renderPeriod);
         }
 
         @Override
@@ -1333,12 +1355,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId) {
+        public void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId,
+                long renderPeriod) {
             if (DEBUG) {
                 Slog.d(TAG, "onModeChanged("
                         + "timestampNanos=" + timestampNanos
                         + ", physicalDisplayId=" + physicalDisplayId
-                        + ", modeId=" + modeId + ")");
+                        + ", modeId=" + modeId
+                        + ", renderPeriod=" + renderPeriod + ")");
             }
             synchronized (getSyncRoot()) {
                 LocalDisplayDevice device = mDevices.get(physicalDisplayId);
@@ -1349,7 +1373,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     }
                     return;
                 }
-                device.onActiveDisplayModeChangedLocked(modeId);
+                float renderFrameRate = 1e9f / renderPeriod;
+                device.onActiveDisplayModeChangedLocked(modeId, renderFrameRate);
             }
         }
 

@@ -446,6 +446,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo.width = mWidth;
                 mInfo.height = mHeight;
                 mInfo.modeId = mMode.getModeId();
+                mInfo.renderFrameRate = mMode.getRefreshRate();
                 mInfo.defaultModeId = mMode.getModeId();
                 mInfo.supportedModes = new Display.Mode[] { mMode };
                 mInfo.densityDpi = mDensityDpi;

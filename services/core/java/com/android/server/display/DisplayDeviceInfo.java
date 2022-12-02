@@ -237,6 +237,12 @@ final class DisplayDeviceInfo {
     public int modeId;
 
     /**
+     * The render frame rate this display is scheduled at.
+     * @see android.view.DisplayInfo#renderFrameRate for more details.
+     */
+    public float renderFrameRate;
+
+    /**
      * The default mode of the display.
      */
     public int defaultModeId;
@@ -431,6 +437,7 @@ final class DisplayDeviceInfo {
                 || width != other.width
                 || height != other.height
                 || modeId != other.modeId
+                || renderFrameRate != other.renderFrameRate
                 || defaultModeId != other.defaultModeId
                 || !Arrays.equals(supportedModes, other.supportedModes)
                 || !Arrays.equals(supportedColorModes, other.supportedColorModes)
@@ -475,6 +482,7 @@ final class DisplayDeviceInfo {
         width = other.width;
         height = other.height;
         modeId = other.modeId;
+        renderFrameRate = other.renderFrameRate;
         defaultModeId = other.defaultModeId;
         supportedModes = other.supportedModes;
         colorMode = other.colorMode;
@@ -515,6 +523,7 @@ final class DisplayDeviceInfo {
         sb.append(name).append("\": uniqueId=\"").append(uniqueId).append("\", ");
         sb.append(width).append(" x ").append(height);
         sb.append(", modeId ").append(modeId);
+        sb.append(", renderFrameRate ").append(renderFrameRate);
         sb.append(", defaultModeId ").append(defaultModeId);
         sb.append(", supportedModes ").append(Arrays.toString(supportedModes));
         sb.append(", colorMode ").append(colorMode);

@@ -1164,6 +1164,76 @@ public class DisplayManagerServiceTest {
     }
 
     /**
+     * Tests that there is a display change notification if the render frame rate is updated
+     */
+    @Test
+    public void testShouldNotifyChangeWhenDisplayInfoRenderFrameRateChanged() throws Exception {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        registerDefaultDisplays(displayManager);
+        displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+
+        FakeDisplayDevice displayDevice = createFakeDisplayDevice(displayManager, new float[]{60f});
+        FakeDisplayManagerCallback callback = registerDisplayListenerCallback(displayManager,
+                displayManagerBinderService, displayDevice);
+
+        updateRenderFrameRate(displayManager, displayDevice, 30f);
+        assertTrue(callback.mDisplayChangedCalled);
+        callback.clear();
+
+        updateRenderFrameRate(displayManager, displayDevice, 30f);
+        assertFalse(callback.mDisplayChangedCalled);
+
+        updateRenderFrameRate(displayManager, displayDevice, 20f);
+        assertTrue(callback.mDisplayChangedCalled);
+        callback.clear();
+    }
+
+    /**
+     * Tests that the DisplayInfo is updated correctly with a render frame rate
+     */
+    @Test
+    public void testDisplayInfoRenderFrameRate() throws Exception {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        registerDefaultDisplays(displayManager);
+        displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+
+        FakeDisplayDevice displayDevice = createFakeDisplayDevice(displayManager,
+                new float[]{60f, 30f, 20f});
+        int displayId = getDisplayIdForDisplayDevice(displayManager, displayManagerBinderService,
+                displayDevice);
+        DisplayInfo displayInfo = displayManagerBinderService.getDisplayInfo(displayId);
+        assertEquals(60f, displayInfo.getRefreshRate(), 0.01f);
+
+        updateRenderFrameRate(displayManager, displayDevice, 20f);
+        displayInfo = displayManagerBinderService.getDisplayInfo(displayId);
+        assertEquals(20f, displayInfo.getRefreshRate(), 0.01f);
+    }
+
+    /**
+     * Tests that the mode reflects the render frame rate is in compat mode
+     */
+    @Test
+    @DisableCompatChanges({DisplayManagerService.DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE})
+    public  void testDisplayInfoRenderFrameRateModeCompat() throws Exception {
+        testDisplayInfoRenderFrameRateModeCompat(/*compatChangeEnabled*/ false);
+    }
+
+    /**
+     * Tests that the mode reflects the physical display refresh rate when not in compat mode.
+     */
+    @Test
+    @EnableCompatChanges({DisplayManagerService.DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE})
+    public  void testDisplayInfoRenderFrameRateMode() throws Exception {
+        testDisplayInfoRenderFrameRateModeCompat(/*compatChangeEnabled*/ true);
+    }
+
+    /**
      * Tests that EVENT_DISPLAY_ADDED is sent when a display is added.
      */
     @Test
@@ -1383,6 +1453,34 @@ public class DisplayManagerServiceTest {
         assertEquals(expectedMode, displayInfo.getMode());
     }
 
+    private void testDisplayInfoRenderFrameRateModeCompat(boolean compatChangeEnabled)
+            throws Exception {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        registerDefaultDisplays(displayManager);
+        displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+
+        FakeDisplayDevice displayDevice = createFakeDisplayDevice(displayManager,
+                new float[]{60f, 30f, 20f});
+        int displayId = getDisplayIdForDisplayDevice(displayManager, displayManagerBinderService,
+                displayDevice);
+        DisplayInfo displayInfo = displayManagerBinderService.getDisplayInfo(displayId);
+        assertEquals(60f, displayInfo.getRefreshRate(), 0.01f);
+
+        updateRenderFrameRate(displayManager, displayDevice, 20f);
+        displayInfo = displayManagerBinderService.getDisplayInfo(displayId);
+        assertEquals(20f, displayInfo.getRefreshRate(), 0.01f);
+        Display.Mode expectedMode;
+        if (compatChangeEnabled) {
+            expectedMode = new Display.Mode(1, 100, 200, 60f);
+        } else {
+            expectedMode = new Display.Mode(3, 100, 200, 20f);
+        }
+        assertEquals(expectedMode, displayInfo.getMode());
+    }
+
     private void testDisplayInfoNonNativeFrameRateOverrideMode(boolean compatChangeEnabled) {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mBasicInjector);
@@ -1452,6 +1550,15 @@ public class DisplayManagerServiceTest {
         updateDisplayDeviceInfo(displayManager, displayDevice, displayDeviceInfo);
     }
 
+    private void updateRenderFrameRate(DisplayManagerService displayManager,
+            FakeDisplayDevice displayDevice,
+            float renderFrameRate) {
+        DisplayDeviceInfo displayDeviceInfo = new DisplayDeviceInfo();
+        displayDeviceInfo.copyFrom(displayDevice.getDisplayDeviceInfoLocked());
+        displayDeviceInfo.renderFrameRate = renderFrameRate;
+        updateDisplayDeviceInfo(displayManager, displayDevice, displayDeviceInfo);
+    }
+
     private void updateModeId(DisplayManagerService displayManager,
             FakeDisplayDevice displayDevice,
             int modeId) {
@@ -1491,6 +1598,7 @@ public class DisplayManagerServiceTest {
                     new Display.Mode(i + 1, width, height, refreshRates[i]);
         }
         displayDeviceInfo.modeId = 1;
+        displayDeviceInfo.renderFrameRate = displayDeviceInfo.supportedModes[0].getRefreshRate();
         displayDeviceInfo.width = width;
         displayDeviceInfo.height = height;
         final Rect zeroRect = new Rect();

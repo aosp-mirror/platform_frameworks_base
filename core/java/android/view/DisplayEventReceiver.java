@@ -227,8 +227,10 @@ public abstract class DisplayEventReceiver {
      * timebase.
      * @param physicalDisplayId Stable display ID that uniquely describes a (display, port) pair.
      * @param modeId The new mode Id
+     * @param renderPeriod The render frame period, which is a multiple of the mode's vsync period
      */
-    public void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId) {
+    public void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId,
+            long renderPeriod) {
     }
 
     /**
@@ -303,8 +305,9 @@ public abstract class DisplayEventReceiver {
 
     // Called from native code.
     @SuppressWarnings("unused")
-    private void dispatchModeChanged(long timestampNanos, long physicalDisplayId, int modeId) {
-        onModeChanged(timestampNanos, physicalDisplayId, modeId);
+    private void dispatchModeChanged(long timestampNanos, long physicalDisplayId, int modeId,
+            long renderPeriod) {
+        onModeChanged(timestampNanos, physicalDisplayId, modeId, renderPeriod);
     }
 
     // Called from native code.

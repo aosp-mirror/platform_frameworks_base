@@ -340,6 +340,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 mInfo.width = mode.getPhysicalWidth();
                 mInfo.height = mode.getPhysicalHeight();
                 mInfo.modeId = mode.getModeId();
+                mInfo.renderFrameRate = mode.getRefreshRate();
                 mInfo.defaultModeId = mModes[0].getModeId();
                 mInfo.supportedModes = mModes;
                 mInfo.densityDpi = rawMode.mDensityDpi;

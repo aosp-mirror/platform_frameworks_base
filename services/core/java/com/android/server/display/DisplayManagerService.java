@@ -35,6 +35,7 @@ import static android.hardware.display.DisplayManagerGlobal.DisplayEvent;
 import static android.hardware.display.DisplayViewport.VIEWPORT_EXTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_INTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_VIRTUAL;
+import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.ROOT_UID;
 
 import android.Manifest;
@@ -881,20 +882,27 @@ public final class DisplayManagerService extends SystemService {
 
     private DisplayInfo getDisplayInfoForFrameRateOverride(DisplayEventReceiver.FrameRateOverride[]
             frameRateOverrides, DisplayInfo info, int callingUid) {
-        float frameRateHz = 0;
+        float frameRateHz = info.renderFrameRate;
         for (DisplayEventReceiver.FrameRateOverride frameRateOverride : frameRateOverrides) {
             if (frameRateOverride.uid == callingUid) {
                 frameRateHz = frameRateOverride.frameRateHz;
                 break;
             }
         }
+
         if (frameRateHz == 0) {
             return info;
         }
 
+        // For non-apps users we always return the physical refresh rate from display mode
+        boolean displayModeReturnsPhysicalRefreshRate =
+                callingUid < FIRST_APPLICATION_UID
+                        || CompatChanges.isChangeEnabled(
+                                DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE, callingUid);
+
         // Override the refresh rate only if it is a divisor of the current
         // refresh rate. This calculation needs to be in sync with the native code
-        // in RefreshRateConfigs::getFrameRateDivisor
+        // in RefreshRateSelector::getFrameRateDivisor
         Display.Mode currentMode = info.getMode();
         float numPeriods = currentMode.getRefreshRate() / frameRateHz;
         float numPeriodsRound = Math.round(numPeriods);
@@ -918,8 +926,7 @@ public final class DisplayManagerService extends SystemService {
                 }
                 overriddenInfo.refreshRateOverride = mode.getRefreshRate();
 
-                if (!CompatChanges.isChangeEnabled(DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE,
-                        callingUid)) {
+                if (!displayModeReturnsPhysicalRefreshRate) {
                     overriddenInfo.modeId = mode.getModeId();
                 }
                 return overriddenInfo;
@@ -927,8 +934,7 @@ public final class DisplayManagerService extends SystemService {
         }
 
         overriddenInfo.refreshRateOverride = frameRateHz;
-        if (!CompatChanges.isChangeEnabled(DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE,
-                callingUid)) {
+        if (!displayModeReturnsPhysicalRefreshRate) {
             overriddenInfo.supportedModes = Arrays.copyOf(info.supportedModes,
                     info.supportedModes.length + 1);
             overriddenInfo.supportedModes[overriddenInfo.supportedModes.length - 1] =
