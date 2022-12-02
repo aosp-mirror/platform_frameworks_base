@@ -21,50 +21,52 @@ import android.content.Context
 import com.android.systemui.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.statusbar.policy.FlashlightController
+import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
 
 @SysUISingleton
-class FlashlightQuickAffordanceConfig @Inject constructor(
-        @Application private val context: Context,
-        private val flashlightController: FlashlightController,
+class FlashlightQuickAffordanceConfig
+@Inject
+constructor(
+    @Application private val context: Context,
+    private val flashlightController: FlashlightController,
 ) : KeyguardQuickAffordanceConfig {
 
     private sealed class FlashlightState {
 
         abstract fun toLockScreenState(): KeyguardQuickAffordanceConfig.LockScreenState
 
-        object On: FlashlightState() {
+        object On : FlashlightState() {
             override fun toLockScreenState(): KeyguardQuickAffordanceConfig.LockScreenState =
                 KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                     Icon.Resource(
-                        R.drawable.ic_flashlight_on,
+                        R.drawable.qs_flashlight_icon_on,
                         ContentDescription.Resource(R.string.quick_settings_flashlight_label)
                     ),
                     ActivationState.Active
                 )
         }
 
-        object OffAvailable: FlashlightState() {
+        object OffAvailable : FlashlightState() {
             override fun toLockScreenState(): KeyguardQuickAffordanceConfig.LockScreenState =
                 KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                     Icon.Resource(
-                        R.drawable.ic_flashlight_off,
+                        R.drawable.qs_flashlight_icon_off,
                         ContentDescription.Resource(R.string.quick_settings_flashlight_label)
                     ),
                     ActivationState.Inactive
                 )
         }
 
-        object Unavailable: FlashlightState() {
+        object Unavailable : FlashlightState() {
             override fun toLockScreenState(): KeyguardQuickAffordanceConfig.LockScreenState =
                 KeyguardQuickAffordanceConfig.LockScreenState.Hidden
         }
@@ -77,57 +79,57 @@ class FlashlightQuickAffordanceConfig @Inject constructor(
         get() = context.getString(R.string.quick_settings_flashlight_label)
 
     override val pickerIconResourceId: Int
-        get() = if (flashlightController.isEnabled) {
-            R.drawable.ic_flashlight_on
-        } else {
-            R.drawable.ic_flashlight_off
-        }
+        get() = R.drawable.ic_flashlight_off
 
     override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState> =
-            conflatedCallbackFlow {
-        val flashlightCallback = object : FlashlightController.FlashlightListener {
-            override fun onFlashlightChanged(enabled: Boolean) {
-                trySendWithFailureLogging(
-                    if (enabled) {
-                        FlashlightState.On.toLockScreenState()
-                    } else {
-                        FlashlightState.OffAvailable.toLockScreenState()
-                    },
-                    TAG
-                )
-            }
+        conflatedCallbackFlow {
+            val flashlightCallback =
+                object : FlashlightController.FlashlightListener {
+                    override fun onFlashlightChanged(enabled: Boolean) {
+                        trySendWithFailureLogging(
+                            if (enabled) {
+                                FlashlightState.On.toLockScreenState()
+                            } else {
+                                FlashlightState.OffAvailable.toLockScreenState()
+                            },
+                            TAG
+                        )
+                    }
 
-            override fun onFlashlightError() {
-                trySendWithFailureLogging(FlashlightState.OffAvailable.toLockScreenState(), TAG)
-            }
+                    override fun onFlashlightError() {
+                        trySendWithFailureLogging(
+                            FlashlightState.OffAvailable.toLockScreenState(),
+                            TAG
+                        )
+                    }
 
-            override fun onFlashlightAvailabilityChanged(available: Boolean) {
-                trySendWithFailureLogging(
-                    if (!available) {
-                        FlashlightState.Unavailable.toLockScreenState()
-                    } else {
-                        if (flashlightController.isEnabled) {
-                            FlashlightState.On.toLockScreenState()
-                        } else {
-                            FlashlightState.OffAvailable.toLockScreenState()
-                        }
-                    },
-                    TAG
-                )
-            }
+                    override fun onFlashlightAvailabilityChanged(available: Boolean) {
+                        trySendWithFailureLogging(
+                            if (!available) {
+                                FlashlightState.Unavailable.toLockScreenState()
+                            } else {
+                                if (flashlightController.isEnabled) {
+                                    FlashlightState.On.toLockScreenState()
+                                } else {
+                                    FlashlightState.OffAvailable.toLockScreenState()
+                                }
+                            },
+                            TAG
+                        )
+                    }
+                }
+
+            flashlightController.addCallback(flashlightCallback)
+
+            awaitClose { flashlightController.removeCallback(flashlightCallback) }
         }
 
-        flashlightController.addCallback(flashlightCallback)
-
-        awaitClose {
-            flashlightController.removeCallback(flashlightCallback)
-        }
-    }
-
-    override fun onTriggered(expandable: Expandable?):
-            KeyguardQuickAffordanceConfig.OnTriggeredResult {
-        flashlightController
-                .setFlashlight(flashlightController.isAvailable && !flashlightController.isEnabled)
+    override fun onTriggered(
+        expandable: Expandable?
+    ): KeyguardQuickAffordanceConfig.OnTriggeredResult {
+        flashlightController.setFlashlight(
+            flashlightController.isAvailable && !flashlightController.isEnabled
+        )
         return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
     }
 
