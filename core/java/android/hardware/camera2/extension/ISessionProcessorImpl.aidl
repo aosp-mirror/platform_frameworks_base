@@ -19,6 +19,8 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.extension.CameraSessionConfig;
 import android.hardware.camera2.extension.ICaptureCallback;
 import android.hardware.camera2.extension.IRequestProcessorImpl;
+import android.hardware.camera2.extension.LatencyPair;
+import android.hardware.camera2.extension.LatencyRange;
 import android.hardware.camera2.extension.OutputSurface;
 
 /** @hide */
@@ -34,4 +36,5 @@ interface ISessionProcessorImpl
     int startCapture(in ICaptureCallback callback);
     void setParameters(in CaptureRequest captureRequest);
     int startTrigger(in CaptureRequest captureRequest, in ICaptureCallback callback);
+    @nullable LatencyPair getRealtimeCaptureLatency();
 }

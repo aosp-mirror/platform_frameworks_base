@@ -48,6 +48,7 @@ import android.hardware.camera2.extension.IRequestCallback;
 import android.hardware.camera2.extension.IRequestProcessorImpl;
 import android.hardware.camera2.extension.IRequestUpdateProcessorImpl;
 import android.hardware.camera2.extension.ISessionProcessorImpl;
+import android.hardware.camera2.extension.LatencyPair;
 import android.hardware.camera2.extension.LatencyRange;
 import android.hardware.camera2.extension.OutputConfigId;
 import android.hardware.camera2.extension.OutputSurface;
@@ -1266,6 +1267,21 @@ public class CameraExtensionsProxyService extends Service {
         public int startCapture(ICaptureCallback callback) {
             return mSessionProcessor.startCapture(new CaptureCallbackStub(callback, mCameraId));
         }
+
+        @Override
+        public LatencyPair getRealtimeCaptureLatency() {
+            if (LATENCY_IMPROVEMENTS_SUPPORTED) {
+                Pair<Long, Long> latency = mSessionProcessor.getRealtimeCaptureLatency();
+                if (latency != null) {
+                    LatencyPair ret = new LatencyPair();
+                    ret.first = latency.first;
+                    ret.second = latency.second;
+                    return ret;
+                }
+            }
+
+            return null;
+        }
     }
 
     private class OutputSurfaceConfigurationImplStub implements OutputSurfaceConfigurationImpl {
@@ -1570,6 +1586,21 @@ public class CameraExtensionsProxyService extends Service {
                     LatencyRange ret = new LatencyRange();
                     ret.min = latencyRange.getLower();
                     ret.max = latencyRange.getUpper();
+                    return ret;
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        public LatencyPair getRealtimeCaptureLatency() {
+            if (LATENCY_IMPROVEMENTS_SUPPORTED) {
+                Pair<Long, Long> latency = mImageExtender.getRealtimeCaptureLatency();
+                if (latency != null) {
+                    LatencyPair ret = new LatencyPair();
+                    ret.first = latency.first;
+                    ret.second = latency.second;
                     return ret;
                 }
             }
