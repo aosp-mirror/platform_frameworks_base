@@ -965,10 +965,16 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @VisibleForTesting
     @GuardedBy("mLock")
     void onActivityDestroyed(@NonNull Activity activity) {
+        if (!activity.isFinishing()) {
+            // onDestroyed is triggered without finishing. This happens when the activity is
+            // relaunched. In this case, we don't want to cleanup the record.
+            return;
+        }
         // Remove any pending appeared activity, as the server won't send finished activity to the
         // organizer.
+        final IBinder activityToken = activity.getActivityToken();
         for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
-            mTaskContainers.valueAt(i).onActivityDestroyed(activity);
+            mTaskContainers.valueAt(i).onActivityDestroyed(activityToken);
         }
         // We didn't trigger the callback if there were any pending appeared activities, so check
         // again after the pending is removed.
@@ -1170,16 +1176,33 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Returns a container that this activity is registered with. An activity can only belong to one
      * container, or no container at all.
      */
+    @GuardedBy("mLock")
     @Nullable
     TaskFragmentContainer getContainerWithActivity(@NonNull Activity activity) {
-        final IBinder activityToken = activity.getActivityToken();
+        return getContainerWithActivity(activity.getActivityToken());
+    }
+
+    @GuardedBy("mLock")
+    @Nullable
+    TaskFragmentContainer getContainerWithActivity(@NonNull IBinder activityToken) {
+        // Check pending appeared activity first because there can be a delay for the server
+        // update.
         for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
             final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i).mContainers;
-            // Traverse from top to bottom in case an activity is added to top pending, and hasn't
-            // received update from server yet.
             for (int j = containers.size() - 1; j >= 0; j--) {
                 final TaskFragmentContainer container = containers.get(j);
-                if (container.hasActivity(activityToken)) {
+                if (container.hasPendingAppearedActivity(activityToken)) {
+                    return container;
+                }
+            }
+        }
+
+        // Check appeared activity if there is no such pending appeared activity.
+        for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
+            final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i).mContainers;
+            for (int j = containers.size() - 1; j >= 0; j--) {
+                final TaskFragmentContainer container = containers.get(j);
+                if (container.hasAppearedActivity(activityToken)) {
                     return container;
                 }
             }
