@@ -22,6 +22,7 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import androidx.annotation.VisibleForTesting
 
 /**
  * A view that allows multiple ripples to play.
@@ -30,7 +31,8 @@ import android.view.View
  */
 class MultiRippleView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
-    internal val ripples = ArrayList<RippleAnimation>()
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+    val ripples = ArrayList<RippleAnimation>()
     private val listeners = ArrayList<RipplesFinishedListener>()
     private val ripplePaint = Paint()
     private var isWarningLogged = false
