@@ -67,7 +67,7 @@ constructor(
     @Application private val scope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val secureSettings: SecureSettings,
-    private val selectionsManager: KeyguardQuickAffordanceSelectionManager,
+    private val selectionsManager: KeyguardQuickAffordanceLocalUserSelectionManager,
 ) {
     companion object {
         private val BINDINGS =

@@ -111,6 +111,9 @@ public interface ShadeController {
     /** Handle status bar touch event. */
     void onStatusBarTouch(MotionEvent event);
 
+    /** Called when the shade finishes collapsing. */
+    void onClosingFinished();
+
     /** Sets the listener for when the visibility of the shade changes. */
     void setVisibilityListener(ShadeVisibilityListener listener);
 

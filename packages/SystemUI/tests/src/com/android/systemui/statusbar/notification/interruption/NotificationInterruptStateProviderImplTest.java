@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.notification.interruption;
 
 
 import static android.app.Notification.FLAG_BUBBLE;
+import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.Notification.GROUP_ALERT_SUMMARY;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
@@ -33,6 +34,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -388,6 +391,127 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         entry.notifyFullScreenIntentLaunched();
 
         assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isFalse();
+    }
+
+    private long makeWhenHoursAgo(long hoursAgo) {
+        return System.currentTimeMillis() - (1000 * 60 * 60 * hoursAgo);
+    }
+
+    @Test
+    public void testShouldHeadsUp_oldWhen_flagDisabled() throws Exception {
+        ensureStateForHeadsUpWhenAwake();
+        when(mFlags.isNoHunForOldWhenEnabled()).thenReturn(false);
+
+        NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
+        entry.getSbn().getNotification().when = makeWhenHoursAgo(25);
+
+        assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isTrue();
+
+        verify(mLogger, never()).logNoHeadsUpOldWhen(any(), anyLong(), anyLong());
+        verify(mLogger, never()).logMaybeHeadsUpDespiteOldWhen(any(), anyLong(), anyLong(), any());
+    }
+
+    @Test
+    public void testShouldHeadsUp_oldWhen_whenNow() throws Exception {
+        ensureStateForHeadsUpWhenAwake();
+        when(mFlags.isNoHunForOldWhenEnabled()).thenReturn(true);
+
+        NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
+
+        assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isTrue();
+
+        verify(mLogger, never()).logNoHeadsUpOldWhen(any(), anyLong(), anyLong());
+        verify(mLogger, never()).logMaybeHeadsUpDespiteOldWhen(any(), anyLong(), anyLong(), any());
+    }
+
+    @Test
+    public void testShouldHeadsUp_oldWhen_whenRecent() throws Exception {
+        ensureStateForHeadsUpWhenAwake();
+        when(mFlags.isNoHunForOldWhenEnabled()).thenReturn(true);
+
+        NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
+        entry.getSbn().getNotification().when = makeWhenHoursAgo(13);
+
+        assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isTrue();
+
+        verify(mLogger, never()).logNoHeadsUpOldWhen(any(), anyLong(), anyLong());
+        verify(mLogger, never()).logMaybeHeadsUpDespiteOldWhen(any(), anyLong(), anyLong(), any());
+    }
+
+    @Test
+    public void testShouldHeadsUp_oldWhen_whenZero() throws Exception {
+        ensureStateForHeadsUpWhenAwake();
+        when(mFlags.isNoHunForOldWhenEnabled()).thenReturn(true);
+
+        NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
+        entry.getSbn().getNotification().when = 0L;
+
+        assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isTrue();
+
+        verify(mLogger, never()).logNoHeadsUpOldWhen(any(), anyLong(), anyLong());
+        verify(mLogger).logMaybeHeadsUpDespiteOldWhen(eq(entry), eq(0L), anyLong(),
+                eq("when <= 0"));
+    }
+
+    @Test
+    public void testShouldHeadsUp_oldWhen_whenNegative() throws Exception {
+        ensureStateForHeadsUpWhenAwake();
+        when(mFlags.isNoHunForOldWhenEnabled()).thenReturn(true);
+
+        NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
+        entry.getSbn().getNotification().when = -1L;
+
+        assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isTrue();
+        verify(mLogger, never()).logNoHeadsUpOldWhen(any(), anyLong(), anyLong());
+        verify(mLogger).logMaybeHeadsUpDespiteOldWhen(eq(entry), eq(-1L), anyLong(),
+                eq("when <= 0"));
+    }
+
+    @Test
+    public void testShouldHeadsUp_oldWhen_hasFullScreenIntent() throws Exception {
+        ensureStateForHeadsUpWhenAwake();
+        when(mFlags.isNoHunForOldWhenEnabled()).thenReturn(true);
+        long when = makeWhenHoursAgo(25);
+
+        NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silent= */ false);
+        entry.getSbn().getNotification().when = when;
+
+        assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isTrue();
+
+        verify(mLogger, never()).logNoHeadsUpOldWhen(any(), anyLong(), anyLong());
+        verify(mLogger).logMaybeHeadsUpDespiteOldWhen(eq(entry), eq(when), anyLong(),
+                eq("full-screen intent"));
+    }
+
+    @Test
+    public void testShouldHeadsUp_oldWhen_isForegroundService() throws Exception {
+        ensureStateForHeadsUpWhenAwake();
+        when(mFlags.isNoHunForOldWhenEnabled()).thenReturn(true);
+        long when = makeWhenHoursAgo(25);
+
+        NotificationEntry entry = createFgsNotification(IMPORTANCE_HIGH);
+        entry.getSbn().getNotification().when = when;
+
+        assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isTrue();
+
+        verify(mLogger, never()).logNoHeadsUpOldWhen(any(), anyLong(), anyLong());
+        verify(mLogger).logMaybeHeadsUpDespiteOldWhen(eq(entry), eq(when), anyLong(),
+                eq("foreground service"));
+    }
+
+    @Test
+    public void testShouldNotHeadsUp_oldWhen() throws Exception {
+        ensureStateForHeadsUpWhenAwake();
+        when(mFlags.isNoHunForOldWhenEnabled()).thenReturn(true);
+        long when = makeWhenHoursAgo(25);
+
+        NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
+        entry.getSbn().getNotification().when = when;
+
+        assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isFalse();
+
+        verify(mLogger).logNoHeadsUpOldWhen(eq(entry), eq(when), anyLong());
+        verify(mLogger, never()).logMaybeHeadsUpDespiteOldWhen(any(), anyLong(), anyLong(), any());
     }
 
     @Test
@@ -758,6 +882,16 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                 .setFullScreenIntent(mPendingIntent, true)
                 .setGroup("fsi")
                 .setGroupAlertBehavior(silent ? GROUP_ALERT_SUMMARY : Notification.GROUP_ALERT_ALL)
+                .build();
+
+        return createNotification(importance, n);
+    }
+
+    private NotificationEntry createFgsNotification(int importance) {
+        Notification n = new Notification.Builder(getContext(), "a")
+                .setContentTitle("title")
+                .setContentText("content text")
+                .setFlag(FLAG_FOREGROUND_SERVICE, true)
                 .build();
 
         return createNotification(importance, n);

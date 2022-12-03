@@ -34,6 +34,7 @@
 #include <SkRuntimeEffect.h>
 #include <vector>
 
+enum class SkBlendMode;
 class SkRRect;
 
 namespace android {

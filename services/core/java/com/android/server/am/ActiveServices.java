@@ -132,6 +132,7 @@ import android.app.compat.CompatChanges;
 import android.app.usage.UsageEvents;
 import android.appwidget.AppWidgetManagerInternal;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.Overridable;
 import android.content.ComponentName;
@@ -150,6 +151,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.ServiceInfo.ForegroundServiceType;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
@@ -389,6 +391,14 @@ public final class ActiveServices {
     @ChangeId
     @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.S)
     static final long FGS_START_EXCEPTION_CHANGE_ID = 174041399L;
+
+    /**
+     * If enabled, the FGS type check against the manifest FSG type will be enabled for
+     * instant apps too. Before U, this check was only done for non-instant apps.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = VERSION_CODES.TIRAMISU)
+    static final long FGS_TYPE_CHECK_FOR_INSTANT_APPS = 261055255L;
 
     final Runnable mLastAnrDumpClearer = new Runnable() {
         @Override public void run() {
@@ -1818,38 +1828,43 @@ public final class ActiveServices {
                             android.Manifest.permission.FOREGROUND_SERVICE,
                             r.app.getPid(), r.appInfo.uid, "startForeground");
                 }
+            }
+            final int manifestType = r.serviceInfo.getForegroundServiceType();
+            // If passed in foreground service type is FOREGROUND_SERVICE_TYPE_MANIFEST,
+            // consider it is the same as manifest foreground service type.
+            if (foregroundServiceType == FOREGROUND_SERVICE_TYPE_MANIFEST) {
+                foregroundServiceType = manifestType;
+            }
 
-                // TODO(short-service): This part really should be above the if block,
-                // so we'll apply the same check for instant apps too.
-                int manifestType = r.serviceInfo.getForegroundServiceType();
-                // If passed in foreground service type is FOREGROUND_SERVICE_TYPE_MANIFEST,
-                // consider it is the same as manifest foreground service type.
-                if (foregroundServiceType == FOREGROUND_SERVICE_TYPE_MANIFEST) {
-                    foregroundServiceType = manifestType;
-                }
-
-                // Check the passed in foreground service type flags is a subset of manifest
-                // foreground service type flags.
-                final String prop = "debug.skip_fgs_manifest_type_check";
-                if (((foregroundServiceType & manifestType) != foregroundServiceType)
-                        // When building a test app on Studio, the SDK may not have all the
-                        // FGS types yet. This debug flag will allow using FGS types that are
-                        // not set in the manifest.
-                        && !SystemProperties.getBoolean(prop, false)) {
-                    throw new IllegalArgumentException("foregroundServiceType "
+            // Check the passed in foreground service type flags is a subset of manifest
+            // foreground service type flags.
+            final String prop = "debug.skip_fgs_manifest_type_check";
+            if (((foregroundServiceType & manifestType) != foregroundServiceType)
+                    // When building a test app on Studio, the SDK may not have all the
+                    // FGS types yet. This debug flag will allow using FGS types that are
+                    // not set in the manifest.
+                    && !SystemProperties.getBoolean(prop, false)) {
+                final String message = "foregroundServiceType "
                         + String.format("0x%08X", foregroundServiceType)
                         + " is not a subset of foregroundServiceType attribute "
-                        +  String.format("0x%08X", manifestType)
-                        + " in service element of manifest file");
+                        + String.format("0x%08X", manifestType)
+                        + " in service element of manifest file";
+                if (!r.appInfo.isInstantApp()
+                        || CompatChanges.isChangeEnabled(FGS_TYPE_CHECK_FOR_INSTANT_APPS,
+                        r.appInfo.uid)) {
+                    throw new IllegalArgumentException(message);
+                } else {
+                    Slog.w(TAG, message + "\n"
+                            + "This will be an exception once the target SDK level is UDC");
                 }
-                if ((foregroundServiceType & FOREGROUND_SERVICE_TYPE_SHORT_SERVICE) != 0
-                        && foregroundServiceType != FOREGROUND_SERVICE_TYPE_SHORT_SERVICE) {
-                    Slog.w(TAG_SERVICE, "startForeground(): FOREGROUND_SERVICE_TYPE_SHORT_SERVICE"
-                            + " is combined with other types. SHORT_SERVICE will be ignored.");
-                    // In this case, the service will be handled as a non-short, regular FGS
-                    // anyway, so we just remove the SHORT_SERVICE type.
-                    foregroundServiceType &= ~FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
-                }
+            }
+            if ((foregroundServiceType & FOREGROUND_SERVICE_TYPE_SHORT_SERVICE) != 0
+                    && foregroundServiceType != FOREGROUND_SERVICE_TYPE_SHORT_SERVICE) {
+                Slog.w(TAG_SERVICE, "startForeground(): FOREGROUND_SERVICE_TYPE_SHORT_SERVICE"
+                        + " is combined with other types. SHORT_SERVICE will be ignored.");
+                // In this case, the service will be handled as a non-short, regular FGS
+                // anyway, so we just remove the SHORT_SERVICE type.
+                foregroundServiceType &= ~FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
             }
 
             boolean alreadyStartedOp = false;
@@ -2978,6 +2993,20 @@ public final class ActiveServices {
             final Message msg = mAm.mHandler.obtainMessage(
                     ActivityManagerService.SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG, sr);
             mAm.mHandler.sendMessageAtTime(msg, sr.getShortFgsInfo().getAnrTime());
+        }
+    }
+
+    boolean shouldServiceTimeOutLocked(ComponentName className, IBinder token) {
+        final int userId = UserHandle.getCallingUserId();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            ServiceRecord sr = findServiceLocked(className, token, userId);
+            if (sr == null) {
+                return false;
+            }
+            return sr.shouldTriggerShortFgsTimeout();
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 

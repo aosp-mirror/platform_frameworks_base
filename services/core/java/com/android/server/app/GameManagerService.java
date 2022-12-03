@@ -118,6 +118,14 @@ import java.util.Set;
  */
 public final class GameManagerService extends IGameManagerService.Stub {
     public static final String TAG = "GameManagerService";
+    // event strings used for logging
+    private static final String EVENT_SET_GAME_MODE = "SET_GAME_MODE";
+    private static final String EVENT_UPDATE_CUSTOM_GAME_MODE_CONFIG =
+            "UPDATE_CUSTOM_GAME_MODE_CONFIG";
+    private static final String EVENT_RECEIVE_SHUTDOWN_INDENT = "RECEIVE_SHUTDOWN_INDENT";
+    private static final String EVENT_ON_USER_STARTING = "ON_USER_STARTING";
+    private static final String EVENT_ON_USER_SWITCHING = "ON_USER_SWITCHING";
+    private static final String EVENT_ON_USER_STOPPING = "ON_USER_STOPPING";
 
     private static final boolean DEBUG = false;
 
@@ -1154,9 +1162,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 }
             }
         }
-        sendUserMessage(userId, WRITE_SETTINGS, "SET_GAME_MODE", WRITE_DELAY_MILLIS);
+        sendUserMessage(userId, WRITE_SETTINGS, EVENT_SET_GAME_MODE, WRITE_DELAY_MILLIS);
         sendUserMessage(userId, WRITE_GAME_MODE_INTERVENTION_LIST_FILE,
-                "SET_GAME_MODE", 0 /*delayMillis*/);
+                EVENT_SET_GAME_MODE, 0 /*delayMillis*/);
         int gameUid = -1;
         try {
             gameUid = mPackageManager.getPackageUidAsUser(packageName, userId);
@@ -1399,6 +1407,11 @@ public final class GameManagerService extends IGameManagerService.Stub {
         Slog.i(TAG, "Updated custom game mode config for package: " + packageName
                 + " with FPS=" + internalConfig.getFps() + ";Scaling="
                 + internalConfig.getScaling() + " under user " + userId);
+
+        sendUserMessage(userId, WRITE_SETTINGS, EVENT_UPDATE_CUSTOM_GAME_MODE_CONFIG,
+                WRITE_DELAY_MILLIS);
+        sendUserMessage(userId, WRITE_GAME_MODE_INTERVENTION_LIST_FILE,
+                EVENT_UPDATE_CUSTOM_GAME_MODE_CONFIG, WRITE_DELAY_MILLIS /*delayMillis*/);
     }
 
     /**
@@ -1473,9 +1486,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
                         for (Map.Entry<Integer, GameManagerSettings> entry : mSettings.entrySet()) {
                             final int userId = entry.getKey();
                             sendUserMessage(userId, WRITE_SETTINGS,
-                                    Intent.ACTION_SHUTDOWN, 0 /*delayMillis*/);
+                                    EVENT_RECEIVE_SHUTDOWN_INDENT, 0 /*delayMillis*/);
                             sendUserMessage(userId,
-                                    WRITE_GAME_MODE_INTERVENTION_LIST_FILE, Intent.ACTION_SHUTDOWN,
+                                    WRITE_GAME_MODE_INTERVENTION_LIST_FILE,
+                                    EVENT_RECEIVE_SHUTDOWN_INDENT,
                                     0 /*delayMillis*/);
                         }
                     }
@@ -1500,7 +1514,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 userSettings.readPersistentDataLocked();
             }
         }
-        sendUserMessage(userId, POPULATE_GAME_MODE_SETTINGS, "ON_USER_STARTING", 0 /*delayMillis*/);
+        sendUserMessage(userId, POPULATE_GAME_MODE_SETTINGS, EVENT_ON_USER_STARTING,
+                0 /*delayMillis*/);
 
         if (mGameServiceController != null) {
             mGameServiceController.notifyUserStarted(user);
@@ -1520,7 +1535,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
             if (!mSettings.containsKey(userId)) {
                 return;
             }
-            sendUserMessage(userId, REMOVE_SETTINGS, "ON_USER_STOPPING", 0 /*delayMillis*/);
+            sendUserMessage(userId, REMOVE_SETTINGS, EVENT_ON_USER_STOPPING, 0 /*delayMillis*/);
         }
 
         if (mGameServiceController != null) {
@@ -1533,7 +1548,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         // we want to re-populate the setting when switching user as the device config may have
         // changed, which will only update for the previous user, see
         // DeviceConfigListener#onPropertiesChanged.
-        sendUserMessage(toUserId, POPULATE_GAME_MODE_SETTINGS, "ON_USER_SWITCHING",
+        sendUserMessage(toUserId, POPULATE_GAME_MODE_SETTINGS, EVENT_ON_USER_SWITCHING,
                 0 /*delayMillis*/);
 
         if (mGameServiceController != null) {
@@ -1617,6 +1632,34 @@ public final class GameManagerService extends IGameManagerService.Stub {
     public void setGameModeConfigOverride(String packageName, @UserIdInt int userId,
             @GameMode int gameMode, String fpsStr, String scaling) throws SecurityException {
         checkPermission(Manifest.permission.MANAGE_GAME_MODE);
+        int gameUid = -1;
+        try {
+            gameUid = mPackageManager.getPackageUidAsUser(packageName, userId);
+        } catch (NameNotFoundException ex) {
+            Slog.d(TAG, "Cannot find the UID for package " + packageName + " under user " + userId);
+        }
+        GamePackageConfiguration pkgConfig = getConfig(packageName, userId);
+        if (pkgConfig != null && pkgConfig.getGameModeConfiguration(gameMode) != null) {
+            final GamePackageConfiguration.GameModeConfiguration currentModeConfig =
+                    pkgConfig.getGameModeConfiguration(gameMode);
+            FrameworkStatsLog.write(FrameworkStatsLog.GAME_MODE_CONFIGURATION_CHANGED, gameUid,
+                    Binder.getCallingUid(), gameModeToStatsdGameMode(gameMode),
+                    currentModeConfig.getScaling() /* fromScaling */,
+                    scaling == null ? currentModeConfig.getScaling()
+                            : Float.parseFloat(scaling) /* toScaling */,
+                    currentModeConfig.getFps() /* fromFps */,
+                    fpsStr == null ? currentModeConfig.getFps()
+                            : Integer.parseInt(fpsStr)) /* toFps */;
+        } else {
+            FrameworkStatsLog.write(FrameworkStatsLog.GAME_MODE_CONFIGURATION_CHANGED, gameUid,
+                    Binder.getCallingUid(), gameModeToStatsdGameMode(gameMode),
+                    GamePackageConfiguration.GameModeConfiguration.DEFAULT_SCALING /* fromScaling*/,
+                    scaling == null ? GamePackageConfiguration.GameModeConfiguration.DEFAULT_SCALING
+                            : Float.parseFloat(scaling) /* toScaling */,
+                    0 /* fromFps */,
+                    fpsStr == null ? 0 : Integer.parseInt(fpsStr) /* toFps */);
+        }
+
         // Adding game mode config override of the given package name
         GamePackageConfiguration configOverride;
         synchronized (mLock) {

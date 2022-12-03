@@ -334,7 +334,7 @@ public class PackageParserTest {
     }
 
     @Test
-    public void testParseActivityTargetDisplayCategoryValid() throws Exception {
+    public void testParseActivityRequiredDisplayCategoryValid() throws Exception {
         final File testFile = extractFile(TEST_APP4_APK);
         String actualDisplayCategory = null;
         try {
@@ -342,7 +342,7 @@ public class PackageParserTest {
             final List<ParsedActivity> activities = pkg.getActivities();
             for (ParsedActivity activity : activities) {
                 if ((PACKAGE_NAME + ".MyActivity").equals(activity.getName())) {
-                    actualDisplayCategory = activity.getTargetDisplayCategory();
+                    actualDisplayCategory = activity.getRequiredDisplayCategory();
                 }
             }
         } finally {
@@ -352,7 +352,7 @@ public class PackageParserTest {
     }
 
     @Test
-    public void testParseActivityTargetDisplayCategoryInvalid() throws Exception {
+    public void testParseActivityRequiredDisplayCategoryInvalid() throws Exception {
         final File testFile = extractFile(TEST_APP6_APK);
         String actualDisplayCategory = null;
         try {
@@ -360,12 +360,12 @@ public class PackageParserTest {
             final List<ParsedActivity> activities = pkg.getActivities();
             for (ParsedActivity activity : activities) {
                 if ((PACKAGE_NAME + ".MyActivity").equals(activity.getName())) {
-                    actualDisplayCategory = activity.getTargetDisplayCategory();
+                    actualDisplayCategory = activity.getRequiredDisplayCategory();
                 }
             }
         } catch (PackageManagerException e) {
             assertThat(e.getMessage()).contains(
-                    "targetDisplayCategory attribute can only consists"
+                    "requiredDisplayCategory attribute can only consist"
                             + " of alphanumeric characters, '_', and '.'");
         } finally {
             testFile.delete();

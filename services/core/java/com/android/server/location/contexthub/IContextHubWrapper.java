@@ -359,6 +359,14 @@ public abstract class IContextHubWrapper {
     public abstract int queryNanoapps(int contextHubId) throws RemoteException;
 
     /**
+     * Provides the list of preloaded nanoapp IDs on the system. The output of this API must
+     * not change.
+     *
+     * @return The list of preloaded nanoapp IDs
+     */
+    public abstract long[] getPreloadedNanoappIds();
+
+    /**
      * Registers a callback with the Context Hub.
      *
      * @param contextHubId The ID of the Context Hub to register the callback with.
@@ -683,6 +691,20 @@ public abstract class IContextHubWrapper {
             }
         }
 
+        public long[] getPreloadedNanoappIds() {
+            android.hardware.contexthub.IContextHub hub = getHub();
+            if (hub == null) {
+                return null;
+            }
+
+            try {
+                return hub.getPreloadedNanoappIds();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Exception while getting preloaded nanoapp IDs: " + e.getMessage());
+                return null;
+            }
+        }
+
         public void registerExistingCallback(int contextHubId) {
             android.hardware.contexthub.IContextHub hub = getHub();
             if (hub == null) {
@@ -861,6 +883,10 @@ public abstract class IContextHubWrapper {
         public int queryNanoapps(int contextHubId) throws RemoteException {
             return ContextHubServiceUtil.toTransactionResult(
                     mHub.queryApps(contextHubId));
+        }
+
+        public long[] getPreloadedNanoappIds() {
+            return new long[0];
         }
 
         public void registerCallback(int contextHubId, ICallback callback) throws RemoteException {

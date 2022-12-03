@@ -25,6 +25,7 @@ import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.statusbar.policy.FlashlightController
 import com.android.systemui.utils.leaks.FakeFlashlightController
 import com.android.systemui.utils.leaks.LeakCheckedTest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -38,156 +39,177 @@ import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class FlashlightQuickAffordanceConfigTest : LeakCheckedTest() {
 
     @Mock private lateinit var context: Context
     private lateinit var flashlightController: FakeFlashlightController
-    private lateinit var underTest : FlashlightQuickAffordanceConfig
+    private lateinit var underTest: FlashlightQuickAffordanceConfig
 
     @Before
     fun setUp() {
         injectLeakCheckedDependency(FlashlightController::class.java)
         MockitoAnnotations.initMocks(this)
 
-        flashlightController = SysuiLeakCheck().getLeakChecker(FlashlightController::class.java) as FakeFlashlightController
+        flashlightController =
+            SysuiLeakCheck().getLeakChecker(FlashlightController::class.java)
+                as FakeFlashlightController
         underTest = FlashlightQuickAffordanceConfig(context, flashlightController)
     }
 
     @Test
     fun `flashlight is off -- triggered -- icon is on and active`() = runTest {
-        //given
+        // given
         flashlightController.isEnabled = false
         flashlightController.isAvailable = true
         val values = mutableListOf<KeyguardQuickAffordanceConfig.LockScreenState>()
-        val job = launch(UnconfinedTestDispatcher()) { underTest.lockScreenState.toList(values)}
+        val job = launch(UnconfinedTestDispatcher()) { underTest.lockScreenState.toList(values) }
 
-        //when
+        // when
         underTest.onTriggered(null)
         val lastValue = values.last()
 
-        //then
+        // then
         assertTrue(lastValue is KeyguardQuickAffordanceConfig.LockScreenState.Visible)
-        assertEquals(R.drawable.ic_flashlight_on,
-                ((lastValue as KeyguardQuickAffordanceConfig.LockScreenState.Visible).icon as? Icon.Resource)?.res)
+        assertEquals(
+            R.drawable.qs_flashlight_icon_on,
+            ((lastValue as KeyguardQuickAffordanceConfig.LockScreenState.Visible).icon
+                    as? Icon.Resource)
+                ?.res
+        )
         job.cancel()
     }
 
     @Test
     fun `flashlight is on -- triggered -- icon is off and inactive`() = runTest {
-        //given
+        // given
         flashlightController.isEnabled = true
         flashlightController.isAvailable = true
         val values = mutableListOf<KeyguardQuickAffordanceConfig.LockScreenState>()
-        val job = launch(UnconfinedTestDispatcher()) { underTest.lockScreenState.toList(values)}
+        val job = launch(UnconfinedTestDispatcher()) { underTest.lockScreenState.toList(values) }
 
-        //when
+        // when
         underTest.onTriggered(null)
         val lastValue = values.last()
 
-        //then
+        // then
         assertTrue(lastValue is KeyguardQuickAffordanceConfig.LockScreenState.Visible)
-        assertEquals(R.drawable.ic_flashlight_off,
-                ((lastValue as KeyguardQuickAffordanceConfig.LockScreenState.Visible).icon as? Icon.Resource)?.res)
+        assertEquals(
+            R.drawable.qs_flashlight_icon_off,
+            ((lastValue as KeyguardQuickAffordanceConfig.LockScreenState.Visible).icon
+                    as? Icon.Resource)
+                ?.res
+        )
         job.cancel()
     }
 
     @Test
     fun `flashlight is on -- receives error -- icon is off and inactive`() = runTest {
-        //given
+        // given
         flashlightController.isEnabled = true
         flashlightController.isAvailable = false
         val values = mutableListOf<KeyguardQuickAffordanceConfig.LockScreenState>()
-        val job = launch(UnconfinedTestDispatcher()) { underTest.lockScreenState.toList(values)}
+        val job = launch(UnconfinedTestDispatcher()) { underTest.lockScreenState.toList(values) }
 
-        //when
+        // when
         flashlightController.onFlashlightError()
         val lastValue = values.last()
 
-        //then
+        // then
         assertTrue(lastValue is KeyguardQuickAffordanceConfig.LockScreenState.Visible)
-        assertEquals(R.drawable.ic_flashlight_off,
-                ((lastValue as KeyguardQuickAffordanceConfig.LockScreenState.Visible).icon as? Icon.Resource)?.res)
+        assertEquals(
+            R.drawable.qs_flashlight_icon_off,
+            ((lastValue as KeyguardQuickAffordanceConfig.LockScreenState.Visible).icon
+                    as? Icon.Resource)
+                ?.res
+        )
         job.cancel()
     }
 
     @Test
     fun `flashlight availability now off -- hidden`() = runTest {
-        //given
+        // given
         flashlightController.isEnabled = true
         flashlightController.isAvailable = false
         val values = mutableListOf<KeyguardQuickAffordanceConfig.LockScreenState>()
-        val job = launch(UnconfinedTestDispatcher()) { underTest.lockScreenState.toList(values)}
+        val job = launch(UnconfinedTestDispatcher()) { underTest.lockScreenState.toList(values) }
 
-        //when
+        // when
         flashlightController.onFlashlightAvailabilityChanged(false)
         val lastValue = values.last()
 
-        //then
+        // then
         assertTrue(lastValue is KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
         job.cancel()
     }
 
     @Test
     fun `flashlight availability now on -- flashlight on -- inactive and icon off`() = runTest {
-        //given
+        // given
         flashlightController.isEnabled = true
         flashlightController.isAvailable = false
         val values = mutableListOf<KeyguardQuickAffordanceConfig.LockScreenState>()
-        val job = launch(UnconfinedTestDispatcher()) { underTest.lockScreenState.toList(values)}
+        val job = launch(UnconfinedTestDispatcher()) { underTest.lockScreenState.toList(values) }
 
-        //when
+        // when
         flashlightController.onFlashlightAvailabilityChanged(true)
         val lastValue = values.last()
 
-        //then
+        // then
         assertTrue(lastValue is KeyguardQuickAffordanceConfig.LockScreenState.Visible)
-        assertTrue((lastValue as KeyguardQuickAffordanceConfig.LockScreenState.Visible).activationState is ActivationState.Active)
-        assertEquals(R.drawable.ic_flashlight_on, (lastValue.icon as? Icon.Resource)?.res)
+        assertTrue(
+            (lastValue as KeyguardQuickAffordanceConfig.LockScreenState.Visible).activationState
+                is ActivationState.Active
+        )
+        assertEquals(R.drawable.qs_flashlight_icon_on, (lastValue.icon as? Icon.Resource)?.res)
         job.cancel()
     }
 
     @Test
     fun `flashlight availability now on -- flashlight off -- inactive and icon off`() = runTest {
-        //given
+        // given
         flashlightController.isEnabled = false
         flashlightController.isAvailable = false
         val values = mutableListOf<KeyguardQuickAffordanceConfig.LockScreenState>()
-        val job = launch(UnconfinedTestDispatcher()) { underTest.lockScreenState.toList(values)}
+        val job = launch(UnconfinedTestDispatcher()) { underTest.lockScreenState.toList(values) }
 
-        //when
+        // when
         flashlightController.onFlashlightAvailabilityChanged(true)
         val lastValue = values.last()
 
-        //then
+        // then
         assertTrue(lastValue is KeyguardQuickAffordanceConfig.LockScreenState.Visible)
-        assertTrue((lastValue as KeyguardQuickAffordanceConfig.LockScreenState.Visible).activationState is ActivationState.Inactive)
-        assertEquals(R.drawable.ic_flashlight_off, (lastValue.icon as? Icon.Resource)?.res)
+        assertTrue(
+            (lastValue as KeyguardQuickAffordanceConfig.LockScreenState.Visible).activationState
+                is ActivationState.Inactive
+        )
+        assertEquals(R.drawable.qs_flashlight_icon_off, (lastValue.icon as? Icon.Resource)?.res)
         job.cancel()
     }
 
     @Test
     fun `flashlight available -- picker state default`() = runTest {
-        //given
+        // given
         flashlightController.isAvailable = true
 
-        //when
+        // when
         val result = underTest.getPickerScreenState()
 
-        //then
+        // then
         assertTrue(result is KeyguardQuickAffordanceConfig.PickerScreenState.Default)
     }
 
     @Test
     fun `flashlight not available -- picker state unavailable`() = runTest {
-        //given
+        // given
         flashlightController.isAvailable = false
 
-        //when
+        // when
         val result = underTest.getPickerScreenState()
 
-        //then
+        // then
         assertTrue(result is KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice)
     }
 }

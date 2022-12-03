@@ -219,8 +219,8 @@ public final class DisplayPowerControllerTest {
         when(mLogicalDisplayMock.getDisplayIdLocked()).thenReturn(displayId);
         when(mLogicalDisplayMock.getPrimaryDisplayDeviceLocked()).thenReturn(mDisplayDeviceMock);
         when(mLogicalDisplayMock.getDisplayInfoLocked()).thenReturn(info);
-        when(mLogicalDisplayMock.isEnabled()).thenReturn(true);
-        when(mLogicalDisplayMock.getPhase()).thenReturn(LogicalDisplay.DISPLAY_PHASE_ENABLED);
+        when(mLogicalDisplayMock.isEnabledLocked()).thenReturn(true);
+        when(mLogicalDisplayMock.isInTransitionLocked()).thenReturn(false);
         when(mDisplayDeviceMock.getDisplayDeviceInfoLocked()).thenReturn(deviceInfo);
         when(mDisplayDeviceMock.getUniqueId()).thenReturn(uniqueId);
         when(mDisplayDeviceMock.getDisplayDeviceConfig()).thenReturn(mDisplayDeviceConfigMock);

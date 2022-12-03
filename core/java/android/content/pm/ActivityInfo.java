@@ -221,21 +221,20 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public String launchToken;
 
     /**
-     * Specifies the category of the target display the activity is expected to run on. Set from
-     * the {@link android.R.attr#targetDisplayCategory} attribute. Upon creation, a virtual display
-     * can specify which display categories it supports and one of the category must be present in
-     * the activity's manifest to allow this activity to run. The default value is {@code null},
-     * which indicates the activity does not belong to a restricted display category and thus can
-     * only run on a display that didn't specify any display categories. Each activity can only
-     * specify one category it targets to but a virtual display can support multiple restricted
-     * categories.
-     *
+     * Specifies the required display category of the activity. Set from the
+     * {@link android.R.attr#requiredDisplayCategory} attribute. Upon creation, a display can
+     * specify which display categories it supports and one of the category must be present
+     * in the {@code <activity>} element to allow this activity to run. The default value is
+     * {@code null}, which indicates the activity does not have a required display category and
+     * thus can only run on a display that didn't specify any display categories. Each activity
+     * can only specify one required category but a display can support multiple display categories.
+     * <p>
      * This field should be formatted as a Java-language-style free form string(for example,
      * com.google.automotive_entertainment), which may contain uppercase or lowercase letters ('A'
      * through 'Z'), numbers, and underscores ('_') but may only start with letters.
      */
     @Nullable
-    public String targetDisplayCategory;
+    public String requiredDisplayCategory;
 
     /**
      * Activity can not be resized and always occupies the fullscreen area with all windows fully
@@ -1330,7 +1329,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         mMaxAspectRatio = orig.mMaxAspectRatio;
         mMinAspectRatio = orig.mMinAspectRatio;
         supportsSizeChanges = orig.supportsSizeChanges;
-        targetDisplayCategory = orig.targetDisplayCategory;
+        requiredDisplayCategory = orig.requiredDisplayCategory;
     }
 
     /**
@@ -1669,8 +1668,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         if (mKnownActivityEmbeddingCerts != null) {
             pw.println(prefix + "knownActivityEmbeddingCerts=" + mKnownActivityEmbeddingCerts);
         }
-        if (targetDisplayCategory != null) {
-            pw.println(prefix + "targetDisplayCategory=" + targetDisplayCategory);
+        if (requiredDisplayCategory != null) {
+            pw.println(prefix + "requiredDisplayCategory=" + requiredDisplayCategory);
         }
         super.dumpBack(pw, prefix, dumpFlags);
     }
@@ -1718,7 +1717,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeFloat(mMinAspectRatio);
         dest.writeBoolean(supportsSizeChanges);
         sForStringSet.parcel(mKnownActivityEmbeddingCerts, dest, flags);
-        dest.writeString8(targetDisplayCategory);
+        dest.writeString8(requiredDisplayCategory);
     }
 
     /**
@@ -1844,7 +1843,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         if (mKnownActivityEmbeddingCerts.isEmpty()) {
             mKnownActivityEmbeddingCerts = null;
         }
-        targetDisplayCategory = source.readString8();
+        requiredDisplayCategory = source.readString8();
     }
 
     /**

@@ -18,13 +18,13 @@ package com.android.credentialmanager.common.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.android.credentialmanager.ui.theme.EntryShape
-import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +42,9 @@ fun Entry(
         icon = icon,
         border = null,
         colors = SuggestionChipDefaults.suggestionChipColors(
-            containerColor = LocalAndroidColorScheme.current.colorSurface,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            iconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
     )
 }

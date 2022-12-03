@@ -661,6 +661,8 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
         sc = mediaEvent.scIndexMask.get<DemuxFilterScIndexMask::Tag::scAvc>();
         // Java uses the values defined by HIDL HAL. Left shift 4 bits.
         sc = sc << 4;
+    } else if (mediaEvent.scIndexMask.getTag() == DemuxFilterScIndexMask::Tag::scVvc) {
+        sc = mediaEvent.scIndexMask.get<DemuxFilterScIndexMask::Tag::scVvc>();
     }
 
     jobject obj = env->NewObject(eventClazz, eventInit, streamId, isPtsPresent, pts, isDtsPresent,
@@ -726,6 +728,8 @@ void FilterClientCallbackImpl::getTsRecordEvent(jobjectArray &arr, const int siz
         sc = tsRecordEvent.scIndexMask.get<DemuxFilterScIndexMask::Tag::scAvc>();
         // Java uses the values defined by HIDL HAL. Left shift 4 bits.
         sc = sc << 4;
+    } else if (tsRecordEvent.scIndexMask.getTag() == DemuxFilterScIndexMask::Tag::scVvc) {
+        sc = tsRecordEvent.scIndexMask.get<DemuxFilterScIndexMask::Tag::scVvc>();
     }
 
     jint ts = tsRecordEvent.tsIndexMask;
@@ -3819,6 +3823,8 @@ static DemuxFilterRecordSettings getFilterRecordSettings(JNIEnv *env, const jobj
     } else if (scIndexType == DemuxRecordScIndexType::SC_AVC) {
         // Java uses the values defined by HIDL HAL. Right shift 4 bits.
         filterRecordSettings.scIndexMask.set<DemuxFilterScIndexMask::Tag::scAvc>(scIndexMask >> 4);
+    } else if (scIndexType == DemuxRecordScIndexType::SC_VVC) {
+        filterRecordSettings.scIndexMask.set<DemuxFilterScIndexMask::Tag::scVvc>(scIndexMask);
     }
     return filterRecordSettings;
 }

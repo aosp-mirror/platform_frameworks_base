@@ -799,4 +799,7 @@ interface IActivityManager {
      * <p>Typically used only by automotive builds when the vehicle has multiple displays.
      */
     @nullable int[] getSecondaryDisplayIdsForStartingBackgroundUsers();
+
+    /** Returns if the service is a short-service is still "alive" and past the timeout. */
+    boolean shouldServiceTimeOut(in ComponentName className, in IBinder token);
 }

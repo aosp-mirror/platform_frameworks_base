@@ -131,6 +131,7 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinatorLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -383,7 +384,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                                 mInteractionJankMonitor, mShadeExpansionStateManager),
                         mKeyguardBypassController,
                         mDozeParameters,
-                        mScreenOffAnimationController);
+                        mScreenOffAnimationController,
+                        mock(NotificationWakeUpCoordinatorLogger.class));
         mConfigurationController = new ConfigurationControllerImpl(mContext);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(
                 mContext,
@@ -499,8 +501,18 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mDumpManager);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
+                null,
                 () -> {},
                 mNotificationShelfController);
+        mNotificationPanelViewController.setTrackingStartedListener(() -> {});
+        mNotificationPanelViewController.setOpenCloseListener(
+                new NotificationPanelViewController.OpenCloseListener() {
+                    @Override
+                    public void onClosingFinished() {}
+
+                    @Override
+                    public void onOpenStarted() {}
+                });
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
         ArgumentCaptor<View.OnAttachStateChangeListener> onAttachStateChangeListenerArgumentCaptor =
                 ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);
@@ -831,11 +843,22 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     public void handleTouchEventFromStatusBar_panelAndViewEnabled_viewReceivesEvent() {
         when(mCommandQueue.panelsEnabled()).thenReturn(true);
         when(mView.isEnabled()).thenReturn(true);
-        MotionEvent event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0);
+        MotionEvent event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 2f, 0);
 
         mNotificationPanelViewController.getStatusBarTouchEventHandler().handleTouchEvent(event);
 
         verify(mView).dispatchTouchEvent(event);
+    }
+
+    @Test
+    public void handleTouchEventFromStatusBar_topEdgeTouch_viewNeverReceivesEvent() {
+        when(mCommandQueue.panelsEnabled()).thenReturn(true);
+        when(mView.isEnabled()).thenReturn(true);
+        MotionEvent event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0);
+
+        mNotificationPanelViewController.getStatusBarTouchEventHandler().handleTouchEvent(event);
+
+        verify(mView, never()).dispatchTouchEvent(event);
     }
 
     @Test
