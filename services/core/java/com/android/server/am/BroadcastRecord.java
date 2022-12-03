@@ -71,6 +71,8 @@ final class BroadcastRecord extends Binder {
     final boolean ordered;  // serialize the send to receivers?
     final boolean sticky;   // originated from existing sticky data?
     final boolean alarm;    // originated from an alarm triggering?
+    final boolean pushMessage; // originated from a push message?
+    final boolean pushMessageOverQuota; // originated from a push message which was over quota?
     final boolean initialSticky; // initial broadcast from register to sticky?
     final int userId;       // user id this broadcast was for
     final String resolvedType; // the resolved data type
@@ -309,6 +311,8 @@ final class BroadcastRecord extends Binder {
         mBackgroundActivityStartsToken = backgroundActivityStartsToken;
         this.timeoutExempt = timeoutExempt;
         alarm = options != null && options.isAlarmBroadcast();
+        pushMessage = options != null && options.isPushMessagingBroadcast();
+        pushMessageOverQuota = options != null && options.isPushMessagingOverQuotaBroadcast();
     }
 
     /**
@@ -362,6 +366,8 @@ final class BroadcastRecord extends Binder {
         mBackgroundActivityStartsToken = from.mBackgroundActivityStartsToken;
         timeoutExempt = from.timeoutExempt;
         alarm = from.alarm;
+        pushMessage = from.pushMessage;
+        pushMessageOverQuota = from.pushMessageOverQuota;
     }
 
     /**
