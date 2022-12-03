@@ -81,6 +81,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -89,6 +90,7 @@ import com.android.systemui.statusbar.notification.collection.PipelineDumpable;
 import com.android.systemui.statusbar.notification.collection.PipelineDumper;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProvider;
 import com.android.systemui.statusbar.notification.collection.provider.VisibilityLocationProviderDelegator;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController;
@@ -174,6 +176,8 @@ public class NotificationStackScrollLayoutController {
     private final StackStateLogger mStackStateLogger;
     private final NotificationStackScrollLogger mLogger;
     private final GroupExpansionManager mGroupExpansionManager;
+    private final NotifPipelineFlags mNotifPipelineFlags;
+    private final SeenNotificationsProvider mSeenNotificationsProvider;
 
     private NotificationStackScrollLayout mView;
     private boolean mFadeNotificationsOnDismiss;
@@ -639,12 +643,14 @@ public class NotificationStackScrollLayoutController {
             GroupExpansionManager groupManager,
             @SilentHeader SectionHeaderController silentHeaderController,
             NotifPipeline notifPipeline,
+            NotifPipelineFlags notifPipelineFlags,
             NotifCollection notifCollection,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             ShadeTransitionController shadeTransitionController,
             UiEventLogger uiEventLogger,
             NotificationRemoteInputManager remoteInputManager,
             VisibilityLocationProviderDelegator visibilityLocationProviderDelegator,
+            SeenNotificationsProvider seenNotificationsProvider,
             ShadeController shadeController,
             InteractionJankMonitor jankMonitor,
             StackStateLogger stackLogger,
@@ -683,10 +689,12 @@ public class NotificationStackScrollLayoutController {
         mGroupExpansionManager = groupManager;
         mSilentHeaderController = silentHeaderController;
         mNotifPipeline = notifPipeline;
+        mNotifPipelineFlags = notifPipelineFlags;
         mNotifCollection = notifCollection;
         mUiEventLogger = uiEventLogger;
         mRemoteInputManager = remoteInputManager;
         mVisibilityLocationProviderDelegator = visibilityLocationProviderDelegator;
+        mSeenNotificationsProvider = seenNotificationsProvider;
         mShadeController = shadeController;
         mFeatureFlags = featureFlags;
         mNotificationTargetsHelper = notificationTargetsHelper;
@@ -1212,7 +1220,11 @@ public class NotificationStackScrollLayoutController {
                 // For more details, see: b/228790482
                 && !isInTransitionToKeyguard();
 
-        mView.updateEmptyShadeView(shouldShow, mZenModeController.areNotificationsHiddenInShade());
+        mView.updateEmptyShadeView(
+                shouldShow,
+                mZenModeController.areNotificationsHiddenInShade(),
+                mNotifPipelineFlags.getShouldFilterUnseenNotifsOnKeyguard()
+                        && mSeenNotificationsProvider.getHasFilteredOutSeenNotifications());
 
         Trace.endSection();
     }
