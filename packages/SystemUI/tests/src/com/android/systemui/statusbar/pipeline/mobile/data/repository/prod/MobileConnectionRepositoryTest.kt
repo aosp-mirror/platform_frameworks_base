@@ -37,7 +37,7 @@ import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.OverrideNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.UnknownNetworkType
@@ -107,10 +107,10 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun testFlowForSubId_default() =
         runBlocking(IMMEDIATE) {
-            var latest: MobileSubscriptionModel? = null
-            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
-            assertThat(latest).isEqualTo(MobileSubscriptionModel())
+            assertThat(latest).isEqualTo(MobileConnectionModel())
 
             job.cancel()
         }
@@ -118,8 +118,8 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun testFlowForSubId_emergencyOnly() =
         runBlocking(IMMEDIATE) {
-            var latest: MobileSubscriptionModel? = null
-            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
             val serviceState = ServiceState()
             serviceState.isEmergencyOnly = true
@@ -134,8 +134,8 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun testFlowForSubId_emergencyOnly_toggles() =
         runBlocking(IMMEDIATE) {
-            var latest: MobileSubscriptionModel? = null
-            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
             val callback = getTelephonyCallbackForType<ServiceStateListener>()
             val serviceState = ServiceState()
@@ -152,8 +152,8 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun testFlowForSubId_signalStrengths_levelsUpdate() =
         runBlocking(IMMEDIATE) {
-            var latest: MobileSubscriptionModel? = null
-            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
             val callback = getTelephonyCallbackForType<TelephonyCallback.SignalStrengthsListener>()
             val strength = signalStrength(gsmLevel = 1, cdmaLevel = 2, isGsm = true)
@@ -169,8 +169,8 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun testFlowForSubId_dataConnectionState_connected() =
         runBlocking(IMMEDIATE) {
-            var latest: MobileSubscriptionModel? = null
-            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
             val callback =
                 getTelephonyCallbackForType<TelephonyCallback.DataConnectionStateListener>()
@@ -184,8 +184,8 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun testFlowForSubId_dataConnectionState_connecting() =
         runBlocking(IMMEDIATE) {
-            var latest: MobileSubscriptionModel? = null
-            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
             val callback =
                 getTelephonyCallbackForType<TelephonyCallback.DataConnectionStateListener>()
@@ -199,8 +199,8 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun testFlowForSubId_dataConnectionState_disconnected() =
         runBlocking(IMMEDIATE) {
-            var latest: MobileSubscriptionModel? = null
-            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
             val callback =
                 getTelephonyCallbackForType<TelephonyCallback.DataConnectionStateListener>()
@@ -214,8 +214,8 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun testFlowForSubId_dataConnectionState_disconnecting() =
         runBlocking(IMMEDIATE) {
-            var latest: MobileSubscriptionModel? = null
-            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
             val callback =
                 getTelephonyCallbackForType<TelephonyCallback.DataConnectionStateListener>()
@@ -229,8 +229,8 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun testFlowForSubId_dataConnectionState_unknown() =
         runBlocking(IMMEDIATE) {
-            var latest: MobileSubscriptionModel? = null
-            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
             val callback =
                 getTelephonyCallbackForType<TelephonyCallback.DataConnectionStateListener>()
@@ -244,8 +244,8 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun testFlowForSubId_dataActivity() =
         runBlocking(IMMEDIATE) {
-            var latest: MobileSubscriptionModel? = null
-            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
             val callback = getTelephonyCallbackForType<TelephonyCallback.DataActivityListener>()
             callback.onDataActivity(3)
@@ -258,8 +258,8 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun testFlowForSubId_carrierNetworkChange() =
         runBlocking(IMMEDIATE) {
-            var latest: MobileSubscriptionModel? = null
-            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
             val callback = getTelephonyCallbackForType<TelephonyCallback.CarrierNetworkListener>()
             callback.onCarrierNetworkChange(true)
@@ -272,8 +272,8 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun subscriptionFlow_networkType_default() =
         runBlocking(IMMEDIATE) {
-            var latest: MobileSubscriptionModel? = null
-            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
             val type = NETWORK_TYPE_UNKNOWN
             val expected = UnknownNetworkType
@@ -286,8 +286,8 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun subscriptionFlow_networkType_updatesUsingDefault() =
         runBlocking(IMMEDIATE) {
-            var latest: MobileSubscriptionModel? = null
-            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
             val callback = getTelephonyCallbackForType<TelephonyCallback.DisplayInfoListener>()
             val type = NETWORK_TYPE_LTE
@@ -303,8 +303,8 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun subscriptionFlow_networkType_updatesUsingOverride() =
         runBlocking(IMMEDIATE) {
-            var latest: MobileSubscriptionModel? = null
-            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
             val callback = getTelephonyCallbackForType<TelephonyCallback.DisplayInfoListener>()
             val type = OVERRIDE_NETWORK_TYPE_LTE_CA

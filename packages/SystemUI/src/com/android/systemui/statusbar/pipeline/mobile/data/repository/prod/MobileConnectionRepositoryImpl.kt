@@ -31,7 +31,7 @@ import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.OverrideNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.UnknownNetworkType
@@ -81,8 +81,8 @@ class MobileConnectionRepositoryImpl(
 
     private val telephonyCallbackEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
-    override val subscriptionModelFlow: StateFlow<MobileSubscriptionModel> = run {
-        var state = MobileSubscriptionModel()
+    override val connectionInfo: StateFlow<MobileConnectionModel> = run {
+        var state = MobileConnectionModel()
         conflatedCallbackFlow {
                 // TODO (b/240569788): log all of these into the connectivity logger
                 val callback =

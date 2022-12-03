@@ -38,7 +38,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionS
  * any new field that needs to be tracked should be copied into this data class rather than
  * threading complex system objects through the pipeline.
  */
-data class MobileSubscriptionModel(
+data class MobileConnectionModel(
     /** From [ServiceStateListener.onServiceStateChanged] */
     val isEmergencyOnly: Boolean = false,
 

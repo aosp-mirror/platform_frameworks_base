@@ -23,7 +23,7 @@ import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -109,18 +109,18 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
     ) {
         when (model) {
             is FakeNetworkEventModel.Mobile -> {
-                val subscriptionModel: MobileSubscriptionModel = conn.subscriptionModelFlow.value
+                val connectionInfo: MobileConnectionModel = conn.connectionInfo.value
                 assertThat(conn.subId).isEqualTo(model.subId)
-                assertThat(subscriptionModel.cdmaLevel).isEqualTo(model.level)
-                assertThat(subscriptionModel.primaryLevel).isEqualTo(model.level)
-                assertThat(subscriptionModel.dataActivityDirection).isEqualTo(model.activity)
-                assertThat(subscriptionModel.carrierNetworkChangeActive)
+                assertThat(connectionInfo.cdmaLevel).isEqualTo(model.level)
+                assertThat(connectionInfo.primaryLevel).isEqualTo(model.level)
+                assertThat(connectionInfo.dataActivityDirection).isEqualTo(model.activity)
+                assertThat(connectionInfo.carrierNetworkChangeActive)
                     .isEqualTo(model.carrierNetworkChange)
 
                 // TODO(b/261029387): check these once we start handling them
-                assertThat(subscriptionModel.isEmergencyOnly).isFalse()
-                assertThat(subscriptionModel.isGsm).isFalse()
-                assertThat(subscriptionModel.dataConnectionState)
+                assertThat(connectionInfo.isEmergencyOnly).isFalse()
+                assertThat(connectionInfo.isGsm).isFalse()
+                assertThat(connectionInfo.dataConnectionState)
                     .isEqualTo(DataConnectionState.Connected)
             }
             // MobileDisabled isn't combinatorial in nature, and is tested in

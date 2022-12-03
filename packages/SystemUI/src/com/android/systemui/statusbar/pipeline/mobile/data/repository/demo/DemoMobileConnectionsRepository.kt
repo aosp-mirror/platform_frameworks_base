@@ -25,8 +25,8 @@ import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
@@ -206,7 +206,7 @@ constructor(
         connection.dataEnabled.value = true
         connection.isDefaultDataSubscription.value = state.dataType != null
 
-        connection.subscriptionModelFlow.value = state.toMobileSubscriptionModel()
+        connection.connectionInfo.value = state.toMobileConnectionModel()
     }
 
     private fun processDisabledMobileState(state: MobileDisabled) {
@@ -246,8 +246,8 @@ constructor(
     private fun subIdsString(): String =
         _subscriptions.value.joinToString(",") { it.subscriptionId.toString() }
 
-    private fun Mobile.toMobileSubscriptionModel(): MobileSubscriptionModel {
-        return MobileSubscriptionModel(
+    private fun Mobile.toMobileConnectionModel(): MobileConnectionModel {
+        return MobileConnectionModel(
             isEmergencyOnly = false, // TODO(b/261029387): not yet supported
             isGsm = false, // TODO(b/261029387): not yet supported
             cdmaLevel = level ?: 0,
@@ -275,7 +275,7 @@ constructor(
 }
 
 class DemoMobileConnectionRepository(override val subId: Int) : MobileConnectionRepository {
-    override val subscriptionModelFlow = MutableStateFlow(MobileSubscriptionModel())
+    override val connectionInfo = MutableStateFlow(MobileConnectionModel())
 
     override val dataEnabled = MutableStateFlow(true)
 

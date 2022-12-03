@@ -69,7 +69,7 @@ class MobileIconInteractorImpl(
     override val isDefaultConnectionFailed: StateFlow<Boolean>,
     connectionRepository: MobileConnectionRepository,
 ) : MobileIconInteractor {
-    private val mobileStatusInfo = connectionRepository.subscriptionModelFlow
+    private val connectionInfo = connectionRepository.connectionInfo
 
     override val isDataEnabled: StateFlow<Boolean> = connectionRepository.dataEnabled
 
@@ -78,7 +78,7 @@ class MobileIconInteractorImpl(
     /** Observable for the current RAT indicator icon ([MobileIconGroup]) */
     override val networkTypeIconGroup: StateFlow<MobileIconGroup> =
         combine(
-                mobileStatusInfo,
+                connectionInfo,
                 defaultMobileIconMapping,
                 defaultMobileIconGroup,
             ) { info, mapping, defaultGroup ->
@@ -87,18 +87,18 @@ class MobileIconInteractorImpl(
             .stateIn(scope, SharingStarted.WhileSubscribed(), defaultMobileIconGroup.value)
 
     override val isEmergencyOnly: StateFlow<Boolean> =
-        mobileStatusInfo
+        connectionInfo
             .mapLatest { it.isEmergencyOnly }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val level: StateFlow<Int> =
-        mobileStatusInfo
-            .mapLatest { mobileModel ->
+        connectionInfo
+            .mapLatest { connection ->
                 // TODO: incorporate [MobileMappings.Config.alwaysShowCdmaRssi]
-                if (mobileModel.isGsm) {
-                    mobileModel.primaryLevel
+                if (connection.isGsm) {
+                    connection.primaryLevel
                 } else {
-                    mobileModel.cdmaLevel
+                    connection.cdmaLevel
                 }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
@@ -110,7 +110,7 @@ class MobileIconInteractorImpl(
     override val numberOfLevels: StateFlow<Int> = MutableStateFlow(4)
 
     override val isDataConnected: StateFlow<Boolean> =
-        mobileStatusInfo
-            .mapLatest { subscriptionModel -> subscriptionModel.dataConnectionState == Connected }
+        connectionInfo
+            .mapLatest { connection -> connection.dataConnectionState == Connected }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 }
