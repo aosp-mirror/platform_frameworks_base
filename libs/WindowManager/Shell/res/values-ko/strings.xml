@@ -72,13 +72,16 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"버블"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"관리"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"대화창을 닫았습니다."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"탭하여 이 앱을 다시 시작하고 전체 화면으로 이동합니다."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"보기를 개선하려면 탭하여 앱을 다시 시작합니다."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"카메라 문제가 있나요?\n해결하려면 탭하세요."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"해결되지 않았나요?\n되돌리려면 탭하세요."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"카메라에 문제가 없나요? 닫으려면 탭하세요."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"일부 앱은 세로 모드에서 가장 잘 작동함"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"공간을 최대한 이용할 수 있도록 이 옵션 중 하나를 시도해 보세요."</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"전체 화면 모드로 전환하려면 기기를 회전하세요."</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"앱 위치를 조정하려면 앱 옆을 두 번 탭하세요."</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"더 많은 정보를 보고 더 많은 작업을 처리하세요"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"화면 분할을 사용하려면 다른 앱을 드래그해 가져옵니다."</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"앱 위치를 조정하려면 앱 외부를 두 번 탭합니다."</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"확인"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"추가 정보는 펼쳐서 확인하세요."</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"최대화"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"최소화"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"닫기"</string>
 </resources>
