@@ -3327,9 +3327,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(resultGrants,
                         resultTo.getUriPermissionsLocked());
             }
-            if (mForceSendResultForMediaProjection) {
-                resultTo.sendResult(this.getUid(), resultWho, requestCode, resultCode,
-                        resultData, resultGrants, true /* forceSendForMediaProjection */);
+            if (mForceSendResultForMediaProjection || resultTo.isState(RESUMED)) {
+                // Sending the result to the resultTo activity asynchronously to prevent the
+                // resultTo activity getting results before this Activity paused.
+                final ActivityRecord resultToActivity = resultTo;
+                mAtmService.mH.post(() -> {
+                    synchronized (mAtmService.mGlobalLock) {
+                        resultToActivity.sendResult(this.getUid(), resultWho, requestCode,
+                                resultCode, resultData, resultGrants,
+                                mForceSendResultForMediaProjection);
+                    }
+                });
             } else {
                 resultTo.addResultLocked(this, resultWho, requestCode, resultCode, resultData);
             }
@@ -4640,7 +4648,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 false /* forceSendForMediaProjection */);
     }
 
-    private void sendResult(int callingUid, String resultWho, int requestCode, int resultCode,
+    void sendResult(int callingUid, String resultWho, int requestCode, int resultCode,
             Intent data, NeededUriGrants dataGrants, boolean forceSendForMediaProjection) {
         if (callingUid > 0) {
             mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(dataGrants,
