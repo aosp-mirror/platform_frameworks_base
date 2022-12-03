@@ -457,6 +457,7 @@ message ServiceRecordProto {
         optional bool stop_if_killed = 3;
         optional bool call_start = 4;
         optional int32 last_start_id = 5;
+        optional int32 start_command_result = 6;
     }
     optional Start start = 19;
 
@@ -499,7 +500,21 @@ message ServiceRecordProto {
     repeated ConnectionRecordProto connections = 26;
 
     optional bool allow_while_in_use_permission_in_fgs = 27;
-    // Next Tag: 28
+
+    message ShortFgsInfo {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int64 start_time = 1;
+        optional int32 start_foreground_count = 2;
+        optional int32 start_id = 3;
+        optional int64 timeout_time = 4;
+        optional int64 proc_state_demote_time = 5;
+        optional int64 anr_time = 6;
+    }
+
+    optional ShortFgsInfo short_fgs_info = 28;
+
+    // Next Tag: 29
 }
 
 message ConnectionRecordProto {
