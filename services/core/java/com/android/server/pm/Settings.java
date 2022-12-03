@@ -5594,8 +5594,8 @@ public final class Settings implements Watchable, Snappable {
     }
 
     private static final class RuntimePermissionPersistence {
-        // 200-400ms delay to avoid monopolizing PMS lock when written for multiple users.
-        private static final long WRITE_PERMISSIONS_DELAY_MILLIS = 300;
+        // 700-1300ms delay to avoid monopolizing PMS lock when written for multiple users.
+        private static final long WRITE_PERMISSIONS_DELAY_MILLIS = 1000;
         private static final double WRITE_PERMISSIONS_DELAY_JITTER = 0.3;
 
         private static final long MAX_WRITE_PERMISSIONS_DELAY_MILLIS = 2000;
