@@ -90,8 +90,6 @@ import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.dreams.DreamManagerInternal;
-import android.service.vr.IVrManager;
-import android.service.vr.IVrStateCallbacks;
 import android.sysprop.InitProperties;
 import android.sysprop.PowerProperties;
 import android.util.ArrayMap;
@@ -196,8 +194,6 @@ public final class PowerManagerService extends SystemService
     private static final int DIRTY_SCREEN_BRIGHTNESS_BOOST = 1 << 11;
     // Dirty bit: sQuiescent changed
     private static final int DIRTY_QUIESCENT = 1 << 12;
-    // Dirty bit: VR Mode enabled changed
-    private static final int DIRTY_VR_MODE_CHANGED = 1 << 13;
     // Dirty bit: attentive timer may have timed out
     private static final int DIRTY_ATTENTIVE = 1 << 14;
     // Dirty bit: display group wakefulness has changed
@@ -580,9 +576,6 @@ public final class PowerManagerService extends SystemService
     public final float mScreenBrightnessDefault;
     public final float mScreenBrightnessDoze;
     public final float mScreenBrightnessDim;
-    public final float mScreenBrightnessMinimumVr;
-    public final float mScreenBrightnessMaximumVr;
-    public final float mScreenBrightnessDefaultVr;
 
     // Value we store for tracking face down behavior.
     private boolean mIsFaceDown = false;
@@ -665,9 +658,6 @@ public final class PowerManagerService extends SystemService
 
     // True if double tap to wake is enabled
     private boolean mDoubleTapWakeEnabled;
-
-    // True if we are currently in VR Mode.
-    private boolean mIsVrModeEnabled;
 
     // True if we in the process of performing a forceSuspend
     private boolean mForceSuspendActive;
@@ -1145,29 +1135,6 @@ public final class PowerManagerService extends SystemService
             mScreenBrightnessDim = dim;
         }
 
-        final float vrMin = mContext.getResources().getFloat(com.android.internal.R.dimen
-                .config_screenBrightnessSettingForVrMinimumFloat);
-        final float vrMax = mContext.getResources().getFloat(com.android.internal.R.dimen
-                .config_screenBrightnessSettingForVrMaximumFloat);
-        final float vrDef = mContext.getResources().getFloat(com.android.internal.R.dimen
-                .config_screenBrightnessSettingForVrDefaultFloat);
-        if (vrMin == INVALID_BRIGHTNESS_IN_CONFIG || vrMax == INVALID_BRIGHTNESS_IN_CONFIG
-                || vrDef == INVALID_BRIGHTNESS_IN_CONFIG) {
-            mScreenBrightnessMinimumVr = BrightnessSynchronizer.brightnessIntToFloat(
-                    mContext.getResources().getInteger(com.android.internal.R.integer
-                            .config_screenBrightnessForVrSettingMinimum));
-            mScreenBrightnessMaximumVr = BrightnessSynchronizer.brightnessIntToFloat(
-                    mContext.getResources().getInteger(com.android.internal.R.integer
-                            .config_screenBrightnessForVrSettingMaximum));
-            mScreenBrightnessDefaultVr = BrightnessSynchronizer.brightnessIntToFloat(
-                    mContext.getResources().getInteger(com.android.internal.R.integer
-                            .config_screenBrightnessForVrSettingDefault));
-        } else {
-            mScreenBrightnessMinimumVr = vrMin;
-            mScreenBrightnessMaximumVr = vrMax;
-            mScreenBrightnessDefaultVr = vrDef;
-        }
-
         synchronized (mLock) {
             mBootingSuspendBlocker =
                     mInjector.createSuspendBlocker(this, "PowerManagerService.Booting");
@@ -1373,14 +1340,6 @@ public final class PowerManagerService extends SystemService
         resolver.registerContentObserver(Settings.Global.getUriFor(
                 Settings.Global.DEVICE_DEMO_MODE),
                 false, mSettingsObserver, UserHandle.USER_SYSTEM);
-        IVrManager vrManager = IVrManager.Stub.asInterface(getBinderService(Context.VR_SERVICE));
-        if (vrManager != null) {
-            try {
-                vrManager.registerListener(mVrStateCallbacks);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to register VR mode state listener: " + e);
-            }
-        }
 
         // Register for broadcasts from other components of the system.
         IntentFilter filter = new IntentFilter();
@@ -2848,7 +2807,7 @@ public final class PowerManagerService extends SystemService
                         >= powerGroup.getLastWakeTimeLocked()) {
                     groupNextTimeout = lastUserActivityTimeNoChangeLights + screenOffTimeout;
                     if (now < groupNextTimeout) {
-                        if (powerGroup.isPolicyBrightLocked() || powerGroup.isPolicyVrLocked()) {
+                        if (powerGroup.isPolicyBrightLocked()) {
                             groupUserActivitySummary = USER_ACTIVITY_SCREEN_BRIGHT;
                         } else if (powerGroup.isPolicyDimLocked()) {
                             groupUserActivitySummary = USER_ACTIVITY_SCREEN_DIM;
@@ -3415,7 +3374,6 @@ public final class PowerManagerService extends SystemService
                 || !mDreamsSupportedConfig
                 || !mDreamsEnabledSetting
                 || !(powerGroup.isBrightOrDimLocked())
-                || powerGroup.isPolicyVrLocked()
                 || (powerGroup.getUserActivitySummaryLocked() & (USER_ACTIVITY_SCREEN_BRIGHT
                 | USER_ACTIVITY_SCREEN_DIM | USER_ACTIVITY_SCREEN_DREAM)) == 0) {
             return false;
@@ -3460,8 +3418,8 @@ public final class PowerManagerService extends SystemService
         final boolean oldPowerGroupsReady = areAllPowerGroupsReadyLocked();
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY | DIRTY_WAKEFULNESS
                 | DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED | DIRTY_BOOT_COMPLETED
-                | DIRTY_SETTINGS | DIRTY_SCREEN_BRIGHTNESS_BOOST | DIRTY_VR_MODE_CHANGED |
-                DIRTY_QUIESCENT | DIRTY_DISPLAY_GROUP_WAKEFULNESS)) != 0) {
+                | DIRTY_SETTINGS | DIRTY_SCREEN_BRIGHTNESS_BOOST
+                | DIRTY_QUIESCENT | DIRTY_DISPLAY_GROUP_WAKEFULNESS)) != 0) {
             if ((dirty & DIRTY_QUIESCENT) != 0) {
                 if (areAllPowerGroupsReadyLocked()) {
                     sQuiescent = false;
@@ -3496,7 +3454,7 @@ public final class PowerManagerService extends SystemService
                         mDozeScreenBrightnessOverrideFromDreamManagerFloat,
                         mDrawWakeLockOverrideFromSidekick,
                         mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.SCREEN_BRIGHTNESS),
-                        sQuiescent, mDozeAfterScreenOff, mIsVrModeEnabled, mBootCompleted,
+                        sQuiescent, mDozeAfterScreenOff, mBootCompleted,
                         mScreenBrightnessBoostInProgress, mRequestWaitForNegativeProximity);
                 int wakefulness = powerGroup.getWakefulnessLocked();
                 if (DEBUG_SPEW) {
@@ -3514,7 +3472,6 @@ public final class PowerManagerService extends SystemService
                             + ", useAutoBrightness=" + autoBrightness
                             + ", mScreenBrightnessBoostInProgress="
                             + mScreenBrightnessBoostInProgress
-                            + ", mIsVrModeEnabled= " + mIsVrModeEnabled
                             + ", sQuiescent=" + sQuiescent);
                 }
 
@@ -3562,7 +3519,7 @@ public final class PowerManagerService extends SystemService
     }
 
     private boolean shouldBoostScreenBrightness() {
-        return !mIsVrModeEnabled && mScreenBrightnessBoostInProgress;
+        return mScreenBrightnessBoostInProgress;
     }
 
     private static boolean isValidBrightness(float value) {
@@ -3573,7 +3530,7 @@ public final class PowerManagerService extends SystemService
     @GuardedBy("mLock")
     int getDesiredScreenPolicyLocked(int groupId) {
         return mPowerGroups.get(groupId).getDesiredScreenPolicyLocked(sQuiescent,
-                mDozeAfterScreenOff, mIsVrModeEnabled, mBootCompleted,
+                mDozeAfterScreenOff, mBootCompleted,
                 mScreenBrightnessBoostInProgress);
     }
 
@@ -3654,8 +3611,7 @@ public final class PowerManagerService extends SystemService
     @GuardedBy("mLock")
     private boolean shouldUseProximitySensorLocked() {
         // Use default display group for proximity sensor.
-        return !mIsVrModeEnabled
-                && (mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP).getWakeLockSummaryLocked()
+        return (mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP).getWakeLockSummaryLocked()
                         & WAKE_LOCK_PROXIMITY_SCREEN_OFF) != 0;
     }
 
@@ -4279,11 +4235,6 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    @VisibleForTesting
-    void setVrModeEnabled(boolean enabled) {
-        mIsVrModeEnabled = enabled;
-    }
-
     private void setPowerBoostInternal(int boost, int durationMs) {
         // Maybe filter the event.
         mNativeWrapper.nativeSetPowerBoost(boost, durationMs);
@@ -4553,7 +4504,6 @@ public final class PowerManagerService extends SystemService
             pw.println("  mScreenBrightnessMaximum=" + mScreenBrightnessMaximum);
             pw.println("  mScreenBrightnessDefault=" + mScreenBrightnessDefault);
             pw.println("  mDoubleTapWakeEnabled=" + mDoubleTapWakeEnabled);
-            pw.println("  mIsVrModeEnabled=" + mIsVrModeEnabled);
             pw.println("  mForegroundProfile=" + mForegroundProfile);
             pw.println("  mUserId=" + mUserId);
 
@@ -4964,9 +4914,6 @@ public final class PowerManagerService extends SystemService
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto.IS_DOUBLE_TAP_WAKE_ENABLED,
                     mDoubleTapWakeEnabled);
-            proto.write(
-                    PowerServiceSettingsAndConfigurationDumpProto.IS_VR_MODE_ENABLED,
-                    mIsVrModeEnabled);
             proto.end(settingsAndConfigurationToken);
 
             final long attentiveTimeout = getAttentiveTimeoutLocked();
@@ -5094,21 +5041,6 @@ public final class PowerManagerService extends SystemService
             }
         }
     }
-
-    private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
-        @Override
-        public void onVrStateChanged(boolean enabled) {
-            setPowerModeInternal(Mode.VR, enabled);
-
-            synchronized (mLock) {
-                if (mIsVrModeEnabled != enabled) {
-                    setVrModeEnabled(enabled);
-                    mDirty |= DIRTY_VR_MODE_CHANGED;
-                    updatePowerStateLocked();
-                }
-            }
-        }
-    };
 
     private final AmbientDisplaySuppressionChangedCallback mAmbientSuppressionChangedCallback =
             new AmbientDisplaySuppressionChangedCallback() {
@@ -5837,12 +5769,6 @@ public final class PowerManagerService extends SystemService
                     return mScreenBrightnessDim;
                 case PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DOZE:
                     return mScreenBrightnessDoze;
-                case PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM_VR:
-                    return mScreenBrightnessMinimumVr;
-                case PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM_VR:
-                    return mScreenBrightnessMaximumVr;
-                case PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT_VR:
-                    return mScreenBrightnessDefaultVr;
                 default:
                     return PowerManager.BRIGHTNESS_INVALID_FLOAT;
             }
@@ -6626,7 +6552,6 @@ public final class PowerManagerService extends SystemService
                 case Display.STATE_DOZE_SUSPEND:
                 case Display.STATE_ON_SUSPEND:
                 case Display.STATE_ON:
-                case Display.STATE_VR:
                     break;
                 default:
                     screenState = Display.STATE_UNKNOWN;
