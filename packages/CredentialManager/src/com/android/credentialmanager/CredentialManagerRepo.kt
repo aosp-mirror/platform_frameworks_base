@@ -128,7 +128,7 @@ class CredentialManagerRepo(
     // TODO: handle runtime cast error
       providerEnabledList as List<GetCredentialProviderData>, context)
     // TODO: covert from real requestInfo
-    val requestDisplayInfo = com.android.credentialmanager.getflow.RequestDisplayInfo("tribank")
+    val requestDisplayInfo = com.android.credentialmanager.getflow.RequestDisplayInfo("the app")
     return GetCredentialUiState(
       providerEnabledList,
       GetScreenState.PRIMARY_SELECTION,
