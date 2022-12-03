@@ -98,8 +98,8 @@ public interface ParsedActivity extends ParsedMainComponent {
     boolean isSupportsSizeChanges();
 
     /**
-     * Gets the category of the target display this activity is supposed to run on.
+     * Gets the required category of the display this activity is supposed to run on.
      */
     @Nullable
-    String getTargetDisplayCategory();
+    String getRequiredDisplayCategory();
 }

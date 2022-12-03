@@ -52,6 +52,7 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
     private static final int LAST_POSITION = POSITION_END;
 
     private static final int MARGIN_UNSPECIFIED = 0xFFFFFFFF;
+    private static final int CONSTRAINT_UNSPECIFIED = 0xFFFFFFFF;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "DIRECTION_" }, value = {
@@ -80,6 +81,8 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
     private final int mWeight;
 
     private final int mMargin;
+
+    private final int mConstraint;
 
     private final boolean mSnapToGuide;
 
@@ -110,7 +113,8 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
      */
     public ComplicationLayoutParams(int width, int height, @Position int position,
             @Direction int direction, int weight) {
-        this(width, height, position, direction, weight, MARGIN_UNSPECIFIED, false);
+        this(width, height, position, direction, weight, MARGIN_UNSPECIFIED, CONSTRAINT_UNSPECIFIED,
+                false);
     }
 
     /**
@@ -127,7 +131,27 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
      */
     public ComplicationLayoutParams(int width, int height, @Position int position,
             @Direction int direction, int weight, int margin) {
-        this(width, height, position, direction, weight, margin, false);
+        this(width, height, position, direction, weight, margin, CONSTRAINT_UNSPECIFIED, false);
+    }
+
+    /**
+     * Constructs a {@link ComplicationLayoutParams}.
+     * @param width The width {@link android.view.View.MeasureSpec} for the view.
+     * @param height The height {@link android.view.View.MeasureSpec} for the view.
+     * @param position The place within the parent container where the view should be positioned.
+     * @param direction The direction the view should be laid out from either the parent container
+     *                  or preceding view.
+     * @param weight The weight that should be considered for this view when compared to other
+     *               views. This has an impact on the placement of the view but not the rendering of
+     *               the view.
+     * @param margin The margin to apply between complications.
+     * @param constraint The max width or height the complication is allowed to spread, depending on
+     *                   its direction. For horizontal directions, this would be applied on width,
+     *                   and for vertical directions, height.
+     */
+    public ComplicationLayoutParams(int width, int height, @Position int position,
+            @Direction int direction, int weight, int margin, int constraint) {
+        this(width, height, position, direction, weight, margin, constraint, false);
     }
 
     /**
@@ -148,7 +172,8 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
      */
     public ComplicationLayoutParams(int width, int height, @Position int position,
             @Direction int direction, int weight, boolean snapToGuide) {
-        this(width, height, position, direction, weight, MARGIN_UNSPECIFIED, snapToGuide);
+        this(width, height, position, direction, weight, MARGIN_UNSPECIFIED, CONSTRAINT_UNSPECIFIED,
+                snapToGuide);
     }
 
     /**
@@ -162,6 +187,9 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
      *               views. This has an impact on the placement of the view but not the rendering of
      *               the view.
      * @param margin The margin to apply between complications.
+     * @param constraint The max width or height the complication is allowed to spread, depending on
+     *                   its direction. For horizontal directions, this would be applied on width,
+     *                   and for vertical directions, height.
      * @param snapToGuide When set to {@code true}, the dimension perpendicular to the direction
      *                    will be automatically set to align with a predetermined guide for that
      *                    side. For example, if the complication is aligned to the top end and
@@ -169,7 +197,7 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
      *                    from the end of the parent to the guide.
      */
     public ComplicationLayoutParams(int width, int height, @Position int position,
-            @Direction int direction, int weight, int margin, boolean snapToGuide) {
+            @Direction int direction, int weight, int margin, int constraint, boolean snapToGuide) {
         super(width, height);
 
         if (!validatePosition(position)) {
@@ -187,6 +215,8 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
 
         mMargin = margin;
 
+        mConstraint = constraint;
+
         mSnapToGuide = snapToGuide;
     }
 
@@ -199,6 +229,7 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
         mDirection = source.mDirection;
         mWeight = source.mWeight;
         mMargin = source.mMargin;
+        mConstraint = source.mConstraint;
         mSnapToGuide = source.mSnapToGuide;
     }
 
@@ -261,18 +292,26 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
     }
 
     /**
-     * Returns whether margin has been specified by the complication.
-     */
-    public boolean isMarginSpecified() {
-        return mMargin != MARGIN_UNSPECIFIED;
-    }
-
-    /**
      * Returns the margin to apply between complications, or the given default if no margin is
      * specified.
      */
     public int getMargin(int defaultMargin) {
         return mMargin == MARGIN_UNSPECIFIED ? defaultMargin : mMargin;
+    }
+
+    /**
+     * Returns whether the horizontal or vertical constraint has been specified.
+     */
+    public boolean constraintSpecified() {
+        return mConstraint != CONSTRAINT_UNSPECIFIED;
+    }
+
+    /**
+     * Returns the horizontal or vertical constraint of the complication, depending its direction.
+     * For horizontal directions, this is the max width, and for vertical directions, max height.
+     */
+    public int getConstraint() {
+        return mConstraint;
     }
 
     /**

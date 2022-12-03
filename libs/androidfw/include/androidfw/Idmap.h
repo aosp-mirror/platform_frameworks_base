@@ -93,8 +93,8 @@ class IdmapResMap {
    public:
     Result() = default;
     explicit Result(uint32_t value) : data_(value) {};
-    explicit Result(const std::map<ConfigDescription, Res_value> &value)
-        : data_(value) { };
+    explicit Result(std::map<ConfigDescription, Res_value> value) : data_(std::move(value)) {
+    }
 
     // Returns `true` if the resource is overlaid.
     explicit operator bool() const {

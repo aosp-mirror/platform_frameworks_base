@@ -51,10 +51,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.util.leak.RotationUtils;
@@ -76,6 +79,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
     private final AccessibilityManager mAccessibilityService;
     private final WindowManager mWindowManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final UserTracker mUserTracker;
 
     private RequestWindowView mRequestWindow;
     private int mNavBarMode;
@@ -83,12 +87,21 @@ public class ScreenPinningRequest implements View.OnClickListener,
     /** ID of task to be pinned or locked. */
     private int taskId;
 
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    clearPrompt();
+                }
+            };
+
     @Inject
     public ScreenPinningRequest(
             Context context,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             NavigationModeController navigationModeController,
-            BroadcastDispatcher broadcastDispatcher) {
+            BroadcastDispatcher broadcastDispatcher,
+            UserTracker userTracker) {
         mContext = context;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mAccessibilityService = (AccessibilityManager)
@@ -97,6 +110,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
                 mContext.getSystemService(Context.WINDOW_SERVICE);
         mNavBarMode = navigationModeController.addListener(this);
         mBroadcastDispatcher = broadcastDispatcher;
+        mUserTracker = userTracker;
     }
 
     public void clearPrompt() {
@@ -228,9 +242,9 @@ public class ScreenPinningRequest implements View.OnClickListener,
             }
 
             IntentFilter filter = new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED);
-            filter.addAction(Intent.ACTION_USER_SWITCHED);
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             mBroadcastDispatcher.registerReceiver(mReceiver, filter);
+            mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());
         }
 
         private void inflateView(int rotation) {
@@ -358,6 +372,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
         @Override
         public void onDetachedFromWindow() {
             mBroadcastDispatcher.unregisterReceiver(mReceiver);
+            mUserTracker.removeCallback(mUserChangedCallback);
         }
 
         protected void onConfigurationChanged() {
@@ -388,8 +403,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                     post(mUpdateLayoutRunnable);
-                } else if (intent.getAction().equals(Intent.ACTION_USER_SWITCHED)
-                        || intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                     clearPrompt();
                 }
             }

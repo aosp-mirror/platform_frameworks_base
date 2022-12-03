@@ -15,6 +15,7 @@
  */
 
 #include <SkBitmap.h>
+#include <SkBlendMode.h>
 #include <SkCanvas.h>
 #include <SkColor.h>
 #include <SkFont.h>

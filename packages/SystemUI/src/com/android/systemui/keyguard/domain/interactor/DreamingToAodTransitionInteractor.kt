@@ -42,7 +42,7 @@ constructor(
 
     override fun start() {
         scope.launch {
-            keyguardInteractor.wakefulnessState
+            keyguardInteractor.wakefulnessModel
                 .sample(keyguardTransitionInteractor.finishedKeyguardState, { a, b -> Pair(a, b) })
                 .collect { pair ->
                     val (wakefulnessState, keyguardState) = pair

@@ -110,6 +110,9 @@
 
     <queries>
         <package android:name="com.android.servicestests.apps.suspendtestapp" />
+        <intent>
+            <action android:name="android.media.browse.MediaBrowserService" />
+        </intent>
     </queries>
 
     <!-- Uses API introduced in O (26) -->

@@ -262,7 +262,7 @@ internal class ExpandableControllerImpl(
 
     private fun dialogController(cuj: DialogCuj?): DialogLaunchAnimator.Controller {
         return object : DialogLaunchAnimator.Controller {
-            override val viewRoot: ViewRootImpl = composeViewRoot.viewRootImpl
+            override val viewRoot: ViewRootImpl? = composeViewRoot.viewRootImpl
             override val sourceIdentity: Any = this@ExpandableControllerImpl
             override val cuj: DialogCuj? = cuj
 

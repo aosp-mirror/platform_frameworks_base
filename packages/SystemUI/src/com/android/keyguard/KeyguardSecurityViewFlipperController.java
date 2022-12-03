@@ -74,17 +74,8 @@ public class KeyguardSecurityViewFlipperController
         }
     }
 
-    /**
-     * Reload colors of ui elements upon theme change.
-     */
-    public void reloadColors() {
-        for (KeyguardInputViewController<KeyguardInputView> child : mChildren) {
-            child.reloadColors();
-        }
-    }
-
     /** Handles density or font scale changes. */
-    public void onDensityOrFontScaleChanged() {
+    public void clearViews() {
         mView.removeAllViews();
         mChildren.clear();
     }

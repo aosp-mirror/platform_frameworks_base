@@ -18,6 +18,7 @@ package com.google.android.lint.aidl
 
 import com.android.tools.lint.detector.api.Category
 import com.android.tools.lint.detector.api.Implementation
+import com.android.tools.lint.detector.api.Incident
 import com.android.tools.lint.detector.api.Issue
 import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
@@ -28,6 +29,7 @@ import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UIfExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UQualifiedReferenceExpression
+import org.jetbrains.uast.skipParenthesizedExprDown
 
 /**
  * Looks for methods implementing generated AIDL interface stubs
@@ -44,30 +46,25 @@ class SimpleManualPermissionEnforcementDetector : AidlImplementationDetector() {
             interfaceName: String,
             body: UBlockExpression
     ) {
-        val fix = accumulateSimplePermissionCheckFixes(body, context) ?: return
+        val enforcePermissionFix = accumulateSimplePermissionCheckFixes(body, context) ?: return
+        val lintFix = enforcePermissionFix.toLintFix(context.getLocation(node))
+        val message =
+                "$interfaceName permission check ${
+                    if (enforcePermissionFix.errorLevel) "should" else "can"
+                } be converted to @EnforcePermission annotation"
 
-        val javaRemoveFixes = fix.locations.map {
-            fix()
-                    .replace()
-                    .reformat(true)
-                    .range(it)
-                    .with("")
-                    .autoFix()
-                    .build()
+        val incident = Incident(
+                ISSUE_SIMPLE_MANUAL_PERMISSION_ENFORCEMENT,
+                enforcePermissionFix.locations.last(),
+                message,
+                lintFix
+        )
+
+        if (enforcePermissionFix.errorLevel) {
+            incident.overrideSeverity(Severity.ERROR)
         }
 
-        val javaAnnotateFix = fix()
-                .annotate(fix.annotation)
-                .range(context.getLocation(node))
-                .autoFix()
-                .build()
-
-        context.report(
-                ISSUE_USE_ENFORCE_PERMISSION_ANNOTATION,
-                fix.locations.last(),
-                "$interfaceName permission check can be converted to @EnforcePermission annotation",
-                fix().composite(*javaRemoveFixes.toTypedArray(), javaAnnotateFix)
-        )
+        context.report(incident)
     }
 
     /**
@@ -89,7 +86,8 @@ class SimpleManualPermissionEnforcementDetector : AidlImplementationDetector() {
             EnforcePermissionFix? {
         val singleFixes = mutableListOf<EnforcePermissionFix>()
         for (expression in methodBody.expressions) {
-            singleFixes.add(getPermissionCheckFix(expression, context) ?: break)
+            singleFixes.add(getPermissionCheckFix(expression.skipParenthesizedExprDown(), context)
+                    ?: break)
         }
         return when (singleFixes.size) {
             0 -> null
@@ -133,7 +131,7 @@ class SimpleManualPermissionEnforcementDetector : AidlImplementationDetector() {
         """.trimIndent()
 
         @JvmField
-        val ISSUE_USE_ENFORCE_PERMISSION_ANNOTATION = Issue.create(
+        val ISSUE_SIMPLE_MANUAL_PERMISSION_ENFORCEMENT = Issue.create(
                 id = "SimpleManualPermissionEnforcement",
                 briefDescription = "Manual permission check can be @EnforcePermission annotation",
                 explanation = EXPLANATION,

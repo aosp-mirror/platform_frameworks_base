@@ -468,6 +468,8 @@
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"সম্পূৰ্ণ হ’বলৈ <xliff:g id="TIME">%1$s</xliff:g> বাকী আছে"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"সম্পূৰ্ণ হ’বলৈ <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> বাকী আছে"</string>
     <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - চাৰ্জিং পজ কৰা হৈছে"</string>
+    <!-- no translation found for power_charging_future_paused (6829683663982987290) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"অজ্ঞাত"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"চাৰ্জ কৰি থকা হৈছে"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"দ্ৰুততাৰে চাৰ্জ হৈছে"</string>

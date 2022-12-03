@@ -16,6 +16,8 @@
 
 #include "TestSceneBase.h"
 
+#include <SkBlendMode.h>
+
 class SaveLayerAnimation;
 
 static TestScene::Registrar _SaveLayer(TestScene::Info{

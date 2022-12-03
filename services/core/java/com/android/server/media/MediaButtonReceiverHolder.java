@@ -275,6 +275,10 @@ final class MediaButtonReceiverHolder {
                 String.valueOf(mComponentType));
     }
 
+    public ComponentName getComponentName() {
+        return mComponentName;
+    }
+
     @ComponentType
     private static int getComponentType(PendingIntent pendingIntent) {
         if (pendingIntent.isBroadcast()) {

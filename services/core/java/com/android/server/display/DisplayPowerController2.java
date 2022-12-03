@@ -422,6 +422,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     private DisplayDeviceConfig mDisplayDeviceConfig;
 
+    private boolean mIsEnabled;
+    private boolean mIsInTransition;
     /**
      * Creates the display power controller.
      */
@@ -439,6 +441,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mHandler = new DisplayControllerHandler(handler.getLooper());
         mDisplayDeviceConfig = logicalDisplay.getPrimaryDisplayDeviceLocked()
                 .getDisplayDeviceConfig();
+        mIsEnabled = logicalDisplay.isEnabledLocked();
+        mIsInTransition = logicalDisplay.isInTransitionLocked();
         mWakelockController = mInjector.getWakelockController(mDisplayId, callbacks);
         mDisplayPowerProximityStateController = mInjector.getDisplayPowerProximityStateController(
                 mWakelockController, mDisplayDeviceConfig, mHandler.getLooper(),
@@ -721,27 +725,34 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         final DisplayDeviceConfig config = device.getDisplayDeviceConfig();
         final IBinder token = device.getDisplayTokenLocked();
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
+        final boolean isEnabled = mLogicalDisplay.isEnabledLocked();
+        final boolean isInTransition = mLogicalDisplay.isInTransitionLocked();
         mHandler.post(() -> {
+            boolean changed = false;
             if (mDisplayDevice != device) {
+                changed = true;
                 mDisplayDevice = device;
                 mUniqueDisplayId = uniqueId;
                 mDisplayStatsId = mUniqueDisplayId.hashCode();
                 mDisplayDeviceConfig = config;
                 loadFromDisplayDeviceConfig(token, info);
                 mDisplayPowerProximityStateController.notifyDisplayDeviceChanged(config);
+
+                // Since the underlying display-device changed, we really don't know the
+                // last command that was sent to change it's state. Lets assume it is unknown so
+                // that we trigger a change immediately.
+                mPowerState.resetScreenState();
+            }
+            if (mIsEnabled != isEnabled || mIsInTransition != isInTransition) {
+                changed = true;
+                mIsEnabled = isEnabled;
+                mIsInTransition = isInTransition;
+            }
+
+            if (changed) {
                 updatePowerState();
             }
         });
-    }
-
-    /**
-     * Called when the displays are preparing to transition from one device state to another.
-     * This process involves turning off some displays so we need updatePowerState() to run and
-     * calculate the new state.
-     */
-    @Override
-    public void onDeviceStateTransition() {
-        sendUpdatePowerState();
     }
 
     /**
@@ -1165,8 +1176,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         mDisplayPowerProximityStateController.updateProximityState(mPowerRequest, state);
 
-        if (!mLogicalDisplay.isEnabled()
-                || mLogicalDisplay.getPhase() == LogicalDisplay.DISPLAY_PHASE_LAYOUT_TRANSITION
+        if (!mIsEnabled
+                || mIsInTransition
                 || mDisplayPowerProximityStateController.isScreenOffBecauseOfProximity()) {
             state = Display.STATE_OFF;
         }

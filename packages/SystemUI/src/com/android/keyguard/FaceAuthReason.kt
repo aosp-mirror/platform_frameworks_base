@@ -48,11 +48,13 @@ import com.android.keyguard.InternalFaceAuthReasons.KEYGUARD_INIT
 import com.android.keyguard.InternalFaceAuthReasons.KEYGUARD_OCCLUSION_CHANGED
 import com.android.keyguard.InternalFaceAuthReasons.KEYGUARD_RESET
 import com.android.keyguard.InternalFaceAuthReasons.KEYGUARD_VISIBILITY_CHANGED
+import com.android.keyguard.InternalFaceAuthReasons.NON_STRONG_BIOMETRIC_ALLOWED_CHANGED
 import com.android.keyguard.InternalFaceAuthReasons.OCCLUDING_APP_REQUESTED
 import com.android.keyguard.InternalFaceAuthReasons.PRIMARY_BOUNCER_SHOWN
 import com.android.keyguard.InternalFaceAuthReasons.PRIMARY_BOUNCER_SHOWN_OR_WILL_BE_SHOWN
 import com.android.keyguard.InternalFaceAuthReasons.RETRY_AFTER_HW_UNAVAILABLE
 import com.android.keyguard.InternalFaceAuthReasons.STARTED_WAKING_UP
+import com.android.keyguard.InternalFaceAuthReasons.STRONG_AUTH_ALLOWED_CHANGED
 import com.android.keyguard.InternalFaceAuthReasons.TRUST_DISABLED
 import com.android.keyguard.InternalFaceAuthReasons.TRUST_ENABLED
 import com.android.keyguard.InternalFaceAuthReasons.USER_SWITCHING
@@ -121,6 +123,9 @@ private object InternalFaceAuthReasons {
     const val FACE_AUTHENTICATED = "Face auth started/stopped because face is authenticated"
     const val BIOMETRIC_ENABLED =
         "Face auth started/stopped because biometric is enabled on keyguard"
+    const val STRONG_AUTH_ALLOWED_CHANGED = "Face auth stopped because strong auth allowed changed"
+    const val NON_STRONG_BIOMETRIC_ALLOWED_CHANGED =
+        "Face auth stopped because non strong biometric allowed changed"
 }
 
 /**
@@ -204,7 +209,11 @@ constructor(private val id: Int, val reason: String, var extraInfo: Int = 0) :
     @UiEvent(doc = FACE_AUTHENTICATED)
     FACE_AUTH_UPDATED_ON_FACE_AUTHENTICATED(1187, FACE_AUTHENTICATED),
     @UiEvent(doc = BIOMETRIC_ENABLED)
-    FACE_AUTH_UPDATED_BIOMETRIC_ENABLED_ON_KEYGUARD(1188, BIOMETRIC_ENABLED);
+    FACE_AUTH_UPDATED_BIOMETRIC_ENABLED_ON_KEYGUARD(1188, BIOMETRIC_ENABLED),
+    @UiEvent(doc = STRONG_AUTH_ALLOWED_CHANGED)
+    FACE_AUTH_UPDATED_STRONG_AUTH_CHANGED(1255, STRONG_AUTH_ALLOWED_CHANGED),
+    @UiEvent(doc = NON_STRONG_BIOMETRIC_ALLOWED_CHANGED)
+    FACE_AUTH_NON_STRONG_BIOMETRIC_ALLOWED_CHANGED(1256, NON_STRONG_BIOMETRIC_ALLOWED_CHANGED);
 
     override fun getId(): Int = this.id
 

@@ -3889,7 +3889,7 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.USER_INITIALIZE";
 
     /**
-     * Sent when a user switch is happening, causing the process's user to be
+     * Sent after a user switch is complete, if the switch caused the process's user to be
      * brought to the foreground.  This is only sent to receivers registered
      * through {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
      * Context.registerReceiver}.  It is sent to the user that is going to the
@@ -3901,7 +3901,7 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.USER_FOREGROUND";
 
     /**
-     * Sent when a user switch is happening, causing the process's user to be
+     * Sent after a user switch is complete, if the switch caused the process's user to be
      * sent to the background.  This is only sent to receivers registered
      * through {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
      * Context.registerReceiver}.  It is sent to the user that is going to the
@@ -4041,6 +4041,11 @@ public class Intent implements Parcelable, Cloneable {
      * regardless of which broadcast you receive. Because of that, receivers should always check
      * the current state of the user.
      * @hide
+     */
+    /*
+     * This broadcast is sent after the user switch is complete. In case a task needs to be done
+     * while the switch is happening (i.e. while the screen is frozen to hide UI jank), please use
+     * ActivityManagerService.registerUserSwitchObserver method.
      */
     @SystemApi
     public static final String ACTION_USER_SWITCHED =

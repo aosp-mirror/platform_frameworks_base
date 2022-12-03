@@ -42,11 +42,13 @@ namespace renderthread {
 RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode,
                          IContextFactory* contextFactory)
         : mRenderThread(RenderThread::getInstance()), mContext(nullptr) {
-    mContext = mRenderThread.queue().runSync([&]() -> CanvasContext* {
-        return CanvasContext::create(mRenderThread, translucent, rootRenderNode, contextFactory);
+    pid_t uiThreadId = pthread_gettid_np(pthread_self());
+    pid_t renderThreadId = getRenderThreadTid();
+    mContext = mRenderThread.queue().runSync([=, this]() -> CanvasContext* {
+        return CanvasContext::create(mRenderThread, translucent, rootRenderNode, contextFactory,
+                                     uiThreadId, renderThreadId);
     });
-    mDrawFrameTask.setContext(&mRenderThread, mContext, rootRenderNode,
-                              pthread_gettid_np(pthread_self()), getRenderThreadTid());
+    mDrawFrameTask.setContext(&mRenderThread, mContext, rootRenderNode);
 }
 
 RenderProxy::~RenderProxy() {
@@ -55,7 +57,7 @@ RenderProxy::~RenderProxy() {
 
 void RenderProxy::destroyContext() {
     if (mContext) {
-        mDrawFrameTask.setContext(nullptr, nullptr, nullptr, -1, -1);
+        mDrawFrameTask.setContext(nullptr, nullptr, nullptr);
         // This is also a fence as we need to be certain that there are no
         // outstanding mDrawFrame tasks posted before it is destroyed
         mRenderThread.queue().runSync([this]() { delete mContext; });
@@ -237,7 +239,7 @@ void RenderProxy::notifyFramePending() {
 }
 
 void RenderProxy::notifyCallbackPending() {
-    mDrawFrameTask.sendLoadResetHint();
+    mRenderThread.queue().post([this]() { mContext->sendLoadResetHint(); });
 }
 
 void RenderProxy::dumpProfileInfo(int fd, int dumpFlags) {

@@ -116,13 +116,6 @@ public class KeyguardMessageAreaController<T extends KeyguardMessageArea>
         return mView.getText();
     }
 
-    /**
-     * Reload colors from resources.
-     **/
-    public void reloadColors() {
-        mView.reloadColor();
-    }
-
     /** Factory for creating {@link com.android.keyguard.KeyguardMessageAreaController}. */
     public static class Factory {
         private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;

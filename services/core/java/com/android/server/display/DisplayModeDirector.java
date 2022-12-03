@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import static android.hardware.display.DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED;
 import static android.hardware.display.DisplayManagerInternal.REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE;
 import static android.os.PowerManager.BRIGHTNESS_INVALID;
 
@@ -48,7 +49,7 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfigInterface;
 import android.provider.Settings;
-import android.sysprop.DisplayProperties;
+import android.sysprop.SurfaceFlingerProperties;
 import android.text.TextUtils;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
@@ -137,8 +138,7 @@ public class DisplayModeDirector {
 
     private boolean mAlwaysRespectAppRequest;
 
-    // TODO(b/241447632): remove the flag once SF changes are ready
-    private final boolean mRenderFrameRateIsPhysicalRefreshRate;
+    private final boolean mSupportsFrameRateOverride;
 
     /**
      * The allowed refresh rate switching type. This is used by SurfaceFlinger.
@@ -175,7 +175,7 @@ public class DisplayModeDirector {
         mHbmObserver = new HbmObserver(injector, ballotBox, BackgroundThread.getHandler(),
                 mDeviceConfigDisplaySettings);
         mAlwaysRespectAppRequest = false;
-        mRenderFrameRateIsPhysicalRefreshRate = injector.renderFrameRateIsPhysicalRefreshRate();
+        mSupportsFrameRateOverride = injector.supportsFrameRateOverride();
     }
 
     /**
@@ -237,21 +237,6 @@ public class DisplayModeDirector {
             }
         }
 
-        if (mRenderFrameRateIsPhysicalRefreshRate) {
-            for (int i = 0; i < votes.size(); i++) {
-
-                Vote vote = votes.valueAt(i);
-                vote.refreshRateRanges.physical.min = Math.max(vote.refreshRateRanges.physical.min,
-                        vote.refreshRateRanges.render.min);
-                vote.refreshRateRanges.physical.max = Math.min(vote.refreshRateRanges.physical.max,
-                        vote.refreshRateRanges.render.max);
-                vote.refreshRateRanges.render.min = Math.max(vote.refreshRateRanges.physical.min,
-                        vote.refreshRateRanges.render.min);
-                vote.refreshRateRanges.render.max = Math.min(vote.refreshRateRanges.physical.max,
-                        vote.refreshRateRanges.render.max);
-            }
-        }
-
         return votes;
     }
 
@@ -278,6 +263,18 @@ public class DisplayModeDirector {
             height = Vote.INVALID_SIZE;
             disableRefreshRateSwitching = false;
             appRequestBaseModeRefreshRate = 0f;
+        }
+
+        @Override
+        public String toString() {
+            return  "minPhysicalRefreshRate=" + minPhysicalRefreshRate
+                    + ", maxPhysicalRefreshRate=" + maxPhysicalRefreshRate
+                    + ", minRenderFrameRate=" + minRenderFrameRate
+                    + ", maxRenderFrameRate=" + maxRenderFrameRate
+                    + ", width=" + width
+                    + ", height=" + height
+                    + ", disableRefreshRateSwitching=" + disableRefreshRateSwitching
+                    + ", appRequestBaseModeRefreshRate=" + appRequestBaseModeRefreshRate;
         }
     }
 
@@ -332,18 +329,8 @@ public class DisplayModeDirector {
             }
 
             if (mLoggingEnabled) {
-                Slog.w(TAG, "Vote summary for priority "
-                        + Vote.priorityToString(priority)
-                        + ": width=" + summary.width
-                        + ", height=" + summary.height
-                        + ", minPhysicalRefreshRate=" + summary.minPhysicalRefreshRate
-                        + ", maxPhysicalRefreshRate=" + summary.maxPhysicalRefreshRate
-                        + ", minRenderFrameRate=" + summary.minRenderFrameRate
-                        + ", maxRenderFrameRate=" + summary.maxRenderFrameRate
-                        + ", disableRefreshRateSwitching="
-                        + summary.disableRefreshRateSwitching
-                        + ", appRequestBaseModeRefreshRate="
-                        + summary.appRequestBaseModeRefreshRate);
+                Slog.w(TAG, "Vote summary for priority " + Vote.priorityToString(priority)
+                        + ": " + summary);
             }
         }
     }
@@ -377,6 +364,23 @@ public class DisplayModeDirector {
         return !availableModes.isEmpty() ? availableModes.get(0) : null;
     }
 
+    private void disableModeSwitching(VoteSummary summary, float fps) {
+        summary.minPhysicalRefreshRate = summary.maxPhysicalRefreshRate = fps;
+        summary.maxRenderFrameRate = Math.min(summary.maxRenderFrameRate, fps);
+
+        if (mLoggingEnabled) {
+            Slog.i(TAG, "Disabled mode switching on summary: " + summary);
+        }
+    }
+
+    private void disableRenderRateSwitching(VoteSummary summary) {
+        summary.minRenderFrameRate = summary.maxRenderFrameRate;
+
+        if (mLoggingEnabled) {
+            Slog.i(TAG, "Disabled render rate switching on summary: " + summary);
+        }
+    }
+
     /**
      * Calculates the refresh rate ranges and display modes that the system is allowed to freely
      * switch between based on global and display-specific constraints.
@@ -405,7 +409,7 @@ public class DisplayModeDirector {
             int highestConsideredPriority = Vote.MAX_PRIORITY;
 
             if (mAlwaysRespectAppRequest) {
-                lowestConsideredPriority = Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE;
+                lowestConsideredPriority = Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE;
                 highestConsideredPriority = Vote.PRIORITY_APP_REQUEST_SIZE;
             }
 
@@ -533,19 +537,15 @@ public class DisplayModeDirector {
 
             if (modeSwitchingDisabled || primarySummary.disableRefreshRateSwitching) {
                 float fps = baseMode.getRefreshRate();
-                primarySummary.minPhysicalRefreshRate = primarySummary.maxPhysicalRefreshRate = fps;
+                disableModeSwitching(primarySummary, fps);
                 if (modeSwitchingDisabled) {
-                    appRequestSummary.minPhysicalRefreshRate =
-                            appRequestSummary.maxPhysicalRefreshRate = fps;
-                }
-            }
+                    disableModeSwitching(appRequestSummary, fps);
+                    disableRenderRateSwitching(primarySummary);
 
-            if (mModeSwitchingType == DisplayManager.SWITCHING_TYPE_NONE
-                    || mRenderFrameRateIsPhysicalRefreshRate) {
-                primarySummary.minRenderFrameRate = primarySummary.minPhysicalRefreshRate;
-                primarySummary.maxRenderFrameRate = primarySummary.maxPhysicalRefreshRate;
-                appRequestSummary.minRenderFrameRate = appRequestSummary.minPhysicalRefreshRate;
-                appRequestSummary.maxRenderFrameRate = appRequestSummary.maxPhysicalRefreshRate;
+                    if (mModeSwitchingType == DisplayManager.SWITCHING_TYPE_NONE) {
+                        disableRenderRateSwitching(appRequestSummary);
+                    }
+                }
             }
 
             boolean allowGroupSwitching =
@@ -609,6 +609,22 @@ public class DisplayModeDirector {
                             + ", modeRefreshRate=" + physicalRefreshRate);
                 }
                 continue;
+            }
+
+            // The physical refresh rate must be in the render frame rate range, unless
+            // frame rate override is supported.
+            if (!mSupportsFrameRateOverride) {
+                if (physicalRefreshRate < (summary.minRenderFrameRate - FLOAT_TOLERANCE)
+                        || physicalRefreshRate > (summary.maxRenderFrameRate + FLOAT_TOLERANCE)) {
+                    if (mLoggingEnabled) {
+                        Slog.w(TAG, "Discarding mode " + mode.getModeId()
+                                + ", outside render rate bounds"
+                                + ": minPhysicalRefreshRate=" + summary.minPhysicalRefreshRate
+                                + ", maxPhysicalRefreshRate=" + summary.maxPhysicalRefreshRate
+                                + ", modeRefreshRate=" + physicalRefreshRate);
+                    }
+                    continue;
+                }
             }
 
             // Check whether the render frame rate range is achievable by the mode's physical
@@ -1640,7 +1656,7 @@ public class DisplayModeDirector {
             SparseArray<Display.Mode[]> modes = new SparseArray<>();
             SparseArray<Display.Mode> defaultModes = new SparseArray<>();
             DisplayInfo info = new DisplayInfo();
-            Display[] displays = dm.getDisplays();
+            Display[] displays = dm.getDisplays(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
             for (Display d : displays) {
                 final int displayId = d.getDisplayId();
                 d.getDisplayInfo(info);
@@ -2517,7 +2533,8 @@ public class DisplayModeDirector {
             sensorManager.addProximityActiveListener(BackgroundThread.getExecutor(), this);
 
             synchronized (mSensorObserverLock) {
-                for (Display d : mDisplayManager.getDisplays()) {
+                for (Display d : mDisplayManager.getDisplays(
+                        DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)) {
                     mDozeStateByDisplay.put(d.getDisplayId(), mInjector.isDozeState(d));
                 }
             }
@@ -2528,7 +2545,8 @@ public class DisplayModeDirector {
         }
 
         private void recalculateVotesLocked() {
-            final Display[] displays = mDisplayManager.getDisplays();
+            final Display[] displays = mDisplayManager.getDisplays(
+                    DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
             for (Display d : displays) {
                 int displayId = d.getDisplayId();
                 Vote vote = null;
@@ -2976,7 +2994,7 @@ public class DisplayModeDirector {
 
         IThermalService getThermalService();
 
-        boolean renderFrameRateIsPhysicalRefreshRate();
+        boolean supportsFrameRateOverride();
     }
 
     @VisibleForTesting
@@ -3031,9 +3049,11 @@ public class DisplayModeDirector {
         }
 
         @Override
-        public boolean renderFrameRateIsPhysicalRefreshRate() {
-            return DisplayProperties
-                    .debug_render_frame_rate_is_physical_refresh_rate().orElse(true);
+        public boolean supportsFrameRateOverride() {
+            return SurfaceFlingerProperties.enable_frame_rate_override().orElse(false)
+                            && !SurfaceFlingerProperties.frame_rate_override_for_native_rates()
+                                    .orElse(true)
+                            && SurfaceFlingerProperties.frame_rate_override_global().orElse(false);
         }
 
         private DisplayManager getDisplayManager() {

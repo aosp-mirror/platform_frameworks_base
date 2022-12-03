@@ -44,6 +44,7 @@ import com.android.internal.util.GrowingArrayUtils;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * A base class that manages text layout in visual elements on
@@ -347,9 +348,13 @@ public abstract class Layout {
 
     /**
      * Draw this Layout on the specified Canvas.
+     *
+     * This API draws background first, then draws text on top of it.
+     *
+     * @see #draw(Canvas, List, List, Path, Paint, int)
      */
     public void draw(Canvas c) {
-        draw(c, null, null, 0);
+        draw(c, (Path) null, (Paint) null, 0);
     }
 
     /**
@@ -357,21 +362,140 @@ public abstract class Layout {
      * between the background and the text.
      *
      * @param canvas the canvas
-     * @param highlight the path of the highlight or cursor; can be null
-     * @param highlightPaint the paint for the highlight
+     * @param selectionHighlight the path of the selection highlight or cursor; can be null
+     * @param selectionHighlightPaint the paint for the selection highlight
      * @param cursorOffsetVertical the amount to temporarily translate the
      *        canvas while rendering the highlight
+     *
+     * @see #draw(Canvas, List, List, Path, Paint, int)
      */
-    public void draw(Canvas canvas, Path highlight, Paint highlightPaint,
+    public void draw(
+            Canvas canvas, Path selectionHighlight,
+            Paint selectionHighlightPaint, int cursorOffsetVertical) {
+        draw(canvas, null, null, selectionHighlight, selectionHighlightPaint, cursorOffsetVertical);
+    }
+
+    /**
+     * Draw this layout on the specified canvas.
+     *
+     * This API draws background first, then draws highlight paths on top of it, then draws
+     * selection or cursor, then finally draws text on top of it.
+     *
+     * @see #drawBackground(Canvas)
+     * @see #drawText(Canvas)
+     *
+     * @param canvas the canvas
+     * @param highlightPaths the path of the highlights. The highlightPaths and highlightPaints must
+     *                      have the same length and aligned in the same order. For example, the
+     *                      paint of the n-th of the highlightPaths should be stored at the n-th of
+     *                      highlightPaints.
+     * @param highlightPaints the paints for the highlights. The highlightPaths and highlightPaints
+     *                        must have the same length and aligned in the same order. For example,
+     *                        the paint of the n-th of the highlightPaths should be stored at the
+     *                        n-th of highlightPaints.
+     * @param selectionPath the selection or cursor path
+     * @param selectionPaint the paint for the selection or cursor.
+     * @param cursorOffsetVertical the amount to temporarily translate the canvas while rendering
+     *                            the highlight
+     */
+    public void draw(@NonNull Canvas canvas,
+            @Nullable List<Path> highlightPaths,
+            @Nullable List<Paint> highlightPaints,
+            @Nullable Path selectionPath,
+            @Nullable Paint selectionPaint,
             int cursorOffsetVertical) {
         final long lineRange = getLineRangeForDraw(canvas);
         int firstLine = TextUtils.unpackRangeStartFromLong(lineRange);
         int lastLine = TextUtils.unpackRangeEndFromLong(lineRange);
         if (lastLine < 0) return;
 
-        drawBackground(canvas, highlight, highlightPaint, cursorOffsetVertical,
-                firstLine, lastLine);
+        drawWithoutText(canvas, highlightPaths, highlightPaints, selectionPath, selectionPaint,
+                cursorOffsetVertical, firstLine, lastLine);
         drawText(canvas, firstLine, lastLine);
+    }
+
+    /**
+     * Draw text part of this layout.
+     *
+     * Different from {@link #draw(Canvas, List, List, Path, Paint, int)} API, this API only draws
+     * text part, not drawing highlights, selections, or backgrounds.
+     *
+     * @see #draw(Canvas, List, List, Path, Paint, int)
+     * @see #drawBackground(Canvas)
+     *
+     * @param canvas the canvas
+     */
+    public void drawText(@NonNull Canvas canvas) {
+        final long lineRange = getLineRangeForDraw(canvas);
+        int firstLine = TextUtils.unpackRangeStartFromLong(lineRange);
+        int lastLine = TextUtils.unpackRangeEndFromLong(lineRange);
+        if (lastLine < 0) return;
+        drawText(canvas, firstLine, lastLine);
+    }
+
+    /**
+     * Draw background of this layout.
+     *
+     * Different from {@link #draw(Canvas, List, List, Path, Paint, int)} API, this API only draws
+     * background, not drawing text, highlights or selections. The background here is drawn by
+     * {@link LineBackgroundSpan} attached to the text.
+     *
+     * @see #draw(Canvas, List, List, Path, Paint, int)
+     * @see #drawText(Canvas)
+     *
+     * @param canvas the canvas
+     */
+    public void drawBackground(@NonNull Canvas canvas) {
+        final long lineRange = getLineRangeForDraw(canvas);
+        int firstLine = TextUtils.unpackRangeStartFromLong(lineRange);
+        int lastLine = TextUtils.unpackRangeEndFromLong(lineRange);
+        if (lastLine < 0) return;
+        drawBackground(canvas, firstLine, lastLine);
+    }
+
+    /**
+     * @hide public for Editor.java
+     */
+    public void drawWithoutText(
+            @NonNull Canvas canvas,
+            @Nullable List<Path> highlightPaths,
+            @Nullable List<Paint> highlightPaints,
+            @Nullable Path selectionPath,
+            @Nullable Paint selectionPaint,
+            int cursorOffsetVertical,
+            int firstLine,
+            int lastLine) {
+        drawBackground(canvas, firstLine, lastLine);
+        if (highlightPaths == null && highlightPaints == null) {
+            return;
+        }
+        if (cursorOffsetVertical != 0) canvas.translate(0, cursorOffsetVertical);
+        try {
+            if (highlightPaths != null) {
+                if (highlightPaints == null) {
+                    throw new IllegalArgumentException(
+                            "if highlight is specified, highlightPaint must be specified.");
+                }
+                if (highlightPaints.size() != highlightPaths.size()) {
+                    throw new IllegalArgumentException(
+                            "The highlight path size is different from the size of highlight"
+                                    + " paints");
+                }
+                for (int i = 0; i < highlightPaths.size(); ++i) {
+                    final Path highlight = highlightPaths.get(i);
+                    final Paint highlightPaint = highlightPaints.get(i);
+                    if (highlight != null) {
+                        canvas.drawPath(highlight, highlightPaint);
+                    }
+                }
+            }
+
+            if (selectionPath != null) {
+                canvas.drawPath(selectionPath, selectionPaint);
+            }
+        } finally {
+            if (cursorOffsetVertical != 0) canvas.translate(0, -cursorOffsetVertical);
+        }
     }
 
     private boolean isJustificationRequired(int lineNum) {
@@ -635,8 +759,9 @@ public abstract class Layout {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public void drawBackground(Canvas canvas, Path highlight, Paint highlightPaint,
-            int cursorOffsetVertical, int firstLine, int lastLine) {
+    public void drawBackground(
+            @NonNull Canvas canvas,
+            int firstLine, int lastLine) {
         // First, draw LineBackgroundSpans.
         // LineBackgroundSpans know nothing about the alignment, margins, or
         // direction of the layout or line.  XXX: Should they?
@@ -699,14 +824,6 @@ public abstract class Layout {
                 }
             }
             mLineBackgroundSpans.recycle();
-        }
-
-        // There can be a highlight even without spans if we are drawing
-        // a non-spanned transformation of a spanned editing buffer.
-        if (highlight != null) {
-            if (cursorOffsetVertical != 0) canvas.translate(0, cursorOffsetVertical);
-            canvas.drawPath(highlight, highlightPaint);
-            if (cursorOffsetVertical != 0) canvas.translate(0, -cursorOffsetVertical);
         }
     }
 

@@ -3165,20 +3165,20 @@
         <attr name="canDisplayOnRemoteDevices" format="boolean"/>
         <attr name="allowUntrustedActivityEmbedding" />
         <attr name="knownActivityEmbeddingCerts" />
-        <!-- Specifies the category of the target display the activity is expected to run on. Upon
-             creation, a virtual display can specify which display categories it supports and one of
-             the category must be present in the activity's manifest to allow this activity to run.
-             The default value is {@code null}, which indicates the activity does not belong to a
-             restricted display category and thus can only run on a display that didn't specify any
-             display categories. Each activity can only specify one category it targets to but a
-             virtual display can accommodate multiple restricted categories.
+        <!-- Specifies the required display category of the activity. Upon creation, a display can
+             specify which display categories it supports and one of the categories must be present
+             in the {@code <activity>} element to allow this activity to run. The default value is
+             {@code null}, which indicates the activity does not have a required display category
+             and thus can only run on a display that didn't specify any display categories. Each
+             activity can only specify one required category but a display can accommodate multiple
+             display categories.
 
              <p> This field should be formatted as a Java-language-style free form string(for
              example, com.google.automotive_entertainment), which may contain uppercase or lowercase
              letters ('A' through 'Z'), numbers, and underscores ('_') but may only start with
              letters.
          -->
-        <attr name="targetDisplayCategory" format="string"/>
+        <attr name="requiredDisplayCategory" format="string"/>
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new

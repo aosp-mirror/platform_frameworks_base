@@ -79,9 +79,10 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     // (requires restart)
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final int MSG_SWITCH_KEYBOARD_LAYOUT = 1;
-    private static final int MSG_RELOAD_KEYBOARD_LAYOUTS = 2;
-    private static final int MSG_UPDATE_KEYBOARD_LAYOUTS = 3;
+    private static final int MSG_UPDATE_EXISTING_DEVICES = 1;
+    private static final int MSG_SWITCH_KEYBOARD_LAYOUT = 2;
+    private static final int MSG_RELOAD_KEYBOARD_LAYOUTS = 3;
+    private static final int MSG_UPDATE_KEYBOARD_LAYOUTS = 4;
 
     private final Context mContext;
     private final NativeInputManagerService mNative;
@@ -121,10 +122,10 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         InputManager inputManager = Objects.requireNonNull(
                 mContext.getSystemService(InputManager.class));
         inputManager.registerInputDeviceListener(this, mHandler);
-        // Circle through all the already added input devices
-        for (int deviceId : inputManager.getInputDeviceIds()) {
-            onInputDeviceAdded(deviceId);
-        }
+
+        Message msg = Message.obtain(mHandler, MSG_UPDATE_EXISTING_DEVICES,
+                inputManager.getInputDeviceIds());
+        mHandler.sendMessage(msg);
     }
 
     @Override
@@ -682,6 +683,13 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
 
     private boolean handleMessage(Message msg) {
         switch (msg.what) {
+            case MSG_UPDATE_EXISTING_DEVICES:
+                // Circle through all the already added input devices
+                // Need to do it on handler thread and not block IMS thread
+                for (int deviceId : (int[]) msg.obj) {
+                    onInputDeviceAdded(deviceId);
+                }
+                return true;
             case MSG_SWITCH_KEYBOARD_LAYOUT:
                 handleSwitchKeyboardLayout(msg.arg1, msg.arg2);
                 return true;

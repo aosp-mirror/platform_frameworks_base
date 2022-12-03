@@ -20,7 +20,6 @@ import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL;
 import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL_UNLOCKED;
 import static com.android.keyguard.KeyguardAbsKeyInputView.MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT;
 
-import android.annotation.CallSuper;
 import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
@@ -115,13 +114,6 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
         } else {
             resetState();
         }
-    }
-
-    @CallSuper
-    @Override
-    public void reloadColors() {
-        super.reloadColors();
-        mMessageAreaController.reloadColors();
     }
 
     @Override

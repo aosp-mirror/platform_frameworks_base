@@ -90,7 +90,7 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
                 // This logic relies on 2 assumptions: 1 is that child tasks will be visited before
                 // parents (due to how z-order works). 2 is that no non-tasks are interleaved
                 // between tasks (hierarchically).
-                taskParents.add(change.getContainer());
+                taskParents.add(change.getParent());
             }
             if (taskParents.contains(change.getContainer())) {
                 continue;
@@ -120,7 +120,7 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
             TransitionInfo.Change change,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        mWindowDecorViewModel.createWindowDecoration(
+        mWindowDecorViewModel.onTaskOpening(
                 change.getTaskInfo(), change.getLeash(), startT, finishT);
     }
 
@@ -128,31 +128,23 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
             TransitionInfo.Change change,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        mWindowDecorViewModel.setupWindowDecorationForTransition(
-                change.getTaskInfo(), startT, finishT);
+        mWindowDecorViewModel.onTaskClosing(change.getTaskInfo(), startT, finishT);
     }
 
     private void onChangeTransitionReady(
             TransitionInfo.Change change,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        mWindowDecorViewModel.setupWindowDecorationForTransition(
-                change.getTaskInfo(), startT, finishT);
+        mWindowDecorViewModel.onTaskChanging(
+                change.getTaskInfo(), change.getLeash(), startT, finishT);
     }
 
     private void onToFrontTransitionReady(
             TransitionInfo.Change change,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        boolean exists = mWindowDecorViewModel.setupWindowDecorationForTransition(
-                change.getTaskInfo(),
-                startT,
-                finishT);
-        if (!exists) {
-            // Window caption does not exist, create it
-            mWindowDecorViewModel.createWindowDecoration(
-                    change.getTaskInfo(), change.getLeash(), startT, finishT);
-        }
+        mWindowDecorViewModel.onTaskChanging(
+                change.getTaskInfo(), change.getLeash(), startT, finishT);
     }
 
     @Override

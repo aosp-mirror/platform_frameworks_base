@@ -22,7 +22,7 @@ import android.os.UserHandle
 import android.provider.Settings.Global
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
@@ -45,7 +45,7 @@ class AirplaneModeRepositoryImplTest : SysuiTestCase() {
 
     private lateinit var underTest: AirplaneModeRepositoryImpl
 
-    @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var logger: TableLogBuffer
     private lateinit var bgHandler: Handler
     private lateinit var scope: CoroutineScope
     private lateinit var settings: FakeSettings

@@ -52,6 +52,8 @@ public class GameManagerServiceSettingsTests {
     private static final String PACKAGE_NAME_1 = "com.android.app1";
     private static final String PACKAGE_NAME_2 = "com.android.app2";
     private static final String PACKAGE_NAME_3 = "com.android.app3";
+    private static final String PACKAGE_NAME_4 = "com.android.app4";
+
 
     private void writeFile(File file, byte[] data) {
         file.mkdirs();
@@ -69,16 +71,23 @@ public class GameManagerServiceSettingsTests {
         writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(),
                         "system/game-manager-service.xml"),
                 ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                        + "<packages>\n"
-                        + "  <package name=\"com.android.app1\" gameMode=\"1\">\n"
-                        + "  </package>\n"
+                        + "<packages>"
+                        + "\n" // app1: no package config setting
+                        + "\n" // app2: performance mode is selected with override
                         + "  <package name=\"com.android.app2\" gameMode=\"2\">\n"
                         + "     <gameModeConfig gameMode=\"2\" scaling=\"0.99\" "
                         + "useAngle=\"true\" fps=\"90\" loadingBoost=\"123\"></gameModeConfig>\n"
                         + "     <gameModeConfig gameMode=\"3\"></gameModeConfig>\n"
-                        + "  </package>\n"
+                        + "  </package>"
+                        + "\n" // app3: only battery mode is selected
                         + "  <package name=\"com.android.app3\" gameMode=\"3\">\n"
-                        + "  </package>\n"
+                        + "  </package>"
+                        + "\n" // app4: no game mode selected but custom game mode config
+                        + "  <package name=\"com.android.app4\">\n"
+                        + "     <gameModeConfig gameMode=\"4\" scaling=\"0.4\" "
+                        + "fps=\"30\"></gameModeConfig>\n"
+                        + "  </package>"
+                        + "\n"
                         + "</packages>\n").getBytes());
     }
 
@@ -115,14 +124,15 @@ public class GameManagerServiceSettingsTests {
         assertTrue(settings.readPersistentDataLocked());
 
         // test game modes
-        assertEquals(1, settings.getGameModeLocked(PACKAGE_NAME_1));
-        assertEquals(2, settings.getGameModeLocked(PACKAGE_NAME_2));
-        assertEquals(3, settings.getGameModeLocked(PACKAGE_NAME_3));
+        assertEquals(GameManager.GAME_MODE_STANDARD, settings.getGameModeLocked(PACKAGE_NAME_1));
+        assertEquals(GameManager.GAME_MODE_PERFORMANCE, settings.getGameModeLocked(PACKAGE_NAME_2));
+        assertEquals(GameManager.GAME_MODE_BATTERY, settings.getGameModeLocked(PACKAGE_NAME_3));
+        assertEquals(GameManager.GAME_MODE_STANDARD, settings.getGameModeLocked(PACKAGE_NAME_4));
 
         // test game mode configs
         assertNull(settings.getConfigOverride(PACKAGE_NAME_1));
         assertNull(settings.getConfigOverride(PACKAGE_NAME_3));
-        final GamePackageConfiguration config = settings.getConfigOverride(PACKAGE_NAME_2);
+        GamePackageConfiguration config = settings.getConfigOverride(PACKAGE_NAME_2);
         assertNotNull(config);
 
         assertNull(config.getGameModeConfiguration(GameManager.GAME_MODE_STANDARD));
@@ -141,6 +151,14 @@ public class GameManagerServiceSettingsTests {
                 GameModeConfiguration.DEFAULT_LOADING_BOOST_DURATION);
         assertEquals(batteryConfig.getFpsStr(), GameModeConfiguration.DEFAULT_FPS);
         assertFalse(batteryConfig.getUseAngle());
+
+        config = settings.getConfigOverride(PACKAGE_NAME_4);
+        assertNotNull(config);
+        GameModeConfiguration customConfig = config.getGameModeConfiguration(
+                GameManager.GAME_MODE_CUSTOM);
+        assertNotNull(customConfig);
+        assertEquals(customConfig.getScaling(), 0.4f, 0.1f);
+        assertEquals(customConfig.getFps(), 30);
     }
 
     @Test
@@ -176,16 +194,20 @@ public class GameManagerServiceSettingsTests {
         writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(),
                         "system/game-manager-service.xml"),
                 ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                        + "<packages>\n"
+                        + "<packages>"
+                        + "\n" // missing package name
                         + "  <package gameMode=\"1\">\n"
-                        + "  </package>\n"
+                        + "  </package>"
+                        + "\n" // app2 with unknown sub element
                         + "  <package name=\"com.android.app2\" gameMode=\"2\">\n"
                         + "     <unknown></unknown>"
                         + "     <gameModeConfig gameMode=\"3\" fps=\"90\"></gameModeConfig>\n"
                         + "     foo bar"
-                        + "  </package>\n"
+                        + "  </package>"
+                        + "\n" // unknown package element
                         + "  <unknownTag></unknownTag>\n"
-                        + "    foo bar\n"
+                        + "    foo bar"
+                        + "\n" // app3 after unknown element
                         + "  <package name=\"com.android.app3\" gameMode=\"3\">\n"
                         + "  </package>\n"
                         + "</packages>\n").getBytes());
@@ -214,6 +236,8 @@ public class GameManagerServiceSettingsTests {
         settings.setGameModeLocked(PACKAGE_NAME_1, GameManager.GAME_MODE_BATTERY);
         settings.setGameModeLocked(PACKAGE_NAME_2, GameManager.GAME_MODE_PERFORMANCE);
         settings.setGameModeLocked(PACKAGE_NAME_3, GameManager.GAME_MODE_STANDARD);
+
+        // set config for app2
         GamePackageConfiguration config = new GamePackageConfiguration(PACKAGE_NAME_2);
         GameModeConfiguration performanceConfig = config.getOrAddDefaultGameModeConfiguration(
                 GameManager.GAME_MODE_PERFORMANCE);
@@ -225,18 +249,29 @@ public class GameManagerServiceSettingsTests {
                 GameManager.GAME_MODE_BATTERY);
         batteryConfig.setScaling(0.77f);
         settings.setConfigOverride(PACKAGE_NAME_2, config);
+
+        // set config for app4
+        config = new GamePackageConfiguration(PACKAGE_NAME_4);
+        GameModeConfiguration customConfig = config.getOrAddDefaultGameModeConfiguration(
+                GameManager.GAME_MODE_CUSTOM);
+        customConfig.setScaling(0.4f);
+        customConfig.setFpsStr("30");
+        settings.setConfigOverride(PACKAGE_NAME_4, config);
+
         settings.writePersistentDataLocked();
 
         // clear the settings in memory
         settings.removeGame(PACKAGE_NAME_1);
         settings.removeGame(PACKAGE_NAME_2);
         settings.removeGame(PACKAGE_NAME_3);
+        settings.removeGame(PACKAGE_NAME_4);
 
         // read back in and verify
         assertTrue(settings.readPersistentDataLocked());
         assertEquals(3, settings.getGameModeLocked(PACKAGE_NAME_1));
         assertEquals(2, settings.getGameModeLocked(PACKAGE_NAME_2));
         assertEquals(1, settings.getGameModeLocked(PACKAGE_NAME_3));
+        assertEquals(1, settings.getGameModeLocked(PACKAGE_NAME_4));
 
         config = settings.getConfigOverride(PACKAGE_NAME_1);
         assertNull(config);
@@ -256,5 +291,14 @@ public class GameManagerServiceSettingsTests {
         assertEquals(performanceConfig.getLoadingBoostDuration(), 321);
         assertEquals(performanceConfig.getFpsStr(), "60");
         assertTrue(performanceConfig.getUseAngle());
+
+        config = settings.getConfigOverride(PACKAGE_NAME_4);
+        assertNotNull(config);
+        customConfig = config.getGameModeConfiguration(GameManager.GAME_MODE_CUSTOM);
+        assertNotNull(customConfig);
+        assertEquals(customConfig.getScaling(), 0.4f, 0.1f);
+        assertEquals(customConfig.getFps(), 30);
+        assertNull(config.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
+        assertNull(config.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
     }
 }

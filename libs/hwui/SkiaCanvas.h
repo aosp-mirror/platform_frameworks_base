@@ -33,6 +33,7 @@
 #include <cassert>
 #include <optional>
 
+enum class SkBlendMode;
 class SkRRect;
 
 namespace android {

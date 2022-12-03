@@ -1955,6 +1955,7 @@ public class BubbleStackView extends FrameLayout
         if (wasExpanded) {
             stopMonitoringSwipeUpGesture();
             animateCollapse();
+            showManageMenu(false);
             logBubbleEvent(mExpandedBubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
         } else {
             animateExpansion();

@@ -8918,9 +8918,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_EXCLUDE_PORTRAIT_FULLSCREEN)
-                && getParent().getConfiguration().orientation == ORIENTATION_PORTRAIT
-                && getParent().getWindowConfiguration().getWindowingMode()
-                        == WINDOWING_MODE_FULLSCREEN) {
+                && isParentFullscreenPortrait()) {
             // We are using the parent configuration here as this is the most recent one that gets
             // passed to onConfigurationChanged when a relevant change takes place
             return info.getMinAspectRatio();
@@ -8941,6 +8939,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     info.getMinAspectRatio());
         }
         return info.getMinAspectRatio();
+    }
+
+    private boolean isParentFullscreenPortrait() {
+        final WindowContainer parent = getParent();
+        return parent != null
+                && parent.getConfiguration().orientation == ORIENTATION_PORTRAIT
+                && parent.getWindowConfiguration().getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
     }
 
     /**

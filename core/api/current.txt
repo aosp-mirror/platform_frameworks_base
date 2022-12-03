@@ -1261,6 +1261,7 @@ package android {
     field public static final int requireDeviceUnlock = 16843756; // 0x10103ec
     field public static final int required = 16843406; // 0x101028e
     field public static final int requiredAccountType = 16843734; // 0x10103d6
+    field public static final int requiredDisplayCategory;
     field public static final int requiredFeature = 16844116; // 0x1010554
     field public static final int requiredForAllUsers = 16843728; // 0x10103d0
     field public static final int requiredNotFeature = 16844117; // 0x1010555
@@ -1508,7 +1509,6 @@ package android {
     field public static final int targetCellWidth = 16844340; // 0x1010634
     field public static final int targetClass = 16842799; // 0x101002f
     field @Deprecated public static final int targetDescriptions = 16843680; // 0x10103a0
-    field public static final int targetDisplayCategory;
     field public static final int targetId = 16843740; // 0x10103dc
     field public static final int targetName = 16843853; // 0x101044d
     field public static final int targetPackage = 16842785; // 0x1010021
@@ -11201,10 +11201,10 @@ package android.content.pm {
     field public String parentActivityName;
     field public String permission;
     field public int persistableMode;
+    field @Nullable public String requiredDisplayCategory;
     field public int screenOrientation;
     field public int softInputMode;
     field public String targetActivity;
-    field @Nullable public String targetDisplayCategory;
     field public String taskAffinity;
     field public int theme;
     field public int uiOptions;
@@ -23953,11 +23953,17 @@ package android.media {
   }
 
   public static final class RouteListingPreference.Item implements android.os.Parcelable {
-    ctor public RouteListingPreference.Item(@NonNull String);
+    ctor public RouteListingPreference.Item(@NonNull String, int, int);
     method public int describeContents();
+    method public int getDisableReason();
+    method public int getFlags();
     method @NonNull public String getRouteId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.RouteListingPreference.Item> CREATOR;
+    field public static final int DISABLE_REASON_NONE = 0; // 0x0
+    field public static final int DISABLE_REASON_SUBSCRIPTION_REQUIRED = 1; // 0x1
+    field public static final int FLAG_ONGOING_SESSION = 1; // 0x1
+    field public static final int FLAG_SUGGESTED_ROUTE = 2; // 0x2
   }
 
   public final class RoutingSessionInfo implements android.os.Parcelable {
@@ -45670,6 +45676,19 @@ package android.text {
     method public int previousStartBoundary(@IntRange(from=0) int);
   }
 
+  public class Highlights {
+    method @NonNull public android.graphics.Paint getPaint(int);
+    method @NonNull public int[] getRanges(int);
+    method public int getSize();
+  }
+
+  public static final class Highlights.Builder {
+    ctor public Highlights.Builder();
+    method @NonNull public android.text.Highlights.Builder addRange(@NonNull android.graphics.Paint, int, int);
+    method @NonNull public android.text.Highlights.Builder addRanges(@NonNull android.graphics.Paint, @NonNull int...);
+    method @NonNull public android.text.Highlights build();
+  }
+
   public class Html {
     method public static String escapeHtml(CharSequence);
     method @Deprecated public static android.text.Spanned fromHtml(String);
@@ -45761,6 +45780,9 @@ package android.text {
     ctor protected Layout(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float);
     method public void draw(android.graphics.Canvas);
     method public void draw(android.graphics.Canvas, android.graphics.Path, android.graphics.Paint, int);
+    method public void draw(@NonNull android.graphics.Canvas, @Nullable java.util.List<android.graphics.Path>, @Nullable java.util.List<android.graphics.Paint>, @Nullable android.graphics.Path, @Nullable android.graphics.Paint, int);
+    method public void drawBackground(@NonNull android.graphics.Canvas);
+    method public void drawText(@NonNull android.graphics.Canvas);
     method public void fillCharacterBounds(@IntRange(from=0) int, @IntRange(from=0) int, @NonNull float[], @IntRange(from=0) int);
     method public final android.text.Layout.Alignment getAlignment();
     method public abstract int getBottomPadding();
@@ -58574,6 +58596,7 @@ package android.widget {
     method public boolean getFreezesText();
     method public int getGravity();
     method @ColorInt public int getHighlightColor();
+    method @Nullable public android.text.Highlights getHighlights();
     method public CharSequence getHint();
     method public final android.content.res.ColorStateList getHintTextColors();
     method public int getHyphenationFrequency();
@@ -58703,6 +58726,7 @@ package android.widget {
     method public void setGravity(int);
     method public void setHeight(int);
     method public void setHighlightColor(@ColorInt int);
+    method public void setHighlights(@Nullable android.text.Highlights);
     method public final void setHint(CharSequence);
     method public final void setHint(@StringRes int);
     method public final void setHintTextColor(@ColorInt int);

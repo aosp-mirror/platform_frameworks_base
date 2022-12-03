@@ -1941,8 +1941,8 @@ public class DisplayDeviceConfig {
     }
 
     private void setProxSensorUnspecified() {
-        mProximitySensor.name = "";
-        mProximitySensor.type = "";
+        mProximitySensor.name = null;
+        mProximitySensor.type = null;
     }
 
     private void loadProxSensorFromDdc(DisplayConfiguration config) {
