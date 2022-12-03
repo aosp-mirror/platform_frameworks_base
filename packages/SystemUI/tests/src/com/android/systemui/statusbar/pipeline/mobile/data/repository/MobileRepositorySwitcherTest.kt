@@ -24,6 +24,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.DemoMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.DemoModeMobileConnectionDataSource
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
@@ -158,15 +159,15 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
                 .thenReturn(listOf(SUB_1, SUB_2))
 
-            var latest: List<SubscriptionInfo>? = null
-            val job = underTest.subscriptionsFlow.onEach { latest = it }.launchIn(this)
+            var latest: List<SubscriptionModel>? = null
+            val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
 
             // The real subscriptions has 2 subs
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
                 .thenReturn(listOf(SUB_1, SUB_2))
             getSubscriptionCallback().onSubscriptionsChanged()
 
-            assertThat(latest).isEqualTo(listOf(SUB_1, SUB_2))
+            assertThat(latest).isEqualTo(listOf(MODEL_1, MODEL_2))
 
             // Demo mode turns on, and we should see only the demo subscriptions
             startDemoMode()
@@ -179,7 +180,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
 
             finishDemoMode()
 
-            assertThat(latest).isEqualTo(listOf(SUB_1, SUB_2))
+            assertThat(latest).isEqualTo(listOf(MODEL_1, MODEL_2))
 
             job.cancel()
         }
@@ -214,9 +215,11 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
         private const val SUB_1_ID = 1
         private val SUB_1 =
             mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_1_ID) }
+        private val MODEL_1 = SubscriptionModel(subscriptionId = SUB_1_ID)
 
         private const val SUB_2_ID = 2
         private val SUB_2 =
             mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_2_ID) }
+        private val MODEL_2 = SubscriptionModel(subscriptionId = SUB_2_ID)
     }
 }

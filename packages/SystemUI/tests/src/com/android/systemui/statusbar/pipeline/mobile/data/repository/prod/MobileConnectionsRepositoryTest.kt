@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.telephony.PhoneConstants
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.util.mockito.any
@@ -99,21 +100,21 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun testSubscriptions_initiallyEmpty() =
         runBlocking(IMMEDIATE) {
-            assertThat(underTest.subscriptionsFlow.value).isEqualTo(listOf<SubscriptionInfo>())
+            assertThat(underTest.subscriptions.value).isEqualTo(listOf<SubscriptionModel>())
         }
 
     @Test
     fun testSubscriptions_listUpdates() =
         runBlocking(IMMEDIATE) {
-            var latest: List<SubscriptionInfo>? = null
+            var latest: List<SubscriptionModel>? = null
 
-            val job = underTest.subscriptionsFlow.onEach { latest = it }.launchIn(this)
+            val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
 
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
                 .thenReturn(listOf(SUB_1, SUB_2))
             getSubscriptionCallback().onSubscriptionsChanged()
 
-            assertThat(latest).isEqualTo(listOf(SUB_1, SUB_2))
+            assertThat(latest).isEqualTo(listOf(MODEL_1, MODEL_2))
 
             job.cancel()
         }
@@ -121,9 +122,9 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun testSubscriptions_removingSub_updatesList() =
         runBlocking(IMMEDIATE) {
-            var latest: List<SubscriptionInfo>? = null
+            var latest: List<SubscriptionModel>? = null
 
-            val job = underTest.subscriptionsFlow.onEach { latest = it }.launchIn(this)
+            val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
 
             // WHEN 2 networks show up
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
@@ -136,7 +137,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             getSubscriptionCallback().onSubscriptionsChanged()
 
             // THEN the subscriptions list represents the newest change
-            assertThat(latest).isEqualTo(listOf(SUB_2))
+            assertThat(latest).isEqualTo(listOf(MODEL_2))
 
             job.cancel()
         }
@@ -166,7 +167,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun testConnectionRepository_validSubId_isCached() =
         runBlocking(IMMEDIATE) {
-            val job = underTest.subscriptionsFlow.launchIn(this)
+            val job = underTest.subscriptions.launchIn(this)
 
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
                 .thenReturn(listOf(SUB_1))
@@ -183,7 +184,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun testConnectionCache_clearsInvalidSubscriptions() =
         runBlocking(IMMEDIATE) {
-            val job = underTest.subscriptionsFlow.launchIn(this)
+            val job = underTest.subscriptions.launchIn(this)
 
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
                 .thenReturn(listOf(SUB_1, SUB_2))
@@ -209,7 +210,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun testConnectionRepository_invalidSubId_throws() =
         runBlocking(IMMEDIATE) {
-            val job = underTest.subscriptionsFlow.launchIn(this)
+            val job = underTest.subscriptions.launchIn(this)
 
             assertThrows(IllegalArgumentException::class.java) {
                 underTest.getRepoForSubId(SUB_1_ID)
@@ -375,10 +376,12 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         private const val SUB_1_ID = 1
         private val SUB_1 =
             mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_1_ID) }
+        private val MODEL_1 = SubscriptionModel(subscriptionId = SUB_1_ID)
 
         private const val SUB_2_ID = 2
         private val SUB_2 =
             mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_2_ID) }
+        private val MODEL_2 = SubscriptionModel(subscriptionId = SUB_2_ID)
 
         private const val NET_ID = 123
         private val NETWORK = mock<Network>().apply { whenever(getNetId()).thenReturn(NET_ID) }

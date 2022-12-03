@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.demo
 
 import android.content.Context
-import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.util.Log
 import com.android.settingslib.SignalIcon
@@ -29,6 +28,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectio
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
@@ -62,16 +62,16 @@ constructor(
     private var demoCommandJob: Job? = null
 
     private val connectionRepoCache = mutableMapOf<Int, DemoMobileConnectionRepository>()
-    private val subscriptionInfoCache = mutableMapOf<Int, SubscriptionInfo>()
+    private val subscriptionInfoCache = mutableMapOf<Int, SubscriptionModel>()
     val demoModeFinishedEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
-    private val _subscriptions = MutableStateFlow<List<SubscriptionInfo>>(listOf())
-    override val subscriptionsFlow =
+    private val _subscriptions = MutableStateFlow<List<SubscriptionModel>>(listOf())
+    override val subscriptions =
         _subscriptions
             .onEach { infos -> dropUnusedReposFromCache(infos) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), _subscriptions.value)
 
-    private fun dropUnusedReposFromCache(newInfos: List<SubscriptionInfo>) {
+    private fun dropUnusedReposFromCache(newInfos: List<SubscriptionModel>) {
         // Remove any connection repository from the cache that isn't in the new set of IDs. They
         // will get garbage collected once their subscribers go away
         val currentValidSubscriptionIds = newInfos.map { it.subscriptionId }
@@ -85,37 +85,17 @@ constructor(
 
     private fun maybeCreateSubscription(subId: Int) {
         if (!subscriptionInfoCache.containsKey(subId)) {
-            createSubscriptionForSubId(subId, subId).also { subscriptionInfoCache[subId] = it }
+            SubscriptionModel(subscriptionId = subId, isOpportunistic = false).also {
+                subscriptionInfoCache[subId] = it
+            }
 
             _subscriptions.value = subscriptionInfoCache.values.toList()
         }
     }
 
-    /** Mimics the old NetworkControllerImpl for now */
-    private fun createSubscriptionForSubId(subId: Int, slotIndex: Int): SubscriptionInfo {
-        return SubscriptionInfo(
-            subId,
-            "",
-            slotIndex,
-            "",
-            "",
-            0,
-            0,
-            "",
-            0,
-            null,
-            null,
-            null,
-            "",
-            false,
-            null,
-            null,
-        )
-    }
-
     // TODO(b/261029387): add a command for this value
     override val activeMobileDataSubscriptionId =
-        subscriptionsFlow
+        subscriptions
             .mapLatest { infos ->
                 // For now, active is just the first in the list
                 infos.firstOrNull()?.subscriptionId ?: INVALID_SUBSCRIPTION_ID
@@ -123,7 +103,7 @@ constructor(
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                subscriptionsFlow.value.firstOrNull()?.subscriptionId ?: INVALID_SUBSCRIPTION_ID
+                subscriptions.value.firstOrNull()?.subscriptionId ?: INVALID_SUBSCRIPTION_ID
             )
 
     /** Demo mode doesn't currently support modifications to the mobile mappings */

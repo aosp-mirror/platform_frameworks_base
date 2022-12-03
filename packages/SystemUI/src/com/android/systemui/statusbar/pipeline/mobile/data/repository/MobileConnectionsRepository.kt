@@ -17,10 +17,10 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
 import android.provider.Settings
-import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
  */
 interface MobileConnectionsRepository {
     /** Observable list of current mobile subscriptions */
-    val subscriptionsFlow: StateFlow<List<SubscriptionInfo>>
+    val subscriptions: StateFlow<List<SubscriptionModel>>
 
     /** Observable for the subscriptionId of the current mobile data connection */
     val activeMobileDataSubscriptionId: StateFlow<Int>

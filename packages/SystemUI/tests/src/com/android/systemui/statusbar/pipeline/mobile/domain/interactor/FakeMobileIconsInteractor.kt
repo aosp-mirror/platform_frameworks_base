@@ -16,14 +16,15 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
-import android.telephony.SubscriptionInfo
 import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO
 import android.telephony.TelephonyManager.NETWORK_TYPE_GSM
 import android.telephony.TelephonyManager.NETWORK_TYPE_LTE
 import android.telephony.TelephonyManager.NETWORK_TYPE_UMTS
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakeMobileIconsInteractor(mobileMappings: MobileMappingsProxy) : MobileIconsInteractor {
@@ -47,8 +48,8 @@ class FakeMobileIconsInteractor(mobileMappings: MobileMappingsProxy) : MobileIco
 
     override val isDefaultConnectionFailed = MutableStateFlow(false)
 
-    private val _filteredSubscriptions = MutableStateFlow<List<SubscriptionInfo>>(listOf())
-    override val filteredSubscriptions = _filteredSubscriptions
+    private val _filteredSubscriptions = MutableStateFlow<List<SubscriptionModel>>(listOf())
+    override val filteredSubscriptions: Flow<List<SubscriptionModel>> = _filteredSubscriptions
 
     private val _activeDataConnectionHasDataEnabled = MutableStateFlow(false)
     override val activeDataConnectionHasDataEnabled = _activeDataConnectionHasDataEnabled

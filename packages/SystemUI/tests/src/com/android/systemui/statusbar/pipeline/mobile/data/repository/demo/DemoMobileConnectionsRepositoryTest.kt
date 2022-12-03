@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.demo
 
-import android.telephony.SubscriptionInfo
 import android.telephony.TelephonyManager.DATA_ACTIVITY_INOUT
 import android.telephony.TelephonyManager.UNKNOWN_CARRIER_ID
 import androidx.test.filters.SmallTest
@@ -25,6 +24,7 @@ import com.android.settingslib.mobile.TelephonyIcons.THREE_G
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel.MobileDisabled
 import com.android.systemui.util.mockito.mock
@@ -73,8 +73,8 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun `network event - create new subscription`() =
         testScope.runTest {
-            var latest: List<SubscriptionInfo>? = null
-            val job = underTest.subscriptionsFlow.onEach { latest = it }.launchIn(this)
+            var latest: List<SubscriptionModel>? = null
+            val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
 
             assertThat(latest).isEmpty()
 
@@ -89,8 +89,8 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun `network event - reuses subscription when same Id`() =
         testScope.runTest {
-            var latest: List<SubscriptionInfo>? = null
-            val job = underTest.subscriptionsFlow.onEach { latest = it }.launchIn(this)
+            var latest: List<SubscriptionModel>? = null
+            val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
 
             assertThat(latest).isEmpty()
 
@@ -111,8 +111,8 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun `multiple subscriptions`() =
         testScope.runTest {
-            var latest: List<SubscriptionInfo>? = null
-            val job = underTest.subscriptionsFlow.onEach { latest = it }.launchIn(this)
+            var latest: List<SubscriptionModel>? = null
+            val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
 
             fakeNetworkEventFlow.value = validMobileEvent(subId = 1)
             fakeNetworkEventFlow.value = validMobileEvent(subId = 2)
@@ -125,8 +125,8 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun `mobile disabled event - disables connection - subId specified - single conn`() =
         testScope.runTest {
-            var latest: List<SubscriptionInfo>? = null
-            val job = underTest.subscriptionsFlow.onEach { latest = it }.launchIn(this)
+            var latest: List<SubscriptionModel>? = null
+            val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
 
             fakeNetworkEventFlow.value = validMobileEvent(subId = 1, level = 1)
 
@@ -140,8 +140,8 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun `mobile disabled event - disables connection - subId not specified - single conn`() =
         testScope.runTest {
-            var latest: List<SubscriptionInfo>? = null
-            val job = underTest.subscriptionsFlow.onEach { latest = it }.launchIn(this)
+            var latest: List<SubscriptionModel>? = null
+            val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
 
             fakeNetworkEventFlow.value = validMobileEvent(subId = 1, level = 1)
 
@@ -155,8 +155,8 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun `mobile disabled event - disables connection - subId specified - multiple conn`() =
         testScope.runTest {
-            var latest: List<SubscriptionInfo>? = null
-            val job = underTest.subscriptionsFlow.onEach { latest = it }.launchIn(this)
+            var latest: List<SubscriptionModel>? = null
+            val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
 
             fakeNetworkEventFlow.value = validMobileEvent(subId = 1, level = 1)
             fakeNetworkEventFlow.value = validMobileEvent(subId = 2, level = 1)
@@ -171,8 +171,8 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun `mobile disabled event - subId not specified - multiple conn - ignores command`() =
         testScope.runTest {
-            var latest: List<SubscriptionInfo>? = null
-            val job = underTest.subscriptionsFlow.onEach { latest = it }.launchIn(this)
+            var latest: List<SubscriptionModel>? = null
+            val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
 
             fakeNetworkEventFlow.value = validMobileEvent(subId = 1, level = 1)
             fakeNetworkEventFlow.value = validMobileEvent(subId = 2, level = 1)
@@ -190,7 +190,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
             var currentEvent: FakeNetworkEventModel = validMobileEvent(subId = 1)
             var connections: List<DemoMobileConnectionRepository>? = null
             val job =
-                underTest.subscriptionsFlow
+                underTest.subscriptions
                     .onEach { infos ->
                         connections =
                             infos.map { info -> underTest.getRepoForSubId(info.subscriptionId) }
@@ -222,7 +222,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
             var connection2: DemoMobileConnectionRepository? = null
             var connections: List<DemoMobileConnectionRepository>? = null
             val job =
-                underTest.subscriptionsFlow
+                underTest.subscriptions
                     .onEach { infos ->
                         connections =
                             infos.map { info -> underTest.getRepoForSubId(info.subscriptionId) }

@@ -16,13 +16,13 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
-import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyManager
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -47,8 +47,8 @@ class FakeMobileConnectionsRepository(mobileMappings: MobileMappingsProxy) :
             LTE_ADVANCED_KEY to TelephonyIcons.NR_5G,
         )
 
-    private val _subscriptionsFlow = MutableStateFlow<List<SubscriptionInfo>>(listOf())
-    override val subscriptionsFlow = _subscriptionsFlow
+    private val _subscriptions = MutableStateFlow<List<SubscriptionModel>>(listOf())
+    override val subscriptions = _subscriptions
 
     private val _activeMobileDataSubscriptionId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
     override val activeMobileDataSubscriptionId = _activeMobileDataSubscriptionId
@@ -74,8 +74,8 @@ class FakeMobileConnectionsRepository(mobileMappings: MobileMappingsProxy) :
     private val _defaultMobileIconGroup = MutableStateFlow(DEFAULT_ICON)
     override val defaultMobileIconGroup = _defaultMobileIconGroup
 
-    fun setSubscriptions(subs: List<SubscriptionInfo>) {
-        _subscriptionsFlow.value = subs
+    fun setSubscriptions(subs: List<SubscriptionModel>) {
+        _subscriptions.value = subs
     }
 
     fun setDefaultDataSubId(id: Int) {

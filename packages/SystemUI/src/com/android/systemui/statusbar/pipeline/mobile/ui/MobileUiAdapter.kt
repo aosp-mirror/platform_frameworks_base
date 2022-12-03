@@ -56,8 +56,8 @@ constructor(
     private val statusBarPipelineFlags: StatusBarPipelineFlags,
 ) : CoreStartable {
     private val mobileSubIds: Flow<List<Int>> =
-        interactor.filteredSubscriptions.mapLatest { infos ->
-            infos.map { subscriptionInfo -> subscriptionInfo.subscriptionId }
+        interactor.filteredSubscriptions.mapLatest { subscriptions ->
+            subscriptions.map { subscriptionModel -> subscriptionModel.subscriptionId }
         }
 
     /**

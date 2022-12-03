@@ -45,6 +45,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
@@ -93,7 +94,7 @@ constructor(
      * [SubscriptionInfo]. We probably only need the [SubscriptionInfo.getSubscriptionId] of each
      * info object, but for now we keep track of the infos themselves.
      */
-    override val subscriptionsFlow: StateFlow<List<SubscriptionInfo>> =
+    override val subscriptions: StateFlow<List<SubscriptionModel>> =
         conflatedCallbackFlow {
                 val callback =
                     object : SubscriptionManager.OnSubscriptionsChangedListener() {
@@ -109,7 +110,7 @@ constructor(
 
                 awaitClose { subscriptionManager.removeOnSubscriptionsChangedListener(callback) }
             }
-            .mapLatest { fetchSubscriptionsList() }
+            .mapLatest { fetchSubscriptionsList().map { it.toSubscriptionModel() } }
             .onEach { infos -> dropUnusedReposFromCache(infos) }
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), listOf())
 
@@ -239,7 +240,7 @@ constructor(
             .stateIn(scope, SharingStarted.WhileSubscribed(), MobileConnectivityModel())
 
     private fun isValidSubId(subId: Int): Boolean {
-        subscriptionsFlow.value.forEach {
+        subscriptions.value.forEach {
             if (it.subscriptionId == subId) {
                 return true
             }
@@ -258,7 +259,7 @@ constructor(
         )
     }
 
-    private fun dropUnusedReposFromCache(newInfos: List<SubscriptionInfo>) {
+    private fun dropUnusedReposFromCache(newInfos: List<SubscriptionModel>) {
         // Remove any connection repository from the cache that isn't in the new set of IDs. They
         // will get garbage collected once their subscribers go away
         val currentValidSubscriptionIds = newInfos.map { it.subscriptionId }
@@ -272,4 +273,10 @@ constructor(
 
     private suspend fun fetchSubscriptionsList(): List<SubscriptionInfo> =
         withContext(bgDispatcher) { subscriptionManager.completeActiveSubscriptionInfoList }
+
+    private fun SubscriptionInfo.toSubscriptionModel(): SubscriptionModel =
+        SubscriptionModel(
+            subscriptionId = subscriptionId,
+            isOpportunistic = isOpportunistic,
+        )
 }

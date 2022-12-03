@@ -17,13 +17,13 @@
 package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
 import android.telephony.CarrierConfigManager
-import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
@@ -52,7 +52,7 @@ import kotlinx.coroutines.flow.stateIn
  */
 interface MobileIconsInteractor {
     /** List of subscriptions, potentially filtered for CBRS */
-    val filteredSubscriptions: Flow<List<SubscriptionInfo>>
+    val filteredSubscriptions: Flow<List<SubscriptionModel>>
     /** True if the active mobile data subscription has data enabled */
     val activeDataConnectionHasDataEnabled: StateFlow<Boolean>
     /** The icon mapping from network type to [MobileIconGroup] for the default subscription */
@@ -100,8 +100,8 @@ constructor(
             .flatMapLatest { it?.dataEnabled ?: flowOf(false) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
-    private val unfilteredSubscriptions: Flow<List<SubscriptionInfo>> =
-        mobileConnectionsRepo.subscriptionsFlow
+    private val unfilteredSubscriptions: Flow<List<SubscriptionModel>> =
+        mobileConnectionsRepo.subscriptions
 
     /**
      * Generally, SystemUI wants to show iconography for each subscription that is listed by
@@ -116,7 +116,7 @@ constructor(
      * [CarrierConfigManager.KEY_ALWAYS_SHOW_PRIMARY_SIGNAL_BAR_IN_OPPORTUNISTIC_NETWORK_BOOLEAN],
      * and by checking which subscription is opportunistic, or which one is active.
      */
-    override val filteredSubscriptions: Flow<List<SubscriptionInfo>> =
+    override val filteredSubscriptions: Flow<List<SubscriptionModel>> =
         combine(unfilteredSubscriptions, activeMobileDataSubscriptionId) { unfilteredSubs, activeId
             ->
             // Based on the old logic,
