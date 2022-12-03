@@ -793,6 +793,24 @@ public final class UiAutomation {
     }
 
     /**
+     * Injects an arbitrary {@link InputEvent} to the accessibility input filter, for use in testing
+     * the accessibility input filter.
+     *
+     * Events injected to the input subsystem using the standard {@link #injectInputEvent} method
+     * skip the accessibility input filter to avoid feedback loops.
+     *
+     * @hide
+     */
+    @TestApi
+    public void injectInputEventToInputFilter(@NonNull InputEvent event) {
+        try {
+            mUiAutomationConnection.injectInputEventToInputFilter(event);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while injecting input event to input filter", re);
+        }
+    }
+
+    /**
      * Sets the system settings values that control the scaling factor for animations. The scale
      * controls the animation playback speed for animations that respect these settings. Animations
      * that do not respect the settings values will not be affected by this function. A lower scale
