@@ -1714,6 +1714,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void showSystemSettings() {
+        startActivityAsUser(new Intent(android.provider.Settings.ACTION_SETTINGS),
+                UserHandle.CURRENT_OR_SELF);
+    }
+
     private void showPictureInPictureMenu(KeyEvent event) {
         if (DEBUG_INPUT) Log.d(TAG, "showPictureInPictureMenu event=" + event);
         mHandler.removeMessages(MSG_SHOW_PICTURE_IN_PICTURE_MENU);
@@ -2900,6 +2905,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
                 return key_consumed;
+            case KeyEvent.KEYCODE_A:
+                if (down && event.isMetaPressed()) {
+                    launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD,
+                            event.getDeviceId(),
+                            event.getEventTime(), AssistUtils.INVOCATION_TYPE_UNKNOWN);
+                    return key_consumed;
+                }
+                break;
+            case KeyEvent.KEYCODE_I:
+                if (down && event.isMetaPressed()) {
+                    showSystemSettings();
+                    return key_consumed;
+                }
+                break;
             case KeyEvent.KEYCODE_N:
                 if (down && event.isMetaPressed()) {
                     IStatusBarService service = getStatusBarService();
@@ -3028,12 +3047,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_TAB:
-                if (event.isMetaPressed()) {
-                    // Pass through keyboard navigation keys.
-                    return key_not_consumed;
-                }
-                // Display task switcher for ALT-TAB.
-                if (down && repeatCount == 0) {
+                if (down && event.isMetaPressed()) {
+                    if (!keyguardOn && isUserSetupComplete()) {
+                        showRecentApps(false);
+                        return key_consumed;
+                    }
+                } else if (down && repeatCount == 0) {
+                    // Display task switcher for ALT-TAB.
                     if (mRecentAppsHeldModifiers == 0 && !keyguardOn && isUserSetupComplete()) {
                         final int shiftlessModifiers =
                                 event.getModifiers() & ~KeyEvent.META_SHIFT_MASK;
@@ -3088,9 +3108,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mPendingCapsLockToggle = false;
                     } else if (mPendingMetaAction) {
                         if (!canceled) {
-                            launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD,
-                                    event.getDeviceId(),
-                                    event.getEventTime(), AssistUtils.INVOCATION_TYPE_UNKNOWN);
+                            // TODO: launch all apps here.
                         }
                         mPendingMetaAction = false;
                     }
