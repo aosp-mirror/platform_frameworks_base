@@ -32,6 +32,7 @@ import java.util.Set;
 public class TestableNotificationManagerService extends NotificationManagerService {
     int countSystemChecks = 0;
     boolean isSystemUid = true;
+    boolean isSystemAppId = true;
     int countLogSmartSuggestionsVisible = 0;
     Set<Integer> mChannelToastsSent = new HashSet<>();
 
@@ -55,6 +56,12 @@ public class TestableNotificationManagerService extends NotificationManagerServi
     protected boolean isCallingUidSystem() {
         countSystemChecks++;
         return isSystemUid;
+    }
+
+    @Override
+    protected boolean isCallingAppIdSystem() {
+        countSystemChecks++;
+        return isSystemUid || isSystemAppId;
     }
 
     @Override
