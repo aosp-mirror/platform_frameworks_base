@@ -209,7 +209,7 @@
     <string name="tts_engine_settings_button" msgid="477155276199968948">"የፍርግም ቅንብሮችን ያስጀምሩ"</string>
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"የተመረጠ ፍርግም"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"አጠቃላይ"</string>
-    <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"የንግግር ድምጽ ውፍረት ዳግም አስጀምር"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"የንግግር ድምፅ ውፍረት ዳግም አስጀምር"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"ጽሑፉ የሚነገርበትን የድምጽ ውፍረት ወደ ነባሪ ዳግም አስጀምር።"</string>
   <string-array name="tts_rate_entries">
     <item msgid="9004239613505400644">"በጣም ቀርፋፋ"</item>
@@ -407,7 +407,7 @@
     <string name="force_resizable_activities" msgid="7143612144399959606">"እንቅስቃሴዎች ዳግመኛ እንዲመጣጠኑ አስገድድ"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"የዝርዝር ሰነድ እሴቶች ምንም ይሁኑ ምን ለበርካታ መስኮቶች ሁሉንም እንቅስቃሴዎች መጠናቸው የሚቀየሩ እንዲሆኑ ያደርጋቸዋል።"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"የነጻ ቅርጽ መስኮቶችን ያንቁ"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"የሙከራ ነጻ መልክ መስኮቶች ድጋፍን አንቃ"</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"የሙከራ ነፃ መልክ መስኮቶች ድጋፍን አንቃ"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"የዴስክቶፕ መጠባበቂያ ይለፍ ቃል"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ዴስክቶፕ ሙሉ ምትኬዎች በአሁኑ ሰዓት አልተጠበቁም"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"የዴስክቶፕ ሙሉ ምትኬዎች የይለፍ ቃሉን ለመለወጥ ወይም ለማስወገድ ነካ ያድርጉ"</string>
