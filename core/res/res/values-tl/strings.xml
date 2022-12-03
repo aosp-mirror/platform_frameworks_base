@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Voicemail"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problema sa koneksyon o di-wastong MMI code."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Hindi sinusuportahan ang feature."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Pinaghihigpitan ang pagpapatakbo sa mga fixed dialing number lang."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Hindi maaaring baguhin ang mga setting ng pagpapasa ng tawag mula sa iyong telepono habang naka-roaming ka."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Pinagana ang serbisyo."</string>

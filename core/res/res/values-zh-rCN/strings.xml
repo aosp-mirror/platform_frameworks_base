@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"语音信箱"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"出现连接问题或 MMI 码无效。"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"不支持此功能。"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"只能对固定拨号号码执行此类操作。"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"漫游时无法通过您的手机来更改来电转接设置。"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"已启用服务。"</string>

@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Hlasová schránka"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problém s připojením nebo neplatný kód MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funkce není podporována."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Operace je omezena pouze na povolená telefonní čísla."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Když je aktivní roaming, nastavení přesměrování hovorů z telefonu nelze změnit."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Služba byla zapnuta."</string>
