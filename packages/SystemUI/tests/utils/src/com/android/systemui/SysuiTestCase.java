@@ -136,6 +136,8 @@ public abstract class SysuiTestCase {
                 InstrumentationRegistry.getArguments());
         if (TestableLooper.get(this) != null) {
             TestableLooper.get(this).processAllMessages();
+            // Must remove static reference to this test object to prevent leak (b/261039202)
+            TestableLooper.remove(this);
         }
         disallowTestableLooperAsMainThread();
         mContext.cleanUpReceivers(this.getClass().getSimpleName());

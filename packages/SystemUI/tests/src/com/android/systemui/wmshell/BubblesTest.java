@@ -1423,10 +1423,40 @@ public class BubblesTest extends SysuiTestCase {
         assertStackCollapsed();
         // Post status bar state change update with the same value
         mBubbleController.onStatusBarStateChanged(false);
-        // Stack should remain collapsedb
+        // Stack should remain collapsed
         assertStackCollapsed();
         // Post status bar state change which should trigger bubble to expand
         mBubbleController.onStatusBarStateChanged(true);
+        assertStackExpanded();
+    }
+
+    /**
+     * Test to verify behavior for the following scenario:
+     * <ol>
+     *     <li>device is locked with keyguard on, status bar shade state updates to
+     *     <code>false</code></li>
+     *     <li>notification entry is marked to be a bubble and it is set to auto-expand</li>
+     *     <li>device unlock starts, status bar shade state receives another update to
+     *     <code>false</code></li>
+     *     <li>device is unlocked and status bar shade state is set to <code>true</code></li>
+     *     <li>bubble should be expanded</li>
+     * </ol>
+     */
+    @Test
+    public void testOnStatusBarStateChanged_newAutoExpandedBubbleRemainsExpanded() {
+        // Set device as locked
+        mBubbleController.onStatusBarStateChanged(false);
+
+        // Create a auto-expanded bubble
+        NotificationEntry entry = mNotificationTestHelper.createAutoExpandedBubble();
+        mEntryListener.onEntryAdded(entry);
+
+        // When unlocking, we may receive duplicate updates with shade=false, ensure they don't
+        // clear the expanded state
+        mBubbleController.onStatusBarStateChanged(false);
+        mBubbleController.onStatusBarStateChanged(true);
+
+        // After unlocking, stack should be expanded
         assertStackExpanded();
     }
 
