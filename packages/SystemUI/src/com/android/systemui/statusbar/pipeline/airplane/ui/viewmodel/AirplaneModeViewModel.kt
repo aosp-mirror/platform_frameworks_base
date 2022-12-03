@@ -36,16 +36,20 @@ import kotlinx.coroutines.flow.stateIn
  * [com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository] for
  * more details.
  */
+interface AirplaneModeViewModel {
+    /** True if the airplane mode icon is currently visible in the status bar. */
+    val isAirplaneModeIconVisible: StateFlow<Boolean>
+}
+
 @SysUISingleton
-class AirplaneModeViewModel
+class AirplaneModeViewModelImpl
 @Inject
 constructor(
     interactor: AirplaneModeInteractor,
     logger: ConnectivityPipelineLogger,
     @Application private val scope: CoroutineScope,
-) {
-    /** True if the airplane mode icon is currently visible in the status bar. */
-    val isAirplaneModeIconVisible: StateFlow<Boolean> =
+) : AirplaneModeViewModel {
+    override val isAirplaneModeIconVisible: StateFlow<Boolean> =
         combine(interactor.isAirplaneMode, interactor.isForceHidden) {
                 isAirplaneMode,
                 isAirplaneIconForceHidden ->

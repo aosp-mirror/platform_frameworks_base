@@ -16,8 +16,11 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import android.graphics.Point
+import android.hardware.biometrics.BiometricSourceType
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.biometrics.AuthController
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.shared.model.Position
@@ -27,8 +30,8 @@ import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
 import com.android.systemui.doze.DozeTransitionListener
 import com.android.systemui.keyguard.WakefulnessLifecycle
-import com.android.systemui.keyguard.WakefulnessLifecycle.Wakefulness
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
@@ -88,8 +91,8 @@ interface KeyguardRepository {
      * enter to conserve battery when the device is locked and inactive.
      *
      * Note that it is possible for the system to be transitioning into doze while this flow still
-     * returns `false`. In order to account for that, observers should also use the [dozeAmount]
-     * flow to check if it's greater than `0`
+     * returns `false`. In order to account for that, observers should also use the
+     * [linearDozeAmount] flow to check if it's greater than `0`
      */
     val isDozing: Flow<Boolean>
 
@@ -111,7 +114,7 @@ interface KeyguardRepository {
      * happens during an animation/transition into doze mode. An observer would be wise to account
      * for both flows if needed.
      */
-    val dozeAmount: Flow<Float>
+    val linearDozeAmount: Flow<Float>
 
     /** Doze state information, as it transitions */
     val dozeTransitionModel: Flow<DozeTransitionModel>
@@ -120,10 +123,19 @@ interface KeyguardRepository {
     val statusBarState: Flow<StatusBarState>
 
     /** Observable for device wake/sleep state */
-    val wakefulnessState: Flow<WakefulnessModel>
+    val wakefulness: Flow<WakefulnessModel>
 
     /** Observable for biometric unlock modes */
     val biometricUnlockState: Flow<BiometricUnlockModel>
+
+    /** Approximate location on the screen of the fingerprint sensor. */
+    val fingerprintSensorLocation: Flow<Point?>
+
+    /** Approximate location on the screen of the face unlock sensor/front facing camera. */
+    val faceSensorLocation: Flow<Point?>
+
+    /** Source of the most recent biometric unlock, such as fingerprint or face. */
+    val biometricUnlockSource: Flow<BiometricUnlockSource?>
 
     /**
      * Returns `true` if the keyguard is showing; `false` otherwise.
@@ -163,6 +175,7 @@ constructor(
     private val keyguardStateController: KeyguardStateController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val dozeTransitionListener: DozeTransitionListener,
+    private val authController: AuthController,
 ) : KeyguardRepository {
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions =
@@ -281,11 +294,11 @@ constructor(
             }
             .distinctUntilChanged()
 
-    override val dozeAmount: Flow<Float> = conflatedCallbackFlow {
+    override val linearDozeAmount: Flow<Float> = conflatedCallbackFlow {
         val callback =
             object : StatusBarStateController.StateListener {
                 override fun onDozeAmountChanged(linear: Float, eased: Float) {
-                    trySendWithFailureLogging(eased, TAG, "updated dozeAmount")
+                    trySendWithFailureLogging(linear, TAG, "updated dozeAmount")
                 }
             }
 
@@ -348,56 +361,137 @@ constructor(
         awaitClose { statusBarStateController.removeCallback(callback) }
     }
 
-    override val wakefulnessState: Flow<WakefulnessModel> = conflatedCallbackFlow {
-        val callback =
-            object : WakefulnessLifecycle.Observer {
-                override fun onStartedWakingUp() {
-                    trySendWithFailureLogging(
-                        WakefulnessModel.STARTING_TO_WAKE,
-                        TAG,
-                        "Wakefulness: starting to wake"
-                    )
-                }
-                override fun onFinishedWakingUp() {
-                    trySendWithFailureLogging(WakefulnessModel.AWAKE, TAG, "Wakefulness: awake")
-                }
-                override fun onStartedGoingToSleep() {
-                    trySendWithFailureLogging(
-                        WakefulnessModel.STARTING_TO_SLEEP,
-                        TAG,
-                        "Wakefulness: starting to sleep"
-                    )
-                }
-                override fun onFinishedGoingToSleep() {
-                    trySendWithFailureLogging(WakefulnessModel.ASLEEP, TAG, "Wakefulness: asleep")
-                }
-            }
-        wakefulnessLifecycle.addObserver(callback)
-        trySendWithFailureLogging(
-            wakefulnessIntToObject(wakefulnessLifecycle.getWakefulness()),
-            TAG,
-            "initial wakefulness state"
-        )
-
-        awaitClose { wakefulnessLifecycle.removeObserver(callback) }
-    }
-
     override val biometricUnlockState: Flow<BiometricUnlockModel> = conflatedCallbackFlow {
+        fun dispatchUpdate() {
+            trySendWithFailureLogging(
+                biometricModeIntToObject(biometricUnlockController.mode),
+                TAG,
+                "biometric mode"
+            )
+        }
+
         val callback =
             object : BiometricUnlockController.BiometricModeListener {
                 override fun onModeChanged(@WakeAndUnlockMode mode: Int) {
-                    trySendWithFailureLogging(biometricModeIntToObject(mode), TAG, "biometric mode")
+                    dispatchUpdate()
+                }
+
+                override fun onResetMode() {
+                    dispatchUpdate()
                 }
             }
 
         biometricUnlockController.addBiometricModeListener(callback)
-        trySendWithFailureLogging(
-            biometricModeIntToObject(biometricUnlockController.getMode()),
-            TAG,
-            "initial biometric mode"
-        )
+        dispatchUpdate()
 
         awaitClose { biometricUnlockController.removeBiometricModeListener(callback) }
+    }
+
+    override val wakefulness: Flow<WakefulnessModel> = conflatedCallbackFlow {
+        val observer =
+            object : WakefulnessLifecycle.Observer {
+                override fun onStartedWakingUp() {
+                    dispatchNewState()
+                }
+
+                override fun onFinishedWakingUp() {
+                    dispatchNewState()
+                }
+
+                override fun onPostFinishedWakingUp() {
+                    dispatchNewState()
+                }
+
+                override fun onStartedGoingToSleep() {
+                    dispatchNewState()
+                }
+
+                override fun onFinishedGoingToSleep() {
+                    dispatchNewState()
+                }
+
+                private fun dispatchNewState() {
+                    trySendWithFailureLogging(
+                        WakefulnessModel.fromWakefulnessLifecycle(wakefulnessLifecycle),
+                        TAG,
+                        "updated wakefulness state"
+                    )
+                }
+            }
+
+        wakefulnessLifecycle.addObserver(observer)
+        trySendWithFailureLogging(
+            WakefulnessModel.fromWakefulnessLifecycle(wakefulnessLifecycle),
+            TAG,
+            "initial wakefulness state"
+        )
+
+        awaitClose { wakefulnessLifecycle.removeObserver(observer) }
+    }
+
+    override val fingerprintSensorLocation: Flow<Point?> = conflatedCallbackFlow {
+        fun sendFpLocation() {
+            trySendWithFailureLogging(
+                authController.fingerprintSensorLocation,
+                TAG,
+                "AuthController.Callback#onFingerprintLocationChanged"
+            )
+        }
+
+        val callback =
+            object : AuthController.Callback {
+                override fun onFingerprintLocationChanged() {
+                    sendFpLocation()
+                }
+            }
+
+        authController.addCallback(callback)
+        sendFpLocation()
+
+        awaitClose { authController.removeCallback(callback) }
+    }
+
+    override val faceSensorLocation: Flow<Point?> = conflatedCallbackFlow {
+        fun sendSensorLocation() {
+            trySendWithFailureLogging(
+                authController.faceSensorLocation,
+                TAG,
+                "AuthController.Callback#onFingerprintLocationChanged"
+            )
+        }
+
+        val callback =
+            object : AuthController.Callback {
+                override fun onFaceSensorLocationChanged() {
+                    sendSensorLocation()
+                }
+            }
+
+        authController.addCallback(callback)
+        sendSensorLocation()
+
+        awaitClose { authController.removeCallback(callback) }
+    }
+
+    override val biometricUnlockSource: Flow<BiometricUnlockSource?> = conflatedCallbackFlow {
+        val callback =
+            object : KeyguardUpdateMonitorCallback() {
+                override fun onBiometricAuthenticated(
+                    userId: Int,
+                    biometricSourceType: BiometricSourceType?,
+                    isStrongBiometric: Boolean
+                ) {
+                    trySendWithFailureLogging(
+                        BiometricUnlockSource.fromBiometricSourceType(biometricSourceType),
+                        TAG,
+                        "onBiometricAuthenticated"
+                    )
+                }
+            }
+
+        keyguardUpdateMonitor.registerCallback(callback)
+        trySendWithFailureLogging(null, TAG, "initial value")
+        awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
     }
 
     override fun setAnimateDozingTransitions(animate: Boolean) {
@@ -420,16 +514,6 @@ constructor(
             1 -> StatusBarState.KEYGUARD
             2 -> StatusBarState.SHADE_LOCKED
             else -> throw IllegalArgumentException("Invalid StatusBarState value: $value")
-        }
-    }
-
-    private fun wakefulnessIntToObject(@Wakefulness value: Int): WakefulnessModel {
-        return when (value) {
-            0 -> WakefulnessModel.ASLEEP
-            1 -> WakefulnessModel.STARTING_TO_WAKE
-            2 -> WakefulnessModel.AWAKE
-            3 -> WakefulnessModel.STARTING_TO_SLEEP
-            else -> throw IllegalArgumentException("Invalid Wakefulness value: $value")
         }
     }
 

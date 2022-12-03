@@ -195,8 +195,16 @@ class RemoteTransitionAdapter {
             val out = ArrayList<RemoteAnimationTarget>()
             for (i in info.changes.indices) {
                 val change = info.changes[i]
-                val changeIsWallpaper = change.flags and TransitionInfo.FLAG_IS_WALLPAPER != 0
-                if (wallpapers != changeIsWallpaper) continue
+                if (change.hasFlags(TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)) {
+                    // For embedded container, when the parent Task is also in the transition, we
+                    // should only animate the parent Task.
+                    if (change.parent != null) continue
+                    // For embedded container without parent, we should only animate if it fills
+                    // the Task. Otherwise we may animate only partial of the Task.
+                    if (!change.hasFlags(TransitionInfo.FLAG_FILLS_TASK)) continue
+                }
+                // Check if it is wallpaper
+                if (wallpapers != change.hasFlags(TransitionInfo.FLAG_IS_WALLPAPER)) continue
                 out.add(createTarget(change, info.changes.size - i, info, t))
                 if (leashMap != null) {
                     leashMap[change.leash] = out[out.size - 1].leash
