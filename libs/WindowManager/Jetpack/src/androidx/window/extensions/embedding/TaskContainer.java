@@ -166,16 +166,16 @@ class TaskContainer {
     }
 
     /** Called when the activity is destroyed. */
-    void onActivityDestroyed(@NonNull Activity activity) {
+    void onActivityDestroyed(@NonNull IBinder activityToken) {
         for (TaskFragmentContainer container : mContainers) {
-            container.onActivityDestroyed(activity);
+            container.onActivityDestroyed(activityToken);
         }
     }
 
     /** Removes the pending appeared activity from all TaskFragments in this Task. */
-    void cleanupPendingAppearedActivity(@NonNull Activity pendingAppearedActivity) {
+    void cleanupPendingAppearedActivity(@NonNull IBinder activityToken) {
         for (TaskFragmentContainer container : mContainers) {
-            container.removePendingAppearedActivity(pendingAppearedActivity);
+            container.removePendingAppearedActivity(activityToken);
         }
     }
 

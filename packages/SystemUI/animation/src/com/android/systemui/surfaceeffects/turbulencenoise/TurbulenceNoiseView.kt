@@ -68,7 +68,7 @@ class TurbulenceNoiseView(context: Context?, attrs: AttributeSet?) : View(contex
         canvas.drawPaint(paint)
     }
 
-    internal fun play(config: TurbulenceNoiseAnimationConfig) {
+    fun play(config: TurbulenceNoiseAnimationConfig) {
         if (isPlaying) {
             return // Ignore if the animation is playing.
         }
