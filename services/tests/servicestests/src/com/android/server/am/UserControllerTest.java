@@ -255,7 +255,6 @@ public class UserControllerTest {
                 .isTrue();
         verifyUserAssignedToDisplay(TEST_USER_ID, 42);
 
-        // TODO(b/239982558): might need to change assertions
         verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
         verify(mInjector, never()).clearAllLockedTasks(anyString());
