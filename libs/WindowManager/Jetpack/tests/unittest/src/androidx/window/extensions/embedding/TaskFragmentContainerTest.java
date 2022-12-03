@@ -161,7 +161,8 @@ public class TaskFragmentContainerTest {
         final TaskFragmentContainer pendingActivityContainer = new TaskFragmentContainer(mActivity,
                 null /* pendingAppearedIntent */, taskContainer, mController);
 
-        assertTrue(pendingActivityContainer.mPendingAppearedActivities.contains(mActivity));
+        assertTrue(pendingActivityContainer.mPendingAppearedActivities.contains(
+                mActivity.getActivityToken()));
 
         final TaskFragmentInfo info0 = createMockTaskFragmentInfo(pendingActivityContainer,
                 mActivity);
@@ -317,7 +318,7 @@ public class TaskFragmentContainerTest {
 
     @Test
     public void testOnActivityDestroyed() {
-        final TaskContainer taskContainer = createTestTaskContainer();
+        final TaskContainer taskContainer = createTestTaskContainer(mController);
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
                 mIntent, taskContainer, mController);
         container.addPendingAppearedActivity(mActivity);
@@ -328,7 +329,7 @@ public class TaskFragmentContainerTest {
 
         assertTrue(container.hasActivity(mActivity.getActivityToken()));
 
-        taskContainer.onActivityDestroyed(mActivity);
+        taskContainer.onActivityDestroyed(mActivity.getActivityToken());
 
         // It should not contain the destroyed Activity.
         assertFalse(container.hasActivity(mActivity.getActivityToken()));
@@ -396,6 +397,79 @@ public class TaskFragmentContainerTest {
 
         assertFalse(container.isInIntermediateState());
         assertFalse(taskContainer.isInIntermediateState());
+    }
+
+    @Test
+    public void testHasAppearedActivity() {
+        final TaskContainer taskContainer = createTestTaskContainer();
+        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
+                mIntent, taskContainer, mController);
+        container.addPendingAppearedActivity(mActivity);
+
+        assertFalse(container.hasAppearedActivity(mActivity.getActivityToken()));
+
+        final List<IBinder> activities = new ArrayList<>();
+        activities.add(mActivity.getActivityToken());
+        doReturn(activities).when(mInfo).getActivities();
+        container.setInfo(mTransaction, mInfo);
+
+        assertTrue(container.hasAppearedActivity(mActivity.getActivityToken()));
+    }
+
+    @Test
+    public void testHasPendingAppearedActivity() {
+        final TaskContainer taskContainer = createTestTaskContainer();
+        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
+                mIntent, taskContainer, mController);
+        container.addPendingAppearedActivity(mActivity);
+
+        assertTrue(container.hasPendingAppearedActivity(mActivity.getActivityToken()));
+
+        final List<IBinder> activities = new ArrayList<>();
+        activities.add(mActivity.getActivityToken());
+        doReturn(activities).when(mInfo).getActivities();
+        container.setInfo(mTransaction, mInfo);
+
+        assertFalse(container.hasPendingAppearedActivity(mActivity.getActivityToken()));
+    }
+
+    @Test
+    public void testHasActivity() {
+        final TaskContainer taskContainer = createTestTaskContainer(mController);
+        final TaskFragmentContainer container1 = new TaskFragmentContainer(null /* activity */,
+                mIntent, taskContainer, mController);
+        final TaskFragmentContainer container2 = new TaskFragmentContainer(null /* activity */,
+                mIntent, taskContainer, mController);
+
+        // Activity is pending appeared on container2.
+        container2.addPendingAppearedActivity(mActivity);
+
+        assertFalse(container1.hasActivity(mActivity.getActivityToken()));
+        assertTrue(container2.hasActivity(mActivity.getActivityToken()));
+
+        // Activity is pending appeared on container1 (removed from container2).
+        container1.addPendingAppearedActivity(mActivity);
+
+        assertTrue(container1.hasActivity(mActivity.getActivityToken()));
+        assertFalse(container2.hasActivity(mActivity.getActivityToken()));
+
+        final List<IBinder> activities = new ArrayList<>();
+        activities.add(mActivity.getActivityToken());
+        doReturn(activities).when(mInfo).getActivities();
+
+        // Although Activity is appeared on container2, we prioritize pending appeared record on
+        // container1.
+        container2.setInfo(mTransaction, mInfo);
+
+        assertTrue(container1.hasActivity(mActivity.getActivityToken()));
+        assertFalse(container2.hasActivity(mActivity.getActivityToken()));
+
+        // When the pending appeared record is removed from container1, we respect the appeared
+        // record in container2.
+        container1.removePendingAppearedActivity(mActivity.getActivityToken());
+
+        assertFalse(container1.hasActivity(mActivity.getActivityToken()));
+        assertTrue(container2.hasActivity(mActivity.getActivityToken()));
     }
 
     /** Creates a mock activity in the organizer process. */
