@@ -974,7 +974,7 @@
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"Pinaliit ang bahagi ng pag-unlock."</string>
     <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> widget."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Tagapili ng user"</string>
-    <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Katayuan"</string>
+    <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Status"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Camera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Mga kontrol ng media"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Nagsimula na ang pagbabago ng ayos ng widget."</string>

@@ -1549,7 +1549,7 @@
     <string name="content_description_sliding_handle" msgid="982510275422590757">"滑动手柄。触摸并按住。"</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"滑动解锁。"</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"导航首页"</string>
-    <string name="action_bar_up_description" msgid="6611579697195026932">"向上导航"</string>
+    <string name="action_bar_up_description" msgid="6611579697195026932">"返回"</string>
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"更多选项"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s：%2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s - %2$s：%3$s"</string>

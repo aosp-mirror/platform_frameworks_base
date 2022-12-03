@@ -1125,7 +1125,7 @@
     <string name="copy" msgid="5472512047143665218">"कॉपी करें"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"क्लिपबोर्ड पर कॉपी नहीं हो सका"</string>
     <string name="paste" msgid="461843306215520225">"चिपकाएं"</string>
-    <string name="paste_as_plain_text" msgid="7664800665823182587">"सादे पाठ के रूप में चिपकाएं"</string>
+    <string name="paste_as_plain_text" msgid="7664800665823182587">"सादे टेक्स्ट के रूप में चिपकाएं"</string>
     <string name="replace" msgid="7842675434546657444">"बदलें•"</string>
     <string name="delete" msgid="1514113991712129054">"मिटाएं"</string>
     <string name="copyUrl" msgid="6229645005987260230">"यूआरएल को कॉपी करें"</string>
@@ -1933,13 +1933,13 @@
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"माइक्रोफ़ोन उपलब्ध नहीं है"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV की सेटिंग उपलब्ध नहीं हैं"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"टैबलेट की सेटिंग उपलब्ध नहीं हैं"</string>
-    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"फ़ोन की सेटिंग उपलब्ध नहीं हैं"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"फ़ोन की सेटिंग उपलब्ध नहीं है"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने Android TV डिवाइस पर ऐक्सेस करने की कोशिश करें."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने टैबलेट पर ऐक्सेस करने की कोशिश करें."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने फ़ोन पर ऐक्सेस करने की कोशिश करें."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. अपने फ़ोन पर ऐक्सेस करने की कोशिश करें."</string>
     <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"इस समय, आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने Android TV डिवाइस पर ऐक्सेस करने की कोशिश करें."</string>
     <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"इस समय, आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने टैबलेट पर ऐक्सेस करने की कोशिश करें."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"इस समय, आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने फ़ोन पर ऐक्सेस करने की कोशिश करें."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"इस समय, आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. अपने फ़ोन पर ऐक्सेस करने की कोशिश करें."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"यह ऐप्लिकेशन ज़्यादा सुरक्षा का अनुरोध कर रहा है. इसके बजाय, अपने Android TV डिवाइस पर ऐक्सेस करने की कोशिश करें."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"यह ऐप्लिकेशन ज़्यादा सुरक्षा का अनुरोध कर रहा है. इसके बजाय, अपने टैबलेट पर ऐक्सेस करने की कोशिश करें."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"यह ऐप्लिकेशन ज़्यादा सुरक्षा का अनुरोध कर रहा है. इसके बजाय, अपने फ़ोन पर ऐक्सेस करने की कोशिश करें."</string>
