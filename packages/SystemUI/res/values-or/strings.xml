@@ -125,8 +125,7 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ଭଏସ୍‌ ସହାୟକ"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"ୱାଲେଟ୍"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR କୋଡ ସ୍କାନର"</string>
-    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
-    <skip />
+    <string name="accessibility_unlock_button" msgid="3613812140816244310">"ଅନଲକ କରାଯାଇଛି"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"ଡିଭାଇସ୍ ଲକ୍ ହୋଇଯାଇଛି"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"ଫେସ୍ ସ୍କାନିଙ୍ଗ କରାଯାଉଛି"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"ପଠାନ୍ତୁ"</string>
@@ -169,8 +168,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"ଫେସ ଚିହ୍ନଟ ହୋଇପାରିବ ନାହିଁ"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
-    <skip />
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"ଫେସ ଅନଲକ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ବ୍ଲୁଟୂଥ୍‍‌ ସଂଯୋଗ କରାଯାଇଛି।"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ବ୍ୟାଟେରୀ ଶତକଡ଼ା ଅଜଣା ଅଟେ।"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> ସହ ସଂଯୁକ୍ତ"</string>
@@ -181,13 +179,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍‌।"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN ଅନ୍‍।"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"ବ୍ୟାଟେରୀ <xliff:g id="NUMBER">%d</xliff:g> ଶତକଡ଼ା।"</string>
-    <!-- no translation found for accessibility_battery_level_with_estimate (6548654589315074529) -->
-    <skip />
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"ବେଟେରୀ <xliff:g id="PERCENTAGE">%1$d</xliff:g> ଶତକଡ଼ା, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"ବ୍ୟାଟେରୀ ଚାର୍ଜ ହେଉଛି, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ଶତକଡ଼ା।"</string>
-    <!-- no translation found for accessibility_battery_level_charging_paused (3560711496775146763) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (2223541217743647858) -->
-    <skip />
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"ବେଟେରୀ <xliff:g id="PERCENTAGE">%d</xliff:g> ଶତକଡ଼ା, ବେଟେରୀର ସୁରକ୍ଷା ପାଇଁ ଚାର୍ଜିଂକୁ ବିରତ କରାଯାଇଛି।"</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"ବେଟେରୀ <xliff:g id="PERCENTAGE">%1$d</xliff:g> ଶତକଡ଼ା, <xliff:g id="TIME">%2$s</xliff:g>, ବେଟେରୀର ସୁରକ୍ଷା ପାଇଁ ଚାର୍ଜିଂକୁ ବିରତ କରାଯାଇଛି।"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"ସମସ୍ତ ବିଜ୍ଞପ୍ତି ଦେଖନ୍ତୁ"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"ଟେଲି-ଟାଇପରାଇଟର୍ ସକ୍ଷମ ଅଛି।"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"ରିଙ୍ଗର୍‌ କମ୍ପନରେ ଅଛି।"</string>
@@ -502,6 +497,7 @@
     <string name="wallet_error_generic" msgid="257704570182963611">"ଆପଣଙ୍କ କାର୍ଡଗୁଡ଼ିକ ପାଇବାରେ ଏକ ସମସ୍ୟା ହୋଇଥିଲା। ଦୟାକରି ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ସ୍କ୍ରିନ୍ ଲକ୍ ସେଟିଂସ୍"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR କୋଡ ସ୍କାନର"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"ଅପଡେଟ ହେଉଛି"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‌"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g>ବେଳେ ଆପଣ ନିଜର ପରବର୍ତ୍ତୀ ଆଲାର୍ମ ଶୁଣିପାରିବେ ନାହିଁ"</string>
@@ -530,7 +526,7 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"ସ୍ୱଚାଳିତ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"କୌଣସି ସାଉଣ୍ଡ କିମ୍ବା ଭାଇବ୍ରେସନ୍ ନାହିଁ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"କୌଣସି ସାଉଣ୍ଡ କିମ୍ବା ଭାଇବ୍ରେସନ୍ ନାହିଁ ଏବଂ ବାର୍ତ୍ତାଳାପ ବିଭାଗର ନିମ୍ନରେ ଦେଖାଯାଏ"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"ଫୋନ୍ ସେଟିଂସ୍ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ୍ ହୋଇପାରେ"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"ଫୋନ ସେଟିଂସ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ ହୋଇପାରେ"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ଫୋନ୍ ସେଟିଂସ୍ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ୍ ହୋଇପାରେ। <xliff:g id="APP_NAME">%1$s</xliff:g>ରୁ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଡିଫଲ୍ଟ ଭାବରେ ବବଲ୍ ହୁଏ।"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ଏହି ବିଜ୍ଞପ୍ତି ପ୍ରାପ୍ତ ହେବା ସମୟରେ ସାଉଣ୍ଡ ହେବା ଉଚିତ ନା ଭାଇବ୍ରେସନ୍ ତାହା ସିଷ୍ଟମକୁ ସ୍ଥିର କରିବାକୁ ଦିଅନ୍ତୁ"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;ସ୍ଥିତି:&lt;/b&gt; ଡିଫଲ୍ଟକୁ ପ୍ରମୋଟ୍ କରାଯାଇଛି"</string>
@@ -665,7 +661,7 @@
     <item msgid="8619482474544321778">"ଏହି ଆଇକନ୍‍ ଦେଖାନ୍ତୁ ନାହିଁ"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"କମ୍‍-ଅଗ୍ରାଧିକାର ବିଜ୍ଞପ୍ତି ଆଇକନ୍‍ ଦେଖାନ୍ତୁ"</string>
-    <string name="other" msgid="429768510980739978">"ଅନ୍ୟାନ୍ୟ"</string>
+    <string name="other" msgid="429768510980739978">"ଅନ୍ୟ"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"ଟାଇଲ୍ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ଶେଷରେ ଟାଇଲ୍ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"ଟାଇଲ୍ ମୁଭ୍ କରନ୍ତୁ"</string>
@@ -995,4 +991,23 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ଖୋଲନ୍ତୁ"</string>
+    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"ଏକ ସର୍ଟକଟ ଭାବେ <xliff:g id="APPNAME">%1$s</xliff:g> ଆପ ଯୋଗ କରିବାକୁ, ଏହା ସୁନିଶ୍ଚିତ କରନ୍ତୁ"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• ଆପ ସେଟ ଅପ କରାଯାଇଥିବା"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Walletରେ ଅତିକମରେ ଗୋଟିଏ କାର୍ଡ ଯୋଗ କରାଯାଇଥିବା"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ଏକ କେମେରା ଆପ ଇନଷ୍ଟଲ କରିବା"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ଆପ ସେଟ ଅପ କରାଯାଇଛି"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ଅତିକମରେ ଗୋଟିଏ ଡିଭାଇସ ଉପଲବ୍ଧ ଅଛି"</string>
+    <!-- no translation found for rear_display_bottom_sheet_cancel (3461468855493357248) -->
+    <skip />
+    <!-- no translation found for rear_display_bottom_sheet_confirm (4383356544661421206) -->
+    <skip />
+    <!-- no translation found for rear_display_fold_bottom_sheet_title (6081542277622721548) -->
+    <skip />
+    <!-- no translation found for rear_display_unfold_bottom_sheet_title (2137403802960396357) -->
+    <skip />
+    <!-- no translation found for rear_display_bottom_sheet_description (1852662982816810352) -->
+    <skip />
+    <!-- no translation found for rear_display_bottom_sheet_warning (800995919558238930) -->
+    <skip />
 </resources>

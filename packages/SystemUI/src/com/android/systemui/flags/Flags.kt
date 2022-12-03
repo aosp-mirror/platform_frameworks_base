@@ -164,6 +164,13 @@ object Flags {
     // TODO(b/256513609): Tracking Bug
     @JvmField val ACTIVE_UNLOCK_CHIPBAR = releasedFlag(217, "active_unlock_chipbar")
 
+    /**
+     * Migrates control of the LightRevealScrim's reveal effect and amount from legacy code to the
+     * new KeyguardTransitionRepository.
+     */
+    @JvmField
+    val LIGHT_REVEAL_MIGRATION = unreleasedFlag(218, "light_reveal_migration", teamfood = true)
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
@@ -372,7 +379,7 @@ object Flags {
     // TODO(b/255854141): Tracking Bug
     @JvmField
     val WM_ENABLE_PREDICTIVE_BACK_SYSUI =
-        unreleasedFlag(1204, "persist.wm.debug.predictive_back_sysui_enable", teamfood = false)
+        unreleasedFlag(1204, "persist.wm.debug.predictive_back_sysui_enable", teamfood = true)
 
     // 1300 - screenshots
     // TODO(b/254512719): Tracking Bug
@@ -405,8 +412,8 @@ object Flags {
     val LEAVE_SHADE_OPEN_FOR_BUGREPORT =
         unreleasedFlag(1800, "leave_shade_open_for_bugreport", teamfood = true)
 
-    // 1900 - note task
-    @JvmField val NOTE_TASKS = sysPropBooleanFlag(1900, "persist.sysui.debug.note_tasks")
+    // 1900
+    @JvmField val NOTE_TASKS = unreleasedFlag(1900, "keycode_flag")
 
     // 2000 - device controls
     @Keep @JvmField val USE_APP_PANELS = unreleasedFlag(2000, "use_app_panels", teamfood = true)

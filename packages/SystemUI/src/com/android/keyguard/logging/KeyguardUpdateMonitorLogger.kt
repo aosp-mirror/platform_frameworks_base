@@ -225,12 +225,13 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
                 { "Retrying face after HW unavailable, attempt $int1" })
     }
 
-    fun logRetryAfterFpError(msgId: Int, errString: String?) {
+    fun logRetryAfterFpErrorWithDelay(msgId: Int, errString: String?, delay: Int) {
         logBuffer.log(TAG, DEBUG, {
             int1 = msgId
+            int2 = delay
             str1 = "$errString"
         }, {
-            "Fingerprint retrying auth due to($int1) -> $str1"
+            "Fingerprint retrying auth after $int2 ms due to($int1) -> $str1"
         })
     }
 

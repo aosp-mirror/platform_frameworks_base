@@ -90,7 +90,7 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
                 // This logic relies on 2 assumptions: 1 is that child tasks will be visited before
                 // parents (due to how z-order works). 2 is that no non-tasks are interleaved
                 // between tasks (hierarchically).
-                taskParents.add(change.getContainer());
+                taskParents.add(change.getParent());
             }
             if (taskParents.contains(change.getContainer())) {
                 continue;

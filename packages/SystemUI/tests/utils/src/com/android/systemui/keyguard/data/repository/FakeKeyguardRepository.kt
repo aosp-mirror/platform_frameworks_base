@@ -17,11 +17,15 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import android.graphics.Point
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.keyguard.shared.model.WakeSleepReason
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
+import com.android.systemui.keyguard.shared.model.WakefulnessState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -49,7 +53,7 @@ class FakeKeyguardRepository : KeyguardRepository {
     override val isDreaming: Flow<Boolean> = _isDreaming
 
     private val _dozeAmount = MutableStateFlow(0f)
-    override val dozeAmount: Flow<Float> = _dozeAmount
+    override val linearDozeAmount: Flow<Float> = _dozeAmount
 
     private val _statusBarState = MutableStateFlow(StatusBarState.SHADE)
     override val statusBarState: Flow<StatusBarState> = _statusBarState
@@ -57,8 +61,16 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _dozeTransitionModel = MutableStateFlow(DozeTransitionModel())
     override val dozeTransitionModel: Flow<DozeTransitionModel> = _dozeTransitionModel
 
-    private val _wakefulnessState = MutableStateFlow(WakefulnessModel.ASLEEP)
-    override val wakefulnessState: Flow<WakefulnessModel> = _wakefulnessState
+    private val _wakefulnessModel =
+        MutableStateFlow(
+            WakefulnessModel(
+                WakefulnessState.ASLEEP,
+                false,
+                WakeSleepReason.OTHER,
+                WakeSleepReason.OTHER
+            )
+        )
+    override val wakefulness: Flow<WakefulnessModel> = _wakefulnessModel
 
     private val _isUdfpsSupported = MutableStateFlow(false)
 
@@ -70,6 +82,15 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     private val _biometricUnlockState = MutableStateFlow(BiometricUnlockModel.NONE)
     override val biometricUnlockState: Flow<BiometricUnlockModel> = _biometricUnlockState
+
+    private val _fingerprintSensorLocation = MutableStateFlow<Point?>(null)
+    override val fingerprintSensorLocation: Flow<Point?> = _fingerprintSensorLocation
+
+    private val _faceSensorLocation = MutableStateFlow<Point?>(null)
+    override val faceSensorLocation: Flow<Point?> = _faceSensorLocation
+
+    private val _biometricUnlockSource = MutableStateFlow<BiometricUnlockSource?>(null)
+    override val biometricUnlockSource: Flow<BiometricUnlockSource?> = _biometricUnlockSource
 
     override fun isKeyguardShowing(): Boolean {
         return _isKeyguardShowing.value
@@ -97,6 +118,22 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     fun setDozeAmount(dozeAmount: Float) {
         _dozeAmount.value = dozeAmount
+    }
+
+    fun setBiometricUnlockState(state: BiometricUnlockModel) {
+        _biometricUnlockState.tryEmit(state)
+    }
+
+    fun setBiometricUnlockSource(source: BiometricUnlockSource?) {
+        _biometricUnlockSource.tryEmit(source)
+    }
+
+    fun setFaceSensorLocation(location: Point?) {
+        _faceSensorLocation.tryEmit(location)
+    }
+
+    fun setFingerprintSensorLocation(location: Point?) {
+        _fingerprintSensorLocation.tryEmit(location)
     }
 
     override fun isUdfpsSupported(): Boolean {
