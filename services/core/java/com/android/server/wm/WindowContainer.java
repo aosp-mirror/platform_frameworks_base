@@ -810,6 +810,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void removeImmediately() {
         final DisplayContent dc = getDisplayContent();
         if (dc != null) {
+            dc.mClosingChangingContainers.remove(this);
             mSurfaceFreezer.unfreeze(getSyncTransaction());
         }
         while (!mChildren.isEmpty()) {
@@ -1019,9 +1020,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @param dc The display this container is on after changes.
      */
     void onDisplayChanged(DisplayContent dc) {
-        if (mDisplayContent != null && mDisplayContent.mChangingContainers.remove(this)) {
-            // Cancel any change transition queued-up for this container on the old display.
-            mSurfaceFreezer.unfreeze(getSyncTransaction());
+        if (mDisplayContent != null) {
+            mDisplayContent.mClosingChangingContainers.remove(this);
+            if (mDisplayContent.mChangingContainers.remove(this)) {
+                // Cancel any change transition queued-up for this container on the old display.
+                mSurfaceFreezer.unfreeze(getSyncTransaction());
+            }
         }
         mDisplayContent = dc;
         if (dc != null && dc != this) {
@@ -1298,12 +1302,25 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // If we are losing visibility, then a snapshot isn't necessary and we are no-longer
         // part of a change transition.
         if (!visible) {
+            if (asTaskFragment() != null) {
+                // If the organized TaskFragment is closing while resizing, we want to keep track of
+                // its starting bounds to make sure the animation starts at the correct position.
+                // This should be called before unfreeze() because we record the starting bounds
+                // in SurfaceFreezer.
+                asTaskFragment().setClosingChangingStartBoundsIfNeeded();
+            }
             mSurfaceFreezer.unfreeze(getSyncTransaction());
         }
         WindowContainer parent = getParent();
         if (parent != null) {
             parent.onChildVisibilityRequested(visible);
         }
+    }
+
+    /** Whether this window is closing while resizing. */
+    boolean isClosingWhenResizing() {
+        return mDisplayContent != null
+                && mDisplayContent.mClosingChangingContainers.containsKey(this);
     }
 
     void writeIdentifierToProto(ProtoOutputStream proto, long fieldId) {
@@ -3004,10 +3021,22 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
             final Rect localBounds = new Rect(mTmpRect);
             localBounds.offsetTo(mTmpPoint.x, mTmpPoint.y);
-            final RemoteAnimationController.RemoteAnimationRecord adapters =
-                    controller.createRemoteAnimationRecord(
-                            this, mTmpPoint, localBounds, screenBounds,
-                            (isChanging ? mSurfaceFreezer.mFreezeBounds : null), showBackdrop);
+            final RemoteAnimationController.RemoteAnimationRecord adapters;
+            if (!isChanging && !enter && isClosingWhenResizing()) {
+                // Container that is closing while resizing. Pass in the closing start bounds, so
+                // the animation can start with the correct bounds, there won't be a snapshot.
+                // Cleanup the mClosingChangingContainers so that when the animation is finished, it
+                // will reset the surface.
+                final Rect closingStartBounds = getDisplayContent().mClosingChangingContainers
+                        .remove(this);
+                adapters = controller.createRemoteAnimationRecord(
+                        this, mTmpPoint, localBounds, screenBounds, closingStartBounds,
+                        showBackdrop, false /* shouldCreateSnapshot */);
+            } else {
+                final Rect startBounds = isChanging ? mSurfaceFreezer.mFreezeBounds : null;
+                adapters = controller.createRemoteAnimationRecord(
+                        this, mTmpPoint, localBounds, screenBounds, startBounds, showBackdrop);
+            }
             if (backdropColor != 0) {
                 adapters.setBackDropColor(backdropColor);
             }
@@ -3464,7 +3493,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             return;
         }
 
-        getRelativePosition(mTmpPos);
+        if (isClosingWhenResizing()) {
+            // This container is closing while resizing, keep its surface at the starting position
+            // to prevent animation flicker.
+            getRelativePosition(mDisplayContent.mClosingChangingContainers.get(this), mTmpPos);
+        } else {
+            getRelativePosition(mTmpPos);
+        }
         final int deltaRotation = getRelativeDisplayRotation();
         if (mTmpPos.equals(mLastSurfacePosition) && deltaRotation == mLastDeltaRotation) {
             return;
@@ -3529,9 +3564,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         outSurfaceInsets.setEmpty();
     }
 
+    /** Gets the position of this container in its parent's coordinate. */
     void getRelativePosition(Point outPos) {
-        final Rect dispBounds = getBounds();
-        outPos.set(dispBounds.left, dispBounds.top);
+        getRelativePosition(getBounds(), outPos);
+    }
+
+    /** Gets the position of {@code curBounds} in this container's parent's coordinate. */
+    void getRelativePosition(Rect curBounds, Point outPos) {
+        outPos.set(curBounds.left, curBounds.top);
         final WindowContainer parent = getParent();
         if (parent != null) {
             final Rect parentBounds = parent.getBounds();

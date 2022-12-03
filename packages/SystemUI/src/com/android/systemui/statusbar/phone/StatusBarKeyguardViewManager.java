@@ -19,9 +19,6 @@ package com.android.systemui.statusbar.phone;
 import static android.view.WindowInsets.Type.navigationBars;
 
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
-import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_DISMISS_BOUNCER;
-import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_SHOW_BOUNCER;
-import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_UNLOCK_COLLAPSING;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
 
@@ -139,6 +136,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     private final BouncerView mPrimaryBouncerView;
     private final Lazy<com.android.systemui.shade.ShadeController> mShadeController;
+
+    // Local cache of expansion events, to avoid duplicates
+    private float mFraction = -1f;
+    private boolean mTracking = false;
 
     private final PrimaryBouncerExpansionCallback mExpansionCallback =
             new PrimaryBouncerExpansionCallback() {
@@ -440,80 +441,68 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         hideBouncer(true /* destroyView */);
     }
 
-    @Override
-    public void onPanelExpansionChanged(ShadeExpansionChangeEvent event) {
-        float fraction = event.getFraction();
-        boolean tracking = event.getTracking();
+    private boolean beginShowingBouncer(ShadeExpansionChangeEvent event) {
         // Avoid having the shade and the bouncer open at the same time over a dream.
         final boolean hideBouncerOverDream =
                 mDreamOverlayStateController.isOverlayActive()
                         && (mNotificationPanelViewController.isExpanded()
                         || mNotificationPanelViewController.isExpanding());
 
-        // We don't want to translate the bounce when:
-        // • device is dozing and not pulsing
-        // • Keyguard is occluded, because we're in a FLAG_SHOW_WHEN_LOCKED activity and need to
-        //   conserve the original animation.
-        // • The user quickly taps on the display and we show "swipe up to unlock."
-        // • Keyguard will be dismissed by an action. a.k.a: FLAG_DISMISS_KEYGUARD_ACTIVITY
-        // • Full-screen user switcher is displayed.
-        if (mDozing && !mPulsing) {
+        final boolean isUserTrackingStarted =
+                event.getFraction() != KeyguardBouncer.EXPANSION_HIDDEN && event.getTracking();
+
+        return mKeyguardStateController.isShowing()
+                && !primaryBouncerIsOrWillBeShowing()
+                && isUserTrackingStarted
+                && !hideBouncerOverDream
+                && !mKeyguardStateController.isOccluded()
+                && !mKeyguardStateController.canDismissLockScreen()
+                && !bouncerIsAnimatingAway()
+                && !mNotificationPanelViewController.isUnlockHintRunning()
+                && !(mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED);
+    }
+
+    @Override
+    public void onPanelExpansionChanged(ShadeExpansionChangeEvent event) {
+        float fraction = event.getFraction();
+        boolean tracking = event.getTracking();
+
+        if (mFraction == fraction && mTracking == tracking) {
+            // Ignore duplicate events, as they will cause confusion with bouncer expansion
             return;
-        } else if (mNotificationPanelViewController.isUnlockHintRunning()) {
+        }
+        mFraction = fraction;
+        mTracking = tracking;
+
+        /*
+         * The bouncer may have received a call to show(), or the following will infer it from
+         * device state and touch handling. The bouncer MUST have been notified that it is about to
+         * show if any subsequent events are to be handled.
+         */
+        if (beginShowingBouncer(event)) {
+            if (mPrimaryBouncer != null) {
+                mPrimaryBouncer.show(false /* resetSecuritySelection */, false /* scrimmed */);
+            } else {
+                mPrimaryBouncerInteractor.show(/* isScrimmed= */false);
+            }
+        }
+
+        if (!primaryBouncerIsOrWillBeShowing()) {
+            return;
+        }
+
+        if (mKeyguardStateController.isShowing()) {
+            if (mPrimaryBouncer != null) {
+                mPrimaryBouncer.setExpansion(fraction);
+            } else {
+                mPrimaryBouncerInteractor.setPanelExpansion(fraction);
+            }
+        } else {
             if (mPrimaryBouncer != null) {
                 mPrimaryBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
             } else {
                 mPrimaryBouncerInteractor.setPanelExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
             }
-        } else if (mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED) {
-            // Don't expand to the bouncer. Instead transition back to the lock screen (see
-            // CentralSurfaces#showBouncerOrLockScreenIfKeyguard)
-            return;
-        } else if (mKeyguardStateController.isOccluded()
-                && !mDreamOverlayStateController.isOverlayActive()) {
-            return;
-        } else if (needsFullscreenBouncer()) {
-            if (mPrimaryBouncer != null) {
-                mPrimaryBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
-            } else {
-                mPrimaryBouncerInteractor.setPanelExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
-            }
-        } else if (mKeyguardStateController.isShowing() && !hideBouncerOverDream) {
-            if (!isWakeAndUnlocking()
-                    && !(mBiometricUnlockController.getMode() == MODE_DISMISS_BOUNCER)
-                    && !(mBiometricUnlockController.getMode() == MODE_SHOW_BOUNCER)
-                    && !isUnlockCollapsing()) {
-                if (mPrimaryBouncer != null) {
-                    mPrimaryBouncer.setExpansion(fraction);
-                } else {
-                    mPrimaryBouncerInteractor.setPanelExpansion(fraction);
-                }
-            }
-            if (fraction != KeyguardBouncer.EXPANSION_HIDDEN && tracking
-                    && !mKeyguardStateController.canDismissLockScreen()
-                    && !primaryBouncerIsShowing()
-                    && !bouncerIsAnimatingAway()) {
-                if (mPrimaryBouncer != null) {
-                    mPrimaryBouncer.show(false /* resetSecuritySelection */, false /* scrimmed */);
-                } else {
-                    mPrimaryBouncerInteractor.show(/* isScrimmed= */false);
-                }
-            }
-        } else if (!mKeyguardStateController.isShowing()  && isPrimaryBouncerInTransit()) {
-            // Keyguard is not visible anymore, but expansion animation was still running.
-            // We need to hide the bouncer, otherwise it will be stuck in transit.
-            if (mPrimaryBouncer != null) {
-                mPrimaryBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
-            } else {
-                mPrimaryBouncerInteractor.setPanelExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
-            }
-        } else if (mPulsing && fraction == KeyguardBouncer.EXPANSION_VISIBLE) {
-            // Panel expanded while pulsing but didn't translate the bouncer (because we are
-            // unlocked.) Let's simply wake-up to dismiss the lock screen.
-            mCentralSurfaces.wakeUpIfDozing(
-                    SystemClock.uptimeMillis(),
-                    mCentralSurfaces.getBouncerContainer(),
-                    "BOUNCER_VISIBLE");
         }
     }
 
@@ -702,11 +691,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean isWakeAndUnlocking() {
         int mode = mBiometricUnlockController.getMode();
         return mode == MODE_WAKE_AND_UNLOCK || mode == MODE_WAKE_AND_UNLOCK_PULSING;
-    }
-
-    private boolean isUnlockCollapsing() {
-        int mode = mBiometricUnlockController.getMode();
-        return mode == MODE_UNLOCK_COLLAPSING;
     }
 
     /**
