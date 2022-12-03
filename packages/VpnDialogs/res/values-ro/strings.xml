@@ -17,21 +17,21 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Solicitare de conexiune"</string>
-    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> dorește să configureze o conexiune VPN care să îi permită să monitorizeze traficul în rețea. Acceptați numai dacă aveți încredere în sursă. Atunci când conexiunea VPN este activă, &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; se afișează în partea de sus a ecranului."</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> solicită permisiunea de a configura o conexiune VPN care să îi permită să monitorizeze traficul de rețea. Acceptați numai dacă aveți încredere în sursă. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; va apărea pe ecran atunci când conexiunea VPN este activă."</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> dorește să configureze o conexiune VPN care să îi permită să monitorizeze traficul în rețea. Acceptă numai dacă ai încredere în sursă. Când conexiunea VPN e activă, &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; se afișează în partea de sus a ecranului."</string>
+    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> solicită permisiunea de a configura o conexiune VPN care să îi permită să monitorizeze traficul de rețea. Acceptă numai dacă ai încredere în sursă. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; va apărea pe ecran când conexiunea VPN e activă."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN este conectat"</string>
     <string name="session" msgid="6470628549473641030">"Sesiune:"</string>
     <string name="duration" msgid="3584782459928719435">"Durată:"</string>
     <string name="data_transmitted" msgid="7988167672982199061">"Trimise:"</string>
     <string name="data_received" msgid="4062776929376067820">"Primite:"</string>
-    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g>   octeți/<xliff:g id="NUMBER_1">%2$s</xliff:g>   pachete"</string>
+    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g>   byți/<xliff:g id="NUMBER_1">%2$s</xliff:g>   pachete"</string>
     <string name="always_on_disconnected_title" msgid="1906740176262776166">"Nu se poate conecta la rețeaua VPN activată permanent"</string>
-    <string name="always_on_disconnected_message" msgid="555634519845992917">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> este setată să rămână conectată permanent, dar momentan nu se poate conecta. Telefonul dvs. va folosi o rețea publică până când se va putea reconecta la <xliff:g id="VPN_APP_1">%1$s</xliff:g>."</string>
-    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"<xliff:g id="VPN_APP">%1$s</xliff:g> este setată să rămână conectată permanent, dar momentan nu se poate conecta. Nu veți avea conexiune până când se va putea reconecta rețeaua VPN."</string>
+    <string name="always_on_disconnected_message" msgid="555634519845992917">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> este setată să rămână conectată permanent, dar momentan nu se poate conecta. Telefonul va folosi o rețea publică până când se va putea reconecta la <xliff:g id="VPN_APP_1">%1$s</xliff:g>."</string>
+    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"<xliff:g id="VPN_APP">%1$s</xliff:g> este setată să rămână conectată permanent, dar momentan nu se poate conecta. Nu vei avea conexiune până când se va putea reconecta rețeaua VPN."</string>
     <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
-    <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"Modificați setările VPN"</string>
-    <string name="configure" msgid="4905518375574791375">"Configurați"</string>
-    <string name="disconnect" msgid="971412338304200056">"Deconectați"</string>
-    <string name="open_app" msgid="3717639178595958667">"Deschideți aplicația"</string>
-    <string name="dismiss" msgid="6192859333764711227">"Închideți"</string>
+    <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"Modifică setările VPN"</string>
+    <string name="configure" msgid="4905518375574791375">"Configurează"</string>
+    <string name="disconnect" msgid="971412338304200056">"Deconectează"</string>
+    <string name="open_app" msgid="3717639178595958667">"Deschide aplicația"</string>
+    <string name="dismiss" msgid="6192859333764711227">"Închide"</string>
 </resources>
