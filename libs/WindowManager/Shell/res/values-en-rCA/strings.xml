@@ -35,7 +35,7 @@
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"App does not support split-screen."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"App may not work on a secondary display."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"App does not support launch on secondary displays."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Split screen divider"</string>
+    <string name="accessibility_divider" msgid="703810061635792791">"Split-screen divider"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Left full screen"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Left 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Left 50%"</string>
@@ -64,9 +64,9 @@
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Don’t bubble conversation"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chat using bubbles"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"New conversations appear as floating icons, or bubbles. Tap to open bubble. Drag to move it."</string>
-    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Control bubbles at any time"</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Control bubbles anytime"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Tap Manage to turn off bubbles from this app"</string>
-    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Got it"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"No recent bubbles"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Recent bubbles and dismissed bubbles will appear here"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bubble"</string>
