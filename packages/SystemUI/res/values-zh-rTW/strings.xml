@@ -660,7 +660,7 @@
     <string name="data_connection_no_internet" msgid="691058178914184544">"沒有網際網路連線"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"開啟「<xliff:g id="ID_1">%s</xliff:g>」設定。"</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"編輯設定順序。"</string>
-    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"電源按鈕選單"</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"電源鍵選單"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"第 <xliff:g id="ID_1">%1$d</xliff:g> 頁，共 <xliff:g id="ID_2">%2$d</xliff:g> 頁"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"鎖定畫面"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"手機先前過熱，因此關閉電源"</string>

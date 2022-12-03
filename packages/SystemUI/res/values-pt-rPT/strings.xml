@@ -138,7 +138,7 @@
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Toque em Confirmar para concluir."</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Desbloqueio com a face. Prima o ícone de desb. p/ continuar."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autenticado"</string>
-    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Utilizar PIN"</string>
+    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Usar PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Utilizar padrão"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Utilizar palavra-passe"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"PIN incorreto."</string>
@@ -471,7 +471,7 @@
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Tocar para abrir"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"A atualizar"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para utilizar"</string>
-    <string name="wallet_error_generic" msgid="257704570182963611">"Ocorreu um problema ao obter os seus cartões. Tente novamente mais tarde."</string>
+    <string name="wallet_error_generic" msgid="257704570182963611">"Ocorreu um problema ao obter os seus cartões. Tente mais tarde."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Definições do ecrã de bloqueio"</string>
     <string name="qr_code_scanner_title" msgid="5290201053875420785">"Leia o código QR"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Perfil de trabalho"</string>

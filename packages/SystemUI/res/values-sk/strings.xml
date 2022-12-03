@@ -505,7 +505,7 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automaticky"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Žiadny zvuk ani vibrácie"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Žiadny zvuk ani vibrácie a zobrazuje sa nižšie v sekcii konverzácií"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Zvoní či vibruje podľa nastavení telefónu"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Môže zvoniť či vibrovať podľa nastavení telefónu"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Môže zvoniť alebo vibrovať podľa nastavení telefónu. Predvolene sa zobrazia konverzácie z bubliny <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Nechajte systém určiť, či má toto upozornenie vydávať zvuk alebo vibrovať"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Stav:&lt;/b&gt; Preradené vyššie do kategórie Predvolené"</string>
@@ -633,7 +633,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"Pravý kód klávesnice"</string>
     <string name="left_icon" msgid="5036278531966897006">"Ľavá ikona"</string>
     <string name="right_icon" msgid="1103955040645237425">"Pravá ikona"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Pridržaním a presunutím pridáte dlaždice"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Pridržaním a presunutím pridáte karty"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Dlaždice môžete usporiadať pridržaním a presunutím"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Presunutím sem odstránite"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Minimálny počet vyžadovaných dlaždíc: <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
