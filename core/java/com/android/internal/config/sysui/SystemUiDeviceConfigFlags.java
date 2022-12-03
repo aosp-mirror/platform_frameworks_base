@@ -556,6 +556,12 @@ public final class SystemUiDeviceConfigFlags {
             "show_stop_button_for_user_allowlisted_apps";
 
     /**
+     * (boolean) Whether the task manager should show apps running user-visible jobs.
+     */
+    public static final String TASK_MANAGER_SHOW_USER_VISIBLE_JOBS =
+            "task_manager_show_user_visible_jobs";
+
+    /**
      * (boolean) Whether to show notification volume control slider separate from ring.
      */
     public static final String VOLUME_SEPARATE_NOTIFICATION = "volume_separate_notification";
