@@ -2320,11 +2320,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         super.onConfigurationChanged(newParentConfig);
-
-        if (mTaskFragmentOrganizer != null) {
-            updateOrganizedTaskFragmentSurface();
-        }
-
+        updateOrganizedTaskFragmentSurface();
         sendTaskFragmentInfoChanged();
     }
 
@@ -2337,8 +2333,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         updateOrganizedTaskFragmentSurface();
     }
 
-    private void updateOrganizedTaskFragmentSurface() {
-        if (mDelayOrganizedTaskFragmentSurfaceUpdate) {
+    /**
+     * TaskFragmentOrganizer doesn't have access to the surface for security reasons, so we need to
+     * update its surface on the server side if it is not collected for Shell or in pending
+     * animation.
+     */
+    void updateOrganizedTaskFragmentSurface() {
+        if (mDelayOrganizedTaskFragmentSurfaceUpdate || mTaskFragmentOrganizer == null) {
             return;
         }
         if (mTransitionController.isShellTransitionsEnabled()
@@ -2370,7 +2371,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return;
         }
 
-        final Rect bounds = getBounds();
+        // If this TaskFragment is closing while resizing, crop to the starting bounds instead.
+        final Rect bounds = isClosingWhenResizing()
+                ? mDisplayContent.mClosingChangingContainers.get(this)
+                : getBounds();
         final int width = bounds.width();
         final int height = bounds.height();
         if (!forceUpdate && width == mLastSurfaceSize.x && height == mLastSurfaceSize.y) {
@@ -2416,6 +2420,15 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         final Rect endBounds = getConfiguration().windowConfiguration.getBounds();
         return endBounds.width() != startBounds.width()
                 || endBounds.height() != startBounds.height();
+    }
+
+    /** Records the starting bounds of the closing organized TaskFragment. */
+    void setClosingChangingStartBoundsIfNeeded() {
+        if (isOrganizedTaskFragment() && mDisplayContent != null
+                && mDisplayContent.mChangingContainers.remove(this)) {
+            mDisplayContent.mClosingChangingContainers.put(
+                    this, new Rect(mSurfaceFreezer.mFreezeBounds));
+        }
     }
 
     @Override

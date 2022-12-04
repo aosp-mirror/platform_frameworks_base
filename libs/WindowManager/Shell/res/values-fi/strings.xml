@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Poista turvasäilytyksestä"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Sovellus ei ehkä toimi jaetulla näytöllä."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Sovellus ei tue jaetun näytön tilaa."</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5242868470666346929) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Tämän sovelluksen voi avata vain yhdessä ikkunassa."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Sovellus ei ehkä toimi toissijaisella näytöllä."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Sovellus ei tue käynnistämistä toissijaisilla näytöillä."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Näytön jakaja"</string>

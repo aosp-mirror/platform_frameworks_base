@@ -324,7 +324,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void updateEmptyView_dndSuppressing() {
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
 
-        mStackScroller.updateEmptyShadeView(true, true);
+        mStackScroller.updateEmptyShadeView(true, true, false);
 
         verify(mEmptyShadeView).setText(R.string.dnd_suppressing_shade_text);
     }
@@ -334,7 +334,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
 
-        mStackScroller.updateEmptyShadeView(true, false);
+        mStackScroller.updateEmptyShadeView(true, false, false);
 
         verify(mEmptyShadeView).setText(R.string.empty_shade_text);
     }
@@ -343,10 +343,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void updateEmptyView_noNotificationsToDndSuppressing() {
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
-        mStackScroller.updateEmptyShadeView(true, false);
+        mStackScroller.updateEmptyShadeView(true, false, false);
         verify(mEmptyShadeView).setText(R.string.empty_shade_text);
 
-        mStackScroller.updateEmptyShadeView(true, true);
+        mStackScroller.updateEmptyShadeView(true, true, false);
         verify(mEmptyShadeView).setText(R.string.dnd_suppressing_shade_text);
     }
 

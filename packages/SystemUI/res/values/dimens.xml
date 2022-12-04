@@ -403,6 +403,8 @@
         (quick_qs_offset_height (60dp)  - ongoing_appops_chip_height (24dp) ) / 2 -->
     <dimen name="notifications_top_padding_split_shade">18dp</dimen>
 
+    <dimen name="notifications_unseen_footer_icon_size">16dp</dimen>
+
     <!-- Height of the status bar header bar when on Keyguard -->
     <dimen name="status_bar_header_height_keyguard">40dp</dimen>
 

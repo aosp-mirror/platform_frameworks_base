@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Félretevés megszüntetése"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Lehet, hogy az alkalmazás nem működik osztott képernyős nézetben."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Az alkalmazás nem támogatja az osztott képernyős nézetet."</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5242868470666346929) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Ez az alkalmazás csak egy ablakban nyitható meg."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Előfordulhat, hogy az alkalmazás nem működik másodlagos kijelzőn."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Az alkalmazást nem lehet másodlagos kijelzőn elindítani."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Elválasztó az osztott nézetben"</string>

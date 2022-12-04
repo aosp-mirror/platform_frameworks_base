@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Дауыстық пошта"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Байланыс мәселесі немесе MMИ коды жарамсыз."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Функция қолданылмайды."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Әрекет анықталған сандарды теруге шектелген."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Роуминг кезінде телефоннан қоңырауды басқа нөмірге бағыттау параметрлері өзгертілмейді."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Қызмет қосылған."</string>
@@ -395,54 +396,30 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Қолданбаға өзінің бөліктерін жадта бекіндіру мүмкіндігін береді. Бұл басқа қолданбалардың жадқа қол жетімділігін шектеп, телефонды баяулатуы мүмкін."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"басымдылығы жоғары қызметті іске қосу"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Қолданбаға басымдылығы жоғары қызметтерді пайдалануға рұқсат береді."</string>
-    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
-    <skip />
+    <string name="permlab_foregroundServiceCamera" msgid="7814751737955715297">"\"camera\" түріне жататын экрандық режимдегі қызметті іске қосу"</string>
+    <string name="permdesc_foregroundServiceCamera" msgid="6973701931250595727">"Қолданбаға \"camera\" түріне жататын экрандық режимдегі қызметтерді пайдалануға рұқсат беріледі."</string>
+    <string name="permlab_foregroundServiceConnectedDevice" msgid="3019650546176872501">"\"health\" түріне жататын экрандық режимдегі қызметті іске қосу"</string>
+    <string name="permdesc_foregroundServiceConnectedDevice" msgid="1067457315741352963">"Қолданбаға \"connectedDevice\" түріне жататын экрандық режимдегі қызметтерді пайдалануға рұқсат беріледі."</string>
+    <string name="permlab_foregroundServiceDataSync" msgid="5847463514326881076">"\"dataSync\" түріне жататын экрандық режимдегі қызметті іске қосу"</string>
+    <string name="permdesc_foregroundServiceDataSync" msgid="2267140263423973050">"Қолданбаға \"dataSync\" түріне жататын экрандық режимдегі қызметтерді пайдалануға рұқсат беріледі."</string>
+    <string name="permlab_foregroundServiceLocation" msgid="3745428302378535690">"\"location\" түріне жататын экрандық режимдегі қызметті іске қосу"</string>
+    <string name="permdesc_foregroundServiceLocation" msgid="118894034365177183">"Қолданбаға \"location\" түріне жататын экрандық режимдегі қызметтерді пайдалануға рұқсат беріледі."</string>
+    <string name="permlab_foregroundServiceMediaPlayback" msgid="4002687983891935514">"\"mediaPlayback\" түріне жататын экрандық режимдегі қызметті іске қосу"</string>
+    <string name="permdesc_foregroundServiceMediaPlayback" msgid="3638032446063968043">"Қолданбаға \"mediaPlayback\" түріне жататын экрандық режимдегі қызметтерді пайдалануға рұқсат беріледі."</string>
+    <string name="permlab_foregroundServiceMediaProjection" msgid="2630868915733312527">"\"mediaProjection\" түріне жататын экрандық режимдегі қызметті іске қосу"</string>
+    <string name="permdesc_foregroundServiceMediaProjection" msgid="4805677128082002298">"Қолданбаға \"mediaProjection\" түріне жататын экрандық режимдегі қызметтерді пайдалануға рұқсат беріледі."</string>
+    <string name="permlab_foregroundServiceMicrophone" msgid="7390033424890545399">"\"microphone\" түріне жататын экрандық режимдегі қызметті іске қосу"</string>
+    <string name="permdesc_foregroundServiceMicrophone" msgid="1206041516173483201">"Қолданбаға \"microphone\" түріне жататын экрандық режимдегі қызметтерді пайдалануға рұқсат беріледі."</string>
+    <string name="permlab_foregroundServicePhoneCall" msgid="627937743867697892">"\"phoneCall\" түріне жататын экрандық режимдегі қызметті іске қосу"</string>
+    <string name="permdesc_foregroundServicePhoneCall" msgid="5941660252587015147">"Қолданбаға \"phoneCall\" түріне жататын экрандық режимдегі қызметтерді пайдалануға рұқсат беріледі."</string>
+    <string name="permlab_foregroundServiceHealth" msgid="3675776442080928184">"\"health\" түріне жататын экрандық режимдегі қызметті іске қосу"</string>
+    <string name="permdesc_foregroundServiceHealth" msgid="2024586220562667185">"Қолданбаға \"health\" түріне жататын экрандық режимдегі қызметтерді пайдалануға рұқсат беріледі."</string>
+    <string name="permlab_foregroundServiceRemoteMessaging" msgid="105670277002780950">"\"remoteMessaging\" түріне жататын экрандық режимдегі қызметті іске қосу"</string>
+    <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Қолданбаға \"remoteMessaging\" түріне жататын экрандық режимдегі қызметтерді пайдалануға рұқсат беріледі."</string>
+    <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"\"systemExempted\" түріне жататын экрандық режимдегі қызметті іске қосу"</string>
+    <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Қолданбаға \"systemExempted\" түріне жататын экрандық режимдегі қызметтерді пайдалануға рұқсат беріледі."</string>
+    <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"specialUse\" түріне жататын экрандық режимдегі қызметті іске қосу"</string>
+    <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Қолданбаға \"specialUse\" түріне жататын экрандық режимдегі қызметтерді пайдалануға рұқсат беріледі."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"қолданба жадындағы бос орынды өлшеу"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Қолданбаға оның кодын, деректерін және кэш өлшемдерін шығарып алуға рұқсат береді"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"жүйе параметрлерін өзгерту"</string>

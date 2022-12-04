@@ -242,6 +242,14 @@ public class SplitControllerTest {
 
         assertTrue(tf.hasActivity(mActivity.getActivityToken()));
 
+        // When the activity is not finishing, do not clear the record.
+        doReturn(false).when(mActivity).isFinishing();
+        mSplitController.onActivityDestroyed(mActivity);
+
+        assertTrue(tf.hasActivity(mActivity.getActivityToken()));
+
+        // Clear the record when the activity is finishing and destroyed.
+        doReturn(true).when(mActivity).isFinishing();
         mSplitController.onActivityDestroyed(mActivity);
 
         assertFalse(tf.hasActivity(mActivity.getActivityToken()));

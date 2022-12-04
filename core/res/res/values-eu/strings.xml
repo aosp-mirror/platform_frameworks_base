@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Erantzungailua"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Konexio-arazoren bat gertatu da edo MMI kodea baliogabea da."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Ez da onartzen eginbidea."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Eragiketa markatze finkoko zenbakietara murriztua dago."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Ezin dira aldatu deiak desbideratzeko ezarpenak telefonoa ibiltaritzan dagoenean."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Zerbitzua gaitu da."</string>

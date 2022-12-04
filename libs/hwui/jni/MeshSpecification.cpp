@@ -50,7 +50,6 @@ std::vector<Attribute> extractAttributes(JNIEnv* env, jobjectArray attributes) {
                        SkString(attName.c_str())};
         attVector.push_back(std::move(temp));
     }
-
     return attVector;
 }
 
@@ -76,11 +75,15 @@ static jlong Make(JNIEnv* env, jobject thiz, jobjectArray attributeArray, jint v
     auto varyings = extractVaryings(env, varyingArray);
     auto skVertexShader = ScopedUtfChars(env, vertexShader);
     auto skFragmentShader = ScopedUtfChars(env, fragmentShader);
-    auto meshSpec = SkMeshSpecification::Make(attributes, vertexStride, varyings,
-                                              SkString(skVertexShader.c_str()),
-                                              SkString(skFragmentShader.c_str()))
-                            .specification;
-    return reinterpret_cast<jlong>(meshSpec.release());
+    auto meshSpecResult = SkMeshSpecification::Make(attributes, vertexStride, varyings,
+                                                    SkString(skVertexShader.c_str()),
+                                                    SkString(skFragmentShader.c_str()));
+
+    if (meshSpecResult.specification.get() == nullptr) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", meshSpecResult.error.c_str());
+    }
+
+    return reinterpret_cast<jlong>(meshSpecResult.specification.release());
 }
 
 static jlong MakeWithCS(JNIEnv* env, jobject thiz, jobjectArray attributeArray, jint vertexStride,
@@ -90,13 +93,15 @@ static jlong MakeWithCS(JNIEnv* env, jobject thiz, jobjectArray attributeArray, 
     auto varyings = extractVaryings(env, varyingArray);
     auto skVertexShader = ScopedUtfChars(env, vertexShader);
     auto skFragmentShader = ScopedUtfChars(env, fragmentShader);
-    auto meshSpec = SkMeshSpecification::Make(attributes, vertexStride, varyings,
-                                              SkString(skVertexShader.c_str()),
-                                              SkString(skFragmentShader.c_str()),
-                                              GraphicsJNI::getNativeColorSpace(colorSpace))
-                            .specification;
+    auto meshSpecResult = SkMeshSpecification::Make(
+            attributes, vertexStride, varyings, SkString(skVertexShader.c_str()),
+            SkString(skFragmentShader.c_str()), GraphicsJNI::getNativeColorSpace(colorSpace));
 
-    return reinterpret_cast<jlong>(meshSpec.release());
+    if (meshSpecResult.specification.get() == nullptr) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", meshSpecResult.error.c_str());
+    }
+
+    return reinterpret_cast<jlong>(meshSpecResult.specification.release());
 }
 
 static jlong MakeWithAlpha(JNIEnv* env, jobject thiz, jobjectArray attributeArray,
@@ -106,12 +111,16 @@ static jlong MakeWithAlpha(JNIEnv* env, jobject thiz, jobjectArray attributeArra
     auto varyings = extractVaryings(env, varyingArray);
     auto skVertexShader = ScopedUtfChars(env, vertexShader);
     auto skFragmentShader = ScopedUtfChars(env, fragmentShader);
-    auto meshSpec = SkMeshSpecification::Make(
-                            attributes, vertexStride, varyings, SkString(skVertexShader.c_str()),
-                            SkString(skFragmentShader.c_str()),
-                            GraphicsJNI::getNativeColorSpace(colorSpace), SkAlphaType(alphaType))
-                            .specification;
-    return reinterpret_cast<jlong>(meshSpec.release());
+    auto meshSpecResult = SkMeshSpecification::Make(
+            attributes, vertexStride, varyings, SkString(skVertexShader.c_str()),
+            SkString(skFragmentShader.c_str()), GraphicsJNI::getNativeColorSpace(colorSpace),
+            SkAlphaType(alphaType));
+
+    if (meshSpecResult.specification.get() == nullptr) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", meshSpecResult.error.c_str());
+    }
+
+    return reinterpret_cast<jlong>(meshSpecResult.specification.release());
 }
 
 static void MeshSpecification_safeUnref(SkMeshSpecification* meshSpec) {

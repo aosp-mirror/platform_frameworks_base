@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"အသံမေးလ်"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"ဆက်သွယ်မှုဆိုင်ရာပြသနာ သို့မဟုတ် မမှန်ကန်သောMMIကုတ်"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ဝန်ဆောင်မှုကို မပံ့ပိုးပါ။"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"သတ်မှတ်ခေါ်ဆိုနိုင်သောနံပါတ်များထံသာ ကန့်သတ်ထားသည်"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"ကွန်ရက်ပြင်ပဒေတာအသုံးပြုခြင်းကို ဖွင့်ထားသည့်အခါ သင့်ဖုန်းမှနေ၍ ခေါ်ဆိုမှုထပ်ဆင့်ပို့ခြင်းဆက်တင်အား ပြောင်း၍မရပါ။"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"ဝန်ဆောင်မှု လုပ်ဆောင်နိုင်မည်"</string>

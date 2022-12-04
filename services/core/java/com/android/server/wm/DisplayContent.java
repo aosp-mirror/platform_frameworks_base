@@ -192,6 +192,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.DisplayUtils;
@@ -356,6 +357,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     final ArraySet<ActivityRecord> mClosingApps = new ArraySet<>();
     final ArraySet<WindowContainer> mChangingContainers = new ArraySet<>();
     final UnknownAppVisibilityController mUnknownAppVisibilityController;
+    /**
+     * If a container is closing when resizing, keeps track of its starting bounds when it is
+     * removed from {@link #mChangingContainers}.
+     */
+    final ArrayMap<WindowContainer, Rect> mClosingChangingContainers = new ArrayMap<>();
 
     private MetricsLogger mMetricsLogger;
 
