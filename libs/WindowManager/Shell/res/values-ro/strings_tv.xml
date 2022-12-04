@@ -26,8 +26,8 @@
     <string name="pip_collapse" msgid="3903295106641385962">"Restrânge"</string>
     <string name="pip_edu_text" msgid="3672999496647508701">" Apasă de două ori "<annotation icon="home_icon">"butonul ecran de pornire"</annotation>" pentru comenzi"</string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Meniu picture-in-picture."</string>
-    <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Mută spre stânga"</string>
-    <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Mută spre dreapta"</string>
+    <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Mută la stânga"</string>
+    <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Mută la dreapta"</string>
     <string name="a11y_action_pip_move_up" msgid="98502616918621959">"Mută în sus"</string>
     <string name="a11y_action_pip_move_down" msgid="3858802832725159740">"Mută în jos"</string>
     <string name="a11y_action_pip_move_done" msgid="1486845365134416210">"Gata"</string>
