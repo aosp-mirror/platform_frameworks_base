@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Röstbrevlåda"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Anslutningsproblem eller ogiltig MMI-kod."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funktionen stöds inte."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Endast fasta nummer kan användas."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Det går inte att ändra inställningarna för vidarebefordran av samtal medan mobilen är i roaming-läge."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Tjänsten har aktiverats."</string>

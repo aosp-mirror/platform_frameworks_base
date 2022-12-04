@@ -106,6 +106,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.IWindow;
+import android.view.InputDevice;
+import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
@@ -147,6 +149,7 @@ import com.android.server.accessibility.magnification.MagnificationScaleProvider
 import com.android.server.accessibility.magnification.WindowMagnificationManager;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -190,7 +193,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     // TODO: Restructure service initialization so services aren't connected before all of
     //       their capabilities are ready.
-    private static final int WAIT_MOTION_INJECTOR_TIMEOUT_MILLIS = 1000;
+    private static final int WAIT_INPUT_FILTER_INSTALL_TIMEOUT_MS = 1000;
 
 
     // This postpones state changes events when a window doesn't exist with the expectation that
@@ -257,6 +260,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private AccessibilityInputFilter mInputFilter;
 
     private boolean mHasInputFilter;
+
+    private boolean mInputFilterInstalled;
 
     private KeyEventDispatcher mKeyEventDispatcher;
 
@@ -515,6 +520,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @Nullable
     public FingerprintGestureDispatcher getFingerprintGestureDispatcher() {
         return mFingerprintGestureDispatcher;
+    }
+
+    /**
+     * Called by the {@link AccessibilityInputFilter} when the filter install state changes.
+     */
+    public void onInputFilterInstalled(boolean installed) {
+        synchronized (mLock) {
+            mInputFilterInstalled = installed;
+            mLock.notifyAll();
+        }
     }
 
     private void onBootPhase(int phase) {
@@ -1350,7 +1365,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    /** Send a motion event to the service to allow it to perform gesture detection. */
+    /** Send a motion event to the services. */
     public boolean sendMotionEventToListeningServices(MotionEvent event) {
         boolean result;
         event = MotionEvent.obtain(event);
@@ -1453,7 +1468,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public @Nullable MotionEventInjector getMotionEventInjectorForDisplayLocked(int displayId) {
-        final long endMillis = SystemClock.uptimeMillis() + WAIT_MOTION_INJECTOR_TIMEOUT_MILLIS;
+        final long endMillis = SystemClock.uptimeMillis() + WAIT_INPUT_FILTER_INSTALL_TIMEOUT_MS;
         MotionEventInjector motionEventInjector = null;
         while ((mMotionEventInjectors == null) && (SystemClock.uptimeMillis() < endMillis)) {
             try {
@@ -1707,7 +1722,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             AccessibilityUserState state = getCurrentUserStateLocked();
             for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
                 AccessibilityServiceConnection service = state.mBoundServices.get(i);
-                if (service.isServiceDetectsGesturesEnabled(displayId)) {
+                if (service.wantsGenericMotionEvent(event)
+                        || (event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)
+                        && service.isServiceDetectsGesturesEnabled(displayId))) {
                     service.notifyMotionEvent(event);
                     result = true;
                 }
@@ -2302,6 +2319,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (userState.isPerformGesturesEnabledLocked()) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_INJECT_MOTION_EVENTS;
             }
+            int combinedGenericMotionEventSources = 0;
+            for (AccessibilityServiceConnection connection : userState.mBoundServices) {
+                combinedGenericMotionEventSources |= connection.mGenericMotionEventSources;
+            }
+            if (combinedGenericMotionEventSources != 0) {
+                flags |= AccessibilityInputFilter.FLAG_FEATURE_INTERCEPT_GENERIC_MOTION_EVENTS;
+            }
             if (flags != 0) {
                 if (!mHasInputFilter) {
                     mHasInputFilter = true;
@@ -2314,6 +2338,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     setInputFilter = true;
                 }
                 mInputFilter.setUserAndEnabledFeatures(userState.mUserId, flags);
+                mInputFilter.setCombinedGenericMotionEventSources(
+                        combinedGenericMotionEventSources);
             } else {
                 if (mHasInputFilter) {
                     mHasInputFilter = false;
@@ -4643,6 +4669,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     service.setImeSessionEnabledLocked(sessions.get(service.mId), enabled);
                 }
             }
+        }
+    }
+
+    @Override
+    public void injectInputEventToInputFilter(InputEvent event) {
+        synchronized (mLock) {
+            final long endMillis =
+                    SystemClock.uptimeMillis() + WAIT_INPUT_FILTER_INSTALL_TIMEOUT_MS;
+            while (!mInputFilterInstalled && (SystemClock.uptimeMillis() < endMillis)) {
+                try {
+                    mLock.wait(endMillis - SystemClock.uptimeMillis());
+                } catch (InterruptedException ie) {
+                    /* ignore */
+                }
+            }
+        }
+
+        if (mInputFilterInstalled && mInputFilter != null) {
+            mInputFilter.onInputEvent(event,
+                    WindowManagerPolicy.FLAG_PASS_TO_USER | WindowManagerPolicy.FLAG_INJECTED);
+        } else {
+            Slog.w(LOG_TAG, "Cannot injectInputEventToInputFilter because the "
+                    + "AccessibilityInputFilter is not installed.");
         }
     }
 

@@ -30,6 +30,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.collection.provider.SectionHeaderVisibilityProvider
+import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProvider
+import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProviderImpl
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
@@ -99,6 +101,31 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
             // THEN: The notification is shown regardless
             assertThat(unseenFilter.shouldFilterOut(fakeEntry, 0L)).isFalse()
+        }
+    }
+
+    @Test
+    fun unseenFilterUpdatesSeenProviderWhenSuppressing() {
+        whenever(notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard).thenReturn(true)
+
+        // GIVEN: Keyguard is not showing, and a notification is present
+        keyguardRepository.setKeyguardShowing(false)
+        runKeyguardCoordinatorTest {
+            val fakeEntry = NotificationEntryBuilder().build()
+            collectionListener.onEntryAdded(fakeEntry)
+
+            // WHEN: The keyguard is now showing
+            keyguardRepository.setKeyguardShowing(true)
+            testScheduler.runCurrent()
+
+            // THEN: The notification is recognized as "seen" and is filtered out.
+            assertThat(unseenFilter.shouldFilterOut(fakeEntry, 0L)).isTrue()
+
+            // WHEN: The filter is cleaned up
+            unseenFilter.onCleanup()
+
+            // THEN: The SeenNotificationProvider has been updated to reflect the suppression
+            assertThat(seenNotificationsProvider.hasFilteredOutSeenNotifications).isTrue()
         }
     }
 
@@ -204,6 +231,7 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
         testBlock: suspend KeyguardCoordinatorTestScope.() -> Unit
     ) {
         val testScope = TestScope(UnconfinedTestDispatcher())
+        val seenNotificationsProvider = SeenNotificationsProviderImpl()
         val keyguardCoordinator =
             KeyguardCoordinator(
                 keyguardNotifVisibilityProvider,
@@ -211,18 +239,20 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
                 notifPipelineFlags,
                 testScope.backgroundScope,
                 sectionHeaderVisibilityProvider,
+                seenNotificationsProvider,
                 statusBarStateController,
             )
         keyguardCoordinator.attach(notifPipeline)
-        KeyguardCoordinatorTestScope(keyguardCoordinator, testScope).run {
-            testScheduler.advanceUntilIdle()
-            testScope.runTest(dispatchTimeoutMs = 1.seconds.inWholeMilliseconds) { testBlock() }
+        testScope.runTest(dispatchTimeoutMs = 1.seconds.inWholeMilliseconds) {
+            KeyguardCoordinatorTestScope(keyguardCoordinator, testScope, seenNotificationsProvider)
+                .testBlock()
         }
     }
 
     private inner class KeyguardCoordinatorTestScope(
         private val keyguardCoordinator: KeyguardCoordinator,
         private val scope: TestScope,
+        val seenNotificationsProvider: SeenNotificationsProvider,
     ) : CoroutineScope by scope {
         val testScheduler: TestCoroutineScheduler
             get() = scope.testScheduler

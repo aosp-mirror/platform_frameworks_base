@@ -20,10 +20,8 @@
     <string name="confirmation_title" msgid="3785000297483688997">"Permet que &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; accedeixi a &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"rellotge"</string>
     <string name="chooser_title" msgid="2262294130493605839">"Tria un <xliff:g id="PROFILE_NAME">%1$s</xliff:g> perquè el gestioni &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <!-- no translation found for summary_watch (4085794790142204006) -->
-    <skip />
-    <!-- no translation found for summary_watch_single_device (1523091550243476756) -->
-    <skip />
+    <string name="summary_watch" msgid="4085794790142204006">"L\'aplicació és necessària per gestionar <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> tindrà permís per interaccionar amb les teves notificacions i accedir al telèfon, als SMS, als contactes, al calendari, als registres de trucades i als dispositius propers."</string>
+    <string name="summary_watch_single_device" msgid="1523091550243476756">"L\'aplicació és necessària per gestionar <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> tindrà permís per interaccionar amb aquests permisos:"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Permet que &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; accedeixi a aquesta informació del telèfon"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Serveis multidispositiu"</string>
     <string name="helper_summary_app_streaming" msgid="5977509499890099">"<xliff:g id="APP_NAME">%1$s</xliff:g> demana permís en nom del teu <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> per reproduir en continu aplicacions entre els dispositius"</string>
@@ -42,29 +40,20 @@
     <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;Això pot incloure accés al micròfon, a la càmera i a la ubicació, i altres permisos sensibles a &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; &lt;p&gt;Pots canviar aquests permisos en qualsevol moment a &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;, a Configuració.&lt;/p&gt;"</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"Icona de l\'aplicació"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"Botó Més informació"</string>
-    <!-- no translation found for permission_phone (2661081078692784919) -->
-    <skip />
-    <!-- no translation found for permission_sms (6337141296535774786) -->
-    <skip />
-    <!-- no translation found for permission_contacts (3858319347208004438) -->
-    <skip />
-    <!-- no translation found for permission_calendar (6805668388691290395) -->
-    <skip />
-    <!-- no translation found for permission_nearby_devices (7530973297737123481) -->
-    <skip />
+    <string name="permission_phone" msgid="2661081078692784919">"Telèfon"</string>
+    <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
+    <string name="permission_contacts" msgid="3858319347208004438">"Contactes"</string>
+    <string name="permission_calendar" msgid="6805668388691290395">"Calendari"</string>
+    <string name="permission_nearby_devices" msgid="7530973297737123481">"Dispositius propers"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotos i contingut multimèdia"</string>
     <string name="permission_notification" msgid="693762568127741203">"Notificacions"</string>
-    <!-- no translation found for permission_app_streaming (6009695219091526422) -->
-    <skip />
-    <!-- no translation found for permission_phone_summary (6154198036705702389) -->
-    <skip />
+    <string name="permission_app_streaming" msgid="6009695219091526422">"Aplicacions"</string>
+    <string name="permission_phone_summary" msgid="6154198036705702389">"Pot accedir al teu número de telèfon i a la informació de la xarxa. Es requereix per fer trucades i VoIP, enviar missatges de veu, redirigir trucades i editar els registres de trucades."</string>
     <string name="permission_sms_summary" msgid="5107174184224165570"></string>
-    <!-- no translation found for permission_contacts_summary (7850901746005070792) -->
-    <skip />
+    <string name="permission_contacts_summary" msgid="7850901746005070792">"Pot llegir, crear o editar la nostra llista de contactes i també accedir a la llista de tots els comptes que s\'utilitzen al teu dispositiu"</string>
     <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
     <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
     <string name="permission_notification_summary" msgid="884075314530071011">"Pot llegir totes les notificacions, inclosa informació com ara els contactes, els missatges i les fotos"</string>
-    <!-- no translation found for permission_app_streaming_summary (606923325679670624) -->
-    <skip />
+    <string name="permission_app_streaming_summary" msgid="606923325679670624">"Reprodueix en continu aplicacions del telèfon"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
 </resources>

@@ -19,11 +19,13 @@ package com.android.systemui.surfaceeffects.ripple
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
+import androidx.annotation.VisibleForTesting
 import androidx.core.graphics.ColorUtils
 
 /** A single ripple animation. */
 class RippleAnimation(private val config: RippleAnimationConfig) {
-    internal val rippleShader: RippleShader = RippleShader(config.rippleShape)
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+    val rippleShader: RippleShader = RippleShader(config.rippleShape)
     private val animator: ValueAnimator = ValueAnimator.ofFloat(0f, 1f)
 
     init {

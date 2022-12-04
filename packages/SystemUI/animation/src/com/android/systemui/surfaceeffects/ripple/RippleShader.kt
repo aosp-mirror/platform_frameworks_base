@@ -32,7 +32,7 @@ import com.android.systemui.surfaceeffects.shaderutil.ShaderUtilLibrary
  *
  * Modeled after frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java.
  */
-class RippleShader internal constructor(rippleShape: RippleShape = RippleShape.CIRCLE) :
+class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
     RuntimeShader(buildShader(rippleShape)) {
 
     /** Shapes that the [RippleShader] supports. */

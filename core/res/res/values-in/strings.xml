@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Pesan suara"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Masalah sambungan atau kode MMI tidak valid."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Fitur tidak didukung."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Operasi dibatasi untuk nomor panggilan tetap saja."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Tidak dapat mengubah setelan penerusan panggilan dari ponsel saat roaming"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Layanan telah diaktifkan."</string>

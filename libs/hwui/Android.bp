@@ -340,6 +340,8 @@ cc_defaults {
         "jni/Graphics.cpp",
         "jni/ImageDecoder.cpp",
         "jni/Interpolator.cpp",
+        "jni/MeshSpecification.cpp",
+        "jni/Mesh.cpp",
         "jni/MaskFilter.cpp",
         "jni/NinePatch.cpp",
         "jni/NinePatchPeeker.cpp",

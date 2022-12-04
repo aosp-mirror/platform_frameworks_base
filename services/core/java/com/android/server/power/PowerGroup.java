@@ -324,11 +324,6 @@ public class PowerGroup {
         return mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DIM;
     }
 
-    public boolean isPolicyVrLocked() {
-        return mDisplayPowerRequest.isVr();
-
-    }
-
     public boolean isBrightOrDimLocked() {
         return mDisplayPowerRequest.isBrightOrDim();
     }
@@ -382,7 +377,7 @@ public class PowerGroup {
 
     @VisibleForTesting
     int getDesiredScreenPolicyLocked(boolean quiescent, boolean dozeAfterScreenOff,
-            boolean vrModeEnabled, boolean bootCompleted, boolean screenBrightnessBoostInProgress) {
+            boolean bootCompleted, boolean screenBrightnessBoostInProgress) {
         final int wakefulness = getWakefulnessLocked();
         final int wakeLockSummary = getWakeLockSummaryLocked();
         if (wakefulness == WAKEFULNESS_ASLEEP || quiescent) {
@@ -396,13 +391,6 @@ public class PowerGroup {
             }
             // Fall through and preserve the current screen policy if not configured to
             // doze after screen off.  This causes the screen off transition to be skipped.
-        }
-
-        // It is important that POLICY_VR check happens after the wakefulness checks above so
-        // that VR-mode does not prevent displays from transitioning to the correct state when
-        // dozing or sleeping.
-        if (vrModeEnabled) {
-            return DisplayPowerRequest.POLICY_VR;
         }
 
         if ((wakeLockSummary & WAKE_LOCK_SCREEN_BRIGHT) != 0
@@ -423,10 +411,10 @@ public class PowerGroup {
             boolean useProximitySensor, boolean boostScreenBrightness, int dozeScreenState,
             float dozeScreenBrightness, boolean overrideDrawWakeLock,
             PowerSaveState powerSaverState, boolean quiescent, boolean dozeAfterScreenOff,
-            boolean vrModeEnabled, boolean bootCompleted, boolean screenBrightnessBoostInProgress,
+            boolean bootCompleted, boolean screenBrightnessBoostInProgress,
             boolean waitForNegativeProximity) {
         mDisplayPowerRequest.policy = getDesiredScreenPolicyLocked(quiescent, dozeAfterScreenOff,
-                vrModeEnabled, bootCompleted, screenBrightnessBoostInProgress);
+                bootCompleted, screenBrightnessBoostInProgress);
         mDisplayPowerRequest.screenBrightnessOverride = screenBrightnessOverride;
         mDisplayPowerRequest.useAutoBrightness = autoBrightness;
         mDisplayPowerRequest.useProximitySensor = useProximitySensor;

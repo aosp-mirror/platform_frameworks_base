@@ -606,6 +606,12 @@ public class BaseRecordingCanvas extends Canvas {
                 indices, indexOffset, indexCount, paint.getNativeInstance());
     }
 
+    @Override
+    public final void drawMesh(Mesh mesh, BlendMode blendMode, Paint paint) {
+        nDrawMesh(mNativeCanvasWrapper, mesh.getNativeWrapperInstance(),
+                blendMode.getXfermode().porterDuffMode, paint.getNativeInstance());
+    }
+
     /**
      * @hide
      */
@@ -706,6 +712,10 @@ public class BaseRecordingCanvas extends Canvas {
     private static native void nDrawBitmapMesh(long nativeCanvas, long bitmapHandle, int meshWidth,
             int meshHeight, float[] verts, int vertOffset, int[] colors, int colorOffset,
             long nativePaint);
+
+    @FastNative
+    private static native void nDrawMesh(
+            long canvasHandle, long nativeMesh, int mode, long nativePaint);
 
     @FastNative
     private static native void nDrawVertices(long nativeCanvas, int mode, int n, float[] verts,

@@ -3116,6 +3116,7 @@ package android.accessibilityservice {
     method public boolean onGesture(@NonNull android.accessibilityservice.AccessibilityGestureEvent);
     method public abstract void onInterrupt();
     method protected boolean onKeyEvent(android.view.KeyEvent);
+    method public void onMotionEvent(@NonNull android.view.MotionEvent);
     method protected void onServiceConnected();
     method public void onSystemActionsChanged();
     method public final boolean performGlobalAction(int);
@@ -3273,6 +3274,7 @@ package android.accessibilityservice {
     method @Deprecated public String getDescription();
     method public String getId();
     method public int getInteractiveUiTimeoutMillis();
+    method public int getMotionEventSources();
     method public int getNonInteractiveUiTimeoutMillis();
     method public android.content.pm.ResolveInfo getResolveInfo();
     method public String getSettingsActivityName();
@@ -3282,6 +3284,7 @@ package android.accessibilityservice {
     method @Nullable public CharSequence loadIntro(@NonNull android.content.pm.PackageManager);
     method public CharSequence loadSummary(android.content.pm.PackageManager);
     method public void setInteractiveUiTimeoutMillis(@IntRange(from=0) int);
+    method public void setMotionEventSources(int);
     method public void setNonInteractiveUiTimeoutMillis(@IntRange(from=0) int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CAPABILITY_CAN_CONTROL_MAGNIFICATION = 16; // 0x10

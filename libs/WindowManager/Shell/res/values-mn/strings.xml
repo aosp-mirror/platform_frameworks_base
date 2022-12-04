@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Ил гаргах"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Апп хуваагдсан дэлгэц дээр ажиллахгүй байж болзошгүй."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Энэ апп нь дэлгэц хуваах тохиргоог дэмждэггүй."</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5242868470666346929) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Энэ аппыг зөвхөн 1 цонхонд нээх боломжтой."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Апп хоёрдогч дэлгэцэд ажиллахгүй."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Аппыг хоёрдогч дэлгэцэд эхлүүлэх боломжгүй."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"\"Дэлгэц хуваах\" хуваагч"</string>

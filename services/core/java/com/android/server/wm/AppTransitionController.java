@@ -272,6 +272,7 @@ public class AppTransitionController {
             handleClosingApps();
             handleOpeningApps();
             handleChangingApps(transit);
+            handleClosingChangingContainers();
 
             appTransition.setLastAppTransition(transit, topOpeningApp,
                     topClosingApp, topChangingApp);
@@ -290,6 +291,7 @@ public class AppTransitionController {
         mDisplayContent.mClosingApps.clear();
         mDisplayContent.mChangingContainers.clear();
         mDisplayContent.mUnknownAppVisibilityController.clear();
+        mDisplayContent.mClosingChangingContainers.clear();
 
         // This has changed the visibility of windows, so perform
         // a new layout to get them all up-to-date.
@@ -1174,6 +1176,24 @@ public class AppTransitionController {
 
             if (mDisplayContent.mAppTransition.isNextAppTransitionThumbnailDown()) {
                 app.attachThumbnailAnimation();
+            }
+        }
+    }
+
+    private void handleClosingChangingContainers() {
+        final ArrayMap<WindowContainer, Rect> containers =
+                mDisplayContent.mClosingChangingContainers;
+        while (!containers.isEmpty()) {
+            final WindowContainer container = containers.keyAt(0);
+            containers.remove(container);
+
+            // For closing changing windows that are part of the transition, they should have been
+            // removed from mClosingChangingContainers in WindowContainer#getAnimationAdapter()
+            // If the closing changing TaskFragment is not part of the transition, update its
+            // surface after removing it from mClosingChangingContainers.
+            final TaskFragment taskFragment = container.asTaskFragment();
+            if (taskFragment != null) {
+                taskFragment.updateOrganizedTaskFragmentSurface();
             }
         }
     }
