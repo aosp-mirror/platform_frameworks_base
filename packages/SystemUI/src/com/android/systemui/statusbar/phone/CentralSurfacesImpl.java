@@ -94,7 +94,6 @@ import android.view.Display;
 import android.view.IRemoteAnimationRunner;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
@@ -2031,43 +2030,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
     }
 
-    /** Called when a touch event occurred on {@link PhoneStatusBarView}. */
     @Override
-    public void onTouchEvent(MotionEvent event) {
-        // TODO(b/202981994): Move this touch debugging to a central location. (Right now, it's
-        //   split between NotificationPanelViewController and here.)
-        if (DEBUG_GESTURES) {
-            if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
-                EventLog.writeEvent(EventLogTags.SYSUI_STATUSBAR_TOUCH,
-                        event.getActionMasked(), (int) event.getX(), (int) event.getY(),
-                        mDisabled1, mDisabled2);
-            }
+    public boolean getCommandQueuePanelsEnabled() {
+        return mCommandQueue.panelsEnabled();
+    }
 
-        }
-
-        if (SPEW) {
-            Log.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event + " mDisabled1="
-                    + mDisabled1 + " mDisabled2=" + mDisabled2);
-        } else if (CHATTY) {
-            if (event.getAction() != MotionEvent.ACTION_MOVE) {
-                Log.d(TAG, String.format(
-                            "panel: %s at (%f, %f) mDisabled1=0x%08x mDisabled2=0x%08x",
-                            MotionEvent.actionToString(event.getAction()),
-                            event.getRawX(), event.getRawY(), mDisabled1, mDisabled2));
-            }
-        }
-
-        if (DEBUG_GESTURES) {
-            mGestureRec.add(event);
-        }
-
-        if (mStatusBarWindowState == WINDOW_STATE_SHOWING) {
-            final boolean upOrCancel =
-                    event.getAction() == MotionEvent.ACTION_UP ||
-                    event.getAction() == MotionEvent.ACTION_CANCEL;
-            setInteracting(StatusBarManager.WINDOW_STATUS_BAR,
-                    !upOrCancel || mShadeController.isExpandedVisible());
-        }
+    @Override
+    public int getStatusBarWindowState() {
+        return mStatusBarWindowState;
     }
 
     @Override
