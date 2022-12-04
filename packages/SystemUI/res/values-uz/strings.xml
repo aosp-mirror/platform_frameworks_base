@@ -72,6 +72,8 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock faolsizlantirildi"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"rasm yuborildi"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Skrinshot saqlanmoqda…"</string>
+    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
+    <skip />
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Skrinshot saqlandi"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Skrinshot saqlanmadi"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Skrinshotni saqlashdan oldin qurilma qulflanmagan boʻlishi lozim"</string>
@@ -392,6 +394,10 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Bezovta qilinmasin rejimida bildirishnomalar pauza qilinadi"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Boshlash"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Bildirishnomalar yo‘q"</string>
+    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
+    <skip />
+    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
+    <skip />
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Bu qurilmani ota-onangiz boshqaradi"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Bu qurilma tashkilotingizga tegishli va tarmoq trafigi tashkilotingiz tomonidan kuzatilishi mumkin"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Bu qurilma <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> tashkilotiga tegishli va tarmoq trafigi tashkilot tomonidan kuzatilishi mumkin"</string>
@@ -998,16 +1004,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kamera ilovasini oʻrnating"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Ilova sozlangan"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Kamida bitta qurilma mavjud"</string>
-    <!-- no translation found for rear_display_bottom_sheet_cancel (3461468855493357248) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_confirm (4383356544661421206) -->
-    <skip />
-    <!-- no translation found for rear_display_fold_bottom_sheet_title (6081542277622721548) -->
-    <skip />
-    <!-- no translation found for rear_display_unfold_bottom_sheet_title (2137403802960396357) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_description (1852662982816810352) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_warning (800995919558238930) -->
-    <skip />
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Bekor qilish"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Hozir aylantirish"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Yaxshiroq selfi olish uchun telefonni yoying"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Old ekran sizga qaragan holda aylantirdingizmi?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Keng va yuqori tiniqlikdagi suratga olish uchun orqa kameradan foydalaning."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Bu ekran oʻchiriladi"</b></string>
 </resources>
