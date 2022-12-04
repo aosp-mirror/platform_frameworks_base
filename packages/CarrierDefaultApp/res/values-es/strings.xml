@@ -8,10 +8,22 @@
     <string name="portal_notification_detail" msgid="2295729385924660881">"Toca para acceder al sitio web de %s"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Ponte en contacto con tu proveedor de servicios (%s)"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Sin conexión de datos móviles"</string>
-    <string name="no_mobile_data_connection" msgid="544980465184147010">"Añade un plan de datos o de itinerancia a través de %s"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Añade un plan de datos o de roaming a través de %s"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Estado de la conexión de datos móviles"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Iniciar sesión en una red móvil"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"La red a la que intentas unirte tiene problemas de seguridad."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Por ejemplo, es posible que la página de inicio de sesión no pertenezca a la organización mostrada."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Continuar de todos modos a través del navegador"</string>
+    <!-- no translation found for network_boost_notification_channel (5430986172506159199) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_title (8226368121348880044) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_detail (3812434025544196192) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_button_not_now (4129218252146702688) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_button_manage (1511552684142641182) -->
+    <skip />
+    <!-- no translation found for slice_purchase_app_label (915654761797446390) -->
+    <skip />
 </resources>
