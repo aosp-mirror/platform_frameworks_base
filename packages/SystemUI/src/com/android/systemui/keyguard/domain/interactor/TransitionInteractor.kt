@@ -29,4 +29,6 @@ package com.android.systemui.keyguard.domain.interactor
 sealed class TransitionInteractor(val name: String) {
 
     abstract fun start()
+
+    fun <A, B, C> toTriple(a: A, bc: Pair<B, C>) = Triple(a, bc.first, bc.second)
 }
