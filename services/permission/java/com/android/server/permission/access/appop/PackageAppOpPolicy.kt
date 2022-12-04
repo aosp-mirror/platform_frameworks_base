@@ -16,9 +16,10 @@
 
 package com.android.server.permission.access.appop
 
-import com.android.server.permission.access.AccessState
 import com.android.server.permission.access.AccessUri
 import com.android.server.permission.access.AppOpUri
+import com.android.server.permission.access.GetStateScope
+import com.android.server.permission.access.MutateStateScope
 import com.android.server.permission.access.PackageUri
 import com.android.server.permission.access.UserState
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
@@ -31,27 +32,23 @@ class PackageAppOpPolicy : BaseAppOpPolicy(PackageAppOpPersistence()) {
     override val objectScheme: String
         get() = AppOpUri.SCHEME
 
-    override fun getModes(subject: AccessUri, state: AccessState): IndexedMap<String, Int>? {
+    override fun GetStateScope.getModes(subject: AccessUri): IndexedMap<String, Int>? {
         subject as PackageUri
         return state.userStates[subject.userId]?.packageAppOpModes?.get(subject.packageName)
     }
 
-    override fun getOrCreateModes(subject: AccessUri, state: AccessState): IndexedMap<String, Int> {
+    override fun MutateStateScope.getOrCreateModes(subject: AccessUri): IndexedMap<String, Int> {
         subject as PackageUri
-        return state.userStates.getOrPut(subject.userId) { UserState() }
+        return newState.userStates.getOrPut(subject.userId) { UserState() }
             .packageAppOpModes.getOrPut(subject.packageName) { IndexedMap() }
     }
 
-    override fun removeModes(subject: AccessUri, state: AccessState) {
+    override fun MutateStateScope.removeModes(subject: AccessUri) {
         subject as PackageUri
-        state.userStates[subject.userId]?.packageAppOpModes?.remove(subject.packageName)
+        newState.userStates[subject.userId]?.packageAppOpModes?.remove(subject.packageName)
     }
 
-    override fun onPackageRemoved(
-        packageState: PackageState,
-        oldState: AccessState,
-        newState: AccessState
-    ) {
+    override fun MutateStateScope.onPackageRemoved(packageState: PackageState) {
         newState.userStates.forEachIndexed { _, _, userState ->
             userState.packageAppOpModes -= packageState.packageName
         }

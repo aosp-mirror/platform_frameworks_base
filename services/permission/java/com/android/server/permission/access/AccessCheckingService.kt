@@ -40,46 +40,53 @@ class AccessCheckingService {
     }
 
     fun getDecision(subject: AccessUri, `object`: AccessUri): Int =
-        policy.getDecision(subject, `object`, state)
+        getState {
+            with(policy) { getDecision(subject, `object`) }
+        }
 
     fun setDecision(subject: AccessUri, `object`: AccessUri, decision: Int) {
-        mutateState { oldState, newState ->
-            policy.setDecision(subject, `object`, decision, oldState, newState)
+        mutateState {
+            with(policy) { setDecision(subject, `object`, decision) }
         }
     }
 
     fun onUserAdded(userId: Int) {
-        mutateState { oldState, newState ->
-            policy.onUserAdded(userId, oldState, newState)
+        mutateState {
+            with(policy) { onUserAdded(userId) }
         }
     }
 
     fun onUserRemoved(userId: Int) {
-        mutateState { oldState, newState ->
-            policy.onUserRemoved(userId, oldState, newState)
+        mutateState {
+            with(policy) { onUserRemoved(userId) }
         }
     }
 
     fun onPackageAdded(packageState: PackageState) {
-        mutateState { oldState, newState ->
-            policy.onPackageAdded(packageState, oldState, newState)
+        mutateState {
+            with(policy) { onPackageAdded(packageState) }
         }
     }
 
     fun onPackageRemoved(packageState: PackageState) {
-        mutateState { oldState, newState ->
-            policy.onPackageRemoved(packageState, oldState, newState)
+        mutateState {
+            with(policy) { onPackageRemoved(packageState) }
         }
     }
 
-    // TODO: Replace (oldState, newState) with Kotlin context receiver once it's stabilized.
-    private inline fun mutateState(action: (oldState: AccessState, newState: AccessState) -> Unit) {
+    internal inline fun <T> getState(action: GetStateScope.() -> T): T =
+        GetStateScope(state).action()
+
+    internal inline fun mutateState(action: MutateStateScope.() -> Unit) {
         synchronized(stateLock) {
             val oldState = state
             val newState = oldState.copy()
-            action(oldState, newState)
+            MutateStateScope(oldState, newState).action()
             persistence.write(newState)
             state = newState
         }
     }
+
+    internal fun getSchemePolicy(subjectScheme: String, objectScheme: String): SchemePolicy =
+        policy.getSchemePolicy(subjectScheme, objectScheme)
 }

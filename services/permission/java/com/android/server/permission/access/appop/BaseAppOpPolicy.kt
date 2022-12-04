@@ -19,44 +19,43 @@ package com.android.server.permission.access.appop
 import android.app.AppOpsManager
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
-import com.android.server.permission.access.AccessState
 import com.android.server.permission.access.AccessUri
 import com.android.server.permission.access.AppOpUri
+import com.android.server.permission.access.GetStateScope
+import com.android.server.permission.access.MutateStateScope
 import com.android.server.permission.access.SchemePolicy
 import com.android.server.permission.access.UserState
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 
 abstract class BaseAppOpPolicy(private val persistence: BaseAppOpPersistence) : SchemePolicy() {
-    override fun getDecision(subject: AccessUri, `object`: AccessUri, state: AccessState): Int {
+    override fun GetStateScope.getDecision(subject: AccessUri, `object`: AccessUri): Int {
         `object` as AppOpUri
-        return getModes(subject, state)
+        return getModes(subject)
             .getWithDefault(`object`.appOpName, opToDefaultMode(`object`.appOpName))
     }
 
-    override fun setDecision(
+    override fun MutateStateScope.setDecision(
         subject: AccessUri,
         `object`: AccessUri,
-        decision: Int,
-        oldState: AccessState,
-        newState: AccessState
+        decision: Int
     ) {
         `object` as AppOpUri
-        val modes = getOrCreateModes(subject, newState)
+        val modes = getOrCreateModes(subject)
         val oldMode = modes.putWithDefault(`object`.appOpName, decision,
             opToDefaultMode(`object`.appOpName))
         if (modes.isEmpty()) {
-            removeModes(subject, newState)
+            removeModes(subject)
         }
         if (oldMode != decision) {
             notifyOnDecisionChangedListeners(subject, `object`, oldMode, decision)
         }
     }
 
-    abstract fun getModes(subject: AccessUri, state: AccessState): IndexedMap<String, Int>?
+    abstract fun GetStateScope.getModes(subject: AccessUri): IndexedMap<String, Int>?
 
-    abstract fun getOrCreateModes(subject: AccessUri, state: AccessState): IndexedMap<String, Int>
+    abstract fun MutateStateScope.getOrCreateModes(subject: AccessUri): IndexedMap<String, Int>
 
-    abstract fun removeModes(subject: AccessUri, state: AccessState)
+    abstract fun MutateStateScope.removeModes(subject: AccessUri)
 
     // TODO need to check that [AppOpsManager.getSystemAlertWindowDefault] works; likely no issue
     //  since running in system process.

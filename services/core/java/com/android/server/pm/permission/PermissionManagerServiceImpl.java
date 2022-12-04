@@ -559,8 +559,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     @Override
     @Nullable
-    public PermissionInfo getPermissionInfo(@NonNull String permName, @NonNull String opPackageName,
-            @PackageManager.PermissionInfoFlags int flags) {
+    public PermissionInfo getPermissionInfo(@NonNull String permName,
+            @PackageManager.PermissionInfoFlags int flags, @NonNull String opPackageName) {
         final int callingUid = Binder.getCallingUid();
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             return null;
@@ -2127,7 +2127,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             for (int i = 0; i < numRequestedPermissions; i++) {
                 PermissionInfo permInfo = getPermissionInfo(
                         newPackage.getRequestedPermissions().get(i),
-                        newPackage.getPackageName(), 0);
+                        0, newPackage.getPackageName());
                 if (permInfo == null) {
                     continue;
                 }
@@ -5204,9 +5204,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     @NonNull
     @Override
-    public ArrayList<PermissionInfo> getAllPermissionsWithProtection(
+    public List<PermissionInfo> getAllPermissionsWithProtection(
             @PermissionInfo.Protection int protection) {
-        ArrayList<PermissionInfo> matchingPermissions = new ArrayList<>();
+        List<PermissionInfo> matchingPermissions = new ArrayList<>();
 
         synchronized (mLock) {
             for (final Permission permission : mRegistry.getPermissions()) {
@@ -5221,9 +5221,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     @NonNull
     @Override
-    public ArrayList<PermissionInfo> getAllPermissionsWithProtectionFlags(
+    public List<PermissionInfo> getAllPermissionsWithProtectionFlags(
             @PermissionInfo.ProtectionFlags int protectionFlags) {
-        ArrayList<PermissionInfo> matchingPermissions = new ArrayList<>();
+        List<PermissionInfo> matchingPermissions = new ArrayList<>();
 
         synchronized (mLock) {
             for (final Permission permission : mRegistry.getPermissions()) {

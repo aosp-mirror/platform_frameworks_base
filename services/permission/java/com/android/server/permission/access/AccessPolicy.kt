@@ -41,38 +41,35 @@ class AccessPolicy private constructor(
         }
     )
 
-    fun getDecision(subject: AccessUri, `object`: AccessUri, state: AccessState): Int =
-        getSchemePolicy(subject, `object`).getDecision(subject, `object`, state)
-
-    fun setDecision(
-        subject: AccessUri,
-        `object`: AccessUri,
-        decision: Int,
-        oldState: AccessState,
-        newState: AccessState
-    ) {
-        getSchemePolicy(subject, `object`)
-            .setDecision(subject, `object`, decision, oldState, newState)
-    }
-
-    private fun getSchemePolicy(subject: AccessUri, `object`: AccessUri): SchemePolicy =
-        checkNotNull(schemePolicies[subject.scheme]?.get(`object`.scheme)) {
-            "Scheme policy for subject=$subject object=$`object` does not exist"
+    fun getSchemePolicy(subjectScheme: String, objectScheme: String): SchemePolicy =
+        checkNotNull(schemePolicies[subjectScheme]?.get(objectScheme)) {
+            "Scheme policy for $subjectScheme and $objectScheme does not exist"
         }
 
-    fun onUserAdded(userId: Int, oldState: AccessState, newState: AccessState) {
+    fun GetStateScope.getDecision(subject: AccessUri, `object`: AccessUri): Int =
+        with(getSchemePolicy(subject, `object`)){ getDecision(subject, `object`) }
+
+    fun MutateStateScope.setDecision(subject: AccessUri, `object`: AccessUri, decision: Int) {
+        with(getSchemePolicy(subject, `object`)) { setDecision(subject, `object`, decision) }
+    }
+
+    fun MutateStateScope.onUserAdded(userId: Int) {
         newState.systemState.userIds += userId
         newState.userStates[userId] = UserState()
-        forEachSchemePolicy { it.onUserAdded(userId, oldState, newState) }
+        forEachSchemePolicy {
+            with(it) { onUserAdded(userId) }
+        }
     }
 
-    fun onUserRemoved(userId: Int, oldState: AccessState, newState: AccessState) {
+    fun MutateStateScope.onUserRemoved(userId: Int) {
         newState.systemState.userIds -= userId
         newState.userStates -= userId
-        forEachSchemePolicy { it.onUserRemoved(userId, oldState, newState) }
+        forEachSchemePolicy {
+            with(it) { onUserRemoved(userId) }
+        }
     }
 
-    fun onPackageAdded(packageState: PackageState, oldState: AccessState, newState: AccessState) {
+    fun MutateStateScope.onPackageAdded(packageState: PackageState) {
         var isAppIdAdded = false
         newState.systemState.apply {
             packageStates[packageState.packageName] = packageState
@@ -82,12 +79,16 @@ class AccessPolicy private constructor(
             }.add(packageState.packageName)
         }
         if (isAppIdAdded) {
-            forEachSchemePolicy { it.onAppIdAdded(packageState.appId, oldState, newState) }
+            forEachSchemePolicy {
+                with(it) { onAppIdAdded(packageState.appId) }
+            }
         }
-        forEachSchemePolicy { it.onPackageAdded(packageState, oldState, newState) }
+        forEachSchemePolicy {
+            with(it) { onPackageAdded(packageState) }
+        }
     }
 
-    fun onPackageRemoved(packageState: PackageState, oldState: AccessState, newState: AccessState) {
+    fun MutateStateScope.onPackageRemoved(packageState: PackageState) {
         var isAppIdRemoved = false
         newState.systemState.apply {
             packageStates -= packageState.packageName
@@ -101,9 +102,13 @@ class AccessPolicy private constructor(
                 }
             }
         }
-        forEachSchemePolicy { it.onPackageRemoved(packageState, oldState, newState) }
+        forEachSchemePolicy {
+            with(it) { onPackageRemoved(packageState) }
+        }
         if (isAppIdRemoved) {
-            forEachSchemePolicy { it.onAppIdRemoved(packageState.appId, oldState, newState) }
+            forEachSchemePolicy {
+                with(it) { onAppIdRemoved(packageState.appId) }
+            }
         }
     }
 
@@ -113,7 +118,7 @@ class AccessPolicy private constructor(
                 TAG_ACCESS -> {
                     forEachTag {
                         forEachSchemePolicy {
-                            with(it) { this@parseSystemState.parseSystemState(systemState) }
+                            with(it) { parseSystemState(systemState) }
                         }
                     }
                 }
@@ -125,7 +130,7 @@ class AccessPolicy private constructor(
     fun BinaryXmlSerializer.serializeSystemState(systemState: SystemState) {
         tag(TAG_ACCESS) {
             forEachSchemePolicy {
-                with(it) { this@serializeSystemState.serializeSystemState(systemState) }
+                with(it) { serializeSystemState(systemState) }
             }
         }
     }
@@ -136,7 +141,7 @@ class AccessPolicy private constructor(
                 TAG_ACCESS -> {
                     forEachTag {
                         forEachSchemePolicy {
-                            with(it) { this@parseUserState.parseUserState(userId, userState) }
+                            with(it) { parseUserState(userId, userState) }
                         }
                     }
                 }
@@ -153,10 +158,13 @@ class AccessPolicy private constructor(
     fun BinaryXmlSerializer.serializeUserState(userId: Int, userState: UserState) {
         tag(TAG_ACCESS) {
             forEachSchemePolicy {
-                with(it) { this@serializeUserState.serializeUserState(userId, userState) }
+                with(it) { serializeUserState(userId, userState) }
             }
         }
     }
+
+    private fun getSchemePolicy(subject: AccessUri, `object`: AccessUri): SchemePolicy =
+        getSchemePolicy(subject.scheme, `object`.scheme)
 
     private inline fun forEachSchemePolicy(action: (SchemePolicy) -> Unit) {
         schemePolicies.forEachValueIndexed { _, objectSchemePolicies ->
@@ -182,14 +190,12 @@ abstract class SchemePolicy {
 
     abstract val objectScheme: String
 
-    abstract fun getDecision(subject: AccessUri, `object`: AccessUri, state: AccessState): Int
+    abstract fun GetStateScope.getDecision(subject: AccessUri, `object`: AccessUri): Int
 
-    abstract fun setDecision(
+    abstract fun MutateStateScope.setDecision(
         subject: AccessUri,
         `object`: AccessUri,
-        decision: Int,
-        oldState: AccessState,
-        newState: AccessState
+        decision: Int
     )
 
     fun addOnDecisionChangedListener(listener: OnDecisionChangedListener) {
@@ -216,25 +222,17 @@ abstract class SchemePolicy {
         }
     }
 
-    open fun onUserAdded(userId: Int, oldState: AccessState, newState: AccessState) {}
+    open fun MutateStateScope.onUserAdded(userId: Int) {}
 
-    open fun onUserRemoved(userId: Int, oldState: AccessState, newState: AccessState) {}
+    open fun MutateStateScope.onUserRemoved(userId: Int) {}
 
-    open fun onAppIdAdded(appId: Int, oldState: AccessState, newState: AccessState) {}
+    open fun MutateStateScope.onAppIdAdded(appId: Int) {}
 
-    open fun onAppIdRemoved(appId: Int, oldState: AccessState, newState: AccessState) {}
+    open fun MutateStateScope.onAppIdRemoved(appId: Int) {}
 
-    open fun onPackageAdded(
-        packageState: PackageState,
-        oldState: AccessState,
-        newState: AccessState
-    ) {}
+    open fun MutateStateScope.onPackageAdded(packageState: PackageState) {}
 
-    open fun onPackageRemoved(
-        packageState: PackageState,
-        oldState: AccessState,
-        newState: AccessState
-    ) {}
+    open fun MutateStateScope.onPackageRemoved(packageState: PackageState) {}
 
     open fun BinaryXmlPullParser.parseSystemState(systemState: SystemState) {}
 
