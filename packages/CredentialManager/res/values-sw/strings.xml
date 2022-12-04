@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for app_name (4539824758261855508) -->
+    <skip />
+    <string name="string_cancel" msgid="6369133483981306063">"Ghairi"</string>
+    <string name="string_continue" msgid="1346732695941131882">"Endelea"</string>
+    <string name="string_create_in_another_place" msgid="1033635365843437603">"Unda katika sehemu nyingine"</string>
+    <string name="string_save_to_another_place" msgid="7590325934591079193">"Hifadhi sehemu nyingine"</string>
+    <string name="string_use_another_device" msgid="8754514926121520445">"Tumia kifaa kingine"</string>
+    <string name="string_save_to_another_device" msgid="1959562542075194458">"Hifadhi kwenye kifaa kingine"</string>
+    <string name="passkey_creation_intro_title" msgid="402553911484409884">"Njia rahisi ya kuingia katika akaunti kwa usalama"</string>
+    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Tumia alama ya vidole, uso au kipengele cha kufunga skrini ili uingie katika kaunti kwa kutumia nenosiri la kipekee ambalo haliwezi kusahaulika au kuibiwa. Pata maelezo zaidi"</string>
+    <string name="choose_provider_title" msgid="7245243990139698508">"Chagua mahali pa <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <skip />
+    <string name="save_your_password" msgid="6597736507991704307">"hifadhi nenosiri lako"</string>
+    <string name="save_your_sign_in_info" msgid="7213978049817076882">"hifadhi maelezo yako ya kuingia katika akaunti"</string>
+    <!-- no translation found for choose_provider_body (8045759834416308059) -->
+    <skip />
+    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Ungependa kuunda ufunguo wa siri katika <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="8812546498357380545">"Ungependa kuhifadhi nenosiri lako kwenye <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Ungependa kuhifadhi maelezo yako ya kuingia katika akaunti kwenye <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_description" msgid="4419171903963100257">"Unaweza kutumia <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> yako ya <xliff:g id="TYPE">%2$s</xliff:g> kwenye kifaa chochote. Imehifadhiwa kwenye <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> kwa ajili ya <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
+    <string name="passkey" msgid="632353688396759522">"ufunguo wa siri"</string>
+    <string name="password" msgid="6738570945182936667">"nenosiri"</string>
+    <string name="sign_ins" msgid="4710739369149469208">"michakato ya kuingia katika akaunti"</string>
+    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
+    <skip />
+    <!-- no translation found for save_password_to_title (3450480045270186421) -->
+    <skip />
+    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
+    <skip />
+    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
+    <skip />
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"Ungependa kutumia <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> kwa ajili ya michakato yako yote ya kuingia katika akaunti?"</string>
+    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
+    <skip />
+    <string name="set_as_default" msgid="4415328591568654603">"Weka iwe chaguomsingi"</string>
+    <string name="use_once" msgid="9027366575315399714">"Tumia mara moja"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"Manenosiri <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>, funguo <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> za siri"</string>
+    <string name="more_options_usage_passwords" msgid="1632047277723187813">"Manenosiri <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Funguo <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> za siri"</string>
+    <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
+    <skip />
+    <string name="another_device" msgid="5147276802037801217">"Kifaa kingine"</string>
+    <string name="other_password_manager" msgid="565790221427004141">"Vidhibiti vinginevyo vya manenosiri"</string>
+    <string name="close_sheet" msgid="1393792015338908262">"Funga laha"</string>
+    <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Rudi kwenye ukurasa uliotangulia"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Ungependa kutumia ufunguo wa siri uliohifadhiwa wa<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Ungependa kutumia kitambulisho kilichohifadhiwa cha kuingia katika akaunti ya <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Chagua vitambulisho vilivyohifadhiwa kwa ajili ya kuingia katika akaunti ya <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Ingia katika akaunti kwa kutumia njia nyingine"</string>
+    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"Hapana"</string>
+    <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Endelea"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Chaguo za kuingia katika akaunti"</string>
+    <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Kwa ajili ya <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Vidhibiti vya manenosiri vilivyofungwa"</string>
+    <string name="locked_credential_entry_label_subtext" msgid="9213450912991988691">"Gusa ili ufungue"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Dhibiti michakato ya kuingia katika akaunti"</string>
+    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Kutoka kwenye kifaa kingine"</string>
+    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Tumia kifaa tofauti"</string>
+</resources>

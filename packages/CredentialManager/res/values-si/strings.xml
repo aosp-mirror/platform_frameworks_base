@@ -8,8 +8,7 @@
     <string name="string_create_in_another_place" msgid="1033635365843437603">"වෙනත් ස්ථානයක තනන්න"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"වෙනත් ස්ථානයකට සුරකින්න"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"වෙනත් උපාංගයක් භාවිතා කරන්න"</string>
-    <!-- no translation found for string_save_to_another_device (1959562542075194458) -->
-    <skip />
+    <string name="string_save_to_another_device" msgid="1959562542075194458">"වෙනත් උපාංගයකට සුරකින්න"</string>
     <string name="passkey_creation_intro_title" msgid="402553911484409884">"සුරක්ෂිතව පුරනය වීමට සරල ක්‍රමයක්"</string>
     <string name="passkey_creation_intro_body" msgid="7493320456005579290">"අමතක කළ නොහැකි හෝ සොරකම් කළ නොහැකි අනන්‍ය මුරයතුරක් සමග පුරනය වීමට ඔබේ ඇඟිලි සලකුණ, මුහුණ හෝ තිර අගුල භාවිතා කරන්න. තව දැන ගන්න⁠"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> කොතැනක ද යන්න තෝරා ගන්න"</string>
@@ -31,6 +30,8 @@
     <!-- no translation found for save_password_to_title (3450480045270186421) -->
     <skip />
     <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
+    <skip />
+    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
     <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"ඔබේ සියලු පුරනය වීම් සඳහා <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> භාවිතා කරන්න ද?"</string>
     <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->

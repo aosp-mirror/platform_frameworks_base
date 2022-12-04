@@ -8,8 +8,7 @@
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Crea en un altre lloc"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Desa en un altre lloc"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Utilitza un altre dispositiu"</string>
-    <!-- no translation found for string_save_to_another_device (1959562542075194458) -->
-    <skip />
+    <string name="string_save_to_another_device" msgid="1959562542075194458">"Desa en un altre dispositiu"</string>
     <string name="passkey_creation_intro_title" msgid="402553911484409884">"Una manera senzilla i segura d\'iniciar la sessió"</string>
     <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Utilitza l\'empremta digital, la cara o el bloqueig de pantalla per iniciar la sessió amb una clau d\'accés única que no es pot oblidar ni robar. Més informació"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Tria on vols <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
@@ -31,6 +30,8 @@
     <!-- no translation found for save_password_to_title (3450480045270186421) -->
     <skip />
     <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
+    <skip />
+    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
     <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Vols utilitzar <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> per a tots els teus inicis de sessió?"</string>
     <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->

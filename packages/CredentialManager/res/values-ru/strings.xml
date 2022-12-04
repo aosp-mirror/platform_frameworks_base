@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_name (4539824758261855508) -->
-    <skip />
+    <string name="app_name" msgid="4539824758261855508">"Менеджер учетных данных"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Отмена"</string>
     <string name="string_continue" msgid="1346732695941131882">"Продолжить"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Создать в другом месте"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Сохранить в другом месте"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Использовать другое устройство"</string>
-    <!-- no translation found for string_save_to_another_device (1959562542075194458) -->
-    <skip />
+    <string name="string_save_to_another_device" msgid="1959562542075194458">"Сохранить на другом устройстве"</string>
     <string name="passkey_creation_intro_title" msgid="402553911484409884">"Простой и безопасный способ входа"</string>
     <string name="passkey_creation_intro_body" msgid="7493320456005579290">"С уникальным ключом доступа, который невозможно украсть или забыть, вы можете подтверждать свою личность по отпечатку пальца, с помощью фейсконтроля или блокировки экрана. Подробнее…"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Выберите, где <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
@@ -32,6 +30,8 @@
     <skip />
     <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
     <skip />
+    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
+    <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Всегда входить с помощью приложения \"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>\"?"</string>
     <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
     <skip />
@@ -40,8 +40,7 @@
     <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"Пароли (<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>) и ключи доступа (<xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>)"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"Пароли (<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>)"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Ключи доступа (<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>)"</string>
-    <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
-    <skip />
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Ключ доступа"</string>
     <string name="another_device" msgid="5147276802037801217">"Другое устройство"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Другие менеджеры паролей"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Закрыть лист"</string>

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_name (4539824758261855508) -->
-    <skip />
+    <string name="app_name" msgid="4539824758261855508">"Управник на акредитиви"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Откажи"</string>
     <string name="string_continue" msgid="1346732695941131882">"Продолжи"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Создајте на друго место"</string>
@@ -31,6 +30,8 @@
     <skip />
     <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
     <skip />
+    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
+    <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Да се користи <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> за сите ваши најавувања?"</string>
     <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
     <skip />
@@ -39,8 +40,7 @@
     <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> лозинки, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> криптографски клучеви"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> лозинки"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> криптографски клучеви"</string>
-    <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
-    <skip />
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Криптографски клуч"</string>
     <string name="another_device" msgid="5147276802037801217">"Друг уред"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Други управници со лозинки"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Затворете го листот"</string>

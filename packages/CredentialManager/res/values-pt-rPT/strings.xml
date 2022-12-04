@@ -11,12 +11,10 @@
     <string name="passkey_creation_intro_title" msgid="402553911484409884">"Uma forma simples de iniciar sessão em segurança"</string>
     <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Use a sua impressão digital, rosto ou bloqueio de ecrã para iniciar sessão com uma chave de acesso única que não pode ser esquecida nem perdida. Saiba mais"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Escolha onde quer guardar <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
-    <skip />
+    <string name="create_your_passkeys" msgid="8901224153607590596">"criar as suas chaves de acesso"</string>
     <string name="save_your_password" msgid="6597736507991704307">"guardar a sua palavra-passe"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"guardar as suas informações de início de sessão"</string>
-    <!-- no translation found for choose_provider_body (8045759834416308059) -->
-    <skip />
+    <string name="choose_provider_body" msgid="8045759834416308059">"Defina um gestor de palavras-passe predefinido para guardar as suas palavras-passe e chaves de acesso e iniciar sessão mais rapidamente da próxima vez."</string>
     <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Criar uma chave de acesso em <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="8812546498357380545">"Guardar a sua palavra-passe em <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Guardar as suas informações de início de sessão em <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
@@ -24,15 +22,12 @@
     <string name="passkey" msgid="632353688396759522">"chave de acesso"</string>
     <string name="password" msgid="6738570945182936667">"palavra-passe"</string>
     <string name="sign_ins" msgid="4710739369149469208">"inícios de sessão"</string>
-    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
-    <skip />
-    <!-- no translation found for save_password_to_title (3450480045270186421) -->
-    <skip />
-    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
-    <skip />
+    <string name="create_passkey_in_title" msgid="2714306562710897785">"Criar chave de acesso em"</string>
+    <string name="save_password_to_title" msgid="3450480045270186421">"Guardar palavra-passe em"</string>
+    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Guardar início de sessão em"</string>
+    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Criar uma chave de acesso noutro dispositivo?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Usar <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> para todos os seus inícios de sessão?"</string>
-    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="6560593199974037820">"Este gestor de palavras-passe armazena as suas palavras-passe e chaves de acesso para ajudar a iniciar sessão facilmente."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Definir como predefinição"</string>
     <string name="use_once" msgid="9027366575315399714">"Usar uma vez"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> palavras-passe, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> chaves de acesso"</string>
