@@ -66,7 +66,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"စကားဝိုင်းအသစ်များကို မျောနေသည့် သင်္ကေတများ သို့မဟုတ် ပူဖောင်းကွက်များအဖြစ် မြင်ရပါမည်။ ပူဖောင်းကွက်ကိုဖွင့်ရန် တို့ပါ။ ရွှေ့ရန် ၎င်းကို ဖိဆွဲပါ။"</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"ပူဖောင်းကွက်ကို အချိန်မရွေး ထိန်းချုပ်ရန်"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"ဤအက်ပ်မှနေ၍ ပူဖောင်းများကို ပိတ်ရန်အတွက် \'စီမံရန်\' ကို တို့ပါ"</string>
-    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"ရပြီ"</string>
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"နားလည်ပြီ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"လတ်တလော ပူဖောင်းကွက်များ မရှိပါ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"လတ်တလော ပူဖောင်းကွက်များနှင့် ပိတ်လိုက်သော ပူဖောင်းကွက်များကို ဤနေရာတွင် မြင်ရပါမည်"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"ပူဖောင်းဖောက်သံ"</string>
@@ -80,5 +80,5 @@
     <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"သင့်နေရာကို အကောင်းဆုံးအသုံးပြုနိုင်ရန် ဤရွေးစရာများထဲမှ တစ်ခုကို စမ်းကြည့်ပါ"</string>
     <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"ဖန်သားပြင်အပြည့်လုပ်ရန် သင့်စက်ကို လှည့်နိုင်သည်"</string>
     <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"အက်ပ်နေရာပြန်ချရန် ၎င်းဘေးတွင် နှစ်ချက်တို့နိုင်သည်"</string>
-    <string name="letterbox_education_got_it" msgid="4057634570866051177">"ရပြီ"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"နားလည်ပြီ"</string>
 </resources>
