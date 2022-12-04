@@ -23,7 +23,10 @@ import com.android.settingslib.spaprivileged.test.R
 import com.android.settingslib.spaprivileged.template.app.TogglePermissionAppListModel
 import kotlinx.coroutines.flow.Flow
 
-class TestTogglePermissionAppListModel : TogglePermissionAppListModel<TestAppRecord> {
+class TestTogglePermissionAppListModel(
+    private val isAllowed: Boolean? = null,
+    private val isChangeable: Boolean = false,
+) : TogglePermissionAppListModel<TestAppRecord> {
     override val pageTitleResId = R.string.test_permission_title
     override val switchTitleResId = R.string.test_permission_switch_title
     override val footerResId = R.string.test_permission_footer
@@ -34,9 +37,9 @@ class TestTogglePermissionAppListModel : TogglePermissionAppListModel<TestAppRec
         recordListFlow
 
     @Composable
-    override fun isAllowed(record: TestAppRecord) = stateOf(null)
+    override fun isAllowed(record: TestAppRecord) = stateOf(isAllowed)
 
-    override fun isChangeable(record: TestAppRecord) = false
+    override fun isChangeable(record: TestAppRecord) = isChangeable
 
     override fun setAllowed(record: TestAppRecord, newAllowed: Boolean) {}
 }

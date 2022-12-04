@@ -25,7 +25,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spaprivileged.test.R
-import com.android.settingslib.spaprivileged.tests.testutils.TestTogglePermissionAppListModel
+import com.android.settingslib.spaprivileged.tests.testutils.TestTogglePermissionAppListProvider
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -69,9 +69,4 @@ class TogglePermissionAppListTest {
         assertThat(createPageProviders.any { it is TogglePermissionAppListPageProvider }).isTrue()
         assertThat(createPageProviders.any { it is TogglePermissionAppInfoPageProvider }).isTrue()
     }
-}
-
-private object TestTogglePermissionAppListProvider : TogglePermissionAppListProvider {
-    override val permissionType = "test.PERMISSION"
-    override fun createModel(context: Context) = TestTogglePermissionAppListModel()
 }
