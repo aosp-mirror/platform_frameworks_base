@@ -19,7 +19,7 @@ package com.android.settingslib.spaprivileged.tests.testutils
 import android.content.pm.ApplicationInfo
 import androidx.compose.runtime.Composable
 import com.android.settingslib.spa.framework.compose.stateOf
-import com.android.settingslib.spaprivileged.R
+import com.android.settingslib.spaprivileged.test.R
 import com.android.settingslib.spaprivileged.template.app.TogglePermissionAppListModel
 import kotlinx.coroutines.flow.Flow
 

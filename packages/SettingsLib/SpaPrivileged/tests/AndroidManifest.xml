@@ -15,7 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.settingslib.spaprivileged.tests">
+    package="com.android.settingslib.spaprivileged.test">
 
     <application>
         <uses-library android:name="android.test.runner" />
@@ -24,5 +24,5 @@
     <instrumentation
         android:name="androidx.test.runner.AndroidJUnitRunner"
         android:label="Tests for SpaPrivilegedLib"
-        android:targetPackage="com.android.settingslib.spaprivileged.tests" />
+        android:targetPackage="com.android.settingslib.spaprivileged.test" />
 </manifest>
