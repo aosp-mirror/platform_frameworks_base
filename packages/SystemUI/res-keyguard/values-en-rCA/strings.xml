@@ -23,10 +23,10 @@
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Enter your PIN"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Enter your pattern"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Enter your password"</string>
-    <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Invalid card."</string>
+    <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Invalid Card."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Charged"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Charging wirelessly"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Charging dock"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Charging Dock"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Charging"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Charging rapidly"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Charging slowly"</string>
@@ -74,8 +74,8 @@
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM is unusable. Contact your carrier."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
-      <item quantity="other">Incorrect SIM PUK code. You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM becomes permanently unusable.</item>
-      <item quantity="one">Incorrect SIM PUK code. You have <xliff:g id="NUMBER_0">%d</xliff:g> remaining attempt before SIM becomes permanently unusable.</item>
+      <item quantity="other">Incorrect SIM PUK code, you have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM becomes permanently unusable.</item>
+      <item quantity="one">Incorrect SIM PUK code, you have <xliff:g id="NUMBER_0">%d</xliff:g> remaining attempt before SIM becomes permanently unusable.</item>
     </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM PIN operation failed!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM PUK operation failed!"</string>
@@ -89,7 +89,7 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Password required for additional security"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Device locked by admin"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Device was locked manually"</string>
-    <string name="kg_face_not_recognized" msgid="7903950626744419160">"Not recognised"</string>
+    <string name="kg_face_not_recognized" msgid="7903950626744419160">"Not recognized"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"To use Face Unlock, turn on "<b>"Camera access"</b>" in Settings &gt; Privacy"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">Enter SIM PIN. You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts.</item>
@@ -101,5 +101,5 @@
     </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Default"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bubble"</string>
-    <string name="clock_title_analog" msgid="8409262532900918273">"Analogue"</string>
+    <string name="clock_title_analog" msgid="8409262532900918273">"Analog"</string>
 </resources>
