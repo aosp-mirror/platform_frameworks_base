@@ -41,17 +41,14 @@ constructor(
 
     override fun start() {
         listenForTransitionToAodFromLockscreen()
-        listenForTransitionToLockscreenFromAod()
+        listenForTransitionToLockscreenFromDozeStates()
     }
 
     private fun listenForTransitionToAodFromLockscreen() {
         scope.launch {
             keyguardInteractor
                 .dozeTransitionTo(DozeStateModel.DOZE_AOD)
-                .sample(
-                    keyguardTransitionInteractor.startedKeyguardTransitionStep,
-                    { a, b -> Pair(a, b) }
-                )
+                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { pair ->
                     val (dozeToAod, lastStartedStep) = pair
                     if (lastStartedStep.to == KeyguardState.LOCKSCREEN) {
@@ -68,21 +65,19 @@ constructor(
         }
     }
 
-    private fun listenForTransitionToLockscreenFromAod() {
+    private fun listenForTransitionToLockscreenFromDozeStates() {
+        val canGoToLockscreen = setOf(KeyguardState.AOD, KeyguardState.DOZING)
         scope.launch {
             keyguardInteractor
                 .dozeTransitionTo(DozeStateModel.FINISH)
-                .sample(
-                    keyguardTransitionInteractor.startedKeyguardTransitionStep,
-                    { a, b -> Pair(a, b) }
-                )
+                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { pair ->
                     val (dozeToAod, lastStartedStep) = pair
-                    if (lastStartedStep.to == KeyguardState.AOD) {
+                    if (canGoToLockscreen.contains(lastStartedStep.to)) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,
-                                KeyguardState.AOD,
+                                lastStartedStep.to,
                                 KeyguardState.LOCKSCREEN,
                                 getAnimator(),
                             )

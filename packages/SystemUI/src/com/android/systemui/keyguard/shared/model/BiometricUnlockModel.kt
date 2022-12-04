@@ -46,5 +46,14 @@ enum class BiometricUnlockModel {
     /** When bouncer is visible and will be dismissed. */
     DISMISS_BOUNCER,
     /** Mode in which fingerprint wakes and unlocks the device from a dream. */
-    WAKE_AND_UNLOCK_FROM_DREAM,
+    WAKE_AND_UNLOCK_FROM_DREAM;
+
+    companion object {
+        private val wakeAndUnlockModes =
+            setOf(WAKE_AND_UNLOCK, WAKE_AND_UNLOCK_FROM_DREAM, WAKE_AND_UNLOCK_PULSING)
+
+        fun isWakeAndUnlock(model: BiometricUnlockModel): Boolean {
+            return wakeAndUnlockModes.contains(model)
+        }
+    }
 }
