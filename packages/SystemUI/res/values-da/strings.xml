@@ -156,7 +156,7 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Hvis du angiver et forkert mønster i næste forsøg, slettes din arbejdsprofil og de tilhørende data."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Hvis du angiver en forkert pinkode i næste forsøg, slettes din arbejdsprofil og de tilhørende data."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Hvis du angiver en forkert adgangskode i næste forsøg, slettes din arbejdsprofil og de tilhørende data."</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Sæt fingeren på fingeraftrykslæseren"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Sæt fingeren på fingeraftrykssensoren"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikon for fingeraftryk"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ansigtet kan ikke genkendes. Brug fingeraftryk i stedet."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -898,11 +898,11 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Der er problemer med at aflæse dit batteriniveau"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tryk for at få flere oplysninger"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Ingen alarm er indstillet"</string>
-    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Fingeraftrykslæser"</string>
+    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Fingeraftrykssensor"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"godkende"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"få adgang til enheden"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Brug fingeraftryk for at åbne"</string>
-    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Godkendelse er påkrævet. Sæt fingeren på fingeraftrykslæseren for at godkende."</string>
+    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Godkendelse er påkrævet. Sæt fingeren på fingeraftrykssensoren for at godkende."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Igangværende telefonopkald"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobildata"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>

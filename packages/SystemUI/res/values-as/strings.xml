@@ -32,13 +32,13 @@
     <string name="battery_saver_start_action" msgid="8353766979886287140">"অন কৰক"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"নালাগে, ধন্যবাদ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"স্বয়ং-ঘূৰ্ণন স্ক্ৰীন"</string>
-    <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ত প্ৰৱেশ কৰিবলৈ <xliff:g id="APPLICATION">%1$s</xliff:g>ক অনুমতি দিবনে?"</string>
+    <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> এক্সেছ কৰিবলৈ <xliff:g id="APPLICATION">%1$s</xliff:g>ক অনুমতি দিবনে?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g>ক <xliff:g id="USB_DEVICE">%2$s</xliff:g> এক্সেছ কৰিবলৈ অনুমতি দিবনে?\nএই এপ্‌টোক ৰেকর্ড কৰাৰ অনুমতি দিয়া হোৱা নাই কিন্তু ই এই ইউএছবি ডিভাইচটোৰ জৰিয়তে অডিঅ\' ৰেকর্ড কৰিব পাৰে।"</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g>ক <xliff:g id="USB_DEVICE">%2$s</xliff:g> এক্সেছ কৰিবলৈ অনুমতি দিবনে?"</string>
     <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> নিয়ন্ত্ৰণ কৰিবলৈ <xliff:g id="APPLICATION">%1$s</xliff:g> খুলিবনে?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"এই এপ্‌টোক ৰেকর্ড কৰাৰ অনুমতি দিয়া হোৱা নাই কিন্তু ই এই ইউএছবি ডিভাইচটোৰ জৰিয়তে অডিঅ\' ৰেকর্ড কৰিব পাৰে। এইটো ডিভাইচৰ সৈতে <xliff:g id="APPLICATION">%1$s</xliff:g> ব্যৱহাৰ কৰিলে কল, জাননী আৰু এলাৰ্ম শুনাটো অৱৰুদ্ধ হ’ব পাৰে।"</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"এইটো ডিভাইচৰ সৈতে <xliff:g id="APPLICATION">%1$s</xliff:g> ব্যৱহাৰ কৰিলে কল, জাননী আৰু এলাৰ্ম শুনাটো অৱৰুদ্ধ হ’ব পাৰে।"</string>
-    <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g>ক <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ত প্ৰৱেশ কৰিবলৈ অনুমতি দিবনে?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g>ক <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> এক্সেছ কৰিবলৈ অনুমতি দিবনে?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ক ব্যৱহাৰ কৰিবলৈ <xliff:g id="APPLICATION">%1$s</xliff:g>ক খোলেনে?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ব্যৱহাৰ কৰিবলৈ <xliff:g id="APPLICATION">%1$s</xliff:g>ক খুলিবনে?\nএই এপ্‌টোক ৰেকর্ড কৰাৰ অনুমতি দিয়া হোৱা নাই কিন্তু ই এই ইউএছবি ডিভাইচটোৰ জৰিয়তে অডিঅ\' ৰেকর্ড কৰিব পাৰে।"</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ক ব্যৱহাৰ কৰিবলৈ <xliff:g id="APPLICATION">%1$s</xliff:g>ক খোলেনে?"</string>
@@ -551,7 +551,7 @@
     <string name="keyboard_key_dpad_down" msgid="2110172278574325796">"তললৈ"</string>
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"বাওঁফালে"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"সোঁফালে"</string>
-    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"স্ক্ৰীণৰ মাজত"</string>
+    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"স্ক্ৰীনৰ মাজত"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"স্পেচ"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"এণ্টাৰ"</string>
@@ -572,7 +572,7 @@
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"নামপেড <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"সংলগ্নক আঁতৰাওক"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"ছিষ্টেম"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"গৃহ স্ক্ৰীণ"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"গৃহ স্ক্ৰীন"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"শেহতীয়াসমূহ"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"উভতি যাওক"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"জাননীসমূহ"</string>
@@ -669,7 +669,7 @@
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"যত্ন লোৱাৰ পদক্ষেপসমূহ চাওক"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ফ\'নটো গৰম হ\'বলৈ ধৰিছে"</string>
     <string name="high_temp_notif_message" msgid="1277346543068257549">"ফ’নটো ঠাণ্ডা হৈ থকাৰ সময়ত কিছুমান সুবিধা উপলব্ধ নহয়।\nঅধিক তথ্যৰ বাবে টিপক"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"আপোনাৰ ফ\'নটোৱে নিজে নিজে ঠাণ্ডা হ\'বলৈ স্বয়ংক্ৰিয়ভাৱে চেষ্টা কৰিব। আপুনি ফ\'নটো ব্যৱহাৰ কৰি থাকিব পাৰে কিন্তু ই লাহে লাহে চলিব পাৰে।\n\nফ\'নটো সম্পূৰ্ণভাৱে ঠাণ্ডা হোৱাৰ পিছত ই আগৰ নিচিনাকৈয়েই চলিব।"</string>
+    <string name="high_temp_dialog_message" msgid="3793606072661253968">"আপোনাৰ ফ\'নটোৱে নিজে নিজে ঠাণ্ডা হ\'বলৈ স্বয়ংক্ৰিয়ভাৱে চেষ্টা কৰিব। আপুনি ফ\'নটো ব্যৱহাৰ কৰি থাকিব পাৰে কিন্তু ই লাহে লাহে চলিব পাৰে।\n\nফ\'নটো সম্পূৰ্ণভাৱে ঠাণ্ডা হোৱাৰ পাছত ই আগৰ নিচিনাকৈয়েই চলিব।"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"যত্ন লোৱাৰ পদক্ষেপসমূহ চাওক"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"চ্চার্জাৰ আনপ্লাগ কৰক"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"এই ডিভাইচটো চাৰ্জ কৰোঁতে কিবা সমস্যা হৈছে। পাৱাৰ এডাপ্টাৰটো আনপ্লাগ কৰক আৰু কে’বলডাল গৰম হ’ব পাৰে; গতিকে সাবধান হ’ব।"</string>
@@ -697,7 +697,7 @@
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> চলি আছে"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"এপ্‌টো ইনষ্ট\'ল নকৰাকৈ খোলা হৈছে।"</string>
-    <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ইনষ্ট\'ল নকৰাকৈয়েই এপটো খোলা হৈছে। অধিক জানিবলৈ টিপক।"</string>
+    <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ইনষ্ট\'ল নকৰাকৈয়েই এপ্‌টো খোলা হৈছে। অধিক জানিবলৈ টিপক।"</string>
     <string name="app_info" msgid="5153758994129963243">"এপৰ তথ্য"</string>
     <string name="go_to_web" msgid="636673528981366511">"ব্ৰাউজাৰলৈ যাওক"</string>
     <string name="mobile_data" msgid="4564407557775397216">"ম’বাইল ডেটা"</string>
