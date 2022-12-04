@@ -116,7 +116,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"المكالمات الهاتفية"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"نقل الملف"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"جهاز الإرسال"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"استخدام الإنترنت"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"الوصول إلى الإنترنت"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"مشاركة جهات الاتصال"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"استخدام مع مشاركة جهة الاتصال"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"مشاركة اتصال الإنترنت"</string>
