@@ -1390,7 +1390,7 @@
     <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"Analyse de l\'espace de stockage sur le support en cours…"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nouveau périphérique <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> ne fonctionne pas"</string>
-    <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Toucher pour configurer"</string>
+    <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Touchez pour configurer"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Sélectionnez pour configurer"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Vous devrez peut-être reformater l\'appareil. Touchez pour l\'éjecter."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Pour transférer des photos et d\'autres fichiers"</string>
@@ -1935,12 +1935,12 @@
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Paramètres Android TV non accessibles"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Paramètres de la tablette non accessibles"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Paramètres du téléphone non accessibles"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Impossible d\'accéder à ce contenu sur votre appareil <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez sur votre appareil Android TV à la place."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Impossible d\'accéder à ce contenu sur votre appareil <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez sur votre tablette à la place."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Impossible d\'accéder à ce contenu sur votre appareil <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez sur votre téléphone à la place."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Impossible d\'accéder à ce contenu sur votre appareil <xliff:g id="DEVICE">%1$s</xliff:g> pour le moment. Essayez sur votre appareil Android TV à la place."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Impossible d\'accéder à ce contenu sur votre appareil <xliff:g id="DEVICE">%1$s</xliff:g> pour le moment. Essayez sur votre tablette à la place."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Impossible d\'accéder à ce contenu sur votre appareil <xliff:g id="DEVICE">%1$s</xliff:g> pour le moment. Essayez sur votre téléphone à la place."</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Impossible d\'accéder à ce contenu sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez sur votre appareil Android TV à la place."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Impossible d\'accéder à ce contenu sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez sur votre tablette à la place."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Impossible d\'accéder à ce contenu sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez sur votre téléphone à la place."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Impossible d\'accéder à ce contenu sur votre <xliff:g id="DEVICE">%1$s</xliff:g> pour le moment. Essayez sur votre appareil Android TV à la place."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Impossible d\'accéder à ce contenu sur votre <xliff:g id="DEVICE">%1$s</xliff:g> pour le moment. Essayez sur votre tablette à la place."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Impossible d\'accéder à ce contenu sur votre <xliff:g id="DEVICE">%1$s</xliff:g> pour le moment. Essayez sur votre téléphone à la place."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Cette application demande une sécurité supplémentaire. Essayez sur votre appareil Android TV à la place."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Cette application demande une sécurité supplémentaire. Essayez sur votre tablette à la place."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Cette application demande une sécurité supplémentaire. Essayez sur votre téléphone à la place."</string>
@@ -2106,7 +2106,7 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Notifications"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Paramètres rapides"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Boîte de dialogue sur l\'alimentation"</string>
-    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Écran de verrouillage"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Verrouiller l\'écran"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Capture d\'écran"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Crochet de casque d\'écoute"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Raccourci d\'accessibilité à l\'écran"</string>

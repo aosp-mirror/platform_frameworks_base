@@ -1196,7 +1196,7 @@
     <string name="aerr_application_repeated" msgid="7804378743218496566">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> neprekidno se ruši"</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"Postupak <xliff:g id="PROCESS">%1$s</xliff:g> neprekidno se ruši"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"Ponovo otvori aplikaciju"</string>
-    <string name="aerr_report" msgid="3095644466849299308">"Pošalji povratne informacije"</string>
+    <string name="aerr_report" msgid="3095644466849299308">"Pošaljite povratne informacije"</string>
     <string name="aerr_close" msgid="3398336821267021852">"Zatvori"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"Zanemari do ponovnog pokretanja uređaja"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"Čekaj"</string>
