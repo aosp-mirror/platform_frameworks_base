@@ -22,6 +22,7 @@ import android.util.Log
 import android.util.Log.TerribleFailure
 import android.util.Log.TerribleFailureHandler
 import android.view.Choreographer.FrameCallback
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Interpolators
@@ -97,6 +98,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    @FlakyTest(bugId = 260213291)
     fun `starting second transition will cancel the first transition`() {
         runBlocking(IMMEDIATE) {
             val (animator, provider) = setupAnimator(this)
