@@ -247,7 +247,7 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
 
         Icon icon;
         ContentDescription contentDescription = null;
-        if (isParentalControlsEnabled) {
+        if (isParentalControlsEnabled && securityModel.getDeviceAdminIcon() != null) {
             icon = new Icon.Loaded(securityModel.getDeviceAdminIcon(), contentDescription);
         } else if (vpnName != null || vpnNameWorkProfile != null) {
             if (securityModel.isVpnBranded()) {
