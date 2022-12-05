@@ -171,4 +171,9 @@
     <item msgid="146088982397753810">"Valiwe"</item>
     <item msgid="460891964396502657">"Vuliwe"</item>
   </string-array>
+  <string-array name="tile_states_dream">
+    <item msgid="6184819793571079513">"Ayitholakali"</item>
+    <item msgid="8014986104355098744">"Valiwe"</item>
+    <item msgid="5966994759929723339">"Vuliwe"</item>
+  </string-array>
 </resources>
