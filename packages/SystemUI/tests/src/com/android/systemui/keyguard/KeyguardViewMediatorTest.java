@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard;
 
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.os.PowerManager;
@@ -41,6 +43,11 @@ import android.os.PowerManager.WakeLock;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.IRemoteAnimationFinishedCallback;
+import android.view.RemoteAnimationTarget;
+import android.view.View;
+import android.view.ViewRootImpl;
+import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -52,21 +59,27 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollectorFake;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
@@ -79,8 +92,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import dagger.Lazy;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -96,11 +107,15 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock BroadcastDispatcher mBroadcastDispatcher;
     private @Mock DismissCallbackRegistry mDismissCallbackRegistry;
     private @Mock DumpManager mDumpManager;
+    private @Mock WindowManager mWindowManager;
+    private @Mock IActivityManager mActivityManager;
+    private @Mock ConfigurationController mConfigurationController;
     private @Mock PowerManager mPowerManager;
     private @Mock TrustManager mTrustManager;
     private @Mock UserSwitcherController mUserSwitcherController;
     private @Mock NavigationModeController mNavigationModeController;
     private @Mock KeyguardDisplayManager mKeyguardDisplayManager;
+    private @Mock KeyguardBypassController mKeyguardBypassController;
     private @Mock DozeParameters mDozeParameters;
     private @Mock SysuiStatusBarStateController mStatusBarStateController;
     private @Mock KeyguardStateController mKeyguardStateController;
@@ -110,10 +125,13 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock InteractionJankMonitor mInteractionJankMonitor;
     private @Mock ScreenOnCoordinator mScreenOnCoordinator;
     private @Mock ShadeController mShadeController;
-    private @Mock Lazy<NotificationShadeWindowController> mNotificationShadeWindowControllerLazy;
+    private NotificationShadeWindowController mNotificationShadeWindowController;
     private @Mock DreamOverlayStateController mDreamOverlayStateController;
     private @Mock ActivityLaunchAnimator mActivityLaunchAnimator;
     private @Mock ScrimController mScrimController;
+    private @Mock SysuiColorExtractor mColorExtractor;
+    private @Mock AuthController mAuthController;
+    private @Mock ShadeExpansionStateManager mShadeExpansionStateManager;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -130,6 +148,14 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         when(mPowerManager.newWakeLock(anyInt(), any())).thenReturn(mock(WakeLock.class));
         when(mInteractionJankMonitor.begin(any(), anyInt())).thenReturn(true);
         when(mInteractionJankMonitor.end(anyInt())).thenReturn(true);
+        final ViewRootImpl testViewRoot = mock(ViewRootImpl.class);
+        when(testViewRoot.getView()).thenReturn(mock(View.class));
+        when(mStatusBarKeyguardViewManager.getViewRootImpl()).thenReturn(testViewRoot);
+        mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
+                mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
+                mConfigurationController, mViewMediator, mKeyguardBypassController,
+                mColorExtractor, mDumpManager, mKeyguardStateController,
+                mScreenOffAnimationController, mAuthController, mShadeExpansionStateManager);
 
         createAndStartViewMediator();
     }
@@ -287,6 +313,23 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         verify(mCentralSurfaces).updateIsKeyguard();
     }
 
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void testStartKeyguardExitAnimation_expectSurfaceBehindRemoteAnimation() {
+        RemoteAnimationTarget[] apps = new RemoteAnimationTarget[]{
+                mock(RemoteAnimationTarget.class)
+        };
+        RemoteAnimationTarget[] wallpapers = new RemoteAnimationTarget[]{
+                mock(RemoteAnimationTarget.class)
+        };
+        IRemoteAnimationFinishedCallback callback = mock(IRemoteAnimationFinishedCallback.class);
+
+        mViewMediator.startKeyguardExitAnimation(TRANSIT_OLD_KEYGUARD_GOING_AWAY, apps, wallpapers,
+                null, callback);
+        TestableLooper.get(this).processAllMessages();
+        assertTrue(mViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehind());
+    }
+
     private void createAndStartViewMediator() {
         mViewMediator = new KeyguardViewMediator(
                 mContext,
@@ -315,7 +358,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mInteractionJankMonitor,
                 mDreamOverlayStateController,
                 () -> mShadeController,
-                mNotificationShadeWindowControllerLazy,
+                () -> mNotificationShadeWindowController,
                 () -> mActivityLaunchAnimator,
                 () -> mScrimController);
         mViewMediator.start();
