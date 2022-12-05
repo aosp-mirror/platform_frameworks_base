@@ -98,15 +98,17 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             android:focusable="true" />
-        <FrameLayout android:id="@+id/keyguard_bouncer_container"
-                     android:layout_height="0dp"
-                     android:layout_width="match_parent"
-                     android:layout_weight="1"
-                     android:background="@android:color/transparent"
-                     android:visibility="invisible"
-                     android:clipChildren="false"
-                     android:clipToPadding="false" />
     </LinearLayout>
+
+    <FrameLayout android:id="@+id/keyguard_bouncer_container"
+        android:paddingTop="@dimen/status_bar_height"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:visibility="invisible"
+        android:clipChildren="false"
+        android:clipToPadding="false" />
 
     <com.android.systemui.biometrics.AuthRippleView
         android:id="@+id/auth_ripple"
