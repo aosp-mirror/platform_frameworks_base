@@ -499,7 +499,7 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"ସ୍ୱଚାଳିତ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"କୌଣସି ସାଉଣ୍ଡ କିମ୍ବା ଭାଇବ୍ରେସନ୍ ନାହିଁ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"କୌଣସି ସାଉଣ୍ଡ କିମ୍ବା ଭାଇବ୍ରେସନ୍ ନାହିଁ ଏବଂ ବାର୍ତ୍ତାଳାପ ବିଭାଗର ନିମ୍ନରେ ଦେଖାଯାଏ"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"ଫୋନ୍ ସେଟିଂସ୍ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ୍ ହୋଇପାରେ"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"ଫୋନ ସେଟିଂସ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ ହୋଇପାରେ"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ଫୋନ୍ ସେଟିଂସ୍ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ୍ ହୋଇପାରେ। <xliff:g id="APP_NAME">%1$s</xliff:g>ରୁ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଡିଫଲ୍ଟ ଭାବରେ ବବଲ୍ ହୁଏ।"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ଏହି ବିଜ୍ଞପ୍ତି ପ୍ରାପ୍ତ ହେବା ସମୟରେ ସାଉଣ୍ଡ ହେବା ଉଚିତ ନା ଭାଇବ୍ରେସନ୍ ତାହା ସିଷ୍ଟମକୁ ସ୍ଥିର କରିବାକୁ ଦିଅନ୍ତୁ"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;ସ୍ଥିତି:&lt;/b&gt; ଡିଫଲ୍ଟକୁ ପ୍ରମୋଟ୍ କରାଯାଇଛି"</string>
@@ -640,7 +640,7 @@
     <item msgid="8619482474544321778">"ଏହି ଆଇକନ୍‍ ଦେଖାନ୍ତୁ ନାହିଁ"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"କମ୍‍-ଅଗ୍ରାଧିକାର ବିଜ୍ଞପ୍ତି ଆଇକନ୍‍ ଦେଖାନ୍ତୁ"</string>
-    <string name="other" msgid="429768510980739978">"ଅନ୍ୟାନ୍ୟ"</string>
+    <string name="other" msgid="429768510980739978">"ଅନ୍ୟ"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"ଟାଇଲ୍ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ଶେଷରେ ଟାଇଲ୍ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"ଟାଇଲ୍ ମୁଭ୍ କରନ୍ତୁ"</string>

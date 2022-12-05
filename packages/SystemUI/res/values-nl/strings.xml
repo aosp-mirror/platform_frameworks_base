@@ -112,7 +112,7 @@
     <string name="accessibility_back" msgid="6530104400086152611">"Terug"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Startscherm"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Menu"</string>
-    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Toegankelijkheid"</string>
+    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Toe­gankelijk­heid"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"Scherm draaien"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"Overzicht"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Camera"</string>
@@ -440,7 +440,7 @@
     <string name="stream_notification" msgid="7930294049046243939">"Melding"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Frequentie voor tweevoudige multitoon"</string>
-    <string name="stream_accessibility" msgid="3873610336741987152">"Toegankelijkheid"</string>
+    <string name="stream_accessibility" msgid="3873610336741987152">"Toe­gankelijk­heid"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Bellen"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Trillen"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Geluid staat uit"</string>
@@ -472,7 +472,7 @@
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Instellingen voor vergrendelscherm"</string>
     <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR-code scannen"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Werkprofiel"</string>
-    <string name="status_bar_airplane" msgid="4848702508684541009">"Vliegtuigmodus"</string>
+    <string name="status_bar_airplane" msgid="4848702508684541009">"Vliegtuig­modus"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Je hoort je volgende wekker niet <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"om <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"op <xliff:g id="WHEN">%1$s</xliff:g>"</string>

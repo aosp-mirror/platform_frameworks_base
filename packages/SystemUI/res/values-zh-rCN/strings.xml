@@ -172,7 +172,7 @@
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN 已开启。"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"电池电量为百分之 <xliff:g id="NUMBER">%d</xliff:g>。"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"电池电量为 <xliff:g id="PERCENTAGE">%1$s</xliff:g>，根据您的使用情况，大约还可使用<xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"正在充电，已完成 <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%。"</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"正在充电，已完成百分之 <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>。"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"查看所有通知"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"电传打字机已启用。"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"振铃器振动。"</string>
@@ -469,7 +469,7 @@
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"正在更新"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"解锁设备即可使用"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"获取您的卡片时出现问题，请稍后重试"</string>
-    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"锁定屏幕设置"</string>
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"锁屏设置"</string>
     <string name="qr_code_scanner_title" msgid="5290201053875420785">"扫描二维码"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"工作资料"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"飞行模式"</string>
