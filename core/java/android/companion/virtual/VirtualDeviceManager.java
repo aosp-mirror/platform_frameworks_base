@@ -231,6 +231,23 @@ public final class VirtualDeviceManager {
     }
 
     /**
+     * Returns the ID of the device which owns the display with the given ID.
+     *
+     * @hide
+     */
+    public int getDeviceIdForDisplayId(int displayId) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
+            return DEFAULT_DEVICE_ID;
+        }
+        try {
+            return mService.getDeviceIdForDisplayId(displayId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * A virtual device has its own virtual display, audio output, microphone, and camera etc. The
      * creator of a virtual device can take the output from the virtual display and stream it over
      * to another device, and inject input events that are received from the remote device.

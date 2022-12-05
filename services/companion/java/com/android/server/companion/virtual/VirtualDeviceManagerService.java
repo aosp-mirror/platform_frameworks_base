@@ -47,6 +47,7 @@ import android.util.ArraySet;
 import android.util.ExceptionUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.Display;
 import android.widget.Toast;
 
 import com.android.internal.annotations.GuardedBy;
@@ -386,6 +387,23 @@ public class VirtualDeviceManagerService extends SystemService {
         @VirtualDeviceParams.DevicePolicy
         public int getDevicePolicy(int deviceId, @VirtualDeviceParams.PolicyType int policyType) {
             return mLocalService.getDevicePolicy(deviceId, policyType);
+        }
+
+
+        @Override // Binder call
+        public int getDeviceIdForDisplayId(int displayId) {
+            if (displayId == Display.INVALID_DISPLAY || displayId == Display.DEFAULT_DISPLAY) {
+                return VirtualDeviceManager.DEFAULT_DEVICE_ID;
+            }
+            synchronized (mVirtualDeviceManagerLock) {
+                for (int i = 0; i < mVirtualDevices.size(); i++) {
+                    VirtualDeviceImpl virtualDevice = mVirtualDevices.valueAt(i);
+                    if (virtualDevice.isDisplayOwnedByVirtualDevice(displayId)) {
+                        return virtualDevice.getDeviceId();
+                    }
+                }
+            }
+            return VirtualDeviceManager.DEFAULT_DEVICE_ID;
         }
 
         @Nullable
