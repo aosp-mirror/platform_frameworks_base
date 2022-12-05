@@ -3016,7 +3016,6 @@ public final class ActiveServices {
 
         final TimeoutRecord tr = TimeoutRecord.forShortFgsTimeout(reason);
 
-        // TODO(short-service): TODO Add SHORT_FGS_TIMEOUT to AnrLatencyTracker
         tr.mLatencyTracker.waitingOnAMSLockStarted();
         synchronized (mAm) {
             tr.mLatencyTracker.waitingOnAMSLockEnded();
