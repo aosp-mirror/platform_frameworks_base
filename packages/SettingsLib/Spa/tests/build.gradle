@@ -56,10 +56,27 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion jetpack_compose_compiler_version
     }
+    buildTypes {
+        debug {
+            testCoverageEnabled = true
+        }
+    }
 }
 
 dependencies {
     androidTestImplementation project(":spa")
     androidTestImplementation project(":testutils")
     androidTestImplementation "com.linkedin.dexmaker:dexmaker-mockito:2.28.1"
+}
+
+task coverageReport(type: JacocoReport, dependsOn: "connectedDebugAndroidTest") {
+    group = "Reporting"
+    description = "Generate Jacoco coverage reports after running tests."
+
+    sourceDirectories.from = files("../spa/src")
+    classDirectories.from = fileTree(
+            dir: "../spa/build/tmp/kotlin-classes/debug",
+            excludes: ["com/android/settingslib/spa/debug/**"],
+    )
+    executionData.from = fileTree(dir: "$buildDir/outputs/code_coverage/debugAndroidTest/connected")
 }
