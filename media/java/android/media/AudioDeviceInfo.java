@@ -89,6 +89,8 @@ public final class AudioDeviceInfo {
     public static final int TYPE_USB_ACCESSORY    = 12;
     /**
      * A device type describing the audio device associated with a dock.
+     * Starting at API 34, this device type only represents digital docks, while docks with an
+     * analog connection are represented with {@link #TYPE_DOCK_ANALOG}.
      * @see #TYPE_DOCK_ANALOG
      */
     public static final int TYPE_DOCK             = 13;
