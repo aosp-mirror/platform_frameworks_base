@@ -8,7 +8,7 @@
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Başka bir yerde oluşturun"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Başka bir yere kaydedin"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Başka bir cihaz kullan"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"Başka bir cihaza kaydedin"</string>
+    <string name="string_save_to_another_device" msgid="1959562542075194458">"Başka bir cihaza kaydet"</string>
     <string name="passkey_creation_intro_title" msgid="402553911484409884">"Güvenli bir şekilde oturum açmanın basit yolu"</string>
     <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Parmak iziniz, yüzünüz ya da ekran kilidinizi kullanarak unutması veya çalınması mümkün olmayan benzersiz bir şifre anahtarıyla oturum açın. Daha fazla bilgi"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> yerini seçin"</string>
@@ -30,6 +30,8 @@
     <!-- no translation found for save_password_to_title (3450480045270186421) -->
     <skip />
     <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
+    <skip />
+    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
     <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Tüm oturum açma işlemlerinizde <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> kullanılsın mı?"</string>
     <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
