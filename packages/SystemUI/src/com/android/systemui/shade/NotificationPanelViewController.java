@@ -200,7 +200,6 @@ import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
-import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -4587,55 +4586,6 @@ public final class NotificationPanelViewController implements Dumpable {
         return new TouchHandler();
     }
 
-    private final PhoneStatusBarView.TouchEventHandler mStatusBarViewTouchEventHandler =
-            new PhoneStatusBarView.TouchEventHandler() {
-                @Override
-                public void onInterceptTouchEvent(MotionEvent event) {
-                    mCentralSurfaces.onTouchEvent(event);
-                }
-
-                @Override
-                public boolean handleTouchEvent(MotionEvent event) {
-                    mCentralSurfaces.onTouchEvent(event);
-
-                    // TODO(b/202981994): Move the touch debugging in this method to a central
-                    //  location. (Right now, it's split between CentralSurfaces and here.)
-
-                    // If panels aren't enabled, ignore the gesture and don't pass it down to the
-                    // panel view.
-                    if (!mCommandQueue.panelsEnabled()) {
-                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                            Log.v(
-                                    TAG,
-                                    String.format(
-                                            "onTouchForwardedFromStatusBar: "
-                                                    + "panel disabled, ignoring touch at (%d,%d)",
-                                            (int) event.getX(),
-                                            (int) event.getY()
-                                    )
-                            );
-                        }
-                        return false;
-                    }
-
-                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        // If the view that would receive the touch is disabled, just have status
-                        // bar eat the gesture.
-                        if (!mView.isEnabled()) {
-                            mShadeLog.logMotionEvent(event,
-                                    "onTouchForwardedFromStatusBar: panel view disabled");
-                            return true;
-                        }
-                        if (isFullyCollapsed() && event.getY() < 1f) {
-                            // b/235889526 Eat events on the top edge of the phone when collapsed
-                            mShadeLog.logMotionEvent(event, "top edge touch ignored");
-                            return true;
-                        }
-                    }
-                    return mView.dispatchTouchEvent(event);
-                }
-            };
-
     public NotificationStackScrollLayoutController getNotificationStackScrollLayoutController() {
         return mNotificationStackScrollLayoutController;
     }
@@ -5238,6 +5188,11 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     /** */
+    public boolean sendTouchEventToView(MotionEvent event) {
+        return mView.dispatchTouchEvent(event);
+    }
+
+    /** */
     public void requestLayoutOnView() {
         mView.requestLayout();
     }
@@ -5245,6 +5200,11 @@ public final class NotificationPanelViewController implements Dumpable {
     /** */
     public void resetViewAlphas() {
         ViewGroupFadeHelper.reset(mView);
+    }
+
+    /** */
+    public boolean isViewEnabled() {
+        return mView.isEnabled();
     }
 
     private void beginJankMonitoring() {
@@ -5794,11 +5754,6 @@ public final class NotificationPanelViewController implements Dumpable {
             mView.post(mMaybeHideExpandedRunnable);
         }
         mCurrentPanelState = state;
-    }
-
-    /** Returns the handler that the status bar should forward touches to. */
-    public PhoneStatusBarView.TouchEventHandler getStatusBarTouchEventHandler() {
-        return mStatusBarViewTouchEventHandler;
     }
 
     @VisibleForTesting
