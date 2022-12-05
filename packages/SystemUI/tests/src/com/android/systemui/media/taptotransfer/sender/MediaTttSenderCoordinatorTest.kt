@@ -265,6 +265,8 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun commandQueueCallback_transferToReceiverSucceeded_triggersCorrectChip() {
+        displayReceiverTriggered()
+        reset(vibratorHelper)
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
             routeInfo,
@@ -278,13 +280,15 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
             .isEqualTo(ChipStateSender.TRANSFER_TO_RECEIVER_SUCCEEDED.getExpectedStateText())
         assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.GONE)
         assertThat(chipbarView.getUndoButton().visibility).isEqualTo(View.GONE)
-        assertThat(uiEventLoggerFake.eventId(0))
+        // Event index 1 since initially displaying the triggered chip would also log an event.
+        assertThat(uiEventLoggerFake.eventId(1))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_SUCCEEDED.id)
         verify(vibratorHelper, never()).vibrate(any<VibrationEffect>())
     }
 
     @Test
     fun transferToReceiverSucceeded_nullUndoCallback_noUndo() {
+        displayReceiverTriggered()
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
             routeInfo,
@@ -297,6 +301,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun transferToReceiverSucceeded_withUndoRunnable_undoVisible() {
+        displayReceiverTriggered()
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
             routeInfo,
@@ -313,6 +318,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     @Test
     fun transferToReceiverSucceeded_undoButtonClick_switchesToTransferToThisDeviceTriggered() {
         var undoCallbackCalled = false
+        displayReceiverTriggered()
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
             routeInfo,
@@ -325,8 +331,9 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
         getChipbarView().getUndoButton().performClick()
 
-        // Event index 1 since initially displaying the succeeded chip would also log an event
-        assertThat(uiEventLoggerFake.eventId(1))
+        // Event index 2 since initially displaying the triggered and succeeded chip would also log
+        // events.
+        assertThat(uiEventLoggerFake.eventId(2))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_RECEIVER_CLICKED.id)
         assertThat(undoCallbackCalled).isTrue()
         assertThat(getChipbarView().getChipText())
@@ -335,6 +342,8 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun commandQueueCallback_transferToThisDeviceSucceeded_triggersCorrectChip() {
+        displayThisDeviceTriggered()
+        reset(vibratorHelper)
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
             routeInfo,
@@ -348,13 +357,15 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
             .isEqualTo(ChipStateSender.TRANSFER_TO_THIS_DEVICE_SUCCEEDED.getExpectedStateText())
         assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.GONE)
         assertThat(chipbarView.getUndoButton().visibility).isEqualTo(View.GONE)
-        assertThat(uiEventLoggerFake.eventId(0))
+        // Event index 1 since initially displaying the triggered chip would also log an event.
+        assertThat(uiEventLoggerFake.eventId(1))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_SUCCEEDED.id)
         verify(vibratorHelper, never()).vibrate(any<VibrationEffect>())
     }
 
     @Test
     fun transferToThisDeviceSucceeded_nullUndoCallback_noUndo() {
+        displayThisDeviceTriggered()
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
             routeInfo,
@@ -367,6 +378,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun transferToThisDeviceSucceeded_withUndoRunnable_undoVisible() {
+        displayThisDeviceTriggered()
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
             routeInfo,
@@ -383,6 +395,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     @Test
     fun transferToThisDeviceSucceeded_undoButtonClick_switchesToTransferToThisDeviceTriggered() {
         var undoCallbackCalled = false
+        displayThisDeviceTriggered()
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
             routeInfo,
@@ -395,8 +408,9 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
         getChipbarView().getUndoButton().performClick()
 
-        // Event index 1 since initially displaying the succeeded chip would also log an event
-        assertThat(uiEventLoggerFake.eventId(1))
+        // Event index 2 since initially displaying the triggered and succeeded chip would also log
+        // events.
+        assertThat(uiEventLoggerFake.eventId(2))
             .isEqualTo(
                 MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_THIS_DEVICE_CLICKED.id
             )
@@ -407,6 +421,8 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun commandQueueCallback_transferToReceiverFailed_triggersCorrectChip() {
+        displayReceiverTriggered()
+        reset(vibratorHelper)
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED,
             routeInfo,
@@ -421,13 +437,20 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.GONE)
         assertThat(chipbarView.getUndoButton().visibility).isEqualTo(View.GONE)
         assertThat(chipbarView.getErrorIcon().visibility).isEqualTo(View.VISIBLE)
-        assertThat(uiEventLoggerFake.eventId(0))
+        // Event index 1 since initially displaying the triggered chip would also log an event.
+        assertThat(uiEventLoggerFake.eventId(1))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_FAILED.id)
         verify(vibratorHelper).vibrate(any<VibrationEffect>())
     }
 
     @Test
     fun commandQueueCallback_transferToThisDeviceFailed_triggersCorrectChip() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
+            routeInfo,
+            null
+        )
+        reset(vibratorHelper)
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED,
             routeInfo,
@@ -442,7 +465,8 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.GONE)
         assertThat(chipbarView.getUndoButton().visibility).isEqualTo(View.GONE)
         assertThat(chipbarView.getErrorIcon().visibility).isEqualTo(View.VISIBLE)
-        assertThat(uiEventLoggerFake.eventId(0))
+        // Event index 1 since initially displaying the triggered chip would also log an event.
+        assertThat(uiEventLoggerFake.eventId(1))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_FAILED.id)
         verify(vibratorHelper).vibrate(any<VibrationEffect>())
     }
@@ -517,6 +541,166 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    fun commandQueueCallback_receiverTriggeredThenAlmostStart_invalidTransitionLogged() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
+            routeInfo,
+            null
+        )
+        verify(windowManager).addView(any(), any())
+        reset(windowManager)
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
+            routeInfo,
+            null
+        )
+
+        verify(logger).logInvalidStateTransitionError(any(), any())
+        verify(windowManager, never()).addView(any(), any())
+    }
+
+    @Test
+    fun commandQueueCallback_thisDeviceTriggeredThenAlmostEnd_invalidTransitionLogged() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
+            routeInfo,
+            null
+        )
+        verify(windowManager).addView(any(), any())
+        reset(windowManager)
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+            routeInfo,
+            null
+        )
+
+        verify(logger).logInvalidStateTransitionError(any(), any())
+        verify(windowManager, never()).addView(any(), any())
+    }
+
+    @Test
+    fun commandQueueCallback_receiverSucceededThenReceiverTriggered_invalidTransitionLogged() {
+        displayReceiverTriggered()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            routeInfo,
+            null
+        )
+        reset(windowManager)
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
+            routeInfo,
+            null
+        )
+
+        verify(logger).logInvalidStateTransitionError(any(), any())
+        verify(windowManager, never()).addView(any(), any())
+    }
+
+    @Test
+    fun commandQueueCallback_thisDeviceSucceededThenThisDeviceTriggered_invalidTransitionLogged() {
+        displayThisDeviceTriggered()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
+            routeInfo,
+            null
+        )
+        reset(windowManager)
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
+            routeInfo,
+            null
+        )
+
+        verify(logger).logInvalidStateTransitionError(any(), any())
+        verify(windowManager, never()).addView(any(), any())
+    }
+
+    @Test
+    fun commandQueueCallback_almostStartThenReceiverSucceeded_invalidTransitionLogged() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
+            routeInfo,
+            null
+        )
+        verify(windowManager).addView(any(), any())
+        reset(windowManager)
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            routeInfo,
+            null
+        )
+
+        verify(logger).logInvalidStateTransitionError(any(), any())
+        verify(windowManager, never()).addView(any(), any())
+    }
+
+    @Test
+    fun commandQueueCallback_almostEndThenThisDeviceSucceeded_invalidTransitionLogged() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+            routeInfo,
+            null
+        )
+        verify(windowManager).addView(any(), any())
+        reset(windowManager)
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
+            routeInfo,
+            null
+        )
+
+        verify(logger).logInvalidStateTransitionError(any(), any())
+        verify(windowManager, never()).addView(any(), any())
+    }
+
+    @Test
+    fun commandQueueCallback_AlmostStartThenReceiverFailed_invalidTransitionLogged() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
+            routeInfo,
+            null
+        )
+        verify(windowManager).addView(any(), any())
+        reset(windowManager)
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED,
+            routeInfo,
+            null
+        )
+
+        verify(logger).logInvalidStateTransitionError(any(), any())
+        verify(windowManager, never()).addView(any(), any())
+    }
+
+    @Test
+    fun commandQueueCallback_almostEndThenThisDeviceFailed_invalidTransitionLogged() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+            routeInfo,
+            null
+        )
+        verify(windowManager).addView(any(), any())
+        reset(windowManager)
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED,
+            routeInfo,
+            null
+        )
+
+        verify(logger).logInvalidStateTransitionError(any(), any())
+        verify(windowManager, never()).addView(any(), any())
+    }
+
+    @Test
     fun receivesNewStateFromCommandQueue_isLogged() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
@@ -575,6 +759,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun transferToReceiverSucceededThenFarFromReceiver_viewStillDisplayedButDoesTimeOut() {
+        displayReceiverTriggered()
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
             routeInfo,
@@ -598,6 +783,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun transferToThisDeviceSucceededThenFarFromReceiver_viewStillDisplayedButDoesTimeOut() {
+        displayThisDeviceTriggered()
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
             routeInfo,
@@ -621,6 +807,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun transferToReceiverSucceeded_thenUndo_thenFar_viewStillDisplayedButDoesTimeOut() {
+        displayReceiverTriggered()
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
             routeInfo,
@@ -660,6 +847,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun transferToThisDeviceSucceeded_thenUndo_thenFar_viewStillDisplayedButDoesTimeOut() {
+        displayThisDeviceTriggered()
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
             routeInfo,
@@ -716,6 +904,26 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
     private fun ChipStateSender.getExpectedStateText(): String? {
         return this.getChipTextString(context, OTHER_DEVICE_NAME).loadText(context)
+    }
+
+    // display receiver triggered state helper method to make sure we start from a valid state
+    // transition (FAR_FROM_RECEIVER -> TRANSFER_TO_RECEIVER_TRIGGERED).
+    private fun displayReceiverTriggered() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
+            routeInfo,
+            null
+        )
+    }
+
+    // display this device triggered state helper method to make sure we start from a valid state
+    // transition (FAR_FROM_RECEIVER -> TRANSFER_TO_THIS_DEVICE_TRIGGERED).
+    private fun displayThisDeviceTriggered() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
+            routeInfo,
+            null
+        )
     }
 }
 

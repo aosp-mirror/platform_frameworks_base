@@ -56,7 +56,12 @@ enum class ChipStateSender(
         R.string.media_move_closer_to_start_cast,
         transferStatus = TransferStatus.NOT_STARTED,
         endItem = null,
-    ),
+    ) {
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            return nextState == FAR_FROM_RECEIVER ||
+                    nextState == TRANSFER_TO_RECEIVER_TRIGGERED
+        }
+    },
 
     /**
      * A state representing that the two devices are close but not close enough to *end* a cast
@@ -70,7 +75,12 @@ enum class ChipStateSender(
         R.string.media_move_closer_to_end_cast,
         transferStatus = TransferStatus.NOT_STARTED,
         endItem = null,
-    ),
+    ) {
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            return nextState == FAR_FROM_RECEIVER ||
+                    nextState == TRANSFER_TO_THIS_DEVICE_TRIGGERED
+        }
+    },
 
     /**
      * A state representing that a transfer to the receiver device has been initiated (but not
@@ -83,7 +93,13 @@ enum class ChipStateSender(
         transferStatus = TransferStatus.IN_PROGRESS,
         endItem = SenderEndItem.Loading,
         timeout = TRANSFER_TRIGGERED_TIMEOUT_MILLIS
-    ),
+    ) {
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            return nextState == FAR_FROM_RECEIVER ||
+                    nextState == TRANSFER_TO_RECEIVER_SUCCEEDED ||
+                    nextState == TRANSFER_TO_RECEIVER_FAILED
+        }
+    },
 
     /**
      * A state representing that a transfer from the receiver device and back to this device (the
@@ -96,7 +112,13 @@ enum class ChipStateSender(
         transferStatus = TransferStatus.IN_PROGRESS,
         endItem = SenderEndItem.Loading,
         timeout = TRANSFER_TRIGGERED_TIMEOUT_MILLIS
-    ),
+    ) {
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            return nextState == FAR_FROM_RECEIVER ||
+                    nextState == TRANSFER_TO_THIS_DEVICE_SUCCEEDED ||
+                    nextState == TRANSFER_TO_THIS_DEVICE_FAILED
+        }
+    },
 
     /**
      * A state representing that a transfer to the receiver device has been successfully completed.
@@ -112,7 +134,13 @@ enum class ChipStateSender(
             newState =
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED
         ),
-    ),
+    ) {
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            return nextState == FAR_FROM_RECEIVER ||
+                    nextState == ALMOST_CLOSE_TO_START_CAST ||
+                    nextState == TRANSFER_TO_THIS_DEVICE_TRIGGERED
+        }
+    },
 
     /**
      * A state representing that a transfer back to this device has been successfully completed.
@@ -128,7 +156,13 @@ enum class ChipStateSender(
             newState =
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED
         ),
-    ),
+    ) {
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            return nextState == FAR_FROM_RECEIVER ||
+                    nextState == ALMOST_CLOSE_TO_END_CAST ||
+                    nextState == TRANSFER_TO_RECEIVER_TRIGGERED
+        }
+    },
 
     /** A state representing that a transfer to the receiver device has failed. */
     TRANSFER_TO_RECEIVER_FAILED(
@@ -137,7 +171,13 @@ enum class ChipStateSender(
         R.string.media_transfer_failed,
         transferStatus = TransferStatus.FAILED,
         endItem = SenderEndItem.Error,
-    ),
+    ) {
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            return nextState == FAR_FROM_RECEIVER ||
+                    nextState == ALMOST_CLOSE_TO_START_CAST ||
+                    nextState == TRANSFER_TO_THIS_DEVICE_TRIGGERED
+        }
+    },
 
     /** A state representing that a transfer back to this device has failed. */
     TRANSFER_TO_THIS_DEVICE_FAILED(
@@ -146,7 +186,13 @@ enum class ChipStateSender(
         R.string.media_transfer_failed,
         transferStatus = TransferStatus.FAILED,
         endItem = SenderEndItem.Error,
-    ),
+    ) {
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            return nextState == FAR_FROM_RECEIVER ||
+                    nextState == ALMOST_CLOSE_TO_END_CAST ||
+                    nextState == TRANSFER_TO_RECEIVER_TRIGGERED
+        }
+    },
 
     /** A state representing that this device is far away from any receiver device. */
     FAR_FROM_RECEIVER(
@@ -162,6 +208,12 @@ enum class ChipStateSender(
             throw IllegalArgumentException("FAR_FROM_RECEIVER should never be displayed, " +
                 "so its string should never be fetched")
         }
+
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            return nextState == FAR_FROM_RECEIVER ||
+                    nextState.transferStatus == TransferStatus.NOT_STARTED ||
+                    nextState.transferStatus == TransferStatus.IN_PROGRESS
+        }
     };
 
     /**
@@ -174,6 +226,8 @@ enum class ChipStateSender(
     open fun getChipTextString(context: Context, otherDeviceName: String): Text {
         return Text.Loaded(context.getString(stringResId!!, otherDeviceName))
     }
+
+    abstract fun isValidNextState(nextState: ChipStateSender): Boolean
 
     companion object {
         /**
@@ -197,6 +251,31 @@ enum class ChipStateSender(
          */
         @StatusBarManager.MediaTransferSenderState
         fun getSenderStateIdFromName(name: String): Int = valueOf(name).stateInt
+
+        /**
+         * Validates the transition from a chip state to another.
+         *
+         * @param currentState is the current state of the chip.
+         * @param desiredState is the desired state of the chip.
+         * @return true if the transition from [currentState] to [desiredState] is valid, and false
+         * otherwise.
+         */
+        fun isValidStateTransition(
+                currentState: ChipStateSender?,
+                desiredState: ChipStateSender,
+        ): Boolean {
+            // Far from receiver is the default state.
+            if (currentState == null) {
+                return FAR_FROM_RECEIVER.isValidNextState(desiredState)
+            }
+
+            // No change in state is valid.
+            if (currentState == desiredState) {
+                return true
+            }
+
+            return currentState.isValidNextState(desiredState)
+        }
     }
 }
 
