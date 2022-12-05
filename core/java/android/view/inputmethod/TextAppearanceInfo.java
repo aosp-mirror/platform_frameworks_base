@@ -31,7 +31,10 @@ import android.inputmethodservice.InputMethodService;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.Spanned;
+import android.text.TextPaint;
 import android.text.method.TransformationMethod;
+import android.text.style.CharacterStyle;
 import android.widget.TextView;
 
 import java.util.Objects;
@@ -180,6 +183,70 @@ public final class TextAppearanceInfo implements Parcelable {
         mTextColor = builder.mTextColor;
         mHintTextColor = builder.mHintTextColor;
         mLinkTextColor = builder.mLinkTextColor;
+    }
+
+    /**
+     * Creates a new instance of {@link TextAppearanceInfo} by extracting text appearance from the
+     * character before cursor in the target {@link TextView}.
+     * @param textView the target {@link TextView}.
+     * @return the new instance of {@link TextAppearanceInfo}.
+     * @hide
+     */
+    @NonNull
+    public static TextAppearanceInfo createFromTextView(@NonNull TextView textView) {
+        final int selectionStart = textView.getSelectionStart();
+        final CharSequence text = textView.getText();
+        TextPaint textPaint = new TextPaint();
+        textPaint.set(textView.getPaint());    // Copy from textView
+        if (text instanceof Spanned && text.length() > 0 && selectionStart > 0) {
+            // Extract the CharacterStyle spans that changes text appearance in the character before
+            // cursor.
+            Spanned spannedText = (Spanned) text;
+            int lastCh = selectionStart - 1;
+            CharacterStyle[] spans = spannedText.getSpans(lastCh, lastCh, CharacterStyle.class);
+            if (spans != null) {
+                for (CharacterStyle span: spans) {
+                    // Exclude spans that end at lastCh
+                    if (spannedText.getSpanStart(span) <= lastCh
+                            && lastCh < spannedText.getSpanEnd(span)) {
+                        span.updateDrawState(textPaint); // Override the TextPaint
+                    }
+                }
+            }
+        }
+        Typeface typeface = textPaint.getTypeface();
+        String systemFontFamilyName = null;
+        int textWeight = FontStyle.FONT_WEIGHT_UNSPECIFIED;
+        int textStyle = Typeface.NORMAL;
+        if (typeface != null) {
+            systemFontFamilyName = typeface.getSystemFontFamilyName();
+            textWeight = typeface.getWeight();
+            textStyle = typeface.getStyle();
+        }
+        TextAppearanceInfo.Builder builder = new TextAppearanceInfo.Builder();
+        builder.setTextSize(textPaint.getTextSize())
+                .setTextLocales(textPaint.getTextLocales())
+                .setSystemFontFamilyName(systemFontFamilyName)
+                .setTextFontWeight(textWeight)
+                .setTextStyle(textStyle)
+                .setShadowDx(textPaint.getShadowLayerDx())
+                .setShadowDy(textPaint.getShadowLayerDy())
+                .setShadowRadius(textPaint.getShadowLayerRadius())
+                .setShadowColor(textPaint.getShadowLayerColor())
+                .setElegantTextHeight(textPaint.isElegantTextHeight())
+                .setLetterSpacing(textPaint.getLetterSpacing())
+                .setFontFeatureSettings(textPaint.getFontFeatureSettings())
+                .setFontVariationSettings(textPaint.getFontVariationSettings())
+                .setTextScaleX(textPaint.getTextScaleX())
+                .setTextColor(textPaint.getColor())
+                .setLinkTextColor(textPaint.linkColor)
+                .setAllCaps(textView.isAllCaps())
+                .setFallbackLineSpacing(textView.isFallbackLineSpacing())
+                .setLineBreakStyle(textView.getLineBreakStyle())
+                .setLineBreakWordStyle(textView.getLineBreakWordStyle())
+                .setHighlightTextColor(textView.getHighlightColor())
+                .setHintTextColor(textView.getCurrentHintTextColor());
+        return builder.build();
     }
 
     @Override
