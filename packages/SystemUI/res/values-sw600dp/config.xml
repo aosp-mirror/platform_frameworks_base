@@ -36,7 +36,4 @@
     <integer name="qs_security_footer_maxLines">1</integer>
 
     <bool name="config_use_large_screen_shade_header">true</bool>
-
-    <!-- Whether to show the side fps hint while on bouncer -->
-    <bool name="config_show_sidefps_hint_on_bouncer">true</bool>
 </resources>
