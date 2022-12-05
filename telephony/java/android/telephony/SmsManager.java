@@ -1914,8 +1914,10 @@ public final class SmsManager {
      * @see #disableCellBroadcastRange(int, int, int)
      *
      * @throws IllegalArgumentException if endMessageId < startMessageId
+     * @deprecated Use {@link TelephonyManager#setCellBroadcastRanges} instead.
      * {@hide}
      */
+    @Deprecated
     @SystemApi
     public boolean enableCellBroadcastRange(int startMessageId, int endMessageId,
             @android.telephony.SmsCbMessage.MessageFormat int ranType) {
@@ -1974,8 +1976,10 @@ public final class SmsManager {
      * @see #enableCellBroadcastRange(int, int, int)
      *
      * @throws IllegalArgumentException if endMessageId < startMessageId
+     * @deprecated Use {@link TelephonyManager#setCellBroadcastRanges} instead.
      * {@hide}
      */
+    @Deprecated
     @SystemApi
     public boolean disableCellBroadcastRange(int startMessageId, int endMessageId,
             @android.telephony.SmsCbMessage.MessageFormat int ranType) {
@@ -3374,8 +3378,10 @@ public final class SmsManager {
 
     /**
      * Reset all cell broadcast ranges. Previously enabled ranges will become invalid after this.
+     * @deprecated Use {@link TelephonyManager#resetAllCellBroadcastRanges} instead
      * @hide
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_CELL_BROADCASTS)
     public void resetAllCellBroadcastRanges() {
