@@ -140,6 +140,32 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         assertThat(listener.visibleFreeformTaskChangedCalls).isEqualTo(3)
     }
 
+    @Test
+    fun addOrMoveFreeformTaskToTop_didNotExist_addsToTop() {
+        repo.addOrMoveFreeformTaskToTop(5)
+        repo.addOrMoveFreeformTaskToTop(6)
+        repo.addOrMoveFreeformTaskToTop(7)
+
+        val tasks = repo.getFreeformTasksInZOrder()
+        assertThat(tasks.size).isEqualTo(3)
+        assertThat(tasks[0]).isEqualTo(7)
+        assertThat(tasks[1]).isEqualTo(6)
+        assertThat(tasks[2]).isEqualTo(5)
+    }
+
+    @Test
+    fun addOrMoveFreeformTaskToTop_alreadyExists_movesToTop() {
+        repo.addOrMoveFreeformTaskToTop(5)
+        repo.addOrMoveFreeformTaskToTop(6)
+        repo.addOrMoveFreeformTaskToTop(7)
+
+        repo.addOrMoveFreeformTaskToTop(6)
+
+        val tasks = repo.getFreeformTasksInZOrder()
+        assertThat(tasks.size).isEqualTo(3)
+        assertThat(tasks.first()).isEqualTo(6)
+    }
+
     class TestListener : DesktopModeTaskRepository.ActiveTasksListener {
         var activeTaskChangedCalls = 0
         override fun onActiveTasksChanged() {

@@ -50,6 +50,7 @@ import android.window.TransitionRequestInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransaction.Change;
+import android.window.WindowContainerTransaction.HierarchyOp;
 
 import androidx.test.filters.SmallTest;
 
@@ -222,25 +223,29 @@ public class DesktopModeControllerTest extends ShellTestCase {
         // Check that there are hierarchy changes for home task and visible task
         assertThat(wct.getHierarchyOps()).hasSize(2);
         // First show home task
-        WindowContainerTransaction.HierarchyOp op1 = wct.getHierarchyOps().get(0);
+        HierarchyOp op1 = wct.getHierarchyOps().get(0);
         assertThat(op1.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
         assertThat(op1.getContainer()).isEqualTo(homeTask.token.asBinder());
 
         // Then visible task on top of it
-        WindowContainerTransaction.HierarchyOp op2 = wct.getHierarchyOps().get(1);
+        HierarchyOp op2 = wct.getHierarchyOps().get(1);
         assertThat(op2.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
         assertThat(op2.getContainer()).isEqualTo(fullscreenTask1.token.asBinder());
     }
 
     @Test
-    public void testShowDesktopApps() {
-        // Set up two active tasks on desktop
+    public void testShowDesktopApps_allAppsInvisible_bringsToFront() {
+        // Set up two active tasks on desktop, task2 is on top of task1.
         RunningTaskInfo freeformTask1 = createFreeformTask();
-        freeformTask1.lastActiveTime = 100;
-        RunningTaskInfo freeformTask2 = createFreeformTask();
-        freeformTask2.lastActiveTime = 200;
         mDesktopModeTaskRepository.addActiveTask(freeformTask1.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(freeformTask1.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(
+                freeformTask1.taskId, false /* visible */);
+        RunningTaskInfo freeformTask2 = createFreeformTask();
         mDesktopModeTaskRepository.addActiveTask(freeformTask2.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(freeformTask2.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(
+                freeformTask2.taskId, false /* visible */);
         when(mShellTaskOrganizer.getRunningTaskInfo(freeformTask1.taskId)).thenReturn(
                 freeformTask1);
         when(mShellTaskOrganizer.getRunningTaskInfo(freeformTask2.taskId)).thenReturn(
@@ -248,27 +253,66 @@ public class DesktopModeControllerTest extends ShellTestCase {
 
         // Run show desktop apps logic
         mController.showDesktopApps();
-        ArgumentCaptor<WindowContainerTransaction> wctCaptor = ArgumentCaptor.forClass(
-                WindowContainerTransaction.class);
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            verify(mTransitions).startTransition(eq(TRANSIT_TO_FRONT), wctCaptor.capture(), any());
-        } else {
-            verify(mShellTaskOrganizer).applyTransaction(wctCaptor.capture());
-        }
-        WindowContainerTransaction wct = wctCaptor.getValue();
 
+        final WindowContainerTransaction wct = getBringAppsToFrontTransaction();
         // Check wct has reorder calls
         assertThat(wct.getHierarchyOps()).hasSize(2);
 
-        // Task 2 has activity later, must be first
-        WindowContainerTransaction.HierarchyOp op1 = wct.getHierarchyOps().get(0);
+        // Task 1 appeared first, must be first reorder to top.
+        HierarchyOp op1 = wct.getHierarchyOps().get(0);
         assertThat(op1.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
-        assertThat(op1.getContainer()).isEqualTo(freeformTask2.token.asBinder());
+        assertThat(op1.getContainer()).isEqualTo(freeformTask1.token.asBinder());
 
-        // Task 1 should be second
-        WindowContainerTransaction.HierarchyOp op2 = wct.getHierarchyOps().get(1);
+        // Task 2 appeared last, must be last reorder to top.
+        HierarchyOp op2 = wct.getHierarchyOps().get(1);
         assertThat(op2.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
-        assertThat(op2.getContainer()).isEqualTo(freeformTask1.token.asBinder());
+        assertThat(op2.getContainer()).isEqualTo(freeformTask2.token.asBinder());
+    }
+
+    @Test
+    public void testShowDesktopApps_appsAlreadyVisible_doesNothing() {
+        final RunningTaskInfo task1 = createFreeformTask();
+        mDesktopModeTaskRepository.addActiveTask(task1.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task1.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task1.taskId, true /* visible */);
+        when(mShellTaskOrganizer.getRunningTaskInfo(task1.taskId)).thenReturn(task1);
+        final RunningTaskInfo task2 = createFreeformTask();
+        mDesktopModeTaskRepository.addActiveTask(task2.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task2.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task2.taskId, true /* visible */);
+        when(mShellTaskOrganizer.getRunningTaskInfo(task2.taskId)).thenReturn(task2);
+
+        mController.showDesktopApps();
+
+        final WindowContainerTransaction wct = getBringAppsToFrontTransaction();
+        // No reordering needed.
+        assertThat(wct.getHierarchyOps()).isEmpty();
+    }
+
+    @Test
+    public void testShowDesktopApps_someAppsInvisible_reordersAll() {
+        final RunningTaskInfo task1 = createFreeformTask();
+        mDesktopModeTaskRepository.addActiveTask(task1.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task1.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task1.taskId, false /* visible */);
+        when(mShellTaskOrganizer.getRunningTaskInfo(task1.taskId)).thenReturn(task1);
+        final RunningTaskInfo task2 = createFreeformTask();
+        mDesktopModeTaskRepository.addActiveTask(task2.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task2.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task2.taskId, true /* visible */);
+        when(mShellTaskOrganizer.getRunningTaskInfo(task2.taskId)).thenReturn(task2);
+
+        mController.showDesktopApps();
+
+        final WindowContainerTransaction wct = getBringAppsToFrontTransaction();
+        // Both tasks should be reordered to top, even if one was already visible.
+        assertThat(wct.getHierarchyOps()).hasSize(2);
+        final HierarchyOp op1 = wct.getHierarchyOps().get(0);
+        assertThat(op1.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
+        assertThat(op1.getContainer()).isEqualTo(task1.token.asBinder());
+        final HierarchyOp op2 = wct.getHierarchyOps().get(1);
+        assertThat(op2.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
+        assertThat(op2.getContainer()).isEqualTo(task2.token.asBinder());
     }
 
     @Test
@@ -351,6 +395,17 @@ public class DesktopModeControllerTest extends ShellTestCase {
             verify(mTransitions).startTransition(eq(TRANSIT_CHANGE), arg.capture(), any());
         } else {
             verify(mRootTaskDisplayAreaOrganizer).applyTransaction(arg.capture());
+        }
+        return arg.getValue();
+    }
+
+    private WindowContainerTransaction getBringAppsToFrontTransaction() {
+        final ArgumentCaptor<WindowContainerTransaction> arg = ArgumentCaptor.forClass(
+                WindowContainerTransaction.class);
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            verify(mTransitions).startTransition(eq(TRANSIT_TO_FRONT), arg.capture(), any());
+        } else {
+            verify(mShellTaskOrganizer).applyTransaction(arg.capture());
         }
         return arg.getValue();
     }
