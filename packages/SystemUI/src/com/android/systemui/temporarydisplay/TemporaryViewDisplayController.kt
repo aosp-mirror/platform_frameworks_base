@@ -105,8 +105,9 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
      *
      * This method handles inflating and attaching the view, then delegates to [updateView] to
      * display the correct information in the view.
+     * @param onViewTimeout a runnable that runs after the view timeout.
      */
-    fun displayView(newInfo: T) {
+    fun displayView(newInfo: T, onViewTimeout: Runnable? = null) {
         val currentDisplayInfo = displayInfo
 
         // Update our list of active devices by removing it if necessary, then adding back at the
@@ -173,7 +174,10 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
             cancelViewTimeout?.run()
         }
         cancelViewTimeout = mainExecutor.executeDelayed(
-            { removeView(id, REMOVAL_REASON_TIMEOUT) },
+            {
+                removeView(id, REMOVAL_REASON_TIMEOUT)
+                onViewTimeout?.run()
+            },
             timeout.toLong()
         )
     }
