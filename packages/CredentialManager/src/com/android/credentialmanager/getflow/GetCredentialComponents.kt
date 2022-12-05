@@ -84,20 +84,22 @@ fun GetCredentialScreen(
         sheetState = state,
         sheetContent = {
             val uiState = viewModel.uiState
-            when (uiState.currentScreenState) {
-                GetScreenState.PRIMARY_SELECTION -> PrimarySelectionCard(
-                    requestDisplayInfo = uiState.requestDisplayInfo,
-                    providerDisplayInfo = uiState.providerDisplayInfo,
-                    onEntrySelected = entrySelectionCallback,
-                    onCancel = viewModel::onCancel,
-                    onMoreOptionSelected = viewModel::onMoreOptionSelected,
-                )
-                GetScreenState.ALL_SIGN_IN_OPTIONS -> AllSignInOptionCard(
-                    providerInfoList = uiState.providerInfoList,
-                    providerDisplayInfo = uiState.providerDisplayInfo,
-                    onEntrySelected = entrySelectionCallback,
-                    onBackButtonClicked = viewModel::onBackToPrimarySelectionScreen,
-                )
+            if (!uiState.hidden) {
+                when (uiState.currentScreenState) {
+                    GetScreenState.PRIMARY_SELECTION -> PrimarySelectionCard(
+                        requestDisplayInfo = uiState.requestDisplayInfo,
+                        providerDisplayInfo = uiState.providerDisplayInfo,
+                        onEntrySelected = entrySelectionCallback,
+                        onCancel = viewModel::onCancel,
+                        onMoreOptionSelected = viewModel::onMoreOptionSelected,
+                    )
+                    GetScreenState.ALL_SIGN_IN_OPTIONS -> AllSignInOptionCard(
+                        providerInfoList = uiState.providerInfoList,
+                        providerDisplayInfo = uiState.providerDisplayInfo,
+                        onEntrySelected = entrySelectionCallback,
+                        onBackButtonClicked = viewModel::onBackToPrimarySelectionScreen,
+                    )
+                }
             }
         },
         scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.8f),

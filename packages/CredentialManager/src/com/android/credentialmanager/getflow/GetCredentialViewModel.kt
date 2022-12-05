@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager.getflow
 
+import android.app.Activity
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
@@ -39,6 +40,7 @@ data class GetCredentialUiState(
   val requestDisplayInfo: RequestDisplayInfo,
   val providerDisplayInfo: ProviderDisplayInfo = toProviderDisplayInfo(providerInfoList),
   val selectedEntry: EntryInfo? = null,
+  val hidden: Boolean = false,
 )
 
 class GetCredentialViewModel(
@@ -63,7 +65,10 @@ class GetCredentialViewModel(
     Log.d("Account Selector", "credential selected:" +
             " {provider=${entry.providerId}, key=${entry.entryKey}, subkey=${entry.entrySubkey}}")
     if (entry.pendingIntent != null) {
-      uiState = uiState.copy(selectedEntry = entry)
+      uiState = uiState.copy(
+        selectedEntry = entry,
+        hidden = true,
+      )
       val intentSenderRequest = IntentSenderRequest.Builder(entry.pendingIntent)
         .setFillInIntent(entry.fillInIntent).build()
       launcher.launch(intentSenderRequest)
@@ -79,20 +84,28 @@ class GetCredentialViewModel(
     val entry = uiState.selectedEntry
     val resultCode = providerActivityResult.resultCode
     val resultData = providerActivityResult.data
-    if (entry != null) {
-      Log.d("Account Selector", "Got provider activity result: {provider=" +
-              "${entry.providerId}, key=${entry.entryKey}, subkey=${entry.entrySubkey}, " +
-                "resultCode=$resultCode, resultData=$resultData}"
-      )
-      CredentialManagerRepo.getInstance().onOptionSelected(
-        entry.providerId, entry.entryKey, entry.entrySubkey,
-        resultCode, resultData,
+    if (resultCode == Activity.RESULT_CANCELED) {
+      // Re-display the CredMan UI if the user canceled from the provider UI.
+      uiState = uiState.copy(
+        selectedEntry = null,
+        hidden = false,
       )
     } else {
-      Log.w("Account Selector",
-        "Illegal state: received a provider result but found no matching entry.")
+      if (entry != null) {
+        Log.d("Account Selector", "Got provider activity result: {provider=" +
+                "${entry.providerId}, key=${entry.entryKey}, subkey=${entry.entrySubkey}, " +
+                "resultCode=$resultCode, resultData=$resultData}"
+        )
+        CredentialManagerRepo.getInstance().onOptionSelected(
+          entry.providerId, entry.entryKey, entry.entrySubkey,
+          resultCode, resultData,
+        )
+      } else {
+        Log.w("Account Selector",
+          "Illegal state: received a provider result but found no matching entry.")
+      }
+      dialogResult.value = DialogResult(ResultState.COMPLETE)
     }
-    dialogResult.value = DialogResult(ResultState.COMPLETE)
   }
 
   fun onMoreOptionSelected() {

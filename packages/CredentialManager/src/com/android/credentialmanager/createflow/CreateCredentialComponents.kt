@@ -75,53 +75,55 @@ fun CreateCredentialScreen(
         sheetState = state,
         sheetContent = {
             val uiState = viewModel.uiState
-            when (uiState.currentScreenState) {
-                CreateScreenState.PASSKEY_INTRO -> ConfirmationCard(
-                    onConfirm = viewModel::onConfirmIntro,
-                    onCancel = viewModel::onCancel,
-                )
-                CreateScreenState.PROVIDER_SELECTION -> ProviderSelectionCard(
-                    requestDisplayInfo = uiState.requestDisplayInfo,
-                    enabledProviderList = uiState.enabledProviders,
-                    disabledProviderList = uiState.disabledProviders,
-                    onCancel = viewModel::onCancel,
-                    onOptionSelected = viewModel::onEntrySelectedFromFirstUseScreen,
-                    onDisabledPasswordManagerSelected =
+            if (!uiState.hidden) {
+                when (uiState.currentScreenState) {
+                    CreateScreenState.PASSKEY_INTRO -> ConfirmationCard(
+                        onConfirm = viewModel::onConfirmIntro,
+                        onCancel = viewModel::onCancel,
+                    )
+                    CreateScreenState.PROVIDER_SELECTION -> ProviderSelectionCard(
+                        requestDisplayInfo = uiState.requestDisplayInfo,
+                        enabledProviderList = uiState.enabledProviders,
+                        disabledProviderList = uiState.disabledProviders,
+                        onCancel = viewModel::onCancel,
+                        onOptionSelected = viewModel::onEntrySelectedFromFirstUseScreen,
+                        onDisabledPasswordManagerSelected =
                         viewModel::onDisabledPasswordManagerSelected,
-                    onRemoteEntrySelected = selectEntryCallback,
-                )
-                CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
-                    requestDisplayInfo = uiState.requestDisplayInfo,
-                    enabledProviderList = uiState.enabledProviders,
-                    providerInfo = uiState.activeEntry?.activeProvider!!,
-                    createOptionInfo = uiState.activeEntry.activeEntryInfo as CreateOptionInfo,
-                    showActiveEntryOnly = uiState.showActiveEntryOnly,
-                    onOptionSelected = selectEntryCallback,
-                    onConfirm = confirmEntryCallback,
-                    onCancel = viewModel::onCancel,
-                    onMoreOptionsSelected = viewModel::onMoreOptionsSelected,
-                )
-                CreateScreenState.MORE_OPTIONS_SELECTION -> MoreOptionsSelectionCard(
-                    requestDisplayInfo = uiState.requestDisplayInfo,
-                    enabledProviderList = uiState.enabledProviders,
-                    disabledProviderList = uiState.disabledProviders,
-                    onBackButtonSelected = viewModel::onBackButtonSelected,
-                    onOptionSelected = viewModel::onEntrySelectedFromMoreOptionScreen,
-                    onDisabledPasswordManagerSelected =
+                        onRemoteEntrySelected = selectEntryCallback,
+                    )
+                    CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
+                        requestDisplayInfo = uiState.requestDisplayInfo,
+                        enabledProviderList = uiState.enabledProviders,
+                        providerInfo = uiState.activeEntry?.activeProvider!!,
+                        createOptionInfo = uiState.activeEntry.activeEntryInfo as CreateOptionInfo,
+                        showActiveEntryOnly = uiState.showActiveEntryOnly,
+                        onOptionSelected = selectEntryCallback,
+                        onConfirm = confirmEntryCallback,
+                        onCancel = viewModel::onCancel,
+                        onMoreOptionsSelected = viewModel::onMoreOptionsSelected,
+                    )
+                    CreateScreenState.MORE_OPTIONS_SELECTION -> MoreOptionsSelectionCard(
+                        requestDisplayInfo = uiState.requestDisplayInfo,
+                        enabledProviderList = uiState.enabledProviders,
+                        disabledProviderList = uiState.disabledProviders,
+                        onBackButtonSelected = viewModel::onBackButtonSelected,
+                        onOptionSelected = viewModel::onEntrySelectedFromMoreOptionScreen,
+                        onDisabledPasswordManagerSelected =
                         viewModel::onDisabledPasswordManagerSelected,
-                    onRemoteEntrySelected = selectEntryCallback,
-                )
-                CreateScreenState.MORE_OPTIONS_ROW_INTRO -> MoreOptionsRowIntroCard(
-                    providerInfo = uiState.activeEntry?.activeProvider!!,
-                    onDefaultOrNotSelected = viewModel::onDefaultOrNotSelected
-                )
-                CreateScreenState.EXTERNAL_ONLY_SELECTION -> ExternalOnlySelectionCard(
-                    requestDisplayInfo = uiState.requestDisplayInfo,
-                    activeRemoteEntry = uiState.activeEntry?.activeEntryInfo!!,
-                    onOptionSelected = selectEntryCallback,
-                    onConfirm = confirmEntryCallback,
-                    onCancel = viewModel::onCancel,
-                )
+                        onRemoteEntrySelected = selectEntryCallback,
+                    )
+                    CreateScreenState.MORE_OPTIONS_ROW_INTRO -> MoreOptionsRowIntroCard(
+                        providerInfo = uiState.activeEntry?.activeProvider!!,
+                        onDefaultOrNotSelected = viewModel::onDefaultOrNotSelected
+                    )
+                    CreateScreenState.EXTERNAL_ONLY_SELECTION -> ExternalOnlySelectionCard(
+                        requestDisplayInfo = uiState.requestDisplayInfo,
+                        activeRemoteEntry = uiState.activeEntry?.activeEntryInfo!!,
+                        onOptionSelected = selectEntryCallback,
+                        onConfirm = confirmEntryCallback,
+                        onCancel = viewModel::onCancel,
+                    )
+                }
             }
         },
         scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.8f),
@@ -270,7 +272,7 @@ fun ProviderSelectionCard(
                             MoreOptionsDisabledProvidersRow(
                                 disabledProviders = disabledProviderList,
                                 onDisabledPasswordManagerSelected =
-                                    onDisabledPasswordManagerSelected,
+                                onDisabledPasswordManagerSelected,
                             )
                         }
                     }
@@ -782,7 +784,8 @@ fun MoreOptionsInfoRow(
                     )
                 }
                 if (createOptionInfo.passwordCount != null &&
-                    createOptionInfo.passkeyCount != null) {
+                    createOptionInfo.passkeyCount != null
+                ) {
                     TextSecondary(
                         text =
                         stringResource(
