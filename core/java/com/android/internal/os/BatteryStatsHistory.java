@@ -1047,6 +1047,17 @@ public class BatteryStatsHistory {
     }
 
     /**
+     * Records a wakelock release event.
+     */
+    public void recordWakelockStopEvent(long elapsedRealtimeMs, long uptimeMs, String historyName,
+            int uid) {
+        mHistoryCur.wakelockTag = mHistoryCur.localWakelockTag;
+        mHistoryCur.wakelockTag.string = historyName != null ? historyName : "";
+        mHistoryCur.wakelockTag.uid = uid;
+        recordStateStopEvent(elapsedRealtimeMs, uptimeMs, HistoryItem.STATE_WAKE_LOCK_FLAG);
+    }
+
+    /**
      * Records an event when some state flag changes to true.
      */
     public void recordStateStartEvent(long elapsedRealtimeMs, long uptimeMs, int stateFlags) {
