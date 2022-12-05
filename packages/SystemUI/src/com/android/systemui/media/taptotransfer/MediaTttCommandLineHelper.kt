@@ -48,52 +48,66 @@ class MediaTttCommandLineHelper @Inject constructor(
     /** All commands for the sender device. */
     inner class SenderCommand : Command {
         override fun execute(pw: PrintWriter, args: List<String>) {
-            val commandName = args[1]
+            if (args.size < 2) {
+                help(pw)
+                return
+            }
+
+            val senderArgs = processArgs(args)
+
             @StatusBarManager.MediaTransferSenderState
             val displayState: Int?
             try {
-                displayState = ChipStateSender.getSenderStateIdFromName(commandName)
+                displayState = ChipStateSender.getSenderStateIdFromName(senderArgs.commandName)
             } catch (ex: IllegalArgumentException) {
-                pw.println("Invalid command name $commandName")
+                pw.println("Invalid command name ${senderArgs.commandName}")
                 return
             }
 
             @SuppressLint("WrongConstant") // sysui allowed to call STATUS_BAR_SERVICE
             val statusBarManager = context.getSystemService(Context.STATUS_BAR_SERVICE)
                     as StatusBarManager
-            val routeInfo = MediaRoute2Info.Builder(if (args.size >= 4) args[3] else "id", args[0])
+            val routeInfo = MediaRoute2Info.Builder(senderArgs.id, senderArgs.deviceName)
                     .addFeature("feature")
-            val useAppIcon = !(args.size >= 3 && args[2] == "useAppIcon=false")
-            if (useAppIcon) {
+            if (senderArgs.useAppIcon) {
                 routeInfo.setClientPackageName(TEST_PACKAGE_NAME)
+            }
+
+            var undoExecutor: Executor? = null
+            var undoRunnable: Runnable? = null
+            if (isSucceededState(displayState) && senderArgs.showUndo) {
+                undoExecutor = mainExecutor
+                undoRunnable = Runnable { Log.i(CLI_TAG, "Undo triggered for $displayState") }
             }
 
             statusBarManager.updateMediaTapToTransferSenderDisplay(
                 displayState,
                 routeInfo.build(),
-                getUndoExecutor(displayState),
-                getUndoCallback(displayState)
+                undoExecutor,
+                undoRunnable,
             )
         }
 
-        private fun getUndoExecutor(
-            @StatusBarManager.MediaTransferSenderState displayState: Int
-        ): Executor? {
-            return if (isSucceededState(displayState)) {
-                mainExecutor
-            } else {
-                null
-            }
-        }
+        private fun processArgs(args: List<String>): SenderArgs {
+            val senderArgs = SenderArgs(
+                deviceName = args[0],
+                commandName = args[1],
+            )
 
-        private fun getUndoCallback(
-            @StatusBarManager.MediaTransferSenderState displayState: Int
-        ): Runnable? {
-            return if (isSucceededState(displayState)) {
-                Runnable { Log.i(CLI_TAG, "Undo triggered for $displayState") }
-            } else {
-                null
+            if (args.size == 2) {
+                return senderArgs
             }
+
+            // Process any optional arguments
+            args.subList(2, args.size).forEach {
+                when {
+                    it == "useAppIcon=false" -> senderArgs.useAppIcon = false
+                    it == "showUndo=false" -> senderArgs.showUndo = false
+                    it.substring(0, 3) == "id=" -> senderArgs.id = it.substring(3)
+                }
+            }
+
+            return senderArgs
         }
 
         private fun isSucceededState(
@@ -106,14 +120,31 @@ class MediaTttCommandLineHelper @Inject constructor(
         }
 
         override fun help(pw: PrintWriter) {
-            pw.println("Usage: adb shell cmd statusbar $SENDER_COMMAND " +
-                    "<deviceName> <chipState> useAppIcon=[true|false] <id>")
+            pw.println(
+                "Usage: adb shell cmd statusbar $SENDER_COMMAND " +
+                "<deviceName> <chipState> " +
+                "useAppIcon=[true|false] id=<id> showUndo=[true|false]"
+            )
+            pw.println("Note: useAppIcon, id, and showUndo are optional additional commands.")
         }
     }
+
+    private data class SenderArgs(
+        val deviceName: String,
+        val commandName: String,
+        var id: String = "id",
+        var useAppIcon: Boolean = true,
+        var showUndo: Boolean = true,
+    )
 
     /** All commands for the receiver device. */
     inner class ReceiverCommand : Command {
         override fun execute(pw: PrintWriter, args: List<String>) {
+            if (args.isEmpty()) {
+                help(pw)
+                return
+            }
+
             val commandName = args[0]
             @StatusBarManager.MediaTransferReceiverState
             val displayState: Int?
