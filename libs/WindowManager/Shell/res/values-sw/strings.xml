@@ -72,13 +72,16 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Kiputo"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Dhibiti"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Umeondoa kiputo."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Gusa ili uzime na uwashe programu hii, kisha nenda kwenye skrini nzima."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Gusa ili uzime kisha uwashe programu hii, ili upate mwonekano bora."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Je, kuna hitilafu za kamera?\nGusa ili urekebishe"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Umeshindwa kurekebisha?\nGusa ili urejeshe nakala ya awali"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Je, hakuna hitilafu za kamera? Gusa ili uondoe."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Baadhi ya programu hufanya kazi vizuri zaidi zikiwa wima"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Jaribu moja kati ya chaguo hizi ili utumie nafasi ya skrini yako kwa ufanisi"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Zungusha kifaa chako ili uende kwenye hali ya skrini nzima"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Gusa mara mbili karibu na programu ili uihamishe"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Angalia na ufanye zaidi"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Buruta ndani programu nyingine ili utumie hali ya skrini iliyogawanywa"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Gusa mara mbili nje ya programu ili uihamishe"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Nimeelewa"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Panua ili upate maelezo zaidi."</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"Panua"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Punguza"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"Funga"</string>
 </resources>

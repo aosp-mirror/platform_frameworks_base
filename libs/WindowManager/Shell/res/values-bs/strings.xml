@@ -35,7 +35,7 @@
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Aplikacija ne podržava dijeljenje ekrana."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Aplikacija možda neće raditi na sekundarnom ekranu."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikacija ne podržava pokretanje na sekundarnim ekranima."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Razdjelnik ekrana"</string>
+    <string name="accessibility_divider" msgid="703810061635792791">"Razdjelnik podijeljenog ekrana"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Lijevo cijeli ekran"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Lijevo 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Lijevo 50%"</string>
@@ -72,13 +72,16 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Oblačić"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Upravljaj"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Oblačić je odbačen."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Dodirnite da ponovo pokrenete ovu aplikaciju i aktivirate prikaz preko cijelog ekrana."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Dodirnite da ponovo pokrenete ovu aplikaciju radi boljeg prikaza."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problemi s kamerom?\nDodirnite da ponovo namjestite"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nije popravljeno?\nDodirnite da vratite"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nema problema s kamerom? Dodirnite da odbacite."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Određene aplikacije najbolje funkcioniraju u uspravnom načinu rada"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Isprobajte jednu od ovih opcija da maksimalno iskoristite prostor"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Zarotirajte uređaj da aktivirate prikaz preko cijelog ekrana"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Dvaput dodirnite pored aplikacije da promijenite njen položaj"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Pogledajte i učinite više"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Prevucite još jednu aplikaciju za podijeljeni ekran"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dvaput dodirnite izvan aplikacije da promijenite njen položaj"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Razumijem"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Proširite za više informacija."</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"Maksimiziranje"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Minimiziranje"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"Zatvaranje"</string>
 </resources>

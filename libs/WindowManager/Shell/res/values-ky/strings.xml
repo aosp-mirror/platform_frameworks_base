@@ -72,13 +72,16 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Көбүк"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Башкаруу"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Калкып чыкма билдирме жабылды."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Бул колдонмону өчүрүп күйгүзүп, толук экранга өтүү үчүн таптап коюңуз."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Жакшыраак көрүү үчүн бул колдонмону өчүрүп күйгүзүңүз. Ал үчүн таптап коюңуз."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Камерада маселелер келип чыктыбы?\nОңдоо үчүн таптаңыз"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Оңдолгон жокпу?\nАртка кайтаруу үчүн таптаңыз"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Камерада маселе жокпу? Этибарга албоо үчүн таптаңыз."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Айрым колдонмолорду тигинен иштетүү туура болот"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Иш чөйрөсүнүн бардык мүмкүнчүлүктөрүн пайдалануу үчүн бул параметрлердин бирин колдонуп көрүңүз"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Толук экран режимине өтүү үчүн түзмөктү буруңуз"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Колдонмонун ракурсун өзгөртүү үчүн анын тушуна эки жолу басыңыз"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Көрүп, көбүрөөк нерселерди жасаңыз"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Экранды бөлүү үчүн башка колдонмону сүйрөңүз"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Колдонмону жылдыруу үчүн сырт жагын эки жолу таптаңыз"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Түшүндүм"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Толук маалымат алуу үчүн жайып көрүңүз."</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"Чоңойтуу"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Кичирейтүү"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"Жабуу"</string>
 </resources>

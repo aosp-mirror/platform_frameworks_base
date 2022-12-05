@@ -72,13 +72,16 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"बबल"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"व्यवस्थापन गर्नुहोस्"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"बबल हटाइयो।"</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"यो एप रिस्टार्ट गर्न ट्याप गर्नुहोस् र फुल स्क्रिन मोडमा जानुहोस्।"</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"यो एप अझ राम्रो हेर्न मिल्ने बनाउनका लागि यसलाई रिस्टार्ट गर्न ट्याप गर्नुहोस्।"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"क्यामेरासम्बन्धी समस्या देखियो?\nसमस्या हल गर्न ट्याप गर्नुहोस्"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"समस्या हल भएन?\nपहिलेको जस्तै बनाउन ट्याप गर्नुहोस्"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"क्यामेरासम्बन्धी कुनै पनि समस्या छैन? खारेज गर्न ट्याप गर्नुहोस्।"</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"केही एपहरूले पोर्ट्रेटमा राम्रोसँग काम गर्छन्"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"तपाईं स्क्रिनको अधिकतम ठाउँ प्रयोग गर्न चाहनुहुन्छ भने यीमध्ये कुनै विकल्प प्रयोग गरी हेर्नुहोस्"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"तपाईं फुल स्क्रिन मोड हेर्न चाहनुहुन्छ भने आफ्नो डिभाइस रोटेट गर्नुहोस्"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"तपाईं जुन एपको स्थिति मिलाउन चाहनुहुन्छ सोही एपको छेउमा डबल ट्याप गर्नुहोस्"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"थप कुरा हेर्नुहोस् र गर्नुहोस्"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"स्प्लिट स्क्रिन मोड प्रयोग गर्न अर्को एप ड्रयाग एन्ड ड्रप गर्नुहोस्"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"तपाईं जुन एपको स्थिति मिलाउन चाहनुहुन्छ सोही एपको बाहिर डबल ट्याप गर्नुहोस्"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"बुझेँ"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"थप जानकारी प्राप्त गर्न चाहनुहुन्छ भने एक्स्पान्ड गर्नुहोस्।"</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"ठुलो बनाउनुहोस्"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"मिनिमाइज गर्नुहोस्"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"बन्द गर्नुहोस्"</string>
 </resources>

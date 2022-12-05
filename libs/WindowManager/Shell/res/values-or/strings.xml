@@ -72,13 +72,16 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"ବବଲ୍"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ବବଲ୍ ଖାରଜ କରାଯାଇଛି।"</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"ଏହି ଆପକୁ ରିଷ୍ଟାର୍ଟ କରି ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନ୍ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"ଏକ ଆହୁରି ଭଲ ଭ୍ୟୁ ପାଇଁ ଏହି ଆପ ରିଷ୍ଟାର୍ଟ କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"କ୍ୟାମେରାରେ ସମସ୍ୟା ଅଛି?\nପୁଣି ଫିଟ କରିବାକୁ ଟାପ କରନ୍ତୁ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ଏହାର ସମାଧାନ ହୋଇନାହିଁ?\nଫେରିଯିବା ପାଇଁ ଟାପ କରନ୍ତୁ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"କ୍ୟାମେରାରେ କିଛି ସମସ୍ୟା ନାହିଁ? ଖାରଜ କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"କିଛି ଆପ ପୋର୍ଟ୍ରେଟରେ ସବୁଠାରୁ ଭଲ କାମ କରେ"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"ଆପଣଙ୍କ ସ୍ପେସରୁ ଅଧିକ ଲାଭ ପାଇବାକୁ ଏହି ବିକଳ୍ପଗୁଡ଼ିକ ମଧ୍ୟରୁ ଗୋଟିଏ ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"ପୂର୍ଣ୍ଣ-ସ୍କ୍ରିନ ବ୍ୟବହାର କରିବାକୁ ଆପଣଙ୍କ ଡିଭାଇସକୁ ରୋଟେଟ କରନ୍ତୁ"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"ଏକ ଆପକୁ ରିପୋଜିସନ କରିବା ପାଇଁ ଏହା ପାଖରେ ଦୁଇଥର-ଟାପ କରନ୍ତୁ"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"ଦେଖନ୍ତୁ ଏବଂ ଆହୁରି ଅନେକ କିଛି କରନ୍ତୁ"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"ସ୍ପ୍ଲିଟ-ସ୍କ୍ରିନ ପାଇଁ ଅନ୍ୟ ଏକ ଆପକୁ ଡ୍ରାଗ କରନ୍ତୁ"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ଏକ ଆପକୁ ରିପୋଜିସନ କରିବା ପାଇଁ ଏହାର ବାହାରେ ଦୁଇଥର-ଟାପ କରନ୍ତୁ"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ବୁଝିଗଲି"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ଅଧିକ ସୂଚନା ପାଇଁ ବିସ୍ତାର କରନ୍ତୁ।"</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"ବଡ଼ କରନ୍ତୁ"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"ଛୋଟ କରନ୍ତୁ"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"ବନ୍ଦ କରନ୍ତୁ"</string>
 </resources>
