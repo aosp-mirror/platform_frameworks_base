@@ -23,9 +23,11 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -36,6 +38,9 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
     private lateinit var qqsConstraint: ConstraintSet
     private lateinit var qsConstraint: ConstraintSet
     private lateinit var largeScreenConstraint: ConstraintSet
+
+    @get:Rule
+    val expect: Expect = Expect.create()
 
     @Before
     fun setUp() {
@@ -341,6 +346,32 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
             assertWithMessage("$name has 0 width in qs")
                     .that(qsConstraint.getConstraint(id).layout.mWidth).isNotEqualTo(0)
         }
+    }
+
+    @Test
+    fun testCheckViewsDontChangeSizeBetweenAnimationConstraints() {
+        val views = mapOf(
+                R.id.clock to "clock",
+                R.id.date to "date",
+                R.id.statusIcons to "icons",
+                R.id.privacy_container to "privacy",
+                R.id.carrier_group to "carriers",
+                R.id.batteryRemainingIcon to "battery",
+        )
+        views.forEach { (id, name) ->
+            expect.withMessage("$name changes height")
+                    .that(qqsConstraint.getConstraint(id).layout.mHeight.fromConstraint())
+                    .isEqualTo(qsConstraint.getConstraint(id).layout.mHeight.fromConstraint())
+            expect.withMessage("$name changes width")
+                    .that(qqsConstraint.getConstraint(id).layout.mWidth.fromConstraint())
+                    .isEqualTo(qsConstraint.getConstraint(id).layout.mWidth.fromConstraint())
+        }
+    }
+
+    private fun Int.fromConstraint() = when (this) {
+        -1 -> "MATCH_PARENT"
+        -2 -> "WRAP_CONTENT"
+        else -> toString()
     }
 
     @Test

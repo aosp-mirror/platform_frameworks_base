@@ -124,20 +124,9 @@
         </KeyFrameSet>
     </Transition>
 
-    <Transition
-        android:id="@+id/large_screen_header_transition"
-        app:constraintSetStart="@id/large_screen_header_constraint"
-        app:constraintSetEnd="@id/large_screen_header_constraint"/>
+    <Include app:constraintSet="@xml/large_screen_shade_header"/>
 
-    <!--
-        Placeholder ConstraintSet. They are populated in the controller for this class.
-        This is needed because there's no easy way to just refer to a `ConstraintSet` file. The
-        options are either a layout file or inline the ConstraintSets.
-     -->
-    <ConstraintSet android:id="@id/qqs_header_constraint"/>
+    <Include app:constraintSet="@xml/qs_header"/>
 
-    <ConstraintSet android:id="@id/qs_header_constraint"/>
-
-    <ConstraintSet android:id="@id/large_screen_header_constraint" />
-
+    <Include app:constraintSet="@xml/qqs_header"/>
 </MotionScene>
