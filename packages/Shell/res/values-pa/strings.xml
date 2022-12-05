@@ -39,7 +39,7 @@
     <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਸਫਲਤਾਪੂਰਵਕ ਲਿਆ ਗਿਆ।"</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਨਹੀਂ ਲਿਆ ਜਾ ਸਕਿਆ।"</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"ਬੱਗ ਰਿਪੋਰਟ <xliff:g id="ID">#%d</xliff:g> ਵੇਰਵੇ"</string>
-    <string name="bugreport_info_name" msgid="4414036021935139527">"ਫ਼ਾਈਲ ਨਾਮ"</string>
+    <string name="bugreport_info_name" msgid="4414036021935139527">"ਫ਼ਾਈਲ ਦਾ ਨਾਮ"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"ਬੱਗ ਸਿਰਲੇਖ"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"ਬੱਗ ਸਾਰਾਂਸ਼"</string>
     <string name="save" msgid="4781509040564835759">"ਰੱਖਿਅਤ ਕਰੋ"</string>
