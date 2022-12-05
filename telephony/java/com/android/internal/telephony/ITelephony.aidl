@@ -1320,6 +1320,16 @@ interface ITelephony {
     String getImeiForSlot(int slotIndex, String callingPackage, String callingFeatureId);
 
     /**
+     * Returns the primary IMEI of the device
+     *
+     * @param callingPackage The package name of the caller
+     * @param callingFeatureId The feature Id of the calling package
+     * @throws UnsupportedOperationException if the radio doesn't support this feature.
+     * @throws SecurityException if the caller does not have the required permission/privileges
+     */
+    String getPrimaryImei(String callingPackage, String callingFeatureId);
+
+    /**
      * Returns the Type Allocation Code from the IMEI for the given slot.
      *
      * @param slotIndex - Which slot to retrieve the Type Allocation Code from.

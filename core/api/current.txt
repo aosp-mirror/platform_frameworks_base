@@ -44334,6 +44334,7 @@ package android.telephony {
     method @Deprecated public int getPhoneCount();
     method public int getPhoneType();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PHONE_STATE}) public int getPreferredOpportunisticDataSubscription();
+    method @NonNull public String getPrimaryImei();
     method @Nullable @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public android.telephony.ServiceState getServiceState();
     method @Nullable @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public android.telephony.ServiceState getServiceState(int);
     method @Nullable public android.telephony.SignalStrength getSignalStrength();
