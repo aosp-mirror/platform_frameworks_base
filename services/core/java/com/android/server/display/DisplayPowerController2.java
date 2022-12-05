@@ -291,7 +291,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private boolean mAppliedDimming;
     private boolean mAppliedLowPower;
     private boolean mAppliedTemporaryAutoBrightnessAdjustment;
-    private boolean mAppliedBrightnessBoost;
     private boolean mAppliedThrottling;
 
     // Reason for which the brightness was last changed. See {@link BrightnessReason} for more
@@ -1201,18 +1200,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             autoBrightnessAdjustment = mAutoBrightnessAdjustment;
             brightnessAdjustmentFlags = BrightnessReason.ADJUSTMENT_AUTO;
             mAppliedTemporaryAutoBrightnessAdjustment = false;
-        }
-        // Apply brightness boost.
-        // We do this here after deciding whether auto-brightness is enabled so that we don't
-        // disable the light sensor during this temporary state.  That way when boost ends we will
-        // be able to resume normal auto-brightness behavior without any delay.
-        if (mPowerRequest.boostScreenBrightness
-                && brightnessState != PowerManager.BRIGHTNESS_OFF_FLOAT) {
-            brightnessState = PowerManager.BRIGHTNESS_MAX;
-            mBrightnessReasonTemp.setReason(BrightnessReason.REASON_BOOST);
-            mAppliedBrightnessBoost = true;
-        } else {
-            mAppliedBrightnessBoost = false;
         }
 
         // If the brightness is already set then it's been overridden by something other than the
@@ -2227,7 +2214,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         pw.println("  mAppliedThrottling=" + mAppliedThrottling);
         pw.println("  mAppliedTemporaryAutoBrightnessAdjustment="
                 + mAppliedTemporaryAutoBrightnessAdjustment);
-        pw.println("  mAppliedBrightnessBoost=" + mAppliedBrightnessBoost);
         pw.println("  mDozing=" + mDozing);
         pw.println("  mSkipRampState=" + skipRampStateToString(mSkipRampState));
         pw.println("  mScreenOnBlockStartRealTime=" + mScreenOnBlockStartRealTime);
