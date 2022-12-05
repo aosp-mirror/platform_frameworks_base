@@ -178,10 +178,10 @@ public class SplitScreenControllerTests extends ShellTestCase {
         Intent startIntent = createStartIntent("startActivity");
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
-        // Put the same component into focus task
-        ActivityManager.RunningTaskInfo focusTaskInfo =
+        // Put the same component to the top running task
+        ActivityManager.RunningTaskInfo topRunningTask =
                 createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, startIntent);
-        doReturn(focusTaskInfo).when(mStageCoordinator).getFocusingTaskInfo();
+        doReturn(topRunningTask).when(mRecentTasks).getTopRunningTask();
         doReturn(true).when(mStageCoordinator).isValidToEnterSplitScreen(any());
 
         mSplitScreenController.startIntent(pendingIntent, null, SPLIT_POSITION_TOP_OR_LEFT, null);
@@ -199,10 +199,10 @@ public class SplitScreenControllerTests extends ShellTestCase {
         Intent startIntent = createStartIntent("startActivity");
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
-        // Put the same component into focus task
-        ActivityManager.RunningTaskInfo focusTaskInfo =
+        // Put the same component to the top running task
+        ActivityManager.RunningTaskInfo topRunningTask =
                 createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, startIntent);
-        doReturn(focusTaskInfo).when(mStageCoordinator).getFocusingTaskInfo();
+        doReturn(topRunningTask).when(mRecentTasks).getTopRunningTask();
         doReturn(true).when(mStageCoordinator).isValidToEnterSplitScreen(any());
         // Put the same component into a task in the background
         ActivityManager.RecentTaskInfo sameTaskInfo = new ActivityManager.RecentTaskInfo();

@@ -315,10 +315,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return mStageCoordinator;
     }
 
-    public ActivityManager.RunningTaskInfo getFocusingTaskInfo() {
-        return mStageCoordinator.getFocusingTaskInfo();
-    }
-
     public boolean isValidToEnterSplitScreen(@NonNull ActivityManager.RunningTaskInfo taskInfo) {
         return mStageCoordinator.isValidToEnterSplitScreen(taskInfo);
     }
@@ -628,9 +624,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         if (!isSplitScreenVisible()) {
             // Split screen is not yet activated, check if the current top running task is valid to
             // split together.
-            final ActivityManager.RunningTaskInfo taskInfo = getFocusingTaskInfo();
-            if (taskInfo != null && isValidToEnterSplitScreen(taskInfo)) {
-                return Objects.equals(taskInfo.baseIntent.getComponent(), launchingActivity);
+            final ActivityManager.RunningTaskInfo topRunningTask = mRecentTasksOptional
+                    .map(recentTasks -> recentTasks.getTopRunningTask()).orElse(null);
+            if (topRunningTask != null && isValidToEnterSplitScreen(topRunningTask)) {
+                return Objects.equals(topRunningTask.baseIntent.getComponent(), launchingActivity);
             }
             return false;
         }
