@@ -150,7 +150,7 @@ import java.util.Optional;
  */
 public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         DisplayController.OnDisplaysChangedListener, Transitions.TransitionHandler,
-        ShellTaskOrganizer.TaskListener, ShellTaskOrganizer.FocusListener {
+        ShellTaskOrganizer.TaskListener {
 
     private static final String TAG = StageCoordinator.class.getSimpleName();
 
@@ -185,8 +185,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private final Rect mTempRect1 = new Rect();
     private final Rect mTempRect2 = new Rect();
-
-    private ActivityManager.RunningTaskInfo mFocusingTaskInfo;
 
     /**
      * A single-top root task which the split divider attached to.
@@ -304,7 +302,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mDisplayController.addDisplayWindowListener(this);
         mDisplayLayout = new DisplayLayout(displayController.getDisplayLayout(displayId));
         transitions.addHandler(this);
-        mTaskOrganizer.addFocusListener(this);
         mSplitUnsupportedToast = Toast.makeText(mContext,
                 R.string.dock_non_resizeble_failed_to_dock_text, Toast.LENGTH_SHORT);
     }
@@ -455,8 +452,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     /** Launches an activity into split by legacy transition. */
-    void startIntentLegacy(PendingIntent intent, Intent fillInIntent,
-            @SplitPosition int position, @Nullable Bundle options) {
+    void startIntentLegacy(PendingIntent intent, Intent fillInIntent, @SplitPosition int position,
+            @Nullable Bundle options) {
+        final boolean isEnteringSplit = !isSplitActive();
         final WindowContainerTransaction evictWct = new WindowContainerTransaction();
         prepareEvictChildTasks(position, evictWct);
 
@@ -466,22 +464,29 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
                     IRemoteAnimationFinishedCallback finishedCallback,
                     SurfaceControl.Transaction t) {
-                if (apps == null || apps.length == 0) {
-                    if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0) {
-                        mMainExecutor.execute(() ->
-                                exitSplitScreen(mMainStage.getChildCount() == 0
-                                        ? mSideStage : mMainStage, EXIT_REASON_UNKNOWN));
-                        mSplitUnsupportedToast.show();
+                if (isEnteringSplit) {
+                    boolean openingToSide = false;
+                    if (apps != null) {
+                        for (int i = 0; i < apps.length; ++i) {
+                            if (apps[i].mode == MODE_OPENING
+                                    && mSideStage.containsTask(apps[i].taskId)) {
+                                openingToSide = true;
+                                break;
+                            }
+                        }
                     }
-
-                    // Do nothing when the animation was cancelled.
-                    t.apply();
-                    return;
+                    if (!openingToSide) {
+                        mMainExecutor.execute(() -> exitSplitScreen(
+                                mSideStage.getChildCount() == 0 ? mMainStage : mSideStage,
+                                EXIT_REASON_UNKNOWN));
+                    }
                 }
 
-                for (int i = 0; i < apps.length; ++i) {
-                    if (apps[i].mode == MODE_OPENING) {
-                        t.show(apps[i].leash);
+                if (apps != null) {
+                    for (int i = 0; i < apps.length; ++i) {
+                        if (apps[i].mode == MODE_OPENING) {
+                            t.show(apps[i].leash);
+                        }
                     }
                 }
                 t.apply();
@@ -503,7 +508,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         // If split still not active, apply windows bounds first to avoid surface reset to
         // wrong pos by SurfaceAnimator from wms.
-        if (!mMainStage.isActive() && mLogger.isEnterRequestedByDrag()) {
+        if (isEnteringSplit && mLogger.isEnterRequestedByDrag()) {
             updateWindowBounds(mSplitLayout, wct);
         }
 
@@ -1613,15 +1618,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return taskInfo.supportsMultiWindow
                 && ArrayUtils.contains(CONTROLLED_ACTIVITY_TYPES, taskInfo.getActivityType())
                 && ArrayUtils.contains(CONTROLLED_WINDOWING_MODES, taskInfo.getWindowingMode());
-    }
-
-    ActivityManager.RunningTaskInfo getFocusingTaskInfo() {
-        return mFocusingTaskInfo;
-    }
-
-    @Override
-    public void onFocusTaskChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        mFocusingTaskInfo = taskInfo;
     }
 
     @Override
