@@ -72,6 +72,7 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.IBinder;
+import android.os.IpcDataCache;
 import android.os.LocaleList;
 import android.os.PowerManager;
 import android.os.PowerManager.AutoPowerSaveModeTriggers;
@@ -123,6 +124,9 @@ import java.util.concurrent.Executor;
 public final class Settings {
     /** @hide */
     public static final boolean DEFAULT_OVERRIDEABLE_BY_RESTORE = false;
+
+    /** @hide default value of whether IpcDataCache is enabled or not */
+    public static final boolean IPC_DATA_CACHE_ENABLED = false;
 
     // Intent actions for Settings
 
@@ -2901,8 +2905,8 @@ public final class Settings {
 
     public static final String AUTHORITY = "settings";
 
-    private static final String TAG = "Settings";
-    private static final boolean LOCAL_LOGV = false;
+    static final String TAG = "Settings";
+    static final boolean LOCAL_LOGV = false;
 
     // Used in system server calling uid workaround in call()
     private static boolean sInSystemServer = false;
@@ -3012,10 +3016,10 @@ public final class Settings {
         }
     }
 
-    private static final class ContentProviderHolder {
+    static final class ContentProviderHolder {
         private final Object mLock = new Object();
 
-        private final Uri mUri;
+        final Uri mUri;
         @GuardedBy("mLock")
         @UnsupportedAppUsage
         private IContentProvider mContentProvider;
@@ -3042,14 +3046,14 @@ public final class Settings {
     }
 
     // Thread-safe.
-    private static class NameValueCache {
+    static class NameValueCache {
         private static final boolean DEBUG = false;
 
-        private static final String[] SELECT_VALUE_PROJECTION = new String[] {
+        static final String[] SELECT_VALUE_PROJECTION = new String[] {
                 Settings.NameValueTable.VALUE
         };
 
-        private static final String NAME_EQ_PLACEHOLDER = "name=?";
+        static final String NAME_EQ_PLACEHOLDER = "name=?";
 
         // Must synchronize on 'this' to access mValues and mValuesVersion.
         private final ArrayMap<String, String> mValues = new ArrayMap<>();
@@ -3069,6 +3073,14 @@ public final class Settings {
         private final ArraySet<String> mReadableFields;
         private final ArraySet<String> mAllFields;
         private final ArrayMap<String, Integer> mReadableFieldsWithMaxTargetSdk;
+
+        private final String mSettingsType;
+
+        // Caches for settings key -> value, only for the current user
+        private final IpcDataCache<SettingsIpcDataCache.GetQuery, String> mValueCache;
+        // Cache for settings namespace -> list of settings, only for the current user
+        private final IpcDataCache<SettingsIpcDataCache.ListQuery, HashMap<String, String>>
+                mNamespaceCache;
 
         @GuardedBy("this")
         private GenerationTracker mGenerationTracker;
@@ -3095,6 +3107,11 @@ public final class Settings {
             mReadableFieldsWithMaxTargetSdk = new ArrayMap<>();
             getPublicSettingsForClass(callerClass, mAllFields, mReadableFields,
                     mReadableFieldsWithMaxTargetSdk);
+            mSettingsType = callerClass.getSimpleName().toLowerCase();
+            mValueCache = IPC_DATA_CACHE_ENABLED ? SettingsIpcDataCache.createValueCache(
+                    mProviderHolder, mCallGetCommand, mUri, mSettingsType) : null;
+            mNamespaceCache = IPC_DATA_CACHE_ENABLED ? SettingsIpcDataCache.createListCache(
+                    mProviderHolder, mCallListCommand, mSettingsType) : null;
         }
 
         public boolean putStringForUser(ContentResolver cr, String name, String value,
@@ -3193,6 +3210,30 @@ public final class Settings {
                 }
             }
 
+            if (IPC_DATA_CACHE_ENABLED) {
+                if (userHandle != UserHandle.myUserId()) {
+                    if (LOCAL_LOGV) {
+                        Log.v(TAG, "get setting for user " + userHandle
+                                + " by user " + UserHandle.myUserId()
+                                + " so skipping cache");
+                    }
+                    try {
+                        return SettingsIpcDataCache.getValueFromContentProviderCall(
+                                mProviderHolder, mCallGetCommand, mUri, userHandle, cr, name);
+                    } catch (RemoteException e) {
+                        return null;
+                    }
+                }
+
+                try {
+                    return mValueCache.query(new SettingsIpcDataCache.GetQuery(cr, name));
+                } catch (RuntimeException e) {
+                    // Failed to query the server
+                    return null;
+                }
+            }
+
+            // Fall back to old cache mechanism
             final boolean isSelf = (userHandle == UserHandle.myUserId());
             int currentGeneration = -1;
             if (isSelf) {
@@ -3389,6 +3430,38 @@ public final class Settings {
                 List<String> names) {
             String namespace = prefix.substring(0, prefix.length() - 1);
             Config.enforceReadPermission(namespace);
+
+            if (mCallListCommand == null) {
+                // No list command specified, return empty map
+                return new ArrayMap<>();
+            }
+
+            if (IPC_DATA_CACHE_ENABLED) {
+                ArrayMap<String, String> results = new ArrayMap<>();
+                HashMap<String, String> flagsToValues;
+                try {
+                    flagsToValues = mNamespaceCache.query(
+                            new SettingsIpcDataCache.ListQuery(cr, prefix));
+                } catch (RuntimeException e) {
+                    // Failed to query the server, return an empty map
+                    return results;
+                }
+
+                if (flagsToValues != null) {
+                    if (!names.isEmpty()) {
+                        for (Map.Entry<String, String> flag : flagsToValues.entrySet()) {
+                            if (names.contains(flag.getKey())) {
+                                results.put(flag.getKey(), flag.getValue());
+                            }
+                        }
+                    } else {
+                        results.putAll(flagsToValues);
+                    }
+                }
+                return results;
+            }
+
+            // Fall back to old cache mechanism
             ArrayMap<String, String> keyValues = new ArrayMap<>();
             int currentGeneration = -1;
 
@@ -3428,10 +3501,7 @@ public final class Settings {
                 }
             }
 
-            if (mCallListCommand == null) {
-                // No list command specified, return empty map
-                return keyValues;
-            }
+
             IContentProvider cp = mProviderHolder.getProvider(cr);
 
             try {
@@ -3537,13 +3607,25 @@ public final class Settings {
             }
         }
 
-        public void clearGenerationTrackerForTest() {
+        public void clearCachesForTest() {
+            if (IPC_DATA_CACHE_ENABLED) {
+                mValueCache.clear();
+                mNamespaceCache.clear();
+                return;
+            }
+            // Fall back to old cache mechanism
             synchronized (NameValueCache.this) {
                 if (mGenerationTracker != null) {
                     mGenerationTracker.destroy();
                 }
                 mValues.clear();
                 mGenerationTracker = null;
+            }
+        }
+
+        public void invalidateCache() {
+            if (IPC_DATA_CACHE_ENABLED) {
+                SettingsIpcDataCache.invalidateCache(mSettingsType);
             }
         }
     }
@@ -3822,7 +3904,12 @@ public final class Settings {
         /** @hide */
         public static void clearProviderForTest() {
             sProviderHolder.clearProviderForTest();
-            sNameValueCache.clearGenerationTrackerForTest();
+            sNameValueCache.clearCachesForTest();
+        }
+
+        /** @hide */
+        public static void invalidateValueCache() {
+            sNameValueCache.invalidateCache();
         }
 
         /** @hide */
@@ -6261,7 +6348,12 @@ public final class Settings {
         /** @hide */
         public static void clearProviderForTest() {
             sProviderHolder.clearProviderForTest();
-            sNameValueCache.clearGenerationTrackerForTest();
+            sNameValueCache.clearCachesForTest();
+        }
+
+        /** @hide */
+        public static void invalidateValueCache() {
+            sNameValueCache.invalidateCache();
         }
 
         /** @hide */
@@ -16355,7 +16447,12 @@ public final class Settings {
         /** @hide */
         public static void clearProviderForTest() {
             sProviderHolder.clearProviderForTest();
-            sNameValueCache.clearGenerationTrackerForTest();
+            sNameValueCache.clearCachesForTest();
+        }
+
+        /** @hide */
+        public static void invalidateValueCache() {
+            sNameValueCache.invalidateCache();
         }
 
         /** @hide */
@@ -18549,7 +18646,17 @@ public final class Settings {
         /** @hide */
         public static void clearProviderForTest() {
             sProviderHolder.clearProviderForTest();
-            sNameValueCache.clearGenerationTrackerForTest();
+            sNameValueCache.clearCachesForTest();
+        }
+
+        /** @hide */
+        public static void invalidateValueCache() {
+            sNameValueCache.invalidateCache();
+        }
+
+        /** @hide */
+        public static void invalidateNamespaceCache() {
+            sNameValueCache.invalidateCache();
         }
 
         private static void handleMonitorCallback(
