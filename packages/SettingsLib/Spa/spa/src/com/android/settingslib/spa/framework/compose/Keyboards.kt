@@ -18,7 +18,6 @@ package com.android.settingslib.spa.framework.compose
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
@@ -32,7 +31,7 @@ import kotlinx.coroutines.flow.filter
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun hideKeyboardAction(): KeyboardActionScope.() -> Unit {
+fun hideKeyboardAction(): () -> Unit {
     val keyboardController = LocalSoftwareKeyboardController.current
     return { keyboardController?.hide() }
 }
