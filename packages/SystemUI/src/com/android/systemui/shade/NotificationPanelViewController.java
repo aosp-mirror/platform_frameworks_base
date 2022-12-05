@@ -915,6 +915,7 @@ public final class NotificationPanelViewController implements Dumpable {
         mQsFrameTranslateController = qsFrameTranslateController;
         updateUserSwitcherFlags();
         mKeyguardBottomAreaViewModel = keyguardBottomAreaViewModel;
+        mKeyguardBottomAreaInteractor = keyguardBottomAreaInteractor;
         onFinishInflate();
         keyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
                 new KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener() {
@@ -932,7 +933,6 @@ public final class NotificationPanelViewController implements Dumpable {
                         unlockAnimationStarted(playingCannedAnimation, isWakeAndUnlock, startDelay);
                     }
                 });
-        mKeyguardBottomAreaInteractor = keyguardBottomAreaInteractor;
         dumpManager.registerDumpable(this);
     }
 
@@ -1108,6 +1108,7 @@ public final class NotificationPanelViewController implements Dumpable {
                 mKeyguardStatusViewComponentFactory.build(keyguardStatusView);
         mKeyguardStatusViewController = statusViewComponent.getKeyguardStatusViewController();
         mKeyguardStatusViewController.init();
+        updateClockAppearance();
 
         if (mKeyguardUserSwitcherController != null) {
             // Try to close the switcher so that callbacks are triggered if necessary.
