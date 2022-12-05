@@ -366,7 +366,7 @@ public class Binder implements IBinder {
      */
     public static final int getCallingUidOrWtf() {
         if (!isDirectlyHandlingTransaction() && !hasExplicitIdentity()) {
-            Log.wtf(TAG,
+            Log.wtfStack(TAG,
                     "Thread is not in a binder transaction, "
                             + "and the calling identity has not been "
                             + "explicitly set with clearCallingIdentity");
