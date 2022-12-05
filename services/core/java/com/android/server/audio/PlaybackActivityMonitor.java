@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
+import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioPlaybackConfiguration.PlayerMuteEvent;
@@ -535,6 +536,26 @@ public final class PlaybackActivityMonitor
         synchronized (mPlayerLock) {
             for (AudioPlaybackConfiguration apc : mPlayers.values()) {
                 if (apc.isActive() && apc.getClientUid() == uid) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return true if an active playback for media use case is currently routed to
+     * a remote submix device with the supplied address.
+     * @param address
+     */
+    public boolean hasActiveMediaPlaybackOnSubmixWithAddress(@NonNull String address) {
+        synchronized (mPlayerLock) {
+            for (AudioPlaybackConfiguration apc : mPlayers.values()) {
+                AudioDeviceInfo device = apc.getAudioDeviceInfo();
+                if (apc.getAudioAttributes().getUsage() == AudioAttributes.USAGE_MEDIA
+                        && apc.isActive() && device != null
+                        && device.getInternalType() == AudioSystem.DEVICE_OUT_REMOTE_SUBMIX
+                        && address.equals(device.getAddress())) {
                     return true;
                 }
             }

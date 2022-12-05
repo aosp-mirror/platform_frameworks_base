@@ -10913,6 +10913,21 @@ public class AudioService extends IAudioService.Stub
     }
 
     /**
+     * Called by an AudioPolicyProxy when the client dies.
+     * Checks if an active playback for media use case is currently routed to one of the
+     * remote submix devices owned by this dynamic policy and broadcasts a becoming noisy
+     * intend in this case.
+     * @param addresses list of remote submix device addresses to check.
+     */
+    private void onPolicyClientDeath(List<String> addresses) {
+        for (String address : addresses) {
+            if (mPlaybackMonitor.hasActiveMediaPlaybackOnSubmixWithAddress(address)) {
+                mDeviceBroker.postBroadcastBecomingNoisy();
+                return;
+            }
+        }
+    }
+    /**
      * Apps with MODIFY_AUDIO_ROUTING can register any policy.
      * Apps with an audio capable MediaProjection are allowed to register a RENDER|LOOPBACK policy
      * as those policy do not modify the audio routing.
@@ -11622,6 +11637,13 @@ public class AudioService extends IAudioService.Stub
         public void binderDied() {
             mDynPolicyLogger.enqueue((new EventLogger.StringEvent("AudioPolicy "
                     + mPolicyCallback.asBinder() + " died").printLog(TAG)));
+
+            List<String> addresses = new ArrayList<>();
+            for (AudioMix mix : mMixes) {
+                addresses.add(mix.getRegistration());
+            }
+            onPolicyClientDeath(addresses);
+
             release();
         }
 
