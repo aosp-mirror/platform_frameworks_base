@@ -599,8 +599,8 @@ public final class Settings {
      * the result is set to {@link android.app.Activity#RESULT_CANCELED}.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_MANAGE_APP_LONG_JOBS =
-            "android.settings.MANAGE_APP_LONG_JOBS";
+    public static final String ACTION_MANAGE_APP_LONG_RUNNING_JOBS =
+            "android.settings.MANAGE_APP_LONG_RUNNING_JOBS";
 
     /**
      * Activity Action: Show settings to allow configuration of cross-profile access for apps
