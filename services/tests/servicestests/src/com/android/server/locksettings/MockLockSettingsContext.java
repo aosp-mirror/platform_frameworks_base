@@ -21,6 +21,7 @@ import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -35,22 +36,25 @@ import android.os.storage.StorageManager;
 
 public class MockLockSettingsContext extends ContextWrapper {
 
-    private UserManager mUserManager;
-    private NotificationManager mNotificationManager;
-    private DevicePolicyManager mDevicePolicyManager;
-    private StorageManager mStorageManager;
-    private TrustManager mTrustManager;
-    private KeyguardManager mKeyguardManager;
-    private FingerprintManager mFingerprintManager;
-    private FaceManager mFaceManager;
-    private PackageManager mPackageManager;
+    private final ContentResolver mContentResolver;
+    private final UserManager mUserManager;
+    private final NotificationManager mNotificationManager;
+    private final DevicePolicyManager mDevicePolicyManager;
+    private final StorageManager mStorageManager;
+    private final TrustManager mTrustManager;
+    private final KeyguardManager mKeyguardManager;
+    private final FingerprintManager mFingerprintManager;
+    private final FaceManager mFaceManager;
+    private final PackageManager mPackageManager;
 
-    public MockLockSettingsContext(Context base, UserManager userManager,
-            NotificationManager notificationManager, DevicePolicyManager devicePolicyManager,
-            StorageManager storageManager, TrustManager trustManager,
-            KeyguardManager keyguardManager, FingerprintManager fingerprintManager,
-            FaceManager faceManager, PackageManager packageManager) {
+    public MockLockSettingsContext(Context base, ContentResolver contentResolver,
+            UserManager userManager, NotificationManager notificationManager,
+            DevicePolicyManager devicePolicyManager, StorageManager storageManager,
+            TrustManager trustManager, KeyguardManager keyguardManager,
+            FingerprintManager fingerprintManager, FaceManager faceManager,
+            PackageManager packageManager) {
         super(base);
+        mContentResolver = contentResolver;
         mUserManager = userManager;
         mNotificationManager = notificationManager;
         mDevicePolicyManager = devicePolicyManager;
@@ -60,6 +64,11 @@ public class MockLockSettingsContext extends ContextWrapper {
         mFingerprintManager = fingerprintManager;
         mFaceManager = faceManager;
         mPackageManager = packageManager;
+    }
+
+    @Override
+    public ContentResolver getContentResolver() {
+        return mContentResolver;
     }
 
     @Override

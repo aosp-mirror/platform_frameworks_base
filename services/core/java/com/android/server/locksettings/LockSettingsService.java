@@ -550,16 +550,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             return (BiometricManager) mContext.getSystemService(Context.BIOMETRIC_SERVICE);
         }
 
-        public int settingsGlobalGetInt(ContentResolver contentResolver, String keyName,
-                int defaultValue) {
-            return Settings.Global.getInt(contentResolver, keyName, defaultValue);
-        }
-
-        public int settingsSecureGetInt(ContentResolver contentResolver, String keyName,
-                int defaultValue, int userId) {
-            return Settings.Secure.getIntForUser(contentResolver, keyName, defaultValue, userId);
-        }
-
         public java.security.KeyStore getJavaKeyStore() {
             try {
                 java.security.KeyStore ks = java.security.KeyStore.getInstance(
@@ -1027,9 +1017,9 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void enforceFrpResolved() {
         final ContentResolver cr = mContext.getContentResolver();
-        final boolean inSetupWizard = mInjector.settingsSecureGetInt(cr,
+        final boolean inSetupWizard = Settings.Secure.getIntForUser(cr,
                 Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_SYSTEM) == 0;
-        final boolean secureFrp = mInjector.settingsSecureGetInt(cr,
+        final boolean secureFrp = Settings.Secure.getIntForUser(cr,
                 Settings.Secure.SECURE_FRP_MODE, 0, UserHandle.USER_SYSTEM) == 1;
         if (inSetupWizard && secureFrp) {
             throw new SecurityException("Cannot change credential in SUW while factory reset"
@@ -2155,7 +2145,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (credential == null || credential.isNone()) {
             throw new IllegalArgumentException("Credential can't be null or empty");
         }
-        if (userId == USER_FRP && mInjector.settingsGlobalGetInt(mContext.getContentResolver(),
+        if (userId == USER_FRP && Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
             Slog.e(TAG, "FRP credential can only be verified prior to provisioning.");
             return VerifyCredentialResponse.ERROR;
@@ -3282,6 +3272,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             for (UserInfo user : users) {
                 if (userOwnsFrpCredential(mContext, user)) {
                     if (!isUserSecure(user.id)) {
+                        Slogf.d(TAG, "Clearing FRP credential tied to user %d", user.id);
                         mStorage.writePersistentDataBlock(PersistentData.TYPE_NONE, user.id,
                                 0, null);
                     }
