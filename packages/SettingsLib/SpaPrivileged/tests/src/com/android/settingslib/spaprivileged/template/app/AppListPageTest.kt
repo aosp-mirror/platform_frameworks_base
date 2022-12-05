@@ -41,7 +41,7 @@ class AppListPageTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private var context: Context = ApplicationProvider.getApplicationContext()
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
     fun title_isDisplayed() {

@@ -24,7 +24,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spaprivileged.R
+import com.android.settingslib.spaprivileged.test.R
 import com.android.settingslib.spaprivileged.tests.testutils.TestTogglePermissionAppListModel
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -36,7 +36,7 @@ class TogglePermissionAppListPageTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private var context: Context = ApplicationProvider.getApplicationContext()
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
     fun appListInjectEntry_titleDisplayed() {

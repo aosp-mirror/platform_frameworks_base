@@ -48,7 +48,7 @@ class AppStorageSizeTest {
     val composeTestRule = createComposeRule()
 
     @Spy
-    private var context: Context = ApplicationProvider.getApplicationContext()
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Mock
     private lateinit var storageStatsManager: StorageStatsManager

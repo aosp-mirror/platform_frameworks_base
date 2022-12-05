@@ -74,6 +74,8 @@ interface RestrictionsProvider {
     fun restrictedModeState(): State<RestrictedMode?>
 }
 
+typealias RestrictionsProviderFactory = (Context, Restrictions) -> RestrictionsProvider
+
 internal class RestrictionsProviderImpl(
     private val context: Context,
     private val restrictions: Restrictions,
