@@ -151,6 +151,7 @@ import android.os.Vibrator;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.service.dreams.DreamManagerInternal;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
@@ -516,6 +517,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mDoublePressOnStemPrimaryBehavior;
     int mTriplePressOnStemPrimaryBehavior;
     int mLongPressOnStemPrimaryBehavior;
+    boolean mStylusButtonsDisabled = false;
     boolean mHasSoftInput = false;
     boolean mHapticTextHandleEnabled;
     boolean mUseTvRouting;
@@ -770,6 +772,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.POWER_BUTTON_SUPPRESSION_DELAY_AFTER_GESTURE_WAKE), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.STYLUS_BUTTONS_DISABLED), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -2560,6 +2565,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
                     mContext.getResources().getInteger(
                             com.android.internal.R.integer.config_keyChordPowerVolumeUp));
+
+            mStylusButtonsDisabled = Settings.Secure.getIntForUser(resolver,
+                    Secure.STYLUS_BUTTONS_DISABLED, 0, UserHandle.USER_CURRENT) == 1;
         }
         if (updateRotation) {
             updateRotation(true);
@@ -4183,7 +4191,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_DEMO_APP_3:
             case KeyEvent.KEYCODE_DEMO_APP_4: {
                 // TODO(b/254604589): Dispatch KeyEvent to System UI.
-                sendSystemKeyToStatusBarAsync(keyCode);
+                if (!mStylusButtonsDisabled) {
+                    sendSystemKeyToStatusBarAsync(keyCode);
+                }
 
                 // Just drop if keys are not intercepted for direct key.
                 result &= ~ACTION_PASS_TO_USER;

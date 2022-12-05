@@ -7224,6 +7224,15 @@ public final class Settings {
         public static final String SHOW_IME_WITH_HARD_KEYBOARD = "show_ime_with_hard_keyboard";
 
         /**
+         * Whether stylus button presses are disabled. This is a boolean that
+         * determines if stylus buttons are ignored.
+         *
+         * @hide
+         */
+        @SuppressLint("NoSettingsProvider")
+        public static final String STYLUS_BUTTONS_DISABLED = "stylus_buttons_disabled";
+
+        /**
          * Host name and port for global http proxy. Uses ':' seperator for
          * between host and port.
          *
