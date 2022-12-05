@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.widget
+package com.android.settingslib.spa.widget.illustration
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

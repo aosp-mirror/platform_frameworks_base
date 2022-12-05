@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.widget
+package com.android.settingslib.spa.widget.illustration
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.RawRes
@@ -39,8 +39,8 @@ class IllustrationTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val DrawableId = SemanticsPropertyKey<Int>("DrawableResId")
-    private var SemanticsPropertyReceiver.drawableId by DrawableId
+    private val drawableId = SemanticsPropertyKey<Int>("DrawableResId")
+    private var SemanticsPropertyReceiver.drawableId by drawableId
 
     @Test
     fun image_displayed() {
@@ -54,7 +54,7 @@ class IllustrationTest {
         }
 
         fun hasDrawable(@DrawableRes id: Int): SemanticsMatcher =
-            SemanticsMatcher.expectValue(DrawableId, id)
+            SemanticsMatcher.expectValue(drawableId, id)
 
         val isIllustrationNode = hasAnyAncestor(hasDrawable(resId))
         composeTestRule.onAllNodes(hasDrawable(resId))
@@ -62,8 +62,8 @@ class IllustrationTest {
             .assertIsDisplayed()
     }
 
-    private val RawId = SemanticsPropertyKey<Int>("RawResId")
-    private var SemanticsPropertyReceiver.rawId by RawId
+    private val rawId = SemanticsPropertyKey<Int>("RawResId")
+    private var SemanticsPropertyReceiver.rawId by rawId
 
     @Test
     fun empty_lottie_not_displayed() {
@@ -77,7 +77,7 @@ class IllustrationTest {
         }
 
         fun hasRaw(@RawRes id: Int): SemanticsMatcher =
-            SemanticsMatcher.expectValue(RawId, id)
+            SemanticsMatcher.expectValue(rawId, id)
 
         val isIllustrationNode = hasAnyAncestor(hasRaw(resId))
         composeTestRule.onAllNodes(hasRaw(resId))
