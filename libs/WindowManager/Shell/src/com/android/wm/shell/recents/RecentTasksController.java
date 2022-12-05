@@ -367,6 +367,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
     public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
+        pw.println(prefix + " mListener=" + mListener);
+        pw.println(prefix + "Tasks:");
         ArrayList<GroupedRecentTaskInfo> recentTasks = getRecentTasks(Integer.MAX_VALUE,
                 ActivityManager.RECENT_IGNORE_UNAVAILABLE, ActivityManager.getCurrentUser());
         for (int i = 0; i < recentTasks.size(); i++) {
