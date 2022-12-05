@@ -328,10 +328,12 @@ java_library {
 
 java_library {
     name: "android_test_stubs_current",
-    // Modules do not have test APIs, but we want to include their SystemApis, like we include
-    // the SystemApi of framework-non-updatable-sources.
     static_libs: [
-        "all-modules-system-stubs",
+        // Updatable modules do not have test APIs, but we want to include their SystemApis, like we
+        // include the SystemApi of framework-non-updatable-sources.
+        "all-updatable-modules-system-stubs",
+        // Non-updatable modules on the other hand can have test APIs, so include their test-stubs.
+        "all-non-updatable-modules-test-stubs",
         "android-non-updatable.stubs.test",
         "private-stub-annotations-jar",
     ],
