@@ -19,10 +19,10 @@ package com.android.server.wm.flicker.launch
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.FixMethodOrder
@@ -43,8 +43,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter) :
-    OpenAppFromNotificationWarm(testSpec) {
+class OpenAppFromLockNotificationWarm(flicker: FlickerTest) : OpenAppFromNotificationWarm(flicker) {
 
     override val openingNotificationsFromLockScreen = true
 
@@ -70,7 +69,7 @@ class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter) :
     @Test
     @Presubmit
     fun appWindowBecomesFirstAndOnlyTopWindow() {
-        testSpec.assertWm {
+        flicker.assertWm {
             this.hasNoVisibleAppWindow()
                 .then()
                 .isAppWindowOnTop(ComponentNameMatcher.SNAPSHOT, isOptional = true)
@@ -85,7 +84,7 @@ class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter) :
     @Test
     @Presubmit
     fun screenLockedStart() {
-        testSpec.assertWmStart { isKeyguardShowing() }
+        flicker.assertWmStart { isKeyguardShowing() }
     }
 
     /** {@inheritDoc} */
@@ -108,7 +107,7 @@ class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter) :
      * Checks the position of the [ComponentNameMatcher.STATUS_BAR] at the start and end of the
      * transition
      */
-    @Presubmit @Test fun statusBarLayerPositionAtEnd() = testSpec.statusBarLayerPositionAtEnd()
+    @Presubmit @Test fun statusBarLayerPositionAtEnd() = flicker.statusBarLayerPositionAtEnd()
 
     /** {@inheritDoc} */
     @Test
@@ -133,13 +132,13 @@ class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter) :
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
-         * screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests()
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests()
         }
     }
 }

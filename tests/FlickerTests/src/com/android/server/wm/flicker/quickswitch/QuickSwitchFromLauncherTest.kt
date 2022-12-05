@@ -19,18 +19,17 @@ package com.android.server.wm.flicker.quickswitch
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.navBarWindowIsVisibleAtStartAndEnd
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.Rect
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Ignore
@@ -55,7 +54,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
+class QuickSwitchFromLauncherTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val testApp = SimpleAppHelper(instrumentation)
 
     /** {@inheritDoc} */
@@ -63,7 +62,7 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
         setup {
             tapl.setExpectedRotationCheckEnabled(false)
 
-            tapl.setExpectedRotation(testSpec.startRotation)
+            tapl.setExpectedRotation(flicker.scenario.startRotation.value)
 
             testApp.launchViaIntent(wmHelper)
             tapl.goHome()
@@ -95,7 +94,7 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Presubmit
     @Test
     fun endsWithAppWindowsCoveringFullScreen() {
-        testSpec.assertWmEnd { this.visibleRegion(testApp).coversExactly(startDisplayBounds) }
+        flicker.assertWmEnd { this.visibleRegion(testApp).coversExactly(startDisplayBounds) }
     }
 
     /**
@@ -105,7 +104,7 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Presubmit
     @Test
     fun endsWithAppLayersCoveringFullScreen() {
-        testSpec.assertLayersEnd { this.visibleRegion(testApp).coversExactly(startDisplayBounds) }
+        flicker.assertLayersEnd { this.visibleRegion(testApp).coversExactly(startDisplayBounds) }
     }
 
     /**
@@ -115,47 +114,48 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Presubmit
     @Test
     fun endsWithAppBeingOnTop() {
-        testSpec.assertWmEnd { this.isAppWindowOnTop(testApp) }
+        flicker.assertWmEnd { this.isAppWindowOnTop(testApp) }
     }
 
     /** Checks that the transition starts with the home activity being tagged as visible. */
     @Presubmit
     @Test
     fun startsWithHomeActivityFlaggedVisible() {
-        testSpec.assertWmStart { this.isHomeActivityVisible() }
+        flicker.assertWmStart { this.isHomeActivityVisible() }
     }
 
     /**
-     * Checks that the transition starts with the [ComponentMatcher.LAUNCHER] windows
+     * Checks that the transition starts with the [ComponentNameMatcher.LAUNCHER] windows
      * filling/covering exactly display size
      */
     @Presubmit
     @Test
     fun startsWithLauncherWindowsCoverFullScreen() {
-        testSpec.assertWmStart {
+        flicker.assertWmStart {
             this.visibleRegion(ComponentNameMatcher.LAUNCHER).coversExactly(startDisplayBounds)
         }
     }
 
     /**
-     * Checks that the transition starts with the [ComponentMatcher.LAUNCHER] layers
+     * Checks that the transition starts with the [ComponentNameMatcher.LAUNCHER] layers
      * filling/covering exactly the display size.
      */
     @Presubmit
     @Test
     fun startsWithLauncherLayersCoverFullScreen() {
-        testSpec.assertLayersStart {
+        flicker.assertLayersStart {
             this.visibleRegion(ComponentNameMatcher.LAUNCHER).coversExactly(startDisplayBounds)
         }
     }
 
     /**
-     * Checks that the transition starts with the [ComponentMatcher.LAUNCHER] being the top window.
+     * Checks that the transition starts with the [ComponentNameMatcher.LAUNCHER] being the top
+     * window.
      */
     @Presubmit
     @Test
     fun startsWithLauncherBeingOnTop() {
-        testSpec.assertWmStart { this.isAppWindowOnTop(ComponentNameMatcher.LAUNCHER) }
+        flicker.assertWmStart { this.isAppWindowOnTop(ComponentNameMatcher.LAUNCHER) }
     }
 
     /**
@@ -165,7 +165,7 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Presubmit
     @Test
     fun endsWithHomeActivityFlaggedInvisible() {
-        testSpec.assertWmEnd { this.isHomeActivityInvisible() }
+        flicker.assertWmEnd { this.isHomeActivityInvisible() }
     }
 
     /**
@@ -175,7 +175,7 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Presubmit
     @Test
     fun appWindowBecomesAndStaysVisible() {
-        testSpec.assertWm { this.isAppWindowInvisible(testApp).then().isAppWindowVisible(testApp) }
+        flicker.assertWm { this.isAppWindowInvisible(testApp).then().isAppWindowVisible(testApp) }
     }
 
     /**
@@ -185,18 +185,18 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Presubmit
     @Test
     fun appLayerBecomesAndStaysVisible() {
-        testSpec.assertLayers { this.isInvisible(testApp).then().isVisible(testApp) }
+        flicker.assertLayers { this.isInvisible(testApp).then().isVisible(testApp) }
     }
 
     /**
-     * Checks that the [ComponentMatcher.LAUNCHER] window starts off visible and becomes invisible
-     * at some point before the end of the transition and then stays invisible until the end of the
-     * transition.
+     * Checks that the [ComponentNameMatcher.LAUNCHER] window starts off visible and becomes
+     * invisible at some point before the end of the transition and then stays invisible until the
+     * end of the transition.
      */
     @Presubmit
     @Test
     fun launcherWindowBecomesAndStaysInvisible() {
-        testSpec.assertWm {
+        flicker.assertWm {
             this.isAppWindowOnTop(ComponentNameMatcher.LAUNCHER)
                 .then()
                 .isAppWindowNotOnTop(ComponentNameMatcher.LAUNCHER)
@@ -204,14 +204,14 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     }
 
     /**
-     * Checks that the [ComponentMatcher.LAUNCHER] layer starts off visible and becomes invisible at
-     * some point before the end of the transition and then stays invisible until the end of the
-     * transition.
+     * Checks that the [ComponentNameMatcher.LAUNCHER] layer starts off visible and becomes
+     * invisible at some point before the end of the transition and then stays invisible until the
+     * end of the transition.
      */
     @Presubmit
     @Test
     fun launcherLayerBecomesAndStaysInvisible() {
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.isVisible(ComponentNameMatcher.LAUNCHER)
                 .then()
                 .isInvisible(ComponentNameMatcher.LAUNCHER)
@@ -219,14 +219,14 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     }
 
     /**
-     * Checks that the [ComponentMatcher.LAUNCHER] window is visible at least until the app window
-     * is visible. Ensures that at any point, either the launcher or [testApp] windows are at least
-     * partially visible.
+     * Checks that the [ComponentNameMatcher.LAUNCHER] window is visible at least until the app
+     * window is visible. Ensures that at any point, either the launcher or [testApp] windows are at
+     * least partially visible.
      */
     @Presubmit
     @Test
     fun appWindowIsVisibleOnceLauncherWindowIsInvisible() {
-        testSpec.assertWm {
+        flicker.assertWm {
             this.isAppWindowOnTop(ComponentNameMatcher.LAUNCHER)
                 .then()
                 .isAppWindowVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
@@ -236,14 +236,14 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     }
 
     /**
-     * Checks that the [ComponentMatcher.LAUNCHER] layer is visible at least until the app layer is
-     * visible. Ensures that at any point, either the launcher or [testApp] layers are at least
+     * Checks that the [ComponentNameMatcher.LAUNCHER] layer is visible at least until the app layer
+     * is visible. Ensures that at any point, either the launcher or [testApp] layers are at least
      * partially visible.
      */
     @Presubmit
     @Test
     fun appLayerIsVisibleOnceLauncherLayerIsInvisible() {
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.isVisible(ComponentNameMatcher.LAUNCHER)
                 .then()
                 .isVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
@@ -263,14 +263,14 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     /**
-     * Checks that [ComponentMatcher.NAV_BAR] window is visible and above the app windows at the
+     * Checks that [ComponentNameMatcher.NAV_BAR] window is visible and above the app windows at the
      * start and end of the WM trace
      */
     @Presubmit
     @Test
     fun navBarWindowIsVisibleAtStartAndEnd() {
-        Assume.assumeFalse(testSpec.isTablet)
-        testSpec.navBarWindowIsVisibleAtStartAndEnd()
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.navBarWindowIsVisibleAtStartAndEnd()
     }
 
     @Presubmit
@@ -293,14 +293,12 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
 
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(
-                    supportedNavigationModes =
-                        listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY),
-                    // TODO: Test with 90 rotation
-                    supportedRotations = listOf(Surface.ROTATION_0)
-                )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_GESTURAL),
+                // TODO: Test with 90 rotation
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
     }
 }

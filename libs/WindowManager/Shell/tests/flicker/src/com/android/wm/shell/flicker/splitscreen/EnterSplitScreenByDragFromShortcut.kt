@@ -17,14 +17,14 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.IwTest
-import android.view.WindowManagerPolicyConstants
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.layerBecomesVisible
 import com.android.wm.shell.flicker.layerIsVisibleAtEnd
@@ -41,8 +41,7 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test enter split screen by dragging a shortcut.
- * This test is only for large screen devices.
+ * Test enter split screen by dragging a shortcut. This test is only for large screen devices.
  *
  * To run this test: `atest WMShellFlickerTests:EnterSplitScreenByDragFromShortcut`
  */
@@ -50,13 +49,11 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class EnterSplitScreenByDragFromShortcut(
-    testSpec: FlickerTestParameter
-) : SplitScreenBase(testSpec) {
+class EnterSplitScreenByDragFromShortcut(flicker: FlickerTest) : SplitScreenBase(flicker) {
 
     @Before
     fun before() {
-        Assume.assumeTrue(testSpec.isTablet)
+        Assume.assumeTrue(flicker.scenario.isTablet)
     }
 
     override val transition: FlickerBuilder.() -> Unit
@@ -80,39 +77,46 @@ class EnterSplitScreenByDragFromShortcut(
     @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
-    fun cujCompleted() = testSpec.splitScreenEntered(primaryApp, secondaryApp,
-        fromOtherApp = false, appExistAtStart = false)
+    fun cujCompleted() =
+        flicker.splitScreenEntered(
+            primaryApp,
+            secondaryApp,
+            fromOtherApp = false,
+            appExistAtStart = false
+        )
 
     @Presubmit
     @Test
-    fun splitScreenDividerBecomesVisible() = testSpec.splitScreenDividerBecomesVisible()
+    fun splitScreenDividerBecomesVisible() = flicker.splitScreenDividerBecomesVisible()
+
+    @Presubmit @Test fun primaryAppLayerIsVisibleAtEnd() = flicker.layerIsVisibleAtEnd(primaryApp)
 
     @Presubmit
     @Test
-    fun primaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(primaryApp)
+    fun secondaryAppLayerBecomesVisible() = flicker.layerBecomesVisible(secondaryApp)
 
     @Presubmit
     @Test
-    fun secondaryAppLayerBecomesVisible() = testSpec.layerBecomesVisible(secondaryApp)
+    fun primaryAppBoundsIsVisibleAtEnd() =
+        flicker.splitAppLayerBoundsIsVisibleAtEnd(
+            primaryApp,
+            landscapePosLeft = false,
+            portraitPosTop = false
+        )
 
     @Presubmit
     @Test
-    fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        primaryApp, landscapePosLeft = false, portraitPosTop = false)
+    fun secondaryAppBoundsBecomesVisible() =
+        flicker.splitAppLayerBoundsBecomesVisibleByDrag(secondaryApp)
 
     @Presubmit
     @Test
-    fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisibleByDrag(
-        secondaryApp)
-
-    @Presubmit
-    @Test
-    fun primaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(primaryApp)
+    fun primaryAppWindowIsVisibleAtEnd() = flicker.appWindowIsVisibleAtEnd(primaryApp)
 
     @Presubmit
     @Test
     fun secondaryAppWindowBecomesVisible() {
-        testSpec.assertWm {
+        flicker.assertWm {
             this.notContains(secondaryApp)
                 .then()
                 .isAppWindowInvisible(secondaryApp, isOptional = true)
@@ -122,28 +126,22 @@ class EnterSplitScreenByDragFromShortcut(
     }
 
     /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun entireScreenCovered() =
-        super.entireScreenCovered()
+    @Postsubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() =
-        super.navBarLayerIsVisibleAtStartAndEnd()
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun navBarLayerPositionAtStartAndEnd() =
-        super.navBarLayerPositionAtStartAndEnd()
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun navBarWindowIsAlwaysVisible() =
-        super.navBarWindowIsAlwaysVisible()
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -154,26 +152,22 @@ class EnterSplitScreenByDragFromShortcut(
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
+    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun statusBarWindowIsAlwaysVisible() =
-        super.statusBarWindowIsAlwaysVisible()
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() =
-        super.taskBarLayerIsVisibleAtStartAndEnd()
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun taskBarWindowIsAlwaysVisible() =
-        super.taskBarWindowIsAlwaysVisible()
+    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -190,11 +184,11 @@ class EnterSplitScreenByDragFromShortcut(
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
+        fun getParams(): List<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
-                supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))
+                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_GESTURAL)
+            )
         }
     }
 }

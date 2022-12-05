@@ -18,16 +18,15 @@ package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeAppHelper
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,7 +41,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class CloseImeWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
+class CloseImeWindowToHomeTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val testApp = ImeAppHelper(instrumentation)
 
     /** {@inheritDoc} */
@@ -63,7 +62,7 @@ class CloseImeWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     @Presubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
-        testSpec.assertWm {
+        flicker.assertWm {
             this.visibleWindowsShownMoreThanOneConsecutiveEntry(
                 listOf(
                     ComponentNameMatcher.IME,
@@ -78,27 +77,27 @@ class CloseImeWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     @Presubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(
                 listOf(ComponentNameMatcher.IME, ComponentNameMatcher.SPLASH_SCREEN)
             )
         }
     }
 
-    @Presubmit @Test fun imeLayerBecomesInvisible() = testSpec.imeLayerBecomesInvisible()
+    @Presubmit @Test fun imeLayerBecomesInvisible() = flicker.imeLayerBecomesInvisible()
 
-    @Presubmit @Test fun imeWindowBecomesInvisible() = testSpec.imeWindowBecomesInvisible()
+    @Presubmit @Test fun imeWindowBecomesInvisible() = flicker.imeWindowBecomesInvisible()
 
     @Presubmit
     @Test
     fun imeAppWindowBecomesInvisible() {
-        testSpec.assertWm { this.isAppWindowVisible(testApp).then().isAppWindowInvisible(testApp) }
+        flicker.assertWm { this.isAppWindowVisible(testApp).then().isAppWindowInvisible(testApp) }
     }
 
     @Presubmit
     @Test
     fun imeAppLayerBecomesInvisible() {
-        testSpec.assertLayers { this.isVisible(testApp).then().isInvisible(testApp) }
+        flicker.assertLayers { this.isVisible(testApp).then().isInvisible(testApp) }
     }
 
     @Test
@@ -115,16 +114,10 @@ class CloseImeWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(
-                    supportedRotations = listOf(Surface.ROTATION_0),
-                    supportedNavigationModes =
-                        listOf(
-                            WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                            WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                        )
-                )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
     }
 }

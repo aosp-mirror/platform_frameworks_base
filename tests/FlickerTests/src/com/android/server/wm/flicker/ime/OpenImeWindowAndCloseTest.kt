@@ -19,17 +19,16 @@ package com.android.server.wm.flicker.ime
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -47,7 +46,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenImeWindowAndCloseTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
+class OpenImeWindowAndCloseTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val simpleApp = SimpleAppHelper(instrumentation)
     private val testApp = ImeAppHelper(instrumentation)
 
@@ -62,9 +61,9 @@ class OpenImeWindowAndCloseTest(testSpec: FlickerTestParameter) : BaseTest(testS
         teardown { simpleApp.exit(wmHelper) }
     }
 
-    @Presubmit @Test fun imeWindowBecomesInvisible() = testSpec.imeWindowBecomesInvisible()
+    @Presubmit @Test fun imeWindowBecomesInvisible() = flicker.imeWindowBecomesInvisible()
 
-    @Presubmit @Test fun imeLayerBecomesInvisible() = testSpec.imeLayerBecomesInvisible()
+    @Presubmit @Test fun imeLayerBecomesInvisible() = flicker.imeLayerBecomesInvisible()
 
     @Presubmit
     @Test
@@ -91,16 +90,10 @@ class OpenImeWindowAndCloseTest(testSpec: FlickerTestParameter) : BaseTest(testS
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(
-                    supportedRotations = listOf(Surface.ROTATION_0),
-                    supportedNavigationModes =
-                        listOf(
-                            WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                            WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                        )
-                )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
     }
 }

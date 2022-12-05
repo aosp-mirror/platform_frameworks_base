@@ -41,8 +41,8 @@ import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.LAUNCHER_UI_PACKAGE_NAME
 import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
-import org.junit.Assert.assertNotNull
 import java.util.Collections
+import org.junit.Assert.assertNotNull
 
 internal object SplitScreenUtils {
     private const val TIMEOUT_MS = 3_000L
@@ -129,10 +129,18 @@ internal object SplitScreenUtils {
 
             // Find the second task in the upper right corner in split select mode by sorting
             // 'left' in descending order and 'top' in ascending order.
-            Collections.sort(snapshots, { t1: UiObject2, t2: UiObject2 ->
-                t2.getVisibleBounds().left - t1.getVisibleBounds().left})
-            Collections.sort(snapshots, { t1: UiObject2, t2: UiObject2 ->
-                t1.getVisibleBounds().top - t2.getVisibleBounds().top})
+            Collections.sort(
+                snapshots,
+                { t1: UiObject2, t2: UiObject2 ->
+                    t2.getVisibleBounds().left - t1.getVisibleBounds().left
+                }
+            )
+            Collections.sort(
+                snapshots,
+                { t1: UiObject2, t2: UiObject2 ->
+                    t1.getVisibleBounds().top - t2.getVisibleBounds().top
+                }
+            )
             snapshots[0].click()
         } else {
             tapl.workspace

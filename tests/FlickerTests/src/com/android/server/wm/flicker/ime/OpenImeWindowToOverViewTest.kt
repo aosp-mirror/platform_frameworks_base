@@ -18,15 +18,13 @@ package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.navBarLayerIsVisibleAtStartAndEnd
 import com.android.server.wm.flicker.statusBarLayerIsVisibleAtStartAndEnd
 import com.android.server.wm.traces.common.ComponentNameMatcher
@@ -48,8 +46,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
-    private val imeTestApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
+class OpenImeWindowToOverViewTest(flicker: FlickerTest) : BaseTest(flicker) {
+    private val imeTestApp = ImeAppAutoFocusHelper(instrumentation, flicker.scenario.startRotation)
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
@@ -82,7 +80,7 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
      */
     private fun waitNavStatusBarVisibility(stateSync: WindowManagerStateHelper.StateSyncBuilder) {
         when {
-            testSpec.isLandscapeOrSeascapeAtStart && !testSpec.isTablet ->
+            flicker.scenario.isLandscapeOrSeascapeAtStart && !flicker.scenario.isTablet ->
                 stateSync.add(WindowManagerConditionsFactory.isStatusBarVisible().negate())
             else -> stateSync.withNavOrTaskBarVisible().withStatusBarVisible()
         }
@@ -91,25 +89,25 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Presubmit
     @Test
     fun imeWindowIsAlwaysVisible() {
-        testSpec.imeWindowIsAlwaysVisible()
+        flicker.imeWindowIsAlwaysVisible()
     }
 
     @Presubmit
     @Test
     fun navBarLayerIsVisibleAtStartAndEnd3Button() {
-        Assume.assumeFalse(testSpec.isTablet)
-        Assume.assumeFalse(testSpec.isGesturalNavigation)
-        testSpec.navBarLayerIsVisibleAtStartAndEnd()
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
+        flicker.navBarLayerIsVisibleAtStartAndEnd()
     }
 
     /** Bars are expected to be hidden while entering overview in landscape (b/227189877) */
     @Presubmit
     @Test
     fun navBarLayerIsVisibleAtStartAndEndGestural() {
-        Assume.assumeFalse(testSpec.isTablet)
-        Assume.assumeTrue(testSpec.isGesturalNavigation)
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
         Assume.assumeFalse(isShellTransitionsEnabled)
-        testSpec.navBarLayerIsVisibleAtStartAndEnd()
+        flicker.navBarLayerIsVisibleAtStartAndEnd()
     }
 
     /**
@@ -119,12 +117,12 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Presubmit
     @Test
     fun navBarLayerIsInvisibleInLandscapeGestural() {
-        Assume.assumeFalse(testSpec.isTablet)
-        Assume.assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
-        Assume.assumeTrue(testSpec.isGesturalNavigation)
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
+        Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
         Assume.assumeTrue(isShellTransitionsEnabled)
-        testSpec.assertLayersStart { this.isVisible(ComponentNameMatcher.NAV_BAR) }
-        testSpec.assertLayersEnd { this.isInvisible(ComponentNameMatcher.NAV_BAR) }
+        flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.NAV_BAR) }
+        flicker.assertLayersEnd { this.isInvisible(ComponentNameMatcher.NAV_BAR) }
     }
 
     /**
@@ -134,11 +132,11 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Presubmit
     @Test
     fun statusBarLayerIsInvisibleInLandscapePhone() {
-        Assume.assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
-        Assume.assumeTrue(testSpec.isGesturalNavigation)
-        Assume.assumeFalse(testSpec.isTablet)
-        testSpec.assertLayersStart { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
-        testSpec.assertLayersEnd { this.isInvisible(ComponentNameMatcher.STATUS_BAR) }
+        Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
+        Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
+        flicker.assertLayersEnd { this.isInvisible(ComponentNameMatcher.STATUS_BAR) }
     }
 
     /**
@@ -148,35 +146,31 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Presubmit
     @Test
     fun statusBarLayerIsInvisibleInLandscapeTablet() {
-        Assume.assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
-        Assume.assumeTrue(testSpec.isGesturalNavigation)
-        Assume.assumeTrue(testSpec.isTablet)
-        testSpec.statusBarLayerIsVisibleAtStartAndEnd()
+        Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
+        Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
+        Assume.assumeTrue(flicker.scenario.isTablet)
+        flicker.statusBarLayerIsVisibleAtStartAndEnd()
     }
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
-    override fun navBarLayerIsVisibleAtStartAndEnd() {
-    }
+    override fun navBarLayerIsVisibleAtStartAndEnd() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
-    override fun navBarLayerPositionAtStartAndEnd() {
-    }
+    override fun navBarLayerPositionAtStartAndEnd() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
-    override fun statusBarLayerPositionAtStartAndEnd() {
-    }
+    override fun statusBarLayerPositionAtStartAndEnd() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
-    override fun statusBarLayerIsVisibleAtStartAndEnd() {
-    }
+    override fun statusBarLayerIsVisibleAtStartAndEnd() {}
 
     @Presubmit
     @Test
@@ -185,38 +179,38 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Presubmit
     @Test
     fun statusBarLayerIsVisibleInPortrait() {
-        Assume.assumeFalse(testSpec.isLandscapeOrSeascapeAtStart)
-        testSpec.statusBarLayerIsVisibleAtStartAndEnd()
+        Assume.assumeFalse(flicker.scenario.isLandscapeOrSeascapeAtStart)
+        flicker.statusBarLayerIsVisibleAtStartAndEnd()
     }
 
     @Presubmit
     @Test
     fun statusBarLayerIsInvisibleInLandscapeShell() {
-        Assume.assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
-        Assume.assumeFalse(testSpec.isTablet)
+        Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
+        Assume.assumeFalse(flicker.scenario.isTablet)
         Assume.assumeTrue(isShellTransitionsEnabled)
-        testSpec.assertLayersStart { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
-        testSpec.assertLayersEnd { this.isInvisible(ComponentNameMatcher.STATUS_BAR) }
+        flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
+        flicker.assertLayersEnd { this.isInvisible(ComponentNameMatcher.STATUS_BAR) }
     }
 
     @Presubmit
     @Test
     fun statusBarLayerIsVisibleInLandscapeLegacy() {
-        Assume.assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
-        Assume.assumeTrue(testSpec.isTablet)
+        Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
+        Assume.assumeTrue(flicker.scenario.isTablet)
         Assume.assumeFalse(isShellTransitionsEnabled)
-        testSpec.statusBarLayerIsVisibleAtStartAndEnd()
+        flicker.statusBarLayerIsVisibleAtStartAndEnd()
     }
 
     @Presubmit
     @Test
     fun imeLayerIsVisibleAndAssociatedWithAppWidow() {
-        testSpec.assertLayersStart {
+        flicker.assertLayersStart {
             isVisible(ComponentNameMatcher.IME)
                 .visibleRegion(ComponentNameMatcher.IME)
                 .coversAtMost(isVisible(imeTestApp).visibleRegion(imeTestApp).region)
         }
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.invoke("imeLayerIsVisibleAndAlignAppWidow") {
                 val imeVisibleRegion = it.visibleRegion(ComponentNameMatcher.IME)
                 val appVisibleRegion = it.visibleRegion(imeTestApp)
@@ -232,21 +226,13 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
-         * screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(
-                    supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90),
-                    supportedNavigationModes =
-                    listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
-                )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests()
         }
     }
 }

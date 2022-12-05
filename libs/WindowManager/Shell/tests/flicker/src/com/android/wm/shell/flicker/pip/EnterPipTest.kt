@@ -17,16 +17,16 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
 import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -57,7 +57,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
+open class EnterPipTest(flicker: FlickerTest) : PipTransition(flicker) {
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
@@ -68,7 +68,7 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
                 pipApp.launchViaIntent(wmHelper)
             }
             teardown {
-                setRotation(Surface.ROTATION_0)
+                setRotation(PlatformConsts.Rotation.ROTATION_0)
                 RemoveAllTasksButHomeRule.removeAllTasksButHome()
                 pipApp.exit(wmHelper)
             }
@@ -79,16 +79,14 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
     @Presubmit
     @Test
     open fun pipAppWindowAlwaysVisible() {
-        testSpec.assertWm { this.isAppWindowVisible(pipApp) }
+        flicker.assertWm { this.isAppWindowVisible(pipApp) }
     }
 
-    /**
-     * Checks [pipApp] layer remains visible throughout the animation
-     */
+    /** Checks [pipApp] layer remains visible throughout the animation */
     @Presubmit
     @Test
     open fun pipAppLayerAlwaysVisible() {
-        testSpec.assertLayers { this.isVisible(pipApp) }
+        flicker.assertLayers { this.isVisible(pipApp) }
     }
 
     /**
@@ -98,7 +96,7 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
     @Presubmit
     @Test
     fun pipWindowRemainInsideVisibleBounds() {
-        testSpec.assertWmVisibleRegion(pipApp) { coversAtMost(displayBounds) }
+        flicker.assertWmVisibleRegion(pipApp) { coversAtMost(displayBounds) }
     }
 
     /**
@@ -108,14 +106,14 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
     @Presubmit
     @Test
     open fun pipLayerRemainInsideVisibleBounds() {
-        testSpec.assertLayersVisibleRegion(pipApp) { coversAtMost(displayBounds) }
+        flicker.assertLayersVisibleRegion(pipApp) { coversAtMost(displayBounds) }
     }
 
     /** Checks that the visible region of [pipApp] always reduces during the animation */
     @Presubmit
     @Test
     open fun pipLayerReduces() {
-        testSpec.assertLayers {
+        flicker.assertLayers {
             val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
                 current.visibleRegion.notBiggerThan(previous.visibleRegion.region)
@@ -127,7 +125,7 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
     @Presubmit
     @Test
     fun pipWindowBecomesPinned() {
-        testSpec.assertWm {
+        flicker.assertWm {
             invoke("pipWindowIsNotPinned") { it.isNotPinned(pipApp) }
                 .then()
                 .invoke("pipWindowIsPinned") { it.isPinned(pipApp) }
@@ -138,7 +136,7 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
     @Presubmit
     @Test
     fun launcherLayerBecomesVisible() {
-        testSpec.assertLayers {
+        flicker.assertLayers {
             isInvisible(ComponentNameMatcher.LAUNCHER)
                 .then()
                 .isVisible(ComponentNameMatcher.LAUNCHER)
@@ -152,21 +150,22 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
     @Presubmit
     @Test
     open fun focusChanges() {
-        testSpec.assertEventLog { this.focusChanges(pipApp.`package`, "NexusLauncherActivity") }
+        flicker.assertEventLog { this.focusChanges(pipApp.`package`, "NexusLauncherActivity") }
     }
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
-         * screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring repetitions, screen orientation
+         * and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0))
+        fun getParams(): List<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
     }
 }

@@ -17,8 +17,6 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.support.test.launcherhelper.ILauncherStrategy
-import android.support.test.launcherhelper.LauncherStrategyFactory
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
@@ -31,10 +29,8 @@ class NotificationAppHelper
 constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.Notification.LABEL,
-    component: ComponentNameMatcher = ActivityOptions.Notification.COMPONENT.toFlickerComponent(),
-    launcherStrategy: ILauncherStrategy =
-        LauncherStrategyFactory.getInstance(instr).launcherStrategy
-) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
+    component: ComponentNameMatcher = ActivityOptions.Notification.COMPONENT.toFlickerComponent()
+) : StandardAppHelper(instr, launcherName, component) {
     fun postNotification(wmHelper: WindowManagerStateHelper) {
         val button =
             uiDevice.wait(Until.findObject(By.res(getPackage(), "post_notification")), FIND_TIMEOUT)

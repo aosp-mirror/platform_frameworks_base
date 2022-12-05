@@ -17,12 +17,12 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.content.Context
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.wm.shell.flicker.BaseTest
 
-abstract class SplitScreenBase(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
+abstract class SplitScreenBase(flicker: FlickerTest) : BaseTest(flicker) {
     protected val context: Context = instrumentation.context
     protected val primaryApp = SplitScreenUtils.getPrimary(instrumentation)
     protected val secondaryApp = SplitScreenUtils.getSecondary(instrumentation)
@@ -32,8 +32,8 @@ abstract class SplitScreenBase(testSpec: FlickerTestParameter) : BaseTest(testSp
         get() = {
             setup {
                 tapl.setEnableRotation(true)
-                setRotation(testSpec.startRotation)
-                tapl.setExpectedRotation(testSpec.startRotation)
+                setRotation(flicker.scenario.startRotation)
+                tapl.setExpectedRotation(flicker.scenario.startRotation.value)
                 tapl.workspace.switchToOverview().dismissAllTasks()
             }
             teardown {

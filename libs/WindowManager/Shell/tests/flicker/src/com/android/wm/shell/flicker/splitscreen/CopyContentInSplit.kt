@@ -20,10 +20,10 @@ import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.EdgeExtensionComponentMatcher
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
@@ -49,7 +49,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
+class CopyContentInSplit(flicker: FlickerTest) : SplitScreenBase(flicker) {
     private val textEditApp = SplitScreenUtils.getIme(instrumentation)
     private val MagnifierLayer = ComponentNameMatcher("", "magnifier surface bbq wrapper#")
     private val PopupWindowLayer = ComponentNameMatcher("", "PopupWindow:")
@@ -72,29 +72,29 @@ class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testS
     @Presubmit
     @Test
     fun cujCompleted() {
-        testSpec.appWindowIsVisibleAtStart(primaryApp)
-        testSpec.appWindowIsVisibleAtStart(textEditApp)
-        testSpec.splitScreenDividerIsVisibleAtStart()
+        flicker.appWindowIsVisibleAtStart(primaryApp)
+        flicker.appWindowIsVisibleAtStart(textEditApp)
+        flicker.splitScreenDividerIsVisibleAtStart()
 
-        testSpec.appWindowIsVisibleAtEnd(primaryApp)
-        testSpec.appWindowIsVisibleAtEnd(textEditApp)
-        testSpec.splitScreenDividerIsVisibleAtEnd()
+        flicker.appWindowIsVisibleAtEnd(primaryApp)
+        flicker.appWindowIsVisibleAtEnd(textEditApp)
+        flicker.splitScreenDividerIsVisibleAtEnd()
 
         // The validation of copied text is already done in SplitScreenUtils.copyContentInSplit()
     }
 
     @Presubmit
     @Test
-    fun splitScreenDividerKeepVisible() = testSpec.layerKeepVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
+    fun splitScreenDividerKeepVisible() = flicker.layerKeepVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
 
-    @Presubmit @Test fun primaryAppLayerKeepVisible() = testSpec.layerKeepVisible(primaryApp)
+    @Presubmit @Test fun primaryAppLayerKeepVisible() = flicker.layerKeepVisible(primaryApp)
 
-    @Presubmit @Test fun textEditAppLayerKeepVisible() = testSpec.layerKeepVisible(textEditApp)
+    @Presubmit @Test fun textEditAppLayerKeepVisible() = flicker.layerKeepVisible(textEditApp)
 
     @Presubmit
     @Test
     fun primaryAppBoundsKeepVisible() =
-        testSpec.splitAppLayerBoundsKeepVisible(
+        flicker.splitAppLayerBoundsKeepVisible(
             primaryApp,
             landscapePosLeft = tapl.isTablet,
             portraitPosTop = false
@@ -103,21 +103,18 @@ class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testS
     @Presubmit
     @Test
     fun textEditAppBoundsKeepVisible() =
-        testSpec.splitAppLayerBoundsKeepVisible(
+        flicker.splitAppLayerBoundsKeepVisible(
             textEditApp,
             landscapePosLeft = !tapl.isTablet,
             portraitPosTop = true
         )
 
-    @Presubmit @Test fun primaryAppWindowKeepVisible() = testSpec.appWindowKeepVisible(primaryApp)
+    @Presubmit @Test fun primaryAppWindowKeepVisible() = flicker.appWindowKeepVisible(primaryApp)
 
-    @Presubmit @Test fun textEditAppWindowKeepVisible() = testSpec.appWindowKeepVisible(textEditApp)
+    @Presubmit @Test fun textEditAppWindowKeepVisible() = flicker.appWindowKeepVisible(textEditApp)
 
     /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun entireScreenCovered() =
-        super.entireScreenCovered()
+    @Presubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
 
     /** {@inheritDoc} */
     @Presubmit
@@ -164,15 +161,18 @@ class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testS
     @Presubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(
-                ignoreLayers = listOf(
-                    ComponentNameMatcher.SPLASH_SCREEN,
-                    ComponentNameMatcher.SNAPSHOT,
-                    ComponentNameMatcher.IME_SNAPSHOT,
-                    EdgeExtensionComponentMatcher(),
-                    MagnifierLayer,
-                    PopupWindowLayer))
+                ignoreLayers =
+                    listOf(
+                        ComponentNameMatcher.SPLASH_SCREEN,
+                        ComponentNameMatcher.SNAPSHOT,
+                        ComponentNameMatcher.IME_SNAPSHOT,
+                        EdgeExtensionComponentMatcher(),
+                        MagnifierLayer,
+                        PopupWindowLayer
+                    )
+            )
         }
     }
 
@@ -185,9 +185,8 @@ class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testS
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests()
+        fun getParams(): List<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests()
         }
     }
 }

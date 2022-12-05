@@ -20,7 +20,7 @@ import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.junit.FlickerBuilderProvider
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume
@@ -34,12 +34,12 @@ import org.junit.Test
 abstract class BaseTest
 @JvmOverloads
 constructor(
-    protected val testSpec: FlickerTestParameter,
+    protected val flicker: FlickerTest,
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation(),
     protected val tapl: LauncherInstrumentation = LauncherInstrumentation()
 ) {
     init {
-        testSpec.setIsTablet(
+        flicker.scenario.setIsTablet(
             WindowManagerStateHelper(instrumentation, clearCacheAfterParsing = false)
                 .currentState
                 .wmState
@@ -58,13 +58,13 @@ constructor(
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            setup { testSpec.setIsTablet(wmHelper.currentState.wmState.isTablet) }
+            setup { flicker.scenario.setIsTablet(wmHelper.currentState.wmState.isTablet) }
             transition()
         }
     }
 
     /** Checks that all parts of the screen are covered during the transition */
-    @Presubmit @Test open fun entireScreenCovered() = testSpec.entireScreenCovered()
+    @Presubmit @Test open fun entireScreenCovered() = flicker.entireScreenCovered()
 
     /**
      * Checks that the [ComponentNameMatcher.NAV_BAR] layer is visible during the whole transition
@@ -74,8 +74,8 @@ constructor(
     @Presubmit
     @Test
     open fun navBarLayerIsVisibleAtStartAndEnd() {
-        Assume.assumeFalse(testSpec.isTablet)
-        testSpec.navBarLayerIsVisibleAtStartAndEnd()
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.navBarLayerIsVisibleAtStartAndEnd()
     }
 
     /**
@@ -87,8 +87,8 @@ constructor(
     @Presubmit
     @Test
     open fun navBarLayerPositionAtStartAndEnd() {
-        Assume.assumeFalse(testSpec.isTablet)
-        testSpec.navBarLayerPositionAtStartAndEnd()
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.navBarLayerPositionAtStartAndEnd()
     }
 
     /**
@@ -99,8 +99,8 @@ constructor(
     @Presubmit
     @Test
     open fun navBarWindowIsAlwaysVisible() {
-        Assume.assumeFalse(testSpec.isTablet)
-        testSpec.navBarWindowIsAlwaysVisible()
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.navBarWindowIsAlwaysVisible()
     }
 
     /**
@@ -112,8 +112,8 @@ constructor(
     @Presubmit
     @Test
     open fun taskBarLayerIsVisibleAtStartAndEnd() {
-        Assume.assumeTrue(testSpec.isTablet)
-        testSpec.taskBarLayerIsVisibleAtStartAndEnd()
+        Assume.assumeTrue(flicker.scenario.isTablet)
+        flicker.taskBarLayerIsVisibleAtStartAndEnd()
     }
 
     /**
@@ -124,8 +124,8 @@ constructor(
     @Presubmit
     @Test
     open fun taskBarWindowIsAlwaysVisible() {
-        Assume.assumeTrue(testSpec.isTablet)
-        testSpec.taskBarWindowIsAlwaysVisible()
+        Assume.assumeTrue(flicker.scenario.isTablet)
+        flicker.taskBarWindowIsAlwaysVisible()
     }
 
     /**
@@ -134,8 +134,7 @@ constructor(
      */
     @Presubmit
     @Test
-    open fun statusBarLayerIsVisibleAtStartAndEnd() =
-        testSpec.statusBarLayerIsVisibleAtStartAndEnd()
+    open fun statusBarLayerIsVisibleAtStartAndEnd() = flicker.statusBarLayerIsVisibleAtStartAndEnd()
 
     /**
      * Checks the position of the [ComponentNameMatcher.STATUS_BAR] at the start and end of the
@@ -143,7 +142,7 @@ constructor(
      */
     @Presubmit
     @Test
-    open fun statusBarLayerPositionAtStartAndEnd() = testSpec.statusBarLayerPositionAtStartAndEnd()
+    open fun statusBarLayerPositionAtStartAndEnd() = flicker.statusBarLayerPositionAtStartAndEnd()
 
     /**
      * Checks that the [ComponentNameMatcher.STATUS_BAR] window is visible during the whole
@@ -151,7 +150,7 @@ constructor(
      */
     @Presubmit
     @Test
-    open fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+    open fun statusBarWindowIsAlwaysVisible() = flicker.statusBarWindowIsAlwaysVisible()
 
     /**
      * Checks that all layers that are visible on the trace, are visible for at least 2 consecutive
@@ -160,7 +159,7 @@ constructor(
     @Presubmit
     @Test
     open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        testSpec.assertLayers { this.visibleLayersShownMoreThanOneConsecutiveEntry() }
+        flicker.assertLayers { this.visibleLayersShownMoreThanOneConsecutiveEntry() }
     }
 
     /**
@@ -170,7 +169,7 @@ constructor(
     @Presubmit
     @Test
     open fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
-        testSpec.assertWm { this.visibleWindowsShownMoreThanOneConsecutiveEntry() }
+        flicker.assertWm { this.visibleWindowsShownMoreThanOneConsecutiveEntry() }
     }
 
     open fun cujCompleted() {

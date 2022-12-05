@@ -92,8 +92,12 @@ open class PipAppHelper(instrumentation: Instrumentation) :
 
         // if the distance per step is less than 1, carry out the animation in two steps
         gestureHelper.pinch(
-                Tuple(initLeftX, yCoord), Tuple(initRightX, yCoord),
-                Tuple(finalLeftX, yCoord), Tuple(finalRightX, yCoord), adjustedSteps)
+            Tuple(initLeftX, yCoord),
+            Tuple(initRightX, yCoord),
+            Tuple(finalLeftX, yCoord),
+            Tuple(finalRightX, yCoord),
+            adjustedSteps
+        )
 
         waitForPipWindowToExpandFrom(wmHelper, Region.from(windowRect))
     }

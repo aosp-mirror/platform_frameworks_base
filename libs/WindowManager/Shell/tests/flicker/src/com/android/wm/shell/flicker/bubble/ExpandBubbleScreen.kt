@@ -20,9 +20,9 @@ import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -42,7 +42,7 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-open class ExpandBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
+open class ExpandBubbleScreen(flicker: FlickerTest) : BaseBubbleScreen(flicker) {
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
@@ -64,6 +64,6 @@ open class ExpandBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen
     @Presubmit
     @Test
     open fun testAppIsAlwaysVisible() {
-        testSpec.assertLayers { this.isVisible(testApp) }
+        flicker.assertLayers { this.isVisible(testApp) }
     }
 }

@@ -20,12 +20,12 @@ import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ShowWhenLockedAppHelper
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -44,8 +44,8 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Postsubmit
-class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParameter) :
-    OpenAppFromLockNotificationCold(testSpec) {
+class OpenAppFromLockNotificationWithLockOverlayApp(flicker: FlickerTest) :
+    OpenAppFromLockNotificationCold(flicker) {
     private val showWhenLockedApp: ShowWhenLockedAppHelper =
         ShowWhenLockedAppHelper(instrumentation)
 
@@ -74,7 +74,7 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
     @Test
     @FlakyTest(bugId = 227143265)
     fun showWhenLockedAppWindowBecomesVisible() {
-        testSpec.assertWm {
+        flicker.assertWm {
             this.hasNoVisibleAppWindow()
                 .then()
                 .isAppWindowOnTop(ComponentNameMatcher.SNAPSHOT, isOptional = true)
@@ -86,7 +86,7 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
     @Test
     @FlakyTest(bugId = 227143265)
     fun showWhenLockedAppLayerBecomesVisible() {
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.isInvisible(showWhenLockedApp)
                 .then()
                 .isVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
@@ -107,20 +107,19 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
     /** {@inheritDoc} */
     @FlakyTest(bugId = 209599395)
     @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() =
-        super.navBarLayerIsVisibleAtStartAndEnd()
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
-         * screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests()
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests()
         }
     }
 }

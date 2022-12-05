@@ -17,16 +17,15 @@
 package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -49,8 +48,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class CloseImeAutoOpenWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
-    private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
+class CloseImeAutoOpenWindowToHomeTest(flicker: FlickerTest) : BaseTest(flicker) {
+    private val testApp = ImeAppAutoFocusHelper(instrumentation, flicker.scenario.startRotation)
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
@@ -68,43 +67,37 @@ class CloseImeAutoOpenWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTes
     @Presubmit
     @Test
     fun imeAppWindowBecomesInvisible() {
-        testSpec.assertWm { this.isAppWindowOnTop(testApp).then().isAppWindowNotOnTop(testApp) }
+        flicker.assertWm { this.isAppWindowOnTop(testApp).then().isAppWindowNotOnTop(testApp) }
     }
 
     @Presubmit
     @Test
     fun imeLayerVisibleStart() {
-        testSpec.assertLayersStart { this.isVisible(ComponentNameMatcher.IME) }
+        flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.IME) }
     }
 
     @Presubmit
     @Test
     fun imeLayerInvisibleEnd() {
-        testSpec.assertLayersEnd { this.isInvisible(ComponentNameMatcher.IME) }
+        flicker.assertLayersEnd { this.isInvisible(ComponentNameMatcher.IME) }
     }
 
-    @Presubmit @Test fun imeLayerBecomesInvisible() = testSpec.imeLayerBecomesInvisible()
+    @Presubmit @Test fun imeLayerBecomesInvisible() = flicker.imeLayerBecomesInvisible()
 
     @Presubmit
     @Test
     fun imeAppLayerBecomesInvisible() {
-        testSpec.assertLayers { this.isVisible(testApp).then().isInvisible(testApp) }
+        flicker.assertLayers { this.isVisible(testApp).then().isInvisible(testApp) }
     }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(
-                    // b/190352379 (IME doesn't show on app launch in 90 degrees)
-                    supportedRotations = listOf(Surface.ROTATION_0),
-                    supportedNavigationModes =
-                        listOf(
-                            WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                            WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                        )
-                )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                // b/190352379 (IME doesn't show on app launch in 90 degrees)
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
     }
 }

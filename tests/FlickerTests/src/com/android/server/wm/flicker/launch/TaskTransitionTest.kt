@@ -22,13 +22,13 @@ import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.NewTasksAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.ComponentNameMatcher.Companion.SPLASH_SCREEN
 import com.android.server.wm.traces.common.ComponentNameMatcher.Companion.WALLPAPER_BBQ_WRAPPER
@@ -56,7 +56,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
+class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val testApp = NewTasksAppHelper(instrumentation)
     private val simpleApp = SimpleAppHelper(instrumentation)
     private val wallpaper by lazy {
@@ -81,7 +81,7 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     @FlakyTest(bugId = 253617416)
     @Test
     fun wallpaperWindowIsNeverVisible() {
-        testSpec.assertWm { this.isNonAppWindowInvisible(wallpaper) }
+        flicker.assertWm { this.isNonAppWindowInvisible(wallpaper) }
     }
 
     /**
@@ -91,7 +91,7 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     @FlakyTest(bugId = 253617416)
     @Test
     fun wallpaperLayerIsNeverVisible() {
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.isInvisible(wallpaper)
             this.isInvisible(WALLPAPER_BBQ_WRAPPER)
         }
@@ -104,7 +104,7 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     @Postsubmit
     @Test
     fun launcherWindowIsNeverVisible() {
-        testSpec.assertWm { this.isAppWindowInvisible(ComponentNameMatcher.LAUNCHER) }
+        flicker.assertWm { this.isAppWindowInvisible(ComponentNameMatcher.LAUNCHER) }
     }
 
     /**
@@ -114,7 +114,7 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     @Postsubmit
     @Test
     fun launcherLayerIsNeverVisible() {
-        testSpec.assertLayers { this.isInvisible(ComponentNameMatcher.LAUNCHER) }
+        flicker.assertLayers { this.isInvisible(ComponentNameMatcher.LAUNCHER) }
     }
 
     /** Checks that a color background is visible while the task transition is occurring. */
@@ -122,9 +122,9 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     @Test
     fun colorLayerIsVisibleDuringTransition() {
         val bgColorLayer = ComponentNameMatcher("", "colorBackgroundLayer")
-        val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
+        val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
 
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.invoke("LAUNCH_NEW_TASK_ACTIVITY coversExactly displayBounds") {
                     it.visibleRegion(testApp.componentMatcher).coversExactly(displayBounds)
                 }
@@ -157,7 +157,7 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     @Postsubmit
     @Test
     fun newTaskOpensOnTopAndThenCloses() {
-        testSpec.assertWm {
+        flicker.assertWm {
             this.isAppWindowOnTop(testApp.componentMatcher)
                 .then()
                 .isAppWindowOnTop(SPLASH_SCREEN, isOptional = true)
@@ -235,8 +235,8 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
 
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests()
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests()
         }
     }
 }

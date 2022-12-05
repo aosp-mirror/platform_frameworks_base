@@ -17,17 +17,17 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -41,7 +41,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
+open class PipKeyboardTest(flicker: FlickerTest) : PipTransition(flicker) {
     private val imeApp = ImeAppHelper(instrumentation)
 
     @Before
@@ -54,11 +54,11 @@ open class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testS
         get() = buildTransition {
             setup {
                 imeApp.launchViaIntent(wmHelper)
-                setRotation(testSpec.startRotation)
+                setRotation(flicker.scenario.startRotation)
             }
             teardown {
                 imeApp.exit(wmHelper)
-                setRotation(Surface.ROTATION_0)
+                setRotation(PlatformConsts.Rotation.ROTATION_0)
             }
             transitions {
                 // open the soft keyboard
@@ -74,8 +74,8 @@ open class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testS
     @Presubmit
     @Test
     open fun pipInVisibleBounds() {
-        testSpec.assertWmVisibleRegion(pipApp) {
-            val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
+        flicker.assertWmVisibleRegion(pipApp) {
+            val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
             coversAtMost(displayBounds)
         }
     }
@@ -84,7 +84,7 @@ open class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testS
     @Presubmit
     @Test
     open fun pipIsAboveAppWindow() {
-        testSpec.assertWmTag(TAG_IME_VISIBLE) { isAboveWindow(ComponentNameMatcher.IME, pipApp) }
+        flicker.assertWmTag(TAG_IME_VISIBLE) { isAboveWindow(ComponentNameMatcher.IME, pipApp) }
     }
 
     companion object {
@@ -92,9 +92,10 @@ open class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testS
 
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0))
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
     }
 }

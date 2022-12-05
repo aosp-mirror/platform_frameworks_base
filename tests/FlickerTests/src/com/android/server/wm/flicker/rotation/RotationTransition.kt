@@ -18,29 +18,29 @@ package com.android.server.wm.flicker.rotation
 
 import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Test
 
 /** Base class for app rotation tests */
-abstract class RotationTransition(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
+abstract class RotationTransition(flicker: FlickerTest) : BaseTest(flicker) {
     protected abstract val testApp: StandardAppHelper
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
-        setup { this.setRotation(testSpec.startRotation) }
+        setup { this.setRotation(flicker.scenario.startRotation) }
         teardown { testApp.exit(wmHelper) }
-        transitions { this.setRotation(testSpec.endRotation) }
+        transitions { this.setRotation(flicker.scenario.endRotation) }
     }
 
     /** {@inheritDoc} */
     @Presubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(
                 ignoreLayers =
                     listOf(
@@ -56,7 +56,7 @@ abstract class RotationTransition(testSpec: FlickerTestParameter) : BaseTest(tes
     @Presubmit
     @Test
     open fun appLayerRotates_StartingPos() {
-        testSpec.assertLayersStart {
+        flicker.assertLayersStart {
             this.entry.displays.map { display ->
                 this.visibleRegion(testApp).coversExactly(display.layerStackSpace)
             }
@@ -67,7 +67,7 @@ abstract class RotationTransition(testSpec: FlickerTestParameter) : BaseTest(tes
     @Presubmit
     @Test
     open fun appLayerRotates_EndingPos() {
-        testSpec.assertLayersEnd {
+        flicker.assertLayersEnd {
             this.entry.displays.map { display ->
                 this.visibleRegion(testApp).coversExactly(display.layerStackSpace)
             }

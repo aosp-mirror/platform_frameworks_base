@@ -18,8 +18,8 @@ package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
@@ -28,15 +28,15 @@ import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Test
 
 /** Base class for app launch tests */
-abstract class OpenAppTransition(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
+abstract class OpenAppTransition(flicker: FlickerTest) : BaseTest(flicker) {
     protected open val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            tapl.setExpectedRotation(testSpec.startRotation)
+            tapl.setExpectedRotation(flicker.scenario.startRotation.value)
             device.wakeUpAndGoToHomeScreen()
-            this.setRotation(testSpec.startRotation)
+            this.setRotation(flicker.scenario.startRotation)
         }
         teardown { testApp.exit(wmHelper) }
     }
@@ -52,7 +52,7 @@ abstract class OpenAppTransition(testSpec: FlickerTestParameter) : BaseTest(test
     }
 
     protected fun appLayerBecomesVisible_coldStart() {
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.notContains(testApp)
                 .then()
                 .isInvisible(testApp, isOptional = true)
@@ -66,7 +66,7 @@ abstract class OpenAppTransition(testSpec: FlickerTestParameter) : BaseTest(test
     }
 
     protected fun appLayerBecomesVisible_warmStart() {
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.isInvisible(testApp)
                 .then()
                 .isVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
@@ -87,7 +87,7 @@ abstract class OpenAppTransition(testSpec: FlickerTestParameter) : BaseTest(test
     @Presubmit @Test open fun appWindowBecomesVisible() = appWindowBecomesVisible_coldStart()
 
     protected fun appWindowBecomesVisible_coldStart() {
-        testSpec.assertWm {
+        flicker.assertWm {
             this.notContains(testApp)
                 .then()
                 .isAppWindowInvisible(testApp, isOptional = true)
@@ -97,7 +97,7 @@ abstract class OpenAppTransition(testSpec: FlickerTestParameter) : BaseTest(test
     }
 
     protected fun appWindowBecomesVisible_warmStart() {
-        testSpec.assertWm {
+        flicker.assertWm {
             this.isAppWindowInvisible(testApp)
                 .then()
                 .isAppWindowVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
@@ -115,7 +115,7 @@ abstract class OpenAppTransition(testSpec: FlickerTestParameter) : BaseTest(test
     @Presubmit
     @Test
     open fun appWindowBecomesTopWindow() {
-        testSpec.assertWm {
+        flicker.assertWm {
             this.isAppWindowNotOnTop(testApp)
                 .then()
                 .isAppWindowOnTop(
@@ -131,6 +131,6 @@ abstract class OpenAppTransition(testSpec: FlickerTestParameter) : BaseTest(test
     @Presubmit
     @Test
     open fun appWindowIsTopWindowAtEnd() {
-        testSpec.assertWmEnd { this.isAppWindowOnTop(testApp) }
+        flicker.assertWmEnd { this.isAppWindowOnTop(testApp) }
     }
 }

@@ -17,8 +17,6 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.support.test.launcherhelper.ILauncherStrategy
-import android.support.test.launcherhelper.LauncherStrategyFactory
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Direction
 import androidx.test.uiautomator.Until
@@ -32,10 +30,8 @@ class GameAppHelper
 constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.Game.LABEL,
-    component: ComponentNameMatcher = ActivityOptions.Game.COMPONENT.toFlickerComponent(),
-    launcherStrategy: ILauncherStrategy =
-        LauncherStrategyFactory.getInstance(instr).launcherStrategy,
-) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
+    component: ComponentNameMatcher = ActivityOptions.Game.COMPONENT.toFlickerComponent()
+) : StandardAppHelper(instr, launcherName, component) {
 
     /**
      * Swipes down in the mock game app.

@@ -25,45 +25,52 @@ import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import org.junit.Assert.assertNotNull
 
-class AssistantAppHelper @JvmOverloads constructor(
+class AssistantAppHelper
+@JvmOverloads
+constructor(
     val instr: Instrumentation,
     val component: ComponentName = ActivityOptions.ASSISTANT_SERVICE_COMPONENT_NAME,
 ) {
     protected val uiDevice: UiDevice = UiDevice.getInstance(instr)
-    protected val defaultAssistant: String? = Settings.Secure.getString(
-        instr.targetContext.contentResolver,
-        Settings.Secure.ASSISTANT)
-    protected val defaultVoiceInteractionService: String? = Settings.Secure.getString(
-        instr.targetContext.contentResolver,
-        Settings.Secure.VOICE_INTERACTION_SERVICE)
+    protected val defaultAssistant: String? =
+        Settings.Secure.getString(instr.targetContext.contentResolver, Settings.Secure.ASSISTANT)
+    protected val defaultVoiceInteractionService: String? =
+        Settings.Secure.getString(
+            instr.targetContext.contentResolver,
+            Settings.Secure.VOICE_INTERACTION_SERVICE
+        )
 
     fun setDefaultAssistant() {
         Settings.Secure.putString(
             instr.targetContext.contentResolver,
             Settings.Secure.VOICE_INTERACTION_SERVICE,
-            component.flattenToString())
+            component.flattenToString()
+        )
         Settings.Secure.putString(
             instr.targetContext.contentResolver,
             Settings.Secure.ASSISTANT,
-            component.flattenToString())
+            component.flattenToString()
+        )
     }
 
     fun resetDefaultAssistant() {
         Settings.Secure.putString(
             instr.targetContext.contentResolver,
             Settings.Secure.VOICE_INTERACTION_SERVICE,
-            defaultVoiceInteractionService)
+            defaultVoiceInteractionService
+        )
         Settings.Secure.putString(
             instr.targetContext.contentResolver,
             Settings.Secure.ASSISTANT,
-            defaultAssistant)
+            defaultAssistant
+        )
     }
 
     /**
      * Open Assistance UI.
      *
-     * @param longpress open the UI by long pressing power button.
-     *  Otherwise open the UI through vioceinteraction shell command directly.
+     * @param longpress open the UI by long pressing power button. Otherwise open the UI through
+     * vioceinteraction shell command directly.
      */
     @JvmOverloads
     fun openUI(longpress: Boolean = false) {
@@ -72,9 +79,11 @@ class AssistantAppHelper @JvmOverloads constructor(
         } else {
             uiDevice.executeShellCommand("cmd voiceinteraction show")
         }
-        val ui = uiDevice.wait(
-            Until.findObject(By.res(ActivityOptions.FLICKER_APP_PACKAGE, "vis_frame")),
-            FIND_TIMEOUT)
+        val ui =
+            uiDevice.wait(
+                Until.findObject(By.res(ActivityOptions.FLICKER_APP_PACKAGE, "vis_frame")),
+                FIND_TIMEOUT
+            )
         assertNotNull("Can't find Assistant UI after long pressing power button.", ui)
     }
 }

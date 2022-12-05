@@ -19,13 +19,13 @@ package com.android.wm.shell.flicker.splitscreen
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.layerBecomesVisible
@@ -43,8 +43,8 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test enter split screen by dragging app icon from notification.
- * This test is only for large screen devices.
+ * Test enter split screen by dragging app icon from notification. This test is only for large
+ * screen devices.
  *
  * To run this test: `atest WMShellFlickerTests:EnterSplitScreenByDragFromNotification`
  */
@@ -52,9 +52,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class EnterSplitScreenByDragFromNotification(
-    testSpec: FlickerTestParameter
-) : SplitScreenBase(testSpec) {
+class EnterSplitScreenByDragFromNotification(flicker: FlickerTest) : SplitScreenBase(flicker) {
 
     private val sendNotificationApp = SplitScreenUtils.getSendNotification(instrumentation)
 
@@ -78,21 +76,19 @@ class EnterSplitScreenByDragFromNotification(
                 SplitScreenUtils.dragFromNotificationToSplit(instrumentation, device, wmHelper)
                 SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, sendNotificationApp)
             }
-            teardown {
-                sendNotificationApp.exit(wmHelper)
-            }
+            teardown { sendNotificationApp.exit(wmHelper) }
         }
 
     @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
-    fun cujCompleted() = testSpec.splitScreenEntered(primaryApp, secondaryApp, fromOtherApp = false)
+    fun cujCompleted() = flicker.splitScreenEntered(primaryApp, secondaryApp, fromOtherApp = false)
 
     @Presubmit
     @Test
     fun splitScreenDividerBecomesVisible() {
         Assume.assumeFalse(isShellTransitionsEnabled)
-        testSpec.splitScreenDividerBecomesVisible()
+        flicker.splitScreenDividerBecomesVisible()
     }
 
     // TODO(b/245472831): Back to splitScreenDividerBecomesVisible after shell transition ready.
@@ -100,20 +96,16 @@ class EnterSplitScreenByDragFromNotification(
     @Test
     fun splitScreenDividerIsVisibleAtEnd_ShellTransit() {
         Assume.assumeTrue(isShellTransitionsEnabled)
-        testSpec.assertLayersEnd {
-            this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
-        }
+        flicker.assertLayersEnd { this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT) }
     }
 
-    @Presubmit
-    @Test
-    fun primaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(primaryApp)
+    @Presubmit @Test fun primaryAppLayerIsVisibleAtEnd() = flicker.layerIsVisibleAtEnd(primaryApp)
 
     @Presubmit
     @Test
     fun secondaryAppLayerBecomesVisible() {
         Assume.assumeFalse(isShellTransitionsEnabled)
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.isInvisible(sendNotificationApp)
                 .then()
                 .isVisible(sendNotificationApp)
@@ -129,50 +121,48 @@ class EnterSplitScreenByDragFromNotification(
     @Test
     fun secondaryAppLayerBecomesVisible_ShellTransit() {
         Assume.assumeTrue(isShellTransitionsEnabled)
-        testSpec.layerBecomesVisible(sendNotificationApp)
+        flicker.layerBecomesVisible(sendNotificationApp)
     }
 
     @Presubmit
     @Test
-    fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        primaryApp, landscapePosLeft = false, portraitPosTop = false)
+    fun primaryAppBoundsIsVisibleAtEnd() =
+        flicker.splitAppLayerBoundsIsVisibleAtEnd(
+            primaryApp,
+            landscapePosLeft = false,
+            portraitPosTop = false
+        )
 
     @Presubmit
     @Test
-    fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisibleByDrag(
-        sendNotificationApp)
+    fun secondaryAppBoundsBecomesVisible() =
+        flicker.splitAppLayerBoundsBecomesVisibleByDrag(sendNotificationApp)
 
     @Presubmit
     @Test
-    fun primaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(primaryApp)
+    fun primaryAppWindowIsVisibleAtEnd() = flicker.appWindowIsVisibleAtEnd(primaryApp)
 
     @Presubmit
     @Test
-    fun secondaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(sendNotificationApp)
+    fun secondaryAppWindowIsVisibleAtEnd() = flicker.appWindowIsVisibleAtEnd(sendNotificationApp)
+
+    /** {@inheritDoc} */
+    @Postsubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun entireScreenCovered() =
-        super.entireScreenCovered()
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() =
-        super.navBarLayerIsVisibleAtStartAndEnd()
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun navBarLayerPositionAtStartAndEnd() =
-        super.navBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun navBarWindowIsAlwaysVisible() =
-        super.navBarWindowIsAlwaysVisible()
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -183,26 +173,22 @@ class EnterSplitScreenByDragFromNotification(
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
+    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun statusBarWindowIsAlwaysVisible() =
-        super.statusBarWindowIsAlwaysVisible()
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() =
-        super.taskBarLayerIsVisibleAtStartAndEnd()
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun taskBarWindowIsAlwaysVisible() =
-        super.taskBarWindowIsAlwaysVisible()
+    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -219,11 +205,10 @@ class EnterSplitScreenByDragFromNotification(
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
+        fun getParams(): List<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
-                supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
+                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_GESTURAL)
             )
         }
     }

@@ -20,10 +20,10 @@ import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Ignore
@@ -44,8 +44,8 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Postsubmit
-open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
-    OpenAppFromNotificationCold(testSpec) {
+open class OpenAppFromLockNotificationCold(flicker: FlickerTest) :
+    OpenAppFromNotificationCold(flicker) {
 
     override val openingNotificationsFromLockScreen = true
 
@@ -93,8 +93,9 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
      * Checks the position of the [ComponentNameMatcher.STATUS_BAR] at the start and end of the
      * transition
      */
-    @Presubmit @Test override fun statusBarLayerPositionAtEnd() =
-        super.statusBarLayerPositionAtEnd()
+    @Presubmit
+    @Test
+    override fun statusBarLayerPositionAtEnd() = super.statusBarLayerPositionAtEnd()
 
     /** {@inheritDoc} */
     @Test
@@ -119,13 +120,13 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
-         * screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests()
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests()
         }
     }
 }

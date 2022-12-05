@@ -18,9 +18,9 @@ package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -40,8 +40,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenAppAfterCameraTest_ShellTransit(testSpec: FlickerTestParameter) :
-    OpenAppAfterCameraTest(testSpec) {
+class OpenAppAfterCameraTest_ShellTransit(flicker: FlickerTest) : OpenAppAfterCameraTest(flicker) {
     @Before
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)

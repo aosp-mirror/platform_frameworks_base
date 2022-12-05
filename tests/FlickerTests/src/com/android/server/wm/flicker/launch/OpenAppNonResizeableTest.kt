@@ -20,14 +20,13 @@ import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.annotation.FlickerServiceCompatible
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Ignore
@@ -63,8 +62,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
-    OpenAppFromLockTransition(testSpec) {
+open class OpenAppNonResizeableTest(flicker: FlickerTest) : OpenAppFromLockTransition(flicker) {
     override val testApp = NonResizeableAppHelper(instrumentation)
 
     /**
@@ -74,8 +72,8 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     @FlakyTest(bugId = 227083463)
     @Test
     fun navBarLayerVisibilityChanges() {
-        Assume.assumeFalse(testSpec.isTablet)
-        testSpec.assertLayers {
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.assertLayers {
             this.isInvisible(ComponentNameMatcher.NAV_BAR)
                 .then()
                 .isVisible(ComponentNameMatcher.NAV_BAR)
@@ -86,7 +84,7 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     @Presubmit
     @Test
     fun appWindowBecomesVisibleAtEnd() {
-        testSpec.assertWmEnd { this.isAppWindowVisible(testApp) }
+        flicker.assertWmEnd { this.isAppWindowVisible(testApp) }
     }
 
     /**
@@ -96,8 +94,8 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     @Presubmit
     @Test
     fun navBarWindowsVisibilityChanges() {
-        Assume.assumeFalse(testSpec.isTablet)
-        testSpec.assertWm {
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.assertWm {
             this.isNonAppWindowInvisible(ComponentNameMatcher.NAV_BAR)
                 .then()
                 .isAboveAppWindowVisible(ComponentNameMatcher.NAV_BAR)
@@ -111,8 +109,8 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     @Presubmit
     @Test
     fun taskBarLayerIsVisibleAtEnd() {
-        Assume.assumeTrue(testSpec.isTablet)
-        testSpec.assertLayersEnd { this.isVisible(ComponentNameMatcher.TASK_BAR) }
+        Assume.assumeTrue(flicker.scenario.isTablet)
+        flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.TASK_BAR) }
     }
 
     /**
@@ -123,45 +121,40 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     @Presubmit
     @Test
     override fun statusBarLayerIsVisibleAtStartAndEnd() {
-        testSpec.assertLayersEnd { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
+        flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
     }
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
-    override fun taskBarLayerIsVisibleAtStartAndEnd() {
-    }
+    override fun taskBarLayerIsVisibleAtStartAndEnd() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
-    override fun navBarLayerIsVisibleAtStartAndEnd() {
-    }
+    override fun navBarLayerIsVisibleAtStartAndEnd() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
-    override fun taskBarWindowIsAlwaysVisible() {
-    }
+    override fun taskBarWindowIsAlwaysVisible() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
-    override fun navBarWindowIsAlwaysVisible() {
-    }
+    override fun navBarWindowIsAlwaysVisible() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
-    override fun statusBarWindowIsAlwaysVisible() {
-    }
+    override fun statusBarWindowIsAlwaysVisible() {}
 
     /** Checks the [ComponentNameMatcher.NAV_BAR] is visible at the end of the transition */
     @Postsubmit
     @Test
     fun navBarLayerIsVisibleAtEnd() {
-        Assume.assumeFalse(testSpec.isTablet)
-        testSpec.assertLayersEnd { this.isVisible(ComponentNameMatcher.NAV_BAR) }
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.NAV_BAR) }
     }
 
     /** {@inheritDoc} */
@@ -174,7 +167,7 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     @Presubmit
     @Test
     override fun appLayerBecomesVisible() {
-        Assume.assumeFalse(testSpec.isTablet)
+        Assume.assumeFalse(flicker.scenario.isTablet)
         super.appLayerBecomesVisible()
     }
 
@@ -182,14 +175,12 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     @FlakyTest(bugId = 227143265)
     @Test
     fun appLayerBecomesVisibleTablet() {
-        Assume.assumeTrue(testSpec.isTablet)
+        Assume.assumeTrue(flicker.scenario.isTablet)
         super.appLayerBecomesVisible()
     }
 
     /** {@inheritDoc} */
-    @FlakyTest
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    @FlakyTest @Test override fun entireScreenCovered() = super.entireScreenCovered()
 
     @FlakyTest(bugId = 218470989)
     @Test
@@ -210,18 +201,16 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
-         * screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(
-                    supportedNavigationModes =
-                        listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY),
-                    supportedRotations = listOf(Surface.ROTATION_0)
-                )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_GESTURAL),
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
     }
 }

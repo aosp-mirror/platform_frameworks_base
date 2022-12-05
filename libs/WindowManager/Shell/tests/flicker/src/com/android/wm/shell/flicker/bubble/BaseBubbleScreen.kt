@@ -21,21 +21,21 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.ServiceManager
-import android.view.Surface
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
-import com.android.server.wm.flicker.Flicker
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
+import com.android.server.wm.flicker.IFlickerTestData
 import com.android.server.wm.flicker.helpers.LaunchBubbleHelper
 import com.android.server.wm.flicker.helpers.SYSTEMUI_PACKAGE
+import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.BaseTest
 import org.junit.runners.Parameterized
 
 /** Base configurations for Bubble flicker tests */
-abstract class BaseBubbleScreen(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
+abstract class BaseBubbleScreen(flicker: FlickerTest) : BaseTest(flicker) {
 
     protected val context: Context = instrumentation.context
     protected val testApp = LaunchBubbleHelper(instrumentation)
@@ -79,17 +79,18 @@ abstract class BaseBubbleScreen(testSpec: FlickerTestParameter) : BaseTest(testS
         }
     }
 
-    protected fun Flicker.waitAndGetAddBubbleBtn(): UiObject2? =
+    protected fun IFlickerTestData.waitAndGetAddBubbleBtn(): UiObject2? =
         device.wait(Until.findObject(By.text("Add Bubble")), FIND_OBJECT_TIMEOUT)
-    protected fun Flicker.waitAndGetCancelAllBtn(): UiObject2? =
+    protected fun IFlickerTestData.waitAndGetCancelAllBtn(): UiObject2? =
         device.wait(Until.findObject(By.text("Cancel All Bubble")), FIND_OBJECT_TIMEOUT)
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0))
+        fun getParams(): List<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
 
         const val FIND_OBJECT_TIMEOUT = 2000L

@@ -17,18 +17,17 @@
 package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.ImeStateInitializeHelper
 import com.android.server.wm.flicker.helpers.setRotation
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -73,15 +72,15 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class LaunchAppShowImeOnStartTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
-    private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
+class LaunchAppShowImeOnStartTest(flicker: FlickerTest) : BaseTest(flicker) {
+    private val testApp = ImeAppAutoFocusHelper(instrumentation, flicker.scenario.startRotation)
     private val initializeApp = ImeStateInitializeHelper(instrumentation)
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
             initializeApp.launchViaIntent(wmHelper)
-            this.setRotation(testSpec.startRotation)
+            this.setRotation(flicker.scenario.startRotation)
         }
         teardown {
             initializeApp.exit(wmHelper)
@@ -93,45 +92,39 @@ class LaunchAppShowImeOnStartTest(testSpec: FlickerTestParameter) : BaseTest(tes
         }
     }
 
-    /** Checks that [ComponentMatcher.IME] window becomes visible during the transition */
-    @Presubmit @Test fun imeWindowBecomesVisible() = testSpec.imeWindowBecomesVisible()
+    /** Checks that [ComponentNameMatcher.IME] window becomes visible during the transition */
+    @Presubmit @Test fun imeWindowBecomesVisible() = flicker.imeWindowBecomesVisible()
 
-    /** Checks that [ComponentMatcher.IME] layer becomes visible during the transition */
-    @Presubmit @Test fun imeLayerBecomesVisible() = testSpec.imeLayerBecomesVisible()
+    /** Checks that [ComponentNameMatcher.IME] layer becomes visible during the transition */
+    @Presubmit @Test fun imeLayerBecomesVisible() = flicker.imeLayerBecomesVisible()
 
-    /** Checks that [ComponentMatcher.IME] layer is invisible at the start of the transition */
+    /** Checks that [ComponentNameMatcher.IME] layer is invisible at the start of the transition */
     @Presubmit
     @Test
     fun imeLayerNotExistsStart() {
-        testSpec.assertLayersStart { this.isInvisible(ComponentNameMatcher.IME) }
+        flicker.assertLayersStart { this.isInvisible(ComponentNameMatcher.IME) }
     }
 
-    /** Checks that [ComponentMatcher.IME] layer is visible at the end of the transition */
+    /** Checks that [ComponentNameMatcher.IME] layer is visible at the end of the transition */
     @Presubmit
     @Test
     fun imeLayerExistsEnd() {
-        testSpec.assertLayersEnd { this.isVisible(ComponentNameMatcher.IME) }
+        flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.IME) }
     }
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
-         * screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(
-                    supportedRotations = listOf(Surface.ROTATION_0),
-                    supportedNavigationModes =
-                        listOf(
-                            WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                            WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                        )
-                )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
     }
 }
