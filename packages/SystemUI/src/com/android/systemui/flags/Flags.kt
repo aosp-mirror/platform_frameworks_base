@@ -222,7 +222,9 @@ object Flags {
     val NEW_STATUS_BAR_WIFI_ICON_BACKEND = unreleasedFlag(609, "new_status_bar_wifi_icon_backend")
 
     // TODO(b/256623670): Tracking Bug
-    @JvmField val BATTERY_SHIELD_ICON = unreleasedFlag(610, "battery_shield_icon")
+    @JvmField
+    val BATTERY_SHIELD_ICON =
+        resourceBooleanFlag(610, R.bool.flag_battery_shield_icon, "battery_shield_icon")
 
     // TODO(b/260881289): Tracking Bug
     val NEW_STATUS_BAR_ICONS_DEBUG_COLORING =
