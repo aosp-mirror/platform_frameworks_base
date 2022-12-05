@@ -63,6 +63,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -144,6 +145,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                 mNotifCollection, mDialogLaunchAnimator,
                 Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags);
+        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(false);
         mLocalMediaManager = spy(mMediaOutputController.mLocalMediaManager);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         MediaDescription.Builder builder = new MediaDescription.Builder();
@@ -275,6 +277,25 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
         mMediaOutputController.onDeviceListUpdate(mMediaDevices);
         final List<MediaDevice> devices = new ArrayList<>(mMediaOutputController.getMediaDevices());
+
+        assertThat(devices.containsAll(mMediaDevices)).isTrue();
+        assertThat(devices.size()).isEqualTo(mMediaDevices.size());
+        verify(mCb).onDeviceListChanged();
+    }
+
+    @Test
+    public void advanced_onDeviceListUpdate_verifyDeviceListCallback() {
+        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(true);
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+
+        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
+        final List<MediaDevice> devices = new ArrayList<>();
+        for (MediaItem item : mMediaOutputController.getMediaItemList()) {
+            if (item.getMediaDevice().isPresent()) {
+                devices.add(item.getMediaDevice().get());
+            }
+        }
 
         assertThat(devices.containsAll(mMediaDevices)).isTrue();
         assertThat(devices.size()).isEqualTo(mMediaDevices.size());
