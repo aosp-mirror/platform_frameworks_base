@@ -552,7 +552,7 @@
     <string name="config_preferredEmergencySosPackage" translatable="false"></string>
 
     <!-- Whether to show the side fps hint while on bouncer -->
-    <bool name="config_show_sidefps_hint_on_bouncer">false</bool>
+    <bool name="config_show_sidefps_hint_on_bouncer">true</bool>
 
     <!-- Whether to use the split 2-column notification shade -->
     <bool name="config_use_split_notification_shade">false</bool>
