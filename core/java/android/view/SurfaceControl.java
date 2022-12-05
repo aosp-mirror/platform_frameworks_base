@@ -1563,6 +1563,7 @@ public final class SurfaceControl implements Parcelable {
         public float refreshRate;
         public long appVsyncOffsetNanos;
         public long presentationDeadlineNanos;
+        public int[] supportedHdrTypes;
 
         /**
          * The config group ID this config is associated to.
@@ -1582,6 +1583,7 @@ public final class SurfaceControl implements Parcelable {
                     + ", refreshRate=" + refreshRate
                     + ", appVsyncOffsetNanos=" + appVsyncOffsetNanos
                     + ", presentationDeadlineNanos=" + presentationDeadlineNanos
+                    + ", supportedHdrTypes=" + Arrays.toString(supportedHdrTypes)
                     + ", group=" + group + "}";
         }
 
@@ -1598,13 +1600,14 @@ public final class SurfaceControl implements Parcelable {
                     && Float.compare(that.refreshRate, refreshRate) == 0
                     && appVsyncOffsetNanos == that.appVsyncOffsetNanos
                     && presentationDeadlineNanos == that.presentationDeadlineNanos
+                    && Arrays.equals(supportedHdrTypes, that.supportedHdrTypes)
                     && group == that.group;
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(id, width, height, xDpi, yDpi, refreshRate, appVsyncOffsetNanos,
-                    presentationDeadlineNanos, group);
+                    presentationDeadlineNanos, group, Arrays.hashCode(supportedHdrTypes));
         }
     }
 

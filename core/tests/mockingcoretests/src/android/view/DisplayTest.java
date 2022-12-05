@@ -27,6 +27,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertArrayEquals;
+
 import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.Resources;
@@ -397,6 +399,15 @@ public class DisplayTest {
                 mApplicationContext.getResources());
         // THEN real metrics matches max bounds for the DisplayArea.
         verifyRealMetricsMatchesBounds(display, sDeviceBoundsLandscape);
+    }
+
+    @Test
+    public void testSupportedHdrTypesForDisplayModeAreSorted() {
+        int[] nonSortedHdrTypes = new int[]{3, 2, 1};
+        Display.Mode displayMode = new Display.Mode(0, 0, 0, 0, new float[0], nonSortedHdrTypes);
+
+        int[] sortedHdrTypes = new int[]{1, 2, 3};
+        assertArrayEquals(sortedHdrTypes, displayMode.getSupportedHdrTypes());
     }
 
     // Given rotated display dimensions, calculate the letterboxed app bounds.

@@ -584,7 +584,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 DisplayModeRecord record = mSupportedModes.valueAt(i);
                 if (record.hasMatchingMode(mode)
                         && refreshRatesEquals(alternativeRefreshRates,
-                                record.mMode.getAlternativeRefreshRates())) {
+                                record.mMode.getAlternativeRefreshRates())
+                        && hdrTypesEqual(mode.supportedHdrTypes,
+                            record.mMode.getSupportedHdrTypes())) {
                     return record;
                 }
             }
@@ -1226,6 +1228,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
     }
 
+    private boolean hdrTypesEqual(int[] modeHdrTypes, int[] recordHdrTypes) {
+        int[] modeHdrTypesCopy = Arrays.copyOf(modeHdrTypes, modeHdrTypes.length);
+        Arrays.sort(modeHdrTypesCopy);
+        // Record HDR types are already sorted when we create the DisplayModeRecord
+        return Arrays.equals(modeHdrTypesCopy, recordHdrTypes);
+    }
+
     /** Supplies a context whose Resources apply runtime-overlays */
     Context getOverlayContext() {
         if (mOverlayContext == null) {
@@ -1243,7 +1252,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         DisplayModeRecord(SurfaceControl.DisplayMode mode,
                 float[] alternativeRefreshRates) {
             mMode = createMode(mode.width, mode.height, mode.refreshRate,
-                    alternativeRefreshRates);
+                    alternativeRefreshRates, mode.supportedHdrTypes);
         }
 
         /**
@@ -1257,7 +1266,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return mMode.getPhysicalWidth() == mode.width
                     && mMode.getPhysicalHeight() == mode.height
                     && Float.floatToIntBits(mMode.getRefreshRate())
-                        == Float.floatToIntBits(mode.refreshRate);
+                    == Float.floatToIntBits(mode.refreshRate);
         }
 
         public String toString() {
