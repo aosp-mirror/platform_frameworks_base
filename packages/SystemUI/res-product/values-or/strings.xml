@@ -43,4 +43,6 @@
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଆପଣଙ୍କ ଫୋନ୍ ଅନଲକ୍ କରନ୍ତୁ"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଆପଣଙ୍କ ଟାବଲେଟ୍ ଅନଲକ୍ କରନ୍ତୁ"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଆପଣଙ୍କ ଡିଭାଇସ୍ ଅନଲକ୍ କରନ୍ତୁ"</string>
+    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"ଏହି ଫୋନରେ ପ୍ଲେ ହେଉଛି"</string>
+    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"ଏହି ଟାବଲେଟରେ ପ୍ଲେ ହେଉଛି"</string>
 </resources>

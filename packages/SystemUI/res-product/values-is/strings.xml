@@ -43,4 +43,6 @@
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Taktu símann úr lás til að fá fleiri valkosti"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Taktu spjaldtölvuna úr lás til að fá fleiri valkosti"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Taktu tækið úr lás til að fá fleiri valkosti"</string>
+    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Í spilun í þessum síma"</string>
+    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Í spilun í þessari spjaldtölvu"</string>
 </resources>
