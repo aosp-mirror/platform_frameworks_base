@@ -21,9 +21,7 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.WAKE_AND_UNLOCK
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.WAKE_AND_UNLOCK_FROM_DREAM
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.WAKE_AND_UNLOCK_PULSING
+import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.util.kotlin.sample
@@ -42,9 +40,6 @@ constructor(
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) : TransitionInteractor(AodToGoneTransitionInteractor::class.simpleName!!) {
 
-    private val wakeAndUnlockModes =
-        setOf(WAKE_AND_UNLOCK, WAKE_AND_UNLOCK_FROM_DREAM, WAKE_AND_UNLOCK_PULSING)
-
     override fun start() {
         scope.launch {
             keyguardInteractor.biometricUnlockState
@@ -52,8 +47,7 @@ constructor(
                 .collect { pair ->
                     val (biometricUnlockState, keyguardState) = pair
                     if (
-                        keyguardState == KeyguardState.AOD &&
-                            wakeAndUnlockModes.contains(biometricUnlockState)
+                        keyguardState == KeyguardState.AOD && isWakeAndUnlock(biometricUnlockState)
                     ) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(

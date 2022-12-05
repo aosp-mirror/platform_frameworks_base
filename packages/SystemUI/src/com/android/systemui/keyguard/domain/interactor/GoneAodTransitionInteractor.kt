@@ -37,7 +37,7 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-) : TransitionInteractor("GONE->AOD") {
+) : TransitionInteractor(GoneAodTransitionInteractor::class.simpleName!!) {
 
     override fun start() {
         scope.launch {
