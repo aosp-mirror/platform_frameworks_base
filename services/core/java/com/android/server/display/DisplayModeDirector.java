@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import static android.hardware.display.DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED;
 import static android.hardware.display.DisplayManagerInternal.REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE;
 import static android.os.PowerManager.BRIGHTNESS_INVALID;
 
@@ -1457,7 +1458,7 @@ public class DisplayModeDirector {
             SparseArray<Display.Mode[]> modes = new SparseArray<>();
             SparseArray<Display.Mode> defaultModes = new SparseArray<>();
             DisplayInfo info = new DisplayInfo();
-            Display[] displays = dm.getDisplays();
+            Display[] displays = dm.getDisplays(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
             for (Display d : displays) {
                 final int displayId = d.getDisplayId();
                 d.getDisplayInfo(info);
@@ -2332,7 +2333,8 @@ public class DisplayModeDirector {
             sensorManager.addProximityActiveListener(BackgroundThread.getExecutor(), this);
 
             synchronized (mSensorObserverLock) {
-                for (Display d : mDisplayManager.getDisplays()) {
+                for (Display d : mDisplayManager.getDisplays(
+                        DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)) {
                     mDozeStateByDisplay.put(d.getDisplayId(), mInjector.isDozeState(d));
                 }
             }
@@ -2343,7 +2345,8 @@ public class DisplayModeDirector {
         }
 
         private void recalculateVotesLocked() {
-            final Display[] displays = mDisplayManager.getDisplays();
+            final Display[] displays = mDisplayManager.getDisplays(
+                    DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
             for (Display d : displays) {
                 int displayId = d.getDisplayId();
                 Vote vote = null;
