@@ -117,7 +117,8 @@ public class PerformanceHintManagerTest {
     public void testSendHint() {
         Session s = createSession();
         assumeNotNull(s);
-        s.sendHint(Session.CPU_LOAD_UP);
+        s.sendHint(Session.CPU_LOAD_RESET);
+        // ensure we can also send within the rate limit without exception
         s.sendHint(Session.CPU_LOAD_RESET);
     }
 
