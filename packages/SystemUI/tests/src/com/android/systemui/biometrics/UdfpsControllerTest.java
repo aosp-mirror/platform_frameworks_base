@@ -110,6 +110,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.inject.Provider;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
@@ -261,6 +263,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         initUdfpsController(true /* hasAlternateTouchProvider */);
     }
 
+
     private void initUdfpsController(boolean hasAlternateTouchProvider) {
         initUdfpsController(mOpticalProps, hasAlternateTouchProvider);
     }
@@ -270,8 +273,10 @@ public class UdfpsControllerTest extends SysuiTestCase {
         reset(mFingerprintManager);
         reset(mScreenLifecycle);
 
-        final Optional<AlternateUdfpsTouchProvider> alternateTouchProvider =
-                hasAlternateTouchProvider ? Optional.of(mAlternateTouchProvider) : Optional.empty();
+        final Optional<Provider<AlternateUdfpsTouchProvider>> alternateTouchProvider =
+                hasAlternateTouchProvider ? Optional.of(
+                        (Provider<AlternateUdfpsTouchProvider>) () -> mAlternateTouchProvider)
+                        : Optional.empty();
 
         mUdfpsController = new UdfpsController(mContext, new FakeExecution(), mLayoutInflater,
                 mFingerprintManager, mWindowManager, mStatusBarStateController, mFgExecutor,
@@ -1140,7 +1145,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onTouch_withNewTouchDetection_shouldCallOldFingerprintManagerPath()
+    public void onTouch_withNewTouchDetection_shouldCallNewFingerprintManagerPath()
             throws RemoteException {
         final NormalizedTouchData touchData = new NormalizedTouchData(0, 0f, 0f, 0f, 0f, 0f, 0L,
                 0L);
