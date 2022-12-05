@@ -237,6 +237,28 @@ class AnimatableClockView @JvmOverloads constructor(
         this.lockScreenColor = lockScreenColor
     }
 
+    fun animateColorChange() {
+        logBuffer?.log(tag, DEBUG, "animateColorChange")
+        setTextStyle(
+            weight = lockScreenWeight,
+            textSize = -1f,
+            color = null, /* using current color */
+            animate = false,
+            duration = 0,
+            delay = 0,
+            onAnimationEnd = null
+        )
+        setTextStyle(
+            weight = lockScreenWeight,
+            textSize = -1f,
+            color = lockScreenColor,
+            animate = true,
+            duration = COLOR_ANIM_DURATION,
+            delay = 0,
+            onAnimationEnd = null
+        )
+    }
+
     fun animateAppearOnLockscreen() {
         logBuffer?.log(tag, DEBUG, "animateAppearOnLockscreen")
         setTextStyle(
@@ -350,6 +372,7 @@ class AnimatableClockView @JvmOverloads constructor(
      *
      * By passing -1 to weight, the view preserves its current weight.
      * By passing -1 to textSize, the view preserves its current text size.
+     * By passing null to color, the view preserves its current color.
      *
      * @param weight text weight.
      * @param textSize font size.
@@ -611,6 +634,7 @@ class AnimatableClockView @JvmOverloads constructor(
         private const val APPEAR_ANIM_DURATION: Long = 350
         private const val CHARGE_ANIM_DURATION_PHASE_0: Long = 500
         private const val CHARGE_ANIM_DURATION_PHASE_1: Long = 1000
+        private const val COLOR_ANIM_DURATION: Long = 400
 
         // Constants for the animation
         private val MOVE_INTERPOLATOR = Interpolators.EMPHASIZED
