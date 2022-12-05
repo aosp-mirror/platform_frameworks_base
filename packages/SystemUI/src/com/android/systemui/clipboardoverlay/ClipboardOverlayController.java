@@ -301,7 +301,9 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
         } else {
             mView.showDefaultTextPreview();
         }
-        maybeShowRemoteCopy(clipData);
+        if (!isRemote) {
+            maybeShowRemoteCopy(clipData);
+        }
         animateIn();
         mView.announceForAccessibility(accessibilityAnnouncement);
         if (isRemote) {
