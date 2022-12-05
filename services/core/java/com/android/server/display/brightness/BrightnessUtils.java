@@ -17,6 +17,7 @@
 package com.android.server.display.brightness;
 
 import android.os.PowerManager;
+import android.util.MathUtils;
 
 import com.android.server.display.DisplayBrightnessState;
 
@@ -30,6 +31,14 @@ public final class BrightnessUtils {
     public static boolean isValidBrightnessValue(float brightness) {
         return !Float.isNaN(brightness) && brightness >= PowerManager.BRIGHTNESS_MIN
                 && brightness <= PowerManager.BRIGHTNESS_MAX;
+    }
+
+    /**
+     * Clamps the brightness value in the maximum and the minimum brightness range
+     */
+    public static float clampAbsoluteBrightness(float value) {
+        return MathUtils.constrain(value, PowerManager.BRIGHTNESS_MIN,
+                PowerManager.BRIGHTNESS_MAX);
     }
 
     /**
