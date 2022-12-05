@@ -115,6 +115,7 @@ final class PackageRemovedInfo {
         final int removedUid = mRemovedAppId >= 0  ? mRemovedAppId : mUid;
         extras.putInt(Intent.EXTRA_UID, removedUid);
         extras.putBoolean(Intent.EXTRA_DATA_REMOVED, mDataRemoved);
+        extras.putBoolean(Intent.EXTRA_SYSTEM_UPDATE_UNINSTALL, mIsRemovedPackageSystemUpdate);
         extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, !killApp);
         extras.putBoolean(Intent.EXTRA_USER_INITIATED, !removedBySystem);
         final boolean isReplace = mIsUpdate || mIsRemovedPackageSystemUpdate;

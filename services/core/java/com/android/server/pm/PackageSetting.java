@@ -664,7 +664,9 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                 mUserStates.put(other.mUserStates.keyAt(i),
                         other.mUserStates.valueAt(i).snapshot());
             } else {
-                mUserStates.put(other.mUserStates.keyAt(i), other.mUserStates.valueAt(i));
+                var userState = other.mUserStates.valueAt(i);
+                userState.setWatchable(this);
+                mUserStates.put(other.mUserStates.keyAt(i), userState);
             }
         }
 

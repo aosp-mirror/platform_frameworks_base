@@ -379,6 +379,8 @@ public final class OverlayManagerService extends SystemService {
             final String packageName = data.getSchemeSpecificPart();
 
             final boolean replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+            final boolean systemUpdateUninstall =
+                    intent.getBooleanExtra(Intent.EXTRA_SYSTEM_UPDATE_UNINSTALL, false);
 
             final int[] userIds;
             final int extraUid = intent.getIntExtra(Intent.EXTRA_UID, UserHandle.USER_NULL);
@@ -405,7 +407,7 @@ public final class OverlayManagerService extends SystemService {
                     break;
                 case ACTION_PACKAGE_REMOVED:
                     if (replacing) {
-                        onPackageReplacing(packageName, userIds);
+                        onPackageReplacing(packageName, systemUpdateUninstall, userIds);
                     } else {
                         onPackageRemoved(packageName, userIds);
                     }
@@ -463,7 +465,7 @@ public final class OverlayManagerService extends SystemService {
         }
 
         private void onPackageReplacing(@NonNull final String packageName,
-                @NonNull final int[] userIds) {
+                boolean systemUpdateUninstall, @NonNull final int[] userIds) {
             try {
                 traceBegin(TRACE_TAG_RRO, "OMS#onPackageReplacing " + packageName);
                 for (int userId : userIds) {
@@ -472,8 +474,8 @@ public final class OverlayManagerService extends SystemService {
                                 packageName, userId);
                         if (pkg != null && !mPackageManager.isInstantApp(packageName, userId)) {
                             try {
-                                updateTargetPackagesLocked(
-                                        mImpl.onPackageReplacing(packageName, userId));
+                                updateTargetPackagesLocked(mImpl.onPackageReplacing(packageName,
+                                        systemUpdateUninstall, userId));
                             } catch (OperationFailedException e) {
                                 Slog.e(TAG, "onPackageReplacing internal error", e);
                             }

@@ -21,6 +21,7 @@ import static android.content.om.OverlayInfo.STATE_ENABLED;
 import static android.content.om.OverlayInfo.STATE_MISSING_TARGET;
 import static android.content.om.OverlayInfo.STATE_NO_IDMAP;
 import static android.content.om.OverlayInfo.STATE_OVERLAY_IS_BEING_REPLACED;
+import static android.content.om.OverlayInfo.STATE_SYSTEM_UPDATE_UNINSTALL;
 import static android.content.om.OverlayInfo.STATE_TARGET_IS_BEING_REPLACED;
 import static android.os.UserHandle.USER_SYSTEM;
 
@@ -78,6 +79,7 @@ final class OverlayManagerServiceImpl {
 
     // Flags to use in conjunction with updateState.
     private static final int FLAG_OVERLAY_IS_BEING_REPLACED = 1 << 1;
+    private static final int FLAG_SYSTEM_UPDATE_UNINSTALL = 1 << 2;
 
     private final PackageManagerHelper mPackageManager;
     private final IdmapManager mIdmapManager;
@@ -275,9 +277,13 @@ final class OverlayManagerServiceImpl {
     }
 
     @NonNull
-    Set<UserPackage> onPackageReplacing(@NonNull final String pkgName, final int userId)
-            throws OperationFailedException {
-        return reconcileSettingsForPackage(pkgName, userId, FLAG_OVERLAY_IS_BEING_REPLACED);
+    Set<UserPackage> onPackageReplacing(@NonNull final String pkgName,
+            boolean systemUpdateUninstall, final int userId) throws OperationFailedException {
+        int flags = FLAG_OVERLAY_IS_BEING_REPLACED;
+        if (systemUpdateUninstall) {
+            flags |= FLAG_SYSTEM_UPDATE_UNINSTALL;
+        }
+        return reconcileSettingsForPackage(pkgName, userId, flags);
     }
 
     @NonNull
@@ -838,6 +844,10 @@ final class OverlayManagerServiceImpl {
 
         if ((flags & FLAG_OVERLAY_IS_BEING_REPLACED) != 0) {
             return STATE_OVERLAY_IS_BEING_REPLACED;
+        }
+
+        if ((flags & FLAG_SYSTEM_UPDATE_UNINSTALL) != 0) {
+            return STATE_SYSTEM_UPDATE_UNINSTALL;
         }
 
         if (targetPackage == null) {
