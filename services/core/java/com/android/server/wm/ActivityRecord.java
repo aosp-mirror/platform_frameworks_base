@@ -7444,8 +7444,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else if (!show && mLastSurfaceShowing) {
                 getSyncTransaction().hide(mSurfaceControl);
             }
-            if (show) {
-                mActivityRecordInputSink.applyChangesToSurfaceIfChanged(getSyncTransaction());
+            // Input sink surface is not a part of animation, so just apply in a steady state
+            // (non-sync) with pending transaction.
+            if (show && mSyncState == SYNC_STATE_NONE) {
+                mActivityRecordInputSink.applyChangesToSurfaceIfChanged(getPendingTransaction());
             }
         }
         if (mThumbnail != null) {
