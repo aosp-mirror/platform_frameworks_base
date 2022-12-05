@@ -50,13 +50,17 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
     private final float mIconStartAlpha;
     private final float mBrandingStartAlpha;
     private final TransactionPool mTransactionPool;
+    // TODO(b/261167708): Clean enter animation code after moving Letterbox code to Shell
+    private final float mRoundedCornerRadius;
 
     private Runnable mFinishCallback;
 
     SplashScreenExitAnimation(Context context, SplashScreenView view, SurfaceControl leash,
-            Rect frame, int mainWindowShiftLength, TransactionPool pool, Runnable handleFinish) {
+            Rect frame, int mainWindowShiftLength, TransactionPool pool, Runnable handleFinish,
+            float roundedCornerRadius) {
         mSplashScreenView = view;
         mFirstWindowSurface = leash;
+        mRoundedCornerRadius = roundedCornerRadius;
         if (frame != null) {
             mFirstWindowFrame.set(frame);
         }
@@ -97,7 +101,7 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
         SplashScreenExitAnimationUtils.startAnimations(mSplashScreenView, mFirstWindowSurface,
                 mMainWindowShiftLength, mTransactionPool, mFirstWindowFrame, mAnimationDuration,
                 mIconFadeOutDuration, mIconStartAlpha, mBrandingStartAlpha, mAppRevealDelay,
-                mAppRevealDuration, this);
+                mAppRevealDuration, this, mRoundedCornerRadius);
     }
 
     private void reset() {
