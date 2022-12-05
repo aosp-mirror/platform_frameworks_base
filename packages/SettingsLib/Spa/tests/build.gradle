@@ -76,7 +76,13 @@ task coverageReport(type: JacocoReport, dependsOn: "connectedDebugAndroidTest") 
     sourceDirectories.from = files("../spa/src")
     classDirectories.from = fileTree(
             dir: "../spa/build/tmp/kotlin-classes/debug",
-            excludes: ["com/android/settingslib/spa/debug/**"],
+            excludes: [
+                    "com/android/settingslib/spa/debug/**",
+
+                    // Excludes files forked from Accompanist.
+                    "com/android/settingslib/spa/framework/compose/DrawablePainter*",
+                    "com/android/settingslib/spa/framework/compose/Pager*",
+            ],
     )
     executionData.from = fileTree(dir: "$buildDir/outputs/code_coverage/debugAndroidTest/connected")
 }

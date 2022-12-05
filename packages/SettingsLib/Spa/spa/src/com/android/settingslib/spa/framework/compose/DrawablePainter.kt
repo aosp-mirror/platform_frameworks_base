@@ -20,6 +20,7 @@ import android.graphics.drawable.Animatable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.view.View
@@ -117,13 +118,17 @@ class DrawablePainter(
         return true
     }
 
-    override fun applyLayoutDirection(layoutDirection: LayoutDirection): Boolean =
-        drawable.setLayoutDirection(
-            when (layoutDirection) {
-                LayoutDirection.Ltr -> View.LAYOUT_DIRECTION_LTR
-                LayoutDirection.Rtl -> View.LAYOUT_DIRECTION_RTL
-            }
-        )
+    override fun applyLayoutDirection(layoutDirection: LayoutDirection): Boolean {
+        if (Build.VERSION.SDK_INT >= 23) {
+            return drawable.setLayoutDirection(
+                when (layoutDirection) {
+                    LayoutDirection.Ltr -> View.LAYOUT_DIRECTION_LTR
+                    LayoutDirection.Rtl -> View.LAYOUT_DIRECTION_RTL
+                }
+            )
+        }
+        return false
+    }
 
     override val intrinsicSize: Size get() = drawableIntrinsicSize
 

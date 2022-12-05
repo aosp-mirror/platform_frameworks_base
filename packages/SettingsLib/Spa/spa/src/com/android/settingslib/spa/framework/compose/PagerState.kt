@@ -85,12 +85,14 @@ class PagerState(
             return layoutInfo.visibleItemsInfo.maxByOrNull {
                 val start = maxOf(it.offset, 0)
                 val end = minOf(
-                    it.offset + it.size, layoutInfo.viewportEndOffset - afterContentPadding)
+                    it.offset + it.size,
+                    layoutInfo.viewportEndOffset - layoutInfo.afterContentPadding
+                )
                 end - start
             }
         }
 
-    internal var afterContentPadding = 0
+    internal var itemSpacing by mutableStateOf(0)
 
     private val currentPageLayoutInfo: LazyListItemInfo?
         get() = lazyListState.layoutInfo.visibleItemsInfo.lastOrNull {
@@ -135,9 +137,7 @@ class PagerState(
      */
     val currentPageOffset: Float by derivedStateOf {
         currentPageLayoutInfo?.let {
-            // We coerce since itemSpacing can make the offset > 1f.
-            // We don't want to count spacing in the offset so cap it to 1f
-            (-it.offset / it.size.toFloat()).coerceIn(-1f, 1f)
+            (-it.offset / (it.size + itemSpacing).toFloat()).coerceIn(-0.5f, 0.5f)
         } ?: 0f
     }
 
@@ -187,28 +187,26 @@ class PagerState(
                     // offset from the size
                     lazyListState.animateScrollToItem(
                         index = page,
-                        scrollOffset = (target.size * pageOffset).roundToInt()
+                        scrollOffset = ((target.size + itemSpacing) * pageOffset).roundToInt()
                     )
                 } else if (layoutInfo.visibleItemsInfo.isNotEmpty()) {
                     // If we don't, we use the current page size as a guide
-                    val currentSize = layoutInfo.visibleItemsInfo.first().size
+                    val currentSize = layoutInfo.visibleItemsInfo.first().size + itemSpacing
                     lazyListState.animateScrollToItem(
                         index = page,
                         scrollOffset = (currentSize * pageOffset).roundToInt()
                     )
 
                     // The target should be visible now
-                    target = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull {
-                        it.index == page
-                    }
+                    target = layoutInfo.visibleItemsInfo.firstOrNull { it.index == page }
 
-                    if (target != null && target.size != currentSize) {
+                    if (target != null && target.size + itemSpacing != currentSize) {
                         // If the size we used for calculating the offset differs from the actual
                         // target page size, we need to scroll again. This doesn't look great,
                         // but there's not much else we can do.
                         lazyListState.animateScrollToItem(
                             index = page,
-                            scrollOffset = (target.size * pageOffset).roundToInt()
+                            scrollOffset = ((target.size + itemSpacing) * pageOffset).roundToInt()
                         )
                     }
                 }
@@ -248,7 +246,7 @@ class PagerState(
             if (pageOffset.absoluteValue > 0.0001f) {
                 currentPageLayoutInfo?.let {
                     scroll {
-                        scrollBy(it.size * pageOffset)
+                        scrollBy((it.size + itemSpacing) * pageOffset)
                     }
                 }
             }
@@ -295,7 +293,7 @@ class PagerState(
     }
 
     private fun requireCurrentPageOffset(value: Float, name: String) {
-        require(value in -1f..1f) { "$name must be >= 0 and <= 1" }
+        require(value in -1f..1f) { "$name must be >= -1 and <= 1" }
     }
 
     companion object {
