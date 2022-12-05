@@ -128,6 +128,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     boolean delayedStop;    // service has been stopped but is in a delayed start?
     boolean stopIfKilled;   // last onStart() said to stop if service killed?
     boolean callStart;      // last onStart() has asked to always be called on restart.
+    int startCommandResult; // last result from onStartCommand(), only for dumpsys.
     int executeNesting;     // number of outstanding operations keeping foreground.
     boolean executeFg;      // should we be executing in the foreground?
     long executingStart;    // start time of last execute request.
@@ -478,6 +479,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             proto.write(ServiceRecordProto.Start.DELAYED_STOP, delayedStop);
             proto.write(ServiceRecordProto.Start.STOP_IF_KILLED, stopIfKilled);
             proto.write(ServiceRecordProto.Start.LAST_START_ID, lastStartId);
+            proto.write(ServiceRecordProto.Start.START_COMMAND_RESULT, startCommandResult);
             proto.end(startToken);
         }
 
@@ -533,9 +535,22 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 }
             }
         }
-        proto.end(token);
+        if (mShortFgsInfo != null && mShortFgsInfo.isCurrent()) {
+            final long shortFgsToken = proto.start(ServiceRecordProto.SHORT_FGS_INFO);
+            proto.write(ServiceRecordProto.ShortFgsInfo.START_TIME,
+                    mShortFgsInfo.getStartTime());
+            proto.write(ServiceRecordProto.ShortFgsInfo.START_ID,
+                    mShortFgsInfo.getStartId());
+            proto.write(ServiceRecordProto.ShortFgsInfo.TIMEOUT_TIME,
+                    mShortFgsInfo.getTimeoutTime());
+            proto.write(ServiceRecordProto.ShortFgsInfo.PROC_STATE_DEMOTE_TIME,
+                    mShortFgsInfo.getProcStateDemoteTime());
+            proto.write(ServiceRecordProto.ShortFgsInfo.ANR_TIME,
+                    mShortFgsInfo.getAnrTime());
+            proto.end(shortFgsToken);
+        }
 
-        // TODO(short-service) Add FGS info
+        proto.end(token);
     }
 
     void dump(PrintWriter pw, String prefix) {
@@ -632,6 +647,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                     pw.print(" stopIfKilled="); pw.print(stopIfKilled);
                     pw.print(" callStart="); pw.print(callStart);
                     pw.print(" lastStartId="); pw.println(lastStartId);
+                    pw.print(" startCommandResult="); pw.println(startCommandResult);
         }
         if (executeNesting != 0) {
             pw.print(prefix); pw.print("executeNesting="); pw.print(executeNesting);
