@@ -102,6 +102,7 @@ filegroup {
         ":android.hardware.keymaster-V4-java-source",
         ":android.hardware.security.keymint-V3-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
+        ":android.hardware.thermal-V1-java-source",
         ":android.hardware.tv.tuner-V2-java-source",
         ":android.security.apc-java-source",
         ":android.security.authorization-java-source",

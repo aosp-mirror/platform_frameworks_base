@@ -19,7 +19,7 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.hardware.thermal.V2_0.CoolingType;
+import android.hardware.thermal.CoolingType;
 
 import com.android.internal.util.Preconditions;
 
@@ -52,11 +52,16 @@ public final class CoolingDevice implements Parcelable {
             TYPE_MODEM,
             TYPE_NPU,
             TYPE_COMPONENT,
+            TYPE_TPU,
+            TYPE_POWER_AMPLIFIER,
+            TYPE_DISPLAY,
+            TYPE_SPEAKER
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
 
-    /** Keep in sync with hardware/interfaces/thermal/2.0/types.hal */
+    /** Keep in sync with hardware/interfaces/thermal/aidl/android/hardware/thermal
+     * /ThrottlingSeverity.aidl */
     /** Fan for active cooling */
     public static final int TYPE_FAN = CoolingType.FAN;
     /** Battery charging cooling deivice */
@@ -67,10 +72,18 @@ public final class CoolingDevice implements Parcelable {
     public static final int TYPE_GPU = CoolingType.GPU;
     /** Modem cooling deivice */
     public static final int TYPE_MODEM = CoolingType.MODEM;
-    /** NPU/TPU cooling deivice */
+    /** NPU cooling deivice */
     public static final int TYPE_NPU = CoolingType.NPU;
     /** Generic passive cooling deivice */
     public static final int TYPE_COMPONENT = CoolingType.COMPONENT;
+    /** TPU cooling deivice */
+    public static final int TYPE_TPU = CoolingType.TPU;
+    /** Power amplifier cooling device */
+    public static final int TYPE_POWER_AMPLIFIER = CoolingType.POWER_AMPLIFIER;
+    /** Display cooling device */
+    public static final int TYPE_DISPLAY = CoolingType.DISPLAY;
+    /** Speaker cooling device */
+    public static final int TYPE_SPEAKER = CoolingType.SPEAKER;
 
     /**
      * Verify a valid cooling device type.
@@ -78,7 +91,7 @@ public final class CoolingDevice implements Parcelable {
      * @return true if a cooling device type is valid otherwise false.
      */
     public static boolean isValidType(@Type int type) {
-        return type >= TYPE_FAN && type <= TYPE_COMPONENT;
+        return type >= TYPE_FAN && type <= TYPE_SPEAKER;
     }
 
     public CoolingDevice(long value, @Type int type, @NonNull String name) {
