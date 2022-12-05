@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util.condition;
+package com.android.systemui.shared.condition;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -68,13 +68,15 @@ public class ConditionMonitorTest extends SysuiTestCase {
         mConditionMonitor = new Monitor(mExecutor);
     }
 
-    public Monitor.Subscription.Builder getDefaultBuilder(Monitor.Callback callback) {
+    public Monitor.Subscription.Builder getDefaultBuilder(
+            Monitor.Callback callback) {
         return new Monitor.Subscription.Builder(callback)
                 .addConditions(mConditions);
     }
 
     private Condition createMockCondition() {
-        final Condition condition = Mockito.mock(Condition.class);
+        final Condition condition = Mockito.mock(
+                Condition.class);
         when(condition.isConditionSet()).thenReturn(true);
         return condition;
     }
@@ -83,11 +85,14 @@ public class ConditionMonitorTest extends SysuiTestCase {
     public void testOverridingCondition() {
         final Condition overridingCondition = createMockCondition();
         final Condition regularCondition = createMockCondition();
-        final Monitor.Callback callback = Mockito.mock(Monitor.Callback.class);
+        final Monitor.Callback callback = Mockito.mock(
+                Monitor.Callback.class);
 
-        final Monitor.Callback referenceCallback = Mockito.mock(Monitor.Callback.class);
+        final Monitor.Callback referenceCallback = Mockito.mock(
+                Monitor.Callback.class);
 
-        final Monitor monitor = new Monitor(mExecutor);
+        final Monitor
+                monitor = new Monitor(mExecutor);
 
         monitor.addSubscription(getDefaultBuilder(callback)
                 .addCondition(overridingCondition)
@@ -136,9 +141,11 @@ public class ConditionMonitorTest extends SysuiTestCase {
         final Condition overridingCondition = createMockCondition();
         final Condition overridingCondition2 = createMockCondition();
         final Condition regularCondition = createMockCondition();
-        final Monitor.Callback callback = Mockito.mock(Monitor.Callback.class);
+        final Monitor.Callback callback = Mockito.mock(
+                Monitor.Callback.class);
 
-        final Monitor monitor = new Monitor(mExecutor);
+        final Monitor
+                monitor = new Monitor(mExecutor);
 
         monitor.addSubscription(getDefaultBuilder(callback)
                 .addCondition(overridingCondition)
@@ -211,9 +218,11 @@ public class ConditionMonitorTest extends SysuiTestCase {
     public void addCallback_addSecondCallback_reportWithExistingValue() {
         final Monitor.Callback callback1 =
                 mock(Monitor.Callback.class);
-        final Condition condition = mock(Condition.class);
+        final Condition condition = mock(
+                Condition.class);
         when(condition.isConditionMet()).thenReturn(true);
-        final Monitor monitor = new Monitor(mExecutor);
+        final Monitor
+                monitor = new Monitor(mExecutor);
         monitor.addSubscription(new Monitor.Subscription.Builder(callback1)
                 .addCondition(condition)
                 .build());
@@ -229,8 +238,10 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
     @Test
     public void addCallback_noConditions_reportAllConditionsMet() {
-        final Monitor monitor = new Monitor(mExecutor);
-        final Monitor.Callback callback = mock(Monitor.Callback.class);
+        final Monitor
+                monitor = new Monitor(mExecutor);
+        final Monitor.Callback callback = mock(
+                Monitor.Callback.class);
 
         monitor.addSubscription(new Monitor.Subscription.Builder(callback).build());
         mExecutor.runAllReady();
@@ -239,8 +250,10 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
     @Test
     public void removeCallback_noFailureOnDoubleRemove() {
-        final Condition condition = mock(Condition.class);
-        final Monitor monitor = new Monitor(mExecutor);
+        final Condition condition = mock(
+                Condition.class);
+        final Monitor
+                monitor = new Monitor(mExecutor);
         final Monitor.Callback callback =
                 mock(Monitor.Callback.class);
         final Monitor.Subscription.Token token = monitor.addSubscription(
@@ -255,8 +268,10 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
     @Test
     public void removeCallback_shouldNoLongerReceiveUpdate() {
-        final Condition condition = mock(Condition.class);
-        final Monitor monitor = new Monitor(mExecutor);
+        final Condition condition = mock(
+                Condition.class);
+        final Monitor
+                monitor = new Monitor(mExecutor);
         final Monitor.Callback callback =
                 mock(Monitor.Callback.class);
         final Monitor.Subscription.Token token = monitor.addSubscription(

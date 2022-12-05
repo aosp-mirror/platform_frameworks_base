@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util.condition;
+package com.android.systemui.shared.condition;
 
 import android.util.Log;
 
-import com.android.systemui.statusbar.policy.CallbackController;
-
-import org.jetbrains.annotations.NotNull;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
+import androidx.lifecycle.LifecycleOwner;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ import java.util.List;
  * Base class for a condition that needs to be fulfilled in order for {@link Monitor} to inform
  * its callbacks.
  */
-public abstract class Condition implements CallbackController<Condition.Callback> {
+public abstract class Condition {
     private final String mTag = getClass().getSimpleName();
 
     private final ArrayList<WeakReference<Callback>> mCallbacks = new ArrayList<>();
@@ -79,8 +80,7 @@ public abstract class Condition implements CallbackController<Condition.Callback
      * Registers a callback to receive updates once started. This should be called before
      * {@link #start()}. Also triggers the callback immediately if already started.
      */
-    @Override
-    public void addCallback(@NotNull Callback callback) {
+    public void addCallback(@NonNull Callback callback) {
         if (shouldLog()) Log.d(mTag, "adding callback");
         mCallbacks.add(new WeakReference<>(callback));
 
@@ -96,8 +96,7 @@ public abstract class Condition implements CallbackController<Condition.Callback
     /**
      * Removes the provided callback from further receiving updates.
      */
-    @Override
-    public void removeCallback(@NotNull Callback callback) {
+    public void removeCallback(@NonNull Callback callback) {
         if (shouldLog()) Log.d(mTag, "removing callback");
         final Iterator<WeakReference<Callback>> iterator = mCallbacks.iterator();
         while (iterator.hasNext()) {
@@ -113,6 +112,29 @@ public abstract class Condition implements CallbackController<Condition.Callback
 
         stop();
         mStarted = false;
+    }
+
+    /**
+     * Wrapper to {@link #addCallback(Callback)} when a lifecycle is in the resumed state
+     * and {@link #removeCallback(Callback)} when not resumed automatically.
+     */
+    public Callback observe(LifecycleOwner owner, Callback listener) {
+        return observe(owner.getLifecycle(), listener);
+    }
+
+    /**
+     * Wrapper to {@link #addCallback(Callback)} when a lifecycle is in the resumed state
+     * and {@link #removeCallback(Condition.Callback)} when not resumed automatically.
+     */
+    public Callback observe(Lifecycle lifecycle, Callback listener) {
+        lifecycle.addObserver((LifecycleEventObserver) (lifecycleOwner, event) -> {
+            if (event == Lifecycle.Event.ON_RESUME) {
+                addCallback(listener);
+            } else if (event == Lifecycle.Event.ON_PAUSE) {
+                removeCallback(listener);
+            }
+        });
+        return listener;
     }
 
     /**
@@ -187,7 +209,7 @@ public abstract class Condition implements CallbackController<Condition.Callback
      * Creates a new condition which will only be true when both this condition and all the provided
      * conditions are true.
      */
-    public Condition and(Collection<Condition> others) {
+    public Condition and(@NonNull Collection<Condition> others) {
         final List<Condition> conditions = new ArrayList<>(others);
         conditions.add(this);
         return new CombinedCondition(conditions, Evaluator.OP_AND);
@@ -197,7 +219,7 @@ public abstract class Condition implements CallbackController<Condition.Callback
      * Creates a new condition which will only be true when both this condition and the provided
      * condition is true.
      */
-    public Condition and(Condition other) {
+    public Condition and(@NonNull Condition other) {
         return new CombinedCondition(Arrays.asList(this, other), Evaluator.OP_AND);
     }
 
@@ -205,7 +227,7 @@ public abstract class Condition implements CallbackController<Condition.Callback
      * Creates a new condition which will only be true when either this condition or any of the
      * provided conditions are true.
      */
-    public Condition or(Collection<Condition> others) {
+    public Condition or(@NonNull Collection<Condition> others) {
         final List<Condition> conditions = new ArrayList<>(others);
         conditions.add(this);
         return new CombinedCondition(conditions, Evaluator.OP_OR);
@@ -215,7 +237,7 @@ public abstract class Condition implements CallbackController<Condition.Callback
      * Creates a new condition which will only be true when either this condition or the provided
      * condition is true.
      */
-    public Condition or(Condition other) {
+    public Condition or(@NonNull Condition other) {
         return new CombinedCondition(Arrays.asList(this, other), Evaluator.OP_OR);
     }
 

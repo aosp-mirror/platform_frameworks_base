@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util.condition;
+package com.android.systemui.shared.condition;
 
 import android.util.ArraySet;
 import android.util.Log;
 
-import com.android.systemui.dagger.qualifiers.Main;
+import androidx.annotation.NonNull;
 
-import org.jetbrains.annotations.NotNull;
+import com.android.systemui.dagger.qualifiers.Main;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -100,7 +100,7 @@ public class Monitor {
      * @param subscription A {@link Subscription} detailing the desired conditions and callback.
      * @return A {@link Subscription.Token} that can be used to remove the subscription.
      */
-    public Subscription.Token addSubscription(@NotNull Subscription subscription) {
+    public Subscription.Token addSubscription(@NonNull Subscription subscription) {
         final Subscription.Token token = new Subscription.Token();
         final SubscriptionState state = new SubscriptionState(subscription);
 
@@ -131,7 +131,7 @@ public class Monitor {
      * @param token The {@link Subscription.Token} returned when the {@link Subscription} was
      *              originally added.
      */
-    public void removeSubscription(@NotNull Subscription.Token token) {
+    public void removeSubscription(@NonNull Subscription.Token token) {
         mExecutor.execute(() -> {
             if (shouldLog()) Log.d(mTag, "removing subscription");
             if (!mSubscriptions.containsKey(token)) {

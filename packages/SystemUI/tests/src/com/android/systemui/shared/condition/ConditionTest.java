@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util.condition;
+package com.android.systemui.shared.condition;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -47,16 +47,20 @@ public class ConditionTest extends SysuiTestCase {
 
     @Test
     public void addCallback_addFirstCallback_triggerStart() {
-        final Condition.Callback callback = mock(Condition.Callback.class);
+        final Condition.Callback callback = mock(
+                Condition.Callback.class);
         mCondition.addCallback(callback);
         verify(mCondition).start();
     }
 
     @Test
     public void addCallback_addMultipleCallbacks_triggerStartOnlyOnce() {
-        final Condition.Callback callback1 = mock(Condition.Callback.class);
-        final Condition.Callback callback2 = mock(Condition.Callback.class);
-        final Condition.Callback callback3 = mock(Condition.Callback.class);
+        final Condition.Callback callback1 = mock(
+                Condition.Callback.class);
+        final Condition.Callback callback2 = mock(
+                Condition.Callback.class);
+        final Condition.Callback callback3 = mock(
+                Condition.Callback.class);
 
         mCondition.addCallback(callback1);
         mCondition.addCallback(callback2);
@@ -67,12 +71,14 @@ public class ConditionTest extends SysuiTestCase {
 
     @Test
     public void addCallback_alreadyStarted_triggerUpdate() {
-        final Condition.Callback callback1 = mock(Condition.Callback.class);
+        final Condition.Callback callback1 = mock(
+                Condition.Callback.class);
         mCondition.addCallback(callback1);
 
         mCondition.fakeUpdateCondition(true);
 
-        final Condition.Callback callback2 = mock(Condition.Callback.class);
+        final Condition.Callback callback2 = mock(
+                Condition.Callback.class);
         mCondition.addCallback(callback2);
         verify(callback2).onConditionChanged(mCondition);
         assertThat(mCondition.isConditionMet()).isTrue();
@@ -80,7 +86,8 @@ public class ConditionTest extends SysuiTestCase {
 
     @Test
     public void removeCallback_removeLastCallback_triggerStop() {
-        final Condition.Callback callback = mock(Condition.Callback.class);
+        final Condition.Callback callback = mock(
+                Condition.Callback.class);
         mCondition.addCallback(callback);
         verify(mCondition, never()).stop();
 
@@ -92,7 +99,8 @@ public class ConditionTest extends SysuiTestCase {
     public void updateCondition_falseToTrue_reportTrue() {
         mCondition.fakeUpdateCondition(false);
 
-        final Condition.Callback callback = mock(Condition.Callback.class);
+        final Condition.Callback callback = mock(
+                Condition.Callback.class);
         mCondition.addCallback(callback);
 
         mCondition.fakeUpdateCondition(true);
@@ -104,7 +112,8 @@ public class ConditionTest extends SysuiTestCase {
     public void updateCondition_trueToFalse_reportFalse() {
         mCondition.fakeUpdateCondition(true);
 
-        final Condition.Callback callback = mock(Condition.Callback.class);
+        final Condition.Callback callback = mock(
+                Condition.Callback.class);
         mCondition.addCallback(callback);
 
         mCondition.fakeUpdateCondition(false);
@@ -116,7 +125,8 @@ public class ConditionTest extends SysuiTestCase {
     public void updateCondition_trueToTrue_reportNothing() {
         mCondition.fakeUpdateCondition(true);
 
-        final Condition.Callback callback = mock(Condition.Callback.class);
+        final Condition.Callback callback = mock(
+                Condition.Callback.class);
         mCondition.addCallback(callback);
 
         mCondition.fakeUpdateCondition(true);
@@ -127,7 +137,8 @@ public class ConditionTest extends SysuiTestCase {
     public void updateCondition_falseToFalse_reportNothing() {
         mCondition.fakeUpdateCondition(false);
 
-        final Condition.Callback callback = mock(Condition.Callback.class);
+        final Condition.Callback callback = mock(
+                Condition.Callback.class);
         mCondition.addCallback(callback);
 
         mCondition.fakeUpdateCondition(false);
@@ -149,7 +160,8 @@ public class ConditionTest extends SysuiTestCase {
         final Condition combinedCondition = mCondition.or(
                 new FakeCondition(/* initialValue= */ false));
 
-        final Condition.Callback callback = mock(Condition.Callback.class);
+        final Condition.Callback callback = mock(
+                Condition.Callback.class);
         combinedCondition.addCallback(callback);
 
         assertThat(combinedCondition.isConditionSet()).isTrue();
@@ -164,7 +176,8 @@ public class ConditionTest extends SysuiTestCase {
         final Condition combinedCondition = mCondition.or(
                 new FakeCondition(/* initialValue= */ true));
 
-        final Condition.Callback callback = mock(Condition.Callback.class);
+        final Condition.Callback callback = mock(
+                Condition.Callback.class);
         combinedCondition.addCallback(callback);
 
         assertThat(combinedCondition.isConditionSet()).isTrue();
@@ -179,7 +192,8 @@ public class ConditionTest extends SysuiTestCase {
         final Condition combinedCondition = mCondition.or(
                 new FakeCondition(/* initialValue= */ true));
 
-        final Condition.Callback callback = mock(Condition.Callback.class);
+        final Condition.Callback callback = mock(
+                Condition.Callback.class);
         combinedCondition.addCallback(callback);
 
         assertThat(combinedCondition.isConditionSet()).isTrue();
@@ -195,7 +209,8 @@ public class ConditionTest extends SysuiTestCase {
         final Condition combinedCondition = mCondition.or(
                 new FakeCondition(/* initialValue= */ null));
 
-        final Condition.Callback callback = mock(Condition.Callback.class);
+        final Condition.Callback callback = mock(
+                Condition.Callback.class);
         combinedCondition.addCallback(callback);
 
         assertThat(combinedCondition.isConditionSet()).isTrue();
@@ -211,7 +226,8 @@ public class ConditionTest extends SysuiTestCase {
         final Condition combinedCondition = mCondition.or(
                 new FakeCondition(/* initialValue= */ null));
 
-        final Condition.Callback callback = mock(Condition.Callback.class);
+        final Condition.Callback callback = mock(
+                Condition.Callback.class);
         combinedCondition.addCallback(callback);
 
         assertThat(combinedCondition.isConditionSet()).isFalse();
@@ -226,7 +242,8 @@ public class ConditionTest extends SysuiTestCase {
         final Condition combinedCondition = mCondition.and(
                 new FakeCondition(/* initialValue= */ false));
 
-        final Condition.Callback callback = mock(Condition.Callback.class);
+        final Condition.Callback callback = mock(
+                Condition.Callback.class);
         combinedCondition.addCallback(callback);
 
         assertThat(combinedCondition.isConditionSet()).isTrue();
@@ -241,7 +258,8 @@ public class ConditionTest extends SysuiTestCase {
         final Condition combinedCondition = mCondition.and(
                 new FakeCondition(/* initialValue= */ true));
 
-        final Condition.Callback callback = mock(Condition.Callback.class);
+        final Condition.Callback callback = mock(
+                Condition.Callback.class);
         combinedCondition.addCallback(callback);
 
         assertThat(combinedCondition.isConditionSet()).isTrue();
@@ -256,7 +274,8 @@ public class ConditionTest extends SysuiTestCase {
         final Condition combinedCondition = mCondition.and(
                 new FakeCondition(/* initialValue= */ false));
 
-        final Condition.Callback callback = mock(Condition.Callback.class);
+        final Condition.Callback callback = mock(
+                Condition.Callback.class);
         combinedCondition.addCallback(callback);
 
         assertThat(combinedCondition.isConditionSet()).isTrue();
@@ -272,7 +291,8 @@ public class ConditionTest extends SysuiTestCase {
         final Condition combinedCondition = mCondition.and(
                 new FakeCondition(/* initialValue= */ null));
 
-        final Condition.Callback callback = mock(Condition.Callback.class);
+        final Condition.Callback callback = mock(
+                Condition.Callback.class);
         combinedCondition.addCallback(callback);
 
         assertThat(combinedCondition.isConditionSet()).isFalse();
@@ -288,7 +308,8 @@ public class ConditionTest extends SysuiTestCase {
         final Condition combinedCondition = mCondition.and(
                 new FakeCondition(/* initialValue= */ null));
 
-        final Condition.Callback callback = mock(Condition.Callback.class);
+        final Condition.Callback callback = mock(
+                Condition.Callback.class);
         combinedCondition.addCallback(callback);
 
         assertThat(combinedCondition.isConditionSet()).isTrue();
