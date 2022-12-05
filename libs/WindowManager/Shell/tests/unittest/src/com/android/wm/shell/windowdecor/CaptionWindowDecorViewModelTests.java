@@ -111,7 +111,7 @@ public class CaptionWindowDecorViewModelTests extends ShellTestCase {
             .create(any(), any(), any(), any(), any(), any(), any(), any());
 
         when(mInputManager.monitorGestureInput(any(), anyInt())).thenReturn(mInputMonitor);
-        when(mEventReceiverFactory.create(any(), any())).thenReturn(mEventReceiver);
+        when(mEventReceiverFactory.create(any(), any(), any())).thenReturn(mEventReceiver);
         when(mInputMonitor.getInputChannel()).thenReturn(mInputChannel);
     }
 
