@@ -8004,6 +8004,26 @@ package android.app.admin {
     field public static final int PACKAGE_POLICY_BLOCKLIST = 1; // 0x1
   }
 
+  public final class PolicyUpdateReason {
+    ctor public PolicyUpdateReason(int);
+    method public int getReasonCode();
+    field public static final int REASON_CONFLICTING_ADMIN_POLICY = 0; // 0x0
+    field public static final int REASON_UNKNOWN = -1; // 0xffffffff
+  }
+
+  public abstract class PolicyUpdatesReceiver extends android.content.BroadcastReceiver {
+    ctor public PolicyUpdatesReceiver();
+    method public void onPolicyChanged(@NonNull android.content.Context, @NonNull String, @NonNull android.os.Bundle, @NonNull android.app.admin.TargetUser, @NonNull android.app.admin.PolicyUpdateReason);
+    method public void onPolicySetResult(@NonNull android.content.Context, @NonNull String, @NonNull android.os.Bundle, @NonNull android.app.admin.TargetUser, int, @Nullable android.app.admin.PolicyUpdateReason);
+    method public final void onReceive(android.content.Context, android.content.Intent);
+    field public static final String ACTION_DEVICE_POLICY_CHANGED = "android.app.admin.action.DEVICE_POLICY_CHANGED";
+    field public static final String ACTION_DEVICE_POLICY_SET_RESULT = "android.app.admin.action.DEVICE_POLICY_SET_RESULT";
+    field public static final String EXTRA_PACKAGE_NAME = "android.app.admin.extra.PACKAGE_NAME";
+    field public static final String EXTRA_PERMISSION_NAME = "android.app.admin.extra.PERMISSION_NAME";
+    field public static final int POLICY_SET_RESULT_FAILURE = -1; // 0xffffffff
+    field public static final int POLICY_SET_RESULT_SUCCESS = 0; // 0x0
+  }
+
   public final class PreferentialNetworkServiceConfig implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public int[] getExcludedUids();
@@ -8130,6 +8150,12 @@ package android.app.admin {
     field public static final int ERROR_NEW_FREEZE_PERIOD_TOO_CLOSE = 4; // 0x4
     field public static final int ERROR_NEW_FREEZE_PERIOD_TOO_LONG = 3; // 0x3
     field public static final int ERROR_UNKNOWN = 1; // 0x1
+  }
+
+  public final class TargetUser {
+    field @NonNull public static final android.app.admin.TargetUser GLOBAL;
+    field @NonNull public static final android.app.admin.TargetUser LOCAL_USER;
+    field @NonNull public static final android.app.admin.TargetUser PARENT_USER;
   }
 
   public final class UnsafeStateException extends java.lang.IllegalStateException implements android.os.Parcelable {
