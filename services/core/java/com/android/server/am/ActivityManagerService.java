@@ -18324,7 +18324,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public void waitForBroadcastBarrier(@Nullable PrintWriter pw) {
         enforceCallingPermission(permission.DUMP, "waitForBroadcastBarrier()");
-        BroadcastLoopers.waitForIdle(pw);
+        BroadcastLoopers.waitForBarrier(pw);
         for (BroadcastQueue queue : mBroadcastQueues) {
             queue.waitForBarrier(pw);
         }
