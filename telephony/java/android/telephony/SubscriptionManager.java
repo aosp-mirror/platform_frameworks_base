@@ -2132,7 +2132,7 @@ public class SubscriptionManager {
     /**
      * Set SIM icon tint color for subscription ID
      * @param tint the RGB value of icon tint color of the SIM
-     * @param subId the unique Subscritpion ID in database
+     * @param subId the unique subscription ID in database
      * @return the number of records updated
      * @hide
      */
@@ -2140,7 +2140,7 @@ public class SubscriptionManager {
     public int setIconTint(@ColorInt int tint, int subId) {
         if (VDBG) logd("[setIconTint]+ tint:" + tint + " subId:" + subId);
         return setSubscriptionPropertyHelper(subId, "setIconTint",
-                (iSub)-> iSub.setIconTint(tint, subId)
+                (iSub)-> iSub.setIconTint(subId, tint)
         );
     }
 
