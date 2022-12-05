@@ -664,21 +664,33 @@ public final class MediaDrm implements AutoCloseable {
      * strategy and details about each possible return value from {@link
      * MediaDrmStateException#getErrorCode()}.
      */
-    public static final class MediaDrmStateException extends java.lang.IllegalStateException {
-        private final int mErrorCode;
+    public static final class MediaDrmStateException extends java.lang.IllegalStateException
+            implements MediaDrmThrowable {
+        private final int mErrorCode, mVendorError, mOemError, mErrorContext;
         private final String mDiagnosticInfo;
 
         /**
          * @hide
          */
         public MediaDrmStateException(int errorCode, @Nullable String detailMessage) {
+            this(detailMessage, errorCode, 0, 0, 0);
+        }
+
+        /**
+         * @hide
+         */
+        public MediaDrmStateException(String detailMessage, int errorCode,
+                int vendorError, int oemError, int errorContext) {
             super(detailMessage);
             mErrorCode = errorCode;
+            mVendorError = vendorError;
+            mOemError = oemError;
+            mErrorContext = errorContext;
 
             // TODO get this from DRM session
             final String sign = errorCode < 0 ? "neg_" : "";
             mDiagnosticInfo =
-                "android.media.MediaDrm.error_" + sign + Math.abs(errorCode);
+                    "android.media.MediaDrm.error_" + sign + Math.abs(errorCode);
 
         }
 
@@ -694,6 +706,21 @@ public final class MediaDrm implements AutoCloseable {
         @MediaDrmErrorCode
         public int getErrorCode() {
             return mErrorCode;
+        }
+
+        @Override
+        public int getVendorError() {
+            return mVendorError;
+        }
+
+        @Override
+        public int getOemError() {
+            return mOemError;
+        }
+
+        @Override
+        public int getErrorContext() {
+            return mErrorContext;
         }
 
         /**
@@ -727,10 +754,22 @@ public final class MediaDrm implements AutoCloseable {
      * {@link #isTransient()} to determine whether the app should retry the
      * failing operation.
      */
-    public static final class SessionException extends RuntimeException {
+    public static final class SessionException extends RuntimeException
+            implements MediaDrmThrowable {
         public SessionException(int errorCode, @Nullable String detailMessage) {
+            this(detailMessage, errorCode, 0, 0, 0);
+        }
+
+        /**
+         * @hide
+         */
+        public SessionException(String detailMessage, int errorCode, int vendorError, int oemError,
+                int errorContext) {
             super(detailMessage);
             mErrorCode = errorCode;
+            mVendorError = vendorError;
+            mOemError = oemError;
+            mErrorContext = errorContext;
         }
 
         /**
@@ -769,6 +808,21 @@ public final class MediaDrm implements AutoCloseable {
             return mErrorCode;
         }
 
+        @Override
+        public int getVendorError() {
+            return mVendorError;
+        }
+
+        @Override
+        public int getOemError() {
+            return mOemError;
+        }
+
+        @Override
+        public int getErrorContext() {
+            return mErrorContext;
+        }
+
         /**
          * Returns true if the {@link SessionException} is a transient
          * issue, perhaps due to resource constraints, and that the operation
@@ -779,7 +833,7 @@ public final class MediaDrm implements AutoCloseable {
             return mErrorCode == ERROR_RESOURCE_CONTENTION;
         }
 
-        private final int mErrorCode;
+        private final int mErrorCode, mVendorError, mOemError, mErrorContext;
     }
 
     /**

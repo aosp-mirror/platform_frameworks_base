@@ -21304,7 +21304,7 @@ package android.media {
     field public static final int ERROR_RECLAIMED = 1101; // 0x44d
   }
 
-  public static final class MediaCodec.CryptoException extends java.lang.RuntimeException {
+  public static final class MediaCodec.CryptoException extends java.lang.RuntimeException implements android.media.MediaDrmThrowable {
     ctor public MediaCodec.CryptoException(int, @Nullable String);
     method public int getErrorCode();
     field @Deprecated public static final int ERROR_FRAME_TOO_LARGE = 8; // 0x8
@@ -21804,7 +21804,7 @@ package android.media {
     method public void setMediaDrmSession(@NonNull byte[]) throws android.media.MediaCryptoException;
   }
 
-  public final class MediaCryptoException extends java.lang.Exception {
+  public final class MediaCryptoException extends java.lang.Exception implements android.media.MediaDrmThrowable {
     ctor public MediaCryptoException(@Nullable String);
   }
 
@@ -22027,7 +22027,7 @@ package android.media {
     method public long getTimestampMillis();
   }
 
-  public static final class MediaDrm.MediaDrmStateException extends java.lang.IllegalStateException {
+  public static final class MediaDrm.MediaDrmStateException extends java.lang.IllegalStateException implements android.media.MediaDrmThrowable {
     method @NonNull public String getDiagnosticInfo();
     method public int getErrorCode();
     method public boolean isTransient();
@@ -22100,7 +22100,7 @@ package android.media {
   @Deprecated @IntDef({android.media.MediaDrm.SECURITY_LEVEL_UNKNOWN, android.media.MediaDrm.SECURITY_LEVEL_SW_SECURE_CRYPTO, android.media.MediaDrm.SECURITY_LEVEL_SW_SECURE_DECODE, android.media.MediaDrm.SECURITY_LEVEL_HW_SECURE_CRYPTO, android.media.MediaDrm.SECURITY_LEVEL_HW_SECURE_DECODE, android.media.MediaDrm.SECURITY_LEVEL_HW_SECURE_ALL}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface MediaDrm.SecurityLevel {
   }
 
-  public static final class MediaDrm.SessionException extends java.lang.RuntimeException {
+  public static final class MediaDrm.SessionException extends java.lang.RuntimeException implements android.media.MediaDrmThrowable {
     ctor public MediaDrm.SessionException(int, @Nullable String);
     method @Deprecated public int getErrorCode();
     method public boolean isTransient();
@@ -22108,12 +22108,18 @@ package android.media {
     field @Deprecated public static final int ERROR_UNKNOWN = 0; // 0x0
   }
 
-  public class MediaDrmException extends java.lang.Exception {
+  public class MediaDrmException extends java.lang.Exception implements android.media.MediaDrmThrowable {
     ctor public MediaDrmException(String);
   }
 
-  public class MediaDrmResetException extends java.lang.IllegalStateException {
+  public class MediaDrmResetException extends java.lang.IllegalStateException implements android.media.MediaDrmThrowable {
     ctor public MediaDrmResetException(String);
+  }
+
+  public interface MediaDrmThrowable {
+    method public default int getErrorContext();
+    method public default int getOemError();
+    method public default int getVendorError();
   }
 
   public final class MediaExtractor {
