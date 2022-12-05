@@ -983,7 +983,7 @@ public class NotificationStackScrollLayoutController {
     }
 
     public boolean isAddOrRemoveAnimationPending() {
-        return mView.isAddOrRemoveAnimationPending();
+        return mView != null && mView.isAddOrRemoveAnimationPending();
     }
 
     public int getVisibleNotificationCount() {
@@ -1140,7 +1140,9 @@ public class NotificationStackScrollLayoutController {
     }
 
     public void setAlpha(float alpha) {
-        mView.setAlpha(alpha);
+        if (mView != null) {
+            mView.setAlpha(alpha);
+        }
     }
 
     public float calculateAppearFraction(float height) {

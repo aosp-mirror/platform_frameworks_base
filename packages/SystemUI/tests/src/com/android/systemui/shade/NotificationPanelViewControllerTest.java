@@ -43,6 +43,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -530,6 +531,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 .setHeadsUpAppearanceController(mock(HeadsUpAppearanceController.class));
         verify(mNotificationStackScrollLayoutController)
                 .setOnEmptySpaceClickListener(mEmptySpaceClickListenerCaptor.capture());
+        verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ true);
+        reset(mKeyguardStatusViewController);
     }
 
     @After
@@ -609,7 +612,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
     @Test
     public void getVerticalSpaceForLockscreenNotifications_useLockIconBottomPadding_returnsSpaceAvailable() {
-        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+        setBottomPadding(/* stackScrollLayoutBottom= */ 180,
                 /* lockIconPadding= */ 20,
                 /* indicationPadding= */ 0,
                 /* ambientPadding= */ 0);
@@ -620,7 +623,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
     @Test
     public void getVerticalSpaceForLockscreenNotifications_useIndicationBottomPadding_returnsSpaceAvailable() {
-        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+        setBottomPadding(/* stackScrollLayoutBottom= */ 180,
                 /* lockIconPadding= */ 0,
                 /* indicationPadding= */ 30,
                 /* ambientPadding= */ 0);
@@ -631,7 +634,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
     @Test
     public void getVerticalSpaceForLockscreenNotifications_useAmbientBottomPadding_returnsSpaceAvailable() {
-        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+        setBottomPadding(/* stackScrollLayoutBottom= */ 180,
                 /* lockIconPadding= */ 0,
                 /* indicationPadding= */ 0,
                 /* ambientPadding= */ 40);
@@ -954,7 +957,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testFinishInflate_userSwitcherDisabled_doNotInflateUserSwitchView() {
+    public void testFinishInflate_userSwitcherDisabled_doNotInflateUserSwitchView_initClock() {
         givenViewAttached();
         when(mResources.getBoolean(
                 com.android.internal.R.bool.config_keyguardUserSwitcher)).thenReturn(true);
@@ -965,6 +968,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mNotificationPanelViewController.onFinishInflate();
 
         verify(mUserSwitcherStubView, never()).inflate();
+        verify(mKeyguardStatusViewController, times(3)).displayClock(LARGE, /* animate */ true);
     }
 
     @Test
