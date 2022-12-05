@@ -432,6 +432,11 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                             AudioManager.DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER |
                             AudioManager.DEVICE_OUT_BLE_HEADSET)) != 0;
             changed |= updateStreamRoutedToBluetoothW(stream, routedToBluetooth);
+        } else if (stream == AudioManager.STREAM_VOICE_CALL) {
+            final boolean routedToBluetooth =
+                    (mAudio.getDevicesForStream(AudioManager.STREAM_VOICE_CALL)
+                            & AudioManager.DEVICE_OUT_BLE_HEADSET) != 0;
+            changed |= updateStreamRoutedToBluetoothW(stream, routedToBluetooth);
         }
         return changed;
     }
