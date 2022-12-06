@@ -147,7 +147,8 @@ public final class DreamManagerService extends SystemService {
             new ActivityInterceptorCallback() {
                 @Nullable
                 @Override
-                public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+                public ActivityInterceptResult onInterceptActivityLaunch(@NonNull
+                        ActivityInterceptorInfo info) {
                     return null;
                 }
 

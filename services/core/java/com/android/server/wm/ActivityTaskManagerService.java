@@ -94,8 +94,10 @@ import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.Scr
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.PACKAGE;
 import static com.android.server.am.EventLogTags.writeBootProgressEnableScreen;
 import static com.android.server.am.EventLogTags.writeConfigurationChanged;
-import static com.android.server.wm.ActivityInterceptorCallback.FIRST_ORDERED_ID;
-import static com.android.server.wm.ActivityInterceptorCallback.LAST_ORDERED_ID;
+import static com.android.server.wm.ActivityInterceptorCallback.MAINLINE_FIRST_ORDERED_ID;
+import static com.android.server.wm.ActivityInterceptorCallback.MAINLINE_LAST_ORDERED_ID;
+import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_FIRST_ORDERED_ID;
+import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_LAST_ORDERED_ID;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_ROOT_TASK;
@@ -6811,10 +6813,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (mActivityInterceptorCallbacks.contains(id)) {
                     throw new IllegalArgumentException("Duplicate id provided: " + id);
                 }
-                if (id > LAST_ORDERED_ID || id < FIRST_ORDERED_ID) {
+                if (!ActivityInterceptorCallback.isValidOrderId(id)) {
                     throw new IllegalArgumentException(
-                            "Provided id " + id + " is not in range of valid ids ["
-                                    + FIRST_ORDERED_ID + "," + LAST_ORDERED_ID + "]");
+                            "Provided id " + id + " is not in range of valid ids for system "
+                                    + "services [" + SYSTEM_FIRST_ORDERED_ID + ","
+                                    + SYSTEM_LAST_ORDERED_ID + "] nor in range of valid ids for "
+                                    + "mainline module services [" + MAINLINE_FIRST_ORDERED_ID + ","
+                                    + MAINLINE_LAST_ORDERED_ID + "]");
                 }
                 mActivityInterceptorCallbacks.put(id, callback);
             }

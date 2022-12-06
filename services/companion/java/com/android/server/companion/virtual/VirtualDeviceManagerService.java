@@ -134,21 +134,22 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Nullable
         @Override
-        public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
-            if (info.callingPackage == null) {
+        public ActivityInterceptResult onInterceptActivityLaunch(@NonNull
+                ActivityInterceptorInfo info) {
+            if (info.getCallingPackage() == null) {
                 return null;
             }
-            PendingTrampoline pt = mPendingTrampolines.remove(info.callingPackage);
+            PendingTrampoline pt = mPendingTrampolines.remove(info.getCallingPackage());
             if (pt == null) {
                 return null;
             }
             pt.mResultReceiver.send(VirtualDeviceManager.LAUNCH_SUCCESS, null);
-            ActivityOptions options = info.checkedOptions;
+            ActivityOptions options = info.getCheckedOptions();
             if (options == null) {
                 options = ActivityOptions.makeBasic();
             }
             return new ActivityInterceptResult(
-                    info.intent, options.setLaunchDisplayId(pt.mDisplayId));
+                    info.getIntent(), options.setLaunchDisplayId(pt.mDisplayId));
         }
     };
 
