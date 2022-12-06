@@ -413,6 +413,16 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
+    public void testCanAffectSystemUiFlags_starting() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION_STARTING, "app");
+        app.mActivityRecord.setVisible(true);
+        app.mStartingData = new SnapshotStartingData(mWm, null, 0);
+        assertFalse(app.canAffectSystemUiFlags());
+        app.mStartingData = new SplashScreenStartingData(mWm, 0, 0);
+        assertTrue(app.canAffectSystemUiFlags());
+    }
+
+    @Test
     public void testCanAffectSystemUiFlags_disallow() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         app.mActivityRecord.setVisible(true);
