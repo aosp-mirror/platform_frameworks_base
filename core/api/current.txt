@@ -10366,6 +10366,7 @@ package android.content {
     field @Deprecated @RequiresPermission("android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS") public static final String ACTION_CLOSE_SYSTEM_DIALOGS = "android.intent.action.CLOSE_SYSTEM_DIALOGS";
     field public static final String ACTION_CONFIGURATION_CHANGED = "android.intent.action.CONFIGURATION_CHANGED";
     field public static final String ACTION_CREATE_DOCUMENT = "android.intent.action.CREATE_DOCUMENT";
+    field public static final String ACTION_CREATE_NOTE = "android.intent.action.CREATE_NOTE";
     field public static final String ACTION_CREATE_REMINDER = "android.intent.action.CREATE_REMINDER";
     field public static final String ACTION_CREATE_SHORTCUT = "android.intent.action.CREATE_SHORTCUT";
     field public static final String ACTION_DATE_CHANGED = "android.intent.action.DATE_CHANGED";
@@ -10614,6 +10615,7 @@ package android.content {
     field public static final String EXTRA_UID = "android.intent.extra.UID";
     field public static final String EXTRA_USER = "android.intent.extra.USER";
     field public static final String EXTRA_USER_INITIATED = "android.intent.extra.USER_INITIATED";
+    field public static final String EXTRA_USE_STYLUS_MODE = "android.intent.extra.USE_STYLUS_MODE";
     field public static final int FILL_IN_ACTION = 1; // 0x1
     field public static final int FILL_IN_CATEGORIES = 4; // 0x4
     field public static final int FILL_IN_CLIP_DATA = 128; // 0x80
