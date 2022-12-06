@@ -14,4 +14,16 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"तुम्ही ज्या नेटवर्कमध्‍ये सामील होण्याचा प्रयत्न करत आहात त्यात सुरक्षितता समस्या आहेत."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"उदाहरणार्थ, लॉग इन पृष्‍ठ दर्शवलेल्या संस्थेच्या मालकीचे नसू शकते."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"तरीही ब्राउझरद्वारे सुरू ठेवा"</string>
+    <!-- no translation found for network_boost_notification_channel (5430986172506159199) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_title (8226368121348880044) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_detail (3812434025544196192) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_button_not_now (4129218252146702688) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_button_manage (1511552684142641182) -->
+    <skip />
+    <!-- no translation found for slice_purchase_app_label (915654761797446390) -->
+    <skip />
 </resources>

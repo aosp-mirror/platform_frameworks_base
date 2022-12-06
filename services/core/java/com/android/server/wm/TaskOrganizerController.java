@@ -691,6 +691,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             if (mainWindow == null || mainWindow.mRemoved) {
                 removalInfo.playRevealAnimation = false;
             } else if (removalInfo.playRevealAnimation && playShiftUpAnimation) {
+                removalInfo.roundedCornerRadius =
+                        topActivity.mLetterboxUiController.getRoundedCornersRadius(mainWindow);
                 removalInfo.windowAnimationLeash = applyStartingWindowAnimation(mainWindow);
                 removalInfo.mainFrame = mainWindow.getRelativeFrame();
             }

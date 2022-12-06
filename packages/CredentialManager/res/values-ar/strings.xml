@@ -8,8 +8,7 @@
     <string name="string_create_in_another_place" msgid="1033635365843437603">"الإنشاء في مكان آخر"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"الحفظ في مكان آخر"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"استخدام جهاز آخر"</string>
-    <!-- no translation found for string_save_to_another_device (1959562542075194458) -->
-    <skip />
+    <string name="string_save_to_another_device" msgid="1959562542075194458">"الحفظ على جهاز آخر"</string>
     <string name="passkey_creation_intro_title" msgid="402553911484409884">"طريقة بسيطة لتسجيل الدخول بأمان"</string>
     <string name="passkey_creation_intro_body" msgid="7493320456005579290">"استخدِم بصمة إصبعك أو وجهك أو قفل الشاشة لتسجيل الدخول باستخدام مفتاح مرور فريد لا يمكن نسيانه أو سرقته. مزيد من المعلومات"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"اختيار مكان <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
@@ -22,7 +21,7 @@
     <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"هل تريد إنشاء مفتاح مرور في \"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>\"؟"</string>
     <string name="choose_create_option_password_title" msgid="8812546498357380545">"هل تريد حفظ كلمة مرورك في \"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>\"؟"</string>
     <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"هل تريد حفظ معلومات تسجيل الدخول في \"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>\"؟"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"يمكنك استخدام <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> على أي جهاز. يتم حفظه في \"<xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>\" لـ \"<xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>\"."</string>
+    <string name="choose_create_option_description" msgid="4419171903963100257">"يمكنك استخدام <xliff:g id="TYPE">%2$s</xliff:g> الخاص بـ \"<xliff:g id="APPDOMAINNAME">%1$s</xliff:g>\" على أي جهاز. ويتم حفظه في \"<xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>\" للحساب \"<xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>\"."</string>
     <string name="passkey" msgid="632353688396759522">"مفتاح مرور"</string>
     <string name="password" msgid="6738570945182936667">"كلمة المرور"</string>
     <string name="sign_ins" msgid="4710739369149469208">"عمليات تسجيل الدخول"</string>
@@ -31,6 +30,8 @@
     <!-- no translation found for save_password_to_title (3450480045270186421) -->
     <skip />
     <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
+    <skip />
+    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
     <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"هل تريد استخدام \"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>\" لكل عمليات تسجيل الدخول؟"</string>
     <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->

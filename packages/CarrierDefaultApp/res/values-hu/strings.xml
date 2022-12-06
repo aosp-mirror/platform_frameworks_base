@@ -8,10 +8,22 @@
     <string name="portal_notification_detail" msgid="2295729385924660881">"Koppintson a(z) %s webhely meglátogatásához"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Vegye fel a kapcsolatot szolgáltatójával (%s)"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Nincs mobiladat-kapcsolat"</string>
-    <string name="no_mobile_data_connection" msgid="544980465184147010">"Adjon hozzá előfizetést vagy barangolási csomagot a következőn keresztül: %s"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Adjon hozzá előfizetést vagy roamingcsomagot a következőn keresztül: %s"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Mobiladat-állapot"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Bejelentkezés a mobilhálózatra"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"Biztonsági problémák vannak azzal a hálózattal, amelyhez csatlakozni szeretne."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Például lehetséges, hogy a bejelentkezési oldal nem a megjelenített szervezethez tartozik."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Folytatás ennek ellenére böngészőn keresztül"</string>
+    <!-- no translation found for network_boost_notification_channel (5430986172506159199) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_title (8226368121348880044) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_detail (3812434025544196192) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_button_not_now (4129218252146702688) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_button_manage (1511552684142641182) -->
+    <skip />
+    <!-- no translation found for slice_purchase_app_label (915654761797446390) -->
+    <skip />
 </resources>

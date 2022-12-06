@@ -22017,6 +22017,11 @@ package android.media {
     field public static final int AVCProfileHigh422 = 32; // 0x20
     field public static final int AVCProfileHigh444 = 64; // 0x40
     field public static final int AVCProfileMain = 2; // 0x2
+    field public static final int DTS_HDProfileHRA = 1; // 0x1
+    field public static final int DTS_HDProfileLBR = 2; // 0x2
+    field public static final int DTS_HDProfileMA = 4; // 0x4
+    field public static final int DTS_UHDProfileP1 = 1; // 0x1
+    field public static final int DTS_UHDProfileP2 = 2; // 0x2
     field public static final int DolbyVisionLevel8k30 = 1024; // 0x400
     field public static final int DolbyVisionLevel8k60 = 2048; // 0x800
     field public static final int DolbyVisionLevelFhd24 = 4; // 0x4
@@ -48751,7 +48756,7 @@ package android.view {
     method public float getDesiredMaxAverageLuminance();
     method public float getDesiredMaxLuminance();
     method public float getDesiredMinLuminance();
-    method public int[] getSupportedHdrTypes();
+    method @Deprecated public int[] getSupportedHdrTypes();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.Display.HdrCapabilities> CREATOR;
     field public static final int HDR_TYPE_DOLBY_VISION = 1; // 0x1
@@ -48768,6 +48773,7 @@ package android.view {
     method public int getPhysicalHeight();
     method public int getPhysicalWidth();
     method public float getRefreshRate();
+    method @NonNull public int[] getSupportedHdrTypes();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.Display.Mode> CREATOR;
   }
@@ -52704,7 +52710,7 @@ package android.view.accessibility {
     method public android.view.accessibility.AccessibilityNodeInfo getLabeledBy();
     method public int getLiveRegion();
     method public int getMaxTextLength();
-    method public int getMinMillisBetweenContentChanges();
+    method @NonNull public java.time.Duration getMinDurationBetweenContentChanges();
     method public int getMovementGranularities();
     method public CharSequence getPackageName();
     method @Nullable public CharSequence getPaneTitle();
@@ -52793,7 +52799,7 @@ package android.view.accessibility {
     method public void setLiveRegion(int);
     method public void setLongClickable(boolean);
     method public void setMaxTextLength(int);
-    method public void setMinMillisBetweenContentChanges(int);
+    method public void setMinDurationBetweenContentChanges(@NonNull java.time.Duration);
     method public void setMovementGranularities(int);
     method public void setMultiLine(boolean);
     method public void setPackageName(CharSequence);
@@ -59151,6 +59157,22 @@ package android.widget.inline {
 }
 
 package android.window {
+
+  public final class BackEvent {
+    ctor public BackEvent(float, float, float, int);
+    method @FloatRange(from=0, to=1) public float getProgress();
+    method public int getSwipeEdge();
+    method public float getTouchX();
+    method public float getTouchY();
+    field public static final int EDGE_LEFT = 0; // 0x0
+    field public static final int EDGE_RIGHT = 1; // 0x1
+  }
+
+  public interface OnBackAnimationCallback extends android.window.OnBackInvokedCallback {
+    method public default void onBackCancelled();
+    method public default void onBackProgressed(@NonNull android.window.BackEvent);
+    method public default void onBackStarted(@NonNull android.window.BackEvent);
+  }
 
   public interface OnBackInvokedCallback {
     method public void onBackInvoked();

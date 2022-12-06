@@ -16,15 +16,10 @@
 
 package com.android.settingslib.spa.framework.util
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.take
 
 /**
  * Returns a [Flow] whose values are a list which containing the results of applying the given
@@ -41,33 +36,13 @@ inline fun <T, R> Flow<List<T>>.asyncMapItem(crossinline transform: (T) -> R): F
     map { list -> list.asyncMap(transform) }
 
 /**
+ * Returns a [Flow] whose values are a list containing only elements matching the given [predicate].
+ */
+inline fun <T> Flow<List<T>>.filterItem(crossinline predicate: (T) -> Boolean): Flow<List<T>> =
+    map { list -> list.filter(predicate) }
+
+/**
  * Delays the flow a little bit, wait the other flow's first value.
  */
 fun <T1, T2> Flow<T1>.waitFirst(otherFlow: Flow<T2>): Flow<T1> =
-    combine(otherFlow.distinctUntilChangedBy {}) { value, _ -> value }
-
-/**
- * Returns a [Flow] whose values are generated list by combining the most recently emitted non null
- * values by each flow.
- */
-inline fun <reified T : Any> combineToList(vararg flows: Flow<T?>): Flow<List<T>> = combine(
-    flows.asList(),
-) { array: Array<T?> -> array.filterNotNull() }
-
-class StateFlowBridge<T> {
-    private val stateFlow = MutableStateFlow<T?>(null)
-    val flow = stateFlow.filterNotNull()
-
-    fun setIfAbsent(value: T) {
-        if (stateFlow.value == null) {
-            stateFlow.value = value
-        }
-    }
-
-    @Composable
-    fun Sync(state: State<T>) {
-        LaunchedEffect(state.value) {
-            stateFlow.value = state.value
-        }
-    }
-}
+    combine(otherFlow.take(1)) { value, _ -> value }

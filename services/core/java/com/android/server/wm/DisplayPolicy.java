@@ -1202,7 +1202,6 @@ public class DisplayPolicy {
             return null;
         }
         return (displayFrames, windowContainer, inOutFrame) -> {
-            inOutFrame.inset(win.mGivenContentInsets);
             final LayoutParams lp = win.mAttrs.forRotation(displayFrames.mRotation);
             final InsetsFrameProvider ifp = lp.providedInsets[index];
             InsetsFrameProvider.calculateInsetsFrame(displayFrames.mUnrestricted,

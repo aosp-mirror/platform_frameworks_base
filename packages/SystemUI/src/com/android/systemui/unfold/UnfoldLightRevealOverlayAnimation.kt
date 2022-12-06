@@ -22,6 +22,8 @@ import android.hardware.devicestate.DeviceStateManager
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener
 import android.hardware.display.DisplayManager
 import android.hardware.input.InputManager
+import android.os.Handler
+import android.os.Looper
 import android.os.Trace
 import android.view.Choreographer
 import android.view.Display
@@ -32,6 +34,7 @@ import android.view.SurfaceControlViewHost
 import android.view.SurfaceSession
 import android.view.WindowManager
 import android.view.WindowlessWindowManager
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dagger.qualifiers.UiBackground
 import com.android.systemui.statusbar.LightRevealEffect
@@ -40,6 +43,7 @@ import com.android.systemui.statusbar.LinearLightRevealEffect
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.unfold.updates.RotationChangeProvider
 import com.android.systemui.unfold.util.ScaleAwareTransitionProgressProvider.Companion.areAnimationsEnabled
+import com.android.systemui.util.Assert.isMainThread
 import com.android.systemui.util.traceSection
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper
 import java.util.Optional
@@ -59,6 +63,7 @@ constructor(
     private val displayAreaHelper: Optional<DisplayAreaHelper>,
     @Main private val executor: Executor,
     @UiBackground private val backgroundExecutor: Executor,
+    @Background private val bgHandler: Handler,
     private val rotationChangeProvider: RotationChangeProvider,
 ) {
 
@@ -120,11 +125,11 @@ constructor(
         try {
             // Add the view only if we are unfolding and this is the first screen on
             if (!isFolded && !isUnfoldHandled && contentResolver.areAnimationsEnabled()) {
-                addView(onOverlayReady)
+                executeInBackground { addView(onOverlayReady) }
                 isUnfoldHandled = true
             } else {
                 // No unfold transition, immediately report that overlay is ready
-                ensureOverlayRemoved()
+                executeInBackground { ensureOverlayRemoved() }
                 onOverlayReady.run()
             }
         } finally {
@@ -139,6 +144,7 @@ constructor(
             return
         }
 
+        ensureInBackground()
         ensureOverlayRemoved()
 
         val newRoot = SurfaceControlViewHost(context, context.display!!, wwm)
@@ -152,7 +158,7 @@ constructor(
         val params = getLayoutParams()
         newRoot.setView(newView, params)
 
-        onOverlayReady?.let { callback ->
+        if (onOverlayReady != null) {
             Trace.beginAsyncSection("UnfoldLightRevealOverlayAnimation#relayout", 0)
 
             newRoot.relayout(params) { transaction ->
@@ -170,7 +176,7 @@ constructor(
                     .setFrameTimelineVsync(vsyncId + 1)
                     .addTransactionCommittedListener(backgroundExecutor) {
                         Trace.endAsyncSection("UnfoldLightRevealOverlayAnimation#relayout", 0)
-                        callback.run()
+                        onOverlayReady.run()
                     }
                     .apply()
             }
@@ -213,9 +219,12 @@ constructor(
     }
 
     private fun ensureOverlayRemoved() {
-        root?.release()
-        root = null
-        scrimView = null
+        ensureInBackground()
+        traceSection("ensureOverlayRemoved") {
+            root?.release()
+            root = null
+            scrimView = null
+        }
     }
 
     private fun getUnfoldedDisplayInfo(): DisplayInfo =
@@ -228,17 +237,17 @@ constructor(
     private inner class TransitionListener : TransitionProgressListener {
 
         override fun onTransitionProgress(progress: Float) {
-            scrimView?.revealAmount = progress
+            executeInBackground { scrimView?.revealAmount = progress }
         }
 
         override fun onTransitionFinished() {
-            ensureOverlayRemoved()
+            executeInBackground { ensureOverlayRemoved() }
         }
 
         override fun onTransitionStarted() {
             // Add view for folding case (when unfolding the view is added earlier)
             if (scrimView == null) {
-                addView()
+                executeInBackground { addView() }
             }
             // Disable input dispatching during transition.
             InputManager.getInstance().cancelCurrentTouch()
@@ -250,11 +259,27 @@ constructor(
             traceSection("UnfoldLightRevealOverlayAnimation#onRotationChanged") {
                 if (currentRotation != newRotation) {
                     currentRotation = newRotation
-                    scrimView?.revealEffect = createLightRevealEffect()
-                    root?.relayout(getLayoutParams())
+                    executeInBackground {
+                        scrimView?.revealEffect = createLightRevealEffect()
+                        root?.relayout(getLayoutParams())
+                    }
                 }
             }
         }
+    }
+
+    private fun executeInBackground(f: () -> Unit) {
+        ensureInMainThread()
+        // The UiBackground executor is not used as it doesn't have a prepared looper.
+        bgHandler.post(f)
+    }
+
+    private fun ensureInBackground() {
+        check(Looper.myLooper() == bgHandler.looper) { "Not being executed in the background!" }
+    }
+
+    private fun ensureInMainThread() {
+        isMainThread()
     }
 
     private inner class FoldListener :
@@ -262,7 +287,7 @@ constructor(
             context,
             Consumer { isFolded ->
                 if (isFolded) {
-                    ensureOverlayRemoved()
+                    executeInBackground { ensureOverlayRemoved() }
                     isUnfoldHandled = false
                 }
                 this.isFolded = isFolded

@@ -25,6 +25,7 @@ import android.view.Display;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.brightness.strategy.BoostBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DisplayBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DozeBrightnessStrategy;
 import com.android.server.display.brightness.strategy.InvalidBrightnessStrategy;
@@ -52,6 +53,8 @@ public class DisplayBrightnessStrategySelector {
     private final OverrideBrightnessStrategy mOverrideBrightnessStrategy;
     // The brightness strategy used to manage the brightness state in temporary state
     private final TemporaryBrightnessStrategy mTemporaryBrightnessStrategy;
+    // The brightness strategy used to manage the brightness state when boost is requested
+    private final BoostBrightnessStrategy mBoostBrightnessStrategy;
     // The brightness strategy used to manage the brightness state when the request is invalid.
     private final InvalidBrightnessStrategy mInvalidBrightnessStrategy;
 
@@ -72,6 +75,7 @@ public class DisplayBrightnessStrategySelector {
         mScreenOffBrightnessStrategy = injector.getScreenOffBrightnessStrategy();
         mOverrideBrightnessStrategy = injector.getOverrideBrightnessStrategy();
         mTemporaryBrightnessStrategy = injector.getTemporaryBrightnessStrategy();
+        mBoostBrightnessStrategy = injector.getBoostBrightnessStrategy();
         mInvalidBrightnessStrategy = injector.getInvalidBrightnessStrategy();
         mAllowAutoBrightnessWhileDozingConfig = context.getResources().getBoolean(
                 R.bool.config_allowAutoBrightnessWhileDozing);
@@ -89,6 +93,8 @@ public class DisplayBrightnessStrategySelector {
         DisplayBrightnessStrategy displayBrightnessStrategy = mInvalidBrightnessStrategy;
         if (targetDisplayState == Display.STATE_OFF) {
             displayBrightnessStrategy = mScreenOffBrightnessStrategy;
+        } else if (displayPowerRequest.boostScreenBrightness) {
+            displayBrightnessStrategy = mBoostBrightnessStrategy;
         } else if (shouldUseDozeBrightnessStrategy(displayPowerRequest)) {
             displayBrightnessStrategy = mDozeBrightnessStrategy;
         } else if (BrightnessUtils
@@ -168,6 +174,10 @@ public class DisplayBrightnessStrategySelector {
 
         TemporaryBrightnessStrategy getTemporaryBrightnessStrategy() {
             return new TemporaryBrightnessStrategy();
+        }
+
+        BoostBrightnessStrategy getBoostBrightnessStrategy() {
+            return new BoostBrightnessStrategy();
         }
 
         InvalidBrightnessStrategy getInvalidBrightnessStrategy() {

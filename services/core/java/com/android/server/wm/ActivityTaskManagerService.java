@@ -4386,6 +4386,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 values.touchscreen,
                 values.uiMode);
 
+        // Note: certain tests currently run as platform_app which is not allowed
+        // to set debug system properties. To ensure that system properties are set
+        // only when allowed, we check the current UID.
+        if (Process.myUid() == Process.SYSTEM_UID) {
+            SystemProperties.set("debug.tracing.mcc", Integer.toString(values.mcc));
+            SystemProperties.set("debug.tracing.mnc", Integer.toString(values.mnc));
+        }
 
         if (!initLocale && !values.getLocales().isEmpty() && values.userSetLocale) {
             final LocaleList locales = values.getLocales();

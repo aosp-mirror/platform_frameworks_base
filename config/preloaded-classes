@@ -9389,8 +9389,8 @@ android.widget.inline.InlinePresentationSpec$1
 android.widget.inline.InlinePresentationSpec$BaseBuilder
 android.widget.inline.InlinePresentationSpec$Builder
 android.widget.inline.InlinePresentationSpec
-android.window.BackEvent$1
-android.window.BackEvent
+android.window.BackMotionEvent$1
+android.window.BackMotionEvent
 android.window.ClientWindowFrames$1
 android.window.ClientWindowFrames
 android.window.CompatOnBackInvokedCallback

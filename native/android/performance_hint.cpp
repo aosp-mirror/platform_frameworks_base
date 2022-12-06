@@ -16,6 +16,7 @@
 
 #define LOG_TAG "perf_hint"
 
+#include <aidl/android/hardware/power/SessionHint.h>
 #include <android/os/IHintManager.h>
 #include <android/os/IHintSession.h>
 #include <android/performance_hint.h>
@@ -25,13 +26,20 @@
 #include <performance_hint_private.h>
 #include <utils/SystemClock.h>
 
+#include <chrono>
 #include <utility>
 #include <vector>
 
 using namespace android;
 using namespace android::os;
 
+using namespace std::chrono_literals;
+
+using AidlSessionHint = aidl::android::hardware::power::SessionHint;
+
 struct APerformanceHintSession;
+
+constexpr int64_t SEND_HINT_TIMEOUT = std::chrono::nanoseconds(100ms).count();
 
 struct APerformanceHintManager {
 public:
@@ -75,6 +83,8 @@ private:
     int64_t mFirstTargetMetTimestamp;
     // Last target hit timestamp
     int64_t mLastTargetMetTimestamp;
+    // Last hint reported from sendHint indexed by hint value
+    std::vector<int64_t> mLastHintSentTimestamp;
     // Cached samples
     std::vector<int64_t> mActualDurationsNanos;
     std::vector<int64_t> mTimestampsNanos;
@@ -147,7 +157,12 @@ APerformanceHintSession::APerformanceHintSession(sp<IHintSession> session,
         mPreferredRateNanos(preferredRateNanos),
         mTargetDurationNanos(targetDurationNanos),
         mFirstTargetMetTimestamp(0),
-        mLastTargetMetTimestamp(0) {}
+        mLastTargetMetTimestamp(0) {
+    const std::vector<AidlSessionHint> sessionHintRange{ndk::enum_range<AidlSessionHint>().begin(),
+                                                        ndk::enum_range<AidlSessionHint>().end()};
+
+    mLastHintSentTimestamp = std::vector<int64_t>(sessionHintRange.size(), 0);
+}
 
 APerformanceHintSession::~APerformanceHintSession() {
     binder::Status ret = mHintSession->close();
@@ -224,9 +239,15 @@ int APerformanceHintSession::reportActualWorkDuration(int64_t actualDurationNano
 }
 
 int APerformanceHintSession::sendHint(int32_t hint) {
-    if (hint < 0) {
-        ALOGE("%s: session hint value must be greater than zero", __FUNCTION__);
+    if (hint < 0 || hint >= static_cast<int32_t>(mLastHintSentTimestamp.size())) {
+        ALOGE("%s: invalid session hint %d", __FUNCTION__, hint);
         return EINVAL;
+    }
+    int64_t now = elapsedRealtimeNano();
+
+    // Limit sendHint to a pre-detemined rate for safety
+    if (now < (mLastHintSentTimestamp[hint] + SEND_HINT_TIMEOUT)) {
+        return 0;
     }
 
     binder::Status ret = mHintSession->sendHint(hint);
@@ -235,6 +256,7 @@ int APerformanceHintSession::sendHint(int32_t hint) {
         ALOGE("%s: HintSession sendHint failed: %s", __FUNCTION__, ret.exceptionMessage().c_str());
         return EPIPE;
     }
+    mLastHintSentTimestamp[hint] = now;
     return 0;
 }
 

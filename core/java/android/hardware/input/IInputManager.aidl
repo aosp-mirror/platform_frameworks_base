@@ -32,6 +32,8 @@ import android.hardware.lights.LightState;
 import android.os.IBinder;
 import android.os.IVibratorStateListener;
 import android.os.VibrationEffect;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodSubtype;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
@@ -106,6 +108,20 @@ interface IInputManager {
             + "android.Manifest.permission.SET_KEYBOARD_LAYOUT)")
     void removeKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor);
+
+    // New Keyboard layout config APIs
+    String getKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier, int userId,
+            in InputMethodInfo imeInfo, in InputMethodSubtype imeSubtype);
+
+    @EnforcePermission("SET_KEYBOARD_LAYOUT")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.SET_KEYBOARD_LAYOUT)")
+    void setKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier, int userId,
+            in InputMethodInfo imeInfo, in InputMethodSubtype imeSubtype,
+            String keyboardLayoutDescriptor);
+
+    String[] getKeyboardLayoutListForInputDevice(in InputDeviceIdentifier identifier, int userId,
+            in InputMethodInfo imeInfo, in InputMethodSubtype imeSubtype);
 
     // Registers an input devices changed listener.
     void registerInputDevicesChangedListener(IInputDevicesChangedListener listener);

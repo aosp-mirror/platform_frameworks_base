@@ -310,6 +310,18 @@ public final class VirtualDeviceManager {
         }
 
         /**
+         * @return A new Context bound to this device. This is a convenience method equivalent to
+         * calling {@link Context#createDeviceContext(int)} with the device id of this device.
+         */
+        public @NonNull Context createContext() {
+            try {
+                return mContext.createDeviceContext(mVirtualDevice.getDeviceId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Returns this device's sensor with the given type and name, if any.
          *
          * @see VirtualDeviceParams.Builder#addVirtualSensorConfig

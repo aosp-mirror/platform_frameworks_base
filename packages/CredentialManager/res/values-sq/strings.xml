@@ -8,8 +8,7 @@
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Krijo në një vend tjetër"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Ruaj në një vend tjetër"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Përdor një pajisje tjetër"</string>
-    <!-- no translation found for string_save_to_another_device (1959562542075194458) -->
-    <skip />
+    <string name="string_save_to_another_device" msgid="1959562542075194458">"Ruaj në një pajisje tjetër"</string>
     <string name="passkey_creation_intro_title" msgid="402553911484409884">"Një mënyrë e thjeshtë për t\'u identifikuar në mënyrë të sigurt"</string>
     <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Përdor gjurmën e gishtit, fytyrën ose kyçjen e ekranit për t\'u identifikuar me një çelës unik kalimi i cili nuk mund të harrohet ose të vidhet. Mëso më shumë"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Zgjidh se ku të <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
@@ -31,6 +30,8 @@
     <!-- no translation found for save_password_to_title (3450480045270186421) -->
     <skip />
     <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
+    <skip />
+    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
     <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Të përdoret <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> për të gjitha identifikimet?"</string>
     <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->

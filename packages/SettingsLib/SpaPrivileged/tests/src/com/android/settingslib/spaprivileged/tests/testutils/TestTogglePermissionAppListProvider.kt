@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package android.window;
+package com.android.settingslib.spaprivileged.tests.testutils
 
-/**
- * @hide
- */
-parcelable BackEvent;
+import android.content.Context
+import com.android.settingslib.spaprivileged.template.app.TogglePermissionAppListProvider
+
+object TestTogglePermissionAppListProvider : TogglePermissionAppListProvider {
+    override val permissionType = "test.PERMISSION"
+    override fun createModel(context: Context) = TestTogglePermissionAppListModel()
+}

@@ -229,19 +229,21 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
 
         @Override
-        public void onBackStarted(BackEvent backEvent) {
+        public void onBackStarted(BackMotionEvent backEvent) {
             Handler.getMain().post(() -> {
                 final OnBackAnimationCallback callback = getBackAnimationCallback();
                 if (callback != null) {
                     mProgressAnimator.onBackStarted(backEvent, event ->
                             callback.onBackProgressed(event));
-                    callback.onBackStarted(backEvent);
+                    callback.onBackStarted(new BackEvent(
+                            backEvent.getTouchX(), backEvent.getTouchY(),
+                            backEvent.getProgress(), backEvent.getSwipeEdge()));
                 }
             });
         }
 
         @Override
-        public void onBackProgressed(BackEvent backEvent) {
+        public void onBackProgressed(BackMotionEvent backEvent) {
             Handler.getMain().post(() -> {
                 final OnBackAnimationCallback callback = getBackAnimationCallback();
                 if (callback != null) {

@@ -17,8 +17,6 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.support.test.launcherhelper.ILauncherStrategy
-import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.util.Log
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
@@ -37,10 +35,8 @@ class ActivityEmbeddingAppHelper
 constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.ActivityEmbedding.MainActivity.LABEL,
-    component: ComponentNameMatcher = MAIN_ACTIVITY_COMPONENT,
-    launcherStrategy: ILauncherStrategy =
-        LauncherStrategyFactory.getInstance(instr).launcherStrategy
-) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
+    component: ComponentNameMatcher = MAIN_ACTIVITY_COMPONENT
+) : StandardAppHelper(instr, launcherName, component) {
 
     /**
      * Clicks the button to launch the placeholder primary activity, which should launch the

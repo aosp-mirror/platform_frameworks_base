@@ -18,9 +18,9 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.FlakyTest
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -38,7 +38,7 @@ import org.junit.runners.Parameterized
  * ```
  *     Launch a [pipApp] in pip mode
  *     Launch another app [fixedApp] (appears below pip)
- *     Rotate the screen from [testSpec.startRotation] to [testSpec.endRotation]
+ *     Rotate the screen from [flicker.scenario.startRotation] to [flicker.scenario.endRotation]
  *     (usually, 0->90 and 90->0)
  * ```
  * Notes:
@@ -56,7 +56,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 239575053)
-class PipRotationTest_ShellTransit(testSpec: FlickerTestParameter) : PipRotationTest(testSpec) {
+class PipRotationTest_ShellTransit(flicker: FlickerTest) : PipRotationTest(flicker) {
     @Before
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)

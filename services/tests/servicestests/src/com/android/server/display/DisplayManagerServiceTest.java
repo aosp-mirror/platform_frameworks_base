@@ -219,6 +219,7 @@ public class DisplayManagerServiceTest {
         SurfaceControl.DisplayMode displayMode = new SurfaceControl.DisplayMode();
         displayMode.width = 100;
         displayMode.height = 200;
+        displayMode.supportedHdrTypes = new int[]{1, 2};
         dynamicDisplayMode.supportedDisplayModes = new SurfaceControl.DisplayMode[] {displayMode};
         when(mSurfaceControlProxy.getDynamicDisplayInfo(mMockDisplayToken))
                 .thenReturn(dynamicDisplayMode);

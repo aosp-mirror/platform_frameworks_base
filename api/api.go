@@ -36,6 +36,8 @@ var core_libraries_modules = []string{art, conscrypt, i18n}
 // built against module_current SDK). Instead they are directly statically
 // linked into the all-framework-module-lib, which is building against hidden
 // APIs.
+// In addition, the modules in this list are allowed to contribute to test APIs
+// stubs.
 var non_updatable_modules = []string{virtualization}
 
 // The intention behind this soong plugin is to generate a number of "merged"
@@ -246,9 +248,33 @@ func createMergedPublicStubs(ctx android.LoadHookContext, modules []string) {
 }
 
 func createMergedSystemStubs(ctx android.LoadHookContext, modules []string) {
+	// First create the all-updatable-modules-system-stubs
+	{
+		updatable_modules := removeAll(modules, non_updatable_modules)
+		props := libraryProps{}
+		props.Name = proptools.StringPtr("all-updatable-modules-system-stubs")
+		props.Static_libs = transformArray(updatable_modules, "", ".stubs.system")
+		props.Sdk_version = proptools.StringPtr("module_current")
+		props.Visibility = []string{"//frameworks/base"}
+		ctx.CreateModule(java.LibraryFactory, &props)
+	}
+	// Now merge all-updatable-modules-system-stubs and stubs from non-updatable modules
+	// into all-modules-system-stubs.
+	{
+		props := libraryProps{}
+		props.Name = proptools.StringPtr("all-modules-system-stubs")
+		props.Static_libs = transformArray(non_updatable_modules, "", ".stubs.system")
+		props.Static_libs = append(props.Static_libs, "all-updatable-modules-system-stubs")
+		props.Sdk_version = proptools.StringPtr("module_current")
+		props.Visibility = []string{"//frameworks/base"}
+		ctx.CreateModule(java.LibraryFactory, &props)
+	}
+}
+
+func createMergedTestStubsForNonUpdatableModules(ctx android.LoadHookContext) {
 	props := libraryProps{}
-	props.Name = proptools.StringPtr("all-modules-system-stubs")
-	props.Static_libs = transformArray(modules, "", ".stubs.system")
+	props.Name = proptools.StringPtr("all-non-updatable-modules-test-stubs")
+	props.Static_libs = transformArray(non_updatable_modules, "", ".stubs.test")
 	props.Sdk_version = proptools.StringPtr("module_current")
 	props.Visibility = []string{"//frameworks/base"}
 	ctx.CreateModule(java.LibraryFactory, &props)
@@ -360,6 +386,7 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 
 	createMergedPublicStubs(ctx, bootclasspath)
 	createMergedSystemStubs(ctx, bootclasspath)
+	createMergedTestStubsForNonUpdatableModules(ctx)
 	createMergedFrameworkModuleLibStubs(ctx, bootclasspath)
 	createMergedFrameworkImpl(ctx, bootclasspath)
 

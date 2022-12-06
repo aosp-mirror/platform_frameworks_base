@@ -16,11 +16,12 @@
 
 package com.android.settingslib.spaprivileged.template.app
 
+import android.content.pm.PackageInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.Footer
-import com.android.settingslib.spaprivileged.model.app.PackageManagers
+import com.android.settingslib.spaprivileged.model.app.IPackageManagers
 
 @Composable
 fun AppInfoPage(
@@ -28,18 +29,16 @@ fun AppInfoPage(
     packageName: String,
     userId: Int,
     footerText: String,
-    content: @Composable () -> Unit,
+    packageManagers: IPackageManagers,
+    content: @Composable PackageInfo.() -> Unit,
 ) {
+    val packageInfo = remember(packageName, userId) {
+        packageManagers.getPackageInfoAsUser(packageName, userId)
+    } ?: return
     RegularScaffold(title = title) {
-        val appInfoProvider = remember {
-            PackageManagers.getPackageInfoAsUser(packageName, userId)?.let { packageInfo ->
-                AppInfoProvider(packageInfo)
-            }
-        } ?: return@RegularScaffold
+        remember(packageInfo) { AppInfoProvider(packageInfo) }.AppInfo(displayVersion = true)
 
-        appInfoProvider.AppInfo(displayVersion = true)
-
-        content()
+        packageInfo.content()
 
         Footer(footerText)
     }

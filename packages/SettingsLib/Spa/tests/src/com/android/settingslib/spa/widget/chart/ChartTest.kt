@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.widget
+package com.android.settingslib.spa.widget.chart
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsPropertyKey
@@ -24,12 +24,6 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.widget.chart.BarChart
-import com.android.settingslib.spa.widget.chart.BarChartData
-import com.android.settingslib.spa.widget.chart.LineChart
-import com.android.settingslib.spa.widget.chart.LineChartData
-import com.android.settingslib.spa.widget.chart.PieChart
-import com.android.settingslib.spa.widget.chart.PieChartData
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,10 +33,10 @@ class ChartTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val Chart = SemanticsPropertyKey<String>("Chart")
-    private var SemanticsPropertyReceiver.chart by Chart
+    private val chart = SemanticsPropertyKey<String>("Chart")
+    private var SemanticsPropertyReceiver.chart by chart
     private fun hasChart(chart: String): SemanticsMatcher =
-        SemanticsMatcher.expectValue(Chart, chart)
+        SemanticsMatcher.expectValue(this.chart, chart)
 
     @Test
     fun line_chart_displayed() {

@@ -59,7 +59,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
+import android.telecom.TelecomManager;
 import android.util.AndroidException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -2139,13 +2139,8 @@ public class UserManager {
                 mContext.getContentResolver(),
                 Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED, 0) != 0;
         boolean isSystemUserUnlocked = isUserUnlocked(UserHandle.SYSTEM);
-        boolean inCall = false;
-        TelephonyManager telephonyManager = mContext.getSystemService(TelephonyManager.class);
-        if (telephonyManager != null) {
-            inCall = telephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE;
-        }
         boolean isUserSwitchDisallowed = hasUserRestrictionForUser(DISALLOW_USER_SWITCH, mUserId);
-        return (allowUserSwitchingWhenSystemUserLocked || isSystemUserUnlocked) && !inCall
+        return (allowUserSwitchingWhenSystemUserLocked || isSystemUserUnlocked) && !inCall()
                 && !isUserSwitchDisallowed;
     }
 
@@ -2184,11 +2179,8 @@ public class UserManager {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public @UserSwitchabilityResult int getUserSwitchability(UserHandle userHandle) {
-        final TelephonyManager tm =
-                (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
-
         int flags = SWITCHABILITY_STATUS_OK;
-        if (tm.getCallState() != TelephonyManager.CALL_STATE_IDLE) {
+        if (inCall()) {
             flags |= SWITCHABILITY_STATUS_USER_IN_CALL;
         }
         if (hasUserRestrictionForUser(DISALLOW_USER_SWITCH, userHandle)) {
@@ -5620,6 +5612,11 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    private boolean inCall() {
+        final TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
+        return telecomManager != null && telecomManager.isInCall();
     }
 
     /* Cache key for anything that assumes that userIds cannot be re-used without rebooting. */

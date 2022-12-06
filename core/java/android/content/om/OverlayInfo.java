@@ -51,6 +51,7 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
             STATE_ENABLED_IMMUTABLE,
             // @Deprecated STATE_TARGET_IS_BEING_REPLACED,
             STATE_OVERLAY_IS_BEING_REPLACED,
+            STATE_SYSTEM_UPDATE_UNINSTALL,
     })
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -126,6 +127,14 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
      */
     @Deprecated
     public static final int STATE_ENABLED_IMMUTABLE = 6;
+
+    /**
+     * The target package needs to be refreshed as a result of a system update uninstall, which
+     * must recalculate the state of overlays against the newly enabled system package, which may
+     * differ in resources/policy from the /data variant that was uninstalled.
+     * @hide
+     */
+    public static final int STATE_SYSTEM_UPDATE_UNINSTALL = 7;
 
     /**
      * Overlay category: theme.

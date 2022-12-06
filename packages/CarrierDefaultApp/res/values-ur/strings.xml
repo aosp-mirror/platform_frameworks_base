@@ -6,7 +6,7 @@
     <string name="portal_notification_id" msgid="5155057562457079297">"موبائل ڈیٹا ختم ہو چکا ہے"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"آپ کا موبائل ڈیٹا غیر فعال کر دیا گیا ہے"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"‏‎%s ویب سائٹ ملاحظہ کرنے کیلئے تھپتھپائیں"</string>
-    <string name="no_data_notification_detail" msgid="3112125343857014825">"‏براہ کرم اپنے خدمت کے فراہم کنندہ %s سے رابطہ کریں"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"‏براہ کرم اپنے سروس فراہم کنندہ %s سے رابطہ کریں"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"کوئی موبائل ڈیٹا کنکشن نہیں ہے"</string>
     <string name="no_mobile_data_connection" msgid="544980465184147010">"‏%s کے ذریعے ڈیٹا یا رومنگ پلان شامل کریں"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"موبائل ڈیٹا کی صورت حال"</string>
@@ -14,4 +14,16 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"آپ جس نیٹ ورک میں شامل ہونے کی کوشش کر رہے ہیں، اس میں سیکیورٹی کے مسائل ہیں۔"</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"مثال کے طور پر ہو سکتا ہے کہ لاگ ان صفحہ دکھائی گئی تنظیم سے تعلق نہ رکھتا ہو۔"</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"براؤزر کے ذریعے بہرحال جاری رکھیں"</string>
+    <!-- no translation found for network_boost_notification_channel (5430986172506159199) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_title (8226368121348880044) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_detail (3812434025544196192) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_button_not_now (4129218252146702688) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_button_manage (1511552684142641182) -->
+    <skip />
+    <!-- no translation found for slice_purchase_app_label (915654761797446390) -->
+    <skip />
 </resources>

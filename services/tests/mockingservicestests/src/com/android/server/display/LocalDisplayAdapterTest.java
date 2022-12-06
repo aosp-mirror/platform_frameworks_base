@@ -23,6 +23,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -58,6 +59,7 @@ import com.android.server.lights.LogicalLight;
 import com.google.common.truth.Truth;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,6 +85,8 @@ public class LocalDisplayAdapterTest {
             new RefreshRateRanges(REFRESH_RATE_RANGE, REFRESH_RATE_RANGE);
 
     private static final long HANDLER_WAIT_MS = 100;
+
+    private static final int[] HDR_TYPES = new int[]{1, 2};
 
     private StaticMockitoSession mMockitoSession;
 
@@ -200,6 +204,38 @@ public class LocalDisplayAdapterTest {
         // This should be public
         assertDisplayPrivateFlag(mListener.addedDisplays.get(2).getDisplayDeviceInfoLocked(),
                 PORT_C, false);
+    }
+
+    @Test
+    public void testSupportedDisplayModesGetOverriddenWhenDisplayIsUpdated()
+            throws InterruptedException {
+        SurfaceControl.DisplayMode displayMode = createFakeDisplayMode(0, 1920, 1080, 0);
+        displayMode.supportedHdrTypes = new int[0];
+        FakeDisplay display = new FakeDisplay(PORT_A, new SurfaceControl.DisplayMode[]{displayMode},
+                0);
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        DisplayDevice displayDevice = mListener.addedDisplays.get(0);
+        displayDevice.applyPendingDisplayDeviceInfoChangesLocked();
+        Display.Mode[] supportedModes = displayDevice.getDisplayDeviceInfoLocked().supportedModes;
+        Assert.assertEquals(1, supportedModes.length);
+        Assert.assertEquals(0, supportedModes[0].getSupportedHdrTypes().length);
+
+        displayMode.supportedHdrTypes = new int[]{3, 2};
+        display.dynamicInfo.supportedDisplayModes = new SurfaceControl.DisplayMode[]{displayMode};
+        setUpDisplay(display);
+        mInjector.getTransmitter().sendHotplug(display, true);
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        displayDevice = mListener.changedDisplays.get(0);
+        displayDevice.applyPendingDisplayDeviceInfoChangesLocked();
+        supportedModes = displayDevice.getDisplayDeviceInfoLocked().supportedModes;
+
+        Assert.assertEquals(1, supportedModes.length);
+        assertArrayEquals(new int[]{2, 3}, supportedModes[0].getSupportedHdrTypes());
     }
 
     /**
@@ -1008,6 +1044,7 @@ public class LocalDisplayAdapterTest {
         mode.xDpi = 100;
         mode.yDpi = 100;
         mode.group = group;
+        mode.supportedHdrTypes = HDR_TYPES;
         return mode;
     }
 

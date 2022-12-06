@@ -19,9 +19,9 @@ package com.android.server.wm.flicker.quickswitch
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.navBarWindowIsVisibleAtStartAndEnd
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Assume
@@ -49,8 +49,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class QuickSwitchBetweenTwoAppsBackTest_ShellTransit(testSpec: FlickerTestParameter) :
-    QuickSwitchBetweenTwoAppsBackTest(testSpec) {
+open class QuickSwitchBetweenTwoAppsBackTest_ShellTransit(flicker: FlickerTest) :
+    QuickSwitchBetweenTwoAppsBackTest(flicker) {
     @Before
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)
@@ -62,21 +62,20 @@ open class QuickSwitchBetweenTwoAppsBackTest_ShellTransit(testSpec: FlickerTestP
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     /**
-     * Checks that [ComponentNameMatcher.NAV_BAR] window is visible and above the app windows at
-     * the start and end of the WM trace
+     * Checks that [ComponentNameMatcher.NAV_BAR] window is visible and above the app windows at the
+     * start and end of the WM trace
      */
     @Presubmit
     @Test
     fun navBarWindowIsVisibleAtStartAndEnd() {
-        Assume.assumeFalse(testSpec.isTablet)
-        testSpec.navBarWindowIsVisibleAtStartAndEnd()
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.navBarWindowIsVisibleAtStartAndEnd()
     }
 
     /** {@inheritDoc} */
     @FlakyTest(bugId = 250520840)
     @Test
-    override fun startsWithApp2LayersCoverFullScreen() =
-        super.startsWithApp2LayersCoverFullScreen()
+    override fun startsWithApp2LayersCoverFullScreen() = super.startsWithApp2LayersCoverFullScreen()
 
     @FlakyTest(bugId = 246284708)
     @Test

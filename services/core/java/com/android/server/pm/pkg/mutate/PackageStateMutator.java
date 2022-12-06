@@ -40,6 +40,8 @@ public class PackageStateMutator {
     private final Function<String, PackageSetting> mActiveStateFunction;
     private final Function<String, PackageSetting> mDisabledStateFunction;
 
+    private final ArraySet<PackageSetting> mChangedStates = new ArraySet<>();
+
     public PackageStateMutator(@NonNull Function<String, PackageSetting> activeStateFunction,
             @NonNull Function<String, PackageSetting> disabledStateFunction) {
         mActiveStateFunction = activeStateFunction;
@@ -52,23 +54,23 @@ public class PackageStateMutator {
 
     @NonNull
     public PackageStateWrite forPackage(@NonNull String packageName) {
-        return mStateWrite.setState(mActiveStateFunction.apply(packageName));
+        return setState(mActiveStateFunction.apply(packageName));
     }
 
     @Nullable
     public PackageStateWrite forPackageNullable(@NonNull String packageName) {
         final PackageSetting packageState = mActiveStateFunction.apply(packageName);
-        mStateWrite.setState(packageState);
+        setState(packageState);
         if (packageState == null) {
             return null;
         }
 
-        return mStateWrite.setState(packageState);
+        return setState(packageState);
     }
 
     @NonNull
     public PackageStateWrite forDisabledSystemPackage(@NonNull String packageName) {
-        return mStateWrite.setState(mDisabledStateFunction.apply(packageName));
+        return setState(mDisabledStateFunction.apply(packageName));
     }
 
     @Nullable
@@ -78,7 +80,7 @@ public class PackageStateMutator {
             return null;
         }
 
-        return mStateWrite.setState(packageState);
+        return setState(packageState);
     }
 
     @NonNull
@@ -107,6 +109,21 @@ public class PackageStateMutator {
         } else {
             return Result.SUCCESS;
         }
+    }
+
+    public void onFinished() {
+        for (int index = 0; index < mChangedStates.size(); index++) {
+            mChangedStates.valueAt(index).onChanged();
+        }
+    }
+
+    @NonNull
+    private StateWriteWrapper setState(@Nullable PackageSetting state) {
+        // State can be nullable because this infrastructure no-ops on non-existent states
+        if (state != null) {
+            mChangedStates.add(state);
+        }
+        return mStateWrite.setState(state);
     }
 
     public static class InitialState {
@@ -173,8 +190,11 @@ public class PackageStateMutator {
         @NonNull
         @Override
         public PackageUserStateWrite userState(int userId) {
-            return mUserStateWrite.setStates(
-                    mState == null ? null : mState.getOrCreateUserState(userId));
+            var userState = mState == null ? null : mState.getOrCreateUserState(userId);
+            if (userState != null) {
+                userState.setWatchable(mState);
+            }
+            return mUserStateWrite.setStates(userState);
         }
 
         @Override

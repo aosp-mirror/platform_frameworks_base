@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_name (4539824758261855508) -->
-    <skip />
+    <string name="app_name" msgid="4539824758261855508">"Akreditācijas datu pārvaldnieks"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Atcelt"</string>
     <string name="string_continue" msgid="1346732695941131882">"Turpināt"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Izveidot citur"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Saglabāt citur"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Izmantot citu ierīci"</string>
-    <!-- no translation found for string_save_to_another_device (1959562542075194458) -->
-    <skip />
+    <string name="string_save_to_another_device" msgid="1959562542075194458">"Saglabāt citā ierīcē"</string>
     <string name="passkey_creation_intro_title" msgid="402553911484409884">"Vienkāršs veids, kā droši pierakstīties"</string>
     <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Izmantojiet pirksta nospiedumu, autorizāciju pēc sejas vai ekrāna bloķēšanu, lai pierakstītos ar unikālu piekļuves atslēgu, ko nevar aizmirst vai nozagt. Uzziniet vairāk."</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Izvēlieties, kur: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
@@ -32,6 +30,8 @@
     <skip />
     <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
     <skip />
+    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
+    <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Vai vienmēr izmantot <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>, lai pierakstītos?"</string>
     <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
     <skip />
@@ -40,8 +40,7 @@
     <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> paroles, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> piekļuves atslēgas"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> paroles"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> piekļuves atslēgas"</string>
-    <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
-    <skip />
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Piekļuves atslēga"</string>
     <string name="another_device" msgid="5147276802037801217">"Cita ierīce"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Citi paroļu pārvaldnieki"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Aizvērt lapu"</string>
