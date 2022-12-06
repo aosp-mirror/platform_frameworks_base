@@ -38,6 +38,7 @@ import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.ITransitionMetricsReporter;
 import android.window.ITransitionPlayer;
@@ -115,6 +116,8 @@ class TransitionController {
      * transaction, set this to true so that the {@link canAssignLayers} will allow it.
      */
     boolean mBuildingFinishLayers = false;
+
+    private final SurfaceControl.Transaction mWakeT = new SurfaceControl.Transaction();
 
     TransitionController(ActivityTaskManagerService atm,
             TaskSnapshotController taskSnapshotController,
@@ -619,8 +622,16 @@ class TransitionController {
     private void updateRunningRemoteAnimation(Transition transition, boolean isPlaying) {
         if (mTransitionPlayerProc == null) return;
         if (isPlaying) {
+            mWakeT.setEarlyWakeupStart();
+            mWakeT.apply();
+            // Usually transitions put quite a load onto the system already (with all the things
+            // happening in app), so pause task snapshot persisting to not increase the load.
+            mAtm.mWindowManager.mTaskSnapshotController.setPersisterPaused(true);
             mTransitionPlayerProc.setRunningRemoteAnimation(true);
         } else if (mPlayingTransitions.isEmpty()) {
+            mWakeT.setEarlyWakeupEnd();
+            mWakeT.apply();
+            mAtm.mWindowManager.mTaskSnapshotController.setPersisterPaused(false);
             mTransitionPlayerProc.setRunningRemoteAnimation(false);
             mRemotePlayer.clear();
             return;
