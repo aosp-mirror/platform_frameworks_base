@@ -126,6 +126,8 @@
     <public name="keyboardLayoutType" />
     <public name="allowUpdateOwnership" />
     <public name="isCredential"/>
+    <public name="searchResultHighlightColor" />
+    <public name="focusedSearchResultHighlightColor" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01cd0000">
