@@ -8468,13 +8468,14 @@ public class AudioManager {
     }
 
     /**
-     * Returns the audio HAL version in the form MAJOR.MINOR. If there is no audio HAL found, null
-     * will be returned.
+     * Returns an {@link AudioHalVersionInfo} indicating the Audio Hal Version. If there is no audio
+     * HAL found, null will be returned.
      *
+     * @return @see @link #AudioHalVersionInfo The version of Audio HAL.
      * @hide
      */
     @TestApi
-    public static @Nullable String getHalVersion() {
+    public static @Nullable AudioHalVersionInfo getHalVersion() {
         try {
             return getService().getHalVersion();
         } catch (RemoteException e) {
