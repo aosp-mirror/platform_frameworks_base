@@ -72,6 +72,8 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock dezactivat"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"a trimis o imagine"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Se salvează captura de ecran..."</string>
+    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
+    <skip />
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Captură de ecran salvată"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Nu s-a putut salva captura de ecran"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Pentru a salva captura de ecran, trebuie să deblochezi dispozitivul"</string>
@@ -179,10 +181,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Mod Avion."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"Rețea VPN activată"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Baterie: <xliff:g id="NUMBER">%d</xliff:g> la sută."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"Baterie la <xliff:g id="PERCENTAGE">%1$d</xliff:g> , <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"Baterie la <xliff:g id="PERCENTAGE">%1$d</xliff:g> %%, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Bateria se încarcă, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> la sută."</string>
-    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"Baterie la <xliff:g id="PERCENTAGE">%d</xliff:g> ; încărcare întreruptă pentru protejarea bateriei."</string>
-    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"Baterie la <xliff:g id="PERCENTAGE">%1$d</xliff:g> ; <xliff:g id="TIME">%2$s</xliff:g>, încărcare întreruptă pentru protejarea bateriei."</string>
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"Baterie la <xliff:g id="PERCENTAGE">%d</xliff:g> %%; încărcare întreruptă pentru protejarea bateriei."</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"Baterie la <xliff:g id="PERCENTAGE">%1$d</xliff:g> %%; <xliff:g id="TIME">%2$s</xliff:g>, încărcare întreruptă pentru protejarea bateriei."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Vezi toate notificările"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter activat."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Vibrare sonerie."</string>
@@ -392,6 +394,10 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificări întrerupte prin „Nu deranja”"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Începe acum"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Nicio notificare"</string>
+    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
+    <skip />
+    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
+    <skip />
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Dispozitivul este gestionat de unul dintre părinți"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organizația ta deține acest dispozitiv și poate monitoriza traficul de rețea"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> deține acest dispozitiv și poate monitoriza traficul din rețea"</string>
@@ -998,16 +1004,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Instalează o aplicație pentru camera foto"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplicația este configurată"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Este disponibil cel puțin un dispozitiv"</string>
-    <!-- no translation found for rear_display_bottom_sheet_cancel (3461468855493357248) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_confirm (4383356544661421206) -->
-    <skip />
-    <!-- no translation found for rear_display_fold_bottom_sheet_title (6081542277622721548) -->
-    <skip />
-    <!-- no translation found for rear_display_unfold_bottom_sheet_title (2137403802960396357) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_description (1852662982816810352) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_warning (800995919558238930) -->
-    <skip />
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Anulează"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Întoarce-l acum"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Desfă telefonul pentru un selfie mai bun"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Comuți la ecranul frontal pentru un selfie mai bun?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Folosește camera posterioară pentru o fotografie mai lată, cu rezoluție mai mare."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Acest ecran se va dezactiva"</b></string>
 </resources>

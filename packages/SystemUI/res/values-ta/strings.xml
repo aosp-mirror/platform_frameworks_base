@@ -72,6 +72,8 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock முடக்கப்பட்டது"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"படம் அனுப்பப்பட்டது"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ஸ்க்ரீன் ஷாட்டைச் சேமிக்கிறது…"</string>
+    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
+    <skip />
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ஸ்கிரீன்ஷாட் சேமிக்கப்பட்டது"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"ஸ்கிரீன் ஷாட்டைச் சேமிக்க முடியவில்லை"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ஸ்கிரீன்ஷாட் சேமிக்கப்படுவதற்கு முன்பு சாதனம் அன்லாக் செய்யப்பட வேண்டும்"</string>
@@ -392,6 +394,10 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'தொந்தரவு செய்ய வேண்டாம்\' அம்சத்தின் மூலம் அறிவிப்புகள் இடைநிறுத்தப்பட்டுள்ளன"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"இப்போது தொடங்கு"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"அறிவிப்புகள் இல்லை"</string>
+    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
+    <skip />
+    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
+    <skip />
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"இந்தச் சாதனம் உங்கள் பெற்றோரால் நிர்வகிக்கப்படுகிறது"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"இந்த சாதனம் உங்கள் நிறுவனத்துக்கு உரியது, நெட்வொர்க் ட்ராஃபிக்கையும் நிறுவனமே கண்காணிக்கக்கூடும்"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"இந்த சாதனம் <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> நிறுவனத்துக்கு உரியது, நெட்வொர்க் ட்ராஃபிக்கையும் நிறுவனமே கண்காணிக்கக்கூடும்"</string>
@@ -1006,16 +1012,10 @@
     <skip />
     <!-- no translation found for keyguard_affordance_enablement_dialog_home_instruction_2 (8308525385889021652) -->
     <skip />
-    <!-- no translation found for rear_display_bottom_sheet_cancel (3461468855493357248) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_confirm (4383356544661421206) -->
-    <skip />
-    <!-- no translation found for rear_display_fold_bottom_sheet_title (6081542277622721548) -->
-    <skip />
-    <!-- no translation found for rear_display_unfold_bottom_sheet_title (2137403802960396357) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_description (1852662982816810352) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_warning (800995919558238930) -->
-    <skip />
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ரத்துசெய்"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"இப்போது மாற்றவும்"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"சிறந்த செல்ஃபிக்கு மொபைலை மடக்காதீர்கள்"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"சிறந்த செல்ஃபிக்கு முன்புற டிஸ்பிளேவிற்கு மாற்றவா?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"அதிகத் தெளிவுத்திறனுடன் அகலக் கோணத்தில் படத்தை எடுப்பதற்குப் பின்பக்கக் கேமராவைப் பயன்படுத்துங்கள்."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ இந்தத் திரை ஆஃப் ஆகிவிடும்"</b></string>
 </resources>

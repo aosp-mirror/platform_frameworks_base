@@ -72,6 +72,8 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Naka-disable ang Smart Lock"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"nagpadala ng larawan"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Sine-save ang screenshot…"</string>
+    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
+    <skip />
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Na-save ang screenshot"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Hindi ma-save ang screenshot"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Dapat naka-unlock ang device bago ma-save ang screenshot"</string>
@@ -392,6 +394,10 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Mga notification na na-pause ng Huwag Istorbohin"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Magsimula ngayon"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Walang mga notification"</string>
+    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
+    <skip />
+    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
+    <skip />
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Pinapamahalaan ng magulang mo itong device"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Pagmamay-ari ng organisasyon mo ang device na ito at puwede nitong subaybayan ang trapiko sa network"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Pagmamay-ari ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang device na ito at puwede nitong subaybayan ang trapiko sa network"</string>
@@ -998,16 +1004,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Mag-install ng camera app"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Na-set up ang app"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• May kahit isang device na available"</string>
-    <!-- no translation found for rear_display_bottom_sheet_cancel (3461468855493357248) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_confirm (4383356544661421206) -->
-    <skip />
-    <!-- no translation found for rear_display_fold_bottom_sheet_title (6081542277622721548) -->
-    <skip />
-    <!-- no translation found for rear_display_unfold_bottom_sheet_title (2137403802960396357) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_description (1852662982816810352) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_warning (800995919558238930) -->
-    <skip />
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Kanselahin"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"I-flip na ngayon"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"I-unfold ang telepono para sa mas magandang selfie"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"I-flip sa front display para sa magandang selfie?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Gamitin ang camera sa harap para sa mas malawak na larawan na may mas mataas na resolution."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Mag-o-off ang screen na ito"</b></string>
 </resources>

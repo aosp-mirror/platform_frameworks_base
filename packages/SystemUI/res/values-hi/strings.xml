@@ -72,6 +72,8 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock की सुविधा बंद कर दी गई है"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"एक इमेज भेजी गई"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
+    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
+    <skip />
     <string name="screenshot_saved_title" msgid="8893267638659083153">"स्क्रीनशॉट सेव किया गया"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"स्क्रीनशॉट सेव नहीं किया जा सका"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"स्क्रीनशॉट सेव करने के लिए डिवाइस का अनलॉक होना ज़रूरी है"</string>
@@ -392,6 +394,10 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'परेशान न करें\' सुविधा के ज़रिए कुछ समय के लिए सूचनाएं दिखाना रोक दिया गया है"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"अभी शुरू करें"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"कोई सूचना नहीं है"</string>
+    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
+    <skip />
+    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
+    <skip />
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"इस डिवाइस का प्रबंधन आपके अभिभावक करते हैं"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है. आपका संगठन, नेटवर्क के ट्रैफ़िक की निगरानी कर सकता है"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"इस डिवाइस का मालिकाना हक <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> के पास है. आपका संगठन, नेटवर्क के ट्रैफ़िक की निगरानी कर सकता है"</string>
@@ -1006,16 +1012,10 @@
     <skip />
     <!-- no translation found for keyguard_affordance_enablement_dialog_home_instruction_2 (8308525385889021652) -->
     <skip />
-    <!-- no translation found for rear_display_bottom_sheet_cancel (3461468855493357248) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_confirm (4383356544661421206) -->
-    <skip />
-    <!-- no translation found for rear_display_fold_bottom_sheet_title (6081542277622721548) -->
-    <skip />
-    <!-- no translation found for rear_display_unfold_bottom_sheet_title (2137403802960396357) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_description (1852662982816810352) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_warning (800995919558238930) -->
-    <skip />
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"रद्द करें"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"कैमरा अभी स्विच करें"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"बेहतर सेल्फ़ी के लिए फ़ोन को अनफ़ोल्ड करें"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"बेहतर सेल्फ़ी के लिए फ़्रंट डिसप्ले पर स्विच करें?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"वाइड ऐंगल में हाई रिज़ॉल्यूशन वाली फ़ोटो लेने के लिए, पीछे का कैमरा इस्तेमाल करें."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ यह स्क्रीन बंद हो जाएगी"</b></string>
 </resources>

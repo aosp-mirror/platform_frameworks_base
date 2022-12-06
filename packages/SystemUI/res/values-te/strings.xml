@@ -72,6 +72,8 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock డిజేబుల్ చేయబడింది"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ఇమేజ్‌ను పంపారు"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"స్క్రీన్‌షాట్‌ను సేవ్ చేస్తోంది…"</string>
+    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
+    <skip />
     <string name="screenshot_saved_title" msgid="8893267638659083153">"స్క్రీన్‌షాట్ సేవ్ చేయబడింది"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"స్క్రీన్‌షాట్‌ని సేవ్ చేయడం సాధ్యం కాలేదు"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"స్క్రీన్‌షాట్ సేవ్ అవ్వకముందే పరికరం అన్‌లాక్ చేయబడాలి"</string>
@@ -392,6 +394,10 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"అంతరాయం కలిగించవద్దు ద్వారా నోటిఫికేషన్‌లు పాజ్ చేయబడ్డాయి"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ఇప్పుడే ప్రారంభించు"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"నోటిఫికేషన్‌లు లేవు"</string>
+    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
+    <skip />
+    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
+    <skip />
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ఈ పరికరాన్ని మీ తల్లి/తండ్రి మేనేజ్ చేస్తున్నారు"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ఈ పరికరం మీ సంస్థకు చెందినది, కాబట్టి అది నెట్‌వర్క్ ట్రాఫిక్‌ను పర్యవేక్షించవచ్చు"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"మీ పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>కు చెందినది, కాబట్టి అది నెట్‌వర్క్ ట్రాఫిక్‌ను పర్యవేక్షించవచ్చు"</string>
