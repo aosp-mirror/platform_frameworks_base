@@ -53,6 +53,11 @@ class PackageManagerLocalSnapshotTest {
         snapshot.use {
             val packageStates = it.packageStates
 
+            // Check for unmodifiable
+            assertFailsWith(UnsupportedOperationException::class) {
+                it.packageStates.clear()
+            }
+
             // Check contents
             assertThat(packageStates).containsExactly(
                 packageStateAll.packageName, packageStateAll,
@@ -78,9 +83,14 @@ class PackageManagerLocalSnapshotTest {
             assertThat(filteredOne.getPackageState(packageStateUser10.packageName)).isNull()
 
             filteredThree.use {
-                val statesList = mutableListOf<PackageState>()
-                assertThat(it.forAllPackageStates { statesList += it })
-                assertThat(statesList).containsExactly(packageStateAll, packageStateUser10)
+                // Check for unmodifiable
+                assertFailsWith(UnsupportedOperationException::class) {
+                    it.packageStates.clear()
+                }
+                assertThat(it.packageStates).containsExactly(
+                    packageStateAll.packageName, packageStateAll,
+                    packageStateUser10.packageName, packageStateUser10,
+                )
             }
 
             // Call after child close, parent open fails
@@ -96,7 +106,7 @@ class PackageManagerLocalSnapshotTest {
 
         // Call after close fails
         assertClosedFailure { snapshot.packageStates }
-        assertClosedFailure { filteredOne.forAllPackageStates {} }
+        assertClosedFailure { filteredOne.packageStates }
         assertClosedFailure {
             filteredTwo.getPackageState(packageStateAll.packageName)
         }
@@ -116,9 +126,15 @@ class PackageManagerLocalSnapshotTest {
                 .isEqualTo(packageStateUser0)
             assertThat(it.getPackageState(packageStateUser10.packageName)).isNull()
 
-            val statesList = mutableListOf<PackageState>()
-            assertThat(it.forAllPackageStates { statesList += it })
-            assertThat(statesList).containsExactly(packageStateAll, packageStateUser0)
+            // Check for unmodifiable
+            assertFailsWith(UnsupportedOperationException::class) {
+                it.packageStates.clear()
+            }
+
+            assertThat(it.packageStates).containsExactly(
+                packageStateAll.packageName, packageStateAll,
+                packageStateUser0.packageName, packageStateUser0,
+            )
         }
 
         // Call after close fails
