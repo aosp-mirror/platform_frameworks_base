@@ -1041,7 +1041,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             String callingFeatureId, IPhoneStateListener callback,
             int[] events, boolean notifyNow) {
         Set<Integer> eventList = Arrays.stream(events).boxed().collect(Collectors.toSet());
-        listen(renounceFineLocationAccess, renounceFineLocationAccess, callingPackage,
+        listen(renounceFineLocationAccess, renounceCoarseLocationAccess, callingPackage,
                 callingFeatureId, callback, eventList, notifyNow, subId);
     }
 
@@ -1606,7 +1606,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             if (DBG) {
                                 log("notifyServiceStateForSubscriber: callback.onSSC r=" + r
                                         + " subId=" + subId + " phoneId=" + phoneId
-                                        + " state=" + state);
+                                        + " state=" + stateToSend);
                             }
                             r.callback.onServiceStateChanged(stateToSend);
                         } catch (RemoteException ex) {
