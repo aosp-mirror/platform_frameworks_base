@@ -277,4 +277,10 @@ public class StubTransaction extends SurfaceControl.Transaction {
     public SurfaceControl.Transaction unsetFixedTransformHint(@NonNull SurfaceControl sc) {
         return this;
     }
+
+    @Override
+    public SurfaceControl.Transaction setTrustedOverlay(SurfaceControl sc,
+            boolean isTrustedOverlay) {
+        return this;
+    }
 }

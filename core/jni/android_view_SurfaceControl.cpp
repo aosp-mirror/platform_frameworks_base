@@ -627,6 +627,14 @@ static void nativeSetShadowRadius(JNIEnv* env, jclass clazz, jlong transactionOb
     transaction->setShadowRadius(ctrl, shadowRadius);
 }
 
+static void nativeSetTrustedOverlay(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                    jlong nativeObject, jboolean isTrustedOverlay) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    transaction->setTrustedOverlay(ctrl, isTrustedOverlay);
+}
+
 static void nativeSetFrameRate(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
                                jfloat frameRate, jint compatibility) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -661,6 +669,13 @@ static void nativeSetFixedTransformHint(JNIEnv* env, jclass clazz, jlong transac
 
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
     transaction->setFixedTransformHint(ctrl, transformHint);
+}
+
+static void nativeSetDropInputMode(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                   jlong nativeObject, jint mode) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->setDropInputMode(ctrl, static_cast<gui::DropInputMode>(mode));
 }
 
 static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
@@ -1487,6 +1502,7 @@ static jlong nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
+        // clang-format off
     {"nativeCreate", "(Landroid/view/SurfaceSession;Ljava/lang/String;IIIIJLandroid/os/Parcel;)J",
             (void*)nativeCreate },
     {"nativeReadFromParcel", "(Landroid/os/Parcel;)J",
@@ -1666,7 +1682,13 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetGlobalShadowSettings },
     {"nativeGetHandle", "(J)J",
             (void*)nativeGetHandle },
-    {"nativeSetFixedTransformHint", "(JJI)V", (void*)nativeSetFixedTransformHint},
+    {"nativeSetFixedTransformHint", "(JJI)V", 
+            (void*)nativeSetFixedTransformHint},
+    {"nativeSetTrustedOverlay", "(JJZ)V",
+            (void*)nativeSetTrustedOverlay },
+    {"nativeSetDropInputMode", "(JJI)V", 
+            (void*)nativeSetDropInputMode},
+        // clang-format on
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)

@@ -1315,11 +1315,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             try {
                 // Ask ActivityManager to bind it. Notice that we are binding the service with the
                 // caller app instead of DevicePolicyManagerService.
-                if(ActivityManager.getService().bindService(
+                if (ActivityManager.getService().bindService(
                         caller, activtiyToken, intent,
                         intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                        connection, flags, mContext.getOpPackageName(),
-                        widget.provider.getUserId()) != 0) {
+                        connection, flags & (Context.BIND_AUTO_CREATE
+                                | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE),
+                        mContext.getOpPackageName(), widget.provider.getUserId()) != 0) {
 
                     // Add it to the mapping of RemoteViewsService to appWidgetIds so that we
                     // can determine when we can call back to the RemoteViewsService later to
