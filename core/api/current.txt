@@ -20202,6 +20202,15 @@ package android.location {
 
 }
 
+package android.location.altitude {
+
+  public final class AltitudeConverter {
+    ctor public AltitudeConverter();
+    method @WorkerThread public void addMslAltitude(@NonNull android.content.Context, @NonNull android.location.Location) throws java.io.IOException;
+  }
+
+}
+
 package android.location.provider {
 
   public final class ProviderProperties implements android.os.Parcelable {
