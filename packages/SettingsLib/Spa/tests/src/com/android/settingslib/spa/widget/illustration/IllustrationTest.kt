@@ -29,7 +29,7 @@ import androidx.compose.ui.test.filterToOne
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.tests.R
+import com.android.settingslib.spa.test.R
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

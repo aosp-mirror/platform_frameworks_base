@@ -53,7 +53,7 @@ android {
 }
 
 dependencies {
-    api project(":SpaLib")
+    api project(":spa")
 
     api "androidx.arch.core:core-testing:2.1.0"
     api "androidx.compose.ui:ui-test-junit4:$jetpack_compose_version"
