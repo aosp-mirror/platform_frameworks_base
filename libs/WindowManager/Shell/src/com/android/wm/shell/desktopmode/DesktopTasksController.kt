@@ -16,10 +16,14 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.content.Context
+import android.view.WindowManager
+import android.window.WindowContainerTransaction
 import androidx.annotation.BinderThread
 import com.android.internal.protolog.common.ProtoLog
 import com.android.wm.shell.ShellTaskOrganizer
+import com.android.wm.shell.common.ExecutorUtils
 import com.android.wm.shell.common.ExternalInterfaceBinder
 import com.android.wm.shell.common.RemoteCallable
 import com.android.wm.shell.common.ShellExecutor
@@ -32,6 +36,7 @@ import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.sysui.ShellSharedConstants
 import com.android.wm.shell.transition.Transitions
 import java.util.concurrent.Executor
+import java.util.function.Consumer
 
 /** Handles moving tasks in and out of desktop */
 class DesktopTasksController(
@@ -60,6 +65,55 @@ class DesktopTasksController(
             { createExternalInterface() },
             this
         )
+    }
+
+    /** Show all tasks, that are part of the desktop, on top of launcher */
+    fun showDesktopApps() {
+        ProtoLog.v(WM_SHELL_DESKTOP_MODE, "showDesktopApps")
+        val wct = WindowContainerTransaction()
+
+        bringDesktopAppsToFront(wct)
+
+        // Execute transaction if there are pending operations
+        if (!wct.isEmpty) {
+            if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+                transitions.startTransition(WindowManager.TRANSIT_TO_FRONT, wct, null /* handler */)
+            } else {
+                shellTaskOrganizer.applyTransaction(wct)
+            }
+        }
+    }
+
+    private fun bringDesktopAppsToFront(wct: WindowContainerTransaction) {
+        val activeTasks = desktopModeTaskRepository.getActiveTasks()
+
+        // Skip if all tasks are already visible
+        if (activeTasks.isNotEmpty() && activeTasks.all(desktopModeTaskRepository::isVisibleTask)) {
+            ProtoLog.d(
+                WM_SHELL_DESKTOP_MODE,
+                "bringDesktopAppsToFront: active tasks are already in front, skipping."
+            )
+            return
+        }
+
+        ProtoLog.v(WM_SHELL_DESKTOP_MODE, "bringDesktopAppsToFront")
+
+        // First move home to front and then other tasks on top of it
+        moveHomeTaskToFront(wct)
+
+        val allTasksInZOrder = desktopModeTaskRepository.getFreeformTasksInZOrder()
+        activeTasks
+            // Sort descending as the top task is at index 0. It should be ordered to top last
+            .sortedByDescending { taskId -> allTasksInZOrder.indexOf(taskId) }
+            .mapNotNull { taskId -> shellTaskOrganizer.getRunningTaskInfo(taskId) }
+            .forEach { task -> wct.reorder(task.token, true /* onTop */) }
+    }
+
+    private fun moveHomeTaskToFront(wct: WindowContainerTransaction) {
+        shellTaskOrganizer
+            .getRunningTasks(context.displayId)
+            .firstOrNull { task -> task.activityType == ACTIVITY_TYPE_HOME }
+            ?.let { homeTask -> wct.reorder(homeTask.getToken(), true /* onTop */) }
     }
 
     override fun getContext(): Context {
@@ -110,7 +164,11 @@ class DesktopTasksController(
         }
 
         override fun showDesktopApps() {
-            // TODO
+            ExecutorUtils.executeRemoteCallWithTaskPermission(
+                controller,
+                "showDesktopApps",
+                Consumer(DesktopTasksController::showDesktopApps)
+            )
         }
     }
 }
