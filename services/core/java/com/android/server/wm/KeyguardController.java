@@ -37,6 +37,7 @@ import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
 
+import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
@@ -649,6 +650,12 @@ class KeyguardController {
             mRequestDismissKeyguard = lastDismissKeyguardActivity != mDismissingKeyguardActivity
                     && !mOccluded && !mKeyguardGoingAway
                     && mDismissingKeyguardActivity != null;
+            if (mOccluded && mKeyguardShowing && !display.isSleeping() && !top.fillsParent()
+                    && display.mWallpaperController.getWallpaperTarget() == null) {
+                // The occluding activity may be translucent or not fill screen. Then let wallpaper
+                // to check whether it should set itself as target to avoid blank background.
+                display.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+            }
 
             if (mTopTurnScreenOnActivity != lastTurnScreenOnActivity
                     && mTopTurnScreenOnActivity != null
