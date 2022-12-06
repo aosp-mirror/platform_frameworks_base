@@ -130,10 +130,7 @@ class CreateCredentialViewModel(
     // TODO: implement the if choose as default or not logic later
   }
 
-  fun onEntrySelected(
-    selectedEntry: EntryInfo,
-    launcher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
-  ) {
+  fun onEntrySelected(selectedEntry: EntryInfo) {
     val providerId = selectedEntry.providerId
     val entryKey = selectedEntry.entryKey
     val entrySubkey = selectedEntry.entrySubkey
@@ -145,9 +142,6 @@ class CreateCredentialViewModel(
         selectedEntry = selectedEntry,
         hidden = true,
       )
-      val intentSenderRequest = IntentSenderRequest.Builder(selectedEntry.pendingIntent)
-        .setFillInIntent(selectedEntry.fillInIntent).build()
-      launcher.launch(intentSenderRequest)
     } else {
       CredentialManagerRepo.getInstance().onOptionSelected(
         providerId,
@@ -160,12 +154,23 @@ class CreateCredentialViewModel(
     }
   }
 
-  fun onConfirmEntrySelected(
+  fun launchProviderUi(
     launcher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
   ) {
+    val entry = uiState.selectedEntry
+    if (entry != null && entry.pendingIntent != null) {
+      val intentSenderRequest = IntentSenderRequest.Builder(entry.pendingIntent)
+        .setFillInIntent(entry.fillInIntent).build()
+      launcher.launch(intentSenderRequest)
+    } else {
+      Log.w("Account Selector", "No provider UI to launch")
+    }
+  }
+
+  fun onConfirmEntrySelected() {
     val selectedEntry = uiState.activeEntry?.activeEntryInfo
     if (selectedEntry != null) {
-      onEntrySelected(selectedEntry, launcher)
+      onEntrySelected(selectedEntry)
     } else {
       Log.w("Account Selector",
         "Illegal state: confirm is pressed but activeEntry isn't set.")

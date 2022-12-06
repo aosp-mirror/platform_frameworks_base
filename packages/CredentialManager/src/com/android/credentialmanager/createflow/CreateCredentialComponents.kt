@@ -60,12 +60,6 @@ fun CreateCredentialScreen(
     viewModel: CreateCredentialViewModel,
     providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
 ) {
-    val selectEntryCallback: (EntryInfo) -> Unit = {
-        viewModel.onEntrySelected(it, providerActivityLauncher)
-    }
-    val confirmEntryCallback: () -> Unit = {
-        viewModel.onConfirmEntrySelected(providerActivityLauncher)
-    }
     val state = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Expanded,
         skipHalfExpanded = true
@@ -89,7 +83,7 @@ fun CreateCredentialScreen(
                         onOptionSelected = viewModel::onEntrySelectedFromFirstUseScreen,
                         onDisabledPasswordManagerSelected =
                         viewModel::onDisabledPasswordManagerSelected,
-                        onRemoteEntrySelected = selectEntryCallback,
+                        onRemoteEntrySelected = viewModel::onEntrySelected,
                     )
                     CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
                         requestDisplayInfo = uiState.requestDisplayInfo,
@@ -97,8 +91,8 @@ fun CreateCredentialScreen(
                         providerInfo = uiState.activeEntry?.activeProvider!!,
                         createOptionInfo = uiState.activeEntry.activeEntryInfo as CreateOptionInfo,
                         showActiveEntryOnly = uiState.showActiveEntryOnly,
-                        onOptionSelected = selectEntryCallback,
-                        onConfirm = confirmEntryCallback,
+                        onOptionSelected = viewModel::onEntrySelected,
+                        onConfirm = viewModel::onConfirmEntrySelected,
                         onCancel = viewModel::onCancel,
                         onMoreOptionsSelected = viewModel::onMoreOptionsSelected,
                     )
@@ -110,7 +104,7 @@ fun CreateCredentialScreen(
                         onOptionSelected = viewModel::onEntrySelectedFromMoreOptionScreen,
                         onDisabledPasswordManagerSelected =
                         viewModel::onDisabledPasswordManagerSelected,
-                        onRemoteEntrySelected = selectEntryCallback,
+                        onRemoteEntrySelected = viewModel::onEntrySelected,
                     )
                     CreateScreenState.MORE_OPTIONS_ROW_INTRO -> MoreOptionsRowIntroCard(
                         providerInfo = uiState.activeEntry?.activeProvider!!,
@@ -119,11 +113,13 @@ fun CreateCredentialScreen(
                     CreateScreenState.EXTERNAL_ONLY_SELECTION -> ExternalOnlySelectionCard(
                         requestDisplayInfo = uiState.requestDisplayInfo,
                         activeRemoteEntry = uiState.activeEntry?.activeEntryInfo!!,
-                        onOptionSelected = selectEntryCallback,
-                        onConfirm = confirmEntryCallback,
+                        onOptionSelected = viewModel::onEntrySelected,
+                        onConfirm = viewModel::onConfirmEntrySelected,
                         onCancel = viewModel::onCancel,
                     )
                 }
+            } else if (uiState.hidden && uiState.selectedEntry != null) {
+                viewModel.launchProviderUi(providerActivityLauncher)
             }
         },
         scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.8f),
