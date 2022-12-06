@@ -499,6 +499,12 @@ class Task extends TaskFragment {
      */
     boolean mInRemoveTask;
 
+    /**
+     * When set, disassociate the leaf task if relaunched and reparented it to TDA as root task if
+     * possible.
+     */
+    boolean mReparentLeafTaskIfRelaunch;
+
     private final AnimatingActivityRegistry mAnimatingActivityRegistry =
             new AnimatingActivityRegistry();
 
@@ -6140,6 +6146,12 @@ class Task extends TaskFragment {
     void dispatchTaskInfoChangedIfNeeded(boolean force) {
         if (isOrganized()) {
             mAtmService.mTaskOrganizerController.onTaskInfoChanged(this, force);
+        }
+    }
+
+    void setReparentLeafTaskIfRelaunch(boolean reparentLeafTaskIfRelaunch) {
+        if (isOrganized()) {
+            mReparentLeafTaskIfRelaunch = reparentLeafTaskIfRelaunch;
         }
     }
 
