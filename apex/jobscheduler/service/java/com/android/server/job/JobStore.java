@@ -91,8 +91,11 @@ public final class JobStore {
 
     /** Threshold to adjust how often we want to write to the db. */
     private static final long JOB_PERSIST_DELAY = 2000L;
-    private static final String JOB_FILE_SPLIT_PREFIX = "jobs_";
+    @VisibleForTesting
+    static final String JOB_FILE_SPLIT_PREFIX = "jobs_";
     private static final int ALL_UIDS = -1;
+    @VisibleForTesting
+    static final int INVALID_UID = -2;
 
     final Object mLock;
     final Object mWriteScheduleLock;    // used solely for invariants around write scheduling
@@ -529,6 +532,25 @@ public final class JobStore {
         return values;
     }
 
+    @VisibleForTesting
+    static int extractUidFromJobFileName(@NonNull File file) {
+        final String fileName = file.getName();
+        if (fileName.startsWith(JOB_FILE_SPLIT_PREFIX)) {
+            try {
+                final int subEnd = fileName.length() - 4; // -4 for ".xml"
+                final int uid = Integer.parseInt(
+                        fileName.substring(JOB_FILE_SPLIT_PREFIX.length(), subEnd));
+                if (uid < 0) {
+                    return INVALID_UID;
+                }
+                return uid;
+            } catch (Exception e) {
+                Slog.e(TAG, "Unexpected file name format", e);
+            }
+        }
+        return INVALID_UID;
+    }
+
     /**
      * Runnable that writes {@link #mJobSet} out to xml.
      * NOTE: This Runnable locks on mLock
@@ -543,6 +565,42 @@ public final class JobStore {
 
             private void prepare() {
                 mCopyAllJobs = !mUseSplitFiles || mPendingJobWriteUids.get(ALL_UIDS);
+                if (mUseSplitFiles) {
+                    // Put the set of changed UIDs in the copy list so that we update each file,
+                    // especially if we've dropped all jobs for that UID.
+                    if (mPendingJobWriteUids.get(ALL_UIDS)) {
+                        // ALL_UIDS is only used when we switch file splitting policy or for tests,
+                        // so going through the file list here shouldn't be
+                        // a large performance hit on user devices.
+
+                        final File[] files;
+                        try {
+                            files = mJobFileDirectory.listFiles();
+                        } catch (SecurityException e) {
+                            Slog.wtf(TAG, "Not allowed to read job file directory", e);
+                            return;
+                        }
+                        if (files == null) {
+                            Slog.wtfStack(TAG, "Couldn't get job file list");
+                        } else {
+                            for (File file : files) {
+                                final int uid = extractUidFromJobFileName(file);
+                                if (uid != INVALID_UID) {
+                                    mJobStoreCopy.put(uid, new ArrayList<>());
+                                }
+                            }
+                        }
+                    } else {
+                        for (int i = 0; i < mPendingJobWriteUids.size(); ++i) {
+                            mJobStoreCopy.put(mPendingJobWriteUids.keyAt(i), new ArrayList<>());
+                        }
+                    }
+                } else {
+                    // Single file mode.
+                    // Put the catchall UID in the copy list so that we update the single file,
+                    // especially if we've dropped all persisted jobs.
+                    mJobStoreCopy.put(ALL_UIDS, new ArrayList<>());
+                }
             }
 
             @Override
