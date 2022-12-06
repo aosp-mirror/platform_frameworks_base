@@ -31,6 +31,7 @@ import static com.android.server.wm.ScreenRotationAnimationProto.STARTED;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.utils.CoordinateTransforms.computeRotationMatrix;
 
 import android.animation.ArgbEvaluator;
 import android.content.Context;
@@ -60,7 +61,6 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.display.DisplayControl;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
-import com.android.server.wm.utils.RotationAnimationUtils;
 
 import java.io.PrintWriter;
 
@@ -378,8 +378,7 @@ class ScreenRotationAnimation {
         // to the snapshot to make it stay in the same original position
         // with the current screen rotation.
         int delta = deltaRotation(rotation, mOriginalRotation);
-        RotationAnimationUtils.createRotationMatrix(delta, mOriginalWidth, mOriginalHeight,
-                mSnapshotInitialMatrix);
+        computeRotationMatrix(delta, mOriginalWidth, mOriginalHeight, mSnapshotInitialMatrix);
         setRotationTransform(t, mSnapshotInitialMatrix);
     }
 

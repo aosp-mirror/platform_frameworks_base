@@ -16,7 +16,7 @@
 
 package com.android.server.display;
 
-import static com.android.server.wm.utils.RotationAnimationUtils.hasProtectedContent;
+import static com.android.internal.policy.TransitionAnimation.hasProtectedContent;
 
 import android.content.Context;
 import android.graphics.BLASTBufferQueue;
