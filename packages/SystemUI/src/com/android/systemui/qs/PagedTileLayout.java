@@ -741,6 +741,14 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         }
     };
 
+    /**
+     * Force all tiles to be redistributed across pages.
+     * Should be called when one of the following changes: rows, columns, number of tiles.
+     */
+    public void forceTilesRedistribution() {
+        mDistributeTiles = true;
+    }
+
     public interface PageListener {
         int INVALID_PAGE = -1;
 

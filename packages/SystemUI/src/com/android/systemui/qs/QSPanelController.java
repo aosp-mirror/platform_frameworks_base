@@ -148,6 +148,11 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         }
     }
 
+    @Override
+    protected void onSplitShadeChanged() {
+        ((PagedTileLayout) mView.getOrCreateTileLayout()).forceTilesRedistribution();
+    }
+
     /** */
     public void setVisibility(int visibility) {
         mView.setVisibility(visibility);
