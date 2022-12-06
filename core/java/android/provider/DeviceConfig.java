@@ -23,8 +23,8 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -68,6 +68,7 @@ public final class DeviceConfig {
      * different namespace in order to avoid phonetype from resetting it.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_ACTIVITY_MANAGER_COMPONENT_ALIAS = "activity_manager_ca";
 
     /**
@@ -86,7 +87,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @TestApi
     public static final String NAMESPACE_ALARM_MANAGER = "alarm_manager";
 
     /**
@@ -224,7 +224,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @TestApi
     public static final String NAMESPACE_DEVICE_IDLE = "device_idle";
 
     /**
@@ -284,6 +283,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_INTELLIGENCE_CONTENT_SUGGESTIONS =
             "intelligence_content_suggestions";
 
@@ -291,7 +291,7 @@ public final class DeviceConfig {
      * Namespace for JobScheduler configurations.
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final String NAMESPACE_JOB_SCHEDULER = "jobscheduler";
 
     /**
@@ -331,6 +331,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_MGLRU_NATIVE = "mglru_native";
 
     /**
@@ -386,6 +387,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_REMOTE_KEY_PROVISIONING_NATIVE =
             "remote_key_provisioning_native";
 
@@ -410,6 +412,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_ROTATION_RESOLVER = "rotation_resolver";
 
     /**
@@ -461,6 +464,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_SETTINGS_STATS = "settings_stats";
 
     /**
@@ -560,6 +564,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_TARE = "tare";
 
     /**
@@ -584,6 +589,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_CONTACTS_PROVIDER = "contacts_provider";
 
     /**
@@ -591,6 +597,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_SETTINGS_UI = "settings_ui";
 
     /**
@@ -601,7 +608,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final String NAMESPACE_ANDROID = "android";
 
     /**
@@ -609,6 +616,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_WINDOW_MANAGER = "window_manager";
 
     /**
@@ -625,7 +633,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final String NAMESPACE_SELECTION_TOOLBAR = "selection_toolbar";
 
     /**
@@ -633,6 +641,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_VOICE_INTERACTION = "voice_interaction";
 
     /**
@@ -640,6 +649,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_DEVICE_POLICY_MANAGER =
             "device_policy_manager";
 
@@ -690,6 +700,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_WIDGET = "widget";
 
     /**
@@ -697,6 +708,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_CONNECTIVITY_THERMAL_POWER_MANAGER =
             "connectivity_thermal_power_manager";
 
@@ -705,6 +717,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_CONFIGURATION = "configuration";
 
     /**
@@ -712,6 +725,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_LATENCY_TRACKER = "latency_tracker";
 
     /**
@@ -719,6 +733,8 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SuppressLint("IntentName")
     public static final String NAMESPACE_INTERACTION_JANK_MONITOR = "interaction_jank_monitor";
 
     /**
@@ -726,6 +742,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_GAME_OVERLAY = "game_overlay";
 
     /**
@@ -733,6 +750,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_VIRTUALIZATION_FRAMEWORK_NATIVE =
             "virtualization_framework_native";
 
@@ -741,7 +759,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final String NAMESPACE_CONSTRAIN_DISPLAY_APIS = "constrain_display_apis";
 
     /**
@@ -749,7 +767,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final String NAMESPACE_APP_COMPAT_OVERRIDES = "app_compat_overrides";
 
     /**
@@ -783,6 +801,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_VENDOR_SYSTEM_NATIVE = "vendor_system_native";
 
     /**
@@ -790,6 +809,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_VENDOR_SYSTEM_NATIVE_BOOT = "vendor_system_native_boot";
 
     /**
@@ -797,6 +817,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_MEMORY_SAFETY_NATIVE = "memory_safety_native";
 
     /**
@@ -804,6 +825,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_WEAR = "wear";
 
     /**
@@ -819,7 +841,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final String NAMESPACE_INPUT_METHOD_MANAGER = "input_method_manager";
 
     /**
@@ -835,6 +857,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String NAMESPACE_ARC_APP_COMPAT = "arc_app_compat";
 
     private static final Object sLock = new Object();
@@ -1112,6 +1135,7 @@ public final class DeviceConfig {
      * @see #getSyncDisabledMode()
      * @hide
      */
+    @SystemApi
     @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static void setSyncDisabledMode(@SyncDisabledMode int syncDisabledMode) {
         Settings.Config.setSyncDisabledMode(syncDisabledMode);
@@ -1123,6 +1147,7 @@ public final class DeviceConfig {
      * @see #setSyncDisabledMode(int)
      * @hide
      */
+    @SystemApi
     @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static @SyncDisabledMode int getSyncDisabledMode() {
         return Settings.Config.getSyncDisabledMode();
@@ -1274,7 +1299,7 @@ public final class DeviceConfig {
      * Enforces READ_DEVICE_CONFIG permission if namespace is not one of public namespaces.
      * @hide
      */
-    public static void enforceReadPermission(String namespace) {
+    public static void enforceReadPermission(@NonNull String namespace) {
         if (Settings.Config.checkCallingOrSelfPermission(READ_DEVICE_CONFIG)
                 != PackageManager.PERMISSION_GRANTED) {
             if (!PUBLIC_NAMESPACES.contains(namespace)) {
@@ -1288,6 +1313,7 @@ public final class DeviceConfig {
      * Returns list of namespaces that can be read without READ_DEVICE_CONFIG_PERMISSION;
      * @hide
      */
+    @SystemApi
     public static @NonNull List<String> getPublicNamespaces() {
         return PUBLIC_NAMESPACES;
     }
@@ -1344,6 +1370,7 @@ public final class DeviceConfig {
          * @param keyValueMap A map between property names and property values.
          * @hide
          */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         public Properties(@NonNull String namespace, @Nullable Map<String, String> keyValueMap) {
             Preconditions.checkNotNull(namespace);
             mNamespace = namespace;
