@@ -993,10 +993,11 @@ public class SplashscreenContentDrawer {
      * Create and play the default exit animation for splash screen view.
      */
     void applyExitAnimation(SplashScreenView view, SurfaceControl leash,
-            Rect frame, Runnable finishCallback, long createTime) {
+            Rect frame, Runnable finishCallback, long createTime, float roundedCornerRadius) {
         final Runnable playAnimation = () -> {
             final SplashScreenExitAnimation animation = new SplashScreenExitAnimation(mContext,
-                    view, leash, frame, mMainWindowShiftLength, mTransactionPool, finishCallback);
+                    view, leash, frame, mMainWindowShiftLength, mTransactionPool, finishCallback,
+                    roundedCornerRadius);
             animation.startAnimations();
         };
         if (view.getIconView() == null) {
