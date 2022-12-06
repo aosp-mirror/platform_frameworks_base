@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayManagerTransaction;
+import android.content.om.OverlayManagerTransaction.Request;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.parsing.FrameworkParsingPackageUtils;
@@ -295,9 +296,8 @@ public class OverlayManagerImpl {
             throws PackageManager.NameNotFoundException, IOException {
         Objects.requireNonNull(transaction);
 
-        for (Iterator<OverlayManagerTransaction.Request> it = transaction.iterator();
-                it.hasNext(); ) {
-            final OverlayManagerTransaction.Request request = it.next();
+        for (Iterator<Request> it = transaction.getRequests(); it.hasNext(); ) {
+            final Request request = it.next();
             if (request.type == TYPE_REGISTER_FABRICATED) {
                 final FabricatedOverlayInternal fabricatedOverlayInternal =
                         Objects.requireNonNull(

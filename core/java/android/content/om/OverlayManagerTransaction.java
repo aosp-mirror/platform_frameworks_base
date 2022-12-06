@@ -60,8 +60,7 @@ import java.util.Objects;
  * @see FabricatedOverlay
  * @hide
  */
-public final class OverlayManagerTransaction
-        implements Iterable<OverlayManagerTransaction.Request>, Parcelable {
+public final class OverlayManagerTransaction implements Parcelable {
     // TODO: remove @hide from this class when OverlayManager is added to the
     // SDK, but keep OverlayManagerTransaction.Request @hidden
     private final List<Request> mRequests;
@@ -113,8 +112,15 @@ public final class OverlayManagerTransaction
         mOverlayManager = null;
     }
 
-    @Override
-    public Iterator<Request> iterator() {
+    /**
+     * Get the iterator of requests
+     *
+     * @return the iterator of request
+     * @hide
+     */
+    @SuppressLint("ReferencesHidden")
+    @NonNull
+    public Iterator<Request> getRequests() {
         return mRequests.iterator();
     }
 
