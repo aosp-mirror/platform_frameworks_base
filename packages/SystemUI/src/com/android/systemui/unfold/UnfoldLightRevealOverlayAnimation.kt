@@ -228,7 +228,7 @@ constructor(
     }
 
     private fun getUnfoldedDisplayInfo(): DisplayInfo =
-        displayManager.displays
+        displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
             .asSequence()
             .map { DisplayInfo().apply { it.getDisplayInfo(this) } }
             .filter { it.type == Display.TYPE_INTERNAL }
