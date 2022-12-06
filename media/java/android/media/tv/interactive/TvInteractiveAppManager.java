@@ -30,6 +30,7 @@ import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvContentRating;
 import android.media.tv.TvInputManager;
+import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -508,6 +509,19 @@ public final class TvInteractiveAppManager {
                         return;
                     }
                     record.postRequestStopRecording(recordingId);
+                }
+            }
+
+            @Override
+            public void onSetTvRecordingInfo(String recordingId, TvRecordingInfo recordingInfo,
+                    int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postSetTvRecordingInfo(recordingId, recordingInfo);
                 }
             }
 
@@ -1799,6 +1813,15 @@ public final class TvInteractiveAppManager {
             });
         }
 
+        void postSetTvRecordingInfo(String recordingId, TvRecordingInfo recordingInfo) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onSetTvRecordingInfo(mSession, recordingId, recordingInfo);
+                }
+            });
+        }
+
         void postAdRequest(final AdRequest request) {
             mHandler.post(new Runnable() {
                 @Override
@@ -1969,6 +1992,19 @@ public final class TvInteractiveAppManager {
          * @param recordingId The recordingId of the recording to be stopped.
          */
         public void onRequestStopRecording(Session session, String recordingId) {
+        }
+
+        /**
+         * This is called when
+         * {@link TvInteractiveAppService.Session#setTvRecordingInfo(String, TvRecordingInfo)} is
+         * called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         * @param recordingId The recordingId of the recording which will have the info set.
+         * @param recordingInfo The recording info to set to the recording.
+         */
+        public void onSetTvRecordingInfo(Session session, String recordingId,
+                TvRecordingInfo recordingInfo) {
         }
 
         /**

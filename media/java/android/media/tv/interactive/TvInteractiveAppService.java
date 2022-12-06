@@ -38,6 +38,7 @@ import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvContentRating;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager;
+import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
 import android.media.tv.TvView;
 import android.media.tv.interactive.TvInteractiveAppView.TvInteractiveAppCallback;
@@ -983,6 +984,28 @@ public abstract class TvInteractiveAppService extends Service {
                     }
                 } catch (RemoteException e) {
                     Log.w(TAG, "error in requestStopRecording", e);
+                }
+            });
+        }
+
+        /**
+         * Sets the recording info for the specified recording
+         *
+         * @hide
+         */
+        @CallSuper
+        public void setTvRecordingInfo(@NonNull String recordingId,
+                @NonNull TvRecordingInfo recordingInfo) {
+            executeOrPostRunnableOnMainThread(() -> {
+                try {
+                    if (DEBUG) {
+                        Log.d(TAG, "setTvRecordingInfo");
+                    }
+                    if (mSessionCallback != null) {
+                        mSessionCallback.onSetTvRecordingInfo(recordingId, recordingInfo);
+                    }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "error in setTvRecordingInfo", e);
                 }
             });
         }

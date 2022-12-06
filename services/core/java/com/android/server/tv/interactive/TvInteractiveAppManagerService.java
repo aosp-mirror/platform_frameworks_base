@@ -34,6 +34,7 @@ import android.media.tv.AdRequest;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
+import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
 import android.media.tv.interactive.AppLinkInfo;
 import android.media.tv.interactive.ITvInteractiveAppClient;
@@ -2310,6 +2311,24 @@ public class TvInteractiveAppManagerService extends SystemService {
                     mSessionState.mClient.onRequestStopRecording(recordingId, mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onRequestStopRecording", e);
+                }
+            }
+        }
+
+        @Override
+        public void onSetTvRecordingInfo(String recordingId, TvRecordingInfo recordingInfo) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onSetTvRecordingInfo");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onSetTvRecordingInfo(recordingId, recordingInfo,
+                            mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onSetTvRecordingInfo", e);
                 }
             }
         }
