@@ -138,6 +138,16 @@ public class KeyStoreException extends Exception {
      * provisioning server refuses key issuance, this is a permanent error.</p>
      */
     public static final int ERROR_ATTESTATION_KEYS_UNAVAILABLE = 16;
+    /**
+     * This device requires a software upgrade to use the key provisioning server. The software
+     * is outdated and this error is returned only on devices that rely solely on
+     * remotely-provisioned keys (see <a href=
+     * "https://android-developers.googleblog.com/2022/03/upgrading-android-attestation-remote.html"
+     * >Remote Key Provisioning</a>).
+     *
+     * @hide
+     */
+    public static final int ERROR_DEVICE_REQUIRES_UPGRADE_FOR_ATTESTATION = 17;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -157,7 +167,8 @@ public class KeyStoreException extends Exception {
             ERROR_INCORRECT_USAGE,
             ERROR_KEY_NOT_TEMPORALLY_VALID,
             ERROR_KEY_OPERATION_EXPIRED,
-            ERROR_ATTESTATION_KEYS_UNAVAILABLE
+            ERROR_ATTESTATION_KEYS_UNAVAILABLE,
+            ERROR_DEVICE_REQUIRES_UPGRADE_FOR_ATTESTATION,
     })
     public @interface PublicErrorCode {
     }
@@ -184,6 +195,16 @@ public class KeyStoreException extends Exception {
      * This value is returned when {@link #isTransientFailure()} is {@code true}.
      */
     public static final int RETRY_WHEN_CONNECTIVITY_AVAILABLE = 3;
+    /**
+     * Re-try the operation that led to this error when the device has a software update
+     * downloaded and on the next reboot. The Remote provisioning server recognizes
+     * the device, but refuses issuance of attestation keys because it contains a software
+     * version that could potentially be vulnerable and needs an update. Re-trying after the
+     * device has upgraded and rebooted may alleviate the problem.
+     *
+     * <p>This value is returned when {@link #isTransientFailure()} is {@code true}.
+     */
+    public static final int RETRY_AFTER_NEXT_REBOOT = 4;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -191,6 +212,7 @@ public class KeyStoreException extends Exception {
             RETRY_NEVER,
             RETRY_WITH_EXPONENTIAL_BACKOFF,
             RETRY_WHEN_CONNECTIVITY_AVAILABLE,
+            RETRY_AFTER_NEXT_REBOOT,
     })
     public @interface RetryPolicy {
     }
@@ -217,6 +239,13 @@ public class KeyStoreException extends Exception {
      * when the device has connectivity again.
      * @hide */
     public static final int RKP_FETCHING_PENDING_CONNECTIVITY = 3;
+    /**
+     * The RKP server recognizes the device, but the device may be running vulnerable software,
+     * and thus refusing issuance of RKP keys to it.
+     *
+     * @hide
+     */
+    public static final int RKP_FETCHING_PENDING_SOFTWARE_REBOOT = 4;
 
     // Constants for encoding information about the error encountered:
     // Whether the error relates to the system state/implementation as a whole, or a specific key.
@@ -236,7 +265,7 @@ public class KeyStoreException extends Exception {
     private static int initializeRkpStatusForRegularErrors(int errorCode) {
         // Check if the system code mistakenly called a constructor of KeyStoreException with
         // the OUT_OF_KEYS error code but without RKP status.
-        if (errorCode == ResponseCode.OUT_OF_KEYS) {
+        if (isRkpRelatedError(errorCode)) {
             Log.e(TAG, "RKP error code without RKP status");
             // Set RKP status to RKP_SERVER_REFUSED_ISSUANCE so that the caller never retries.
             return RKP_SERVER_REFUSED_ISSUANCE;
@@ -272,7 +301,7 @@ public class KeyStoreException extends Exception {
         super(message);
         mErrorCode = errorCode;
         mRkpStatus = rkpStatus;
-        if (mErrorCode != ResponseCode.OUT_OF_KEYS) {
+        if (!isRkpRelatedError(mErrorCode)) {
             Log.e(TAG, "Providing RKP status for error code " + errorCode + " has no effect.");
         }
     }
@@ -309,10 +338,11 @@ public class KeyStoreException extends Exception {
     public boolean isTransientFailure() {
         PublicErrorInformation failureInfo = getErrorInformation(mErrorCode);
         // Special-case handling for RKP failures:
-        if (mRkpStatus != RKP_SUCCESS && mErrorCode == ResponseCode.OUT_OF_KEYS) {
+        if (mRkpStatus != RKP_SUCCESS && isRkpRelatedError(mErrorCode)) {
             switch (mRkpStatus) {
                 case RKP_TEMPORARILY_UNAVAILABLE:
                 case RKP_FETCHING_PENDING_CONNECTIVITY:
+                case RKP_FETCHING_PENDING_SOFTWARE_REBOOT:
                     return true;
                 case RKP_SERVER_REFUSED_ISSUANCE:
                 default:
@@ -346,6 +376,11 @@ public class KeyStoreException extends Exception {
         return (failureInfo.indicators & IS_SYSTEM_ERROR) != 0;
     }
 
+    private static boolean isRkpRelatedError(int errorCode) {
+        return errorCode == ResponseCode.OUT_OF_KEYS
+                  || errorCode == ResponseCode.OUT_OF_KEYS_REQUIRES_UPGRADE;
+    }
+
     /**
      * Returns the re-try policy for transient failures. Valid only if
      * {@link #isTransientFailure()} returns {@code True}.
@@ -362,6 +397,8 @@ public class KeyStoreException extends Exception {
                     return RETRY_WHEN_CONNECTIVITY_AVAILABLE;
                 case RKP_SERVER_REFUSED_ISSUANCE:
                     return RETRY_NEVER;
+                case RKP_FETCHING_PENDING_SOFTWARE_REBOOT:
+                    return RETRY_AFTER_NEXT_REBOOT;
                 default:
                     return (failureInfo.indicators & IS_TRANSIENT_ERROR) != 0
                             ? RETRY_WITH_EXPONENTIAL_BACKOFF : RETRY_NEVER;
@@ -620,5 +657,8 @@ public class KeyStoreException extends Exception {
                 new PublicErrorInformation(0, ERROR_KEY_DOES_NOT_EXIST));
         sErrorCodeToFailureInfo.put(ResponseCode.OUT_OF_KEYS,
                 new PublicErrorInformation(IS_SYSTEM_ERROR, ERROR_ATTESTATION_KEYS_UNAVAILABLE));
+        sErrorCodeToFailureInfo.put(ResponseCode.OUT_OF_KEYS_REQUIRES_UPGRADE,
+                new PublicErrorInformation(IS_SYSTEM_ERROR | IS_TRANSIENT_ERROR,
+                        ERROR_DEVICE_REQUIRES_UPGRADE_FOR_ATTESTATION));
     }
 }
