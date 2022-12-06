@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+<!--
   Copyright (C) 2022 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,18 +15,14 @@
   limitations under the License.
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.settingslib.spa.test">
+<resources>
+    <string name="test_quantity_strings">{count, plural,
+        =1    {There is one song found.}
+        other {There are # songs found.}
+    }</string>
 
-    <uses-sdk android:minSdkVersion="21"/>
-
-    <application>
-        <uses-library android:name="android.test.runner" />
-    </application>
-
-    <instrumentation
-        android:name="androidx.test.runner.AndroidJUnitRunner"
-        android:label="Tests for SpaLib"
-        android:targetPackage="com.android.settingslib.spa.test">
-    </instrumentation>
-</manifest>
+    <string name="test_quantity_strings_with_param">{count, plural,
+        =1    {There is one song found in {place}.}
+        other {There are # songs found in {place}.}
+    }</string>
+</resources>
