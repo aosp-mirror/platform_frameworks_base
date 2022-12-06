@@ -16,11 +16,39 @@
 
 package com.android.server.content;
 
+import static android.content.pm.UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT;
+import static android.content.pm.UserProperties.SHOW_IN_LAUNCHER_WITH_PARENT;
+import static android.content.pm.UserProperties.SHOW_IN_SETTINGS_WITH_PARENT;
+
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
+import android.accounts.AccountManagerInternal;
 import android.content.ContentResolver;
+import android.content.Context;
+import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.os.Bundle;
+import android.os.UserManager;
+import android.provider.ContactsContract;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.test.core.app.ApplicationProvider;
+
+import com.android.server.job.JobSchedulerInternal;
+
 import junit.framework.TestCase;
+
+import org.jetbrains.annotations.NotNull;
+import org.junit.Before;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
 
 /**
  * Tests for SyncManager.
@@ -32,6 +60,43 @@ public class SyncManagerTest extends TestCase {
 
     final String KEY_1 = "key_1";
     final String KEY_2 = "key_2";
+
+    private SyncManager mSyncManager;
+    private Context mContext;
+
+    @Mock
+    private UserManager mUserManager;
+    @Mock
+    private AccountManagerInternal mAccountManagerInternal;
+    @Mock
+    private JobSchedulerInternal mJobSchedulerInternal;
+
+    private class SyncManagerWithMockedServices extends SyncManager {
+
+        @Override
+        protected AccountManagerInternal getAccountManagerInternal() {
+            return mAccountManagerInternal;
+        }
+
+        @Override
+        protected JobSchedulerInternal getJobSchedulerInternal() {
+            return mJobSchedulerInternal;
+        }
+
+        private SyncManagerWithMockedServices(Context context, boolean factoryTest) {
+            super(context, factoryTest);
+        }
+    }
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        mContext = spy(ApplicationProvider.getApplicationContext());
+        when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
+        doNothing().when(mAccountManagerInternal).addOnAppPermissionChangeListener(any());
+        when(mJobSchedulerInternal.getSystemScheduledPendingJobs()).thenReturn(new ArrayList<>());
+        mSyncManager = new SyncManagerWithMockedServices(mContext, true);
+    }
 
     public void testSyncExtrasEquals_WithNull() throws Exception {
         Bundle b1 = new Bundle();
@@ -139,5 +204,46 @@ public class SyncManagerTest extends TestCase {
 
         final StringBuilder sb = new StringBuilder();
         assertEquals(expected, SyncManager.formatDurationHMS(sb, time * 1000).toString());
+    }
+
+    private UserInfo createUserInfo(String name, int id, int groupId, int flags) {
+        final UserInfo ui = new UserInfo(id, name, flags | UserInfo.FLAG_INITIALIZED);
+        ui.profileGroupId = groupId;
+        return ui;
+    }
+
+    @NotNull
+    private UserProperties getCloneUserProperties() {
+        return new UserProperties.Builder()
+                .setStartWithParent(true)
+                .setShowInLauncher(SHOW_IN_LAUNCHER_WITH_PARENT)
+                .setShowInSettings(SHOW_IN_SETTINGS_WITH_PARENT)
+                .setUseParentsContacts(true)
+                .setInheritDevicePolicy(INHERIT_DEVICE_POLICY_FROM_PARENT)
+                .build();
+    }
+
+    private void mockUserProperties(UserInfo primaryUserInfo, UserInfo cloneUserInfo) {
+        UserProperties cloneUserProperties = getCloneUserProperties();
+        when(mUserManager.getUserProperties(cloneUserInfo.getUserHandle()))
+                .thenReturn(cloneUserProperties);
+        // Set default user properties for primary user
+        when(mUserManager.getUserProperties(primaryUserInfo.getUserHandle()))
+                .thenReturn(new UserProperties.Builder().build());
+    }
+
+    public void testShouldDisableSync() {
+        UserInfo primaryUserInfo = createUserInfo("primary", 0 /* id */, 0 /* groupId */,
+                UserInfo.FLAG_PRIMARY | UserInfo.FLAG_ADMIN);
+        UserInfo cloneUserInfo = createUserInfo("clone", 10 /* id */, 0 /* groupId */,
+                UserInfo.FLAG_PROFILE);
+
+        mockUserProperties(primaryUserInfo, cloneUserInfo);
+
+        // Clone user accounts must have contact syncs disabled
+        assertThat(mSyncManager.shouldDisableSyncForUser(cloneUserInfo,
+                ContactsContract.AUTHORITY)).isTrue();
+        assertThat(mSyncManager.shouldDisableSyncForUser(primaryUserInfo,
+                ContactsContract.AUTHORITY)).isFalse();
     }
 }
