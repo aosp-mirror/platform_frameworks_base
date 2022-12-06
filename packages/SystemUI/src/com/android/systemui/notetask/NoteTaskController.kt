@@ -17,10 +17,12 @@
 package com.android.systemui.notetask
 
 import android.app.KeyguardManager
+import android.content.ComponentName
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.UserManager
-import android.view.KeyEvent
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
@@ -45,15 +47,22 @@ constructor(
     @NoteTaskEnabledKey private val isEnabled: Boolean,
 ) {
 
-    fun handleSystemKey(keyCode: Int) {
+    /**
+     * Shows a note task. How the task is shown will depend on when the method is invoked.
+     *
+     * If in multi-window mode, notes will open as a full screen experience. That is particularly
+     * important for Large screen devices. These devices may support a taskbar that let users to
+     * drag and drop a shortcut into multi-window mode, and notes should comply with this behaviour.
+     *
+     * If the keyguard is locked, notes will open as a full screen experience. A locked device has
+     * no contextual information which let us use the whole screen space available.
+     *
+     * If no in multi-window or the keyguard is unlocked, notes will open as a floating experience.
+     * That will let users open other apps in full screen, and take contextual notes.
+     */
+    fun showNoteTask(isInMultiWindowMode: Boolean = false) {
         if (!isEnabled) return
 
-        if (keyCode == KeyEvent.KEYCODE_VIDEO_APP_1) {
-            showNoteTask()
-        }
-    }
-
-    private fun showNoteTask() {
         val bubbles = optionalBubbles.getOrNull() ?: return
         val keyguardManager = optionalKeyguardManager.getOrNull() ?: return
         val userManager = optionalUserManager.getOrNull() ?: return
@@ -62,11 +71,35 @@ constructor(
         // TODO(b/249954038): We should handle direct boot (isUserUnlocked). For now, we do nothing.
         if (!userManager.isUserUnlocked) return
 
-        if (keyguardManager.isKeyguardLocked) {
+        if (isInMultiWindowMode || keyguardManager.isKeyguardLocked) {
             context.startActivity(intent)
         } else {
             // TODO(b/254606432): Should include Intent.EXTRA_FLOATING_WINDOW_MODE parameter.
             bubbles.showAppBubble(intent)
         }
+    }
+
+    /**
+     * Set `android:enabled` property in the `AndroidManifest` associated with the Shortcut
+     * component to [value].
+     *
+     * If the shortcut entry `android:enabled` is set to `true`, the shortcut will be visible in the
+     * Widget Picker to all users.
+     */
+    fun setNoteTaskShortcutEnabled(value: Boolean) {
+        val componentName = ComponentName(context, CreateNoteTaskShortcutActivity::class.java)
+
+        val enabledState =
+            if (value) {
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+            } else {
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+            }
+
+        context.packageManager.setComponentEnabledSetting(
+            componentName,
+            enabledState,
+            PackageManager.DONT_KILL_APP,
+        )
     }
 }
