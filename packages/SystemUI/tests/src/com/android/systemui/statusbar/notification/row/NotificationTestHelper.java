@@ -213,8 +213,7 @@ public class NotificationTestHelper {
             SourceType sourceType
     ) throws Exception {
         ExpandableNotificationRow row = createRow();
-        row.requestTopRoundness(topRoundness, false, sourceType);
-        row.requestBottomRoundness(bottomRoundness, /*animate = */ false, sourceType);
+        row.requestRoundness(topRoundness, bottomRoundness, sourceType, /*animate = */ false);
         assertEquals(topRoundness, row.getTopRoundness(), /* delta = */ 0f);
         assertEquals(bottomRoundness, row.getBottomRoundness(), /* delta = */ 0f);
         return row;

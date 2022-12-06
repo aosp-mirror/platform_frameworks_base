@@ -35,7 +35,7 @@ class NotificationTargetsHelperTest : SysuiTestCase() {
     ) =
         NotificationTargetsHelper(
             FakeFeatureFlags().apply {
-                set(Flags.NOTIFICATION_GROUP_CORNER, notificationGroupCorner)
+                set(Flags.USE_ROUNDNESS_SOURCETYPES, notificationGroupCorner)
             }
         )
 
