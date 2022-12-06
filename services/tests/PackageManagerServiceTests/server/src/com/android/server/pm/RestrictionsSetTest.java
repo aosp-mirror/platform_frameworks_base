@@ -32,6 +32,7 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -138,6 +139,7 @@ public class RestrictionsSetTest {
     }
 
     @Test
+    @Ignore("b/268334580")
     public void testGetEnforcingUsers_hasEnforcingUser() {
         mRestrictionsSet.updateRestrictions(originatingUserId,
                 newRestrictions(UserManager.ENSURE_VERIFY_APPS));
@@ -154,6 +156,7 @@ public class RestrictionsSetTest {
     }
 
     @Test
+    @Ignore("b/268334580")
     public void testGetEnforcingUsers_hasMultipleEnforcingUsers() {
         int originatingUserId2 = 10;
         mRestrictionsSet.updateRestrictions(originatingUserId,
