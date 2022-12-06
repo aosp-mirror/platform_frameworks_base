@@ -21,6 +21,7 @@ import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChang
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.admin.PasswordMetrics;
 import android.content.Context;
 import android.content.pm.UserInfo;
@@ -93,6 +94,9 @@ import java.util.Set;
  *                     while the LSKF is nonempty.
  *     SP_E0_NAME, SP_P1_NAME: Information needed to create and use escrow token-based protectors.
  *                             Deleted when escrow token support is disabled for the user.
+ *     VENDOR_AUTH_SECRET_NAME: A copy of the secret passed using the IAuthSecret interface,
+ *                              encrypted using a secret derived from the SP using
+ *                              PERSONALIZATION_AUTHSECRET_ENCRYPTION_KEY.
  *
  *     For each protector, stored under the corresponding protector ID:
  *       SP_BLOB_NAME: The encrypted SP secret (the SP itself or the P0 value).  Always exists.
@@ -120,6 +124,7 @@ class SyntheticPasswordManager {
     private static final String PASSWORD_DATA_NAME = "pwd";
     private static final String WEAVER_SLOT_NAME = "weaver";
     private static final String PASSWORD_METRICS_NAME = "metrics";
+    private static final String VENDOR_AUTH_SECRET_NAME = "vendor_auth_secret";
 
     // used for files associated with the SP itself, not with a particular protector
     public static final long NULL_PROTECTOR_ID = 0L;
@@ -158,6 +163,8 @@ class SyntheticPasswordManager {
     private static final byte[] PERSONALIZATION_SP_GK_AUTH = "sp-gk-authentication".getBytes();
     private static final byte[] PERSONALIZATION_FBE_KEY = "fbe-key".getBytes();
     private static final byte[] PERSONALIZATION_AUTHSECRET_KEY = "authsecret-hal".getBytes();
+    private static final byte[] PERSONALIZATION_AUTHSECRET_ENCRYPTION_KEY =
+            "vendor-authsecret-encryption-key".getBytes();
     private static final byte[] PERSONALIZATION_SP_SPLIT = "sp-split".getBytes();
     private static final byte[] PERSONALIZATION_PASSWORD_HASH = "pw-hash".getBytes();
     private static final byte[] PERSONALIZATION_E0 = "e0-encryption".getBytes();
@@ -247,6 +254,10 @@ class SyntheticPasswordManager {
         /** Derives key used to encrypt password metrics */
         public byte[] deriveMetricsKey() {
             return deriveSubkey(PERSONALIZATION_PASSWORD_METRICS);
+        }
+
+        public byte[] deriveVendorAuthSecretEncryptionKey() {
+            return deriveSubkey(PERSONALIZATION_AUTHSECRET_ENCRYPTION_KEY);
         }
 
         /**
@@ -1736,5 +1747,26 @@ class SyntheticPasswordManager {
         } finally {
             mListeners.finishBroadcast();
         }
+    }
+
+    public void writeVendorAuthSecret(
+            @NonNull final byte[] vendorAuthSecret,
+            @NonNull final SyntheticPassword sp,
+            @UserIdInt final int userId) {
+        final byte[] encrypted =
+                SyntheticPasswordCrypto.encrypt(
+                        sp.deriveVendorAuthSecretEncryptionKey(), new byte[0], vendorAuthSecret);
+        saveState(VENDOR_AUTH_SECRET_NAME, encrypted, NULL_PROTECTOR_ID, userId);
+        syncState(userId);
+    }
+
+    public @Nullable byte[] readVendorAuthSecret(
+            @NonNull final SyntheticPassword sp, @UserIdInt final int userId) {
+        final byte[] encrypted = loadState(VENDOR_AUTH_SECRET_NAME, NULL_PROTECTOR_ID, userId);
+        if (encrypted == null) {
+            return null;
+        }
+        return SyntheticPasswordCrypto.decrypt(
+                sp.deriveVendorAuthSecretEncryptionKey(), new byte[0], encrypted);
     }
 }

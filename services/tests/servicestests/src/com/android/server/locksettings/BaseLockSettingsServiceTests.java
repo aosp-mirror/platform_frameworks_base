@@ -49,8 +49,8 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
-import android.provider.Settings;
 import android.provider.DeviceConfig;
+import android.provider.Settings;
 import android.security.KeyStore;
 
 import androidx.test.InstrumentationRegistry;
@@ -83,16 +83,15 @@ public abstract class BaseLockSettingsServiceTests {
     protected static final int MANAGED_PROFILE_USER_ID = 12;
     protected static final int TURNED_OFF_PROFILE_USER_ID = 17;
     protected static final int SECONDARY_USER_ID = 20;
+    protected static final int TERTIARY_USER_ID = 21;
 
-    private static final UserInfo PRIMARY_USER_INFO = new UserInfo(PRIMARY_USER_ID, null, null,
-            UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY
-                    | UserInfo.FLAG_MAIN);
-    private static final UserInfo SECONDARY_USER_INFO = new UserInfo(SECONDARY_USER_ID, null, null,
-            UserInfo.FLAG_INITIALIZED);
+    protected UserInfo mPrimaryUserInfo;
+    protected UserInfo mSecondaryUserInfo;
+    protected UserInfo mTertiaryUserInfo;
 
     private ArrayList<UserInfo> mPrimaryUserProfiles = new ArrayList<>();
 
-    LockSettingsService mService;
+    LockSettingsServiceTestable mService;
     LockSettingsInternal mLocalService;
 
     MockLockSettingsContext mContext;
@@ -117,6 +116,7 @@ public abstract class BaseLockSettingsServiceTests {
     FingerprintManager mFingerprintManager;
     FaceManager mFaceManager;
     PackageManager mPackageManager;
+    LockSettingsServiceTestable.MockInjector mInjector;
     @Rule
     public FakeSettingsProviderRule mSettingsRule = FakeSettingsProvider.rule();
 
@@ -162,22 +162,61 @@ public abstract class BaseLockSettingsServiceTests {
         mSpManager = new MockSyntheticPasswordManager(mContext, mStorage, mGateKeeperService,
                 mUserManager, mPasswordSlotManager);
         mAuthSecretService = mock(IAuthSecret.class);
-        mService = new LockSettingsServiceTestable(mContext, mStorage,
-                mGateKeeperService, mKeyStore, setUpStorageManagerMock(), mActivityManager,
-                mSpManager, mAuthSecretService, mGsiService, mRecoverableKeyStoreManager,
-                mUserManagerInternal, mDeviceStateCache);
+        mInjector =
+                new LockSettingsServiceTestable.MockInjector(
+                        mContext,
+                        mStorage,
+                        mKeyStore,
+                        mActivityManager,
+                        setUpStorageManagerMock(),
+                        mSpManager,
+                        mGsiService,
+                        mRecoverableKeyStoreManager,
+                        mUserManagerInternal,
+                        mDeviceStateCache);
+        mService =
+                new LockSettingsServiceTestable(mInjector, mGateKeeperService, mAuthSecretService);
         mService.mHasSecureLockScreen = true;
-        when(mUserManager.getUserInfo(eq(PRIMARY_USER_ID))).thenReturn(PRIMARY_USER_INFO);
-        mPrimaryUserProfiles.add(PRIMARY_USER_INFO);
+        mPrimaryUserInfo =
+                new UserInfo(
+                        PRIMARY_USER_ID,
+                        null,
+                        null,
+                        UserInfo.FLAG_INITIALIZED
+                                | UserInfo.FLAG_ADMIN
+                                | UserInfo.FLAG_PRIMARY
+                                | UserInfo.FLAG_MAIN
+                                | UserInfo.FLAG_FULL);
+        mSecondaryUserInfo =
+                new UserInfo(
+                        SECONDARY_USER_ID,
+                        null,
+                        null,
+                        UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_FULL);
+        mTertiaryUserInfo =
+                new UserInfo(
+                        TERTIARY_USER_ID,
+                        null,
+                        null,
+                        UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_FULL);
+
+        when(mUserManager.getUserInfo(eq(PRIMARY_USER_ID))).thenReturn(mPrimaryUserInfo);
+        when(mUserManagerInternal.getUserInfo(eq(PRIMARY_USER_ID))).thenReturn(mPrimaryUserInfo);
+        mPrimaryUserProfiles.add(mPrimaryUserInfo);
         installChildProfile(MANAGED_PROFILE_USER_ID);
         installAndTurnOffChildProfile(TURNED_OFF_PROFILE_USER_ID);
         for (UserInfo profile : mPrimaryUserProfiles) {
             when(mUserManager.getProfiles(eq(profile.id))).thenReturn(mPrimaryUserProfiles);
         }
-        when(mUserManager.getUserInfo(eq(SECONDARY_USER_ID))).thenReturn(SECONDARY_USER_INFO);
+        when(mUserManager.getUserInfo(eq(SECONDARY_USER_ID))).thenReturn(mSecondaryUserInfo);
+        when(mUserManagerInternal.getUserInfo(eq(SECONDARY_USER_ID)))
+                .thenReturn(mSecondaryUserInfo);
+        when(mUserManager.getUserInfo(eq(TERTIARY_USER_ID))).thenReturn(mTertiaryUserInfo);
+        when(mUserManagerInternal.getUserInfo(eq(TERTIARY_USER_ID))).thenReturn(mTertiaryUserInfo);
 
         final ArrayList<UserInfo> allUsers = new ArrayList<>(mPrimaryUserProfiles);
-        allUsers.add(SECONDARY_USER_INFO);
+        allUsers.add(mSecondaryUserInfo);
+        allUsers.add(mTertiaryUserInfo);
         when(mUserManager.getUsers()).thenReturn(allUsers);
 
         when(mActivityManager.unlockUser2(anyInt(), any())).thenAnswer(
@@ -227,9 +266,10 @@ public abstract class BaseLockSettingsServiceTests {
         userInfo.profileGroupId = PRIMARY_USER_ID;
         mPrimaryUserProfiles.add(userInfo);
         when(mUserManager.getUserInfo(eq(profileId))).thenReturn(userInfo);
-        when(mUserManager.getProfileParent(eq(profileId))).thenReturn(PRIMARY_USER_INFO);
+        when(mUserManager.getProfileParent(eq(profileId))).thenReturn(mPrimaryUserInfo);
         when(mUserManager.isUserRunning(eq(profileId))).thenReturn(true);
         when(mUserManager.isUserUnlocked(eq(profileId))).thenReturn(true);
+        when(mUserManagerInternal.getUserInfo(eq(profileId))).thenReturn(userInfo);
         // TODO(b/258213147): Remove
         when(mUserManagerInternal.isUserManaged(eq(profileId))).thenReturn(true);
         when(mDeviceStateCache.isUserOrganizationManaged(eq(profileId)))

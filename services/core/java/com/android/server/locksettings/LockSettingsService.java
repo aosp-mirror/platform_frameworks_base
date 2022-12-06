@@ -29,6 +29,7 @@ import static android.app.admin.DevicePolicyResources.Strings.Core.PROFILE_ENCRY
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.UserHandle.USER_ALL;
+import static android.os.UserHandle.USER_SYSTEM;
 import static android.provider.DeviceConfig.NAMESPACE_AUTO_PIN_CONFIRMATION;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
@@ -70,6 +71,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.authsecret.IAuthSecret;
@@ -218,6 +220,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final String PROFILE_KEY_NAME_ENCRYPT = "profile_key_name_encrypt_";
     private static final String PROFILE_KEY_NAME_DECRYPT = "profile_key_name_decrypt_";
 
+    private static final int HEADLESS_VENDOR_AUTH_SECRET_LENGTH = 32;
+
     // Order of holding lock: mSeparateChallengeLock -> mSpManager -> this
     // Do not call into ActivityManager while holding mSpManager lock.
     private final Object mSeparateChallengeLock = new Object();
@@ -265,6 +269,13 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final SparseArray<PasswordMetrics> mUserPasswordMetrics = new SparseArray<>();
     @VisibleForTesting
     protected boolean mHasSecureLockScreen;
+
+    @VisibleForTesting
+    protected final Object mHeadlessAuthSecretLock = new Object();
+
+    @VisibleForTesting
+    @GuardedBy("mHeadlessAuthSecretLock")
+    protected byte[] mAuthSecret;
 
     protected IGateKeeperService mGateKeeperService;
     protected IAuthSecret mAuthSecretService;
@@ -561,6 +572,15 @@ public class LockSettingsService extends ILockSettings.Stub {
         public @NonNull ManagedProfilePasswordCache getManagedProfilePasswordCache(
                 java.security.KeyStore ks) {
             return new ManagedProfilePasswordCache(ks, getUserManager());
+        }
+
+        public boolean isHeadlessSystemUserMode() {
+            return UserManager.isHeadlessSystemUserMode();
+        }
+
+        public boolean isMainUserPermanentAdmin() {
+            return Resources.getSystem()
+                    .getBoolean(com.android.internal.R.bool.config_isMainUserPermanentAdmin);
         }
     }
 
@@ -1679,7 +1699,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 throw new IllegalStateException("password change failed");
             }
 
-            onSyntheticPasswordKnown(userId, sp);
+            onSyntheticPasswordUnlocked(userId, sp);
             setLockCredentialWithSpLocked(credential, sp, userId);
             sendCredentialsOnChangeIfRequired(credential, userId, isLockTiedToParent);
             return true;
@@ -1991,7 +2011,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 Slogf.wtf(TAG, "Failed to unwrap synthetic password for unsecured user %d", userId);
                 return;
             }
-            onSyntheticPasswordKnown(userId, result.syntheticPassword);
+            onSyntheticPasswordUnlocked(userId, result.syntheticPassword);
             unlockUserKey(userId, result.syntheticPassword);
         }
     }
@@ -2584,43 +2604,112 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private void onSyntheticPasswordKnown(@UserIdInt int userId, SyntheticPassword sp) {
+    private void onSyntheticPasswordCreated(@UserIdInt int userId, SyntheticPassword sp) {
+        onSyntheticPasswordKnown(userId, sp, true);
+    }
+
+    private void onSyntheticPasswordUnlocked(@UserIdInt int userId, SyntheticPassword sp) {
+        onSyntheticPasswordKnown(userId, sp, false);
+    }
+
+    private void onSyntheticPasswordKnown(
+            @UserIdInt int userId, SyntheticPassword sp, boolean justCreated) {
         if (mInjector.isGsiRunning()) {
             Slog.w(TAG, "Running in GSI; skipping calls to AuthSecret and RebootEscrow");
             return;
         }
 
-        mRebootEscrowManager.callToRebootEscrowIfNeeded(userId, sp.getVersion(),
-                sp.getSyntheticPassword());
-
-        callToAuthSecretIfNeeded(userId, sp);
+        mRebootEscrowManager.callToRebootEscrowIfNeeded(
+                userId, sp.getVersion(), sp.getSyntheticPassword());
+        callToAuthSecretIfNeeded(userId, sp, justCreated);
     }
 
-    private void callToAuthSecretIfNeeded(@UserIdInt int userId, SyntheticPassword sp) {
-        // If the given user is the primary user, pass the auth secret to the HAL.  Only the system
-        // user can be primary.  Check for the system user ID before calling getUserInfo(), as other
-        // users may still be under construction.
+    /**
+     * Handles generation, storage, and sending of the vendor auth secret. Here we try to retrieve
+     * the auth secret to send it to the auth secret HAL, generate a fresh secret if need be, store
+     * it encrypted on disk so that the given user can unlock it in future, and stash it in memory
+     * so that when future users are created they can also unlock it.
+     *
+     * <p>Called whenever the SP of a user is available, except in GSI.
+     */
+    private void callToAuthSecretIfNeeded(
+            @UserIdInt int userId, SyntheticPassword sp, boolean justCreated) {
         if (mAuthSecretService == null) {
+            // If there's no IAuthSecret service, we don't need to maintain a auth secret
             return;
         }
-        if (userId == UserHandle.USER_SYSTEM &&
-                mUserManager.getUserInfo(userId).isPrimary()) {
-            final byte[] secret = sp.deriveVendorAuthSecret();
-            try {
-                mAuthSecretService.setPrimaryUserCredential(secret);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to pass primary user secret to AuthSecret HAL", e);
+        // User may be partially created, so use the internal user manager interface
+        final UserManagerInternal userManagerInternal = mInjector.getUserManagerInternal();
+        final UserInfo userInfo = userManagerInternal.getUserInfo(userId);
+        if (userInfo == null) {
+            // User may be partially deleted, skip this.
+            return;
+        }
+        final byte[] authSecret;
+        if (!mInjector.isHeadlessSystemUserMode()) {
+            // On non-headless systems, the auth secret is derived from user 0's
+            // SP, and only user 0 passes it to the HAL.
+            if (userId != USER_SYSTEM) {
+                return;
             }
+            authSecret = sp.deriveVendorAuthSecret();
+        } else if (!mInjector.isMainUserPermanentAdmin() || !userInfo.isFull()) {
+            // Only full users can receive or pass on the auth secret.
+            // If there is no main permanent admin user, we don't try to create or send
+            // an auth secret, since there may sometimes be no full users.
+            return;
+        } else if (justCreated) {
+            if (userInfo.isMain()) {
+                // The first user is just being created, so we create a new auth secret
+                // at the same time.
+                Slog.i(TAG, "Generating new vendor auth secret and storing for user: " + userId);
+                authSecret = SecureRandomUtils.randomBytes(HEADLESS_VENDOR_AUTH_SECRET_LENGTH);
+                // Store it in memory, for when new users are created.
+                synchronized (mHeadlessAuthSecretLock) {
+                    mAuthSecret = authSecret;
+                }
+            } else {
+                // A new user is being created. Another user should already have logged in at
+                // this point, and therefore the auth secret should be stored in memory.
+                synchronized (mHeadlessAuthSecretLock) {
+                    authSecret = mAuthSecret;
+                }
+                if (authSecret == null) {
+                    Slog.e(TAG, "Creating non-main user " + userId
+                            + " but vendor auth secret is not in memory");
+                    return;
+                }
+            }
+            // Store the auth secret encrypted using the user's SP (which was just created).
+            mSpManager.writeVendorAuthSecret(authSecret, sp, userId);
+        } else {
+            // The user already exists, so the auth secret should be stored encrypted
+            // with that user's SP.
+            authSecret = mSpManager.readVendorAuthSecret(sp, userId);
+            if (authSecret == null) {
+                Slog.e(TAG, "Unable to read vendor auth secret for user: " + userId);
+                return;
+            }
+            // Store it in memory, for when new users are created.
+            synchronized (mHeadlessAuthSecretLock) {
+                mAuthSecret = authSecret;
+            }
+        }
+        Slog.i(TAG, "Sending vendor auth secret to IAuthSecret HAL as user: " + userId);
+        try {
+            mAuthSecretService.setPrimaryUserCredential(authSecret);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to send vendor auth secret to IAuthSecret HAL", e);
         }
     }
 
     /**
      * Creates the synthetic password (SP) for the given user, protects it with an empty LSKF, and
      * protects the user's CE key with a key derived from the SP.
-     * <p>
-     * This is called just once in the lifetime of the user: at user creation time (possibly delayed
-     * until the time when Weaver is guaranteed to be available), or when upgrading from Android 13
-     * or earlier where users with no LSKF didn't necessarily have an SP.
+     *
+     * <p>This is called just once in the lifetime of the user: at user creation time (possibly
+     * delayed until the time when Weaver is guaranteed to be available), or when upgrading from
+     * Android 13 or earlier where users with no LSKF didn't necessarily have an SP.
      */
     @VisibleForTesting
     SyntheticPassword initializeSyntheticPassword(int userId) {
@@ -2635,7 +2724,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                     LockscreenCredential.createNone(), sp, userId);
             setCurrentLskfBasedProtectorId(protectorId, userId);
             setUserKeyProtection(userId, sp.deriveFileBasedEncryptionKey());
-            onSyntheticPasswordKnown(userId, sp);
+            onSyntheticPasswordCreated(userId, sp);
             return sp;
         }
     }
@@ -2702,7 +2791,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         mStrongAuth.reportSuccessfulStrongAuthUnlock(userId);
 
-        onSyntheticPasswordKnown(userId, sp);
+        onSyntheticPasswordUnlocked(userId, sp);
     }
 
     private void setDeviceUnlockedForUser(int userId) {
@@ -2990,7 +3079,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                     + "verification.");
             return false;
         }
-        onSyntheticPasswordKnown(userId, result.syntheticPassword);
+        onSyntheticPasswordUnlocked(userId, result.syntheticPassword);
         setLockCredentialWithSpLocked(credential, result.syntheticPassword, userId);
         return true;
     }
