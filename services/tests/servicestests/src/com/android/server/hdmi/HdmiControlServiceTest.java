@@ -1036,6 +1036,7 @@ public class HdmiControlServiceTest {
 
     @Test
     public void setSoundbarMode_enabled_addAudioSystemLocalDevice() {
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
         // Initialize the local devices excluding the audio system.
         mHdmiControlServiceSpy.clearCecLocalDevices();
         mLocalDevices.remove(mAudioSystemDeviceSpy);
@@ -1053,6 +1054,7 @@ public class HdmiControlServiceTest {
 
     @Test
     public void setSoundbarMode_disabled_removeAudioSystemLocalDevice() {
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
         // Initialize the local devices excluding the audio system.
         mHdmiControlServiceSpy.clearCecLocalDevices();
         mLocalDevices.remove(mAudioSystemDeviceSpy);
@@ -1072,6 +1074,10 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
                 HdmiControlManager.SOUNDBAR_MODE_DISABLED);
+        mTestLooper.dispatchAll();
+
+        // Wait for ArcTerminationActionFromAvr timeout for the logical address allocation to start.
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
         mTestLooper.dispatchAll();
         assertThat(mHdmiControlServiceSpy.audioSystem()).isNull();
     }
