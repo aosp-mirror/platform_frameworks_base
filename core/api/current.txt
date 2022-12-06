@@ -4149,6 +4149,8 @@ package android.app {
     method @Deprecated public android.app.FragmentManager getFragmentManager();
     method public android.content.Intent getIntent();
     method @Nullable public Object getLastNonConfigurationInstance();
+    method @Nullable public String getLaunchedFromPackage();
+    method public int getLaunchedFromUid();
     method @NonNull public android.view.LayoutInflater getLayoutInflater();
     method @Deprecated public android.app.LoaderManager getLoaderManager();
     method @NonNull public String getLocalClassName();
@@ -4618,6 +4620,7 @@ package android.app {
     method public android.app.ActivityOptions setLaunchDisplayId(int);
     method public android.app.ActivityOptions setLockTaskEnabled(boolean);
     method public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
+    method @NonNull public android.app.ActivityOptions setShareIdentityEnabled(boolean);
     method @NonNull public android.app.ActivityOptions setSplashScreenStyle(int);
     method public android.os.Bundle toBundle();
     method public void update(android.app.ActivityOptions);
