@@ -47,6 +47,7 @@ import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopModeController;
+import com.android.wm.shell.desktopmode.DesktopTasksController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -76,6 +77,8 @@ public class CaptionWindowDecorViewModelTests extends ShellTestCase {
 
     @Mock private DesktopModeController mDesktopModeController;
 
+    @Mock private DesktopTasksController mDesktopTasksController;
+
     @Mock private InputMonitor mInputMonitor;
 
     @Mock private InputChannel mInputChannel;
@@ -103,6 +106,7 @@ public class CaptionWindowDecorViewModelTests extends ShellTestCase {
                 mDisplayController,
                 mSyncQueue,
                 Optional.of(mDesktopModeController),
+                Optional.of(mDesktopTasksController),
                 mCaptionWindowDecorFactory,
                 new MockObjectSupplier<>(mMockInputManagers, () -> mock(InputManager.class)));
         mCaptionWindowDecorViewModel.setEventReceiverFactory(mEventReceiverFactory);
