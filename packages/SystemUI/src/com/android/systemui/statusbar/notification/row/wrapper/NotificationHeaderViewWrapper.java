@@ -343,4 +343,14 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
             }
         }
     }
+
+    /**
+     * Interface that handle the Roundness changes
+     */
+    public interface RoundnessChangedListener {
+        /**
+         * This method will be called when this class call applyRoundnessAndInvalidate()
+         */
+        void applyRoundnessAndInvalidate();
+    }
 }
