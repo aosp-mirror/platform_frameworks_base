@@ -37,10 +37,17 @@ public final class AudioMixerAttributes implements Parcelable {
      */
     public static final int MIXER_BEHAVIOR_DEFAULT = 0;
 
+    /**
+     * Constant indicating the audio mixer behavior is bit-perfect, which indicates there will
+     * not be mixing happen, the audio data will be sent as is down to the HAL.
+     */
+    public static final int MIXER_BEHAVIOR_BIT_PERFECT = 1;
+
     /** @hide */
     @IntDef(flag = false, prefix = "MIXER_BEHAVIOR_", value = {
-            MIXER_BEHAVIOR_DEFAULT }
-    )
+            MIXER_BEHAVIOR_DEFAULT,
+            MIXER_BEHAVIOR_BIT_PERFECT
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface MixerBehavior {}
 
@@ -103,12 +110,14 @@ public final class AudioMixerAttributes implements Parcelable {
 
         /**
          * Sets the mixer behavior for the audio mixer
-         * @param mixerBehavior must be {@link #MIXER_BEHAVIOR_DEFAULT}.
+         * @param mixerBehavior must be {@link #MIXER_BEHAVIOR_DEFAULT} or
+         *                      {@link #MIXER_BEHAVIOR_BIT_PERFECT}.
          * @return the same Builder instance.
          */
         public @NonNull Builder setMixerBehavior(@MixerBehavior int mixerBehavior) {
             switch (mixerBehavior) {
                 case MIXER_BEHAVIOR_DEFAULT:
+                case MIXER_BEHAVIOR_BIT_PERFECT:
                     mMixerBehavior = mixerBehavior;
                     break;
                 default:
@@ -137,6 +146,8 @@ public final class AudioMixerAttributes implements Parcelable {
         switch (mixerBehavior) {
             case MIXER_BEHAVIOR_DEFAULT:
                 return "default";
+            case MIXER_BEHAVIOR_BIT_PERFECT:
+                return "bit-perfect";
             default:
                 return "unknown";
         }
