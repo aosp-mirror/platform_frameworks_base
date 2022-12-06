@@ -192,6 +192,18 @@ public final class PlaybackActivityMonitor
     }
 
     //=================================================================
+    // Player to ignore (only handling single player, designed for ignoring
+    // in the logs one specific player such as the touch sounds player)
+    @GuardedBy("mPlayerLock")
+    private ArrayList<Integer> mDoNotLogPiidList = new ArrayList<>();
+
+    /*package*/ void ignorePlayerIId(int doNotLogPiid) {
+        synchronized (mPlayerLock) {
+            mDoNotLogPiidList.add(doNotLogPiid);
+        }
+    }
+
+    //=================================================================
     // Track players and their states
     // methods playerAttributes, playerEvent, releasePlayer are all oneway calls
     //  into AudioService. They trigger synchronous dispatchPlaybackChange() which updates
@@ -315,14 +327,18 @@ public final class PlaybackActivityMonitor
             Log.v(TAG, TextUtils.formatSimple("playerEvent(piid=%d, event=%s, eventValue=%d)",
                     piid, AudioPlaybackConfiguration.playerStateToString(event), eventValue));
         }
-
-        final boolean change;
+        boolean change;
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
             if (apc == null) {
                 return;
             }
 
+            final boolean doNotLog = mDoNotLogPiidList.contains(piid);
+            if (doNotLog && event != AudioPlaybackConfiguration.PLAYER_STATE_RELEASED) {
+                // do not log nor dispatch events for "ignored" players other than the release
+                return;
+            }
             sEventLogger.enqueue(new PlayerEvent(piid, event, eventValue));
 
             if (event == AudioPlaybackConfiguration.PLAYER_UPDATE_PORT_ID) {
@@ -339,7 +355,8 @@ public final class PlaybackActivityMonitor
                     }
                 }
             }
-            if (apc.getPlayerType() == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {
+            if (apc.getPlayerType() == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL
+                    && event != AudioPlaybackConfiguration.PLAYER_STATE_RELEASED) {
                 // FIXME SoundPool not ready for state reporting
                 return;
             }
@@ -351,9 +368,15 @@ public final class PlaybackActivityMonitor
                 Log.e(TAG, "Error handling event " + event);
                 change = false;
             }
-            if (change && event == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
-                mDuckingManager.checkDuck(apc);
-                mFadingManager.checkFade(apc);
+            if (change) {
+                if (event == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
+                    mDuckingManager.checkDuck(apc);
+                    mFadingManager.checkFade(apc);
+                }
+                if (doNotLog) {
+                    // do not dispatch events for "ignored" players
+                    change = false;
+                }
             }
         }
         if (change) {
@@ -436,6 +459,10 @@ public final class PlaybackActivityMonitor
                 mEventHandler.sendMessage(
                         mEventHandler.obtainMessage(MSG_L_CLEAR_PORTS_FOR_PIID, piid, /*arg2=*/0));
 
+                if (change && mDoNotLogPiidList.contains(piid)) {
+                    // do not dispatch a change for a "do not log" player
+                    change = false;
+                }
             }
         }
         if (change) {
@@ -581,6 +608,9 @@ public final class PlaybackActivityMonitor
             for (Integer piidInt : piidIntList) {
                 final AudioPlaybackConfiguration apc = mPlayers.get(piidInt);
                 if (apc != null) {
+                    if (mDoNotLogPiidList.contains(apc.getPlayerInterfaceId())) {
+                        pw.print("(not logged)");
+                    }
                     apc.dump(pw);
                 }
             }
