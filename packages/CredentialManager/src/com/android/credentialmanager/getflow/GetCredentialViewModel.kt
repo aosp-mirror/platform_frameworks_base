@@ -58,10 +58,7 @@ class GetCredentialViewModel(
     return dialogResult
   }
 
-  fun onEntrySelected(
-    entry: EntryInfo,
-    launcher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
-  ) {
+  fun onEntrySelected(entry: EntryInfo) {
     Log.d("Account Selector", "credential selected:" +
             " {provider=${entry.providerId}, key=${entry.entryKey}, subkey=${entry.entrySubkey}}")
     if (entry.pendingIntent != null) {
@@ -69,14 +66,24 @@ class GetCredentialViewModel(
         selectedEntry = entry,
         hidden = true,
       )
-      val intentSenderRequest = IntentSenderRequest.Builder(entry.pendingIntent)
-        .setFillInIntent(entry.fillInIntent).build()
-      launcher.launch(intentSenderRequest)
     } else {
       CredentialManagerRepo.getInstance().onOptionSelected(
         entry.providerId, entry.entryKey, entry.entrySubkey,
       )
       dialogResult.value = DialogResult(ResultState.COMPLETE)
+    }
+  }
+
+  fun launchProviderUi(
+    launcher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
+  ) {
+    val entry = uiState.selectedEntry
+    if (entry != null && entry.pendingIntent != null) {
+      val intentSenderRequest = IntentSenderRequest.Builder(entry.pendingIntent)
+        .setFillInIntent(entry.fillInIntent).build()
+      launcher.launch(intentSenderRequest)
+    } else {
+      Log.w("Account Selector", "No provider UI to launch")
     }
   }
 
