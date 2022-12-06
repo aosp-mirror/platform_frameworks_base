@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Binder;
 import android.os.Process;
 
@@ -30,6 +31,7 @@ import com.android.server.LocalServices;
  * int, ActivityInterceptorCallback)}.
  * @hide
  */
+@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public class ActivityInterceptorCallbackRegistry {
 
     private static final ActivityInterceptorCallbackRegistry sInstance =
