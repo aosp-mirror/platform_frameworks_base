@@ -396,6 +396,10 @@ public class NotificationChildrenContainer extends ViewGroup
                             getContext(),
                             mNotificationHeader,
                             mContainingNotification);
+            mNotificationHeaderWrapper.useRoundnessSourceTypes(mUseRoundnessSourceTypes);
+            if (mUseRoundnessSourceTypes) {
+                mNotificationHeaderWrapper.setOnRoundnessChangedListener(this::invalidate);
+            }
             addView(mNotificationHeader, 0);
             invalidate();
         } else {
@@ -433,6 +437,12 @@ public class NotificationChildrenContainer extends ViewGroup
                                 getContext(),
                                 mNotificationHeaderLowPriority,
                                 mContainingNotification);
+                mNotificationHeaderWrapperLowPriority.useRoundnessSourceTypes(
+                        mUseRoundnessSourceTypes
+                );
+                if (mUseRoundnessSourceTypes) {
+                    mNotificationHeaderWrapper.setOnRoundnessChangedListener(this::invalidate);
+                }
                 addView(mNotificationHeaderLowPriority, 0);
                 invalidate();
             } else {
