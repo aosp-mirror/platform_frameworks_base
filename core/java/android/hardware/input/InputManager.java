@@ -26,6 +26,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -66,6 +67,8 @@ import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.VerifiedInputEvent;
 import android.view.WindowManager.LayoutParams;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -883,6 +886,91 @@ public final class InputManager {
             TouchCalibration calibration) {
         try {
             mIm.setTouchCalibrationForInputDevice(inputDeviceDescriptor, surfaceRotation, calibration);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the keyboard layout descriptor for the specified input device, userId, imeInfo and
+     * imeSubtype.
+     *
+     * @param identifier Identifier for the input device
+     * @param userId user profile ID
+     * @param imeInfo contains IME information like imeId, etc.
+     * @param imeSubtype contains IME subtype information like input languageTag, layoutType, etc.
+     * @return The keyboard layout descriptor, or null if no keyboard layout has been set.
+     *
+     * @hide
+     */
+    @Nullable
+    public String getKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
+            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
+            @NonNull InputMethodSubtype imeSubtype) {
+        try {
+            return mIm.getKeyboardLayoutForInputDevice(identifier, userId, imeInfo, imeSubtype);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the keyboard layout descriptor for the specified input device, userId, imeInfo and
+     * imeSubtype.
+     *
+     * <p>
+     * This method may have the side-effect of causing the input device in question to be
+     * reconfigured.
+     * </p>
+     *
+     * @param identifier The identifier for the input device.
+     * @param userId user profile ID
+     * @param imeInfo contains IME information like imeId, etc.
+     * @param imeSubtype contains IME subtype information like input languageTag, layoutType, etc.
+     * @param keyboardLayoutDescriptor The keyboard layout descriptor to use, must not be null.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
+    public void setKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
+            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
+            @NonNull InputMethodSubtype imeSubtype, @NonNull String keyboardLayoutDescriptor) {
+        if (identifier == null) {
+            throw new IllegalArgumentException("identifier must not be null");
+        }
+        if (keyboardLayoutDescriptor == null) {
+            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
+        }
+
+        try {
+            mIm.setKeyboardLayoutForInputDevice(identifier, userId, imeInfo, imeSubtype,
+                    keyboardLayoutDescriptor);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets all keyboard layout descriptors that are enabled for the specified input device, userId,
+     * imeInfo and imeSubtype.
+     *
+     * @param identifier The identifier for the input device.
+     * @param userId user profile ID
+     * @param imeInfo contains IME information like imeId, etc.
+     * @param imeSubtype contains IME subtype information like input languageTag, layoutType, etc.
+     * @return The keyboard layout descriptors.
+     *
+     * @hide
+     */
+    public String[] getKeyboardLayoutListForInputDevice(InputDeviceIdentifier identifier,
+            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
+            @NonNull InputMethodSubtype imeSubtype) {
+        if (identifier == null) {
+            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
+        }
+
+        try {
+            return mIm.getKeyboardLayoutListForInputDevice(identifier, userId, imeInfo, imeSubtype);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

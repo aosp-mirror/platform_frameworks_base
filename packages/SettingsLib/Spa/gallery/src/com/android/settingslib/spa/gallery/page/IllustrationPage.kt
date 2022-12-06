@@ -26,9 +26,9 @@ import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
-import com.android.settingslib.spa.widget.Illustration
-import com.android.settingslib.spa.widget.IllustrationModel
-import com.android.settingslib.spa.widget.ResourceType
+import com.android.settingslib.spa.widget.illustration.Illustration
+import com.android.settingslib.spa.widget.illustration.IllustrationModel
+import com.android.settingslib.spa.widget.illustration.ResourceType
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 

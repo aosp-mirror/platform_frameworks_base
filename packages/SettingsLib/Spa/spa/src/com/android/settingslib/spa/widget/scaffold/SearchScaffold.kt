@@ -158,6 +158,7 @@ private fun SearchTopAppBar(
 private fun SearchBox(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
     val focusRequester = remember { FocusRequester() }
     val textStyle = MaterialTheme.typography.bodyLarge
+    val hideKeyboardAction = hideKeyboardAction()
     TextField(
         value = query,
         onValueChange = onQueryChange,
@@ -173,7 +174,7 @@ private fun SearchBox(query: TextFieldValue, onQueryChange: (TextFieldValue) -> 
             )
         },
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = hideKeyboardAction()),
+        keyboardActions = KeyboardActions(onSearch = { hideKeyboardAction() }),
         singleLine = true,
         colors = TextFieldDefaults.textFieldColors(
             containerColor = Color.Transparent,

@@ -59,8 +59,10 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
+import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProviderImpl;
 import com.android.systemui.statusbar.notification.collection.provider.VisibilityLocationProviderDelegator;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
@@ -119,6 +121,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private GroupExpansionManager mGroupExpansionManager;
     @Mock private SectionHeaderController mSilentHeaderController;
     @Mock private NotifPipeline mNotifPipeline;
+    @Mock private NotifPipelineFlags mNotifPipelineFlags;
     @Mock private NotifCollection mNotifCollection;
     @Mock private UiEventLogger mUiEventLogger;
     @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
@@ -170,12 +173,14 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mGroupExpansionManager,
                 mSilentHeaderController,
                 mNotifPipeline,
+                mNotifPipelineFlags,
                 mNotifCollection,
                 mLockscreenShadeTransitionController,
                 mShadeTransitionController,
                 mUiEventLogger,
                 mRemoteInputManager,
                 mVisibilityLocationProviderDelegator,
+                new SeenNotificationsProviderImpl(),
                 mShadeController,
                 mJankMonitor,
                 mStackLogger,
@@ -228,14 +233,16 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ true,
-                /* notifVisibleInShade= */ true);
+                /* notifVisibleInShade= */ true,
+                /* areSeenNotifsFiltered= */false);
 
         setupShowEmptyShadeViewState(false);
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ false,
-                /* notifVisibleInShade= */ true);
+                /* notifVisibleInShade= */ true,
+                /* areSeenNotifsFiltered= */false);
     }
 
     @Test
@@ -248,14 +255,16 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ true,
-                /* notifVisibleInShade= */ false);
+                /* notifVisibleInShade= */ false,
+                /* areSeenNotifsFiltered= */false);
 
         setupShowEmptyShadeViewState(false);
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ false,
-                /* notifVisibleInShade= */ false);
+                /* notifVisibleInShade= */ false,
+                /* areSeenNotifsFiltered= */false);
     }
 
     @Test
@@ -274,14 +283,16 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ true,
-                /* notifVisibleInShade= */ false);
+                /* notifVisibleInShade= */ false,
+                /* areSeenNotifsFiltered= */false);
 
         mController.setQsFullScreen(true);
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ true,
-                /* notifVisibleInShade= */ false);
+                /* notifVisibleInShade= */ false,
+                /* areSeenNotifsFiltered= */false);
     }
 
     @Test

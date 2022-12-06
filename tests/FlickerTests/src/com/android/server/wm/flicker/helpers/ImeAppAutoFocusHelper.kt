@@ -26,6 +26,7 @@ import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.Condition
 import com.android.server.wm.traces.common.DeviceStateDump
+import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import java.util.regex.Pattern
@@ -34,7 +35,7 @@ class ImeAppAutoFocusHelper
 @JvmOverloads
 constructor(
     instr: Instrumentation,
-    private val rotation: Int,
+    private val rotation: PlatformConsts.Rotation,
     private val imePackageName: String = IME_PACKAGE,
     launcherName: String = ActivityOptions.Ime.AutoFocusActivity.LABEL,
     component: ComponentNameMatcher =
@@ -63,7 +64,7 @@ constructor(
             } else {
                 getPackage()
             }
-        launcherStrategy.launch(appName, expectedPackage)
+        open(expectedPackage)
     }
 
     fun startDialogThemedActivity(wmHelper: WindowManagerStateHelper) {

@@ -135,7 +135,7 @@ constructor(
         WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
+                WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
                 Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS,
                 PixelFormat.TRANSLUCENT
             )
@@ -370,10 +370,14 @@ private fun WindowInsets.hasBigNavigationBar(): Boolean =
 private fun LottieAnimationView.addOverlayDynamicColor(context: Context) {
     fun update() {
         val c = context.getColor(R.color.biometric_dialog_accent)
+        val chevronFill = context.getColor(R.color.sfps_chevron_fill)
         for (key in listOf(".blue600", ".blue400")) {
             addValueCallback(KeyPath(key, "**"), LottieProperty.COLOR_FILTER) {
                 PorterDuffColorFilter(c, PorterDuff.Mode.SRC_ATOP)
             }
+        }
+        addValueCallback(KeyPath(".black", "**"), LottieProperty.COLOR_FILTER) {
+            PorterDuffColorFilter(chevronFill, PorterDuff.Mode.SRC_ATOP)
         }
     }
 

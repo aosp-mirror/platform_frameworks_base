@@ -310,6 +310,18 @@ public final class VirtualDeviceManager {
         }
 
         /**
+         * @return A new Context bound to this device. This is a convenience method equivalent to
+         * calling {@link Context#createDeviceContext(int)} with the device id of this device.
+         */
+        public @NonNull Context createContext() {
+            try {
+                return mContext.createDeviceContext(mVirtualDevice.getDeviceId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Returns this device's sensor with the given type and name, if any.
          *
          * @see VirtualDeviceParams.Builder#addVirtualSensorConfig
@@ -416,7 +428,7 @@ public final class VirtualDeviceManager {
          * @param densityDpi The density of the virtual display in dpi, must be greater than 0.
          * @param displayCategories The categories of the virtual display, indicating the type of
          * activities allowed to run on the display. Activities can declare their type using
-         * {@link android.content.pm.ActivityInfo#targetDisplayCategory}.
+         * {@link android.content.pm.ActivityInfo#requiredDisplayCategory}.
          * @param surface The surface to which the content of the virtual display should
          * be rendered, or null if there is none initially. The surface can also be set later using
          * {@link VirtualDisplay#setSurface(Surface)}.

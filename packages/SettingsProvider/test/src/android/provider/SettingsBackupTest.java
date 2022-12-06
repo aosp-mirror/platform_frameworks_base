@@ -659,7 +659,8 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.SCREEN_UNLOCK_SOUND_ENABLED,
                     Settings.Global.Wearable.BEDTIME_MODE,
                     Settings.Global.Wearable.BEDTIME_HARD_MODE,
-                    Settings.Global.Wearable.EARLY_UPDATES_STATUS);
+                    Settings.Global.Wearable.EARLY_UPDATES_STATUS,
+                    Settings.Global.Wearable.RSB_WAKE_ENABLED);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(
@@ -771,6 +772,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SLEEP_TIMEOUT,
                  Settings.Secure.SMS_DEFAULT_APPLICATION,
                  Settings.Secure.SPELL_CHECKER_ENABLED,  // Intentionally removed in Q
+                 Settings.Secure.STYLUS_BUTTONS_DISABLED,
                  Settings.Secure.TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.KNOWN_TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.TV_APP_USES_NON_SYSTEM_INPUTS,

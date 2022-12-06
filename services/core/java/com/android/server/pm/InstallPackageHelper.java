@@ -2259,20 +2259,26 @@ final class InstallPackageHelper {
                 incrementalStorages.add(storage);
             }
 
-            try {
-                if (!VerityUtils.hasFsverity(pkg.getBaseApkPath())) {
-                    VerityUtils.setUpFsverity(pkg.getBaseApkPath(), (byte[]) null);
-                }
-                for (String path : pkg.getSplitCodePaths()) {
-                    if (!VerityUtils.hasFsverity(path)) {
-                        VerityUtils.setUpFsverity(path, (byte[]) null);
-                    }
-                }
-            } catch (IOException e) {
-                // There's nothing we can do if the setup failed. Since fs-verity is
-                // optional, just ignore the error for now.
-                Slog.e(TAG, "Failed to fully enable fs-verity to " + packageName);
+            // Enabling fs-verity is a blocking operation. To reduce the impact to the install time,
+            // run in a background thread.
+            final ArrayList<String> apkPaths = new ArrayList<>();
+            apkPaths.add(pkg.getBaseApkPath());
+            if (pkg.getSplitCodePaths() != null) {
+                Collections.addAll(apkPaths, pkg.getSplitCodePaths());
             }
+            mInjector.getBackgroundHandler().post(() -> {
+                try {
+                    for (String path : apkPaths) {
+                        if (!VerityUtils.hasFsverity(path)) {
+                            VerityUtils.setUpFsverity(path, (byte[]) null);
+                        }
+                    }
+                } catch (IOException e) {
+                    // There's nothing we can do if the setup failed. Since fs-verity is
+                    // optional, just ignore the error for now.
+                    Slog.e(TAG, "Failed to fully enable fs-verity to " + packageName);
+                }
+            });
 
             // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
             mAppDataHelper.prepareAppDataPostCommitLIF(pkg, 0);
@@ -3923,13 +3929,20 @@ final class InstallPackageHelper {
                 && !pkgSetting.getPathString().equals(parsedPackage.getPath());
         final boolean newPkgVersionGreater = pkgAlreadyExists
                 && parsedPackage.getLongVersionCode() > pkgSetting.getVersionCode();
+        final boolean newSharedUserSetting = pkgAlreadyExists
+                && (initialScanRequest.mOldSharedUserSetting
+                != initialScanRequest.mSharedUserSetting);
         final boolean isSystemPkgBetter = scanSystemPartition && isSystemPkgUpdated
-                && newPkgChangedPaths && newPkgVersionGreater;
+                && newPkgChangedPaths && (newPkgVersionGreater || newSharedUserSetting);
         if (isSystemPkgBetter) {
             // The version of the application on /system is greater than the version on
             // /data. Switch back to the application on /system.
             // It's safe to assume the application on /system will correctly scan. If not,
             // there won't be a working copy of the application.
+            // Also, if the sharedUserSetting of the application on /system is different
+            // from the sharedUserSetting on /data, switch back to the application on /system.
+            // We should trust the sharedUserSetting on /system, even if the application
+            // version on /system is smaller than the version on /data.
             synchronized (mPm.mLock) {
                 // just remove the loaded entries from package lists
                 mPm.mPackages.remove(pkgSetting.getPackageName());

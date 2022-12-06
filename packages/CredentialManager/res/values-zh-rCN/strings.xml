@@ -31,6 +31,8 @@
     <skip />
     <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
     <skip />
+    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
+    <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"将“<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>”用于您的所有登录信息？"</string>
     <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
     <skip />

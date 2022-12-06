@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Ivoyisimeyili"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Inkinga yoxhumano noma ikhadi ye-MMI engalungile."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Isakhi asisekelwa."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Umsebenzi uvinjelwe ekudayeleni izinombolo ezingaguquki kuphela."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Ayikwazi ukushintsha izilungiselelo zokudluliselwa kwekholi kusuka efonini yakho ngenkathi uzula."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Isevisi ivaliwe."</string>

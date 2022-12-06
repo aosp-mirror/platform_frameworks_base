@@ -875,6 +875,8 @@ public class PipTouchHandler {
             }
 
             if (touchState.isDragging()) {
+                mPipBoundsState.setHasUserMovedPip(true);
+
                 // Move the pinned stack freely
                 final PointF lastDelta = touchState.getLastTouchDelta();
                 float lastX = mStartPosition.x + mDelta.x;

@@ -496,7 +496,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 && mPendingAuthenticated.userId == KeyguardUpdateMonitor.getCurrentUser();
     }
 
-    public int getMode() {
+    public @WakeAndUnlockMode int getMode() {
         return mMode;
     }
 

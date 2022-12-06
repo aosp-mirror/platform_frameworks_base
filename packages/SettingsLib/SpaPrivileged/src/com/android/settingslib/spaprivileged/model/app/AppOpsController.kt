@@ -16,7 +16,6 @@
 
 package com.android.settingslib.spaprivileged.model.app
 
-import android.app.AppOpsManager
 import android.app.AppOpsManager.MODE_ALLOWED
 import android.app.AppOpsManager.MODE_ERRORED
 import android.app.AppOpsManager.Mode
@@ -25,34 +24,41 @@ import android.content.pm.ApplicationInfo
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
+import com.android.settingslib.spaprivileged.framework.common.appOpsManager
+
+interface IAppOpsController {
+    val mode: LiveData<Int>
+    val isAllowed: LiveData<Boolean>
+        get() = mode.map { it == MODE_ALLOWED }
+
+    fun setAllowed(allowed: Boolean)
+
+    @Mode
+    fun getMode(): Int
+}
 
 class AppOpsController(
     context: Context,
     private val app: ApplicationInfo,
     private val op: Int,
-) {
-    private val appOpsManager = checkNotNull(context.getSystemService(AppOpsManager::class.java))
+) : IAppOpsController {
+    private val appOpsManager = context.appOpsManager
 
-    val mode: LiveData<Int>
+    override val mode: LiveData<Int>
         get() = _mode
-    val isAllowed: LiveData<Boolean>
-        get() = _mode.map { it == MODE_ALLOWED }
 
-    fun setAllowed(allowed: Boolean) {
+    override fun setAllowed(allowed: Boolean) {
         val mode = if (allowed) MODE_ALLOWED else MODE_ERRORED
         appOpsManager.setMode(op, app.uid, app.packageName, mode)
         _mode.postValue(mode)
     }
 
     @Mode
-    fun getMode(): Int = appOpsManager.checkOpNoThrow(op, app.uid, app.packageName)
+    override fun getMode(): Int = appOpsManager.checkOpNoThrow(op, app.uid, app.packageName)
 
     private val _mode = object : MutableLiveData<Int>() {
         override fun onActive() {
             postValue(getMode())
-        }
-
-        override fun onInactive() {
         }
     }
 }

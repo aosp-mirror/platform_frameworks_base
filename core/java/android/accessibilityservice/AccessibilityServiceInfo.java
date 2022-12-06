@@ -612,6 +612,12 @@ public class AccessibilityServiceInfo implements Parcelable {
     private boolean mIsAccessibilityTool = false;
 
     /**
+     * The bit mask of {@link android.view.InputDevice} sources that the accessibility
+     * service wants to listen to for generic {@link android.view.MotionEvent}s.
+     */
+    private int mMotionEventSources = 0;
+
+    /**
      * Creates a new instance.
      */
     public AccessibilityServiceInfo() {
@@ -785,6 +791,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         mNonInteractiveUiTimeout = other.mNonInteractiveUiTimeout;
         mInteractiveUiTimeout = other.mInteractiveUiTimeout;
         flags = other.flags;
+        mMotionEventSources = other.mMotionEventSources;
         // NOTE: Ensure that only properties that are safe to be modified by the service itself
         // are included here (regardless of hidden setters, etc.).
     }
@@ -953,6 +960,44 @@ public class AccessibilityServiceInfo implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setCapabilities(int capabilities) {
         mCapabilities = capabilities;
+    }
+
+    /**
+     * Returns the bit mask of {@link android.view.InputDevice} sources that the accessibility
+     * service wants to listen to for generic {@link android.view.MotionEvent}s.
+     */
+    public int getMotionEventSources() {
+        return mMotionEventSources;
+    }
+
+    /**
+     * Sets the bit mask of {@link android.view.InputDevice} sources that the accessibility
+     * service wants to listen to for generic {@link android.view.MotionEvent}s.
+     *
+     * <p>
+     * Note: including an {@link android.view.InputDevice} source that does not send
+     * {@link android.view.MotionEvent}s is effectively a no-op for that source, since you will
+     * not receive any events from that source.
+     * </p>
+     * <p>
+     * Allowed sources include:
+     * <li>{@link android.view.InputDevice#SOURCE_MOUSE}</li>
+     * <li>{@link android.view.InputDevice#SOURCE_STYLUS}</li>
+     * <li>{@link android.view.InputDevice#SOURCE_BLUETOOTH_STYLUS}</li>
+     * <li>{@link android.view.InputDevice#SOURCE_TRACKBALL}</li>
+     * <li>{@link android.view.InputDevice#SOURCE_MOUSE_RELATIVE}</li>
+     * <li>{@link android.view.InputDevice#SOURCE_TOUCHPAD}</li>
+     * <li>{@link android.view.InputDevice#SOURCE_TOUCH_NAVIGATION}</li>
+     * <li>{@link android.view.InputDevice#SOURCE_ROTARY_ENCODER}</li>
+     * <li>{@link android.view.InputDevice#SOURCE_JOYSTICK}</li>
+     * <li>{@link android.view.InputDevice#SOURCE_SENSOR}</li>
+     * </p>
+     *
+     * @param motionEventSources A bit mask of {@link android.view.InputDevice} sources.
+     * @see AccessibilityService#onMotionEvent
+     */
+    public void setMotionEventSources(int motionEventSources) {
+        mMotionEventSources = motionEventSources;
     }
 
     /**
@@ -1179,6 +1224,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeBoolean(mIsAccessibilityTool);
         parcel.writeString(mTileServiceName);
         parcel.writeInt(mIntroResId);
+        parcel.writeInt(mMotionEventSources);
     }
 
     private void initFromParcel(Parcel parcel) {
@@ -1203,6 +1249,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         mIsAccessibilityTool = parcel.readBoolean();
         mTileServiceName = parcel.readString();
         mIntroResId = parcel.readInt();
+        mMotionEventSources = parcel.readInt();
     }
 
     @Override

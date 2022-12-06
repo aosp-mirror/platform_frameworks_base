@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.startingsurface;
 
-import static android.content.Context.CONTEXT_RESTRICTED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Choreographer.CALLBACK_INSETS_ANIMATION;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -32,8 +31,6 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -198,118 +195,21 @@ public class StartingSurfaceDrawer {
         if (activityInfo == null || activityInfo.packageName == null) {
             return;
         }
-
-        final int displayId = taskInfo.displayId;
-        final int taskId = taskInfo.taskId;
-
         // replace with the default theme if the application didn't set
         final int theme = getSplashScreenTheme(windowInfo.splashScreenThemeResId, activityInfo);
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
-                "addSplashScreen for package: %s with theme: %s for task: %d, suggestType: %d",
-                activityInfo.packageName, Integer.toHexString(theme), taskId, suggestType);
-        final Display display = getDisplay(displayId);
-        if (display == null) {
-            // Can't show splash screen on requested display, so skip showing at all.
-            return;
-        }
-        Context context = displayId == DEFAULT_DISPLAY
-                ? mContext : mContext.createDisplayContext(display);
+        final Context context = SplashscreenContentDrawer.createContext(mContext, windowInfo, theme,
+                suggestType, mDisplayManager);
         if (context == null) {
             return;
         }
-        if (theme != context.getThemeResId()) {
-            try {
-                context = context.createPackageContextAsUser(activityInfo.packageName,
-                        CONTEXT_RESTRICTED, UserHandle.of(taskInfo.userId));
-                context.setTheme(theme);
-            } catch (PackageManager.NameNotFoundException e) {
-                Slog.w(TAG, "Failed creating package context with package name "
-                        + activityInfo.packageName + " for user " + taskInfo.userId, e);
-                return;
-            }
-        }
+        final WindowManager.LayoutParams params = SplashscreenContentDrawer.createLayoutParameters(
+                context, windowInfo, suggestType, activityInfo.packageName,
+                suggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
+                        ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT, appToken);
 
-        final Configuration taskConfig = taskInfo.getConfiguration();
-        if (taskConfig.diffPublicOnly(context.getResources().getConfiguration()) != 0) {
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
-                    "addSplashScreen: creating context based on task Configuration %s",
-                    taskConfig);
-            final Context overrideContext = context.createConfigurationContext(taskConfig);
-            overrideContext.setTheme(theme);
-            final TypedArray typedArray = overrideContext.obtainStyledAttributes(
-                    com.android.internal.R.styleable.Window);
-            final int resId = typedArray.getResourceId(R.styleable.Window_windowBackground, 0);
-            try {
-                if (resId != 0 && overrideContext.getDrawable(resId) != null) {
-                    // We want to use the windowBackground for the override context if it is
-                    // available, otherwise we use the default one to make sure a themed starting
-                    // window is displayed for the app.
-                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
-                            "addSplashScreen: apply overrideConfig %s",
-                            taskConfig);
-                    context = overrideContext;
-                }
-            } catch (Resources.NotFoundException e) {
-                Slog.w(TAG, "failed creating starting window for overrideConfig at taskId: "
-                        + taskId, e);
-                return;
-            }
-            typedArray.recycle();
-        }
-
-        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.TYPE_APPLICATION_STARTING);
-        params.setFitInsetsSides(0);
-        params.setFitInsetsTypes(0);
-        params.format = suggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
-                ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT;
-        int windowFlags = WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
-        final TypedArray a = context.obtainStyledAttributes(R.styleable.Window);
-        if (a.getBoolean(R.styleable.Window_windowShowWallpaper, false)) {
-            windowFlags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-        }
-        if (suggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
-            if (a.getBoolean(R.styleable.Window_windowDrawsSystemBarBackgrounds, false)) {
-                windowFlags |= WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-            }
-        } else {
-            windowFlags |= WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-        }
-        params.layoutInDisplayCutoutMode = a.getInt(
-                R.styleable.Window_windowLayoutInDisplayCutoutMode,
-                params.layoutInDisplayCutoutMode);
-        params.windowAnimations = a.getResourceId(R.styleable.Window_windowAnimationStyle, 0);
-        a.recycle();
-
-        // Assumes it's safe to show starting windows of launched apps while
-        // the keyguard is being hidden. This is okay because starting windows never show
-        // secret information.
-        // TODO(b/113840485): Occluded may not only happen on default display
-        if (displayId == DEFAULT_DISPLAY && windowInfo.isKeyguardOccluded) {
-            windowFlags |= WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
-        }
-
-        // Force the window flags: this is a fake window, so it is not really
-        // touchable or focusable by the user.  We also add in the ALT_FOCUSABLE_IM
-        // flag because we do know that the next window will take input
-        // focus, so we want to get the IME window up on top of us right away.
-        // Touches will only pass through to the host activity window and will be blocked from
-        // passing to any other windows.
-        windowFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-        params.flags = windowFlags;
-        params.token = appToken;
-        params.packageName = activityInfo.packageName;
-        params.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
-
-        if (!context.getResources().getCompatibilityInfo().supportsScreen()) {
-            params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
-        }
-
-        params.setTitle("Splash Screen " + activityInfo.packageName);
+        final int displayId = taskInfo.displayId;
+        final int taskId = taskInfo.taskId;
+        final Display display = getDisplay(displayId);
 
         // TODO(b/173975965) tracking performance
         // Prepare the splash screen content view on splash screen worker thread in parallel, so the
@@ -646,7 +546,7 @@ public class StartingSurfaceDrawer {
                             mSplashscreenContentDrawer.applyExitAnimation(record.mContentView,
                                     removalInfo.windowAnimationLeash, removalInfo.mainFrame,
                                     () -> removeWindowInner(record.mDecorView, true),
-                                    record.mCreateTime);
+                                    record.mCreateTime, removalInfo.roundedCornerRadius);
                         } else {
                             // the SplashScreenView has been copied to client, hide the view to skip
                             // default exit animation

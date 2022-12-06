@@ -68,6 +68,7 @@ import android.content.res.XmlResourceParser;
 import android.graphics.BaseCanvas;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -87,6 +88,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.LocaleList;
 import android.os.Parcel;
@@ -102,6 +104,7 @@ import android.text.Editable;
 import android.text.GetChars;
 import android.text.GraphemeClusterSegmentFinder;
 import android.text.GraphicsOperations;
+import android.text.Highlights;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Layout;
@@ -147,6 +150,7 @@ import android.text.style.SuggestionSpan;
 import android.text.style.URLSpan;
 import android.text.style.UpdateAppearance;
 import android.text.util.Linkify;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.FeatureFlagUtils;
@@ -198,6 +202,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InsertGesture;
 import android.view.inputmethod.JoinOrSplitGesture;
+import android.view.inputmethod.PreviewableHandwritingGesture;
 import android.view.inputmethod.RemoveSpaceGesture;
 import android.view.inputmethod.SelectGesture;
 import android.view.inputmethod.SelectRangeGesture;
@@ -221,6 +226,7 @@ import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.accessibility.util.AccessibilityUtils;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.graphics.ColorUtils;
 import com.android.internal.inputmethod.EditableInputConnection;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -238,8 +244,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -925,6 +933,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private final Paint mHighlightPaint;
     @UnsupportedAppUsage
     private boolean mHighlightPathBogus = true;
+
+    private List<Path> mHighlightPaths;
+    private List<Paint> mHighlightPaints;
+    private Highlights mHighlights;
+    private int mGesturePreviewHighlightStart = -1;
+    private int mGesturePreviewHighlightEnd = -1;
+    private Paint mGesturePreviewHighlightPaint;
+    private final List<Path> mPathRecyclePool = new ArrayList<>();
+    private boolean mHighlightPathsBogus = true;
 
     // Although these fields are specific to editable text, they are not added to Editor because
     // they are defined by the TextView's style and are theme-dependent.
@@ -6131,6 +6148,87 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Set Highlights
+     *
+     * @param highlights A highlight object. Call with null for reset.
+     *
+     * @see #getHighlights()
+     * @see Highlights
+     */
+    public void setHighlights(@Nullable Highlights highlights) {
+        mHighlights = highlights;
+        mHighlightPathsBogus = true;
+        invalidate();
+    }
+
+    /**
+     * Returns highlights
+     *
+     * @return a highlight to be drawn. null if no highlight was set.
+     *
+     * @see #setHighlights(Highlights)
+     * @see Highlights
+     *
+     */
+    @Nullable
+    public Highlights getHighlights() {
+        return mHighlights;
+    }
+
+    /**
+     * Highlights the text range (from inclusive start offset to exclusive end offset) to show what
+     * will be selected by the ongoing select handwriting gesture. While the gesture preview
+     * highlight is shown, the selection or cursor is hidden. If the text or selection is changed,
+     * the gesture preview highlight will be cleared.
+     */
+    private void setSelectGesturePreviewHighlight(int start, int end) {
+        // Selection preview highlight color is the same as selection highlight color.
+        setGesturePreviewHighlight(start, end, mHighlightColor);
+    }
+
+    /**
+     * Highlights the text range (from inclusive start offset to exclusive end offset) to show what
+     * will be deleted by the ongoing delete handwriting gesture. While the gesture preview
+     * highlight is shown, the selection or cursor is hidden. If the text or selection is changed,
+     * the gesture preview highlight will be cleared.
+     */
+    private void setDeleteGesturePreviewHighlight(int start, int end) {
+        // Deletion preview highlight color is 20% opacity of the default text color.
+        int color = mTextColor.getDefaultColor();
+        color = ColorUtils.setAlphaComponent(color, (int) (0.2f * Color.alpha(color)));
+        setGesturePreviewHighlight(start, end, color);
+    }
+
+    private void setGesturePreviewHighlight(int start, int end, int color) {
+        mGesturePreviewHighlightStart = start;
+        mGesturePreviewHighlightEnd = end;
+        if (mGesturePreviewHighlightPaint == null) {
+            mGesturePreviewHighlightPaint = new Paint();
+            mGesturePreviewHighlightPaint.setStyle(Paint.Style.FILL);
+        }
+        mGesturePreviewHighlightPaint.setColor(color);
+
+        if (mEditor != null) {
+            mEditor.hideCursorAndSpanControllers();
+            mEditor.stopTextActionModeWithPreservingSelection();
+        }
+
+        mHighlightPathsBogus = true;
+        invalidate();
+    }
+
+    private void clearGesturePreviewHighlight() {
+        mGesturePreviewHighlightStart = -1;
+        mGesturePreviewHighlightEnd = -1;
+        mHighlightPathsBogus = true;
+        invalidate();
+    }
+
+    boolean hasGesturePreviewHighlight() {
+        return mGesturePreviewHighlightStart > 0;
+    }
+
+    /**
      * Convenience method to append the specified text to the TextView's
      * display buffer, upgrading it to {@link android.widget.TextView.BufferType#EDITABLE}
      * if it was not already editable.
@@ -8219,6 +8317,70 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return drawableState;
     }
 
+    private void maybeUpdateHighlightPaths() {
+        if (!mHighlightPathsBogus) {
+            return;
+        }
+
+        if (mHighlightPaths != null) {
+            mPathRecyclePool.addAll(mHighlightPaths);
+            mHighlightPaths.clear();
+            mHighlightPaints.clear();
+        } else {
+            mHighlightPaths = new ArrayList<>();
+            mHighlightPaints = new ArrayList<>();
+        }
+
+        if (mHighlights != null) {
+            for (int i = 0; i < mHighlights.getSize(); ++i) {
+                final int[] ranges = mHighlights.getRanges(i);
+                final Paint paint = mHighlights.getPaint(i);
+
+                final Path path;
+                if (mPathRecyclePool.isEmpty()) {
+                    path = new Path();
+                } else {
+                    path = mPathRecyclePool.get(mPathRecyclePool.size() - 1);
+                    mPathRecyclePool.remove(mPathRecyclePool.size() - 1);
+                    path.reset();
+                }
+
+                boolean atLeastOnePathAdded = false;
+                for (int j = 0; j < ranges.length / 2; ++j) {
+                    final int start = ranges[2 * j];
+                    final int end = ranges[2 * j + 1];
+                    if (start < end) {
+                        mLayout.getSelection(start, end, (left, top, right, bottom, layout) ->
+                                path.addRect(left, top, right, bottom, Path.Direction.CW)
+                        );
+                        atLeastOnePathAdded = true;
+                    }
+                }
+                if (atLeastOnePathAdded) {
+                    mHighlightPaths.add(path);
+                    mHighlightPaints.add(paint);
+                }
+            }
+        }
+
+        if (hasGesturePreviewHighlight()) {
+            final Path path;
+            if (mPathRecyclePool.isEmpty()) {
+                path = new Path();
+            } else {
+                path = mPathRecyclePool.get(mPathRecyclePool.size() - 1);
+                mPathRecyclePool.remove(mPathRecyclePool.size() - 1);
+                path.reset();
+            }
+            mLayout.getSelectionPath(
+                    mGesturePreviewHighlightStart, mGesturePreviewHighlightEnd, path);
+            mHighlightPaths.add(path);
+            mHighlightPaints.add(mGesturePreviewHighlightPaint);
+        }
+
+        mHighlightPathsBogus = false;
+    }
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private Path getUpdatedHighlightPath() {
         Path highlight = null;
@@ -8418,17 +8580,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final int cursorOffsetVertical = voffsetCursor - voffsetText;
 
-        Path highlight = getUpdatedHighlightPath();
+        maybeUpdateHighlightPaths();
+        // If there is a gesture preview highlight, then the selection or cursor is not drawn.
+        Path highlight = hasGesturePreviewHighlight() ? null : getUpdatedHighlightPath();
         if (mEditor != null) {
-            mEditor.onDraw(canvas, layout, highlight, mHighlightPaint, cursorOffsetVertical);
+            mEditor.onDraw(canvas, layout, mHighlightPaths, mHighlightPaints, highlight,
+                    mHighlightPaint, cursorOffsetVertical);
         } else {
-            layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
+            layout.draw(canvas, mHighlightPaths, mHighlightPaints, highlight, mHighlightPaint,
+                    cursorOffsetVertical);
         }
 
         if (mMarquee != null && mMarquee.shouldDrawGhost()) {
             final float dx = mMarquee.getGhostOffset();
             canvas.translate(layout.getParagraphDirection(0) * dx, 0.0f);
-            layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
+            layout.draw(canvas, mHighlightPaths, mHighlightPaints, highlight, mHighlightPaint,
+                    cursorOffsetVertical);
         }
 
         canvas.restore();
@@ -9112,6 +9279,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 gestures.add(RemoveSpaceGesture.class);
                 gestures.add(JoinOrSplitGesture.class);
                 outAttrs.setSupportedHandwritingGestures(gestures);
+
+                Set<Class<? extends PreviewableHandwritingGesture>> previews = new ArraySet<>();
+                previews.add(SelectGesture.class);
+                previews.add(SelectRangeGesture.class);
+                previews.add(DeleteGesture.class);
+                previews.add(DeleteRangeGesture.class);
+                outAttrs.setSupportedHandwritingGesturePreviews(previews);
+
                 return ic;
             }
         }
@@ -9323,83 +9498,130 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /** @hide */
+    public boolean previewHandwritingGesture(
+            @NonNull PreviewableHandwritingGesture gesture,
+            @Nullable CancellationSignal cancellationSignal) {
+        if (gesture instanceof SelectGesture) {
+            performHandwritingSelectGesture((SelectGesture) gesture, /* isPreview= */ true);
+        } else if (gesture instanceof SelectRangeGesture) {
+            performHandwritingSelectRangeGesture(
+                    (SelectRangeGesture) gesture, /* isPreview= */ true);
+        } else if (gesture instanceof DeleteGesture) {
+            performHandwritingDeleteGesture((DeleteGesture) gesture, /* isPreview= */ true);
+        } else if (gesture instanceof DeleteRangeGesture) {
+            performHandwritingDeleteRangeGesture(
+                    (DeleteRangeGesture) gesture, /* isPreview= */ true);
+        } else {
+            return false;
+        }
+        if (cancellationSignal != null) {
+            cancellationSignal.setOnCancelListener(this::clearGesturePreviewHighlight);
+        }
+        return true;
+    }
+
+    /** @hide */
     public int performHandwritingSelectGesture(@NonNull SelectGesture gesture) {
+        return performHandwritingSelectGesture(gesture, /* isPreview= */ false);
+    }
+
+    private int performHandwritingSelectGesture(@NonNull SelectGesture gesture, boolean isPreview) {
         int[] range = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getSelectionArea()),
                 gesture.getGranularity());
         if (range == null) {
-            return handleGestureFailure(gesture);
+            return handleGestureFailure(gesture, isPreview);
         }
-        Selection.setSelection(getEditableText(), range[0], range[1]);
-        mEditor.startSelectionActionModeAsync(/* adjustSelection= */ false);
+        return performHandwritingSelectGesture(range, isPreview);
+    }
+
+    private int performHandwritingSelectGesture(int[] range, boolean isPreview) {
+        if (isPreview) {
+            setSelectGesturePreviewHighlight(range[0], range[1]);
+        } else {
+            Selection.setSelection(getEditableText(), range[0], range[1]);
+            mEditor.startSelectionActionModeAsync(/* adjustSelection= */ false);
+        }
         return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
     /** @hide */
     public int performHandwritingSelectRangeGesture(@NonNull SelectRangeGesture gesture) {
+        return performHandwritingSelectRangeGesture(gesture, /* isPreview= */ false);
+    }
+
+    private int performHandwritingSelectRangeGesture(
+            @NonNull SelectRangeGesture gesture, boolean isPreview) {
         int[] startRange = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getSelectionStartArea()),
                 gesture.getGranularity());
         if (startRange == null) {
-            return handleGestureFailure(gesture);
+            return handleGestureFailure(gesture, isPreview);
         }
         int[] endRange = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getSelectionEndArea()),
                 gesture.getGranularity());
         if (endRange == null) {
-            return handleGestureFailure(gesture);
+            return handleGestureFailure(gesture, isPreview);
         }
         int[] range = new int[] {
                 Math.min(startRange[0], endRange[0]), Math.max(startRange[1], endRange[1])
         };
-        Selection.setSelection(getEditableText(), range[0], range[1]);
-        mEditor.startSelectionActionModeAsync(/* adjustSelection= */ false);
-        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
+        return performHandwritingSelectGesture(range, isPreview);
     }
 
     /** @hide */
     public int performHandwritingDeleteGesture(@NonNull DeleteGesture gesture) {
+        return performHandwritingDeleteGesture(gesture, /* isPreview= */ false);
+    }
+
+    private int performHandwritingDeleteGesture(@NonNull DeleteGesture gesture, boolean isPreview) {
         int[] range = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getDeletionArea()),
                 gesture.getGranularity());
         if (range == null) {
-            return handleGestureFailure(gesture);
+            return handleGestureFailure(gesture, isPreview);
         }
+        return performHandwritingDeleteGesture(range, gesture.getGranularity(), isPreview);
+    }
 
-        if (gesture.getGranularity() == HandwritingGesture.GRANULARITY_WORD) {
-            range = adjustHandwritingDeleteGestureRange(range);
+    private int performHandwritingDeleteGesture(int[] range, int granularity, boolean isPreview) {
+        if (isPreview) {
+            setDeleteGesturePreviewHighlight(range[0], range[1]);
+        } else {
+            if (granularity == HandwritingGesture.GRANULARITY_WORD) {
+                range = adjustHandwritingDeleteGestureRange(range);
+            }
+
+            getEditableText().delete(range[0], range[1]);
+            Selection.setSelection(getEditableText(), range[0]);
         }
-
-        getEditableText().delete(range[0], range[1]);
-        Selection.setSelection(getEditableText(), range[0]);
         return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
     /** @hide */
     public int performHandwritingDeleteRangeGesture(@NonNull DeleteRangeGesture gesture) {
+        return performHandwritingDeleteRangeGesture(gesture, /* isPreview= */ false);
+    }
+
+    private int performHandwritingDeleteRangeGesture(
+            @NonNull DeleteRangeGesture gesture, boolean isPreview) {
         int[] startRange = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getDeletionStartArea()),
                 gesture.getGranularity());
         if (startRange == null) {
-            return handleGestureFailure(gesture);
+            return handleGestureFailure(gesture, isPreview);
         }
         int[] endRange = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getDeletionEndArea()),
                 gesture.getGranularity());
         if (endRange == null) {
-            return handleGestureFailure(gesture);
+            return handleGestureFailure(gesture, isPreview);
         }
         int[] range = new int[] {
                 Math.min(startRange[0], endRange[0]), Math.max(startRange[1], endRange[1])
         };
-
-        if (gesture.getGranularity() == HandwritingGesture.GRANULARITY_WORD) {
-            range = adjustHandwritingDeleteGestureRange(range);
-        }
-
-        getEditableText().delete(range[0], range[1]);
-        Selection.setSelection(getEditableText(), range[0]);
-        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
+        return performHandwritingDeleteGesture(range, gesture.getGranularity(), isPreview);
     }
 
     private int[] adjustHandwritingDeleteGestureRange(int[] range) {
@@ -9577,7 +9799,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private int handleGestureFailure(HandwritingGesture gesture) {
-        if (!TextUtils.isEmpty(gesture.getFallbackText())) {
+        return handleGestureFailure(gesture, /* isPreview= */ false);
+    }
+
+    private int handleGestureFailure(HandwritingGesture gesture, boolean isPreview) {
+        clearGesturePreviewHighlight();
+        if (!isPreview && !TextUtils.isEmpty(gesture.getFallbackText())) {
             getEditableText()
                     .replace(getSelectionStart(), getSelectionEnd(), gesture.getFallbackText());
             return InputConnection.HANDWRITING_GESTURE_RESULT_FALLBACK;
@@ -9750,6 +9977,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mOldMaxMode = mMaxMode;
 
         mHighlightPathBogus = true;
+        mHighlightPathsBogus = true;
 
         if (wantWidth < 0) {
             wantWidth = 0;
@@ -11610,6 +11838,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         resetErrorChangedFlag();
         sendOnTextChanged(buffer, start, before, after);
         onTextChanged(buffer, start, before, after);
+
+        clearGesturePreviewHighlight();
     }
 
     /**
@@ -11648,6 +11878,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (selChanged) {
+            clearGesturePreviewHighlight();
             mHighlightPathBogus = true;
             if (mEditor != null && !isFocused()) mEditor.mSelectionMoved = true;
 

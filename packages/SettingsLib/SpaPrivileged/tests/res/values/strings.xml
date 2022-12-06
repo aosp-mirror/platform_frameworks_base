@@ -22,5 +22,14 @@
     <string name="test_permission_switch_title" translatable="false">Allow Test Permission</string>
 
     <!-- Test Permission footer. [DO NOT TRANSLATE] -->
-    <string name="test_permission_footer" translatable="false">Test Permission is for demo.</string>
+    <string name="test_permission_footer" translatable="false">Test Permission is for testing.</string>
+
+    <!-- Test App Op Permission title. [DO NOT TRANSLATE] -->
+    <string name="test_app_op_permission_title" translatable="false">Test App Op Permission</string>
+
+    <!-- Test App Op Permission switch title. [DO NOT TRANSLATE] -->
+    <string name="test_app_op_permission_switch_title" translatable="false">Allow Test App Op Permission</string>
+
+    <!-- Test App Op Permission footer. [DO NOT TRANSLATE] -->
+    <string name="test_app_op_permission_footer" translatable="false">Test App Op Permission is for testing.</string>
 </resources>

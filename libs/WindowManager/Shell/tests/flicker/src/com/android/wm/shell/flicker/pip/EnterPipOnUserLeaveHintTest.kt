@@ -17,14 +17,14 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -56,7 +56,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest(testSpec) {
+class EnterPipOnUserLeaveHintTest(flicker: FlickerTest) : EnterPipTest(flicker) {
     /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
@@ -68,7 +68,7 @@ class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest
                 pipApp.enableEnterPipOnUserLeaveHint()
             }
             teardown {
-                setRotation(Surface.ROTATION_0)
+                setRotation(PlatformConsts.Rotation.ROTATION_0)
                 RemoveAllTasksButHomeRule.removeAllTasksButHome()
                 pipApp.exit(wmHelper)
             }
@@ -78,10 +78,10 @@ class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest
     @Presubmit
     @Test
     override fun pipAppLayerAlwaysVisible() {
-        if (!testSpec.isGesturalNavigation) super.pipAppLayerAlwaysVisible()
+        if (!flicker.scenario.isGesturalNavigation) super.pipAppLayerAlwaysVisible()
         else {
             // pip layer in gesture nav will disappear during transition
-            testSpec.assertLayers {
+            flicker.assertLayers {
                 this.isVisible(pipApp).then().isInvisible(pipApp).then().isVisible(pipApp)
             }
         }
@@ -91,7 +91,7 @@ class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest
     @Test
     override fun pipLayerReduces() {
         // in gestural nav the pip enters through alpha animation
-        Assume.assumeFalse(testSpec.isGesturalNavigation)
+        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
         super.pipLayerReduces()
     }
 
@@ -99,7 +99,7 @@ class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest
     @Test
     override fun focusChanges() {
         // in gestural nav the focus goes to different activity on swipe up
-        Assume.assumeFalse(testSpec.isGesturalNavigation)
+        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
         super.focusChanges()
     }
 
@@ -112,11 +112,11 @@ class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest
     @Presubmit
     @Test
     override fun pipLayerRemainInsideVisibleBounds() {
-        if (!testSpec.isGesturalNavigation) super.pipLayerRemainInsideVisibleBounds()
+        if (!flicker.scenario.isGesturalNavigation) super.pipLayerRemainInsideVisibleBounds()
         else {
             // pip layer in gesture nav will disappear during transition
-            testSpec.assertLayersStart { this.visibleRegion(pipApp).coversAtMost(displayBounds) }
-            testSpec.assertLayersEnd { this.visibleRegion(pipApp).coversAtMost(displayBounds) }
+            flicker.assertLayersStart { this.visibleRegion(pipApp).coversAtMost(displayBounds) }
+            flicker.assertLayersEnd { this.visibleRegion(pipApp).coversAtMost(displayBounds) }
         }
     }
 }

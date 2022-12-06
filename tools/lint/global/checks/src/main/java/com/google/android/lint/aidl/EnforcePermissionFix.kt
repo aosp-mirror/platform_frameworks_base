@@ -17,10 +17,14 @@
 package com.google.android.lint.aidl
 
 import com.android.tools.lint.detector.api.JavaContext
+import com.android.tools.lint.detector.api.LintFix
 import com.android.tools.lint.detector.api.Location
+import com.android.tools.lint.detector.api.UastLintUtils.Companion.getAnnotationBooleanValue
 import com.android.tools.lint.detector.api.getUMethod
+import com.google.android.lint.getPermissionMethodAnnotation
 import com.google.android.lint.hasPermissionNameAnnotation
 import com.google.android.lint.isPermissionMethodCall
+import com.intellij.psi.PsiType
 import org.jetbrains.kotlin.psi.psiUtil.parameterIndex
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.evaluateString
@@ -36,13 +40,37 @@ import org.jetbrains.uast.visitor.AbstractUastVisitor
  */
 data class EnforcePermissionFix(
     val locations: List<Location>,
-    val permissionNames: List<String>
+    val permissionNames: List<String>,
+    val errorLevel: Boolean,
 ) {
-    val annotation: String
+    fun toLintFix(annotationLocation: Location): LintFix {
+        val removeFixes = this.locations.map {
+            LintFix.create()
+                .replace()
+                .reformat(true)
+                .range(it)
+                .with("")
+                .autoFix()
+                .build()
+        }
+
+        val annotateFix = LintFix.create()
+            .annotate(this.annotation)
+            .range(annotationLocation)
+            .autoFix()
+            .build()
+
+        return LintFix.create().composite(annotateFix, *removeFixes.toTypedArray())
+    }
+
+    private val annotation: String
         get() {
             val quotedPermissions = permissionNames.joinToString(", ") { """"$it"""" }
+
             val annotationParameter =
-                if (permissionNames.size > 1) "allOf={$quotedPermissions}" else quotedPermissions
+                if (permissionNames.size > 1) "allOf={$quotedPermissions}"
+                else quotedPermissions
+
             return "@$ANNOTATION_ENFORCE_PERMISSION($annotationParameter)"
         }
 
@@ -54,19 +82,28 @@ data class EnforcePermissionFix(
         fun fromCallExpression(
             context: JavaContext,
             callExpression: UCallExpression
-        ): EnforcePermissionFix? =
-            if (isPermissionMethodCall(callExpression)) {
-                EnforcePermissionFix(
+        ): EnforcePermissionFix? {
+            val method = callExpression.resolve()?.getUMethod() ?: return null
+            val annotation = getPermissionMethodAnnotation(method) ?: return null
+            val enforces = method.returnType == PsiType.VOID
+            val orSelf = getAnnotationBooleanValue(annotation, "orSelf") ?: false
+            return EnforcePermissionFix(
                     listOf(getPermissionCheckLocation(context, callExpression)),
-                    getPermissionCheckValues(callExpression)
-                )
-            } else null
+                    getPermissionCheckValues(callExpression),
+                    // If we detect that the PermissionMethod enforces that permission is granted,
+                    // AND is of the "orSelf" variety, we are very confident that this is a behavior
+                    // preserving migration to @EnforcePermission.  Thus, the incident should be ERROR
+                    // level.
+                    errorLevel = enforces && orSelf
+            )
+        }
 
 
         fun compose(individuals: List<EnforcePermissionFix>): EnforcePermissionFix =
             EnforcePermissionFix(
                 individuals.flatMap { it.locations },
-                individuals.flatMap { it.permissionNames }
+                individuals.flatMap { it.permissionNames },
+                errorLevel = individuals.all(EnforcePermissionFix::errorLevel)
             )
 
         /**

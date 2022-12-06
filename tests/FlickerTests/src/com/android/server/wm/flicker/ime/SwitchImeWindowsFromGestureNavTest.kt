@@ -19,19 +19,18 @@ package com.android.server.wm.flicker.ime
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -49,9 +48,9 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Presubmit
-open class SwitchImeWindowsFromGestureNavTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
+open class SwitchImeWindowsFromGestureNavTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val testApp = SimpleAppHelper(instrumentation)
-    private val imeTestApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
+    private val imeTestApp = ImeAppAutoFocusHelper(instrumentation, flicker.scenario.startRotation)
 
     @Before
     open fun before() {
@@ -63,7 +62,7 @@ open class SwitchImeWindowsFromGestureNavTest(testSpec: FlickerTestParameter) : 
         setup {
             tapl.setExpectedRotationCheckEnabled(false)
             tapl.setIgnoreTaskbarVisibility(true)
-            this.setRotation(testSpec.startRotation)
+            this.setRotation(flicker.scenario.startRotation)
             testApp.launchViaIntent(wmHelper)
             wmHelper.StateSyncBuilder().withFullScreenApp(testApp).waitForAndVerify()
 
@@ -143,7 +142,7 @@ open class SwitchImeWindowsFromGestureNavTest(testSpec: FlickerTestParameter) : 
     @Presubmit
     @Test
     fun imeAppWindowVisibility() {
-        testSpec.assertWm {
+        flicker.assertWm {
             isAppWindowVisible(imeTestApp)
                 .then()
                 .isAppSnapshotStartingWindowVisibleFor(testApp, isOptional = true)
@@ -159,27 +158,25 @@ open class SwitchImeWindowsFromGestureNavTest(testSpec: FlickerTestParameter) : 
     @FlakyTest(bugId = 244414110)
     @Test
     open fun imeLayerIsVisibleWhenSwitchingToImeApp() {
-        testSpec.assertLayersStart { isVisible(ComponentNameMatcher.IME) }
-        testSpec.assertLayersTag(TAG_IME_VISIBLE) { isVisible(ComponentNameMatcher.IME) }
-        testSpec.assertLayersEnd { isVisible(ComponentNameMatcher.IME) }
+        flicker.assertLayersStart { isVisible(ComponentNameMatcher.IME) }
+        flicker.assertLayersTag(TAG_IME_VISIBLE) { isVisible(ComponentNameMatcher.IME) }
+        flicker.assertLayersEnd { isVisible(ComponentNameMatcher.IME) }
     }
 
     @Presubmit
     @Test
     fun imeLayerIsInvisibleWhenSwitchingToTestApp() {
-        testSpec.assertLayersTag(TAG_IME_INVISIBLE) { isInvisible(ComponentNameMatcher.IME) }
+        flicker.assertLayersTag(TAG_IME_INVISIBLE) { isInvisible(ComponentNameMatcher.IME) }
     }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(
-                    supportedNavigationModes =
-                        listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY),
-                    supportedRotations = listOf(Surface.ROTATION_0)
-                )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_GESTURAL),
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
 
         private const val TAG_IME_VISIBLE = "imeVisible"

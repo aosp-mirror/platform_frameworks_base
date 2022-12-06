@@ -584,7 +584,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 DisplayModeRecord record = mSupportedModes.valueAt(i);
                 if (record.hasMatchingMode(mode)
                         && refreshRatesEquals(alternativeRefreshRates,
-                                record.mMode.getAlternativeRefreshRates())) {
+                                record.mMode.getAlternativeRefreshRates())
+                        && hdrTypesEqual(mode.supportedHdrTypes,
+                            record.mMode.getSupportedHdrTypes())) {
                     return record;
                 }
             }
@@ -762,18 +764,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             }
                         }
 
-                        // If the state change was from or to VR, then we need to tell the light
-                        // so that it can apply appropriate VR brightness settings. Also, update the
-                        // brightness so the state is propogated to light.
-                        boolean vrModeChange = false;
-                        if ((state == Display.STATE_VR || currentState == Display.STATE_VR) &&
-                                currentState != state) {
-                            setVrMode(state == Display.STATE_VR);
-                            vrModeChange = true;
-                        }
-
                         // Apply brightness changes given that we are in a non-suspended state.
-                        if (brightnessChanged || vrModeChange) {
+                        if (brightnessChanged) {
                             setDisplayBrightness(brightnessState, sdrBrightnessState);
                             mBrightnessState = brightnessState;
                             mSdrBrightnessState = sdrBrightnessState;
@@ -783,15 +775,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         if (state != currentState) {
                             setDisplayState(state);
                         }
-                    }
-
-                    private void setVrMode(boolean isVrEnabled) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "setVrMode("
-                                    + "id=" + physicalDisplayId
-                                    + ", state=" + Display.stateToString(state) + ")");
-                        }
-                        mBacklightAdapter.setVrMode(isVrEnabled);
                     }
 
                     private void setDisplayState(int state) {
@@ -1245,6 +1228,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
     }
 
+    private boolean hdrTypesEqual(int[] modeHdrTypes, int[] recordHdrTypes) {
+        int[] modeHdrTypesCopy = Arrays.copyOf(modeHdrTypes, modeHdrTypes.length);
+        Arrays.sort(modeHdrTypesCopy);
+        // Record HDR types are already sorted when we create the DisplayModeRecord
+        return Arrays.equals(modeHdrTypesCopy, recordHdrTypes);
+    }
+
     /** Supplies a context whose Resources apply runtime-overlays */
     Context getOverlayContext() {
         if (mOverlayContext == null) {
@@ -1262,7 +1252,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         DisplayModeRecord(SurfaceControl.DisplayMode mode,
                 float[] alternativeRefreshRates) {
             mMode = createMode(mode.width, mode.height, mode.refreshRate,
-                    alternativeRefreshRates);
+                    alternativeRefreshRates, mode.supportedHdrTypes);
         }
 
         /**
@@ -1276,7 +1266,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return mMode.getPhysicalWidth() == mode.width
                     && mMode.getPhysicalHeight() == mode.height
                     && Float.floatToIntBits(mMode.getRefreshRate())
-                        == Float.floatToIntBits(mode.refreshRate);
+                    == Float.floatToIntBits(mode.refreshRate);
         }
 
         public String toString() {
@@ -1502,12 +1492,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 }
             } else if (mBacklight != null) {
                 mBacklight.setBrightness(backlight);
-            }
-        }
-
-        void setVrMode(boolean isVrModeEnabled) {
-            if (mBacklight != null) {
-                mBacklight.setVrMode(isVrModeEnabled);
             }
         }
 

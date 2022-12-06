@@ -25,11 +25,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
+import com.android.settingslib.spa.framework.util.filterItem
 import com.android.settingslib.spaprivileged.model.app.AppOpsController
 import com.android.settingslib.spaprivileged.model.app.AppRecord
+import com.android.settingslib.spaprivileged.model.app.IAppOpsController
+import com.android.settingslib.spaprivileged.model.app.IPackageManagers
 import com.android.settingslib.spaprivileged.model.app.PackageManagers
-import com.android.settingslib.spaprivileged.model.app.PackageManagers.hasGrantPermission
-import com.android.settingslib.spaprivileged.model.app.PackageManagers.hasRequestPermission
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -37,21 +38,24 @@ import kotlinx.coroutines.flow.map
 data class AppOpPermissionRecord(
     override val app: ApplicationInfo,
     val hasRequestPermission: Boolean,
-    var appOpsController: AppOpsController,
+    var appOpsController: IAppOpsController,
 ) : AppRecord
 
-abstract class AppOpPermissionListModel(private val context: Context) :
-    TogglePermissionAppListModel<AppOpPermissionRecord> {
+abstract class AppOpPermissionListModel(
+    private val context: Context,
+    private val packageManagers: IPackageManagers = PackageManagers,
+) : TogglePermissionAppListModel<AppOpPermissionRecord> {
 
     abstract val appOp: Int
     abstract val permission: String
 
+    /** These not changeable packages will also be hidden from app list. */
     private val notChangeablePackages =
         setOf("android", "com.android.systemui", context.packageName)
 
     override fun transform(userIdFlow: Flow<Int>, appListFlow: Flow<List<ApplicationInfo>>) =
         userIdFlow.map { userId ->
-            PackageManagers.getAppOpPermissionPackages(userId, permission)
+            packageManagers.getAppOpPermissionPackages(userId, permission)
         }.combine(appListFlow) { packageNames, appList ->
             appList.map { app ->
                 AppOpPermissionRecord(
@@ -64,14 +68,12 @@ abstract class AppOpPermissionListModel(private val context: Context) :
 
     override fun transformItem(app: ApplicationInfo) = AppOpPermissionRecord(
         app = app,
-        hasRequestPermission = app.hasRequestPermission(permission),
+        hasRequestPermission = with(packageManagers) { app.hasRequestPermission(permission) },
         appOpsController = AppOpsController(context = context, app = app, op = appOp),
     )
 
     override fun filter(userIdFlow: Flow<Int>, recordListFlow: Flow<List<AppOpPermissionRecord>>) =
-        recordListFlow.map { recordList ->
-            recordList.filter { it.hasRequestPermission }
-        }
+        recordListFlow.filterItem(::isChangeable)
 
     /**
      * Defining the default behavior as permissible as long as the package requested this permission
@@ -85,7 +87,9 @@ abstract class AppOpPermissionListModel(private val context: Context) :
                 when (mode.value) {
                     null -> null
                     MODE_ALLOWED -> true
-                    MODE_DEFAULT -> record.app.hasGrantPermission(permission)
+                    MODE_DEFAULT -> with(packageManagers) {
+                        record.app.hasGrantPermission(permission)
+                    }
                     else -> false
                 }
             }

@@ -30,6 +30,7 @@ import android.content.IntentSender;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -37,6 +38,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.statusbar.NotificationVisibility;
@@ -127,21 +129,6 @@ public class NotificationLockscreenUserManagerImpl implements
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             switch (action) {
-                case Intent.ACTION_USER_SWITCHED:
-                    mCurrentUserId = intent.getIntExtra(
-                            Intent.EXTRA_USER_HANDLE, UserHandle.USER_ALL);
-                    updateCurrentProfilesCache();
-
-                    Log.v(TAG, "userId " + mCurrentUserId + " is in the house");
-
-                    updateLockscreenNotificationSetting();
-                    updatePublicMode();
-                    mPresenter.onUserSwitched(mCurrentUserId);
-
-                    for (UserChangedListener listener : mListeners) {
-                        listener.onUserChanged(mCurrentUserId);
-                    }
-                    break;
                 case Intent.ACTION_USER_REMOVED:
                     int removedUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                     if (removedUserId != -1) {
@@ -180,6 +167,25 @@ public class NotificationLockscreenUserManagerImpl implements
             }
         }
     };
+
+    protected final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    mCurrentUserId = newUser;
+                    updateCurrentProfilesCache();
+
+                    Log.v(TAG, "userId " + mCurrentUserId + " is in the house");
+
+                    updateLockscreenNotificationSetting();
+                    updatePublicMode();
+                    mPresenter.onUserSwitched(mCurrentUserId);
+
+                    for (UserChangedListener listener : mListeners) {
+                        listener.onUserChanged(mCurrentUserId);
+                    }
+                }
+            };
 
     protected final Context mContext;
     private final Handler mMainHandler;
@@ -284,7 +290,6 @@ public class NotificationLockscreenUserManagerImpl implements
                 null /* handler */, UserHandle.ALL);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
@@ -297,6 +302,8 @@ public class NotificationLockscreenUserManagerImpl implements
         internalFilter.addAction(NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION);
         mContext.registerReceiver(mBaseBroadcastReceiver, internalFilter, PERMISSION_SELF, null,
                 Context.RECEIVER_EXPORTED_UNAUDITED);
+
+        mUserTracker.addCallback(mUserChangedCallback, new HandlerExecutor(mMainHandler));
 
         mCurrentUserId = mUserTracker.getUserId(); // in case we reg'd receiver too late
         updateCurrentProfilesCache();

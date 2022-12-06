@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Bústia de veu"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problema de connexió o codi MMI no vàlid."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"La funció no s\'admet."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"L\'operació està restringida a números de marcatge fixos."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"No es pot canviar la configuració de desviació de trucades del telèfon quan estàs en itinerància."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"El servei s\'ha activat."</string>
@@ -395,54 +396,30 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Permet que l\'aplicació faci que parts de la seva memòria siguin persistents. Aquesta acció pot limitar la memòria disponible per a altres aplicacions i alentir el telèfon."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"executar serveis en primer pla"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Permet que l\'aplicació utilitzi serveis en primer pla."</string>
-    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
-    <skip />
+    <string name="permlab_foregroundServiceCamera" msgid="7814751737955715297">"executa serveis en primer pla amb el tipus \"camera\""</string>
+    <string name="permdesc_foregroundServiceCamera" msgid="6973701931250595727">"Permet que l\'aplicació utilitzi serveis en primer pla amb el tipus \"camera\""</string>
+    <string name="permlab_foregroundServiceConnectedDevice" msgid="3019650546176872501">"executa serveis en primer pla amb el tipus \"connectedDevice\""</string>
+    <string name="permdesc_foregroundServiceConnectedDevice" msgid="1067457315741352963">"Permet que l\'aplicació utilitzi serveis en primer pla amb el tipus \"connectedDevice\""</string>
+    <string name="permlab_foregroundServiceDataSync" msgid="5847463514326881076">"executa serveis en primer pla amb el tipus \"dataSync\""</string>
+    <string name="permdesc_foregroundServiceDataSync" msgid="2267140263423973050">"Permet que l\'aplicació utilitzi serveis en primer pla amb el tipus \"dataSync\""</string>
+    <string name="permlab_foregroundServiceLocation" msgid="3745428302378535690">"executa serveis en primer pla amb el tipus \"location\""</string>
+    <string name="permdesc_foregroundServiceLocation" msgid="118894034365177183">"Permet que l\'aplicació utilitzi serveis en primer pla amb el tipus \"location\""</string>
+    <string name="permlab_foregroundServiceMediaPlayback" msgid="4002687983891935514">"executa serveis en primer pla amb el tipus \"mediaPlayback\""</string>
+    <string name="permdesc_foregroundServiceMediaPlayback" msgid="3638032446063968043">"Permet que l\'aplicació utilitzi serveis en primer pla amb el tipus \"mediaPlayback\""</string>
+    <string name="permlab_foregroundServiceMediaProjection" msgid="2630868915733312527">"executa serveis en primer pla amb el tipus \"mediaProjection\""</string>
+    <string name="permdesc_foregroundServiceMediaProjection" msgid="4805677128082002298">"Permet que l\'aplicació utilitzi serveis en primer pla amb el tipus \"mediaProjection\""</string>
+    <string name="permlab_foregroundServiceMicrophone" msgid="7390033424890545399">"executa serveis en primer pla amb el tipus \"microphone\""</string>
+    <string name="permdesc_foregroundServiceMicrophone" msgid="1206041516173483201">"Permet que l\'aplicació utilitzi serveis en primer pla amb el tipus \"microphone\""</string>
+    <string name="permlab_foregroundServicePhoneCall" msgid="627937743867697892">"executa serveis en primer pla amb el tipus \"phoneCall\""</string>
+    <string name="permdesc_foregroundServicePhoneCall" msgid="5941660252587015147">"Permet que l\'aplicació utilitzi serveis en primer pla amb el tipus \"phoneCall\""</string>
+    <string name="permlab_foregroundServiceHealth" msgid="3675776442080928184">"executa serveis en primer pla amb el tipus \"health\""</string>
+    <string name="permdesc_foregroundServiceHealth" msgid="2024586220562667185">"Permet que l\'aplicació utilitzi serveis en primer pla amb el tipus \"health\""</string>
+    <string name="permlab_foregroundServiceRemoteMessaging" msgid="105670277002780950">"executa serveis en primer pla amb el tipus \"remoteMessaging\""</string>
+    <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Permet que l\'aplicació utilitzi serveis en primer pla amb el tipus \"remoteMessaging\""</string>
+    <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"executa serveis en primer pla amb el tipus \"systemExempted\""</string>
+    <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Permet que l\'aplicació utilitzi serveis en primer pla amb el tipus \"systemExempted\""</string>
+    <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"executa serveis en primer pla amb el tipus \"specialUse\""</string>
+    <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Permet que l\'aplicació utilitzi serveis en primer pla amb el tipus \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"mesura l\'espai d\'emmagatzematge d\'aplicacions"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Permet que l\'aplicació recuperi les mides del codi, de les dades i de la memòria cau"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"modificar la configuració del sistema"</string>

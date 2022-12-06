@@ -33,6 +33,7 @@
 #include <cassert>
 #include <optional>
 
+enum class SkBlendMode;
 class SkRRect;
 
 namespace android {
@@ -119,8 +120,8 @@ public:
     virtual void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
                                const Paint& paint) override;
 
-   virtual void drawDoubleRoundRect(const SkRRect& outer, const SkRRect& inner,
-                               const Paint& paint) override;
+    virtual void drawDoubleRoundRect(const SkRRect& outer, const SkRRect& inner,
+                                     const Paint& paint) override;
 
     virtual void drawCircle(float x, float y, float radius, const Paint& paint) override;
     virtual void drawOval(float left, float top, float right, float bottom,
@@ -129,6 +130,8 @@ public:
                          float sweepAngle, bool useCenter, const Paint& paint) override;
     virtual void drawPath(const SkPath& path, const Paint& paint) override;
     virtual void drawVertices(const SkVertices*, SkBlendMode, const Paint& paint) override;
+    virtual void drawMesh(const SkMesh& mesh, sk_sp<SkBlender> blender,
+                          const SkPaint& paint) override;
 
     virtual void drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) override;
     virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const Paint* paint) override;

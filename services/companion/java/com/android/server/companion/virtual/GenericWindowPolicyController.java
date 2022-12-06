@@ -355,10 +355,10 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
 
     private boolean activityMatchesDisplayCategory(ActivityInfo activityInfo) {
         if (mDisplayCategories.isEmpty()) {
-            return activityInfo.targetDisplayCategory == null;
+            return activityInfo.requiredDisplayCategory == null;
         }
-        return activityInfo.targetDisplayCategory != null
-                    && mDisplayCategories.contains(activityInfo.targetDisplayCategory);
+        return activityInfo.requiredDisplayCategory != null
+                    && mDisplayCategories.contains(activityInfo.requiredDisplayCategory);
 
     }
 
@@ -375,9 +375,9 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         }
         if (!activityMatchesDisplayCategory(activityInfo)) {
             Slog.d(TAG, String.format(
-                    "The activity's target display category: %s is not found on virtual display"
-                            + " with the following allowed display categories: %s",
-                    activityInfo.targetDisplayCategory, mDisplayCategories.toString()));
+                    "The activity's required display category: %s is not found on virtual display"
+                            + " with the following categories: %s",
+                    activityInfo.requiredDisplayCategory, mDisplayCategories.toString()));
             return false;
         }
         final UserHandle activityUser =

@@ -349,6 +349,15 @@ public class Filter implements AutoCloseable {
                         + mMainType + ", filter subtype=" + mSubtype + ". config main type="
                         + config.getType() + ", config subtype=" + subType);
             }
+            // Tuner only support VVC after tuner 3.0
+            if (s instanceof RecordSettings
+                    && ((RecordSettings) s).getScIndexType() == RecordSettings.INDEX_TYPE_SC_VVC
+                    && !TunerVersionChecker.isHigherOrEqualVersionTo(
+                            TunerVersionChecker.TUNER_VERSION_3_0)) {
+                Log.e(TAG, "Tuner version " + TunerVersionChecker.getTunerVersion()
+                        + " does not support VVC");
+                return Tuner.RESULT_UNAVAILABLE;
+            }
             return nativeConfigureFilter(config.getType(), subType, config);
         }
     }

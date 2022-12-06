@@ -198,15 +198,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     private final float mScreenBrightnessDefault;
 
-    // The minimum allowed brightness while in VR.
-    private final float mScreenBrightnessForVrRangeMinimum;
-
-    // The maximum allowed brightness while in VR.
-    private final float mScreenBrightnessForVrRangeMaximum;
-
-    // The default screen brightness for VR.
-    private final float mScreenBrightnessForVrDefault;
-
     // True if auto-brightness should be used.
     private boolean mUseSoftwareAutoBrightnessConfig;
 
@@ -300,7 +291,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private boolean mAppliedDimming;
     private boolean mAppliedLowPower;
     private boolean mAppliedTemporaryAutoBrightnessAdjustment;
-    private boolean mAppliedBrightnessBoost;
     private boolean mAppliedThrottling;
 
     // Reason for which the brightness was last changed. See {@link BrightnessReason} for more
@@ -394,9 +384,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     // behalf of the user.
     private float mCurrentScreenBrightnessSetting;
 
-    // The current screen brightness while in VR mode.
-    private float mScreenBrightnessForVr;
-
     // The last auto brightness adjustment that was set by the user and not temporary. Set to
     // Float.NaN when an auto-brightness adjustment hasn't been recorded yet.
     private float mAutoBrightnessAdjustment;
@@ -422,6 +409,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     private DisplayDeviceConfig mDisplayDeviceConfig;
 
+    private boolean mIsEnabled;
+    private boolean mIsInTransition;
     /**
      * Creates the display power controller.
      */
@@ -439,6 +428,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mHandler = new DisplayControllerHandler(handler.getLooper());
         mDisplayDeviceConfig = logicalDisplay.getPrimaryDisplayDeviceLocked()
                 .getDisplayDeviceConfig();
+        mIsEnabled = logicalDisplay.isEnabledLocked();
+        mIsInTransition = logicalDisplay.isInTransitionLocked();
         mWakelockController = mInjector.getWakelockController(mDisplayId, callbacks);
         mDisplayPowerProximityStateController = mInjector.getDisplayPowerProximityStateController(
                 mWakelockController, mDisplayDeviceConfig, mHandler.getLooper(),
@@ -483,14 +474,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // NORMAL SCREEN SETTINGS
         mScreenBrightnessDefault = clampAbsoluteBrightness(
                 mLogicalDisplay.getDisplayInfoLocked().brightnessDefault);
-
-        // VR SETTINGS
-        mScreenBrightnessForVrDefault = clampAbsoluteBrightness(
-                pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT_VR));
-        mScreenBrightnessForVrRangeMaximum = clampAbsoluteBrightness(
-                pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM_VR));
-        mScreenBrightnessForVrRangeMinimum = clampAbsoluteBrightness(
-                pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM_VR));
 
         loadBrightnessRampRates();
         mSkipScreenOnBrightnessRamp = resources.getBoolean(
@@ -558,7 +541,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mDisplayBrightnessController =
                 new DisplayBrightnessController(context, null, mDisplayId);
         mCurrentScreenBrightnessSetting = getScreenBrightnessSetting();
-        mScreenBrightnessForVr = getScreenBrightnessForVrSetting();
         mAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
         mPendingScreenBrightnessSetting = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         mTemporaryAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
@@ -721,27 +703,34 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         final DisplayDeviceConfig config = device.getDisplayDeviceConfig();
         final IBinder token = device.getDisplayTokenLocked();
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
+        final boolean isEnabled = mLogicalDisplay.isEnabledLocked();
+        final boolean isInTransition = mLogicalDisplay.isInTransitionLocked();
         mHandler.post(() -> {
+            boolean changed = false;
             if (mDisplayDevice != device) {
+                changed = true;
                 mDisplayDevice = device;
                 mUniqueDisplayId = uniqueId;
                 mDisplayStatsId = mUniqueDisplayId.hashCode();
                 mDisplayDeviceConfig = config;
                 loadFromDisplayDeviceConfig(token, info);
                 mDisplayPowerProximityStateController.notifyDisplayDeviceChanged(config);
+
+                // Since the underlying display-device changed, we really don't know the
+                // last command that was sent to change it's state. Lets assume it is unknown so
+                // that we trigger a change immediately.
+                mPowerState.resetScreenState();
+            }
+            if (mIsEnabled != isEnabled || mIsInTransition != isInTransition) {
+                changed = true;
+                mIsEnabled = isEnabled;
+                mIsInTransition = isInTransition;
+            }
+
+            if (changed) {
                 updatePowerState();
             }
         });
-    }
-
-    /**
-     * Called when the displays are preparing to transition from one device state to another.
-     * This process involves turning off some displays so we need updatePowerState() to run and
-     * calculate the new state.
-     */
-    @Override
-    public void onDeviceStateTransition() {
-        sendUpdatePowerState();
     }
 
     /**
@@ -850,9 +839,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         };
 
         mBrightnessSetting.registerListener(mBrightnessSettingListener);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS_FOR_VR_FLOAT),
-                false /*notifyForDescendants*/, mSettingsObserver, UserHandle.USER_ALL);
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ),
                 false /*notifyForDescendants*/, mSettingsObserver, UserHandle.USER_ALL);
@@ -1152,9 +1138,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     state = Display.STATE_DOZE;
                 }
                 break;
-            case DisplayPowerRequest.POLICY_VR:
-                state = Display.STATE_VR;
-                break;
             case DisplayPowerRequest.POLICY_DIM:
             case DisplayPowerRequest.POLICY_BRIGHT:
             default:
@@ -1165,8 +1148,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         mDisplayPowerProximityStateController.updateProximityState(mPowerRequest, state);
 
-        if (!mLogicalDisplay.isEnabled()
-                || mLogicalDisplay.getPhase() == LogicalDisplay.DISPLAY_PHASE_LAYOUT_TRANSITION
+        if (!mIsEnabled
+                || mIsInTransition
                 || mDisplayPowerProximityStateController.isScreenOffBecauseOfProximity()) {
             state = Display.STATE_OFF;
         }
@@ -1187,12 +1170,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 .updateBrightness(mPowerRequest, state);
         float brightnessState = displayBrightnessState.getBrightness();
         mBrightnessReasonTemp.set(displayBrightnessState.getBrightnessReason());
-
-        // Always use the VR brightness when in the VR state.
-        if (state == Display.STATE_VR) {
-            brightnessState = mScreenBrightnessForVr;
-            mBrightnessReasonTemp.setReason(BrightnessReason.REASON_VR);
-        }
 
         final boolean autoBrightnessEnabledInDoze =
                 mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig()
@@ -1223,18 +1200,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             autoBrightnessAdjustment = mAutoBrightnessAdjustment;
             brightnessAdjustmentFlags = BrightnessReason.ADJUSTMENT_AUTO;
             mAppliedTemporaryAutoBrightnessAdjustment = false;
-        }
-        // Apply brightness boost.
-        // We do this here after deciding whether auto-brightness is enabled so that we don't
-        // disable the light sensor during this temporary state.  That way when boost ends we will
-        // be able to resume normal auto-brightness behavior without any delay.
-        if (mPowerRequest.boostScreenBrightness
-                && brightnessState != PowerManager.BRIGHTNESS_OFF_FLOAT) {
-            brightnessState = PowerManager.BRIGHTNESS_MAX;
-            mBrightnessReasonTemp.setReason(BrightnessReason.REASON_BOOST);
-            mAppliedBrightnessBoost = true;
-        } else {
-            mAppliedBrightnessBoost = false;
         }
 
         // If the brightness is already set then it's been overridden by something other than the
@@ -1394,7 +1359,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 mBrightnessThrottler.getBrightnessMaxReason());
 
         // Animate the screen brightness when the screen is on or dozing.
-        // Skip the animation when the screen is off or suspended or transition to/from VR.
+        // Skip the animation when the screen is off or suspended.
         boolean brightnessAdjusted = false;
         final boolean brightnessIsTemporary =
                 (mBrightnessReason.getReason() == BrightnessReason.REASON_TEMPORARY)
@@ -1418,8 +1383,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 }
             }
 
-            final boolean wasOrWillBeInVr =
-                    (state == Display.STATE_VR || oldState == Display.STATE_VR);
             final boolean initialRampSkip = (state == Display.STATE_ON && mSkipRampState
                     != RAMP_STATE_SKIP_NONE) || mDisplayPowerProximityStateController
                     .shouldSkipRampBecauseOfProximityChangeToNegative();
@@ -1462,7 +1425,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     && (animateValue != currentBrightness
                     || sdrAnimateValue != currentSdrBrightness)) {
                 if (initialRampSkip || hasBrightnessBuckets
-                        || wasOrWillBeInVr || !isDisplayContentVisible || brightnessIsTemporary) {
+                        || !isDisplayContentVisible || brightnessIsTemporary) {
                     animateScreenBrightness(animateValue, sdrAnimateValue,
                             SCREEN_ANIMATION_RATE_MINIMUM);
                 } else {
@@ -1875,12 +1838,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 fallbackType);
     }
 
-    private float clampScreenBrightnessForVr(float value) {
-        return MathUtils.constrain(
-                value, mScreenBrightnessForVrRangeMinimum,
-                mScreenBrightnessForVrRangeMaximum);
-    }
-
     private float clampScreenBrightness(float value) {
         if (Float.isNaN(value)) {
             value = PowerManager.BRIGHTNESS_MIN;
@@ -1969,23 +1926,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 mPowerState.setColorFadeLevel(1.0f);
                 mPowerState.dismissColorFade();
             }
-        } else if (target == Display.STATE_VR) {
-            // Wait for brightness animation to complete beforehand when entering VR
-            // from screen on to prevent a perceptible jump because brightness may operate
-            // differently when the display is configured for dozing.
-            if (mScreenBrightnessRampAnimator.isAnimating()
-                    && mPowerState.getScreenState() == Display.STATE_ON) {
-                return;
-            }
-
-            // Set screen state.
-            if (!setScreenState(Display.STATE_VR)) {
-                return; // screen on blocked
-            }
-
-            // Dismiss the black surface without fanfare.
-            mPowerState.setColorFadeLevel(1.0f);
-            mPowerState.dismissColorFade();
         } else if (target == Display.STATE_DOZE) {
             // Want screen dozing.
             // Wait for brightness animation to complete beforehand when entering doze
@@ -2102,9 +2042,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 mAutomaticBrightnessController.resetShortTermModel();
             }
         }
-        // We don't bother with a pending variable for VR screen brightness since we just
-        // immediately adapt to it.
-        mScreenBrightnessForVr = getScreenBrightnessForVrSetting();
         sendUpdatePowerState();
     }
 
@@ -2121,13 +2058,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             brightness = mScreenBrightnessDefault;
         }
         return clampAbsoluteBrightness(brightness);
-    }
-
-    private float getScreenBrightnessForVrSetting() {
-        final float brightnessFloat = Settings.System.getFloatForUser(mContext.getContentResolver(),
-                Settings.System.SCREEN_BRIGHTNESS_FOR_VR_FLOAT, mScreenBrightnessForVrDefault,
-                UserHandle.USER_CURRENT);
-        return clampScreenBrightnessForVr(brightnessFloat);
     }
 
     @Override
@@ -2243,9 +2173,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         pw.println("  mScreenBrightnessRangeDefault=" + mScreenBrightnessDefault);
         pw.println("  mScreenBrightnessDozeConfig=" + mScreenBrightnessDozeConfig);
         pw.println("  mScreenBrightnessDimConfig=" + mScreenBrightnessDimConfig);
-        pw.println("  mScreenBrightnessForVrRangeMinimum=" + mScreenBrightnessForVrRangeMinimum);
-        pw.println("  mScreenBrightnessForVrRangeMaximum=" + mScreenBrightnessForVrRangeMaximum);
-        pw.println("  mScreenBrightnessForVrDefault=" + mScreenBrightnessForVrDefault);
         pw.println("  mUseSoftwareAutoBrightnessConfig=" + mUseSoftwareAutoBrightnessConfig);
         pw.println("  mSkipScreenOnBrightnessRamp=" + mSkipScreenOnBrightnessRamp);
         pw.println("  mColorFadeFadesConfig=" + mColorFadeFadesConfig);
@@ -2281,14 +2208,12 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         pw.println("  mBrightnessReason=" + mBrightnessReason);
         pw.println("  mTemporaryAutoBrightnessAdjustment=" + mTemporaryAutoBrightnessAdjustment);
         pw.println("  mPendingAutoBrightnessAdjustment=" + mPendingAutoBrightnessAdjustment);
-        pw.println("  mScreenBrightnessForVrFloat=" + mScreenBrightnessForVr);
         pw.println("  mAppliedAutoBrightness=" + mAppliedAutoBrightness);
         pw.println("  mAppliedDimming=" + mAppliedDimming);
         pw.println("  mAppliedLowPower=" + mAppliedLowPower);
         pw.println("  mAppliedThrottling=" + mAppliedThrottling);
         pw.println("  mAppliedTemporaryAutoBrightnessAdjustment="
                 + mAppliedTemporaryAutoBrightnessAdjustment);
-        pw.println("  mAppliedBrightnessBoost=" + mAppliedBrightnessBoost);
         pw.println("  mDozing=" + mDozing);
         pw.println("  mSkipRampState=" + skipRampStateToString(mSkipRampState));
         pw.println("  mScreenOnBlockStartRealTime=" + mScreenOnBlockStartRealTime);

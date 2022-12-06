@@ -17,12 +17,12 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.Direction
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -36,68 +36,55 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTests:MovePipDownShelfHeightChangeTest`
  *
  * Actions:
+ * ```
  *     Launch [pipApp] in pip mode
  *     Launch [testApp]
  *     Press home
  *     Check if pip window moves up (visually)
- *
+ * ```
  * Notes:
+ * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited [PipTransition]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class MovePipUpShelfHeightChangeTest(
-    testSpec: FlickerTestParameter
-) : MovePipShelfHeightTransition(testSpec) {
-    /**
-     * Defines the transition used to run the test
-     */
+open class MovePipUpShelfHeightChangeTest(flicker: FlickerTest) :
+    MovePipShelfHeightTransition(flicker) {
+    /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition() {
-            setup {
-                testApp.launchViaIntent(wmHelper)
+        get() =
+            buildTransition() {
+                setup { testApp.launchViaIntent(wmHelper) }
+                transitions { tapl.pressHome() }
+                teardown { testApp.exit(wmHelper) }
             }
-            transitions {
-                tapl.pressHome()
-            }
-            teardown {
-                testApp.exit(wmHelper)
-            }
-        }
 
-    /**
-     * Checks that the visible region of [pipApp] window always moves up during the animation.
-     */
-    @Presubmit
-    @Test
-    fun pipWindowMovesUp() = pipWindowMoves(Direction.UP)
+    /** Checks that the visible region of [pipApp] window always moves up during the animation. */
+    @Presubmit @Test fun pipWindowMovesUp() = pipWindowMoves(Direction.UP)
 
-    /**
-     * Checks that the visible region of [pipApp] layer always moves up during the animation.
-     */
-    @Presubmit
-    @Test
-    fun pipLayerMovesUp() = pipLayerMoves(Direction.UP)
+    /** Checks that the visible region of [pipApp] layer always moves up during the animation. */
+    @Presubmit @Test fun pipLayerMovesUp() = pipLayerMoves(Direction.UP)
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                supportedRotations = listOf(Surface.ROTATION_0)
+        fun getParams(): List<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
             )
         }
     }

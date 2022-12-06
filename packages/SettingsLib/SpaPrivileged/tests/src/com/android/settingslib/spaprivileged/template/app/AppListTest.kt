@@ -44,7 +44,7 @@ class AppListTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private var context: Context = ApplicationProvider.getApplicationContext()
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
     fun whenNoApps() {

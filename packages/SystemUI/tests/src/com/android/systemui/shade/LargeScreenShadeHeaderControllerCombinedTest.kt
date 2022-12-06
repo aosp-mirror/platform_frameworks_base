@@ -46,7 +46,6 @@ import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.HEADER_TRANSITION_ID
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
-import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.LARGE_SCREEN_HEADER_TRANSITION_ID
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
@@ -77,6 +76,7 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
@@ -212,20 +212,6 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
     }
 
     @Test
-    fun testCorrectConstraints() {
-        val captor = ArgumentCaptor.forClass(XmlResourceParser::class.java)
-
-        verify(qqsConstraints).load(eq(context), capture(captor))
-        assertThat(captor.value.getResId()).isEqualTo(R.xml.qqs_header)
-
-        verify(qsConstraints).load(eq(context), capture(captor))
-        assertThat(captor.value.getResId()).isEqualTo(R.xml.qs_header)
-
-        verify(largeScreenConstraints).load(eq(context), capture(captor))
-        assertThat(captor.value.getResId()).isEqualTo(R.xml.large_screen_shade_header)
-    }
-
-    @Test
     fun testControllersCreatedAndInitialized() {
         verify(variableDateViewController).init()
 
@@ -284,16 +270,6 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
 
         controller.largeScreenActive = true
         assertThat(viewVisibility).isEqualTo(View.INVISIBLE)
-    }
-
-    @Test
-    fun testLargeScreenActive_true() {
-        controller.largeScreenActive = false // Make sure there's a change
-        clearInvocations(view)
-
-        controller.largeScreenActive = true
-
-        verify(view).setTransition(LARGE_SCREEN_HEADER_TRANSITION_ID)
     }
 
     @Test
@@ -694,6 +670,25 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         height = 150
         clock.executeLayoutChange(0, 0, width, height, captor.value)
         verify(clock).pivotY = height.toFloat() / 2
+    }
+
+    @Test
+    fun onDensityOrFontScaleChanged_reloadConstraints() {
+        // After density or font scale change, constraints need to be reloaded to reflect new
+        // dimensions.
+        reset(qqsConstraints)
+        reset(qsConstraints)
+        reset(largeScreenConstraints)
+
+        configurationController.notifyDensityOrFontScaleChanged()
+
+        val captor = ArgumentCaptor.forClass(XmlResourceParser::class.java)
+        verify(qqsConstraints).load(eq(context), capture(captor))
+        assertThat(captor.value.getResId()).isEqualTo(R.xml.qqs_header)
+        verify(qsConstraints).load(eq(context), capture(captor))
+        assertThat(captor.value.getResId()).isEqualTo(R.xml.qs_header)
+        verify(largeScreenConstraints).load(eq(context), capture(captor))
+        assertThat(captor.value.getResId()).isEqualTo(R.xml.large_screen_shade_header)
     }
 
     private fun View.executeLayoutChange(

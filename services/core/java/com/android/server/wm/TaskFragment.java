@@ -1151,8 +1151,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
 
         next.delayedResume = false;
-        final TaskDisplayArea taskDisplayArea = getDisplayArea();
 
+        // If we are currently pausing an activity, then don't do anything until that is done.
+        final boolean allPausedComplete = mRootWindowContainer.allPausedActivitiesComplete();
+        if (!allPausedComplete) {
+            ProtoLog.v(WM_DEBUG_STATES,
+                    "resumeTopActivity: Skip resume: some activity pausing.");
+            return false;
+        }
+
+        final TaskDisplayArea taskDisplayArea = getDisplayArea();
         // If the top activity is the resumed one, nothing to do.
         if (mResumedActivity == next && next.isState(RESUMED)
                 && taskDisplayArea.allResumedActivitiesComplete()) {
@@ -1172,14 +1180,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             }
             ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivity: Top activity "
                     + "resumed %s", next);
-            return false;
-        }
-
-        // If we are currently pausing an activity, then don't do anything until that is done.
-        final boolean allPausedComplete = mRootWindowContainer.allPausedActivitiesComplete();
-        if (!allPausedComplete) {
-            ProtoLog.v(WM_DEBUG_STATES,
-                    "resumeTopActivity: Skip resume: some activity pausing.");
             return false;
         }
 
@@ -2320,11 +2320,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         super.onConfigurationChanged(newParentConfig);
-
-        if (mTaskFragmentOrganizer != null) {
-            updateOrganizedTaskFragmentSurface();
-        }
-
+        updateOrganizedTaskFragmentSurface();
         sendTaskFragmentInfoChanged();
     }
 
@@ -2337,8 +2333,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         updateOrganizedTaskFragmentSurface();
     }
 
-    private void updateOrganizedTaskFragmentSurface() {
-        if (mDelayOrganizedTaskFragmentSurfaceUpdate) {
+    /**
+     * TaskFragmentOrganizer doesn't have access to the surface for security reasons, so we need to
+     * update its surface on the server side if it is not collected for Shell or in pending
+     * animation.
+     */
+    void updateOrganizedTaskFragmentSurface() {
+        if (mDelayOrganizedTaskFragmentSurfaceUpdate || mTaskFragmentOrganizer == null) {
             return;
         }
         if (mTransitionController.isShellTransitionsEnabled()
@@ -2370,7 +2371,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return;
         }
 
-        final Rect bounds = getBounds();
+        // If this TaskFragment is closing while resizing, crop to the starting bounds instead.
+        final Rect bounds = isClosingWhenResizing()
+                ? mDisplayContent.mClosingChangingContainers.get(this)
+                : getBounds();
         final int width = bounds.width();
         final int height = bounds.height();
         if (!forceUpdate && width == mLastSurfaceSize.x && height == mLastSurfaceSize.y) {
@@ -2416,6 +2420,15 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         final Rect endBounds = getConfiguration().windowConfiguration.getBounds();
         return endBounds.width() != startBounds.width()
                 || endBounds.height() != startBounds.height();
+    }
+
+    /** Records the starting bounds of the closing organized TaskFragment. */
+    void setClosingChangingStartBoundsIfNeeded() {
+        if (isOrganizedTaskFragment() && mDisplayContent != null
+                && mDisplayContent.mChangingContainers.remove(this)) {
+            mDisplayContent.mClosingChangingContainers.put(
+                    this, new Rect(mSurfaceFreezer.mFreezeBounds));
+        }
     }
 
     @Override
@@ -2578,6 +2591,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return true;
         }
         return false;
+    }
+
+    @Override
+    boolean canCustomizeAppTransition() {
+        // This is only called when the app transition is going to be played by system server. In
+        // this case, we should allow custom app transition for fullscreen embedded TaskFragment
+        // just like Activity.
+        return isEmbedded() && matchParentBounds();
     }
 
     /** Clear {@link #mLastPausedActivity} for all {@link TaskFragment} children */

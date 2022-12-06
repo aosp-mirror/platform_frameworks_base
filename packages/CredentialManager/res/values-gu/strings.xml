@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_name (4539824758261855508) -->
-    <skip />
+    <string name="app_name" msgid="4539824758261855508">"લૉગ ઇન વિગતોના મેનેજર"</string>
     <string name="string_cancel" msgid="6369133483981306063">"રદ કરો"</string>
     <string name="string_continue" msgid="1346732695941131882">"ચાલુ રાખો"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"કોઈ અન્ય સ્થાન પર બનાવો"</string>
@@ -31,6 +30,8 @@
     <skip />
     <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
     <skip />
+    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
+    <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"શું તમારા બધા સાઇન-ઇન માટે <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>નો ઉપયોગ કરીએ?"</string>
     <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
     <skip />
@@ -39,8 +40,7 @@
     <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> પાસવર્ડ, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> પાસકી"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> પાસવર્ડ"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> પાસકી"</string>
-    <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
-    <skip />
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"પાસકી"</string>
     <string name="another_device" msgid="5147276802037801217">"કોઈ અન્ય ડિવાઇસ"</string>
     <string name="other_password_manager" msgid="565790221427004141">"અન્ય પાસવર્ડ મેનેજર"</string>
     <string name="close_sheet" msgid="1393792015338908262">"શીટ બંધ કરો"</string>

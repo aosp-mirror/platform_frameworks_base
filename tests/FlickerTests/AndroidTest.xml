@@ -19,6 +19,8 @@
         <option name="run-command" value="pm disable com.google.android.internal.betterbug" />
         <!-- restart launcher to activate TAPL -->
         <option name="run-command" value="setprop ro.test_harness 1 ; am force-stop com.google.android.apps.nexuslauncher" />
+        <!-- Ensure output directory is empty at the start -->
+        <option name="run-command" value="rm -rf /sdcard/flicker" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true"/>

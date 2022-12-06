@@ -38,19 +38,14 @@ import com.android.settingslib.spaprivileged.model.enterprise.BlockedByAdmin
 import com.android.settingslib.spaprivileged.model.enterprise.NoRestricted
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictedMode
 import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
-import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProvider
+import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderFactory
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderImpl
 
 @Composable
-fun RestrictedSwitchPreference(model: SwitchPreferenceModel, restrictions: Restrictions) {
-    RestrictedSwitchPreferenceImpl(model, restrictions, ::RestrictionsProviderImpl)
-}
-
-@Composable
-internal fun RestrictedSwitchPreferenceImpl(
+fun RestrictedSwitchPreference(
     model: SwitchPreferenceModel,
     restrictions: Restrictions,
-    restrictionsProviderFactory: (Context, Restrictions) -> RestrictionsProvider,
+    restrictionsProviderFactory: RestrictionsProviderFactory = ::RestrictionsProviderImpl,
 ) {
     if (restrictions.keys.isEmpty()) {
         SwitchPreference(model)

@@ -423,8 +423,6 @@ public abstract class DisplayManagerInternal {
         public static final int POLICY_DIM = 2;
         // Policy: Make the screen bright as usual.
         public static final int POLICY_BRIGHT = 3;
-        // Policy: Keep the screen and display optimized for VR mode.
-        public static final int POLICY_VR = 4;
 
         // The basic overall policy to apply: off, doze, dim or bright.
         public int policy;
@@ -487,10 +485,6 @@ public abstract class DisplayManagerInternal {
 
         public boolean isBrightOrDim() {
             return policy == POLICY_BRIGHT || policy == POLICY_DIM;
-        }
-
-        public boolean isVr() {
-            return policy == POLICY_VR;
         }
 
         public void copyFrom(DisplayPowerRequest other) {
@@ -566,8 +560,6 @@ public abstract class DisplayManagerInternal {
                     return "DIM";
                 case POLICY_BRIGHT:
                     return "BRIGHT";
-                case POLICY_VR:
-                    return "VR";
                 default:
                     return Integer.toString(policy);
             }

@@ -95,6 +95,24 @@ class UserRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun userSwitcherSettings_isUserSwitcherEnabled_notInitialized() = runSelfCancelingTest {
+        underTest = create(this)
+
+        var value: UserSwitcherSettingsModel? = null
+        underTest.userSwitcherSettings.onEach { value = it }.launchIn(this)
+
+        assertUserSwitcherSettings(
+            model = value,
+            expectedSimpleUserSwitcher = false,
+            expectedAddUsersFromLockscreen = false,
+            expectedUserSwitcherEnabled =
+                context.resources.getBoolean(
+                    com.android.internal.R.bool.config_showUserSwitcherByDefault
+                ),
+        )
+    }
+
+    @Test
     fun refreshUsers() = runSelfCancelingTest {
         underTest = create(this)
         val initialExpectedValue =

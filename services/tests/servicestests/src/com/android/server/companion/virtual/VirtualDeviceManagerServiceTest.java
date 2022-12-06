@@ -212,14 +212,14 @@ public class VirtualDeviceManagerServiceTest {
 
     private ArrayList<ActivityInfo> getActivityInfoList(
             String packageName, String name, boolean displayOnRemoveDevices,
-            String targetDisplayCategory) {
+            String requiredDisplayCategory) {
         ActivityInfo activityInfo = new ActivityInfo();
         activityInfo.packageName = packageName;
         activityInfo.name = name;
         activityInfo.flags = displayOnRemoveDevices
                 ? FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES : FLAG_CANNOT_DISPLAY_ON_REMOTE_DEVICES;
         activityInfo.applicationInfo = mApplicationInfoMock;
-        activityInfo.targetDisplayCategory = targetDisplayCategory;
+        activityInfo.requiredDisplayCategory = requiredDisplayCategory;
         return new ArrayList<>(Arrays.asList(activityInfo));
     }
 

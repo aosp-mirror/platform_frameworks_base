@@ -22,11 +22,22 @@ import android.os.Trace
  * Run a block within a [Trace] section.
  * Calls [Trace.beginSection] before and [Trace.endSection] after the passed block.
  */
-inline fun <T> traceSection(tag: String, block: () -> T): T {
-    Trace.beginSection(tag)
-    try {
-        return block()
-    } finally {
-        Trace.endSection()
+inline fun <T> traceSection(tag: String, block: () -> T): T =
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_APP)) {
+            Trace.traceBegin(Trace.TRACE_TAG_APP, tag)
+            try {
+                block()
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_APP)
+            }
+        } else {
+            block()
+        }
+
+class TraceUtils {
+    companion object {
+        inline fun traceRunnable(tag: String, crossinline block: () -> Unit): Runnable {
+            return Runnable { traceSection(tag) { block() } }
+        }
     }
 }

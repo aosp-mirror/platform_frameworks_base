@@ -146,17 +146,11 @@ public enum ScrimState {
             mBehindAlpha = mClipQsScrim ? 1 : mDefaultScrimAlpha;
             mNotifAlpha = 1f;
             mFrontAlpha = 0f;
-            mBehindTint = Color.BLACK;
+            mBehindTint = mClipQsScrim ? Color.TRANSPARENT : Color.BLACK;
 
             if (mClipQsScrim) {
                 updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
             }
-        }
-
-        // to make sure correct color is returned before "prepare" is called
-        @Override
-        public int getBehindTint() {
-            return Color.BLACK;
         }
     },
 

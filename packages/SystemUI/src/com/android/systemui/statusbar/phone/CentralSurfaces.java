@@ -28,7 +28,6 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.RemoteAnimationAdapter;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,7 +50,6 @@ import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
-import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.NotificationPresenter;
 
@@ -286,9 +284,11 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void animateCollapseQuickSettings();
 
-    void onTouchEvent(MotionEvent event);
+    /** */
+    boolean getCommandQueuePanelsEnabled();
 
-    GestureRecorder getGestureRecorder();
+    /** */
+    int getStatusBarWindowState();
 
     BiometricUnlockController getBiometricUnlockController();
 
@@ -404,10 +404,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     LightRevealScrim getLightRevealScrim();
 
-    void onTrackingStarted();
-
-    void onClosingFinished();
-
     // TODO: Figure out way to remove these.
     NavigationBarView getNavigationBarView();
 
@@ -490,13 +486,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     boolean isKeyguardSecure();
 
     void updateNotificationPanelTouchState();
-
-    /**
-     * TODO(b/257041702) delete this
-     * @deprecated Use ShadeController#makeExpandedVisible
-     */
-    @Deprecated
-    void makeExpandedVisible(boolean force);
 
     int getDisplayId();
 

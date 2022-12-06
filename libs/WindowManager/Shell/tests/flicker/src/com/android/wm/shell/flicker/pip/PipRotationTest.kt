@@ -18,16 +18,15 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -45,7 +44,7 @@ import org.junit.runners.Parameterized
  * ```
  *     Launch a [pipApp] in pip mode
  *     Launch another app [fixedApp] (appears below pip)
- *     Rotate the screen from [testSpec.startRotation] to [testSpec.endRotation]
+ *     Rotate the screen from [flicker.scenario.startRotation] to [flicker.scenario.endRotation]
  *     (usually, 0->90 and 90->0)
  * ```
  * Notes:
@@ -62,10 +61,10 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
+open class PipRotationTest(flicker: FlickerTest) : PipTransition(flicker) {
     private val testApp = SimpleAppHelper(instrumentation)
-    private val screenBoundsStart = WindowUtils.getDisplayBounds(testSpec.startRotation)
-    private val screenBoundsEnd = WindowUtils.getDisplayBounds(testSpec.endRotation)
+    private val screenBoundsStart = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
+    private val screenBoundsEnd = WindowUtils.getDisplayBounds(flicker.scenario.endRotation)
 
     @Before
     open fun before() {
@@ -76,9 +75,9 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
         get() = buildTransition {
             setup {
                 testApp.launchViaIntent(wmHelper)
-                setRotation(testSpec.startRotation)
+                setRotation(flicker.scenario.startRotation)
             }
-            transitions { setRotation(testSpec.endRotation) }
+            transitions { setRotation(flicker.scenario.endRotation) }
         }
 
     /** Checks the position of the navigation bar at the start and end of the transition */
@@ -90,14 +89,14 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     @Presubmit
     @Test
     fun fixedAppLayer_StartingBounds() {
-        testSpec.assertLayersStart { visibleRegion(testApp).coversAtMost(screenBoundsStart) }
+        flicker.assertLayersStart { visibleRegion(testApp).coversAtMost(screenBoundsStart) }
     }
 
     /** Checks that [testApp] layer is within [screenBoundsEnd] at the end of the transition */
     @Presubmit
     @Test
     fun fixedAppLayer_EndingBounds() {
-        testSpec.assertLayersEnd { visibleRegion(testApp).coversAtMost(screenBoundsEnd) }
+        flicker.assertLayersEnd { visibleRegion(testApp).coversAtMost(screenBoundsEnd) }
     }
 
     /**
@@ -107,7 +106,7 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     @Presubmit
     @Test
     fun appLayers_StartingBounds() {
-        testSpec.assertLayersStart {
+        flicker.assertLayersStart {
             visibleRegion(testApp.or(pipApp)).coversExactly(screenBoundsStart)
         }
     }
@@ -119,14 +118,12 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     @Presubmit
     @Test
     fun appLayers_EndingBounds() {
-        testSpec.assertLayersEnd {
-            visibleRegion(testApp.or(pipApp)).coversExactly(screenBoundsEnd)
-        }
+        flicker.assertLayersEnd { visibleRegion(testApp.or(pipApp)).coversExactly(screenBoundsEnd) }
     }
 
     /** Checks that [pipApp] layer is within [screenBoundsStart] at the start of the transition */
     private fun pipLayerRotates_StartingBounds_internal() {
-        testSpec.assertLayersStart { visibleRegion(pipApp).coversAtMost(screenBoundsStart) }
+        flicker.assertLayersStart { visibleRegion(pipApp).coversAtMost(screenBoundsStart) }
     }
 
     /** Checks that [pipApp] layer is within [screenBoundsStart] at the start of the transition */
@@ -140,7 +137,7 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     @Presubmit
     @Test
     fun pipLayerRotates_EndingBounds() {
-        testSpec.assertLayersEnd { visibleRegion(pipApp).coversAtMost(screenBoundsEnd) }
+        flicker.assertLayersEnd { visibleRegion(pipApp).coversAtMost(screenBoundsEnd) }
     }
 
     /**
@@ -149,7 +146,7 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     @Presubmit
     @Test
     fun pipIsAboveFixedAppWindow_Start() {
-        testSpec.assertWmStart { isAboveWindow(pipApp, testApp) }
+        flicker.assertWmStart { isAboveWindow(pipApp, testApp) }
     }
 
     /**
@@ -158,7 +155,7 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     @Presubmit
     @Test
     fun pipIsAboveFixedAppWindow_End() {
-        testSpec.assertWmEnd { isAboveWindow(pipApp, testApp) }
+        flicker.assertWmEnd { isAboveWindow(pipApp, testApp) }
     }
 
     @Presubmit
@@ -171,16 +168,13 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
-         * screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring repetitions, screen orientation
+         * and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigRotationTests(
-                    supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90)
-                )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.rotationTests()
         }
     }
 }

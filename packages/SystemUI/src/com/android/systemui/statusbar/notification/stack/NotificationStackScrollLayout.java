@@ -32,10 +32,12 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.ColorInt;
+import android.annotation.DrawableRes;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -4556,7 +4558,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    void setEmptyShadeView(EmptyShadeView emptyShadeView) {
+    public void setEmptyShadeView(EmptyShadeView emptyShadeView) {
         int index = -1;
         if (mEmptyShadeView != null) {
             index = indexOfChild(mEmptyShadeView);
@@ -4567,14 +4569,42 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    void updateEmptyShadeView(boolean visible, boolean areNotificationsHiddenInShade) {
+    void updateEmptyShadeView(
+            boolean visible, boolean areNotificationsHiddenInShade, boolean areSeenNotifsFiltered) {
         mEmptyShadeView.setVisible(visible, mIsExpanded && mAnimationsEnabled);
 
+        if (areNotificationsHiddenInShade) {
+            updateEmptyShadeView(R.string.dnd_suppressing_shade_text, 0, 0);
+        } else if (areSeenNotifsFiltered) {
+            updateEmptyShadeView(
+                    R.string.no_unseen_notif_text,
+                    R.string.unlock_to_see_notif_text,
+                    R.drawable.ic_friction_lock_closed);
+        } else {
+            updateEmptyShadeView(R.string.empty_shade_text, 0, 0);
+        }
+    }
+
+    private void updateEmptyShadeView(
+            @StringRes int newTextRes,
+            @StringRes int newFooterTextRes,
+            @DrawableRes int newFooterIconRes) {
         int oldTextRes = mEmptyShadeView.getTextResource();
-        int newTextRes = areNotificationsHiddenInShade
-                ? R.string.dnd_suppressing_shade_text : R.string.empty_shade_text;
         if (oldTextRes != newTextRes) {
             mEmptyShadeView.setText(newTextRes);
+        }
+        int oldFooterTextRes = mEmptyShadeView.getFooterTextResource();
+        if (oldFooterTextRes != newFooterTextRes) {
+            mEmptyShadeView.setFooterText(newFooterTextRes);
+        }
+        int oldFooterIconRes = mEmptyShadeView.getFooterIconResource();
+        if (oldFooterIconRes != newFooterIconRes) {
+            mEmptyShadeView.setFooterIcon(newFooterIconRes);
+        }
+        if (newFooterIconRes != 0 || newFooterTextRes != 0) {
+            mEmptyShadeView.setFooterVisibility(View.VISIBLE);
+        } else {
+            mEmptyShadeView.setFooterVisibility(View.GONE);
         }
     }
 
@@ -5348,9 +5378,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void inflateEmptyShadeView() {
+        EmptyShadeView oldView = mEmptyShadeView;
         EmptyShadeView view = (EmptyShadeView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_no_notifications, this, false);
-        view.setText(R.string.empty_shade_text);
         view.setOnClickListener(v -> {
             final boolean showHistory = mController.isHistoryEnabled();
             Intent intent = showHistory
@@ -5359,6 +5389,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mCentralSurfaces.startActivity(intent, true, true, Intent.FLAG_ACTIVITY_SINGLE_TOP);
         });
         setEmptyShadeView(view);
+        updateEmptyShadeView(
+                oldView == null ? R.string.empty_shade_text : oldView.getTextResource(),
+                oldView == null ? 0 : oldView.getFooterTextResource(),
+                oldView == null ? 0 : oldView.getFooterIconResource());
     }
 
     /**

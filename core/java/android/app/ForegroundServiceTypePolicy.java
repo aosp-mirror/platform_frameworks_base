@@ -58,6 +58,7 @@ import android.hardware.usb.UsbManager;
 import android.healthconnect.HealthConnectManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.permission.PermissionCheckerManager;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
@@ -880,11 +881,12 @@ public abstract class ForegroundServiceTypePolicy {
         int checkPermission(@NonNull Context context, @NonNull String name, int callerUid,
                 int callerPid, String packageName, boolean allowWhileInUse) {
             // Simple case, check if it's already granted.
-            if (PermissionChecker.checkPermissionForPreflight(context, name,
-                    callerPid, callerUid, packageName) == PERMISSION_GRANTED) {
+            @PackageManager.PermissionResult int result;
+            if ((result = PermissionChecker.checkPermissionForPreflight(context, name,
+                    callerPid, callerUid, packageName)) == PERMISSION_GRANTED) {
                 return PERMISSION_GRANTED;
             }
-            if (allowWhileInUse) {
+            if (allowWhileInUse && result == PermissionCheckerManager.PERMISSION_SOFT_DENIED) {
                 // Check its appops
                 final int opCode = AppOpsManager.permissionToOpCode(name);
                 final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);

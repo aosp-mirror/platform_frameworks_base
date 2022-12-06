@@ -440,6 +440,7 @@ package android.app {
     method @NonNull public java.util.Set<java.lang.String> getAdoptedShellPermissions();
     method @Deprecated public boolean grantRuntimePermission(String, String, android.os.UserHandle);
     method public boolean injectInputEvent(@NonNull android.view.InputEvent, boolean, boolean);
+    method public void injectInputEventToInputFilter(@NonNull android.view.InputEvent);
     method @Deprecated public boolean revokeRuntimePermission(String, String, android.os.UserHandle);
     method public void syncInputTransactions();
     method public void syncInputTransactions(boolean);
@@ -1312,6 +1313,14 @@ package android.hardware.lights {
 
   public abstract class LightsManager {
     method @NonNull public abstract android.hardware.lights.LightsManager.LightsSession openSession(int);
+  }
+
+}
+
+package android.hardware.location {
+
+  public final class ContextHubManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public long[] getPreloadedNanoAppIds(@NonNull android.hardware.location.ContextHubInfo);
   }
 
 }

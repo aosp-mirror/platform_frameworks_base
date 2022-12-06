@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.SB_LOGGING_TAG
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logInputChange
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.ACTIVITY_PREFIX
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiActivityModel
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -109,7 +110,12 @@ class WifiRepositoryImpl @Inject constructor(
             merge(wifiNetworkChangeEvents, wifiStateChangeEvents)
                 .mapLatest { wifiManager.isWifiEnabled }
                 .distinctUntilChanged()
-                .logInputChange(logger, "enabled")
+                .logDiffsForTable(
+                    wifiTableLogBuffer,
+                    columnPrefix = "",
+                    columnName = "isWifiEnabled",
+                    initialValue = wifiManager.isWifiEnabled,
+                )
                 .stateIn(
                     scope = scope,
                     started = SharingStarted.WhileSubscribed(),
@@ -143,7 +149,12 @@ class WifiRepositoryImpl @Inject constructor(
         awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
     }
         .distinctUntilChanged()
-        .logInputChange(logger, "isWifiDefault")
+        .logDiffsForTable(
+            wifiTableLogBuffer,
+            columnPrefix = "",
+            columnName = "isWifiDefault",
+            initialValue = false,
+        )
         .stateIn(
             scope,
             started = SharingStarted.WhileSubscribed(),
@@ -233,6 +244,11 @@ class WifiRepositoryImpl @Inject constructor(
                     awaitClose { wifiManager.unregisterTrafficStateCallback(callback) }
                 }
             }
+                .logDiffsForTable(
+                    wifiTableLogBuffer,
+                    columnPrefix = ACTIVITY_PREFIX,
+                    initialValue = ACTIVITY_DEFAULT,
+                )
                 .stateIn(
                     scope,
                     started = SharingStarted.WhileSubscribed(),

@@ -14,4 +14,16 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"La rete a cui stai tentando di accedere presenta problemi di sicurezza."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Ad esempio, la pagina di accesso potrebbe non appartenere all\'organizzazione indicata."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Continua comunque dal browser"</string>
+    <!-- no translation found for network_boost_notification_channel (5430986172506159199) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_title (8226368121348880044) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_detail (3812434025544196192) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_button_not_now (4129218252146702688) -->
+    <skip />
+    <!-- no translation found for network_boost_notification_button_manage (1511552684142641182) -->
+    <skip />
+    <!-- no translation found for slice_purchase_app_label (915654761797446390) -->
+    <skip />
 </resources>

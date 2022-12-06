@@ -570,6 +570,10 @@ void SkiaCanvas::drawVertices(const SkVertices* vertices, SkBlendMode mode, cons
     applyLooper(&paint, [&](const SkPaint& p) { mCanvas->drawVertices(vertices, mode, p); });
 }
 
+void SkiaCanvas::drawMesh(const SkMesh& mesh, sk_sp<SkBlender> blender, const SkPaint& paint) {
+    mCanvas->drawMesh(mesh, blender, paint);
+}
+
 // ----------------------------------------------------------------------------
 // Canvas draw operations: Bitmaps
 // ----------------------------------------------------------------------------

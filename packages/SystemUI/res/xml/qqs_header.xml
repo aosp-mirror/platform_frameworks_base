@@ -59,7 +59,6 @@
         <Layout
             android:layout_width="wrap_content"
             android:layout_height="@dimen/new_qs_header_non_clickable_element_height"
-            app:layout_constrainedWidth="true"
             app:layout_constraintHeight_min="@dimen/new_qs_header_non_clickable_element_height"
             app:layout_constraintStart_toEndOf="@id/date"
             app:layout_constraintEnd_toStartOf="@id/batteryRemainingIcon"
@@ -75,7 +74,6 @@
         <Layout
             android:layout_width="wrap_content"
             android:layout_height="@dimen/new_qs_header_non_clickable_element_height"
-            app:layout_constrainedWidth="true"
             app:layout_constraintHeight_min="@dimen/new_qs_header_non_clickable_element_height"
             app:layout_constraintStart_toEndOf="@id/statusIcons"
             app:layout_constraintEnd_toEndOf="@id/end_guide"
@@ -112,5 +110,4 @@
             app:layout_constraintHorizontal_bias="1"
         />
     </Constraint>
-
 </ConstraintSet>

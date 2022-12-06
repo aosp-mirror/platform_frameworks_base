@@ -31,7 +31,7 @@ class AndroidGlobalIssueRegistry : IssueRegistry() {
             EnforcePermissionDetector.ISSUE_MISSING_ENFORCE_PERMISSION,
             EnforcePermissionDetector.ISSUE_MISMATCHING_ENFORCE_PERMISSION,
             EnforcePermissionHelperDetector.ISSUE_ENFORCE_PERMISSION_HELPER,
-            SimpleManualPermissionEnforcementDetector.ISSUE_USE_ENFORCE_PERMISSION_ANNOTATION,
+            SimpleManualPermissionEnforcementDetector.ISSUE_SIMPLE_MANUAL_PERMISSION_ENFORCEMENT,
     )
 
     override val api: Int

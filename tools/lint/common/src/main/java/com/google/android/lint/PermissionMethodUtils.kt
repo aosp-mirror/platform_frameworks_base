@@ -17,6 +17,7 @@
 package com.google.android.lint
 
 import com.android.tools.lint.detector.api.getUMethod
+import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UParameter
@@ -26,10 +27,11 @@ fun isPermissionMethodCall(callExpression: UCallExpression): Boolean {
     return hasPermissionMethodAnnotation(method)
 }
 
-fun hasPermissionMethodAnnotation(method: UMethod): Boolean = method.annotations
-        .any {
-            it.hasQualifiedName(ANNOTATION_PERMISSION_METHOD)
-        }
+fun hasPermissionMethodAnnotation(method: UMethod): Boolean =
+        getPermissionMethodAnnotation(method) != null
+
+fun getPermissionMethodAnnotation(method: UMethod?): UAnnotation? = method?.uAnnotations
+        ?.firstOrNull { it.qualifiedName == ANNOTATION_PERMISSION_METHOD }
 
 fun hasPermissionNameAnnotation(parameter: UParameter) = parameter.annotations.any {
     it.hasQualifiedName(ANNOTATION_PERMISSION_NAME)

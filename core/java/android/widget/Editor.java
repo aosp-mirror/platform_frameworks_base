@@ -2054,7 +2054,10 @@ public class Editor {
         }
     }
 
-    void onDraw(Canvas canvas, Layout layout, Path highlight, Paint highlightPaint,
+    void onDraw(Canvas canvas, Layout layout,
+            List<Path> highlightPaths,
+            List<Paint> highlightPaints,
+            Path selectionHighlight, Paint selectionHighlightPaint,
             int cursorOffsetVertical) {
         final int selectionStart = mTextView.getSelectionStart();
         final int selectionEnd = mTextView.getSelectionEnd();
@@ -2078,37 +2081,41 @@ public class Editor {
             mCorrectionHighlighter.draw(canvas, cursorOffsetVertical);
         }
 
-        if (highlight != null && selectionStart == selectionEnd && mDrawableForCursor != null) {
+        if (selectionHighlight != null && selectionStart == selectionEnd
+                && mDrawableForCursor != null
+                && !mTextView.hasGesturePreviewHighlight()) {
             drawCursor(canvas, cursorOffsetVertical);
             // Rely on the drawable entirely, do not draw the cursor line.
             // Has to be done after the IMM related code above which relies on the highlight.
-            highlight = null;
+            selectionHighlight = null;
         }
 
         if (mSelectionActionModeHelper != null) {
             mSelectionActionModeHelper.onDraw(canvas);
             if (mSelectionActionModeHelper.isDrawingHighlight()) {
-                highlight = null;
+                selectionHighlight = null;
             }
         }
 
         if (mTextView.canHaveDisplayList() && canvas.isHardwareAccelerated()) {
-            drawHardwareAccelerated(canvas, layout, highlight, highlightPaint,
-                    cursorOffsetVertical);
+            drawHardwareAccelerated(canvas, layout, highlightPaths, highlightPaints,
+                    selectionHighlight, selectionHighlightPaint, cursorOffsetVertical);
         } else {
-            layout.draw(canvas, highlight, highlightPaint, cursorOffsetVertical);
+            layout.draw(canvas, highlightPaths, highlightPaints, selectionHighlight,
+                    selectionHighlightPaint, cursorOffsetVertical);
         }
     }
 
-    private void drawHardwareAccelerated(Canvas canvas, Layout layout, Path highlight,
-            Paint highlightPaint, int cursorOffsetVertical) {
+    private void drawHardwareAccelerated(Canvas canvas, Layout layout,
+            List<Path> highlightPaths, List<Paint> highlightPaints,
+            Path selectionHighlight, Paint selectionHighlightPaint, int cursorOffsetVertical) {
         final long lineRange = layout.getLineRangeForDraw(canvas);
         int firstLine = TextUtils.unpackRangeStartFromLong(lineRange);
         int lastLine = TextUtils.unpackRangeEndFromLong(lineRange);
         if (lastLine < 0) return;
 
-        layout.drawBackground(canvas, highlight, highlightPaint, cursorOffsetVertical,
-                firstLine, lastLine);
+        layout.drawWithoutText(canvas, highlightPaths, highlightPaints, selectionHighlight,
+                selectionHighlightPaint, cursorOffsetVertical, firstLine, lastLine);
 
         if (layout instanceof DynamicLayout) {
             if (mTextRenderNodes == null) {
@@ -2154,8 +2161,9 @@ public class Editor {
                     continue;
                 }
                 startIndexToFindAvailableRenderNode = drawHardwareAcceleratedInner(canvas, layout,
-                        highlight, highlightPaint, cursorOffsetVertical, blockEndLines,
-                        blockIndices, i, numberOfBlocks, startIndexToFindAvailableRenderNode);
+                        selectionHighlight, selectionHighlightPaint, cursorOffsetVertical,
+                        blockEndLines, blockIndices, i, numberOfBlocks,
+                        startIndexToFindAvailableRenderNode);
                 if (blockEndLines[i] >= lastLine) {
                     lastIndex = Math.max(indexFirstChangedBlock, i + 1);
                     break;
@@ -2169,9 +2177,9 @@ public class Editor {
                             || mTextRenderNodes[blockIndex] == null
                             || mTextRenderNodes[blockIndex].needsToBeShifted) {
                         startIndexToFindAvailableRenderNode = drawHardwareAcceleratedInner(canvas,
-                                layout, highlight, highlightPaint, cursorOffsetVertical,
-                                blockEndLines, blockIndices, block, numberOfBlocks,
-                                startIndexToFindAvailableRenderNode);
+                                layout, selectionHighlight, selectionHighlightPaint,
+                                cursorOffsetVertical, blockEndLines, blockIndices, block,
+                                numberOfBlocks, startIndexToFindAvailableRenderNode);
                     }
                 }
             }
@@ -2707,7 +2715,7 @@ public class Editor {
         unregisterOnBackInvokedCallback();
     }
 
-    private void stopTextActionModeWithPreservingSelection() {
+    void stopTextActionModeWithPreservingSelection() {
         if (mTextActionMode != null) {
             mRestartActionModeOnNextRefresh = true;
         }

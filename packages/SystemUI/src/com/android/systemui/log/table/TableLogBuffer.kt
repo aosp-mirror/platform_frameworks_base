@@ -16,10 +16,7 @@
 
 package com.android.systemui.log.table
 
-import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
-import com.android.systemui.dump.DumpManager
-import com.android.systemui.dump.DumpsysTableLogger
 import com.android.systemui.plugins.util.RingBuffer
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
@@ -83,7 +80,7 @@ class TableLogBuffer(
     maxSize: Int,
     private val name: String,
     private val systemClock: SystemClock,
-) {
+) : Dumpable {
     init {
         if (maxSize <= 0) {
             throw IllegalArgumentException("maxSize must be > 0")
@@ -104,6 +101,9 @@ class TableLogBuffer(
      * @param columnPrefix a prefix that will be applied to every column name that gets logged. This
      * ensures that all the columns related to the same state object will be grouped together in the
      * table.
+     *
+     * @throws IllegalArgumentException if [columnPrefix] or column name contain "|". "|" is used as
+     * the separator token for parsing, so it can't be present in any part of the column name.
      */
     @Synchronized
     fun <T : Diffable<T>> logDiffs(columnPrefix: String, prevVal: T, newVal: T) {
@@ -111,6 +111,25 @@ class TableLogBuffer(
         row.timestamp = systemClock.currentTimeMillis()
         row.columnPrefix = columnPrefix
         newVal.logDiffs(prevVal, row)
+    }
+
+    /**
+     * Logs change(s) to the buffer using [rowInitializer].
+     *
+     * @param rowInitializer a function that will be called immediately to store relevant data on
+     * the row.
+     */
+    @Synchronized
+    fun logChange(columnPrefix: String, rowInitializer: (TableRowLogger) -> Unit) {
+        val row = tempRow
+        row.timestamp = systemClock.currentTimeMillis()
+        row.columnPrefix = columnPrefix
+        rowInitializer(row)
+    }
+
+    /** Logs a boolean change. */
+    fun logChange(prefix: String, columnName: String, value: Boolean) {
+        logChange(systemClock.currentTimeMillis(), prefix, columnName, value)
     }
 
     // Keep these individual [logChange] methods private (don't let clients give us their own
@@ -135,32 +154,31 @@ class TableLogBuffer(
 
     @Synchronized
     private fun obtain(timestamp: Long, prefix: String, columnName: String): TableChange {
+        verifyValidName(prefix, columnName)
         val tableChange = buffer.advance()
         tableChange.reset(timestamp, prefix, columnName)
         return tableChange
     }
 
-    /**
-     * Registers this buffer as dumpables in [dumpManager]. Must be called for the table to be
-     * dumped.
-     *
-     * This will be automatically called in [TableLogBufferFactory.create].
-     */
-    fun registerDumpables(dumpManager: DumpManager) {
-        dumpManager.registerNormalDumpable("$name-changes", changeDumpable)
-        dumpManager.registerNormalDumpable("$name-table", tableDumpable)
+    private fun verifyValidName(prefix: String, columnName: String) {
+        if (prefix.contains(SEPARATOR)) {
+            throw IllegalArgumentException("columnPrefix cannot contain $SEPARATOR but was $prefix")
+        }
+        if (columnName.contains(SEPARATOR)) {
+            throw IllegalArgumentException(
+                "columnName cannot contain $SEPARATOR but was $columnName"
+            )
+        }
     }
 
-    private val changeDumpable = Dumpable { pw, _ -> dumpChanges(pw) }
-    private val tableDumpable = Dumpable { pw, _ -> dumpTable(pw) }
-
-    /** Dumps the list of [TableChange] objects. */
     @Synchronized
-    @VisibleForTesting
-    fun dumpChanges(pw: PrintWriter) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.println(HEADER_PREFIX + name)
+        pw.println("version $VERSION")
         for (i in 0 until buffer.size) {
             buffer[i].dump(pw)
         }
+        pw.println(FOOTER_PREFIX + name)
     }
 
     /** Dumps an individual [TableChange]. */
@@ -170,67 +188,11 @@ class TableLogBuffer(
         }
         val formattedTimestamp = TABLE_LOG_DATE_FORMAT.format(timestamp)
         pw.print(formattedTimestamp)
-        pw.print(" ")
+        pw.print(SEPARATOR)
         pw.print(this.getName())
-        pw.print("=")
+        pw.print(SEPARATOR)
         pw.print(this.getVal())
         pw.println()
-    }
-
-    /**
-     * Coalesces all the [TableChange] objects into a table of values of time and dumps the table.
-     */
-    // TODO(b/259454430): Since this is an expensive process, it could cause the bug report dump to
-    //   fail and/or not dump anything else. We should move this processing to ABT (Android Bug
-    //   Tool), where we have unlimited time to process.
-    @Synchronized
-    @VisibleForTesting
-    fun dumpTable(pw: PrintWriter) {
-        val messages = buffer.iterator().asSequence().toList()
-
-        if (messages.isEmpty()) {
-            return
-        }
-
-        // Step 1: Create list of column headers
-        val headerSet = mutableSetOf<String>()
-        messages.forEach { headerSet.add(it.getName()) }
-        val headers: MutableList<String> = headerSet.toList().sorted().toMutableList()
-        headers.add(0, "timestamp")
-
-        // Step 2: Create a list with the current values for each column. Will be updated with each
-        // change.
-        val currentRow: MutableList<String> = MutableList(headers.size) { DEFAULT_COLUMN_VALUE }
-
-        // Step 3: For each message, make the correct update to [currentRow] and save it to [rows].
-        val columnIndices: Map<String, Int> =
-            headers.mapIndexed { index, headerName -> headerName to index }.toMap()
-        val allRows = mutableListOf<List<String>>()
-
-        messages.forEach {
-            if (!it.hasData()) {
-                return@forEach
-            }
-
-            val formattedTimestamp = TABLE_LOG_DATE_FORMAT.format(it.timestamp)
-            if (formattedTimestamp != currentRow[0]) {
-                // The timestamp has updated, so save the previous row and continue to the next row
-                allRows.add(currentRow.toList())
-                currentRow[0] = formattedTimestamp
-            }
-            val columnIndex = columnIndices[it.getName()]!!
-            currentRow[columnIndex] = it.getVal()
-        }
-        // Add the last row
-        allRows.add(currentRow.toList())
-
-        // Step 4: Dump the rows
-        DumpsysTableLogger(
-                name,
-                headers,
-                allRows,
-            )
-            .printTableData(pw)
     }
 
     /**
@@ -261,4 +223,8 @@ class TableLogBuffer(
 }
 
 val TABLE_LOG_DATE_FORMAT = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US)
-private const val DEFAULT_COLUMN_VALUE = "UNKNOWN"
+
+private const val HEADER_PREFIX = "SystemUI StateChangeTableSection START: "
+private const val FOOTER_PREFIX = "SystemUI StateChangeTableSection END: "
+private const val SEPARATOR = "|"
+private const val VERSION = "1"

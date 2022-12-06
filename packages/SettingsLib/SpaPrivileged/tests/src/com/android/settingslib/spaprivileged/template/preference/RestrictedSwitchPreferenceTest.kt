@@ -142,7 +142,7 @@ class RestrictedSwitchPreferenceTest {
 
     private fun setContent(restrictions: Restrictions) {
         composeTestRule.setContent {
-            RestrictedSwitchPreferenceImpl(switchPreferenceModel, restrictions) { _, _ ->
+            RestrictedSwitchPreference(switchPreferenceModel, restrictions) { _, _ ->
                 fakeRestrictionsProvider
             }
         }

@@ -20,7 +20,6 @@ import android.graphics.Rect
 import android.icu.text.NumberFormat
 import android.util.TypedValue
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.customization.R
@@ -143,7 +142,7 @@ class DefaultClockController(
             currentColor = color
             view.setColors(DOZE_COLOR, color)
             if (!animations.dozeState.isActive) {
-                view.animateAppearOnLockscreen()
+                view.animateColorChange()
             }
         }
     }
@@ -152,15 +151,9 @@ class DefaultClockController(
         view: AnimatableClockView,
     ) : DefaultClockFaceController(view) {
         override fun recomputePadding(targetRegion: Rect?) {
-            // We center the view within the targetRegion instead of within the parent
-            // view by computing the difference and adding that to the padding.
-            val parent = view.parent
-            val yDiff =
-                if (targetRegion != null && parent is View && parent.isLaidOut())
-                    targetRegion.centerY() - parent.height / 2f
-                else 0f
+            // Ignore Target Region until top padding fixed in aod
             val lp = view.getLayoutParams() as FrameLayout.LayoutParams
-            lp.topMargin = (-0.5f * view.bottom + yDiff).toInt()
+            lp.topMargin = (-0.5f * view.bottom).toInt()
             view.setLayoutParams(lp)
         }
 

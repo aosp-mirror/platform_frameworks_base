@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 #include "StretchMask.h"
-#include "SkSurface.h"
+
+#include "SkBlendMode.h"
 #include "SkCanvas.h"
+#include "SkSurface.h"
 #include "TransformCanvas.h"
 #include "SkiaDisplayList.h"
 

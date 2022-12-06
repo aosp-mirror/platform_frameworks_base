@@ -18,8 +18,8 @@ package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.navBarLayerPositionAtEnd
 import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
 import com.android.server.wm.traces.common.ComponentNameMatcher
@@ -28,8 +28,7 @@ import org.junit.Ignore
 import org.junit.Test
 
 /** Base class for app launch tests from lock screen */
-abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
-    OpenAppTransition(testSpec) {
+abstract class OpenAppFromLockTransition(flicker: FlickerTest) : OpenAppTransition(flicker) {
 
     /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit = {
@@ -46,7 +45,7 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
     @Presubmit
     @Test
     open fun focusChanges() {
-        testSpec.assertEventLog { this.focusChanges("", testApp.`package`) }
+        flicker.assertEventLog { this.focusChanges("", testApp.`package`) }
     }
 
     /**
@@ -56,7 +55,7 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
     @FlakyTest(bugId = 203538234)
     @Test
     open fun appWindowBecomesFirstAndOnlyTopWindow() {
-        testSpec.assertWm {
+        flicker.assertWm {
             this.hasNoVisibleAppWindow()
                 .then()
                 .isAppWindowOnTop(ComponentNameMatcher.SNAPSHOT, isOptional = true)
@@ -71,7 +70,7 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
     @Presubmit
     @Test
     fun screenLockedStart() {
-        testSpec.assertLayersStart { isEmpty() }
+        flicker.assertLayersStart { isEmpty() }
     }
 
     /** {@inheritDoc} */
@@ -99,16 +98,16 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun taskBarWindowIsAlwaysVisible() {}
 
-    /** Checks the position of the [ComponentMatcher.NAV_BAR] at the end of the transition */
+    /** Checks the position of the [ComponentNameMatcher.NAV_BAR] at the end of the transition */
     @Presubmit
     @Test
     open fun navBarLayerPositionAtEnd() {
-        Assume.assumeFalse(testSpec.isTablet)
-        testSpec.navBarLayerPositionAtEnd()
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.navBarLayerPositionAtEnd()
     }
 
-    /** Checks the position of the [ComponentMatcher.STATUS_BAR] at the end of the transition */
-    @Presubmit @Test fun statusBarLayerPositionAtEnd() = testSpec.statusBarLayerPositionAtEnd()
+    /** Checks the position of the [ComponentNameMatcher.STATUS_BAR] at the end of the transition */
+    @Presubmit @Test fun statusBarLayerPositionAtEnd() = flicker.statusBarLayerPositionAtEnd()
 
     /** {@inheritDoc} */
     @Test
@@ -116,13 +115,13 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
     override fun statusBarLayerIsVisibleAtStartAndEnd() {}
 
     /**
-     * Checks that the [ComponentMatcher.STATUS_BAR] layer is visible at the end of the trace
+     * Checks that the [ComponentNameMatcher.STATUS_BAR] layer is visible at the end of the trace
      *
      * It is not possible to check at the start because the screen is off
      */
     @Presubmit
     @Test
     fun statusBarLayerIsVisibleAtEnd() {
-        testSpec.assertLayersEnd { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
+        flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
     }
 }

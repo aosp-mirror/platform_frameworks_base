@@ -38,6 +38,9 @@
     <!-- Minimum bottom margin under the security view -->
     <dimen name="keyguard_security_view_bottom_margin">60dp</dimen>
 
+    <!-- Margin above the ambient indication container -->
+    <dimen name="ambient_indication_container_margin_top">0dp</dimen>
+
     <dimen name="keyguard_eca_top_margin">18dp</dimen>
     <dimen name="keyguard_eca_bottom_margin">12dp</dimen>
 

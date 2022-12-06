@@ -15,13 +15,16 @@
  */
 
 #include "RecordingCanvas.h"
-#include <hwui/Paint.h>
 
 #include <GrRecordingContext.h>
+#include <SkMesh.h>
+#include <hwui/Paint.h>
 
 #include <experimental/type_traits>
+#include <utility>
 
 #include "SkAndroidFrameworkUtils.h"
+#include "SkBlendMode.h"
 #include "SkCanvas.h"
 #include "SkCanvasPriv.h"
 #include "SkColor.h"
@@ -270,7 +273,6 @@ struct DrawDRRect final : Op {
     SkPaint paint;
     void draw(SkCanvas* c, const SkMatrix&) const { c->drawDRRect(outer, inner, paint); }
 };
-
 struct DrawAnnotation final : Op {
     static const auto kType = Type::DrawAnnotation;
     DrawAnnotation(const SkRect& rect, SkData* value) : rect(rect), value(sk_ref_sp(value)) {}
@@ -451,6 +453,16 @@ struct DrawVertices final : Op {
     void draw(SkCanvas* c, const SkMatrix&) const {
         c->drawVertices(vertices, mode, paint);
     }
+};
+struct DrawMesh final : Op {
+    static const auto kType = Type::DrawMesh;
+    DrawMesh(const SkMesh& mesh, sk_sp<SkBlender> blender, const SkPaint& paint)
+            : mesh(mesh), blender(std::move(blender)), paint(paint) {}
+
+    SkMesh mesh;
+    sk_sp<SkBlender> blender;
+    SkPaint paint;
+    void draw(SkCanvas* c, const SkMatrix&) const { c->drawMesh(mesh, blender, paint); }
 };
 struct DrawAtlas final : Op {
     static const auto kType = Type::DrawAtlas;
@@ -762,6 +774,10 @@ void DisplayListData::drawPoints(SkCanvas::PointMode mode, size_t count, const S
 }
 void DisplayListData::drawVertices(const SkVertices* vert, SkBlendMode mode, const SkPaint& paint) {
     this->push<DrawVertices>(0, vert, mode, paint);
+}
+void DisplayListData::drawMesh(const SkMesh& mesh, const sk_sp<SkBlender>& blender,
+                               const SkPaint& paint) {
+    this->push<DrawMesh>(0, mesh, blender, paint);
 }
 void DisplayListData::drawAtlas(const SkImage* atlas, const SkRSXform xforms[], const SkRect texs[],
                                 const SkColor colors[], int count, SkBlendMode xfermode,
@@ -1104,6 +1120,10 @@ void RecordingCanvas::onDrawPoints(SkCanvas::PointMode mode, size_t count, const
 void RecordingCanvas::onDrawVerticesObject(const SkVertices* vertices,
                                            SkBlendMode mode, const SkPaint& paint) {
     fDL->drawVertices(vertices, mode, paint);
+}
+void RecordingCanvas::onDrawMesh(const SkMesh& mesh, sk_sp<SkBlender> blender,
+                                 const SkPaint& paint) {
+    fDL->drawMesh(mesh, blender, paint);
 }
 void RecordingCanvas::onDrawAtlas2(const SkImage* atlas, const SkRSXform xforms[],
                                    const SkRect texs[], const SkColor colors[], int count,

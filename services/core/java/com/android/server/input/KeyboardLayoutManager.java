@@ -17,6 +17,7 @@
 package com.android.server.input;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -46,6 +47,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.view.InputDevice;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodSubtype;
 import android.widget.Toast;
 
 import com.android.internal.R;
@@ -79,9 +82,10 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     // (requires restart)
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final int MSG_SWITCH_KEYBOARD_LAYOUT = 1;
-    private static final int MSG_RELOAD_KEYBOARD_LAYOUTS = 2;
-    private static final int MSG_UPDATE_KEYBOARD_LAYOUTS = 3;
+    private static final int MSG_UPDATE_EXISTING_DEVICES = 1;
+    private static final int MSG_SWITCH_KEYBOARD_LAYOUT = 2;
+    private static final int MSG_RELOAD_KEYBOARD_LAYOUTS = 3;
+    private static final int MSG_UPDATE_KEYBOARD_LAYOUTS = 4;
 
     private final Context mContext;
     private final NativeInputManagerService mNative;
@@ -121,10 +125,10 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         InputManager inputManager = Objects.requireNonNull(
                 mContext.getSystemService(InputManager.class));
         inputManager.registerInputDeviceListener(this, mHandler);
-        // Circle through all the already added input devices
-        for (int deviceId : inputManager.getInputDeviceIds()) {
-            onInputDeviceAdded(deviceId);
-        }
+
+        Message msg = Message.obtain(mHandler, MSG_UPDATE_EXISTING_DEVICES,
+                inputManager.getInputDeviceIds());
+        mHandler.sendMessage(msg);
     }
 
     @Override
@@ -544,6 +548,35 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         }
     }
 
+    public String getKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
+            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
+            @NonNull InputMethodSubtype imeSubtype) {
+        // TODO(b/259530132): Implement the new keyboard layout API: Returning non-IME specific
+        //  layout for now.
+        return getCurrentKeyboardLayoutForInputDevice(identifier);
+    }
+
+    public void setKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
+            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
+            @NonNull InputMethodSubtype imeSubtype, String keyboardLayoutDescriptor) {
+        // TODO(b/259530132): Implement the new keyboard layout API: setting non-IME specific
+        //  layout for now.
+        setCurrentKeyboardLayoutForInputDevice(identifier, keyboardLayoutDescriptor);
+    }
+
+    public String[] getKeyboardLayoutListForInputDevice(InputDeviceIdentifier identifier,
+            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
+            @NonNull InputMethodSubtype imeSubtype) {
+        // TODO(b/259530132): Implement the new keyboard layout API: Returning list of all
+        //  layouts for now.
+        KeyboardLayout[] allLayouts = getKeyboardLayouts();
+        String[] allLayoutDesc = new String[allLayouts.length];
+        for (int i = 0; i < allLayouts.length; i++) {
+            allLayoutDesc[i] = allLayouts[i].getDescriptor();
+        }
+        return allLayoutDesc;
+    }
+
     public void switchKeyboardLayout(int deviceId, int direction) {
         mHandler.obtainMessage(MSG_SWITCH_KEYBOARD_LAYOUT, deviceId, direction).sendToTarget();
     }
@@ -682,6 +715,13 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
 
     private boolean handleMessage(Message msg) {
         switch (msg.what) {
+            case MSG_UPDATE_EXISTING_DEVICES:
+                // Circle through all the already added input devices
+                // Need to do it on handler thread and not block IMS thread
+                for (int deviceId : (int[]) msg.obj) {
+                    onInputDeviceAdded(deviceId);
+                }
+                return true;
             case MSG_SWITCH_KEYBOARD_LAYOUT:
                 handleSwitchKeyboardLayout(msg.arg1, msg.arg2);
                 return true;

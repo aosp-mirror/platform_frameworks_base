@@ -19,13 +19,13 @@ package com.android.wm.shell.flicker.splitscreen
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowBecomesVisible
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
@@ -44,8 +44,8 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test enter split screen by dragging app icon from taskbar.
- * This test is only for large screen devices.
+ * Test enter split screen by dragging app icon from taskbar. This test is only for large screen
+ * devices.
  *
  * To run this test: `atest WMShellFlickerTests:EnterSplitScreenByDragFromTaskbar`
  */
@@ -53,9 +53,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class EnterSplitScreenByDragFromTaskbar(
-    testSpec: FlickerTestParameter
-) : SplitScreenBase(testSpec) {
+class EnterSplitScreenByDragFromTaskbar(flicker: FlickerTest) : SplitScreenBase(flicker) {
 
     @Before
     fun before() {
@@ -68,9 +66,7 @@ class EnterSplitScreenByDragFromTaskbar(
             super.transition(this)
             setup {
                 tapl.goHome()
-                SplitScreenUtils.createShortcutOnHotseatIfNotExist(
-                    tapl, secondaryApp.appName
-                )
+                SplitScreenUtils.createShortcutOnHotseatIfNotExist(tapl, secondaryApp.appName)
                 primaryApp.launchViaIntent(wmHelper)
             }
             transitions {
@@ -84,13 +80,13 @@ class EnterSplitScreenByDragFromTaskbar(
     @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
-    fun cujCompleted() = testSpec.splitScreenEntered(primaryApp, secondaryApp, fromOtherApp = false)
+    fun cujCompleted() = flicker.splitScreenEntered(primaryApp, secondaryApp, fromOtherApp = false)
 
     @Presubmit
     @Test
     fun splitScreenDividerBecomesVisible() {
         Assume.assumeFalse(isShellTransitionsEnabled)
-        testSpec.splitScreenDividerBecomesVisible()
+        flicker.splitScreenDividerBecomesVisible()
     }
 
     // TODO(b/245472831): Back to splitScreenDividerBecomesVisible after shell transition ready.
@@ -98,20 +94,16 @@ class EnterSplitScreenByDragFromTaskbar(
     @Test
     fun splitScreenDividerIsVisibleAtEnd_ShellTransit() {
         Assume.assumeTrue(isShellTransitionsEnabled)
-        testSpec.assertLayersEnd {
-            this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
-        }
+        flicker.assertLayersEnd { this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT) }
     }
 
-    @Presubmit
-    @Test
-    fun primaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(primaryApp)
+    @Presubmit @Test fun primaryAppLayerIsVisibleAtEnd() = flicker.layerIsVisibleAtEnd(primaryApp)
 
     @Presubmit
     @Test
     fun secondaryAppLayerBecomesVisible() {
         Assume.assumeFalse(isShellTransitionsEnabled)
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.isInvisible(secondaryApp)
                 .then()
                 .isVisible(secondaryApp)
@@ -127,50 +119,48 @@ class EnterSplitScreenByDragFromTaskbar(
     @Test
     fun secondaryAppLayerBecomesVisible_ShellTransit() {
         Assume.assumeTrue(isShellTransitionsEnabled)
-        testSpec.layerBecomesVisible(secondaryApp)
+        flicker.layerBecomesVisible(secondaryApp)
     }
 
     @Presubmit
     @Test
-    fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        primaryApp, landscapePosLeft = false, portraitPosTop = false)
+    fun primaryAppBoundsIsVisibleAtEnd() =
+        flicker.splitAppLayerBoundsIsVisibleAtEnd(
+            primaryApp,
+            landscapePosLeft = false,
+            portraitPosTop = false
+        )
 
     @Presubmit
     @Test
-    fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisibleByDrag(
-        secondaryApp)
+    fun secondaryAppBoundsBecomesVisible() =
+        flicker.splitAppLayerBoundsBecomesVisibleByDrag(secondaryApp)
 
     @Presubmit
     @Test
-    fun primaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(primaryApp)
+    fun primaryAppWindowIsVisibleAtEnd() = flicker.appWindowIsVisibleAtEnd(primaryApp)
 
     @Presubmit
     @Test
-    fun secondaryAppWindowBecomesVisible() = testSpec.appWindowBecomesVisible(secondaryApp)
+    fun secondaryAppWindowBecomesVisible() = flicker.appWindowBecomesVisible(secondaryApp)
+
+    /** {@inheritDoc} */
+    @Postsubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun entireScreenCovered() =
-        super.entireScreenCovered()
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() =
-        super.navBarLayerIsVisibleAtStartAndEnd()
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun navBarLayerPositionAtStartAndEnd() =
-        super.navBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun navBarWindowIsAlwaysVisible() =
-        super.navBarWindowIsAlwaysVisible()
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -181,26 +171,22 @@ class EnterSplitScreenByDragFromTaskbar(
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
+    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun statusBarWindowIsAlwaysVisible() =
-        super.statusBarWindowIsAlwaysVisible()
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() =
-        super.taskBarLayerIsVisibleAtStartAndEnd()
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun taskBarWindowIsAlwaysVisible() =
-        super.taskBarWindowIsAlwaysVisible()
+    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -217,10 +203,9 @@ class EnterSplitScreenByDragFromTaskbar(
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
+        fun getParams(): List<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_GESTURAL)
             )
         }
     }
