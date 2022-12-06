@@ -13,16 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <jni.h>
+package parcelfuzzer;
 
-extern "C" {
-    JNIEXPORT void JNICALL Java_randomparcel_FuzzBinder_fuzzServiceInternal(JNIEnv *env, jobject thiz, jobject javaBinder, jbyteArray fuzzData);
+import com.code_intelligence.jazzer.api.FuzzedDataProvider;
 
-    // Function to register libandroid_runtime JNI functions with java env.
-    JNIEXPORT jint JNICALL Java_randomparcel_FuzzBinder_registerNatives(JNIEnv* env);
-
-    // Function from AndroidRuntime
-    jint registerFrameworkNatives(JNIEnv* env);
-
-    JNIEXPORT void JNICALL Java_randomparcel_FuzzBinder_fillParcelInternal(JNIEnv *env, jobject thiz, jobject parcel, jbyteArray fuzzData);
+public interface FuzzOperation {
+    void doFuzz(FuzzedDataProvider data);
 }
