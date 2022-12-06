@@ -16,10 +16,10 @@
 package com.android.systemui.notetask
 
 import android.test.suitebuilder.annotation.SmallTest
+import android.view.KeyEvent
 import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
@@ -45,6 +45,7 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
     @Mock lateinit var commandQueue: CommandQueue
     @Mock lateinit var bubbles: Bubbles
     @Mock lateinit var optionalBubbles: Optional<Bubbles>
+    @Mock lateinit var noteTaskController: NoteTaskController
 
     @Before
     fun setUp() {
@@ -57,12 +58,13 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
     private fun createNoteTaskInitializer(isEnabled: Boolean = true): NoteTaskInitializer {
         return NoteTaskInitializer(
             optionalBubbles = optionalBubbles,
-            lazyNoteTaskController = mock(),
+            noteTaskController = noteTaskController,
             commandQueue = commandQueue,
             isEnabled = isEnabled,
         )
     }
 
+    // region initializer
     @Test
     fun initialize_shouldAddCallbacks() {
         createNoteTaskInitializer().initialize()
@@ -85,4 +87,35 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
 
         verify(commandQueue, never()).addCallback(any())
     }
+
+    @Test
+    fun initialize_flagEnabled_shouldEnableShortcut() {
+        createNoteTaskInitializer().initialize()
+
+        verify(noteTaskController).setNoteTaskShortcutEnabled(true)
+    }
+
+    @Test
+    fun initialize_flagDisabled_shouldDisableShortcut() {
+        createNoteTaskInitializer(isEnabled = false).initialize()
+
+        verify(noteTaskController).setNoteTaskShortcutEnabled(false)
+    }
+    // endregion
+
+    // region handleSystemKey
+    @Test
+    fun handleSystemKey_receiveValidSystemKey_shouldShowNoteTask() {
+        createNoteTaskInitializer().callbacks.handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
+
+        verify(noteTaskController).showNoteTask()
+    }
+
+    @Test
+    fun handleSystemKey_receiveInvalidSystemKey_shouldDoNothing() {
+        createNoteTaskInitializer().callbacks.handleSystemKey(KeyEvent.KEYCODE_UNKNOWN)
+
+        verify(noteTaskController, never()).showNoteTask()
+    }
+    // endregion
 }
