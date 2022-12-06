@@ -899,15 +899,16 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             }
         } else if (candidateTask != null) {
             final int position = onTop ? POSITION_TOP : POSITION_BOTTOM;
-            final Task launchRootTask = getLaunchRootTask(resolvedWindowingMode, activityType,
+            final Task launchParentTask = getLaunchRootTask(resolvedWindowingMode, activityType,
                     options, sourceTask, launchFlags, candidateTask);
-            if (launchRootTask != null) {
+            if (launchParentTask != null) {
                 if (candidateTask.getParent() == null) {
-                    launchRootTask.addChild(candidateTask, position);
-                } else if (candidateTask.getParent() != launchRootTask) {
-                    candidateTask.reparent(launchRootTask, position);
+                    launchParentTask.addChild(candidateTask, position);
+                } else if (candidateTask.getParent() != launchParentTask) {
+                    candidateTask.reparent(launchParentTask, position);
                 }
-            } else if (candidateTask.getDisplayArea() != this) {
+            } else if (candidateTask.getDisplayArea() != this
+                    || candidateTask.getRootTask().mReparentLeafTaskIfRelaunch) {
                 if (candidateTask.getParent() == null) {
                     addChild(candidateTask, position);
                 } else {
