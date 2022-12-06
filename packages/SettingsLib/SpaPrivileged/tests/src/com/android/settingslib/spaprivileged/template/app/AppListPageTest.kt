@@ -118,12 +118,12 @@ class AppListPageTest {
     ): State<AppListInput<TestAppRecord>?> {
         val appListState = mutableStateOf<AppListInput<TestAppRecord>?>(null)
         composeTestRule.setContent {
-            AppListPageImpl(
+            AppListPage(
                 title = TITLE,
                 listModel = TestAppListModel(options),
                 header = header,
                 appItem = { AppListItem {} },
-                appList = { appListState.value = it },
+                appList = { appListState.value = this },
             )
         }
         return appListState

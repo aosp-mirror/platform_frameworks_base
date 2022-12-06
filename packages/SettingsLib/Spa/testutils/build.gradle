@@ -44,9 +44,17 @@ android {
         jvmTarget = '1.8'
         freeCompilerArgs = ["-Xjvm-default=all"]
     }
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion jetpack_compose_compiler_version
+    }
 }
 
 dependencies {
+    api project(":SpaLib")
+
     api "androidx.arch.core:core-testing:2.1.0"
     api "androidx.compose.ui:ui-test-junit4:$jetpack_compose_version"
     api "com.google.truth:truth:1.1.3"

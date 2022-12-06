@@ -47,23 +47,8 @@ fun <T : AppRecord> AppListPage(
     primaryUserOnly: Boolean = false,
     moreOptions: @Composable MoreOptionsScope.() -> Unit = {},
     header: @Composable () -> Unit = {},
+    appList: @Composable AppListInput<T>.() -> Unit = { AppList() },
     appItem: @Composable AppListItemModel<T>.() -> Unit,
-) {
-    AppListPageImpl(
-        title, listModel, showInstantApps, primaryUserOnly, moreOptions, header, appItem,
-    ) { it.AppList() }
-}
-
-@Composable
-internal fun <T : AppRecord> AppListPageImpl(
-    title: String,
-    listModel: AppListModel<T>,
-    showInstantApps: Boolean = false,
-    primaryUserOnly: Boolean = false,
-    moreOptions: @Composable MoreOptionsScope.() -> Unit = {},
-    header: @Composable () -> Unit = {},
-    appItem: @Composable AppListItemModel<T>.() -> Unit,
-    appList: @Composable (input: AppListInput<T>) -> Unit,
 ) {
     val showSystem = rememberSaveable { mutableStateOf(false) }
     SearchScaffold(

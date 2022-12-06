@@ -102,7 +102,7 @@ class AppListTest {
                 appItem = { AppListItem {} },
                 bottomPadding = 0.dp,
             )
-            appListInput.AppList { stateOf(AppListData(appEntries, option = 0)) }
+            appListInput.AppListImpl { stateOf(AppListData(appEntries, option = 0)) }
         }
     }
 
