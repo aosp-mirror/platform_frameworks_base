@@ -592,6 +592,73 @@ public class BroadcastQueueModernImplTest {
     }
 
     /**
+     * Verify that offload broadcasts are not starved because of broadcasts in higher priority
+     * queues.
+     */
+    @Test
+    public void testOffloadStarvation() {
+        final BroadcastOptions optInteractive = BroadcastOptions.makeBasic();
+        optInteractive.setInteractive(true);
+
+        mConstants.MAX_CONSECUTIVE_URGENT_DISPATCHES = 1;
+        mConstants.MAX_CONSECUTIVE_NORMAL_DISPATCHES = 2;
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
+
+        // mix of broadcasts, with more than 2 normal
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_BOOT_COMPLETED)
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIMEZONE_CHANGED)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_PACKAGE_CHANGED)
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_ALARM_CHANGED)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIME_TICK)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_LOCALE_CHANGED)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_APPLICATION_PREFERENCES),
+                        optInteractive), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE),
+                        optInteractive), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_INPUT_METHOD_CHANGED)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_NEW_OUTGOING_CALL),
+                        optInteractive), 0);
+
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_LOCALE_CHANGED, queue.getActive().intent.getAction());
+        // after MAX_CONSECUTIVE_URGENT_DISPATCHES expect an ordinary one next
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_TIMEZONE_CHANGED, queue.getActive().intent.getAction());
+        // and then back to prioritizing urgent ones
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_APPLICATION_PREFERENCES, queue.getActive().intent.getAction());
+        // after MAX_CONSECUTIVE_URGENT_DISPATCHES, again an ordinary one next
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_ALARM_CHANGED, queue.getActive().intent.getAction());
+        // and then back to prioritizing urgent ones
+        queue.makeActiveNextPending();
+        assertEquals(AppWidgetManager.ACTION_APPWIDGET_UPDATE,
+                queue.getActive().intent.getAction());
+        // after MAX_CONSECUTIVE_URGENT_DISPATCHES and MAX_CONSECUTIVE_NORMAL_DISPATCHES,
+        // expect an offload one
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_BOOT_COMPLETED, queue.getActive().intent.getAction());
+        // and then back to prioritizing urgent ones
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_INPUT_METHOD_CHANGED, queue.getActive().intent.getAction());
+    }
+
+    /**
      * Verify that sending a broadcast that removes any matching pending
      * broadcasts is applied as expected.
      */

@@ -153,6 +153,12 @@ class BroadcastProcessQueue {
     private int mActiveCountConsecutiveUrgent;
 
     /**
+     * Number of consecutive normal broadcasts that have been dispatched
+     * since the last offload dispatch.
+     */
+    private int mActiveCountConsecutiveNormal;
+
+    /**
      * Count of pending broadcasts of these various flavors.
      */
     private int mCountForeground;
@@ -551,48 +557,63 @@ class BroadcastProcessQueue {
      * Will thrown an exception if there are no pending broadcasts; relies on
      * {@link #isEmpty()} being false.
      */
-    SomeArgs removeNextBroadcast() {
+    private @Nullable SomeArgs removeNextBroadcast() {
         final ArrayDeque<SomeArgs> queue = queueForNextBroadcast();
         if (queue == mPendingUrgent) {
             mActiveCountConsecutiveUrgent++;
-        } else {
+        } else if (queue == mPending) {
             mActiveCountConsecutiveUrgent = 0;
+            mActiveCountConsecutiveNormal++;
+        } else if (queue == mPendingOffload) {
+            mActiveCountConsecutiveUrgent = 0;
+            mActiveCountConsecutiveNormal = 0;
         }
-        return queue.removeFirst();
+        return !isQueueEmpty(queue) ? queue.removeFirst() : null;
     }
 
     @Nullable ArrayDeque<SomeArgs> queueForNextBroadcast() {
-        ArrayDeque<SomeArgs> nextUrgent = mPendingUrgent.isEmpty() ? null : mPendingUrgent;
-        ArrayDeque<SomeArgs> nextNormal = null;
-        if (!mPending.isEmpty()) {
-            nextNormal = mPending;
-        } else if (!mPendingOffload.isEmpty()) {
-            nextNormal = mPendingOffload;
+        final ArrayDeque<SomeArgs> nextNormal = queueForNextBroadcast(
+                mPending, mPendingOffload,
+                mActiveCountConsecutiveNormal, constants.MAX_CONSECUTIVE_NORMAL_DISPATCHES);
+        final ArrayDeque<SomeArgs> nextBroadcastQueue = queueForNextBroadcast(
+                mPendingUrgent, nextNormal,
+                mActiveCountConsecutiveUrgent, constants.MAX_CONSECUTIVE_URGENT_DISPATCHES);
+        return nextBroadcastQueue;
+    }
+
+    private @Nullable ArrayDeque<SomeArgs> queueForNextBroadcast(
+            @Nullable ArrayDeque<SomeArgs> highPriorityQueue,
+            @Nullable ArrayDeque<SomeArgs> lowPriorityQueue,
+            int consecutiveHighPriorityCount,
+            int maxHighPriorityDispatchLimit) {
+        // nothing high priority pending, no further decisionmaking
+        if (isQueueEmpty(highPriorityQueue)) {
+            return lowPriorityQueue;
         }
-        // nothing urgent pending, no further decisionmaking
-        if (nextUrgent == null) {
-            return nextNormal;
-        }
-        // nothing but urgent pending, also no further decisionmaking
-        if (nextNormal == null) {
-            return nextUrgent;
+        // nothing but high priority pending, also no further decisionmaking
+        if (isQueueEmpty(lowPriorityQueue)) {
+            return highPriorityQueue;
         }
 
-        // Starvation mitigation: although we prioritize urgent broadcasts by default,
-        // we allow non-urgent deliveries to make steady progress even if urgent
-        // broadcasts are arriving faster than they can be dispatched.
+        // Starvation mitigation: although we prioritize high priority queues by default,
+        // we allow low priority queues to make steady progress even if broadcasts in
+        // high priority queue are arriving faster than they can be dispatched.
         //
-        // We do not try to defer to the next non-urgent broadcast if that broadcast
+        // We do not try to defer to the next broadcast in low priority queues if that broadcast
         // is ordered and still blocked on delivery to other recipients.
-        final SomeArgs nextNormalArgs = nextNormal.peekFirst();
-        final BroadcastRecord rNormal = (BroadcastRecord) nextNormalArgs.arg1;
-        final int nextNormalIndex = nextNormalArgs.argi1;
-        final BroadcastRecord rUrgent = (BroadcastRecord) nextUrgent.peekFirst().arg1;
-        final boolean canTakeNormal =
-                mActiveCountConsecutiveUrgent >= constants.MAX_CONSECUTIVE_URGENT_DISPATCHES
-                        && rNormal.enqueueTime <= rUrgent.enqueueTime
-                        && !blockedOnOrderedDispatch(rNormal, nextNormalIndex);
-        return canTakeNormal ? nextNormal : nextUrgent;
+        final SomeArgs nextLPArgs = lowPriorityQueue.peekFirst();
+        final BroadcastRecord nextLPRecord = (BroadcastRecord) nextLPArgs.arg1;
+        final int nextLPRecordIndex = nextLPArgs.argi1;
+        final BroadcastRecord nextHPRecord = (BroadcastRecord) highPriorityQueue.peekFirst().arg1;
+        final boolean isLPQueueEligible =
+                consecutiveHighPriorityCount >= maxHighPriorityDispatchLimit
+                        && nextLPRecord.enqueueTime <= nextHPRecord.enqueueTime
+                        && !blockedOnOrderedDispatch(nextLPRecord, nextLPRecordIndex);
+        return isLPQueueEligible ? lowPriorityQueue : highPriorityQueue;
+    }
+
+    private static boolean isQueueEmpty(@Nullable ArrayDeque<SomeArgs> queue) {
+        return (queue == null || queue.isEmpty());
     }
 
     /**
@@ -600,13 +621,13 @@ class BroadcastProcessQueue {
      */
     @Nullable SomeArgs peekNextBroadcast() {
         ArrayDeque<SomeArgs> queue = queueForNextBroadcast();
-        return (queue != null) ? queue.peekFirst() : null;
+        return !isQueueEmpty(queue) ? queue.peekFirst() : null;
     }
 
     @VisibleForTesting
     @Nullable BroadcastRecord peekNextBroadcastRecord() {
         ArrayDeque<SomeArgs> queue = queueForNextBroadcast();
-        return (queue != null) ? (BroadcastRecord) queue.peekFirst().arg1 : null;
+        return !isQueueEmpty(queue) ? (BroadcastRecord) queue.peekFirst().arg1 : null;
     }
 
     /**
