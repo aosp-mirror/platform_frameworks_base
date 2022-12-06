@@ -53,7 +53,6 @@ import android.view.IWindowSessionCallback;
 import android.view.KeyEvent;
 import android.view.InputEvent;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.InputChannel;
