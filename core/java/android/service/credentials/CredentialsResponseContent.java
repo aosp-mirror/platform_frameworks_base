@@ -29,7 +29,7 @@ import java.util.Objects;
 
 /**
  * The content to be displayed on the account selector UI, including credential entries,
- * actions etc. Returned as part of {@link GetCredentialsResponse}
+ * actions etc. Returned as part of {@link BeginGetCredentialsResponse}
  */
 public final class CredentialsResponseContent implements Parcelable {
     /** List of credential entries to be displayed on the UI. */
@@ -124,7 +124,7 @@ public final class CredentialsResponseContent implements Parcelable {
          *
          * <p> Once the remote credential flow is complete, the {@link android.app.Activity}
          * result should be set to {@link android.app.Activity#RESULT_OK} and an extra with the
-         * {@link CredentialProviderService#EXTRA_CREDENTIAL_RESULT} key should be populated
+         * {@link CredentialProviderService#EXTRA_GET_CREDENTIAL_RESPONSE} key should be populated
          * with a {@link android.credentials.Credential} object.
          */
         public @NonNull Builder setRemoteCredentialEntry(@Nullable CredentialEntry
@@ -188,7 +188,7 @@ public final class CredentialsResponseContent implements Parcelable {
         }
 
         /**
-         * Builds a {@link GetCredentialsResponse} instance.
+         * Builds a {@link CredentialsResponseContent} instance.
          *
          * @throws IllegalStateException if {@code credentialEntries}, {@code actions}
          * and {@code remoteCredentialEntry} are all null or empty.

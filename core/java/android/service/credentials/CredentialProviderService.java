@@ -21,6 +21,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.CancellationSignal;
@@ -45,10 +46,21 @@ public abstract class CredentialProviderService extends Service {
      * returned as part of the {@link BeginCreateCredentialResponse}
      *
      * <p>
-     * Type: {@link android.credentials.CreateCredentialRequest}
+     * Type: {@link android.service.credentials.CreateCredentialRequest}
      */
     public static final String EXTRA_CREATE_CREDENTIAL_REQUEST =
             "android.service.credentials.extra.CREATE_CREDENTIAL_REQUEST";
+
+    /**
+     * Intent extra: The {@link GetCredentialRequest} attached with
+     * the {@code pendingIntent} that is invoked when the user selects a {@link CredentialEntry}
+     * returned as part of the {@link BeginGetCredentialsResponse}
+     *
+     * <p>
+     * Type: {@link GetCredentialRequest}
+     */
+    public static final String EXTRA_GET_CREDENTIAL_REQUEST =
+            "android.service.credentials.extra.GET_CREDENTIAL_REQUEST";
 
     /**
      * Intent extra: The result of a create flow operation, to be set on finish of the
@@ -58,8 +70,8 @@ public abstract class CredentialProviderService extends Service {
      * <p>
      * Type: {@link android.credentials.CreateCredentialResponse}
      */
-    public static final String EXTRA_CREATE_CREDENTIAL_RESULT =
-            "android.service.credentials.extra.CREATE_CREDENTIAL_RESULT";
+    public static final String EXTRA_CREATE_CREDENTIAL_RESPONSE =
+            "android.service.credentials.extra.CREATE_CREDENTIAL_RESPONSE";
 
     /**
      * Intent extra: The result of a get credential flow operation, to be set on finish of the
@@ -67,33 +79,48 @@ public abstract class CredentialProviderService extends Service {
      * a {@link CredentialEntry}.
      *
      * <p>
-     * Type: {@link android.credentials.Credential}
+     * Type: {@link android.credentials.GetCredentialResponse}
      */
-    public static final String EXTRA_CREDENTIAL_RESULT =
-            "android.service.credentials.extra.CREDENTIAL_RESULT";
+    public static final String EXTRA_GET_CREDENTIAL_RESPONSE =
+            "android.service.credentials.extra.GET_CREDENTIAL_RESPONSE";
 
     /**
      * Intent extra: The result of an authentication flow, to be set on finish of the
      * {@link android.app.Activity} invoked through the {@link android.app.PendingIntent} set on
-     * a {@link GetCredentialsResponse}. This result should contain the actual content, including
-     * credential entries and action entries, to be shown on the selector.
+     * a {@link BeginGetCredentialsResponse}. This result should contain the actual content,
+     * including credential entries and action entries, to be shown on the selector.
      *
      * <p>
      * Type: {@link CredentialsResponseContent}
      */
-    public static final String EXTRA_GET_CREDENTIALS_CONTENT_RESULT =
-            "android.service.credentials.extra.GET_CREDENTIALS_CONTENT_RESULT";
+    public static final String EXTRA_CREDENTIALS_RESPONSE_CONTENT =
+            "android.service.credentials.extra.CREDENTIALS_RESPONSE_CONTENT";
 
     /**
-     * Intent extra: The error result of any {@link android.app.PendingIntent} flow, to be set
-     * on finish of the corresponding {@link android.app.Activity}. This result should contain an
-     * error code, representing the error encountered by the provider.
+     * Intent extra: The failure exception set at the final stage of a get flow.
+     * This exception is set at the finishing result of the {@link android.app.Activity}
+     * invoked by the {@link PendingIntent} , when a user selects the {@link CredentialEntry}
+     * that contained the {@link PendingIntent} in question.
+     *
+     * <p>The result must be set through {@link android.app.Activity#setResult} as an intent extra
      *
      * <p>
-     * Type: {@link String}
+     * Type: {@link android.credentials.GetCredentialException}
      */
-    public static final String EXTRA_ERROR =
-            "android.service.credentials.extra.ERROR";
+    public static final String EXTRA_GET_CREDENTIAL_EXCEPTION =
+            "android.service.credentials.extra.GET_CREDENTIAL_EXCEPTION";
+
+    /**
+     * Intent extra: The failure exception set at the final stage of a create flow.
+     * This exception is set at the finishing result of the {@link android.app.Activity}
+     * invoked by the {@link PendingIntent} , when a user selects the {@link CreateEntry}
+     * that contained the {@link PendingIntent} in question.
+     *
+     * <p>
+     * Type: {@link android.credentials.CreateCredentialException}
+     */
+    public static final String EXTRA_CREATE_CREDENTIAL_EXCEPTION =
+            "android.service.credentials.extra.CREATE_CREDENTIAL_EXCEPTION";
 
     private static final String TAG = "CredProviderService";
 
@@ -128,20 +155,21 @@ public abstract class CredentialProviderService extends Service {
 
     private final ICredentialProviderService mInterface = new ICredentialProviderService.Stub() {
         @Override
-        public ICancellationSignal onGetCredentials(GetCredentialsRequest request,
-                IGetCredentialsCallback callback) {
+        public ICancellationSignal onBeginGetCredentials(BeginGetCredentialsRequest request,
+                IBeginGetCredentialsCallback callback) {
             Objects.requireNonNull(request);
             Objects.requireNonNull(callback);
 
             ICancellationSignal transport = CancellationSignal.createTransport();
 
             mHandler.sendMessage(obtainMessage(
-                    CredentialProviderService::onGetCredentials,
+                    CredentialProviderService::onBeginGetCredentials,
                     CredentialProviderService.this, request,
                     CancellationSignal.fromTransport(transport),
-                    new OutcomeReceiver<GetCredentialsResponse, CredentialProviderException>() {
+                    new OutcomeReceiver<BeginGetCredentialsResponse,
+                            CredentialProviderException>() {
                         @Override
-                        public void onResult(GetCredentialsResponse result) {
+                        public void onResult(BeginGetCredentialsResponse result) {
                             try {
                                 callback.onSuccess(result);
                             } catch (RemoteException e) {
@@ -200,14 +228,29 @@ public abstract class CredentialProviderService extends Service {
     /**
      * Called by the android system to retrieve user credentials from the connected provider
      * service.
-     * @param request the credential request for the provider to handle
+     *
+     *
+     *
+     * <p>This API denotes a query stage request for getting user's credentials from a given
+     * credential provider. The request contains a list of
+     * {@link android.credentials.GetCredentialOption} that have parameters to be used for
+     * populating candidate credentials, as a list of {@link CredentialEntry} to be set
+     * on the {@link BeginGetCredentialsResponse}. This list is then shown to the user on a
+     * selector.
+     *
+     * <p>If a {@link PendingIntent} is set on a {@link CredentialEntry}, and the user selects that
+     * entry, a {@link GetCredentialRequest} with all parameters needed to get the actual
+     * {@link android.credentials.Credential} will be sent as part of the {@link Intent} fired
+     * through the {@link PendingIntent}.
+     * @param request the request for the provider to handle
      * @param cancellationSignal signal for providers to listen to any cancellation requests from
      *                           the android system
      * @param callback object used to relay the response of the credentials request
      */
-    public abstract void onGetCredentials(@NonNull GetCredentialsRequest request,
+    public abstract void onBeginGetCredentials(@NonNull BeginGetCredentialsRequest request,
             @NonNull CancellationSignal cancellationSignal,
-            @NonNull OutcomeReceiver<GetCredentialsResponse, CredentialProviderException> callback);
+            @NonNull OutcomeReceiver<
+                    BeginGetCredentialsResponse, CredentialProviderException> callback);
 
     /**
      * Called by the android system to create a credential.

@@ -26,14 +26,14 @@ import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.BeginCreateCredentialRequest;
 import android.service.credentials.BeginCreateCredentialResponse;
+import android.service.credentials.BeginGetCredentialsRequest;
+import android.service.credentials.BeginGetCredentialsResponse;
 import android.service.credentials.CredentialProviderException;
 import android.service.credentials.CredentialProviderException.CredentialProviderError;
 import android.service.credentials.CredentialProviderService;
-import android.service.credentials.GetCredentialsRequest;
-import android.service.credentials.GetCredentialsResponse;
 import android.service.credentials.IBeginCreateCredentialCallback;
+import android.service.credentials.IBeginGetCredentialsCallback;
 import android.service.credentials.ICredentialProviderService;
-import android.service.credentials.IGetCredentialsCallback;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -106,19 +106,21 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
      * @param callback the callback to be used to send back the provider response to the
      *                 {@link ProviderGetSession} class that maintains provider state
      */
-    public void onGetCredentials(@NonNull GetCredentialsRequest request,
-            ProviderCallbacks<GetCredentialsResponse> callback) {
+    public void onBeginGetCredentials(@NonNull BeginGetCredentialsRequest request,
+            ProviderCallbacks<BeginGetCredentialsResponse> callback) {
         Log.i(TAG, "In onGetCredentials in RemoteCredentialService");
         AtomicReference<ICancellationSignal> cancellationSink = new AtomicReference<>();
-        AtomicReference<CompletableFuture<GetCredentialsResponse>> futureRef =
+        AtomicReference<CompletableFuture<BeginGetCredentialsResponse>> futureRef =
                 new AtomicReference<>();
 
-        CompletableFuture<GetCredentialsResponse> connectThenExecute = postAsync(service -> {
-            CompletableFuture<GetCredentialsResponse> getCredentials = new CompletableFuture<>();
+        CompletableFuture<BeginGetCredentialsResponse> connectThenExecute = postAsync(service -> {
+            CompletableFuture<BeginGetCredentialsResponse> getCredentials =
+                    new CompletableFuture<>();
             ICancellationSignal cancellationSignal =
-                    service.onGetCredentials(request, new IGetCredentialsCallback.Stub() {
+                    service.onBeginGetCredentials(request,
+                            new IBeginGetCredentialsCallback.Stub() {
                         @Override
-                        public void onSuccess(GetCredentialsResponse response) {
+                        public void onSuccess(BeginGetCredentialsResponse response) {
                             Log.i(TAG, "In onSuccess in RemoteCredentialService");
                             getCredentials.complete(response);
                         }
@@ -132,7 +134,7 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
                                     errorCode, errorMsg));
                         }
                     });
-            CompletableFuture<GetCredentialsResponse> future = futureRef.get();
+            CompletableFuture<BeginGetCredentialsResponse> future = futureRef.get();
             if (future != null && future.isCancelled()) {
                 dispatchCancellationSignal(cancellationSignal);
             } else {
@@ -159,7 +161,8 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
         AtomicReference<CompletableFuture<BeginCreateCredentialResponse>> futureRef =
                 new AtomicReference<>();
 
-        CompletableFuture<BeginCreateCredentialResponse> connectThenExecute = postAsync(service -> {
+        CompletableFuture<BeginCreateCredentialResponse> connectThenExecute =
+                postAsync(service -> {
             CompletableFuture<BeginCreateCredentialResponse> createCredentialFuture =
                     new CompletableFuture<>();
             ICancellationSignal cancellationSignal = service.onBeginCreateCredential(
