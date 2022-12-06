@@ -19,8 +19,6 @@
 #include "hwui/Canvas.h"
 #include "RenderNode.h"
 
-#include <SkBlendMode.h>
-
 using namespace android;
 using namespace android::uirenderer;
 

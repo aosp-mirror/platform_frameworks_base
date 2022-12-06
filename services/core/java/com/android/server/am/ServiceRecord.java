@@ -364,6 +364,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
          * Note, we do _not_ check the "start id" here, because the start id increments if the
          * app calls startService() or startForegroundService() on the same service,
          * but that will _not_ update the ShortFgsInfo, and will not extend the timeout.
+         *
+         * TODO(short-service): Make sure, calling startService will not extend or remove the
+         * timeout, in CTS.
          */
         boolean isCurrent() {
             return this.mStartForegroundCount == ServiceRecord.this.mStartForegroundCount;
@@ -894,9 +897,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      *         has no reason to start again. Note this condition doesn't consider the bindings.
      */
     boolean canStopIfKilled(boolean isStartCanceled) {
-        if (isShortFgs()) { // Short-FGS should always stop if killed.
-            return true;
-        }
+        // TODO(short-service): If it's a "short FGS", we should stop it if killed.
         return startRequested && (stopIfKilled || isStartCanceled) && pendingStarts.isEmpty();
     }
 
@@ -1360,9 +1361,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         // Note if the type contains FOREGROUND_SERVICE_TYPE_SHORT_SERVICE but also other bits
         // set, it's _not_ considered be a short service. (because we shouldn't apply
         // the short-service restrictions)
-        // (But we should be preventing mixture of FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
-        // and other types in Service.startForeground().)
-        return startRequested && isForeground
+        return isForeground
                 && (foregroundServiceType == ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE);
     }
 

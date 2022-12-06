@@ -39,13 +39,10 @@ import java.io.PrintWriter;
  */
 public interface CoreStartable extends Dumpable {
 
-    /** Main entry point for implementations. Called shortly after SysUI startup. */
+    /** Main entry point for implementations. Called shortly after app startup. */
     void start();
 
-    /** Called when the device configuration changes. This will not be called before
-     * {@link #start()}, but it could be called before {@link #onBootCompleted()}.
-     *
-     * @see android.app.Application#onConfigurationChanged(Configuration)  */
+    /** */
     default void onConfigurationChanged(Configuration newConfig) {
     }
 
@@ -53,11 +50,7 @@ public interface CoreStartable extends Dumpable {
     default void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
     }
 
-    /** Called immediately after the system broadcasts
-     * {@link android.content.Intent#ACTION_LOCKED_BOOT_COMPLETED} or during SysUI startup if the
-     * property {@code sys.boot_completed} is already set to 1. The latter typically occurs when
-     * starting a new SysUI instance, such as when starting SysUI for a secondary user.
-     * {@link #onBootCompleted()} will never be called before {@link #start()}. */
+    /** Called when the device reports BOOT_COMPLETED. */
     default void onBootCompleted() {
     }
 }

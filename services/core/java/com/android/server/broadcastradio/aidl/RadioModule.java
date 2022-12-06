@@ -55,7 +55,7 @@ final class RadioModule {
 
     private final IBroadcastRadio mService;
 
-    private final Object mLock = new Object();
+    private final Object mLock;
     private final Handler mHandler;
     private final RadioLogger mLogger;
     private final RadioManager.ModuleProperties mProperties;
@@ -165,15 +165,18 @@ final class RadioModule {
     };
 
     @VisibleForTesting
-    RadioModule(IBroadcastRadio service, RadioManager.ModuleProperties properties) {
+    RadioModule(IBroadcastRadio service,
+            RadioManager.ModuleProperties properties, Object lock) {
         mProperties = Objects.requireNonNull(properties, "properties cannot be null");
         mService = Objects.requireNonNull(service, "service cannot be null");
+        mLock = Objects.requireNonNull(lock, "lock cannot be null");
         mHandler = new Handler(Looper.getMainLooper());
         mLogger = new RadioLogger(TAG, RADIO_EVENT_LOGGER_QUEUE_SIZE);
     }
 
     @Nullable
-    static RadioModule tryLoadingModule(int moduleId, String moduleName, IBinder serviceBinder) {
+    static RadioModule tryLoadingModule(int moduleId, String moduleName,
+            IBinder serviceBinder, Object lock) {
         try {
             Slogf.i(TAG, "Try loading module for module id = %d, module name = %s",
                     moduleId, moduleName);
@@ -203,7 +206,7 @@ final class RadioModule {
             RadioManager.ModuleProperties prop = ConversionUtils.propertiesFromHalProperties(
                     moduleId, moduleName, service.getProperties(), amfmConfig, dabConfig);
 
-            return new RadioModule(service, prop);
+            return new RadioModule(service, prop, lock);
         } catch (RemoteException ex) {
             Slogf.e(TAG, ex, "Failed to load module %s", moduleName);
             return null;
@@ -219,7 +222,9 @@ final class RadioModule {
     }
 
     void setInternalHalCallback() throws RemoteException {
-        mService.setTunerCallback(mHalTunerCallback);
+        synchronized (mLock) {
+            mService.setTunerCallback(mHalTunerCallback);
+        }
     }
 
     TunerSession openSession(android.hardware.radio.ITunerCallback userCb)
@@ -229,7 +234,7 @@ final class RadioModule {
         Boolean antennaConnected;
         RadioManager.ProgramInfo currentProgramInfo;
         synchronized (mLock) {
-            tunerSession = new TunerSession(this, mService, userCb);
+            tunerSession = new TunerSession(this, mService, userCb, mLock);
             mAidlTunerSessions.add(tunerSession);
             antennaConnected = mAntennaConnected;
             currentProgramInfo = mCurrentProgramInfo;
@@ -351,14 +356,14 @@ final class RadioModule {
             // Otherwise, update the HAL's filter, and AIDL clients will be updated when
             // mHalTunerCallback.onProgramListUpdated() is called.
             mUnionOfAidlProgramFilters = newFilter;
-        }
-        try {
-            mService.startProgramListUpdates(
-                    ConversionUtils.filterToHalProgramFilter(newFilter));
-        } catch (RuntimeException ex) {
-            throw ConversionUtils.throwOnError(ex, /* action= */ "Start Program ListUpdates");
-        } catch (RemoteException ex) {
-            Slogf.e(TAG, ex, "mHalTunerSession.startProgramListUpdates() failed");
+            try {
+                mService.startProgramListUpdates(
+                        ConversionUtils.filterToHalProgramFilter(newFilter));
+            } catch (RuntimeException ex) {
+                throw ConversionUtils.throwOnError(ex, /* action= */ "Start Program ListUpdates");
+            } catch (RemoteException ex) {
+                Slogf.e(TAG, ex, "mHalTunerSession.startProgramListUpdates() failed");
+            }
         }
     }
 
@@ -448,10 +453,12 @@ final class RadioModule {
             }
         };
 
-        try {
-            hwCloseHandle[0] = mService.registerAnnouncementListener(hwListener, enabledList);
-        } catch (RuntimeException ex) {
-            throw ConversionUtils.throwOnError(ex, /* action= */ "AnnouncementListener");
+        synchronized (mLock) {
+            try {
+                hwCloseHandle[0] = mService.registerAnnouncementListener(hwListener, enabledList);
+            } catch (RuntimeException ex) {
+                throw ConversionUtils.throwOnError(ex, /* action= */ "AnnouncementListener");
+            }
         }
 
         return new android.hardware.radio.ICloseHandle.Stub() {
@@ -471,10 +478,12 @@ final class RadioModule {
         if (id == 0) throw new IllegalArgumentException("Image ID is missing");
 
         byte[] rawImage;
-        try {
-            rawImage = mService.getImage(id);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
+        synchronized (mLock) {
+            try {
+                rawImage = mService.getImage(id);
+            } catch (RemoteException ex) {
+                throw ex.rethrowFromSystemServer();
+            }
         }
 
         if (rawImage == null || rawImage.length == 0) return null;

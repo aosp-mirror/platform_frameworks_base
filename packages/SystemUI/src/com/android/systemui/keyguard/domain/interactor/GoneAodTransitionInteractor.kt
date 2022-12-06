@@ -23,10 +23,11 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -37,17 +38,17 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-) : TransitionInteractor(GoneAodTransitionInteractor::class.simpleName!!) {
+) : TransitionInteractor("GONE->AOD") {
 
     override fun start() {
         scope.launch {
-            keyguardInteractor.wakefulnessModel
+            keyguardInteractor.wakefulnessState
                 .sample(keyguardTransitionInteractor.finishedKeyguardState, { a, b -> Pair(a, b) })
                 .collect { pair ->
                     val (wakefulnessState, keyguardState) = pair
                     if (
                         keyguardState == KeyguardState.GONE &&
-                            wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP
+                            wakefulnessState == WakefulnessModel.STARTING_TO_SLEEP
                     ) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(

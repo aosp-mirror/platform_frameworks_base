@@ -56,8 +56,7 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.GlobalSettings
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 
 /**
  * Util class to create real implementations of the FooterActions repositories, viewModel and
@@ -66,7 +65,6 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 class FooterActionsTestUtils(
     private val context: Context,
     private val testableLooper: TestableLooper,
-    private val scheduler: TestCoroutineScheduler,
 ) {
     /** Enable or disable the user switcher in the settings. */
     fun setUserSwitcherEnabled(settings: GlobalSettings, enabled: Boolean, userId: Int) {
@@ -107,7 +105,7 @@ class FooterActionsTestUtils(
         foregroundServicesRepository: ForegroundServicesRepository = foregroundServicesRepository(),
         userSwitcherRepository: UserSwitcherRepository = userSwitcherRepository(),
         broadcastDispatcher: BroadcastDispatcher = mock(),
-        bgDispatcher: CoroutineDispatcher = StandardTestDispatcher(scheduler),
+        bgDispatcher: CoroutineDispatcher = TestCoroutineDispatcher(),
     ): FooterActionsInteractor {
         return FooterActionsInteractorImpl(
             activityStarter,
@@ -128,7 +126,7 @@ class FooterActionsTestUtils(
     /** Create a [SecurityRepository] to be used in tests. */
     fun securityRepository(
         securityController: SecurityController = FakeSecurityController(),
-        bgDispatcher: CoroutineDispatcher = StandardTestDispatcher(scheduler),
+        bgDispatcher: CoroutineDispatcher = TestCoroutineDispatcher(),
     ): SecurityRepository {
         return SecurityRepositoryImpl(
             securityController,
@@ -147,7 +145,7 @@ class FooterActionsTestUtils(
     fun userSwitcherRepository(
         @Application context: Context = this.context.applicationContext,
         bgHandler: Handler = Handler(testableLooper.looper),
-        bgDispatcher: CoroutineDispatcher = StandardTestDispatcher(scheduler),
+        bgDispatcher: CoroutineDispatcher = TestCoroutineDispatcher(),
         userManager: UserManager = mock(),
         userTracker: UserTracker = FakeUserTracker(),
         userSwitcherController: UserSwitcherController = mock(),

@@ -199,7 +199,8 @@ static void getNonRotatedSize(const DisplayViewport& viewport, int32_t& width, i
     width = viewport.deviceWidth;
     height = viewport.deviceHeight;
 
-    if (viewport.orientation == ui::ROTATION_90 || viewport.orientation == ui::ROTATION_270) {
+    if (viewport.orientation == DISPLAY_ORIENTATION_90 ||
+        viewport.orientation == DISPLAY_ORIENTATION_270) {
         std::swap(width, height);
     }
 }
@@ -243,41 +244,37 @@ void MouseCursorController::setDisplayViewport(const DisplayViewport& viewport,
 
         // Undo the previous rotation.
         switch (oldViewport.orientation) {
-            case ui::ROTATION_90:
+            case DISPLAY_ORIENTATION_90:
                 temp = x;
                 x = oldViewport.deviceHeight - y;
                 y = temp;
                 break;
-            case ui::ROTATION_180:
+            case DISPLAY_ORIENTATION_180:
                 x = oldViewport.deviceWidth - x;
                 y = oldViewport.deviceHeight - y;
                 break;
-            case ui::ROTATION_270:
+            case DISPLAY_ORIENTATION_270:
                 temp = x;
                 x = y;
                 y = oldViewport.deviceWidth - temp;
-                break;
-            case ui::ROTATION_0:
                 break;
         }
 
         // Perform the new rotation.
         switch (viewport.orientation) {
-            case ui::ROTATION_90:
+            case DISPLAY_ORIENTATION_90:
                 temp = x;
                 x = y;
                 y = viewport.deviceHeight - temp;
                 break;
-            case ui::ROTATION_180:
+            case DISPLAY_ORIENTATION_180:
                 x = viewport.deviceWidth - x;
                 y = viewport.deviceHeight - y;
                 break;
-            case ui::ROTATION_270:
+            case DISPLAY_ORIENTATION_270:
                 temp = x;
                 x = viewport.deviceWidth - y;
                 y = temp;
-                break;
-            case ui::ROTATION_0:
                 break;
         }
 

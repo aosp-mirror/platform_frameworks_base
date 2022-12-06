@@ -77,7 +77,7 @@ public final class BroadcastRadioServiceImpl {
                 }
 
                 RadioModule radioModule =
-                        RadioModule.tryLoadingModule(moduleId, name, newBinder);
+                        RadioModule.tryLoadingModule(moduleId, name, newBinder, mLock);
                 if (radioModule == null) {
                     Slogf.w(TAG, "No module %s with id %d (HAL AIDL)", name, moduleId);
                     return;

@@ -5149,10 +5149,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ApplicationExitInfo.REASON_INITIALIZATION_FAILURE,
                     ApplicationExitInfo.SUBREASON_UNKNOWN,
                     "wrong startSeq");
-            synchronized (this) {
-                app.killLocked("unexpected process record",
-                        ApplicationExitInfo.REASON_OTHER, true);
-            }
+            app.killLocked("unexpected process record",
+                    ApplicationExitInfo.REASON_OTHER, true);
             return;
         }
 
@@ -12979,13 +12977,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     public int getForegroundServiceType(ComponentName className, IBinder token) {
         synchronized (this) {
             return mServices.getForegroundServiceTypeLocked(className, token);
-        }
-    }
-
-    @Override
-    public boolean shouldServiceTimeOut(ComponentName className, IBinder token) {
-        synchronized (this) {
-            return mServices.shouldServiceTimeOutLocked(className, token);
         }
     }
 

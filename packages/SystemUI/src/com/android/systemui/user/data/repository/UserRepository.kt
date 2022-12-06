@@ -242,15 +242,7 @@ constructor(
             val isUserSwitcherEnabled =
                 globalSettings.getIntForUser(
                     Settings.Global.USER_SWITCHER_ENABLED,
-                    if (
-                        appContext.resources.getBoolean(
-                            com.android.internal.R.bool.config_showUserSwitcherByDefault
-                        )
-                    ) {
-                        1
-                    } else {
-                        0
-                    },
+                    0,
                     UserHandle.USER_SYSTEM,
                 ) != 0
 

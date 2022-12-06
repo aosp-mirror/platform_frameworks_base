@@ -16,6 +16,22 @@
 
 #pragma once
 
+#include "DamageAccumulator.h"
+#include "FrameInfo.h"
+#include "FrameInfoVisualizer.h"
+#include "FrameMetricsReporter.h"
+#include "IContextFactory.h"
+#include "IRenderPipeline.h"
+#include "JankTracker.h"
+#include "LayerUpdateQueue.h"
+#include "Lighting.h"
+#include "ReliableSurface.h"
+#include "RenderNode.h"
+#include "renderthread/RenderTask.h"
+#include "renderthread/RenderThread.h"
+#include "utils/RingBuffer.h"
+#include "ColorMode.h"
+
 #include <SkBitmap.h>
 #include <SkRect.h>
 #include <SkSize.h>
@@ -29,23 +45,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-
-#include "ColorMode.h"
-#include "DamageAccumulator.h"
-#include "FrameInfo.h"
-#include "FrameInfoVisualizer.h"
-#include "FrameMetricsReporter.h"
-#include "HintSessionWrapper.h"
-#include "IContextFactory.h"
-#include "IRenderPipeline.h"
-#include "JankTracker.h"
-#include "LayerUpdateQueue.h"
-#include "Lighting.h"
-#include "ReliableSurface.h"
-#include "RenderNode.h"
-#include "renderthread/RenderTask.h"
-#include "renderthread/RenderThread.h"
-#include "utils/RingBuffer.h"
 
 namespace android {
 namespace uirenderer {
@@ -67,8 +66,7 @@ class Frame;
 class CanvasContext : public IFrameCallback {
 public:
     static CanvasContext* create(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
-                                 IContextFactory* contextFactory, pid_t uiThreadId,
-                                 pid_t renderThreadId);
+                                 IContextFactory* contextFactory);
     virtual ~CanvasContext();
 
     /**
@@ -140,7 +138,7 @@ public:
     bool makeCurrent();
     void prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t syncQueued, RenderNode* target);
     // Returns the DequeueBufferDuration.
-    void draw();
+    std::optional<nsecs_t> draw();
     void destroy();
 
     // IFrameCallback, Choreographer-driven frame callback entry point
@@ -216,14 +214,9 @@ public:
 
     static CanvasContext* getActiveContext();
 
-    void sendLoadResetHint();
-
-    void setSyncDelayDuration(nsecs_t duration);
-
 private:
     CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
-                  IContextFactory* contextFactory, std::unique_ptr<IRenderPipeline> renderPipeline,
-                  pid_t uiThreadId, pid_t renderThreadId);
+                  IContextFactory* contextFactory, std::unique_ptr<IRenderPipeline> renderPipeline);
 
     friend class RegisterFrameCallbackTask;
     // TODO: Replace with something better for layer & other GL object
@@ -337,11 +330,6 @@ private:
 
     std::function<bool(int64_t, int64_t, int64_t)> mASurfaceTransactionCallback;
     std::function<void()> mPrepareSurfaceControlForWebviewCallback;
-
-    HintSessionWrapper mHintSessionWrapper;
-    nsecs_t mLastDequeueBufferDuration = 0;
-    nsecs_t mSyncDelayDuration = 0;
-    nsecs_t mIdleDuration = 0;
 };
 
 } /* namespace renderthread */

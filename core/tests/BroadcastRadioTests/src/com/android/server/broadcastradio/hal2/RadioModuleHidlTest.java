@@ -62,12 +62,13 @@ public final class RadioModuleHidlTest {
     @Mock
     private android.hardware.broadcastradio.V2_0.ICloseHandle mHalCloseHandleMock;
 
+    private final Object mLock = new Object();
     private RadioModule mRadioModule;
     private android.hardware.broadcastradio.V2_0.IAnnouncementListener mHalListener;
 
     @Before
     public void setup() throws RemoteException {
-        mRadioModule = new RadioModule(mBroadcastRadioMock, TEST_MODULE_PROPERTIES);
+        mRadioModule = new RadioModule(mBroadcastRadioMock, TEST_MODULE_PROPERTIES, mLock);
 
         when(mBroadcastRadioMock.getImage(anyInt())).thenReturn(new ArrayList<Byte>(0));
 

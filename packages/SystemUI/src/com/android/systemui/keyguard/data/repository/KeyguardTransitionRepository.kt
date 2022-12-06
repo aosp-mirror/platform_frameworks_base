@@ -116,7 +116,6 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
                 KeyguardState.LOCKSCREEN,
                 0f,
                 TransitionState.STARTED,
-                KeyguardTransitionRepositoryImpl::class.simpleName!!,
             )
         )
         emitTransition(
@@ -125,7 +124,6 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
                 KeyguardState.LOCKSCREEN,
                 1f,
                 TransitionState.FINISHED,
-                KeyguardTransitionRepositoryImpl::class.simpleName!!,
             )
         )
     }

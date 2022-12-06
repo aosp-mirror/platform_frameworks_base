@@ -43,9 +43,6 @@ class FakeFgsManagerController(
 
     override val showFooterDot: MutableStateFlow<Boolean> = MutableStateFlow(showFooterDot)
 
-    override var includesUserVisibleJobs = false
-        private set
-
     private val numRunningPackagesListeners = LinkedHashSet<OnNumberOfPackagesChangedListener>()
     private val dialogDismissedListeners = LinkedHashSet<OnDialogDismissedListener>()
 

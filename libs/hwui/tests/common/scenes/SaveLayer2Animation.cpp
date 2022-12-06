@@ -16,7 +16,6 @@
 
 #include <hwui/Paint.h>
 #include <minikin/Layout.h>
-#include <SkBlendMode.h>
 #include <string>
 #include "TestSceneBase.h"
 

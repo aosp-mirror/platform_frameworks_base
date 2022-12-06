@@ -1573,7 +1573,7 @@ public final class DisplayManagerService extends SystemService {
             mSyncRoot.notifyAll();
         }
 
-        sendDisplayEventLocked(display, DisplayManagerGlobal.EVENT_DISPLAY_ADDED);
+        sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_ADDED);
 
         Runnable work = updateDisplayStateLocked(device);
         if (work != null) {
@@ -1592,7 +1592,7 @@ public final class DisplayManagerService extends SystemService {
         // We don't bother invalidating the display info caches here because any changes to the
         // display info will trigger a cache invalidation inside of LogicalDisplay before we hit
         // this point.
-        sendDisplayEventLocked(display, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
+        sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
         scheduleTraversalLocked(false);
         mPersistentDataStore.saveIfNeeded();
 
@@ -1622,7 +1622,7 @@ public final class DisplayManagerService extends SystemService {
         mDisplayStates.delete(displayId);
         mDisplayBrightnesses.delete(displayId);
         DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
-        sendDisplayEventLocked(display, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
+        sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
         scheduleTraversalLocked(false);
 
         if (mDisplayWindowPolicyControllers.contains(displayId)) {
@@ -1638,13 +1638,23 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void handleLogicalDisplaySwappedLocked(@NonNull LogicalDisplay display) {
-        handleLogicalDisplayChangedLocked(display);
-
+        final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
+        final Runnable work = updateDisplayStateLocked(device);
+        if (work != null) {
+            mHandler.post(work);
+        }
         final int displayId = display.getDisplayIdLocked();
+
         if (displayId == Display.DEFAULT_DISPLAY) {
             notifyDefaultDisplayDeviceUpdated(display);
         }
+        DisplayPowerControllerInterface dpc = mDisplayPowerControllers.get(displayId);
+        if (dpc != null) {
+            dpc.onDisplayChanged();
+        }
+        mPersistentDataStore.saveIfNeeded();
         mHandler.sendEmptyMessage(MSG_LOAD_BRIGHTNESS_CONFIGURATIONS);
+        handleLogicalDisplayChangedLocked(display);
     }
 
     private void notifyDefaultDisplayDeviceUpdated(LogicalDisplay display) {
@@ -1656,7 +1666,7 @@ public final class DisplayManagerService extends SystemService {
         final int displayId = display.getDisplayIdLocked();
         final DisplayPowerControllerInterface dpc = mDisplayPowerControllers.get(displayId);
         if (dpc != null) {
-            dpc.onDisplayChanged();
+            dpc.onDeviceStateTransition();
         }
     }
 
@@ -2356,13 +2366,9 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void sendDisplayEventLocked(@NonNull LogicalDisplay display, @DisplayEvent int event) {
-        // Only send updates outside of DisplayManagerService for enabled displays
-        if (display.isEnabledLocked()) {
-            int displayId = display.getDisplayIdLocked();
-            Message msg = mHandler.obtainMessage(MSG_DELIVER_DISPLAY_EVENT, displayId, event);
-            mHandler.sendMessage(msg);
-        }
+    private void sendDisplayEventLocked(int displayId, @DisplayEvent int event) {
+        Message msg = mHandler.obtainMessage(MSG_DELIVER_DISPLAY_EVENT, displayId, event);
+        mHandler.sendMessage(msg);
     }
 
     private void sendDisplayGroupEvent(int groupId, int event) {
@@ -2647,7 +2653,8 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void handleBrightnessChange(LogicalDisplay display) {
-        sendDisplayEventLocked(display, DisplayManagerGlobal.EVENT_DISPLAY_BRIGHTNESS_CHANGED);
+        sendDisplayEventLocked(display.getDisplayIdLocked(),
+                DisplayManagerGlobal.EVENT_DISPLAY_BRIGHTNESS_CHANGED);
     }
 
     private DisplayDevice getDeviceForDisplayLocked(int displayId) {
@@ -2864,12 +2871,12 @@ public final class DisplayManagerService extends SystemService {
          * Returns the list of all display ids.
          */
         @Override // Binder call
-        public int[] getDisplayIds(boolean includeDisabled) {
+        public int[] getDisplayIds() {
             final int callingUid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mSyncRoot) {
-                    return mLogicalDisplayMapper.getDisplayIdsLocked(callingUid, includeDisabled);
+                    return mLogicalDisplayMapper.getDisplayIdsLocked(callingUid);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -3360,11 +3367,6 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mSyncRoot) {
-                    LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(
-                            displayId, /* includeDisabled= */ false);
-                    if (display == null || !display.isEnabledLocked()) {
-                        return null;
-                    }
                     DisplayPowerControllerInterface dpc = mDisplayPowerControllers.get(displayId);
                     if (dpc != null) {
                         return dpc.getBrightnessInfo();

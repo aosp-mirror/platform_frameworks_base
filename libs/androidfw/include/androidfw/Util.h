@@ -22,6 +22,7 @@
 
 #include <cstdlib>
 #include <memory>
+#include <sstream>
 #include <vector>
 
 #include "androidfw/BigBuffer.h"
@@ -32,14 +33,7 @@
 #ifdef __ANDROID__
 #define ANDROID_LOG(x) LOG(x)
 #else
-namespace android {
-// No default logging for aapt2, as it's too noisy for a command line dev tool.
-struct NullLogger {
-  template <class T>
-  friend const NullLogger& operator<<(const NullLogger& l, const T&) { return l; }
-};
-}
-#define ANDROID_LOG(x) (android::NullLogger{})
+#define ANDROID_LOG(x) std::stringstream()
 #endif
 
 namespace android {
@@ -55,14 +49,76 @@ std::unique_ptr<T> make_unique(Args&&... args) {
   return std::unique_ptr<T>(new T{std::forward<Args>(args)...});
 }
 
-// Based on std::unique_ptr, but uses free() to release malloc'ed memory.
-struct FreeDeleter {
-  void operator()(void* ptr) const {
-    ::free(ptr);
-  }
-};
+// Based on std::unique_ptr, but uses free() to release malloc'ed memory
+// without incurring the size increase of holding on to a custom deleter.
 template <typename T>
-using unique_cptr = std::unique_ptr<T, FreeDeleter>;
+class unique_cptr {
+ public:
+  using pointer = typename std::add_pointer<T>::type;
+
+  constexpr unique_cptr() : ptr_(nullptr) {}
+  constexpr explicit unique_cptr(std::nullptr_t) : ptr_(nullptr) {}
+  explicit unique_cptr(pointer ptr) : ptr_(ptr) {}
+  unique_cptr(unique_cptr&& o) noexcept : ptr_(o.ptr_) { o.ptr_ = nullptr; }
+
+  ~unique_cptr() { std::free(reinterpret_cast<void*>(ptr_)); }
+
+  inline unique_cptr& operator=(unique_cptr&& o) noexcept {
+    if (&o == this) {
+      return *this;
+    }
+
+    std::free(reinterpret_cast<void*>(ptr_));
+    ptr_ = o.ptr_;
+    o.ptr_ = nullptr;
+    return *this;
+  }
+
+  inline unique_cptr& operator=(std::nullptr_t) {
+    std::free(reinterpret_cast<void*>(ptr_));
+    ptr_ = nullptr;
+    return *this;
+  }
+
+  pointer release() {
+    pointer result = ptr_;
+    ptr_ = nullptr;
+    return result;
+  }
+
+  inline pointer get() const { return ptr_; }
+
+  void reset(pointer ptr = pointer()) {
+    if (ptr == ptr_) {
+      return;
+    }
+
+    pointer old_ptr = ptr_;
+    ptr_ = ptr;
+    std::free(reinterpret_cast<void*>(old_ptr));
+  }
+
+  inline void swap(unique_cptr& o) { std::swap(ptr_, o.ptr_); }
+
+  inline explicit operator bool() const { return ptr_ != nullptr; }
+
+  inline typename std::add_lvalue_reference<T>::type operator*() const { return *ptr_; }
+
+  inline pointer operator->() const { return ptr_; }
+
+  inline bool operator==(const unique_cptr& o) const { return ptr_ == o.ptr_; }
+
+  inline bool operator!=(const unique_cptr& o) const { return ptr_ != o.ptr_; }
+
+  inline bool operator==(std::nullptr_t) const { return ptr_ == nullptr; }
+
+  inline bool operator!=(std::nullptr_t) const { return ptr_ != nullptr; }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(unique_cptr);
+
+  pointer ptr_;
+};
 
 void ReadUtf16StringFromDevice(const uint16_t* src, size_t len, std::string* out);
 
@@ -96,13 +152,13 @@ inline uint32_t DeviceToHost32(uint32_t value) {
 
 std::vector<std::string> SplitAndLowercase(android::StringPiece str, char sep);
 
-inline bool IsFourByteAligned(const void* data) {
-  return ((uintptr_t)data & 0x3U) == 0;
-}
-
 template <typename T>
 inline bool IsFourByteAligned(const incfs::map_ptr<T>& data) {
-  return IsFourByteAligned(data.unsafe_ptr());
+  return ((size_t)data.unsafe_ptr() & 0x3U) == 0;
+}
+
+inline bool IsFourByteAligned(const void* data) {
+  return ((size_t)data & 0x3U) == 0;
 }
 
 // Helper method to extract a UTF-16 string from a StringPool. If the string is stored as UTF-8,

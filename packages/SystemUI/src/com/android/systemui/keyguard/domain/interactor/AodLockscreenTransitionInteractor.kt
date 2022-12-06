@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -41,14 +42,17 @@ constructor(
 
     override fun start() {
         listenForTransitionToAodFromLockscreen()
-        listenForTransitionToLockscreenFromDozeStates()
+        listenForTransitionToLockscreenFromAod()
     }
 
     private fun listenForTransitionToAodFromLockscreen() {
         scope.launch {
             keyguardInteractor
                 .dozeTransitionTo(DozeStateModel.DOZE_AOD)
-                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(
+                    keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                    { a, b -> Pair(a, b) }
+                )
                 .collect { pair ->
                     val (dozeToAod, lastStartedStep) = pair
                     if (lastStartedStep.to == KeyguardState.LOCKSCREEN) {
@@ -65,19 +69,21 @@ constructor(
         }
     }
 
-    private fun listenForTransitionToLockscreenFromDozeStates() {
-        val canGoToLockscreen = setOf(KeyguardState.AOD, KeyguardState.DOZING)
+    private fun listenForTransitionToLockscreenFromAod() {
         scope.launch {
             keyguardInteractor
                 .dozeTransitionTo(DozeStateModel.FINISH)
-                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(
+                    keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                    { a, b -> Pair(a, b) }
+                )
                 .collect { pair ->
                     val (dozeToAod, lastStartedStep) = pair
-                    if (canGoToLockscreen.contains(lastStartedStep.to)) {
+                    if (lastStartedStep.to == KeyguardState.AOD) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,
-                                lastStartedStep.to,
+                                KeyguardState.AOD,
                                 KeyguardState.LOCKSCREEN,
                                 getAnimator(),
                             )

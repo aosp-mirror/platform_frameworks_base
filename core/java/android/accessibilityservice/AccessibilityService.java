@@ -54,7 +54,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
-import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
@@ -798,8 +797,6 @@ public abstract class AccessibilityService extends Service {
 
     private FingerprintGestureController mFingerprintGestureController;
 
-    private int mMotionEventSources;
-
     /**
      * Callback for {@link android.view.accessibility.AccessibilityEvent}s.
      *
@@ -823,11 +820,7 @@ public abstract class AccessibilityService extends Service {
             for (int i = 0; i < mMagnificationControllers.size(); i++) {
                 mMagnificationControllers.valueAt(i).onServiceConnectedLocked();
             }
-            final AccessibilityServiceInfo info = getServiceInfo();
-            if (info != null) {
-                updateInputMethod(info);
-                mMotionEventSources = info.getMotionEventSources();
-            }
+            updateInputMethod(getServiceInfo());
         }
         if (mSoftKeyboardController != null) {
             mSoftKeyboardController.onServiceConnected();
@@ -951,25 +944,6 @@ public abstract class AccessibilityService extends Service {
     protected boolean onKeyEvent(KeyEvent event) {
         return false;
     }
-
-    /**
-     * Callback that allows an accessibility service to observe generic {@link MotionEvent}s.
-     * <p>
-     * Prefer {@link TouchInteractionController} to observe and control touchscreen events,
-     * including touch gestures. If this or any enabled service is using
-     * {@link AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} then
-     * {@link #onMotionEvent} will not receive touchscreen events.
-     * </p>
-     * <p>
-     * <strong>Note:</strong> The service must first request to listen to events using
-     * {@link AccessibilityServiceInfo#setMotionEventSources}.
-     * {@link MotionEvent}s from sources in {@link AccessibilityServiceInfo#getMotionEventSources()}
-     * are not sent to the rest of the system. To stop listening to events from a given source, call
-     * {@link AccessibilityServiceInfo#setMotionEventSources} with that source removed.
-     * </p>
-     * @param event The event to be processed.
-     */
-    public void onMotionEvent(@NonNull MotionEvent event) { }
 
     /**
      * Gets the windows on the screen of the default display. This method returns only the windows
@@ -2547,7 +2521,6 @@ public abstract class AccessibilityService extends Service {
     public final void setServiceInfo(AccessibilityServiceInfo info) {
         mInfo = info;
         updateInputMethod(info);
-        mMotionEventSources = info.getMotionEventSources();
         sendServiceInfo();
     }
 
@@ -2751,7 +2724,7 @@ public abstract class AccessibilityService extends Service {
 
             @Override
             public void onMotionEvent(MotionEvent event) {
-                AccessibilityService.this.sendMotionEventToCallback(event);
+                AccessibilityService.this.onMotionEvent(event);
             }
 
             @Override
@@ -3386,23 +3359,14 @@ public abstract class AccessibilityService extends Service {
         }
     }
 
-    void sendMotionEventToCallback(MotionEvent event) {
-        boolean sendingTouchEventToTouchInteractionController = false;
-        if (event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)) {
-            TouchInteractionController controller;
-            synchronized (mLock) {
-                int displayId = event.getDisplayId();
-                controller = mTouchInteractionControllers.get(displayId);
-            }
-            if (controller != null) {
-                sendingTouchEventToTouchInteractionController = true;
-                controller.onMotionEvent(event);
-            }
+    void onMotionEvent(MotionEvent event) {
+        TouchInteractionController controller;
+        synchronized (mLock) {
+            int displayId = event.getDisplayId();
+            controller = mTouchInteractionControllers.get(displayId);
         }
-        final int eventSourceWithoutClass = event.getSource() & ~InputDevice.SOURCE_CLASS_MASK;
-        if ((mMotionEventSources & eventSourceWithoutClass) != 0
-                && !sendingTouchEventToTouchInteractionController) {
-            onMotionEvent(event);
+        if (controller != null) {
+            controller.onMotionEvent(event);
         }
     }
 

@@ -763,12 +763,7 @@ static void android_view_MotionEvent_nativeScale(jlong nativePtr, jfloat scale) 
 
 static jint android_view_MotionEvent_nativeGetSurfaceRotation(jlong nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    auto rotation = event->getSurfaceRotation();
-    if (rotation) {
-        return static_cast<jint>(rotation.value());
-    } else {
-        return -1;
-    }
+    return jint(event->getSurfaceRotation());
 }
 
 // ----------------------------------------------------------------------------

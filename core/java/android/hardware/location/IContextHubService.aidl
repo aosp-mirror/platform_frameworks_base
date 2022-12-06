@@ -109,8 +109,4 @@ interface IContextHubService {
     // Queries for a list of nanoapps
     @EnforcePermission("ACCESS_CONTEXT_HUB")
     void queryNanoApps(int contextHubId, in IContextHubTransactionCallback transactionCallback);
-
-    // Queries for a list of preloaded nanoapps
-    @EnforcePermission("ACCESS_CONTEXT_HUB")
-    long[] getPreloadedNanoAppIds(in ContextHubInfo hubInfo);
 }

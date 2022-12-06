@@ -23,10 +23,9 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.qs.SettingObserver
-import com.android.systemui.statusbar.pipeline.dagger.AirplaneTableLog
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logInputChange
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -59,7 +58,7 @@ class AirplaneModeRepositoryImpl
 constructor(
     @Background private val bgHandler: Handler,
     private val globalSettings: GlobalSettings,
-    @AirplaneTableLog logger: TableLogBuffer,
+    logger: ConnectivityPipelineLogger,
     @Application scope: CoroutineScope,
 ) : AirplaneModeRepository {
     // TODO(b/254848912): Replace this with a generic SettingObserver coroutine once we have it.
@@ -83,12 +82,7 @@ constructor(
                 awaitClose { observer.isListening = false }
             }
             .distinctUntilChanged()
-            .logDiffsForTable(
-                logger,
-                columnPrefix = "",
-                columnName = "isAirplaneMode",
-                initialValue = false
-            )
+            .logInputChange(logger, "isAirplaneMode")
             .stateIn(
                 scope,
                 started = SharingStarted.WhileSubscribed(),

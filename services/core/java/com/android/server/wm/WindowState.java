@@ -4927,8 +4927,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // animation on the keyguard but seeing the IME window that originally on the app
         // which behinds the keyguard.
         final WindowState imeInputTarget = getImeInputTarget();
-        if (imeInputTarget != null
-                && !(imeInputTarget.isDrawn() || imeInputTarget.isVisibleRequested())) {
+        if (imeInputTarget != null && !(imeInputTarget.isDrawn() || imeInputTarget.isVisible())) {
             return false;
         }
         return mDisplayContent.forAllImeWindows(callback, traverseTopToBottom);

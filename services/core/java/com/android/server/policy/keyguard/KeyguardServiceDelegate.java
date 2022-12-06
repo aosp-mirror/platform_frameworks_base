@@ -200,9 +200,6 @@ public class KeyguardServiceDelegate {
             if (!mKeyguardState.enabled) {
                 mKeyguardService.setKeyguardEnabled(mKeyguardState.enabled);
             }
-            if (mKeyguardState.dreaming) {
-                mKeyguardService.onDreamingStarted();
-            }
         }
 
         @Override

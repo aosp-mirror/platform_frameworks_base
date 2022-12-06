@@ -28,7 +28,6 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.collection.provider.SectionHeaderVisibilityProvider
-import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProviderImpl
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
@@ -50,7 +49,6 @@ constructor(
     private val notifPipelineFlags: NotifPipelineFlags,
     @Application private val scope: CoroutineScope,
     private val sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider,
-    private val seenNotifsProvider: SeenNotificationsProviderImpl,
     private val statusBarStateController: StatusBarStateController,
 ) : Coordinator {
 
@@ -107,9 +105,6 @@ constructor(
     @VisibleForTesting
     internal val unseenNotifFilter =
         object : NotifFilter("$TAG-unseen") {
-
-            var hasFilteredAnyNotifs = false
-
             override fun shouldFilterOut(entry: NotificationEntry, now: Long): Boolean =
                 when {
                     // Don't apply filter if the keyguard isn't currently showing
@@ -120,12 +115,7 @@ constructor(
                     //  - summary will be pruned if necessary, depending on if children are filtered
                     entry.parent?.summary == entry -> false
                     else -> true
-                }.also { hasFiltered -> hasFilteredAnyNotifs = hasFilteredAnyNotifs || hasFiltered }
-
-            override fun onCleanup() {
-                seenNotifsProvider.hasFilteredOutSeenNotifications = hasFilteredAnyNotifs
-                hasFilteredAnyNotifs = false
-            }
+                }
         }
 
     private val notifFilter: NotifFilter =

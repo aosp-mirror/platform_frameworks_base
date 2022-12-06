@@ -17,7 +17,6 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import android.graphics.Point
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
@@ -42,7 +41,7 @@ constructor(
      * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
      * all.
      */
-    val dozeAmount: Flow<Float> = repository.linearDozeAmount
+    val dozeAmount: Flow<Float> = repository.dozeAmount
     /** Whether the system is in doze mode. */
     val isDozing: Flow<Boolean> = repository.isDozing
     /** Doze transition information. */
@@ -59,7 +58,7 @@ constructor(
     /** Whether the bouncer is showing or not. */
     val isBouncerShowing: Flow<Boolean> = repository.isBouncerShowing
     /** The device wake/sleep state */
-    val wakefulnessModel: Flow<WakefulnessModel> = repository.wakefulness
+    val wakefulnessState: Flow<WakefulnessModel> = repository.wakefulnessState
     /** Observable for the [StatusBarState] */
     val statusBarState: Flow<StatusBarState> = repository.statusBarState
     /**
@@ -68,15 +67,10 @@ constructor(
      */
     val biometricUnlockState: Flow<BiometricUnlockModel> = repository.biometricUnlockState
 
-    /** The approximate location on the screen of the fingerprint sensor, if one is available. */
-    val fingerprintSensorLocation: Flow<Point?> = repository.fingerprintSensorLocation
-
-    /** The approximate location on the screen of the face unlock sensor, if one is available. */
-    val faceSensorLocation: Flow<Point?> = repository.faceSensorLocation
-
     fun dozeTransitionTo(state: DozeStateModel): Flow<DozeTransitionModel> {
         return dozeTransitionModel.filter { it.to == state }
     }
+
     fun isKeyguardShowing(): Boolean {
         return repository.isKeyguardShowing()
     }

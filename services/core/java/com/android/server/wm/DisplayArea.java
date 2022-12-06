@@ -343,11 +343,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
             if (childArea == null) {
                 continue;
             }
-            pw.print(prefix + "* " + childArea.getName());
-            if (childArea.isOrganized()) {
-                pw.print(" (organized)");
-            }
-            pw.println();
+            pw.println(prefix + "* " + childArea.getName());
             if (childArea.isTaskDisplayArea()) {
                 // TaskDisplayArea can only contain task. And it is already printed by display.
                 continue;

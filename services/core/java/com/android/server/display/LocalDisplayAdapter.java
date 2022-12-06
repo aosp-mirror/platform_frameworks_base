@@ -762,8 +762,18 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             }
                         }
 
+                        // If the state change was from or to VR, then we need to tell the light
+                        // so that it can apply appropriate VR brightness settings. Also, update the
+                        // brightness so the state is propogated to light.
+                        boolean vrModeChange = false;
+                        if ((state == Display.STATE_VR || currentState == Display.STATE_VR) &&
+                                currentState != state) {
+                            setVrMode(state == Display.STATE_VR);
+                            vrModeChange = true;
+                        }
+
                         // Apply brightness changes given that we are in a non-suspended state.
-                        if (brightnessChanged) {
+                        if (brightnessChanged || vrModeChange) {
                             setDisplayBrightness(brightnessState, sdrBrightnessState);
                             mBrightnessState = brightnessState;
                             mSdrBrightnessState = sdrBrightnessState;
@@ -773,6 +783,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         if (state != currentState) {
                             setDisplayState(state);
                         }
+                    }
+
+                    private void setVrMode(boolean isVrEnabled) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "setVrMode("
+                                    + "id=" + physicalDisplayId
+                                    + ", state=" + Display.stateToString(state) + ")");
+                        }
+                        mBacklightAdapter.setVrMode(isVrEnabled);
                     }
 
                     private void setDisplayState(int state) {
@@ -1483,6 +1502,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 }
             } else if (mBacklight != null) {
                 mBacklight.setBrightness(backlight);
+            }
+        }
+
+        void setVrMode(boolean isVrModeEnabled) {
+            if (mBacklight != null) {
+                mBacklight.setVrMode(isVrModeEnabled);
             }
         }
 

@@ -19,7 +19,6 @@ package com.android.server.app;
 import android.app.GameManager;
 import android.os.FileUtils;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
@@ -38,6 +37,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Persists all GameService related settings.
@@ -49,11 +49,7 @@ public class GameManagerSettings {
     // The XML file follows the below format:
     // <?xml>
     // <packages>
-    //     <package name="" gameMode="">
-    //       <gameModeConfig gameMode="" fps="" scaling="" useAngle="" loadingBoost="">
-    //       </gameModeConfig>
-    //       ...
-    //     </package>
+    //     <package></package>
     //     ...
     // </packages>
     private static final String GAME_SERVICE_FILE_NAME = "game-manager-service.xml";
@@ -159,14 +155,11 @@ public class GameManagerSettings {
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
             serializer.startTag(null, TAG_PACKAGES);
-            final ArraySet<String> packageNames = new ArraySet<>(mGameModes.keySet());
-            packageNames.addAll(mConfigOverrides.keySet());
-            for (String packageName : packageNames) {
+            for (Map.Entry<String, Integer> entry : mGameModes.entrySet()) {
+                String packageName = entry.getKey();
                 serializer.startTag(null, TAG_PACKAGE);
                 serializer.attribute(null, ATTR_NAME, packageName);
-                if (mGameModes.containsKey(packageName)) {
-                    serializer.attributeInt(null, ATTR_GAME_MODE, mGameModes.get(packageName));
-                }
+                serializer.attributeInt(null, ATTR_GAME_MODE, entry.getValue());
                 writeGameModeConfigTags(serializer, mConfigOverrides.get(packageName));
                 serializer.endTag(null, TAG_PACKAGE);
             }
@@ -231,7 +224,7 @@ public class GameManagerSettings {
                 // Do nothing
             }
             if (type != XmlPullParser.START_TAG) {
-                Slog.wtf(TAG, "No start tag found in game manager settings");
+                Slog.wtf(TAG, "No start tag found in package manager settings");
                 return false;
             }
 
@@ -252,7 +245,7 @@ public class GameManagerSettings {
                 }
             }
         } catch (XmlPullParserException | java.io.IOException e) {
-            Slog.wtf(TAG, "Error reading game manager settings", e);
+            Slog.wtf(TAG, "Error reading package manager settings", e);
             return false;
         }
         return true;
@@ -267,12 +260,15 @@ public class GameManagerSettings {
             XmlUtils.skipCurrentTag(parser);
             return;
         }
+        int gameMode;
         try {
-            final int gameMode = parser.getAttributeInt(null, ATTR_GAME_MODE);
-            mGameModes.put(name, gameMode);
+            gameMode = parser.getAttributeInt(null, ATTR_GAME_MODE);
         } catch (XmlPullParserException e) {
-            Slog.v(TAG, "No game mode selected by user for package" + name);
+            Slog.wtf(TAG, "Invalid game mode in package tag: "
+                    + parser.getAttributeValue(null, ATTR_GAME_MODE), e);
+            return;
         }
+        mGameModes.put(name, gameMode);
         final int packageTagDepth = parser.getDepth();
         int type;
         final GamePackageConfiguration config = new GamePackageConfiguration(name);

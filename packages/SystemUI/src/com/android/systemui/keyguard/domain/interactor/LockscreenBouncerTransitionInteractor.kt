@@ -25,7 +25,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE_LOCKED
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.sample
 import java.util.UUID
@@ -58,26 +58,22 @@ constructor(
             keyguardInteractor.isBouncerShowing
                 .sample(
                     combine(
-                        keyguardInteractor.wakefulnessModel,
+                        keyguardInteractor.wakefulnessState,
                         keyguardTransitionInteractor.startedKeyguardTransitionStep,
-                    ) { wakefulnessModel, transitionStep ->
-                        Pair(wakefulnessModel, transitionStep)
-                    }
-                ) { bouncerShowing, wakefulnessAndTransition ->
-                    Triple(
-                        bouncerShowing,
-                        wakefulnessAndTransition.first,
-                        wakefulnessAndTransition.second
-                    )
-                }
-                .collect { (isBouncerShowing, wakefulnessState, lastStartedTransitionStep) ->
+                    ) { a, b ->
+                        Pair(a, b)
+                    },
+                    { a, bc -> Triple(a, bc.first, bc.second) }
+                )
+                .collect { triple ->
+                    val (isBouncerShowing, wakefulnessState, lastStartedTransitionStep) = triple
                     if (
                         !isBouncerShowing && lastStartedTransitionStep.to == KeyguardState.BOUNCER
                     ) {
                         val to =
                             if (
-                                wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP ||
-                                    wakefulnessState.state == WakefulnessState.ASLEEP
+                                wakefulnessState == WakefulnessModel.STARTING_TO_SLEEP ||
+                                    wakefulnessState == WakefulnessModel.ASLEEP
                             ) {
                                 KeyguardState.AOD
                             } else {
@@ -104,17 +100,14 @@ constructor(
                     combine(
                         keyguardTransitionInteractor.finishedKeyguardState,
                         keyguardInteractor.statusBarState,
-                    ) { finishedKeyguardState, statusBarState ->
-                        Pair(finishedKeyguardState, statusBarState)
-                    }
-                ) { shadeModel, keyguardStateAndStatusBarState ->
-                    Triple(
-                        shadeModel,
-                        keyguardStateAndStatusBarState.first,
-                        keyguardStateAndStatusBarState.second
-                    )
-                }
-                .collect { (shadeModel, keyguardState, statusBarState) ->
+                    ) { a, b ->
+                        Pair(a, b)
+                    },
+                    { a, bc -> Triple(a, bc.first, bc.second) }
+                )
+                .collect { triple ->
+                    val (shadeModel, keyguardState, statusBarState) = triple
+
                     val id = transitionId
                     if (id != null) {
                         // An existing `id` means a transition is started, and calls to

@@ -190,6 +190,8 @@ constructor(
 
     /** Returns affordance IDs indexed by slot ID, for all known slots. */
     suspend fun getSelections(): Map<String, List<KeyguardQuickAffordancePickerRepresentation>> {
+        check(isUsingRepository)
+
         val slots = repository.get().getSlotPickerRepresentations()
         val selections = repository.get().getSelections()
         val affordanceById =
@@ -310,6 +312,8 @@ constructor(
 
     suspend fun getAffordancePickerRepresentations():
         List<KeyguardQuickAffordancePickerRepresentation> {
+        check(isUsingRepository)
+
         return repository.get().getAffordancePickerRepresentations()
     }
 

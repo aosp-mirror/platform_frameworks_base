@@ -219,11 +219,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 insetsState.getSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
         // Only insets the divider bar with task bar when it's expanded so that the rounded corners
         // will be drawn against task bar.
-        // But there is no need to do it when IME showing because there are no rounded corners at
-        // the bottom. This also avoids the problem of task bar height not changing when IME
-        // floating.
-        if (!insetsState.getSourceOrDefaultVisibility(InsetsState.ITYPE_IME)
-                && taskBarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight) {
+        if (taskBarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight) {
             mTempRect.inset(taskBarInsetsSource.calculateVisibleInsets(mTempRect));
         }
 

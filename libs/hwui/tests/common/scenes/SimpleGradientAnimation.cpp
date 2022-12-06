@@ -16,7 +16,6 @@
 
 #include "TestSceneBase.h"
 
-#include <SkBlendMode.h>
 #include <SkGradientShader.h>
 
 class SimpleGradientAnimation;

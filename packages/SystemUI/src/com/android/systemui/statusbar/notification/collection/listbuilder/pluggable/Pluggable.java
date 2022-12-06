@@ -51,9 +51,7 @@ public abstract class Pluggable<This> {
      */
     public final void invalidateList(@Nullable String reason) {
         if (mListener != null) {
-            if (Trace.isEnabled()) {
-                Trace.traceBegin(Trace.TRACE_TAG_APP, "Pluggable<" + mName + ">.invalidateList");
-            }
+            Trace.beginSection("Pluggable<" + mName + ">.invalidateList");
             mListener.onPluggableInvalidated((This) this, reason);
             Trace.endSection();
         }

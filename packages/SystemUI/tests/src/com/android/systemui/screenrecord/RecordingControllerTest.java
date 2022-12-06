@@ -33,9 +33,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.settings.UserContextProvider;
-import com.android.systemui.settings.UserTracker;
-import com.android.systemui.util.concurrency.FakeExecutor;
-import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,16 +49,12 @@ import org.mockito.MockitoAnnotations;
  */
 public class RecordingControllerTest extends SysuiTestCase {
 
-    private FakeSystemClock mFakeSystemClock = new FakeSystemClock();
-    private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
     @Mock
     private RecordingController.RecordingStateChangeCallback mCallback;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private UserContextProvider mUserContextProvider;
-    @Mock
-    private UserTracker mUserTracker;
 
     private RecordingController mController;
 
@@ -70,8 +63,7 @@ public class RecordingControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mController = new RecordingController(mMainExecutor, mBroadcastDispatcher,
-                mUserContextProvider, mUserTracker);
+        mController = new RecordingController(mBroadcastDispatcher, mUserContextProvider);
         mController.addCallback(mCallback);
     }
 
@@ -184,7 +176,9 @@ public class RecordingControllerTest extends SysuiTestCase {
         mController.updateState(true);
 
         // and user is changed
-        mController.mUserChangedCallback.onUserChanged(USER_ID, mContext);
+        Intent intent = new Intent(Intent.ACTION_USER_SWITCHED)
+                .putExtra(Intent.EXTRA_USER_HANDLE, USER_ID);
+        mController.mUserChangeReceiver.onReceive(mContext, intent);
 
         // Ensure that the recording was stopped
         verify(mCallback).onRecordingEnd();

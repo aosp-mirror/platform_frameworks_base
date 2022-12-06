@@ -853,12 +853,7 @@ public final class ViewRootImpl implements ViewParent,
 
     private SurfaceSyncGroup mSyncGroup;
     private SurfaceSyncGroup.TransactionReadyCallback mTransactionReadyCallback;
-
-    private static final Object sSyncProgressLock = new Object();
-    // The count needs to be static since it's used to enable or disable RT animations which is
-    // done at a global level per process. If any VRI syncs are in progress, we can't enable RT
-    // animations until all are done.
-    private static int sNumSyncsInProgress = 0;
+    private int mNumSyncsInProgress = 0;
 
     private HashSet<ScrollCaptureCallback> mRootScrollCaptureCallbacks;
 
@@ -11234,6 +11229,13 @@ public final class ViewRootImpl implements ViewParent,
         });
     }
 
+    private final Executor mPostAtFrontExecutor = new Executor() {
+        @Override
+        public void execute(Runnable command) {
+            mHandler.postAtFrontOfQueue(command);
+        }
+    };
+
     public final SurfaceSyncGroup.SyncTarget mSyncTarget = new SurfaceSyncGroup.SyncTarget() {
         @Override
         public void onAddedToSyncGroup(SurfaceSyncGroup parentSyncGroup,
@@ -11242,6 +11244,9 @@ public final class ViewRootImpl implements ViewParent,
             if (!isInLocalSync()) {
                 // Always sync the buffer if the sync request did not come from VRI.
                 mSyncBuffer = true;
+            }
+            if (mAttachInfo.mThreadedRenderer != null) {
+                HardwareRenderer.setRtAnimationsEnabled(false);
             }
 
             if (mTransactionReadyCallback != null) {
@@ -11256,29 +11261,16 @@ public final class ViewRootImpl implements ViewParent,
                 scheduleTraversals();
             }
         }
-    };
 
-    private final Executor mSimpleExecutor = Runnable::run;
-
-    private void updateSyncInProgressCount(SurfaceSyncGroup syncGroup) {
-        if (mAttachInfo.mThreadedRenderer == null) {
-            return;
-        }
-
-        synchronized (sSyncProgressLock) {
-            if (sNumSyncsInProgress++ == 0) {
-                HardwareRenderer.setRtAnimationsEnabled(false);
-            }
-        }
-
-        syncGroup.addSyncCompleteCallback(mSimpleExecutor, () -> {
-            synchronized (sSyncProgressLock) {
-                if (--sNumSyncsInProgress == 0) {
+        private void updateSyncInProgressCount(SurfaceSyncGroup parentSyncGroup) {
+            mNumSyncsInProgress++;
+            parentSyncGroup.addSyncCompleteCallback(mPostAtFrontExecutor, () -> {
+                if (--mNumSyncsInProgress == 0 && mAttachInfo.mThreadedRenderer != null) {
                     HardwareRenderer.setRtAnimationsEnabled(true);
                 }
-            }
-        });
-    }
+            });
+        }
+    };
 
     @Override
     public SurfaceSyncGroup.SyncTarget getSyncTarget() {

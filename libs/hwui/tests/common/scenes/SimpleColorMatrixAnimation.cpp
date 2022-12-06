@@ -16,7 +16,6 @@
 
 #include "TestSceneBase.h"
 
-#include <SkBlendMode.h>
 #include <SkColorFilter.h>
 #include <SkColorMatrix.h>
 #include <SkGradientShader.h>

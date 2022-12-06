@@ -84,6 +84,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             new RadioManager.FmBandConfig(FM_BAND_DESCRIPTOR);
     private static final int UNSUPPORTED_CONFIG_FLAG = 0;
 
+    private final Object mLock = new Object();
     private final ArrayMap<Integer, Boolean> mHalConfigMap = new ArrayMap<>();
     private RadioModule mRadioModule;
     private ITunerCallback mHalTunerCallback;
@@ -104,7 +105,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
         doReturn(true).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
 
         mRadioModule = new RadioModule(mBroadcastRadioMock,
-                TestUtils.makeDefaultModuleProperties());
+                TestUtils.makeDefaultModuleProperties(), mLock);
 
         doAnswer(invocation -> {
             mHalTunerCallback = (ITunerCallback) invocation.getArguments()[0];

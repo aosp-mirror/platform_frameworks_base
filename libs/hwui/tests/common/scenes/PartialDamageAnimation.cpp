@@ -16,8 +16,6 @@
 
 #include "TestSceneBase.h"
 
-#include <SkBlendMode.h>
-
 class PartialDamageAnimation;
 
 static TestScene::Registrar _PartialDamage(TestScene::Info{

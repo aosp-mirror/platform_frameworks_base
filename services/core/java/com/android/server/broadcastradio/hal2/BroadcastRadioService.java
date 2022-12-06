@@ -43,16 +43,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * Broadcast radio service using BroadcastRadio HIDL 2.0 HAL
- */
-public final class BroadcastRadioService {
+public class BroadcastRadioService {
     private static final String TAG = "BcRadio2Srv";
 
-    private final Object mLock = new Object();
+    private final Object mLock;
 
     @GuardedBy("mLock")
-    private int mNextModuleId;
+    private int mNextModuleId = 0;
 
     @GuardedBy("mLock")
     private final Map<String, Integer> mServiceNameToModuleIdMap = new HashMap<>();
@@ -75,7 +72,7 @@ public final class BroadcastRadioService {
                     moduleId = mNextModuleId;
                 }
 
-                RadioModule module = RadioModule.tryLoadingModule(moduleId, serviceName);
+                RadioModule module = RadioModule.tryLoadingModule(moduleId, serviceName, mLock);
                 if (module == null) {
                     return;
                 }
@@ -123,8 +120,9 @@ public final class BroadcastRadioService {
         }
     };
 
-    public BroadcastRadioService(int nextModuleId) {
+    public BroadcastRadioService(int nextModuleId, Object lock) {
         mNextModuleId = nextModuleId;
+        mLock = lock;
         try {
             IServiceManager manager = IServiceManager.getService();
             if (manager == null) {
@@ -138,8 +136,9 @@ public final class BroadcastRadioService {
     }
 
     @VisibleForTesting
-    BroadcastRadioService(int nextModuleId, IServiceManager manager) {
+    BroadcastRadioService(int nextModuleId, Object lock, IServiceManager manager) {
         mNextModuleId = nextModuleId;
+        mLock = lock;
         Objects.requireNonNull(manager, "Service manager cannot be null");
         try {
             manager.registerForNotifications(IBroadcastRadio.kInterfaceName, "", mServiceListener);
@@ -181,7 +180,7 @@ public final class BroadcastRadioService {
             throw new IllegalArgumentException("Non-audio sessions not supported with HAL 2.0");
         }
 
-        RadioModule module;
+        RadioModule module = null;
         synchronized (mLock) {
             module = mModules.get(moduleId);
             if (module == null) {

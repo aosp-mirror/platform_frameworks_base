@@ -35,7 +35,6 @@ import android.widget.ImageView;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.controls.ControlsServiceInfo;
 import com.android.systemui.controls.controller.ControlsController;
@@ -85,10 +84,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     private ArgumentCaptor<ControlsListingController.ControlsListingCallback> mCallbackCaptor;
 
     @Mock
-    private View mView;
-
-    @Mock
-    private ImageView mHomeControlsView;
+    private ImageView mView;
 
     @Mock
     private ActivityStarter mActivityStarter;
@@ -109,7 +105,6 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
         when(mControlsComponent.getControlsListingController()).thenReturn(
                 Optional.of(mControlsListingController));
         when(mControlsComponent.getVisibility()).thenReturn(AVAILABLE);
-        when(mView.findViewById(R.id.home_controls_chip)).thenReturn(mHomeControlsView);
     }
 
     @Test
@@ -211,9 +206,9 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
 
         final ArgumentCaptor<View.OnClickListener> clickListenerCaptor =
                 ArgumentCaptor.forClass(View.OnClickListener.class);
-        verify(mHomeControlsView).setOnClickListener(clickListenerCaptor.capture());
+        verify(mView).setOnClickListener(clickListenerCaptor.capture());
 
-        clickListenerCaptor.getValue().onClick(mHomeControlsView);
+        clickListenerCaptor.getValue().onClick(mView);
         verify(mUiEventLogger).log(
                 DreamHomeControlsComplication.DreamHomeControlsChipViewController
                         .DreamOverlayEvent.DREAM_HOME_CONTROLS_TAPPED);

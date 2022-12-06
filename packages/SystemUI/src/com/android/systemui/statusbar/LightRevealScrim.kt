@@ -15,7 +15,6 @@ import android.os.Trace
 import android.util.AttributeSet
 import android.util.MathUtils.lerp
 import android.view.View
-import android.view.animation.PathInterpolator
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.statusbar.LightRevealEffect.Companion.getPercentPastThreshold
 import com.android.systemui.util.getColorWithAlpha
@@ -89,12 +88,10 @@ object LiftReveal : LightRevealEffect {
 
 class LinearLightRevealEffect(private val isVertical: Boolean) : LightRevealEffect {
 
-    // Interpolator that reveals >80% of the content at 0.5 progress, makes revealing faster
-    private val interpolator = PathInterpolator(/* controlX1= */ 0.4f, /* controlY1= */ 0f,
-            /* controlX2= */ 0.2f, /* controlY2= */ 1f)
+    private val INTERPOLATOR = Interpolators.FAST_OUT_SLOW_IN_REVERSE
 
     override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {
-        val interpolatedAmount = interpolator.getInterpolation(amount)
+        val interpolatedAmount = INTERPOLATOR.getInterpolation(amount)
 
         scrim.interpolatedRevealAmount = interpolatedAmount
 

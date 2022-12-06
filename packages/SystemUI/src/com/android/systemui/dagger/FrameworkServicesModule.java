@@ -32,7 +32,6 @@ import android.app.StatsManager;
 import android.app.UiModeManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
-import android.app.job.JobScheduler;
 import android.app.role.RoleManager;
 import android.app.smartspace.SmartspaceManager;
 import android.app.trust.TrustManager;
@@ -283,12 +282,6 @@ public class FrameworkServicesModule {
             @Nullable FaceManager faceManager, @Nullable FingerprintManager fingerprintManager) {
         return faceManager == null && fingerprintManager == null ? null :
                 context.getSystemService(BiometricManager.class);
-    }
-
-    @Provides
-    @Singleton
-    static JobScheduler provideJobScheduler(Context context) {
-        return context.getSystemService(JobScheduler.class);
     }
 
     @Provides

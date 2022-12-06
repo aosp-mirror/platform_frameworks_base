@@ -44,11 +44,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.telecom.TelecomManager;
 import android.testing.AndroidTestingRunner;
@@ -76,6 +79,7 @@ import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
@@ -115,7 +119,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
-import java.util.concurrent.Executor;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
@@ -163,7 +166,7 @@ public class NavigationBarTest extends SysuiTestCase {
     @Mock
     private Handler mHandler;
     @Mock
-    private UserTracker mUserTracker;
+    private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private UiEventLogger mUiEventLogger;
     @Mock
@@ -312,10 +315,14 @@ public class NavigationBarTest extends SysuiTestCase {
     }
 
     @Test
-    public void testRegisteredWithUserTracker() {
+    public void testRegisteredWithDispatcher() {
         mNavigationBar.init();
         mNavigationBar.onViewAttached();
-        verify(mUserTracker).addCallback(any(UserTracker.Callback.class), any(Executor.class));
+        verify(mBroadcastDispatcher).registerReceiverWithHandler(
+                any(BroadcastReceiver.class),
+                any(IntentFilter.class),
+                any(Handler.class),
+                any(UserHandle.class));
     }
 
     @Test
@@ -456,7 +463,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 mStatusBarStateController,
                 mStatusBarKeyguardViewManager,
                 mMockSysUiState,
-                mUserTracker,
+                mBroadcastDispatcher,
                 mCommandQueue,
                 Optional.of(mock(Pip.class)),
                 Optional.of(mock(Recents.class)),

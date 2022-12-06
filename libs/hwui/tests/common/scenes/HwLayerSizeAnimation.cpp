@@ -16,8 +16,6 @@
 
 #include "TestSceneBase.h"
 
-#include <SkBlendMode.h>
-
 class HwLayerSizeAnimation;
 
 static TestScene::Registrar _HwLayerSize(TestScene::Info{

@@ -17,18 +17,19 @@
 package com.android.systemui.controls.dagger
 
 import android.testing.AndroidTestingRunner
+import android.provider.Settings
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.controls.FakeControlsSettingsRepository
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.ControlsTileResourceConfiguration
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.settings.SecureSettings
 import dagger.Lazy
 import java.util.Optional
 import org.junit.Assert.assertEquals
@@ -62,12 +63,12 @@ class ControlsComponentTest : SysuiTestCase() {
     @Mock
     private lateinit var lockPatternUtils: LockPatternUtils
     @Mock
+    private lateinit var secureSettings: SecureSettings
+    @Mock
     private lateinit var optionalControlsTileResourceConfiguration:
             Optional<ControlsTileResourceConfiguration>
     @Mock
     private lateinit var controlsTileResourceConfiguration: ControlsTileResourceConfiguration
-
-    private lateinit var controlsSettingsRepository: FakeControlsSettingsRepository
 
     companion object {
         fun <T> eq(value: T): T = Mockito.eq(value) ?: value
@@ -76,8 +77,6 @@ class ControlsComponentTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
-        controlsSettingsRepository = FakeControlsSettingsRepository()
 
         `when`(userTracker.userHandle.identifier).thenReturn(0)
         `when`(optionalControlsTileResourceConfiguration.orElse(any()))
@@ -126,7 +125,8 @@ class ControlsComponentTest : SysuiTestCase() {
         `when`(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(STRONG_AUTH_NOT_REQUIRED)
         `when`(keyguardStateController.isUnlocked()).thenReturn(false)
-        controlsSettingsRepository.setCanShowControlsInLockscreen(false)
+        `when`(secureSettings.getInt(eq(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS), anyInt()))
+            .thenReturn(0)
         val component = setupComponent(true)
 
         assertEquals(ControlsComponent.Visibility.AVAILABLE_AFTER_UNLOCK, component.getVisibility())
@@ -137,7 +137,9 @@ class ControlsComponentTest : SysuiTestCase() {
         `when`(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(STRONG_AUTH_NOT_REQUIRED)
         `when`(keyguardStateController.isUnlocked()).thenReturn(false)
-        controlsSettingsRepository.setCanShowControlsInLockscreen(true)
+        `when`(secureSettings.getIntForUser(eq(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS),
+                anyInt(), anyInt()))
+            .thenReturn(1)
         val component = setupComponent(true)
 
         assertEquals(ControlsComponent.Visibility.AVAILABLE, component.getVisibility())
@@ -145,7 +147,8 @@ class ControlsComponentTest : SysuiTestCase() {
 
     @Test
     fun testFeatureEnabledAndCanShowWhileUnlockedVisibility() {
-        controlsSettingsRepository.setCanShowControlsInLockscreen(false)
+        `when`(secureSettings.getInt(eq(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS), anyInt()))
+            .thenReturn(0)
         `when`(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(STRONG_AUTH_NOT_REQUIRED)
         `when`(keyguardStateController.isUnlocked()).thenReturn(true)
@@ -184,7 +187,7 @@ class ControlsComponentTest : SysuiTestCase() {
             lockPatternUtils,
             keyguardStateController,
             userTracker,
-            controlsSettingsRepository,
+            secureSettings,
             optionalControlsTileResourceConfiguration
         )
     }

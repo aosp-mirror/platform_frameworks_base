@@ -27,7 +27,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.RectF;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.method.KeyListener;
@@ -45,7 +44,6 @@ import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InsertGesture;
 import android.view.inputmethod.JoinOrSplitGesture;
-import android.view.inputmethod.PreviewableHandwritingGesture;
 import android.view.inputmethod.RemoveSpaceGesture;
 import android.view.inputmethod.SelectGesture;
 import android.view.inputmethod.SelectRangeGesture;
@@ -320,13 +318,6 @@ public final class EditableInputConnection extends BaseInputConnection
         if (executor != null && consumer != null) {
             executor.execute(() -> consumer.accept(result));
         }
-    }
-
-    @Override
-    public boolean previewHandwritingGesture(
-            @NonNull PreviewableHandwritingGesture gesture,
-            @Nullable CancellationSignal cancellationSignal) {
-        return mTextView.previewHandwritingGesture(gesture, cancellationSignal);
     }
 
     @Override

@@ -226,9 +226,6 @@ class BLASTSyncEngine {
         }
 
         private void setReady(boolean ready) {
-            if (mReady == ready) {
-                return;
-            }
             ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Set ready", mSyncId);
             mReady = ready;
             if (!ready) return;
@@ -242,9 +239,7 @@ class BLASTSyncEngine {
             ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Adding to group: %s", mSyncId, wc);
             wc.setSyncGroup(this);
             wc.prepareSync();
-            if (mReady) {
-                mWm.mWindowPlacerLocked.requestTraversal();
-            }
+            mWm.mWindowPlacerLocked.requestTraversal();
         }
 
         void onCancelSync(WindowContainer wc) {

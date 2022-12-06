@@ -184,7 +184,6 @@ constructor(
 
     private val configListener =
         object : ConfigurationController.ConfigurationListener {
-
             override fun onDensityOrFontScaleChanged() {
                 // System font changes should only happen when UMO is offscreen or a flicker may
                 // occur
@@ -200,7 +199,6 @@ constructor(
             override fun onConfigChanged(newConfig: Configuration?) {
                 if (newConfig == null) return
                 isRtl = newConfig.layoutDirection == View.LAYOUT_DIRECTION_RTL
-                updatePlayers(recreateMedia = true)
             }
 
             override fun onUiModeChanged() {
@@ -637,7 +635,7 @@ constructor(
             val existingSmartspaceMediaKey = MediaPlayerData.smartspaceMediaKey()
             existingSmartspaceMediaKey?.let {
                 val removedPlayer =
-                    removePlayer(existingSmartspaceMediaKey, dismissMediaData = false)
+                    MediaPlayerData.removeMediaPlayer(existingSmartspaceMediaKey, true)
                 removedPlayer?.run {
                     debugLogger.logPotentialMemoryLeak(existingSmartspaceMediaKey)
                 }
@@ -687,7 +685,7 @@ constructor(
         key: String,
         dismissMediaData: Boolean = true,
         dismissRecommendation: Boolean = true
-    ): MediaControlPanel? {
+    ) {
         if (key == MediaPlayerData.smartspaceMediaKey()) {
             MediaPlayerData.smartspaceMediaData?.let {
                 logger.logRecommendationRemoved(it.packageName, it.instanceId)
@@ -695,7 +693,7 @@ constructor(
         }
         val removed =
             MediaPlayerData.removeMediaPlayer(key, dismissMediaData || dismissRecommendation)
-        return removed?.apply {
+        removed?.apply {
             mediaCarouselScrollHandler.onPrePlayerRemoved(removed)
             mediaContent.removeView(removed.mediaViewHolder?.player)
             mediaContent.removeView(removed.recommendationViewHolder?.recommendations)

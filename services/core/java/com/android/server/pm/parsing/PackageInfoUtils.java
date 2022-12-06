@@ -533,7 +533,7 @@ public class PackageInfoUtils {
             ai.metaData = null;
         }
         ai.applicationInfo = applicationInfo;
-        ai.requiredDisplayCategory = a.getRequiredDisplayCategory();
+        ai.targetDisplayCategory = a.getTargetDisplayCategory();
         ai.setKnownActivityEmbeddingCerts(a.getKnownActivityEmbeddingCerts());
         assignFieldsComponentInfoParsedMainComponent(ai, a, pkgSetting, userId);
         return ai;

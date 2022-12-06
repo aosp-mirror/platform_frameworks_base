@@ -483,7 +483,8 @@ class AutomaticBrightnessController {
 
     private static boolean isInteractivePolicy(int policy) {
         return policy == DisplayPowerRequest.POLICY_BRIGHT
-                || policy == DisplayPowerRequest.POLICY_DIM;
+                || policy == DisplayPowerRequest.POLICY_DIM
+                || policy == DisplayPowerRequest.POLICY_VR;
     }
 
     private boolean setScreenBrightnessByUser(float brightness) {

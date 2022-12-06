@@ -75,7 +75,7 @@ constructor(
      */
     interface Controller {
         /** The [ViewRootImpl] of this controller. */
-        val viewRoot: ViewRootImpl?
+        val viewRoot: ViewRootImpl
 
         /**
          * The identity object of the source animated by this controller. This animator will ensure
@@ -807,17 +807,15 @@ private class AnimatedDialog(
      * inversely, removed from the overlay when the source is moved back to its original position).
      */
     private fun synchronizeNextDraw(then: () -> Unit) {
-        val controllerRootView = controller.viewRoot?.view
-        if (forceDisableSynchronization || controllerRootView == null) {
-            // Don't synchronize when inside an automated test or if the controller root view is
-            // detached.
+        if (forceDisableSynchronization) {
+            // Don't synchronize when inside an automated test.
             then()
             return
         }
 
-        ViewRootSync.synchronizeNextDraw(controllerRootView, decorView, then)
+        ViewRootSync.synchronizeNextDraw(controller.viewRoot.view, decorView, then)
         decorView.invalidate()
-        controllerRootView.invalidate()
+        controller.viewRoot.view.invalidate()
     }
 
     private fun findFirstViewGroupWithBackground(view: View): ViewGroup? {

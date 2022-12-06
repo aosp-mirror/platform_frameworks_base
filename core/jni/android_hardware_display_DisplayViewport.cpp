@@ -61,8 +61,7 @@ status_t android_hardware_display_DisplayViewport_toNative(JNIEnv* env, jobject 
 
     viewport->displayId = env->GetIntField(viewportObj, gDisplayViewportClassInfo.displayId);
     viewport->isActive = env->GetBooleanField(viewportObj, gDisplayViewportClassInfo.isActive);
-    jint orientation = env->GetIntField(viewportObj, gDisplayViewportClassInfo.orientation);
-    viewport->orientation = static_cast<ui::Rotation>(orientation);
+    viewport->orientation = env->GetIntField(viewportObj, gDisplayViewportClassInfo.orientation);
     viewport->deviceWidth = env->GetIntField(viewportObj, gDisplayViewportClassInfo.deviceWidth);
     viewport->deviceHeight = env->GetIntField(viewportObj, gDisplayViewportClassInfo.deviceHeight);
 

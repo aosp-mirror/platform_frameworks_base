@@ -122,7 +122,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private int mDensity;
 
     private final boolean mDimNonImeSide;
-    private ValueAnimator mDividerFlingAnimator;
 
     public SplitLayout(String windowName, Context context, Configuration configuration,
             SplitLayoutHandler splitLayoutHandler,
@@ -396,10 +395,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mSplitWindowManager.release(t);
         mDisplayImeController.removePositionProcessor(mImePositionProcessor);
         mImePositionProcessor.reset();
-        if (mDividerFlingAnimator != null) {
-            mDividerFlingAnimator.cancel();
-        }
-        resetDividerPosition();
     }
 
     public void release() {
@@ -582,18 +577,13 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                     CUJ_SPLIT_SCREEN_RESIZE);
             return;
         }
-
-        if (mDividerFlingAnimator != null) {
-            mDividerFlingAnimator.cancel();
-        }
-
-        mDividerFlingAnimator = ValueAnimator
+        ValueAnimator animator = ValueAnimator
                 .ofInt(from, to)
                 .setDuration(duration);
-        mDividerFlingAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
-        mDividerFlingAnimator.addUpdateListener(
+        animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        animator.addUpdateListener(
                 animation -> updateDivideBounds((int) animation.getAnimatedValue()));
-        mDividerFlingAnimator.addListener(new AnimatorListenerAdapter() {
+        animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (flingFinishedCallback != null) {
@@ -601,15 +591,14 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 }
                 InteractionJankMonitorUtils.endTracing(
                         CUJ_SPLIT_SCREEN_RESIZE);
-                mDividerFlingAnimator = null;
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                mDividerFlingAnimator = null;
+                setDividePosition(to, true /* applyLayoutChange */);
             }
         });
-        mDividerFlingAnimator.start();
+        animator.start();
     }
 
     /** Switch both surface position with animation. */

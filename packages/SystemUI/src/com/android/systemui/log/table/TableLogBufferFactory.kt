@@ -34,7 +34,7 @@ constructor(
         maxSize: Int,
     ): TableLogBuffer {
         val tableBuffer = TableLogBuffer(adjustMaxSize(maxSize), name, systemClock)
-        dumpManager.registerNormalDumpable(name, tableBuffer)
+        tableBuffer.registerDumpables(dumpManager)
         return tableBuffer
     }
 }

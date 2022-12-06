@@ -16,8 +16,6 @@
 
 #include "TestSceneBase.h"
 
-#include <SkBlendMode.h>
-
 #include <unistd.h>
 
 class JankyScene;

@@ -26,17 +26,22 @@ import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.collection.EntryUtilKt.modifyEntry;
+import static com.android.systemui.util.mockito.KotlinMockitoHelpersKt.argThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -49,10 +54,10 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -92,7 +97,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private HighPriorityProvider mHighPriorityProvider;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
-    @Mock private UserTracker mUserTracker;
+    @Mock private BroadcastDispatcher mBroadcastDispatcher;
     private final FakeSettings mFakeSettings = new FakeSettings();
 
     private KeyguardNotificationVisibilityProvider mKeyguardNotificationVisibilityProvider;
@@ -112,7 +117,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
                                 mKeyguardUpdateMonitor,
                                 mHighPriorityProvider,
                                 mStatusBarStateController,
-                                mUserTracker,
+                                mBroadcastDispatcher,
                                 mFakeSettings,
                                 mFakeSettings);
         mKeyguardNotificationVisibilityProvider = component.getProvider();
@@ -200,19 +205,23 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     }
 
     @Test
-    public void notifyListeners_onReceiveUserSwitchCallback() {
-        ArgumentCaptor<UserTracker.Callback> callbackCaptor =
-                ArgumentCaptor.forClass(UserTracker.Callback.class);
-        verify(mUserTracker).addCallback(
+    public void notifyListeners_onReceiveUserSwitchBroadcast() {
+        ArgumentCaptor<BroadcastReceiver> callbackCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mBroadcastDispatcher).registerReceiver(
                 callbackCaptor.capture(),
-                any());
-        UserTracker.Callback callback = callbackCaptor.getValue();
+                argThat(intentFilter -> intentFilter.hasAction(Intent.ACTION_USER_SWITCHED)),
+                isNull(),
+                isNull(),
+                eq(Context.RECEIVER_EXPORTED),
+                isNull());
+        BroadcastReceiver callback = callbackCaptor.getValue();
 
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
         when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
-        callback.onUserChanged(CURR_USER_ID, mContext);
+        callback.onReceive(mContext, new Intent(Intent.ACTION_USER_SWITCHED));
 
         verify(listener).accept(anyString());
     }
@@ -610,7 +619,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
                     @BindsInstance KeyguardUpdateMonitor keyguardUpdateMonitor,
                     @BindsInstance HighPriorityProvider highPriorityProvider,
                     @BindsInstance SysuiStatusBarStateController statusBarStateController,
-                    @BindsInstance UserTracker userTracker,
+                    @BindsInstance BroadcastDispatcher broadcastDispatcher,
                     @BindsInstance SecureSettings secureSettings,
                     @BindsInstance GlobalSettings globalSettings
             );

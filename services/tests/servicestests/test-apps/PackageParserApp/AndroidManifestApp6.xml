@@ -21,7 +21,7 @@
     <application>
         <activity android:name="com.android.servicestests.apps.packageparserapp.MyActivity"
                   android:exported="true"
-                  android:requiredDisplayCategory="$automotive">
+                  android:targetDisplayCategory="$automotive">
         </activity>
     </application>
 </manifest>

@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.os.UserHandle;
 import android.text.Editable;
@@ -38,6 +39,7 @@ import android.widget.TextView.OnEditorActionListener;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -92,6 +94,18 @@ public class KeyguardPasswordViewController
             }
         }
     };
+
+    @Override
+    public void reloadColors() {
+        super.reloadColors();
+        int textColor = Utils.getColorAttr(mView.getContext(),
+                android.R.attr.textColorPrimary).getDefaultColor();
+        mPasswordEntry.setTextColor(textColor);
+        mPasswordEntry.setHighlightColor(textColor);
+        mPasswordEntry.setBackgroundTintList(ColorStateList.valueOf(textColor));
+        mPasswordEntry.setForegroundTintList(ColorStateList.valueOf(textColor));
+        mSwitchImeButton.setImageTintList(ColorStateList.valueOf(textColor));
+    }
 
     protected KeyguardPasswordViewController(KeyguardPasswordView view,
             KeyguardUpdateMonitor keyguardUpdateMonitor,

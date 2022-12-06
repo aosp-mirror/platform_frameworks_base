@@ -21,29 +21,12 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         >
-    <LinearLayout android:orientation="vertical"
+    <TextView
+            android:id="@+id/no_notifications"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:minHeight="64dp"
+            android:textAppearance="?android:attr/textAppearanceButton"
             android:gravity="center"
-            >
-        <TextView
-                android:id="@+id/no_notifications"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="64dp"
-                android:gravity="center"
-                android:textAppearance="?android:attr/textAppearanceButton"
-                android:text="@string/empty_shade_text"/>
-        <TextView
-                android:id="@+id/no_notifications_footer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center"
-                android:drawablePadding="8dp"
-                android:visibility="gone"
-                android:textAppearance="?android:attr/textAppearanceButton"
-                android:text="@string/unlock_to_see_notif_text"/>
-    </LinearLayout>
+            android:text="@string/empty_shade_text"/>
 </com.android.systemui.statusbar.EmptyShadeView>

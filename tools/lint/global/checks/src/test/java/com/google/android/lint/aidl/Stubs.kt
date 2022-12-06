@@ -17,12 +17,8 @@ val contextStub: TestFile = java(
     """
         package android.content;
         public class Context {
-            @android.content.pm.PermissionMethod(orSelf = true)
-            public void enforceCallingOrSelfPermission(@android.content.pm.PermissionName String permission, String message) {}
             @android.content.pm.PermissionMethod
-            public void enforceCallingPermission(@android.content.pm.PermissionName String permission, String message) {}
-            @android.content.pm.PermissionMethod(orSelf = true)
-            public int checkCallingOrSelfPermission(@android.content.pm.PermissionName String permission, String message) {}
+            public void enforceCallingOrSelfPermission(@android.content.pm.PermissionName String permission, String message) {}
         }
     """
 ).indented()

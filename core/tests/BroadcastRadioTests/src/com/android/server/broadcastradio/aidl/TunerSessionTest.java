@@ -83,6 +83,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     @Mock private IBroadcastRadio mBroadcastRadioMock;
     private android.hardware.radio.ITunerCallback[] mAidlTunerCallbackMocks;
 
+    private final Object mLock = new Object();
     // RadioModule under test
     private RadioModule mRadioModule;
 
@@ -103,7 +104,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
         doReturn(true).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
 
         mRadioModule = new RadioModule(mBroadcastRadioMock,
-                AidlTestUtils.makeDefaultModuleProperties());
+                AidlTestUtils.makeDefaultModuleProperties(), mLock);
 
         doAnswer(invocation -> {
             mHalTunerCallback = (ITunerCallback) invocation.getArguments()[0];

@@ -103,7 +103,7 @@ public class FreeformTaskTransitionObserverTest {
         mTransitionObserver.onTransitionReady(transition, info, startT, finishT);
         mTransitionObserver.onTransitionStarting(transition);
 
-        verify(mWindowDecorViewModel).onTaskOpening(
+        verify(mWindowDecorViewModel).createWindowDecoration(
                 change.getTaskInfo(), change.getLeash(), startT, finishT);
     }
 
@@ -120,7 +120,7 @@ public class FreeformTaskTransitionObserverTest {
         mTransitionObserver.onTransitionReady(transition, info, startT, finishT);
         mTransitionObserver.onTransitionStarting(transition);
 
-        verify(mWindowDecorViewModel).onTaskClosing(
+        verify(mWindowDecorViewModel).setupWindowDecorationForTransition(
                 change.getTaskInfo(), startT, finishT);
     }
 

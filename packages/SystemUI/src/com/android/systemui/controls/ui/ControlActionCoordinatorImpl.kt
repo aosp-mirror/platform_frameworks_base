@@ -25,6 +25,9 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.database.ContentObserver
+import android.net.Uri
+import android.os.Handler
 import android.os.UserHandle
 import android.os.VibrationEffect
 import android.provider.Settings.Secure
@@ -38,7 +41,6 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.controls.ControlsMetricsLogger
-import com.android.systemui.controls.ControlsSettingsRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -67,22 +69,54 @@ class ControlActionCoordinatorImpl @Inject constructor(
     private val vibrator: VibratorHelper,
     private val secureSettings: SecureSettings,
     private val userContextProvider: UserContextProvider,
-    private val controlsSettingsRepository: ControlsSettingsRepository,
+    @Main mainHandler: Handler
 ) : ControlActionCoordinator {
     private var dialog: Dialog? = null
     private var pendingAction: Action? = null
     private var actionsInProgress = mutableSetOf<String>()
     private val isLocked: Boolean
         get() = !keyguardStateController.isUnlocked()
-    private val allowTrivialControls: Boolean
-        get() = controlsSettingsRepository.allowActionOnTrivialControlsInLockscreen.value
-    private val showDeviceControlsInLockscreen: Boolean
-        get() = controlsSettingsRepository.canShowControlsInLockscreen.value
+    private var mAllowTrivialControls: Boolean = secureSettings.getIntForUser(
+            Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS, 0, UserHandle.USER_CURRENT) != 0
+    private var mShowDeviceControlsInLockscreen: Boolean = secureSettings.getIntForUser(
+            Secure.LOCKSCREEN_SHOW_CONTROLS, 0, UserHandle.USER_CURRENT) != 0
     override lateinit var activityContext: Context
 
     companion object {
         private const val RESPONSE_TIMEOUT_IN_MILLIS = 3000L
         private const val MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG = 2
+    }
+
+    init {
+        val lockScreenShowControlsUri =
+            secureSettings.getUriFor(Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS)
+        val showControlsUri =
+                secureSettings.getUriFor(Secure.LOCKSCREEN_SHOW_CONTROLS)
+        val controlsContentObserver = object : ContentObserver(mainHandler) {
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                super.onChange(selfChange, uri)
+                when (uri) {
+                    lockScreenShowControlsUri -> {
+                        mAllowTrivialControls = secureSettings.getIntForUser(
+                                Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
+                                0, UserHandle.USER_CURRENT) != 0
+                    }
+                    showControlsUri -> {
+                        mShowDeviceControlsInLockscreen = secureSettings
+                                .getIntForUser(Secure.LOCKSCREEN_SHOW_CONTROLS,
+                                        0, UserHandle.USER_CURRENT) != 0
+                    }
+                }
+            }
+        }
+        secureSettings.registerContentObserverForUser(
+            lockScreenShowControlsUri,
+            false /* notifyForDescendants */, controlsContentObserver, UserHandle.USER_ALL
+        )
+        secureSettings.registerContentObserverForUser(
+            showControlsUri,
+            false /* notifyForDescendants */, controlsContentObserver, UserHandle.USER_ALL
+        )
     }
 
     override fun closeDialogs() {
@@ -199,7 +233,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
     @AnyThread
     @VisibleForTesting
     fun bouncerOrRun(action: Action) {
-        val authRequired = action.authIsRequired || !allowTrivialControls
+        val authRequired = action.authIsRequired || !mAllowTrivialControls
 
         if (keyguardStateController.isShowing() && authRequired) {
             if (isLocked) {
@@ -257,7 +291,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
                 PREFS_CONTROLS_FILE, Context.MODE_PRIVATE)
         val attempts = prefs.getInt(PREFS_SETTINGS_DIALOG_ATTEMPTS, 0)
         if (attempts >= MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG ||
-                (showDeviceControlsInLockscreen && allowTrivialControls)) {
+                (mShowDeviceControlsInLockscreen && mAllowTrivialControls)) {
             return
         }
         val builder = AlertDialog
@@ -279,7 +313,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
                     true
                 }
 
-        if (showDeviceControlsInLockscreen) {
+        if (mShowDeviceControlsInLockscreen) {
             dialog = builder
                     .setTitle(R.string.controls_settings_trivial_controls_dialog_title)
                     .setMessage(R.string.controls_settings_trivial_controls_dialog_message)

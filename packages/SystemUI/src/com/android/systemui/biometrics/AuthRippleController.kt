@@ -29,8 +29,6 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.CircleReveal
@@ -73,8 +71,7 @@ class AuthRippleController @Inject constructor(
     private val biometricUnlockController: BiometricUnlockController,
     private val udfpsControllerProvider: Provider<UdfpsController>,
     private val statusBarStateController: StatusBarStateController,
-    private val featureFlags: FeatureFlags,
-        rippleView: AuthRippleView?
+    rippleView: AuthRippleView?
 ) : ViewController<AuthRippleView>(rippleView), KeyguardStateController.Callback,
     WakefulnessLifecycle.Observer {
 
@@ -162,17 +159,12 @@ class AuthRippleController @Inject constructor(
 
     private fun showUnlockedRipple() {
         notificationShadeWindowController.setForcePluginOpen(true, this)
-
-        // This code path is not used if the KeyguardTransitionRepository is managing the light
-        // reveal scrim.
-        if (!featureFlags.isEnabled(Flags.LIGHT_REVEAL_MIGRATION)) {
-            val lightRevealScrim = centralSurfaces.lightRevealScrim
-            if (statusBarStateController.isDozing || biometricUnlockController.isWakeAndUnlock) {
-                circleReveal?.let {
-                    lightRevealScrim?.revealAmount = 0f
-                    lightRevealScrim?.revealEffect = it
-                    startLightRevealScrimOnKeyguardFadingAway = true
-                }
+        val lightRevealScrim = centralSurfaces.lightRevealScrim
+        if (statusBarStateController.isDozing || biometricUnlockController.isWakeAndUnlock) {
+            circleReveal?.let {
+                lightRevealScrim?.revealAmount = 0f
+                lightRevealScrim?.revealEffect = it
+                startLightRevealScrimOnKeyguardFadingAway = true
             }
         }
 
@@ -185,10 +177,6 @@ class AuthRippleController @Inject constructor(
     }
 
     override fun onKeyguardFadingAwayChanged() {
-        if (featureFlags.isEnabled(Flags.LIGHT_REVEAL_MIGRATION)) {
-            return
-        }
-
         if (keyguardStateController.isKeyguardFadingAway) {
             val lightRevealScrim = centralSurfaces.lightRevealScrim
             if (startLightRevealScrimOnKeyguardFadingAway && lightRevealScrim != null) {

@@ -46,109 +46,6 @@ class TableLogBufferTest : SysuiTestCase() {
     }
 
     @Test
-    fun dumpChanges_hasHeader() {
-        val dumpedString = dumpChanges()
-
-        assertThat(logLines(dumpedString)[0]).isEqualTo(HEADER_PREFIX + NAME)
-    }
-
-    @Test
-    fun dumpChanges_hasVersion() {
-        val dumpedString = dumpChanges()
-
-        assertThat(logLines(dumpedString)[1]).isEqualTo("version $VERSION")
-    }
-
-    @Test
-    fun dumpChanges_hasFooter() {
-        val dumpedString = dumpChanges()
-
-        assertThat(logLines(dumpedString).last()).isEqualTo(FOOTER_PREFIX + NAME)
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun dumpChanges_str_separatorNotAllowedInPrefix() {
-        val next =
-            object : TestDiffable() {
-                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
-                    row.logChange("columnName", "stringValue")
-                }
-            }
-        underTest.logDiffs("some${SEPARATOR}thing", TestDiffable(), next)
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun dumpChanges_bool_separatorNotAllowedInPrefix() {
-        val next =
-            object : TestDiffable() {
-                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
-                    row.logChange("columnName", true)
-                }
-            }
-        underTest.logDiffs("some${SEPARATOR}thing", TestDiffable(), next)
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun dumpChanges_int_separatorNotAllowedInPrefix() {
-        val next =
-            object : TestDiffable() {
-                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
-                    row.logChange("columnName", 567)
-                }
-            }
-        underTest.logDiffs("some${SEPARATOR}thing", TestDiffable(), next)
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun dumpChanges_str_separatorNotAllowedInColumnName() {
-        val next =
-            object : TestDiffable() {
-                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
-                    row.logChange("column${SEPARATOR}Name", "stringValue")
-                }
-            }
-        underTest.logDiffs("prefix", TestDiffable(), next)
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun dumpChanges_bool_separatorNotAllowedInColumnName() {
-        val next =
-            object : TestDiffable() {
-                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
-                    row.logChange("column${SEPARATOR}Name", true)
-                }
-            }
-        underTest.logDiffs("prefix", TestDiffable(), next)
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun dumpChanges_int_separatorNotAllowedInColumnName() {
-        val next =
-            object : TestDiffable() {
-                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
-                    row.logChange("column${SEPARATOR}Name", 456)
-                }
-            }
-        underTest.logDiffs("prefix", TestDiffable(), next)
-    }
-
-    @Test
-    fun logChange_bool_dumpsCorrectly() {
-        systemClock.setCurrentTimeMillis(4000L)
-
-        underTest.logChange("prefix", "columnName", true)
-
-        val dumpedString = dumpChanges()
-        val expected =
-            TABLE_LOG_DATE_FORMAT.format(4000L) +
-                SEPARATOR +
-                "prefix.columnName" +
-                SEPARATOR +
-                "true"
-        assertThat(dumpedString).contains(expected)
-    }
-
-    @Test
     fun dumpChanges_strChange_logsFromNext() {
         systemClock.setCurrentTimeMillis(100L)
 
@@ -169,14 +66,11 @@ class TableLogBufferTest : SysuiTestCase() {
 
         val dumpedString = dumpChanges()
 
-        val expected =
-            TABLE_LOG_DATE_FORMAT.format(100L) +
-                SEPARATOR +
-                "prefix.stringValChange" +
-                SEPARATOR +
-                "newStringVal"
-        assertThat(dumpedString).contains(expected)
+        assertThat(dumpedString).contains("prefix")
+        assertThat(dumpedString).contains("stringValChange")
+        assertThat(dumpedString).contains("newStringVal")
         assertThat(dumpedString).doesNotContain("prevStringVal")
+        assertThat(dumpedString).contains(TABLE_LOG_DATE_FORMAT.format(100L))
     }
 
     @Test
@@ -200,14 +94,11 @@ class TableLogBufferTest : SysuiTestCase() {
 
         val dumpedString = dumpChanges()
 
-        val expected =
-            TABLE_LOG_DATE_FORMAT.format(100L) +
-                SEPARATOR +
-                "prefix.booleanValChange" +
-                SEPARATOR +
-                "true"
-        assertThat(dumpedString).contains(expected)
+        assertThat(dumpedString).contains("prefix")
+        assertThat(dumpedString).contains("booleanValChange")
+        assertThat(dumpedString).contains("true")
         assertThat(dumpedString).doesNotContain("false")
+        assertThat(dumpedString).contains(TABLE_LOG_DATE_FORMAT.format(100L))
     }
 
     @Test
@@ -231,14 +122,11 @@ class TableLogBufferTest : SysuiTestCase() {
 
         val dumpedString = dumpChanges()
 
-        val expected =
-            TABLE_LOG_DATE_FORMAT.format(100L) +
-                SEPARATOR +
-                "prefix.intValChange" +
-                SEPARATOR +
-                "67890"
-        assertThat(dumpedString).contains(expected)
+        assertThat(dumpedString).contains("prefix")
+        assertThat(dumpedString).contains("intValChange")
+        assertThat(dumpedString).contains("67890")
         assertThat(dumpedString).doesNotContain("12345")
+        assertThat(dumpedString).contains(TABLE_LOG_DATE_FORMAT.format(100L))
     }
 
     @Test
@@ -264,9 +152,9 @@ class TableLogBufferTest : SysuiTestCase() {
         val dumpedString = dumpChanges()
 
         // THEN the dump still works
-        val expected =
-            TABLE_LOG_DATE_FORMAT.format(100L) + SEPARATOR + "booleanValChange" + SEPARATOR + "true"
-        assertThat(dumpedString).contains(expected)
+        assertThat(dumpedString).contains("booleanValChange")
+        assertThat(dumpedString).contains("true")
+        assertThat(dumpedString).contains(TABLE_LOG_DATE_FORMAT.format(100L))
     }
 
     @Test
@@ -298,34 +186,15 @@ class TableLogBufferTest : SysuiTestCase() {
 
         val dumpedString = dumpChanges()
 
-        val expected1 =
-            TABLE_LOG_DATE_FORMAT.format(12000L) +
-                SEPARATOR +
-                "valChange" +
-                SEPARATOR +
-                "stateValue12"
-        val expected2 =
-            TABLE_LOG_DATE_FORMAT.format(20000L) +
-                SEPARATOR +
-                "valChange" +
-                SEPARATOR +
-                "stateValue20"
-        val expected3 =
-            TABLE_LOG_DATE_FORMAT.format(40000L) +
-                SEPARATOR +
-                "valChange" +
-                SEPARATOR +
-                "stateValue40"
-        val expected4 =
-            TABLE_LOG_DATE_FORMAT.format(45000L) +
-                SEPARATOR +
-                "valChange" +
-                SEPARATOR +
-                "stateValue45"
-        assertThat(dumpedString).contains(expected1)
-        assertThat(dumpedString).contains(expected2)
-        assertThat(dumpedString).contains(expected3)
-        assertThat(dumpedString).contains(expected4)
+        assertThat(dumpedString).contains("valChange")
+        assertThat(dumpedString).contains("stateValue12")
+        assertThat(dumpedString).contains("stateValue20")
+        assertThat(dumpedString).contains("stateValue40")
+        assertThat(dumpedString).contains("stateValue45")
+        assertThat(dumpedString).contains(TABLE_LOG_DATE_FORMAT.format(12000L))
+        assertThat(dumpedString).contains(TABLE_LOG_DATE_FORMAT.format(20000L))
+        assertThat(dumpedString).contains(TABLE_LOG_DATE_FORMAT.format(40000L))
+        assertThat(dumpedString).contains(TABLE_LOG_DATE_FORMAT.format(45000L))
     }
 
     @Test
@@ -345,73 +214,10 @@ class TableLogBufferTest : SysuiTestCase() {
 
         val dumpedString = dumpChanges()
 
-        val timestamp = TABLE_LOG_DATE_FORMAT.format(100L)
-        val expected1 = timestamp + SEPARATOR + "status" + SEPARATOR + "in progress"
-        val expected2 = timestamp + SEPARATOR + "connected" + SEPARATOR + "false"
-        assertThat(dumpedString).contains(expected1)
-        assertThat(dumpedString).contains(expected2)
-    }
-
-    @Test
-    fun logChange_rowInitializer_dumpsCorrectly() {
-        systemClock.setCurrentTimeMillis(100L)
-
-        underTest.logChange("") { row ->
-            row.logChange("column1", "val1")
-            row.logChange("column2", 2)
-            row.logChange("column3", true)
-        }
-
-        val dumpedString = dumpChanges()
-
-        val timestamp = TABLE_LOG_DATE_FORMAT.format(100L)
-        val expected1 = timestamp + SEPARATOR + "column1" + SEPARATOR + "val1"
-        val expected2 = timestamp + SEPARATOR + "column2" + SEPARATOR + "2"
-        val expected3 = timestamp + SEPARATOR + "column3" + SEPARATOR + "true"
-        assertThat(dumpedString).contains(expected1)
-        assertThat(dumpedString).contains(expected2)
-        assertThat(dumpedString).contains(expected3)
-    }
-
-    @Test
-    fun logChangeAndLogDiffs_bothLogged() {
-        systemClock.setCurrentTimeMillis(100L)
-
-        underTest.logChange("") { row ->
-            row.logChange("column1", "val1")
-            row.logChange("column2", 2)
-            row.logChange("column3", true)
-        }
-
-        systemClock.setCurrentTimeMillis(200L)
-        val prevDiffable = object : TestDiffable() {}
-        val nextDiffable =
-            object : TestDiffable() {
-                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
-                    row.logChange("column1", "newVal1")
-                    row.logChange("column2", 222)
-                    row.logChange("column3", false)
-                }
-            }
-
-        underTest.logDiffs(columnPrefix = "", prevDiffable, nextDiffable)
-
-        val dumpedString = dumpChanges()
-
-        val timestamp1 = TABLE_LOG_DATE_FORMAT.format(100L)
-        val expected1 = timestamp1 + SEPARATOR + "column1" + SEPARATOR + "val1"
-        val expected2 = timestamp1 + SEPARATOR + "column2" + SEPARATOR + "2"
-        val expected3 = timestamp1 + SEPARATOR + "column3" + SEPARATOR + "true"
-        val timestamp2 = TABLE_LOG_DATE_FORMAT.format(200L)
-        val expected4 = timestamp2 + SEPARATOR + "column1" + SEPARATOR + "newVal1"
-        val expected5 = timestamp2 + SEPARATOR + "column2" + SEPARATOR + "222"
-        val expected6 = timestamp2 + SEPARATOR + "column3" + SEPARATOR + "false"
-        assertThat(dumpedString).contains(expected1)
-        assertThat(dumpedString).contains(expected2)
-        assertThat(dumpedString).contains(expected3)
-        assertThat(dumpedString).contains(expected4)
-        assertThat(dumpedString).contains(expected5)
-        assertThat(dumpedString).contains(expected6)
+        assertThat(dumpedString).contains("status")
+        assertThat(dumpedString).contains("in progress")
+        assertThat(dumpedString).contains("connected")
+        assertThat(dumpedString).contains("false")
     }
 
     @Test
@@ -441,24 +247,14 @@ class TableLogBufferTest : SysuiTestCase() {
     }
 
     private fun dumpChanges(): String {
-        underTest.dump(PrintWriter(outputWriter), arrayOf())
+        underTest.dumpChanges(PrintWriter(outputWriter))
         return outputWriter.toString()
     }
 
-    private fun logLines(string: String): List<String> {
-        return string.split("\n").filter { it.isNotBlank() }
-    }
-
-    private open class TestDiffable : Diffable<TestDiffable> {
+    private abstract class TestDiffable : Diffable<TestDiffable> {
         override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {}
     }
 }
 
 private const val NAME = "TestTableBuffer"
 private const val MAX_SIZE = 10
-
-// Copying these here from [TableLogBuffer] so that we catch any accidental versioning change
-private const val HEADER_PREFIX = "SystemUI StateChangeTableSection START: "
-private const val FOOTER_PREFIX = "SystemUI StateChangeTableSection END: "
-private const val SEPARATOR = "|" // TBD
-private const val VERSION = "1"

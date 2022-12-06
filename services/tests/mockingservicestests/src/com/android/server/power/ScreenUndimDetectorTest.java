@@ -20,6 +20,7 @@ import static android.hardware.display.DisplayManagerInternal.DisplayPowerReques
 import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_DIM;
 import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
 import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF;
+import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_VR;
 import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
 import static android.view.Display.DEFAULT_DISPLAY_GROUP;
 
@@ -58,7 +59,8 @@ public class ScreenUndimDetectorTest {
             Arrays.asList(POLICY_OFF,
                     POLICY_DOZE,
                     POLICY_DIM,
-                    POLICY_BRIGHT);
+                    POLICY_BRIGHT,
+                    POLICY_VR);
     private static final int OTHER_DISPLAY_GROUP = DEFAULT_DISPLAY_GROUP + 1;
 
     @ClassRule
@@ -289,7 +291,7 @@ public class ScreenUndimDetectorTest {
 
     @Test
     public void recordScreenPolicy_dimToNonBright_resets() {
-        for (int to : Arrays.asList(POLICY_OFF, POLICY_DOZE)) {
+        for (int to : Arrays.asList(POLICY_OFF, POLICY_DOZE, POLICY_VR)) {
             setup();
             mScreenUndimDetector.mUndimCounter = 1;
             mScreenUndimDetector.mUndimCounterStartedMillis = 123;
@@ -307,7 +309,7 @@ public class ScreenUndimDetectorTest {
 
     @Test
     public void recordScreenPolicy_brightToNonDim_resets() {
-        for (int to : Arrays.asList(POLICY_OFF, POLICY_DOZE)) {
+        for (int to : Arrays.asList(POLICY_OFF, POLICY_DOZE, POLICY_VR)) {
             setup();
             mScreenUndimDetector.mUndimCounter = 1;
             mScreenUndimDetector.mUndimCounterStartedMillis = 123;

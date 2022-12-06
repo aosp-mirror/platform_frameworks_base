@@ -18,93 +18,45 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.content.Context
-import android.os.UserHandle
 import com.android.systemui.Dumpable
 import com.android.systemui.R
-import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLocalUserSelectionManager
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceSelectionManager
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
-import com.android.systemui.settings.UserTracker
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Abstracts access to application state related to keyguard quick affordances. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class KeyguardQuickAffordanceRepository
 @Inject
 constructor(
     @Application private val appContext: Context,
     @Application private val scope: CoroutineScope,
-    private val localUserSelectionManager: KeyguardQuickAffordanceLocalUserSelectionManager,
-    private val remoteUserSelectionManager: KeyguardQuickAffordanceRemoteUserSelectionManager,
-    private val userTracker: UserTracker,
+    private val selectionManager: KeyguardQuickAffordanceSelectionManager,
     legacySettingSyncer: KeyguardQuickAffordanceLegacySettingSyncer,
     private val configs: Set<@JvmSuppressWildcards KeyguardQuickAffordanceConfig>,
     dumpManager: DumpManager,
-    userHandle: UserHandle,
 ) {
-    private val userId: Flow<Int> =
-        ConflatedCallbackFlow.conflatedCallbackFlow {
-            val callback =
-                object : UserTracker.Callback {
-                    override fun onUserChanged(newUser: Int, userContext: Context) {
-                        trySendWithFailureLogging(newUser, TAG)
-                    }
-                }
-
-            userTracker.addCallback(callback) { it.run() }
-            trySendWithFailureLogging(userTracker.userId, TAG)
-
-            awaitClose { userTracker.removeCallback(callback) }
-        }
-
-    private val selectionManager: StateFlow<KeyguardQuickAffordanceSelectionManager> =
-        userId
-            .distinctUntilChanged()
-            .map { selectedUserId ->
-                if (userHandle.identifier == selectedUserId) {
-                    localUserSelectionManager
-                } else {
-                    remoteUserSelectionManager
-                }
-            }
-            .stateIn(
-                scope = scope,
-                started = SharingStarted.Eagerly,
-                initialValue = localUserSelectionManager,
-            )
-
     /**
      * List of [KeyguardQuickAffordanceConfig] instances of the affordances at the slot with the
      * given ID. The configs are sorted in descending priority order.
      */
     val selections: StateFlow<Map<String, List<KeyguardQuickAffordanceConfig>>> =
-        selectionManager
-            .flatMapLatest { selectionManager ->
-                selectionManager.selections.map { selectionsBySlotId ->
-                    selectionsBySlotId.mapValues { (_, selections) ->
-                        configs.filter { selections.contains(it.key) }
-                    }
+        selectionManager.selections
+            .map { selectionsBySlotId ->
+                selectionsBySlotId.mapValues { (_, selections) ->
+                    configs.filter { selections.contains(it.key) }
                 }
             }
             .stateIn(
@@ -147,7 +99,7 @@ constructor(
      * slot with the given ID. The configs are sorted in descending priority order.
      */
     fun getSelections(slotId: String): List<KeyguardQuickAffordanceConfig> {
-        val selections = selectionManager.value.getSelections().getOrDefault(slotId, emptyList())
+        val selections = selectionManager.getSelections().getOrDefault(slotId, emptyList())
         return configs.filter { selections.contains(it.key) }
     }
 
@@ -156,7 +108,7 @@ constructor(
      * are sorted in descending priority order.
      */
     fun getSelections(): Map<String, List<String>> {
-        return selectionManager.value.getSelections()
+        return selectionManager.getSelections()
     }
 
     /**
@@ -167,7 +119,7 @@ constructor(
         slotId: String,
         affordanceIds: List<String>,
     ) {
-        selectionManager.value.setSelections(
+        selectionManager.setSelections(
             slotId = slotId,
             affordanceIds = affordanceIds,
         )
@@ -236,7 +188,6 @@ constructor(
     }
 
     companion object {
-        private const val TAG = "KeyguardQuickAffordanceRepository"
         private const val SLOT_CONFIG_DELIMITER = ":"
     }
 }

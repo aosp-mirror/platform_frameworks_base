@@ -83,9 +83,6 @@ public class PowerStatsService extends SystemService {
     @Nullable
     @GuardedBy("this")
     private Looper mLooper;
-    @Nullable
-    @GuardedBy("this")
-    private EnergyConsumer[] mEnergyConsumers = null;
 
     @VisibleForTesting
     static class Injector {
@@ -263,15 +260,6 @@ public class PowerStatsService extends SystemService {
         }
     }
 
-    private EnergyConsumer[] getEnergyConsumerInfo() {
-        synchronized (this) {
-            if (mEnergyConsumers == null) {
-                mEnergyConsumers = getPowerStatsHal().getEnergyConsumerInfo();
-            }
-            return mEnergyConsumers;
-        }
-    }
-
     public PowerStatsService(Context context) {
         this(context, new Injector());
     }
@@ -339,69 +327,7 @@ public class PowerStatsService extends SystemService {
 
     private void getEnergyConsumedAsync(CompletableFuture<EnergyConsumerResult[]> future,
             int[] energyConsumerIds) {
-        EnergyConsumerResult[] results = getPowerStatsHal().getEnergyConsumed(energyConsumerIds);
-
-        // STOPSHIP(253292374): Remove once missing EnergyConsumer results issue is resolved.
-        EnergyConsumer[] energyConsumers = getEnergyConsumerInfo();
-        if (energyConsumers != null) {
-            final int expectedLength;
-            if (energyConsumerIds.length == 0) {
-                // Empty request is a request for all available EnergyConsumers.
-                expectedLength = energyConsumers.length;
-            } else {
-                expectedLength = energyConsumerIds.length;
-            }
-
-            if (results == null || expectedLength != results.length) {
-                // Mismatch in requested/received energy consumer data.
-                StringBuilder sb = new StringBuilder();
-                sb.append("Requested ids:");
-                if (energyConsumerIds.length == 0) {
-                    sb.append("ALL");
-                }
-                sb.append("[");
-                for (int i = 0; i < expectedLength; i++) {
-                    final int id = energyConsumerIds[i];
-                    sb.append(id);
-                    sb.append("(type:");
-                    sb.append(energyConsumers[id].type);
-                    sb.append(",ord:");
-                    sb.append(energyConsumers[id].ordinal);
-                    sb.append(",name:");
-                    sb.append(energyConsumers[id].name);
-                    sb.append(")");
-                    if (i != expectedLength - 1) {
-                        sb.append(", ");
-                    }
-                }
-                sb.append("]");
-
-                sb.append(", Received result ids:");
-                if (results == null) {
-                    sb.append("null");
-                } else {
-                    sb.append("[");
-                    final int resultLength = results.length;
-                    for (int i = 0; i < resultLength; i++) {
-                        final int id = results[i].id;
-                        sb.append(id);
-                        sb.append("(type:");
-                        sb.append(energyConsumers[id].type);
-                        sb.append(",ord:");
-                        sb.append(energyConsumers[id].ordinal);
-                        sb.append(",name:");
-                        sb.append(energyConsumers[id].name);
-                        sb.append(")");
-                        if (i != resultLength - 1) {
-                            sb.append(", ");
-                        }
-                    }
-                    sb.append("]");
-                }
-                Slog.wtf(TAG, "Missing result from getEnergyConsumedAsync call. " + sb);
-            }
-        }
-        future.complete(results);
+        future.complete(getPowerStatsHal().getEnergyConsumed(energyConsumerIds));
     }
 
     private void getStateResidencyAsync(CompletableFuture<StateResidencyResult[]> future,

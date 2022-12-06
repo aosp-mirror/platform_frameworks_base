@@ -36,7 +36,7 @@ public class BroadcastRadioService {
      */
     private final long mNativeContext = nativeInit();
 
-    private final Object mLock = new Object();
+    private final Object mLock;
 
     @Override
     protected void finalize() throws Throwable {
@@ -49,6 +49,14 @@ public class BroadcastRadioService {
     private native List<RadioManager.ModuleProperties> nativeLoadModules(long nativeContext);
     private native Tuner nativeOpenTuner(long nativeContext, int moduleId,
             RadioManager.BandConfig config, boolean withAudio, ITunerCallback callback);
+
+    /**
+     * Constructor. should pass
+     * {@code com.android.server.broadcastradio.BroadcastRadioService#mLock} for lock.
+     */
+    public BroadcastRadioService(Object lock) {
+        mLock = lock;
+    }
 
     public @NonNull List<RadioManager.ModuleProperties> loadModules() {
         synchronized (mLock) {

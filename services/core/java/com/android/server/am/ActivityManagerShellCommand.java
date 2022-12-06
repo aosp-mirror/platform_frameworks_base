@@ -906,8 +906,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
     }
 
-    // NOTE: current profiles can only be started on default display (even on automotive builds with
-    // passenger displays), so there's no need to pass a display-id
+    // TODO(b/239982558): might need to support --displayId as well
     private int runProfile(PrintWriter pw) throws RemoteException {
         final PrintWriter err = getErrPrintWriter();
         String profileFile = null;

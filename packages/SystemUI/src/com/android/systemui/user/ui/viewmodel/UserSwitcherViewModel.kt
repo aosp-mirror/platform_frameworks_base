@@ -19,8 +19,6 @@ package com.android.systemui.user.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.android.systemui.R
-import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.ui.drawable.CircularDrawable
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.user.domain.interactor.GuestUserInteractor
@@ -146,12 +144,7 @@ private constructor(
     ): UserViewModel {
         return UserViewModel(
             viewKey = model.id,
-            name =
-                if (model.isGuest && model.isSelected) {
-                    Text.Resource(R.string.guest_exit_quick_settings_button)
-                } else {
-                    model.name
-                },
+            name = model.name,
             image = CircularDrawable(model.image),
             isSelectionMarkerVisible = model.isSelected,
             alpha =

@@ -38,7 +38,6 @@ import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.player.MediaDeviceData
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.controls.pipeline.RESUME_MEDIA_TIMEOUT
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
@@ -80,7 +79,6 @@ private fun <T> any(): T = Mockito.any<T>()
 class MediaResumeListenerTest : SysuiTestCase() {
 
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
-    @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var mediaDataManager: MediaDataManager
     @Mock private lateinit var device: MediaDeviceData
     @Mock private lateinit var token: MediaSession.Token
@@ -133,15 +131,12 @@ class MediaResumeListenerTest : SysuiTestCase() {
         whenever(sharedPrefsEditor.putString(any(), any())).thenReturn(sharedPrefsEditor)
         whenever(mockContext.packageManager).thenReturn(context.packageManager)
         whenever(mockContext.contentResolver).thenReturn(context.contentResolver)
-        whenever(mockContext.userId).thenReturn(context.userId)
 
         executor = FakeExecutor(clock)
         resumeListener =
             MediaResumeListener(
                 mockContext,
                 broadcastDispatcher,
-                userTracker,
-                executor,
                 executor,
                 tunerService,
                 resumeBrowserFactory,
@@ -182,8 +177,6 @@ class MediaResumeListenerTest : SysuiTestCase() {
             MediaResumeListener(
                 context,
                 broadcastDispatcher,
-                userTracker,
-                executor,
                 executor,
                 tunerService,
                 resumeBrowserFactory,
@@ -192,7 +185,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
             )
         listener.setManager(mediaDataManager)
         verify(broadcastDispatcher, never())
-            .registerReceiver(eq(listener.userUnlockReceiver), any(), any(), any(), anyInt(), any())
+            .registerReceiver(eq(listener.userChangeReceiver), any(), any(), any(), anyInt(), any())
 
         // When data is loaded, we do NOT execute or update anything
         listener.onMediaDataLoaded(KEY, OLD_KEY, data)
@@ -296,7 +289,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
         resumeListener.setManager(mediaDataManager)
         verify(broadcastDispatcher)
             .registerReceiver(
-                eq(resumeListener.userUnlockReceiver),
+                eq(resumeListener.userChangeReceiver),
                 any(),
                 any(),
                 any(),
@@ -306,8 +299,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
         // When we get an unlock event
         val intent = Intent(Intent.ACTION_USER_UNLOCKED)
-        intent.putExtra(Intent.EXTRA_USER_HANDLE, context.userId)
-        resumeListener.userUnlockReceiver.onReceive(context, intent)
+        resumeListener.userChangeReceiver.onReceive(context, intent)
 
         // Then we should attempt to find recent media for each saved component
         verify(resumeBrowser, times(3)).findRecentMedia()
@@ -383,8 +375,6 @@ class MediaResumeListenerTest : SysuiTestCase() {
             MediaResumeListener(
                 mockContext,
                 broadcastDispatcher,
-                userTracker,
-                executor,
                 executor,
                 tunerService,
                 resumeBrowserFactory,
@@ -396,8 +386,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
         // When we load a component that was played recently
         val intent = Intent(Intent.ACTION_USER_UNLOCKED)
-        intent.putExtra(Intent.EXTRA_USER_HANDLE, context.userId)
-        resumeListener.userUnlockReceiver.onReceive(mockContext, intent)
+        resumeListener.userChangeReceiver.onReceive(mockContext, intent)
 
         // We add its resume controls
         verify(resumeBrowser, times(1)).findRecentMedia()
@@ -415,8 +404,6 @@ class MediaResumeListenerTest : SysuiTestCase() {
             MediaResumeListener(
                 mockContext,
                 broadcastDispatcher,
-                userTracker,
-                executor,
                 executor,
                 tunerService,
                 resumeBrowserFactory,
@@ -428,8 +415,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
         // When we load a component that is not recent
         val intent = Intent(Intent.ACTION_USER_UNLOCKED)
-        intent.putExtra(Intent.EXTRA_USER_HANDLE, context.userId)
-        resumeListener.userUnlockReceiver.onReceive(mockContext, intent)
+        resumeListener.userChangeReceiver.onReceive(mockContext, intent)
 
         // We do not try to add resume controls
         verify(resumeBrowser, times(0)).findRecentMedia()
@@ -457,8 +443,6 @@ class MediaResumeListenerTest : SysuiTestCase() {
             MediaResumeListener(
                 mockContext,
                 broadcastDispatcher,
-                userTracker,
-                executor,
                 executor,
                 tunerService,
                 resumeBrowserFactory,

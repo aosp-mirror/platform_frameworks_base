@@ -222,32 +222,31 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onPanelExpansionChanged_neverHidesFullscreenBouncer() {
+        when(mPrimaryBouncer.isShowing()).thenReturn(true);
+        when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(
+                KeyguardSecurityModel.SecurityMode.SimPuk);
+        mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
+        verify(mPrimaryBouncer).setExpansion(eq(KeyguardBouncer.EXPANSION_VISIBLE));
+
+        reset(mPrimaryBouncer);
+        when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(
+                KeyguardSecurityModel.SecurityMode.SimPin);
+        mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
+        verify(mPrimaryBouncer).setExpansion(eq(KeyguardBouncer.EXPANSION_VISIBLE));
+    }
+
+    @Test
     public void onPanelExpansionChanged_neverShowsDuringHintAnimation() {
         when(mNotificationPanelView.isUnlockHintRunning()).thenReturn(true);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
-        verify(mPrimaryBouncer, never()).setExpansion(anyFloat());
+        verify(mPrimaryBouncer).setExpansion(eq(KeyguardBouncer.EXPANSION_HIDDEN));
     }
 
     @Test
-    public void onPanelExpansionChanged_propagatesToBouncerOnlyIfShowing() {
-        mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
-        verify(mPrimaryBouncer, never()).setExpansion(eq(0.5f));
-
-        when(mPrimaryBouncer.isShowing()).thenReturn(true);
-        mStatusBarKeyguardViewManager.onPanelExpansionChanged(
-                expansionEvent(/* fraction= */ 0.6f, /* expanded= */ false, /* tracking= */ true));
-        verify(mPrimaryBouncer).setExpansion(eq(0.6f));
-    }
-
-    @Test
-    public void onPanelExpansionChanged_duplicateEventsAreIgnored() {
-        when(mPrimaryBouncer.isShowing()).thenReturn(true);
+    public void onPanelExpansionChanged_propagatesToBouncer() {
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
         verify(mPrimaryBouncer).setExpansion(eq(0.5f));
-
-        reset(mPrimaryBouncer);
-        mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
-        verify(mPrimaryBouncer, never()).setExpansion(eq(0.5f));
     }
 
     @Test

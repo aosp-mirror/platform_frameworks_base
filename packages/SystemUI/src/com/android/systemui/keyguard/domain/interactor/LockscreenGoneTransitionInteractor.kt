@@ -37,15 +37,15 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
-) : TransitionInteractor(LockscreenGoneTransitionInteractor::class.simpleName!!) {
+) : TransitionInteractor("LOCKSCREEN->GONE") {
 
     override fun start() {
         scope.launch {
             keyguardInteractor.isKeyguardGoingAway
-                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(keyguardTransitionInteractor.finishedKeyguardState, { a, b -> Pair(a, b) })
                 .collect { pair ->
-                    val (isKeyguardGoingAway, lastStartedStep) = pair
-                    if (isKeyguardGoingAway && lastStartedStep.to == KeyguardState.LOCKSCREEN) {
+                    val (isKeyguardGoingAway, keyguardState) = pair
+                    if (!isKeyguardGoingAway && keyguardState == KeyguardState.LOCKSCREEN) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,

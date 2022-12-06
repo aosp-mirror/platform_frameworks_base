@@ -192,7 +192,9 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
                         break;
                 }
 
-                if (!isRoot) {
+                // Add margin if specified by the complication. Otherwise add default margin
+                // between complications.
+                if (mLayoutParams.isMarginSpecified() || !isRoot) {
                     final int margin = mLayoutParams.getMargin(mDefaultMargin);
                     switch(direction) {
                         case ComplicationLayoutParams.DIRECTION_DOWN:
@@ -210,19 +212,6 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
                     }
                 }
             });
-
-            if (mLayoutParams.constraintSpecified()) {
-                switch (direction) {
-                    case ComplicationLayoutParams.DIRECTION_START:
-                    case ComplicationLayoutParams.DIRECTION_END:
-                        params.matchConstraintMaxWidth = mLayoutParams.getConstraint();
-                        break;
-                    case ComplicationLayoutParams.DIRECTION_UP:
-                    case ComplicationLayoutParams.DIRECTION_DOWN:
-                        params.matchConstraintMaxHeight = mLayoutParams.getConstraint();
-                        break;
-                }
-            }
 
             mView.setLayoutParams(params);
         }

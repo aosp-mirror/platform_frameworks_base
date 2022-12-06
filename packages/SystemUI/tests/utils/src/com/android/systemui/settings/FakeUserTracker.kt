@@ -66,8 +66,7 @@ class FakeUserTracker(
         _userId = _userInfo.id
         _userHandle = UserHandle.of(_userId)
 
-        val copy = callbacks.toList()
-        copy.forEach { it.onUserChanged(_userId, userContext) }
+        callbacks.forEach { it.onUserChanged(_userId, userContext) }
     }
 
     fun onProfileChanged() {

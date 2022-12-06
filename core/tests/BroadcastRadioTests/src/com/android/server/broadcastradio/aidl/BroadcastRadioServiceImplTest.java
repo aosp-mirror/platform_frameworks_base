@@ -210,9 +210,9 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
                 any(IServiceCallback.class)));
 
         doReturn(mFmRadioModuleMock).when(() -> RadioModule.tryLoadingModule(
-                eq(FM_RADIO_MODULE_ID), anyString(), any(IBinder.class)));
+                eq(FM_RADIO_MODULE_ID), anyString(), any(IBinder.class), any(Object.class)));
         doReturn(mDabRadioModuleMock).when(() -> RadioModule.tryLoadingModule(
-                eq(DAB_RADIO_MODULE_ID), anyString(), any(IBinder.class)));
+                eq(DAB_RADIO_MODULE_ID), anyString(), any(IBinder.class), any(Object.class)));
 
         when(mFmRadioModuleMock.getProperties()).thenReturn(mFmModuleMock);
         when(mDabRadioModuleMock.getProperties()).thenReturn(mDabModuleMock);

@@ -17,7 +17,6 @@
 #include "TestSceneBase.h"
 #include "tests/common/TestListViewSceneBase.h"
 #include "hwui/Paint.h"
-#include <SkBlendMode.h>
 #include <SkGradientShader.h>
 
 class ListOfFadedTextAnimation;

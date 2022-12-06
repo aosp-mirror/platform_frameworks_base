@@ -27,7 +27,4 @@ interface KeyguardRepositoryModule {
     fun keyguardTransitionRepository(
         impl: KeyguardTransitionRepositoryImpl
     ): KeyguardTransitionRepository
-
-    @Binds
-    fun lightRevealScrimRepository(impl: LightRevealScrimRepositoryImpl): LightRevealScrimRepository
 }

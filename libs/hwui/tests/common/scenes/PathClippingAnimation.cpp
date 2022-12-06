@@ -16,8 +16,6 @@
 
 #include <vector>
 
-#include <SkBlendMode.h>
-
 #include "TestSceneBase.h"
 
 class PathClippingAnimation : public TestScene {

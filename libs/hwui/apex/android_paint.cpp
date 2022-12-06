@@ -19,7 +19,6 @@
 #include "TypeCast.h"
 
 #include <hwui/Paint.h>
-#include <SkBlendMode.h>
 
 using namespace android;
 

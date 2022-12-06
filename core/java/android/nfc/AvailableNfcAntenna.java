@@ -27,15 +27,13 @@ import android.os.Parcelable;
  */
 public final class AvailableNfcAntenna implements Parcelable {
     /**
-     * Location of the antenna on the Y axis in millimeters.
-     * 0 is the bottom-left when the user is facing the screen
-     * and the device orientation is Portrait.
+     * Location on the antenna on the Y axis in millimeters.
+     * 0 is the bottom-left when the user is facing the screen.
      */
     private final int mLocationX;
     /**
-     * Location of the antenna on the Y axis in millimeters.
-     * 0 is the bottom-left when the user is facing the screen
-     * and the device orientation is Portrait.
+     * Location on the antenna on the Y axis in millimeters.
+     * 0 is the bottom-left when the user is facing the screen.
      */
     private final int mLocationY;
 
@@ -45,18 +43,16 @@ public final class AvailableNfcAntenna implements Parcelable {
     }
 
     /**
-     * Location of the antenna on the X axis in millimeters.
-     * 0 is the bottom-left when the user is facing the screen
-     * and the device orientation is Portrait.
+     * Location on the antenna on the X axis in millimeters.
+     * 0 is the bottom-left when the user is facing the screen.
      */
     public int getLocationX() {
         return mLocationX;
     }
 
     /**
-     * Location of the antenna on the Y axis in millimeters.
-     * 0 is the bottom-left when the user is facing the screen
-     * and the device orientation is Portrait.
+     * Location on the antenna on the Y axis in millimeters.
+     * 0 is the bottom-left when the user is facing the screen.
      */
     public int getLocationY() {
         return mLocationY;

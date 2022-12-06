@@ -17,7 +17,6 @@
 #include <VectorDrawable.h>
 #include <gtest/gtest.h>
 
-#include <SkBlendMode.h>
 #include <SkClipStack.h>
 #include <SkSurface_Base.h>
 #include <string.h>

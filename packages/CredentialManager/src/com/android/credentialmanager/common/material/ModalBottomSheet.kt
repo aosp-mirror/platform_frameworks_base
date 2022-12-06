@@ -62,6 +62,7 @@ import com.android.credentialmanager.R
 import com.android.credentialmanager.common.material.ModalBottomSheetValue.Expanded
 import com.android.credentialmanager.common.material.ModalBottomSheetValue.HalfExpanded
 import com.android.credentialmanager.common.material.ModalBottomSheetValue.Hidden
+import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlin.math.max
@@ -318,7 +319,7 @@ fun ModalBottomSheetLayout(
         rememberModalBottomSheetState(Hidden),
     sheetShape: Shape = MaterialTheme.shapes.large,
     sheetElevation: Dp = ModalBottomSheetDefaults.Elevation,
-    sheetBackgroundColor: Color = MaterialTheme.colorScheme.surface,
+    sheetBackgroundColor: Color = ModalBottomSheetDefaults.scrimColor,
     sheetContentColor: Color = contentColorFor(sheetBackgroundColor),
     scrimColor: Color = ModalBottomSheetDefaults.scrimColor,
     content: @Composable () -> Unit
@@ -476,5 +477,5 @@ object ModalBottomSheetDefaults {
      */
     val scrimColor: Color
         @Composable
-        get() = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.32f)
+        get() = LocalAndroidColorScheme.current.colorSurfaceHighlight
 }

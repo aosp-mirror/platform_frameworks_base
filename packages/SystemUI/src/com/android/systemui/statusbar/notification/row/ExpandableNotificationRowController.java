@@ -359,15 +359,10 @@ public class ExpandableNotificationRowController implements NotifViewController 
 
     @Override
     public boolean offerToKeepInParentForAnimation() {
-        //If the User dismissed the notification's parent, we want to keep it attached until the
-        //dismiss animation is ongoing. Therefore we don't want to remove it in the ShadeViewDiffer.
-        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_DISMISSAL_ANIMATION)
-                && mView.isParentDismissed()) {
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_DISMISSAL_ANIMATION)) {
             mView.setKeepInParentForDismissAnimation(true);
             return true;
         }
-
-        //Otherwise the view system doesn't do the removal, so we rely on the ShadeViewDiffer
         return false;
     }
 

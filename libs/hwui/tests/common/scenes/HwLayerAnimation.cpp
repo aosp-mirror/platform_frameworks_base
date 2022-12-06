@@ -16,8 +16,6 @@
 
 #include "TestSceneBase.h"
 
-#include <SkBlendMode.h>
-
 class HwLayerAnimation;
 
 static TestScene::Registrar _HwLayer(TestScene::Info{

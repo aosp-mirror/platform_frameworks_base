@@ -106,7 +106,6 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.PluginDependencyProvider;
@@ -213,7 +212,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private NotificationPanelView mNotificationPanelView;
     @Mock private IStatusBarService mBarService;
     @Mock private IDreamManager mDreamManager;
-    @Mock private LightRevealScrimViewModel mLightRevealScrimViewModel;
     @Mock private ScrimController mScrimController;
     @Mock private DozeScrimController mDozeScrimController;
     @Mock private Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
@@ -499,8 +497,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mDeviceStateManager,
                 mWiredChargingRippleController,
                 mDreamManager,
-                mCameraLauncherLazy,
-                () -> mLightRevealScrimViewModel) {
+                mCameraLauncherLazy) {
             @Override
             protected ViewRootImpl getViewRootImpl() {
                 return mViewRootImpl;

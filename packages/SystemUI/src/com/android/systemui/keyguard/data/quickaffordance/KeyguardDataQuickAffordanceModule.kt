@@ -17,35 +17,27 @@
 
 package com.android.systemui.keyguard.data.quickaffordance
 
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet
 
 @Module
-interface KeyguardDataQuickAffordanceModule {
-    @Binds
-    fun providerClientFactory(
-        impl: KeyguardQuickAffordanceProviderClientFactoryImpl,
-    ): KeyguardQuickAffordanceProviderClientFactory
-
-    companion object {
-        @Provides
-        @ElementsIntoSet
-        fun quickAffordanceConfigs(
-            flashlight: FlashlightQuickAffordanceConfig,
-            home: HomeControlsKeyguardQuickAffordanceConfig,
-            quickAccessWallet: QuickAccessWalletKeyguardQuickAffordanceConfig,
-            qrCodeScanner: QrCodeScannerKeyguardQuickAffordanceConfig,
-            camera: CameraQuickAffordanceConfig,
-        ): Set<KeyguardQuickAffordanceConfig> {
-            return setOf(
-                camera,
-                flashlight,
-                home,
-                quickAccessWallet,
-                qrCodeScanner,
-            )
-        }
+object KeyguardDataQuickAffordanceModule {
+    @Provides
+    @ElementsIntoSet
+    fun quickAffordanceConfigs(
+        flashlight: FlashlightQuickAffordanceConfig,
+        home: HomeControlsKeyguardQuickAffordanceConfig,
+        quickAccessWallet: QuickAccessWalletKeyguardQuickAffordanceConfig,
+        qrCodeScanner: QrCodeScannerKeyguardQuickAffordanceConfig,
+        camera: CameraQuickAffordanceConfig,
+    ): Set<KeyguardQuickAffordanceConfig> {
+        return setOf(
+            camera,
+            flashlight,
+            home,
+            quickAccessWallet,
+            qrCodeScanner,
+        )
     }
 }

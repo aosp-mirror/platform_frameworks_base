@@ -59,6 +59,8 @@ public final class BroadcastRadioServiceHidlTest extends ExtendedRadioMockitoTes
             new ArrayList<>(Arrays.asList("FmService", "DabService"));
     private static final int[] TEST_ENABLED_TYPES = new int[]{Announcement.TYPE_TRAFFIC};
 
+    private final Object mLock = new Object();
+
     private BroadcastRadioService mBroadcastRadioService;
     private DeathRecipient mFmDeathRecipient;
 
@@ -198,7 +200,7 @@ public final class BroadcastRadioServiceHidlTest extends ExtendedRadioMockitoTes
 
         mockServiceManager();
         mBroadcastRadioService = new BroadcastRadioService(/* nextModuleId= */ FM_RADIO_MODULE_ID,
-                mServiceManagerMock);
+                mLock, mServiceManagerMock);
     }
 
     private void mockServiceManager() throws RemoteException {
@@ -219,9 +221,9 @@ public final class BroadcastRadioServiceHidlTest extends ExtendedRadioMockitoTes
                 }).thenReturn(true);
 
         doReturn(mFmRadioModuleMock).when(() -> RadioModule.tryLoadingModule(
-                eq(FM_RADIO_MODULE_ID), anyString()));
+                eq(FM_RADIO_MODULE_ID), anyString(), any(Object.class)));
         doReturn(mDabRadioModuleMock).when(() -> RadioModule.tryLoadingModule(
-                eq(DAB_RADIO_MODULE_ID), anyString()));
+                eq(DAB_RADIO_MODULE_ID), anyString(), any(Object.class)));
 
         when(mFmRadioModuleMock.getProperties()).thenReturn(mFmModuleMock);
         when(mDabRadioModuleMock.getProperties()).thenReturn(mDabModuleMock);

@@ -18,9 +18,7 @@ package androidx.window.extensions.embedding;
 
 import static android.graphics.Matrix.MTRANS_X;
 import static android.graphics.Matrix.MTRANS_Y;
-import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.Choreographer;
 import android.view.RemoteAnimationTarget;
@@ -51,16 +49,6 @@ class TaskFragmentAnimationAdapter {
     /** Area in absolute coordinate that the animation surface shouldn't go beyond. */
     @NonNull
     private final Rect mWholeAnimationBounds = new Rect();
-    /**
-     * Area in absolute coordinate that should represent all the content to show for this window.
-     * This should be the end bounds for opening window, and start bounds for closing window in case
-     * the window is resizing during the open/close transition.
-     */
-    @NonNull
-    private final Rect mContentBounds = new Rect();
-    /** Offset relative to the window parent surface for {@link #mContentBounds}. */
-    @NonNull
-    private final Point mContentRelOffset = new Point();
 
     @NonNull
     final Transformation mTransformation = new Transformation();
@@ -90,21 +78,6 @@ class TaskFragmentAnimationAdapter {
         mTarget = target;
         mLeash = leash;
         mWholeAnimationBounds.set(wholeAnimationBounds);
-        if (target.mode == MODE_CLOSING) {
-            // When it is closing, we want to show the content at the start position in case the
-            // window is resizing as well. For example, when the activities is changing from split
-            // to stack, the bottom TaskFragment will be resized to fullscreen when hiding.
-            final Rect startBounds = target.startBounds;
-            final Rect endBounds = target.screenSpaceBounds;
-            mContentBounds.set(startBounds);
-            mContentRelOffset.set(target.localBounds.left, target.localBounds.top);
-            mContentRelOffset.offset(
-                    startBounds.left - endBounds.left,
-                    startBounds.top - endBounds.top);
-        } else {
-            mContentBounds.set(target.screenSpaceBounds);
-            mContentRelOffset.set(target.localBounds.left, target.localBounds.top);
-        }
     }
 
     /**
@@ -135,7 +108,8 @@ class TaskFragmentAnimationAdapter {
     /** To be overridden by subclasses to adjust the animation surface change. */
     void onAnimationUpdateInner(@NonNull SurfaceControl.Transaction t) {
         // Update the surface position and alpha.
-        mTransformation.getMatrix().postTranslate(mContentRelOffset.x, mContentRelOffset.y);
+        mTransformation.getMatrix().postTranslate(
+                mTarget.localBounds.left, mTarget.localBounds.top);
         t.setMatrix(mLeash, mTransformation.getMatrix(), mMatrix);
         t.setAlpha(mLeash, mTransformation.getAlpha());
 
@@ -143,8 +117,9 @@ class TaskFragmentAnimationAdapter {
         // positionX/Y are in local coordinate, so minus the local offset to get the slide amount.
         final int positionX = Math.round(mMatrix[MTRANS_X]);
         final int positionY = Math.round(mMatrix[MTRANS_Y]);
-        final Rect cropRect = new Rect(mContentBounds);
-        cropRect.offset(positionX - mContentRelOffset.x, positionY - mContentRelOffset.y);
+        final Rect cropRect = new Rect(mTarget.screenSpaceBounds);
+        final Rect localBounds = mTarget.localBounds;
+        cropRect.offset(positionX - localBounds.left, positionY - localBounds.top);
 
         // Store the current offset of the surface top left from (0,0) in absolute coordinate.
         final int offsetX = cropRect.left;

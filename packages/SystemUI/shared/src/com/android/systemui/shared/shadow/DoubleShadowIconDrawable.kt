@@ -71,7 +71,7 @@ class DoubleShadowIconDrawable(
                 mKeyShadowInfo.offsetY,
                 mKeyShadowInfo.alpha
             )
-        val blend = RenderEffect.createBlendModeEffect(ambientShadow, keyShadow, BlendMode.DST_ATOP)
+        val blend = RenderEffect.createBlendModeEffect(ambientShadow, keyShadow, BlendMode.DARKEN)
         renderNode.setRenderEffect(blend)
         return renderNode
     }

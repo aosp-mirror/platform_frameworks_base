@@ -1073,6 +1073,9 @@ class UserController implements Handler.Callback {
             uss.setState(UserState.STATE_STOPPING);
             UserManagerInternal userManagerInternal = mInjector.getUserManagerInternal();
             userManagerInternal.setUserState(userId, uss.state);
+            // TODO(b/239982558): for now we're just updating the user's visibility, but most likely
+            // we'll need to remove this call and handle that as part of the user state workflow
+            // instead.
             userManagerInternal.unassignUserFromDisplayOnStop(userId);
 
             updateStartedUserArrayLU();
@@ -1502,32 +1505,13 @@ class UserController implements Handler.Callback {
         return startUserNoChecks(userId, Display.DEFAULT_DISPLAY, foreground, unlockListener);
     }
 
-    /**
-     * Starts a user in background and make it visible in the given display.
-     *
-     * <p>This call will trigger the usual "user started" lifecycle events (i.e., `SystemService`
-     * callbacks and app intents), plus a call to
-     * {@link UserManagerInternal.UserVisibilityListener#onUserVisibilityChanged(int, boolean)} if
-     * the user visibility changed. Notice that the visibility change is independent of the user
-     * workflow state, and they can mismatch in some corner events (for example, if the user was
-     * already running in the background but not associated with a display, this call for that user
-     * would not trigger any lifecycle event but would trigger {@code onUserVisibilityChanged}).
-     *
-     * <p>See {@link ActivityManager#startUserInBackgroundOnSecondaryDisplay(int, int)} for more
-     * semantics.
-     *
-     * @param userId user to be started
-     * @param displayId display where the user will be visible
-     *
-     * @return whether the user was started
-     */
+    // TODO(b/239982558): add javadoc (need to wait until the intents / SystemService callbacks are
+    // defined
     boolean startUserOnSecondaryDisplay(@UserIdInt int userId, int displayId) {
         checkCallingHasOneOfThosePermissions("startUserOnSecondaryDisplay",
                 MANAGE_USERS, INTERACT_ACROSS_USERS);
 
         // DEFAULT_DISPLAY is used for the current foreground user only
-        // TODO(b/245939659): might need to move this check to UserVisibilityMediator to support
-        // passenger-only screens
         Preconditions.checkArgument(displayId != Display.DEFAULT_DISPLAY,
                 "Cannot use DEFAULT_DISPLAY");
 
@@ -1535,7 +1519,7 @@ class UserController implements Handler.Callback {
             return startUserNoChecks(userId, displayId, /* foreground= */ false,
                     /* unlockListener= */ null);
         } catch (RuntimeException e) {
-            Slogf.e(TAG, "startUserOnSecondaryDisplay(%d, %d) failed: %s", userId, displayId, e);
+            Slogf.w(TAG, "startUserOnSecondaryDisplay(%d, %d) failed: %s", userId, displayId, e);
             return false;
         }
     }
@@ -1634,6 +1618,7 @@ class UserController implements Handler.Callback {
                 return false;
             }
 
+            // TODO(b/239982558): might need something similar for bg users on secondary display
             if (foreground && isUserSwitchUiEnabled()) {
                 t.traceBegin("startFreezingScreen");
                 mInjector.getWindowManager().startFreezingScreen(
@@ -1689,9 +1674,9 @@ class UserController implements Handler.Callback {
                     userSwitchUiEnabled = mUserSwitchUiEnabled;
                 }
                 mInjector.updateUserConfiguration();
-                // NOTE: updateProfileRelatedCaches() is called on both if and else parts, ideally
-                // it should be moved outside, but for now it's not as there are many calls to
-                // external components here afterwards
+                // TODO(b/244644281): updateProfileRelatedCaches() is called on both if and else
+                // parts, ideally it should be moved outside, but for now it's not as there are many
+                // calls to external components here afterwards
                 updateProfileRelatedCaches();
                 mInjector.getWindowManager().setCurrentUser(userId);
                 mInjector.reportCurWakefulnessUsageEvent();
@@ -1784,7 +1769,7 @@ class UserController implements Handler.Callback {
 
             if (foreground) {
                 t.traceBegin("moveUserToForeground");
-                moveUserToForeground(uss, userId);
+                moveUserToForeground(uss, oldUserId, userId);
                 t.traceEnd();
             } else {
                 t.traceBegin("finishUserBoot");
@@ -1998,25 +1983,21 @@ class UserController implements Handler.Callback {
 
     /** Called on handler thread */
     @VisibleForTesting
-    void dispatchUserSwitchComplete(@UserIdInt int oldUserId, @UserIdInt int newUserId) {
+    void dispatchUserSwitchComplete(@UserIdInt int userId) {
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
-        t.traceBegin("dispatchUserSwitchComplete-" + newUserId);
+        t.traceBegin("dispatchUserSwitchComplete-" + userId);
         mInjector.getWindowManager().setSwitchingUser(false);
         final int observerCount = mUserSwitchObservers.beginBroadcast();
         for (int i = 0; i < observerCount; i++) {
             try {
-                t.traceBegin("onUserSwitchComplete-" + newUserId + " #" + i + " "
+                t.traceBegin("onUserSwitchComplete-" + userId + " #" + i + " "
                         + mUserSwitchObservers.getBroadcastCookie(i));
-                mUserSwitchObservers.getBroadcastItem(i).onUserSwitchComplete(newUserId);
+                mUserSwitchObservers.getBroadcastItem(i).onUserSwitchComplete(userId);
                 t.traceEnd();
             } catch (RemoteException e) {
-                // Ignore
             }
         }
         mUserSwitchObservers.finishBroadcast();
-        t.traceBegin("sendUserSwitchBroadcasts-" + oldUserId + "-" + newUserId);
-        sendUserSwitchBroadcasts(oldUserId, newUserId);
-        t.traceEnd();
         t.traceEnd();
     }
 
@@ -2178,8 +2159,7 @@ class UserController implements Handler.Callback {
 
         // Do the keyguard dismiss and unfreeze later
         mHandler.removeMessages(COMPLETE_USER_SWITCH_MSG);
-        mHandler.sendMessage(mHandler.obtainMessage(
-                COMPLETE_USER_SWITCH_MSG, oldUserId, newUserId));
+        mHandler.sendMessage(mHandler.obtainMessage(COMPLETE_USER_SWITCH_MSG, newUserId, 0));
 
         uss.switching = false;
         stopGuestOrEphemeralUserIfBackground(oldUserId);
@@ -2189,7 +2169,7 @@ class UserController implements Handler.Callback {
     }
 
     @VisibleForTesting
-    void completeUserSwitch(int oldUserId, int newUserId) {
+    void completeUserSwitch(int newUserId) {
         final boolean isUserSwitchUiEnabled = isUserSwitchUiEnabled();
         final Runnable runnable = () -> {
             if (isUserSwitchUiEnabled) {
@@ -2197,7 +2177,7 @@ class UserController implements Handler.Callback {
             }
             mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
             mHandler.sendMessage(mHandler.obtainMessage(
-                    REPORT_USER_SWITCH_COMPLETE_MSG, oldUserId, newUserId));
+                    REPORT_USER_SWITCH_COMPLETE_MSG, newUserId, 0));
         };
 
         // If there is no challenge set, dismiss the keyguard right away
@@ -2222,7 +2202,7 @@ class UserController implements Handler.Callback {
         t.traceEnd();
     }
 
-    private void moveUserToForeground(UserState uss, int newUserId) {
+    private void moveUserToForeground(UserState uss, int oldUserId, int newUserId) {
         boolean homeInFront = mInjector.taskSupervisorSwitchUser(newUserId, uss);
         if (homeInFront) {
             mInjector.startHomeActivity(newUserId, "moveUserToForeground");
@@ -2230,6 +2210,7 @@ class UserController implements Handler.Callback {
             mInjector.taskSupervisorResumeFocusedStackTopActivity();
         }
         EventLogTags.writeAmSwitchUser(newUserId);
+        sendUserSwitchBroadcasts(oldUserId, newUserId);
     }
 
     void sendUserSwitchBroadcasts(int oldUserId, int newUserId) {
@@ -3099,8 +3080,9 @@ class UserController implements Handler.Callback {
                 dispatchForegroundProfileChanged(msg.arg1);
                 break;
             case REPORT_USER_SWITCH_COMPLETE_MSG:
-                dispatchUserSwitchComplete(msg.arg1, msg.arg2);
-                logUserLifecycleEvent(msg.arg2, USER_LIFECYCLE_EVENT_SWITCH_USER,
+                dispatchUserSwitchComplete(msg.arg1);
+
+                logUserLifecycleEvent(msg.arg1, USER_LIFECYCLE_EVENT_SWITCH_USER,
                         USER_LIFECYCLE_EVENT_STATE_FINISH);
                 break;
             case REPORT_LOCKED_BOOT_COMPLETE_MSG:
@@ -3118,7 +3100,7 @@ class UserController implements Handler.Callback {
                 logAndClearSessionId(msg.arg1);
                 break;
             case COMPLETE_USER_SWITCH_MSG:
-                completeUserSwitch(msg.arg1, msg.arg2);
+                completeUserSwitch(msg.arg1);
                 break;
         }
         return false;

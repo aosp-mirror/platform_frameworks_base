@@ -17,8 +17,6 @@
 #include "TestSceneBase.h"
 #include "utils/Color.h"
 
-#include <SkBlendMode.h>
-
 class OvalAnimation;
 
 static TestScene::Registrar _Oval(TestScene::Info{"oval", "Draws 1 oval.",

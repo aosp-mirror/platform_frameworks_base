@@ -51,6 +51,7 @@ import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
+import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.NotificationPresenter;
 
@@ -287,6 +288,8 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void onTouchEvent(MotionEvent event);
 
+    GestureRecorder getGestureRecorder();
+
     BiometricUnlockController getBiometricUnlockController();
 
     void showWirelessChargingAnimation(int batteryLevel);
@@ -401,6 +404,10 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     LightRevealScrim getLightRevealScrim();
 
+    void onTrackingStarted();
+
+    void onClosingFinished();
+
     // TODO: Figure out way to remove these.
     NavigationBarView getNavigationBarView();
 
@@ -483,6 +490,13 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     boolean isKeyguardSecure();
 
     void updateNotificationPanelTouchState();
+
+    /**
+     * TODO(b/257041702) delete this
+     * @deprecated Use ShadeController#makeExpandedVisible
+     */
+    @Deprecated
+    void makeExpandedVisible(boolean force);
 
     int getDisplayId();
 

@@ -17,7 +17,6 @@
 #include <VectorDrawable.h>
 #include <gtest/gtest.h>
 
-#include <SkBlendMode.h>
 #include <SkClipStack.h>
 #include <SkSurface_Base.h>
 #include <string.h>
@@ -335,7 +334,7 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorder) {
             "A");
     ContextFactory contextFactory;
     std::unique_ptr<CanvasContext> canvasContext(
-            CanvasContext::create(renderThread, false, parent.get(), &contextFactory, 0, 0));
+            CanvasContext::create(renderThread, false, parent.get(), &contextFactory));
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;
@@ -399,7 +398,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, emptyReceiver) {
                                       "A");
     ContextFactory contextFactory;
     std::unique_ptr<CanvasContext> canvasContext(
-            CanvasContext::create(renderThread, false, parent.get(), &contextFactory, 0, 0));
+            CanvasContext::create(renderThread, false, parent.get(), &contextFactory));
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;
@@ -519,7 +518,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, projectionHwLayer) {
     // prepareTree is required to find, which receivers have backward projected nodes
     ContextFactory contextFactory;
     std::unique_ptr<CanvasContext> canvasContext(
-            CanvasContext::create(renderThread, false, parent.get(), &contextFactory, 0, 0));
+            CanvasContext::create(renderThread, false, parent.get(), &contextFactory));
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;
@@ -619,7 +618,7 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionChildScroll) {
     // prepareTree is required to find, which receivers have backward projected nodes
     ContextFactory contextFactory;
     std::unique_ptr<CanvasContext> canvasContext(
-            CanvasContext::create(renderThread, false, parent.get(), &contextFactory, 0, 0));
+            CanvasContext::create(renderThread, false, parent.get(), &contextFactory));
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;
@@ -635,7 +634,7 @@ namespace {
 static int drawNode(RenderThread& renderThread, const sp<RenderNode>& renderNode) {
     ContextFactory contextFactory;
     std::unique_ptr<CanvasContext> canvasContext(
-            CanvasContext::create(renderThread, false, renderNode.get(), &contextFactory, 0, 0));
+            CanvasContext::create(renderThread, false, renderNode.get(), &contextFactory));
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;

@@ -19,8 +19,6 @@
 #include "TestContext.h"
 #include "TestUtils.h"
 
-#include <SkBlendMode.h>
-
 #include <utils/Color.h>
 
 namespace android {

@@ -23,10 +23,10 @@
 
 #include "android-base/logging.h"
 
-#ifdef __linux__
+#ifndef _WIN32
 #include <sys/statvfs.h>
 #include <sys/vfs.h>
-#endif  // __linux__
+#endif  // _WIN32
 
 #include <cstring>
 #include <cstdio>
@@ -86,15 +86,15 @@ time_t getFileModDate(const char* fileName)
     return sb.st_mtime;
 }
 
-#ifndef __linux__
-// No need to implement these on the host, the functions only matter on a device.
+#ifdef _WIN32
+// No need to implement these for Windows, the functions only matter on a device.
 bool isReadonlyFilesystem(const char*) {
     return false;
 }
 bool isReadonlyFilesystem(int) {
     return false;
 }
-#else   // __linux__
+#else   // _WIN32
 bool isReadonlyFilesystem(const char* path) {
     struct statfs sfs;
     if (::statfs(path, &sfs)) {
@@ -112,6 +112,6 @@ bool isReadonlyFilesystem(int fd) {
     }
     return (sfs.f_flags & ST_RDONLY) != 0;
 }
-#endif  // __linux__
+#endif  // _WIN32
 
 }; // namespace android

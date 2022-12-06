@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static android.content.Intent.ACTION_USER_SWITCHED;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -32,6 +34,7 @@ import android.app.Notification;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.os.Handler;
@@ -290,9 +293,11 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUserSwitchedCallsOnUserSwitched() {
-        mLockscreenUserManager.getUserTrackerCallbackForTest().onUserChanged(mSecondaryUser.id,
-                mContext);
+    public void testActionUserSwitchedCallsOnUserSwitched() {
+        Intent intent = new Intent()
+                .setAction(ACTION_USER_SWITCHED)
+                .putExtra(Intent.EXTRA_USER_HANDLE, mSecondaryUser.id);
+        mLockscreenUserManager.getBaseBroadcastReceiverForTest().onReceive(mContext, intent);
         verify(mPresenter, times(1)).onUserSwitched(mSecondaryUser.id);
     }
 
@@ -359,10 +364,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
         public BroadcastReceiver getBaseBroadcastReceiverForTest() {
             return mBaseBroadcastReceiver;
-        }
-
-        public UserTracker.Callback getUserTrackerCallbackForTest() {
-            return mUserChangedCallback;
         }
 
         public ContentObserver getLockscreenSettingsObserverForTest() {
