@@ -3446,6 +3446,27 @@ class Task extends TaskFragment {
         info.isSleeping = shouldSleepActivities();
     }
 
+    /**
+     * Removes the activity info if the activity belongs to a different uid, which is
+     * different from the app that hosts the task.
+     */
+    static void trimIneffectiveInfo(Task task, TaskInfo info) {
+        final ActivityRecord baseActivity = task.getActivity(r -> !r.finishing,
+                false /* traverseTopToBottom */);
+        final int baseActivityUid =
+                baseActivity != null ? baseActivity.getUid() : task.effectiveUid;
+
+        if (info.topActivityInfo != null
+                && task.effectiveUid != info.topActivityInfo.applicationInfo.uid) {
+            info.topActivity = null;
+            info.topActivityInfo = null;
+        }
+
+        if (task.effectiveUid != baseActivityUid) {
+            info.baseActivity = null;
+        }
+    }
+
     @Nullable PictureInPictureParams getPictureInPictureParams() {
         final Task topTask = getTopMostTask();
         if (topTask == null) return null;
