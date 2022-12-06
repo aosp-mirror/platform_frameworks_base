@@ -156,11 +156,14 @@ open class ChipbarCoordinator @Inject constructor(
         }
 
         // ---- Overall accessibility ----
-        currentView.requireViewById<ViewGroup>(
-                R.id.chipbar_inner
-        ).contentDescription =
-            "${newInfo.startIcon.icon.contentDescription.loadContentDescription(context)} " +
-                "${newInfo.text.loadText(context)}"
+        val iconDesc = newInfo.startIcon.icon.contentDescription
+        val loadedIconDesc = if (iconDesc != null) {
+            "${iconDesc.loadContentDescription(context)} "
+        } else {
+            ""
+        }
+        currentView.requireViewById<ViewGroup>(R.id.chipbar_inner).contentDescription =
+            "$loadedIconDesc${newInfo.text.loadText(context)}"
 
         // ---- Haptics ----
         newInfo.vibrationEffect?.let {

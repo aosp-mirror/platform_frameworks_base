@@ -110,6 +110,35 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    fun displayView_contentDescription_iconHasDescription() {
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.drawable.ic_cake, ContentDescription.Loaded("loadedCD")),
+                Text.Loaded("text"),
+                endItem = null,
+            )
+        )
+
+        val contentDescView = getChipbarView().requireViewById<ViewGroup>(R.id.chipbar_inner)
+        assertThat(contentDescView.contentDescription.toString()).contains("loadedCD")
+        assertThat(contentDescView.contentDescription.toString()).contains("text")
+    }
+
+    @Test
+    fun displayView_contentDescription_iconHasNoDescription() {
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.drawable.ic_cake, contentDescription = null),
+                Text.Loaded("text"),
+                endItem = null,
+            )
+        )
+
+        val contentDescView = getChipbarView().requireViewById<ViewGroup>(R.id.chipbar_inner)
+        assertThat(contentDescView.contentDescription.toString()).isEqualTo("text")
+    }
+
+    @Test
     fun displayView_loadedIcon_correctlyRendered() {
         val drawable = context.getDrawable(R.drawable.ic_celebration)!!
 
