@@ -24,6 +24,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
+import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -35,6 +36,7 @@ import static com.android.server.job.JobSchedulerService.FREQUENT_INDEX;
 import static com.android.server.job.JobSchedulerService.RARE_INDEX;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -240,20 +242,20 @@ public class ConnectivityControllerTest {
                         .setLinkDownstreamBandwidthKbps(1).build(), mConstants));
         // Slow downstream
         assertFalse(controller.isSatisfied(createJobStatus(job), net,
-                createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(137)
+                createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(140)
                         .setLinkDownstreamBandwidthKbps(1).build(), mConstants));
         // Slow upstream
         assertFalse(controller.isSatisfied(createJobStatus(job), net,
                 createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(1)
-                        .setLinkDownstreamBandwidthKbps(137).build(), mConstants));
+                        .setLinkDownstreamBandwidthKbps(140).build(), mConstants));
         // Network good enough
         assertTrue(controller.isSatisfied(createJobStatus(job), net,
-                createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(137)
-                        .setLinkDownstreamBandwidthKbps(137).build(), mConstants));
+                createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(140)
+                        .setLinkDownstreamBandwidthKbps(140).build(), mConstants));
         // Network slightly too slow given reduced time
         assertFalse(controller.isSatisfied(createJobStatus(job), net,
-                createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(130)
-                        .setLinkDownstreamBandwidthKbps(130).build(), mConstants));
+                createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(139)
+                        .setLinkDownstreamBandwidthKbps(139).build(), mConstants));
         // Slow network is too slow, but device is charging and network is unmetered.
         when(mService.isBatteryCharging()).thenReturn(true);
         controller.onBatteryStateChangedLocked();
@@ -1188,6 +1190,78 @@ public class ConnectivityControllerTest {
         assertFalse(unnetworked.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
     }
 
+    @Test
+    public void testCalculateTransferTimeMs() {
+        assertEquals(ConnectivityController.UNKNOWN_TIME,
+                ConnectivityController.calculateTransferTimeMs(1, 0));
+        assertEquals(ConnectivityController.UNKNOWN_TIME,
+                ConnectivityController.calculateTransferTimeMs(JobInfo.NETWORK_BYTES_UNKNOWN, 512));
+        assertEquals(1, ConnectivityController.calculateTransferTimeMs(1, 8));
+        assertEquals(1000, ConnectivityController.calculateTransferTimeMs(1000, 8));
+        assertEquals(8, ConnectivityController.calculateTransferTimeMs(1024, 1024));
+    }
+
+    @Test
+    public void testGetEstimatedTransferTimeMs() {
+        final ArgumentCaptor<NetworkCallback> callbackCaptor =
+                ArgumentCaptor.forClass(NetworkCallback.class);
+        doNothing().when(mConnManager).registerNetworkCallback(any(), callbackCaptor.capture());
+
+        final JobStatus job = createJobStatus(createJob()
+                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(10_000),
+                        DataUnit.MEBIBYTES.toBytes(1_000))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
+
+        final ConnectivityController controller = new ConnectivityController(mService,
+                mFlexibilityController);
+
+        final JobStatus jobNoEstimates = createJobStatus(createJob());
+        assertEquals(ConnectivityController.UNKNOWN_TIME,
+                controller.getEstimatedTransferTimeMs(jobNoEstimates));
+
+        // No network
+        job.network = null;
+        assertEquals(ConnectivityController.UNKNOWN_TIME,
+                controller.getEstimatedTransferTimeMs(job));
+
+        final NetworkCallback generalCallback = callbackCaptor.getValue();
+
+        // No capabilities
+        final Network network = mock(Network.class);
+        answerNetwork(generalCallback, null, null, network, null);
+        job.network = network;
+        assertEquals(ConnectivityController.UNKNOWN_TIME,
+                controller.getEstimatedTransferTimeMs(job));
+
+        // Capabilities don't have bandwidth values
+        NetworkCapabilities caps = createCapabilitiesBuilder().build();
+        answerNetwork(generalCallback, null, null, network, caps);
+        assertEquals(ConnectivityController.UNKNOWN_TIME,
+                controller.getEstimatedTransferTimeMs(job));
+
+        // Capabilities only has downstream bandwidth
+        caps = createCapabilitiesBuilder()
+                .setLinkDownstreamBandwidthKbps(1024)
+                .build();
+        answerNetwork(generalCallback, null, null, network, caps);
+        assertEquals(81920 * SECOND_IN_MILLIS, controller.getEstimatedTransferTimeMs(job));
+
+        // Capabilities only has upstream bandwidth
+        caps = createCapabilitiesBuilder()
+                .setLinkUpstreamBandwidthKbps(2 * 1024)
+                .build();
+        answerNetwork(generalCallback, null, null, network, caps);
+        assertEquals(4096 * SECOND_IN_MILLIS, controller.getEstimatedTransferTimeMs(job));
+
+        // Capabilities only both stream bandwidths
+        caps = createCapabilitiesBuilder()
+                .setLinkDownstreamBandwidthKbps(1024)
+                .setLinkUpstreamBandwidthKbps(2 * 1024)
+                .build();
+        answerNetwork(generalCallback, null, null, network, caps);
+        assertEquals((81920 + 4096) * SECOND_IN_MILLIS, controller.getEstimatedTransferTimeMs(job));
+    }
+
     private void answerNetwork(@NonNull NetworkCallback generalCallback,
             @Nullable NetworkCallback uidCallback, @Nullable Network lastNetwork,
             @Nullable Network net, @Nullable NetworkCapabilities caps) {
@@ -1198,11 +1272,15 @@ public class ConnectivityControllerTest {
             }
         } else {
             generalCallback.onAvailable(net);
-            generalCallback.onCapabilitiesChanged(net, caps);
+            if (caps != null) {
+                generalCallback.onCapabilitiesChanged(net, caps);
+            }
             if (uidCallback != null) {
                 uidCallback.onAvailable(net);
                 uidCallback.onBlockedStatusChanged(net, ConnectivityManager.BLOCKED_REASON_NONE);
-                uidCallback.onCapabilitiesChanged(net, caps);
+                if (caps != null) {
+                    uidCallback.onCapabilitiesChanged(net, caps);
+                }
             }
         }
     }
