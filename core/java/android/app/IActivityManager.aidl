@@ -771,6 +771,14 @@ interface IActivityManager {
     /** Blocks until all broadcast queues become idle. */
     void waitForBroadcastIdle();
 
+    /** Delays delivering broadcasts to the specified package. */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
+    void forceDelayBroadcastDelivery(in String targetPackage, long delayedDurationMs);
+
+    /** Checks if the modern broadcast queue is enabled. */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
+    boolean isModernBroadcastQueueEnabled();
+
     /**
      * @return The reason code of whether or not the given UID should be exempted from background
      * restrictions here.

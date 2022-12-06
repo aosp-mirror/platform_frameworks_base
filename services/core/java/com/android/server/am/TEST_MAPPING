@@ -97,6 +97,15 @@
         { "include-filter": "com.android.server.am.BroadcastQueueTest" },
         { "include-filter": "com.android.server.am.BroadcastQueueModernImplTest" }
       ]
+    },
+    {
+      "file_patterns": ["Broadcast"],
+      "name": "CtsBroadcastTestCases",
+      "options": [
+        { "exclude-annotation": "androidx.test.filters.LargeTest" },
+        { "exclude-annotation": "androidx.test.filters.FlakyTest" },
+        { "exclude-annotation": "org.junit.Ignore" }
+      ]
     }
   ],
   "presubmit-large": [
