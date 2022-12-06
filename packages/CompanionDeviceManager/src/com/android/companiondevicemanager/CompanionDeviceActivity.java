@@ -36,6 +36,7 @@ import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_APP_STREAMING;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CALENDAR;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CONTACTS;
+import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_MICROPHONE;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_NEARBY_DEVICES;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_NEARBY_DEVICE_STREAMING;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_NOTIFICATION;
@@ -596,10 +597,9 @@ public class CompanionDeviceActivity extends FragmentActivity implements
                     this, R.string.summary_glasses_single_device, profileName, appLabel);
             profileIcon = getIcon(this, R.drawable.ic_glasses);
 
-            // TODO (b/256140614): add PERMISSION_MICROPHONE
             mPermissionTypes.addAll(Arrays.asList(
                     PERMISSION_PHONE, PERMISSION_SMS, PERMISSION_CONTACTS,
-                    PERMISSION_NEARBY_DEVICES));
+                    PERMISSION_MICROPHONE, PERMISSION_NEARBY_DEVICES));
 
             setupPermissionList();
         } else {
