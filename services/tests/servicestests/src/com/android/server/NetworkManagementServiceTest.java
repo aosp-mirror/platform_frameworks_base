@@ -37,6 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.annotation.NonNull;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.INetd;
@@ -46,8 +47,10 @@ import android.net.NetworkPolicyManager;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.PermissionEnforcer;
 import android.os.Process;
 import android.os.RemoteException;
+import android.permission.PermissionCheckerManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArrayMap;
 
@@ -87,6 +90,7 @@ public class NetworkManagementServiceTest {
     private ArgumentCaptor<INetdUnsolicitedEventListener> mUnsolListenerCaptor;
 
     private final MockDependencies mDeps = new MockDependencies();
+    private final MockPermissionEnforcer mPermissionEnforcer = new MockPermissionEnforcer();
 
     private final class MockDependencies extends Dependencies {
         @Override
@@ -114,6 +118,24 @@ public class NetworkManagementServiceTest {
         }
     }
 
+    private static final class MockPermissionEnforcer extends PermissionEnforcer {
+        @Override
+        protected int checkPermission(@NonNull String permission,
+                @NonNull AttributionSource source) {
+            String[] granted = new String [] {
+                android.Manifest.permission.NETWORK_SETTINGS,
+                android.Manifest.permission.OBSERVE_NETWORK_POLICY,
+                android.Manifest.permission.SHUTDOWN
+            };
+            for (String p : granted) {
+                if (p.equals(permission)) {
+                    return PermissionCheckerManager.PERMISSION_GRANTED;
+                }
+            }
+            return PermissionCheckerManager.PERMISSION_HARD_DENIED;
+        }
+    }
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -122,6 +144,13 @@ public class NetworkManagementServiceTest {
         doReturn(Context.CONNECTIVITY_SERVICE).when(mContext).getSystemServiceName(
                 eq(ConnectivityManager.class));
         doReturn(mCm).when(mContext).getSystemService(eq(Context.CONNECTIVITY_SERVICE));
+        // The AIDL stub will use PermissionEnforcer to check permission from the caller.
+        // Mock the service. See MockPermissionEnforcer above.
+        doReturn(Context.PERMISSION_ENFORCER_SERVICE).when(mContext).getSystemServiceName(
+                eq(PermissionEnforcer.class));
+        doReturn(mPermissionEnforcer).when(mContext).getSystemService(
+                eq(Context.PERMISSION_ENFORCER_SERVICE));
+
         // Start the service and wait until it connects to our socket.
         mNMService = NetworkManagementService.create(mContext, mDeps);
     }

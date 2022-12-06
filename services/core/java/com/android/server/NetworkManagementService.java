@@ -17,9 +17,6 @@
 package com.android.server;
 
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
-import static android.Manifest.permission.NETWORK_SETTINGS;
-import static android.Manifest.permission.OBSERVE_NETWORK_POLICY;
-import static android.Manifest.permission.SHUTDOWN;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
@@ -63,6 +60,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
+import android.os.PermissionEnforcer;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -230,6 +228,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
      */
     private NetworkManagementService(
             Context context, Dependencies deps) {
+        super(PermissionEnforcer.fromContext(context));
         mContext = context;
         mDeps = deps;
 
