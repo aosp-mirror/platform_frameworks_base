@@ -38156,6 +38156,7 @@ package android.security {
     field public static final int ERROR_PERMISSION_DENIED = 5; // 0x5
     field public static final int ERROR_UNIMPLEMENTED = 12; // 0xc
     field public static final int ERROR_USER_AUTHENTICATION_REQUIRED = 2; // 0x2
+    field public static final int RETRY_AFTER_NEXT_REBOOT = 4; // 0x4
     field public static final int RETRY_NEVER = 1; // 0x1
     field public static final int RETRY_WHEN_CONNECTIVITY_AVAILABLE = 3; // 0x3
     field public static final int RETRY_WITH_EXPONENTIAL_BACKOFF = 2; // 0x2
