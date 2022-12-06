@@ -148,15 +148,16 @@ class ResetTargetTaskHelper {
             return false;
 
         } else {
-            mResultActivities.add(r);
             if (r.resultTo != null) {
                 // If this activity is sending a reply to a previous activity, we can't do
                 // anything with it now until we reach the start of the reply chain.
                 // NOTE: that we are assuming the result is always to the previous activity,
                 // which is almost always the case but we really shouldn't count on.
+                mResultActivities.add(r);
                 return false;
             } else if (mTargetTaskFound && allowTaskReparenting && mTargetTask.affinity != null
                     && mTargetTask.affinity.equals(r.taskAffinity)) {
+                mResultActivities.add(r);
                 // This activity has an affinity for our task. Either remove it if we are
                 // clearing or move it over to our task. Note that we currently punt on the case
                 // where we are resetting a task that is not at the top but who has activities

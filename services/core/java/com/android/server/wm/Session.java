@@ -662,7 +662,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void grantInputChannel(int displayId, SurfaceControl surface,
-            IWindow window, IBinder hostInputToken, int flags, int type,
+            IWindow window, IBinder hostInputToken, int flags, int privateFlags, int type,
             InputChannel outInputChannel) {
         if (hostInputToken == null && !mCanAddInternalSystemWindow) {
             // Callers without INTERNAL_SYSTEM_WINDOW permission cannot grant input channel to
@@ -678,7 +678,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         final long identity = Binder.clearCallingIdentity();
         try {
             mService.grantInputChannel(mUid, mPid, displayId, surface, window, hostInputToken,
-                    flags, mCanAddInternalSystemWindow ? type : 0, outInputChannel);
+                    flags, mCanAddInternalSystemWindow ? privateFlags : 0,
+                    mCanAddInternalSystemWindow ? type : 0, outInputChannel);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -686,10 +687,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void updateInputChannel(IBinder channelToken, int displayId, SurfaceControl surface,
-            int flags, Region region) {
+            int flags, int privateFlags, Region region) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            mService.updateInputChannel(channelToken, displayId, surface, flags, region);
+            mService.updateInputChannel(channelToken, displayId, surface, flags,
+                    mCanAddInternalSystemWindow ? privateFlags : 0, region);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

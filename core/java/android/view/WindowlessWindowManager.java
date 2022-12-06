@@ -115,7 +115,8 @@ public class WindowlessWindowManager implements IWindowSession {
             if (state.mInputChannelToken != null) {
                 try {
                     mRealWm.updateInputChannel(state.mInputChannelToken, state.mDisplayId,
-                            state.mSurfaceControl, state.mParams.flags, state.mInputRegion);
+                            state.mSurfaceControl, state.mParams.flags, state.mParams.privateFlags,
+                            state.mInputRegion);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to update surface input channel: ", e);
                 }
@@ -144,7 +145,7 @@ public class WindowlessWindowManager implements IWindowSession {
                 WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL) == 0)) {
             try {
                 mRealWm.grantInputChannel(displayId, sc, window, mHostInputToken, attrs.flags,
-                        attrs.type, outInputChannel);
+                        attrs.privateFlags, attrs.type, outInputChannel);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to grant input to surface: ", e);
             }
@@ -274,7 +275,7 @@ public class WindowlessWindowManager implements IWindowSession {
                 && state.mInputChannelToken != null) {
             try {
                 mRealWm.updateInputChannel(state.mInputChannelToken, state.mDisplayId, sc,
-                        attrs.flags, state.mInputRegion);
+                        attrs.flags, attrs.privateFlags, state.mInputRegion);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to update surface input channel: ", e);
             }
@@ -445,12 +446,13 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public void grantInputChannel(int displayId, SurfaceControl surface, IWindow window,
-            IBinder hostInputToken, int flags, int type, InputChannel outInputChannel) {
+            IBinder hostInputToken, int flags, int privateFlags, int type,
+            InputChannel outInputChannel) {
     }
 
     @Override
     public void updateInputChannel(IBinder channelToken, int displayId, SurfaceControl surface,
-            int flags, Region region) {
+            int flags, int privateFlags, Region region) {
     }
 
     @Override
