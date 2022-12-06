@@ -53203,6 +53203,7 @@ package android.view.animation {
 package android.view.autofill {
 
   public final class AutofillId implements android.os.Parcelable {
+    method @NonNull public static android.view.autofill.AutofillId create(@NonNull android.view.View, int);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.autofill.AutofillId> CREATOR;
