@@ -36,12 +36,13 @@ import com.android.internal.util.Preconditions
 
 data class GetCredentialUiState(
   val providerInfoList: List<ProviderInfo>,
-  val currentScreenState: GetScreenState,
   val requestDisplayInfo: RequestDisplayInfo,
+  val currentScreenState: GetScreenState = toGetScreenState(providerInfoList),
   val providerDisplayInfo: ProviderDisplayInfo = toProviderDisplayInfo(providerInfoList),
   val selectedEntry: EntryInfo? = null,
   val hidden: Boolean = false,
   val providerActivityPending: Boolean = false,
+  val isNoAccount: Boolean = false,
 )
 
 class GetCredentialViewModel(
@@ -127,6 +128,14 @@ class GetCredentialViewModel(
     )
   }
 
+  fun onMoreOptionOnSnackBarSelected(isNoAccount: Boolean) {
+    Log.d("Account Selector", "More Option on snackBar selected")
+    uiState = uiState.copy(
+      currentScreenState = GetScreenState.ALL_SIGN_IN_OPTIONS,
+      isNoAccount = isNoAccount,
+    )
+  }
+
   fun onBackToPrimarySelectionScreen() {
     uiState = uiState.copy(
       currentScreenState = GetScreenState.PRIMARY_SELECTION
@@ -190,6 +199,24 @@ private fun toProviderDisplayInfo(
     authenticationEntryList = authenticationEntryList,
     remoteEntry = remoteEntryList.getOrNull(0),
   )
+}
+
+private fun toGetScreenState(
+  providerInfoList: List<ProviderInfo>
+): GetScreenState {
+  var noLocalAccount = true
+  var remoteInfo: RemoteEntryInfo? = null
+  providerInfoList.forEach{providerInfo -> if (
+    providerInfo.credentialEntryList.isNotEmpty() || providerInfo.authenticationEntry != null
+  ) { noLocalAccount = false }
+    // TODO: handle the error situation that if multiple remoteInfos exists
+    if (providerInfo.remoteEntry != null) {
+      remoteInfo = providerInfo.remoteEntry
+    }
+  }
+
+  return if (noLocalAccount && remoteInfo != null)
+    GetScreenState.REMOTE_ONLY else GetScreenState.PRIMARY_SELECTION
 }
 
 internal class CredentialEntryInfoComparator : Comparator<CredentialEntryInfo> {

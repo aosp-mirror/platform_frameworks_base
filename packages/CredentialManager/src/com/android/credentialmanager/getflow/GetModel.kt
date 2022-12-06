@@ -120,4 +120,6 @@ enum class GetScreenState {
   PRIMARY_SELECTION,
   /** The secondary credential selection page, where all sign-in options are listed. */
   ALL_SIGN_IN_OPTIONS,
+  /** The snackbar only page when there's no account but only a remoteEntry. */
+  REMOTE_ONLY,
 }
