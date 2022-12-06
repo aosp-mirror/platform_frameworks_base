@@ -167,7 +167,6 @@ import android.app.IActivityManager;
 import android.app.IAssistDataReceiver;
 import android.app.WindowConfiguration;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -177,7 +176,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.TestUtilityService;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -5845,6 +5843,11 @@ public class WindowManagerService extends IWindowManager.Stub
             if (displayContent != null && displayContent.hasAccess(Binder.getCallingUid())) {
                 return displayContent.mInitialDisplayDensity;
             }
+
+            DisplayInfo info = mDisplayManagerInternal.getDisplayInfo(displayId);
+            if (info != null && info.hasAccess(Binder.getCallingUid())) {
+                return info.logicalDensityDpi;
+            }
         }
         return -1;
     }
@@ -5876,6 +5879,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
                 if (displayContent != null) {
                     displayContent.setForcedDensity(density, targetUserId);
+                } else {
+                    DisplayInfo info = mDisplayManagerInternal.getDisplayInfo(displayId);
+                    if (info != null) {
+                        mDisplayWindowSettings.setForcedDensity(info, density, userId);
+                    }
                 }
             }
         } finally {
@@ -5900,6 +5908,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (displayContent != null) {
                     displayContent.setForcedDensity(displayContent.mInitialDisplayDensity,
                             callingUserId);
+                } else {
+                    DisplayInfo info = mDisplayManagerInternal.getDisplayInfo(displayId);
+                    if (info != null) {
+                        mDisplayWindowSettings.setForcedDensity(info, info.logicalDensityDpi,
+                                userId);
+                    }
                 }
             }
         } finally {
