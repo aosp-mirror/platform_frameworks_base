@@ -34,7 +34,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
-import android.app.BroadcastOptions;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -54,7 +53,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.LayerDrawable;
-import android.os.Bundle;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.AttributeSet;
@@ -171,7 +169,6 @@ public class ScreenshotView extends FrameLayout implements
     private long mDefaultTimeoutOfTimeoutHandler;
     private ActionIntentExecutor mActionExecutor;
     private FeatureFlags mFlags;
-    private final Bundle mInteractiveBroadcastOption;
 
     private enum PendingInteraction {
         PREVIEW,
@@ -197,10 +194,6 @@ public class ScreenshotView extends FrameLayout implements
         super(context, attrs, defStyleAttr, defStyleRes);
         mResources = mContext.getResources();
         mInteractionJankMonitor = getInteractionJankMonitorInstance();
-
-        BroadcastOptions options = BroadcastOptions.makeBasic();
-        options.setInteractive(true);
-        mInteractiveBroadcastOption = options.toBundle();
 
         mFixedSize = mResources.getDimensionPixelSize(R.dimen.overlay_x_scale);
 
@@ -1099,7 +1092,7 @@ public class ScreenshotView extends FrameLayout implements
     private void startSharedTransition(ActionTransition transition) {
         try {
             mPendingSharedTransition = true;
-            transition.action.actionIntent.send(mInteractiveBroadcastOption);
+            transition.action.actionIntent.send();
 
             // fade out non-preview UI
             createScreenshotFadeDismissAnimation().start();
