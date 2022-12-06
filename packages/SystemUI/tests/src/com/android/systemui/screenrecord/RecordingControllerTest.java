@@ -107,7 +107,7 @@ public class RecordingControllerTest extends SysuiTestCase {
         mController.startCountdown(0, 0, startIntent, null);
 
         verify(mCallback).onCountdownEnd();
-        verify(startIntent).send(any());
+        verify(startIntent).send();
     }
 
     // Test that when recording is stopped, the stop intent is sent and listeners are notified.
@@ -125,7 +125,7 @@ public class RecordingControllerTest extends SysuiTestCase {
 
         assertFalse(mController.isStarting());
         assertFalse(mController.isRecording());
-        verify(stopIntent).send(any());
+        verify(stopIntent).send();
         verify(mCallback).onRecordingEnd();
     }
 
