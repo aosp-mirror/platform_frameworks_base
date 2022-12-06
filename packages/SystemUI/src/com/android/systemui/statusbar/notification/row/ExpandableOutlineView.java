@@ -219,9 +219,9 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     }
 
     @Override
-    public void applyRoundness() {
+    public void applyRoundnessAndInvalidate() {
         invalidateOutline();
-        super.applyRoundness();
+        super.applyRoundnessAndInvalidate();
     }
 
     protected void setBackgroundTop(int backgroundTop) {
@@ -233,7 +233,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
 
     public void onDensityOrFontScaleChanged() {
         initDimens();
-        applyRoundness();
+        applyRoundnessAndInvalidate();
     }
 
     @Override
@@ -241,7 +241,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         int previousHeight = getActualHeight();
         super.setActualHeight(actualHeight, notifyListeners);
         if (previousHeight != actualHeight) {
-            applyRoundness();
+            applyRoundnessAndInvalidate();
         }
     }
 
@@ -250,7 +250,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         int previousAmount = getClipTopAmount();
         super.setClipTopAmount(clipTopAmount);
         if (previousAmount != clipTopAmount) {
-            applyRoundness();
+            applyRoundnessAndInvalidate();
         }
     }
 
@@ -259,14 +259,14 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         int previousAmount = getClipBottomAmount();
         super.setClipBottomAmount(clipBottomAmount);
         if (previousAmount != clipBottomAmount) {
-            applyRoundness();
+            applyRoundnessAndInvalidate();
         }
     }
 
     protected void setOutlineAlpha(float alpha) {
         if (alpha != mOutlineAlpha) {
             mOutlineAlpha = alpha;
-            applyRoundness();
+            applyRoundnessAndInvalidate();
         }
     }
 
@@ -280,7 +280,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
             setOutlineRect(rect.left, rect.top, rect.right, rect.bottom);
         } else {
             mCustomOutline = false;
-            applyRoundness();
+            applyRoundnessAndInvalidate();
         }
     }
 
@@ -340,7 +340,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         // Outlines need to be at least 1 dp
         mOutlineRect.bottom = (int) Math.max(top, mOutlineRect.bottom);
         mOutlineRect.right = (int) Math.max(left, mOutlineRect.right);
-        applyRoundness();
+        applyRoundnessAndInvalidate();
     }
 
     public Path getCustomClipPath(View child) {
