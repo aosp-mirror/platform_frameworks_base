@@ -92,7 +92,7 @@
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Оповещения"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Переадресация вызовов"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Режим экстренных обратных вызовов"</string>
-    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Состояние мобильного Интернета"</string>
+    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Состояние мобильного интернета"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Голосовые сообщения"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"Звонки по Wi-Fi"</string>
