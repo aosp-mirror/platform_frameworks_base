@@ -189,6 +189,28 @@ must be used on IBar.Stub. Did you forget to annotate the AIDL definition? \
 1 errors, 0 warnings""".addLineContinuation())
     }
 
+    fun testDetectIssuesMissingAnnotationOnMethodWhenClassIsCalledDefault() {
+        lint().files(java(
+            """
+            package test.pkg;
+            public class Default extends IFooMethod.Stub {
+                public void testMethod() {}
+            }
+            """).indented(),
+            *stubs
+        )
+            .run()
+            .expect(
+                """
+                src/test/pkg/Default.java:3: Error: The method Default.testMethod \
+                overrides the method Stub.testMethod which is annotated with @EnforcePermission. The same annotation must be used on Default.testMethod [MissingEnforcePermissionAnnotation]
+                    public void testMethod() {}
+                                ~~~~~~~~~~
+                1 errors, 0 warnings 
+                """.addLineContinuation()
+            )
+    }
+
     /* Stubs */
 
     // A service with permission annotation on the class.

@@ -114,6 +114,13 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
         val overridingName = "${overridingClass.name}.${overridingMethod.name}"
         val overriddenName = "${overriddenClass.name}.${overriddenMethod.name}"
         if (overridingAnnotation == null) {
+            if (shouldIgnoreGeneratedMethod(
+                            context,
+                            overriddenClass = overriddenClass,
+                            overridingClass = overridingClass)
+            ) {
+                return
+            }
             val msg = "The method $overridingName overrides the method $overriddenName which " +
                 "is annotated with @EnforcePermission. The same annotation must be used " +
                 "on $overridingName"
@@ -214,6 +221,39 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
             }
         }
     }
+
+    /**
+     * since this lint runs globally, it will also run against generated
+     * test code e.g.
+     * system/tools/aidl/tests/golden_output/aidl-test-interface-permission-java-source/gen/android/aidl/tests/permission/IProtected.java
+     * system/tools/aidl/tests/golden_output/aidl-test-interface-permission-java-source/gen/android/aidl/tests/permission/IProtectedInterface.java
+     * we do not want to report errors against generated `Stub` and `Proxy` classes in those files
+     */
+    private fun shouldIgnoreGeneratedMethod(
+            context: JavaContext,
+            overriddenClass: PsiClass,
+            overridingClass: PsiClass,
+
+    ): Boolean {
+        if (isInterfaceAndExtendsIInterface(overriddenClass) &&
+                context.evaluator.isStatic(overridingClass)) {
+            if (overridingClass.name == "Default") return true
+            if (overridingClass.name == "Proxy") {
+                val shouldBeStub = overridingClass.parent as? PsiClass ?: return false
+                return shouldBeStub.name == "Stub" &&
+                        context.evaluator.isAbstract(shouldBeStub) &&
+                        context.evaluator.isStatic(shouldBeStub) &&
+                        shouldBeStub.extendsList?.referenceElements
+                        ?.any { it.qualifiedName == BINDER_CLASS } == true
+            }
+        }
+        return false
+    }
+
+    private fun isInterfaceAndExtendsIInterface(overriddenClass: PsiClass): Boolean =
+            overriddenClass.isInterface &&
+                    overriddenClass.extendsList?.referenceElements
+                    ?.any { it.qualifiedName == IINTERFACE_INTERFACE } == true
 
     companion object {
         val EXPLANATION = """
