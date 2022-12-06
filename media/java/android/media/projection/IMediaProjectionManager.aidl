@@ -27,12 +27,32 @@ import android.view.ContentRecordingSession;
 interface IMediaProjectionManager {
     @UnsupportedAppUsage
     boolean hasProjectionPermission(int uid, String packageName);
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
     IMediaProjection createProjection(int uid, String packageName, int type,
             boolean permanentGrant);
+
     boolean isValidMediaProjection(IMediaProjection projection);
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
     MediaProjectionInfo getActiveProjectionInfo();
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
     void stopActiveProjection();
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    void notifyActiveProjectionCapturedContentResized(int width, int height);
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
     void addCallback(IMediaProjectionWatcherCallback callback);
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
     void removeCallback(IMediaProjectionWatcherCallback callback);
 
     /**

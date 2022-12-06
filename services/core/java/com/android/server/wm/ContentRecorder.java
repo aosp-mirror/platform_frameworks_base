@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.content.Context.MEDIA_PROJECTION_SERVICE;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
@@ -27,8 +28,10 @@ import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.media.projection.MediaProjectionManager;
+import android.media.projection.IMediaProjectionManager;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.DeviceConfig;
 import android.view.ContentRecordingSession;
 import android.view.Display;
@@ -83,13 +86,7 @@ final class ContentRecorder implements WindowContainerListener {
     private int mLastOrientation = ORIENTATION_UNDEFINED;
 
     ContentRecorder(@NonNull DisplayContent displayContent) {
-        this(displayContent, () -> {
-            MediaProjectionManager mpm = displayContent.mWmService.mContext.getSystemService(
-                    MediaProjectionManager.class);
-            if (mpm != null) {
-                mpm.stopActiveProjection();
-            }
-        });
+        this(displayContent, new RemoteMediaProjectionManagerWrapper());
     }
 
     @VisibleForTesting
@@ -445,6 +442,9 @@ final class ContentRecorder implements WindowContainerListener {
                 .setPosition(mRecordedSurface, shiftedX /* x */, shiftedY /* y */)
                 .apply();
         mLastRecordedBounds = new Rect(recordedContentBounds);
+        // Request to notify the client about the resize.
+        mMediaProjectionManager.notifyActiveProjectionCapturedContentResized(
+                mLastRecordedBounds.width(), mLastRecordedBounds.height());
     }
 
     /**
@@ -503,6 +503,56 @@ final class ContentRecorder implements WindowContainerListener {
 
     @VisibleForTesting interface MediaProjectionManagerWrapper {
         void stopActiveProjection();
+        void notifyActiveProjectionCapturedContentResized(int width, int height);
+    }
+
+    private static final class RemoteMediaProjectionManagerWrapper implements
+            MediaProjectionManagerWrapper {
+        @Nullable private IMediaProjectionManager mIMediaProjectionManager = null;
+
+        @Override
+        public void stopActiveProjection() {
+            fetchMediaProjectionManager();
+            if (mIMediaProjectionManager == null) {
+                return;
+            }
+            try {
+                mIMediaProjectionManager.stopActiveProjection();
+            } catch (RemoteException e) {
+                ProtoLog.e(WM_DEBUG_CONTENT_RECORDING,
+                        "Unable to tell MediaProjectionManagerService to stop the active "
+                                + "projection: %s",
+                        e);
+            }
+        }
+
+        @Override
+        public void notifyActiveProjectionCapturedContentResized(int width, int height) {
+            fetchMediaProjectionManager();
+            if (mIMediaProjectionManager == null) {
+                return;
+            }
+            try {
+                mIMediaProjectionManager.notifyActiveProjectionCapturedContentResized(width,
+                        height);
+            } catch (RemoteException e) {
+                ProtoLog.e(WM_DEBUG_CONTENT_RECORDING,
+                        "Unable to tell MediaProjectionManagerService about resizing the active "
+                                + "projection: %s",
+                        e);
+            }
+        }
+
+        private void fetchMediaProjectionManager() {
+            if (mIMediaProjectionManager != null) {
+                return;
+            }
+            IBinder b = ServiceManager.getService(MEDIA_PROJECTION_SERVICE);
+            if (b == null) {
+                return;
+            }
+            mIMediaProjectionManager = IMediaProjectionManager.Stub.asInterface(b);
+        }
     }
 
     private boolean isRecordingContentTask() {

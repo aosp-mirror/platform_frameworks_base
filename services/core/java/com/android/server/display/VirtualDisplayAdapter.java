@@ -599,6 +599,15 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 handleMediaProjectionStoppedLocked(mAppToken);
             }
         }
+
+        @Override
+        public void onCapturedContentResize(int width, int height) {
+            // Do nothing when we tell the client that the content is resized - it is up to them
+            // to decide to update the VirtualDisplay and Surface.
+            // We could only update the VirtualDisplay size, anyway (which the client wouldn't
+            // expect), and there will still be letterboxing on the output content since the
+            // Surface and VirtualDisplay would then have different aspect ratios.
+        }
     }
 
     @VisibleForTesting
