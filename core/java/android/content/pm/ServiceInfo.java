@@ -308,9 +308,7 @@ public class ServiceInfo extends ComponentInfo
      * permissions:
      * {@link android.Manifest.permission#ACTIVITY_RECOGNITION},
      * {@link android.Manifest.permission#BODY_SENSORS},
-     * {@link android.Manifest.permission#HIGH_SAMPLING_RATE_SENSORS},
-     * or one of the {@code "android.permission.health.*"} permissions defined in the
-     * {@link android.healthconnect.HealthPermissions}.
+     * {@link android.Manifest.permission#HIGH_SAMPLING_RATE_SENSORS}.
      */
     @RequiresPermission(
             allOf = {
@@ -320,8 +318,7 @@ public class ServiceInfo extends ComponentInfo
                 Manifest.permission.ACTIVITY_RECOGNITION,
                 Manifest.permission.BODY_SENSORS,
                 Manifest.permission.HIGH_SAMPLING_RATE_SENSORS,
-            },
-            conditional = true
+            }
     )
     public static final int FOREGROUND_SERVICE_TYPE_HEALTH = 1 << 8;
 
