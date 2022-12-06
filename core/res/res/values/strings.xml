@@ -6407,4 +6407,22 @@ ul.</string>
 
     <!-- Display content to tell the user the sim card name and number-->
     <string name="default_card_name">CARD <xliff:g id="cardNumber" example="1">%d</xliff:g></string>
+
+    <!-- Strings for CompanionDeviceManager -->
+    <!-- Title of Watch profile permission, which allows a companion app to manage watches. [CHAR LIMIT=NONE] -->
+    <string name="permlab_companionProfileWatch">Companion Watch profile permission to manage watches</string>
+    <!-- Description of Watch profile permission, which allows a companion app to manage watches. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_companionProfileWatch">Allows a companion app to manage watches.</string>
+    <!-- Title of observing device presence permission, which allows a companion app to observe the presence of the associated devices. [CHAR LIMIT=NONE] -->
+    <string name="permlab_observeCompanionDevicePresence">Observe companion device presence</string>
+    <!-- Description of observing device presence permission, which allows a companion app to observe the presence of the associated devices. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_observeCompanionDevicePresence">Allows a companion app to observe companion device presence when the devices are nearby or far-away.</string>
+    <!-- Title of delivering companion messages permission, which allows a companion app to deliver messages to other devices. [CHAR LIMIT=NONE] -->
+    <string name="permlab_deliverCompanionMessages">Deliver companion messages</string>
+    <!-- Description of delivering companion messages permission, which allows a companion app to deliver messages to other devices. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_deliverCompanionMessages">Allows a companion app to deliver companion messages to other devices.</string>
+    <!-- Title of start foreground services from background permission [CHAR LIMIT=NONE] -->
+    <string name="permlab_startForegroundServicesFromBackground">Start foreground services from background</string>
+    <!-- Description of start foreground services from background permission [CHAR LIMIT=NONE] -->
+    <string name="permdesc_startForegroundServicesFromBackground">Allows a companion app to start foreground services from background.</string>
 </resources>
