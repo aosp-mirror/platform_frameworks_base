@@ -64,6 +64,7 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -258,18 +259,36 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
 
     @NonNull
     private WindowContainerTransaction bringDesktopAppsToFront() {
-        ArraySet<Integer> activeTasks = mDesktopModeTaskRepository.getActiveTasks();
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        final ArraySet<Integer> activeTasks = mDesktopModeTaskRepository.getActiveTasks();
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "bringDesktopAppsToFront: tasks=%s", activeTasks.size());
-        ArrayList<RunningTaskInfo> taskInfos = new ArrayList<>();
+
+        final List<RunningTaskInfo> taskInfos = new ArrayList<>();
         for (Integer taskId : activeTasks) {
             RunningTaskInfo taskInfo = mShellTaskOrganizer.getRunningTaskInfo(taskId);
             if (taskInfo != null) {
                 taskInfos.add(taskInfo);
             }
         }
-        // Order by lastActiveTime, descending
-        taskInfos.sort(Comparator.comparingLong(task -> -task.lastActiveTime));
-        WindowContainerTransaction wct = new WindowContainerTransaction();
+
+        if (taskInfos.isEmpty()) {
+            return wct;
+        }
+
+        final boolean allActiveTasksAreVisible = taskInfos.stream()
+                .allMatch(info -> mDesktopModeTaskRepository.isVisibleTask(info.taskId));
+        if (allActiveTasksAreVisible) {
+            ProtoLog.d(WM_SHELL_DESKTOP_MODE,
+                    "bringDesktopAppsToFront: active tasks are already in front, skipping.");
+            return wct;
+        }
+        ProtoLog.d(WM_SHELL_DESKTOP_MODE,
+                "bringDesktopAppsToFront: reordering all active tasks to the front");
+        final List<Integer> allTasksInZOrder =
+                mDesktopModeTaskRepository.getFreeformTasksInZOrder();
+        // Sort by z-order, bottom to top, so that the top-most task is reordered to the top last
+        // in the WCT.
+        taskInfos.sort(Comparator.comparingInt(task -> -allTasksInZOrder.indexOf(task.taskId)));
         for (RunningTaskInfo task : taskInfos) {
             wct.reorder(task.token, true);
         }
