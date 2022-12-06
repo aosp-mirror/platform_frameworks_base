@@ -124,8 +124,8 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             .thenReturn(mock(UdfpsBpView::class.java))
         whenever(inflater.inflate(R.layout.udfps_keyguard_view, null))
             .thenReturn(mock(UdfpsKeyguardView::class.java))
-        whenever(inflater.inflate(R.layout.udfps_fpm_other_view, null))
-            .thenReturn(mock(UdfpsFpmOtherView::class.java))
+        whenever(inflater.inflate(R.layout.udfps_fpm_empty_view, null))
+            .thenReturn(mock(UdfpsFpmEmptyView::class.java))
         whenever(udfpsEnrollView.context).thenReturn(context)
     }
 

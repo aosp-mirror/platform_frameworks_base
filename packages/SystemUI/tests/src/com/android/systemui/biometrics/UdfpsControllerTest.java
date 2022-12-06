@@ -190,7 +190,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private UdfpsBpView mBpView;
     @Mock
-    private UdfpsFpmOtherView mFpmOtherView;
+    private UdfpsFpmEmptyView mFpmEmptyView;
     @Mock
     private UdfpsKeyguardView mKeyguardView;
     private final UdfpsAnimationViewController mUdfpsKeyguardViewController =
@@ -240,8 +240,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 .thenReturn(mKeyguardView); // for showOverlay REASON_AUTH_FPM_KEYGUARD
         when(mLayoutInflater.inflate(R.layout.udfps_bp_view, null))
                 .thenReturn(mBpView);
-        when(mLayoutInflater.inflate(R.layout.udfps_fpm_other_view, null))
-                .thenReturn(mFpmOtherView);
+        when(mLayoutInflater.inflate(R.layout.udfps_fpm_empty_view, null))
+                .thenReturn(mFpmEmptyView);
         when(mEnrollView.getContext()).thenReturn(mContext);
         when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
         when(mSessionTracker.getSessionId(anyInt())).thenReturn(

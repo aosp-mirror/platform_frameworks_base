@@ -80,8 +80,8 @@
 -packages/SystemUI/src/com/android/systemui/biometrics/UdfpsControllerOverlay.kt
 -packages/SystemUI/src/com/android/systemui/biometrics/UdfpsDrawable.kt
 -packages/SystemUI/src/com/android/systemui/biometrics/UdfpsFpDrawable.kt
--packages/SystemUI/src/com/android/systemui/biometrics/UdfpsFpmOtherView.kt
--packages/SystemUI/src/com/android/systemui/biometrics/UdfpsFpmOtherViewController.kt
+-packages/SystemUI/src/com/android/systemui/biometrics/UdfpsFpmEmptyView.kt
+-packages/SystemUI/src/com/android/systemui/biometrics/UdfpsFpmEmptyViewController.kt
 -packages/SystemUI/src/com/android/systemui/biometrics/UdfpsHapticsSimulator.kt
 -packages/SystemUI/src/com/android/systemui/biometrics/UdfpsOverlayParams.kt
 -packages/SystemUI/src/com/android/systemui/biometrics/UdfpsShell.kt

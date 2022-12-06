@@ -17,24 +17,19 @@ package com.android.systemui.biometrics
 
 import android.content.Context
 import android.util.AttributeSet
-import android.widget.ImageView
-import com.android.systemui.R
 
 /**
- * View corresponding with udfps_fpm_other_view.xml
+ * View corresponding with udfps_fpm_empty_view.xml
+ *
+ * Currently doesn't draw anything.
  */
-class UdfpsFpmOtherView(
+class UdfpsFpmEmptyView(
     context: Context,
     attrs: AttributeSet?
 ) : UdfpsAnimationView(context, attrs) {
 
+    // Drawable isn't ever added to the view, so we don't currently show anything
     private val fingerprintDrawable: UdfpsFpDrawable = UdfpsFpDrawable(context)
-    private lateinit var fingerprintView: ImageView
-
-    override fun onFinishInflate() {
-        fingerprintView = findViewById(R.id.udfps_fpm_other_fp_view)!!
-        fingerprintView.setImageDrawable(fingerprintDrawable)
-    }
 
     override fun getDrawable(): UdfpsDrawable = fingerprintDrawable
 }
