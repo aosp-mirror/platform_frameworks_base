@@ -1889,7 +1889,18 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         // actions.
         taskFragment.setTaskFragmentOrganizer(creationParams.getOrganizer(),
                 ownerActivity.getUid(), ownerActivity.info.processName);
-        ownerTask.addChild(taskFragment, POSITION_TOP);
+        final int position;
+        if (creationParams.getPairedPrimaryFragmentToken() != null) {
+            // When there is a paired primary TaskFragment, we want to place the new TaskFragment
+            // right above the paired one to make sure there is no other window in between.
+            final TaskFragment pairedPrimaryTaskFragment = getTaskFragment(
+                    creationParams.getPairedPrimaryFragmentToken());
+            final int pairedPosition = ownerTask.mChildren.indexOf(pairedPrimaryTaskFragment);
+            position = pairedPosition != -1 ? pairedPosition + 1 : POSITION_TOP;
+        } else {
+            position = POSITION_TOP;
+        }
+        ownerTask.addChild(taskFragment, position);
         taskFragment.setWindowingMode(creationParams.getWindowingMode());
         taskFragment.setBounds(creationParams.getInitialBounds());
         mLaunchTaskFragments.put(creationParams.getFragmentToken(), taskFragment);

@@ -1218,14 +1218,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     TaskFragmentContainer newContainer(@NonNull Activity pendingAppearedActivity,
             @NonNull Activity activityInTask, int taskId) {
         return newContainer(pendingAppearedActivity, null /* pendingAppearedIntent */,
-                activityInTask, taskId);
+                activityInTask, taskId, null /* pairedPrimaryContainer */);
     }
 
     @GuardedBy("mLock")
     TaskFragmentContainer newContainer(@NonNull Intent pendingAppearedIntent,
             @NonNull Activity activityInTask, int taskId) {
         return newContainer(null /* pendingAppearedActivity */, pendingAppearedIntent,
-                activityInTask, taskId);
+                activityInTask, taskId, null /* pairedPrimaryContainer */);
     }
 
     /**
@@ -1237,10 +1237,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * @param activityInTask            activity in the same Task so that we can get the Task bounds
      *                                  if needed.
      * @param taskId                    parent Task of the new TaskFragment.
+     * @param pairedPrimaryContainer    the paired primary {@link TaskFragmentContainer}. When it is
+     *                                  set, the new container will be added right above it.
      */
     @GuardedBy("mLock")
     TaskFragmentContainer newContainer(@Nullable Activity pendingAppearedActivity,
-            @Nullable Intent pendingAppearedIntent, @NonNull Activity activityInTask, int taskId) {
+            @Nullable Intent pendingAppearedIntent, @NonNull Activity activityInTask, int taskId,
+            @Nullable TaskFragmentContainer pairedPrimaryContainer) {
         if (activityInTask == null) {
             throw new IllegalArgumentException("activityInTask must not be null,");
         }
@@ -1249,7 +1252,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
         final TaskContainer taskContainer = mTaskContainers.get(taskId);
         final TaskFragmentContainer container = new TaskFragmentContainer(pendingAppearedActivity,
-                pendingAppearedIntent, taskContainer, this);
+                pendingAppearedIntent, taskContainer, this, pairedPrimaryContainer);
         return container;
     }
 
