@@ -1766,8 +1766,7 @@ public class SubscriptionManager {
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see
-     * {@link TelephonyManager#hasCarrierPrivileges}). In the latter case, only records accessible
-     * to the calling app are returned.
+     * {@link TelephonyManager#hasCarrierPrivileges}).
      *
      * @return Sorted list of the currently {@link SubscriptionInfo} records available on the device.
      * <ul>
@@ -1785,7 +1784,6 @@ public class SubscriptionManager {
      * </li>
      * </ul>
      */
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public List<SubscriptionInfo> getActiveSubscriptionInfoList() {
         return getActiveSubscriptionInfoList(/* userVisibleonly */true);
@@ -1989,17 +1987,12 @@ public class SubscriptionManager {
     }
 
     /**
+     * Get the active subscription count.
      *
-     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see
-     * {@link TelephonyManager#hasCarrierPrivileges}). In the latter case, the count will include
-     * only those subscriptions accessible to the caller.
+     * @return The current number of active subscriptions.
      *
-     * @return the current number of active subscriptions. There is no guarantee the value
-     * returned by this method will be the same as the length of the list returned by
-     * {@link #getActiveSubscriptionInfoList}.
+     * @see #getActiveSubscriptionInfoList()
      */
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public int getActiveSubscriptionInfoCount() {
         int result = 0;
@@ -2139,7 +2132,7 @@ public class SubscriptionManager {
     /**
      * Set SIM icon tint color for subscription ID
      * @param tint the RGB value of icon tint color of the SIM
-     * @param subId the unique Subscritpion ID in database
+     * @param subId the unique subscription ID in database
      * @return the number of records updated
      * @hide
      */
@@ -2147,7 +2140,7 @@ public class SubscriptionManager {
     public int setIconTint(@ColorInt int tint, int subId) {
         if (VDBG) logd("[setIconTint]+ tint:" + tint + " subId:" + subId);
         return setSubscriptionPropertyHelper(subId, "setIconTint",
-                (iSub)-> iSub.setIconTint(tint, subId)
+                (iSub)-> iSub.setIconTint(subId, tint)
         );
     }
 
