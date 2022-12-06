@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.companion.virtual.IVirtualDevice;
+import android.hardware.Sensor;
 import android.os.IBinder;
 import android.os.RemoteException;
 
@@ -68,8 +69,10 @@ public class VirtualSensor {
     }
 
     /**
-     * Returns the
-     * <a href="https://source.android.com/devices/sensors/sensor-types">type</a> of the sensor.
+     * Returns the type of the sensor.
+     *
+     * @see Sensor#getType()
+     * @see <a href="https://source.android.com/devices/sensors/sensor-types">Sensor types</a>
      */
     public int getType() {
         return mType;
@@ -87,7 +90,7 @@ public class VirtualSensor {
      * Send a sensor event to the system.
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public void sendSensorEvent(@NonNull VirtualSensorEvent event) {
+    public void sendEvent(@NonNull VirtualSensorEvent event) {
         try {
             mVirtualDevice.sendSensorEvent(mToken, event);
         } catch (RemoteException e) {

@@ -3062,7 +3062,7 @@ package android.companion.virtual.sensor {
   public class VirtualSensor {
     method @NonNull public String getName();
     method public int getType();
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendSensorEvent(@NonNull android.companion.virtual.sensor.VirtualSensorEvent);
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendEvent(@NonNull android.companion.virtual.sensor.VirtualSensorEvent);
   }
 
   public static interface VirtualSensor.SensorStateChangeCallback {
