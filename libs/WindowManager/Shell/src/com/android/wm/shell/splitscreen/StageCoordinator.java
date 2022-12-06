@@ -49,6 +49,7 @@ import static com.android.wm.shell.splitscreen.SplitScreenController.ENTER_REASO
 import static com.android.wm.shell.splitscreen.SplitScreenController.ENTER_REASON_MULTI_INSTANCE;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_FINISHED;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_FULLSCREEN_SHORTCUT;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_CHILD_TASK_ENTER_PIP;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DEVICE_FOLDED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DRAG_DIVIDER;
@@ -1115,15 +1116,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
      * Exits the split screen by finishing one of the tasks.
      */
     protected void exitStage(@SplitPosition int stageToClose) {
-        if (ENABLE_SHELL_TRANSITIONS) {
-            StageTaskListener stageToTop = mSideStagePosition == stageToClose
-                    ? mMainStage
-                    : mSideStage;
-            exitSplitScreen(stageToTop, EXIT_REASON_APP_FINISHED);
-        } else {
-            boolean toEnd = stageToClose == SPLIT_POSITION_BOTTOM_OR_RIGHT;
-            mSplitLayout.flingDividerToDismiss(toEnd, EXIT_REASON_APP_FINISHED);
-        }
+        mSplitLayout.flingDividerToDismiss(stageToClose == SPLIT_POSITION_BOTTOM_OR_RIGHT,
+                EXIT_REASON_APP_FINISHED);
     }
 
     /**
@@ -1157,6 +1151,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             case EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP:
                 // User has unlocked the device after folded
             case EXIT_REASON_DEVICE_FOLDED:
+                // The device is folded
+            case EXIT_REASON_FULLSCREEN_SHORTCUT:
+                // User has used a keyboard shortcut to go back to fullscreen from split
                 return true;
             default:
                 return false;
@@ -2117,6 +2114,16 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         finishEnterSplitScreen(finishT);
         addDividerBarToTransition(info, finishT, true /* show */);
         return true;
+    }
+
+    public void goToFullscreenFromSplit() {
+        boolean leftOrTop;
+        if (mSideStage.isFocused()) {
+            leftOrTop = (mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT);
+        } else {
+            leftOrTop = (mSideStagePosition == SPLIT_POSITION_BOTTOM_OR_RIGHT);
+        }
+        mSplitLayout.flingDividerToDismiss(!leftOrTop, EXIT_REASON_FULLSCREEN_SHORTCUT);
     }
 
     /** Synchronize split-screen state with transition and make appropriate preparations. */

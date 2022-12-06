@@ -2867,6 +2867,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return key_consumed;
                 }
                 break;
+            case KeyEvent.KEYCODE_DPAD_UP:
+                if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
+                    StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+                    if (statusbar != null) {
+                        statusbar.goToFullscreenFromSplit();
+                    }
+                    return key_consumed;
+                }
+                break;
             case KeyEvent.KEYCODE_SLASH:
                 if (down && repeatCount == 0 && event.isMetaPressed() && !keyguardOn) {
                     toggleKeyboardShortcutsMenu(event.getDeviceId());
