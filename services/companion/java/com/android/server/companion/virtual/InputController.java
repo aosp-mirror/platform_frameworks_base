@@ -78,9 +78,8 @@ class InputController {
     final Object mLock;
 
     /* Token -> file descriptor associations. */
-    @VisibleForTesting
     @GuardedBy("mLock")
-    final Map<IBinder, InputDeviceDescriptor> mInputDeviceDescriptors = new ArrayMap<>();
+    private final Map<IBinder, InputDeviceDescriptor> mInputDeviceDescriptors = new ArrayMap<>();
 
     private final Handler mHandler;
     private final NativeWrapper mNativeWrapper;
