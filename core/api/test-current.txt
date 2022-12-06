@@ -1711,7 +1711,6 @@ package android.os {
   public class Build {
     method public static boolean is64BitAbi(String);
     method public static boolean isDebuggable();
-    method public static boolean isSecure();
     field public static final boolean IS_EMULATOR;
   }
 
