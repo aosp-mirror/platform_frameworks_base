@@ -55,6 +55,7 @@ import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.transition.Transitions;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -74,7 +75,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     private final DisplayController mDisplayController;
     private final SyncTransactionQueue mSyncQueue;
     private FreeformTaskTransitionStarter mTransitionStarter;
-    private DesktopModeController mDesktopModeController;
+    private Optional<DesktopModeController> mDesktopModeController;
     private boolean mTransitionDragActive;
 
     private SparseArray<EventReceiver> mEventReceiversByDisplay = new SparseArray<>();
@@ -90,7 +91,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             SyncTransactionQueue syncQueue,
-            DesktopModeController desktopModeController) {
+            Optional<DesktopModeController> desktopModeController) {
         this(
                 context,
                 mainHandler,
@@ -110,7 +111,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             SyncTransactionQueue syncQueue,
-            DesktopModeController desktopModeController,
+            Optional<DesktopModeController> desktopModeController,
             CaptionWindowDecoration.Factory captionWindowDecorFactory,
             Supplier<InputManager> inputManagerSupplier) {
 
@@ -246,10 +247,10 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             } else if (id == R.id.caption_handle) {
                 decoration.createHandleMenu();
             } else if (id == R.id.desktop_button) {
-                mDesktopModeController.setDesktopModeActive(true);
+                mDesktopModeController.ifPresent(c -> c.setDesktopModeActive(true));
                 decoration.closeHandleMenu();
             } else if (id == R.id.fullscreen_button) {
-                mDesktopModeController.setDesktopModeActive(false);
+                mDesktopModeController.ifPresent(c -> c.setDesktopModeActive(false));
                 decoration.closeHandleMenu();
                 decoration.setButtonVisibility();
             }
@@ -304,9 +305,9 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
          */
         private void handleEventForMove(MotionEvent e) {
             RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
-            int windowingMode = mDesktopModeController
-                    .getDisplayAreaWindowingMode(taskInfo.displayId);
-            if (windowingMode == WINDOWING_MODE_FULLSCREEN) {
+            if (mDesktopModeController.isPresent()
+                    && mDesktopModeController.get().getDisplayAreaWindowingMode(taskInfo.displayId)
+                    == WINDOWING_MODE_FULLSCREEN) {
                 return;
             }
             switch (e.getActionMasked()) {
@@ -331,7 +332,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     if (e.getRawY(dragPointerIdx) <= statusBarHeight
                             && DesktopModeStatus.isActive(mContext)) {
-                        mDesktopModeController.setDesktopModeActive(false);
+                        mDesktopModeController.ifPresent(c -> c.setDesktopModeActive(false));
                     }
                     break;
                 }
@@ -471,7 +472,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                     int statusBarHeight = mDisplayController
                             .getDisplayLayout(focusedDecor.mTaskInfo.displayId).stableInsets().top;
                     if (ev.getY() > statusBarHeight) {
-                        mDesktopModeController.setDesktopModeActive(true);
+                        mDesktopModeController.ifPresent(c -> c.setDesktopModeActive(true));
                         return;
                     }
                 }

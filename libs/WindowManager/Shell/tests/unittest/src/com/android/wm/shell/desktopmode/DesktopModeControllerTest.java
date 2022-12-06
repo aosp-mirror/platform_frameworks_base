@@ -36,7 +36,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -100,15 +100,14 @@ public class DesktopModeControllerTest extends ShellTestCase {
     @Before
     public void setUp() {
         mMockitoSession = mockitoSession().mockStatic(DesktopModeStatus.class).startMocking();
+        when(DesktopModeStatus.isSupported()).thenReturn(true);
         when(DesktopModeStatus.isActive(any())).thenReturn(true);
 
         mShellInit = Mockito.spy(new ShellInit(mTestExecutor));
 
         mDesktopModeTaskRepository = new DesktopModeTaskRepository();
 
-        mController = new DesktopModeController(mContext, mShellInit, mShellController,
-                mShellTaskOrganizer, mRootTaskDisplayAreaOrganizer, mTransitions,
-                mDesktopModeTaskRepository, mMockHandler, new TestShellExecutor());
+        mController = createController();
 
         when(mShellTaskOrganizer.getRunningTasks(anyInt())).thenReturn(new ArrayList<>());
 
@@ -125,7 +124,17 @@ public class DesktopModeControllerTest extends ShellTestCase {
 
     @Test
     public void instantiate_addInitCallback() {
-        verify(mShellInit, times(1)).addInitCallback(any(), any());
+        verify(mShellInit).addInitCallback(any(), any());
+    }
+
+    @Test
+    public void instantiate_flagOff_doNotAddInitCallback() {
+        when(DesktopModeStatus.isSupported()).thenReturn(false);
+        clearInvocations(mShellInit);
+
+        createController();
+
+        verify(mShellInit, never()).addInitCallback(any(), any());
     }
 
     @Test
@@ -351,6 +360,12 @@ public class DesktopModeControllerTest extends ShellTestCase {
                 mock(IBinder.class),
                 new TransitionRequestInfo(TRANSIT_OPEN, trigger, null /* remote */));
         assertThat(wct).isNotNull();
+    }
+
+    private DesktopModeController createController() {
+        return new DesktopModeController(mContext, mShellInit, mShellController,
+                mShellTaskOrganizer, mRootTaskDisplayAreaOrganizer, mTransitions,
+                mDesktopModeTaskRepository, mMockHandler, new TestShellExecutor());
     }
 
     private DisplayAreaInfo createMockDisplayArea() {
