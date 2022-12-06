@@ -398,6 +398,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final int HAL_ERROR_RETRY_MAX = 20;
 
     @VisibleForTesting
+    protected static final int HAL_POWER_PRESS_TIMEOUT = 50; // ms
+
+    @VisibleForTesting
     protected final Runnable mFpCancelNotReceived = this::onFingerprintCancelNotReceived;
 
     private final Runnable mFaceCancelNotReceived = this::onFaceCancelNotReceived;
@@ -918,7 +921,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
-    private final Runnable mRetryFingerprintAuthentication = new Runnable() {
+    private final Runnable mRetryFingerprintAuthenticationAfterHwUnavailable = new Runnable() {
         @SuppressLint("MissingPermission")
         @Override
         public void run() {
@@ -927,7 +930,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
             } else if (mHardwareFingerprintUnavailableRetryCount < HAL_ERROR_RETRY_MAX) {
                 mHardwareFingerprintUnavailableRetryCount++;
-                mHandler.postDelayed(mRetryFingerprintAuthentication, HAL_ERROR_RETRY_TIMEOUT);
+                mHandler.postDelayed(mRetryFingerprintAuthenticationAfterHwUnavailable,
+                        HAL_ERROR_RETRY_TIMEOUT);
             }
         }
     };
@@ -957,12 +961,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE) {
             mLogger.logRetryAfterFpErrorWithDelay(msgId, errString, HAL_ERROR_RETRY_TIMEOUT);
-            mHandler.postDelayed(mRetryFingerprintAuthentication, HAL_ERROR_RETRY_TIMEOUT);
+            mHandler.postDelayed(mRetryFingerprintAuthenticationAfterHwUnavailable,
+                    HAL_ERROR_RETRY_TIMEOUT);
         }
 
         if (msgId == FingerprintManager.BIOMETRIC_ERROR_POWER_PRESSED) {
-            mLogger.logRetryAfterFpErrorWithDelay(msgId, errString, 0);
-            updateFingerprintListeningState(BIOMETRIC_ACTION_START);
+            mLogger.logRetryAfterFpErrorWithDelay(msgId, errString, HAL_POWER_PRESS_TIMEOUT);
+            mHandler.postDelayed(() -> {
+                mLogger.d("Retrying fingerprint listening after power pressed error.");
+                updateFingerprintListeningState(BIOMETRIC_ACTION_START);
+            }, HAL_POWER_PRESS_TIMEOUT);
         }
 
         boolean lockedOutStateChanged = false;

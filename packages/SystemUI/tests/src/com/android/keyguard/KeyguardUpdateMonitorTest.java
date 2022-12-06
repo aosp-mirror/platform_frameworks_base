@@ -30,6 +30,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.keyguard.FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_STATE_CANCELLING_RESTARTING;
 import static com.android.keyguard.KeyguardUpdateMonitor.DEFAULT_CANCEL_SIGNAL_TIMEOUT;
+import static com.android.keyguard.KeyguardUpdateMonitor.HAL_POWER_PRESS_TIMEOUT;
 import static com.android.keyguard.KeyguardUpdateMonitor.getCurrentUser;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -855,12 +856,21 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testFingerprintPowerPressed_restartsFingerprintListeningStateImmediately() {
+    public void testFingerprintPowerPressed_restartsFingerprintListeningStateWithDelay() {
         mKeyguardUpdateMonitor.mFingerprintAuthenticationCallback
                 .onAuthenticationError(FingerprintManager.BIOMETRIC_ERROR_POWER_PRESSED, "");
 
-        verify(mFingerprintManager).authenticate(any(), any(), any(), any(), anyInt(), anyInt(),
-                anyInt());
+        // THEN doesn't authenticate immediately
+        verify(mFingerprintManager, never()).authenticate(any(),
+                any(), any(), any(), anyInt(), anyInt(), anyInt());
+
+        // WHEN all messages (with delays) are processed
+        mTestableLooper.moveTimeForward(HAL_POWER_PRESS_TIMEOUT);
+        mTestableLooper.processAllMessages();
+
+        // THEN fingerprint manager attempts to authenticate again
+        verify(mFingerprintManager).authenticate(any(),
+                any(), any(), any(), anyInt(), anyInt(), anyInt());
     }
 
     @Test

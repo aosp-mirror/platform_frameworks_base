@@ -231,7 +231,7 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
             int2 = delay
             str1 = "$errString"
         }, {
-            "Fingerprint retrying auth after $int2 ms due to($int1) -> $str1"
+            "Fingerprint scheduling retry auth after $int2 ms due to($int1) -> $str1"
         })
     }
 
