@@ -1371,30 +1371,6 @@
          Must be in the range specified by minimum and maximum. -->
     <item name="config_screenBrightnessSettingDefaultFloat" format="float" type="dimen">-2</item>
 
-    <!-- Note: This setting is deprecated, please use
-    config_screenBrightnessSettingForVrDefaultFloat instead -->
-    <integer name="config_screenBrightnessForVrSettingDefault">86</integer>
-
-    <!-- Note: This setting is deprecated, please use
-    config_screenBrightnessSettingForVrMinimumFloat instead -->
-    <integer name="config_screenBrightnessForVrSettingMinimum">79</integer>
-
-    <!-- Note: This setting is deprecated, please use
-    config_screenBrightnessSettingForVrMaximumFloat instead -->
-    <integer name="config_screenBrightnessForVrSettingMaximum">255</integer>
-
-    <!-- Default screen brightness for VR setting as a float.
-    Equivalent to 86/255-->
-    <item name="config_screenBrightnessSettingForVrDefaultFloat" format="float" type="dimen">0.33464</item>
-
-    <!-- Minimum screen brightness setting allowed for VR. Device panels start increasing pulse
-     width as brightness decreases below this threshold as float.
-     Equivalent to 79/255 -->
-    <item name="config_screenBrightnessSettingForVrMinimumFloat" format="float" type="dimen">0.307087</item>
-
-    <!-- Maximum screen brightness setting allowed for VR as float. -->
-    <item name="config_screenBrightnessSettingForVrMaximumFloat" format="float" type="dimen">1.0</item>
-
     <!-- Screen brightness used to dim the screen while dozing in a very low power state.
          May be less than the minimum allowed brightness setting
          that can be set by the user. -->

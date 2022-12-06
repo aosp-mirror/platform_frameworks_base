@@ -2062,12 +2062,6 @@
   <java-symbol type="integer" name="config_screenBrightnessSettingMinimum" />
   <java-symbol type="integer" name="config_screenBrightnessSettingMaximum" />
   <java-symbol type="integer" name="config_screenBrightnessSettingDefault" />
-  <java-symbol type="integer" name="config_screenBrightnessForVrSettingDefault" />
-  <java-symbol type="integer" name="config_screenBrightnessForVrSettingMaximum" />
-  <java-symbol type="integer" name="config_screenBrightnessForVrSettingMinimum" />
-  <java-symbol type="dimen" name="config_screenBrightnessSettingForVrMinimumFloat" />
-  <java-symbol type="dimen" name="config_screenBrightnessSettingForVrMaximumFloat" />
-  <java-symbol type="dimen" name="config_screenBrightnessSettingForVrDefaultFloat" />
   <java-symbol type="dimen" name="config_screenBrightnessSettingMinimumFloat" />
   <java-symbol type="dimen" name="config_screenBrightnessSettingMaximumFloat" />
   <java-symbol type="dimen" name="config_screenBrightnessSettingDefaultFloat" />

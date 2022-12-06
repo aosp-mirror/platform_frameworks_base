@@ -4310,7 +4310,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
         assertExpectException(SecurityException.class, null, () ->
-                dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS_FOR_VR, "0"));
+                dpm.setSystemSetting(admin1, Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, "0"));
     }
 
     @Test
