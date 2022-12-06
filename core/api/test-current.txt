@@ -1511,13 +1511,33 @@ package android.media {
     method public static boolean isEncodingLinearPcm(int);
   }
 
+  public final class AudioHalVersionInfo implements java.lang.Comparable<android.media.AudioHalVersionInfo> android.os.Parcelable {
+    method public int compareTo(@NonNull android.media.AudioHalVersionInfo);
+    method public int describeContents();
+    method public int getHalType();
+    method public int getMajorVersion();
+    method public int getMinorVersion();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.media.AudioHalVersionInfo AIDL_1_0;
+    field public static final int AUDIO_HAL_TYPE_AIDL = 1; // 0x1
+    field public static final int AUDIO_HAL_TYPE_HIDL = 0; // 0x0
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioHalVersionInfo> CREATOR;
+    field @NonNull public static final android.media.AudioHalVersionInfo HIDL_2_0;
+    field @NonNull public static final android.media.AudioHalVersionInfo HIDL_4_0;
+    field @NonNull public static final android.media.AudioHalVersionInfo HIDL_5_0;
+    field @NonNull public static final android.media.AudioHalVersionInfo HIDL_6_0;
+    field @NonNull public static final android.media.AudioHalVersionInfo HIDL_7_0;
+    field @NonNull public static final android.media.AudioHalVersionInfo HIDL_7_1;
+    field @NonNull public static final java.util.List<android.media.AudioHalVersionInfo> VERSIONS;
+  }
+
   public class AudioManager {
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int abandonAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioRecord getCallDownlinkExtractionAudioRecord(@NonNull android.media.AudioFormat);
     method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioTrack getCallUplinkInjectionAudioTrack(@NonNull android.media.AudioFormat);
     method @Nullable public static android.media.AudioDeviceInfo getDeviceInfoFromType(int);
     method @IntRange(from=0) @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFadeOutDurationOnFocusLossMillis(@NonNull android.media.AudioAttributes);
-    method @Nullable public static String getHalVersion();
+    method @Nullable public static android.media.AudioHalVersionInfo getHalVersion();
     method public static final int[] getPublicStreamTypes();
     method @NonNull public java.util.List<java.lang.Integer> getReportedSurroundFormats();
     method public int getStreamMinVolumeInt(int);
