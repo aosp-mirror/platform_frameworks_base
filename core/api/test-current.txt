@@ -1835,6 +1835,14 @@ package android.os {
     method public static java.io.File getFile(java.io.FileDescriptor) throws java.io.IOException;
   }
 
+  public static class PerformanceHintManager.Session implements java.io.Closeable {
+    method public void sendHint(int);
+    field public static final int CPU_LOAD_DOWN = 1; // 0x1
+    field public static final int CPU_LOAD_RESET = 2; // 0x2
+    field public static final int CPU_LOAD_RESUME = 3; // 0x3
+    field public static final int CPU_LOAD_UP = 0; // 0x0
+  }
+
   public final class PowerManager {
     method public boolean areAutoPowerSaveModesEnabled();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER}) public void forceLowPowerStandbyActive(boolean);

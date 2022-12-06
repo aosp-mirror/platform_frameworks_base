@@ -330,7 +330,6 @@ LIBANDROID {
     APerformanceHint_updateTargetWorkDuration; # introduced=Tiramisu
     APerformanceHint_reportActualWorkDuration; # introduced=Tiramisu
     APerformanceHint_closeSession; # introduced=Tiramisu
-    APerformanceHint_sendHint; # introduced=UpsideDownCake
   local:
     *;
 };
@@ -338,6 +337,7 @@ LIBANDROID {
 LIBANDROID_PLATFORM {
   global:
     APerformanceHint_setIHintManagerForTesting;
+    APerformanceHint_sendHint;
     extern "C++" {
         ASurfaceControl_registerSurfaceStatsListener*;
         ASurfaceControl_unregisterSurfaceStatsListener*;

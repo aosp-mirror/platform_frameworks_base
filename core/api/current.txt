@@ -32329,12 +32329,7 @@ package android.os {
   public static class PerformanceHintManager.Session implements java.io.Closeable {
     method public void close();
     method public void reportActualWorkDuration(long);
-    method public void sendHint(int);
     method public void updateTargetWorkDuration(long);
-    field public static final int CPU_LOAD_DOWN = 1; // 0x1
-    field public static final int CPU_LOAD_RESET = 2; // 0x2
-    field public static final int CPU_LOAD_RESUME = 3; // 0x3
-    field public static final int CPU_LOAD_UP = 0; // 0x0
   }
 
   public final class PersistableBundle extends android.os.BaseBundle implements java.lang.Cloneable android.os.Parcelable {

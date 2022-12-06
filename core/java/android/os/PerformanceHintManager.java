@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 
 import com.android.internal.util.Preconditions;
@@ -113,24 +114,36 @@ public final class PerformanceHintManager {
         * This hint indicates a sudden increase in CPU workload intensity. It means
         * that this hint session needs extra CPU resources immediately to meet the
         * target duration for the current work cycle.
+        *
+        * @hide
         */
+        @TestApi
         public static final int CPU_LOAD_UP = 0;
         /**
         * This hint indicates a decrease in CPU workload intensity. It means that
         * this hint session can reduce CPU resources and still meet the target duration.
+        *
+        * @hide
         */
+        @TestApi
         public static final int CPU_LOAD_DOWN = 1;
-        /*
+        /**
         * This hint indicates an upcoming CPU workload that is completely changed and
         * unknown. It means that the hint session should reset CPU resources to a known
         * baseline to prepare for an arbitrary load, and must wake up if inactive.
+        *
+        * @hide
         */
+        @TestApi
         public static final int CPU_LOAD_RESET = 2;
-        /*
+        /**
         * This hint indicates that the most recent CPU workload is resuming after a
         * period of inactivity. It means that the hint session should allocate similar
         * CPU resources to what was used previously, and must wake up if inactive.
+        *
+        * @hide
         */
+        @TestApi
         public static final int CPU_LOAD_RESUME = 3;
 
         /** @hide */
@@ -196,7 +209,10 @@ public final class PerformanceHintManager {
          * Sends performance hints to inform the hint session of changes in the workload.
          *
          * @param hint The hint to send to the session.
+         *
+         * @hide
          */
+        @TestApi
         public void sendHint(@Hint int hint) {
             Preconditions.checkArgumentNonNegative(hint, "the hint ID should be at least"
                     + " zero.");
