@@ -1129,7 +1129,7 @@ public class PackageManagerServiceUtils {
                 throw new IllegalArgumentException("Unsupported component type");
             }
 
-            if (comp.getIntents().isEmpty()) {
+            if (comp == null || comp.getIntents().isEmpty()) {
                 continue;
             }
 
