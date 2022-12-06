@@ -6813,6 +6813,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (mActivityInterceptorCallbacks.contains(id)) {
                     throw new IllegalArgumentException("Duplicate id provided: " + id);
                 }
+                if (callback == null) {
+                    throw new IllegalArgumentException("The passed ActivityInterceptorCallback "
+                            + "can not be null");
+                }
                 if (!ActivityInterceptorCallback.isValidOrderId(id)) {
                     throw new IllegalArgumentException(
                             "Provided id " + id + " is not in range of valid ids for system "
@@ -6822,6 +6826,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                                     + MAINLINE_LAST_ORDERED_ID + "]");
                 }
                 mActivityInterceptorCallbacks.put(id, callback);
+            }
+        }
+
+        @Override
+        public void unregisterActivityStartInterceptor(
+                @ActivityInterceptorCallback.OrderedId int id) {
+            synchronized (mGlobalLock) {
+                if (!mActivityInterceptorCallbacks.contains(id)) {
+                    throw new IllegalArgumentException(
+                            "ActivityInterceptorCallback with id (" + id + ") is not registered");
+                }
+                mActivityInterceptorCallbacks.remove(id);
             }
         }
 

@@ -680,11 +680,22 @@ public abstract class ActivityTaskManagerInternal {
 
     /**
      * Registers a callback which can intercept activity starts.
-     * @throws IllegalArgumentException if duplicate ids are provided
+     * @throws IllegalArgumentException if duplicate ids are provided or the provided {@code
+     * callback} is null
+     * @see ActivityInterceptorCallbackRegistry
+     * #registerActivityInterceptorCallback(int, ActivityInterceptorCallback)
      */
     public abstract void registerActivityStartInterceptor(
             @ActivityInterceptorCallback.OrderedId int id,
             ActivityInterceptorCallback callback);
+
+    /**
+     * Unregisters an {@link ActivityInterceptorCallback}.
+     * @throws IllegalArgumentException if id is not registered
+     * @see ActivityInterceptorCallbackRegistry#unregisterActivityInterceptorCallback(int)
+     */
+    public abstract void unregisterActivityStartInterceptor(
+            @ActivityInterceptorCallback.OrderedId int id);
 
     /** Get the most recent task excluding the first running task (the one on the front most). */
     public abstract ActivityManager.RecentTaskInfo getMostRecentTaskFromBackground();
