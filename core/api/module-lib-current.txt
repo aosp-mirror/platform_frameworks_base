@@ -425,6 +425,26 @@ package android.provider {
     field public static final String NAMESPACE_DEVICE_IDLE = "device_idle";
   }
 
+  public final class Settings {
+    field public static final int RESET_MODE_PACKAGE_DEFAULTS = 1; // 0x1
+    field public static final int RESET_MODE_TRUSTED_DEFAULTS = 4; // 0x4
+    field public static final int RESET_MODE_UNTRUSTED_CHANGES = 3; // 0x3
+    field public static final int RESET_MODE_UNTRUSTED_DEFAULTS = 2; // 0x2
+  }
+
+  public static final class Settings.Config extends android.provider.Settings.NameValueTable {
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean deleteString(@NonNull String, @NonNull String);
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static String getString(@NonNull String);
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static java.util.Map<java.lang.String,java.lang.String> getStrings(@NonNull String, @NonNull java.util.List<java.lang.String>);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static int getSyncDisabledMode();
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean putString(@NonNull String, @NonNull String, @Nullable String, boolean);
+    method public static void registerContentObserver(@Nullable String, boolean, @NonNull android.database.ContentObserver);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void resetToDefaults(int, @Nullable String);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setStrings(@NonNull String, @NonNull java.util.Map<java.lang.String,java.lang.String>) throws android.provider.DeviceConfig.BadConfigException;
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void setSyncDisabledMode(int);
+    method public static void unregisterContentObserver(@NonNull android.database.ContentObserver);
+  }
+
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     field public static final String BLE_SCAN_ALWAYS_AVAILABLE = "ble_scan_always_enabled";
     field public static final String BLE_SCAN_BACKGROUND_MODE = "ble_scan_background_mode";

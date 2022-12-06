@@ -55,13 +55,6 @@ import java.util.concurrent.Executor;
 @SystemApi
 public final class DeviceConfig {
     /**
-     * The content:// style URL for the config table.
-     *
-     * @hide
-     */
-    public static final Uri CONTENT_URI = Uri.parse("content://" + Settings.AUTHORITY + "/config");
-
-    /**
      * Namespace for activity manager related features. These features will be applied
      * immediately upon change.
      *
@@ -1194,11 +1187,6 @@ public final class DeviceConfig {
         }
     }
 
-    private static Uri createNamespaceUri(@NonNull String namespace) {
-        Preconditions.checkNotNull(namespace);
-        return CONTENT_URI.buildUpon().appendPath(namespace).build();
-    }
-
     /**
      * Increment the count used to represent the number of listeners subscribed to the given
      * namespace. If this is the first (i.e. incrementing from 0 to 1) for the given namespace, a
@@ -1223,7 +1211,7 @@ public final class DeviceConfig {
                 }
             };
             Settings.Config
-                    .registerContentObserver(createNamespaceUri(namespace), true, contentObserver);
+                    .registerContentObserver(namespace, true, contentObserver);
             sNamespaces.put(namespace, new Pair<>(contentObserver, 1));
         }
     }

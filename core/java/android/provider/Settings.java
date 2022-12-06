@@ -2819,6 +2819,7 @@ public final class Settings {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @TestApi
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int RESET_MODE_PACKAGE_DEFAULTS = 1;
 
     /**
@@ -2828,6 +2829,7 @@ public final class Settings {
      * the setting will be deleted. This mode is only available to the system.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int RESET_MODE_UNTRUSTED_DEFAULTS = 2;
 
     /**
@@ -2838,6 +2840,7 @@ public final class Settings {
      * This mode is only available to the system.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int RESET_MODE_UNTRUSTED_CHANGES = 3;
 
     /**
@@ -2849,6 +2852,7 @@ public final class Settings {
      * to the system.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int RESET_MODE_TRUSTED_DEFAULTS = 4;
 
     /** @hide */
@@ -18001,6 +18005,7 @@ public final class Settings {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final class Config extends NameValueTable {
 
         /**
@@ -18035,12 +18040,19 @@ public final class Settings {
          */
         public static final int SYNC_DISABLED_MODE_UNTIL_REBOOT = 2;
 
+        /**
+         * The content:// style URL for the config table.
+         *
+         * @hide
+         */
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/config");
+
         private static final ContentProviderHolder sProviderHolder =
-                new ContentProviderHolder(DeviceConfig.CONTENT_URI);
+                new ContentProviderHolder(CONTENT_URI);
 
         // Populated lazily, guarded by class object:
         private static final NameValueCache sNameValueCache = new NameValueCache(
-                DeviceConfig.CONTENT_URI,
+                CONTENT_URI,
                 CALL_METHOD_GET_CONFIG,
                 CALL_METHOD_PUT_CONFIG,
                 CALL_METHOD_DELETE_CONFIG,
@@ -18049,6 +18061,10 @@ public final class Settings {
                 sProviderHolder,
                 Config.class);
 
+        // Should never be invoked
+        private Config() {
+        }
+
         /**
          * Look up a name in the database.
          * @param name to look up in the table
@@ -18056,8 +18072,10 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @Nullable
         @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
-        static String getString(String name) {
+        public static String getString(@NonNull String name) {
             ContentResolver resolver = getContentResolver();
             return sNameValueCache.getStringForUser(resolver, name, resolver.getUserId());
         }
@@ -18072,6 +18090,8 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @NonNull
         @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
         public static Map<String, String> getStrings(@NonNull String namespace,
                 @NonNull List<String> names) {
@@ -18128,6 +18148,7 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
         public static boolean putString(@NonNull String namespace,
                 @NonNull String name, @Nullable String value, boolean makeDefault) {
@@ -18147,6 +18168,7 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
         public static boolean setStrings(@NonNull String namespace,
                 @NonNull Map<String, String> keyValues)
@@ -18197,8 +18219,9 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
-        static boolean deleteString(@NonNull String namespace,
+        public static boolean deleteString(@NonNull String namespace,
                 @NonNull String name) {
             ContentResolver resolver = getContentResolver();
             return sNameValueCache.deleteStringForUser(resolver,
@@ -18218,8 +18241,9 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
-        static void resetToDefaults(@ResetMode int resetMode,
+        public static void resetToDefaults(@ResetMode int resetMode,
                 @Nullable String namespace) {
             try {
                 ContentResolver resolver = getContentResolver();
@@ -18233,7 +18257,7 @@ public final class Settings {
                 cp.call(resolver.getAttributionSource(),
                         sProviderHolder.mUri.getAuthority(), CALL_METHOD_RESET_CONFIG, null, arg);
             } catch (RemoteException e) {
-                Log.w(TAG, "Can't reset to defaults for " + DeviceConfig.CONTENT_URI, e);
+                Log.w(TAG, "Can't reset to defaults for " + CONTENT_URI, e);
             }
         }
 
@@ -18243,9 +18267,10 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         @SuppressLint("AndroidFrameworkRequiresPermission")
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
-        static void setSyncDisabledMode(@SyncDisabledMode int disableSyncMode) {
+        public static void setSyncDisabledMode(@SyncDisabledMode int disableSyncMode) {
             try {
                 ContentResolver resolver = getContentResolver();
                 Bundle args = new Bundle();
@@ -18254,7 +18279,7 @@ public final class Settings {
                 cp.call(resolver.getAttributionSource(), sProviderHolder.mUri.getAuthority(),
                         CALL_METHOD_SET_SYNC_DISABLED_MODE_CONFIG, null, args);
             } catch (RemoteException e) {
-                Log.w(TAG, "Can't set sync disabled mode " + DeviceConfig.CONTENT_URI, e);
+                Log.w(TAG, "Can't set sync disabled mode " + CONTENT_URI, e);
             }
         }
 
@@ -18264,9 +18289,10 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         @SuppressLint("AndroidFrameworkRequiresPermission")
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
-        static int getSyncDisabledMode() {
+        public static int getSyncDisabledMode() {
             try {
                 ContentResolver resolver = getContentResolver();
                 Bundle args = Bundle.EMPTY;
@@ -18277,7 +18303,7 @@ public final class Settings {
                         null, args);
                 return bundle.getInt(KEY_CONFIG_GET_SYNC_DISABLED_MODE_RETURN);
             } catch (RemoteException e) {
-                Log.w(TAG, "Can't query sync disabled mode " + DeviceConfig.CONTENT_URI, e);
+                Log.w(TAG, "Can't query sync disabled mode " + CONTENT_URI, e);
             }
             return -1;
         }
@@ -18297,21 +18323,26 @@ public final class Settings {
 
 
         /**
-         * Register a content observer
+         * Register a content observer.
          *
          * @hide
          */
-        public static void registerContentObserver(@NonNull Uri uri, boolean notifyForDescendants,
-                @NonNull ContentObserver observer) {
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        public static void registerContentObserver(@Nullable String namespace,
+                boolean notifyForDescendants, @NonNull ContentObserver observer) {
             ActivityThread.currentApplication().getContentResolver()
-               .registerContentObserver(uri, notifyForDescendants, observer);
+                    .registerContentObserver(createNamespaceUri(namespace),
+                         notifyForDescendants, observer);
         }
 
         /**
-         * Unregister a content observer
+         * Unregister a content observer.
+         * this may only be used with content observers registered through
+         * {@link Config#registerContentObserver}
          *
          * @hide
          */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         public static void unregisterContentObserver(@NonNull ContentObserver observer) {
             ActivityThread.currentApplication().getContentResolver()
               .unregisterContentObserver(observer);
@@ -18370,6 +18401,11 @@ public final class Settings {
         private static String createPrefix(@NonNull String namespace) {
             Preconditions.checkNotNull(namespace);
             return namespace + "/";
+        }
+
+        private static Uri createNamespaceUri(@NonNull String namespace) {
+            Preconditions.checkNotNull(namespace);
+            return CONTENT_URI.buildUpon().appendPath(namespace).build();
         }
 
         private static ContentResolver getContentResolver() {
