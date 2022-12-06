@@ -140,12 +140,11 @@ fun ConfirmationCard(
 ) {
     ContainerCard() {
         Column() {
-            Icon(
-                painter = painterResource(R.drawable.ic_passkey),
+            Image(
+                painter = painterResource(R.drawable.ic_passkeys_onboarding),
                 contentDescription = null,
-                tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                    .padding(top = 24.dp, bottom = 12.dp)
+                    .padding(top = 24.dp, bottom = 12.dp).size(316.dp, 168.dp)
             )
             TextOnSurface(
                 text = stringResource(R.string.passkey_creation_intro_title),
@@ -159,11 +158,62 @@ fun ConfirmationCard(
                 thickness = 16.dp,
                 color = Color.Transparent
             )
-            TextSecondary(
-                text = stringResource(R.string.passkey_creation_intro_body),
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(horizontal = 28.dp),
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+            ) {
+                Image(
+                    modifier = Modifier.size(24.dp),
+                    painter = painterResource(R.drawable.ic_passkeys_onboarding_password),
+                    contentDescription = null
+                )
+                TextSecondary(
+                    text = stringResource(R.string.passkey_creation_intro_body_password),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(start = 16.dp),
+                )
+            }
+            Divider(
+                thickness = 16.dp,
+                color = Color.Transparent
             )
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+            ) {
+                Image(
+                    modifier = Modifier.size(24.dp),
+                    painter = painterResource(R.drawable.ic_passkeys_onboarding_fingerprint),
+                    contentDescription = null
+                )
+                TextSecondary(
+                    text = stringResource(R.string.passkey_creation_intro_body_fingerprint),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(start = 16.dp),
+                )
+            }
+            Divider(
+                thickness = 16.dp,
+                color = Color.Transparent
+            )
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+            ) {
+                Image(
+                    modifier = Modifier.size(24.dp),
+                    painter = painterResource(R.drawable.ic_passkeys_onboarding_device),
+                    contentDescription = null
+                )
+                TextSecondary(
+                    text = stringResource(R.string.passkey_creation_intro_body_device),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(start = 16.dp),
+                )
+            }
             Divider(
                 thickness = 32.dp,
                 color = Color.Transparent
@@ -698,7 +748,7 @@ fun PrimaryCreateOptionRow(
                 },
                 contentDescription = null,
                 tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
-                modifier = Modifier.padding(start = 18.dp).size(32.dp)
+                modifier = Modifier.padding(horizontal = 18.dp).size(32.dp)
             )
         },
         label = {
@@ -760,7 +810,7 @@ fun MoreOptionsInfoRow(
         onClick = onOptionSelected,
         icon = {
             Image(
-                modifier = Modifier.size(32.dp).padding(start = 16.dp),
+                modifier = Modifier.padding(horizontal = 16.dp).size(32.dp),
                 bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
                 contentDescription = null
             )
@@ -770,13 +820,12 @@ fun MoreOptionsInfoRow(
                 TextOnSurfaceVariant(
                     text = providerInfo.displayName,
                     style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(top = 16.dp, start = 16.dp),
+                    modifier = Modifier.padding(top = 16.dp),
                 )
                 if (createOptionInfo.userProviderDisplayName != null) {
                     TextSecondary(
                         text = createOptionInfo.userProviderDisplayName,
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(start = 16.dp),
                     )
                 }
                 if (createOptionInfo.passwordCount != null &&
@@ -790,7 +839,7 @@ fun MoreOptionsInfoRow(
                             createOptionInfo.passkeyCount
                         ),
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 16.dp, start = 16.dp),
+                        modifier = Modifier.padding(bottom = 16.dp),
                     )
                 } else if (createOptionInfo.passwordCount != null) {
                     TextSecondary(
@@ -800,7 +849,7 @@ fun MoreOptionsInfoRow(
                             createOptionInfo.passwordCount
                         ),
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 16.dp, start = 16.dp),
+                        modifier = Modifier.padding(bottom = 16.dp),
                     )
                 } else if (createOptionInfo.passkeyCount != null) {
                     TextSecondary(
@@ -810,7 +859,7 @@ fun MoreOptionsInfoRow(
                             createOptionInfo.passkeyCount
                         ),
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 16.dp, start = 16.dp),
+                        modifier = Modifier.padding(bottom = 16.dp),
                     )
                 } else if (createOptionInfo.totalCredentialCount != null) {
                     // TODO: Handle the case when there is total count
