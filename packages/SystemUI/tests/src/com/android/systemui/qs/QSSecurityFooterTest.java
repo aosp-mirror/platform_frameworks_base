@@ -703,28 +703,32 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     public void testParentalControls() {
         // Make sure the security footer is visible, so that the images are updated.
         when(mSecurityController.isProfileOwnerOfOrganizationOwnedDevice()).thenReturn(true);
-
         when(mSecurityController.isParentalControlsEnabled()).thenReturn(true);
+
+        // We use the default icon when there is no admin icon.
+        when(mSecurityController.getIcon(any())).thenReturn(null);
+        mFooter.refreshState();
+        TestableLooper.get(this).processAllMessages();
+        assertEquals(mContext.getString(R.string.quick_settings_disclosure_parental_controls),
+                mFooterText.getText());
+        assertEquals(DEFAULT_ICON_ID, mPrimaryFooterIcon.getLastImageResource());
 
         Drawable testDrawable = new VectorDrawable();
         when(mSecurityController.getIcon(any())).thenReturn(testDrawable);
         assertNotNull(mSecurityController.getIcon(null));
 
         mFooter.refreshState();
-
         TestableLooper.get(this).processAllMessages();
 
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_parental_controls),
                 mFooterText.getText());
         assertEquals(View.VISIBLE, mPrimaryFooterIcon.getVisibility());
-
         assertEquals(testDrawable, mPrimaryFooterIcon.getDrawable());
 
         // Ensure the primary icon is back to default after parental controls are gone
         when(mSecurityController.isParentalControlsEnabled()).thenReturn(false);
         mFooter.refreshState();
         TestableLooper.get(this).processAllMessages();
-
         assertEquals(DEFAULT_ICON_ID, mPrimaryFooterIcon.getLastImageResource());
     }
 
