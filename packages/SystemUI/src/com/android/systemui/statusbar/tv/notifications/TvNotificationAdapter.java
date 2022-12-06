@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.tv.notifications;
 
+import android.app.BroadcastOptions;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.service.notification.StatusBarNotification;
@@ -100,7 +101,9 @@ public class TvNotificationAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         public void onClick(View v) {
             try {
                 if (mPendingIntent != null) {
-                    mPendingIntent.send();
+                    BroadcastOptions options = BroadcastOptions.makeBasic();
+                    options.setInteractive(true);
+                    mPendingIntent.send(options.toBundle());
                 }
             } catch (PendingIntent.CanceledException e) {
                 Log.d(TAG, "Pending intent canceled for : " + mPendingIntent);
