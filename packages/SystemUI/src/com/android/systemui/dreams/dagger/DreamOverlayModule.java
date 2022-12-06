@@ -58,22 +58,6 @@ public abstract class DreamOverlayModule {
             "dream_in_complications_translation_y";
     public static final String DREAM_IN_TRANSLATION_Y_DURATION =
             "dream_in_complications_translation_y_duration";
-    public static final String DREAM_OUT_TRANSLATION_Y_DISTANCE =
-            "dream_out_complications_translation_y";
-    public static final String DREAM_OUT_TRANSLATION_Y_DURATION =
-            "dream_out_complications_translation_y_duration";
-    public static final String DREAM_OUT_TRANSLATION_Y_DELAY_BOTTOM =
-            "dream_out_complications_translation_y_delay_bottom";
-    public static final String DREAM_OUT_TRANSLATION_Y_DELAY_TOP =
-            "dream_out_complications_translation_y_delay_top";
-    public static final String DREAM_OUT_ALPHA_DURATION =
-            "dream_out_complications_alpha_duration";
-    public static final String DREAM_OUT_ALPHA_DELAY_BOTTOM =
-            "dream_out_complications_alpha_delay_bottom";
-    public static final String DREAM_OUT_ALPHA_DELAY_TOP =
-            "dream_out_complications_alpha_delay_top";
-    public static final String DREAM_OUT_BLUR_DURATION =
-            "dream_out_blur_duration";
 
     /** */
     @Provides
@@ -178,66 +162,6 @@ public abstract class DreamOverlayModule {
     @DreamOverlayComponent.DreamOverlayScope
     static long providesDreamInComplicationsTranslationYDuration(@Main Resources resources) {
         return (long) resources.getInteger(R.integer.config_dreamOverlayInTranslationYDurationMs);
-    }
-
-    /**
-     * Provides the number of pixels to translate complications when waking up from dream.
-     */
-    @Provides
-    @Named(DREAM_OUT_TRANSLATION_Y_DISTANCE)
-    @DreamOverlayComponent.DreamOverlayScope
-    static int providesDreamOutComplicationsTranslationY(@Main Resources resources) {
-        return resources.getDimensionPixelSize(R.dimen.dream_overlay_exit_y_offset);
-    }
-
-    @Provides
-    @Named(DREAM_OUT_TRANSLATION_Y_DURATION)
-    @DreamOverlayComponent.DreamOverlayScope
-    static long providesDreamOutComplicationsTranslationYDuration(@Main Resources resources) {
-        return (long) resources.getInteger(R.integer.config_dreamOverlayOutTranslationYDurationMs);
-    }
-
-    @Provides
-    @Named(DREAM_OUT_TRANSLATION_Y_DELAY_BOTTOM)
-    @DreamOverlayComponent.DreamOverlayScope
-    static long providesDreamOutComplicationsTranslationYDelayBottom(@Main Resources resources) {
-        return (long) resources.getInteger(
-                R.integer.config_dreamOverlayOutTranslationYDelayBottomMs);
-    }
-
-    @Provides
-    @Named(DREAM_OUT_TRANSLATION_Y_DELAY_TOP)
-    @DreamOverlayComponent.DreamOverlayScope
-    static long providesDreamOutComplicationsTranslationYDelayTop(@Main Resources resources) {
-        return (long) resources.getInteger(R.integer.config_dreamOverlayOutTranslationYDelayTopMs);
-    }
-
-    @Provides
-    @Named(DREAM_OUT_ALPHA_DURATION)
-    @DreamOverlayComponent.DreamOverlayScope
-    static long providesDreamOutComplicationsAlphaDuration(@Main Resources resources) {
-        return (long) resources.getInteger(R.integer.config_dreamOverlayOutAlphaDurationMs);
-    }
-
-    @Provides
-    @Named(DREAM_OUT_ALPHA_DELAY_BOTTOM)
-    @DreamOverlayComponent.DreamOverlayScope
-    static long providesDreamOutComplicationsAlphaDelayBottom(@Main Resources resources) {
-        return (long) resources.getInteger(R.integer.config_dreamOverlayOutAlphaDelayBottomMs);
-    }
-
-    @Provides
-    @Named(DREAM_OUT_ALPHA_DELAY_TOP)
-    @DreamOverlayComponent.DreamOverlayScope
-    static long providesDreamOutComplicationsAlphaDelayTop(@Main Resources resources) {
-        return (long) resources.getInteger(R.integer.config_dreamOverlayOutAlphaDelayTopMs);
-    }
-
-    @Provides
-    @Named(DREAM_OUT_BLUR_DURATION)
-    @DreamOverlayComponent.DreamOverlayScope
-    static long providesDreamOutBlurDuration(@Main Resources resources) {
-        return (long) resources.getInteger(R.integer.config_dreamOverlayOutBlurDurationMs);
     }
 
     @Provides
