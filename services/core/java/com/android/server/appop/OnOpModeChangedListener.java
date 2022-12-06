@@ -22,7 +22,7 @@ import android.os.RemoteException;
  * Listener for mode changes, encapsulates methods that should be triggered in the event of a mode
  * change.
  */
-abstract class OnOpModeChangedListener {
+public abstract class OnOpModeChangedListener {
 
     // Constant meaning that any UID should be matched when dispatching callbacks
     private static final int UID_ANY = -2;
