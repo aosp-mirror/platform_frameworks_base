@@ -9351,6 +9351,7 @@ package android.net.wifi.nl80211 {
   }
 
   public class WifiNl80211Manager {
+    ctor public WifiNl80211Manager(@NonNull android.content.Context, @NonNull android.os.IBinder);
     method public void abortScan(@NonNull String);
     method public void enableVerboseLogging(boolean);
     method @NonNull public int[] getChannelsMhzForBand(int);

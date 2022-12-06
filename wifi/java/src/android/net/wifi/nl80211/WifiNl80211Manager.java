@@ -393,6 +393,21 @@ public class WifiNl80211Manager {
         mEventHandler = new Handler(context.getMainLooper());
     }
 
+    /**
+     * Construct WifiNl80211Manager with giving context and binder which is an interface of
+     * IWificond.
+     *
+     * @param context Android context.
+     * @param binder a binder of IWificond.
+     */
+    public WifiNl80211Manager(@NonNull Context context, @NonNull IBinder binder) {
+        this(context);
+        mWificond = IWificond.Stub.asInterface(binder);
+        if (mWificond == null) {
+            Log.e(TAG, "Failed to get reference to wificond");
+        }
+    }
+
     /** @hide */
     @VisibleForTesting
     public WifiNl80211Manager(Context context, IWificond wificond) {
