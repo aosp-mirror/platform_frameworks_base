@@ -21,7 +21,6 @@ import android.view.View;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
@@ -127,11 +126,9 @@ public interface StatusBarFragmentModule {
     @StatusBarFragmentScope
     static PhoneStatusBarViewController providePhoneStatusBarViewController(
             PhoneStatusBarViewController.Factory phoneStatusBarViewControllerFactory,
-            @RootView PhoneStatusBarView phoneStatusBarView,
-            NotificationPanelViewController notificationPanelViewController) {
+            @RootView PhoneStatusBarView phoneStatusBarView) {
         return phoneStatusBarViewControllerFactory.create(
-                phoneStatusBarView,
-                notificationPanelViewController.getStatusBarTouchEventHandler());
+                phoneStatusBarView);
     }
 
     /** */
