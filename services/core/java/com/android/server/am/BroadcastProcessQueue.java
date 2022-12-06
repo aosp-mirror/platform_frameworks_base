@@ -170,6 +170,8 @@ class BroadcastProcessQueue {
     private int mCountInstrumented;
     private int mCountManifest;
 
+    private boolean mPrioritizeEarliest;
+
     private @UptimeMillisLong long mRunnableAt = Long.MAX_VALUE;
     private @Reason int mRunnableAtReason = REASON_EMPTY;
     private boolean mRunnableAtInvalidated;
@@ -605,15 +607,27 @@ class BroadcastProcessQueue {
         final BroadcastRecord nextLPRecord = (BroadcastRecord) nextLPArgs.arg1;
         final int nextLPRecordIndex = nextLPArgs.argi1;
         final BroadcastRecord nextHPRecord = (BroadcastRecord) highPriorityQueue.peekFirst().arg1;
-        final boolean isLPQueueEligible =
-                consecutiveHighPriorityCount >= maxHighPriorityDispatchLimit
-                        && nextLPRecord.enqueueTime <= nextHPRecord.enqueueTime
-                        && !blockedOnOrderedDispatch(nextLPRecord, nextLPRecordIndex);
+        final boolean shouldConsiderLPQueue = (mPrioritizeEarliest
+                || consecutiveHighPriorityCount >= maxHighPriorityDispatchLimit);
+        final boolean isLPQueueEligible = shouldConsiderLPQueue
+                && nextLPRecord.enqueueTime <= nextHPRecord.enqueueTime
+                && !blockedOnOrderedDispatch(nextLPRecord, nextLPRecordIndex);
         return isLPQueueEligible ? lowPriorityQueue : highPriorityQueue;
     }
 
     private static boolean isQueueEmpty(@Nullable ArrayDeque<SomeArgs> queue) {
         return (queue == null || queue.isEmpty());
+    }
+
+    /**
+     * When {@code prioritizeEarliest} is set to {@code true}, then earliest enqueued
+     * broadcasts would be prioritized for dispatching, even if there are urgent broadcasts
+     * waiting. This is typically used in case there are callers waiting for "barrier" to be
+     * reached.
+     */
+    @VisibleForTesting
+    void setPrioritizeEarliest(boolean prioritizeEarliest) {
+        mPrioritizeEarliest = prioritizeEarliest;
     }
 
     /**
