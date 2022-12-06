@@ -18,6 +18,7 @@ package android.app;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -29,8 +30,9 @@ import android.os.LocaleList;
 import android.os.RemoteException;
 
 /**
- * This class gives access to system locale services. These services allow applications to control
- * granular locale settings (such as per-app locales).
+ * This class gives access to system locale services. These services allow applications to
+ * control granular locale settings (such as per-app locales) or override their list of supported
+ * locales while running.
  *
  * <p> Third party applications should treat this as a write-side surface, and continue reading
  * locales via their in-process {@link LocaleList}s.
@@ -106,8 +108,8 @@ public class LocaleManager {
     private void setApplicationLocales(@NonNull String appPackageName, @NonNull LocaleList locales,
             boolean fromDelegate) {
         try {
-            mService.setApplicationLocales(appPackageName, mContext.getUser().getIdentifier(),
-                    locales, fromDelegate);
+            mService.setApplicationLocales(appPackageName, mContext.getUserId(), locales,
+                    fromDelegate);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -144,8 +146,7 @@ public class LocaleManager {
     @NonNull
     public LocaleList getApplicationLocales(@NonNull String appPackageName) {
         try {
-            return mService.getApplicationLocales(appPackageName, mContext.getUser()
-                    .getIdentifier());
+            return mService.getApplicationLocales(appPackageName, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -182,6 +183,51 @@ public class LocaleManager {
             Configuration conf = new Configuration();
             conf.setLocales(locales);
             ActivityManager.getService().updatePersistentConfiguration(conf);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the override LocaleConfig for the calling app.
+     *
+     * <p><b>Note:</b> Only the app itself with the same user can override its own LocaleConfig.
+     *
+     * <p><b>Note:</b> This function takes in a {@link LocaleConfig} which is intended to
+     * override the original config in the application’s resources. This LocaleConfig will become
+     * the override config, and stored in a system file for future access.
+     *
+     * <p><b>Note:</b> Using this function, applications can update their list of supported
+     * locales while running, without an update of the application’s software. For more
+     * information, see TODO(b/261528306): add link to guide.
+     *
+     * <p>Applications can remove the override LocaleConfig with a {@code null} object.
+     *
+     * @param localeConfig the desired {@link LocaleConfig} for the calling app.
+     */
+    @UserHandleAware
+    public void setOverrideLocaleConfig(@Nullable LocaleConfig localeConfig) {
+        try {
+            // The permission android.Manifest.permission#SET_APP_SPECIFIC_LOCALECONFIG is
+            // required to set an override LocaleConfig of another packages
+            mService.setOverrideLocaleConfig(mContext.getPackageName(), mContext.getUserId(),
+                    localeConfig);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the override LocaleConfig for the calling app.
+     *
+     * @return the override LocaleConfig, or {@code null} if the LocaleConfig isn't overridden.
+     */
+    @Nullable
+    @UserHandleAware
+    public LocaleConfig getOverrideLocaleConfig() {
+        try {
+            return mService.getOverrideLocaleConfig(mContext.getPackageName(),
+                    mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

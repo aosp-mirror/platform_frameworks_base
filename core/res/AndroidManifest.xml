@@ -3607,6 +3607,11 @@
     <permission android:name="android.permission.READ_APP_SPECIFIC_LOCALES"
                 android:protectionLevel="signature|installer" />
 
+    <!-- @hide Allows applications to set an application-specific {@link LocaleConfig}.
+    <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.SET_APP_SPECIFIC_LOCALECONFIG"
+        android:protectionLevel="signature" />
+
     <!-- @hide Allows an application to monitor {@link android.provider.Settings.Config} access.
     <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.MONITOR_DEVICE_CONFIG_ACCESS"

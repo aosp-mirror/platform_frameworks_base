@@ -158,7 +158,7 @@ public class LocaleManagerBackupRestoreTest {
 
         mUserMonitor = mBackupHelper.getUserMonitor();
         mPackageMonitor = new LocaleManagerServicePackageMonitor(mBackupHelper,
-            systemAppUpdateTracker, appUpdateTracker);
+            systemAppUpdateTracker, appUpdateTracker, mMockLocaleManagerService);
         setCurrentTimeMillis(DEFAULT_CREATION_TIME_MILLIS);
     }
 
@@ -667,7 +667,7 @@ public class LocaleManagerBackupRestoreTest {
         String pkgNameB = "com.android.myAppB";
         setUpPackageNamesForSp(new ArraySet<>(Arrays.asList(pkgNameA, pkgNameB)));
 
-        mPackageMonitor.onPackageRemoved(DEFAULT_PACKAGE_NAME, DEFAULT_UID);
+        mBackupHelper.onPackageRemoved(DEFAULT_PACKAGE_NAME, DEFAULT_UID);
 
         verify(mMockSpEditor, times(0)).putStringSet(anyString(), any());
     }
@@ -679,7 +679,7 @@ public class LocaleManagerBackupRestoreTest {
         Set<String> pkgNames = new ArraySet<>(Arrays.asList(pkgNameA, pkgNameB));
         setUpPackageNamesForSp(pkgNames);
 
-        mPackageMonitor.onPackageRemoved(pkgNameA, DEFAULT_UID);
+        mBackupHelper.onPackageRemoved(pkgNameA, DEFAULT_UID);
         pkgNames.remove(pkgNameA);
 
         verify(mMockSpEditor, times(1)).putStringSet(
@@ -693,7 +693,7 @@ public class LocaleManagerBackupRestoreTest {
         Set<String> pkgNames = new ArraySet<>(Arrays.asList(pkgNameA, pkgNameB));
         setUpPackageNamesForSp(pkgNames);
 
-        mPackageMonitor.onPackageDataCleared(pkgNameB, DEFAULT_UID);
+        mBackupHelper.onPackageDataCleared(pkgNameB, DEFAULT_UID);
         pkgNames.remove(pkgNameB);
 
         verify(mMockSpEditor, times(1)).putStringSet(

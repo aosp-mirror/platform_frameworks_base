@@ -25,6 +25,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ILocaleManager;
+import android.app.LocaleConfig;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -32,6 +33,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.res.Configuration;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.HandlerThread;
 import android.os.LocaleList;
 import android.os.Process;
@@ -42,21 +44,40 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * The implementation of ILocaleManager.aidl.
  *
- * <p>This service is API entry point for storing app-specific UI locales
+ * <p>This service is API entry point for storing app-specific UI locales and an override
+ * {@link LocaleConfig} for a specified app.
  */
 public class LocaleManagerService extends SystemService {
     private static final String TAG = "LocaleManagerService";
@@ -64,6 +85,13 @@ public class LocaleManagerService extends SystemService {
     // app.
     private static final String PROP_ALLOW_IME_QUERY_APP_LOCALE =
             "i18n.feature.allow_ime_query_app_locale";
+    // The feature flag control that the application can dynamically override the LocaleConfig.
+    private static final String PROP_DYNAMIC_LOCALES_CHANGE =
+            "i18n.feature.dynamic_locales_change";
+    private static final String LOCALE_CONFIGS = "locale_configs";
+    private static final String SUFFIX_FILE_NAME = ".xml";
+    private static final String ATTR_NAME = "name";
+
     final Context mContext;
     private final LocaleManagerService.LocaleManagerBinderService mBinderService;
     private ActivityTaskManagerInternal mActivityTaskManagerInternal;
@@ -73,6 +101,8 @@ public class LocaleManagerService extends SystemService {
     private LocaleManagerBackupHelper mBackupHelper;
 
     private final PackageMonitor mPackageMonitor;
+
+    private final Object mWriteLock = new Object();
 
     public static final boolean DEBUG = false;
 
@@ -103,7 +133,7 @@ public class LocaleManagerService extends SystemService {
                 new AppUpdateTracker(mContext, this, mBackupHelper);
 
         mPackageMonitor = new LocaleManagerServicePackageMonitor(mBackupHelper,
-                systemAppUpdateTracker, appUpdateTracker);
+                systemAppUpdateTracker, appUpdateTracker, this);
         mPackageMonitor.register(context, broadcastHandlerThread.getLooper(),
                 UserHandle.ALL,
                 true);
@@ -173,6 +203,19 @@ public class LocaleManagerService extends SystemService {
         }
 
         @Override
+        public void setOverrideLocaleConfig(@NonNull String appPackageName, @UserIdInt int userId,
+                @Nullable LocaleConfig localeConfig) throws RemoteException {
+            LocaleManagerService.this.setOverrideLocaleConfig(appPackageName, userId, localeConfig);
+        }
+
+        @Override
+        @Nullable
+        public LocaleConfig getOverrideLocaleConfig(@NonNull String appPackageName,
+                @UserIdInt int userId) {
+            return LocaleManagerService.this.getOverrideLocaleConfig(appPackageName, userId);
+        }
+
+        @Override
         public void onShellCommand(FileDescriptor in, FileDescriptor out,
                 FileDescriptor err, String[] args, ShellCallback callback,
                 ResultReceiver resultReceiver) {
@@ -211,7 +254,6 @@ public class LocaleManagerService extends SystemService {
             if (!isCallerOwner) {
                 enforceChangeConfigurationPermission(atomRecordForMetrics);
             }
-
             mBackupHelper.persistLocalesModificationInfo(userId, appPackageName, fromDelegate,
                     locales.isEmpty());
             final long token = Binder.clearCallingIdentity();
@@ -515,5 +557,243 @@ public class LocaleManagerService extends SystemService {
                 atomRecordForMetrics.mNewLocales,
                 atomRecordForMetrics.mPrevLocales,
                 atomRecordForMetrics.mStatus);
+    }
+
+    /**
+     * Storing an override {@link LocaleConfig} for a specified app.
+     */
+    public void setOverrideLocaleConfig(@NonNull String appPackageName, @UserIdInt int userId,
+            @Nullable LocaleConfig localeConfig) throws IllegalArgumentException {
+        // TODO(b/262713398): Remove when stable
+        if (!SystemProperties.getBoolean(PROP_DYNAMIC_LOCALES_CHANGE, true)) {
+            return;
+        }
+
+        requireNonNull(appPackageName);
+
+        //Allow apps with INTERACT_ACROSS_USERS permission to set locales for different user.
+        userId = mActivityManagerInternal.handleIncomingUser(
+                Binder.getCallingPid(), Binder.getCallingUid(), userId,
+                false /* allowAll */, ActivityManagerInternal.ALLOW_NON_FULL,
+                "setOverrideLocaleConfig", /* callerPackage= */ null);
+
+        // This function handles two types of set operations:
+        // 1.) A normal, an app overrides its own LocaleConfig.
+        // 2.) A privileged system application or service is granted the necessary permission to
+        // override a LocaleConfig of another package.
+        if (!isPackageOwnedByCaller(appPackageName, userId)) {
+            enforceSetAppSpecificLocaleConfigPermission();
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            setOverrideLocaleConfigUnchecked(appPackageName, userId, localeConfig);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        //TODO: Add metrics to monitor the usage by applications
+    }
+    private void setOverrideLocaleConfigUnchecked(@NonNull String appPackageName,
+            @UserIdInt int userId, @Nullable LocaleConfig overridelocaleConfig) {
+        synchronized (mWriteLock) {
+            if (DEBUG) {
+                Slog.d(TAG,
+                        "set the override LocaleConfig for package " + appPackageName + " and user "
+                                + userId);
+            }
+            final File file = getXmlFileNameForUser(appPackageName, userId);
+
+            if (overridelocaleConfig == null) {
+                if (file.exists()) {
+                    Slog.d(TAG, "remove the override LocaleConfig");
+                    file.delete();
+                }
+                return;
+            } else {
+                LocaleList localeList = overridelocaleConfig.getSupportedLocales();
+                // Normally the LocaleList object should not be null. However we reassign it as the
+                // empty list in case it happens.
+                if (localeList == null) {
+                    localeList = LocaleList.getEmptyLocaleList();
+                }
+                if (DEBUG) {
+                    Slog.d(TAG,
+                            "setOverrideLocaleConfig, localeList: " + localeList.toLanguageTags());
+                }
+
+                // Store the override LocaleConfig to the file storage.
+                final AtomicFile atomicFile = new AtomicFile(file);
+                FileOutputStream stream = null;
+                try {
+                    stream = atomicFile.startWrite();
+                    stream.write(toXmlByteArray(localeList));
+                } catch (Exception e) {
+                    Slog.e(TAG, "Failed to write file " + atomicFile, e);
+                    if (stream != null) {
+                        atomicFile.failWrite(stream);
+                    }
+                    return;
+                }
+                atomicFile.finishWrite(stream);
+                // Clear per-app locales if they are not in the override LocaleConfig.
+                removeUnsupportedAppLocales(appPackageName, userId, overridelocaleConfig);
+                if (DEBUG) {
+                    Slog.i(TAG, "Successfully written to " + atomicFile);
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks if the per-app locales are in the new override LocaleConfig. Per-app locales
+     * missing from the new LocaleConfig will be removed.
+     */
+    private void removeUnsupportedAppLocales(String appPackageName, int userId,
+            LocaleConfig localeConfig) {
+        LocaleList appLocales = getApplicationLocalesUnchecked(appPackageName, userId);
+        // Remove the app locale from the locale list if it doesn't exist in the override
+        // LocaleConfig.
+        boolean resetAppLocales = false;
+        List<Locale> newAppLocales = new ArrayList<Locale>();
+        for (int i = 0; i < appLocales.size(); i++) {
+            if (!localeConfig.containsLocale(appLocales.get(i))) {
+                Slog.i(TAG, "reset the app locales");
+                resetAppLocales = true;
+                continue;
+            }
+            newAppLocales.add(appLocales.get(i));
+        }
+
+        if (resetAppLocales) {
+            // Reset the app locales
+            Locale[] locales = new Locale[newAppLocales.size()];
+            try {
+                setApplicationLocales(appPackageName, userId,
+                        new LocaleList(newAppLocales.toArray(locales)), false);
+            } catch (RemoteException | IllegalArgumentException e) {
+                Slog.e(TAG, "Could not set locales for " + appPackageName, e);
+            }
+        }
+    }
+
+    private void enforceSetAppSpecificLocaleConfigPermission() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.SET_APP_SPECIFIC_LOCALECONFIG,
+                "setOverrideLocaleConfig");
+    }
+
+    /**
+     * Returns the override LocaleConfig for a specified app.
+     */
+    @Nullable
+    public LocaleConfig getOverrideLocaleConfig(@NonNull String appPackageName,
+            @UserIdInt int userId) {
+        // TODO(b/262713398): Remove when stable
+        if (!SystemProperties.getBoolean(PROP_DYNAMIC_LOCALES_CHANGE, true)) {
+            return null;
+        }
+
+        requireNonNull(appPackageName);
+
+        // Allow apps with INTERACT_ACROSS_USERS permission to query the override LocaleConfig for
+        // different user.
+        userId = mActivityManagerInternal.handleIncomingUser(
+                Binder.getCallingPid(), Binder.getCallingUid(), userId,
+                false /* allowAll */, ActivityManagerInternal.ALLOW_NON_FULL,
+                "getOverrideLocaleConfig", /* callerPackage= */ null);
+
+        final File file = getXmlFileNameForUser(appPackageName, userId);
+        if (!file.exists()) {
+            if (DEBUG) {
+                Slog.i(TAG, "getOverrideLocaleConfig, the file is not existed.");
+            }
+            return null;
+        }
+
+        try (InputStream in = new FileInputStream(file)) {
+            final TypedXmlPullParser parser = Xml.resolvePullParser(in);
+            List<String> overrideLocales = loadFromXml(parser);
+            if (DEBUG) {
+                Slog.i(TAG, "getOverrideLocaleConfig, Loaded locales: " + overrideLocales);
+            }
+            LocaleConfig storedLocaleConfig = new LocaleConfig(
+                    LocaleList.forLanguageTags(String.join(",", overrideLocales)));
+
+            return storedLocaleConfig;
+        } catch (IOException | XmlPullParserException e) {
+            Slog.e(TAG, "Failed to parse XML configuration from " + file, e);
+        }
+
+        return null;
+    }
+
+    /**
+     * Delete an override {@link LocaleConfig} for a specified app from the file storage.
+     *
+     * <p>Clear the override LocaleConfig from the storage when the app is uninstalled.
+     */
+    void deleteOverrideLocaleConfig(@NonNull String appPackageName, @UserIdInt int userId) {
+        final File file = getXmlFileNameForUser(appPackageName, userId);
+
+        if (file.exists()) {
+            Slog.d(TAG, "Delete the override LocaleConfig.");
+            file.delete();
+        }
+    }
+
+    private byte[] toXmlByteArray(LocaleList localeList) {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            TypedXmlSerializer out = Xml.newFastSerializer();
+            out.setOutput(os, StandardCharsets.UTF_8.name());
+            out.startDocument(/* encoding= */ null, /* standalone= */ true);
+            out.startTag(/* namespace= */ null, LocaleConfig.TAG_LOCALE_CONFIG);
+
+            List<String> locales = new ArrayList<String>(
+                    Arrays.asList(localeList.toLanguageTags().split(",")));
+            for (String locale : locales) {
+                out.startTag(null, LocaleConfig.TAG_LOCALE);
+                out.attribute(null, ATTR_NAME, locale);
+                out.endTag(null, LocaleConfig.TAG_LOCALE);
+            }
+
+            out.endTag(/* namespace= */ null, LocaleConfig.TAG_LOCALE_CONFIG);
+            out.endDocument();
+
+            if (DEBUG) {
+                Slog.d(TAG, "setOverrideLocaleConfig toXmlByteArray, output: " + os.toString());
+            }
+            return os.toByteArray();
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    @NonNull
+    private List<String> loadFromXml(TypedXmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        List<String> localeList = new ArrayList<>();
+
+        XmlUtils.beginDocument(parser, LocaleConfig.TAG_LOCALE_CONFIG);
+        int depth = parser.getDepth();
+        while (XmlUtils.nextElementWithin(parser, depth)) {
+            final String tagName = parser.getName();
+            if (LocaleConfig.TAG_LOCALE.equals(tagName)) {
+                String locale = parser.getAttributeValue(/* namespace= */ null, ATTR_NAME);
+                localeList.add(locale);
+            } else {
+                Slog.w(TAG, "Unexpected tag name: " + tagName);
+                XmlUtils.skipCurrentTag(parser);
+            }
+        }
+
+        return localeList;
+    }
+
+    @NonNull
+    private File getXmlFileNameForUser(@NonNull String appPackageName, @UserIdInt int userId) {
+        // TODO(b/262752965): use per-package data directory
+        final File dir = new File(Environment.getDataSystemDeDirectory(userId), LOCALE_CONFIGS);
+        return new File(dir, appPackageName + SUFFIX_FILE_NAME);
     }
 }

@@ -5863,10 +5863,15 @@ package android.app {
     method @Deprecated public android.view.Window startActivity(String, android.content.Intent);
   }
 
-  public class LocaleConfig {
+  public class LocaleConfig implements android.os.Parcelable {
     ctor public LocaleConfig(@NonNull android.content.Context);
+    ctor public LocaleConfig(@NonNull android.os.LocaleList);
+    method public int describeContents();
+    method @NonNull public static android.app.LocaleConfig fromResources(@NonNull android.content.Context);
     method public int getStatus();
     method @Nullable public android.os.LocaleList getSupportedLocales();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.LocaleConfig> CREATOR;
     field public static final int STATUS_NOT_SPECIFIED = 1; // 0x1
     field public static final int STATUS_PARSING_FAILED = 2; // 0x2
     field public static final int STATUS_SUCCESS = 0; // 0x0
@@ -5877,8 +5882,10 @@ package android.app {
   public class LocaleManager {
     method @NonNull public android.os.LocaleList getApplicationLocales();
     method @NonNull @RequiresPermission(value="android.permission.READ_APP_SPECIFIC_LOCALES", conditional=true) public android.os.LocaleList getApplicationLocales(@NonNull String);
+    method @Nullable public android.app.LocaleConfig getOverrideLocaleConfig();
     method @NonNull public android.os.LocaleList getSystemLocales();
     method public void setApplicationLocales(@NonNull android.os.LocaleList);
+    method public void setOverrideLocaleConfig(@Nullable android.app.LocaleConfig);
   }
 
   public class MediaRouteActionProvider extends android.view.ActionProvider {
