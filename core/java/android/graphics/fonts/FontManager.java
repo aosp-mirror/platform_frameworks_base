@@ -198,6 +198,15 @@ public class FontManager {
      */
     public static final int RESULT_ERROR_INVALID_XML = -10007;
 
+    /**
+     * Indicates a failure due to invalid debug certificate file.
+     *
+     * This error code is only used with the shell command interaction.
+     *
+     * @hide
+     */
+    public static final int RESULT_ERROR_INVALID_DEBUG_CERTIFICATE = -10008;
+
     private FontManager(@NonNull IFontManager iFontManager) {
         mIFontManager = iFontManager;
     }
