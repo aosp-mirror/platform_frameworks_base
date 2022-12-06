@@ -44,13 +44,13 @@ class AccessPersistence(
         systemFile.parse {
             // This is the canonical way to call an extension function in a different class.
             // TODO(b/259469752): Use context receiver for this when it becomes stable.
-            with(policy) { this@parse.parseSystemState(systemState) }
+            with(policy) { parseSystemState(systemState) }
         }
     }
 
     private fun readUserState(userId: Int, userState: UserState) {
         getUserFile(userId).parse {
-            with(policy) { this@parse.parseUserState(userId, userState) }
+            with(policy) { parseUserState(userId, userState) }
         }
     }
 
@@ -82,13 +82,13 @@ class AccessPersistence(
 
     private fun writeSystemState(systemState: SystemState) {
         systemFile.serialize {
-            with(policy) { this@serialize.serializeSystemState(systemState) }
+            with(policy) { serializeSystemState(systemState) }
         }
     }
 
     private fun writeUserState(userId: Int, userState: UserState) {
         getUserFile(userId).serialize {
-            with(policy) { this@serialize.serializeUserState(userId, userState) }
+            with(policy) { serializeUserState(userId, userState) }
         }
     }
 

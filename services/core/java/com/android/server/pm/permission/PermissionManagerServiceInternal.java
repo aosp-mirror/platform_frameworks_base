@@ -164,11 +164,12 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
 
     /** Get all permissions that have a certain protection */
     @NonNull
-    ArrayList<PermissionInfo> getAllPermissionsWithProtection(
+    List<PermissionInfo> getAllPermissionsWithProtection(
             @PermissionInfo.Protection int protection);
 
-    /** Get all permissions that have certain protection flags */
-    @NonNull ArrayList<PermissionInfo> getAllPermissionsWithProtectionFlags(
+    /** Get all permissions that have certain protection flags
+     * @return*/
+    @NonNull List<PermissionInfo> getAllPermissionsWithProtectionFlags(
             @PermissionInfo.ProtectionFlags int protectionFlags);
 
     /**

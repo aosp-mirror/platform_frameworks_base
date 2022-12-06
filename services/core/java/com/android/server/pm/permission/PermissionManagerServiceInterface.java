@@ -32,7 +32,6 @@ import com.android.server.pm.pkg.AndroidPackage;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,8 +76,8 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      * @return a {@link PermissionInfo} containing information about the permission, or {@code null}
      *         if not found
      */
-    PermissionInfo getPermissionInfo(@NonNull String permName, @NonNull String opPackageName,
-            @PackageManager.PermissionInfoFlags int flags);
+    PermissionInfo getPermissionInfo(@NonNull String permName,
+            @PackageManager.PermissionInfoFlags int flags, @NonNull String opPackageName);
 
     /**
      * Query for all of the permissions associated with a particular group.
@@ -487,11 +486,11 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
 
     /** Get all permissions that have a certain protection */
     @NonNull
-    ArrayList<PermissionInfo> getAllPermissionsWithProtection(
+    List<PermissionInfo> getAllPermissionsWithProtection(
             @PermissionInfo.Protection int protection);
 
     /** Get all permissions that have certain protection flags */
-    @NonNull ArrayList<PermissionInfo> getAllPermissionsWithProtectionFlags(
+    @NonNull List<PermissionInfo> getAllPermissionsWithProtectionFlags(
             @PermissionInfo.ProtectionFlags int protectionFlags);
 
     /**
