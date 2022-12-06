@@ -83,6 +83,9 @@ public class LockPatternView extends View {
     private static final float MIN_DOT_HIT_FACTOR = 0.2f;
     private final CellState[][] mCellStates;
 
+    private static final int CELL_ACTIVATE = 0;
+    private static final int CELL_DEACTIVATE = 1;
+
     private final int mDotSize;
     private final int mDotSizeActivated;
     private final float mDotHitFactor;
@@ -636,10 +639,19 @@ public class LockPatternView extends View {
      * Reset all pattern state.
      */
     private void resetPattern() {
+        if (mKeepDotActivated && !mPattern.isEmpty()) {
+            resetLastActivatedCellProgress();
+        }
         mPattern.clear();
         clearPatternDrawLookup();
         mPatternDisplayMode = DisplayMode.Correct;
         invalidate();
+    }
+
+    private void resetLastActivatedCellProgress() {
+        final ArrayList<Cell> pattern = mPattern;
+        final Cell lastCell = pattern.get(pattern.size() - 1);
+        mCellStates[lastCell.row][lastCell.column].activationAnimationProgress = 0f;
     }
 
     /**
@@ -800,14 +812,14 @@ public class LockPatternView extends View {
     }
 
     private void startCellActivatedAnimation(Cell cell) {
-        startCellActivationAnimation(cell, true);
+        startCellActivationAnimation(cell, CELL_ACTIVATE);
     }
 
     private void startCellDeactivatedAnimation(Cell cell) {
-        startCellActivationAnimation(cell, false);
+        startCellActivationAnimation(cell, CELL_DEACTIVATE);
     }
 
-    private void startCellActivationAnimation(Cell cell, boolean activate) {
+    private void startCellActivationAnimation(Cell cell, int activate) {
         final CellState cellState = mCellStates[cell.row][cell.column];
 
         if (cellState.activationAnimator != null) {
@@ -836,7 +848,7 @@ public class LockPatternView extends View {
         animatorSet.start();
     }
 
-    private Animator createDotActivationColorAnimation(CellState cellState, boolean activate) {
+    private Animator createDotActivationColorAnimation(CellState cellState, int activate) {
         ValueAnimator.AnimatorUpdateListener updateListener =
                 valueAnimator -> {
                     cellState.activationAnimationProgress =
@@ -856,7 +868,7 @@ public class LockPatternView extends View {
         AnimatorSet set = new AnimatorSet();
 
         if (mKeepDotActivated) {
-            set.play(activate ? activateAnimator : deactivateAnimator);
+            set.play(activate == CELL_ACTIVATE ? activateAnimator : deactivateAnimator);
         } else {
             // 'activate' ignored in this case, do full deactivate -> activate cycle
             set.play(deactivateAnimator)
@@ -1113,9 +1125,9 @@ public class LockPatternView extends View {
                     state.activationAnimator.cancel();
                     state.activationAnimator = null;
                     state.radius = mDotSize / 2f;
-                    state.activationAnimationProgress = 0f;
                     state.lineEndX = Float.MIN_VALUE;
                     state.lineEndY = Float.MIN_VALUE;
+                    state.activationAnimationProgress = 0f;
                 }
             }
         }
