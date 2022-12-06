@@ -4821,6 +4821,9 @@ public class DeviceIdleController extends SystemService
                     Binder.restoreCallingIdentity(token);
                 }
             } else {
+                if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
+                    return -1;
+                }
                 synchronized (this) {
                     for (int j=0; j<mPowerSaveWhitelistAppsExceptIdle.size(); j++) {
                         pw.print("system-excidle,");
@@ -4882,6 +4885,9 @@ public class DeviceIdleController extends SystemService
                 pw.println("[-r] requires a package name");
                 return -1;
             } else {
+                if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
+                    return -1;
+                }
                 dumpTempWhitelistSchedule(pw, false);
             }
         } else if ("except-idle-whitelist".equals(cmd)) {
@@ -4957,6 +4963,9 @@ public class DeviceIdleController extends SystemService
                     Binder.restoreCallingIdentity(token);
                 }
             } else {
+                if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
+                    return -1;
+                }
                 synchronized (this) {
                     for (int j = 0; j < mPowerSaveWhitelistApps.size(); j++) {
                         pw.print(mPowerSaveWhitelistApps.keyAt(j));
