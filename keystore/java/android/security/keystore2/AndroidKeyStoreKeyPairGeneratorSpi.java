@@ -648,6 +648,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         // {@link android.security.KeyStoreException#RKP_TEMPORARILY_UNAVAILABLE},
         // {@link android.security.KeyStoreException#RKP_SERVER_REFUSED_ISSUANCE},
         // {@link android.security.KeyStoreException#RKP_FETCHING_PENDING_CONNECTIVITY}
+        // {@link android.security.KeyStoreException#RKP_FETCHING_PENDING_SOFTWARE_REBOOT}
         public final int rkpStatus;
         @Nullable
         public final KeyPair keyPair;
