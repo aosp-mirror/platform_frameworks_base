@@ -432,6 +432,7 @@ filegroup {
         "android/os/IInterface.java",
         "android/os/Binder.java",
         "android/os/IBinder.java",
+        "android/os/Parcelable.java",
     ],
 }
 
