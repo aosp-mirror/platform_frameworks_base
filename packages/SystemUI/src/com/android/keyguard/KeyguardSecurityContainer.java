@@ -221,10 +221,11 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 public void onEnd(WindowInsetsAnimation animation) {
                     if (!mDisappearAnimRunning) {
                         endJankInstrument(InteractionJankMonitor.CUJ_LOCKSCREEN_PASSWORD_APPEAR);
-                        updateChildren(0 /* translationY */, 1f /* alpha */);
                     } else {
                         endJankInstrument(InteractionJankMonitor.CUJ_LOCKSCREEN_PASSWORD_DISAPPEAR);
+                        setAlpha(0f);
                     }
+                    updateChildren(0 /* translationY */, 1f /* alpha */);
                 }
 
                 private void updateChildren(int translationY, float alpha) {

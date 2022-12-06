@@ -75,9 +75,9 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     private final SyncTransactionQueue mSyncQueue;
     private FreeformTaskTransitionStarter mTransitionStarter;
     private DesktopModeController mDesktopModeController;
-    private EventReceiver mEventReceiver;
-    private InputMonitor mInputMonitor;
     private boolean mTransitionDragActive;
+
+    private SparseArray<EventReceiver> mEventReceiversByDisplay = new SparseArray<>();
 
     private final SparseArray<CaptionWindowDecoration> mWindowDecorByTaskId = new SparseArray<>();
     private final DragStartListenerImpl mDragStartListener = new DragStartListenerImpl();
@@ -150,7 +150,14 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     @Override
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
         final CaptionWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
+
         if (decoration == null) return;
+
+        int oldDisplayId = decoration.mDisplay.getDisplayId();
+        if (taskInfo.displayId != oldDisplayId) {
+            removeTaskFromEventReceiver(oldDisplayId);
+            incrementEventReceiverTasks(taskInfo.displayId);
+        }
 
         decoration.relayout(taskInfo);
     }
@@ -195,6 +202,11 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         if (decoration == null) return;
 
         decoration.close();
+        int displayId = taskInfo.displayId;
+        if (mEventReceiversByDisplay.contains(displayId)) {
+            EventReceiver eventReceiver = mEventReceiversByDisplay.get(displayId);
+            removeTaskFromEventReceiver(displayId);
+        }
     }
 
     private class CaptionTouchEventListener implements
@@ -329,8 +341,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
 
     // InputEventReceiver to listen for touch input outside of caption bounds
     class EventReceiver extends InputEventReceiver {
-        EventReceiver(InputChannel channel, Looper looper) {
+        private InputMonitor mInputMonitor;
+        private int mTasksOnDisplay;
+        EventReceiver(InputMonitor inputMonitor, InputChannel channel, Looper looper) {
             super(channel, looper);
+            mInputMonitor = inputMonitor;
+            mTasksOnDisplay = 1;
         }
 
         @Override
@@ -338,15 +354,62 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             boolean handled = false;
             if (event instanceof MotionEvent) {
                 handled = true;
-                CaptionWindowDecorViewModel.this.handleReceivedMotionEvent((MotionEvent) event);
+                CaptionWindowDecorViewModel.this
+                        .handleReceivedMotionEvent((MotionEvent) event, mInputMonitor);
             }
             finishInputEvent(event, handled);
+        }
+
+        @Override
+        public void dispose() {
+            if (mInputMonitor != null) {
+                mInputMonitor.dispose();
+                mInputMonitor = null;
+            }
+            super.dispose();
+        }
+
+        private void incrementTaskNumber() {
+            mTasksOnDisplay++;
+        }
+
+        private void decrementTaskNumber() {
+            mTasksOnDisplay--;
+        }
+
+        private int getTasksOnDisplay() {
+            return mTasksOnDisplay;
+        }
+    }
+
+    /**
+     * Check if an EventReceiver exists on a particular display.
+     * If it does, increment its task count. Otherwise, create one for that display.
+     * @param displayId the display to check against
+     */
+    private void incrementEventReceiverTasks(int displayId) {
+        if (mEventReceiversByDisplay.contains(displayId)) {
+            EventReceiver eventReceiver = mEventReceiversByDisplay.get(displayId);
+            eventReceiver.incrementTaskNumber();
+        } else {
+            createInputChannel(displayId);
+        }
+    }
+
+    // If all tasks on this display are gone, we don't need to monitor its input.
+    private void removeTaskFromEventReceiver(int displayId) {
+        if (!mEventReceiversByDisplay.contains(displayId)) return;
+        EventReceiver eventReceiver = mEventReceiversByDisplay.get(displayId);
+        if (eventReceiver == null) return;
+        eventReceiver.decrementTaskNumber();
+        if (eventReceiver.getTasksOnDisplay() == 0) {
+            disposeInputChannel(displayId);
         }
     }
 
     class EventReceiverFactory {
-        EventReceiver create(InputChannel channel, Looper looper) {
-            return new EventReceiver(channel, looper);
+        EventReceiver create(InputMonitor inputMonitor, InputChannel channel, Looper looper) {
+            return new EventReceiver(inputMonitor, channel, looper);
         }
     }
 
@@ -355,14 +418,14 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
      *
      * @param ev the {@link MotionEvent} received by {@link EventReceiver}
      */
-    private void handleReceivedMotionEvent(MotionEvent ev) {
+    private void handleReceivedMotionEvent(MotionEvent ev, InputMonitor inputMonitor) {
         if (!DesktopModeStatus.isActive(mContext)) {
             handleCaptionThroughStatusBar(ev);
         }
         handleEventOutsideFocusedCaption(ev);
         // Prevent status bar from reacting to a caption drag.
         if (mTransitionDragActive && !DesktopModeStatus.isActive(mContext)) {
-            mInputMonitor.pilferPointers();
+            inputMonitor.pilferPointers();
         }
     }
 
@@ -380,6 +443,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             }
         }
     }
+
 
     /**
      * Perform caption actions if not able to through normal means.
@@ -434,6 +498,22 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         return focusedDecor;
     }
 
+    private void createInputChannel(int displayId) {
+        InputManager inputManager = mInputManagerSupplier.get();
+        InputMonitor inputMonitor =
+                inputManager.monitorGestureInput("caption-touch", mContext.getDisplayId());
+        EventReceiver eventReceiver = mEventReceiverFactory.create(
+                inputMonitor, inputMonitor.getInputChannel(), Looper.myLooper());
+        mEventReceiversByDisplay.put(displayId, eventReceiver);
+    }
+
+    private void disposeInputChannel(int displayId) {
+        EventReceiver eventReceiver = mEventReceiversByDisplay.removeReturnOld(displayId);
+        if (eventReceiver != null) {
+            eventReceiver.dispose();
+        }
+    }
+
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
         if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) return true;
         return DesktopModeStatus.IS_SUPPORTED
@@ -472,14 +552,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
         windowDecoration.setDragResizeCallback(taskPositioner);
         windowDecoration.relayout(taskInfo, startT, finishT);
-        if (mInputMonitor == null) {
-            InputManager inputManager = mInputManagerSupplier.get();
-            mInputMonitor =
-                    inputManager.monitorGestureInput("caption-touch", mContext.getDisplayId());
-            mEventReceiver =
-                    mEventReceiverFactory.create(
-                            mInputMonitor.getInputChannel(), Looper.myLooper());
-        }
+        incrementEventReceiverTasks(taskInfo.displayId);
     }
 
     private class DragStartListenerImpl implements TaskPositioner.DragStartListener {

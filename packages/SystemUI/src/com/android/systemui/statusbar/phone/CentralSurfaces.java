@@ -28,7 +28,6 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.RemoteAnimationAdapter;
 import android.view.View;
 import android.view.ViewGroup;
@@ -283,7 +282,11 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void animateCollapseQuickSettings();
 
-    void onTouchEvent(MotionEvent event);
+    /** */
+    boolean getCommandQueuePanelsEnabled();
+
+    /** */
+    int getStatusBarWindowState();
 
     BiometricUnlockController getBiometricUnlockController();
 

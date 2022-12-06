@@ -56,6 +56,7 @@
         <Layout
             android:layout_width="wrap_content"
             android:layout_height="@dimen/new_qs_header_non_clickable_element_height"
+            app:layout_constrainedWidth="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/space"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -88,7 +89,6 @@
         <Layout
             android:layout_width="wrap_content"
             android:layout_height="@dimen/new_qs_header_non_clickable_element_height"
-            app:layout_constrainedWidth="true"
             app:layout_constraintStart_toEndOf="@id/space"
             app:layout_constraintEnd_toStartOf="@id/batteryRemainingIcon"
             app:layout_constraintTop_toTopOf="@id/date"

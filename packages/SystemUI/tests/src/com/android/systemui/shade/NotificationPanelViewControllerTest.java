@@ -43,6 +43,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -530,6 +531,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 .setHeadsUpAppearanceController(mock(HeadsUpAppearanceController.class));
         verify(mNotificationStackScrollLayoutController)
                 .setOnEmptySpaceClickListener(mEmptySpaceClickListenerCaptor.capture());
+        verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ true);
+        reset(mKeyguardStatusViewController);
     }
 
     @After
@@ -609,7 +612,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
     @Test
     public void getVerticalSpaceForLockscreenNotifications_useLockIconBottomPadding_returnsSpaceAvailable() {
-        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+        setBottomPadding(/* stackScrollLayoutBottom= */ 180,
                 /* lockIconPadding= */ 20,
                 /* indicationPadding= */ 0,
                 /* ambientPadding= */ 0);
@@ -620,7 +623,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
     @Test
     public void getVerticalSpaceForLockscreenNotifications_useIndicationBottomPadding_returnsSpaceAvailable() {
-        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+        setBottomPadding(/* stackScrollLayoutBottom= */ 180,
                 /* lockIconPadding= */ 0,
                 /* indicationPadding= */ 30,
                 /* ambientPadding= */ 0);
@@ -631,7 +634,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
     @Test
     public void getVerticalSpaceForLockscreenNotifications_useAmbientBottomPadding_returnsSpaceAvailable() {
-        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+        setBottomPadding(/* stackScrollLayoutBottom= */ 180,
                 /* lockIconPadding= */ 0,
                 /* indicationPadding= */ 0,
                 /* ambientPadding= */ 40);
@@ -802,66 +805,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void handleTouchEventFromStatusBar_panelsNotEnabled_returnsFalseAndNoViewEvent() {
-        when(mCommandQueue.panelsEnabled()).thenReturn(false);
-
-        boolean returnVal = mNotificationPanelViewController
-                .getStatusBarTouchEventHandler()
-                .handleTouchEvent(
-                        MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0));
-
-        assertThat(returnVal).isFalse();
-        verify(mView, never()).dispatchTouchEvent(any());
-    }
-
-    @Test
-    public void handleTouchEventFromStatusBar_viewNotEnabled_returnsTrueAndNoViewEvent() {
-        when(mCommandQueue.panelsEnabled()).thenReturn(true);
-        when(mView.isEnabled()).thenReturn(false);
-
-        boolean returnVal = mNotificationPanelViewController
-                .getStatusBarTouchEventHandler()
-                .handleTouchEvent(
-                        MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0));
-
-        assertThat(returnVal).isTrue();
-        verify(mView, never()).dispatchTouchEvent(any());
-    }
-
-    @Test
-    public void handleTouchEventFromStatusBar_viewNotEnabledButIsMoveEvent_viewReceivesEvent() {
-        when(mCommandQueue.panelsEnabled()).thenReturn(true);
-        when(mView.isEnabled()).thenReturn(false);
-        MotionEvent event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0);
-
-        mNotificationPanelViewController.getStatusBarTouchEventHandler().handleTouchEvent(event);
-
-        verify(mView).dispatchTouchEvent(event);
-    }
-
-    @Test
-    public void handleTouchEventFromStatusBar_panelAndViewEnabled_viewReceivesEvent() {
-        when(mCommandQueue.panelsEnabled()).thenReturn(true);
-        when(mView.isEnabled()).thenReturn(true);
-        MotionEvent event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 2f, 0);
-
-        mNotificationPanelViewController.getStatusBarTouchEventHandler().handleTouchEvent(event);
-
-        verify(mView).dispatchTouchEvent(event);
-    }
-
-    @Test
-    public void handleTouchEventFromStatusBar_topEdgeTouch_viewNeverReceivesEvent() {
-        when(mCommandQueue.panelsEnabled()).thenReturn(true);
-        when(mView.isEnabled()).thenReturn(true);
-        MotionEvent event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0);
-
-        mNotificationPanelViewController.getStatusBarTouchEventHandler().handleTouchEvent(event);
-
-        verify(mView, never()).dispatchTouchEvent(event);
-    }
-
-    @Test
     public void testA11y_initializeNode() {
         AccessibilityNodeInfo nodeInfo = new AccessibilityNodeInfo();
         mAccessibilityDelegate.onInitializeAccessibilityNodeInfo(mView, nodeInfo);
@@ -1014,7 +957,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testFinishInflate_userSwitcherDisabled_doNotInflateUserSwitchView() {
+    public void testFinishInflate_userSwitcherDisabled_doNotInflateUserSwitchView_initClock() {
         givenViewAttached();
         when(mResources.getBoolean(
                 com.android.internal.R.bool.config_keyguardUserSwitcher)).thenReturn(true);
@@ -1025,6 +968,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mNotificationPanelViewController.onFinishInflate();
 
         verify(mUserSwitcherStubView, never()).inflate();
+        verify(mKeyguardStatusViewController, times(3)).displayClock(LARGE, /* animate */ true);
     }
 
     @Test
