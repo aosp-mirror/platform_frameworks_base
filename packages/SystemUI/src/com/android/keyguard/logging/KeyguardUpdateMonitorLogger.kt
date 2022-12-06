@@ -132,6 +132,12 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
         logBuffer.log(TAG, DEBUG, { int1 = faceRunningState }, { "faceRunningState: $int1" })
     }
 
+    fun logFaceUnlockPossible(isFaceUnlockPossible: Boolean) {
+        logBuffer.log(TAG, DEBUG,
+                { bool1 = isFaceUnlockPossible },
+                {"isUnlockWithFacePossible: $bool1"})
+    }
+
     fun logFingerprintAuthForWrongUser(authUserId: Int) {
         logBuffer.log(TAG, DEBUG,
                 { int1 = authUserId },
