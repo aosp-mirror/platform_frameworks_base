@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.demo
 
 import android.content.Context
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
+import android.telephony.TelephonyManager.DATA_ACTIVITY_NONE
 import android.util.Log
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.MobileMappings
@@ -34,6 +35,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConn
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel.Mobile
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel.MobileDisabled
+import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -236,7 +238,7 @@ constructor(
             primaryLevel = level ?: 0,
             dataConnectionState =
                 DataConnectionState.Connected, // TODO(b/261029387): not yet supported
-            dataActivityDirection = activity,
+            dataActivityDirection = (activity ?: DATA_ACTIVITY_NONE).toMobileDataActivityModel(),
             carrierNetworkChangeActive = carrierNetworkChange,
             resolvedNetworkType = dataType.toResolvedNetworkType()
         )

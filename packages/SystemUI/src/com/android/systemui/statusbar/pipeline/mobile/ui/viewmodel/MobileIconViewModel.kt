@@ -22,13 +22,16 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 
 /**
@@ -48,6 +51,7 @@ constructor(
     val subscriptionId: Int,
     iconInteractor: MobileIconInteractor,
     logger: ConnectivityPipelineLogger,
+    constants: ConnectivityConstants,
 ) {
     /** Whether or not to show the error state of [SignalDrawable] */
     private val showExclamationMark: Flow<Boolean> =
@@ -88,6 +92,18 @@ constructor(
         }
 
     val roaming: Flow<Boolean> = iconInteractor.isRoaming
+
+    private val activity: Flow<DataActivityModel?> =
+        if (!constants.shouldShowActivityConfig) {
+            flowOf(null)
+        } else {
+            iconInteractor.activity
+        }
+
+    val activityInVisible: Flow<Boolean> = activity.map { it?.hasActivityIn ?: false }
+    val activityOutVisible: Flow<Boolean> = activity.map { it?.hasActivityOut ?: false }
+    val activityContainerVisible: Flow<Boolean> =
+        activity.map { it != null && (it.hasActivityIn || it.hasActivityOut) }
 
     val tint: Flow<Int> = flowOf(Color.CYAN)
 }

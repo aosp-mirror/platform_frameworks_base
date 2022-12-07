@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.demo
 
 import android.telephony.TelephonyManager.DATA_ACTIVITY_INOUT
+import android.telephony.TelephonyManager.DATA_ACTIVITY_NONE
 import android.telephony.TelephonyManager.UNKNOWN_CARRIER_ID
 import androidx.test.filters.SmallTest
 import com.android.settingslib.SignalIcon
@@ -27,6 +28,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectio
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel.MobileDisabled
+import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -289,7 +291,8 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
                 assertThat(conn.subId).isEqualTo(model.subId)
                 assertThat(connectionInfo.cdmaLevel).isEqualTo(model.level)
                 assertThat(connectionInfo.primaryLevel).isEqualTo(model.level)
-                assertThat(connectionInfo.dataActivityDirection).isEqualTo(model.activity)
+                assertThat(connectionInfo.dataActivityDirection)
+                    .isEqualTo((model.activity ?: DATA_ACTIVITY_NONE).toMobileDataActivityModel())
                 assertThat(connectionInfo.carrierNetworkChangeActive)
                     .isEqualTo(model.carrierNetworkChange)
                 assertThat(connectionInfo.isRoaming).isEqualTo(model.roaming)

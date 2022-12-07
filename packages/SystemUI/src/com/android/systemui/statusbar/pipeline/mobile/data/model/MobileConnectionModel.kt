@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.model
 
 import android.annotation.IntRange
-import android.telephony.Annotation.DataActivityType
 import android.telephony.CellSignalStrength
 import android.telephony.TelephonyCallback.CarrierNetworkListener
 import android.telephony.TelephonyCallback.DataActivityListener
@@ -28,6 +27,7 @@ import android.telephony.TelephonyCallback.SignalStrengthsListener
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyManager
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Disconnected
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 
 /**
  * Data class containing all of the relevant information for a particular line of service, known as
@@ -54,7 +54,11 @@ data class MobileConnectionModel(
     val dataConnectionState: DataConnectionState = Disconnected,
 
     /** From [DataActivityListener.onDataActivity]. See [TelephonyManager] for the values */
-    @DataActivityType val dataActivityDirection: Int? = null,
+    val dataActivityDirection: DataActivityModel =
+        DataActivityModel(
+            hasActivityIn = false,
+            hasActivityOut = false,
+        ),
 
     /** From [CarrierNetworkListener.onCarrierNetworkChange] */
     val carrierNetworkChangeActive: Boolean = false,

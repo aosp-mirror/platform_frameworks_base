@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConn
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
+import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -137,7 +138,10 @@ class MobileConnectionRepositoryImpl(
                         }
 
                         override fun onDataActivity(direction: Int) {
-                            state = state.copy(dataActivityDirection = direction)
+                            state =
+                                state.copy(
+                                    dataActivityDirection = direction.toMobileDataActivityModel()
+                                )
                             trySend(state)
                         }
 

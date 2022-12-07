@@ -23,10 +23,16 @@ import android.telephony.ServiceState
 import android.telephony.SignalStrength
 import android.telephony.SubscriptionInfo
 import android.telephony.TelephonyCallback
+import android.telephony.TelephonyCallback.DataActivityListener
 import android.telephony.TelephonyCallback.ServiceStateListener
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA
 import android.telephony.TelephonyManager
+import android.telephony.TelephonyManager.DATA_ACTIVITY_DORMANT
+import android.telephony.TelephonyManager.DATA_ACTIVITY_IN
+import android.telephony.TelephonyManager.DATA_ACTIVITY_INOUT
+import android.telephony.TelephonyManager.DATA_ACTIVITY_NONE
+import android.telephony.TelephonyManager.DATA_ACTIVITY_OUT
 import android.telephony.TelephonyManager.DATA_CONNECTED
 import android.telephony.TelephonyManager.DATA_CONNECTING
 import android.telephony.TelephonyManager.DATA_DISCONNECTED
@@ -46,6 +52,8 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetwork
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
+import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
@@ -249,10 +257,11 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             var latest: MobileConnectionModel? = null
             val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
-            val callback = getTelephonyCallbackForType<TelephonyCallback.DataActivityListener>()
-            callback.onDataActivity(3)
+            val callback = getTelephonyCallbackForType<DataActivityListener>()
+            callback.onDataActivity(DATA_ACTIVITY_INOUT)
 
-            assertThat(latest?.dataActivityDirection).isEqualTo(3)
+            assertThat(latest?.dataActivityDirection)
+                .isEqualTo(DATA_ACTIVITY_INOUT.toMobileDataActivityModel())
 
             job.cancel()
         }
@@ -455,6 +464,44 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             cb.onServiceStateChanged(serviceState)
 
             assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun `activity - updates from callback`() =
+        runBlocking(IMMEDIATE) {
+            var latest: DataActivityModel? = null
+            val job =
+                underTest.connectionInfo.onEach { latest = it.dataActivityDirection }.launchIn(this)
+
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = false, hasActivityOut = false))
+
+            val cb = getTelephonyCallbackForType<DataActivityListener>()
+            cb.onDataActivity(DATA_ACTIVITY_IN)
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = true, hasActivityOut = false))
+
+            cb.onDataActivity(DATA_ACTIVITY_OUT)
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = false, hasActivityOut = true))
+
+            cb.onDataActivity(DATA_ACTIVITY_INOUT)
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = true, hasActivityOut = true))
+
+            cb.onDataActivity(DATA_ACTIVITY_NONE)
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = false, hasActivityOut = false))
+
+            cb.onDataActivity(DATA_ACTIVITY_DORMANT)
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = false, hasActivityOut = false))
+
+            cb.onDataActivity(1234)
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = false, hasActivityOut = false))
 
             job.cancel()
         }

@@ -21,9 +21,11 @@ import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Connected
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.util.CarrierConfigTracker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +34,9 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
 interface MobileIconInteractor {
+    /** The current mobile data activity */
+    val activity: Flow<DataActivityModel>
+
     /** Only true if mobile is the default transport but is not validated, otherwise false */
     val isDefaultConnectionFailed: StateFlow<Boolean>
 
@@ -81,6 +86,8 @@ class MobileIconInteractorImpl(
     connectionRepository: MobileConnectionRepository,
 ) : MobileIconInteractor {
     private val connectionInfo = connectionRepository.connectionInfo
+
+    override val activity = connectionInfo.mapLatest { it.dataActivityDirection }
 
     override val isDataEnabled: StateFlow<Boolean> = connectionRepository.dataEnabled
 

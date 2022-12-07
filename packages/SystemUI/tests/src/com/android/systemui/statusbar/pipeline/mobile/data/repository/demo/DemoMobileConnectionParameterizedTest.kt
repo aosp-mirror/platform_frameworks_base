@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.demo
 
 import android.telephony.Annotation
 import android.telephony.TelephonyManager
+import android.telephony.TelephonyManager.DATA_ACTIVITY_NONE
 import androidx.test.filters.SmallTest
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.TelephonyIcons
@@ -25,6 +26,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
+import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -114,7 +116,8 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 assertThat(conn.subId).isEqualTo(model.subId)
                 assertThat(connectionInfo.cdmaLevel).isEqualTo(model.level)
                 assertThat(connectionInfo.primaryLevel).isEqualTo(model.level)
-                assertThat(connectionInfo.dataActivityDirection).isEqualTo(model.activity)
+                assertThat(connectionInfo.dataActivityDirection)
+                    .isEqualTo((model.activity ?: DATA_ACTIVITY_NONE).toMobileDataActivityModel())
                 assertThat(connectionInfo.carrierNetworkChangeActive)
                     .isEqualTo(model.carrierNetworkChange)
                 assertThat(connectionInfo.isRoaming).isEqualTo(model.roaming)
