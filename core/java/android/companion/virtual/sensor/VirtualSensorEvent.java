@@ -18,6 +18,7 @@ package android.companion.virtual.sensor;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.hardware.Sensor;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -60,9 +61,11 @@ public final class VirtualSensorEvent implements Parcelable {
     }
 
     /**
-     * Returns the values of this sensor event. The length and contents depend on the
-     * <a href="https://source.android.com/devices/sensors/sensor-types">sensor type</a>.
+     * Returns the values of this sensor event. The length and contents depend on the sensor type.
+     *
      * @see android.hardware.SensorEvent#values
+     * @see Sensor#getType()
+     * @see <a href="https://source.android.com/devices/sensors/sensor-types">Sensor types</a>
      */
     @NonNull
     public float[] getValues() {
@@ -90,7 +93,9 @@ public final class VirtualSensorEvent implements Parcelable {
 
         /**
          * Creates a new builder.
-         * @param values the values of the sensor event. @see android.hardware.SensorEvent#values
+         *
+         * @param values the values of the sensor event.
+         * @see android.hardware.SensorEvent#values
          */
         public Builder(@NonNull float[] values) {
             mValues = values;

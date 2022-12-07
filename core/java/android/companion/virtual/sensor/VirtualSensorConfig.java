@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.hardware.Sensor;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -77,8 +78,10 @@ public final class VirtualSensorConfig implements Parcelable {
     }
 
     /**
-     * Returns the
-     * <a href="https://source.android.com/devices/sensors/sensor-types">type</a> of the sensor.
+     * Returns the type of the sensor.
+     *
+     * @see Sensor#getType()
+     * @see <a href="https://source.android.com/devices/sensors/sensor-types">Sensor types</a>
      */
     public int getType() {
         return mType;
@@ -150,8 +153,7 @@ public final class VirtualSensorConfig implements Parcelable {
         /**
          * Creates a new builder.
          *
-         * @param type The
-         * <a href="https://source.android.com/devices/sensors/sensor-types">type</a> of the sensor.
+         * @param type The type of the sensor, matching {@link Sensor#getType}.
          * @param name The name of the sensor. Must be unique among all sensors with the same type
          * that belong to the same virtual device.
          */
