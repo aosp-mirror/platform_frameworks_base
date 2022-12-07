@@ -702,7 +702,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun bind_seekBarDisabled_noActions_seekBarVisibilityIsSetToGone() {
+    fun bind_seekBarDisabled_noActions_seekBarVisibilityIsSetToInvisible() {
         useRealConstraintSets()
 
         val state = mediaData.copy(semanticActions = MediaButton())
@@ -711,7 +711,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         player.bindPlayer(state, PACKAGE)
 
-        assertThat(expandedSet.getVisibility(seekBar.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(expandedSet.getVisibility(seekBar.id)).isEqualTo(ConstraintSet.INVISIBLE)
     }
 
     @Test
@@ -741,7 +741,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun seekBarChangesToDisabledAfterBind_noActions_seekBarChangesToGone() {
+    fun seekBarChangesToDisabledAfterBind_noActions_seekBarChangesToInvisible() {
         useRealConstraintSets()
 
         val state = mediaData.copy(semanticActions = MediaButton())
@@ -752,7 +752,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         getEnabledChangeListener().onEnabledChanged(enabled = false)
 
-        assertThat(expandedSet.getVisibility(seekBar.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(expandedSet.getVisibility(seekBar.id)).isEqualTo(ConstraintSet.INVISIBLE)
     }
 
     @Test

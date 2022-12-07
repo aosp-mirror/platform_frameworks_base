@@ -24,11 +24,15 @@ import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.companion.virtual.sensor.VirtualSensorEvent;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.hardware.input.VirtualDpadConfig;
+import android.hardware.input.VirtualKeyboardConfig;
 import android.hardware.input.VirtualKeyEvent;
 import android.hardware.input.VirtualMouseButtonEvent;
+import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
 import android.hardware.input.VirtualTouchEvent;
+import android.hardware.input.VirtualTouchscreenConfig;
 import android.os.ResultReceiver;
 
 /**
@@ -64,32 +68,22 @@ interface IVirtualDevice {
             IAudioConfigChangedCallback configChangedCallback);
 
     void onAudioSessionEnded();
-
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
     void createVirtualDpad(
-            int displayId,
-            String inputDeviceName,
-            int vendorId,
-            int productId,
+            in VirtualDpadConfig config,
             IBinder token);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
     void createVirtualKeyboard(
-            int displayId,
-            String inputDeviceName,
-            int vendorId,
-            int productId,
+            in VirtualKeyboardConfig config,
             IBinder token);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
     void createVirtualMouse(
-            int displayId,
-            String inputDeviceName,
-            int vendorId,
-            int productId,
+            in VirtualMouseConfig config,
             IBinder token);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
     void createVirtualTouchscreen(
-            int displayId,
-            String inputDeviceName,
-            int vendorId,
-            int productId,
-            IBinder token,
-            in Point screenSize);
+            in VirtualTouchscreenConfig config,
+            IBinder token);
     void unregisterInputDevice(IBinder token);
     int getInputDeviceId(IBinder token);
     boolean sendDpadKeyEvent(IBinder token, in VirtualKeyEvent event);

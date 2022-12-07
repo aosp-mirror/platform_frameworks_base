@@ -31,6 +31,7 @@ import com.android.systemui.R;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.notification.LegacySourceType;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -51,6 +52,7 @@ public class StackScrollAlgorithm {
 
     private static final String TAG = "StackScrollAlgorithm";
     private static final Boolean DEBUG = false;
+    private static final SourceType STACK_SCROLL_ALGO = SourceType.from("StackScrollAlgorithm");
 
     private final ViewGroup mHostView;
     private float mPaddingBetweenElements;
@@ -70,6 +72,7 @@ public class StackScrollAlgorithm {
     private float mQuickQsOffsetHeight;
     private float mSmallCornerRadius;
     private float mLargeCornerRadius;
+    private boolean mUseRoundnessSourceTypes;
 
     public StackScrollAlgorithm(
             Context context,
@@ -129,7 +132,7 @@ public class StackScrollAlgorithm {
     }
 
     private void updateAlphaState(StackScrollAlgorithmState algorithmState,
-            AmbientState ambientState) {
+                                  AmbientState ambientState) {
         for (ExpandableView view : algorithmState.visibleChildren) {
             final ViewState viewState = view.getViewState();
 
@@ -229,7 +232,7 @@ public class StackScrollAlgorithm {
     }
 
     private void getNotificationChildrenStates(StackScrollAlgorithmState algorithmState,
-            AmbientState ambientState) {
+                                               AmbientState ambientState) {
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
             ExpandableView v = algorithmState.visibleChildren.get(i);
@@ -241,7 +244,7 @@ public class StackScrollAlgorithm {
     }
 
     private void updateSpeedBumpState(StackScrollAlgorithmState algorithmState,
-            int speedBumpIndex) {
+                                      int speedBumpIndex) {
         int childCount = algorithmState.visibleChildren.size();
         int belowSpeedBump = speedBumpIndex;
         for (int i = 0; i < childCount; i++) {
@@ -268,7 +271,7 @@ public class StackScrollAlgorithm {
     }
 
     private void updateClipping(StackScrollAlgorithmState algorithmState,
-            AmbientState ambientState) {
+                                AmbientState ambientState) {
         float drawStart = ambientState.isOnKeyguard() ? 0
                 : ambientState.getStackY() - ambientState.getScrollY();
         float clipStart = 0;
@@ -314,7 +317,7 @@ public class StackScrollAlgorithm {
      * Updates the dimmed, activated and hiding sensitive states of the children.
      */
     private void updateDimmedActivatedHideSensitive(AmbientState ambientState,
-            StackScrollAlgorithmState algorithmState) {
+                                                    StackScrollAlgorithmState algorithmState) {
         boolean dimmed = ambientState.isDimmed();
         boolean hideSensitive = ambientState.isHideSensitive();
         View activatedChild = ambientState.getActivatedChild();
@@ -408,7 +411,7 @@ public class StackScrollAlgorithm {
     }
 
     private int updateNotGoneIndex(StackScrollAlgorithmState state, int notGoneIndex,
-            ExpandableView v) {
+                                   ExpandableView v) {
         ExpandableViewState viewState = v.getViewState();
         viewState.notGoneIndex = notGoneIndex;
         state.visibleChildren.add(v);
@@ -434,7 +437,7 @@ public class StackScrollAlgorithm {
      * @param ambientState   The current ambient state
      */
     protected void updatePositionsForState(StackScrollAlgorithmState algorithmState,
-            AmbientState ambientState) {
+                                           AmbientState ambientState) {
         if (!ambientState.isOnKeyguard()
                 || (ambientState.isBypassEnabled() && ambientState.isPulseExpanding())) {
             algorithmState.mCurrentYPosition += mNotificationScrimPadding;
@@ -448,7 +451,7 @@ public class StackScrollAlgorithm {
     }
 
     private void setLocation(ExpandableViewState expandableViewState, float currentYPosition,
-            int i) {
+                             int i) {
         expandableViewState.location = ExpandableViewState.LOCATION_MAIN_AREA;
         if (currentYPosition <= 0) {
             expandableViewState.location = ExpandableViewState.LOCATION_HIDDEN_TOP;
@@ -496,9 +499,13 @@ public class StackScrollAlgorithm {
     }
 
     @VisibleForTesting
-    void maybeUpdateHeadsUpIsVisible(ExpandableViewState viewState, boolean isShadeExpanded,
-            boolean mustStayOnScreen, boolean topVisible, float viewEnd, float hunMax) {
-
+    void maybeUpdateHeadsUpIsVisible(
+            ExpandableViewState viewState,
+            boolean isShadeExpanded,
+            boolean mustStayOnScreen,
+            boolean topVisible,
+            float viewEnd,
+            float hunMax) {
         if (isShadeExpanded && mustStayOnScreen && topVisible) {
             viewState.headsUpIsVisible = viewEnd < hunMax;
         }
@@ -676,7 +683,7 @@ public class StackScrollAlgorithm {
     }
 
     private void updatePulsingStates(StackScrollAlgorithmState algorithmState,
-            AmbientState ambientState) {
+                                     AmbientState ambientState) {
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
             View child = algorithmState.visibleChildren.get(i);
@@ -693,7 +700,7 @@ public class StackScrollAlgorithm {
     }
 
     private void updateHeadsUpStates(StackScrollAlgorithmState algorithmState,
-            AmbientState ambientState) {
+                                     AmbientState ambientState) {
         int childCount = algorithmState.visibleChildren.size();
 
         // Move the tracked heads up into position during the appear animation, by interpolating
@@ -777,7 +784,7 @@ public class StackScrollAlgorithm {
      */
     @VisibleForTesting
     void clampHunToTop(float quickQsOffsetHeight, float stackTranslation, float collapsedHeight,
-            ExpandableViewState viewState) {
+                       ExpandableViewState viewState) {
 
         final float newTranslation = Math.max(quickQsOffsetHeight + stackTranslation,
                 viewState.getYTranslation());
@@ -792,7 +799,7 @@ public class StackScrollAlgorithm {
     // Pin HUN to bottom of expanded QS
     // while the rest of notifications are scrolled offscreen.
     private void clampHunToMaxTranslation(AmbientState ambientState, ExpandableNotificationRow row,
-            ExpandableViewState childState) {
+                                          ExpandableViewState childState) {
         float maxHeadsUpTranslation = ambientState.getMaxHeadsUpTranslation();
         final float maxShelfPosition = ambientState.getInnerHeight() + ambientState.getTopPadding()
                 + ambientState.getStackTranslation();
@@ -807,14 +814,19 @@ public class StackScrollAlgorithm {
         // Animate pinned HUN bottom corners to and from original roundness.
         final float originalCornerRadius =
                 row.isLastInSection() ? 1f : (mSmallCornerRadius / mLargeCornerRadius);
-        final float roundness = computeCornerRoundnessForPinnedHun(mHostView.getHeight(),
+        final float bottomValue = computeCornerRoundnessForPinnedHun(mHostView.getHeight(),
                 ambientState.getStackY(), getMaxAllowedChildHeight(row), originalCornerRadius);
-        row.requestBottomRoundness(roundness, /* animate = */ false, SourceType.OnScroll);
+        if (mUseRoundnessSourceTypes) {
+            row.requestBottomRoundness(bottomValue, STACK_SCROLL_ALGO);
+            row.addOnDetachResetRoundness(STACK_SCROLL_ALGO);
+        } else {
+            row.requestBottomRoundness(bottomValue, LegacySourceType.OnScroll);
+        }
     }
 
     @VisibleForTesting
     float computeCornerRoundnessForPinnedHun(float hostViewHeight, float stackY,
-            float viewMaxHeight, float originalCornerRadius) {
+                                             float viewMaxHeight, float originalCornerRadius) {
 
         // Compute y where corner roundness should be in its original unpinned state.
         // We use view max height because the pinned collapsed HUN expands to max height
@@ -844,7 +856,7 @@ public class StackScrollAlgorithm {
      * @param ambientState   The ambient state of the algorithm
      */
     private void updateZValuesForState(StackScrollAlgorithmState algorithmState,
-            AmbientState ambientState) {
+                                       AmbientState ambientState) {
         int childCount = algorithmState.visibleChildren.size();
         float childrenOnTop = 0.0f;
 
@@ -876,9 +888,9 @@ public class StackScrollAlgorithm {
      *                      previous HUNs whose Z positions are greater than 0.
      */
     protected float updateChildZValue(int i, float childrenOnTop,
-            StackScrollAlgorithmState algorithmState,
-            AmbientState ambientState,
-            boolean isTopHun) {
+                                      StackScrollAlgorithmState algorithmState,
+                                      AmbientState ambientState,
+                                      boolean isTopHun) {
         ExpandableView child = algorithmState.visibleChildren.get(i);
         ExpandableViewState childViewState = child.getViewState();
         float baseZ = ambientState.getBaseZHeight();
@@ -948,6 +960,14 @@ public class StackScrollAlgorithm {
 
     public void setIsExpanded(boolean isExpanded) {
         this.mIsExpanded = isExpanded;
+    }
+
+    /**
+     * Enable the support for rounded corner based on the SourceType
+     * @param enabled true if is supported
+     */
+    public void useRoundnessSourceTypes(boolean enabled) {
+        mUseRoundnessSourceTypes = enabled;
     }
 
     public static class StackScrollAlgorithmState {

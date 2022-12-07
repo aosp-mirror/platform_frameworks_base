@@ -33,6 +33,7 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DeviceStateCache;
 import android.app.trust.TrustManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.hardware.authsecret.V1_0.IAuthSecret;
@@ -41,14 +42,18 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.os.FileUtils;
 import android.os.IProgressListener;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
+import android.provider.Settings;
 import android.security.KeyStore;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.LockscreenCredential;
@@ -59,6 +64,7 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -106,7 +112,8 @@ public abstract class BaseLockSettingsServiceTests {
     FingerprintManager mFingerprintManager;
     FaceManager mFaceManager;
     PackageManager mPackageManager;
-    FakeSettings mSettings;
+    @Rule
+    public FakeSettingsProviderRule mSettingsRule = FakeSettingsProvider.rule();
 
     @Before
     public void setUp_baseServices() throws Exception {
@@ -126,7 +133,6 @@ public abstract class BaseLockSettingsServiceTests {
         mFingerprintManager = mock(FingerprintManager.class);
         mFaceManager = mock(FaceManager.class);
         mPackageManager = mock(PackageManager.class);
-        mSettings = new FakeSettings();
 
         LocalServices.removeServiceForTest(LockSettingsInternal.class);
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
@@ -134,12 +140,13 @@ public abstract class BaseLockSettingsServiceTests {
         LocalServices.addService(DevicePolicyManagerInternal.class, mDevicePolicyManagerInternal);
         LocalServices.addService(WindowManagerInternal.class, mMockWindowManager);
 
-        mContext = new MockLockSettingsContext(InstrumentationRegistry.getContext(), mUserManager,
-                mNotificationManager, mDevicePolicyManager, mock(StorageManager.class),
-                mock(TrustManager.class), mock(KeyguardManager.class), mFingerprintManager,
-                mFaceManager, mPackageManager);
+        final Context origContext = InstrumentationRegistry.getContext();
+        mContext = new MockLockSettingsContext(origContext,
+                mSettingsRule.mockContentResolver(origContext), mUserManager, mNotificationManager,
+                mDevicePolicyManager, mock(StorageManager.class), mock(TrustManager.class),
+                mock(KeyguardManager.class), mFingerprintManager, mFaceManager, mPackageManager);
         mStorage = new LockSettingsStorageTestable(mContext,
-                new File(InstrumentationRegistry.getContext().getFilesDir(), "locksettings"));
+                new File(origContext.getFilesDir(), "locksettings"));
         File storageDir = mStorage.mStorageDir;
         if (storageDir.exists()) {
             FileUtils.deleteContents(storageDir);
@@ -153,7 +160,7 @@ public abstract class BaseLockSettingsServiceTests {
         mService = new LockSettingsServiceTestable(mContext, mStorage,
                 mGateKeeperService, mKeyStore, setUpStorageManagerMock(), mActivityManager,
                 mSpManager, mAuthSecretService, mGsiService, mRecoverableKeyStoreManager,
-                mUserManagerInternal, mDeviceStateCache, mSettings);
+                mUserManagerInternal, mDeviceStateCache);
         mService.mHasSecureLockScreen = true;
         when(mUserManager.getUserInfo(eq(PRIMARY_USER_ID))).thenReturn(PRIMARY_USER_INFO);
         mPrimaryUserProfiles.add(PRIMARY_USER_INFO);
@@ -186,8 +193,23 @@ public abstract class BaseLockSettingsServiceTests {
         mockBiometricsHardwareFingerprintsAndTemplates(PRIMARY_USER_ID);
         mockBiometricsHardwareFingerprintsAndTemplates(MANAGED_PROFILE_USER_ID);
 
-        mSettings.setDeviceProvisioned(true);
+        setDeviceProvisioned(true);
         mLocalService = LocalServices.getService(LockSettingsInternal.class);
+    }
+
+    protected void setDeviceProvisioned(boolean provisioned) {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.DEVICE_PROVISIONED, provisioned ? 1 : 0);
+    }
+
+    protected void setUserSetupComplete(boolean complete) {
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE, complete ? 1 : 0, UserHandle.USER_SYSTEM);
+    }
+
+    protected void setSecureFrpMode(boolean secure) {
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.SECURE_FRP_MODE, secure ? 1 : 0, UserHandle.USER_SYSTEM);
     }
 
     private UserInfo installChildProfile(int profileId) {

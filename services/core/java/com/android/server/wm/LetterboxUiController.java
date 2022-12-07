@@ -673,6 +673,12 @@ final class LetterboxUiController {
                 + getHorizontalPositionMultiplier(mActivityRecord.getParent().getConfiguration()));
         pw.println(prefix + "  letterboxVerticalPositionMultiplier="
                 + getVerticalPositionMultiplier(mActivityRecord.getParent().getConfiguration()));
+        pw.println(prefix + "  letterboxPositionForHorizontalReachability="
+                + LetterboxConfiguration.letterboxHorizontalReachabilityPositionToString(
+                    mLetterboxConfiguration.getLetterboxPositionForHorizontalReachability()));
+        pw.println(prefix + "  letterboxPositionForVerticalReachability="
+                + LetterboxConfiguration.letterboxVerticalReachabilityPositionToString(
+                    mLetterboxConfiguration.getLetterboxPositionForVerticalReachability()));
         pw.println(prefix + "  fixedOrientationLetterboxAspectRatio="
                 + mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio());
         pw.println(prefix + "  defaultMinAspectRatioForUnresizableApps="

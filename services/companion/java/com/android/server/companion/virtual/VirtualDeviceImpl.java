@@ -44,14 +44,17 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.hardware.display.DisplayManager;
+import android.hardware.input.VirtualDpadConfig;
 import android.hardware.input.VirtualKeyEvent;
+import android.hardware.input.VirtualKeyboardConfig;
 import android.hardware.input.VirtualMouseButtonEvent;
+import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
 import android.hardware.input.VirtualTouchEvent;
+import android.hardware.input.VirtualTouchscreenConfig;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Looper;
@@ -397,19 +400,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Override // Binder call
-    public void createVirtualDpad(
-            int displayId,
-            @NonNull String deviceName,
-            int vendorId,
-            int productId,
-            @NonNull IBinder deviceToken) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
+    public void createVirtualDpad(VirtualDpadConfig config, @NonNull IBinder deviceToken) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
                 "Permission required to create a virtual dpad");
         synchronized (mVirtualDeviceLock) {
-            if (!mVirtualDisplayIds.contains(displayId)) {
+            if (!mVirtualDisplayIds.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
                         "Cannot create a virtual dpad for a display not associated with "
                                 + "this virtual device");
@@ -417,26 +413,19 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
         final long ident = Binder.clearCallingIdentity();
         try {
-            mInputController.createDpad(deviceName, vendorId, productId, deviceToken,
-                    displayId);
+            mInputController.createDpad(config.getInputDeviceName(), config.getVendorId(),
+                    config.getProductId(), deviceToken, config.getAssociatedDisplayId());
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Override // Binder call
-    public void createVirtualKeyboard(
-            int displayId,
-            @NonNull String deviceName,
-            int vendorId,
-            int productId,
-            @NonNull IBinder deviceToken) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
+    public void createVirtualKeyboard(VirtualKeyboardConfig config, @NonNull IBinder deviceToken) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
                 "Permission required to create a virtual keyboard");
         synchronized (mVirtualDeviceLock) {
-            if (!mVirtualDisplayIds.contains(displayId)) {
+            if (!mVirtualDisplayIds.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
                         "Cannot create a virtual keyboard for a display not associated with "
                                 + "this virtual device");
@@ -444,26 +433,19 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
         final long ident = Binder.clearCallingIdentity();
         try {
-            mInputController.createKeyboard(deviceName, vendorId, productId, deviceToken,
-                    displayId);
+            mInputController.createKeyboard(config.getInputDeviceName(), config.getVendorId(),
+                    config.getProductId(), deviceToken, config.getAssociatedDisplayId());
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Override // Binder call
-    public void createVirtualMouse(
-            int displayId,
-            @NonNull String deviceName,
-            int vendorId,
-            int productId,
-            @NonNull IBinder deviceToken) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
+    public void createVirtualMouse(VirtualMouseConfig config, @NonNull IBinder deviceToken) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
                 "Permission required to create a virtual mouse");
         synchronized (mVirtualDeviceLock) {
-            if (!mVirtualDisplayIds.contains(displayId)) {
+            if (!mVirtualDisplayIds.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
                         "Cannot create a virtual mouse for a display not associated with this "
                                 + "virtual device");
@@ -471,42 +453,38 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
         final long ident = Binder.clearCallingIdentity();
         try {
-            mInputController.createMouse(deviceName, vendorId, productId, deviceToken, displayId);
+            mInputController.createMouse(config.getInputDeviceName(), config.getVendorId(),
+                    config.getProductId(), deviceToken, config.getAssociatedDisplayId());
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Override // Binder call
-    public void createVirtualTouchscreen(
-            int displayId,
-            @NonNull String deviceName,
-            int vendorId,
-            int productId,
-            @NonNull IBinder deviceToken,
-            @NonNull Point screenSize) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
+    public void createVirtualTouchscreen(VirtualTouchscreenConfig config,
+            @NonNull IBinder deviceToken) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
                 "Permission required to create a virtual touchscreen");
         synchronized (mVirtualDeviceLock) {
-            if (!mVirtualDisplayIds.contains(displayId)) {
+            if (!mVirtualDisplayIds.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
                         "Cannot create a virtual touchscreen for a display not associated with "
                                 + "this virtual device");
             }
         }
-
-        if (screenSize.x <= 0 || screenSize.y <= 0) {
+        int screenHeightPixels = config.getHeightInPixels();
+        int screenWidthPixels = config.getWidthInPixels();
+        if (screenHeightPixels <= 0 || screenWidthPixels <= 0) {
             throw new IllegalArgumentException(
                     "Cannot create a virtual touchscreen, screen dimensions must be positive. Got: "
-                            + screenSize);
+                            + "(" + screenWidthPixels + ", " + screenHeightPixels + ")");
         }
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            mInputController.createTouchscreen(deviceName, vendorId, productId,
-                    deviceToken, displayId, screenSize);
+            mInputController.createTouchscreen(config.getInputDeviceName(), config.getVendorId(),
+                    config.getProductId(), deviceToken, config.getAssociatedDisplayId(),
+                    screenHeightPixels, screenWidthPixels);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

@@ -165,9 +165,11 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
         // If the launch windowing mode is still undefined, inherit from the target task if the
         // task is already on the right display area (otherwise, the task may be on a different
-        // display area that has incompatible windowing mode).
+        // display area that has incompatible windowing mode or the task organizer request to
+        // disassociate the leaf task if relaunched and reparented it to TDA as root task).
         if (launchMode == WINDOWING_MODE_UNDEFINED
-                && task != null && task.getTaskDisplayArea() == suggestedDisplayArea) {
+                && task != null && task.getTaskDisplayArea() == suggestedDisplayArea
+                && !task.getRootTask().mReparentLeafTaskIfRelaunch) {
             launchMode = task.getWindowingMode();
             if (DEBUG) {
                 appendLog("inherit-from-task="

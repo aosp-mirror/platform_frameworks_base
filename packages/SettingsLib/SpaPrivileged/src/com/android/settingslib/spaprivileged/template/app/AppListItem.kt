@@ -28,7 +28,7 @@ import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 
-class AppListItemModel<T : AppRecord>(
+data class AppListItemModel<T : AppRecord>(
     val record: T,
     val label: String,
     val summary: State<String>,

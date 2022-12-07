@@ -19,6 +19,7 @@ package com.android.keyguard
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.internal.widget.LockPatternUtils
@@ -42,6 +43,8 @@ import org.mockito.MockitoAnnotations
 class KeyguardPasswordViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var keyguardPasswordView: KeyguardPasswordView
+    @Mock
+    private lateinit var passwordEntry: EditText
     @Mock
     lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock
@@ -81,6 +84,9 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
         ).thenReturn(mKeyguardMessageArea)
         Mockito.`when`(messageAreaControllerFactory.create(mKeyguardMessageArea))
             .thenReturn(mKeyguardMessageAreaController)
+        Mockito.`when`(keyguardPasswordView.passwordTextViewId).thenReturn(R.id.passwordEntry)
+        Mockito.`when`(keyguardPasswordView.findViewById<EditText>(R.id.passwordEntry)
+        ).thenReturn(passwordEntry)
         keyguardPasswordViewController = KeyguardPasswordViewController(
             keyguardPasswordView,
             keyguardUpdateMonitor,
@@ -103,7 +109,10 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
         Mockito.`when`(keyguardViewController.isBouncerShowing).thenReturn(true)
         Mockito.`when`(keyguardPasswordView.isShown).thenReturn(true)
         keyguardPasswordViewController.onResume(KeyguardSecurityView.VIEW_REVEALED)
-        keyguardPasswordView.post { verify(keyguardPasswordView).requestFocus() }
+        keyguardPasswordView.post {
+            verify(keyguardPasswordView).requestFocus()
+            verify(keyguardPasswordView).showKeyboard()
+        }
     }
 
     @Test
@@ -112,6 +121,15 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
         Mockito.`when`(keyguardPasswordView.isShown).thenReturn(true)
         keyguardPasswordViewController.onResume(KeyguardSecurityView.VIEW_REVEALED)
         verify(keyguardPasswordView, never()).requestFocus()
+    }
+
+    @Test
+    fun testHideKeyboardWhenOnPause() {
+        keyguardPasswordViewController.onPause()
+        keyguardPasswordView.post {
+            verify(keyguardPasswordView).clearFocus()
+            verify(keyguardPasswordView).hideKeyboard()
+        }
     }
 
     @Test

@@ -57,7 +57,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-import static android.view.WindowManager.TRANSIT_WAKE;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerPolicyConstants.ACTION_HDMI_PLUGGED;
 import static android.view.WindowManagerPolicyConstants.ALT_BAR_BOTTOM;
@@ -789,13 +788,7 @@ public class DisplayPolicy {
             if (!mDisplayContent.isDefaultDisplay) {
                 return;
             }
-            if (mAwake && mDisplayContent.mTransitionController.isShellTransitionsEnabled()
-                    && !mDisplayContent.mTransitionController.isCollecting()) {
-                // Start a transition for waking. This is needed for showWhenLocked activities.
-                mDisplayContent.mTransitionController.requestTransitionIfNeeded(TRANSIT_WAKE,
-                        0 /* flags */, null /* trigger */, mDisplayContent);
-            }
-            mService.mAtmService.mKeyguardController.updateDeferWakeTransition(
+            mService.mAtmService.mKeyguardController.updateDeferTransitionForAod(
                     mAwake /* waiting */);
         }
     }

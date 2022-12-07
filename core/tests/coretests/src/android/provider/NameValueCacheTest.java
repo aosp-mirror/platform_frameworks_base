@@ -76,7 +76,7 @@ public class NameValueCacheTest {
         when(mMockContentProvider.getIContentProvider()).thenReturn(mMockIContentProvider);
         mMockContentResolver = new MockContentResolver(InstrumentationRegistry
                 .getInstrumentation().getContext());
-        mMockContentResolver.addProvider(DeviceConfig.CONTENT_URI.getAuthority(),
+        mMockContentResolver.addProvider(Settings.Config.CONTENT_URI.getAuthority(),
                 mMockContentProvider);
         mCacheGenerationStore = new MemoryIntArray(1);
         mStorage = new HashMap<>();
@@ -84,7 +84,7 @@ public class NameValueCacheTest {
         // Stores keyValues for a given prefix and increments the generation. (Note that this
         // increments the generation no matter what, it doesn't pay attention to if anything
         // actually changed).
-        when(mMockIContentProvider.call(any(), eq(DeviceConfig.CONTENT_URI.getAuthority()),
+        when(mMockIContentProvider.call(any(), eq(Settings.Config.CONTENT_URI.getAuthority()),
                 eq(Settings.CALL_METHOD_SET_ALL_CONFIG),
                 any(), any(Bundle.class))).thenAnswer(invocationOnMock -> {
                     Bundle incomingBundle = invocationOnMock.getArgument(4);
@@ -104,7 +104,7 @@ public class NameValueCacheTest {
         // Returns the keyValues corresponding to a namespace, or an empty map if the namespace
         // doesn't have anything stored for it. Returns the generation key if the caller asked
         // for one.
-        when(mMockIContentProvider.call(any(), eq(DeviceConfig.CONTENT_URI.getAuthority()),
+        when(mMockIContentProvider.call(any(), eq(Settings.Config.CONTENT_URI.getAuthority()),
                 eq(Settings.CALL_METHOD_LIST_CONFIG),
                 any(), any(Bundle.class))).thenAnswer(invocationOnMock -> {
                     Bundle incomingBundle = invocationOnMock.getArgument(4);

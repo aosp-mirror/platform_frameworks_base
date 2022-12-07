@@ -619,7 +619,7 @@ final class PersistentDataStore {
 
     private static final class DisplayState {
         private int mColorMode;
-        private float mBrightness;
+        private float mBrightness = Float.NaN;
         private int mWidth;
         private int mHeight;
         private float mRefreshRate;
@@ -700,7 +700,11 @@ final class PersistentDataStore {
                         break;
                     case TAG_BRIGHTNESS_VALUE:
                         String brightness = parser.nextText();
-                        mBrightness = Float.parseFloat(brightness);
+                        try {
+                            mBrightness = Float.parseFloat(brightness);
+                        } catch (NumberFormatException e) {
+                            mBrightness = Float.NaN;
+                        }
                         break;
                     case TAG_BRIGHTNESS_CONFIGURATIONS:
                         mDisplayBrightnessConfigurations.loadFromXml(parser);
@@ -727,7 +731,9 @@ final class PersistentDataStore {
             serializer.endTag(null, TAG_COLOR_MODE);
 
             serializer.startTag(null, TAG_BRIGHTNESS_VALUE);
-            serializer.text(Float.toString(mBrightness));
+            if (!Float.isNaN(mBrightness)) {
+                serializer.text(Float.toString(mBrightness));
+            }
             serializer.endTag(null, TAG_BRIGHTNESS_VALUE);
 
             serializer.startTag(null, TAG_BRIGHTNESS_CONFIGURATIONS);

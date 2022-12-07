@@ -29,6 +29,8 @@ java_library_static {
     ],
     static_libs: [
         "kotlin-stdlib",
+        // Adds reflection-less suppressed exceptions and AutoCloseable.use().
+        "kotlin-stdlib-jdk7",
     ],
     jarjar_rules: "jarjar-rules.txt",
     kotlincflags: [

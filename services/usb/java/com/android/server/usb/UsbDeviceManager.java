@@ -219,7 +219,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
     private static EventLogger sEventLogger;
 
-    private UsbGadgetHal mUsbGadgetHal;
+    private static UsbGadgetHal mUsbGadgetHal;
 
     /**
      * Counter for tracking UsbOperation operations.
@@ -1976,7 +1976,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         }
     }
 
-    private final class UsbHandlerHal extends UsbHandler {
+    private static final class UsbHandlerHal extends UsbHandler {
 
         private final Object mGadgetProxyLock = new Object();
 

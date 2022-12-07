@@ -6814,10 +6814,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         @Override
         public boolean isRequestedVisible(@InsetsType int types) {
-            if (types == ime()) {
-                return getInsetsStateController().getImeSourceProvider().isImeShowing();
-            }
-            return (mRequestedVisibleTypes & types) != 0;
+            return ((types & ime()) != 0
+                            && getInsetsStateController().getImeSourceProvider().isImeShowing())
+                    || (mRequestedVisibleTypes & types) != 0;
         }
 
         @Override

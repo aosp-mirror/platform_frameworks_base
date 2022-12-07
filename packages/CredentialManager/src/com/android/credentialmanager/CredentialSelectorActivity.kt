@@ -69,6 +69,7 @@ class CredentialSelectorActivity : ComponentActivity() {
         )
         providerActivityResult.value?.let {
           viewModel.onProviderActivityResult(it)
+          providerActivityResult.value = null
         }
         CreateCredentialScreen(viewModel = viewModel, providerActivityLauncher = launcher)
       }
@@ -80,6 +81,7 @@ class CredentialSelectorActivity : ComponentActivity() {
         )
         providerActivityResult.value?.let {
           viewModel.onProviderActivityResult(it)
+          providerActivityResult.value = null
         }
         GetCredentialScreen(viewModel = viewModel, providerActivityLauncher = launcher)
       }

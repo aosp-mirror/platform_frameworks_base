@@ -189,7 +189,7 @@ public abstract class WMShellModule {
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             SyncTransactionQueue syncQueue,
-            @DynamicOverride DesktopModeController desktopModeController) {
+            Optional<DesktopModeController> desktopModeController) {
         return new CaptionWindowDecorViewModel(
                     context,
                     mainHandler,

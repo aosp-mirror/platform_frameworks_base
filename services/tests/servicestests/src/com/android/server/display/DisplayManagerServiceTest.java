@@ -16,7 +16,9 @@
 
 package com.android.server.display;
 
+import static android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY;
 import static android.Manifest.permission.ADD_TRUSTED_DISPLAY;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
 
@@ -724,9 +726,6 @@ public class DisplayManagerServiceTest {
         registerDefaultDisplays(displayManager);
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
 
-        when(mContext.checkCallingPermission(ADD_TRUSTED_DISPLAY))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
-
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
         when(mMockVirtualDeviceManagerInternal.isValidVirtualDevice(virtualDevice))
                 .thenReturn(true);
@@ -780,9 +779,6 @@ public class DisplayManagerServiceTest {
         registerDefaultDisplays(displayManager);
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
 
-        when(mContext.checkCallingPermission(ADD_TRUSTED_DISPLAY))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
-
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
         when(mMockVirtualDeviceManagerInternal.isValidVirtualDevice(virtualDevice))
                 .thenReturn(true);
@@ -792,7 +788,7 @@ public class DisplayManagerServiceTest {
         // virtual device.
         final VirtualDisplayConfig.Builder builder1 =
                 new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
-                        .setUniqueId("uniqueId --- device display group 1");
+                        .setUniqueId("uniqueId --- device display group");
 
         int displayId1 =
                 localService.createVirtualDisplay(
@@ -808,7 +804,7 @@ public class DisplayManagerServiceTest {
         final VirtualDisplayConfig.Builder builder2 =
                 new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
                         .setFlags(VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP)
-                        .setUniqueId("uniqueId --- device display group 1");
+                        .setUniqueId("uniqueId --- own display group");
 
         int displayId2 =
                 localService.createVirtualDisplay(
@@ -824,6 +820,99 @@ public class DisplayManagerServiceTest {
                         + " group.",
                 displayGroupId1,
                 displayGroupId2);
+    }
+
+    @Test
+    public void displaysInDeviceOrOwnDisplayGroupShouldPreserveAlwaysUnlockedFlag()
+            throws Exception {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+
+        registerDefaultDisplays(displayManager);
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+
+        IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
+        when(mMockVirtualDeviceManagerInternal.isValidVirtualDevice(virtualDevice))
+                .thenReturn(true);
+        when(virtualDevice.getDeviceId()).thenReturn(1);
+
+        // Allow an ALWAYS_UNLOCKED display to be created.
+        when(mContext.checkCallingPermission(ADD_TRUSTED_DISPLAY))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        when(mContext.checkCallingPermission(ADD_ALWAYS_UNLOCKED_DISPLAY))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        // Create a virtual display in a device display group.
+        final VirtualDisplayConfig deviceDisplayGroupDisplayConfig =
+                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
+                        .setUniqueId("uniqueId --- device display group 1")
+                        .setFlags(VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED)
+                        .build();
+
+        int deviceDisplayGroupDisplayId =
+                localService.createVirtualDisplay(
+                        deviceDisplayGroupDisplayConfig,
+                        mMockAppToken /* callback */,
+                        virtualDevice /* virtualDeviceToken */,
+                        mock(DisplayWindowPolicyController.class),
+                        PACKAGE_NAME);
+
+        // Check that FLAG_ALWAYS_UNLOCKED is set.
+        assertNotEquals(
+                "FLAG_ALWAYS_UNLOCKED should be set for displays created in a device display"
+                        + " group.",
+                (displayManager.getDisplayDeviceInfoInternal(deviceDisplayGroupDisplayId).flags
+                        & DisplayDeviceInfo.FLAG_ALWAYS_UNLOCKED),
+                0);
+
+        // Create a virtual display in its own display group.
+        final VirtualDisplayConfig ownDisplayGroupConfig =
+                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
+                        .setUniqueId("uniqueId --- own display group 1")
+                        .setFlags(
+                                VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED
+                                        | VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP)
+                        .build();
+
+        int ownDisplayGroupDisplayId =
+                localService.createVirtualDisplay(
+                        ownDisplayGroupConfig,
+                        mMockAppToken /* callback */,
+                        virtualDevice /* virtualDeviceToken */,
+                        mock(DisplayWindowPolicyController.class),
+                        PACKAGE_NAME);
+
+        // Check that FLAG_ALWAYS_UNLOCKED is set.
+        assertNotEquals(
+                "FLAG_ALWAYS_UNLOCKED should be set for displays created in their own display"
+                        + " group.",
+                (displayManager.getDisplayDeviceInfoInternal(ownDisplayGroupDisplayId).flags
+                        & DisplayDeviceInfo.FLAG_ALWAYS_UNLOCKED),
+                0);
+
+        // Create a virtual display in a device display group.
+        final VirtualDisplayConfig defaultDisplayGroupConfig =
+                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
+                        .setUniqueId("uniqueId --- default display group 1")
+                        .setFlags(VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED)
+                        .build();
+
+        int defaultDisplayGroupDisplayId =
+                localService.createVirtualDisplay(
+                        defaultDisplayGroupConfig,
+                        mMockAppToken /* callback */,
+                        null /* virtualDeviceToken */,
+                        mock(DisplayWindowPolicyController.class),
+                        PACKAGE_NAME);
+
+        // Check that FLAG_ALWAYS_UNLOCKED is not set.
+        assertEquals(
+                "FLAG_ALWAYS_UNLOCKED should not be set for displays created in the default"
+                        + " display group.",
+                (displayManager.getDisplayDeviceInfoInternal(defaultDisplayGroupDisplayId).flags
+                        & DisplayDeviceInfo.FLAG_ALWAYS_UNLOCKED),
+                0);
     }
 
     @Test

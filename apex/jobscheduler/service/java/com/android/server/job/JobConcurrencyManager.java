@@ -1175,7 +1175,7 @@ class JobConcurrencyManager {
 
             if (jobStatus != null && !jsc.isWithinExecutionGuaranteeTime()
                     && restriction.isJobRestricted(jobStatus)) {
-                jsc.cancelExecutingJobLocked(restriction.getReason(),
+                jsc.cancelExecutingJobLocked(restriction.getStopReason(),
                         restriction.getInternalReason(),
                         JobParameters.getInternalReasonCodeDescription(
                                 restriction.getInternalReason()));
@@ -1208,7 +1208,7 @@ class JobConcurrencyManager {
                 final JobRestriction restriction = mService.checkIfRestricted(running);
                 if (restriction != null) {
                     final int internalReasonCode = restriction.getInternalReason();
-                    serviceContext.cancelExecutingJobLocked(restriction.getReason(),
+                    serviceContext.cancelExecutingJobLocked(restriction.getStopReason(),
                             internalReasonCode,
                             "restricted due to "
                                     + JobParameters.getInternalReasonCodeDescription(
@@ -1324,6 +1324,7 @@ class JobConcurrencyManager {
                 mActivePkgStats.add(
                         jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(),
                         packageStats);
+                mService.resetPendingJobReasonCache(jobStatus);
             }
             if (mService.getPendingJobQueue().remove(jobStatus)) {
                 mService.mJobPackageTracker.noteNonpending(jobStatus);

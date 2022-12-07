@@ -27,6 +27,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.doAnswer
@@ -295,6 +296,7 @@ class ConfigurationControllerImplTest : SysuiTestCase() {
     }
 
     @Test
+    @Ignore("b/261408895")
     fun equivalentConfigObject_listenerNotNotified() {
         val config = mContext.resources.configuration
         val listener = createAndAddListener()

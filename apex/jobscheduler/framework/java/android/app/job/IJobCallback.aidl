@@ -16,6 +16,7 @@
 
 package android.app.job;
 
+import android.app.Notification;
 import android.app.job.JobWorkItem;
 
 /**
@@ -104,4 +105,17 @@ interface IJobCallback {
      */
     void updateTransferredNetworkBytes(int jobId, in JobWorkItem item,
             long transferredDownloadBytes, long transferredUploadBytes);
+    /**
+     * Provide JobScheduler with a notification to post and tie to this job's
+     * lifecycle.
+     * This is required for all user-initiated job and optional for other jobs.
+     *
+     * @param jobId Unique integer used to identify this job.
+     * @param notificationId The ID for this notification, as per
+     *                       {@link android.app.NotificationManager#notify(int, Notification)}.
+     * @param notification The notification to be displayed.
+     * @param jobEndNotificationPolicy The policy to apply to the notification when the job stops.
+     */
+    void setNotification(int jobId, int notificationId,
+            in Notification notification, int jobEndNotificationPolicy);
 }

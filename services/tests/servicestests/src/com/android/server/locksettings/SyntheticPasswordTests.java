@@ -136,6 +136,43 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertTrue(mService.isSyntheticPasswordBasedCredential(userId));
     }
 
+    protected void initializeSyntheticPassword(int userId) {
+        synchronized (mService.mSpManager) {
+            mService.initializeSyntheticPasswordLocked(userId);
+        }
+    }
+
+    // Tests that the FRP credential is updated when an LSKF-based protector is created for the user
+    // that owns the FRP credential, if the device is already provisioned.
+    @Test
+    public void testFrpCredentialSyncedIfDeviceProvisioned() throws RemoteException {
+        setDeviceProvisioned(true);
+        initializeSyntheticPassword(PRIMARY_USER_ID);
+        verify(mStorage.mPersistentDataBlockManager).setFrpCredentialHandle(any());
+    }
+
+    // Tests that the FRP credential is not updated when an LSKF-based protector is created for the
+    // user that owns the FRP credential, if the new credential is empty and the device is not yet
+    // provisioned.
+    @Test
+    public void testEmptyFrpCredentialNotSyncedIfDeviceNotProvisioned() throws RemoteException {
+        setDeviceProvisioned(false);
+        initializeSyntheticPassword(PRIMARY_USER_ID);
+        verify(mStorage.mPersistentDataBlockManager, never()).setFrpCredentialHandle(any());
+    }
+
+    // Tests that the FRP credential is updated when an LSKF-based protector is created for the user
+    // that owns the FRP credential, if the new credential is nonempty and the device is not yet
+    // provisioned.
+    @Test
+    public void testNonEmptyFrpCredentialSyncedIfDeviceNotProvisioned() throws RemoteException {
+        setDeviceProvisioned(false);
+        initializeSyntheticPassword(PRIMARY_USER_ID);
+        verify(mStorage.mPersistentDataBlockManager, never()).setFrpCredentialHandle(any());
+        mService.setLockCredential(newPassword("password"), nonePassword(), PRIMARY_USER_ID);
+        verify(mStorage.mPersistentDataBlockManager).setFrpCredentialHandle(any());
+    }
+
     @Test
     public void testChangeCredential() throws RemoteException {
         final LockscreenCredential password = newPassword("password");

@@ -43,6 +43,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_COMPANION_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_SHORTCUT;
 
@@ -1233,7 +1234,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 WindowContainer.fromBinder(hop.getContainer())
                         .removeLocalInsetsSourceProvider(hop.getInsetsTypes());
                 break;
-            case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP:
+            case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP: {
                 final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
                 if (container == null || container.asDisplayArea() == null
                         || !container.isAttached()) {
@@ -1244,7 +1245,26 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 container.setAlwaysOnTop(hop.isAlwaysOnTop());
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
-
+            }
+            case HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH: {
+                final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
+                final Task task = container != null ? container.asTask() : null;
+                if (task == null || !task.isAttached()) {
+                    Slog.e(TAG, "Attempt to operate on unknown or detached container: "
+                            + container);
+                    break;
+                }
+                if (!task.mCreatedByOrganizer) {
+                    throw new UnsupportedOperationException(
+                            "Cannot set reparent leaf task flag on non-organized task : " + task);
+                }
+                if (!task.isRootTask()) {
+                    throw new UnsupportedOperationException(
+                            "Cannot set reparent leaf task flag on non-root task : " + task);
+                }
+                task.setReparentLeafTaskIfRelaunch(hop.isReparentLeafTaskIfRelaunch());
+                break;
+            }
         }
         return effects;
     }

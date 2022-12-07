@@ -1709,6 +1709,13 @@
            for more details.
         -->
         <flag name="shortService" value="0x800" />
+        <!-- The file management use case which manages files/directories, often involving file I/O
+            across the file system.
+            <p>Requires the app to hold the permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_FILE_MANAGEMENT} in order to use
+            this type.
+        -->
+        <flag name="fileManagement" value="0x1000" />
         <!-- Use cases that can't be categorized into any other foreground service types, but also
             can't use @link android.app.job.JobInfo.Builder} APIs.
             See {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SPECIAL_USE} for the

@@ -1493,37 +1493,37 @@ public final class WindowInsets {
         public static String toString(@InsetsType int types) {
             StringBuilder result = new StringBuilder();
             if ((types & STATUS_BARS) != 0) {
-                result.append("statusBars |");
+                result.append("statusBars ");
             }
             if ((types & NAVIGATION_BARS) != 0) {
-                result.append("navigationBars |");
+                result.append("navigationBars ");
             }
             if ((types & CAPTION_BAR) != 0) {
-                result.append("captionBar |");
+                result.append("captionBar ");
             }
             if ((types & IME) != 0) {
-                result.append("ime |");
+                result.append("ime ");
             }
             if ((types & SYSTEM_GESTURES) != 0) {
-                result.append("systemGestures |");
+                result.append("systemGestures ");
             }
             if ((types & MANDATORY_SYSTEM_GESTURES) != 0) {
-                result.append("mandatorySystemGestures |");
+                result.append("mandatorySystemGestures ");
             }
             if ((types & TAPPABLE_ELEMENT) != 0) {
-                result.append("tappableElement |");
+                result.append("tappableElement ");
             }
             if ((types & DISPLAY_CUTOUT) != 0) {
-                result.append("displayCutout |");
+                result.append("displayCutout ");
             }
             if ((types & WINDOW_DECOR) != 0) {
-                result.append("windowDecor |");
+                result.append("windowDecor ");
             }
             if ((types & SYSTEM_OVERLAYS) != 0) {
-                result.append("systemOverlays |");
+                result.append("systemOverlays ");
             }
             if (result.length() > 0) {
-                result.delete(result.length() - 2, result.length());
+                result.delete(result.length() - 1, result.length());
             }
             return result.toString();
         }

@@ -27,6 +27,8 @@ android {
     defaultConfig {
         minSdk MIN_SDK
         targetSdk TARGET_SDK
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     sourceSets {
@@ -36,6 +38,13 @@ android {
             }
             res.srcDirs = ["res"]
             manifest.srcFile "AndroidManifest.xml"
+        }
+        androidTest {
+            kotlin {
+                srcDir "../tests/src"
+            }
+            res.srcDirs = ["../tests/res"]
+            manifest.srcFile "../tests/AndroidManifest.xml"
         }
     }
     compileOptions {
@@ -51,6 +60,11 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion jetpack_compose_compiler_version
+    }
+    buildTypes {
+        debug {
+            testCoverageEnabled = true
+        }
     }
 }
 
@@ -72,4 +86,29 @@ dependencies {
     api "com.google.android.material:material:1.7.0-alpha03"
     debugApi "androidx.compose.ui:ui-tooling:$jetpack_compose_version"
     implementation "com.airbnb.android:lottie-compose:5.2.0"
+
+    androidTestImplementation project(":testutils")
+    androidTestImplementation "com.linkedin.dexmaker:dexmaker-mockito:2.28.1"
+}
+
+task coverageReport(type: JacocoReport, dependsOn: "connectedDebugAndroidTest") {
+    group = "Reporting"
+    description = "Generate Jacoco coverage reports after running tests."
+
+    sourceDirectories.from = files("src")
+    classDirectories.from = fileTree(
+            dir: "$buildDir/tmp/kotlin-classes/debug",
+            excludes: [
+                    "com/android/settingslib/spa/debug/**",
+
+                    // Excludes files forked from AndroidX.
+                    "com/android/settingslib/spa/widget/scaffold/CustomizedAppBar*",
+                    "com/android/settingslib/spa/widget/scaffold/TopAppBarColors*",
+
+                    // Excludes files forked from Accompanist.
+                    "com/android/settingslib/spa/framework/compose/DrawablePainter*",
+                    "com/android/settingslib/spa/framework/compose/Pager*",
+            ],
+    )
+    executionData.from = fileTree(dir: "$buildDir/outputs/code_coverage/debugAndroidTest/connected")
 }

@@ -2209,6 +2209,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 case START_KEYGUARD_EXIT_ANIM:
                     Trace.beginSection(
                             "KeyguardViewMediator#handleMessage START_KEYGUARD_EXIT_ANIM");
+                    synchronized (KeyguardViewMediator.this) {
+                        mHiding = true;
+                    }
                     StartKeyguardExitAnimParams params = (StartKeyguardExitAnimParams) msg.obj;
                     mNotificationShadeWindowControllerLazy.get().batchApplyWindowLayoutParams(
                             () -> {

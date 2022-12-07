@@ -59,6 +59,7 @@ package com.android.server.pm {
     method public void close();
     method public void forAllPackageStates(@NonNull java.util.function.Consumer<com.android.server.pm.pkg.PackageState>);
     method @Nullable public com.android.server.pm.pkg.PackageState getPackageState(@NonNull String);
+    method @NonNull public java.util.Map<java.lang.String,com.android.server.pm.pkg.PackageState> getPackageStates();
   }
 
   public static interface PackageManagerLocal.UnfilteredSnapshot extends java.lang.AutoCloseable {

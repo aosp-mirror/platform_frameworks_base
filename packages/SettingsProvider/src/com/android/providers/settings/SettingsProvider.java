@@ -3595,8 +3595,8 @@ public class SettingsProvider extends ContentProvider {
 
         private Uri getNotificationUriFor(int key, String name) {
             if (isConfigSettingsKey(key)) {
-                return (name != null) ? Uri.withAppendedPath(DeviceConfig.CONTENT_URI, name)
-                        : DeviceConfig.CONTENT_URI;
+                return (name != null) ? Uri.withAppendedPath(Settings.Config.CONTENT_URI, name)
+                        : Settings.Config.CONTENT_URI;
             } else if (isGlobalSettingsKey(key)) {
                 return (name != null) ? Uri.withAppendedPath(Settings.Global.CONTENT_URI, name)
                         : Settings.Global.CONTENT_URI;

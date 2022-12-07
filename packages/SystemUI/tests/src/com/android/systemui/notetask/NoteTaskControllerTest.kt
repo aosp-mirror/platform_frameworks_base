@@ -16,16 +16,21 @@
 package com.android.systemui.notetask
 
 import android.app.KeyguardManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.UserManager
 import android.test.suitebuilder.annotation.SmallTest
-import android.view.KeyEvent
 import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.notetask.NoteTaskIntentResolver.Companion.NOTES_ACTION
+import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.android.wm.shell.bubbles.Bubbles
+import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import org.junit.Before
 import org.junit.Test
@@ -48,6 +53,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     private val notesIntent = Intent(NOTES_ACTION)
 
     @Mock lateinit var context: Context
+    @Mock lateinit var packageManager: PackageManager
     @Mock lateinit var noteTaskIntentResolver: NoteTaskIntentResolver
     @Mock lateinit var bubbles: Bubbles
     @Mock lateinit var optionalBubbles: Optional<Bubbles>
@@ -60,6 +66,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        whenever(context.packageManager).thenReturn(packageManager)
         whenever(noteTaskIntentResolver.resolveIntent()).thenReturn(notesIntent)
         whenever(optionalBubbles.orElse(null)).thenReturn(bubbles)
         whenever(optionalKeyguardManager.orElse(null)).thenReturn(keyguardManager)
@@ -78,89 +85,125 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         )
     }
 
+    // region showNoteTask
     @Test
-    fun handleSystemKey_keyguardIsLocked_shouldStartActivity() {
+    fun showNoteTask_keyguardIsLocked_shouldStartActivity() {
         whenever(keyguardManager.isKeyguardLocked).thenReturn(true)
 
-        createNoteTaskController().handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
+        createNoteTaskController().showNoteTask(isInMultiWindowMode = false)
 
         verify(context).startActivity(notesIntent)
         verify(bubbles, never()).showAppBubble(notesIntent)
     }
 
     @Test
-    fun handleSystemKey_keyguardIsUnlocked_shouldStartBubbles() {
+    fun showNoteTask_keyguardIsUnlocked_shouldStartBubbles() {
         whenever(keyguardManager.isKeyguardLocked).thenReturn(false)
 
-        createNoteTaskController().handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
+        createNoteTaskController().showNoteTask(isInMultiWindowMode = false)
 
         verify(bubbles).showAppBubble(notesIntent)
         verify(context, never()).startActivity(notesIntent)
     }
 
     @Test
-    fun handleSystemKey_receiveInvalidSystemKey_shouldDoNothing() {
-        createNoteTaskController().handleSystemKey(KeyEvent.KEYCODE_UNKNOWN)
+    fun showNoteTask_isInMultiWindowMode_shouldStartActivity() {
+        whenever(keyguardManager.isKeyguardLocked).thenReturn(false)
 
-        verify(context, never()).startActivity(notesIntent)
+        createNoteTaskController().showNoteTask(isInMultiWindowMode = true)
+
+        verify(context).startActivity(notesIntent)
         verify(bubbles, never()).showAppBubble(notesIntent)
     }
 
     @Test
-    fun handleSystemKey_bubblesIsNull_shouldDoNothing() {
+    fun showNoteTask_bubblesIsNull_shouldDoNothing() {
         whenever(optionalBubbles.orElse(null)).thenReturn(null)
 
-        createNoteTaskController().handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
+        createNoteTaskController().showNoteTask(isInMultiWindowMode = false)
 
         verify(context, never()).startActivity(notesIntent)
         verify(bubbles, never()).showAppBubble(notesIntent)
     }
 
     @Test
-    fun handleSystemKey_keyguardManagerIsNull_shouldDoNothing() {
+    fun showNoteTask_keyguardManagerIsNull_shouldDoNothing() {
         whenever(optionalKeyguardManager.orElse(null)).thenReturn(null)
 
-        createNoteTaskController().handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
+        createNoteTaskController().showNoteTask(isInMultiWindowMode = false)
 
         verify(context, never()).startActivity(notesIntent)
         verify(bubbles, never()).showAppBubble(notesIntent)
     }
 
     @Test
-    fun handleSystemKey_userManagerIsNull_shouldDoNothing() {
+    fun showNoteTask_userManagerIsNull_shouldDoNothing() {
         whenever(optionalUserManager.orElse(null)).thenReturn(null)
 
-        createNoteTaskController().handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
+        createNoteTaskController().showNoteTask(isInMultiWindowMode = false)
 
         verify(context, never()).startActivity(notesIntent)
         verify(bubbles, never()).showAppBubble(notesIntent)
     }
 
     @Test
-    fun handleSystemKey_intentResolverReturnsNull_shouldDoNothing() {
+    fun showNoteTask_intentResolverReturnsNull_shouldDoNothing() {
         whenever(noteTaskIntentResolver.resolveIntent()).thenReturn(null)
 
-        createNoteTaskController().handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
+        createNoteTaskController().showNoteTask(isInMultiWindowMode = false)
 
         verify(context, never()).startActivity(notesIntent)
         verify(bubbles, never()).showAppBubble(notesIntent)
     }
 
     @Test
-    fun handleSystemKey_flagDisabled_shouldDoNothing() {
-        createNoteTaskController(isEnabled = false).handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
+    fun showNoteTask_flagDisabled_shouldDoNothing() {
+        createNoteTaskController(isEnabled = false).showNoteTask()
 
         verify(context, never()).startActivity(notesIntent)
         verify(bubbles, never()).showAppBubble(notesIntent)
     }
 
     @Test
-    fun handleSystemKey_userIsLocked_shouldDoNothing() {
+    fun showNoteTask_userIsLocked_shouldDoNothing() {
         whenever(userManager.isUserUnlocked).thenReturn(false)
 
-        createNoteTaskController().handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
+        createNoteTaskController().showNoteTask(isInMultiWindowMode = false)
 
         verify(context, never()).startActivity(notesIntent)
         verify(bubbles, never()).showAppBubble(notesIntent)
     }
+    // endregion
+
+    // region setNoteTaskShortcutEnabled
+    @Test
+    fun setNoteTaskShortcutEnabled_setTrue() {
+        createNoteTaskController().setNoteTaskShortcutEnabled(value = true)
+
+        val argument = argumentCaptor<ComponentName>()
+        verify(context.packageManager)
+            .setComponentEnabledSetting(
+                argument.capture(),
+                eq(PackageManager.COMPONENT_ENABLED_STATE_ENABLED),
+                eq(PackageManager.DONT_KILL_APP),
+            )
+        val expected = ComponentName(context, CreateNoteTaskShortcutActivity::class.java)
+        assertThat(argument.value.flattenToString()).isEqualTo(expected.flattenToString())
+    }
+
+    @Test
+    fun setNoteTaskShortcutEnabled_setFalse() {
+        createNoteTaskController().setNoteTaskShortcutEnabled(value = false)
+
+        val argument = argumentCaptor<ComponentName>()
+        verify(context.packageManager)
+            .setComponentEnabledSetting(
+                argument.capture(),
+                eq(PackageManager.COMPONENT_ENABLED_STATE_DISABLED),
+                eq(PackageManager.DONT_KILL_APP),
+            )
+        val expected = ComponentName(context, CreateNoteTaskShortcutActivity::class.java)
+        assertThat(argument.value.flattenToString()).isEqualTo(expected.flattenToString())
+    }
+    // endregion
 }

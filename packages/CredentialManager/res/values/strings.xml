@@ -18,9 +18,13 @@
   <!-- This appears as a text button where users can click to save this credential to another device. [CHAR LIMIT=80] -->
   <string name="string_save_to_another_device">Save to another device</string>
   <!-- This appears as the title of the modal bottom sheet introducing what is passkey to users. [CHAR LIMIT=200] -->
-  <string name="passkey_creation_intro_title">A simple way to sign in safely</string>
-  <!-- This appears as the description body of the modal bottom sheet introducing what is passkey to users. [CHAR LIMIT=200] -->
-  <string name="passkey_creation_intro_body">Use your fingerprint, face or screen lock to sign in with a unique passkey that can’t be forgotten or stolen. Learn more</string>
+  <string name="passkey_creation_intro_title">Safer with passkeys</string>
+  <!-- This appears as the description body of the modal bottom sheet introducing why passkey beneficial on the passwords side. [CHAR LIMIT=200] -->
+  <string name="passkey_creation_intro_body_password">No need to create or remember complex passwords</string>
+  <!-- This appears as the description body of the modal bottom sheet introducing why passkey beneficial on the safety side. [CHAR LIMIT=200] -->
+  <string name="passkey_creation_intro_body_fingerprint">Use your fingerprint, face, or screen lock to create a unique passkey</string>
+  <!-- This appears as the description body of the modal bottom sheet introducing why passkey beneficial on the using other devices side. [CHAR LIMIT=200] -->
+  <string name="passkey_creation_intro_body_device">Passkeys are saved to a password manager, so you can sign in on other devices</string>
   <!-- This appears as the title of the modal bottom sheet which provides all available providers for users to choose. [CHAR LIMIT=200] -->
   <string name="choose_provider_title">Choose where to <xliff:g id="createTypes" example="create your passkeys">%1$s</xliff:g></string>
   <!-- Create types which are inserted as a placeholder for string choose_provider_title. [CHAR LIMIT=200] -->

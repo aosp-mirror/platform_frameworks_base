@@ -9,7 +9,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarIconView
-import com.android.systemui.statusbar.notification.SourceType
+import com.android.systemui.statusbar.notification.LegacySourceType
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
@@ -314,9 +314,9 @@ class NotificationShelfTest : SysuiTestCase() {
         val row: ExpandableNotificationRow = notificationTestHelper.createRowWithRoundness(
                 /* topRoundness = */ 1f,
                 /* bottomRoundness = */ 1f,
-                /* sourceType = */ SourceType.OnScroll)
+                /* sourceType = */ LegacySourceType.OnScroll)
 
-        NotificationShelf.resetOnScrollRoundness(row)
+        NotificationShelf.resetLegacyOnScrollRoundness(row)
 
         assertEquals(0f, row.topRoundness)
         assertEquals(0f, row.bottomRoundness)
@@ -327,14 +327,14 @@ class NotificationShelfTest : SysuiTestCase() {
         val row1: ExpandableNotificationRow = notificationTestHelper.createRowWithRoundness(
                 /* topRoundness = */ 1f,
                 /* bottomRoundness = */ 1f,
-                /* sourceType = */ SourceType.DefaultValue)
+                /* sourceType = */ LegacySourceType.DefaultValue)
         val row2: ExpandableNotificationRow = notificationTestHelper.createRowWithRoundness(
                 /* topRoundness = */ 1f,
                 /* bottomRoundness = */ 1f,
-                /* sourceType = */ SourceType.OnDismissAnimation)
+                /* sourceType = */ LegacySourceType.OnDismissAnimation)
 
-        NotificationShelf.resetOnScrollRoundness(row1)
-        NotificationShelf.resetOnScrollRoundness(row2)
+        NotificationShelf.resetLegacyOnScrollRoundness(row1)
+        NotificationShelf.resetLegacyOnScrollRoundness(row2)
 
         assertEquals(1f, row1.topRoundness)
         assertEquals(1f, row1.bottomRoundness)

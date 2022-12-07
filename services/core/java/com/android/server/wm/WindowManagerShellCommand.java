@@ -1221,6 +1221,12 @@ public class WindowManagerShellCommand extends ShellCommand {
             pw.println("Default position for vertical reachability: "
                     + LetterboxConfiguration.letterboxVerticalReachabilityPositionToString(
                     mLetterboxConfiguration.getDefaultPositionForVerticalReachability()));
+            pw.println("Current position for horizontal reachability:"
+                    + LetterboxConfiguration.letterboxHorizontalReachabilityPositionToString(
+                        mLetterboxConfiguration.getLetterboxPositionForHorizontalReachability()));
+            pw.println("Current position for vertical reachability:"
+                    + LetterboxConfiguration.letterboxVerticalReachabilityPositionToString(
+                        mLetterboxConfiguration.getLetterboxPositionForVerticalReachability()));
             pw.println("Is education enabled: "
                     + mLetterboxConfiguration.getIsEducationEnabled());
             pw.println("Is using split screen aspect ratio as aspect ratio for unresizable apps: "

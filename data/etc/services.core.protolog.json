@@ -4171,6 +4171,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "1945495497": {
+      "message": "Focused window didn't have a valid surface drawn.",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "1947239194": {
       "message": "Deferring rotation, still finishing previous rotation",
       "level": "VERBOSE",
