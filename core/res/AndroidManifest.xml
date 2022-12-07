@@ -7584,6 +7584,11 @@
     <permission android:name="android.permission.CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD"
                 android:protectionLevel="internal|appop" />
 
+    <!-- @SystemApi Allows to call APIs that log process lifecycle events
+         @hide -->
+    <permission android:name="android.permission.LOG_PROCESS_ACTIVITIES"
+                android:protectionLevel="signature|privileged" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->

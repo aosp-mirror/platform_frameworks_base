@@ -636,6 +636,105 @@ public class ActivityManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProcessCapability {}
 
+    /**
+     * Used to log FGS API events from CAMERA API
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_TYPE_CAMERA = 1;
+
+    /**
+     * Used to log FGS API events from BLUETOOTH API, used
+     * with FGS type of CONNECTED_DEVICE
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_TYPE_BLUETOOTH = 2;
+    /**
+     * Used to log FGS API events from Location API.
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_TYPE_LOCATION = 3;
+    /**
+     * Used to log FGS API events from media playback API
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_TYPE_MEDIA_PLAYBACK = 4;
+    /**
+     * Used to log FGS API events from Audio API
+     * @hide
+     */
+    public static final int FOREGROUND_SERVICE_API_TYPE_AUDIO = 5;
+    /**
+     * Used to log FGS API events from microphone API
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_TYPE_MICROPHONE = 6;
+    /**
+     * Used to log FGS API events from phone API
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_TYPE_PHONE_CALL = 7;
+    /**
+     * Used to log FGS API events from USB API
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_TYPE_USB = 8;
+    /**
+     * Used to log FGS API events from CDM API
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_TYPE_CDM = 9;
+
+    /**
+     * Constants used to denote what API type
+     * is creating an API event for logging.
+     * @hide
+     */
+    @IntDef(flag = false, prefix = { "FOREGROUND_SERVICE_API_TYPE_" }, value = {
+            FOREGROUND_SERVICE_API_TYPE_CAMERA,
+            FOREGROUND_SERVICE_API_TYPE_BLUETOOTH,
+            FOREGROUND_SERVICE_API_TYPE_LOCATION,
+            FOREGROUND_SERVICE_API_TYPE_MEDIA_PLAYBACK,
+            FOREGROUND_SERVICE_API_TYPE_AUDIO,
+            FOREGROUND_SERVICE_API_TYPE_MICROPHONE,
+            FOREGROUND_SERVICE_API_TYPE_PHONE_CALL,
+            FOREGROUND_SERVICE_API_TYPE_USB,
+            FOREGROUND_SERVICE_API_TYPE_CDM,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ForegroundServiceApiType {}
+
+    /**
+     * Used to log a start event for an FGS API
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_EVENT_BEGIN = 1;
+    /**
+     * Used to log a stop event for an FGS API
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_EVENT_END = 2;
+    /**
+     * Constants used to denote API state
+     * during an API event for logging.
+     * @hide
+     */
+    @IntDef(flag = false, prefix = { "FOREGROUND_SERVICE_API_EVENT_" }, value = {
+            FOREGROUND_SERVICE_API_EVENT_BEGIN,
+            FOREGROUND_SERVICE_API_EVENT_END,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ForegroundServiceApiEvent {}
+
     /** @hide Process does not have any capability */
     @SystemApi
     public static final int PROCESS_CAPABILITY_NONE = 0;
@@ -5491,6 +5590,35 @@ public class ActivityManager {
             return getService().isProcessFrozen(pid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Internal method for logging API starts. Used with
+     * FGS metrics logging. Is called by APIs that are
+     * used with FGS to log an API event (eg when
+     * the camera starts).
+     * @hide
+     *
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.LOG_PROCESS_ACTIVITIES)
+    public void noteForegroundResourceUse(@ForegroundServiceApiType int apiType,
+            @ForegroundServiceApiEvent int apiEvent, int uid, int pid) {
+        try {
+            switch (apiEvent) {
+                case FOREGROUND_SERVICE_API_EVENT_BEGIN:
+                    getService().logFgsApiBegin(apiType, uid, pid);
+                    break;
+                case FOREGROUND_SERVICE_API_EVENT_END:
+                    getService().logFgsApiEnd(apiType, uid, pid);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Argument of "
+                            + apiType + " not supported for foreground resource use logging");
+            }
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
         }
     }
 

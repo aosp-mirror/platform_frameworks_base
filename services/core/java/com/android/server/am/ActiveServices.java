@@ -368,6 +368,9 @@ public final class ActiveServices {
     @GuardedBy("mAm")
     private final ArraySet<String> mRestartBackoffDisabledPackages = new ArraySet<>();
 
+    // Used for logging foreground service API starts and end
+    private final ForegroundServiceTypeLoggerModule mFGSLogger;
+
     /**
      * For keeping ActiveForegroundApps retaining state while the screen is off.
      */
@@ -623,6 +626,7 @@ public final class ActiveServices {
                 ? maxBg : ActivityManager.isLowRamDeviceStatic() ? 1 : 8;
 
         final IBinder b = ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
+        this.mFGSLogger = new ForegroundServiceTypeLoggerModule();
     }
 
     void systemServicesReady() {
@@ -1829,6 +1833,24 @@ public final class ActiveServices {
                 && isForegroundServiceAllowedInBackgroundRestricted(app);
     }
 
+    void logFgsApiBeginLocked(int uid, int pid, int apiType) {
+        synchronized (mFGSLogger) {
+            mFGSLogger.logForegroundServiceApiEventBegin(uid, pid, apiType, "");
+        }
+    }
+
+    void logFgsApiEndLocked(int uid, int pid, int apiType) {
+        synchronized (mFGSLogger) {
+            mFGSLogger.logForegroundServiceApiEventEnd(uid, pid, apiType);
+        }
+    }
+
+    void logFgsApiStateChangedLocked(int uid, int pid, int apiType, int state) {
+        synchronized (mFGSLogger) {
+            mFGSLogger.logForegroundServiceApiStateChanged(uid, pid, apiType, state);
+        }
+    }
+
     /**
      * @param id Notification ID.  Zero === exit foreground state for the given service.
      */
@@ -2224,6 +2246,9 @@ public final class ActiveServices {
                         logFGSStateChangeLocked(r,
                                 FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER,
                                 0, FGS_STOP_REASON_UNKNOWN, fgsTypeCheckCode);
+                        synchronized (mFGSLogger) {
+                            mFGSLogger.logForegroundServiceStart(r.appInfo.uid, 0, r);
+                        }
                         updateNumForegroundServicesLocked();
                     }
                     // Even if the service is already a FGS, we need to update the notification,
@@ -2318,6 +2343,9 @@ public final class ActiveServices {
                 // foregroundServiceType is used in logFGSStateChangeLocked(), so we can't clear it
                 // earlier.
                 r.foregroundServiceType = 0;
+                synchronized (mFGSLogger) {
+                    mFGSLogger.logForegroundServiceStop(r.appInfo.uid, r);
+                }
                 r.mFgsNotificationWasDeferred = false;
                 signalForegroundServiceObserversLocked(r);
                 resetFgsRestrictionLocked(r);
@@ -5393,6 +5421,9 @@ public final class ActiveServices {
                             ? (int) (r.mFgsExitTime - r.mFgsEnterTime) : 0,
                     FGS_STOP_REASON_STOP_SERVICE,
                     FGS_TYPE_POLICY_CHECK_UNKNOWN);
+            synchronized (mFGSLogger) {
+                mFGSLogger.logForegroundServiceStop(r.appInfo.uid, r);
+            }
             mAm.updateForegroundServiceUsageStats(r.name, r.userId, false);
 
             // TODO(short-service): Make sure we stop the timeout by here.
@@ -7727,8 +7758,7 @@ public final class ActiveServices {
                 r.mIsFgsDelegate,
                 r.mFgsDelegation != null ? r.mFgsDelegation.mOptions.mClientUid : INVALID_UID,
                 r.mFgsDelegation != null ? r.mFgsDelegation.mOptions.mDelegationService
-                        : ForegroundServiceDelegationOptions.DELEGATION_SERVICE_DEFAULT
-        );
+                        : ForegroundServiceDelegationOptions.DELEGATION_SERVICE_DEFAULT);
 
         int event = 0;
         if (state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER) {
