@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.hardware.radio.IRadioService;
 import android.hardware.radio.ITuner;
@@ -35,6 +36,7 @@ import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
 import android.hardware.radio.RadioTuner;
+import android.os.Build;
 
 import org.junit.After;
 import org.junit.Before;
@@ -51,6 +53,8 @@ import java.util.Map;
 @RunWith(MockitoJUnitRunner.class)
 public final class TunerAdapterTest {
 
+    private static final int TEST_TARGET_SDK_VERSION = Build.VERSION_CODES.CUR_DEVELOPMENT;
+
     private static final int CALLBACK_TIMEOUT_MS = 30_000;
     private static final int AM_LOWER_LIMIT_KHZ = 150;
 
@@ -65,6 +69,7 @@ public final class TunerAdapterTest {
 
     private RadioTuner mRadioTuner;
     private ITunerCallback mTunerCallback;
+    private final ApplicationInfo mApplicationInfo = new ApplicationInfo();
 
     @Mock
     private IRadioService mRadioServiceMock;
@@ -77,12 +82,14 @@ public final class TunerAdapterTest {
 
     @Before
     public void setUp() throws Exception {
+        mApplicationInfo.targetSdkVersion = TEST_TARGET_SDK_VERSION;
+        when(mContextMock.getApplicationInfo()).thenReturn(mApplicationInfo);
         RadioManager radioManager = new RadioManager(mContextMock, mRadioServiceMock);
 
         doAnswer(invocation -> {
             mTunerCallback = (ITunerCallback) invocation.getArguments()[3];
             return mTunerMock;
-        }).when(mRadioServiceMock).openTuner(anyInt(), any(), anyBoolean(), any());
+        }).when(mRadioServiceMock).openTuner(anyInt(), any(), anyBoolean(), any(), anyInt());
 
         doAnswer(invocation -> {
             ProgramSelector program = (ProgramSelector) invocation.getArguments()[0];

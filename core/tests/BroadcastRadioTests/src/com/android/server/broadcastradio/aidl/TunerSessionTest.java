@@ -42,6 +42,7 @@ import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
+import android.os.Build;
 import android.os.ServiceSpecificException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -65,6 +66,7 @@ import java.util.Map;
  */
 public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
+    private static final int TARGET_SDK_VERSION = Build.VERSION_CODES.CUR_DEVELOPMENT;
     private static final VerificationWithTimeout CALLBACK_TIMEOUT =
             timeout(/* millis= */ 200);
     private static final int SIGNAL_QUALITY = 1;
@@ -289,6 +291,18 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     @Test
     public void tune_withOneSession() throws Exception {
         openAidlClients(/* numClients= */ 1);
+        ProgramSelector initialSel = AidlTestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
+        RadioManager.ProgramInfo tuneInfo =
+                AidlTestUtils.makeProgramInfo(initialSel, SIGNAL_QUALITY);
+
+        mTunerSessions[0].tune(initialSel);
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onCurrentProgramInfoChanged(tuneInfo);
+    }
+
+    @Test
+    public void tune_withLowerSdkVersion() throws Exception {
+        openAidlClients(/* numClients= */ 1, Build.VERSION_CODES.TIRAMISU);
         ProgramSelector initialSel = AidlTestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
         RadioManager.ProgramInfo tuneInfo =
                 AidlTestUtils.makeProgramInfo(initialSel, SIGNAL_QUALITY);
@@ -627,13 +641,17 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
                     .onParametersUpdated(parametersExpected);
         }
     }
-
     private void openAidlClients(int numClients) throws Exception {
+        openAidlClients(numClients, TARGET_SDK_VERSION);
+    }
+
+    private void openAidlClients(int numClients, int targetSdkVersion) throws Exception {
         mAidlTunerCallbackMocks = new android.hardware.radio.ITunerCallback[numClients];
         mTunerSessions = new TunerSession[numClients];
         for (int index = 0; index < numClients; index++) {
             mAidlTunerCallbackMocks[index] = mock(android.hardware.radio.ITunerCallback.class);
-            mTunerSessions[index] = mRadioModule.openSession(mAidlTunerCallbackMocks[index]);
+            mTunerSessions[index] = mRadioModule.openSession(mAidlTunerCallbackMocks[index],
+                    targetSdkVersion);
         }
     }
 

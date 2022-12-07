@@ -21,7 +21,6 @@ import android.graphics.Bitmap;
 import android.hardware.broadcastradio.ConfigFlag;
 import android.hardware.broadcastradio.IBroadcastRadio;
 import android.hardware.radio.ITuner;
-import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
@@ -47,6 +46,7 @@ final class TunerSession extends ITuner.Stub {
     private final RadioLogger mLogger;
     private final RadioModule mModule;
     final android.hardware.radio.ITunerCallback mCallback;
+    private final int mTargetSdkVersion;
     private final IBroadcastRadio mService;
 
     @GuardedBy("mLock")
@@ -61,10 +61,11 @@ final class TunerSession extends ITuner.Stub {
     private RadioManager.BandConfig mPlaceHolderConfig;
 
     TunerSession(RadioModule radioModule, IBroadcastRadio service,
-            android.hardware.radio.ITunerCallback callback) {
+            android.hardware.radio.ITunerCallback callback, int targetSdkVersion) {
         mModule = Objects.requireNonNull(radioModule, "radioModule cannot be null");
         mService = Objects.requireNonNull(service, "service cannot be null");
         mCallback = Objects.requireNonNull(callback, "callback cannot be null");
+        mTargetSdkVersion = targetSdkVersion;
         mLogger = new RadioLogger(TAG, TUNER_EVENT_LOGGER_QUEUE_SIZE);
     }
 
@@ -129,7 +130,7 @@ final class TunerSession extends ITuner.Stub {
             mPlaceHolderConfig = Objects.requireNonNull(config, "config cannot be null");
         }
         Slogf.i(TAG, "Ignoring setConfiguration - not applicable for broadcastradio HAL AIDL");
-        mModule.fanoutAidlCallback(cb -> cb.onConfigurationChanged(config));
+        mModule.fanoutAidlCallback((cb, sdkVersion) -> cb.onConfigurationChanged(config));
     }
 
     @Override
@@ -248,7 +249,9 @@ final class TunerSession extends ITuner.Stub {
             Slogf.w(TAG, "Cannot start background scan on AIDL HAL client from non-current user");
             return false;
         }
-        mModule.fanoutAidlCallback(ITunerCallback::onBackgroundScanComplete);
+        mModule.fanoutAidlCallback((cb, sdkVersion) -> {
+            cb.onBackgroundScanComplete();
+        });
         return true;
     }
 
@@ -274,6 +277,10 @@ final class TunerSession extends ITuner.Stub {
         // Note: RadioModule.onTunerSessionProgramListFilterChanged() must be called without mLock
         // held since it can call getProgramListFilter() and onHalProgramInfoUpdated().
         mModule.onTunerSessionProgramListFilterChanged(this);
+    }
+
+    int getTargetSdkVersion() {
+        return mTargetSdkVersion;
     }
 
     ProgramList.Filter getProgramListFilter() {
@@ -311,7 +318,14 @@ final class TunerSession extends ITuner.Stub {
         }
         for (int i = 0; i < chunks.size(); i++) {
             try {
-                mCallback.onProgramListUpdated(chunks.get(i));
+                if (!ConversionUtils.isAtLeastU(getTargetSdkVersion())) {
+                    ProgramList.Chunk downgradedChunk =
+                            ConversionUtils.convertChunkToTargetSdkVersion(chunks.get(i),
+                                    getTargetSdkVersion());
+                    mCallback.onProgramListUpdated(downgradedChunk);
+                } else {
+                    mCallback.onProgramListUpdated(chunks.get(i));
+                }
             } catch (RemoteException ex) {
                 Slogf.w(TAG, ex, "mCallback.onProgramListUpdated() failed");
             }

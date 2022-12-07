@@ -41,6 +41,8 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.ArraySet;
 
+import androidx.test.InstrumentationRegistry;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -53,6 +55,8 @@ import java.util.concurrent.Executor;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class ProgramListTest {
+
+    public final Context mContext = InstrumentationRegistry.getContext();
 
     private static final int CREATOR_ARRAY_SIZE = 3;
     private static final VerificationWithTimeout CALLBACK_TIMEOUT = timeout(/* millis= */ 500);
@@ -108,8 +112,6 @@ public final class ProgramListTest {
     private ProgramList.OnCompleteListener[] mOnCompleteListenerMocks;
     @Mock
     private IRadioService mRadioServiceMock;
-    @Mock
-    private Context mContextMock;
     @Mock
     private ITuner mTunerMock;
     @Mock
@@ -477,7 +479,7 @@ public final class ProgramListTest {
     }
 
     private void createRadioTuner() throws Exception {
-        RadioManager radioManager = new RadioManager(mContextMock, mRadioServiceMock);
+        RadioManager radioManager = new RadioManager(mContext, mRadioServiceMock);
         RadioManager.BandConfig band = new RadioManager.FmBandConfig(
                 new RadioManager.FmBandDescriptor(RadioManager.REGION_ITU_1, RadioManager.BAND_FM,
                         /* lowerLimit= */ 87500, /* upperLimit= */ 108000, /* spacing= */ 200,
@@ -487,7 +489,7 @@ public final class ProgramListTest {
         doAnswer(invocation -> {
             mTunerCallback = (ITunerCallback) invocation.getArguments()[3];
             return mTunerMock;
-        }).when(mRadioServiceMock).openTuner(anyInt(), any(), anyBoolean(), any());
+        }).when(mRadioServiceMock).openTuner(anyInt(), any(), anyBoolean(), any(), anyInt());
 
         mRadioTuner = radioManager.openTuner(/* moduleId= */ 0, band,
                 /* withAudio= */ true, mTunerCallbackMock, /* handler= */ null);
