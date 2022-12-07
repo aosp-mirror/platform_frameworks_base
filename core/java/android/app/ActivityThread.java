@@ -1020,6 +1020,12 @@ public final class ActivityThread extends ClientTransactionHandler
         int flags;
     }
 
+    // A list of receivers and an index into the receiver to be processed next.
+    static final class ReceiverList {
+        List<ReceiverInfo> receivers;
+        int index;
+    }
+
     private class ApplicationThread extends IApplicationThread.Stub {
         private static final String DB_CONNECTION_INFO_HEADER = "  %8s %8s %14s %5s %5s %5s  %s";
         private static final String DB_CONNECTION_INFO_FORMAT = "  %8s %8s %14s %5d %5d %5d  %s";
@@ -1034,6 +1040,21 @@ public final class ActivityThread extends ClientTransactionHandler
                     sync, false, mAppThread.asBinder(), sendingUser);
             r.info = info;
             sendMessage(H.RECEIVER, r);
+        }
+
+        public final void scheduleReceiverList(List<ReceiverInfo> info) throws RemoteException {
+            for (int i = 0; i < info.size(); i++) {
+                ReceiverInfo r = info.get(i);
+                if (r.registered) {
+                    scheduleRegisteredReceiver(r.receiver, r.intent,
+                            r.resultCode, r.data, r.extras, r.ordered, r.sticky,
+                            r.sendingUser, r.processState);
+                } else {
+                    scheduleReceiver(r.intent, r.activityInfo, r.compatInfo,
+                            r.resultCode, r.data, r.extras, r.sync,
+                            r.sendingUser, r.processState);
+                }
+            }
         }
 
         public final void scheduleCreateBackupAgent(ApplicationInfo app,
