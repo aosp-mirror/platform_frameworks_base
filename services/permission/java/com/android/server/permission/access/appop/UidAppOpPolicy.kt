@@ -16,9 +16,10 @@
 
 package com.android.server.permission.access.appop
 
-import com.android.server.permission.access.AccessState
 import com.android.server.permission.access.AccessUri
 import com.android.server.permission.access.AppOpUri
+import com.android.server.permission.access.GetStateScope
+import com.android.server.permission.access.MutateStateScope
 import com.android.server.permission.access.UidUri
 import com.android.server.permission.access.UserState
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
@@ -30,23 +31,23 @@ class UidAppOpPolicy : BaseAppOpPolicy(UidAppOpPersistence()) {
     override val objectScheme: String
         get() = AppOpUri.SCHEME
 
-    override fun getModes(subject: AccessUri, state: AccessState): IndexedMap<String, Int>? {
+    override fun GetStateScope.getModes(subject: AccessUri): IndexedMap<String, Int>? {
         subject as UidUri
         return state.userStates[subject.userId]?.uidAppOpModes?.get(subject.appId)
     }
 
-    override fun getOrCreateModes(subject: AccessUri, state: AccessState): IndexedMap<String, Int> {
+    override fun MutateStateScope.getOrCreateModes(subject: AccessUri): IndexedMap<String, Int> {
         subject as UidUri
-        return state.userStates.getOrPut(subject.userId) { UserState() }
+        return newState.userStates.getOrPut(subject.userId) { UserState() }
             .uidAppOpModes.getOrPut(subject.appId) { IndexedMap() }
     }
 
-    override fun removeModes(subject: AccessUri, state: AccessState) {
+    override fun MutateStateScope.removeModes(subject: AccessUri) {
         subject as UidUri
-        state.userStates[subject.userId]?.uidAppOpModes?.remove(subject.appId)
+        newState.userStates[subject.userId]?.uidAppOpModes?.remove(subject.appId)
     }
 
-    override fun onAppIdRemoved(appId: Int, oldState: AccessState, newState: AccessState) {
+    override fun MutateStateScope.onAppIdRemoved(appId: Int) {
         newState.userStates.forEachIndexed { _, _, userState ->
             userState.uidAppOpModes -= appId
         }

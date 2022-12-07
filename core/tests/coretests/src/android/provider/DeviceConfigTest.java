@@ -857,7 +857,10 @@ public class DeviceConfigTest {
         ContentResolver resolver = InstrumentationRegistry.getContext().getContentResolver();
         String compositeName = namespace + "/" + key;
         Bundle result = resolver.call(
-                DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, compositeName, null);
+                Settings.Config.CONTENT_URI,
+                Settings.CALL_METHOD_DELETE_CONFIG,
+                compositeName,
+                null);
         assertThat(result).isNotNull();
         return compositeName.equals(result.getString(Settings.NameValueTable.VALUE));
     }

@@ -602,6 +602,14 @@ class AutomaticBrightnessController {
         mAmbientBrightnessThresholdsIdle.dump(pw);
     }
 
+    public float[] getLastSensorValues() {
+        return mAmbientLightRingBuffer.getAllLuxValues();
+    }
+
+    public long[] getLastSensorTimestamps() {
+        return mAmbientLightRingBuffer.getAllTimestamps();
+    }
+
     private String configStateToString(int state) {
         switch (state) {
         case AUTO_BRIGHTNESS_ENABLED:
@@ -1231,8 +1239,40 @@ class AutomaticBrightnessController {
             return mRingLux[offsetOf(index)];
         }
 
+        public float[] getAllLuxValues() {
+            float[] values = new float[mCount];
+            if (mCount == 0) {
+                return values;
+            }
+
+            if (mStart < mEnd) {
+                System.arraycopy(mRingLux, mStart, values, 0, mCount);
+            } else {
+                System.arraycopy(mRingLux, mStart, values, 0, mCapacity - mStart);
+                System.arraycopy(mRingLux, 0, values, mCapacity - mStart, mEnd);
+            }
+
+            return values;
+        }
+
         public long getTime(int index) {
             return mRingTime[offsetOf(index)];
+        }
+
+        public long[] getAllTimestamps() {
+            long[] values = new long[mCount];
+            if (mCount == 0) {
+                return values;
+            }
+
+            if (mStart < mEnd) {
+                System.arraycopy(mRingTime, mStart, values, 0, mCount);
+            } else {
+                System.arraycopy(mRingTime, mStart, values, 0, mCapacity - mStart);
+                System.arraycopy(mRingTime, 0, values, mCapacity - mStart, mEnd);
+            }
+
+            return values;
         }
 
         public void push(long time, float lux) {

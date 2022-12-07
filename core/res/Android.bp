@@ -107,7 +107,9 @@ android_app {
     sdk_version: "core_platform",
     certificate: "platform",
 
-    srcs: [":remote-color-resources-arsc"],
+    srcs: [
+        ":remote-color-resources-arsc",
+    ],
 
     // Disable dexpreopt and verify_uses_libraries check as the app
     // contains no Java code to be dexpreopted.

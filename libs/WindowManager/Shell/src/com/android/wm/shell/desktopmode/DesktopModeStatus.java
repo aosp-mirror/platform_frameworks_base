@@ -37,6 +37,13 @@ public class DesktopModeStatus {
             "persist.wm.debug.desktop_mode", false);
 
     /**
+     * Return {@code true} if desktop mode support is enabled
+     */
+    public static boolean isSupported() {
+        return IS_SUPPORTED;
+    }
+
+    /**
      * Check if desktop mode is active
      *
      * @return {@code true} if active
@@ -54,4 +61,5 @@ public class DesktopModeStatus {
             return false;
         }
     }
+
 }

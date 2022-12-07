@@ -34,12 +34,12 @@ public class FuzzBinder {
         fuzzServiceInternal(binder, data);
     }
 
-    // This API creates random parcel object
-    public static void createRandomParcel(Parcel parcel, byte[] data) {
-        getRandomParcel(parcel, data);
+    // This API fills parcel object
+    public static void fillRandomParcel(Parcel parcel, byte[] data) {
+        fillParcelInternal(parcel, data);
     }
 
     private static native void fuzzServiceInternal(IBinder binder, byte[] data);
-    private static native void getRandomParcel(Parcel parcel, byte[] data);
+    private static native void fillParcelInternal(Parcel parcel, byte[] data);
     private static native int registerNatives();
 }

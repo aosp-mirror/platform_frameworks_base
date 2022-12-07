@@ -32,6 +32,7 @@ import android.hardware.weaver.V1_0.WeaverStatus;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.security.GateKeeper;
 import android.security.Scrypt;
 import android.service.gatekeeper.GateKeeperResponse;
@@ -457,6 +458,11 @@ public class SyntheticPasswordManager {
         mPasswordSlotManager = passwordSlotManager;
     }
 
+    private boolean isDeviceProvisioned() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+    }
+
     @VisibleForTesting
     protected IWeaver getWeaverService() throws RemoteException {
         try {
@@ -770,6 +776,17 @@ public class SyntheticPasswordManager {
     private int getNextAvailableWeaverSlot() {
         Set<Integer> usedSlots = getUsedWeaverSlots();
         usedSlots.addAll(mPasswordSlotManager.getUsedSlots());
+        // If the device is not yet provisioned, then the Weaver slot used by the FRP credential may
+        // be still needed and must not be reused yet.  (This *should* instead check "has FRP been
+        // resolved yet?", which would allow reusing the slot a bit earlier.  However, the
+        // SECURE_FRP_MODE setting gets set to 1 too late for it to be used here.)
+        if (!isDeviceProvisioned()) {
+            PersistentData persistentData = mStorage.readPersistentDataBlock();
+            if (persistentData != null && persistentData.type == PersistentData.TYPE_SP_WEAVER) {
+                int slot = persistentData.userId; // Note: field name is misleading
+                usedSlots.add(slot);
+            }
+        }
         for (int i = 0; i < mWeaverConfig.slots; i++) {
             if (!usedSlots.contains(i)) {
                 return i;
@@ -814,9 +831,14 @@ public class SyntheticPasswordManager {
 
             protectorSecret = transformUnderWeaverSecret(stretchedLskf, weaverSecret);
         } else {
-            // Weaver is unavailable, so make the protector use Gatekeeper to verify the LSKF
-            // instead.  However, skip Gatekeeper when the LSKF is empty, since it wouldn't give any
-            // benefit in that case as Gatekeeper isn't expected to provide secure deletion.
+            // Weaver is unavailable, so make the protector use Gatekeeper (GK) to verify the LSKF.
+            //
+            // However, skip GK when the LSKF is empty.  There are two reasons for this, one
+            // performance and one correctness.  The performance reason is that GK wouldn't give any
+            // benefit with an empty LSKF anyway, since GK isn't expected to provide secure
+            // deletion.  The correctness reason is that it is unsafe to enroll a password in the
+            // 'fakeUserId' GK range on an FRP-protected device that is in the setup wizard with FRP
+            // not passed yet, as that may overwrite the enrollment used by the FRP credential.
             if (!credential.isNone()) {
                 // In case GK enrollment leaves persistent state around (in RPMB), this will nuke
                 // them to prevent them from accumulating and causing problems.
@@ -908,12 +930,40 @@ public class SyntheticPasswordManager {
         }
     }
 
+    private static boolean isNoneCredential(PasswordData pwd) {
+        return pwd == null || pwd.credentialType == LockPatternUtils.CREDENTIAL_TYPE_NONE;
+    }
+
+    private boolean shouldSynchronizeFrpCredential(@Nullable PasswordData pwd, int userId) {
+        if (mStorage.getPersistentDataBlockManager() == null) {
+            return false;
+        }
+        UserInfo userInfo = mUserManager.getUserInfo(userId);
+        if (!LockPatternUtils.userOwnsFrpCredential(mContext, userInfo)) {
+            return false;
+        }
+        // When initializing the synthetic password of the user that will own the FRP credential,
+        // the FRP data block must not be cleared if the device isn't provisioned yet, since in this
+        // case the old value of the block may still be needed for the FRP authentication step.  The
+        // FRP data block will instead be cleared later, by
+        // LockSettingsService.DeviceProvisionedObserver.clearFrpCredentialIfOwnerNotSecure().
+        //
+        // Don't check the SECURE_FRP_MODE setting here, as it gets set to 1 too late.
+        //
+        // Don't delay anything for a nonempty credential.  A nonempty credential can be set before
+        // the device has been provisioned, but it's guaranteed to be after FRP was resolved.
+        if (isNoneCredential(pwd) && !isDeviceProvisioned()) {
+            Slog.d(TAG, "Not clearing FRP credential yet because device is not yet provisioned");
+            return false;
+        }
+        return true;
+    }
+
     private void synchronizeFrpPassword(@Nullable PasswordData pwd, int requestedQuality,
             int userId) {
-        if (mStorage.getPersistentDataBlockManager() != null
-                && LockPatternUtils.userOwnsFrpCredential(mContext,
-                mUserManager.getUserInfo(userId))) {
-            if (pwd != null && pwd.credentialType != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
+        if (shouldSynchronizeFrpCredential(pwd, userId)) {
+            Slogf.d(TAG, "Syncing Gatekeeper-based FRP credential tied to user %d", userId);
+            if (!isNoneCredential(pwd)) {
                 mStorage.writePersistentDataBlock(PersistentData.TYPE_SP, userId, requestedQuality,
                         pwd.toBytes());
             } else {
@@ -924,10 +974,9 @@ public class SyntheticPasswordManager {
 
     private void synchronizeWeaverFrpPassword(@Nullable PasswordData pwd, int requestedQuality,
             int userId, int weaverSlot) {
-        if (mStorage.getPersistentDataBlockManager() != null
-                && LockPatternUtils.userOwnsFrpCredential(mContext,
-                mUserManager.getUserInfo(userId))) {
-            if (pwd != null && pwd.credentialType != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
+        if (shouldSynchronizeFrpCredential(pwd, userId)) {
+            Slogf.d(TAG, "Syncing Weaver-based FRP credential tied to user %d", userId);
+            if (!isNoneCredential(pwd)) {
                 mStorage.writePersistentDataBlock(PersistentData.TYPE_SP_WEAVER, weaverSlot,
                         requestedQuality, pwd.toBytes());
             } else {
@@ -1058,7 +1107,7 @@ public class SyntheticPasswordManager {
         AuthenticationResult result = new AuthenticationResult();
 
         if (protectorId == SyntheticPasswordManager.NULL_PROTECTOR_ID) {
-            // This should never happen, due to the migration done in LSS.bootCompleted().
+            // This should never happen, due to the migration done in LSS.onThirdPartyAppsStarted().
             Slogf.wtf(TAG, "Synthetic password not found for user %d", userId);
             result.gkResponse = VerifyCredentialResponse.ERROR;
             return result;

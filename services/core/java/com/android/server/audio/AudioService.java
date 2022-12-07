@@ -86,6 +86,7 @@ import android.media.AudioDeviceVolumeManager;
 import android.media.AudioFocusInfo;
 import android.media.AudioFocusRequest;
 import android.media.AudioFormat;
+import android.media.AudioHalVersionInfo;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.AudioPlaybackConfiguration;
@@ -257,6 +258,9 @@ public class AudioService extends IAudioService.Stub
     /** Debug communication route */
     protected static final boolean DEBUG_COMM_RTE = false;
 
+    /** Debug log sound fx (touchsounds...) in dumpsys */
+    protected static final boolean DEBUG_LOG_SOUND_FX = false;
+
     /** How long to delay before persisting a change in volume/ringer mode. */
     private static final int PERSIST_DELAY = 500;
 
@@ -378,6 +382,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_ROTATION_UPDATE = 48;
     private static final int MSG_FOLD_UPDATE = 49;
     private static final int MSG_RESET_SPATIALIZER = 50;
+    private static final int MSG_NO_LOG_FOR_PLAYER_I = 51;
 
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
@@ -1016,7 +1021,7 @@ public class AudioService extends IAudioService.Stub
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mAudioEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleAudioEvent");
 
-        mSfxHelper = new SoundEffectsHelper(mContext);
+        mSfxHelper = new SoundEffectsHelper(mContext, playerBase -> ignorePlayerLogs(playerBase));
 
         final boolean headTrackingDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_spatial_audio_head_tracking_enabled_default);
@@ -1497,6 +1502,18 @@ public class AudioService extends IAudioService.Stub
         // use REPLACE as only the last fold state matters
         sendMsg(mAudioHandler, MSG_FOLD_UPDATE, SENDMSG_REPLACE, /*arg1*/ 0, /*arg2*/ 0,
                 /*obj*/ foldParameter, /*delay*/ 0);
+    }
+
+    //-----------------------------------------------------------------
+    // Communicate to PlayackActivityMonitor whether to log or not
+    // the sound FX activity (useful for removing touch sounds in the activity logs)
+    void ignorePlayerLogs(@NonNull PlayerBase playerToIgnore) {
+        if (DEBUG_LOG_SOUND_FX) {
+            return;
+        }
+        sendMsg(mAudioHandler, MSG_NO_LOG_FOR_PLAYER_I, SENDMSG_REPLACE,
+                /*arg1, piid of the player*/ playerToIgnore.getPlayerIId(),
+                /*arg2 ignored*/ 0, /*obj ignored*/ null, /*delay*/ 0);
     }
 
     //-----------------------------------------------------------------
@@ -6622,9 +6639,13 @@ public class AudioService extends IAudioService.Stub
                     return AudioSystem.STREAM_RING;
                 } else if (wasStreamActiveRecently(
                         AudioSystem.STREAM_NOTIFICATION, sStreamOverrideDelayMs)) {
-                    if (DEBUG_VOL)
-                        Log.v(TAG, "getActiveStreamType: Forcing STREAM_NOTIFICATION stream active");
-                    return AudioSystem.STREAM_NOTIFICATION;
+                        if (DEBUG_VOL) {
+                            Log.v(
+                                    TAG,
+                                    "getActiveStreamType: Forcing STREAM_NOTIFICATION stream"
+                                            + " active");
+                        }
+                        return AudioSystem.STREAM_NOTIFICATION;
                 } else {
                     if (DEBUG_VOL) {
                         Log.v(TAG, "getActiveStreamType: Forcing DEFAULT_VOL_STREAM_NO_PLAYBACK("
@@ -8720,6 +8741,10 @@ public class AudioService extends IAudioService.Stub
                 case MSG_FOLD_UPDATE:
                     // fold parameter format: "device_folded=x" where x is one of on, off
                     mAudioSystem.setParameters((String) msg.obj);
+                    break;
+
+                case MSG_NO_LOG_FOR_PLAYER_I:
+                    mPlaybackMonitor.ignorePlayerIId(msg.arg1);
                     break;
             }
         }
@@ -10913,6 +10938,21 @@ public class AudioService extends IAudioService.Stub
     }
 
     /**
+     * Called by an AudioPolicyProxy when the client dies.
+     * Checks if an active playback for media use case is currently routed to one of the
+     * remote submix devices owned by this dynamic policy and broadcasts a becoming noisy
+     * intend in this case.
+     * @param addresses list of remote submix device addresses to check.
+     */
+    private void onPolicyClientDeath(List<String> addresses) {
+        for (String address : addresses) {
+            if (mPlaybackMonitor.hasActiveMediaPlaybackOnSubmixWithAddress(address)) {
+                mDeviceBroker.postBroadcastBecomingNoisy();
+                return;
+            }
+        }
+    }
+    /**
      * Apps with MODIFY_AUDIO_ROUTING can register any policy.
      * Apps with an audio capable MediaProjection are allowed to register a RENDER|LOOPBACK policy
      * as those policy do not modify the audio routing.
@@ -11284,15 +11324,16 @@ public class AudioService extends IAudioService.Stub
         return mMediaFocusControl.sendFocusLoss(focusLoser);
     }
 
-    private static final String[] HAL_VERSIONS =
-            new String[] {"7.1", "7.0", "6.0", "5.0", "4.0", "2.0"};
-
-    /** @see AudioManager#getHalVersion */
-    public @Nullable String getHalVersion() {
-        for (String version : HAL_VERSIONS) {
+    /**
+     * @see AudioManager#getHalVersion
+     */
+    public @Nullable AudioHalVersionInfo getHalVersion() {
+        for (AudioHalVersionInfo version : AudioHalVersionInfo.VERSIONS) {
             try {
+                // TODO: check AIDL service.
+                String versionStr = version.getMajorVersion() + "." + version.getMinorVersion();
                 HwBinder.getService(
-                        String.format("android.hardware.audio@%s::IDevicesFactory", version),
+                        String.format("android.hardware.audio@%s::IDevicesFactory", versionStr),
                         "default");
                 return version;
             } catch (NoSuchElementException e) {
@@ -11622,6 +11663,13 @@ public class AudioService extends IAudioService.Stub
         public void binderDied() {
             mDynPolicyLogger.enqueue((new EventLogger.StringEvent("AudioPolicy "
                     + mPolicyCallback.asBinder() + " died").printLog(TAG)));
+
+            List<String> addresses = new ArrayList<>();
+            for (AudioMix mix : mMixes) {
+                addresses.add(mix.getRegistration());
+            }
+            onPolicyClientDeath(addresses);
+
             release();
         }
 

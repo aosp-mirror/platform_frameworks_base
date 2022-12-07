@@ -878,16 +878,30 @@ public class HdmiControlService extends SystemService {
             Slog.w(TAG, "Device type doesn't support ARC.");
             return;
         }
+        boolean isArcEnabled = false;
         if (settingValue == SOUNDBAR_MODE_DISABLED && audioSystem != null) {
-            if (audioSystem.isArcEnabled()) {
-                audioSystem.addAndStartAction(new ArcTerminationActionFromAvr(audioSystem));
-            }
+            isArcEnabled = audioSystem.isArcEnabled();
             if (isSystemAudioActivated()) {
                 audioSystem.terminateSystemAudioMode();
             }
+            if (isArcEnabled) {
+                if (audioSystem.hasAction(ArcTerminationActionFromAvr.class)) {
+                    audioSystem.removeAction(ArcTerminationActionFromAvr.class);
+                }
+                audioSystem.addAndStartAction(new ArcTerminationActionFromAvr(audioSystem,
+                        new IHdmiControlCallback.Stub() {
+                            @Override
+                            public void onComplete(int result) {
+                                mAddressAllocated = false;
+                                initializeCecLocalDevices(INITIATED_BY_SOUNDBAR_MODE);
+                            }
+                        }));
+            }
         }
-        mAddressAllocated = false;
-        initializeCecLocalDevices(INITIATED_BY_SOUNDBAR_MODE);
+        if (!isArcEnabled) {
+            mAddressAllocated = false;
+            initializeCecLocalDevices(INITIATED_BY_SOUNDBAR_MODE);
+        }
     }
 
     /**

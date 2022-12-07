@@ -344,6 +344,40 @@ public class PersistentDataStoreTest {
         assertEquals(85.3f, newDataStore.getUserPreferredRefreshRate(testDisplayDevice), 0.1f);
     }
 
+    @Test
+    public void testBrightnessInitialisesWithInvalidFloat() {
+        final String uniqueDisplayId = "test:123";
+        DisplayDevice testDisplayDevice = new DisplayDevice(null, null, uniqueDisplayId, null) {
+            @Override
+            public boolean hasStableUniqueId() {
+                return true;
+            }
+
+            @Override
+            public DisplayDeviceInfo getDisplayDeviceInfoLocked() {
+                return null;
+            }
+        };
+
+        // Set any value which initialises Display state
+        float refreshRate = 85.3f;
+        mDataStore.loadIfNeeded();
+        mDataStore.setUserPreferredRefreshRate(testDisplayDevice, refreshRate);
+
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        mInjector.setWriteStream(baos);
+        mDataStore.saveIfNeeded();
+        mTestLooper.dispatchAll();
+        assertTrue(mInjector.wasWriteSuccessful());
+        TestInjector newInjector = new TestInjector();
+        PersistentDataStore newDataStore = new PersistentDataStore(newInjector);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        newInjector.setReadStream(bais);
+        newDataStore.loadIfNeeded();
+        assertTrue(Float.isNaN(mDataStore.getBrightness(testDisplayDevice)));
+    }
+
+
     public class TestInjector extends PersistentDataStore.Injector {
         private InputStream mReadStream;
         private OutputStream mWriteStream;

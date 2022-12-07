@@ -31,6 +31,7 @@ import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.database.sqlite.SQLiteDatabase;
@@ -49,11 +50,14 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -78,14 +82,17 @@ public class LockSettingsStorageTests {
 
     public static final byte[] PAYLOAD = new byte[] {1, 2, -1, -2, 33};
 
-    LockSettingsStorageTestable mStorage;
-    File mStorageDir;
-
+    private LockSettingsStorageTestable mStorage;
+    private File mStorageDir;
     private File mDb;
+    @Rule
+    public FakeSettingsProviderRule mSettingsRule = FakeSettingsProvider.rule();
 
     @Before
     public void setUp() throws Exception {
-        mStorageDir = new File(InstrumentationRegistry.getContext().getFilesDir(), "locksettings");
+        final Context origContext = InstrumentationRegistry.getContext();
+
+        mStorageDir = new File(origContext.getFilesDir(), "locksettings");
         mDb = InstrumentationRegistry.getContext().getDatabasePath("locksettings.db");
 
         assertTrue(mStorageDir.exists() || mStorageDir.mkdirs());
@@ -98,8 +105,8 @@ public class LockSettingsStorageTests {
         // User 3 is a profile of user 0.
         when(mockUserManager.getProfileParent(eq(3))).thenReturn(new UserInfo(0, "name", 0));
 
-        MockLockSettingsContext context = new MockLockSettingsContext(
-                InstrumentationRegistry.getContext(), mockUserManager,
+        MockLockSettingsContext context = new MockLockSettingsContext(origContext,
+                mSettingsRule.mockContentResolver(origContext), mockUserManager,
                 mock(NotificationManager.class), mock(DevicePolicyManager.class),
                 mock(StorageManager.class), mock(TrustManager.class), mock(KeyguardManager.class),
                 mock(FingerprintManager.class), mock(FaceManager.class),

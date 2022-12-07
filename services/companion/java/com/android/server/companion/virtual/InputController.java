@@ -19,7 +19,6 @@ package com.android.server.companion.virtual;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.StringDef;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputDeviceIdentifier;
@@ -178,13 +177,14 @@ class InputController {
             int productId,
             @NonNull IBinder deviceToken,
             int displayId,
-            @NonNull Point screenSize) {
+            int height,
+            int width) {
         final String phys = createPhys(PHYS_TYPE_TOUCHSCREEN);
         try {
             createDeviceInternal(InputDeviceDescriptor.TYPE_TOUCHSCREEN, deviceName, vendorId,
                     productId, deviceToken, displayId, phys,
                     () -> mNativeWrapper.openUinputTouchscreen(deviceName, vendorId, productId,
-                            phys, screenSize.y, screenSize.x));
+                            phys, height, width));
         } catch (DeviceCreationException e) {
             throw new RuntimeException(
                     "Failed to create virtual touchscreen device '" + deviceName + "'.", e);
@@ -414,17 +414,25 @@ class InputController {
     }
 
     @VisibleForTesting
-    void addDeviceForTesting(IBinder deviceToken, int fd, int type, int displayId,
-            String phys, int inputDeviceId) {
+    void addDeviceForTesting(IBinder deviceToken, int fd, int type, int displayId, String phys,
+            int inputDeviceId) {
         synchronized (mLock) {
-            mInputDeviceDescriptors.put(deviceToken,
-                    new InputDeviceDescriptor(fd, () -> {}, type, displayId, phys,
-                            inputDeviceId));
+            mInputDeviceDescriptors.put(deviceToken, new InputDeviceDescriptor(fd, () -> {
+            }, type, displayId, phys, inputDeviceId));
         }
     }
 
-    private static native int nativeOpenUinputDpad(String deviceName, int vendorId,
-            int productId, String phys);
+    @VisibleForTesting
+    Map<IBinder, InputDeviceDescriptor> getInputDeviceDescriptors() {
+        final Map<IBinder, InputDeviceDescriptor> inputDeviceDescriptors = new ArrayMap<>();
+        synchronized (mLock) {
+            inputDeviceDescriptors.putAll(mInputDeviceDescriptors);
+        }
+        return inputDeviceDescriptors;
+    }
+
+    private static native int nativeOpenUinputDpad(String deviceName, int vendorId, int productId,
+            String phys);
     private static native int nativeOpenUinputKeyboard(String deviceName, int vendorId,
             int productId, String phys);
     private static native int nativeOpenUinputMouse(String deviceName, int vendorId, int productId,

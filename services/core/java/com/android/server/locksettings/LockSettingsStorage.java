@@ -550,7 +550,7 @@ class LockSettingsStorage {
         mCache.clear();
     }
 
-    @Nullable @VisibleForTesting
+    @Nullable
     PersistentDataBlockManagerInternal getPersistentDataBlockManager() {
         if (mPersistentDataBlockManagerInternal == null) {
             mPersistentDataBlockManagerInternal =

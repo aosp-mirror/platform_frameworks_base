@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.combine
 /**
  * The config used to load the App List.
  */
-internal data class AppListConfig(
+data class AppListConfig(
     val userId: Int,
     val showInstantApps: Boolean,
 )

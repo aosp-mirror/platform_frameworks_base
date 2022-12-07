@@ -1446,28 +1446,6 @@ public class Build {
         return IS_DEBUGGABLE;
     }
 
-
-    /**
-     * Returns true if the device is running a secure build, such as "user" or "userdebug".
-     *
-     * Secure builds drop adbd privileges by default, though debuggable builds still allow users
-     * to gain root access via local shell. See should_drop_privileges() in adb for details.
-     * @hide
-     */
-    private static final boolean IS_SECURE =
-            SystemProperties.getBoolean("ro.secure", true);
-    /**
-     * Returns true if the device is running a secure build, such as "user" or "userdebug".
-     *
-     * Secure builds drop adbd privileges by default, though debuggable builds still allow users
-     * to gain root access via local shell. See should_drop_privileges() in adb for details.
-     * @hide
-     */
-    @TestApi
-    public static boolean isSecure() {
-        return IS_SECURE;
-    }
-
     /** {@hide} */
     public static final boolean IS_ENG = "eng".equals(TYPE);
     /** {@hide} */

@@ -419,6 +419,15 @@ public final class DisplayManager {
     @TestApi
     public static final int VIRTUAL_DISPLAY_FLAG_OWN_FOCUS = 1 << 14;
 
+    /**
+     * Virtual display flags: Indicates that the display should not be a part of the default
+     * DisplayGroup and instead be part of a DisplayGroup associated with its virtual device.
+     *
+     * @see #createVirtualDisplay
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP = 1 << 15;
+
 
     /** @hide */
     @IntDef(prefix = {"MATCH_CONTENT_FRAMERATE_"}, value = {

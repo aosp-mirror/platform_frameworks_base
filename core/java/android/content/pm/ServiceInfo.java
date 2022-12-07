@@ -331,8 +331,7 @@ public class ServiceInfo extends ComponentInfo
      * Messaging use cases which host local server to relay messages across devices.
      */
     @RequiresPermission(
-            value = Manifest.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING,
-            conditional = true
+            value = Manifest.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING
     )
     public static final int FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING = 1 << 9;
 
@@ -360,8 +359,7 @@ public class ServiceInfo extends ComponentInfo
      * </p>
      */
     @RequiresPermission(
-            value = Manifest.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED,
-            conditional = true
+            value = Manifest.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED
     )
     public static final int FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED = 1 << 10;
 
@@ -412,6 +410,17 @@ public class ServiceInfo extends ComponentInfo
     public static final int FOREGROUND_SERVICE_TYPE_SHORT_SERVICE = 1 << 11;
 
     /**
+     * Constant corresponding to {@code fileManagement} in
+     * the {@link android.R.attr#foregroundServiceType} attribute.
+     * The file management use case which manages files/directories, often involving file I/O
+     * across the file system.
+     */
+    @RequiresPermission(
+            value = Manifest.permission.FOREGROUND_SERVICE_FILE_MANAGEMENT
+    )
+    public static final int FOREGROUND_SERVICE_TYPE_FILE_MANAGEMENT = 1 << 12;
+
+    /**
      * Constant corresponding to {@code specialUse} in
      * the {@link android.R.attr#foregroundServiceType} attribute.
      * Use cases that can't be categorized into any other foreground service types, but also
@@ -457,8 +466,7 @@ public class ServiceInfo extends ComponentInfo
      * </pre>
      */
     @RequiresPermission(
-            value = Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE,
-            conditional = true
+            value = Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE
     )
     public static final int FOREGROUND_SERVICE_TYPE_SPECIAL_USE = 1 << 30;
 
@@ -495,7 +503,8 @@ public class ServiceInfo extends ComponentInfo
             FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING,
             FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED,
             FOREGROUND_SERVICE_TYPE_SHORT_SERVICE,
-            FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+            FOREGROUND_SERVICE_TYPE_FILE_MANAGEMENT,
+            FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ForegroundServiceType {}
@@ -579,6 +588,8 @@ public class ServiceInfo extends ComponentInfo
                 return "systemExempted";
             case FOREGROUND_SERVICE_TYPE_SHORT_SERVICE:
                 return "shortService";
+            case FOREGROUND_SERVICE_TYPE_FILE_MANAGEMENT:
+                return "fileManagement";
             case FOREGROUND_SERVICE_TYPE_SPECIAL_USE:
                 return "specialUse";
             default:

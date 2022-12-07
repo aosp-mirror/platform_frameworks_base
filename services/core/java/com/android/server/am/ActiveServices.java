@@ -3016,7 +3016,6 @@ public final class ActiveServices {
 
         final TimeoutRecord tr = TimeoutRecord.forShortFgsTimeout(reason);
 
-        // TODO(short-service): TODO Add SHORT_FGS_TIMEOUT to AnrLatencyTracker
         tr.mLatencyTracker.waitingOnAMSLockStarted();
         synchronized (mAm) {
             tr.mLatencyTracker.waitingOnAMSLockEnded();
@@ -5426,6 +5425,13 @@ public final class ActiveServices {
                 // This is a call from a service start...  take care of
                 // book-keeping.
                 r.callStart = true;
+
+                // Set the result to startCommandResult.
+                // START_TASK_REMOVED_COMPLETE is _not_ a result from onStartCommand(), so
+                // let's ignore.
+                if (res != Service.START_TASK_REMOVED_COMPLETE) {
+                    r.startCommandResult = res;
+                }
                 switch (res) {
                     case Service.START_STICKY_COMPATIBILITY:
                     case Service.START_STICKY: {

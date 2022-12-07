@@ -58,15 +58,18 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.graphics.Point;
 import android.hardware.Sensor;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.IInputManager;
+import android.hardware.input.VirtualDpadConfig;
 import android.hardware.input.VirtualKeyEvent;
+import android.hardware.input.VirtualKeyboardConfig;
 import android.hardware.input.VirtualMouseButtonEvent;
+import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
 import android.hardware.input.VirtualTouchEvent;
+import android.hardware.input.VirtualTouchscreenConfig;
 import android.net.MacAddress;
 import android.os.Binder;
 import android.os.Handler;
@@ -135,7 +138,37 @@ public class VirtualDeviceManagerServiceTest {
     private static final int SENSOR_HANDLE = 64;
     private static final Binder BINDER = new Binder("binder");
     private static final int FLAG_CANNOT_DISPLAY_ON_REMOTE_DEVICES = 0x00000;
-    private static final int VIRTUAL_DEVICE_ID =  42;
+    private static final int VIRTUAL_DEVICE_ID = 42;
+    private static final VirtualDpadConfig DPAD_CONFIG =
+            new VirtualDpadConfig.Builder()
+                    .setVendorId(VENDOR_ID)
+                    .setProductId(PRODUCT_ID)
+                    .setInputDeviceName(DEVICE_NAME)
+                    .setAssociatedDisplayId(DISPLAY_ID)
+                    .build();
+    private static final VirtualKeyboardConfig KEYBOARD_CONFIG =
+            new VirtualKeyboardConfig.Builder()
+                    .setVendorId(VENDOR_ID)
+                    .setProductId(PRODUCT_ID)
+                    .setInputDeviceName(DEVICE_NAME)
+                    .setAssociatedDisplayId(DISPLAY_ID)
+                    .build();
+    private static final VirtualMouseConfig MOUSE_CONFIG =
+            new VirtualMouseConfig.Builder()
+                    .setVendorId(VENDOR_ID)
+                    .setProductId(PRODUCT_ID)
+                    .setInputDeviceName(DEVICE_NAME)
+                    .setAssociatedDisplayId(DISPLAY_ID)
+                    .build();
+    private static final VirtualTouchscreenConfig TOUCHSCREEN_CONFIG =
+            new VirtualTouchscreenConfig.Builder()
+                    .setVendorId(VENDOR_ID)
+                    .setProductId(PRODUCT_ID)
+                    .setInputDeviceName(DEVICE_NAME)
+                    .setAssociatedDisplayId(DISPLAY_ID)
+                    .setWidthInPixels(WIDTH)
+                    .setHeightInPixels(HEIGHT)
+                    .build();
 
     private Context mContext;
     private InputManagerMockHelper mInputManagerMockHelper;
@@ -477,63 +510,77 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void createVirtualDpad_noDisplay_failsSecurityException() {
-        assertThrows(
-                SecurityException.class,
-                () -> mDeviceImpl.createVirtualDpad(DISPLAY_ID, DEVICE_NAME, VENDOR_ID,
-                        PRODUCT_ID, BINDER));
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.createVirtualDpad(DPAD_CONFIG, BINDER));
     }
 
     @Test
     public void createVirtualKeyboard_noDisplay_failsSecurityException() {
-        assertThrows(
-                SecurityException.class,
-                () -> mDeviceImpl.createVirtualKeyboard(DISPLAY_ID, DEVICE_NAME, VENDOR_ID,
-                        PRODUCT_ID, BINDER));
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.createVirtualKeyboard(KEYBOARD_CONFIG, BINDER));
     }
 
     @Test
     public void createVirtualMouse_noDisplay_failsSecurityException() {
-        assertThrows(
-                SecurityException.class,
-                () -> mDeviceImpl.createVirtualMouse(DISPLAY_ID, DEVICE_NAME, VENDOR_ID,
-                        PRODUCT_ID, BINDER));
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.createVirtualMouse(MOUSE_CONFIG, BINDER));
     }
 
     @Test
     public void createVirtualTouchscreen_noDisplay_failsSecurityException() {
-        assertThrows(
-                SecurityException.class,
-                () -> mDeviceImpl.createVirtualTouchscreen(DISPLAY_ID, DEVICE_NAME,
-                        VENDOR_ID, PRODUCT_ID, BINDER, new Point(WIDTH, HEIGHT)));
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.createVirtualTouchscreen(TOUCHSCREEN_CONFIG, BINDER));
     }
 
     @Test
     public void createVirtualTouchscreen_zeroDisplayDimension_failsIllegalArgumentException() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
-        Point size = new Point(0, 0);
+        final VirtualTouchscreenConfig zeroConfig =
+                new VirtualTouchscreenConfig.Builder()
+                        .setVendorId(VENDOR_ID)
+                        .setProductId(PRODUCT_ID)
+                        .setInputDeviceName(DEVICE_NAME)
+                        .setAssociatedDisplayId(DISPLAY_ID)
+                        .setWidthInPixels(0)
+                        .setHeightInPixels(0)
+                        .build();
         assertThrows(IllegalArgumentException.class,
-                () -> mDeviceImpl.createVirtualTouchscreen(DISPLAY_ID, DEVICE_NAME, VENDOR_ID,
-                        PRODUCT_ID, BINDER, size));
+                () -> mDeviceImpl.createVirtualTouchscreen(zeroConfig, BINDER));
     }
 
     @Test
     public void createVirtualTouchscreen_negativeDisplayDimension_failsIllegalArgumentException() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
-        Point size = new Point(-100, -100);
+        final VirtualTouchscreenConfig negativeConfig =
+                new VirtualTouchscreenConfig.Builder()
+                        .setVendorId(VENDOR_ID)
+                        .setProductId(PRODUCT_ID)
+                        .setInputDeviceName(DEVICE_NAME)
+                        .setAssociatedDisplayId(DISPLAY_ID)
+                        .setWidthInPixels(-100)
+                        .setHeightInPixels(-100)
+                        .build();
         assertThrows(IllegalArgumentException.class,
-                () -> mDeviceImpl.createVirtualTouchscreen(DISPLAY_ID, DEVICE_NAME, VENDOR_ID,
-                        PRODUCT_ID, BINDER, size));
+                () -> mDeviceImpl.createVirtualTouchscreen(negativeConfig, BINDER));
+
     }
 
     @Test
     public void createVirtualTouchscreen_positiveDisplayDimension_successful() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
-        Point size = new Point(600, 800);
-        mDeviceImpl.createVirtualTouchscreen(DISPLAY_ID, DEVICE_NAME, VENDOR_ID, PRODUCT_ID, BINDER,
-                size);
+        VirtualTouchscreenConfig positiveConfig =
+                new VirtualTouchscreenConfig.Builder()
+                        .setVendorId(VENDOR_ID)
+                        .setProductId(PRODUCT_ID)
+                        .setInputDeviceName(DEVICE_NAME)
+                        .setAssociatedDisplayId(DISPLAY_ID)
+                        .setWidthInPixels(600)
+                        .setHeightInPixels(800)
+                        .build();
+        mDeviceImpl.createVirtualTouchscreen(positiveConfig, BINDER);
         assertWithMessage(
-                "Virtual touchscreen should create input device descriptor on successful creation.")
-                .that(mInputController.mInputDeviceDescriptors).isNotEmpty();
+                "Virtual touchscreen should create input device descriptor on successful creation"
+                        + ".").that(mInputController.getInputDeviceDescriptors()).isNotEmpty();
     }
 
     @Test
@@ -548,10 +595,8 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
         doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
                 eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
-        assertThrows(
-                SecurityException.class,
-                () -> mDeviceImpl.createVirtualDpad(DISPLAY_ID, DEVICE_NAME, VENDOR_ID,
-                        PRODUCT_ID, BINDER));
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.createVirtualDpad(DPAD_CONFIG, BINDER));
     }
 
     @Test
@@ -559,10 +604,8 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
         doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
                 eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
-        assertThrows(
-                SecurityException.class,
-                () -> mDeviceImpl.createVirtualKeyboard(DISPLAY_ID, DEVICE_NAME, VENDOR_ID,
-                        PRODUCT_ID, BINDER));
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.createVirtualKeyboard(KEYBOARD_CONFIG, BINDER));
     }
 
     @Test
@@ -570,10 +613,8 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
         doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
                 eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
-        assertThrows(
-                SecurityException.class,
-                () -> mDeviceImpl.createVirtualMouse(DISPLAY_ID, DEVICE_NAME, VENDOR_ID,
-                        PRODUCT_ID, BINDER));
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.createVirtualMouse(MOUSE_CONFIG, BINDER));
     }
 
     @Test
@@ -581,10 +622,8 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
         doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
                 eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
-        assertThrows(
-                SecurityException.class,
-                () -> mDeviceImpl.createVirtualTouchscreen(DISPLAY_ID, DEVICE_NAME,
-                        VENDOR_ID, PRODUCT_ID, BINDER, new Point(WIDTH, HEIGHT)));
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.createVirtualTouchscreen(TOUCHSCREEN_CONFIG, BINDER));
     }
 
     @Test
@@ -619,21 +658,19 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void createVirtualDpad_hasDisplay_obtainFileDescriptor() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
-        mDeviceImpl.createVirtualDpad(DISPLAY_ID, DEVICE_NAME, VENDOR_ID, PRODUCT_ID,
-                BINDER);
-        assertWithMessage("Virtual dpad should register fd when the display matches")
-          	.that(mInputController.mInputDeviceDescriptors).isNotEmpty();
-        verify(mNativeWrapperMock).openUinputDpad(eq(DEVICE_NAME), eq(VENDOR_ID),
-                eq(PRODUCT_ID), anyString());
+        mDeviceImpl.createVirtualDpad(DPAD_CONFIG, BINDER);
+        assertWithMessage("Virtual dpad should register fd when the display matches").that(
+                mInputController.getInputDeviceDescriptors()).isNotEmpty();
+        verify(mNativeWrapperMock).openUinputDpad(eq(DEVICE_NAME), eq(VENDOR_ID), eq(PRODUCT_ID),
+                anyString());
     }
 
     @Test
     public void createVirtualKeyboard_hasDisplay_obtainFileDescriptor() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
-        mDeviceImpl.createVirtualKeyboard(DISPLAY_ID, DEVICE_NAME, VENDOR_ID, PRODUCT_ID,
-                BINDER);
-        assertWithMessage("Virtual keyboard should register fd when the display matches")
-                .that(mInputController.mInputDeviceDescriptors).isNotEmpty();
+        mDeviceImpl.createVirtualKeyboard(KEYBOARD_CONFIG, BINDER);
+        assertWithMessage("Virtual keyboard should register fd when the display matches").that(
+                mInputController.getInputDeviceDescriptors()).isNotEmpty();
         verify(mNativeWrapperMock).openUinputKeyboard(eq(DEVICE_NAME), eq(VENDOR_ID),
                 eq(PRODUCT_ID), anyString());
     }
@@ -641,10 +678,9 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void createVirtualMouse_hasDisplay_obtainFileDescriptor() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
-        mDeviceImpl.createVirtualMouse(DISPLAY_ID, DEVICE_NAME, VENDOR_ID, PRODUCT_ID,
-                BINDER);
-        assertWithMessage("Virtual mouse should register fd when the display matches")
-                .that(mInputController.mInputDeviceDescriptors).isNotEmpty();
+        mDeviceImpl.createVirtualMouse(MOUSE_CONFIG, BINDER);
+        assertWithMessage("Virtual mouse should register fd when the display matches").that(
+                mInputController.getInputDeviceDescriptors()).isNotEmpty();
         verify(mNativeWrapperMock).openUinputMouse(eq(DEVICE_NAME), eq(VENDOR_ID), eq(PRODUCT_ID),
                 anyString());
     }
@@ -652,10 +688,9 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void createVirtualTouchscreen_hasDisplay_obtainFileDescriptor() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
-        mDeviceImpl.createVirtualTouchscreen(DISPLAY_ID, DEVICE_NAME, VENDOR_ID, PRODUCT_ID,
-                BINDER, new Point(WIDTH, HEIGHT));
-        assertWithMessage("Virtual touchscreen should register fd when the display matches")
-                .that(mInputController.mInputDeviceDescriptors).isNotEmpty();
+        mDeviceImpl.createVirtualTouchscreen(TOUCHSCREEN_CONFIG, BINDER);
+        assertWithMessage("Virtual touchscreen should register fd when the display matches").that(
+                mInputController.getInputDeviceDescriptors()).isNotEmpty();
         verify(mNativeWrapperMock).openUinputTouchscreen(eq(DEVICE_NAME), eq(VENDOR_ID),
                 eq(PRODUCT_ID), anyString(), eq(HEIGHT), eq(WIDTH));
     }
@@ -909,9 +944,28 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl.mVirtualDisplayIds.add(1);
         mDeviceImpl.mVirtualDisplayIds.add(2);
         mDeviceImpl.mVirtualDisplayIds.add(3);
-        mDeviceImpl.createVirtualMouse(1, DEVICE_NAME, VENDOR_ID, PRODUCT_ID, BINDER);
-        mDeviceImpl.createVirtualMouse(2, DEVICE_NAME, VENDOR_ID, PRODUCT_ID, BINDER);
-        mDeviceImpl.createVirtualMouse(3, DEVICE_NAME, VENDOR_ID, PRODUCT_ID, BINDER);
+        VirtualMouseConfig config1 = new VirtualMouseConfig.Builder()
+                .setAssociatedDisplayId(1)
+                .setInputDeviceName(DEVICE_NAME)
+                .setVendorId(VENDOR_ID)
+                .setProductId(PRODUCT_ID)
+                .build();
+        VirtualMouseConfig config2 = new VirtualMouseConfig.Builder()
+                .setAssociatedDisplayId(2)
+                .setInputDeviceName(DEVICE_NAME)
+                .setVendorId(VENDOR_ID)
+                .setProductId(PRODUCT_ID)
+                .build();
+        VirtualMouseConfig config3 = new VirtualMouseConfig.Builder()
+                .setAssociatedDisplayId(3)
+                .setInputDeviceName(DEVICE_NAME)
+                .setVendorId(VENDOR_ID)
+                .setProductId(PRODUCT_ID)
+                .build();
+
+        mDeviceImpl.createVirtualMouse(config1, BINDER);
+        mDeviceImpl.createVirtualMouse(config2, BINDER);
+        mDeviceImpl.createVirtualMouse(config3, BINDER);
         mDeviceImpl.setShowPointerIcon(false);
         verify(mInputManagerInternalMock, times(3)).setPointerIconVisible(eq(false), anyInt());
         verify(mInputManagerInternalMock, never()).setPointerIconVisible(eq(true), anyInt());

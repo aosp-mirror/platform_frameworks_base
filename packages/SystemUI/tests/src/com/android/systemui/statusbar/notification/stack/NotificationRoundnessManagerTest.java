@@ -35,6 +35,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationRoundnessLogger;
@@ -73,7 +74,8 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
         mRoundnessManager = new NotificationRoundnessManager(
                 new NotificationSectionsFeatureManager(new DeviceConfigProxy(), mContext),
                 mLogger,
-                mock(DumpManager.class));
+                mock(DumpManager.class),
+                mock(FeatureFlags.class));
         allowTestableLooperAsMainThread();
         NotificationTestHelper testHelper = new NotificationTestHelper(
                 mContext,

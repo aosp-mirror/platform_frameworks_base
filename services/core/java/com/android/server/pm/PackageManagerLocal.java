@@ -167,14 +167,16 @@ public interface PackageManagerLocal {
         PackageState getPackageState(@NonNull String packageName);
 
         /**
-         * Iterates on all states. This should only be used when either the target package name
-         * is not known or the large majority of the states are expected to be used.
-         *
+         * Returns a map of all {@link PackageState PackageStates} on the device.
+         * <p>
          * This will cause app visibility filtering to be invoked on each state on the device,
-         * which can be expensive.
+         * which can be expensive. Prefer {@link #getPackageState(String)} if possible.
          *
-         * @param consumer Block to accept each state as it becomes available post-filtering.
+         * @return Mapping of package name to {@link PackageState}.
          */
+        @NonNull
+        Map<String, PackageState> getPackageStates();
+
         void forAllPackageStates(@NonNull Consumer<PackageState> consumer);
 
         @Override

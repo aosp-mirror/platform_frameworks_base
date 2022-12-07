@@ -232,7 +232,7 @@ public final class PermissionPolicyService extends SystemService {
             }
         };
 
-        final ArrayList<PermissionInfo> dangerousPerms =
+        final List<PermissionInfo> dangerousPerms =
                 mPermissionManagerInternal.getAllPermissionsWithProtection(
                         PermissionInfo.PROTECTION_DANGEROUS);
         try {

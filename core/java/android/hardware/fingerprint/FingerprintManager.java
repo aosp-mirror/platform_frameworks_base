@@ -1014,8 +1014,22 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             return;
         }
 
-        // TODO(b/218388821): Propagate all the parameters to FingerprintService.
-        Slog.e(TAG, "onPointerDown: not implemented!");
+        final PointerContext pc = new PointerContext();
+        pc.pointerId = pointerId;
+        pc.x = x;
+        pc.y = y;
+        pc.minor = minor;
+        pc.major = major;
+        pc.orientation = orientation;
+        pc.time = time;
+        pc.gestureStart = gestureStart;
+        pc.isAod = isAod;
+
+        try {
+            mService.onPointerDown(requestId, sensorId, pc);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1040,8 +1054,22 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             return;
         }
 
-        // TODO(b/218388821): Propagate all the parameters to FingerprintService.
-        Slog.e(TAG, "onPointerUp: not implemented!");
+        final PointerContext pc = new PointerContext();
+        pc.pointerId = pointerId;
+        pc.x = x;
+        pc.y = y;
+        pc.minor = minor;
+        pc.major = major;
+        pc.orientation = orientation;
+        pc.time = time;
+        pc.gestureStart = gestureStart;
+        pc.isAod = isAod;
+
+        try {
+            mService.onPointerUp(requestId, sensorId, pc);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

@@ -458,8 +458,16 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             HdmiLogger.debug("ARC is not established between TV and AVR device");
             return Constants.ABORT_NOT_IN_CORRECT_MODE;
         } else {
-            removeAction(ArcTerminationActionFromAvr.class);
-            addAndStartAction(new ArcTerminationActionFromAvr(this));
+            if (!getActions(ArcTerminationActionFromAvr.class).isEmpty()
+                    && !getActions(ArcTerminationActionFromAvr.class).get(0).mCallbacks.isEmpty()) {
+                IHdmiControlCallback callback =
+                        getActions(ArcTerminationActionFromAvr.class).get(0).mCallbacks.get(0);
+                removeAction(ArcTerminationActionFromAvr.class);
+                addAndStartAction(new ArcTerminationActionFromAvr(this, callback));
+            } else {
+                removeAction(ArcTerminationActionFromAvr.class);
+                addAndStartAction(new ArcTerminationActionFromAvr(this));
+            }
             return Constants.HANDLED;
         }
     }

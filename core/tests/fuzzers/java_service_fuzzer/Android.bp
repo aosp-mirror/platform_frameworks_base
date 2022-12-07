@@ -37,4 +37,12 @@ java_fuzz {
         "framework-res",
     ],
     native_bridge_supported: true,
+    fuzz_config: {
+        cc: [
+            "smoreland@google.com",
+            "waghpawan@google.com",
+        ],
+        // Adds bugs to hotlist "AIDL fuzzers bugs" on buganizer
+        hotlists: ["4637097"],
+    },
 }

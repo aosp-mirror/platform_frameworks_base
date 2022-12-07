@@ -15,7 +15,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.settingslib.spa.tests">
+    package="com.android.settingslib.spa.test">
 
     <uses-sdk android:minSdkVersion="21"/>
 
@@ -26,6 +26,6 @@
     <instrumentation
         android:name="androidx.test.runner.AndroidJUnitRunner"
         android:label="Tests for SpaLib"
-        android:targetPackage="com.android.settingslib.spa.tests">
+        android:targetPackage="com.android.settingslib.spa.test">
     </instrumentation>
 </manifest>

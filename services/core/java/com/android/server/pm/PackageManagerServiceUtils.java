@@ -142,6 +142,11 @@ public class PackageManagerServiceUtils {
     public static final Predicate<PackageStateInternal> REMOVE_IF_NULL_PKG =
             pkgSetting -> pkgSetting.getPkg() == null;
 
+    // This is a horrible hack to workaround b/240373119, specifically for fixing the T branch.
+    // A proper fix should be implemented in master instead.
+    public static final ThreadLocal<Boolean> DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS =
+            ThreadLocal.withInitial(() -> false);
+
     /**
      * Components of apps targeting Android T and above will stop receiving intents from
      * external callers that do not match its declared intent filters.
@@ -1093,6 +1098,8 @@ public class PackageManagerServiceUtils {
             PlatformCompat compat, ComponentResolverApi resolver,
             List<ResolveInfo> resolveInfos, boolean isReceiver,
             Intent intent, String resolvedType, int filterCallingUid) {
+        if (DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.get()) return;
+
         final Printer logPrinter = DEBUG_INTENT_MATCHING
                 ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM)
                 : null;

@@ -36,7 +36,7 @@ import java.util.List;
  * Note android.app.job is the better package to put this class, but we can't move it there
  * because that'd break robolectric. Grr.
  *
- * @hide 
+ * @hide
  */
 public class JobSchedulerImpl extends JobScheduler {
     IJobScheduler mBinder;
@@ -105,6 +105,15 @@ public class JobSchedulerImpl extends JobScheduler {
             return mBinder.getPendingJob(jobId);
         } catch (RemoteException e) {
             return null;
+        }
+    }
+
+    @Override
+    public int getPendingJobReason(int jobId) {
+        try {
+            return mBinder.getPendingJobReason(jobId);
+        } catch (RemoteException e) {
+            return PENDING_JOB_REASON_UNDEFINED;
         }
     }
 

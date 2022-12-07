@@ -535,6 +535,25 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    public void handleRequestArcTerminate_callbackIsPreserved() throws Exception {
+        TestCallback callback = new TestCallback();
+
+        mHdmiCecLocalDeviceAudioSystem.setArcStatus(true);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.isArcEnabled()).isTrue();
+        mHdmiCecLocalDeviceAudioSystem.addAndStartAction(
+                new ArcTerminationActionFromAvr(mHdmiCecLocalDeviceAudioSystem, callback));
+
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRequestArcTermination(ADDR_TV, ADDR_AUDIO_SYSTEM);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcTermination(message))
+                .isEqualTo(Constants.HANDLED);
+
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getActions(
+                ArcTerminationActionFromAvr.class).get(0).mCallbacks.get(0)).isEqualTo(callback);
+    }
+
+    @Test
     public void handleRequestArcInit_arcIsNotSupported() throws Exception {
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildRequestArcInitiation(ADDR_TV, ADDR_AUDIO_SYSTEM);
@@ -879,5 +898,14 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(activeSource_fromAudioSystem);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(
                 systemAudioModeRequest_fromAudioSystem);
+    }
+
+    private static class TestCallback extends IHdmiControlCallback.Stub {
+        private final ArrayList<Integer> mCallbackResult = new ArrayList<Integer>();
+
+        @Override
+        public void onComplete(int result) {
+            mCallbackResult.add(result);
+        }
     }
 }

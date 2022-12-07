@@ -168,6 +168,12 @@ class BackNavigationController {
                             + "recents. Overriding back callback to recents controller callback.");
                     return null;
                 }
+
+                if (!window.isDrawn()) {
+                    ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
+                            "Focused window didn't have a valid surface drawn.");
+                    return null;
+                }
             }
 
             if (window == null) {

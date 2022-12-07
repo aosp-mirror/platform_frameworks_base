@@ -32,6 +32,7 @@ import android.annotation.ElapsedRealtimeLong;
 import android.app.AppGlobals;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
+import android.app.job.JobScheduler;
 import android.app.job.JobWorkItem;
 import android.content.ClipData;
 import android.content.ComponentName;
@@ -105,6 +106,13 @@ public final class JobStatus {
     static final int CONSTRAINT_PREFETCH = 1 << 23;
     static final int CONSTRAINT_BACKGROUND_NOT_RESTRICTED = 1 << 22; // Implicit constraint
     static final int CONSTRAINT_FLEXIBLE = 1 << 21; // Implicit constraint
+
+    private static final int IMPLICIT_CONSTRAINTS = 0
+            | CONSTRAINT_BACKGROUND_NOT_RESTRICTED
+            | CONSTRAINT_DEVICE_NOT_DOZING
+            | CONSTRAINT_FLEXIBLE
+            | CONSTRAINT_TARE_WEALTH
+            | CONSTRAINT_WITHIN_QUOTA;
 
     // The following set of dynamic constraints are for specific use cases (as explained in their
     // relative naming and comments). Right now, they apply different constraints, which is fine,
@@ -1611,6 +1619,101 @@ public final class JobStatus {
                 Slog.wtf(TAG, "Unsupported constraint (" + constraint + ") --stop reason mapping");
                 return JobParameters.STOP_REASON_UNDEFINED;
         }
+    }
+
+    /**
+     * If {@link #isReady()} returns false, this will return a single reason why the job isn't
+     * ready. If {@link #isReady()} returns true, this will return
+     * {@link JobScheduler#PENDING_JOB_REASON_UNDEFINED}.
+     */
+    @JobScheduler.PendingJobReason
+    public int getPendingJobReason() {
+        final int unsatisfiedConstraints = ~satisfiedConstraints
+                & (requiredConstraints | mDynamicConstraints | IMPLICIT_CONSTRAINTS);
+        if ((CONSTRAINT_BACKGROUND_NOT_RESTRICTED & unsatisfiedConstraints) != 0) {
+            // The BACKGROUND_NOT_RESTRICTED constraint could be unsatisfied either because
+            // the app is background restricted, or because we're restricting background work
+            // in battery saver. Assume that background restriction is the reason apps that
+            // jobs are not ready, and battery saver otherwise.
+            // This has the benefit of being consistent for background restricted apps
+            // (they'll always get BACKGROUND_RESTRICTION) as the reason, regardless of
+            // battery saver state.
+            if (mIsUserBgRestricted) {
+                return JobScheduler.PENDING_JOB_REASON_BACKGROUND_RESTRICTION;
+            }
+            return JobScheduler.PENDING_JOB_REASON_DEVICE_STATE;
+        }
+        if ((CONSTRAINT_BATTERY_NOT_LOW & unsatisfiedConstraints) != 0) {
+            if ((CONSTRAINT_BATTERY_NOT_LOW & requiredConstraints) != 0) {
+                // The developer requested this constraint, so it makes sense to return the
+                // explicit constraint reason.
+                return JobScheduler.PENDING_JOB_REASON_CONSTRAINT_BATTERY_NOT_LOW;
+            }
+            // Hard-coding right now since the current dynamic constraint sets don't overlap
+            // TODO: return based on active dynamic constraint sets when they start overlapping
+            return JobScheduler.PENDING_JOB_REASON_APP_STANDBY;
+        }
+        if ((CONSTRAINT_CHARGING & unsatisfiedConstraints) != 0) {
+            if ((CONSTRAINT_CHARGING & requiredConstraints) != 0) {
+                // The developer requested this constraint, so it makes sense to return the
+                // explicit constraint reason.
+                return JobScheduler.PENDING_JOB_REASON_CONSTRAINT_CHARGING;
+            }
+            // Hard-coding right now since the current dynamic constraint sets don't overlap
+            // TODO: return based on active dynamic constraint sets when they start overlapping
+            return JobScheduler.PENDING_JOB_REASON_APP_STANDBY;
+        }
+        if ((CONSTRAINT_CONNECTIVITY & unsatisfiedConstraints) != 0) {
+            return JobScheduler.PENDING_JOB_REASON_CONSTRAINT_CONNECTIVITY;
+        }
+        if ((CONSTRAINT_CONTENT_TRIGGER & unsatisfiedConstraints) != 0) {
+            return JobScheduler.PENDING_JOB_REASON_CONSTRAINT_CONTENT_TRIGGER;
+        }
+        if ((CONSTRAINT_DEVICE_NOT_DOZING & unsatisfiedConstraints) != 0) {
+            return JobScheduler.PENDING_JOB_REASON_DEVICE_STATE;
+        }
+        if ((CONSTRAINT_FLEXIBLE & unsatisfiedConstraints) != 0) {
+            return JobScheduler.PENDING_JOB_REASON_JOB_SCHEDULER_OPTIMIZATION;
+        }
+        if ((CONSTRAINT_IDLE & unsatisfiedConstraints) != 0) {
+            if ((CONSTRAINT_IDLE & requiredConstraints) != 0) {
+                // The developer requested this constraint, so it makes sense to return the
+                // explicit constraint reason.
+                return JobScheduler.PENDING_JOB_REASON_CONSTRAINT_DEVICE_IDLE;
+            }
+            // Hard-coding right now since the current dynamic constraint sets don't overlap
+            // TODO: return based on active dynamic constraint sets when they start overlapping
+            return JobScheduler.PENDING_JOB_REASON_APP_STANDBY;
+        }
+        if ((CONSTRAINT_PREFETCH & unsatisfiedConstraints) != 0) {
+            return JobScheduler.PENDING_JOB_REASON_CONSTRAINT_PREFETCH;
+        }
+        if ((CONSTRAINT_STORAGE_NOT_LOW & unsatisfiedConstraints) != 0) {
+            return JobScheduler.PENDING_JOB_REASON_CONSTRAINT_STORAGE_NOT_LOW;
+        }
+        if ((CONSTRAINT_TARE_WEALTH & unsatisfiedConstraints) != 0) {
+            return JobScheduler.PENDING_JOB_REASON_QUOTA;
+        }
+        if ((CONSTRAINT_TIMING_DELAY & unsatisfiedConstraints) != 0) {
+            return JobScheduler.PENDING_JOB_REASON_CONSTRAINT_MINIMUM_LATENCY;
+        }
+        if ((CONSTRAINT_WITHIN_QUOTA & unsatisfiedConstraints) != 0) {
+            return JobScheduler.PENDING_JOB_REASON_QUOTA;
+        }
+
+        if (getEffectiveStandbyBucket() == NEVER_INDEX) {
+            Slog.wtf(TAG, "App in NEVER bucket querying pending job reason");
+            // The user hasn't officially launched this app.
+            return JobScheduler.PENDING_JOB_REASON_USER;
+        }
+        if (serviceProcessName != null) {
+            return JobScheduler.PENDING_JOB_REASON_APP;
+        }
+
+        if (!isReady()) {
+            Slog.wtf(TAG, "Unknown reason job isn't ready");
+        }
+        return JobScheduler.PENDING_JOB_REASON_UNDEFINED;
     }
 
     /** @return whether or not the @param constraint is satisfied */

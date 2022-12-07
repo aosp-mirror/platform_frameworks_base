@@ -24,6 +24,7 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
+import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
 import javax.inject.Inject
@@ -73,7 +74,9 @@ constructor(
                         // Note that this flow may still run if
                         // [statusBarPipelineFlags.runNewWifiIconBackend] is true because we may
                         // want to get the logging data without rendering.
-                        if (wifiIcon != null && statusBarPipelineFlags.useNewWifiIcon()) {
+                        if (
+                            wifiIcon is WifiIcon.Visible && statusBarPipelineFlags.useNewWifiIcon()
+                        ) {
                             iconController.setNewWifiIcon()
                         }
                     }

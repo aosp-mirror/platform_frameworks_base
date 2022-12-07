@@ -26,7 +26,7 @@ public class ImageFormat {
      @Retention(RetentionPolicy.SOURCE)
      @IntDef(value = {
              UNKNOWN,
-             /**
+             /*
               * Since some APIs accept either ImageFormat or PixelFormat (and the two
               * enums do not overlap since they're both partial versions of the
               * internal format enum), add PixelFormat values here so linting

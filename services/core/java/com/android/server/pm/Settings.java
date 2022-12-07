@@ -367,8 +367,12 @@ public final class Settings implements Watchable, Snappable {
     @Watched(manual = true)
     private final RuntimePermissionPersistence mRuntimePermissionsPersistence;
 
+    // Current settings file.
     private final File mSettingsFilename;
-    private final File mBackupSettingsFilename;
+    // Previous settings file.
+    // Removed when the current settings file successfully stored.
+    private final File mPreviousSettingsFilename;
+
     private final File mPackageListFilename;
     private final File mStoppedPackagesFilename;
     private final File mBackupStoppedPackagesFilename;
@@ -635,7 +639,7 @@ public final class Settings implements Watchable, Snappable {
         mRuntimePermissionsPersistence = null;
         mPermissionDataProvider = null;
         mSettingsFilename = null;
-        mBackupSettingsFilename = null;
+        mPreviousSettingsFilename = null;
         mPackageListFilename = null;
         mStoppedPackagesFilename = null;
         mBackupStoppedPackagesFilename = null;
@@ -706,7 +710,7 @@ public final class Settings implements Watchable, Snappable {
                 |FileUtils.S_IROTH|FileUtils.S_IXOTH,
                 -1, -1);
         mSettingsFilename = new File(mSystemDir, "packages.xml");
-        mBackupSettingsFilename = new File(mSystemDir, "packages-backup.xml");
+        mPreviousSettingsFilename = new File(mSystemDir, "packages-backup.xml");
         mPackageListFilename = new File(mSystemDir, "packages.list");
         FileUtils.setPermissions(mPackageListFilename, 0640, SYSTEM_UID, PACKAGE_INFO_GID);
 
@@ -747,7 +751,7 @@ public final class Settings implements Watchable, Snappable {
         mLock = null;
         mRuntimePermissionsPersistence = r.mRuntimePermissionsPersistence;
         mSettingsFilename = null;
-        mBackupSettingsFilename = null;
+        mPreviousSettingsFilename = null;
         mPackageListFilename = null;
         mStoppedPackagesFilename = null;
         mBackupStoppedPackagesFilename = null;
@@ -2572,10 +2576,10 @@ public final class Settings implements Watchable, Snappable {
             // to persist settings earlier. So preserve the older
             // backup for future reference since the current settings
             // might have been corrupted.
-            if (!mBackupSettingsFilename.exists()) {
-                if (!mSettingsFilename.renameTo(mBackupSettingsFilename)) {
+            if (!mPreviousSettingsFilename.exists()) {
+                if (!mSettingsFilename.renameTo(mPreviousSettingsFilename)) {
                     Slog.wtf(PackageManagerService.TAG,
-                            "Unable to backup package manager settings, "
+                            "Unable to store older package manager settings, "
                             + " current changes will be lost at reboot");
                     return;
                 }
@@ -2669,9 +2673,9 @@ public final class Settings implements Watchable, Snappable {
             FileUtils.sync(fstr);
             fstr.close();
 
-            // New settings successfully written, old ones are no longer
-            // needed.
-            mBackupSettingsFilename.delete();
+            // New settings successfully written, old ones are no longer needed.
+            mPreviousSettingsFilename.delete();
+
             FileUtils.setPermissions(mSettingsFilename.toString(),
                     FileUtils.S_IRUSR|FileUtils.S_IWUSR
                     |FileUtils.S_IRGRP|FileUtils.S_IWGRP,
@@ -3109,16 +3113,15 @@ public final class Settings implements Watchable, Snappable {
 
     boolean readLPw(@NonNull Computer computer, @NonNull List<UserInfo> users) {
         FileInputStream str = null;
-        if (mBackupSettingsFilename.exists()) {
+        if (mPreviousSettingsFilename.exists()) {
             try {
-                str = new FileInputStream(mBackupSettingsFilename);
+                str = new FileInputStream(mPreviousSettingsFilename);
                 mReadMessages.append("Reading from backup settings file\n");
                 PackageManagerService.reportSettingsProblem(Log.INFO,
                         "Need to read from backup settings file");
                 if (mSettingsFilename.exists()) {
-                    // If both the backup and settings file exist, we
-                    // ignore the settings since it might have been
-                    // corrupted.
+                    // If both the previous and current settings files exist,
+                    // we ignore the current since it might have been corrupted.
                     Slog.w(PackageManagerService.TAG, "Cleaning up settings file "
                             + mSettingsFilename);
                     mSettingsFilename.delete();

@@ -40,6 +40,7 @@ import android.view.DisplayAddress;
 import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.layout.DisplayIdProducer;
 import com.android.server.display.layout.Layout;
 
 import java.io.PrintWriter;
@@ -81,6 +82,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private static final int UPDATE_STATE_NEW = 0;
     private static final int UPDATE_STATE_TRANSITION = 1;
     private static final int UPDATE_STATE_UPDATED = 2;
+
+    private static int sNextNonDefaultDisplayId = DEFAULT_DISPLAY + 1;
 
     /**
      * Temporary display info, used for comparing display configurations.
@@ -170,6 +173,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private final ArrayMap<String, Integer> mVirtualDeviceDisplayMapping = new ArrayMap<>();
 
     private int mNextNonDefaultGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
+    private final DisplayIdProducer mIdProducer = (isDefault) ->
+            isDefault ? DEFAULT_DISPLAY : sNextNonDefaultDisplayId++;
     private Layout mCurrentLayout = null;
     private int mDeviceState = DeviceStateManager.INVALID_DEVICE_STATE;
     private int mPendingDeviceState = DeviceStateManager.INVALID_DEVICE_STATE;
@@ -179,7 +184,9 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     LogicalDisplayMapper(@NonNull Context context, @NonNull DisplayDeviceRepository repo,
             @NonNull Listener listener, @NonNull DisplayManagerService.SyncRoot syncRoot,
             @NonNull Handler handler) {
-        this(context, repo, listener, syncRoot, handler, new DeviceStateToLayoutMap());
+        this(context, repo, listener, syncRoot, handler,
+                new DeviceStateToLayoutMap((isDefault) -> isDefault ? DEFAULT_DISPLAY
+                        : sNextNonDefaultDisplayId++));
     }
 
     LogicalDisplayMapper(@NonNull Context context, @NonNull DisplayDeviceRepository repo,
@@ -588,7 +595,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
 
         // Create a logical display for the new display device
         LogicalDisplay display = createNewLogicalDisplayLocked(
-                device, Layout.assignDisplayIdLocked(false /*isDefault*/));
+                device, mIdProducer.getId(/* isDefault= */ false));
 
         applyLayoutLocked();
         updateLogicalDisplaysLocked();
@@ -621,7 +628,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                         & DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY) != 0
                         && !nextDeviceInfo.address.equals(deviceInfo.address)) {
                     layout.createDisplayLocked(nextDeviceInfo.address,
-                            /* isDefault= */ true, /* isEnabled= */ true);
+                            /* isDefault= */ true, /* isEnabled= */ true, mIdProducer);
                     applyLayoutLocked();
                     return;
                 }
@@ -1036,7 +1043,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             return;
         }
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
-        layout.createDisplayLocked(info.address, /* isDefault= */ true, /* isEnabled= */ true);
+        layout.createDisplayLocked(info.address, /* isDefault= */ true, /* isEnabled= */ true,
+                mIdProducer);
     }
 
     private int assignLayerStackLocked(int displayId) {

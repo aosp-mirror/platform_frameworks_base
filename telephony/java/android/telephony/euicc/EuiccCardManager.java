@@ -75,7 +75,6 @@ public class EuiccCardManager {
             CANCEL_REASON_TIMEOUT,
             CANCEL_REASON_PPR_NOT_ALLOWED
     })
-    /** @hide */
     public @interface CancelReason {
     }
 
@@ -105,7 +104,6 @@ public class EuiccCardManager {
             RESET_OPTION_DELETE_FIELD_LOADED_TEST_PROFILES,
             RESET_OPTION_RESET_DEFAULT_SMDP_ADDRESS
     })
-    /** @hide */
     public @interface ResetOption {
     }
 

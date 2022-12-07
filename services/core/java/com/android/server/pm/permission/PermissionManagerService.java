@@ -467,7 +467,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Override
     public PermissionInfo getPermissionInfo(String permissionName, String packageName, int flags) {
-        return mPermissionManagerServiceImpl.getPermissionInfo(permissionName, packageName, flags);
+        return mPermissionManagerServiceImpl.getPermissionInfo(permissionName, flags, packageName);
     }
 
     @Override
@@ -792,14 +792,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         @NonNull
         @Override
-        public ArrayList<PermissionInfo> getAllPermissionsWithProtection(
+        public List<PermissionInfo> getAllPermissionsWithProtection(
                 @PermissionInfo.Protection int protection) {
             return mPermissionManagerServiceImpl.getAllPermissionsWithProtection(protection);
         }
 
         @NonNull
         @Override
-        public ArrayList<PermissionInfo> getAllPermissionsWithProtectionFlags(
+        public List<PermissionInfo> getAllPermissionsWithProtectionFlags(
                 @PermissionInfo.ProtectionFlags int protectionFlags) {
             return mPermissionManagerServiceImpl
                     .getAllPermissionsWithProtectionFlags(protectionFlags);

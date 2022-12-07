@@ -50,15 +50,33 @@ public class Layout {
         return mDisplays.toString();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+
+        if (!(obj instanceof  Layout)) {
+            return false;
+        }
+
+        Layout otherLayout = (Layout) obj;
+        return this.mDisplays.equals(otherLayout.mDisplays);
+    }
+
+    @Override
+    public int hashCode() {
+        return mDisplays.hashCode();
+    }
+
     /**
      * Creates a simple 1:1 LogicalDisplay mapping for the specified DisplayDevice.
      *
      * @param address Address of the device.
      * @param isDefault Indicates if the device is meant to be the default display.
+     * @param isEnabled Indicates if this display is usable and can be switched on
      * @return The new layout.
      */
     public Display createDisplayLocked(
-            @NonNull DisplayAddress address, boolean isDefault, boolean isEnabled) {
+            @NonNull DisplayAddress address, boolean isDefault, boolean isEnabled,
+            DisplayIdProducer idProducer) {
         if (contains(address)) {
             Slog.w(TAG, "Attempting to add second definition for display-device: " + address);
             return null;
@@ -74,7 +92,7 @@ public class Layout {
         // Note that the logical display ID is saved into the layout, so when switching between
         // different layouts, a logical display can be destroyed and later recreated with the
         // same logical display ID.
-        final int logicalDisplayId = assignDisplayIdLocked(isDefault);
+        final int logicalDisplayId = idProducer.getId(isDefault);
         final Display display = new Display(address, logicalDisplayId, isEnabled);
 
         mDisplays.add(display);
@@ -158,25 +176,64 @@ public class Layout {
      * Describes how a {@link LogicalDisplay} is built from {@link DisplayDevice}s.
      */
     public static class Display {
+        public static final int POSITION_UNKNOWN = -1;
+        public static final int POSITION_FRONT = 0;
+        public static final int POSITION_REAR = 1;
+
         // Address of the display device to map to this display.
         private final DisplayAddress mAddress;
 
         // Logical Display ID to apply to this display.
         private final int mLogicalDisplayId;
 
-        // Indicates that this display is not usable and should remain off.
+        // Indicates if this display is usable and can be switched on
         private final boolean mIsEnabled;
+
+        // The direction the display faces
+        // {@link DeviceStateToLayoutMap.POSITION_FRONT} or
+        // {@link DeviceStateToLayoutMap.POSITION_REAR}.
+        // {@link DeviceStateToLayoutMap.POSITION_UNKNOWN} is unspecified.
+        private int mPosition;
 
         Display(@NonNull DisplayAddress address, int logicalDisplayId, boolean isEnabled) {
             mAddress = address;
             mLogicalDisplayId = logicalDisplayId;
             mIsEnabled = isEnabled;
+            mPosition = POSITION_UNKNOWN;
         }
 
         @Override
         public String toString() {
-            return "{addr: " + mAddress + ", dispId: " + mLogicalDisplayId
-                    + "(" + (mIsEnabled ? "ON" : "OFF") + ")}";
+            return "{"
+                    + "dispId: " + mLogicalDisplayId
+                    + "(" + (mIsEnabled ? "ON" : "OFF") + ")"
+                    + ", addr: " + mAddress
+                    +  ((mPosition == POSITION_UNKNOWN) ? "" : ", position: " + mPosition)
+                    + "}";
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof Display)) {
+                return false;
+            }
+
+            Display otherDisplay = (Display) obj;
+
+            return otherDisplay.mIsEnabled == this.mIsEnabled
+                    && otherDisplay.mPosition == this.mPosition
+                    && otherDisplay.mLogicalDisplayId == this.mLogicalDisplayId
+                    && this.mAddress.equals(otherDisplay.mAddress);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = 1;
+            result = 31 * result + Boolean.hashCode(mIsEnabled);
+            result = 31 * result + mPosition;
+            result = 31 * result + mLogicalDisplayId;
+            result = 31 * result + mAddress.hashCode();
+            return result;
         }
 
         public DisplayAddress getAddress() {
@@ -189,6 +246,10 @@ public class Layout {
 
         public boolean isEnabled() {
             return mIsEnabled;
+        }
+
+        public void setPosition(int position) {
+            mPosition = position;
         }
     }
 }

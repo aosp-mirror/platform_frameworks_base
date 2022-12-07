@@ -118,6 +118,11 @@
     <bool name="config_using_subscription_manager_service">false</bool>
     <java-symbol type="bool" name="config_using_subscription_manager_service" />
 
+    <!-- Whether asynchronously update the subscription database or not. Async mode increases
+         the performance, but sync mode reduces the chance of database/cache out-of-sync. -->
+    <bool name="config_subscription_database_async_update">true</bool>
+    <java-symbol type="bool" name="config_subscription_database_async_update" />
+
     <!-- Boolean indicating whether the emergency numbers for a country, sourced from modem/config,
          should be ignored if that country is 'locked' (i.e. ignore_modem_config set to true) in
          Android Emergency DB. If this value is true, emergency numbers for a country, sourced from

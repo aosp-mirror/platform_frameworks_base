@@ -1,0 +1,54 @@
+/*
+ * Copyright 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package com.android.internal.location.altitude;
+
+option java_package = "com.android.internal.location.altitude";
+option java_multiple_files = true;
+
+// Defines parameters for a spherically projected geoid map and corresponding
+// tile management.
+message MapParamsProto {
+  // Defines the resolution of the map in terms of an S2 level.
+  optional int32 map_s2_level = 1;
+  // Defines the resolution of the tiles in cache in terms of an S2 level.
+  optional int32 cache_tile_s2_level = 2;
+  // Defines the resolution of the tiles on disk in terms of an S2 level.
+  optional int32 disk_tile_s2_level = 3;
+  // Defines the `a` coefficient in the expression `a * map_value + b` used to
+  // calculate a geoid height in meters.
+  optional double model_a_meters = 4;
+  // Defines the `b` coefficient in the expression `a * map_value + b` used to
+  // calculate a geoid height in meters.
+  optional double model_b_meters = 5;
+  // Defines the root mean square error in meters of the geoid height.
+  optional double model_rmse_meters = 6;
+}
+
+// A single tile associating values in the unit interval [0, 1] to map cells.
+message S2TileProto {
+  // The S2 token associated with the common parent of all map cells in this
+  // tile.
+  optional string tile_key = 1;
+
+  // Encoded data that merge into a value in the unit interval [0, 1] for each
+  // map cell in this tile.
+  optional bytes byte_buffer = 2;
+  optional bytes byte_jpeg = 3;
+  optional bytes byte_png = 4;
+}

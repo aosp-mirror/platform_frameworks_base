@@ -21,6 +21,7 @@ import static android.app.job.JobScheduler.THROW_ON_INVALID_DATA_TRANSFER_IMPLEM
 import android.annotation.BytesLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Notification;
 import android.app.Service;
 import android.compat.Compatibility;
 import android.content.Intent;
@@ -73,6 +74,8 @@ public abstract class JobServiceEngine {
     private static final int MSG_UPDATE_TRANSFERRED_NETWORK_BYTES = 5;
     /** Message that the client wants to update JobScheduler of the estimated transfer size. */
     private static final int MSG_UPDATE_ESTIMATED_NETWORK_BYTES = 6;
+    /** Message that the client wants to give JobScheduler a notification to tie to the job. */
+    private static final int MSG_SET_NOTIFICATION = 7;
 
     private final IJobService mBinder;
 
@@ -246,6 +249,24 @@ public abstract class JobServiceEngine {
                     } else {
                         Log.e(TAG,
                                 "updateEstimatedNetworkBytes() called for a nonexistent job id.");
+                    }
+                    args.recycle();
+                    break;
+                }
+                case MSG_SET_NOTIFICATION: {
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final JobParameters params = (JobParameters) args.arg1;
+                    final Notification notification = (Notification) args.arg2;
+                    IJobCallback callback = params.getCallback();
+                    if (callback != null) {
+                        try {
+                            callback.setNotification(params.getJobId(),
+                                    args.argi1, notification, args.argi2);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Error providing notification: binder has gone away.");
+                        }
+                    } else {
+                        Log.e(TAG, "setNotification() called for a nonexistent job.");
                     }
                     args.recycle();
                     break;
@@ -431,5 +452,28 @@ public abstract class JobServiceEngine {
         args.argl1 = downloadBytes;
         args.argl2 = uploadBytes;
         mHandler.obtainMessage(MSG_UPDATE_ESTIMATED_NETWORK_BYTES, args).sendToTarget();
+    }
+
+    /**
+     * Give JobScheduler a notification to tie to this job's lifecycle.
+     *
+     * @hide
+     * @see JobService#setNotification(JobParameters, int, Notification, int)
+     */
+    public void setNotification(@NonNull JobParameters params, int notificationId,
+            @NonNull Notification notification,
+            @JobService.JobEndNotificationPolicy int jobEndNotificationPolicy) {
+        if (params == null) {
+            throw new NullPointerException("params");
+        }
+        if (notification == null) {
+            throw new NullPointerException("notification");
+        }
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = params;
+        args.arg2 = notification;
+        args.argi1 = notificationId;
+        args.argi2 = jobEndNotificationPolicy;
+        mHandler.obtainMessage(MSG_SET_NOTIFICATION, args).sendToTarget();
     }
 }
