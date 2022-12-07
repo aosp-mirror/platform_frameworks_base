@@ -5775,4 +5775,8 @@
     <string-array name="config_serviceStateLocationAllowedPackages">
         <item>"com.android.phone"</item>
     </string-array>
+
+    <!-- List of certificate to be used for font fs-verity integrity verification -->
+    <string-array translatable="false" name="config_fontManagerServiceCerts">
+    </string-array>
 </resources>
