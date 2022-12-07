@@ -333,15 +333,18 @@ public class DozeTriggers implements DozeMachine.Part {
                     }
                     gentleWakeUp(pulseReason);
                 } else if (isUdfpsLongPress) {
-                    final State state = mMachine.getState();
-                    if (state == State.DOZE_AOD || state == State.DOZE) {
+                    if (canPulse(mMachine.getState(), true)) {
+                        mDozeLog.d("updfsLongPress - setting aodInterruptRunnable to run when "
+                                + "the display is on");
                         // Since the gesture won't be received by the UDFPS view, we need to
                         // manually inject an event once the display is ON
                         mAodInterruptRunnable = () ->
-                            mAuthController.onAodInterrupt((int) screenX, (int) screenY,
-                                rawValues[3] /* major */, rawValues[4] /* minor */);
+                                mAuthController.onAodInterrupt((int) screenX, (int) screenY,
+                                        rawValues[3] /* major */, rawValues[4] /* minor */);
+                    } else {
+                        mDozeLog.d("udfpsLongPress - Not sending aodInterrupt. "
+                                + "Unsupported doze state.");
                     }
-
                     requestPulse(DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS, true, null);
                 } else {
                     mDozeHost.extendPulse(pulseReason);
@@ -380,7 +383,7 @@ public class DozeTriggers implements DozeMachine.Part {
         // when a new event is arriving. This means that a state transition might have happened
         // and the proximity check is now obsolete.
         if (mMachine.isExecutingTransition()) {
-            Log.w(TAG, "onProximityFar called during transition. Ignoring sensor response.");
+            mDozeLog.d("onProximityFar called during transition. Ignoring sensor response.");
             return;
         }
 
@@ -392,21 +395,15 @@ public class DozeTriggers implements DozeMachine.Part {
 
         if (state == DozeMachine.State.DOZE_PULSING
                 || state == DozeMachine.State.DOZE_PULSING_BRIGHT) {
-            if (DEBUG) {
-                Log.i(TAG, "Prox changed, ignore touch = " + near);
-            }
+            mDozeLog.traceSetIgnoreTouchWhilePulsing(near);
             mDozeHost.onIgnoreTouchWhilePulsing(near);
         }
 
         if (far && (paused || pausing)) {
-            if (DEBUG) {
-                Log.i(TAG, "Prox FAR, unpausing AOD");
-            }
+            mDozeLog.d("Prox FAR, unpausing AOD");
             mMachine.requestState(DozeMachine.State.DOZE_AOD);
         } else if (near && aod) {
-            if (DEBUG) {
-                Log.i(TAG, "Prox NEAR, pausing AOD");
-            }
+            mDozeLog.d("Prox NEAR, starting pausing AOD countdown");
             mMachine.requestState(DozeMachine.State.DOZE_AOD_PAUSING);
         }
     }
@@ -551,12 +548,13 @@ public class DozeTriggers implements DozeMachine.Part {
             return;
         }
 
-        if (!mAllowPulseTriggers || mDozeHost.isPulsePending() || !canPulse(dozeState)) {
+        if (!mAllowPulseTriggers || mDozeHost.isPulsePending()
+                || !canPulse(dozeState, performedProxCheck)) {
             if (!mAllowPulseTriggers) {
                 mDozeLog.tracePulseDropped("requestPulse - !mAllowPulseTriggers");
             } else if (mDozeHost.isPulsePending()) {
                 mDozeLog.tracePulseDropped("requestPulse - pulsePending");
-            } else if (!canPulse(dozeState)) {
+            } else if (!canPulse(dozeState, performedProxCheck)) {
                 mDozeLog.tracePulseDropped("requestPulse - dozeState cannot pulse", dozeState);
             }
             runIfNotNull(onPulseSuppressedListener);
@@ -574,14 +572,15 @@ public class DozeTriggers implements DozeMachine.Part {
                 // not in pocket, continue pulsing
                 final boolean isPulsePending = mDozeHost.isPulsePending();
                 mDozeHost.setPulsePending(false);
-                if (!isPulsePending || mDozeHost.isPulsingBlocked() || !canPulse(dozeState)) {
+                if (!isPulsePending || mDozeHost.isPulsingBlocked()
+                        || !canPulse(dozeState, performedProxCheck)) {
                     if (!isPulsePending) {
                         mDozeLog.tracePulseDropped("continuePulseRequest - pulse no longer"
                                 + " pending, pulse was cancelled before it could start"
                                 + " transitioning to pulsing state.");
                     } else if (mDozeHost.isPulsingBlocked()) {
                         mDozeLog.tracePulseDropped("continuePulseRequest - pulsingBlocked");
-                    } else if (!canPulse(dozeState)) {
+                    } else if (!canPulse(dozeState, performedProxCheck)) {
                         mDozeLog.tracePulseDropped("continuePulseRequest"
                                 + " - doze state cannot pulse", dozeState);
                     }
@@ -598,10 +597,13 @@ public class DozeTriggers implements DozeMachine.Part {
                 .ifPresent(uiEventEnum -> mUiEventLogger.log(uiEventEnum, getKeyguardSessionId()));
     }
 
-    private boolean canPulse(DozeMachine.State dozeState) {
+    private boolean canPulse(DozeMachine.State dozeState, boolean pulsePerformedProximityCheck) {
+        final boolean dozePausedOrPausing = dozeState == State.DOZE_AOD_PAUSED
+                || dozeState == State.DOZE_AOD_PAUSING;
         return dozeState == DozeMachine.State.DOZE
                 || dozeState == DozeMachine.State.DOZE_AOD
-                || dozeState == DozeMachine.State.DOZE_AOD_DOCKED;
+                || dozeState == DozeMachine.State.DOZE_AOD_DOCKED
+                || (dozePausedOrPausing && pulsePerformedProximityCheck);
     }
 
     @Nullable
