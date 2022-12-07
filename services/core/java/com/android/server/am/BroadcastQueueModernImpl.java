@@ -91,6 +91,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -1224,6 +1225,17 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return didSomething;
     }
 
+    private void forEachQueue(@NonNull Consumer<BroadcastProcessQueue> consumer) {
+        for (int i = 0; i < mProcessQueues.size(); ++i) {
+            BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
+            while (leaf != null) {
+                consumer.accept(leaf);
+                updateRunnableList(leaf);
+                leaf = leaf.processNameNext;
+            }
+        }
+    }
+
     @Override
     public void start(@NonNull ContentResolver resolver) {
         mFgConstants.startObserving(mHandler, resolver);
@@ -1282,12 +1294,19 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final CountDownLatch latch = new CountDownLatch(1);
         synchronized (mService) {
             mWaitingFor.add(Pair.create(condition, latch));
+            forEachQueue(q -> q.setPrioritizeEarliest(true));
         }
         enqueueUpdateRunningList();
         try {
             latch.await();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        } finally {
+            synchronized (mService) {
+                if (mWaitingFor.isEmpty()) {
+                    forEachQueue(q -> q.setPrioritizeEarliest(false));
+                }
+            }
         }
     }
 

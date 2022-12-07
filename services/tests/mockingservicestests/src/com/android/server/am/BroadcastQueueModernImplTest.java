@@ -195,6 +195,12 @@ public class BroadcastQueueModernImplTest {
                 false, null, false, null);
     }
 
+    private void enqueueOrReplaceBroadcast(BroadcastProcessQueue queue,
+            BroadcastRecord record, int recordIndex, long enqueueTime) {
+        queue.enqueueOrReplaceBroadcast(record, recordIndex);
+        record.enqueueTime = enqueueTime;
+    }
+
     @Test
     public void testRunnableList_Simple() {
         assertRunnableList(List.of(), mHead);
@@ -549,29 +555,32 @@ public class BroadcastQueueModernImplTest {
         mConstants.MAX_CONSECUTIVE_URGENT_DISPATCHES = 2;
         BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
+        long timeCounter = 100;
 
         // mix of broadcasts, with more than 2 fg/urgent
-        queue.enqueueOrReplaceBroadcast(
-                makeBroadcastRecord(new Intent(Intent.ACTION_TIMEZONE_CHANGED)), 0);
-        queue.enqueueOrReplaceBroadcast(
-                makeBroadcastRecord(new Intent(Intent.ACTION_ALARM_CHANGED)), 0);
-        queue.enqueueOrReplaceBroadcast(
-                makeBroadcastRecord(new Intent(Intent.ACTION_TIME_TICK)), 0);
-        queue.enqueueOrReplaceBroadcast(
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIMEZONE_CHANGED)),
+                        0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_ALARM_CHANGED)),
+                        0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIME_TICK)), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
                 makeBroadcastRecord(new Intent(Intent.ACTION_LOCALE_CHANGED)
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0);
-        queue.enqueueOrReplaceBroadcast(
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
                 makeBroadcastRecord(new Intent(Intent.ACTION_APPLICATION_PREFERENCES),
-                        optInteractive), 0);
-        queue.enqueueOrReplaceBroadcast(
+                        optInteractive), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
                 makeBroadcastRecord(new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE),
-                        optInteractive), 0);
-        queue.enqueueOrReplaceBroadcast(
+                        optInteractive), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
                 makeBroadcastRecord(new Intent(Intent.ACTION_INPUT_METHOD_CHANGED)
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0);
-        queue.enqueueOrReplaceBroadcast(
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
                 makeBroadcastRecord(new Intent(Intent.ACTION_NEW_OUTGOING_CALL),
-                        optInteractive), 0);
+                        optInteractive), 0, timeCounter++);
 
         queue.makeActiveNextPending();
         assertEquals(Intent.ACTION_LOCALE_CHANGED, queue.getActive().intent.getAction());
@@ -604,35 +613,38 @@ public class BroadcastQueueModernImplTest {
         mConstants.MAX_CONSECUTIVE_NORMAL_DISPATCHES = 2;
         final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
+        long timeCounter = 100;
 
         // mix of broadcasts, with more than 2 normal
-        queue.enqueueOrReplaceBroadcast(
+        enqueueOrReplaceBroadcast(queue,
                 makeBroadcastRecord(new Intent(Intent.ACTION_BOOT_COMPLETED)
-                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0);
-        queue.enqueueOrReplaceBroadcast(
-                makeBroadcastRecord(new Intent(Intent.ACTION_TIMEZONE_CHANGED)), 0);
-        queue.enqueueOrReplaceBroadcast(
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIMEZONE_CHANGED)),
+                        0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
                 makeBroadcastRecord(new Intent(Intent.ACTION_PACKAGE_CHANGED)
-                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0);
-        queue.enqueueOrReplaceBroadcast(
-                makeBroadcastRecord(new Intent(Intent.ACTION_ALARM_CHANGED)), 0);
-        queue.enqueueOrReplaceBroadcast(
-                makeBroadcastRecord(new Intent(Intent.ACTION_TIME_TICK)), 0);
-        queue.enqueueOrReplaceBroadcast(
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_ALARM_CHANGED)),
+                0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIME_TICK)), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
                 makeBroadcastRecord(new Intent(Intent.ACTION_LOCALE_CHANGED)
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0);
-        queue.enqueueOrReplaceBroadcast(
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
                 makeBroadcastRecord(new Intent(Intent.ACTION_APPLICATION_PREFERENCES),
-                        optInteractive), 0);
-        queue.enqueueOrReplaceBroadcast(
+                        optInteractive), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
                 makeBroadcastRecord(new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE),
-                        optInteractive), 0);
-        queue.enqueueOrReplaceBroadcast(
+                        optInteractive), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
                 makeBroadcastRecord(new Intent(Intent.ACTION_INPUT_METHOD_CHANGED)
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0);
-        queue.enqueueOrReplaceBroadcast(
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
                 makeBroadcastRecord(new Intent(Intent.ACTION_NEW_OUTGOING_CALL),
-                        optInteractive), 0);
+                        optInteractive), 0, timeCounter++);
 
         queue.makeActiveNextPending();
         assertEquals(Intent.ACTION_LOCALE_CHANGED, queue.getActive().intent.getAction());
@@ -656,6 +668,63 @@ public class BroadcastQueueModernImplTest {
         // and then back to prioritizing urgent ones
         queue.makeActiveNextPending();
         assertEquals(Intent.ACTION_INPUT_METHOD_CHANGED, queue.getActive().intent.getAction());
+    }
+
+    /**
+     * Verify that BroadcastProcessQueue#setPrioritizeEarliest() works as expected.
+     */
+    @Test
+    public void testPrioritizeEarliest() {
+        final BroadcastOptions optInteractive = BroadcastOptions.makeBasic();
+        optInteractive.setInteractive(true);
+
+        BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
+        queue.setPrioritizeEarliest(true);
+        long timeCounter = 100;
+
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_BOOT_COMPLETED)
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIMEZONE_CHANGED)),
+                        0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_PACKAGE_CHANGED)
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_ALARM_CHANGED)),
+                        0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIME_TICK)),
+                        0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_LOCALE_CHANGED)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE),
+                        optInteractive), 0, timeCounter++);
+
+        // When we mark BroadcastProcessQueue to prioritize earliest, we should
+        // expect to dispatch broadcasts in the order they were enqueued
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_BOOT_COMPLETED, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_TIMEZONE_CHANGED, queue.getActive().intent.getAction());
+        // after MAX_CONSECUTIVE_URGENT_DISPATCHES expect an ordinary one next
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_PACKAGE_CHANGED, queue.getActive().intent.getAction());
+        // and then back to prioritizing urgent ones
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_ALARM_CHANGED, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_TIME_TICK, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_LOCALE_CHANGED, queue.getActive().intent.getAction());
+        // verify the reset-count-then-resume worked too
+        queue.makeActiveNextPending();
+        assertEquals(AppWidgetManager.ACTION_APPWIDGET_UPDATE,
+                queue.getActive().intent.getAction());
     }
 
     /**
