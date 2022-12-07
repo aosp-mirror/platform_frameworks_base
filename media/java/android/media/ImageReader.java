@@ -277,7 +277,7 @@ public class ImageReader implements AutoCloseable {
     }
 
     private void initializeImageReader(int width, int height, int imageFormat, int maxImages,
-            long usage, int hardwareBufferFormat, int dataSpace, boolean useLegacyImageFormat) {
+            long usage, int hardwareBufferFormat, int dataSpace) {
         if (width < 1 || height < 1) {
             throw new IllegalArgumentException(
                 "The image dimensions must be positive");
@@ -306,8 +306,7 @@ public class ImageReader implements AutoCloseable {
         // complex, and 1 buffer is enough for the VM to treat the ImageReader as being of some
         // size.
         mEstimatedNativeAllocBytes = ImageUtils.getEstimatedNativeAllocBytes(
-            width, height, useLegacyImageFormat ? imageFormat : hardwareBufferFormat,
-            /*buffer count*/ 1);
+                width, height, imageFormat, /*buffer count*/ 1);
         VMRuntime.getRuntime().registerNativeAllocation(mEstimatedNativeAllocBytes);
     }
 
@@ -322,28 +321,26 @@ public class ImageReader implements AutoCloseable {
         // retrieve hal Format and hal dataspace from imageFormat
         mHardwareBufferFormat = PublicFormatUtils.getHalFormat(mFormat);
         mDataSpace = PublicFormatUtils.getHalDataspace(mFormat);
-        mUseLegacyImageFormat = true;
         mNumPlanes = ImageUtils.getNumPlanesForFormat(mFormat);
 
         initializeImageReader(width, height, imageFormat, maxImages, usage, mHardwareBufferFormat,
-                mDataSpace, mUseLegacyImageFormat);
+                mDataSpace);
     }
 
     private ImageReader(int width, int height, int maxImages, long usage,
             MultiResolutionImageReader parent, int hardwareBufferFormat, int dataSpace) {
         mWidth = width;
         mHeight = height;
-        mFormat = ImageFormat.UNKNOWN; // set default image format value as UNKNOWN
         mUsage = usage;
         mMaxImages = maxImages;
         mParent = parent;
         mHardwareBufferFormat = hardwareBufferFormat;
         mDataSpace = dataSpace;
-        mUseLegacyImageFormat = false;
         mNumPlanes = ImageUtils.getNumPlanesForHardwareBufferFormat(mHardwareBufferFormat);
+        mFormat = PublicFormatUtils.getPublicFormat(hardwareBufferFormat, dataSpace);
 
         initializeImageReader(width, height, mFormat, maxImages, usage, hardwareBufferFormat,
-                dataSpace, mUseLegacyImageFormat);
+                dataSpace);
     }
 
     /**
@@ -537,12 +534,7 @@ public class ImageReader implements AutoCloseable {
      * @hide
      */
     public Image acquireNextImageNoThrowISE() {
-        SurfaceImage si;
-        if (mUseLegacyImageFormat) {
-            si = new SurfaceImage(mFormat);
-        } else {
-            si = new SurfaceImage(mHardwareBufferFormat, mDataSpace);
-        }
+        SurfaceImage si = new SurfaceImage(mFormat);
         return acquireNextSurfaceImage(si) == ACQUIRE_SUCCESS ? si : null;
     }
 
@@ -565,7 +557,7 @@ public class ImageReader implements AutoCloseable {
             // A null image will eventually be returned if ImageReader is already closed.
             int status = ACQUIRE_NO_BUFS;
             if (mIsReaderValid) {
-                status = nativeImageSetup(si, mUseLegacyImageFormat);
+                status = nativeImageSetup(si);
             }
 
             switch (status) {
@@ -619,11 +611,7 @@ public class ImageReader implements AutoCloseable {
         // Initialize with reader format, but can be overwritten by native if the image
         // format is different from the reader format.
         SurfaceImage si;
-        if (mUseLegacyImageFormat) {
-            si = new SurfaceImage(mFormat);
-        } else {
-            si = new SurfaceImage(mHardwareBufferFormat, mDataSpace);
-        }
+        si = new SurfaceImage(mFormat);
         int status = acquireNextSurfaceImage(si);
 
         switch (status) {
@@ -1094,8 +1082,6 @@ public class ImageReader implements AutoCloseable {
 
     private final @NamedDataSpace int mDataSpace;
 
-    private final boolean mUseLegacyImageFormat;
-
     /**
      * This field is used by native code, do not access or modify.
      */
@@ -1136,12 +1122,6 @@ public class ImageReader implements AutoCloseable {
             mDataSpace = ImageReader.this.mDataSpace;
         }
 
-        SurfaceImage(int hardwareBufferFormat, int dataSpace) {
-            mHardwareBufferFormat = hardwareBufferFormat;
-            mDataSpace = dataSpace;
-            mFormat = PublicFormatUtils.getPublicFormat(mHardwareBufferFormat, mDataSpace);
-        }
-
         @Override
         public void close() {
             synchronized (this.mCloseLock) {
@@ -1159,12 +1139,10 @@ public class ImageReader implements AutoCloseable {
             // update mFormat only if ImageReader is initialized by factory pattern.
             // if using builder pattern, mFormat has been updated upon initialization.
             // no need update here.
-            if (ImageReader.this.mUseLegacyImageFormat) {
-                int readerFormat = ImageReader.this.getImageFormat();
-                // Assume opaque reader always produce opaque images.
-                mFormat = (readerFormat == ImageFormat.PRIVATE) ? readerFormat :
-                    nativeGetFormat(readerFormat);
-            }
+            int readerFormat = ImageReader.this.getImageFormat();
+            // Assume opaque reader always produce opaque images.
+            mFormat = (readerFormat == ImageFormat.PRIVATE) ? readerFormat :
+                nativeGetFormat(readerFormat);
             return mFormat;
         }
 
@@ -1263,8 +1241,8 @@ public class ImageReader implements AutoCloseable {
             throwISEIfImageIsInvalid();
 
             if (mPlanes == null) {
-                mPlanes = nativeCreatePlanes(ImageReader.this.mNumPlanes, ImageReader.this.mFormat,
-                        ImageReader.this.mUsage);
+                mPlanes = nativeCreatePlanes(ImageReader.this.mNumPlanes,
+                        ImageReader.this.mHardwareBufferFormat, ImageReader.this.mUsage);
             }
             // Shallow copy is fine.
             return mPlanes.clone();
@@ -1395,7 +1373,7 @@ public class ImageReader implements AutoCloseable {
         private AtomicBoolean mIsDetached = new AtomicBoolean(false);
 
         private synchronized native SurfacePlane[] nativeCreatePlanes(int numPlanes,
-                int readerFormat, long readerUsage);
+                int hardwareBufferFormat, long readerUsage);
         private synchronized native int nativeGetWidth();
         private synchronized native int nativeGetHeight();
         private synchronized native int nativeGetFormat(int readerFormat);
@@ -1418,7 +1396,7 @@ public class ImageReader implements AutoCloseable {
      * @see #ACQUIRE_NO_BUFS
      * @see #ACQUIRE_MAX_IMAGES
      */
-    private synchronized native int nativeImageSetup(Image i, boolean legacyValidateImageFormat);
+    private synchronized native int nativeImageSetup(Image i);
 
     /**
      * @hide
