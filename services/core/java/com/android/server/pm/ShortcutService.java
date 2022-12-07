@@ -181,6 +181,9 @@ public class ShortcutService extends IShortcutService.Stub {
     static final int DEFAULT_MAX_SHORTCUTS_PER_ACTIVITY = 15;
 
     @VisibleForTesting
+    static final int DEFAULT_MAX_SHORTCUTS_PER_APP = 60;
+
+    @VisibleForTesting
     static final int DEFAULT_MAX_ICON_DIMENSION_DP = 96;
 
     @VisibleForTesting
@@ -257,6 +260,11 @@ public class ShortcutService extends IShortcutService.Stub {
         String KEY_MAX_SHORTCUTS = "max_shortcuts";
 
         /**
+         * Key name for the max dynamic shortcuts per app. (int)
+         */
+        String KEY_MAX_SHORTCUTS_PER_APP = "max_shortcuts_per_app";
+
+        /**
          * Key name for icon compression quality, 0-100.
          */
         String KEY_ICON_QUALITY = "icon_quality";
@@ -329,9 +337,14 @@ public class ShortcutService extends IShortcutService.Stub {
             new SparseArray<>();
 
     /**
+     * Max number of dynamic + manifest shortcuts that each activity can have at a time.
+     */
+    private int mMaxShortcutsPerActivity;
+
+    /**
      * Max number of dynamic + manifest shortcuts that each application can have at a time.
      */
-    private int mMaxShortcuts;
+    private int mMaxShortcutsPerApp;
 
     /**
      * Max number of updating API calls that each application can make during the interval.
@@ -804,8 +817,11 @@ public class ShortcutService extends IShortcutService.Stub {
         mMaxUpdatesPerInterval = Math.max(0, (int) parser.getLong(
                 ConfigConstants.KEY_MAX_UPDATES_PER_INTERVAL, DEFAULT_MAX_UPDATES_PER_INTERVAL));
 
-        mMaxShortcuts = Math.max(0, (int) parser.getLong(
+        mMaxShortcutsPerActivity = Math.max(0, (int) parser.getLong(
                 ConfigConstants.KEY_MAX_SHORTCUTS, DEFAULT_MAX_SHORTCUTS_PER_ACTIVITY));
+
+        mMaxShortcutsPerApp = Math.max(0, (int) parser.getLong(
+                ConfigConstants.KEY_MAX_SHORTCUTS_PER_APP, DEFAULT_MAX_SHORTCUTS_PER_APP));
 
         final int iconDimensionDp = Math.max(1, injectIsLowRamDevice()
                 ? (int) parser.getLong(
@@ -1746,8 +1762,18 @@ public class ShortcutService extends IShortcutService.Stub {
      *                                  {@link #getMaxActivityShortcuts()}.
      */
     void enforceMaxActivityShortcuts(int numShortcuts) {
-        if (numShortcuts > mMaxShortcuts) {
+        if (numShortcuts > mMaxShortcutsPerActivity) {
             throw new IllegalArgumentException("Max number of dynamic shortcuts exceeded");
+        }
+    }
+
+    /**
+     * @throws IllegalArgumentException if {@code numShortcuts} is bigger than
+     *                                  {@link #getMaxAppShortcuts()}.
+     */
+    void enforceMaxAppShortcuts(int numShortcuts) {
+        if (numShortcuts > mMaxShortcutsPerApp) {
+            throw new IllegalArgumentException("Max number of dynamic shortcuts per app exceeded");
         }
     }
 
@@ -1755,7 +1781,14 @@ public class ShortcutService extends IShortcutService.Stub {
      * Return the max number of dynamic + manifest shortcuts for each launcher icon.
      */
     int getMaxActivityShortcuts() {
-        return mMaxShortcuts;
+        return mMaxShortcutsPerActivity;
+    }
+
+    /**
+     * Return the max number of dynamic + manifest shortcuts for each launcher icon.
+     */
+    int getMaxAppShortcuts() {
+        return mMaxShortcutsPerApp;
     }
 
     /**
@@ -2188,6 +2221,8 @@ public class ShortcutService extends IShortcutService.Stub {
             ps.ensureNotImmutable(shortcut.getId(), /*ignoreInvisible=*/ true);
             fillInDefaultActivity(Arrays.asList(shortcut));
 
+            enforceMaxAppShortcuts(ps.getShortcutCount());
+
             if (!shortcut.hasRank()) {
                 shortcut.setRank(0);
             }
@@ -2575,7 +2610,7 @@ public class ShortcutService extends IShortcutService.Stub {
             throws RemoteException {
         verifyCaller(packageName, userId);
 
-        return mMaxShortcuts;
+        return mMaxShortcutsPerActivity;
     }
 
     @Override
@@ -4724,7 +4759,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 pw.print("    maxUpdatesPerInterval: ");
                 pw.println(mMaxUpdatesPerInterval);
                 pw.print("    maxShortcutsPerActivity: ");
-                pw.println(mMaxShortcuts);
+                pw.println(mMaxShortcutsPerActivity);
                 pw.println();
 
                 mStatLogger.dump(pw, "  ");
@@ -5211,7 +5246,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     int getMaxShortcutsForTest() {
-        return mMaxShortcuts;
+        return mMaxShortcutsPerActivity;
     }
 
     @VisibleForTesting
