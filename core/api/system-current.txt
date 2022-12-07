@@ -826,7 +826,6 @@ package android.app {
     method public int describeContents();
     method public int getFpsOverride();
     method public float getScalingFactor();
-    method @NonNull public android.app.GameModeConfiguration.Builder toBuilder();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.GameModeConfiguration> CREATOR;
     field public static final int FPS_OVERRIDE_NONE = 0; // 0x0
@@ -834,6 +833,7 @@ package android.app {
 
   public static final class GameModeConfiguration.Builder {
     ctor public GameModeConfiguration.Builder();
+    ctor public GameModeConfiguration.Builder(@NonNull android.app.GameModeConfiguration);
     method @NonNull public android.app.GameModeConfiguration build();
     method @NonNull public android.app.GameModeConfiguration.Builder setFpsOverride(int);
     method @NonNull public android.app.GameModeConfiguration.Builder setScalingFactor(float);
