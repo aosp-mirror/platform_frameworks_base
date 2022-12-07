@@ -40,6 +40,8 @@ import com.android.systemui.dagger.qualifiers.UiBackground
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.LinearLightRevealEffect
+import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation.AddOverlayReason.FOLD
+import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation.AddOverlayReason.UNFOLD
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.unfold.updates.RotationChangeProvider
 import com.android.systemui.unfold.util.ScaleAwareTransitionProgressProvider.Companion.areAnimationsEnabled
@@ -125,7 +127,7 @@ constructor(
         try {
             // Add the view only if we are unfolding and this is the first screen on
             if (!isFolded && !isUnfoldHandled && contentResolver.areAnimationsEnabled()) {
-                executeInBackground { addView(onOverlayReady) }
+                executeInBackground { addOverlay(onOverlayReady, reason = UNFOLD) }
                 isUnfoldHandled = true
             } else {
                 // No unfold transition, immediately report that overlay is ready
@@ -137,7 +139,7 @@ constructor(
         }
     }
 
-    private fun addView(onOverlayReady: Runnable? = null) {
+    private fun addOverlay(onOverlayReady: Runnable? = null, reason: AddOverlayReason) {
         if (!::wwm.isInitialized) {
             // Surface overlay is not created yet on the first SysUI launch
             onOverlayReady?.run()
@@ -152,7 +154,10 @@ constructor(
             LightRevealScrim(context, null).apply {
                 revealEffect = createLightRevealEffect()
                 isScrimOpaqueChangedListener = Consumer {}
-                revealAmount = 0f
+                revealAmount = when (reason) {
+                    FOLD -> TRANSPARENT
+                    UNFOLD -> BLACK
+                }
             }
 
         val params = getLayoutParams()
@@ -247,7 +252,7 @@ constructor(
         override fun onTransitionStarted() {
             // Add view for folding case (when unfolding the view is added earlier)
             if (scrimView == null) {
-                executeInBackground { addView() }
+                executeInBackground { addOverlay(reason = FOLD) }
             }
             // Disable input dispatching during transition.
             InputManager.getInstance().cancelCurrentTouch()
@@ -294,11 +299,17 @@ constructor(
             }
         )
 
+    private enum class AddOverlayReason { FOLD, UNFOLD }
+
     private companion object {
-        private const val ROTATION_ANIMATION_OVERLAY_Z_INDEX = Integer.MAX_VALUE
+        const val ROTATION_ANIMATION_OVERLAY_Z_INDEX = Integer.MAX_VALUE
 
         // Put the unfold overlay below the rotation animation screenshot to hide the moment
         // when it is rotated but the rotation of the other windows hasn't happen yet
-        private const val UNFOLD_OVERLAY_LAYER_Z_INDEX = ROTATION_ANIMATION_OVERLAY_Z_INDEX - 1
+        const val UNFOLD_OVERLAY_LAYER_Z_INDEX = ROTATION_ANIMATION_OVERLAY_Z_INDEX - 1
+
+        // constants for revealAmount.
+        const val TRANSPARENT = 1f
+        const val BLACK = 0f
     }
 }
