@@ -109,9 +109,8 @@ public abstract class DreamOverlayModule {
     /** */
     @Provides
     @DreamOverlayComponent.DreamOverlayScope
-    public static TouchInsetManager providesTouchInsetManager(@Main Executor executor,
-            DreamOverlayContainerView view) {
-        return new TouchInsetManager(executor, view);
+    public static TouchInsetManager providesTouchInsetManager(@Main Executor executor) {
+        return new TouchInsetManager(executor);
     }
 
     /** */
