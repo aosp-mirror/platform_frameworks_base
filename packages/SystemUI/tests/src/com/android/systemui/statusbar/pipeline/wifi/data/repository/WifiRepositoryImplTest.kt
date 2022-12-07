@@ -31,10 +31,10 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryImpl.Companion.ACTIVITY_DEFAULT
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryImpl.Companion.WIFI_NETWORK_DEFAULT
-import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiActivityModel
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -724,7 +724,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     fun wifiActivity_nullWifiManager_receivesDefault() = runBlocking(IMMEDIATE) {
         underTest = createRepo(wifiManagerToUse = null)
 
-        var latest: WifiActivityModel? = null
+        var latest: DataActivityModel? = null
         val job = underTest
                 .wifiActivity
                 .onEach { latest = it }
@@ -737,7 +737,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiActivity_callbackGivesNone_activityFlowHasNone() = runBlocking(IMMEDIATE) {
-        var latest: WifiActivityModel? = null
+        var latest: DataActivityModel? = null
         val job = underTest
                 .wifiActivity
                 .onEach { latest = it }
@@ -746,7 +746,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         getTrafficStateCallback().onStateChanged(TrafficStateCallback.DATA_ACTIVITY_NONE)
 
         assertThat(latest).isEqualTo(
-            WifiActivityModel(hasActivityIn = false, hasActivityOut = false)
+            DataActivityModel(hasActivityIn = false, hasActivityOut = false)
         )
 
         job.cancel()
@@ -754,7 +754,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiActivity_callbackGivesIn_activityFlowHasIn() = runBlocking(IMMEDIATE) {
-        var latest: WifiActivityModel? = null
+        var latest: DataActivityModel? = null
         val job = underTest
                 .wifiActivity
                 .onEach { latest = it }
@@ -763,7 +763,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         getTrafficStateCallback().onStateChanged(TrafficStateCallback.DATA_ACTIVITY_IN)
 
         assertThat(latest).isEqualTo(
-            WifiActivityModel(hasActivityIn = true, hasActivityOut = false)
+            DataActivityModel(hasActivityIn = true, hasActivityOut = false)
         )
 
         job.cancel()
@@ -771,7 +771,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiActivity_callbackGivesOut_activityFlowHasOut() = runBlocking(IMMEDIATE) {
-        var latest: WifiActivityModel? = null
+        var latest: DataActivityModel? = null
         val job = underTest
                 .wifiActivity
                 .onEach { latest = it }
@@ -780,7 +780,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         getTrafficStateCallback().onStateChanged(TrafficStateCallback.DATA_ACTIVITY_OUT)
 
         assertThat(latest).isEqualTo(
-            WifiActivityModel(hasActivityIn = false, hasActivityOut = true)
+            DataActivityModel(hasActivityIn = false, hasActivityOut = true)
         )
 
         job.cancel()
@@ -788,7 +788,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiActivity_callbackGivesInout_activityFlowHasInAndOut() = runBlocking(IMMEDIATE) {
-        var latest: WifiActivityModel? = null
+        var latest: DataActivityModel? = null
         val job = underTest
                 .wifiActivity
                 .onEach { latest = it }
@@ -796,7 +796,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
         getTrafficStateCallback().onStateChanged(TrafficStateCallback.DATA_ACTIVITY_INOUT)
 
-        assertThat(latest).isEqualTo(WifiActivityModel(hasActivityIn = true, hasActivityOut = true))
+        assertThat(latest).isEqualTo(DataActivityModel(hasActivityIn = true, hasActivityOut = true))
 
         job.cancel()
     }

@@ -37,10 +37,10 @@ import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneMod
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
-import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiActivityModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -147,7 +147,7 @@ constructor(
             )
 
     /** The wifi activity status. Null if we shouldn't display the activity status. */
-    private val activity: Flow<WifiActivityModel?> =
+    private val activity: Flow<DataActivityModel?> =
         if (!wifiConstants.shouldShowActivityConfig) {
             flowOf(null)
         } else {
