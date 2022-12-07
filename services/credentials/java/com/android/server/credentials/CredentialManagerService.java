@@ -20,6 +20,7 @@ import static android.content.Context.CREDENTIAL_SERVICE;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.credentials.ClearCredentialStateRequest;
@@ -30,9 +31,11 @@ import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ICreateCredentialCallback;
 import android.credentials.ICredentialManager;
 import android.credentials.IGetCredentialCallback;
+import android.credentials.ISetEnabledProvidersCallback;
 import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.ICancellationSignal;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.credentials.BeginCreateCredentialRequest;
@@ -205,6 +208,47 @@ public final class CredentialManagerService extends
                         /*callback=*/providerCreateSession);
             });
             return cancelTransport;
+        }
+
+        @Override
+        public void setEnabledProviders(
+                List<String> providers, int userId, ISetEnabledProvidersCallback callback) {
+            Log.i(TAG, "setEnabledProviders");
+
+            userId =
+                    ActivityManager.handleIncomingUser(
+                            Binder.getCallingPid(),
+                            Binder.getCallingUid(),
+                            userId,
+                            false,
+                            false,
+                            "setEnabledProviders",
+                            null);
+
+            String storedValue = String.join(":", providers);
+            if (!Settings.Secure.putStringForUser(
+                    getContext().getContentResolver(),
+                    Settings.Secure.CREDENTIAL_SERVICE,
+                    storedValue,
+                    userId)) {
+                Log.e(TAG, "Failed to store setting containing enabled providers");
+                try {
+                    callback.onError(
+                            "failed_setting_store",
+                            "Failed to store setting containing enabled providers");
+                } catch (RemoteException e) {
+                    Log.i(TAG, "Issue with invoking error response: " + e.getMessage());
+                    // TODO: Propagate failure
+                }
+            }
+
+            // Call the callback.
+            try {
+                callback.onResponse();
+            } catch (RemoteException e) {
+                Log.i(TAG, "Issue with invoking response: " + e.getMessage());
+                // TODO: Propagate failure
+            }
         }
 
         @Override
