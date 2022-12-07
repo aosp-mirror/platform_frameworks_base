@@ -27,11 +27,13 @@ import android.os.ServiceSpecificException;
 import android.telecom.TelecomManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSession;
+import android.telephony.ims.ImsCallSessionListener;
 import android.telephony.ims.ImsException;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsService;
 import android.telephony.ims.RtpHeaderExtensionType;
 import android.telephony.ims.SrvccCall;
+import android.telephony.ims.aidl.IImsCallSessionListener;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsMmTelListener;
@@ -546,11 +548,19 @@ public class MmTelFeature extends ImsFeature {
         /**
          * Called when the IMS provider receives an incoming call.
          * @param c The {@link ImsCallSession} associated with the new call.
+         * @param callId The call ID of the session of the new incoming call.
+         * @param extras A bundle containing extra parameters related to the call. See
+         * {@link #EXTRA_IS_UNKNOWN_CALL} and {@link #EXTRA_IS_USSD} above.
+         * @return the listener to listen to the session events. An {@link ImsCallSession} can only
+         *         hold one listener at a time. see {@link ImsCallSessionListener}.
+         *         If this method returns {@code null}, then the call could not be placed.
          * @hide
          */
         @Override
-        public void onIncomingCall(IImsCallSession c, Bundle extras) {
-
+        @Nullable
+        public IImsCallSessionListener onIncomingCall(IImsCallSession c,
+                String callId, Bundle extras) {
+            return null;
         }
 
         /**
@@ -686,8 +696,11 @@ public class MmTelFeature extends ImsFeature {
      * @param c The {@link ImsCallSessionImplBase} of the new incoming call.
      * @param extras A bundle containing extra parameters related to the call. See
      * {@link #EXTRA_IS_UNKNOWN_CALL} and {@link #EXTRA_IS_USSD} above.
-      * @hide
+     * @hide
+     *
+     * @deprecated use {@link #notifyIncomingCall(ImsCallSessionImplBase, String, Bundle)} instead
      */
+    @Deprecated
     @SystemApi
     public final void notifyIncomingCall(@NonNull ImsCallSessionImplBase c,
             @NonNull Bundle extras) {
@@ -700,8 +713,44 @@ public class MmTelFeature extends ImsFeature {
             throw new IllegalStateException("Session is not available.");
         }
         try {
+            listener.onIncomingCall(c.getServiceImpl(), null, extras);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Notify the framework of an incoming call.
+     * @param c The {@link ImsCallSessionImplBase} of the new incoming call.
+     * @param callId The call ID of the session of the new incoming call.
+     * @param extras A bundle containing extra parameters related to the call. See
+     * {@link #EXTRA_IS_UNKNOWN_CALL} and {@link #EXTRA_IS_USSD} above.
+     * @return The listener used by the framework to listen to call session events created
+     *         from the ImsService.
+     *         If this method returns {@code null}, then the call could not be placed.
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public final ImsCallSessionListener notifyIncomingCall(
+            @NonNull ImsCallSessionImplBase c, @NonNull String callId, @NonNull Bundle extras) {
+        if (c == null || callId == null || extras == null) {
+            throw new IllegalArgumentException("ImsCallSessionImplBase, callId, and Bundle can "
+                    + "not be null.");
+        }
+        IImsMmTelListener listener = getListener();
+        if (listener == null) {
+            throw new IllegalStateException("Session is not available.");
+        }
+        try {
             c.setDefaultExecutor(MmTelFeature.this.mExecutor);
-            listener.onIncomingCall(c.getServiceImpl(), extras);
+            IImsCallSessionListener isl =
+                    listener.onIncomingCall(c.getServiceImpl(), callId, extras);
+            if (isl != null) {
+                return new ImsCallSessionListener(isl);
+            } else {
+                return null;
+            }
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -743,7 +792,7 @@ public class MmTelFeature extends ImsFeature {
             throw new IllegalStateException("Session is not available.");
         }
         try {
-            listener.onIncomingCall(c, extras);
+            listener.onIncomingCall(c, null, extras);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
