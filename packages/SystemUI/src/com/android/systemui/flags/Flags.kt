@@ -71,6 +71,9 @@ object Flags {
     val NOTIFICATION_MEMORY_MONITOR_ENABLED =
         releasedFlag(112, "notification_memory_monitor_enabled")
 
+    val NOTIFICATION_MEMORY_LOGGING_ENABLED =
+        unreleasedFlag(119, "notification_memory_logging_enabled", teamfood = true)
+
     // TODO(b/254512731): Tracking Bug
     @JvmField
     val NOTIFICATION_DISMISSAL_FADE =
