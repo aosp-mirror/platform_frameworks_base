@@ -333,7 +333,14 @@ public class InternetTile extends QSTileImpl<SignalState> {
             mCellularInfo.mAirplaneModeEnabled = icon.visible;
             mWifiInfo.mAirplaneModeEnabled = icon.visible;
             if (!mSignalCallback.mEthernetInfo.mConnected) {
-                if (mWifiInfo.mEnabled && (mWifiInfo.mWifiSignalIconId > 0)
+                // Always use mWifiInfo to refresh the Internet Tile if airplane mode is enabled,
+                // because Internet Tile will show different information depending on whether WiFi
+                // is enabled or not.
+                if (mWifiInfo.mAirplaneModeEnabled) {
+                    refreshState(mWifiInfo);
+                // If airplane mode is disabled, we will use mWifiInfo to refresh the Internet Tile
+                // if WiFi is currently connected to avoid any icon flickering.
+                } else if (mWifiInfo.mEnabled && (mWifiInfo.mWifiSignalIconId > 0)
                         && (mWifiInfo.mSsid != null)) {
                     refreshState(mWifiInfo);
                 } else {
