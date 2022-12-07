@@ -176,11 +176,11 @@ public class HapClientProfile implements LocalBluetoothProfile {
      * @param device is the device for which we want to know if supports synchronized presets
      * @return {@code true} if the device supports synchronized presets
      */
-    public boolean supportSynchronizedPresets(@NonNull BluetoothDevice device) {
+    public boolean supportsSynchronizedPresets(@NonNull BluetoothDevice device) {
         if (mService == null) {
             return false;
         }
-        return mService.supportSynchronizedPresets(device);
+        return mService.supportsSynchronizedPresets(device);
     }
 
     /**
@@ -189,11 +189,11 @@ public class HapClientProfile implements LocalBluetoothProfile {
      * @param device is the device for which we want to know if supports independent presets
      * @return {@code true} if the device supports independent presets
      */
-    public boolean supportIndependentPresets(@NonNull BluetoothDevice device) {
+    public boolean supportsIndependentPresets(@NonNull BluetoothDevice device) {
         if (mService == null) {
             return false;
         }
-        return mService.supportIndependentPresets(device);
+        return mService.supportsIndependentPresets(device);
     }
 
     /**
@@ -202,11 +202,11 @@ public class HapClientProfile implements LocalBluetoothProfile {
      * @param device is the device for which we want to know if supports dynamic presets
      * @return {@code true} if the device supports dynamic presets
      */
-    public boolean supportDynamicPresets(@NonNull BluetoothDevice device) {
+    public boolean supportsDynamicPresets(@NonNull BluetoothDevice device) {
         if (mService == null) {
             return false;
         }
-        return mService.supportDynamicPresets(device);
+        return mService.supportsDynamicPresets(device);
     }
 
     /**
@@ -215,11 +215,11 @@ public class HapClientProfile implements LocalBluetoothProfile {
      * @param device is the device for which we want to know if supports writable presets
      * @return {@code true} if the device supports writable presets
      */
-    public boolean supportWritablePresets(@NonNull BluetoothDevice device) {
+    public boolean supportsWritablePresets(@NonNull BluetoothDevice device) {
         if (mService == null) {
             return false;
         }
-        return mService.supportWritablePresets(device);
+        return mService.supportsWritablePresets(device);
     }
 
     @Override
