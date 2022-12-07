@@ -1416,7 +1416,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 || !mShortFgsInfo.isCurrent()) {
             return false;
         }
-        return mShortFgsInfo.getTimeoutTime() < SystemClock.uptimeMillis();
+        return mShortFgsInfo.getTimeoutTime() <= SystemClock.uptimeMillis();
     }
 
     /**
@@ -1431,7 +1431,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 || !mShortFgsInfo.isCurrent()) {
             return false;
         }
-        return mShortFgsInfo.getAnrTime() < SystemClock.uptimeMillis();
+        return mShortFgsInfo.getAnrTime() <= SystemClock.uptimeMillis();
     }
 
     private boolean isAppAlive() {

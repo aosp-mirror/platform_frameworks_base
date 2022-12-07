@@ -2981,6 +2981,9 @@ public final class ActiveServices {
     void onShortFgsTimeout(ServiceRecord sr) {
         synchronized (mAm) {
             if (!sr.shouldTriggerShortFgsTimeout()) {
+                if (DEBUG_SHORT_SERVICE) {
+                    Slog.d(TAG_SERVICE, "[STALE] Short FGS timed out: " + sr);
+                }
                 return;
             }
             Slog.e(TAG_SERVICE, "Short FGS timed out: " + sr);
@@ -3021,6 +3024,9 @@ public final class ActiveServices {
             tr.mLatencyTracker.waitingOnAMSLockEnded();
 
             if (!sr.shouldTriggerShortFgsAnr()) {
+                if (DEBUG_SHORT_SERVICE) {
+                    Slog.d(TAG_SERVICE, "[STALE] Short FGS ANR'ed: " + sr);
+                }
                 return;
             }
 
