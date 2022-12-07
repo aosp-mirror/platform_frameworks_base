@@ -9225,6 +9225,14 @@ public final class Settings {
         public static final int DOCK_SETUP_PAUSED = 2;
 
         /**
+         * Indicates that the user has been prompted to start dock setup.
+         * One of the possible states for {@link #DOCK_SETUP_STATE}.
+         *
+         * @hide
+         */
+        public static final int DOCK_SETUP_PROMPTED = 3;
+
+        /**
          * Indicates that the user has completed dock setup.
          * One of the possible states for {@link #DOCK_SETUP_STATE}.
          *
@@ -9238,6 +9246,7 @@ public final class Settings {
                 DOCK_SETUP_NOT_STARTED,
                 DOCK_SETUP_STARTED,
                 DOCK_SETUP_PAUSED,
+                DOCK_SETUP_PROMPTED,
                 DOCK_SETUP_COMPLETED
         })
         public @interface DockSetupState {
