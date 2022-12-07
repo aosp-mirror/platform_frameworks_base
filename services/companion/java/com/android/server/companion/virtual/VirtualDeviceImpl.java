@@ -679,8 +679,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                             this::onEnteringPipBlocked,
                             this::onActivityBlocked,
                             this::onSecureWindowShown,
-                            mAssociationInfo.getDeviceProfile(),
-                            displayCategories);
+                            displayCategories,
+                            mParams.getDefaultRecentsPolicy());
             gwpc.registerRunningAppsChangedListener(/* listener= */ this);
             return gwpc;
         }

@@ -243,7 +243,7 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         }
 
         @Override
-        public boolean canShowTasksInRecents() {
+        public boolean canShowTasksInHostDeviceRecents() {
             return true;
         }
 

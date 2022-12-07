@@ -1393,7 +1393,7 @@ class RecentTasks {
         // Ignore the task if it is started on a display which is not allow to show its tasks on
         // Recents.
         if (task.getDisplayContent() != null
-                && !task.getDisplayContent().canShowTasksInRecents()) {
+                && !task.getDisplayContent().canShowTasksInHostDeviceRecents()) {
             return false;
         }
 
