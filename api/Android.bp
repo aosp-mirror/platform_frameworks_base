@@ -118,6 +118,7 @@ combined_apis {
     ],
     system_server_classpath: [
         "service-art",
+        "service-configinfrastructure",
         "service-healthconnect",
         "service-media-s",
         "service-permission",
