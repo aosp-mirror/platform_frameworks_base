@@ -31,6 +31,7 @@ import android.telephony.TelephonyManager.DATA_CONNECTED
 import android.telephony.TelephonyManager.DATA_CONNECTING
 import android.telephony.TelephonyManager.DATA_DISCONNECTED
 import android.telephony.TelephonyManager.DATA_DISCONNECTING
+import android.telephony.TelephonyManager.DATA_UNKNOWN
 import android.telephony.TelephonyManager.NETWORK_TYPE_LTE
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
@@ -216,6 +217,21 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             callback.onDataConnectionStateChanged(DATA_DISCONNECTING, 200 /* unused */)
 
             assertThat(latest?.dataConnectionState).isEqualTo(DataConnectionState.Disconnecting)
+
+            job.cancel()
+        }
+
+    @Test
+    fun testFlowForSubId_dataConnectionState_unknown() =
+        runBlocking(IMMEDIATE) {
+            var latest: MobileSubscriptionModel? = null
+            val job = underTest.subscriptionModelFlow.onEach { latest = it }.launchIn(this)
+
+            val callback =
+                getTelephonyCallbackForType<TelephonyCallback.DataConnectionStateListener>()
+            callback.onDataConnectionStateChanged(DATA_UNKNOWN, 200 /* unused */)
+
+            assertThat(latest?.dataConnectionState).isEqualTo(DataConnectionState.Unknown)
 
             job.cancel()
         }
