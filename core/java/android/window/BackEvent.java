@@ -99,7 +99,21 @@ public class BackEvent implements Parcelable {
     }
 
     /**
-     * Returns a value between 0 and 1 on how far along the back gesture is.
+     * Returns a value between 0 and 1 on how far along the back gesture is. This value is
+     * driven by the horizontal location of the touch point, and should be used as the fraction to
+     * seek the predictive back animation with. Specifically,
+     * <ol>
+     * <li>The progress is 0 when the touch is at the starting edge of the screen (left or right),
+     * and animation should seek to its start state.
+     * <li>The progress is approximately 1 when the touch is at the opposite side of the screen,
+     * and animation should seek to its end state. Exact end value may vary depending on
+     * screen size.
+     * </ol>
+     * <li> After the gesture finishes in cancel state, this method keeps getting invoked until the
+     * progress value animates back to 0.
+     * </ol>
+     * In-between locations are linearly interpolated based on horizontal distance from the starting
+     * edge and smooth clamped to 1 when the distance exceeds a system-wide threshold.
      */
     public float getProgress() {
         return mProgress;

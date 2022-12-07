@@ -255,11 +255,12 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         @Override
         public void onBackCancelled() {
             Handler.getMain().post(() -> {
-                mProgressAnimator.reset();
-                final OnBackAnimationCallback callback = getBackAnimationCallback();
-                if (callback != null) {
-                    callback.onBackCancelled();
-                }
+                mProgressAnimator.onBackCancelled(() -> {
+                    final OnBackAnimationCallback callback = getBackAnimationCallback();
+                    if (callback != null) {
+                        callback.onBackCancelled();
+                    }
+                });
             });
         }
 
