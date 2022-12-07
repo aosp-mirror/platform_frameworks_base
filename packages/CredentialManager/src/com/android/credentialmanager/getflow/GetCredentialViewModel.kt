@@ -41,6 +41,7 @@ data class GetCredentialUiState(
   val providerDisplayInfo: ProviderDisplayInfo = toProviderDisplayInfo(providerInfoList),
   val selectedEntry: EntryInfo? = null,
   val hidden: Boolean = false,
+  val providerActivityPending: Boolean = false,
 )
 
 class GetCredentialViewModel(
@@ -79,6 +80,9 @@ class GetCredentialViewModel(
   ) {
     val entry = uiState.selectedEntry
     if (entry != null && entry.pendingIntent != null) {
+      uiState = uiState.copy(
+        providerActivityPending = true,
+      )
       val intentSenderRequest = IntentSenderRequest.Builder(entry.pendingIntent)
         .setFillInIntent(entry.fillInIntent).build()
       launcher.launch(intentSenderRequest)
@@ -96,6 +100,7 @@ class GetCredentialViewModel(
       uiState = uiState.copy(
         selectedEntry = null,
         hidden = false,
+        providerActivityPending = false,
       )
     } else {
       if (entry != null) {
