@@ -151,20 +151,17 @@ public final class AltitudeConverter {
      * altitude accuracy if the {@code location} has a finite and non-negative vertical accuracy;
      * otherwise, does not add a corresponding accuracy.
      *
-     * <p>Must be called off the main thread as data may be loaded from raw assets. Throws an
-     * {@link IOException} if an I/O error occurs when loading data.
+     * <p>Must be called off the main thread as data may be loaded from raw assets.
      *
-     * <p>Throws an {@link IllegalArgumentException} if the {@code location} has an invalid
-     * latitude, longitude, or altitude above WGS84. Specifically:
-     *
-     * <ul>
-     *     <li>The latitude must be between -90 and 90, both inclusive.
-     *     <li>The longitude must be between -180 and 180, both inclusive.
-     *     <li>The altitude above WGS84 must be finite.
-     * </ul>
+     * @throws IOException              if an I/O error occurs when loading data from raw assets.
+     * @throws IllegalArgumentException if the {@code location} has an invalid latitude, longitude,
+     *                                  or altitude above WGS84. Specifically, the latitude must be
+     *                                  between -90 and 90 (both inclusive), the longitude must be
+     *                                  between -180 and 180 (both inclusive), and the altitude
+     *                                  above WGS84 must be finite.
      */
     @WorkerThread
-    public void addMslAltitude(@NonNull Context context, @NonNull Location location)
+    public void addMslAltitudeToLocation(@NonNull Context context, @NonNull Location location)
             throws IOException {
         validate(location);
         MapParamsProto params = GeoidHeightMap.getParams(context);

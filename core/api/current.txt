@@ -20206,7 +20206,7 @@ package android.location.altitude {
 
   public final class AltitudeConverter {
     ctor public AltitudeConverter();
-    method @WorkerThread public void addMslAltitude(@NonNull android.content.Context, @NonNull android.location.Location) throws java.io.IOException;
+    method @WorkerThread public void addMslAltitudeToLocation(@NonNull android.content.Context, @NonNull android.location.Location) throws java.io.IOException;
   }
 
 }
