@@ -339,6 +339,9 @@ cc_library_shared {
                 "dnsproxyd_protocol_headers",
                 "libtextclassifier_hash_headers",
             ],
+            runtime_libs: [
+                "libidmap2",
+            ],
         },
         host: {
             cflags: [
