@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.annotation.XmlRes;
 import android.content.Context;
 import android.net.NetworkStats;
 import android.os.BatteryConsumer;
@@ -50,6 +51,7 @@ public class BatteryUsageStatsRule implements TestRule {
                     .powerProfileModeledOnly()
                     .includePowerModels()
                     .build();
+    private final Context mContext;
 
     private final PowerProfile mPowerProfile;
     private final MockClock mMockClock = new MockClock();
@@ -67,12 +69,17 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     public BatteryUsageStatsRule(long currentTime, File historyDir) {
-        Context context = InstrumentationRegistry.getContext();
-        mPowerProfile = spy(new PowerProfile(context, true /* forTest */));
+        mContext = InstrumentationRegistry.getContext();
+        mPowerProfile = spy(new PowerProfile(mContext, true /* forTest */));
         mMockClock.currentTime = currentTime;
         mBatteryStats = new MockBatteryStatsImpl(mMockClock, historyDir);
         mBatteryStats.setPowerProfile(mPowerProfile);
         mBatteryStats.onSystemReady();
+    }
+
+    public BatteryUsageStatsRule setTestPowerProfile(@XmlRes int xmlId) {
+        mPowerProfile.forceInitForTesting(mContext, xmlId);
+        return this;
     }
 
     public BatteryUsageStatsRule setAveragePower(String key, double value) {

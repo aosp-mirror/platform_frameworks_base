@@ -12229,6 +12229,7 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     private void incrementPerRatDataLocked(ModemActivityInfo deltaInfo, long elapsedRealtimeMs) {
         final int infoSize = deltaInfo.getSpecificInfoLength();
+
         if (infoSize == 1 && deltaInfo.getSpecificInfoRat(0)
                 == AccessNetworkConstants.AccessNetworkType.UNKNOWN
                 && deltaInfo.getSpecificInfoFrequencyRange(0)

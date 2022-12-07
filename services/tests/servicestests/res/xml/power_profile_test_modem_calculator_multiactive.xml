@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<device name="Android">
+    <modem>
+        <sleep>70</sleep>
+        <idle>360</idle>
+        <active rat="DEFAULT">
+            <receive>1440</receive>
+            <transmit level="0">720</transmit>
+            <transmit level="1">1080</transmit>
+            <transmit level="2">1440</transmit>
+            <transmit level="3">1800</transmit>
+            <transmit level="4">2160</transmit>
+        </active>
+        <active rat="LTE">
+            <receive>2000</receive>
+            <transmit level="0">800</transmit>
+            <transmit level="1">1200</transmit>
+            <transmit level="2">1600</transmit>
+            <transmit level="3">2000</transmit>
+            <transmit level="4">2400</transmit>
+        </active>
+        <active rat="NR" nrFrequency="DEFAULT">
+            <receive>2222</receive>
+            <transmit level="0">999</transmit>
+            <transmit level="1">1333</transmit>
+            <transmit level="2">1888</transmit>
+            <transmit level="3">2222</transmit>
+            <transmit level="4">2666</transmit>
+        </active>
+        <active rat="NR" nrFrequency="HIGH">
+            <receive>2727</receive>
+            <transmit level="0">1818</transmit>
+            <transmit level="1">2727</transmit>
+            <transmit level="2">3636</transmit>
+            <transmit level="3">4545</transmit>
+            <transmit level="4">5454</transmit>
+        </active>
+        <active rat="NR" nrFrequency="MMWAVE">
+            <receive>3456</receive>
+            <transmit level="0">2345</transmit>
+            <transmit level="1">3456</transmit>
+            <transmit level="2">4567</transmit>
+            <transmit level="3">5678</transmit>
+            <transmit level="4">6789</transmit>
+        </active>
+    </modem>
+</device>

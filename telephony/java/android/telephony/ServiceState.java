@@ -138,6 +138,12 @@ public class ServiceState implements Parcelable {
      */
     public static final int FREQUENCY_RANGE_MMWAVE = 4;
 
+    /**
+     * Number of frequency ranges.
+     * @hide
+     */
+    public static final int FREQUENCY_RANGE_COUNT = 5;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "DUPLEX_MODE_",
