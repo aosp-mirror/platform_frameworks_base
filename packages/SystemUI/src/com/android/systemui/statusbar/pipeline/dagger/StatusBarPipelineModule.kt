@@ -25,7 +25,7 @@ import com.android.systemui.statusbar.pipeline.airplane.data.repository.Airplane
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepositoryImpl
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileRepositorySwitcher
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepositoryImpl
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
@@ -63,7 +63,7 @@ abstract class StatusBarPipelineModule {
 
     @Binds
     abstract fun mobileConnectionsRepository(
-        impl: MobileConnectionsRepositoryImpl
+        impl: MobileRepositorySwitcher
     ): MobileConnectionsRepository
 
     @Binds abstract fun userSetupRepository(impl: UserSetupRepositoryImpl): UserSetupRepository
