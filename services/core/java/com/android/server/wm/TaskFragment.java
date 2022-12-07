@@ -2552,7 +2552,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 mRemoteToken.toWindowContainerToken(),
                 getConfiguration(),
                 getNonFinishingActivityCount(),
-                isVisibleRequested(),
+                shouldBeVisible(null /* starting */),
                 childActivities,
                 positionInParent,
                 mClearedTaskForReuse,
@@ -2848,6 +2848,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (parentTf != null) {
             parentTf.onActivityVisibleRequestedChanged();
         }
+        // Send the info changed to update the TaskFragment visibility.
+        sendTaskFragmentInfoChanged();
     }
 
     @Nullable
