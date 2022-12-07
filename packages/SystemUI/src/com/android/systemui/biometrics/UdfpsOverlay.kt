@@ -42,6 +42,7 @@ import com.android.systemui.util.concurrency.Execution
 import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
@@ -64,7 +65,7 @@ constructor(
     private val fingerprintManager: FingerprintManager?,
     private val handler: Handler,
     private val biometricExecutor: Executor,
-    private val alternateTouchProvider: Optional<AlternateUdfpsTouchProvider>,
+    private val alternateTouchProvider: Optional<Provider<AlternateUdfpsTouchProvider>>,
     @Main private val fgExecutor: DelayableExecutor,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val authController: AuthController,
@@ -126,6 +127,7 @@ constructor(
                     if (!processedMotionEvent && goodOverlap) {
                         biometricExecutor.execute {
                             alternateTouchProvider
+                                .map(Provider<AlternateUdfpsTouchProvider>::get)
                                 .get()
                                 .onPointerDown(
                                     requestId,
@@ -142,7 +144,10 @@ constructor(
 
                             view.configureDisplay {
                                 biometricExecutor.execute {
-                                    alternateTouchProvider.get().onUiReady()
+                                    alternateTouchProvider
+                                        .map(Provider<AlternateUdfpsTouchProvider>::get)
+                                        .get()
+                                        .onUiReady()
                                 }
                             }
 
@@ -158,7 +163,10 @@ constructor(
             MotionEvent.ACTION_CANCEL -> {
                 if (processedMotionEvent && alternateTouchProvider.isPresent) {
                     biometricExecutor.execute {
-                        alternateTouchProvider.get().onPointerUp(requestId)
+                        alternateTouchProvider
+                            .map(Provider<AlternateUdfpsTouchProvider>::get)
+                            .get()
+                            .onPointerUp(requestId)
                     }
                     fgExecutor.execute {
                         if (keyguardUpdateMonitor.isFingerprintDetectionRunning) {
@@ -241,7 +249,10 @@ constructor(
             if (overlayView != null && isShowing && alternateTouchProvider.isPresent) {
                 if (processedMotionEvent) {
                     biometricExecutor.execute {
-                        alternateTouchProvider.get().onPointerUp(requestId)
+                        alternateTouchProvider
+                            .map(Provider<AlternateUdfpsTouchProvider>::get)
+                            .get()
+                            .onPointerUp(requestId)
                     }
                     fgExecutor.execute {
                         if (keyguardUpdateMonitor.isFingerprintDetectionRunning) {
