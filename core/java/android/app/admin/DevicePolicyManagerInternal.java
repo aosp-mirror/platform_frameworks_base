@@ -269,4 +269,9 @@ public abstract class DevicePolicyManagerInternal {
      * {@link #supportsResetOp(int)} is true.
      */
     public abstract void resetOp(int op, String packageName, @UserIdInt int userId);
+
+    /**
+     * Returns whether new "turn off work" behavior is enabled via feature flag.
+     */
+    public abstract boolean isKeepProfilesRunningEnabled();
 }
