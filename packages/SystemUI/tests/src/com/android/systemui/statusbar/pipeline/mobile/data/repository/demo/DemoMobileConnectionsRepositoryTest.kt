@@ -184,6 +184,25 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
             job.cancel()
         }
 
+    /** Regression test for b/261706421 */
+    @Test
+    fun `multiple connections - remove all - does not throw`() =
+        testScope.runTest {
+            var latest: List<SubscriptionModel>? = null
+            val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
+
+            // Two subscriptions are added
+            fakeNetworkEventFlow.value = validMobileEvent(subId = 1, level = 1)
+            fakeNetworkEventFlow.value = validMobileEvent(subId = 2, level = 1)
+
+            // Then both are removed by turning off demo mode
+            underTest.stopProcessingCommands()
+
+            assertThat(latest).isEmpty()
+
+            job.cancel()
+        }
+
     @Test
     fun `demo connection - single subscription`() =
         testScope.runTest {

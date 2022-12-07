@@ -87,7 +87,7 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val mobileConnectionRepositoryFactory: MobileConnectionRepositoryImpl.Factory
 ) : MobileConnectionsRepository {
-    private val subIdRepositoryCache: MutableMap<Int, MobileConnectionRepository> = mutableMapOf()
+    private var subIdRepositoryCache: MutableMap<Int, MobileConnectionRepository> = mutableMapOf()
 
     /**
      * State flow that emits the set of mobile data subscriptions, each represented by its own
@@ -264,11 +264,10 @@ constructor(
         // will get garbage collected once their subscribers go away
         val currentValidSubscriptionIds = newInfos.map { it.subscriptionId }
 
-        subIdRepositoryCache.keys.forEach {
-            if (!currentValidSubscriptionIds.contains(it)) {
-                subIdRepositoryCache.remove(it)
-            }
-        }
+        subIdRepositoryCache =
+            subIdRepositoryCache
+                .filter { currentValidSubscriptionIds.contains(it.key) }
+                .toMutableMap()
     }
 
     private suspend fun fetchSubscriptionsList(): List<SubscriptionInfo> =

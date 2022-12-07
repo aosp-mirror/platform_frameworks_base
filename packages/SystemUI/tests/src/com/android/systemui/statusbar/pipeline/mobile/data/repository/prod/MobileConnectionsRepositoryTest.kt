@@ -52,6 +52,7 @@ import org.junit.After
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -76,6 +77,24 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        // Set up so the individual connection repositories
+        whenever(telephonyManager.createForSubscriptionId(anyInt())).thenAnswer { invocation ->
+            telephonyManager.also {
+                whenever(telephonyManager.subscriptionId).thenReturn(invocation.getArgument(0))
+            }
+        }
+
+        val connectionFactory: MobileConnectionRepositoryImpl.Factory =
+            MobileConnectionRepositoryImpl.Factory(
+                context = context,
+                telephonyManager = telephonyManager,
+                bgDispatcher = IMMEDIATE,
+                globalSettings = globalSettings,
+                logger = logger,
+                mobileMappingsProxy = mobileMappings,
+                scope = scope,
+            )
+
         underTest =
             MobileConnectionsRepositoryImpl(
                 connectivityManager,
@@ -88,7 +107,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 context,
                 IMMEDIATE,
                 scope,
-                mock(),
+                connectionFactory,
             )
     }
 
@@ -203,6 +222,32 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             getSubscriptionCallback().onSubscriptionsChanged()
 
             assertThat(underTest.getSubIdRepoCache()).containsExactly(SUB_1_ID, repo1)
+
+            job.cancel()
+        }
+
+    /** Regression test for b/261706421 */
+    @Test
+    fun testConnectionsCache_clearMultipleSubscriptionsAtOnce_doesNotThrow() =
+        runBlocking(IMMEDIATE) {
+            val job = underTest.subscriptions.launchIn(this)
+
+            whenever(subscriptionManager.completeActiveSubscriptionInfoList)
+                .thenReturn(listOf(SUB_1, SUB_2))
+            getSubscriptionCallback().onSubscriptionsChanged()
+
+            // Get repos to trigger caching
+            val repo1 = underTest.getRepoForSubId(SUB_1_ID)
+            val repo2 = underTest.getRepoForSubId(SUB_2_ID)
+
+            assertThat(underTest.getSubIdRepoCache())
+                .containsExactly(SUB_1_ID, repo1, SUB_2_ID, repo2)
+
+            // All subscriptions disappear
+            whenever(subscriptionManager.completeActiveSubscriptionInfoList).thenReturn(listOf())
+            getSubscriptionCallback().onSubscriptionsChanged()
+
+            assertThat(underTest.getSubIdRepoCache()).isEmpty()
 
             job.cancel()
         }

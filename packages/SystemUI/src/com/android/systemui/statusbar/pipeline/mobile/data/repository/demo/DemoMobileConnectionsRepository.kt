@@ -61,7 +61,7 @@ constructor(
 
     private var demoCommandJob: Job? = null
 
-    private val connectionRepoCache = mutableMapOf<Int, DemoMobileConnectionRepository>()
+    private var connectionRepoCache = mutableMapOf<Int, DemoMobileConnectionRepository>()
     private val subscriptionInfoCache = mutableMapOf<Int, SubscriptionModel>()
     val demoModeFinishedEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
@@ -76,11 +76,10 @@ constructor(
         // will get garbage collected once their subscribers go away
         val currentValidSubscriptionIds = newInfos.map { it.subscriptionId }
 
-        connectionRepoCache.keys.forEach {
-            if (!currentValidSubscriptionIds.contains(it)) {
-                connectionRepoCache.remove(it)
-            }
-        }
+        connectionRepoCache =
+            connectionRepoCache
+                .filter { currentValidSubscriptionIds.contains(it.key) }
+                .toMutableMap()
     }
 
     private fun maybeCreateSubscription(subId: Int) {
