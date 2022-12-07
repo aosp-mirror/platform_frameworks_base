@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.framework.common
+package com.android.settingslib.spa.debug
 
 import android.content.UriMatcher
-import androidx.annotation.VisibleForTesting
 
 /**
  * Enum to define all column names in provider.
@@ -39,12 +38,6 @@ enum class ColumnEnum(val id: String) {
     ENTRY_INTENT_URI("entryIntent"),
     ENTRY_HIERARCHY_PATH("entryPath"),
     ENTRY_START_ADB("entryStartAdb"),
-
-    // Columns related to search
-    SEARCH_TITLE("searchTitle"),
-    SEARCH_KEYWORD("searchKw"),
-    SEARCH_PATH("searchPath"),
-    SEARCH_STATUS_DISABLED("searchDisabled"),
 }
 
 /**
@@ -89,54 +82,16 @@ enum class QueryEnum(
             ColumnEnum.ENTRY_HIERARCHY_PATH,
         )
     ),
-
-    SEARCH_STATIC_DATA_QUERY(
-        "search_static", 301,
-        listOf(
-            ColumnEnum.ENTRY_ID,
-            ColumnEnum.ENTRY_INTENT_URI,
-            ColumnEnum.SEARCH_TITLE,
-            ColumnEnum.SEARCH_KEYWORD,
-            ColumnEnum.SEARCH_PATH,
-        )
-    ),
-    SEARCH_DYNAMIC_DATA_QUERY(
-        "search_dynamic", 302,
-        listOf(
-            ColumnEnum.ENTRY_ID,
-            ColumnEnum.ENTRY_INTENT_URI,
-            ColumnEnum.SEARCH_TITLE,
-            ColumnEnum.SEARCH_KEYWORD,
-            ColumnEnum.SEARCH_PATH,
-        )
-    ),
-    SEARCH_IMMUTABLE_STATUS_DATA_QUERY(
-        "search_immutable_status", 303,
-        listOf(
-            ColumnEnum.ENTRY_ID,
-            ColumnEnum.SEARCH_STATUS_DISABLED,
-        )
-    ),
-    SEARCH_MUTABLE_STATUS_DATA_QUERY(
-        "search_mutable_status", 304,
-        listOf(
-            ColumnEnum.ENTRY_ID,
-            ColumnEnum.SEARCH_STATUS_DISABLED,
-        )
-    ),
 }
 
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-fun QueryEnum.getColumns(): Array<String> {
+internal fun QueryEnum.getColumns(): Array<String> {
     return columnNames.map { it.id }.toTypedArray()
 }
 
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-fun QueryEnum.getIndex(name: ColumnEnum): Int {
+internal fun QueryEnum.getIndex(name: ColumnEnum): Int {
     return columnNames.indexOf(name)
 }
 
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-fun QueryEnum.addUri(uriMatcher: UriMatcher, authority: String) {
+internal fun QueryEnum.addUri(uriMatcher: UriMatcher, authority: String) {
     uriMatcher.addURI(authority, queryPath, queryMatchCode)
 }

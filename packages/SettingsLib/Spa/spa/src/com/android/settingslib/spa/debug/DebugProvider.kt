@@ -27,11 +27,7 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
 import android.util.Log
-import com.android.settingslib.spa.framework.common.ColumnEnum
-import com.android.settingslib.spa.framework.common.QueryEnum
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
-import com.android.settingslib.spa.framework.common.addUri
-import com.android.settingslib.spa.framework.common.getColumns
 import com.android.settingslib.spa.framework.util.KEY_DESTINATION
 import com.android.settingslib.spa.framework.util.KEY_HIGHLIGHT_ENTRY
 import com.android.settingslib.spa.framework.util.KEY_SESSION_SOURCE_NAME
