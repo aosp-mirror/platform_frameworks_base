@@ -19,7 +19,6 @@ package com.android.systemui.dreams;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -45,9 +44,12 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dreams.complication.ComplicationLayoutEngine;
 import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
+import com.android.systemui.dreams.dreamcomplication.HideComplicationTouchHandler;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
+import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
@@ -94,6 +96,20 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     ComplicationComponent mComplicationComponent;
 
     @Mock
+    ComplicationLayoutEngine mComplicationVisibilityController;
+
+    @Mock
+    com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent.Factory
+            mDreamComplicationComponentFactory;
+
+    @Mock
+    com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent
+            mDreamComplicationComponent;
+
+    @Mock
+    HideComplicationTouchHandler mHideComplicationTouchHandler;
+
+    @Mock
     DreamOverlayComponent.Factory mDreamOverlayComponentFactory;
 
     @Mock
@@ -118,6 +134,9 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     ViewGroup mDreamOverlayContainerViewParent;
 
     @Mock
+    TouchInsetManager mTouchInsetManager;
+
+    @Mock
     UiEventLogger mUiEventLogger;
 
     @Captor
@@ -136,25 +155,33 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         when(mDreamOverlayComponent.getDreamOverlayTouchMonitor())
                 .thenReturn(mDreamOverlayTouchMonitor);
         when(mComplicationComponentFactory
-                .create())
+                .create(any(), any(), any(), any()))
                 .thenReturn(mComplicationComponent);
-        // TODO(b/261781069): A touch handler should be passed in from the complication component
-        // when the complication component is introduced.
+        when(mComplicationComponent.getVisibilityController())
+                .thenReturn(mComplicationVisibilityController);
+        when(mDreamComplicationComponent.getHideComplicationTouchHandler())
+                .thenReturn(mHideComplicationTouchHandler);
+        when(mDreamComplicationComponentFactory
+                .create(any(), any()))
+                .thenReturn(mDreamComplicationComponent);
         when(mDreamOverlayComponentFactory
-                .create(any(), any(), any(), isNull()))
+                .create(any(), any(), any(), any()))
                 .thenReturn(mDreamOverlayComponent);
         when(mDreamOverlayContainerViewController.getContainerView())
                 .thenReturn(mDreamOverlayContainerView);
 
-        mService = new DreamOverlayService(mContext,
+        mService = new DreamOverlayService(
+                mContext,
                 mMainExecutor,
                 mLifecycleOwner,
                 mWindowManager,
                 mComplicationComponentFactory,
+                mDreamComplicationComponentFactory,
                 mDreamOverlayComponentFactory,
                 mStateController,
                 mKeyguardUpdateMonitor,
                 mUiEventLogger,
+                mTouchInsetManager,
                 LOW_LIGHT_COMPONENT);
     }
 

@@ -24,11 +24,15 @@ import android.view.View;
 
 import androidx.concurrent.futures.CallbackToFutureAdapter;
 
+import com.android.systemui.dagger.qualifiers.Main;
+
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.Executor;
+
+import javax.inject.Inject;
 
 /**
  * {@link TouchInsetManager} handles setting the touchable inset regions for a given View. This
@@ -141,7 +145,8 @@ public class TouchInsetManager {
      * Default constructor.
      * @param executor An {@link Executor} to marshal all operations on.
      */
-    public TouchInsetManager(Executor executor) {
+    @Inject
+    public TouchInsetManager(@Main Executor executor) {
         mExecutor = executor;
     }
 

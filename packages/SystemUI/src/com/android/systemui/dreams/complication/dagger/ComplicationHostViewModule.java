@@ -24,12 +24,11 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dreams.dagger.DreamOverlayComponent;
-
-import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
+
+import javax.inject.Named;
 
 /**
  * Module for providing a scoped host view.
@@ -49,7 +48,7 @@ public abstract class ComplicationHostViewModule {
      */
     @Provides
     @Named(SCOPED_COMPLICATIONS_LAYOUT)
-    @DreamOverlayComponent.DreamOverlayScope
+    @ComplicationModule.ComplicationScope
     static ConstraintLayout providesComplicationHostView(
             LayoutInflater layoutInflater) {
         return Preconditions.checkNotNull((ConstraintLayout)
@@ -60,7 +59,6 @@ public abstract class ComplicationHostViewModule {
 
     @Provides
     @Named(COMPLICATION_MARGIN_DEFAULT)
-    @DreamOverlayComponent.DreamOverlayScope
     static int providesComplicationPadding(@Main Resources resources) {
         return resources.getDimensionPixelSize(R.dimen.dream_overlay_complication_margin);
     }
@@ -70,7 +68,6 @@ public abstract class ComplicationHostViewModule {
      */
     @Provides
     @Named(COMPLICATIONS_FADE_OUT_DURATION)
-    @DreamOverlayComponent.DreamOverlayScope
     static int providesComplicationsFadeOutDuration(@Main Resources resources) {
         return resources.getInteger(R.integer.complicationFadeOutMs);
     }
@@ -80,7 +77,6 @@ public abstract class ComplicationHostViewModule {
      */
     @Provides
     @Named(COMPLICATIONS_FADE_OUT_DELAY)
-    @DreamOverlayComponent.DreamOverlayScope
     static int providesComplicationsFadeOutDelay(@Main Resources resources) {
         return resources.getInteger(R.integer.complicationFadeOutDelayMs);
     }
@@ -90,7 +86,6 @@ public abstract class ComplicationHostViewModule {
      */
     @Provides
     @Named(COMPLICATIONS_FADE_IN_DURATION)
-    @DreamOverlayComponent.DreamOverlayScope
     static int providesComplicationsFadeInDuration(@Main Resources resources) {
         return resources.getInteger(R.integer.complicationFadeInMs);
     }
@@ -100,7 +95,6 @@ public abstract class ComplicationHostViewModule {
      */
     @Provides
     @Named(COMPLICATIONS_RESTORE_TIMEOUT)
-    @DreamOverlayComponent.DreamOverlayScope
     static int providesComplicationsRestoreTimeout(@Main Resources resources) {
         return resources.getInteger(R.integer.complicationRestoreMs);
     }

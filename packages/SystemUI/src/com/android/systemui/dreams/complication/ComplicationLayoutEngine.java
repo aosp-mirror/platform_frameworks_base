@@ -30,7 +30,7 @@ import androidx.constraintlayout.widget.Constraints;
 
 import com.android.systemui.R;
 import com.android.systemui.dreams.complication.ComplicationLayoutParams.Position;
-import com.android.systemui.dreams.dagger.DreamOverlayComponent;
+import com.android.systemui.dreams.complication.dagger.ComplicationModule;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.touch.TouchInsetManager;
 
@@ -50,7 +50,7 @@ import javax.inject.Named;
  * their layout parameters and attributes. The management of this set is done by
  * {@link ComplicationHostViewController}.
  */
-@DreamOverlayComponent.DreamOverlayScope
+@ComplicationModule.ComplicationScope
 public class ComplicationLayoutEngine implements Complication.VisibilityController {
     public static final String TAG = "ComplicationLayoutEng";
 
