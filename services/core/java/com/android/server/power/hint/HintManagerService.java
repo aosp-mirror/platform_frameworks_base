@@ -16,9 +16,11 @@
 
 package com.android.server.power.hint;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IUidObserver;
+import android.app.StatsManager;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -27,13 +29,17 @@ import android.os.IHintSession;
 import android.os.PerformanceHintManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
+import android.util.StatsEvent;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -53,7 +59,7 @@ public final class HintManagerService extends SystemService {
     private static final boolean DEBUG = false;
     @VisibleForTesting final long mHintSessionPreferredRate;
 
-    // Multi-levle map storing all active AppHintSessions.
+    // Multi-level map storing all active AppHintSessions.
     // First level is keyed by the UID of the client process creating the session.
     // Second level is keyed by an IBinder passed from client process. This is used to observe
     // when the process exits. The client generally uses the same IBinder object across multiple
@@ -70,6 +76,11 @@ public final class HintManagerService extends SystemService {
 
     private final ActivityManagerInternal mAmInternal;
 
+    private final Context mContext;
+
+    private static final String PROPERTY_SF_ENABLE_CPU_HINT = "debug.sf.enable_adpf_cpu_hint";
+    private static final String PROPERTY_HWUI_ENABLE_HINT_MANAGER = "debug.hwui.use_hint_manager";
+
     @VisibleForTesting final IHintManager.Stub mService = new BinderService();
 
     public HintManagerService(Context context) {
@@ -79,6 +90,7 @@ public final class HintManagerService extends SystemService {
     @VisibleForTesting
     HintManagerService(Context context, Injector injector) {
         super(context);
+        mContext = context;
         mActiveSessions = new ArrayMap<>();
         mNativeWrapper = injector.createNativeWrapper();
         mNativeWrapper.halInit();
@@ -109,6 +121,9 @@ public final class HintManagerService extends SystemService {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             systemReady();
         }
+        if (phase == SystemService.PHASE_BOOT_COMPLETED) {
+            registerStatsCallbacks();
+        }
     }
 
     private void systemReady() {
@@ -121,6 +136,30 @@ public final class HintManagerService extends SystemService {
             // ignored; both services live in system_server
         }
 
+    }
+
+    private void registerStatsCallbacks() {
+        final StatsManager statsManager = mContext.getSystemService(StatsManager.class);
+        statsManager.setPullAtomCallback(
+                FrameworkStatsLog.ADPF_SYSTEM_COMPONENT_INFO,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                this::onPullAtom);
+    }
+
+    private int onPullAtom(int atomTag, @NonNull List<StatsEvent> data) {
+        if (atomTag == FrameworkStatsLog.ADPF_SYSTEM_COMPONENT_INFO) {
+            final boolean isSurfaceFlingerUsingCpuHint =
+                    SystemProperties.getBoolean(PROPERTY_SF_ENABLE_CPU_HINT, false);
+            final boolean isHwuiHintManagerEnabled =
+                    SystemProperties.getBoolean(PROPERTY_HWUI_ENABLE_HINT_MANAGER, false);
+
+            data.add(FrameworkStatsLog.buildStatsEvent(
+                    FrameworkStatsLog.ADPF_SYSTEM_COMPONENT_INFO,
+                    isSurfaceFlingerUsingCpuHint,
+                    isHwuiHintManagerEnabled));
+        }
+        return android.app.StatsManager.PULL_SUCCESS;
     }
 
     /**
@@ -334,6 +373,7 @@ public final class HintManagerService extends SystemService {
 
                 AppHintSession hs = new AppHintSession(callingUid, callingTgid, tids, token,
                         halSessionPtr, durationNanos);
+                logPerformanceHintSessionAtom(callingUid, halSessionPtr, durationNanos, tids);
                 synchronized (mLock) {
                     ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap =
                             mActiveSessions.get(callingUid);
@@ -381,6 +421,12 @@ public final class HintManagerService extends SystemService {
                     }
                 }
             }
+        }
+
+        private void logPerformanceHintSessionAtom(int uid, long sessionId,
+                long targetDuration, int[] tids) {
+            FrameworkStatsLog.write(FrameworkStatsLog.PERFORMANCE_HINT_SESSION_REPORTED, uid,
+                    sessionId, targetDuration, tids.length);
         }
     }
 
