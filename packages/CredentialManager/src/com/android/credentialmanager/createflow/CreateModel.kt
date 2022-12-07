@@ -77,6 +77,7 @@ data class RequestDisplayInfo(
   val type: String,
   val appDomainName: String,
   val typeIcon: Drawable,
+  val isFirstUsage: Boolean,
 )
 
 /**

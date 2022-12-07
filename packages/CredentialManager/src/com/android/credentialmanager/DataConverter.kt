@@ -28,6 +28,9 @@ import android.graphics.drawable.Drawable
 import com.android.credentialmanager.createflow.CreateOptionInfo
 import com.android.credentialmanager.createflow.RemoteInfo
 import com.android.credentialmanager.createflow.RequestDisplayInfo
+import com.android.credentialmanager.createflow.EnabledProviderInfo
+import com.android.credentialmanager.createflow.CreateScreenState
+import com.android.credentialmanager.createflow.ActiveEntry
 import com.android.credentialmanager.getflow.ActionEntryInfo
 import com.android.credentialmanager.getflow.AuthenticationEntryInfo
 import com.android.credentialmanager.getflow.CredentialEntryInfo
@@ -36,6 +39,7 @@ import com.android.credentialmanager.getflow.RemoteEntryInfo
 import com.android.credentialmanager.jetpack.developer.CreateCredentialRequest
 import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest
 import com.android.credentialmanager.jetpack.developer.CreatePublicKeyCredentialRequest
+import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 import com.android.credentialmanager.jetpack.provider.ActionUi
 import com.android.credentialmanager.jetpack.provider.CredentialEntryUi
 import com.android.credentialmanager.jetpack.provider.SaveEntryUi
@@ -243,7 +247,8 @@ class CreateFlowUtils {
             createCredentialRequestJetpack.password,
             createCredentialRequestJetpack.type,
             requestInfo.appPackageName,
-            context.getDrawable(R.drawable.ic_password)!!
+            context.getDrawable(R.drawable.ic_password)!!,
+            requestInfo.isFirstUsage
           )
         }
         is CreatePublicKeyCredentialRequest -> {
@@ -261,7 +266,8 @@ class CreateFlowUtils {
             displayName,
             createCredentialRequestJetpack.type,
             requestInfo.appPackageName,
-            context.getDrawable(R.drawable.ic_passkey)!!)
+            context.getDrawable(R.drawable.ic_passkey)!!,
+            requestInfo.isFirstUsage)
         }
         // TODO: correctly parsing for other sign-ins
         else -> {
@@ -270,9 +276,56 @@ class CreateFlowUtils {
             "Elisa Beckett",
             "other-sign-ins",
             requestInfo.appPackageName,
-            context.getDrawable(R.drawable.ic_other_sign_in)!!)
+            context.getDrawable(R.drawable.ic_other_sign_in)!!,
+            requestInfo.isFirstUsage)
         }
       }
+    }
+
+    fun toCreateScreenState(
+      createOptionSize: Int,
+      isOnPasskeyIntroStateAlready: Boolean,
+      requestDisplayInfo: RequestDisplayInfo,
+      defaultProvider: EnabledProviderInfo?,
+      remoteEntry: RemoteInfo?,
+    ): CreateScreenState {
+      return if (requestDisplayInfo.isFirstUsage && requestDisplayInfo
+          .type == TYPE_PUBLIC_KEY_CREDENTIAL && !isOnPasskeyIntroStateAlready) {
+        CreateScreenState.PASSKEY_INTRO
+      } else if (
+        (defaultProvider == null || defaultProvider.createOptions.isEmpty()
+                ) && createOptionSize > 1) {
+        CreateScreenState.PROVIDER_SELECTION
+      } else if (
+        ((defaultProvider == null || defaultProvider.createOptions.isEmpty()
+                ) && createOptionSize == 1) || (
+                defaultProvider != null && defaultProvider.createOptions.isNotEmpty())) {
+        CreateScreenState.CREATION_OPTION_SELECTION
+      } else if (createOptionSize == 0 && remoteEntry != null) {
+        CreateScreenState.EXTERNAL_ONLY_SELECTION
+      } else {
+          // TODO: properly handle error and gracefully finish itself
+          throw java.lang.IllegalStateException("Empty provider list.")
+      }
+    }
+
+   fun toActiveEntry(
+      defaultProvider: EnabledProviderInfo?,
+      createOptionSize: Int,
+      lastSeenProviderWithNonEmptyCreateOptions: EnabledProviderInfo?,
+      remoteEntry: RemoteInfo?,
+    ): ActiveEntry? {
+      return if (
+        defaultProvider != null && defaultProvider.createOptions.isEmpty() && remoteEntry != null) {
+        ActiveEntry(defaultProvider, remoteEntry)
+      } else if (
+        defaultProvider != null && defaultProvider.createOptions.isNotEmpty()
+      ) {
+        ActiveEntry(defaultProvider, defaultProvider.createOptions.first())
+      } else if (createOptionSize == 1) {
+        ActiveEntry(lastSeenProviderWithNonEmptyCreateOptions!!,
+          lastSeenProviderWithNonEmptyCreateOptions.createOptions.first())
+      } else null
     }
 
     private fun toCreationOptionInfoList(
