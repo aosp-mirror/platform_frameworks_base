@@ -291,6 +291,10 @@ object Flags {
     // TODO(b/261734857): Tracking Bug
     @JvmField val UMO_TURBULENCE_NOISE = unreleasedFlag(909, "umo_turbulence_noise")
 
+    // TODO(b/263272731): Tracking Bug
+    val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE =
+        unreleasedFlag(910, "media_ttt_receiver_success_ripple", teamfood = true)
+
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
 

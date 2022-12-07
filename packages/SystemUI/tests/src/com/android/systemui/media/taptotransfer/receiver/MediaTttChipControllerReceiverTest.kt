@@ -95,6 +95,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(mediaTttFlags.isMediaTttEnabled()).thenReturn(true)
+        whenever(mediaTttFlags.isMediaTttReceiverSuccessRippleEnabled()).thenReturn(true)
 
         fakeAppIconDrawable = context.getDrawable(R.drawable.ic_cake)!!
         whenever(packageManager.getApplicationIcon(PACKAGE_NAME)).thenReturn(fakeAppIconDrawable)
