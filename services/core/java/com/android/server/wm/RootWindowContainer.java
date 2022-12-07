@@ -2619,7 +2619,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final ArrayList<Task> addedTasks = new ArrayList<>();
         forAllActivities((r) -> {
             final Task task = r.getTask();
-            if (r.mVisibleRequested && r.mStartingData == null && !addedTasks.contains(task)) {
+            if (r.isVisibleRequested() && r.mStartingData == null && !addedTasks.contains(task)) {
                 r.showStartingWindow(true /*taskSwitch*/);
                 addedTasks.add(task);
             }
@@ -2644,7 +2644,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         forAllLeafTasks(task -> {
             final int oldRank = task.mLayerRank;
             final ActivityRecord r = task.topRunningActivityLocked();
-            if (r != null && r.mVisibleRequested) {
+            if (r != null && r.isVisibleRequested()) {
                 task.mLayerRank = ++mTmpTaskLayerRank;
             } else {
                 task.mLayerRank = Task.LAYER_RANK_INVISIBLE;

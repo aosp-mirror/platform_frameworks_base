@@ -398,7 +398,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
                     .setParentTask(rootHomeTask).setCreateTask(true).build();
         }
         homeActivity.setVisible(false);
-        homeActivity.mVisibleRequested = true;
+        homeActivity.setVisibleRequested(true);
         assertFalse(rootHomeTask.isVisible());
 
         assertEquals(defaultTaskDisplayArea.getOrientation(), rootHomeTask.getOrientation());

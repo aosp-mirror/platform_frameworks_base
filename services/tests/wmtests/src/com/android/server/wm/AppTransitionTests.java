@@ -385,11 +385,11 @@ public class AppTransitionTests extends WindowTestsBase {
         // Simulate activity1 launches activity2.
         final ActivityRecord activity1 = createActivityRecord(task);
         activity1.setVisible(true);
-        activity1.mVisibleRequested = false;
+        activity1.setVisibleRequested(false);
         activity1.allDrawn = true;
         final ActivityRecord activity2 = createActivityRecord(task);
         activity2.setVisible(false);
-        activity2.mVisibleRequested = true;
+        activity2.setVisibleRequested(true);
         activity2.allDrawn = true;
 
         dc.mClosingApps.add(activity1);

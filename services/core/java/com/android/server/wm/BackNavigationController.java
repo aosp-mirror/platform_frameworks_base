@@ -810,7 +810,7 @@ class BackNavigationController {
         if (activity == null) {
             return;
         }
-        if (!activity.mVisibleRequested) {
+        if (!activity.isVisibleRequested()) {
             activity.setVisibility(true);
         }
         activity.mLaunchTaskBehind = true;

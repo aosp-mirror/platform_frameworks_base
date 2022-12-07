@@ -2455,7 +2455,7 @@ class Task extends TaskFragment {
 
         final String myReason = reason + " adjustFocusToNextFocusableTask";
         final ActivityRecord top = focusableTask.topRunningActivity();
-        if (focusableTask.isActivityTypeHome() && (top == null || !top.mVisibleRequested)) {
+        if (focusableTask.isActivityTypeHome() && (top == null || !top.isVisibleRequested())) {
             // If we will be focusing on the root home task next and its current top activity isn't
             // visible, then use the move the root home task to top to make the activity visible.
             focusableTask.getDisplayArea().moveHomeActivityToTop(myReason);
@@ -2768,7 +2768,7 @@ class Task extends TaskFragment {
      */
     private static void getMaxVisibleBounds(ActivityRecord token, Rect out, boolean[] foundTop) {
         // skip hidden (or about to hide) apps
-        if (token.mIsExiting || !token.isClientVisible() || !token.mVisibleRequested) {
+        if (token.mIsExiting || !token.isClientVisible() || !token.isVisibleRequested()) {
             return;
         }
         final WindowState win = token.findMainWindow();
@@ -3077,7 +3077,7 @@ class Task extends TaskFragment {
      * this activity.
      */
     ActivityRecord getTopVisibleActivity() {
-        return getActivity((r) -> !r.mIsExiting && r.isClientVisible() && r.mVisibleRequested);
+        return getActivity((r) -> !r.mIsExiting && r.isClientVisible() && r.isVisibleRequested());
     }
 
     /**
@@ -5726,7 +5726,7 @@ class Task extends TaskFragment {
         forAllActivities(r -> {
             if (!r.info.packageName.equals(packageName)) return;
             r.forceNewConfig = true;
-            if (starting != null && r == starting && r.mVisibleRequested) {
+            if (starting != null && r == starting && r.isVisibleRequested()) {
                 r.startFreezingScreenLocked(CONFIG_SCREEN_LAYOUT);
             }
         });

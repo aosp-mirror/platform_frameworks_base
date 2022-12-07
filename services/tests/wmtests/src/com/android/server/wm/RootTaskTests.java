@@ -1068,7 +1068,7 @@ public class RootTaskTests extends WindowTestsBase {
         activity.app = null;
         overlayActivity.app = null;
         // Simulate the process is dead
-        activity.mVisibleRequested = false;
+        activity.setVisibleRequested(false);
         activity.setState(DESTROYED, "Test");
 
         assertEquals(2, task.getChildCount());
@@ -1205,7 +1205,7 @@ public class RootTaskTests extends WindowTestsBase {
 
         // There is still an activity1 in rootTask1 so the activity2 should be added to finishing
         // list that will be destroyed until idle.
-        rootTask2.getTopNonFinishingActivity().mVisibleRequested = true;
+        rootTask2.getTopNonFinishingActivity().setVisibleRequested(true);
         final ActivityRecord activity2 = finishTopActivity(rootTask2);
         assertEquals(STOPPING, activity2.getState());
         assertThat(mSupervisor.mStoppingActivities).contains(activity2);
@@ -1410,7 +1410,7 @@ public class RootTaskTests extends WindowTestsBase {
         new ActivityBuilder(mAtm).setTask(task).build();
         // The scenario we are testing is when the app isn't visible yet.
         nonTopVisibleActivity.setVisible(false);
-        nonTopVisibleActivity.mVisibleRequested = false;
+        nonTopVisibleActivity.setVisibleRequested(false);
         doReturn(false).when(nonTopVisibleActivity).attachedToProcess();
         doReturn(true).when(nonTopVisibleActivity).shouldBeVisibleUnchecked();
         doNothing().when(mSupervisor).startSpecificActivity(any(), anyBoolean(),
