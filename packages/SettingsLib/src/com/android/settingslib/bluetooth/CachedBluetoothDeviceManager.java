@@ -223,8 +223,14 @@ public class CachedBluetoothDeviceManager {
 
     public synchronized void clearNonBondedDevices() {
         clearNonBondedSubDevices();
-        mCachedDevices.removeIf(cachedDevice
-            -> cachedDevice.getBondState() == BluetoothDevice.BOND_NONE);
+        final List<CachedBluetoothDevice> removedCachedDevice = new ArrayList<>();
+        mCachedDevices.stream()
+                .filter(cachedDevice -> cachedDevice.getBondState() == BluetoothDevice.BOND_NONE)
+                .forEach(cachedDevice -> {
+                    cachedDevice.release();
+                    removedCachedDevice.add(cachedDevice);
+                });
+        mCachedDevices.removeAll(removedCachedDevice);
     }
 
     private void clearNonBondedSubDevices() {
@@ -245,6 +251,7 @@ public class CachedBluetoothDeviceManager {
             if (subDevice != null
                     && subDevice.getDevice().getBondState() == BluetoothDevice.BOND_NONE) {
                 // Sub device exists and it is not bonded
+                subDevice.release();
                 cachedDevice.setSubDevice(null);
             }
         }
@@ -294,6 +301,7 @@ public class CachedBluetoothDeviceManager {
                 }
                 if (cachedDevice.getBondState() != BluetoothDevice.BOND_BONDED) {
                     cachedDevice.setJustDiscovered(false);
+                    cachedDevice.release();
                     mCachedDevices.remove(i);
                 }
             }
