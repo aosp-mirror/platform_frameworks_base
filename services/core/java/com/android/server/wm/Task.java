@@ -1591,15 +1591,22 @@ class Task extends TaskFragment {
                 removeChild(r, reason);
             });
         } else {
+            final ArrayList<ActivityRecord> finishingActivities = new ArrayList<>();
+            forAllActivities(r -> {
+                if (r.finishing || (excludingTaskOverlay && r.isTaskOverlay())) {
+                    return;
+                }
+                finishingActivities.add(r);
+            });
+
             // Finish or destroy apps from the bottom to ensure that all the other activity have
             // been finished and the top task in another task gets resumed when a top activity is
             // removed. Otherwise, the next top activity could be started while the top activity
             // is removed, which is not necessary since the next top activity is on the same Task
             // and should also be removed.
-            forAllActivities((r) -> {
-                if (r.finishing || (excludingTaskOverlay && r.isTaskOverlay())) {
-                    return;
-                }
+            for (int i = finishingActivities.size() - 1; i >= 0; i--) {
+                final ActivityRecord r = finishingActivities.get(i);
+
                 // Prevent the transition from being executed too early if the top activity is
                 // resumed but the mVisibleRequested of any other activity is true, the transition
                 // should wait until next activity resumed.
@@ -1609,7 +1616,7 @@ class Task extends TaskFragment {
                 } else {
                     r.destroyIfPossible(reason);
                 }
-            }, false /* traverseTopToBottom */);
+            }
         }
     }
 
