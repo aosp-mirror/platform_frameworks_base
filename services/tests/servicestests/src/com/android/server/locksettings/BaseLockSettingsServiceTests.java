@@ -36,7 +36,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
-import android.hardware.authsecret.V1_0.IAuthSecret;
+import android.hardware.authsecret.IAuthSecret;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.FileUtils;
