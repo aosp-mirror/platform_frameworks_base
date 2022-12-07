@@ -25,7 +25,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
-import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.provider.Settings.Config.SyncDisabledMode;
@@ -1168,12 +1167,10 @@ public final class DeviceConfig {
      * @see #removeOnPropertiesChangedListener(OnPropertiesChangedListener)
      */
     @SystemApi
-    @RequiresPermission(READ_DEVICE_CONFIG)
     public static void addOnPropertiesChangedListener(
             @NonNull String namespace,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnPropertiesChangedListener onPropertiesChangedListener) {
-        enforceReadPermission(namespace);
         synchronized (sLock) {
             Pair<String, Executor> oldNamespace = sListeners.get(onPropertiesChangedListener);
             if (oldNamespace == null) {
@@ -1291,20 +1288,6 @@ public final class DeviceConfig {
                         listener.onPropertiesChanged(properties);
                     });
                 }
-            }
-        }
-    }
-
-    /**
-     * Enforces READ_DEVICE_CONFIG permission if namespace is not one of public namespaces.
-     * @hide
-     */
-    public static void enforceReadPermission(@NonNull String namespace) {
-        if (Settings.Config.checkCallingOrSelfPermission(READ_DEVICE_CONFIG)
-                != PackageManager.PERMISSION_GRANTED) {
-            if (!PUBLIC_NAMESPACES.contains(namespace)) {
-                throw new SecurityException("Permission denial: reading from settings requires:"
-                        + READ_DEVICE_CONFIG);
             }
         }
     }

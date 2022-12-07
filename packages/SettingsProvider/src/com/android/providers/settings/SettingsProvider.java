@@ -1144,7 +1144,7 @@ public class SettingsProvider extends ContentProvider {
             Slog.v(LOG_TAG, "getConfigSetting(" + name + ")");
         }
 
-        DeviceConfig.enforceReadPermission(/*namespace=*/name.split("/")[0]);
+        Settings.Config.enforceReadPermission(/*namespace=*/name.split("/")[0]);
 
         // Get the value.
         synchronized (mLock) {
@@ -1317,7 +1317,7 @@ public class SettingsProvider extends ContentProvider {
             Slog.v(LOG_TAG, "getAllConfigFlags() for " + prefix);
         }
 
-        DeviceConfig.enforceReadPermission(
+        Settings.Config.enforceReadPermission(
                 prefix != null ? prefix.split("/")[0] : null);
 
         synchronized (mLock) {

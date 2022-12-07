@@ -50,13 +50,6 @@ public class DeviceConfigProxy {
     }
 
     /**
-     * Wrapped version of {@link DeviceConfig#enforceReadPermission}.
-     */
-    public void enforceReadPermission(String namespace) {
-        DeviceConfig.enforceReadPermission(namespace);
-    }
-
-    /**
      * Wrapped version of {@link DeviceConfig#getBoolean}.
      */
     public boolean getBoolean(
