@@ -1612,10 +1612,18 @@ class Task extends TaskFragment {
             // removed. Otherwise, shell transitions wouldn't run because there would be no event
             // that sets the transition ready.
             final boolean traverseTopToBottom = !mTransitionController.isShellTransitionsEnabled();
-            forAllActivities((r) -> {
+            final ArrayList<ActivityRecord> finishingActivities = new ArrayList<>();
+            forAllActivities(r -> {
                 if (r.finishing || (excludingTaskOverlay && r.isTaskOverlay())) {
                     return;
                 }
+                finishingActivities.add(r);
+            }, traverseTopToBottom);
+
+
+            for (int i = 0; i < finishingActivities.size(); i++) {
+                final ActivityRecord r = finishingActivities.get(i);
+
                 // Prevent the transition from being executed too early if the top activity is
                 // resumed but the mVisibleRequested of any other activity is true, the transition
                 // should wait until next activity resumed.
@@ -1625,7 +1633,7 @@ class Task extends TaskFragment {
                 } else {
                     r.destroyIfPossible(reason);
                 }
-            }, traverseTopToBottom);
+            }
         }
     }
 
