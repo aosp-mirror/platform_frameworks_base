@@ -25,6 +25,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.lifecycle.InstantTaskExecutorRule
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
 import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
@@ -64,6 +65,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
     private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock
     private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var tableLogBuffer: TableLogBuffer
     @Mock
     private lateinit var connectivityConstants: ConnectivityConstants
     @Mock
@@ -103,6 +105,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
             connectivityConstants,
             context,
             logger,
+            tableLogBuffer,
             interactor,
             scope,
             statusBarPipelineFlags,

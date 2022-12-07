@@ -247,7 +247,7 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
 
         Icon icon;
         ContentDescription contentDescription = null;
-        if (isParentalControlsEnabled) {
+        if (isParentalControlsEnabled && securityModel.getDeviceAdminIcon() != null) {
             icon = new Icon.Loaded(securityModel.getDeviceAdminIcon(), contentDescription);
         } else if (vpnName != null || vpnNameWorkProfile != null) {
             if (securityModel.isVpnBranded()) {
@@ -476,7 +476,7 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
     @VisibleForTesting
     View createDialogView(Context quickSettingsContext) {
         if (mSecurityController.isParentalControlsEnabled()) {
-            return createParentalControlsDialogView();
+            return createParentalControlsDialogView(quickSettingsContext);
         }
         return createOrganizationDialogView(quickSettingsContext);
     }
@@ -579,8 +579,8 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
         return dialogView;
     }
 
-    private View createParentalControlsDialogView() {
-        View dialogView = LayoutInflater.from(mContext)
+    private View createParentalControlsDialogView(Context quickSettingsContext) {
+        View dialogView = LayoutInflater.from(quickSettingsContext)
                 .inflate(R.layout.quick_settings_footer_dialog_parental_controls, null, false);
 
         DeviceAdminInfo info = mSecurityController.getDeviceAdminInfo();

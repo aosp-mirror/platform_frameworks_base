@@ -26,7 +26,6 @@ import android.text.method.TextKeyListener;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup.MarginLayoutParams;
-import android.view.WindowInsets;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -200,12 +199,9 @@ public class KeyguardPasswordViewController
             return;
         }
 
-        mView.post(() -> {
-            if (mView.isShown()) {
-                mPasswordEntry.requestFocus();
-                mPasswordEntry.getWindowInsetsController().show(WindowInsets.Type.ime());
-            }
-        });
+        if (mView.isShown()) {
+            mView.showKeyboard();
+        }
     }
 
     @Override
@@ -227,16 +223,12 @@ public class KeyguardPasswordViewController
                 super.onPause();
             });
         }
-        if (mPasswordEntry.isAttachedToWindow()) {
-            mPasswordEntry.getWindowInsetsController().hide(WindowInsets.Type.ime());
-        }
+        mView.hideKeyboard();
     }
 
     @Override
     public void onStartingToHide() {
-        if (mPasswordEntry.isAttachedToWindow()) {
-            mPasswordEntry.getWindowInsetsController().hide(WindowInsets.Type.ime());
-        }
+        mView.hideKeyboard();
     }
 
     private void updateSwitchImeButton() {

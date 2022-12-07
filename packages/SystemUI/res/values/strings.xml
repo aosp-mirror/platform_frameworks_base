@@ -2669,6 +2669,10 @@
         <xliff:g id="weather_condition" example="Partly cloudy">%1$s</xliff:g>, <xliff:g id="temperature" example="7°C">%2$s</xliff:g>
     </string>
 
+    <!-- TODO(b/259369672): Replace with final resource. -->
+    <!-- [CHAR LIMIT=30] Label used to open Note Task -->
+    <string name="note_task_button_label">Notetaking</string>
+
     <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, media app is broadcasting -->
     <string name="broadcasting_description_is_broadcasting">Broadcasting</string>
     <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, title -->

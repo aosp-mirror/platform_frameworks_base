@@ -74,6 +74,7 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
     private NotificationSwipeHelper mSwipeHelper;
     private NotificationSwipeHelper.NotificationCallback mCallback;
     private NotificationMenuRowPlugin.OnMenuEventListener mListener;
+    private NotificationRoundnessManager mNotificationRoundnessManager;
     private View mView;
     private MotionEvent mEvent;
     private NotificationMenuRowPlugin mMenuRow;
@@ -92,10 +93,17 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
     public void setUp() throws Exception {
         mCallback = mock(NotificationSwipeHelper.NotificationCallback.class);
         mListener = mock(NotificationMenuRowPlugin.OnMenuEventListener.class);
+        mNotificationRoundnessManager = mock(NotificationRoundnessManager.class);
         mFeatureFlags = mock(FeatureFlags.class);
         mSwipeHelper = spy(new NotificationSwipeHelper(
-                mContext.getResources(), ViewConfiguration.get(mContext),
-                new FalsingManagerFake(), mFeatureFlags, SwipeHelper.X, mCallback, mListener));
+                mContext.getResources(),
+                ViewConfiguration.get(mContext),
+                new FalsingManagerFake(),
+                mFeatureFlags,
+                SwipeHelper.X,
+                mCallback,
+                mListener,
+                mNotificationRoundnessManager));
         mView = mock(View.class);
         mEvent = mock(MotionEvent.class);
         mMenuRow = mock(NotificationMenuRowPlugin.class);

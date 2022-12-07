@@ -17,8 +17,8 @@
 package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
 import android.graphics.Color
-import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
+import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -33,8 +33,8 @@ abstract class LocationBasedWifiViewModel(
     statusBarPipelineFlags: StatusBarPipelineFlags,
     debugTint: Int,
 
-    /** The wifi icon that should be displayed. Null if we shouldn't display any icon. */
-    val wifiIcon: StateFlow<Icon.Resource?>,
+    /** The wifi icon that should be displayed. */
+    val wifiIcon: StateFlow<WifiIcon>,
 
     /** True if the activity in view should be visible. */
     val isActivityInViewVisible: Flow<Boolean>,

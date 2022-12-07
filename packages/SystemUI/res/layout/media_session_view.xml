@@ -35,7 +35,6 @@
         android:layout_height="@dimen/qs_media_session_height_expanded"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:translationZ="0dp"
         android:scaleType="centerCrop"

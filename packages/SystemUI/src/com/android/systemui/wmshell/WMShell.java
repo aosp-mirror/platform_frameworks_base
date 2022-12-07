@@ -253,6 +253,12 @@ public final class WMShell implements
                 splitScreen.onFinishedWakingUp();
             }
         });
+        mCommandQueue.addCallback(new CommandQueue.Callbacks() {
+            @Override
+            public void goToFullscreenFromSplit() {
+                splitScreen.goToFullscreenFromSplit();
+            }
+        });
     }
 
     @VisibleForTesting

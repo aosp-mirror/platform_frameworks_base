@@ -91,6 +91,7 @@ import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
+import com.android.systemui.statusbar.notification.LegacySourceType;
 import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -143,6 +144,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private static final int MENU_VIEW_INDEX = 0;
     public static final float DEFAULT_HEADER_VISIBLE_AMOUNT = 1.0f;
     private static final long RECENTLY_ALERTED_THRESHOLD_MS = TimeUnit.SECONDS.toMillis(30);
+    private static final SourceType BASE_VALUE = SourceType.from("BaseValue");
+    private static final SourceType FROM_PARENT = SourceType.from("FromParent(ENR)");
+    private static final SourceType PINNED = SourceType.from("Pinned");
 
     // We don't correctly track dark mode until the content views are inflated, so always update
     // the background on first content update just in case it happens to be during a theme change.
@@ -150,6 +154,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mNotificationTranslationFinished = false;
     private boolean mIsSnoozed;
     private boolean mIsFaded;
+    private boolean mAnimatePinnedRoundness = false;
 
     /**
      * Listener for when {@link ExpandableNotificationRow} is laid out.
@@ -376,7 +381,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     private float mTopRoundnessDuringLaunchAnimation;
     private float mBottomRoundnessDuringLaunchAnimation;
-    private boolean mIsNotificationGroupCornerEnabled;
+    private float mSmallRoundness;
 
     /**
      * Returns whether the given {@code statusBarNotification} is a system notification.
@@ -844,7 +849,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         onAttachedChildrenCountChanged();
         row.setIsChildInGroup(false, null);
-        row.requestBottomRoundness(0.0f, /* animate = */ false, SourceType.DefaultValue);
+        if (!mUseRoundnessSourceTypes) {
+            row.requestBottomRoundness(0.0f, LegacySourceType.DefaultValue, /* animate = */ false);
+        }
     }
 
     /**
@@ -860,7 +867,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             if (child.keepInParentForDismissAnimation()) {
                 mChildrenContainer.removeNotification(child);
                 child.setIsChildInGroup(false, null);
-                child.requestBottomRoundness(0.0f, /* animate = */ false, SourceType.DefaultValue);
+                if (!mUseRoundnessSourceTypes) {
+                    LegacySourceType sourceType = LegacySourceType.DefaultValue;
+                    child.requestBottomRoundness(0f, sourceType, /* animate = */ false);
+                }
                 child.setKeepInParentForDismissAnimation(false);
                 logKeepInParentChildDetached(child);
                 childCountChanged = true;
@@ -915,6 +925,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mNotificationParent.updateBackgroundForGroupState();
         }
         updateBackgroundClipping();
+        if (mUseRoundnessSourceTypes) {
+            updateBaseRoundness();
+        }
     }
 
     @Override
@@ -1032,6 +1045,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         setChronometerRunning(mLastChronometerRunning);
         if (isAboveShelf() != wasAboveShelf) {
             mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
+        }
+        if (mUseRoundnessSourceTypes) {
+            if (pinned) {
+                // Should be animated if someone explicitly set it to 0 and the row is shown.
+                boolean animated = mAnimatePinnedRoundness && isShown();
+                requestRoundness(/* top = */ 1f, /* bottom = */ 1f, PINNED, animated);
+            } else {
+                requestRoundnessReset(PINNED);
+                mAnimatePinnedRoundness = true;
+            }
         }
     }
 
@@ -1607,6 +1630,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         super(context, attrs);
         mImageResolver = new NotificationInlineImageResolver(context,
                 new NotificationInlineImageCache());
+        float radius = getResources().getDimension(R.dimen.notification_corner_radius_small);
+        mSmallRoundness = radius / getMaxRadius();
         initDimens();
     }
 
@@ -1839,7 +1864,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mChildrenContainer.setIsLowPriority(mIsLowPriority);
             mChildrenContainer.setContainingNotification(ExpandableNotificationRow.this);
             mChildrenContainer.onNotificationUpdated();
-            mChildrenContainer.enableNotificationGroupCorner(mIsNotificationGroupCornerEnabled);
+            mChildrenContainer.useRoundnessSourceTypes(mUseRoundnessSourceTypes);
 
             mTranslateableViews.add(mChildrenContainer);
         });
@@ -2271,7 +2296,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public float getTopRoundness() {
-        if (mExpandAnimationRunning) {
+        if (!mUseRoundnessSourceTypes && mExpandAnimationRunning) {
             return mTopRoundnessDuringLaunchAnimation;
         }
 
@@ -2280,7 +2305,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public float getBottomRoundness() {
-        if (mExpandAnimationRunning) {
+        if (!mUseRoundnessSourceTypes && mExpandAnimationRunning) {
             return mBottomRoundnessDuringLaunchAnimation;
         }
 
@@ -3436,17 +3461,24 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
-    public void applyRoundness() {
-        super.applyRoundness();
+    public void applyRoundnessAndInvalidate() {
         applyChildrenRoundness();
+        super.applyRoundnessAndInvalidate();
     }
 
     private void applyChildrenRoundness() {
         if (mIsSummaryWithChildren) {
-            mChildrenContainer.requestBottomRoundness(
-                    getBottomRoundness(),
-                    /* animate = */ false,
-                    SourceType.DefaultValue);
+            if (mUseRoundnessSourceTypes) {
+                mChildrenContainer.requestRoundness(
+                        /* top = */ getTopRoundness(),
+                        /* bottom = */ getBottomRoundness(),
+                        FROM_PARENT);
+            } else {
+                mChildrenContainer.requestBottomRoundness(
+                        getBottomRoundness(),
+                        LegacySourceType.DefaultValue,
+                        /* animate = */ false);
+            }
         }
     }
 
@@ -3605,6 +3637,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             } else {
                 pw.println("no viewState!!!");
             }
+            pw.println("Roundness: " + getRoundableState().debugString());
 
             if (mIsSummaryWithChildren) {
                 pw.println();
@@ -3649,14 +3682,38 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mTargetPoint;
     }
 
+    /** Update the minimum roundness based on current state */
+    private void updateBaseRoundness() {
+        if (isChildInGroup()) {
+            requestRoundnessReset(BASE_VALUE);
+        } else {
+            requestRoundness(mSmallRoundness, mSmallRoundness, BASE_VALUE);
+        }
+    }
+
     /**
-     * Enable the support for rounded corner in notification group
+     * Enable the support for rounded corner based on the SourceType
      * @param enabled true if is supported
      */
-    public void enableNotificationGroupCorner(boolean enabled) {
-        mIsNotificationGroupCornerEnabled = enabled;
+    @Override
+    public void useRoundnessSourceTypes(boolean enabled) {
+        super.useRoundnessSourceTypes(enabled);
         if (mChildrenContainer != null) {
-            mChildrenContainer.enableNotificationGroupCorner(mIsNotificationGroupCornerEnabled);
+            mChildrenContainer.useRoundnessSourceTypes(mUseRoundnessSourceTypes);
+        }
+    }
+
+    @Override
+    public String toString() {
+        String roundableStateDebug = "RoundableState = " + getRoundableState().debugString();
+        return "ExpandableNotificationRow:" + hashCode() + " { " + roundableStateDebug + " }";
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (mUseRoundnessSourceTypes) {
+            updateBaseRoundness();
         }
     }
 }
