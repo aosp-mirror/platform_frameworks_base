@@ -27,6 +27,7 @@ import android.telephony.TelephonyCallback
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE
 import android.telephony.TelephonyManager
+import android.telephony.TelephonyManager.ERI_OFF
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
@@ -95,7 +96,11 @@ class MobileConnectionRepositoryImpl(
                         TelephonyCallback.CarrierNetworkListener,
                         TelephonyCallback.DisplayInfoListener {
                         override fun onServiceStateChanged(serviceState: ServiceState) {
-                            state = state.copy(isEmergencyOnly = serviceState.isEmergencyOnly)
+                            state =
+                                state.copy(
+                                    isEmergencyOnly = serviceState.isEmergencyOnly,
+                                    isRoaming = serviceState.roaming,
+                                )
                             trySend(state)
                         }
 
@@ -207,6 +212,11 @@ class MobileConnectionRepositoryImpl(
             localMobileDataSettingChangedEvent,
             globalMobileDataSettingChangedEvent,
         )
+
+    override val cdmaRoaming: StateFlow<Boolean> =
+        telephonyPollingEvent
+            .mapLatest { telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber != ERI_OFF }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val dataEnabled: StateFlow<Boolean> =
         telephonyPollingEvent

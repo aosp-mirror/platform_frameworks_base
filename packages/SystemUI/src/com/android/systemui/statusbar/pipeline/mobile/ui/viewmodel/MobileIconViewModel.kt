@@ -87,5 +87,7 @@ constructor(
             }
         }
 
+    val roaming: Flow<Boolean> = iconInteractor.isRoaming
+
     val tint: Flow<Int> = flowOf(Color.CYAN)
 }
