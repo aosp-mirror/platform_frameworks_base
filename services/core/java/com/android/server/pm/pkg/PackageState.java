@@ -112,6 +112,19 @@ public interface PackageState {
     int getAppId();
 
     /**
+     * Retrieves effective hidden API policy for this app. The state can be dependent on
+     * {@link #getAndroidPackage()} availability and whether the app is a system app.
+     *
+     * Note that during process start, this policy may be mutated by device specific process
+     * configuration, so this value isn't truly final.
+     *
+     * @return The (mostly) final {@link ApplicationInfo.HiddenApiEnforcementPolicy} that should be
+     * applied to this package.
+     */
+    @ApplicationInfo.HiddenApiEnforcementPolicy
+    int getHiddenApiEnforcementPolicy();
+
+    /**
      * @see PackageInfo#packageName
      * @see AndroidPackage#getPackageName()
      */
@@ -139,6 +152,18 @@ public interface PackageState {
     String getSeInfo();
 
     /**
+     * @return State for a user or {@link PackageUserState#DEFAULT} if the state doesn't exist.
+     */
+    @NonNull
+    PackageUserState getStateForUser(@NonNull UserHandle user);
+
+    /**
+     * @see R.styleable#AndroidManifestUsesLibrary
+     */
+    @NonNull
+    List<SharedLibrary> getUsesLibraries();
+
+    /**
      * @see AndroidPackage#isPrivileged()
      */
     boolean isPrivileged();
@@ -153,18 +178,6 @@ public interface PackageState {
      * system partition.
      */
     boolean isUpdatedSystemApp();
-
-    /**
-     * @return State for a user or {@link PackageUserState#DEFAULT} if the state doesn't exist.
-     */
-    @NonNull
-    PackageUserState getStateForUser(@NonNull UserHandle user);
-
-    /**
-     * @see R.styleable#AndroidManifestUsesLibrary
-     */
-    @NonNull
-    List<SharedLibrary> getUsesLibraries();
 
     // Methods below this comment are not yet exposed as API
 

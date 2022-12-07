@@ -234,10 +234,12 @@ public class AndroidPackageUtils {
                 || !pkg.getLibraryNames().isEmpty();
     }
 
-    public static int getHiddenApiEnforcementPolicy(AndroidPackage pkg,
+    public static int getHiddenApiEnforcementPolicy(@Nullable AndroidPackage pkg,
             @NonNull PackageStateInternal pkgSetting) {
         boolean isAllowedToUseHiddenApis;
-        if (pkg.isSignedWithPlatformKey()) {
+        if (pkg == null) {
+            isAllowedToUseHiddenApis = false;
+        } else if (pkg.isSignedWithPlatformKey()) {
             isAllowedToUseHiddenApis = true;
         } else if (pkg.isSystem() || pkgSetting.getTransientState().isUpdatedSystemApp()) {
             isAllowedToUseHiddenApis = pkg.isUsesNonSdkApi()

@@ -99,6 +99,7 @@ package com.android.server.pm.pkg {
   public interface PackageState {
     method @Nullable public com.android.server.pm.pkg.AndroidPackage getAndroidPackage();
     method public int getAppId();
+    method public int getHiddenApiEnforcementPolicy();
     method @NonNull public String getPackageName();
     method @Nullable public String getPrimaryCpuAbi();
     method @Nullable public String getSeInfo();
