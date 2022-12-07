@@ -29,11 +29,13 @@ import static com.android.server.job.controllers.FlexibilityController.NUM_SYSTE
 import static com.android.server.job.controllers.FlexibilityController.SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS;
 
 import android.annotation.ElapsedRealtimeLong;
+import android.annotation.NonNull;
 import android.app.AppGlobals;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobWorkItem;
+import android.app.job.UserVisibleJobSummary;
 import android.content.ClipData;
 import android.content.ComponentName;
 import android.net.Network;
@@ -453,6 +455,12 @@ public final class JobStatus {
      * Whether or not this job is approved to be treated as expedited per TARE policy.
      */
     private boolean mExpeditedTareApproved;
+
+    /**
+     * Summary describing this job. Lazily created in {@link #getUserVisibleJobSummary()}
+     * since not every job will need it.
+     */
+    private UserVisibleJobSummary mUserVisibleJobSummary;
 
     /////// Booleans that track if a job is ready to run. They should be updated whenever dependent
     /////// states change.
@@ -1334,6 +1342,27 @@ public final class JobStatus {
      */
     public boolean shouldTreatAsExpeditedJob() {
         return mExpeditedQuotaApproved && mExpeditedTareApproved && isRequestedExpeditedJob();
+    }
+
+    /**
+     * Return a summary that uniquely identifies the underlying job.
+     */
+    @NonNull
+    public UserVisibleJobSummary getUserVisibleJobSummary() {
+        if (mUserVisibleJobSummary == null) {
+            mUserVisibleJobSummary = new UserVisibleJobSummary(
+                    callingUid, getSourceUserId(), getSourcePackageName(), getJobId());
+        }
+        return mUserVisibleJobSummary;
+    }
+
+    /**
+     * @return true if this is a job whose execution should be made visible to the user.
+     */
+    public boolean isUserVisibleJob() {
+        // TODO(255767350): limit to user-initiated jobs
+        // Placeholder implementation until we have the code in
+        return shouldTreatAsExpeditedJob();
     }
 
     /**

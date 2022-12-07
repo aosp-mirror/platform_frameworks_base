@@ -1184,6 +1184,22 @@ class JobConcurrencyManager {
     }
 
     @GuardedBy("mLock")
+    void stopUserVisibleJobsLocked(int userId, @NonNull String packageName,
+            @JobParameters.StopReason int reason, int internalReasonCode) {
+        for (int i = mActiveServices.size() - 1; i >= 0; --i) {
+            final JobServiceContext jsc = mActiveServices.get(i);
+            final JobStatus jobStatus = jsc.getRunningJobLocked();
+
+            if (jobStatus != null && userId == jobStatus.getSourceUserId()
+                    && jobStatus.getSourcePackageName().equals(packageName)
+                    && jobStatus.isUserVisibleJob()) {
+                jsc.cancelExecutingJobLocked(reason, internalReasonCode,
+                        JobParameters.getInternalReasonCodeDescription(internalReasonCode));
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
     void stopNonReadyActiveJobsLocked() {
         for (int i = 0; i < mActiveServices.size(); i++) {
             JobServiceContext serviceContext = mActiveServices.get(i);
