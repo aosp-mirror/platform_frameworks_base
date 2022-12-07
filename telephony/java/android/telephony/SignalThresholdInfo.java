@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -169,11 +170,18 @@ public final class SignalThresholdInfo implements Parcelable {
     public static final int HYSTERESIS_MS_DISABLED = 0;
 
     /**
-     * Indicates the hysteresisDb is disabled.
+     * Indicates the default hysteresis value in dB.
      *
      * @hide
      */
-    public static final int HYSTERESIS_DB_DISABLED = 0;
+    private static final int HYSTERESIS_DB_DEFAULT = 2;
+
+    /**
+     * Indicates the hysteresisDb value is not set and to be initialised to default value.
+     *
+     * @hide
+     */
+    public static final int HYSTERESIS_DB_MINIMUM = 0;
 
     /**
      * Minimum valid value for {@link #SIGNAL_MEASUREMENT_TYPE_RSSI}.
@@ -339,7 +347,7 @@ public final class SignalThresholdInfo implements Parcelable {
         mRan = ran;
         mSignalMeasurementType = signalMeasurementType;
         mHysteresisMs = hysteresisMs < 0 ? HYSTERESIS_MS_DISABLED : hysteresisMs;
-        mHysteresisDb = hysteresisDb < 0 ? HYSTERESIS_DB_DISABLED : hysteresisDb;
+        mHysteresisDb = hysteresisDb;
         mThresholds = thresholds;
         mIsEnabled = isEnabled;
     }
@@ -351,7 +359,7 @@ public final class SignalThresholdInfo implements Parcelable {
         private int mRan = AccessNetworkConstants.AccessNetworkType.UNKNOWN;
         private int mSignalMeasurementType = SIGNAL_MEASUREMENT_TYPE_UNKNOWN;
         private int mHysteresisMs = HYSTERESIS_MS_DISABLED;
-        private int mHysteresisDb = HYSTERESIS_DB_DISABLED;
+        private int mHysteresisDb = HYSTERESIS_DB_DEFAULT;
         private int[] mThresholds = null;
         private boolean mIsEnabled = false;
 
@@ -361,7 +369,8 @@ public final class SignalThresholdInfo implements Parcelable {
          * @param ran The radio access network type
          * @return the builder to facilitate the chaining
          */
-        public @NonNull Builder setRadioAccessNetworkType(
+        @NonNull
+        public Builder setRadioAccessNetworkType(
                 @AccessNetworkConstants.RadioAccessNetworkType int ran) {
             mRan = ran;
             return this;
@@ -373,7 +382,8 @@ public final class SignalThresholdInfo implements Parcelable {
          * @param signalMeasurementType The signal measurement type
          * @return the builder to facilitate the chaining
          */
-        public @NonNull Builder setSignalMeasurementType(
+        @NonNull
+        public Builder setSignalMeasurementType(
                 @SignalMeasurementType int signalMeasurementType) {
             mSignalMeasurementType = signalMeasurementType;
             return this;
@@ -387,20 +397,27 @@ public final class SignalThresholdInfo implements Parcelable {
          * @return the builder to facilitate the chaining
          * @hide
          */
-        public @NonNull Builder setHysteresisMs(int hysteresisMs) {
+        @NonNull
+        public Builder setHysteresisMs(int hysteresisMs) {
             mHysteresisMs = hysteresisMs;
             return this;
         }
 
         /**
-         * Set the interval in dB defining the required magnitude change between reports. A value of
-         * zero disabled dB-based hysteresis restrictions.
+         * Set the interval in dB defining the required minimum magnitude change to report a
+         * signal strength change. A value of zero disables dB-based hysteresis restrictions.
+         * Note:
+         * <p>Default hysteresis db value is 2. Minimum hysteresis db value allowed to set is 0.
+         * If hysteresis db value is not set, default hysteresis db value of 2 will be used.
          *
          * @param hysteresisDb the interval in dB
          * @return the builder to facilitate the chaining
-         * @hide
          */
-        public @NonNull Builder setHysteresisDb(int hysteresisDb) {
+        @NonNull
+        public Builder setHysteresisDb(@IntRange(from = 0) int hysteresisDb) {
+            if (hysteresisDb < 0) {
+                throw new IllegalArgumentException("hysteresis db value should not be less than 0");
+            }
             mHysteresisDb = hysteresisDb;
             return this;
         }
@@ -428,7 +445,8 @@ public final class SignalThresholdInfo implements Parcelable {
          * @see #SIGNAL_MEASUREMENT_TYPE_ECNO
          * @see #getThresholds() for more details on signal strength thresholds
          */
-        public @NonNull Builder setThresholds(@NonNull int[] thresholds) {
+        @NonNull
+        public Builder setThresholds(@NonNull int[] thresholds) {
             return setThresholds(thresholds, false /*isSystem*/);
         }
 
@@ -442,7 +460,8 @@ public final class SignalThresholdInfo implements Parcelable {
          *
          * @hide
          */
-        public @NonNull Builder setThresholds(@NonNull int[] thresholds, boolean isSystem) {
+        @NonNull
+        public Builder setThresholds(@NonNull int[] thresholds, boolean isSystem) {
             Objects.requireNonNull(thresholds, "thresholds must not be null");
             if (!isSystem
                     && (thresholds.length < MINIMUM_NUMBER_OF_THRESHOLDS_ALLOWED
@@ -465,7 +484,8 @@ public final class SignalThresholdInfo implements Parcelable {
          * @return the builder to facilitate the chaining
          * @hide
          */
-        public @NonNull Builder setIsEnabled(boolean isEnabled) {
+        @NonNull
+        public Builder setIsEnabled(boolean isEnabled) {
             mIsEnabled = isEnabled;
             return this;
         }
@@ -479,7 +499,8 @@ public final class SignalThresholdInfo implements Parcelable {
          * the thresholds is out of range, or the RAN is not allowed to set with the signal
          * measurement type
          */
-        public @NonNull SignalThresholdInfo build() {
+        @NonNull
+        public SignalThresholdInfo build() {
             return new SignalThresholdInfo(
                     mRan,
                     mSignalMeasurementType,
@@ -495,7 +516,8 @@ public final class SignalThresholdInfo implements Parcelable {
      *
      * @return radio access network type
      */
-    public @AccessNetworkConstants.RadioAccessNetworkType int getRadioAccessNetworkType() {
+    @AccessNetworkConstants.RadioAccessNetworkType
+    public int getRadioAccessNetworkType() {
         return mRan;
     }
 
@@ -504,7 +526,8 @@ public final class SignalThresholdInfo implements Parcelable {
      *
      * @return the SignalMeasurementType value
      */
-    public @SignalMeasurementType int getSignalMeasurementType() {
+    @SignalMeasurementType
+    public int getSignalMeasurementType() {
         return mSignalMeasurementType;
     }
 
@@ -513,7 +536,11 @@ public final class SignalThresholdInfo implements Parcelable {
         return mHysteresisMs;
     }
 
-    /** @hide */
+    /**
+     * Get measurement hysteresis db.
+     *
+     * @return hysteresis db value
+     */
     public int getHysteresisDb() {
         return mHysteresisDb;
     }
@@ -544,7 +571,8 @@ public final class SignalThresholdInfo implements Parcelable {
      * @see #SIGNAL_MEASUREMENT_TYPE_SSSINR
      * @see #SIGNAL_MEASUREMENT_TYPE_ECNO
      */
-    public @NonNull int[] getThresholds() {
+    @NonNull
+    public int[] getThresholds() {
         return mThresholds.clone();
     }
 
@@ -618,7 +646,8 @@ public final class SignalThresholdInfo implements Parcelable {
                 mIsEnabled);
     }
 
-    public static final @NonNull Parcelable.Creator<SignalThresholdInfo> CREATOR =
+    @NonNull
+    public static final Parcelable.Creator<SignalThresholdInfo> CREATOR =
             new Parcelable.Creator<SignalThresholdInfo>() {
                 @Override
                 public SignalThresholdInfo createFromParcel(Parcel in) {
