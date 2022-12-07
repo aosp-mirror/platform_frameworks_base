@@ -132,7 +132,10 @@ private fun Title(title: String, maxLines: Int = Int.MAX_VALUE) {
                     .asPaddingValues()
                     .horizontalValues()
             )
-            .padding(horizontal = SettingsDimension.itemPaddingAround),
+            .padding(
+                start = SettingsDimension.itemPaddingAround,
+                end = SettingsDimension.itemPaddingEnd,
+            ),
         overflow = TextOverflow.Ellipsis,
         maxLines = maxLines,
     )
