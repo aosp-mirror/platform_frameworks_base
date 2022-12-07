@@ -213,6 +213,24 @@ class MediaUiEventLogger @Inject constructor(private val logger: UiEventLogger) 
             instanceId
         )
     }
+
+    fun logSingleMediaPlayerInCarousel(uid: Int, packageName: String, instanceId: InstanceId) {
+        logger.logWithInstanceId(
+            MediaUiEvent.MEDIA_CAROUSEL_SINGLE_PLAYER,
+            uid,
+            packageName,
+            instanceId
+        )
+    }
+
+    fun logMultipleMediaPlayersInCarousel(uid: Int, packageName: String, instanceId: InstanceId) {
+        logger.logWithInstanceId(
+            MediaUiEvent.MEDIA_CAROUSEL_MULTIPLE_PLAYERS,
+            uid,
+            packageName,
+            instanceId
+        )
+    }
 }
 
 enum class MediaUiEvent(val metricId: Int) : UiEventLogger.UiEventEnum {
@@ -269,7 +287,11 @@ enum class MediaUiEvent(val metricId: Int) : UiEventLogger.UiEventEnum {
     @UiEvent(doc = "User tapped on a media recommendation card")
     MEDIA_RECOMMENDATION_CARD_TAP(1045),
     @UiEvent(doc = "User opened the broadcast dialog from a media control")
-    MEDIA_OPEN_BROADCAST_DIALOG(1079);
+    MEDIA_OPEN_BROADCAST_DIALOG(1079),
+    @UiEvent(doc = "The media carousel contains one media player card")
+    MEDIA_CAROUSEL_SINGLE_PLAYER(1244),
+    @UiEvent(doc = "The media carousel contains multiple media player cards")
+    MEDIA_CAROUSEL_MULTIPLE_PLAYERS(1245);
 
     override fun getId() = metricId
 }

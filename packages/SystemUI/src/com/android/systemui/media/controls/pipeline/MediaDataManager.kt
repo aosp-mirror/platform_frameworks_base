@@ -422,6 +422,7 @@ class MediaDataManager(
                     appUid = appUid
                 )
             mediaEntries.put(packageName, resumeData)
+            logSingleVsMultipleMediaAdded(appUid, packageName, instanceId)
             logger.logResumeMediaAdded(appUid, packageName, instanceId)
         }
         backgroundExecutor.execute {
@@ -812,6 +813,7 @@ class MediaDataManager(
         val appUid = appInfo?.uid ?: Process.INVALID_UID
 
         if (logEvent) {
+            logSingleVsMultipleMediaAdded(appUid, sbn.packageName, instanceId)
             logger.logActiveMediaAdded(appUid, sbn.packageName, instanceId, playbackLocation)
         } else if (playbackLocation != currentEntry?.playbackLocation) {
             logger.logPlaybackLocationChange(appUid, sbn.packageName, instanceId, playbackLocation)
@@ -852,6 +854,20 @@ class MediaDataManager(
                     appUid = appUid
                 )
             )
+        }
+    }
+
+    private fun logSingleVsMultipleMediaAdded(
+        appUid: Int,
+        packageName: String,
+        instanceId: InstanceId
+    ) {
+        if (mediaEntries.size == 1) {
+            logger.logSingleMediaPlayerInCarousel(appUid, packageName, instanceId)
+        } else if (mediaEntries.size == 2) {
+            // Since this method is only called when there is a new media session added.
+            // logging needed once there is more than one media session in carousel.
+            logger.logMultipleMediaPlayersInCarousel(appUid, packageName, instanceId)
         }
     }
 
