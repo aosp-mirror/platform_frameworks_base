@@ -47,6 +47,7 @@ import android.window.WindowContainerTransactionCallback;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.transition.OneShotRemoteHandler;
 import com.android.wm.shell.transition.Transitions;
@@ -64,6 +65,7 @@ class SplitScreenTransitions {
     DismissTransition mPendingDismiss = null;
     TransitSession mPendingEnter = null;
     TransitSession mPendingRecent = null;
+    TransitSession mPendingResize = null;
 
     private IBinder mAnimatingTransition = null;
     OneShotRemoteHandler mPendingRemoteHandler = null;
@@ -177,6 +179,43 @@ class SplitScreenTransitions {
         onFinish(null /* wct */, null /* wctCB */);
     }
 
+    void applyResizeTransition(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback,
+            @NonNull WindowContainerToken mainRoot, @NonNull WindowContainerToken sideRoot,
+            @NonNull SplitDecorManager mainDecor, @NonNull SplitDecorManager sideDecor) {
+        mFinishCallback = finishCallback;
+        mAnimatingTransition = transition;
+        mFinishTransaction = finishTransaction;
+
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            if (mainRoot.equals(change.getContainer()) || sideRoot.equals(change.getContainer())) {
+                final SurfaceControl leash = change.getLeash();
+                startTransaction.setPosition(leash, change.getEndAbsBounds().left,
+                        change.getEndAbsBounds().top);
+                startTransaction.setWindowCrop(leash, change.getEndAbsBounds().width(),
+                        change.getEndAbsBounds().height());
+
+                SplitDecorManager decor = mainRoot.equals(change.getContainer())
+                        ? mainDecor : sideDecor;
+                ValueAnimator va = new ValueAnimator();
+                mAnimations.add(va);
+                decor.setScreenshotIfNeeded(change.getSnapshot(), startTransaction);
+                decor.onResized(startTransaction, () -> {
+                    mTransitions.getMainExecutor().execute(() -> {
+                        mAnimations.remove(va);
+                        onFinish(null /* wct */, null /* wctCB */);
+                    });
+                });
+            }
+        }
+
+        startTransaction.apply();
+        onFinish(null /* wct */, null /* wctCB */);
+    }
+
     boolean isPendingTransition(IBinder transition) {
         return getPendingTransition(transition) != null;
     }
@@ -193,6 +232,10 @@ class SplitScreenTransitions {
         return mPendingDismiss != null && mPendingDismiss.mTransition == transition;
     }
 
+    boolean isPendingResize(IBinder transition) {
+        return mPendingResize != null && mPendingResize.mTransition == transition;
+    }
+
     @Nullable
     private TransitSession getPendingTransition(IBinder transition) {
         if (isPendingEnter(transition)) {
@@ -201,10 +244,13 @@ class SplitScreenTransitions {
             return mPendingRecent;
         } else if (isPendingDismiss(transition)) {
             return mPendingDismiss;
+        } else if (isPendingResize(transition)) {
+            return mPendingResize;
         }
 
         return null;
     }
+
 
     /** Starts a transition to enter split with a remote transition animator. */
     IBinder startEnterTransition(
@@ -256,6 +302,21 @@ class SplitScreenTransitions {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
                         + " deduced Dismiss due to %s. toTop=%s",
                 exitReasonToString(reason), stageTypeToString(dismissTop));
+    }
+
+    IBinder startResizeTransition(WindowContainerTransaction wct,
+            Transitions.TransitionHandler handler,
+            @Nullable TransitionFinishedCallback finishCallback) {
+        IBinder transition = mTransitions.startTransition(TRANSIT_CHANGE, wct, handler);
+        setResizeTransition(transition, finishCallback);
+        return transition;
+    }
+
+    void setResizeTransition(@NonNull IBinder transition,
+            @Nullable TransitionFinishedCallback finishCallback) {
+        mPendingResize = new TransitSession(transition, null /* consumedCb */, finishCallback);
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
+                + " deduced Resize split screen");
     }
 
     void setRecentTransition(@NonNull IBinder transition,
@@ -324,6 +385,9 @@ class SplitScreenTransitions {
             mPendingRecent.onConsumed(aborted);
             mPendingRecent = null;
             mPendingRemoteHandler = null;
+        } else if (isPendingResize(transition)) {
+            mPendingResize.onConsumed(aborted);
+            mPendingResize = null;
         }
     }
 
@@ -340,6 +404,9 @@ class SplitScreenTransitions {
         } else if (isPendingDismiss(mAnimatingTransition)) {
             mPendingDismiss.onFinished(wct, mFinishTransaction);
             mPendingDismiss = null;
+        } else if (isPendingResize(mAnimatingTransition)) {
+            mPendingResize.onFinished(wct, mFinishTransaction);
+            mPendingResize = null;
         }
 
         mPendingRemoteHandler = null;

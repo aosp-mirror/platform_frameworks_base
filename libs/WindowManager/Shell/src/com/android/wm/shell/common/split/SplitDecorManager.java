@@ -51,8 +51,6 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.SurfaceUtils;
 
-import java.util.function.Consumer;
-
 /**
  * Handles split decor like showing resizing hint for a specific split.
  */
@@ -72,17 +70,18 @@ public class SplitDecorManager extends WindowlessWindowManager {
     private SurfaceControl mIconLeash;
     private SurfaceControl mBackgroundLeash;
     private SurfaceControl mGapBackgroundLeash;
+    private SurfaceControl mScreenshot;
 
     private boolean mShown;
     private boolean mIsResizing;
     private final Rect mBounds = new Rect();
-    private final Rect mResizingBounds = new Rect();
     private final Rect mTempRect = new Rect();
     private ValueAnimator mFadeAnimator;
 
     private int mIconSize;
     private int mOffsetX;
     private int mOffsetY;
+    private int mRunningAnimationCount = 0;
 
     public SplitDecorManager(Configuration configuration, IconProvider iconProvider,
             SurfaceSession surfaceSession) {
@@ -173,7 +172,6 @@ public class SplitDecorManager extends WindowlessWindowManager {
             mIsResizing = true;
             mBounds.set(newBounds);
         }
-        mResizingBounds.set(newBounds);
         mOffsetX = offsetX;
         mOffsetY = offsetY;
 
@@ -227,33 +225,41 @@ public class SplitDecorManager extends WindowlessWindowManager {
                 t.setVisibility(mBackgroundLeash, show);
                 t.setVisibility(mIconLeash, show);
             } else {
-                startFadeAnimation(show, null /* finishedConsumer */);
+                startFadeAnimation(show, false, null);
             }
             mShown = show;
         }
     }
 
     /** Stops showing resizing hint. */
-    public void onResized(SurfaceControl.Transaction t) {
-        if (!mShown && mIsResizing) {
-            mTempRect.set(mResizingBounds);
-            mTempRect.offsetTo(-mOffsetX, -mOffsetY);
-            final SurfaceControl screenshot = ScreenshotUtils.takeScreenshot(t,
-                    mHostLeash, mTempRect, Integer.MAX_VALUE - 1);
+    public void onResized(SurfaceControl.Transaction t, Runnable animFinishedCallback) {
+        if (mScreenshot != null) {
+            t.setPosition(mScreenshot, mOffsetX, mOffsetY);
 
             final SurfaceControl.Transaction animT = new SurfaceControl.Transaction();
             final ValueAnimator va = ValueAnimator.ofFloat(1, 0);
             va.addUpdateListener(valueAnimator -> {
                 final float progress = (float) valueAnimator.getAnimatedValue();
-                animT.setAlpha(screenshot, progress);
+                animT.setAlpha(mScreenshot, progress);
                 animT.apply();
             });
             va.addListener(new AnimatorListenerAdapter() {
                 @Override
+                public void onAnimationStart(Animator animation) {
+                    mRunningAnimationCount++;
+                }
+
+                @Override
                 public void onAnimationEnd(@androidx.annotation.NonNull Animator animation) {
-                    animT.remove(screenshot);
+                    mRunningAnimationCount--;
+                    animT.remove(mScreenshot);
                     animT.apply();
                     animT.close();
+                    mScreenshot = null;
+
+                    if (mRunningAnimationCount == 0 && animFinishedCallback != null) {
+                        animFinishedCallback.run();
+                    }
                 }
             });
             va.start();
@@ -285,10 +291,34 @@ public class SplitDecorManager extends WindowlessWindowManager {
             mFadeAnimator.cancel();
         }
         if (mShown) {
-            fadeOutDecor(null /* finishedCallback */);
+            fadeOutDecor(animFinishedCallback);
         } else {
             // Decor surface is hidden so release it directly.
             releaseDecor(t);
+            if (mRunningAnimationCount == 0 && animFinishedCallback != null) {
+                animFinishedCallback.run();
+            }
+        }
+    }
+
+    /** Screenshot host leash and attach on it if meet some conditions */
+    public void screenshotIfNeeded(SurfaceControl.Transaction t) {
+        if (!mShown && mIsResizing) {
+            mTempRect.set(mBounds);
+            mTempRect.offsetTo(0, 0);
+            mScreenshot = ScreenshotUtils.takeScreenshot(t, mHostLeash, mTempRect,
+                    Integer.MAX_VALUE - 1);
+        }
+    }
+
+    /** Set screenshot and attach on host leash it if meet some conditions */
+    public void setScreenshotIfNeeded(SurfaceControl screenshot, SurfaceControl.Transaction t) {
+        if (screenshot == null || !screenshot.isValid()) return;
+
+        if (!mShown && mIsResizing) {
+            mScreenshot = screenshot;
+            t.reparent(screenshot, mHostLeash);
+            t.setLayer(screenshot, Integer.MAX_VALUE - 1);
         }
     }
 
@@ -296,18 +326,15 @@ public class SplitDecorManager extends WindowlessWindowManager {
      * directly. */
     public void fadeOutDecor(Runnable finishedCallback) {
         if (mShown) {
-            startFadeAnimation(false /* show */, transaction -> {
-                releaseDecor(transaction);
-                if (finishedCallback != null) finishedCallback.run();
-            });
+            startFadeAnimation(false /* show */, true, finishedCallback);
             mShown = false;
         } else {
             if (finishedCallback != null) finishedCallback.run();
         }
     }
 
-    private void startFadeAnimation(boolean show,
-            Consumer<SurfaceControl.Transaction> finishedConsumer) {
+    private void startFadeAnimation(boolean show, boolean releaseSurface,
+            Runnable finishedCallback) {
         final SurfaceControl.Transaction animT = new SurfaceControl.Transaction();
         mFadeAnimator = ValueAnimator.ofFloat(0f, 1f);
         mFadeAnimator.setDuration(FADE_DURATION);
@@ -324,6 +351,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
         mFadeAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(@NonNull Animator animation) {
+                mRunningAnimationCount++;
                 if (show) {
                     animT.show(mBackgroundLeash).show(mIconLeash);
                 }
@@ -335,6 +363,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
             @Override
             public void onAnimationEnd(@NonNull Animator animation) {
+                mRunningAnimationCount--;
                 if (!show) {
                     if (mBackgroundLeash != null) {
                         animT.hide(mBackgroundLeash);
@@ -343,11 +372,15 @@ public class SplitDecorManager extends WindowlessWindowManager {
                         animT.hide(mIconLeash);
                     }
                 }
-                if (finishedConsumer != null) {
-                    finishedConsumer.accept(animT);
+                if (releaseSurface) {
+                    releaseDecor(animT);
                 }
                 animT.apply();
                 animT.close();
+
+                if (mRunningAnimationCount == 0 && finishedCallback != null) {
+                    finishedCallback.run();
+                }
             }
         });
         mFadeAnimator.start();
