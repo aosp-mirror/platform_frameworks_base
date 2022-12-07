@@ -1864,6 +1864,21 @@ public class UsageStatsService extends SystemService implements
                         mResponseStatsTracker.dump(idpw);
                     }
                     return;
+                } else if ("app-component-usage".equals(arg)) {
+                    final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+                    synchronized (mLock) {
+                        if (!mLastTimeComponentUsedGlobal.isEmpty()) {
+                            ipw.println("App Component Usages:");
+                            ipw.increaseIndent();
+                            for (String pkg : mLastTimeComponentUsedGlobal.keySet()) {
+                                ipw.println("package=" + pkg
+                                            + " lastUsed=" + UserUsageStatsService.formatDateTime(
+                                                    mLastTimeComponentUsedGlobal.get(pkg), true));
+                            }
+                            ipw.decreaseIndent();
+                        }
+                    }
+                    return;
                 } else if (arg != null && !arg.startsWith("-")) {
                     // Anything else that doesn't start with '-' is a pkg to filter
                     pkgs.add(arg);
