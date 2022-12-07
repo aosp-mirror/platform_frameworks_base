@@ -98,7 +98,7 @@ public class NavigationBarController implements
 
     // Tracks config changes that will actually recreate the nav bar
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
-            ActivityInfo.CONFIG_FONT_SCALE | ActivityInfo.CONFIG_SCREEN_LAYOUT
+            ActivityInfo.CONFIG_FONT_SCALE
                     | ActivityInfo.CONFIG_UI_MODE);
 
     @Inject
