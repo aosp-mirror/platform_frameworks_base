@@ -48,7 +48,6 @@ public final class WindowContainerToken implements Parcelable {
     }
 
     @Override
-    /** @hide */
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStrongBinder(mRealToken.asBinder());
     }
@@ -68,7 +67,6 @@ public final class WindowContainerToken implements Parcelable {
             };
 
     @Override
-    /** @hide */
     public int describeContents() {
         return 0;
     }
