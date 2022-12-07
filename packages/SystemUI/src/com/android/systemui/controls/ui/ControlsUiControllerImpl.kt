@@ -28,6 +28,7 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.service.controls.Control
+import android.service.controls.ControlsProviderService
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
@@ -48,6 +49,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.ControlsServiceInfo
+import com.android.systemui.controls.ControlsSettingsRepository
 import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.StructureInfo
@@ -96,6 +98,7 @@ class ControlsUiControllerImpl @Inject constructor (
         private val userFileManager: UserFileManager,
         private val userTracker: UserTracker,
         private val taskViewFactory: Optional<TaskViewFactory>,
+        private val controlsSettingsRepository: ControlsSettingsRepository,
         dumpManager: DumpManager
 ) : ControlsUiController, Dumpable {
 
@@ -354,7 +357,6 @@ class ControlsUiControllerImpl @Inject constructor (
                 } else {
                     items[0]
                 }
-
         maybeUpdateSelectedItem(selectionItem)
 
         createControlsSpaceFrame()
@@ -374,11 +376,20 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private fun createPanelView(componentName: ComponentName) {
-        val pendingIntent = PendingIntent.getActivity(
+        val setting = controlsSettingsRepository
+                .allowActionOnTrivialControlsInLockscreen.value
+        val pendingIntent = PendingIntent.getActivityAsUser(
                 context,
                 0,
-                Intent().setComponent(componentName),
-                PendingIntent.FLAG_IMMUTABLE
+                Intent()
+                        .setComponent(componentName)
+                        .putExtra(
+                                ControlsProviderService.EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
+                                setting
+                        ),
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+                null,
+                userTracker.userHandle
         )
 
         parent.requireViewById<View>(R.id.controls_scroll_view).visibility = View.GONE
@@ -698,6 +709,8 @@ class ControlsUiControllerImpl @Inject constructor (
             println("hidden: $hidden")
             println("selectedItem: $selectedItem")
             println("lastSelections: $lastSelections")
+            println("setting: ${controlsSettingsRepository
+                    .allowActionOnTrivialControlsInLockscreen.value}")
         }
     }
 }
