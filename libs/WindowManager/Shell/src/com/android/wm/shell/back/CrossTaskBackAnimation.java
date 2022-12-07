@@ -329,8 +329,7 @@ class CrossTaskBackAnimation {
 
         @Override
         public void onBackCancelled() {
-            mProgressAnimator.reset();
-            finishAnimation();
+            mProgressAnimator.onBackCancelled(CrossTaskBackAnimation.this::finishAnimation);
         }
 
         @Override
