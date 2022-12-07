@@ -118,7 +118,7 @@ fun CreateCredentialScreen(
                         onCancel = viewModel::onCancel,
                     )
                 }
-            } else if (uiState.hidden && uiState.selectedEntry != null) {
+            } else if (uiState.selectedEntry != null && !uiState.providerActivityPending) {
                 viewModel.launchProviderUi(providerActivityLauncher)
             }
         },
