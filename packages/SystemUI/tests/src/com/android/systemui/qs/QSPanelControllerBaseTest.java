@@ -226,7 +226,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
                 + "    " + mockTileViewString + "\n"
                 + "  media bounds: null\n"
                 + "  horizontal layout: false\n"
-                + "  last orientation: 0\n";
+                + "  last orientation: 0\n"
+                + "  mShouldUseSplitNotificationShade: false\n";
         assertEquals(expected, w.getBuffer().toString());
     }
 
