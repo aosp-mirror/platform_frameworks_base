@@ -1504,6 +1504,7 @@ public final class SurfaceControl implements Parcelable {
     public static final class DynamicDisplayInfo {
         public DisplayMode[] supportedDisplayModes;
         public int activeDisplayModeId;
+        public float renderFrameRate;
 
         public int[] supportedColorModes;
         public int activeColorMode;
@@ -1520,6 +1521,7 @@ public final class SurfaceControl implements Parcelable {
             return "DynamicDisplayInfo{"
                     + "supportedDisplayModes=" + Arrays.toString(supportedDisplayModes)
                     + ", activeDisplayModeId=" + activeDisplayModeId
+                    + ", renderFrameRate=" + renderFrameRate
                     + ", supportedColorModes=" + Arrays.toString(supportedColorModes)
                     + ", activeColorMode=" + activeColorMode
                     + ", hdrCapabilities=" + hdrCapabilities
@@ -1535,6 +1537,7 @@ public final class SurfaceControl implements Parcelable {
             DynamicDisplayInfo that = (DynamicDisplayInfo) o;
             return Arrays.equals(supportedDisplayModes, that.supportedDisplayModes)
                 && activeDisplayModeId == that.activeDisplayModeId
+                && renderFrameRate == that.renderFrameRate
                 && Arrays.equals(supportedColorModes, that.supportedColorModes)
                 && activeColorMode == that.activeColorMode
                 && Objects.equals(hdrCapabilities, that.hdrCapabilities)
@@ -1544,7 +1547,7 @@ public final class SurfaceControl implements Parcelable {
         @Override
         public int hashCode() {
             return Objects.hash(Arrays.hashCode(supportedDisplayModes), activeDisplayModeId,
-                    activeColorMode, hdrCapabilities);
+                    renderFrameRate, activeColorMode, hdrCapabilities);
         }
     }
 

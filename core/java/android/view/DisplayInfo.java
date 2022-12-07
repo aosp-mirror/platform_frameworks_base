@@ -180,6 +180,16 @@ public final class DisplayInfo implements Parcelable {
     public int modeId;
 
     /**
+     * The render frame rate this display is scheduled at, which is a divisor of the active mode
+     * refresh rate. This is the rate SurfaceFlinger would consume frames and would be observable
+     * by applications via the cadence of {@link android.view.Choreographer} callbacks and
+     * by backpressure when submitting buffers as fast as possible.
+     * Apps can call {@link android.view.Display#getRefreshRate} to query this value.
+     *
+     */
+    public float renderFrameRate;
+
+    /**
      * The default display mode.
      */
     public int defaultModeId;
@@ -376,6 +386,7 @@ public final class DisplayInfo implements Parcelable {
                 && Objects.equals(displayCutout, other.displayCutout)
                 && rotation == other.rotation
                 && modeId == other.modeId
+                && renderFrameRate == other.renderFrameRate
                 && defaultModeId == other.defaultModeId
                 && Arrays.equals(supportedModes, other.supportedModes)
                 && colorMode == other.colorMode
@@ -428,6 +439,7 @@ public final class DisplayInfo implements Parcelable {
         displayCutout = other.displayCutout;
         rotation = other.rotation;
         modeId = other.modeId;
+        renderFrameRate = other.renderFrameRate;
         defaultModeId = other.defaultModeId;
         supportedModes = Arrays.copyOf(other.supportedModes, other.supportedModes.length);
         colorMode = other.colorMode;
@@ -475,6 +487,7 @@ public final class DisplayInfo implements Parcelable {
         displayCutout = DisplayCutout.ParcelableWrapper.readCutoutFromParcel(source);
         rotation = source.readInt();
         modeId = source.readInt();
+        renderFrameRate = source.readFloat();
         defaultModeId = source.readInt();
         int nModes = source.readInt();
         supportedModes = new Display.Mode[nModes];
@@ -535,6 +548,7 @@ public final class DisplayInfo implements Parcelable {
         DisplayCutout.ParcelableWrapper.writeCutoutToParcel(displayCutout, dest, flags);
         dest.writeInt(rotation);
         dest.writeInt(modeId);
+        dest.writeFloat(renderFrameRate);
         dest.writeInt(defaultModeId);
         dest.writeInt(supportedModes.length);
         for (int i = 0; i < supportedModes.length; i++) {
@@ -764,6 +778,7 @@ public final class DisplayInfo implements Parcelable {
         sb.append(presentationDeadlineNanos);
         sb.append(", mode ");
         sb.append(modeId);
+        sb.append(renderFrameRate);
         sb.append(", defaultMode ");
         sb.append(defaultModeId);
         sb.append(", modes ");

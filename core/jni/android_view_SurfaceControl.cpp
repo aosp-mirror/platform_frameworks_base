@@ -109,6 +109,7 @@ static struct {
     jmethodID ctor;
     jfieldID supportedDisplayModes;
     jfieldID activeDisplayModeId;
+    jfieldID renderFrameRate;
     jfieldID supportedColorModes;
     jfieldID activeColorMode;
     jfieldID hdrCapabilities;
@@ -1184,6 +1185,7 @@ static jobject nativeGetDynamicDisplayInfo(JNIEnv* env, jclass clazz, jobject to
     env->SetObjectField(object, gDynamicDisplayInfoClassInfo.supportedDisplayModes, modesArray);
     env->SetIntField(object, gDynamicDisplayInfoClassInfo.activeDisplayModeId,
                      info.activeDisplayModeId);
+    env->SetFloatField(object, gDynamicDisplayInfoClassInfo.renderFrameRate, info.renderFrameRate);
 
     jintArray colorModesArray = env->NewIntArray(info.supportedColorModes.size());
     if (colorModesArray == NULL) {
@@ -2174,6 +2176,8 @@ int register_android_view_SurfaceControl(JNIEnv* env)
                             "[Landroid/view/SurfaceControl$DisplayMode;");
     gDynamicDisplayInfoClassInfo.activeDisplayModeId =
             GetFieldIDOrDie(env, dynamicInfoClazz, "activeDisplayModeId", "I");
+    gDynamicDisplayInfoClassInfo.renderFrameRate =
+            GetFieldIDOrDie(env, dynamicInfoClazz, "renderFrameRate", "F");
     gDynamicDisplayInfoClassInfo.supportedColorModes =
             GetFieldIDOrDie(env, dynamicInfoClazz, "supportedColorModes", "[I");
     gDynamicDisplayInfoClassInfo.activeColorMode =
