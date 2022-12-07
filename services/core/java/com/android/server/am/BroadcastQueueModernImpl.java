@@ -220,10 +220,19 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     private void enqueueFinishReceiver(@NonNull BroadcastProcessQueue queue,
             @DeliveryState int deliveryState, @NonNull String reason) {
+        enqueueFinishReceiver(queue, queue.getActive(), queue.getActiveIndex(),
+                deliveryState, reason);
+    }
+
+    private void enqueueFinishReceiver(@NonNull BroadcastProcessQueue queue,
+            @NonNull BroadcastRecord r, int index,
+            @DeliveryState int deliveryState, @NonNull String reason) {
         final SomeArgs args = SomeArgs.obtain();
         args.arg1 = queue;
         args.argi1 = deliveryState;
         args.arg2 = reason;
+        args.arg3 = r;
+        args.argi2 = index;
         mLocalHandler.sendMessage(Message.obtain(mLocalHandler, MSG_FINISH_RECEIVER, args));
     }
 
@@ -271,8 +280,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     final BroadcastProcessQueue queue = (BroadcastProcessQueue) args.arg1;
                     final int deliveryState = args.argi1;
                     final String reason = (String) args.arg2;
+                    final BroadcastRecord r = (BroadcastRecord) args.arg3;
+                    final int index = args.argi2;
                     args.recycle();
-                    finishReceiverLocked(queue, deliveryState, reason);
+                    finishReceiverLocked(queue, deliveryState, reason, r, index);
                 }
                 return true;
             }
@@ -729,10 +740,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private void scheduleReceiverWarmLocked(@NonNull BroadcastProcessQueue queue) {
         checkState(queue.isActive(), "isActive");
 
-        final ProcessRecord app = queue.app;
         final BroadcastRecord r = queue.getActive();
         final int index = queue.getActiveIndex();
-        final Object receiver = r.receivers.get(index);
 
         if (r.terminalCount == 0) {
             r.dispatchTime = SystemClock.uptimeMillis();
@@ -740,26 +749,40 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             r.dispatchClockTime = System.currentTimeMillis();
         }
 
-        // If someone already finished this broadcast, finish immediately
+        if (maybeSkipReceiver(queue, r, index)) {
+            return;
+        }
+        dispatchReceivers(queue, r, index);
+    }
+
+    /**
+     * Examine a receiver and possibly skip it.  The method returns true if the receiver is
+     * skipped (and therefore no more work is required).
+     */
+    private boolean maybeSkipReceiver(BroadcastProcessQueue queue, BroadcastRecord r, int index) {
         final int oldDeliveryState = getDeliveryState(r, index);
+        final ProcessRecord app = queue.app;
+        final Object receiver = r.receivers.get(index);
+
+        // If someone already finished this broadcast, finish immediately
         if (isDeliveryStateTerminal(oldDeliveryState)) {
             enqueueFinishReceiver(queue, oldDeliveryState, "already terminal state");
-            return;
+            return true;
         }
 
         // Consider additional cases where we'd want to finish immediately
         if (app.isInFullBackup()) {
             enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_SKIPPED, "isInFullBackup");
-            return;
+            return true;
         }
         if (mSkipPolicy.shouldSkip(r, receiver)) {
             enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_SKIPPED, "mSkipPolicy");
-            return;
+            return true;
         }
         final Intent receiverIntent = r.getReceiverIntent(receiver);
         if (receiverIntent == null) {
             enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_SKIPPED, "getReceiverIntent");
-            return;
+            return true;
         }
 
         // Ignore registered receivers from a previous PID
@@ -767,12 +790,29 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 && ((BroadcastFilter) receiver).receiverList.pid != app.getPid()) {
             enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_SKIPPED,
                     "BroadcastFilter for mismatched PID");
-            return;
+            return true;
         }
+        // The receiver was not handled in this method.
+        return false;
+    }
+
+    /**
+     * Return true if this receiver should be assumed to have been delivered.
+     */
+    private boolean isAssumedDelivered(BroadcastRecord r, int index) {
+        return (r.receivers.get(index) instanceof BroadcastFilter) && !r.ordered;
+    }
+
+    /**
+     * A receiver is about to be dispatched.  Start ANR timers, if necessary.
+     */
+    private void dispatchReceivers(BroadcastProcessQueue queue, BroadcastRecord r, int index) {
+        final ProcessRecord app = queue.app;
+        final Object receiver = r.receivers.get(index);
 
         // Skip ANR tracking early during boot, when requested, or when we
         // immediately assume delivery success
-        final boolean assumeDelivered = (receiver instanceof BroadcastFilter) && !r.ordered;
+        final boolean assumeDelivered = isAssumedDelivered(r, index);
         if (mService.mProcessesReady && !r.timeoutExempt && !assumeDelivered) {
             queue.lastCpuDelayTime = queue.app.getCpuDelayTime();
 
@@ -805,6 +845,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         setDeliveryState(queue, app, r, index, receiver, BroadcastRecord.DELIVERY_SCHEDULED,
                 "scheduleReceiverWarmLocked");
 
+        final Intent receiverIntent = r.getReceiverIntent(receiver);
         final IApplicationThread thread = app.getOnewayThread();
         if (thread != null) {
             try {
@@ -920,6 +961,19 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return finishReceiverLocked(queue, BroadcastRecord.DELIVERY_DELIVERED, "remote app");
     }
 
+    /**
+     * Return true if there are more broadcasts in the queue and the queue is runnable.
+     */
+    private boolean shouldContinueScheduling(@NonNull BroadcastProcessQueue queue) {
+        // If we've made reasonable progress, periodically retire ourselves to
+        // avoid starvation of other processes and stack overflow when a
+        // broadcast is immediately finished without waiting
+        final boolean shouldRetire =
+                (queue.getActiveCountSinceIdle() >= mConstants.MAX_RUNNING_ACTIVE_BROADCASTS);
+
+        return queue.isRunnable() && queue.isProcessWarm() && !shouldRetire;
+    }
+
     private boolean finishReceiverLocked(@NonNull BroadcastProcessQueue queue,
             @DeliveryState int deliveryState, @NonNull String reason) {
         if (!queue.isActive()) {
@@ -927,10 +981,21 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             return false;
         }
 
-        final int cookie = traceBegin("finishReceiver");
-        final ProcessRecord app = queue.app;
         final BroadcastRecord r = queue.getActive();
         final int index = queue.getActiveIndex();
+        return finishReceiverLocked(queue, deliveryState, reason, r, index);
+    }
+
+    private boolean finishReceiverLocked(@NonNull BroadcastProcessQueue queue,
+            @DeliveryState int deliveryState, @NonNull String reason,
+            BroadcastRecord r, int index) {
+        if (!queue.isActive()) {
+            logw("Ignoring finish; no active broadcast for " + queue);
+            return false;
+        }
+
+        final int cookie = traceBegin("finishReceiver");
+        final ProcessRecord app = queue.app;
         final Object receiver = r.receivers.get(index);
 
         setDeliveryState(queue, app, r, index, receiver, deliveryState, reason);
@@ -945,18 +1010,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_HARD, queue);
         }
 
-        // If we've made reasonable progress, periodically retire ourselves to
-        // avoid starvation of other processes and stack overflow when a
-        // broadcast is immediately finished without waiting
-        final boolean shouldRetire =
-                (queue.getActiveCountSinceIdle() >= mConstants.MAX_RUNNING_ACTIVE_BROADCASTS);
-
-        final boolean res;
-        if (queue.isRunnable() && queue.isProcessWarm() && !shouldRetire) {
+        final boolean res = shouldContinueScheduling(queue);
+        if (res) {
             // We're on a roll; move onto the next broadcast for this process
             queue.makeActiveNextPending();
             scheduleReceiverWarmLocked(queue);
-            res = true;
         } else {
             // We've drained running broadcasts; maybe move back to runnable
             queue.makeActiveIdle();
@@ -970,7 +1028,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             // Tell other OS components that app is not actively running, giving
             // a chance to update OOM adjustment
             notifyStoppedRunning(queue);
-            res = false;
         }
         traceEnd(cookie);
         return res;
@@ -1442,10 +1499,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     private void notifyFinishBroadcast(@NonNull BroadcastRecord r) {
         mService.notifyBroadcastFinishedLocked(r);
-        mHistory.addBroadcastToHistoryLocked(r);
-
         r.finishTime = SystemClock.uptimeMillis();
         r.nextReceiver = r.receivers.size();
+        mHistory.addBroadcastToHistoryLocked(r);
+
         BroadcastQueueImpl.logBootCompletedBroadcastCompletionLatencyIfPossible(r);
 
         if (r.intent.getComponent() == null && r.intent.getPackage() == null
