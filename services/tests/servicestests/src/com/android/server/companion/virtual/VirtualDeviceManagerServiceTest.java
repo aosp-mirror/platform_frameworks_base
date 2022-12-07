@@ -16,8 +16,8 @@
 
 package com.android.server.companion.virtual;
 
-import static android.companion.virtual.VirtualDeviceManager.DEFAULT_DEVICE_ID;
-import static android.companion.virtual.VirtualDeviceManager.INVALID_DEVICE_ID;
+import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_DEFAULT;
+import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_INVALID;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_SENSORS;
@@ -322,13 +322,13 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void getDeviceIdForDisplayId_invalidDisplayId_returnsDefault() {
         assertThat(mVdm.getDeviceIdForDisplayId(Display.INVALID_DISPLAY))
-                .isEqualTo(DEFAULT_DEVICE_ID);
+                .isEqualTo(DEVICE_ID_DEFAULT);
     }
 
     @Test
     public void getDeviceIdForDisplayId_defaultDisplayId_returnsDefault() {
         assertThat(mVdm.getDeviceIdForDisplayId(Display.DEFAULT_DISPLAY))
-                .isEqualTo(DEFAULT_DEVICE_ID);
+                .isEqualTo(DEVICE_ID_DEFAULT);
     }
 
     @Test
@@ -336,7 +336,7 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl.mVirtualDisplayIds.remove(DISPLAY_ID);
 
         assertThat(mVdm.getDeviceIdForDisplayId(DISPLAY_ID))
-                .isEqualTo(DEFAULT_DEVICE_ID);
+                .isEqualTo(DEVICE_ID_DEFAULT);
     }
 
     @Test
@@ -349,13 +349,13 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void getDevicePolicy_invalidDeviceId_returnsDefault() {
-        assertThat(mVdm.getDevicePolicy(INVALID_DEVICE_ID, POLICY_TYPE_SENSORS))
+        assertThat(mVdm.getDevicePolicy(DEVICE_ID_INVALID, POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_DEFAULT);
     }
 
     @Test
     public void getDevicePolicy_defaultDeviceId_returnsDefault() {
-        assertThat(mVdm.getDevicePolicy(DEFAULT_DEVICE_ID, POLICY_TYPE_SENSORS))
+        assertThat(mVdm.getDevicePolicy(DEVICE_ID_DEFAULT, POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_DEFAULT);
     }
 

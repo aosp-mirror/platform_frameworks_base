@@ -9177,8 +9177,8 @@ package android.companion.virtual {
 
   public final class VirtualDeviceManager {
     method @NonNull public java.util.List<android.companion.virtual.VirtualDevice> getVirtualDevices();
-    field public static final int DEFAULT_DEVICE_ID = 0; // 0x0
-    field public static final int INVALID_DEVICE_ID = -1; // 0xffffffff
+    field public static final int DEVICE_ID_DEFAULT = 0; // 0x0
+    field public static final int DEVICE_ID_INVALID = -1; // 0xffffffff
   }
 
 }
