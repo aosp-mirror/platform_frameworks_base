@@ -100,7 +100,7 @@ final class AudioVolumesTestRule extends ExternalResource {
 
     @Before
     public void setUp() throws Exception {
-        ActivityScenario.launch(AudioPolicyTestActivity.class);
+        ActivityScenario.launch(AudioVolumeTestActivity.class);
 
         mContext = getApplicationContext();
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);

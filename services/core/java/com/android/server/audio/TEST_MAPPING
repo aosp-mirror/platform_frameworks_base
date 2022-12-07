@@ -13,6 +13,14 @@
                     "include-filter": "android.media.audio.cts.SpatializerTest"
                 }
             ]
+        },
+        {
+            "name": "AudioPolicyDeathTest",
+            "options": [
+                {
+                    "include-annotation": "android.platform.test.annotations.Presubmit"
+                }
+            ]
         }
     ]
 }
