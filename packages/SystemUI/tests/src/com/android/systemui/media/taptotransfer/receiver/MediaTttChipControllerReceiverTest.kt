@@ -193,6 +193,36 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     }
 
     @Test
+    fun commandQueueCallback_transferToReceiverSucceeded_noChipShown() {
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+                StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+                routeInfo,
+                null,
+                null
+        )
+
+        verify(windowManager, never()).addView(any(), any())
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+                MediaTttReceiverUiEvents.MEDIA_TTT_RECEIVER_TRANSFER_TO_RECEIVER_SUCCEEDED.id
+        )
+    }
+
+    @Test
+    fun commandQueueCallback_transferToReceiverFailed_noChipShown() {
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+                StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_FAILED,
+                routeInfo,
+                null,
+                null
+        )
+
+        verify(windowManager, never()).addView(any(), any())
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+                MediaTttReceiverUiEvents.MEDIA_TTT_RECEIVER_TRANSFER_TO_RECEIVER_FAILED.id
+        )
+    }
+
+    @Test
     fun commandQueueCallback_closeThenFar_chipShownThenHidden() {
         commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
             StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
@@ -203,6 +233,48 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
 
         commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
             StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
+            routeInfo,
+            null,
+            null
+        )
+
+        val viewCaptor = ArgumentCaptor.forClass(View::class.java)
+        verify(windowManager).addView(viewCaptor.capture(), any())
+        verify(windowManager).removeView(viewCaptor.value)
+    }
+
+    @Test
+    fun commandQueueCallback_closeThenSucceeded_chipShownThenHidden() {
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
+            routeInfo,
+            null,
+            null
+        )
+
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            routeInfo,
+            null,
+            null
+        )
+
+        val viewCaptor = ArgumentCaptor.forClass(View::class.java)
+        verify(windowManager).addView(viewCaptor.capture(), any())
+        verify(windowManager).removeView(viewCaptor.value)
+    }
+
+    @Test
+    fun commandQueueCallback_closeThenFailed_chipShownThenHidden() {
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
+            routeInfo,
+            null,
+            null
+        )
+
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_FAILED,
             routeInfo,
             null,
             null

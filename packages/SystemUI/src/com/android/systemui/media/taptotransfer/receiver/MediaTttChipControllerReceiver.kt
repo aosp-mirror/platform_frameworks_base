@@ -123,8 +123,8 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         }
         uiEventLogger.logReceiverStateChange(chipState)
 
-        if (chipState == ChipStateReceiver.FAR_FROM_SENDER) {
-            removeView(routeInfo.id, removalReason = ChipStateReceiver.FAR_FROM_SENDER.name)
+        if (chipState != ChipStateReceiver.CLOSE_TO_SENDER) {
+            removeView(routeInfo.id, removalReason = chipState.name)
             return
         }
         if (appIcon == null) {
