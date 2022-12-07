@@ -3849,7 +3849,10 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
-     * The device supports running activities on secondary displays.
+     * The device supports running activities on secondary displays. Displays here
+     * refers to both physical and virtual displays. Disabling this feature can impact
+     * support for application projection use-cases and support for virtual devices
+     * on the device.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS
