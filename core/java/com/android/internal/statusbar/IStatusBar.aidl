@@ -328,4 +328,7 @@ oneway interface IStatusBar
 
     /** Shows rear display educational dialog */
     void showRearDisplayDialog(int currentBaseState);
+
+    /** Called when requested to go to fullscreen from the active split app. */
+    void goToFullscreenFromSplit();
 }

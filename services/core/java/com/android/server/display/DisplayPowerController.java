@@ -2471,7 +2471,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     : 1.0f;
             mBrightnessTracker.notifyBrightnessChanged(brightnessInNits, userInitiated,
                     powerFactor, hadUserDataPoint,
-                    mAutomaticBrightnessController.isDefaultConfig(), mUniqueDisplayId);
+                    mAutomaticBrightnessController.isDefaultConfig(), mUniqueDisplayId,
+                    mAutomaticBrightnessController.getLastSensorValues(),
+                    mAutomaticBrightnessController.getLastSensorTimestamps());
         }
     }
 

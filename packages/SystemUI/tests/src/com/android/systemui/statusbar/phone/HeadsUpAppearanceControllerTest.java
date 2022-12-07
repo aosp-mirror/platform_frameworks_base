@@ -32,6 +32,7 @@ import android.widget.TextView;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationPanelViewController;
@@ -40,6 +41,7 @@ import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -71,6 +73,8 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     private NotificationWakeUpCoordinator mWakeUpCoordinator;
     private KeyguardStateController mKeyguardStateController;
     private CommandQueue mCommandQueue;
+    private NotificationRoundnessManager mNotificationRoundnessManager;
+    private FeatureFlags mFeatureFlag;
 
     @Before
     public void setUp() throws Exception {
@@ -89,6 +93,8 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         mWakeUpCoordinator = mock(NotificationWakeUpCoordinator.class);
         mKeyguardStateController = mock(KeyguardStateController.class);
         mCommandQueue = mock(CommandQueue.class);
+        mNotificationRoundnessManager = mock(NotificationRoundnessManager.class);
+        mFeatureFlag = mock(FeatureFlags.class);
         mHeadsUpAppearanceController = new HeadsUpAppearanceController(
                 mock(NotificationIconAreaController.class),
                 mHeadsUpManager,
@@ -100,6 +106,8 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mCommandQueue,
                 mStackScrollerController,
                 mPanelView,
+                mNotificationRoundnessManager,
+                mFeatureFlag,
                 mHeadsUpStatusBarView,
                 new Clock(mContext, null),
                 Optional.of(mOperatorNameView));
@@ -182,6 +190,8 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mCommandQueue,
                 mStackScrollerController,
                 mPanelView,
+                mNotificationRoundnessManager,
+                mFeatureFlag,
                 mHeadsUpStatusBarView,
                 new Clock(mContext, null),
                 Optional.empty());

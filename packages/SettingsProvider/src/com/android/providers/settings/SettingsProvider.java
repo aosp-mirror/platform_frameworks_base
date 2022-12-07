@@ -3631,7 +3631,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 210;
+            private static final int SETTINGS_VERSION = 211;
 
             private final int mUserId;
 
@@ -5512,7 +5512,17 @@ public class SettingsProvider extends ContentProvider {
                     // removed now that feature is enabled for everyone
                     currentVersion = 210;
                 }
-
+                if (currentVersion == 210) {
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final int defaultValueVibrateIconEnabled = getContext().getResources()
+                            .getInteger(R.integer.def_statusBarVibrateIconEnabled);
+                    secureSettings.insertSettingOverrideableByRestoreLocked(
+                            Secure.STATUS_BAR_SHOW_VIBRATE_ICON,
+                            String.valueOf(defaultValueVibrateIconEnabled),
+                            null /* tag */, true /* makeDefault */,
+                            SettingsState.SYSTEM_PACKAGE_NAME);
+                    currentVersion = 211;
+                }
                 // vXXX: Add new settings above this point.
 
                 if (currentVersion != newVersion) {

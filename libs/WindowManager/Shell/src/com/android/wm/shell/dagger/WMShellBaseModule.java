@@ -687,10 +687,13 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static Optional<DesktopModeController> providesDesktopModeController(
-            @DynamicOverride Optional<DesktopModeController> desktopModeController) {
+    static Optional<DesktopModeController> provideDesktopModeController(
+            @DynamicOverride Optional<Lazy<DesktopModeController>> desktopModeController) {
+        // Use optional-of-lazy for the dependency that this provider relies on.
+        // Lazy ensures that this provider will not be the cause the dependency is created
+        // when it will not be returned due to the condition below.
         if (DesktopModeStatus.IS_SUPPORTED) {
-            return desktopModeController;
+            return desktopModeController.map(Lazy::get);
         }
         return Optional.empty();
     }
@@ -701,10 +704,13 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static Optional<DesktopModeTaskRepository> providesDesktopTaskRepository(
-            @DynamicOverride Optional<DesktopModeTaskRepository> desktopModeTaskRepository) {
+    static Optional<DesktopModeTaskRepository> provideDesktopTaskRepository(
+            @DynamicOverride Optional<Lazy<DesktopModeTaskRepository>> desktopModeTaskRepository) {
+        // Use optional-of-lazy for the dependency that this provider relies on.
+        // Lazy ensures that this provider will not be the cause the dependency is created
+        // when it will not be returned due to the condition below.
         if (DesktopModeStatus.IS_SUPPORTED) {
-            return desktopModeTaskRepository;
+            return desktopModeTaskRepository.map(Lazy::get);
         }
         return Optional.empty();
     }

@@ -25,7 +25,7 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.SourceType;
+import com.android.systemui.statusbar.notification.LegacySourceType;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 
@@ -158,7 +158,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
         ExpandableNotificationRow row = mNotificationTestHelper.createRowWithRoundness(
                 /* topRoundness = */ 1f,
                 /* bottomRoundness = */ 1f,
-                /* sourceType = */ SourceType.OnScroll);
+                /* sourceType = */ LegacySourceType.OnScroll);
 
         mChildrenContainer.addNotification(row, 0);
 
@@ -171,11 +171,11 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
         ExpandableNotificationRow row1 = mNotificationTestHelper.createRowWithRoundness(
                 /* topRoundness = */ 1f,
                 /* bottomRoundness = */ 1f,
-                /* sourceType = */ SourceType.DefaultValue);
+                /* sourceType = */ LegacySourceType.DefaultValue);
         ExpandableNotificationRow row2 = mNotificationTestHelper.createRowWithRoundness(
                 /* topRoundness = */ 1f,
                 /* bottomRoundness = */ 1f,
-                /* sourceType = */ SourceType.OnDismissAnimation);
+                /* sourceType = */ LegacySourceType.OnDismissAnimation);
 
         mChildrenContainer.addNotification(row1, 0);
         mChildrenContainer.addNotification(row2, 0);

@@ -72,6 +72,8 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock inhabilitado"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ha enviado una imagen"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Guardando captura..."</string>
+    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
+    <skip />
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Se ha guardado la captura de pantalla"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"No se ha podido guardar la captura de pantalla"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"El dispositivo debe desbloquearse para que se pueda guardar la captura de pantalla"</string>
@@ -366,7 +368,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Se eliminarán todas las aplicaciones y datos de este usuario."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Quitar"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tendrá acceso a toda la información que se muestre en la pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que ofrece esta función tendrá acceso a toda la información que se muestre en la pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que ofrece esta función tendrá acceso a toda la información que se muestre en tu pantalla o se reproduzca en tu dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"¿Empezar a grabar o enviar contenido?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"¿Iniciar grabación o el envío de contenido en <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"¿Permitir que <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> comparta o grabe contenido?"</string>
@@ -392,6 +394,10 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificaciones pausadas por el modo No molestar"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Empezar ahora"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"No hay notificaciones"</string>
+    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
+    <skip />
+    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
+    <skip />
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Este dispositivo lo gestionan tu padre o tu madre"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"El dispositivo pertenece a tu organización, que puede monitorizar su tráfico de red"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"El dispositivo pertenece a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, que puede monitorizar su tráfico de red"</string>
@@ -998,16 +1004,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Debes instalar una aplicación de cámara"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• La aplicación debe estar configurada"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Al menos un dispositivo debe estar disponible"</string>
-    <!-- no translation found for rear_display_bottom_sheet_cancel (3461468855493357248) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_confirm (4383356544661421206) -->
-    <skip />
-    <!-- no translation found for rear_display_fold_bottom_sheet_title (6081542277622721548) -->
-    <skip />
-    <!-- no translation found for rear_display_unfold_bottom_sheet_title (2137403802960396357) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_description (1852662982816810352) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_warning (800995919558238930) -->
-    <skip />
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancelar"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Girar ahora"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Despliega el teléfono para hacer un selfie mejor"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"¿Usar pantalla frontal para hacer mejores selfies?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Usa la cámara trasera para hacer una foto más amplia y con mayor resolución."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Esta pantalla se apagará"</b></string>
 </resources>

@@ -52,6 +52,8 @@ constructor(
 ) : CoreStartable {
 
     private var displayedState: ChipStateSender? = null
+    // A map to store current chip state per id.
+    private var stateMap: MutableMap<String, ChipStateSender> = mutableMapOf()
 
     private val commandQueueCallbacks =
         object : CommandQueue.Callbacks {
@@ -87,9 +89,22 @@ constructor(
             logger.logStateChangeError(displayState)
             return
         }
+
+        val currentState = stateMap[routeInfo.id]
+        if (!ChipStateSender.isValidStateTransition(currentState, chipState)) {
+            // ChipStateSender.FAR_FROM_RECEIVER is the default state when there is no state.
+            logger.logInvalidStateTransitionError(
+                currentState = currentState?.name ?: ChipStateSender.FAR_FROM_RECEIVER.name,
+                chipState.name
+            )
+            return
+        }
         uiEventLogger.logSenderStateChange(chipState)
 
+        stateMap.put(routeInfo.id, chipState)
         if (chipState == ChipStateSender.FAR_FROM_RECEIVER) {
+            // No need to store the state since it is the default state
+            stateMap.remove(routeInfo.id)
             // Return early if we're not displaying a chip anyway
             val currentDisplayedState = displayedState ?: return
 
@@ -119,7 +134,7 @@ constructor(
                     context,
                     logger,
                 )
-            )
+            ) { stateMap.remove(routeInfo.id) }
         }
     }
 
