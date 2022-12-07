@@ -2183,7 +2183,7 @@ class Task extends TaskFragment {
     }
 
     private boolean shouldStartChangeTransition(int prevWinMode, @NonNull Rect prevBounds) {
-        if (!isLeafTask() || !canStartChangeTransition()) {
+        if (!(isLeafTask() || mCreatedByOrganizer) || !canStartChangeTransition()) {
             return false;
         }
         final int newWinMode = getWindowingMode();
