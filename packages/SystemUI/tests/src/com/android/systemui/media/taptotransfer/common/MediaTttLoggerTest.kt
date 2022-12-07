@@ -22,6 +22,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogcatEchoTracker
+import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -33,7 +34,7 @@ import org.mockito.Mockito.mock
 class MediaTttLoggerTest : SysuiTestCase() {
 
     private lateinit var buffer: LogBuffer
-    private lateinit var logger: MediaTttLogger
+    private lateinit var logger: MediaTttLogger<TemporaryViewInfo>
 
     @Before
     fun setUp () {

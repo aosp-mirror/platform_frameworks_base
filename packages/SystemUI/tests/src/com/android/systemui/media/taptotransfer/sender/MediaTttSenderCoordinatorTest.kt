@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
+import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
 import com.android.systemui.temporarydisplay.chipbar.ChipbarLogger
 import com.android.systemui.temporarydisplay.chipbar.FakeChipbarCoordinator
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -83,7 +84,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var falsingCollector: FalsingCollector
     @Mock private lateinit var chipbarLogger: ChipbarLogger
-    @Mock private lateinit var logger: MediaTttLogger
+    @Mock private lateinit var logger: MediaTttLogger<ChipbarInfo>
     @Mock private lateinit var mediaTttFlags: MediaTttFlags
     @Mock private lateinit var packageManager: PackageManager
     @Mock private lateinit var powerManager: PowerManager
@@ -142,6 +143,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 viewUtil,
                 vibratorHelper,
                 fakeWakeLockBuilder,
+                fakeClock,
             )
         chipbarCoordinator.start()
 

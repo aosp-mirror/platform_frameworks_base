@@ -42,6 +42,20 @@ abstract class TemporaryViewInfo {
      * The id of the temporary view.
      */
     abstract val id: String
+
+    /** The priority for this view. */
+    abstract val priority: ViewPriority
 }
 
 const val DEFAULT_TIMEOUT_MILLIS = 10000
+
+/**
+ * The priority of the view being displayed.
+ *
+ * Must be ordered from lowest priority to highest priority. (CRITICAL is currently the highest
+ * priority.)
+ */
+enum class ViewPriority {
+    NORMAL,
+    CRITICAL,
+}
