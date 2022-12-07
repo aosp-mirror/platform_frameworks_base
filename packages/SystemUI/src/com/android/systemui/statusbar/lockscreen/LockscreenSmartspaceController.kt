@@ -102,22 +102,27 @@ class LockscreenSmartspaceController @Inject constructor(
     private var showSensitiveContentForManagedUser = false
     private var managedUserHandle: UserHandle? = null
 
+    // TODO(b/202758428): refactor so that we can test color updates via region samping, similar to
+    //  how we test color updates when theme changes (See testThemeChangeUpdatesTextColor).
     private val updateFun: UpdateColorCallback = { updateTextColorFromRegionSampler() }
 
     var stateChangeListener = object : View.OnAttachStateChangeListener {
         override fun onViewAttachedToWindow(v: View) {
             smartspaceViews.add(v as SmartspaceView)
 
-            var regionSampler = RegionSampler(
-                    v,
-                    uiExecutor,
-                    bgExecutor,
-                    regionSamplingEnabled,
-                    updateFun
-            )
-            initializeTextColors(regionSampler)
-            regionSampler.startRegionSampler()
-            regionSamplers.put(v, regionSampler)
+            if (regionSamplingEnabled) {
+                var regionSampler = RegionSampler(
+                        v,
+                        uiExecutor,
+                        bgExecutor,
+                        regionSamplingEnabled,
+                        updateFun
+                )
+                initializeTextColors(regionSampler)
+                regionSampler.startRegionSampler()
+                regionSamplers.put(v, regionSampler)
+            }
+
             connectSession()
 
             updateTextColorFromWallpaper()
@@ -127,9 +132,11 @@ class LockscreenSmartspaceController @Inject constructor(
         override fun onViewDetachedFromWindow(v: View) {
             smartspaceViews.remove(v as SmartspaceView)
 
-            var regionSampler = regionSamplers.getValue(v)
-            regionSampler.stopRegionSampler()
-            regionSamplers.remove(v)
+            if (regionSamplingEnabled) {
+                var regionSampler = regionSamplers.getValue(v)
+                regionSampler.stopRegionSampler()
+                regionSamplers.remove(v)
+            }
 
             if (smartspaceViews.isEmpty()) {
                 disconnect()
