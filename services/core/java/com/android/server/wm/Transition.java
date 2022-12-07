@@ -646,8 +646,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 if (target.asDisplayContent() != null || target.asActivityRecord() != null) {
                     t.setCrop(targetLeash, null /* crop */);
                 } else {
-                    // Crop to the requested bounds.
-                    final Rect clipRect = target.getRequestedOverrideBounds();
+                    // Crop to the resolved override bounds.
+                    final Rect clipRect = target.getResolvedOverrideBounds();
                     t.setWindowCrop(targetLeash, clipRect.width(), clipRect.height());
                 }
                 t.setCornerRadius(targetLeash, 0);
@@ -1645,8 +1645,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         WindowContainer<?> ancestor = findCommonAncestor(sortedTargets, changes, topApp);
 
-        // make leash based on highest (z-order) direct child of ancestor with a participant.
-        WindowContainer leashReference = sortedTargets.get(0);
+        // Make leash based on highest (z-order) direct child of ancestor with a participant.
+        // TODO(b/261418859): Handle the case when the target contains window containers which
+        // belong to a different display. As a workaround we use topApp, from which wallpaper
+        // window container is removed, instead of sortedTargets here.
+        WindowContainer leashReference = topApp;
         while (leashReference.getParent() != ancestor) {
             leashReference = leashReference.getParent();
         }

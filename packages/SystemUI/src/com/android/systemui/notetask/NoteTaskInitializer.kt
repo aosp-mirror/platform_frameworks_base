@@ -16,9 +16,10 @@
 
 package com.android.systemui.notetask
 
+import android.view.KeyEvent
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.statusbar.CommandQueue
 import com.android.wm.shell.bubbles.Bubbles
-import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
 
@@ -27,15 +28,18 @@ internal class NoteTaskInitializer
 @Inject
 constructor(
     private val optionalBubbles: Optional<Bubbles>,
-    private val lazyNoteTaskController: Lazy<NoteTaskController>,
+    private val noteTaskController: NoteTaskController,
     private val commandQueue: CommandQueue,
     @NoteTaskEnabledKey private val isEnabled: Boolean,
 ) {
 
-    private val callbacks =
+    @VisibleForTesting
+    val callbacks =
         object : CommandQueue.Callbacks {
             override fun handleSystemKey(keyCode: Int) {
-                lazyNoteTaskController.get().handleSystemKey(keyCode)
+                if (keyCode == KeyEvent.KEYCODE_VIDEO_APP_1) {
+                    noteTaskController.showNoteTask()
+                }
             }
         }
 
@@ -43,5 +47,6 @@ constructor(
         if (isEnabled && optionalBubbles.isPresent) {
             commandQueue.addCallback(callbacks)
         }
+        noteTaskController.setNoteTaskShortcutEnabled(isEnabled)
     }
 }

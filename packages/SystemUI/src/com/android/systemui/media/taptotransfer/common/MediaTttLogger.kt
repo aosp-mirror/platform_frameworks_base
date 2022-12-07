@@ -58,6 +58,27 @@ class MediaTttLogger(
         )
     }
 
+    /**
+     * Logs an invalid sender state transition error in trying to update to [desiredState].
+     *
+     * @param currentState the previous state of the chip.
+     * @param desiredState the new state of the chip.
+     */
+    fun logInvalidStateTransitionError(
+        currentState: String,
+        desiredState: String
+    ) {
+        buffer.log(
+                tag,
+                LogLevel.ERROR,
+                {
+                    str1 = currentState
+                    str2 = desiredState
+                },
+                { "Cannot display state=$str2 after state=$str1; invalid transition" }
+        )
+    }
+
     /** Logs that we couldn't find information for [packageName]. */
     fun logPackageNotFound(packageName: String) {
         buffer.log(

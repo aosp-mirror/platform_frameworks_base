@@ -25,6 +25,9 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.statusbar.notification.LegacySourceType;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.Roundable;
 import com.android.systemui.statusbar.notification.SourceType;
@@ -45,6 +48,7 @@ import javax.inject.Inject;
 public class NotificationRoundnessManager implements Dumpable {
 
     private static final String TAG = "NotificationRoundnessManager";
+    private static final SourceType DISMISS_ANIMATION = SourceType.from("DismissAnimation");
 
     private final ExpandableView[] mFirstInSectionViews;
     private final ExpandableView[] mLastInSectionViews;
@@ -63,12 +67,14 @@ public class NotificationRoundnessManager implements Dumpable {
     private ExpandableView mSwipedView = null;
     private Roundable mViewBeforeSwipedView = null;
     private Roundable mViewAfterSwipedView = null;
+    private boolean mUseRoundnessSourceTypes;
 
     @Inject
     NotificationRoundnessManager(
             NotificationSectionsFeatureManager sectionsFeatureManager,
             NotificationRoundnessLogger notifLogger,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            FeatureFlags featureFlags) {
         int numberOfSections = sectionsFeatureManager.getNumberOfBuckets();
         mFirstInSectionViews = new ExpandableView[numberOfSections];
         mLastInSectionViews = new ExpandableView[numberOfSections];
@@ -76,6 +82,7 @@ public class NotificationRoundnessManager implements Dumpable {
         mTmpLastInSectionViews = new ExpandableView[numberOfSections];
         mNotifLogger = notifLogger;
         mDumpManager = dumpManager;
+        mUseRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES);
 
         mDumpManager.registerDumpable(TAG, this);
     }
@@ -94,6 +101,7 @@ public class NotificationRoundnessManager implements Dumpable {
     }
 
     public void updateView(ExpandableView view, boolean animate) {
+        if (mUseRoundnessSourceTypes) return;
         boolean changed = updateViewWithoutCallback(view, animate);
         if (changed) {
             mRoundingChangedCallback.run();
@@ -110,6 +118,7 @@ public class NotificationRoundnessManager implements Dumpable {
     boolean updateViewWithoutCallback(
             ExpandableView view,
             boolean animate) {
+        if (mUseRoundnessSourceTypes) return false;
         if (view == null
                 || view == mViewBeforeSwipedView
                 || view == mViewAfterSwipedView) {
@@ -118,13 +127,13 @@ public class NotificationRoundnessManager implements Dumpable {
 
         final boolean isTopChanged = view.requestTopRoundness(
                 getRoundnessDefaultValue(view, true /* top */),
-                animate,
-                SourceType.DefaultValue);
+                LegacySourceType.DefaultValue,
+                animate);
 
         final boolean isBottomChanged = view.requestBottomRoundness(
                 getRoundnessDefaultValue(view, /* top = */ false),
-                animate,
-                SourceType.DefaultValue);
+                LegacySourceType.DefaultValue,
+                animate);
 
         final boolean isFirstInSection = isFirstInSection(view);
         final boolean isLastInSection = isLastInSection(view);
@@ -139,6 +148,7 @@ public class NotificationRoundnessManager implements Dumpable {
     }
 
     private boolean isFirstInSection(ExpandableView view) {
+        if (mUseRoundnessSourceTypes) return false;
         for (int i = 0; i < mFirstInSectionViews.length; i++) {
             if (view == mFirstInSectionViews[i]) {
                 return true;
@@ -148,6 +158,7 @@ public class NotificationRoundnessManager implements Dumpable {
     }
 
     private boolean isLastInSection(ExpandableView view) {
+        if (mUseRoundnessSourceTypes) return false;
         for (int i = mLastInSectionViews.length - 1; i >= 0; i--) {
             if (view == mLastInSectionViews[i]) {
                 return true;
@@ -160,9 +171,6 @@ public class NotificationRoundnessManager implements Dumpable {
             Roundable viewBefore,
             ExpandableView viewSwiped,
             Roundable viewAfter) {
-        final boolean animate = true;
-        final SourceType source = SourceType.OnDismissAnimation;
-
         // This method requires you to change the roundness of the current View targets and reset
         // the roundness of the old View targets (if any) to 0f.
         // To avoid conflicts, it generates a set of old Views and removes the current Views
@@ -172,31 +180,34 @@ public class NotificationRoundnessManager implements Dumpable {
         if (mSwipedView != null) oldViews.add(mSwipedView);
         if (mViewAfterSwipedView != null) oldViews.add(mViewAfterSwipedView);
 
+        final SourceType source;
+        if (mUseRoundnessSourceTypes) {
+            source = DISMISS_ANIMATION;
+        } else {
+            source = LegacySourceType.OnDismissAnimation;
+        }
+
         mViewBeforeSwipedView = viewBefore;
         if (viewBefore != null) {
             oldViews.remove(viewBefore);
-            viewBefore.requestTopRoundness(0f, animate, source);
-            viewBefore.requestBottomRoundness(1f, animate, source);
+            viewBefore.requestRoundness(/* top = */ 0f, /* bottom = */ 1f, source);
         }
 
         mSwipedView = viewSwiped;
         if (viewSwiped != null) {
             oldViews.remove(viewSwiped);
-            viewSwiped.requestTopRoundness(1f, animate, source);
-            viewSwiped.requestBottomRoundness(1f, animate, source);
+            viewSwiped.requestRoundness(/* top = */ 1f, /* bottom = */ 1f, source);
         }
 
         mViewAfterSwipedView = viewAfter;
         if (viewAfter != null) {
             oldViews.remove(viewAfter);
-            viewAfter.requestTopRoundness(1f, animate, source);
-            viewAfter.requestBottomRoundness(0f, animate, source);
+            viewAfter.requestRoundness(/* top = */ 1f, /* bottom = */ 0f, source);
         }
 
         // After setting the current Views, reset the views that are still present in the set.
         for (Roundable oldView : oldViews) {
-            oldView.requestTopRoundness(0f, animate, source);
-            oldView.requestBottomRoundness(0f, animate, source);
+            oldView.requestRoundnessReset(source);
         }
     }
 
@@ -204,7 +215,23 @@ public class NotificationRoundnessManager implements Dumpable {
         mIsClearAllInProgress = isClearingAll;
     }
 
+    /**
+     * Check if "Clear all" notifications is in progress.
+     */
+    public boolean isClearAllInProgress() {
+        return mIsClearAllInProgress;
+    }
+
+    /**
+     * Check if we can request the `Pulsing` roundness for notification.
+     */
+    public boolean shouldRoundNotificationPulsing() {
+        return mRoundForPulsingViews;
+    }
+
     private float getRoundnessDefaultValue(Roundable view, boolean top) {
+        if (mUseRoundnessSourceTypes) return 0f;
+
         if (view == null) {
             return 0f;
         }
@@ -250,6 +277,7 @@ public class NotificationRoundnessManager implements Dumpable {
     }
 
     public void setExpanded(float expandedHeight, float appearFraction) {
+        if (mUseRoundnessSourceTypes) return;
         mExpanded = expandedHeight != 0.0f;
         mAppearFraction = appearFraction;
         if (mTrackedHeadsUp != null) {
@@ -258,6 +286,7 @@ public class NotificationRoundnessManager implements Dumpable {
     }
 
     public void updateRoundedChildren(NotificationSection[] sections) {
+        if (mUseRoundnessSourceTypes) return;
         boolean anyChanged = false;
         for (int i = 0; i < sections.length; i++) {
             mTmpFirstInSectionViews[i] = mFirstInSectionViews[i];
@@ -280,6 +309,7 @@ public class NotificationRoundnessManager implements Dumpable {
             NotificationSection[] sections,
             ExpandableView[] oldViews,
             boolean first) {
+        if (mUseRoundnessSourceTypes) return false;
         boolean anyChanged = false;
         for (ExpandableView oldView : oldViews) {
             if (oldView != null) {
@@ -313,6 +343,7 @@ public class NotificationRoundnessManager implements Dumpable {
             NotificationSection[] sections,
             ExpandableView[] oldViews,
             boolean first) {
+        if (mUseRoundnessSourceTypes) return false;
         boolean anyChanged = false;
         for (NotificationSection section : sections) {
             ExpandableView newView =
@@ -337,6 +368,15 @@ public class NotificationRoundnessManager implements Dumpable {
 
     public void setAnimatedChildren(HashSet<ExpandableView> animatedChildren) {
         mAnimatedChildren = animatedChildren;
+    }
+
+    /**
+     * Check if the view should be animated
+     * @param view target view
+     * @return true, if is in the AnimatedChildren set
+     */
+    public boolean isAnimatedChild(ExpandableView view) {
+        return mAnimatedChildren.contains(view);
     }
 
     public void setOnRoundingChangedCallback(Runnable roundingChangedCallback) {

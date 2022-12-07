@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
 import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
+import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -92,8 +93,10 @@ object WifiViewBinder {
 
                 launch {
                     viewModel.wifiIcon.collect { wifiIcon ->
-                        view.isVisible = wifiIcon != null
-                        wifiIcon?.let { IconViewBinder.bind(wifiIcon, iconView) }
+                        view.isVisible = wifiIcon is WifiIcon.Visible
+                        if (wifiIcon is WifiIcon.Visible) {
+                            IconViewBinder.bind(wifiIcon.icon, iconView)
+                        }
                     }
                 }
 
@@ -135,7 +138,7 @@ object WifiViewBinder {
 
         return object : Binding {
             override fun getShouldIconBeVisible(): Boolean {
-                return viewModel.wifiIcon.value != null
+                return viewModel.wifiIcon.value is WifiIcon.Visible
             }
 
             override fun onVisibilityStateChanged(@StatusBarIconView.VisibleState state: Int) {

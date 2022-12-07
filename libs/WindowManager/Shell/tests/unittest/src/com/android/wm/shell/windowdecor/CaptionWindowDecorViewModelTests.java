@@ -54,6 +54,7 @@ import org.mockito.Mock;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /** Tests of {@link CaptionWindowDecorViewModel} */
@@ -101,7 +102,7 @@ public class CaptionWindowDecorViewModelTests extends ShellTestCase {
                 mTaskOrganizer,
                 mDisplayController,
                 mSyncQueue,
-                mDesktopModeController,
+                Optional.of(mDesktopModeController),
                 mCaptionWindowDecorFactory,
                 new MockObjectSupplier<>(mMockInputManagers, () -> mock(InputManager.class)));
         mCaptionWindowDecorViewModel.setEventReceiverFactory(mEventReceiverFactory);

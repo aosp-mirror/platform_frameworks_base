@@ -72,6 +72,8 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"‏تم إيقاف Smart Lock."</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"أرسَل صورة"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"جارٍ حفظ لقطة الشاشة..."</string>
+    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
+    <skip />
     <string name="screenshot_saved_title" msgid="8893267638659083153">"تم حفظ لقطة الشاشة."</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"تعذّر حفظ لقطة الشاشة"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"يجب أن يتم فتح قفل الجهاز قبل حفظ لقطة الشاشة."</string>
@@ -179,10 +181,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"وضع الطيران."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"‏الشبكة الافتراضية الخاصة (VPN) قيد التفعيل."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"مستوى البطارية <xliff:g id="NUMBER">%d</xliff:g> في المائة."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"نسبة شحن البطارية <xliff:g id="PERCENTAGE">%1$d</xliff:g> في المائة؛ <xliff:g id="TIME">%2$s</xliff:g>."</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"نسبة شحن البطارية <xliff:g id="PERCENTAGE">%1$d</xliff:g> في المئة، <xliff:g id="TIME">%2$s</xliff:g>."</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"جارٍ شحن البطارية، <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
-    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"نسبة شحن البطارية <xliff:g id="PERCENTAGE">%d</xliff:g> في المئة؛ تم إيقاف الشحن مؤقتًا لحماية البطارية."</string>
-    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"نسبة شحن البطارية <xliff:g id="PERCENTAGE">%1$d</xliff:g> في المئة؛ <xliff:g id="TIME">%2$s</xliff:g>؛ تم إيقاف الشحن مؤقتًا لحماية البطارية."</string>
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"نسبة شحن البطارية <xliff:g id="PERCENTAGE">%d</xliff:g> في المئة. تم إيقاف الشحن مؤقتًا لحماية البطارية."</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"نسبة شحن البطارية <xliff:g id="PERCENTAGE">%1$d</xliff:g> في المئة، <xliff:g id="TIME">%2$s</xliff:g>. تم إيقاف الشحن مؤقتًا لحماية البطارية."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"الاطّلاع على جميع الإشعارات"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"تم تفعيل المبرقة الكاتبة."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"رنين مع الاهتزاز."</string>
@@ -366,8 +368,8 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"سيتم حذف جميع تطبيقات وبيانات هذا المستخدم."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"إزالة"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"سيتمكن تطبيق <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> من الوصول إلى كل المعلومات المرئية لك على الشاشة أو التي يتم تشغيلها على جهازك أثناء التسجيل أو الإرسال. ويشمل ذلك معلومات مثل كلمات المرور وتفاصيل الدفع والصور والرسائل والمقاطع الصوتية التي تشغِّلها."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ستتمكن الخدمة التي تقدّم هذه الوظيفة من الوصول إلى كل المعلومات المرئية لك على الشاشة أو التي يتم تشغيلها على جهازك أثناء التسجيل أو الإرسال. ويشمل ذلك معلومات مثل كلمات المرور وتفاصيل الدفع والصور والرسائل والمقاطع الصوتية التي تشغِّلها."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"هل تريد بدء التسجيل أو الإرسال؟"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ستتمكن الخدمة التي تقدّم هذه الوظيفة من الوصول إلى كل المعلومات المرئية لك على الشاشة أو التي يتم تشغيلها على جهازك أثناء التسجيل أو البث. ويشمل ذلك معلومات مثل كلمات المرور وتفاصيل الدفع والصور والرسائل والمقاطع الصوتية التي تشغِّلها."</string>
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"هل تريد بدء التسجيل أو البث؟"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"هل تريد بدء التسجيل أو الإرسال باستخدام <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>؟"</string>
     <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"هل تريد السماح لتطبيق <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>بالمشاركة أو التسجيل؟"</string>
     <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"الشاشة بالكامل"</string>
@@ -392,6 +394,10 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"تم إيقاف الإشعارات مؤقتًا وفقًا لإعداد \"عدم الإزعاج\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"البدء الآن"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ليس هناك أي اشعارات"</string>
+    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
+    <skip />
+    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
+    <skip />
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"يتولّى أحد الوالدين إدارة هذا الجهاز."</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"تملك مؤسستك هذا الجهاز ويمكنها تتبّع حركة بيانات الشبكة."</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"تملك مؤسسة <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> هذا الجهاز ويمكنها تتبّع حركة بيانات الشبكة"</string>
@@ -497,8 +503,7 @@
     <string name="wallet_error_generic" msgid="257704570182963611">"حدثت مشكلة أثناء الحصول على البطاقات، يُرجى إعادة المحاولة لاحقًا."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"إعدادات شاشة القفل"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"ماسح ضوئي لرمز الاستجابة السريعة"</string>
-    <!-- no translation found for qr_code_scanner_updating_secondary_label (8344598017007876352) -->
-    <skip />
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"جارٍ تعديل الحالة"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"الملف الشخصي للعمل"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"وضع الطيران"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"لن تسمع المنبّه القادم في <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -992,30 +997,17 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"‏EEE،‏ d‏ MMM"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_action_template (8164857863036314664) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_message (2790910660524887941) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_wallet_instruction_1 (8439655049139819278) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_wallet_instruction_2 (4321089250629477835) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_qr_scanner_instruction (5355839079232119791) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_home_instruction_1 (8438311171750568633) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_home_instruction_2 (8308525385889021652) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_cancel (3461468855493357248) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_confirm (4383356544661421206) -->
-    <skip />
-    <!-- no translation found for rear_display_fold_bottom_sheet_title (6081542277622721548) -->
-    <skip />
-    <!-- no translation found for rear_display_unfold_bottom_sheet_title (2137403802960396357) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_description (1852662982816810352) -->
-    <skip />
-    <!-- no translation found for rear_display_bottom_sheet_warning (800995919558238930) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"فتح \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
+    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"لإضافة تطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\" كاختصار، تأكّد من"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• إعداد التطبيق"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"‏• إضافة بطاقة واحدة على الأقل إلى \"محفظة Google\""</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• تثبيت تطبيق كاميرا"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• إعداد التطبيق"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• توفُّر جهاز واحد على الأقل"</string>
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"إلغاء"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"قلب الجهاز الآن"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"عليك فتح الهاتف لالتقاط صورة ذاتية بشكل أفضل."</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"أتريد استخدام الكاميرا الأمامية لصورة ذاتية أفضل؟"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"استخدِم الكاميرا الخلفية لالتقاط صورة أعرض وبدرجة دقة أعلى."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"* سيتم إطفاء هذه الشاشة."</b></string>
 </resources>

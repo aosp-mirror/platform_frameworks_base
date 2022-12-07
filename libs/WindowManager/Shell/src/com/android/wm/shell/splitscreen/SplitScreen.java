@@ -73,6 +73,9 @@ public interface SplitScreen {
     /** Called when device waking up finished. */
     void onFinishedWakingUp();
 
+    /** Called when requested to go to fullscreen from the current active split app. */
+    void goToFullscreenFromSplit();
+
     /** Get a string representation of a stage type */
     static String stageTypeToString(@StageType int stage) {
         switch (stage) {

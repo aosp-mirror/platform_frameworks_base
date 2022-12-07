@@ -378,13 +378,14 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                 try {
                     conditionSatisfied = mStateConditions.get(state).getAsBoolean();
                 } catch (IllegalStateException e) {
-                    // Failed to compute the current state based on current available data. Return
+                    // Failed to compute the current state based on current available data. Continue
                     // with the expectation that notifyDeviceStateChangedIfNeeded() will be called
-                    // when a callback with the missing data is triggered.
+                    // when a callback with the missing data is triggered. May trigger another state
+                    // change if another state is satisfied currently.
                     if (DEBUG) {
                         Slog.d(TAG, "Unable to check current state", e);
                     }
-                    return;
+                    continue;
                 }
 
                 if (conditionSatisfied) {
