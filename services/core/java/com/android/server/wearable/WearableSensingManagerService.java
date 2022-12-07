@@ -161,6 +161,32 @@ public class WearableSensingManagerService extends
         return null;
     }
 
+    // Used in testing.
+    void provideDataStream(@UserIdInt int userId, ParcelFileDescriptor parcelFileDescriptor,
+            RemoteCallback callback) {
+        synchronized (mLock) {
+            final WearableSensingManagerPerUserService mService = getServiceForUserLocked(userId);
+            if (mService != null) {
+                mService.onProvideDataStream(parcelFileDescriptor, callback);
+            } else {
+                Slog.w(TAG, "Service not available.");
+            }
+        }
+    }
+
+    // Used in testing.
+    void provideData(@UserIdInt int userId, PersistableBundle data, SharedMemory sharedMemory,
+            RemoteCallback callback) {
+        synchronized (mLock) {
+            final WearableSensingManagerPerUserService mService = getServiceForUserLocked(userId);
+            if (mService != null) {
+                mService.onProvidedData(data, sharedMemory, callback);
+            } else {
+                Slog.w(TAG, "Service not available.");
+            }
+        }
+    }
+
     private final class WearableSensingManagerInternal extends IWearableSensingManager.Stub {
         final WearableSensingManagerPerUserService mService = getServiceForUserLocked(
                 UserHandle.getCallingUserId());
@@ -205,6 +231,8 @@ public class WearableSensingManagerService extends
         @Override
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
+            new WearableSensingShellCommand(WearableSensingManagerService.this).exec(
+                    this, in, out, err, args, callback, resultReceiver);
         }
     }
 }

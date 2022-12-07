@@ -211,6 +211,7 @@ import com.android.server.usage.UsageStatsService;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.vibrator.VibratorManagerService;
 import com.android.server.vr.VrManagerService;
+import com.android.server.wearable.WearableSensingManagerService;
 import com.android.server.webkit.WebViewUpdateService;
 import com.android.server.wm.ActivityTaskManagerService;
 import com.android.server.wm.WindowManagerGlobalLock;
@@ -1830,6 +1831,7 @@ public final class SystemServer implements Dumpable {
             startSystemCaptionsManagerService(context, t);
             startTextToSpeechManagerService(context, t);
             startAmbientContextService(t);
+            startWearableSensingService(t);
 
             // System Speech Recognition Service
             t.traceBegin("StartSpeechRecognitionManagerService");
@@ -3167,6 +3169,12 @@ public final class SystemServer implements Dumpable {
     private void startAmbientContextService(@NonNull TimingsTraceAndSlog t) {
         t.traceBegin("StartAmbientContextService");
         mSystemServiceManager.startService(AmbientContextManagerService.class);
+        t.traceEnd();
+    }
+
+    private void startWearableSensingService(@NonNull TimingsTraceAndSlog t) {
+        t.traceBegin("startWearableSensingService");
+        mSystemServiceManager.startService(WearableSensingManagerService.class);
         t.traceEnd();
     }
 
