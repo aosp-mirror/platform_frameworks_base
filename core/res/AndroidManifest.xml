@@ -4629,6 +4629,8 @@
          <p>Protection level: appop
      -->
     <permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:label="@string/permlab_schedule_exact_alarm"
+        android:description="@string/permdesc_schedule_exact_alarm"
         android:protectionLevel="normal|appop"/>
 
     <!-- Allows apps to use exact alarms just like with {@link
@@ -4654,6 +4656,8 @@
          lower standby bucket.
     -->
     <permission android:name="android.permission.USE_EXACT_ALARM"
+                android:label="@string/permlab_use_exact_alarm"
+                android:description="@string/permdesc_use_exact_alarm"
                 android:protectionLevel="normal"/>
 
     <!-- Allows an application to query tablet mode state and monitor changes
