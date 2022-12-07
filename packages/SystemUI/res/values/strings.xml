@@ -2753,4 +2753,8 @@
     <string name="rear_display_bottom_sheet_description">Use the rear-facing camera for a wider photo with higher resolution.</string>
     <!-- Text for education page description to warn user that the display will turn off if the button is clicked. [CHAR_LIMIT=NONE] -->
     <string name="rear_display_bottom_sheet_warning"><b>&#x2731; This screen will turn off</b></string>
+    <!-- Text for education page content description for folded animation. [CHAR_LIMIT=NONE] -->
+    <string name="rear_display_accessibility_folded_animation">Foldable device being unfolded</string>
+    <!-- Text for education page content description for unfolded animation. [CHAR_LIMIT=NONE] -->
+    <string name="rear_display_accessibility_unfolded_animation">Foldable device being flipped around</string>
 </resources>
