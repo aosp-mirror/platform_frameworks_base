@@ -44,23 +44,3 @@ android_library {
     manifest: "AndroidManifest.xml",
     kotlincflags: ["-Xjvm-default=all"],
 }
-
-android_test {
-    name: "SystemUIAnimationLibTests",
-
-    static_libs: [
-        "SystemUIAnimationLib",
-        "androidx.test.ext.junit",
-        "androidx.test.rules",
-        "testables",
-    ],
-    libs: [
-        "android.test.base",
-    ],
-    srcs: [
-        "**/*.java",
-        "**/*.kt",
-    ],
-    kotlincflags: ["-Xjvm-default=all"],
-    test_suites: ["general-tests"],
-}

@@ -17,6 +17,7 @@
 package com.android.systemui.animation
 
 import androidx.test.filters.SmallTest
+import com.android.systemui.SysuiTestCase
 import java.lang.reflect.Modifier
 import junit.framework.Assert.assertEquals
 import org.junit.Test
@@ -25,7 +26,7 @@ import org.junit.runners.JUnit4
 
 @SmallTest
 @RunWith(JUnit4::class)
-class InterpolatorsAndroidXTest {
+class InterpolatorsAndroidXTest : SysuiTestCase() {
 
     @Test
     fun testInterpolatorsAndInterpolatorsAndroidXPublicMethodsAreEqual() {
