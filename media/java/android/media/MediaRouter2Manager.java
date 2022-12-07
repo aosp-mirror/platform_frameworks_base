@@ -76,13 +76,7 @@ public final class MediaRouter2Manager {
     private static MediaRouter2Manager sInstance;
 
     private final MediaSessionManager mMediaSessionManager;
-
-    final String mPackageName;
-
-    private final Context mContext;
-
     private final Client mClient;
-
     private final IMediaRouterService mMediaRouterService;
     private final AtomicInteger mScanRequestCount = new AtomicInteger(/* initialValue= */ 0);
     final Handler mHandler;
@@ -120,16 +114,14 @@ public final class MediaRouter2Manager {
     }
 
     private MediaRouter2Manager(Context context) {
-        mContext = context.getApplicationContext();
         mMediaRouterService = IMediaRouterService.Stub.asInterface(
                 ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
         mMediaSessionManager = (MediaSessionManager) context
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
-        mPackageName = mContext.getPackageName();
         mHandler = new Handler(context.getMainLooper());
         mClient = new Client();
         try {
-            mMediaRouterService.registerManager(mClient, mPackageName);
+            mMediaRouterService.registerManager(mClient, context.getPackageName());
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
