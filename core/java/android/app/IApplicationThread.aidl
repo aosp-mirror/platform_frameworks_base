@@ -20,6 +20,7 @@ import android.app.ContentProviderHolder;
 import android.app.IInstrumentationWatcher;
 import android.app.IUiAutomationConnection;
 import android.app.ProfilerInfo;
+import android.app.ReceiverInfo;
 import android.app.ResultInfo;
 import android.app.servertransaction.ClientTransaction;
 import android.content.AutofillOptions;
@@ -66,6 +67,9 @@ oneway interface IApplicationThread {
             in CompatibilityInfo compatInfo,
             int resultCode, in String data, in Bundle extras, boolean sync,
             int sendingUser, int processState);
+
+    void scheduleReceiverList(in List<ReceiverInfo> info);
+
     @UnsupportedAppUsage
     void scheduleCreateService(IBinder token, in ServiceInfo info,
             in CompatibilityInfo compatInfo, int processState);
