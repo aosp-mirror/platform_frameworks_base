@@ -25468,8 +25468,17 @@ package android.media.projection {
     method public void onStop();
   }
 
+  public final class MediaProjectionConfig implements android.os.Parcelable {
+    method @NonNull public static android.media.projection.MediaProjectionConfig createConfigForDisplay(@IntRange(from=android.view.Display.DEFAULT_DISPLAY, to=android.view.Display.DEFAULT_DISPLAY) int);
+    method @NonNull public static android.media.projection.MediaProjectionConfig createConfigForUserChoice();
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.projection.MediaProjectionConfig> CREATOR;
+  }
+
   public final class MediaProjectionManager {
-    method public android.content.Intent createScreenCaptureIntent();
+    method @NonNull public android.content.Intent createScreenCaptureIntent();
+    method @NonNull public android.content.Intent createScreenCaptureIntent(@NonNull android.media.projection.MediaProjectionConfig);
     method public android.media.projection.MediaProjection getMediaProjection(int, @NonNull android.content.Intent);
   }
 
