@@ -30,6 +30,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.app.Notification;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -403,6 +404,13 @@ public class JobInfo implements Parcelable {
     public static final int FLAG_DATA_TRANSFER = 1 << 5;
 
     /**
+     * Whether it's a user initiated job or not.
+     *
+     * @hide
+     */
+    public static final int FLAG_USER_INITIATED = 1 << 6;
+
+    /**
      * @hide
      */
     public static final int CONSTRAINT_FLAG_CHARGING = 1 << 0;
@@ -735,6 +743,14 @@ public class JobInfo implements Parcelable {
      */
     public boolean isDataTransfer() {
         return (flags & FLAG_DATA_TRANSFER) != 0;
+    }
+
+    /**
+     * @see JobInfo.Builder#setUserInitiated(boolean)
+     * @hide
+     */
+    public boolean isUserInitiated() {
+        return (flags & FLAG_USER_INITIATED) != 0;
     }
 
     /**
@@ -1849,15 +1865,8 @@ public class JobInfo implements Parcelable {
          *
          * <p>
          * For user-initiated transfers that must be started immediately, call
-         * {@link #setExpedited(boolean) setExpedited(true)}. Otherwise, the system may defer the
-         * job to a more opportune time. Using {@link #setExpedited(boolean) setExpedited(true)}
-         * with this API will only be allowed for foreground apps and when the user has clearly
-         * interacted with the app. {@link #setExpedited(boolean) setExpedited(true)} will return
-         * {@link JobScheduler#RESULT_FAILURE} for a data transfer job if the app is in the
-         * background. Apps that successfully schedule data transfer jobs with
-         * {@link #setExpedited(boolean) setExpedited(true)} will not have quotas applied to them,
-         * though they may still be stopped for system health or constraint reasons. The system will
-         * also give a user the ability to stop a data transfer job via the Task Manager.
+         * {@link #setUserInitiated(boolean) setUserInitiated(true)}. Otherwise, the system may
+         * defer the job to a more opportune time.
          *
          * <p>
          * If you want to perform more than one data transfer job, consider enqueuing multiple
@@ -1872,6 +1881,50 @@ public class JobInfo implements Parcelable {
                 mFlags |= FLAG_DATA_TRANSFER;
             } else {
                 mFlags &= (~FLAG_DATA_TRANSFER);
+            }
+            return this;
+        }
+
+        /**
+         * Indicates that this job is being scheduled to fulfill an explicit user request.
+         * As such, user-initiated jobs can only be scheduled when the app is in the foreground
+         * or in a state where launching an activity is allowed, as defined
+         * <a href=
+         * "https://developer.android.com/guide/components/activities/background-starts#exceptions">
+         * here</a>. Attempting to schedule one outside of these conditions will throw a
+         * {@link SecurityException}.
+         *
+         * <p>
+         * This should <b>NOT</b> be used for automatic features.
+         *
+         * <p>
+         * All user-initiated jobs must have an associated notification, set via
+         * {@link JobService#setNotification(JobParameters, int, Notification, int)}, and will be
+         * shown in the Task Manager when running.
+         *
+         * <p>
+         * These jobs will not be subject to quotas and will be started immediately once scheduled
+         * if all constraints are met and the device system health allows for additional tasks.
+         *
+         * @see JobInfo#isUserInitiated()
+         * @hide
+         */
+        @NonNull
+        public Builder setUserInitiated(boolean userInitiated) {
+            if (userInitiated) {
+                mFlags |= FLAG_USER_INITIATED;
+                if (mPriority == PRIORITY_DEFAULT) {
+                    // The default priority for UIJs is MAX, but only change this if .setPriority()
+                    // hasn't been called yet.
+                    mPriority = PRIORITY_MAX;
+                }
+            } else {
+                if (mPriority == PRIORITY_MAX && (mFlags & FLAG_USER_INITIATED) != 0) {
+                    // Reset the priority for the job, but only change this if .setPriority()
+                    // hasn't been called yet.
+                    mPriority = PRIORITY_DEFAULT;
+                }
+                mFlags &= (~FLAG_USER_INITIATED);
             }
             return this;
         }
@@ -2086,10 +2139,12 @@ public class JobInfo implements Parcelable {
         }
 
         final boolean isExpedited = (flags & FLAG_EXPEDITED) != 0;
+        final boolean isUserInitiated = (flags & FLAG_USER_INITIATED) != 0;
         switch (mPriority) {
             case PRIORITY_MAX:
-                if (!isExpedited) {
-                    throw new IllegalArgumentException("Only expedited jobs can have max priority");
+                if (!(isExpedited || isUserInitiated)) {
+                    throw new IllegalArgumentException(
+                            "Only expedited or user-initiated jobs can have max priority");
                 }
                 break;
             case PRIORITY_HIGH:
@@ -2118,14 +2173,20 @@ public class JobInfo implements Parcelable {
             if (isPeriodic) {
                 throw new IllegalArgumentException("An expedited job cannot be periodic");
             }
+            if ((flags & FLAG_DATA_TRANSFER) != 0) {
+                throw new IllegalArgumentException(
+                        "An expedited job cannot also be a data transfer job");
+            }
+            if (isUserInitiated) {
+                throw new IllegalArgumentException("An expedited job cannot be user-initiated");
+            }
             if (mPriority != PRIORITY_MAX && mPriority != PRIORITY_HIGH) {
                 throw new IllegalArgumentException(
                         "An expedited job must be high or max priority. Don't use expedited jobs"
                                 + " for unimportant tasks.");
             }
-            if (((constraintFlags & ~CONSTRAINT_FLAG_STORAGE_NOT_LOW) != 0
-                    || (flags & ~(FLAG_EXPEDITED | FLAG_EXEMPT_FROM_APP_STANDBY
-                                    | FLAG_DATA_TRANSFER)) != 0)) {
+            if ((constraintFlags & ~CONSTRAINT_FLAG_STORAGE_NOT_LOW) != 0
+                    || (flags & ~(FLAG_EXPEDITED | FLAG_EXEMPT_FROM_APP_STANDBY)) != 0) {
                 throw new IllegalArgumentException(
                         "An expedited job can only have network and storage-not-low constraints");
             }
@@ -2150,6 +2211,33 @@ public class JobInfo implements Parcelable {
             if (networkRequest == null) {
                 throw new IllegalArgumentException(
                         "A data transfer job must specify a valid network type");
+            }
+        }
+
+        if (isUserInitiated) {
+            if (hasEarlyConstraint) {
+                throw new IllegalArgumentException("A user-initiated job cannot have a time delay");
+            }
+            if (hasLateConstraint) {
+                throw new IllegalArgumentException("A user-initiated job cannot have a deadline");
+            }
+            if (isPeriodic) {
+                throw new IllegalArgumentException("A user-initiated job cannot be periodic");
+            }
+            if ((flags & FLAG_PREFETCH) != 0) {
+                throw new IllegalArgumentException(
+                        "A user-initiated job cannot also be a prefetch job");
+            }
+            if (mPriority != PRIORITY_MAX) {
+                throw new IllegalArgumentException("A user-initiated job must be max priority.");
+            }
+            if ((constraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0) {
+                throw new IllegalArgumentException(
+                        "A user-initiated job cannot have a device-idle constraint");
+            }
+            if (triggerContentUris != null && triggerContentUris.length > 0) {
+                throw new IllegalArgumentException(
+                        "Can't call addTriggerContentUri() on a user-initiated job");
             }
         }
     }
