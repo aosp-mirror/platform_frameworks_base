@@ -33,31 +33,28 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
-/**
- */
 @SysUISingleton
 public class ManagedProfileControllerImpl implements ManagedProfileController {
 
     private final List<Callback> mCallbacks = new ArrayList<>();
-
+    private final UserTrackerCallback mUserTrackerCallback = new UserTrackerCallback();
     private final Context mContext;
     private final Executor mMainExecutor;
     private final UserManager mUserManager;
     private final UserTracker mUserTracker;
     private final LinkedList<UserInfo> mProfiles;
+
     private boolean mListening;
     private int mCurrentUser;
 
-    /**
-     */
     @Inject
     public ManagedProfileControllerImpl(Context context, @Main Executor mainExecutor,
-            UserTracker userTracker) {
+            UserTracker userTracker, UserManager userManager) {
         mContext = context;
         mMainExecutor = mainExecutor;
-        mUserManager = UserManager.get(mContext);
+        mUserManager = userManager;
         mUserTracker = userTracker;
-        mProfiles = new LinkedList<UserInfo>();
+        mProfiles = new LinkedList<>();
     }
 
     @Override
@@ -100,16 +97,22 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
                 }
             }
             if (mProfiles.size() == 0 && hadProfile && (user == mCurrentUser)) {
-                for (Callback callback : mCallbacks) {
-                    callback.onManagedProfileRemoved();
-                }
+                mMainExecutor.execute(this::notifyManagedProfileRemoved);
             }
             mCurrentUser = user;
         }
     }
 
+    private void notifyManagedProfileRemoved() {
+        for (Callback callback : mCallbacks) {
+            callback.onManagedProfileRemoved();
+        }
+    }
+
     public boolean hasActiveProfile() {
-        if (!mListening) reloadManagedProfiles();
+        if (!mListening || mUserTracker.getUserId() != mCurrentUser) {
+            reloadManagedProfiles();
+        }
         synchronized (mProfiles) {
             return mProfiles.size() > 0;
         }
@@ -134,28 +137,28 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
         mListening = listening;
         if (listening) {
             reloadManagedProfiles();
-            mUserTracker.addCallback(mUserChangedCallback, mMainExecutor);
+            mUserTracker.addCallback(mUserTrackerCallback, mMainExecutor);
         } else {
-            mUserTracker.removeCallback(mUserChangedCallback);
+            mUserTracker.removeCallback(mUserTrackerCallback);
         }
     }
 
-    private final UserTracker.Callback mUserChangedCallback =
-            new UserTracker.Callback() {
-                @Override
-                public void onUserChanged(int newUser, @NonNull Context userContext) {
-                    reloadManagedProfiles();
-                    for (Callback callback : mCallbacks) {
-                        callback.onManagedProfileChanged();
-                    }
-                }
+    private final class UserTrackerCallback implements UserTracker.Callback {
 
-                @Override
-                public void onProfilesChanged(@NonNull List<UserInfo> profiles) {
-                    reloadManagedProfiles();
-                    for (Callback callback : mCallbacks) {
-                        callback.onManagedProfileChanged();
-                    }
-                }
-            };
+        @Override
+        public void onUserChanged(int newUser, @NonNull Context userContext) {
+            reloadManagedProfiles();
+            for (Callback callback : mCallbacks) {
+                callback.onManagedProfileChanged();
+            }
+        }
+
+        @Override
+        public void onProfilesChanged(@NonNull List<UserInfo> profiles) {
+            reloadManagedProfiles();
+            for (Callback callback : mCallbacks) {
+                callback.onManagedProfileChanged();
+            }
+        }
+    }
 }
