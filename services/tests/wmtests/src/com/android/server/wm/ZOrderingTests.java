@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -31,6 +32,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
@@ -541,6 +543,30 @@ public class ZOrderingTests extends WindowTestsBase {
         verify(popupWindow).needsRelativeLayeringToIme();
         assertThat(popupWindow.needsRelativeLayeringToIme()).isTrue();
         assertZOrderGreaterThan(mTransaction, popupWindow.getSurfaceControl(),
+                mDisplayContent.getImeContainer().getSurfaceControl());
+    }
+
+    @Test
+    public void testSystemDialogWindow_expectHigherThanIme_inMultiWindow() {
+        // Simulate the app window is in multi windowing mode and being IME target
+        mAppWindow.getConfiguration().windowConfiguration.setWindowingMode(
+                WINDOWING_MODE_MULTI_WINDOW);
+        mDisplayContent.setImeLayeringTarget(mAppWindow);
+        mDisplayContent.setImeInputTarget(mAppWindow);
+        makeWindowVisible(mImeWindow);
+
+        // Create a popupWindow
+        final WindowState systemDialogWindow = createWindow(null, TYPE_SECURE_SYSTEM_OVERLAY,
+                mDisplayContent, "SystemDialog", true);
+        systemDialogWindow.mAttrs.flags |= FLAG_ALT_FOCUSABLE_IM;
+        spyOn(systemDialogWindow);
+
+        mDisplayContent.assignChildLayers(mTransaction);
+
+        // Verify the surface layer of the popupWindow should higher than IME
+        verify(systemDialogWindow).needsRelativeLayeringToIme();
+        assertThat(systemDialogWindow.needsRelativeLayeringToIme()).isTrue();
+        assertZOrderGreaterThan(mTransaction, systemDialogWindow.getSurfaceControl(),
                 mDisplayContent.getImeContainer().getSurfaceControl());
     }
 }
