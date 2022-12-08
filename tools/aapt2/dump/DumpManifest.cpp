@@ -223,7 +223,8 @@ class ManifestExtractor {
     Element() = default;
     virtual ~Element() = default;
 
-    static std::unique_ptr<Element> Inflate(ManifestExtractor* extractor, xml::Element* el);
+    static std::unique_ptr<Element> Inflate(ManifestExtractor* extractor, xml::Element* el,
+                                            const std::string& parent_tag);
 
     /** Writes out the extracted contents of the element. */
     virtual void Print(text::Printer* printer) {
@@ -249,8 +250,13 @@ class ManifestExtractor {
     }
 
     /** Retrieves the extracted xml element tag. */
-    const std::string tag() const {
+    const std::string& tag() const {
       return tag_;
+    }
+
+    /** Whether this element has special Extract/Print/ToProto logic. */
+    bool is_featured() const {
+      return featured_;
     }
 
    protected:
@@ -394,6 +400,8 @@ class ManifestExtractor {
               return &(*intValue->value);
             } else if (RawString* rawValue = ValueCast<RawString>(value)) {
               return &(*rawValue->value);
+            } else if (StyledString* styledStrValue = ValueCast<StyledString>(value)) {
+              return &(styledStrValue->value->value);
             } else if (FileReference* strValue = ValueCast<FileReference>(value)) {
               return &(*strValue->path);
             }
@@ -424,6 +432,7 @@ class ManifestExtractor {
       ManifestExtractor* extractor_;
       std::vector<std::unique_ptr<Element>> children_;
       std::string tag_;
+      bool featured_ = false;
   };
 
   friend Element;
@@ -446,7 +455,7 @@ class ManifestExtractor {
   bool DumpProto(pb::Badging* out_badging);
 
   /** Recursively visit the xml element tree and return a processed badging element tree. */
-  std::unique_ptr<Element> Visit(xml::Element* element);
+  std::unique_ptr<Element> Visit(xml::Element* element, const std::string& parent_tag);
 
   /** Resets target SDK to 0. */
   void ResetTargetSdk() {
@@ -485,7 +494,7 @@ class ManifestExtractor {
   }
 
   /** Retrieves the current stack of parent during data extraction. */
-  const std::vector<Element*> parent_stack() const {
+  const std::vector<Element*>& parent_stack() const {
     return parent_stack_;
   }
 
@@ -533,8 +542,9 @@ static ManifestExtractor::Element* FindElement(ManifestExtractor::Element* root,
   if (f(root)) {
     return root;
   }
-  for (auto& child : root->children()) {
-    if (auto b2 = FindElement(child.get(), f)) {
+  const auto& children = root->children();
+  for (auto it = children.rbegin(); it != children.rend(); ++it) {
+    if (auto b2 = FindElement(it->get(), f)) {
       return b2;
     }
   }
@@ -1348,11 +1358,6 @@ class UsesPermission : public ManifestExtractor::Element {
   std::string impliedReason;
 
   void Extract(xml::Element* element) override {
-    const auto parent_stack = extractor()->parent_stack();
-    if (!extractor()->options_.only_permissions &&
-        (parent_stack.size() != 1 || !ElementCast<Manifest>(parent_stack[0]))) {
-      return;
-    }
     name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
     std::string feature =
         GetAttributeStringDefault(FindAttribute(element, REQUIRED_FEATURE_ATTR), "");
@@ -1477,11 +1482,6 @@ class UsesPermissionSdk23 : public ManifestExtractor::Element {
   const int32_t* maxSdkVersion = nullptr;
 
   void Extract(xml::Element* element) override {
-    const auto parent_stack = extractor()->parent_stack();
-    if (!extractor()->options_.only_permissions &&
-        (parent_stack.size() != 1 || !ElementCast<Manifest>(parent_stack[0]))) {
-      return;
-    }
     name = GetAttributeString(FindAttribute(element, NAME_ATTR));
     maxSdkVersion = GetAttributeInteger(FindAttribute(element, MAX_SDK_VERSION_ATTR));
 
@@ -1717,11 +1717,8 @@ class UsesLibrary : public ManifestExtractor::Element {
   int required;
 
   void Extract(xml::Element* element) override {
-    auto parent_stack = extractor()->parent_stack();
-    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
-      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
-      required = GetAttributeIntegerDefault(FindAttribute(element, REQUIRED_ATTR), 1);
-    }
+    name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+    required = GetAttributeIntegerDefault(FindAttribute(element, REQUIRED_ATTR), 1);
   }
 
   void Print(text::Printer* printer) override {
@@ -1749,12 +1746,9 @@ class StaticLibrary : public ManifestExtractor::Element {
   int versionMajor;
 
   void Extract(xml::Element* element) override {
-    auto parent_stack = extractor()->parent_stack();
-    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
-      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
-      version = GetAttributeIntegerDefault(FindAttribute(element, VERSION_ATTR), 0);
-      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
-    }
+    name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+    version = GetAttributeIntegerDefault(FindAttribute(element, VERSION_ATTR), 0);
+    versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
   }
 
   void Print(text::Printer* printer) override {
@@ -1781,13 +1775,10 @@ class UsesStaticLibrary : public ManifestExtractor::Element {
   std::vector<std::string> certDigests;
 
   void Extract(xml::Element* element) override {
-    auto parent_stack = extractor()->parent_stack();
-    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
-      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
-      version = GetAttributeIntegerDefault(FindAttribute(element, VERSION_ATTR), 0);
-      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
-      AddCertDigest(element);
-    }
+    name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+    version = GetAttributeIntegerDefault(FindAttribute(element, VERSION_ATTR), 0);
+    versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
+    AddCertDigest(element);
   }
 
   void AddCertDigest(xml::Element* element) {
@@ -1829,11 +1820,8 @@ class SdkLibrary : public ManifestExtractor::Element {
   int versionMajor;
 
   void Extract(xml::Element* element) override {
-    auto parent_stack = extractor()->parent_stack();
-    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
-      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
-      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
-    }
+    name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+    versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
   }
 
   void Print(text::Printer* printer) override {
@@ -1857,12 +1845,9 @@ class UsesSdkLibrary : public ManifestExtractor::Element {
   std::vector<std::string> certDigests;
 
   void Extract(xml::Element* element) override {
-    auto parent_stack = extractor()->parent_stack();
-    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
-      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
-      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
-      AddCertDigest(element);
-    }
+    name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+    versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
+    AddCertDigest(element);
   }
 
   void AddCertDigest(xml::Element* element) {
@@ -1902,11 +1887,8 @@ class UsesNativeLibrary : public ManifestExtractor::Element {
   int required;
 
   void Extract(xml::Element* element) override {
-    auto parent_stack = extractor()->parent_stack();
-    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
-      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
-      required = GetAttributeIntegerDefault(FindAttribute(element, REQUIRED_ATTR), 1);
-    }
+    name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+    required = GetAttributeIntegerDefault(FindAttribute(element, REQUIRED_ATTR), 1);
   }
 
   void Print(text::Printer* printer) override {
@@ -2251,14 +2233,11 @@ class UsesPackage : public ManifestExtractor::Element {
   std::vector<std::string> certDigests;
 
   void Extract(xml::Element* element) override {
-    auto parent_stack = extractor()->parent_stack();
-    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
-      packageType = GetAttributeString(FindAttribute(element, PACKAGE_TYPE_ATTR));
-      name = GetAttributeString(FindAttribute(element, NAME_ATTR));
-      version = GetAttributeIntegerDefault(FindAttribute(element, VERSION_ATTR), 0);
-      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
-      AddCertDigest(element);
-    }
+    packageType = GetAttributeString(FindAttribute(element, PACKAGE_TYPE_ATTR));
+    name = GetAttributeString(FindAttribute(element, NAME_ATTR));
+    version = GetAttributeIntegerDefault(FindAttribute(element, VERSION_ATTR), 0);
+    versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
+    AddCertDigest(element);
   }
 
   void AddCertDigest(xml::Element* element) {
@@ -2480,7 +2459,7 @@ bool ManifestExtractor::Extract(android::IDiagnostics* diag) {
   // Print only the <uses-permission>, <uses-permission-sdk23>, and <permission> elements if
   // printing only permission elements is requested
   if (options_.only_permissions) {
-    root_element_ = ManifestExtractor::Element::Inflate(this, element);
+    root_element_ = ManifestExtractor::Element::Inflate(this, element, "");
 
     if (auto manifest = ElementCast<Manifest>(root_element_.get())) {
       manifest->only_package_name = true;
@@ -2489,7 +2468,7 @@ bool ManifestExtractor::Extract(android::IDiagnostics* diag) {
         if (child->name == "uses-permission" || child->name == "uses-permission-sdk-23"
             || child->name == "permission") {
           // Inflate the element and its descendants
-          auto permission_element = Visit(child);
+          auto permission_element = Visit(child, "manifest");
           manifest->AddChild(permission_element);
         }
       }
@@ -2528,7 +2507,7 @@ bool ManifestExtractor::Extract(android::IDiagnostics* diag) {
   }
 
   // Extract badging information
-  root_element_ = Visit(element);
+  root_element_ = Visit(element, "");
 
   // Filter out all "uses-sdk" tags besides the very last tag. The android runtime only uses the
   // attribute values from the last defined tag.
@@ -2683,7 +2662,7 @@ bool ManifestExtractor::Extract(android::IDiagnostics* diag) {
                            (meta_data->name == "android.nfc.cardemulation.off_host_apdu_service" &&
                             offhost_apdu_action)) {
                          // Attempt to load the resource file
-                         if (!meta_data->resource.empty()) {
+                         if (meta_data->resource.empty()) {
                            return;
                          }
                          auto resource = this->apk_->LoadXml(meta_data->resource, diag);
@@ -2878,58 +2857,66 @@ bool ManifestExtractor::DumpProto(pb::Badging* out_badging) {
   return true;
 }
 
+template <typename T>
+constexpr const char* GetExpectedTagForType() {
+  // This array does not appear at runtime, as GetExpectedTagForType function is used by compiler
+  // to inject proper 'expected_tag' into ElementCast.
+  std::array<std::pair<const char*, bool>, 37> tags = {
+      std::make_pair("action", std::is_same<Action, T>::value),
+      std::make_pair("activity", std::is_same<Activity, T>::value),
+      std::make_pair("additional-certificate", std::is_same<AdditionalCertificate, T>::value),
+      std::make_pair("application", std::is_same<Application, T>::value),
+      std::make_pair("category", std::is_same<Category, T>::value),
+      std::make_pair("compatible-screens", std::is_same<CompatibleScreens, T>::value),
+      std::make_pair("feature-group", std::is_same<FeatureGroup, T>::value),
+      std::make_pair("input-type", std::is_same<InputType, T>::value),
+      std::make_pair("intent-filter", std::is_same<IntentFilter, T>::value),
+      std::make_pair("meta-data", std::is_same<MetaData, T>::value),
+      std::make_pair("manifest", std::is_same<Manifest, T>::value),
+      std::make_pair("original-package", std::is_same<OriginalPackage, T>::value),
+      std::make_pair("overlay", std::is_same<Overlay, T>::value),
+      std::make_pair("package-verifier", std::is_same<PackageVerifier, T>::value),
+      std::make_pair("permission", std::is_same<Permission, T>::value),
+      std::make_pair("property", std::is_same<Property, T>::value),
+      std::make_pair("provider", std::is_same<Provider, T>::value),
+      std::make_pair("receiver", std::is_same<Receiver, T>::value),
+      std::make_pair("required-feature", std::is_same<RequiredFeature, T>::value),
+      std::make_pair("required-not-feature", std::is_same<RequiredNotFeature, T>::value),
+      std::make_pair("screen", std::is_same<Screen, T>::value),
+      std::make_pair("service", std::is_same<Service, T>::value),
+      std::make_pair("sdk-library", std::is_same<SdkLibrary, T>::value),
+      std::make_pair("static-library", std::is_same<StaticLibrary, T>::value),
+      std::make_pair("supports-gl-texture", std::is_same<SupportsGlTexture, T>::value),
+      std::make_pair("supports-input", std::is_same<SupportsInput, T>::value),
+      std::make_pair("supports-screens", std::is_same<SupportsScreen, T>::value),
+      std::make_pair("uses-configuration", std::is_same<UsesConfiguarion, T>::value),
+      std::make_pair("uses-feature", std::is_same<UsesFeature, T>::value),
+      std::make_pair("uses-library", std::is_same<UsesLibrary, T>::value),
+      std::make_pair("uses-native-library", std::is_same<UsesNativeLibrary, T>::value),
+      std::make_pair("uses-package", std::is_same<UsesPackage, T>::value),
+      std::make_pair("uses-permission", std::is_same<UsesPermission, T>::value),
+      std::make_pair("uses-permission-sdk-23", std::is_same<UsesPermissionSdk23, T>::value),
+      std::make_pair("uses-sdk", std::is_same<UsesSdkBadging, T>::value),
+      std::make_pair("uses-sdk-library", std::is_same<UsesSdkLibrary, T>::value),
+      std::make_pair("uses-static-library", std::is_same<UsesStaticLibrary, T>::value),
+  };
+  for (const auto& pair : tags) {
+    if (pair.second) {
+      return pair.first;
+    }
+  }
+  return nullptr;
+}
+
 /**
  * Returns the element casted to the type if the element is of that type. Otherwise, returns a null
  * pointer.
  **/
 template<typename T>
 T* ElementCast(ManifestExtractor::Element* element) {
-  if (element == nullptr) {
-    return nullptr;
-  }
-
-  const std::unordered_map<std::string, bool> kTagCheck = {
-      {"action", std::is_base_of<Action, T>::value},
-      {"activity", std::is_base_of<Activity, T>::value},
-      {"additional-certificate", std::is_base_of<AdditionalCertificate, T>::value},
-      {"application", std::is_base_of<Application, T>::value},
-      {"category", std::is_base_of<Category, T>::value},
-      {"compatible-screens", std::is_base_of<CompatibleScreens, T>::value},
-      {"feature-group", std::is_base_of<FeatureGroup, T>::value},
-      {"input-type", std::is_base_of<InputType, T>::value},
-      {"intent-filter", std::is_base_of<IntentFilter, T>::value},
-      {"meta-data", std::is_base_of<MetaData, T>::value},
-      {"manifest", std::is_base_of<Manifest, T>::value},
-      {"original-package", std::is_base_of<OriginalPackage, T>::value},
-      {"overlay", std::is_base_of<Overlay, T>::value},
-      {"package-verifier", std::is_base_of<PackageVerifier, T>::value},
-      {"permission", std::is_base_of<Permission, T>::value},
-      {"property", std::is_base_of<Property, T>::value},
-      {"provider", std::is_base_of<Provider, T>::value},
-      {"receiver", std::is_base_of<Receiver, T>::value},
-      {"required-feature", std::is_base_of<RequiredFeature, T>::value},
-      {"required-not-feature", std::is_base_of<RequiredNotFeature, T>::value},
-      {"screen", std::is_base_of<Screen, T>::value},
-      {"service", std::is_base_of<Service, T>::value},
-      {"sdk-library", std::is_base_of<SdkLibrary, T>::value},
-      {"static-library", std::is_base_of<StaticLibrary, T>::value},
-      {"supports-gl-texture", std::is_base_of<SupportsGlTexture, T>::value},
-      {"supports-input", std::is_base_of<SupportsInput, T>::value},
-      {"supports-screens", std::is_base_of<SupportsScreen, T>::value},
-      {"uses-configuration", std::is_base_of<UsesConfiguarion, T>::value},
-      {"uses-feature", std::is_base_of<UsesFeature, T>::value},
-      {"uses-library", std::is_base_of<UsesLibrary, T>::value},
-      {"uses-native-library", std::is_base_of<UsesNativeLibrary, T>::value},
-      {"uses-package", std::is_base_of<UsesPackage, T>::value},
-      {"uses-permission", std::is_base_of<UsesPermission, T>::value},
-      {"uses-permission-sdk-23", std::is_base_of<UsesPermissionSdk23, T>::value},
-      {"uses-sdk", std::is_base_of<UsesSdkBadging, T>::value},
-      {"uses-sdk-library", std::is_base_of<UsesSdkLibrary, T>::value},
-      {"uses-static-library", std::is_base_of<UsesStaticLibrary, T>::value},
-  };
-
-  auto check = kTagCheck.find(element->tag());
-  if (check != kTagCheck.end() && check->second) {
+  constexpr const char* expected_tag = GetExpectedTagForType<T>();
+  if (element != nullptr && expected_tag != nullptr && element->is_featured() &&
+      element->tag() == expected_tag) {
     return static_cast<T*>(element);
   }
   return nullptr;
@@ -2941,9 +2928,9 @@ std::unique_ptr<T> CreateType() {
 }
 
 std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
-    ManifestExtractor* extractor, xml::Element* el) {
-  const std::unordered_map<std::string,
-                           std::function<std::unique_ptr<ManifestExtractor::Element>()>>
+    ManifestExtractor* extractor, xml::Element* el, const std::string& parent_tag) {
+  static const std::unordered_map<std::string_view,
+                                  std::function<std::unique_ptr<ManifestExtractor::Element>()>>
       kTagCheck = {
           {"action", &CreateType<Action>},
           {"activity", &CreateType<Activity>},
@@ -2983,12 +2970,71 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
           {"uses-sdk-library", &CreateType<UsesSdkLibrary>},
           {"uses-static-library", &CreateType<UsesStaticLibrary>},
       };
-
+  static constexpr std::array<std::pair<std::string_view, std::string_view>, 53>
+      kValidChildParentTags = {
+          std::make_pair("action", "intent-filter"),
+          std::make_pair("activity", "application"),
+          std::make_pair("additional-certificate", "uses-package"),
+          std::make_pair("additional-certificate", "uses-static-library"),
+          std::make_pair("application", "manifest"),
+          std::make_pair("category", "intent-filter"),
+          std::make_pair("compatible-screens", "manifest"),
+          std::make_pair("feature-group", "manifest"),
+          std::make_pair("input-type", "supports-input"),
+          std::make_pair("intent-filter", "activity"),
+          std::make_pair("intent-filter", "activity-alias"),
+          std::make_pair("intent-filter", "service"),
+          std::make_pair("intent-filter", "receiver"),
+          std::make_pair("intent-filter", "provider"),
+          std::make_pair("manifest", ""),
+          std::make_pair("meta-data", "activity"),
+          std::make_pair("meta-data", "activity-alias"),
+          std::make_pair("meta-data", "application"),
+          std::make_pair("meta-data", "service"),
+          std::make_pair("meta-data", "receiver"),
+          std::make_pair("meta-data", "provider"),
+          std::make_pair("original-package", "manifest"),
+          std::make_pair("overlay", "manifest"),
+          std::make_pair("package-verifier", "manifest"),
+          std::make_pair("permission", "manifest"),
+          std::make_pair("property", "activity"),
+          std::make_pair("property", "activity-alias"),
+          std::make_pair("property", "application"),
+          std::make_pair("property", "service"),
+          std::make_pair("property", "receiver"),
+          std::make_pair("property", "provider"),
+          std::make_pair("provider", "application"),
+          std::make_pair("receiver", "application"),
+          std::make_pair("required-feature", "uses-permission"),
+          std::make_pair("required-not-feature", "uses-permission"),
+          std::make_pair("screen", "compatible-screens"),
+          std::make_pair("service", "application"),
+          std::make_pair("sdk-library", "application"),
+          std::make_pair("static-library", "application"),
+          std::make_pair("supports-gl-texture", "manifest"),
+          std::make_pair("supports-input", "manifest"),
+          std::make_pair("supports-screens", "manifest"),
+          std::make_pair("uses-configuration", "manifest"),
+          std::make_pair("uses-feature", "feature-group"),
+          std::make_pair("uses-feature", "manifest"),
+          std::make_pair("uses-library", "application"),
+          std::make_pair("uses-native-library", "application"),
+          std::make_pair("uses-package", "application"),
+          std::make_pair("uses-permission", "manifest"),
+          std::make_pair("uses-permission-sdk-23", "manifest"),
+          std::make_pair("uses-sdk", "manifest"),
+          std::make_pair("uses-sdk-library", "application"),
+          std::make_pair("uses-static-library", "application"),
+      };
+  bool is_valid_tag = std::find(kValidChildParentTags.begin(), kValidChildParentTags.end(),
+                                std::make_pair<std::string_view, std::string_view>(
+                                    el->name, parent_tag)) != kValidChildParentTags.end();
   // Attempt to map the xml tag to a element inflater
   std::unique_ptr<ManifestExtractor::Element> element;
   auto check = kTagCheck.find(el->name);
-  if (check != kTagCheck.end()) {
+  if (check != kTagCheck.end() && is_valid_tag) {
     element = check->second();
+    element->featured_ = true;
   } else {
     element = util::make_unique<ManifestExtractor::Element>();
   }
@@ -2999,13 +3045,14 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
   return element;
 }
 
-std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Visit(xml::Element* el) {
-  auto element = ManifestExtractor::Element::Inflate(this, el);
+std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Visit(
+    xml::Element* el, const std::string& parent_tag) {
+  auto element = ManifestExtractor::Element::Inflate(this, el, parent_tag);
   parent_stack_.insert(parent_stack_.begin(), element.get());
 
   // Process the element and recursively visit the children
   for (xml::Element* child : el->GetChildElements()) {
-    auto v = Visit(child);
+    auto v = Visit(child, el->name);
     element->AddChild(v);
   }
 
