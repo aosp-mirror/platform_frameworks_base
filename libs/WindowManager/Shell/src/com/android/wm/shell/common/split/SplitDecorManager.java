@@ -74,7 +74,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
     private boolean mShown;
     private boolean mIsResizing;
-    private final Rect mBounds = new Rect();
+    private final Rect mOldBounds = new Rect();
+    private final Rect mResizingBounds = new Rect();
     private final Rect mTempRect = new Rect();
     private ValueAnimator mFadeAnimator;
 
@@ -158,6 +159,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
         mResizingIconView = null;
         mIsResizing = false;
         mShown = false;
+        mOldBounds.setEmpty();
+        mResizingBounds.setEmpty();
     }
 
     /** Showing resizing hint. */
@@ -170,13 +173,14 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
         if (!mIsResizing) {
             mIsResizing = true;
-            mBounds.set(newBounds);
+            mOldBounds.set(newBounds);
         }
+        mResizingBounds.set(newBounds);
         mOffsetX = offsetX;
         mOffsetY = offsetY;
 
         final boolean show =
-                newBounds.width() > mBounds.width() || newBounds.height() > mBounds.height();
+                newBounds.width() > mOldBounds.width() || newBounds.height() > mOldBounds.height();
         final boolean update = show != mShown;
         if (update && mFadeAnimator != null && mFadeAnimator.isRunning()) {
             // If we need to animate and animator still running, cancel it before we ensure both
@@ -193,8 +197,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
         if (mGapBackgroundLeash == null && !immediately) {
             final boolean isLandscape = newBounds.height() == sideBounds.height();
-            final int left = isLandscape ? mBounds.width() : 0;
-            final int top = isLandscape ? 0 : mBounds.height();
+            final int left = isLandscape ? mOldBounds.width() : 0;
+            final int top = isLandscape ? 0 : mOldBounds.height();
             mGapBackgroundLeash = SurfaceUtils.makeColorLayer(mHostLeash,
                     GAP_BACKGROUND_SURFACE_NAME, mSurfaceSession);
             // Fill up another side bounds area.
@@ -272,6 +276,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
         mIsResizing = false;
         mOffsetX = 0;
         mOffsetY = 0;
+        mOldBounds.setEmpty();
+        mResizingBounds.setEmpty();
         if (mFadeAnimator != null && mFadeAnimator.isRunning()) {
             if (!mShown) {
                 // If fade-out animation is running, just add release callback to it.
@@ -303,8 +309,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
     /** Screenshot host leash and attach on it if meet some conditions */
     public void screenshotIfNeeded(SurfaceControl.Transaction t) {
-        if (!mShown && mIsResizing) {
-            mTempRect.set(mBounds);
+        if (!mShown && mIsResizing && !mOldBounds.equals(mResizingBounds)) {
+            mTempRect.set(mOldBounds);
             mTempRect.offsetTo(0, 0);
             mScreenshot = ScreenshotUtils.takeScreenshot(t, mHostLeash, mTempRect,
                     Integer.MAX_VALUE - 1);
@@ -315,7 +321,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
     public void setScreenshotIfNeeded(SurfaceControl screenshot, SurfaceControl.Transaction t) {
         if (screenshot == null || !screenshot.isValid()) return;
 
-        if (!mShown && mIsResizing) {
+        if (!mShown && mIsResizing && !mOldBounds.equals(mResizingBounds)) {
             mScreenshot = screenshot;
             t.reparent(screenshot, mHostLeash);
             t.setLayer(screenshot, Integer.MAX_VALUE - 1);
