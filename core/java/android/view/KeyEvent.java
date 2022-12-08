@@ -897,13 +897,38 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * This key is handled by the framework and is never delivered to applications.
      */
     public static final int KEYCODE_RECENT_APPS = 312;
+    /**
+     * Key code constant: A button whose usage can be customized by the user through
+     *                    the system.
+     * User customizable key #1.
+     */
+    public static final int KEYCODE_MACRO_1 = 313;
+    /**
+     * Key code constant: A button whose usage can be customized by the user through
+     *                    the system.
+     * User customizable key #2.
+     */
+    public static final int KEYCODE_MACRO_2 = 314;
+    /**
+     * Key code constant: A button whose usage can be customized by the user through
+     *                    the system.
+     * User customizable key #3.
+     */
+    public static final int KEYCODE_MACRO_3 = 315;
+    /**
+     * Key code constant: A button whose usage can be customized by the user through
+     *                    the system.
+     * User customizable key #4.
+     */
+    public static final int KEYCODE_MACRO_4 = 316;
+
 
    /**
      * Integer value of the last KEYCODE. Increases as new keycodes are added to KeyEvent.
      * @hide
      */
     @TestApi
-    public static final int LAST_KEYCODE = KEYCODE_RECENT_APPS;
+    public static final int LAST_KEYCODE = KEYCODE_MACRO_4;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
