@@ -826,6 +826,19 @@ public class RingtoneManager {
         if(!isInternalRingtoneUri(ringtoneUri)) {
             ringtoneUri = ContentProvider.maybeAddUserId(ringtoneUri, context.getUserId());
         }
+
+        final String mimeType = resolver.getType(ringtoneUri);
+        if (mimeType == null) {
+            Log.e(TAG, "setActualDefaultRingtoneUri for URI:" + ringtoneUri
+                    + " ignored: failure to find mimeType (no access from this context?)");
+            return;
+        }
+        if (!(mimeType.startsWith("audio/") || mimeType.equals("application/ogg"))) {
+            Log.e(TAG, "setActualDefaultRingtoneUri for URI:" + ringtoneUri
+                    + " ignored: associated mimeType:" + mimeType + " is not an audio type");
+            return;
+        }
+
         Settings.System.putStringForUser(resolver, setting,
                 ringtoneUri != null ? ringtoneUri.toString() : null, context.getUserId());
 

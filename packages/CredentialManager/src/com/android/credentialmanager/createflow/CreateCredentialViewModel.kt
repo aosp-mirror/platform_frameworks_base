@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.android.credentialmanager.CreateFlowUtils
 import com.android.credentialmanager.CredentialManagerRepo
 import com.android.credentialmanager.common.DialogResult
 import com.android.credentialmanager.common.ProviderActivityResult
@@ -41,6 +42,7 @@ data class CreateCredentialUiState(
   val activeEntry: ActiveEntry? = null,
   val selectedEntry: EntryInfo? = null,
   val hidden: Boolean = false,
+  val providerActivityPending: Boolean = false,
 )
 
 class CreateCredentialViewModel(
@@ -60,24 +62,26 @@ class CreateCredentialViewModel(
 
   fun onConfirmIntro() {
     var createOptionSize = 0
+    var lastSeenProviderWithNonEmptyCreateOptions: EnabledProviderInfo? = null
+    var remoteEntry: RemoteInfo? = null
     uiState.enabledProviders.forEach {
-      enabledProvider -> createOptionSize += enabledProvider.createOptions.size}
-    uiState = if (createOptionSize > 1) {
-      uiState.copy(
-        currentScreenState = CreateScreenState.PROVIDER_SELECTION,
-        showActiveEntryOnly = true
-      )
-    } else if (createOptionSize == 1){
-      uiState.copy(
-        currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
-        showActiveEntryOnly = false,
-        activeEntry = ActiveEntry(uiState.enabledProviders.first(),
-          uiState.enabledProviders.first().createOptions.first()
-        )
-      )
-    } else {
-      throw java.lang.IllegalStateException("Empty provider list.")
+      enabledProvider ->
+      if (enabledProvider.createOptions.isNotEmpty()) {
+        createOptionSize += enabledProvider.createOptions.size
+        lastSeenProviderWithNonEmptyCreateOptions = enabledProvider
+      }
+      if (enabledProvider.remoteEntry != null) {
+        remoteEntry = enabledProvider.remoteEntry!!
+      }
     }
+    uiState = uiState.copy(
+      currentScreenState = CreateFlowUtils.toCreateScreenState(
+        createOptionSize, true,
+        uiState.requestDisplayInfo, null, remoteEntry),
+      showActiveEntryOnly = createOptionSize > 1,
+      activeEntry = CreateFlowUtils.toActiveEntry(
+        null, createOptionSize, lastSeenProviderWithNonEmptyCreateOptions, remoteEntry),
+    )
   }
 
   fun getProviderInfoByName(providerName: String): EnabledProviderInfo {
@@ -159,6 +163,9 @@ class CreateCredentialViewModel(
   ) {
     val entry = uiState.selectedEntry
     if (entry != null && entry.pendingIntent != null) {
+      uiState = uiState.copy(
+        providerActivityPending = true,
+      )
       val intentSenderRequest = IntentSenderRequest.Builder(entry.pendingIntent)
         .setFillInIntent(entry.fillInIntent).build()
       launcher.launch(intentSenderRequest)
@@ -189,6 +196,7 @@ class CreateCredentialViewModel(
       uiState = uiState.copy(
         selectedEntry = null,
         hidden = false,
+        providerActivityPending = false,
       )
     } else {
       if (entry != null) {

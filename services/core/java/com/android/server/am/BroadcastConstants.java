@@ -153,10 +153,25 @@ public class BroadcastConstants {
             "bcast_extra_running_urgent_process_queues";
     private static final int DEFAULT_EXTRA_RUNNING_URGENT_PROCESS_QUEUES = 1;
 
+    /**
+     * For {@link BroadcastQueueModernImpl}: Maximum number of consecutive urgent
+     * broadcast dispatches allowed before letting broadcasts in lower priority queue
+     * to be scheduled in order to avoid starvation.
+     */
     public int MAX_CONSECUTIVE_URGENT_DISPATCHES = DEFAULT_MAX_CONSECUTIVE_URGENT_DISPATCHES;
     private static final String KEY_MAX_CONSECUTIVE_URGENT_DISPATCHES =
             "bcast_max_consecutive_urgent_dispatches";
     private static final int DEFAULT_MAX_CONSECUTIVE_URGENT_DISPATCHES = 3;
+
+    /**
+     * For {@link BroadcastQueueModernImpl}: Maximum number of consecutive normal
+     * broadcast dispatches allowed before letting broadcasts in lower priority queue
+     * to be scheduled in order to avoid starvation.
+     */
+    public int MAX_CONSECUTIVE_NORMAL_DISPATCHES = DEFAULT_MAX_CONSECUTIVE_NORMAL_DISPATCHES;
+    private static final String KEY_MAX_CONSECUTIVE_NORMAL_DISPATCHES =
+            "bcast_max_consecutive_normal_dispatches";
+    private static final int DEFAULT_MAX_CONSECUTIVE_NORMAL_DISPATCHES = 10;
 
     /**
      * For {@link BroadcastQueueModernImpl}: Maximum number of active broadcasts
@@ -341,6 +356,9 @@ public class BroadcastConstants {
             MAX_CONSECUTIVE_URGENT_DISPATCHES = getDeviceConfigInt(
                     KEY_MAX_CONSECUTIVE_URGENT_DISPATCHES,
                     DEFAULT_MAX_CONSECUTIVE_URGENT_DISPATCHES);
+            MAX_CONSECUTIVE_NORMAL_DISPATCHES = getDeviceConfigInt(
+                    KEY_MAX_CONSECUTIVE_NORMAL_DISPATCHES,
+                    DEFAULT_MAX_CONSECUTIVE_NORMAL_DISPATCHES);
             MAX_RUNNING_ACTIVE_BROADCASTS = getDeviceConfigInt(KEY_MAX_RUNNING_ACTIVE_BROADCASTS,
                     DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS);
             MAX_PENDING_BROADCASTS = getDeviceConfigInt(KEY_MAX_PENDING_BROADCASTS,
@@ -396,6 +414,10 @@ public class BroadcastConstants {
                     TimeUtils.formatDuration(DELAY_URGENT_MILLIS)).println();
             pw.print(KEY_MAX_HISTORY_COMPLETE_SIZE, MAX_HISTORY_COMPLETE_SIZE).println();
             pw.print(KEY_MAX_HISTORY_SUMMARY_SIZE, MAX_HISTORY_SUMMARY_SIZE).println();
+            pw.print(KEY_MAX_CONSECUTIVE_URGENT_DISPATCHES,
+                    MAX_CONSECUTIVE_URGENT_DISPATCHES).println();
+            pw.print(KEY_MAX_CONSECUTIVE_NORMAL_DISPATCHES,
+                    MAX_CONSECUTIVE_NORMAL_DISPATCHES).println();
             pw.decreaseIndent();
             pw.println();
         }

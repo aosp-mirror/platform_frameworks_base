@@ -37,6 +37,16 @@ sk_sp<SkMesh::IndexBuffer> genIndexBuffer(JNIEnv* env, jobject buffer, int size,
     return indexBuffer;
 }
 
+// TODO(b/260252882): undefine SK_LEGACY_MESH_MAKE and remove this.
+template <typename T>
+SkMesh get_mesh_from_result(T&& result) {
+#ifdef SK_LEGACY_MESH_MAKE
+    return result;
+#else
+    return result.mesh;
+#endif
+}
+
 static jlong make(JNIEnv* env, jobject, jlong meshSpec, jint mode, jobject vertexBuffer,
                   jboolean isDirect, jint vertexCount, jint vertexOffset, jint left, jint top,
                   jint right, jint bottom) {
@@ -44,8 +54,8 @@ static jlong make(JNIEnv* env, jobject, jlong meshSpec, jint mode, jobject verte
     sk_sp<SkMesh::VertexBuffer> skVertexBuffer =
             genVertexBuffer(env, vertexBuffer, vertexCount * skMeshSpec->stride(), isDirect);
     auto skRect = SkRect::MakeLTRB(left, top, right, bottom);
-    auto mesh = SkMesh::Make(skMeshSpec, SkMesh::Mode(mode), skVertexBuffer, vertexCount,
-                             vertexOffset, nullptr, skRect);
+    auto mesh = get_mesh_from_result(SkMesh::Make(skMeshSpec, SkMesh::Mode(mode), skVertexBuffer,
+                                                  vertexCount, vertexOffset, nullptr, skRect));
     auto meshPtr = std::make_unique<MeshWrapper>(MeshWrapper{mesh, MeshUniformBuilder(skMeshSpec)});
     return reinterpret_cast<jlong>(meshPtr.release());
 }
@@ -60,9 +70,9 @@ static jlong makeIndexed(JNIEnv* env, jobject, jlong meshSpec, jint mode, jobjec
     sk_sp<SkMesh::IndexBuffer> skIndexBuffer =
             genIndexBuffer(env, indexBuffer, indexCount * gIndexByteSize, isIndexDirect);
     auto skRect = SkRect::MakeLTRB(left, top, right, bottom);
-    auto mesh = SkMesh::MakeIndexed(skMeshSpec, SkMesh::Mode(mode), skVertexBuffer, vertexCount,
-                                    vertexOffset, skIndexBuffer, indexCount, indexOffset, nullptr,
-                                    skRect);
+    auto mesh = get_mesh_from_result(SkMesh::MakeIndexed(
+            skMeshSpec, SkMesh::Mode(mode), skVertexBuffer, vertexCount, vertexOffset,
+            skIndexBuffer, indexCount, indexOffset, nullptr, skRect));
     auto meshPtr = std::make_unique<MeshWrapper>(MeshWrapper{mesh, MeshUniformBuilder(skMeshSpec)});
     return reinterpret_cast<jlong>(meshPtr.release());
 }
@@ -71,14 +81,15 @@ static void updateMesh(JNIEnv* env, jobject, jlong meshWrapper, jboolean indexed
     auto wrapper = reinterpret_cast<MeshWrapper*>(meshWrapper);
     auto mesh = wrapper->mesh;
     if (indexed) {
-        wrapper->mesh = SkMesh::MakeIndexed(
+        wrapper->mesh = get_mesh_from_result(SkMesh::MakeIndexed(
                 sk_ref_sp(mesh.spec()), mesh.mode(), sk_ref_sp(mesh.vertexBuffer()),
                 mesh.vertexCount(), mesh.vertexOffset(), sk_ref_sp(mesh.indexBuffer()),
-                mesh.indexCount(), mesh.indexOffset(), wrapper->builder.fUniforms, mesh.bounds());
+                mesh.indexCount(), mesh.indexOffset(), wrapper->builder.fUniforms, mesh.bounds()));
     } else {
-        wrapper->mesh = SkMesh::Make(
-                sk_ref_sp(mesh.spec()), mesh.mode(), sk_ref_sp(mesh.vertexBuffer()),
-                mesh.vertexCount(), mesh.vertexOffset(), wrapper->builder.fUniforms, mesh.bounds());
+        wrapper->mesh = get_mesh_from_result(
+                SkMesh::Make(sk_ref_sp(mesh.spec()), mesh.mode(), sk_ref_sp(mesh.vertexBuffer()),
+                             mesh.vertexCount(), mesh.vertexOffset(), wrapper->builder.fUniforms,
+                             mesh.bounds()));
     }
 }
 

@@ -145,7 +145,7 @@ public class NavigationBarController implements
         boolean willApplyConfig = mConfigChanges.applyNewConfig(mContext.getResources());
         boolean largeScreenChanged = mIsTablet != isOldConfigTablet;
         // TODO(b/243765256): Disable this logging once b/243765256 is fixed.
-        Log.d(DEBUG_MISSING_GESTURE_TAG, "NavbarController: newConfig=" + newConfig
+        Log.i(DEBUG_MISSING_GESTURE_TAG, "NavbarController: newConfig=" + newConfig
                 + " mTaskbarDelegate initialized=" + mTaskbarDelegate.isInitialized()
                 + " willApplyConfigToNavbars=" + willApplyConfig
                 + " navBarCount=" + mNavigationBars.size());

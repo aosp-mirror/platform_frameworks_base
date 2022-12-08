@@ -22,7 +22,7 @@ import android.app.IActivityManager;
 import android.app.admin.DeviceStateCache;
 import android.content.Context;
 import android.content.pm.UserInfo;
-import android.hardware.authsecret.V1_0.IAuthSecret;
+import android.hardware.authsecret.IAuthSecret;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Process;
@@ -154,7 +154,7 @@ public class LockSettingsServiceTestable extends LockSettingsService {
                 storageManager, spManager, gsiService, recoverableKeyStoreManager,
                 userManagerInternal, deviceStateCache));
         mGateKeeperService = gatekeeper;
-        mAuthSecretService = authSecretService;
+        mAuthSecretServiceAidl = authSecretService;
     }
 
     @Override

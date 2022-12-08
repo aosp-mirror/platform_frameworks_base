@@ -145,7 +145,7 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     @Override
     public void onInputDeviceChanged(int deviceId) {
         final InputDevice inputDevice = getInputDevice(deviceId);
-        if (inputDevice == null) {
+        if (inputDevice == null || inputDevice.isVirtual() || !inputDevice.isFullKeyboard()) {
             return;
         }
         synchronized (mDataStore) {

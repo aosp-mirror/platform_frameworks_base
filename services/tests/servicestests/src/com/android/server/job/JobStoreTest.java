@@ -8,6 +8,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -22,6 +23,7 @@ import android.os.Build;
 import android.os.PersistableBundle;
 import android.os.SystemClock;
 import android.test.RenamingDelegatingContext;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 
@@ -38,9 +40,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.File;
 import java.time.Clock;
 import java.time.ZoneOffset;
-import java.util.Iterator;
 
 /**
  * Test reading and writing correctly from file.
@@ -93,9 +95,145 @@ public class JobStoreTest {
         mTaskStoreUnderTest.waitForWriteToCompleteForTesting(5_000L);
     }
 
+    private void setUseSplitFiles(boolean useSplitFiles) throws Exception {
+        mTaskStoreUnderTest.setUseSplitFiles(useSplitFiles);
+        waitForPendingIo();
+    }
+
     private void waitForPendingIo() throws Exception {
         assertTrue("Timed out waiting for persistence I/O to complete",
                 mTaskStoreUnderTest.waitForWriteToCompleteForTesting(5_000L));
+    }
+
+    /** Test that we properly remove the last job of an app from the persisted file. */
+    @Test
+    public void testRemovingLastJob_singleFile() throws Exception {
+        setUseSplitFiles(false);
+        runRemovingLastJob();
+    }
+
+    /** Test that we properly remove the last job of an app from the persisted file. */
+    @Test
+    public void testRemovingLastJob_splitFiles() throws Exception {
+        setUseSplitFiles(true);
+        runRemovingLastJob();
+    }
+
+    private void runRemovingLastJob() throws Exception {
+        final JobInfo task1 = new Builder(8, mComponent)
+                .setRequiresDeviceIdle(true)
+                .setPeriodic(10000L)
+                .setRequiresCharging(true)
+                .setPersisted(true)
+                .build();
+        final JobInfo task2 = new Builder(12, mComponent)
+                .setMinimumLatency(5000L)
+                .setBackoffCriteria(15000L, JobInfo.BACKOFF_POLICY_LINEAR)
+                .setOverrideDeadline(30000L)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+                .setPersisted(true)
+                .build();
+        final int uid1 = SOME_UID;
+        final int uid2 = uid1 + 1;
+        final JobStatus JobStatus1 = JobStatus.createFromJobInfo(task1, uid1, null, -1, null);
+        final JobStatus JobStatus2 = JobStatus.createFromJobInfo(task2, uid2, null, -1, null);
+        runWritingJobsToDisk(JobStatus1, JobStatus2);
+
+        // Remove 1 job
+        mTaskStoreUnderTest.remove(JobStatus1, true);
+        waitForPendingIo();
+        JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+
+        assertJobsEqual(JobStatus2, loaded);
+        assertTrue("JobStore#contains invalid.", mTaskStoreUnderTest.containsJob(JobStatus2));
+
+        // Remove 2nd job
+        mTaskStoreUnderTest.remove(JobStatus2, true);
+        waitForPendingIo();
+        jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        assertEquals("Incorrect # of persisted tasks.", 0, jobStatusSet.size());
+    }
+
+    /** Test that we properly clear the persisted file when all jobs are dropped. */
+    @Test
+    public void testClearJobs_singleFile() throws Exception {
+        setUseSplitFiles(false);
+        runClearJobs();
+    }
+
+    /** Test that we properly clear the persisted file when all jobs are dropped. */
+    @Test
+    public void testClearJobs_splitFiles() throws Exception {
+        setUseSplitFiles(true);
+        runClearJobs();
+    }
+
+    private void runClearJobs() throws Exception {
+        final JobInfo task1 = new Builder(8, mComponent)
+                .setRequiresDeviceIdle(true)
+                .setPeriodic(10000L)
+                .setRequiresCharging(true)
+                .setPersisted(true)
+                .build();
+        final JobInfo task2 = new Builder(12, mComponent)
+                .setMinimumLatency(5000L)
+                .setBackoffCriteria(15000L, JobInfo.BACKOFF_POLICY_LINEAR)
+                .setOverrideDeadline(30000L)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+                .setPersisted(true)
+                .build();
+        final int uid1 = SOME_UID;
+        final int uid2 = uid1 + 1;
+        final JobStatus JobStatus1 = JobStatus.createFromJobInfo(task1, uid1, null, -1, null);
+        final JobStatus JobStatus2 = JobStatus.createFromJobInfo(task2, uid2, null, -1, null);
+        runWritingJobsToDisk(JobStatus1, JobStatus2);
+
+        // Remove all jobs
+        mTaskStoreUnderTest.clear();
+        waitForPendingIo();
+        JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        assertEquals("Incorrect # of persisted tasks.", 0, jobStatusSet.size());
+    }
+
+    @Test
+    public void testExtractUidFromJobFileName() {
+        File file = new File(mTestContext.getFilesDir(), "randomName");
+        assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
+
+        file = new File(mTestContext.getFilesDir(), "jobs.xml");
+        assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
+
+        file = new File(mTestContext.getFilesDir(), ".xml");
+        assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
+
+        file = new File(mTestContext.getFilesDir(), "1000.xml");
+        assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
+
+        file = new File(mTestContext.getFilesDir(), "10000");
+        assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
+
+        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX);
+        assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
+
+        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX + "text.xml");
+        assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
+
+        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX + ".xml");
+        assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
+
+        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX + "-10123.xml");
+        assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
+
+        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX + "1.xml");
+        assertEquals(1, JobStore.extractUidFromJobFileName(file));
+
+        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX + "101023.xml");
+        assertEquals(101023, JobStore.extractUidFromJobFileName(file));
     }
 
     @Test
@@ -144,13 +282,13 @@ public class JobStoreTest {
 
     @Test
     public void testWritingTwoJobsToDisk_singleFile() throws Exception {
-        mTaskStoreUnderTest.setUseSplitFiles(false);
+        setUseSplitFiles(false);
         runWritingTwoJobsToDisk();
     }
 
     @Test
     public void testWritingTwoJobsToDisk_splitFiles() throws Exception {
-        mTaskStoreUnderTest.setUseSplitFiles(true);
+        setUseSplitFiles(true);
         runWritingTwoJobsToDisk();
     }
 
@@ -172,28 +310,44 @@ public class JobStoreTest {
         final int uid2 = uid1 + 1;
         final JobStatus taskStatus1 = JobStatus.createFromJobInfo(task1, uid1, null, -1, null);
         final JobStatus taskStatus2 = JobStatus.createFromJobInfo(task2, uid2, null, -1, null);
-        mTaskStoreUnderTest.add(taskStatus1);
-        mTaskStoreUnderTest.add(taskStatus2);
+
+        runWritingJobsToDisk(taskStatus1, taskStatus2);
+    }
+
+    private void runWritingJobsToDisk(JobStatus... jobStatuses) throws Exception {
+        ArraySet<JobStatus> expectedJobs = new ArraySet<>();
+        for (JobStatus jobStatus : jobStatuses) {
+            mTaskStoreUnderTest.add(jobStatus);
+            expectedJobs.add(jobStatus);
+        }
         waitForPendingIo();
 
         final JobSet jobStatusSet = new JobSet();
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
-        assertEquals("Incorrect # of persisted tasks.", 2, jobStatusSet.size());
-        Iterator<JobStatus> it = jobStatusSet.getAllJobs().iterator();
-        JobStatus loaded1 = it.next();
-        JobStatus loaded2 = it.next();
+        assertEquals("Incorrect # of persisted tasks.", expectedJobs.size(), jobStatusSet.size());
+        int count = 0;
+        final int expectedCount = expectedJobs.size();
+        for (JobStatus loaded : jobStatusSet.getAllJobs()) {
+            count++;
+            for (int i = 0; i < expectedJobs.size(); ++i) {
+                JobStatus expected = expectedJobs.valueAt(i);
 
-        // Reverse them so we know which comparison to make.
-        if (loaded1.getJobId() != 8) {
-            JobStatus tmp = loaded1;
-            loaded1 = loaded2;
-            loaded2 = tmp;
+                try {
+                    assertJobsEqual(expected, loaded);
+                    expectedJobs.remove(expected);
+                    break;
+                } catch (AssertionError e) {
+                    // Not equal. Move along.
+                }
+            }
         }
-
-        assertJobsEqual(taskStatus1, loaded1);
-        assertJobsEqual(taskStatus2, loaded2);
-        assertTrue("JobStore#contains invalid.", mTaskStoreUnderTest.containsJob(taskStatus1));
-        assertTrue("JobStore#contains invalid.", mTaskStoreUnderTest.containsJob(taskStatus2));
+        assertEquals("Loaded more jobs than expected", expectedCount, count);
+        if (expectedJobs.size() > 0) {
+            fail("Not all expected jobs were restored");
+        }
+        for (JobStatus jobStatus : jobStatuses) {
+            assertTrue("JobStore#contains invalid.", mTaskStoreUnderTest.containsJob(jobStatus));
+        }
     }
 
     @Test

@@ -147,6 +147,19 @@ public final class VirtualDeviceParams implements Parcelable {
      */
     public static final int POLICY_TYPE_SENSORS = 0;
 
+    /** @hide */
+    @IntDef(flag = true, prefix = "RECENTS_POLICY_",
+            value = {RECENTS_POLICY_ALLOW_IN_HOST_DEVICE_RECENTS})
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
+    public @interface RecentsPolicy {}
+
+    /**
+     * If set, activities launched on this virtual device are allowed to appear in the host device
+     * of the recently launched activities list.
+     */
+    public static final int RECENTS_POLICY_ALLOW_IN_HOST_DEVICE_RECENTS = 1 << 0;
+
     private final int mLockState;
     @NonNull private final ArraySet<UserHandle> mUsersWithMatchingAccounts;
     @NonNull private final ArraySet<ComponentName> mAllowedCrossTaskNavigations;
@@ -161,6 +174,8 @@ public final class VirtualDeviceParams implements Parcelable {
     // Mapping of @PolicyType to @DevicePolicy
     @NonNull private final SparseIntArray mDevicePolicies;
     @NonNull private final List<VirtualSensorConfig> mVirtualSensorConfigs;
+    @RecentsPolicy
+    private final int mDefaultRecentsPolicy;
 
     private VirtualDeviceParams(
             @LockState int lockState,
@@ -173,7 +188,8 @@ public final class VirtualDeviceParams implements Parcelable {
             @ActivityPolicy int defaultActivityPolicy,
             @Nullable String name,
             @NonNull SparseIntArray devicePolicies,
-            @NonNull List<VirtualSensorConfig> virtualSensorConfigs) {
+            @NonNull List<VirtualSensorConfig> virtualSensorConfigs,
+            @RecentsPolicy int defaultRecentsPolicy) {
         mLockState = lockState;
         mUsersWithMatchingAccounts =
                 new ArraySet<>(Objects.requireNonNull(usersWithMatchingAccounts));
@@ -188,6 +204,7 @@ public final class VirtualDeviceParams implements Parcelable {
         mName = name;
         mDevicePolicies = Objects.requireNonNull(devicePolicies);
         mVirtualSensorConfigs = Objects.requireNonNull(virtualSensorConfigs);
+        mDefaultRecentsPolicy = defaultRecentsPolicy;
     }
 
     @SuppressWarnings("unchecked")
@@ -204,6 +221,7 @@ public final class VirtualDeviceParams implements Parcelable {
         mDevicePolicies = parcel.readSparseIntArray();
         mVirtualSensorConfigs = new ArrayList<>();
         parcel.readTypedList(mVirtualSensorConfigs, VirtualSensorConfig.CREATOR);
+        mDefaultRecentsPolicy = parcel.readInt();
     }
 
     /**
@@ -328,6 +346,16 @@ public final class VirtualDeviceParams implements Parcelable {
         return mVirtualSensorConfigs;
     }
 
+    /**
+     * Returns the policy of how to handle activities in recents.
+     *
+     * @see RecentsPolicy
+     */
+    @RecentsPolicy
+    public int getDefaultRecentsPolicy() {
+        return mDefaultRecentsPolicy;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -346,6 +374,7 @@ public final class VirtualDeviceParams implements Parcelable {
         dest.writeString8(mName);
         dest.writeSparseIntArray(mDevicePolicies);
         dest.writeTypedList(mVirtualSensorConfigs);
+        dest.writeInt(mDefaultRecentsPolicy);
     }
 
     @Override
@@ -377,15 +406,17 @@ public final class VirtualDeviceParams implements Parcelable {
                 && Objects.equals(mAllowedActivities, that.mAllowedActivities)
                 && Objects.equals(mBlockedActivities, that.mBlockedActivities)
                 && mDefaultActivityPolicy == that.mDefaultActivityPolicy
-                && Objects.equals(mName, that.mName);
+                && Objects.equals(mName, that.mName)
+                && mDefaultRecentsPolicy == that.mDefaultRecentsPolicy;
     }
 
     @Override
     public int hashCode() {
         int hashCode = Objects.hash(
                 mLockState, mUsersWithMatchingAccounts, mAllowedCrossTaskNavigations,
-                mBlockedCrossTaskNavigations, mDefaultNavigationPolicy,  mAllowedActivities,
-                mBlockedActivities, mDefaultActivityPolicy, mName, mDevicePolicies);
+                mBlockedCrossTaskNavigations, mDefaultNavigationPolicy, mAllowedActivities,
+                mBlockedActivities, mDefaultActivityPolicy, mName, mDevicePolicies,
+                mDefaultRecentsPolicy);
         for (int i = 0; i < mDevicePolicies.size(); i++) {
             hashCode = 31 * hashCode + mDevicePolicies.keyAt(i);
             hashCode = 31 * hashCode + mDevicePolicies.valueAt(i);
@@ -407,6 +438,7 @@ public final class VirtualDeviceParams implements Parcelable {
                 + " mDefaultActivityPolicy=" + mDefaultActivityPolicy
                 + " mName=" + mName
                 + " mDevicePolicies=" + mDevicePolicies
+                + " mDefaultRecentsPolicy=" + mDefaultRecentsPolicy
                 + ")";
     }
 
@@ -442,6 +474,7 @@ public final class VirtualDeviceParams implements Parcelable {
         @Nullable private String mName;
         @NonNull private SparseIntArray mDevicePolicies = new SparseIntArray();
         @NonNull private List<VirtualSensorConfig> mVirtualSensorConfigs = new ArrayList<>();
+        private int mDefaultRecentsPolicy;
 
         /**
          * Sets the lock state of the device. The permission {@code ADD_ALWAYS_UNLOCKED_DISPLAY}
@@ -647,6 +680,17 @@ public final class VirtualDeviceParams implements Parcelable {
         }
 
         /**
+         * Sets the policy to indicate how activities are handled in recents.
+         *
+         * @param defaultRecentsPolicy A policy specifying how to handle activities in recents.
+         */
+        @NonNull
+        public Builder setDefaultRecentsPolicy(@RecentsPolicy int defaultRecentsPolicy) {
+            mDefaultRecentsPolicy = defaultRecentsPolicy;
+            return this;
+        }
+
+        /**
          * Builds the {@link VirtualDeviceParams} instance.
          *
          * @throws IllegalArgumentException if there's mismatch between policy definition and
@@ -684,7 +728,8 @@ public final class VirtualDeviceParams implements Parcelable {
                     mDefaultActivityPolicy,
                     mName,
                     mDevicePolicies,
-                    mVirtualSensorConfigs);
+                    mVirtualSensorConfigs,
+                    mDefaultRecentsPolicy);
         }
     }
 }

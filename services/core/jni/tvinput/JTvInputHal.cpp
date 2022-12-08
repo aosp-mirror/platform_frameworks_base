@@ -42,8 +42,11 @@ JTvInputHal* JTvInputHal::createInstance(JNIEnv* env, jobject thiz, const sp<Loo
                                std::shared_ptr<ITvInputWrapper>(new ITvInputWrapper(hidlITvInput)),
                                looper);
     }
-    ::ndk::SpAIBinder binder(AServiceManager_waitForService(TV_INPUT_AIDL_SERVICE_NAME));
-    std::shared_ptr<AidlITvInput> aidlITvInput = AidlITvInput::fromBinder(binder);
+    std::shared_ptr<AidlITvInput> aidlITvInput = nullptr;
+    if (AServiceManager_isDeclared(TV_INPUT_AIDL_SERVICE_NAME)) {
+        ::ndk::SpAIBinder binder(AServiceManager_waitForService(TV_INPUT_AIDL_SERVICE_NAME));
+        aidlITvInput = AidlITvInput::fromBinder(binder);
+    }
     if (aidlITvInput == nullptr) {
         ALOGE("Couldn't get tv.input service.");
         return nullptr;

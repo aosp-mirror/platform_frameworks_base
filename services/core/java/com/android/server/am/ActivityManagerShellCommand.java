@@ -3131,7 +3131,17 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runWaitForBroadcastBarrier(PrintWriter pw) throws RemoteException {
-        mInternal.waitForBroadcastBarrier(pw);
+        boolean flushBroadcastLoopers = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--flush-broadcast-loopers")) {
+                flushBroadcastLoopers = true;
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        mInternal.waitForBroadcastBarrier(pw, flushBroadcastLoopers);
         return 0;
     }
 

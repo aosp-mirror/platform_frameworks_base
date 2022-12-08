@@ -330,4 +330,11 @@ oneway interface IStatusBar
 
     /** Called when requested to go to fullscreen from the active split app. */
     void goToFullscreenFromSplit();
+
+    /**
+     * Enters stage split from a current running app.
+     *
+     * @param leftOrTop indicates where the stage split is.
+     */
+    void enterStageSplitFromRunningApp(boolean leftOrTop);
 }

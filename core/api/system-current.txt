@@ -826,7 +826,6 @@ package android.app {
     method public int describeContents();
     method public int getFpsOverride();
     method public float getScalingFactor();
-    method @NonNull public android.app.GameModeConfiguration.Builder toBuilder();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.GameModeConfiguration> CREATOR;
     field public static final int FPS_OVERRIDE_NONE = 0; // 0x0
@@ -834,6 +833,7 @@ package android.app {
 
   public static final class GameModeConfiguration.Builder {
     ctor public GameModeConfiguration.Builder();
+    ctor public GameModeConfiguration.Builder(@NonNull android.app.GameModeConfiguration);
     method @NonNull public android.app.GameModeConfiguration build();
     method @NonNull public android.app.GameModeConfiguration.Builder setFpsOverride(int);
     method @NonNull public android.app.GameModeConfiguration.Builder setScalingFactor(float);
@@ -3010,6 +3010,7 @@ package android.companion.virtual {
     method @NonNull public java.util.Set<android.content.ComponentName> getBlockedCrossTaskNavigations();
     method public int getDefaultActivityPolicy();
     method public int getDefaultNavigationPolicy();
+    method public int getDefaultRecentsPolicy();
     method public int getDevicePolicy(int);
     method public int getLockState();
     method @Nullable public String getName();
@@ -3026,6 +3027,7 @@ package android.companion.virtual {
     field public static final int NAVIGATION_POLICY_DEFAULT_ALLOWED = 0; // 0x0
     field public static final int NAVIGATION_POLICY_DEFAULT_BLOCKED = 1; // 0x1
     field public static final int POLICY_TYPE_SENSORS = 0; // 0x0
+    field public static final int RECENTS_POLICY_ALLOW_IN_HOST_DEVICE_RECENTS = 1; // 0x1
   }
 
   public static final class VirtualDeviceParams.Builder {
@@ -3036,6 +3038,7 @@ package android.companion.virtual {
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAllowedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedActivities(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
+    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setDefaultRecentsPolicy(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setDevicePolicy(int, int);
     method @NonNull @RequiresPermission(value=android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY, conditional=true) public android.companion.virtual.VirtualDeviceParams.Builder setLockState(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setName(@NonNull String);
@@ -3094,7 +3097,7 @@ package android.companion.virtual.sensor {
   public class VirtualSensor {
     method @NonNull public String getName();
     method public int getType();
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendSensorEvent(@NonNull android.companion.virtual.sensor.VirtualSensorEvent);
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendEvent(@NonNull android.companion.virtual.sensor.VirtualSensorEvent);
   }
 
   public static interface VirtualSensor.SensorStateChangeCallback {
@@ -10704,7 +10707,7 @@ package android.provider {
   }
 
   public final class DeviceConfig {
-    method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static void addOnPropertiesChangedListener(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.OnPropertiesChangedListener);
+    method public static void addOnPropertiesChangedListener(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.OnPropertiesChangedListener);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean deleteProperty(@NonNull String, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static boolean getBoolean(@NonNull String, @NonNull String, boolean);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static float getFloat(@NonNull String, @NonNull String, float);

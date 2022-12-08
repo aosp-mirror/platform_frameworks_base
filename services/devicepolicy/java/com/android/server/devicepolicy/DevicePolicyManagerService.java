@@ -718,6 +718,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final String ENABLE_COEXISTENCE_FLAG = "enable_coexistence";
     private static final boolean DEFAULT_ENABLE_COEXISTENCE_FLAG = false;
 
+    // TODO(b/258425381) remove the flag after rollout.
+    private static final String KEEP_PROFILES_RUNNING_FLAG = "enable_keep_profiles_running";
+    private static final boolean DEFAULT_KEEP_PROFILES_RUNNING_FLAG = false;
+
+    /**
+     * This feature flag is checked once after boot and this value us used until the next reboot to
+     * avoid needing to handle the flag changing on the fly.
+     */
+    private final boolean mKeepProfilesRunning = isKeepProfilesRunningFlagEnabled();
+
     /**
      * For apps targeting U+
      * Enable multiple admins to coexist on the same device.
@@ -9892,6 +9902,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             (size == 1 ? "" : "s"));
                 }
                 pw.println();
+                pw.println("Keep profiles running: " + mKeepProfilesRunning);
+                pw.println();
 
                 mPolicyCache.dump(pw);
                 pw.println();
@@ -13531,6 +13543,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 sendProfileOwnerCommand(DeviceAdminReceiver.ACTION_OPERATION_SAFETY_STATE_CHANGED,
                         extras, profileOwnerId);
             }
+        }
+
+        @Override
+        public boolean isKeepProfilesRunningEnabled() {
+            return mKeepProfilesRunning;
         }
 
         private @Mode int findInteractAcrossProfilesResetMode(String packageName) {
@@ -19166,5 +19183,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 NAMESPACE_DEVICE_POLICY_MANAGER,
                 ENABLE_COEXISTENCE_FLAG,
                 DEFAULT_ENABLE_COEXISTENCE_FLAG);
+    }
+
+    private static boolean isKeepProfilesRunningFlagEnabled() {
+        return DeviceConfig.getBoolean(
+                NAMESPACE_DEVICE_POLICY_MANAGER,
+                KEEP_PROFILES_RUNNING_FLAG,
+                DEFAULT_KEEP_PROFILES_RUNNING_FLAG);
     }
 }
