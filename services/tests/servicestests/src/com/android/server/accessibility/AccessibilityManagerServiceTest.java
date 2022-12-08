@@ -21,10 +21,12 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 
-import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
-
+import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -51,7 +53,9 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.drawable.Icon;
 import android.hardware.display.DisplayManagerGlobal;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.TestableContext;
 import android.view.Display;
@@ -61,6 +65,7 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityWindowAttributes;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 
 import com.android.compatibility.common.util.TestUtils;
@@ -76,12 +81,12 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -92,13 +97,16 @@ import java.util.ArrayList;
  * APCT tests for {@link AccessibilityManagerService}.
  */
 public class AccessibilityManagerServiceTest {
-    private static final String TAG = "A11Y_MANAGER_SERVICE_TEST";
+    @Rule
+    public final A11yTestableContext mTestableContext = new A11yTestableContext(
+            ApplicationProvider.getApplicationContext());
+
     private static final int ACTION_ID = 20;
     private static final String LABEL = "label";
     private static final String INTENT_ACTION = "TESTACTION";
     private static final String DESCRIPTION = "description";
     private static final PendingIntent TEST_PENDING_INTENT = PendingIntent.getBroadcast(
-            InstrumentationRegistry.getTargetContext(), 0, new Intent(INTENT_ACTION),
+            ApplicationProvider.getApplicationContext(), 0, new Intent(INTENT_ACTION),
             PendingIntent.FLAG_MUTABLE_UNAUDITED);
     private static final RemoteAction TEST_ACTION = new RemoteAction(
             Icon.createWithContentUri("content://test"),
@@ -130,11 +138,7 @@ public class AccessibilityManagerServiceTest {
     @Mock private MagnificationController mMockMagnificationController;
     @Mock private FullScreenMagnificationController mMockFullScreenMagnificationController;
     @Mock private ProxyManager mProxyManager;
-
-    @Rule
-    public final TestableContext mTestableContext = new TestableContext(
-            getInstrumentation().getTargetContext(), null);
-
+    @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
     private MessageCapturingHandler mHandler = new MessageCapturingHandler(null);
     private AccessibilityServiceConnection mAccessibilityServiceConnection;
     private AccessibilityInputFilter mInputFilter;
@@ -228,11 +232,8 @@ public class AccessibilityManagerServiceTest {
         doThrow(SecurityException.class).when(mMockSecurityPolicy)
                 .enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
 
-        try {
-            mA11yms.registerSystemAction(TEST_ACTION, ACTION_ID);
-            Assert.fail();
-        } catch (SecurityException expected) {
-        }
+        assertThrows(SecurityException.class,
+                () -> mA11yms.registerSystemAction(TEST_ACTION, ACTION_ID));
         verify(mMockSystemActionPerformer, never()).registerSystemAction(ACTION_ID, TEST_ACTION);
     }
 
@@ -248,11 +249,8 @@ public class AccessibilityManagerServiceTest {
         doThrow(SecurityException.class).when(mMockSecurityPolicy)
                 .enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
 
-        try {
-            mA11yms.unregisterSystemAction(ACTION_ID);
-            Assert.fail();
-        } catch (SecurityException expected) {
-        }
+        assertThrows(SecurityException.class,
+                () -> mA11yms.unregisterSystemAction(ACTION_ID));
         verify(mMockSystemActionPerformer, never()).unregisterSystemAction(ACTION_ID);
     }
 
@@ -290,11 +288,9 @@ public class AccessibilityManagerServiceTest {
     public void testRegisterProxyWithoutPermission() throws Exception {
         doThrow(SecurityException.class).when(mMockSecurityPolicy)
                 .enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
-        try {
-            mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY);
-            Assert.fail();
-        } catch (SecurityException expected) {
-        }
+
+        assertThrows(SecurityException.class,
+                () -> mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY));
         verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
                 any(), any(), any(), any());
     }
@@ -302,11 +298,8 @@ public class AccessibilityManagerServiceTest {
     @SmallTest
     @Test
     public void testRegisterProxyForDefaultDisplay() throws Exception {
-        try {
-            mA11yms.registerProxyForDisplay(mMockServiceClient, Display.DEFAULT_DISPLAY);
-            Assert.fail();
-        } catch (IllegalArgumentException expected) {
-        }
+        assertThrows(IllegalArgumentException.class,
+                () -> mA11yms.registerProxyForDisplay(mMockServiceClient, Display.DEFAULT_DISPLAY));
         verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
                 any(), any(), any(), any());
     }
@@ -314,11 +307,8 @@ public class AccessibilityManagerServiceTest {
     @SmallTest
     @Test
     public void testRegisterProxyForInvalidDisplay() throws Exception {
-        try {
-            mA11yms.registerProxyForDisplay(mMockServiceClient, Display.INVALID_DISPLAY);
-            Assert.fail();
-        } catch (IllegalArgumentException expected) {
-        }
+        assertThrows(IllegalArgumentException.class,
+                () -> mA11yms.registerProxyForDisplay(mMockServiceClient, Display.INVALID_DISPLAY));
         verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
                 any(), any(), any(), any());
     }
@@ -337,11 +327,9 @@ public class AccessibilityManagerServiceTest {
     public void testUnRegisterProxyWithoutPermission() throws Exception {
         doThrow(SecurityException.class).when(mMockSecurityPolicy)
                 .enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
-        try {
-            mA11yms.unregisterProxyForDisplay(TEST_DISPLAY);
-            Assert.fail();
-        } catch (SecurityException expected) {
-        }
+
+        assertThrows(SecurityException.class,
+                () -> mA11yms.unregisterProxyForDisplay(TEST_DISPLAY));
         verify(mProxyManager, never()).unregisterProxy(TEST_DISPLAY);
     }
 
@@ -357,8 +345,9 @@ public class AccessibilityManagerServiceTest {
 
         mA11yms.onMagnificationTransitionEndedLocked(Display.DEFAULT_DISPLAY, false);
 
-        Assert.assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
-                userState.getMagnificationModeLocked(Display.DEFAULT_DISPLAY));
+        assertThat(userState.getMagnificationModeLocked(Display.DEFAULT_DISPLAY)).isEqualTo(
+                ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
     }
 
     @SmallTest
@@ -376,7 +365,7 @@ public class AccessibilityManagerServiceTest {
 
         ArgumentCaptor<Display> displayCaptor = ArgumentCaptor.forClass(Display.class);
         verify(mInputFilter, timeout(100)).refreshMagnificationMode(displayCaptor.capture());
-        Assert.assertEquals(Display.DEFAULT_DISPLAY, displayCaptor.getValue().getDisplayId());
+        assertThat(displayCaptor.getValue().getDisplayId()).isEqualTo(Display.DEFAULT_DISPLAY);
     }
 
     @SmallTest
@@ -506,10 +495,59 @@ public class AccessibilityManagerServiceTest {
                 attributes);
     }
 
+    @SmallTest
+    @Test
+    public void testPerformAccessibilityShortcut_hearingAids_startActivityWithExpectedComponent() {
+        final AccessibilityUserState userState = mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked());
+        mockManageAccessibilityGranted(mTestableContext);
+        userState.mAccessibilityShortcutKeyTargets.add(
+                ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+
+        mA11yms.performAccessibilityShortcut(
+                ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+        mHandler.sendAllMessages();
+
+        assertStartActivityWithExpectedComponentName(mTestableContext.getMockContext(),
+                ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+    }
+
+    private void mockManageAccessibilityGranted(TestableContext context) {
+        context.getTestablePermissions().setPermission(Manifest.permission.MANAGE_ACCESSIBILITY,
+                PackageManager.PERMISSION_GRANTED);
+    }
+
+    private void assertStartActivityWithExpectedComponentName(Context mockContext,
+            String componentName) {
+        verify(mockContext).startActivityAsUser(mIntentArgumentCaptor.capture(),
+                any(Bundle.class), any(UserHandle.class));
+        assertThat(mIntentArgumentCaptor.getValue().getStringExtra(
+                Intent.EXTRA_COMPONENT_NAME)).isEqualTo(componentName);
+    }
+
     public static class FakeInputFilter extends AccessibilityInputFilter {
         FakeInputFilter(Context context,
                 AccessibilityManagerService service) {
             super(context, service);
+        }
+    }
+
+    private static class A11yTestableContext extends TestableContext {
+
+        private final Context mMockContext;
+
+        A11yTestableContext(Context base) {
+            super(base);
+            mMockContext = Mockito.mock(Context.class);
+        }
+
+        @Override
+        public void startActivityAsUser(Intent intent, Bundle options, UserHandle user) {
+            mMockContext.startActivityAsUser(intent, options, user);
+        }
+
+        Context getMockContext() {
+            return mMockContext;
         }
     }
 }
