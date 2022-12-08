@@ -9851,6 +9851,7 @@ package android.content {
     method @Deprecated public abstract int getWallpaperDesiredMinimumHeight();
     method @Deprecated public abstract int getWallpaperDesiredMinimumWidth();
     method public abstract void grantUriPermission(String, android.net.Uri, int);
+    method public boolean isDeviceContext();
     method public abstract boolean isDeviceProtectedStorage();
     method public boolean isRestricted();
     method public boolean isUiContext();
@@ -9866,6 +9867,7 @@ package android.content {
     method public abstract android.database.sqlite.SQLiteDatabase openOrCreateDatabase(String, int, android.database.sqlite.SQLiteDatabase.CursorFactory, @Nullable android.database.DatabaseErrorHandler);
     method @Deprecated public abstract android.graphics.drawable.Drawable peekWallpaper();
     method public void registerComponentCallbacks(android.content.ComponentCallbacks);
+    method public void registerDeviceIdChangeListener(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.IntConsumer);
     method @Nullable public abstract android.content.Intent registerReceiver(@Nullable android.content.BroadcastReceiver, android.content.IntentFilter);
     method @Nullable public abstract android.content.Intent registerReceiver(@Nullable android.content.BroadcastReceiver, android.content.IntentFilter, int);
     method @Nullable public abstract android.content.Intent registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter, @Nullable String, @Nullable android.os.Handler);
@@ -9905,6 +9907,7 @@ package android.content {
     method public abstract boolean stopService(android.content.Intent);
     method public abstract void unbindService(@NonNull android.content.ServiceConnection);
     method public void unregisterComponentCallbacks(android.content.ComponentCallbacks);
+    method public void unregisterDeviceIdChangeListener(@NonNull java.util.function.IntConsumer);
     method public abstract void unregisterReceiver(android.content.BroadcastReceiver);
     method public void updateServiceGroup(@NonNull android.content.ServiceConnection, int, int);
     field public static final String ACCESSIBILITY_SERVICE = "accessibility";
