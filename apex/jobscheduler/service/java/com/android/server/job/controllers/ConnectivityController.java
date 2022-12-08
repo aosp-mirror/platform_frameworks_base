@@ -42,7 +42,6 @@ import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.DataUnit;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Pools;
@@ -81,6 +80,8 @@ public final class ConnectivityController extends RestrictingController implemen
     private static final String TAG = "JobScheduler.Connectivity";
     private static final boolean DEBUG = JobSchedulerService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
+
+    public static final long UNKNOWN_TIME = -1L;
 
     // The networking stack has a hard limit so we can't make this configurable.
     private static final int MAX_NETWORK_CALLBACKS = 125;
@@ -570,9 +571,8 @@ public final class ConnectivityController extends RestrictingController implemen
             // If we don't know the bandwidth, all we can do is hope the job finishes the minimum
             // chunk in time.
             if (bandwidthDown > 0) {
-                // Divide by 8 to convert bits to bytes.
-                final long estimatedMillis = ((minimumChunkBytes * DateUtils.SECOND_IN_MILLIS)
-                        / (DataUnit.KIBIBYTES.toBytes(bandwidthDown) / 8));
+                final long estimatedMillis =
+                        calculateTransferTimeMs(minimumChunkBytes, bandwidthDown);
                 if (estimatedMillis > maxJobExecutionTimeMs) {
                     // If we'd never finish the minimum chunk before the timeout, we'd be insane!
                     Slog.w(TAG, "Minimum chunk " + minimumChunkBytes + " bytes over "
@@ -585,9 +585,8 @@ public final class ConnectivityController extends RestrictingController implemen
             final long bandwidthUp = capabilities.getLinkUpstreamBandwidthKbps();
             // If we don't know the bandwidth, all we can do is hope the job finishes in time.
             if (bandwidthUp > 0) {
-                // Divide by 8 to convert bits to bytes.
-                final long estimatedMillis = ((minimumChunkBytes * DateUtils.SECOND_IN_MILLIS)
-                        / (DataUnit.KIBIBYTES.toBytes(bandwidthUp) / 8));
+                final long estimatedMillis =
+                        calculateTransferTimeMs(minimumChunkBytes, bandwidthUp);
                 if (estimatedMillis > maxJobExecutionTimeMs) {
                     // If we'd never finish the minimum chunk before the timeout, we'd be insane!
                     Slog.w(TAG, "Minimum chunk " + minimumChunkBytes + " bytes over " + bandwidthUp
@@ -615,9 +614,7 @@ public final class ConnectivityController extends RestrictingController implemen
             final long bandwidth = capabilities.getLinkDownstreamBandwidthKbps();
             // If we don't know the bandwidth, all we can do is hope the job finishes in time.
             if (bandwidth > 0) {
-                // Divide by 8 to convert bits to bytes.
-                final long estimatedMillis = ((downloadBytes * DateUtils.SECOND_IN_MILLIS)
-                        / (DataUnit.KIBIBYTES.toBytes(bandwidth) / 8));
+                final long estimatedMillis = calculateTransferTimeMs(downloadBytes, bandwidth);
                 if (estimatedMillis > maxJobExecutionTimeMs) {
                     // If we'd never finish before the timeout, we'd be insane!
                     Slog.w(TAG, "Estimated " + downloadBytes + " download bytes over " + bandwidth
@@ -633,9 +630,7 @@ public final class ConnectivityController extends RestrictingController implemen
             final long bandwidth = capabilities.getLinkUpstreamBandwidthKbps();
             // If we don't know the bandwidth, all we can do is hope the job finishes in time.
             if (bandwidth > 0) {
-                // Divide by 8 to convert bits to bytes.
-                final long estimatedMillis = ((uploadBytes * DateUtils.SECOND_IN_MILLIS)
-                        / (DataUnit.KIBIBYTES.toBytes(bandwidth) / 8));
+                final long estimatedMillis = calculateTransferTimeMs(uploadBytes, bandwidth);
                 if (estimatedMillis > maxJobExecutionTimeMs) {
                     // If we'd never finish before the timeout, we'd be insane!
                     Slog.w(TAG, "Estimated " + uploadBytes + " upload bytes over " + bandwidth
@@ -647,6 +642,48 @@ public final class ConnectivityController extends RestrictingController implemen
         }
 
         return false;
+    }
+
+    /**
+     * Return the estimated amount of time this job will be transferring data,
+     * based on the current network speed.
+     */
+    public long getEstimatedTransferTimeMs(JobStatus jobStatus) {
+        final long downloadBytes = jobStatus.getEstimatedNetworkDownloadBytes();
+        final long uploadBytes = jobStatus.getEstimatedNetworkUploadBytes();
+        if (downloadBytes == JobInfo.NETWORK_BYTES_UNKNOWN
+                && uploadBytes == JobInfo.NETWORK_BYTES_UNKNOWN) {
+            return UNKNOWN_TIME;
+        }
+        if (jobStatus.network == null) {
+            // This job doesn't have a network assigned.
+            return UNKNOWN_TIME;
+        }
+        NetworkCapabilities capabilities = getNetworkCapabilities(jobStatus.network);
+        if (capabilities == null) {
+            return UNKNOWN_TIME;
+        }
+        final long estimatedDownloadTimeMs = calculateTransferTimeMs(downloadBytes,
+                capabilities.getLinkDownstreamBandwidthKbps());
+        final long estimatedUploadTimeMs = calculateTransferTimeMs(uploadBytes,
+                capabilities.getLinkUpstreamBandwidthKbps());
+        if (estimatedDownloadTimeMs == UNKNOWN_TIME) {
+            return estimatedUploadTimeMs;
+        } else if (estimatedUploadTimeMs == UNKNOWN_TIME) {
+            return estimatedDownloadTimeMs;
+        }
+        return estimatedDownloadTimeMs + estimatedUploadTimeMs;
+    }
+
+    @VisibleForTesting
+    static long calculateTransferTimeMs(long transferBytes, long bandwidthKbps) {
+        if (transferBytes == JobInfo.NETWORK_BYTES_UNKNOWN || bandwidthKbps <= 0) {
+            return UNKNOWN_TIME;
+        }
+        return (transferBytes * DateUtils.SECOND_IN_MILLIS)
+                // Multiply by 1000 to convert kilobits to bits.
+                // Divide by 8 to convert bits to bytes.
+                / (bandwidthKbps * 1000 / 8);
     }
 
     private static boolean isCongestionDelayed(JobStatus jobStatus, Network network,
