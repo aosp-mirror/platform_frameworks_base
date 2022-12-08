@@ -7398,8 +7398,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(getServices().notificationManager, times(1))
                 .notifyAsUser(any(), anyInt(), any(), any());
         // Verify that the apps are suspended.
-        verify(getServices().ipackageManager, times(1)).setPackagesSuspendedAsUser(
-                any(), eq(true), any(), any(), any(), any(), anyInt());
+        verify(getServices().packageManagerInternal, times(1))
+                .setPackagesSuspendedByAdmin(anyInt(), any(), eq(true));
     }
 
     /**

@@ -271,6 +271,26 @@ public abstract class PackageManagerInternal {
     public abstract String getSuspendingPackage(String suspendedPackage, int userId);
 
     /**
+     * Suspend or unsuspend packages upon admin request.
+     *
+     * @param userId The target user.
+     * @param packageNames The names of the packages to set the suspended status.
+     * @param suspended Whether the packages should be suspended or unsuspended.
+     * @return an array of package names for which the suspended status could not be set as
+     *   requested in this method.
+     */
+    public abstract String[] setPackagesSuspendedByAdmin(
+            @UserIdInt int userId, @NonNull String[] packageNames, boolean suspended);
+
+    /**
+     * Suspend or unsuspend packages in a profile when quiet mode is toggled.
+     *
+     * @param userId The target user.
+     * @param suspended Whether the packages should be suspended or unsuspended.
+     */
+    public abstract void setPackagesSuspendedForQuietMode(@UserIdInt int userId, boolean suspended);
+
+    /**
      * Get the information describing the dialog to be shown to the user when they try to launch a
      * suspended application.
      *

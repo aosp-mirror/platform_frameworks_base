@@ -308,6 +308,11 @@ public abstract class DevicePolicyManagerInternal {
     public abstract boolean isUserOrganizationManaged(@UserIdInt int userId);
 
     /**
+     * Returns the list of packages suspended by admin on a given user.
+     */
+    public abstract Set<String> getPackagesSuspendedByAdmin(@UserIdInt int userId);
+
+    /**
      * Returns whether the application exemptions feature flag is enabled.
      */
     public abstract boolean isApplicationExemptionsFlagEnabled();
