@@ -59,7 +59,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.provider.Settings;
-import android.telecom.TelecomManager;
 import android.util.AndroidException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -1748,7 +1747,7 @@ public class UserManager {
     public static final int SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED = 1 << 2;
 
     /**
-     * Result returned in {@link #getUserSwitchability()} indicating user swichability.
+     * Result returned in {@link #getUserSwitchability()} indicating user switchability.
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -2128,20 +2127,16 @@ public class UserManager {
      * @hide
      */
     @Deprecated
-    @RequiresPermission(allOf = {
-            Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.MANAGE_USERS}, // Can be INTERACT_ACROSS_USERS instead.
-            conditional = true)
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @UserHandleAware
     public boolean canSwitchUsers() {
-        boolean allowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
-                mContext.getContentResolver(),
-                Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED, 0) != 0;
-        boolean isSystemUserUnlocked = isUserUnlocked(UserHandle.SYSTEM);
-        boolean isUserSwitchDisallowed = hasUserRestrictionForUser(DISALLOW_USER_SWITCH, mUserId);
-        return (allowUserSwitchingWhenSystemUserLocked || isSystemUserUnlocked) && !inCall()
-                && !isUserSwitchDisallowed;
+        try {
+            return mService.getUserSwitchability(mUserId) == SWITCHABILITY_STATUS_OK;
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -2156,9 +2151,8 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(allOf = {Manifest.permission.READ_PHONE_STATE,
-            android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
     @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public @UserSwitchabilityResult int getUserSwitchability() {
         return getUserSwitchability(UserHandle.of(getContextUserIfAppropriate()));
@@ -2175,31 +2169,14 @@ public class UserManager {
      * @return A {@link UserSwitchabilityResult} flag indicating if the user is switchable.
      * @hide
      */
-    @RequiresPermission(allOf = {Manifest.permission.READ_PHONE_STATE,
-            android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
     public @UserSwitchabilityResult int getUserSwitchability(UserHandle userHandle) {
-        int flags = SWITCHABILITY_STATUS_OK;
-        if (inCall()) {
-            flags |= SWITCHABILITY_STATUS_USER_IN_CALL;
+        try {
+            return mService.getUserSwitchability(userHandle.getIdentifier());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
-        if (hasUserRestrictionForUser(DISALLOW_USER_SWITCH, userHandle)) {
-            flags |= SWITCHABILITY_STATUS_USER_SWITCH_DISALLOWED;
-        }
-
-        // System User is always unlocked in Headless System User Mode, so ignore this flag
-        if (!isHeadlessSystemUserMode()) {
-            final boolean allowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
-                    mContext.getContentResolver(),
-                    Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED, 0) != 0;
-            final boolean systemUserUnlocked = isUserUnlocked(UserHandle.SYSTEM);
-
-            if (!allowUserSwitchingWhenSystemUserLocked && !systemUserUnlocked) {
-                flags |= SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED;
-            }
-        }
-
-        return flags;
     }
 
     /**
@@ -5612,11 +5589,6 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
-    }
-
-    private boolean inCall() {
-        final TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
-        return telecomManager != null && telecomManager.isInCall();
     }
 
     /* Cache key for anything that assumes that userIds cannot be re-used without rebooting. */
