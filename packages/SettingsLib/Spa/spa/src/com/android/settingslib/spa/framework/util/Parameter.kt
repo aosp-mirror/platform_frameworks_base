@@ -47,12 +47,15 @@ fun List<NamedNavArgument>.navLink(arguments: Bundle? = null): String {
     return argsArray.joinToString("") { arg -> "/$arg" }
 }
 
-fun List<NamedNavArgument>.normalize(arguments: Bundle? = null): Bundle? {
+fun List<NamedNavArgument>.normalize(
+    arguments: Bundle? = null,
+    eraseRuntimeValues: Boolean = false
+): Bundle? {
     if (this.isEmpty()) return null
     val normArgs = Bundle()
     for (navArg in this) {
         // Erase value of runtime parameters.
-        if (navArg.isRuntimeParam()) {
+        if (navArg.isRuntimeParam() && eraseRuntimeValues) {
             normArgs.putString(navArg.name, null)
             continue
         }
