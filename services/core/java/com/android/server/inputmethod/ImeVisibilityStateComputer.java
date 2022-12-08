@@ -45,6 +45,7 @@ import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.server.LocalServices;
 import com.android.server.wm.WindowManagerInternal;
@@ -138,11 +139,38 @@ public final class ImeVisibilityStateComputer {
      */
     private final ImeVisibilityPolicy mPolicy;
 
-    public ImeVisibilityStateComputer(InputMethodManagerService service) {
+    public ImeVisibilityStateComputer(@NonNull InputMethodManagerService service) {
+        this(service,
+                LocalServices.getService(WindowManagerInternal.class),
+                LocalServices.getService(WindowManagerInternal.class)::getDisplayImePolicy,
+                new ImeVisibilityPolicy());
+    }
+
+    @VisibleForTesting
+    public ImeVisibilityStateComputer(@NonNull InputMethodManagerService service,
+            @NonNull Injector injector) {
+        this(service, injector.getWmService(), injector.getImeValidator(),
+                new ImeVisibilityPolicy());
+    }
+
+    interface Injector {
+        default WindowManagerInternal getWmService() {
+            return null;
+        }
+
+        default InputMethodManagerService.ImeDisplayValidator getImeValidator() {
+            return null;
+        }
+    }
+
+    private ImeVisibilityStateComputer(InputMethodManagerService service,
+            WindowManagerInternal wmService,
+            InputMethodManagerService.ImeDisplayValidator imeDisplayValidator,
+            ImeVisibilityPolicy imePolicy) {
         mService = service;
-        mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
-        mImeDisplayValidator = mWindowManagerInternal::getDisplayImePolicy;
-        mPolicy = new ImeVisibilityPolicy();
+        mWindowManagerInternal = wmService;
+        mImeDisplayValidator = imeDisplayValidator;
+        mPolicy = imePolicy;
     }
 
     /**

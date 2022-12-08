@@ -200,9 +200,8 @@ public class InputMethodManagerServiceTestBase {
                         "TestServiceThread",
                         Process.THREAD_PRIORITY_FOREGROUND, /* allowIo */
                         false);
-        mInputMethodManagerService =
-                new InputMethodManagerService(
-                        mContext, mServiceThread, mMockInputMethodBindingController);
+        mInputMethodManagerService = new InputMethodManagerService(mContext, mServiceThread,
+                mMockInputMethodBindingController);
 
         // Start a InputMethodManagerService.Lifecycle to publish and manage the lifecycle of
         // InputMethodManagerService, which is closer to the real situation.

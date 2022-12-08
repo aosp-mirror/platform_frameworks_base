@@ -683,7 +683,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * The display ID of the input method indicates the fallback display which returned by
      * {@link #computeImeDisplayIdForTarget}.
      */
-    private static final int FALLBACK_DISPLAY_ID = DEFAULT_DISPLAY;
+    static final int FALLBACK_DISPLAY_ID = DEFAULT_DISPLAY;
 
     /**
      * If non-null, this is the input method service we are currently connected
@@ -4645,6 +4645,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+    }
+
+    @VisibleForTesting
+    ImeVisibilityStateComputer getVisibilityStateComputer() {
+        return mVisibilityStateComputer;
+    }
+
+    @VisibleForTesting
+    ImeVisibilityApplier getVisibilityApplier() {
+        return mVisibilityApplier;
     }
 
     @GuardedBy("ImfLock.class")
