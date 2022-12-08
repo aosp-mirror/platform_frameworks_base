@@ -3804,6 +3804,7 @@
   <java-symbol type="string" name="config_cameraShutterSound" />
   <java-symbol type="integer" name="config_autoGroupAtCount" />
   <java-symbol type="bool" name="config_dozeAlwaysOnDisplayAvailable" />
+  <java-symbol type="bool" name="config_dozePickupGestureEnabled" />
   <java-symbol type="bool" name="config_dozeAlwaysOnEnabled" />
   <java-symbol type="bool" name="config_dozeSupportsAodWallpaper" />
   <java-symbol type="bool" name="config_displayBlanksAfterDoze" />
