@@ -1099,10 +1099,9 @@ static jobject convertDeviceProductInfoToJavaObject(
                           connectionToSinkType);
 }
 
-static jobject nativeGetStaticDisplayInfo(JNIEnv* env, jclass clazz, jobject tokenObj) {
+static jobject nativeGetStaticDisplayInfo(JNIEnv* env, jclass clazz, jlong id) {
     ui::StaticDisplayInfo info;
-    if (const auto token = ibinderForJavaObject(env, tokenObj);
-        !token || SurfaceComposerClient::getStaticDisplayInfo(token, &info) != NO_ERROR) {
+    if (SurfaceComposerClient::getStaticDisplayInfo(id, &info) != NO_ERROR) {
         return nullptr;
     }
 
@@ -1160,10 +1159,9 @@ jobject convertHdrCapabilitiesToJavaObject(JNIEnv* env, const HdrCapabilities& c
                           capabilities.getDesiredMinLuminance());
 }
 
-static jobject nativeGetDynamicDisplayInfo(JNIEnv* env, jclass clazz, jobject tokenObj) {
+static jobject nativeGetDynamicDisplayInfo(JNIEnv* env, jclass clazz, jlong displayId) {
     ui::DynamicDisplayInfo info;
-    if (const auto token = ibinderForJavaObject(env, tokenObj);
-        !token || SurfaceComposerClient::getDynamicDisplayInfo(token, &info) != NO_ERROR) {
+    if (SurfaceComposerClient::getDynamicDisplayInfoFromId(displayId, &info) != NO_ERROR) {
         return nullptr;
     }
 
@@ -2020,10 +2018,10 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeSetDisplaySize", "(JLandroid/os/IBinder;II)V",
             (void*)nativeSetDisplaySize },
     {"nativeGetStaticDisplayInfo",
-            "(Landroid/os/IBinder;)Landroid/view/SurfaceControl$StaticDisplayInfo;",
+            "(J)Landroid/view/SurfaceControl$StaticDisplayInfo;",
             (void*)nativeGetStaticDisplayInfo },
     {"nativeGetDynamicDisplayInfo",
-            "(Landroid/os/IBinder;)Landroid/view/SurfaceControl$DynamicDisplayInfo;",
+            "(J)Landroid/view/SurfaceControl$DynamicDisplayInfo;",
             (void*)nativeGetDynamicDisplayInfo },
     {"nativeSetDesiredDisplayModeSpecs",
             "(Landroid/os/IBinder;Landroid/view/SurfaceControl$DesiredDisplayModeSpecs;)Z",

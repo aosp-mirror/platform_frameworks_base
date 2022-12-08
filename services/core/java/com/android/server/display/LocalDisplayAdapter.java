@@ -112,13 +112,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mSurfaceControlProxy.getPhysicalDisplayToken(physicalDisplayId);
         if (displayToken != null) {
             SurfaceControl.StaticDisplayInfo staticInfo =
-                    mSurfaceControlProxy.getStaticDisplayInfo(displayToken);
+                    mSurfaceControlProxy.getStaticDisplayInfo(physicalDisplayId);
             if (staticInfo == null) {
                 Slog.w(TAG, "No valid static info found for display device " + physicalDisplayId);
                 return;
             }
             SurfaceControl.DynamicDisplayInfo dynamicInfo =
-                    mSurfaceControlProxy.getDynamicDisplayInfo(displayToken);
+                    mSurfaceControlProxy.getDynamicDisplayInfo(physicalDisplayId);
             if (dynamicInfo == null) {
                 Slog.w(TAG, "No valid dynamic info found for display device " + physicalDisplayId);
                 return;
@@ -1402,8 +1402,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     @VisibleForTesting
     public static class SurfaceControlProxy {
-        public SurfaceControl.DynamicDisplayInfo getDynamicDisplayInfo(IBinder token) {
-            return SurfaceControl.getDynamicDisplayInfo(token);
+        public SurfaceControl.DynamicDisplayInfo getDynamicDisplayInfo(long displayId) {
+            return SurfaceControl.getDynamicDisplayInfo(displayId);
         }
 
         public long[] getPhysicalDisplayIds() {
@@ -1414,8 +1414,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return DisplayControl.getPhysicalDisplayToken(physicalDisplayId);
         }
 
-        public SurfaceControl.StaticDisplayInfo getStaticDisplayInfo(IBinder displayToken) {
-            return SurfaceControl.getStaticDisplayInfo(displayToken);
+        public SurfaceControl.StaticDisplayInfo getStaticDisplayInfo(long displayId) {
+            return SurfaceControl.getStaticDisplayInfo(displayId);
         }
 
         public SurfaceControl.DesiredDisplayModeSpecs getDesiredDisplayModeSpecs(

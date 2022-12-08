@@ -214,7 +214,7 @@ public class DisplayManagerServiceTest {
                 .thenReturn(mMockDisplayToken);
         SurfaceControl.StaticDisplayInfo staticDisplayInfo = new SurfaceControl.StaticDisplayInfo();
         staticDisplayInfo.isInternal = true;
-        when(mSurfaceControlProxy.getStaticDisplayInfo(mMockDisplayToken))
+        when(mSurfaceControlProxy.getStaticDisplayInfo(anyLong()))
                 .thenReturn(staticDisplayInfo);
         SurfaceControl.DynamicDisplayInfo dynamicDisplayMode =
                 new SurfaceControl.DynamicDisplayInfo();
@@ -223,7 +223,7 @@ public class DisplayManagerServiceTest {
         displayMode.height = 200;
         displayMode.supportedHdrTypes = new int[]{1, 2};
         dynamicDisplayMode.supportedDisplayModes = new SurfaceControl.DisplayMode[] {displayMode};
-        when(mSurfaceControlProxy.getDynamicDisplayInfo(mMockDisplayToken))
+        when(mSurfaceControlProxy.getDynamicDisplayInfo(anyLong()))
                 .thenReturn(dynamicDisplayMode);
         when(mSurfaceControlProxy.getDesiredDisplayModeSpecs(mMockDisplayToken))
                 .thenReturn(new SurfaceControl.DesiredDisplayModeSpecs());

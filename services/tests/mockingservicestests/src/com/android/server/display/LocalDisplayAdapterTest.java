@@ -1046,9 +1046,9 @@ public class LocalDisplayAdapterTest {
         mAddresses.add(display.address);
         when(mSurfaceControlProxy.getPhysicalDisplayToken(display.address.getPhysicalDisplayId()))
                 .thenReturn(display.token);
-        when(mSurfaceControlProxy.getStaticDisplayInfo(display.token))
+        when(mSurfaceControlProxy.getStaticDisplayInfo(display.address.getPhysicalDisplayId()))
                 .thenReturn(display.info);
-        when(mSurfaceControlProxy.getDynamicDisplayInfo(display.token))
+        when(mSurfaceControlProxy.getDynamicDisplayInfo(display.address.getPhysicalDisplayId()))
                 .thenReturn(display.dynamicInfo);
         when(mSurfaceControlProxy.getDesiredDisplayModeSpecs(display.token))
                 .thenReturn(display.desiredDisplayModeSpecs);
