@@ -11427,8 +11427,8 @@ public class AudioService extends IAudioService.Stub
     }
 
     public List<AudioRecordingConfiguration> getActiveRecordingConfigurations() {
-        final boolean isPrivileged =
-                (PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(
+        final boolean isPrivileged = Binder.getCallingUid() == Process.SYSTEM_UID
+                || (PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(
                         android.Manifest.permission.MODIFY_AUDIO_ROUTING));
         return mRecordMonitor.getActiveRecordingConfigurations(isPrivileged);
     }
