@@ -845,7 +845,7 @@ package android.app {
     method public int getActiveGameMode();
     method @NonNull public int[] getAvailableGameModes();
     method @Nullable public android.app.GameModeConfiguration getGameModeConfiguration(int);
-    method @NonNull public int[] getOptedInGameModes();
+    method @NonNull public int[] getOverriddenGameModes();
     method public boolean isDownscalingAllowed();
     method public boolean isFpsOverrideAllowed();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -860,7 +860,7 @@ package android.app {
     method @NonNull public android.app.GameModeInfo.Builder setDownscalingAllowed(boolean);
     method @NonNull public android.app.GameModeInfo.Builder setFpsOverrideAllowed(boolean);
     method @NonNull public android.app.GameModeInfo.Builder setGameModeConfiguration(int, @NonNull android.app.GameModeConfiguration);
-    method @NonNull public android.app.GameModeInfo.Builder setOptedInGameModes(@NonNull int[]);
+    method @NonNull public android.app.GameModeInfo.Builder setOverriddenGameModes(@NonNull int[]);
   }
 
   public abstract class InstantAppResolverService extends android.app.Service {
