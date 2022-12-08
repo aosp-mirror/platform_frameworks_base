@@ -2873,6 +2873,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return key_consumed;
                 }
                 break;
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
+                    enterStageSplitFromRunningApp(true /* leftOrTop */);
+                    return key_consumed;
+                }
+                break;
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
+                    enterStageSplitFromRunningApp(false /* leftOrTop */);
+                    return key_consumed;
+                }
+                break;
             case KeyEvent.KEYCODE_SLASH:
                 if (down && repeatCount == 0 && event.isMetaPressed() && !keyguardOn) {
                     toggleKeyboardShortcutsMenu(event.getDeviceId());
@@ -3486,6 +3498,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
         if (statusbar != null) {
             statusbar.hideRecentApps(triggeredFromAltTab, triggeredFromHome);
+        }
+    }
+
+    private void enterStageSplitFromRunningApp(boolean leftOrTop) {
+        StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+        if (statusbar != null) {
+            statusbar.enterStageSplitFromRunningApp(leftOrTop);
         }
     }
 
