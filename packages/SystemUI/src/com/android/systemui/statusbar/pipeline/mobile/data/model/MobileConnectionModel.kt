@@ -39,33 +39,42 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityMod
  * threading complex system objects through the pipeline.
  */
 data class MobileConnectionModel(
-    /** From [ServiceStateListener.onServiceStateChanged] */
+    /** Fields below are from [ServiceStateListener.onServiceStateChanged] */
     val isEmergencyOnly: Boolean = false,
     val isRoaming: Boolean = false,
+    /**
+     * See [android.telephony.ServiceState.getOperatorAlphaShort], this value is defined as the
+     * current registered operator name in short alphanumeric format. In some cases this name might
+     * be preferred over other methods of calculating the network name
+     */
+    val operatorAlphaShort: String? = null,
 
-    /** From [SignalStrengthsListener.onSignalStrengthsChanged] */
+    /** Fields below from [SignalStrengthsListener.onSignalStrengthsChanged] */
     val isGsm: Boolean = false,
     @IntRange(from = 0, to = 4)
     val cdmaLevel: Int = CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN,
     @IntRange(from = 0, to = 4)
     val primaryLevel: Int = CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN,
 
-    /** Mapped from [DataConnectionStateListener.onDataConnectionStateChanged] */
+    /** Fields below from [DataConnectionStateListener.onDataConnectionStateChanged] */
     val dataConnectionState: DataConnectionState = Disconnected,
 
-    /** From [DataActivityListener.onDataActivity]. See [TelephonyManager] for the values */
+    /**
+     * Fields below from [DataActivityListener.onDataActivity]. See [TelephonyManager] for the
+     * values
+     */
     val dataActivityDirection: DataActivityModel =
         DataActivityModel(
             hasActivityIn = false,
             hasActivityOut = false,
         ),
 
-    /** From [CarrierNetworkListener.onCarrierNetworkChange] */
+    /** Fields below from [CarrierNetworkListener.onCarrierNetworkChange] */
     val carrierNetworkChangeActive: Boolean = false,
 
+    /** Fields below from [DisplayInfoListener.onDisplayInfoChanged]. */
+
     /**
-     * From [DisplayInfoListener.onDisplayInfoChanged].
-     *
      * [resolvedNetworkType] is the [TelephonyDisplayInfo.getOverrideNetworkType] if it exists or
      * [TelephonyDisplayInfo.getNetworkType]. This is used to look up the proper network type icon
      */

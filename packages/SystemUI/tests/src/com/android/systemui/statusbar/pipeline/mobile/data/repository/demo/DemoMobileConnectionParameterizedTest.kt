@@ -25,6 +25,7 @@ import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.util.mockito.mock
@@ -98,6 +99,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                     activity = testCase.activity,
                     carrierNetworkChange = testCase.carrierNetworkChange,
                     roaming = testCase.roaming,
+                    name = "demo name",
                 )
 
             fakeNetworkEventFlow.value = networkModel
@@ -121,6 +123,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 assertThat(connectionInfo.carrierNetworkChangeActive)
                     .isEqualTo(model.carrierNetworkChange)
                 assertThat(connectionInfo.isRoaming).isEqualTo(model.roaming)
+                assertThat(conn.networkName.value).isEqualTo(NetworkNameModel.Derived(model.name))
 
                 // TODO(b/261029387): check these once we start handling them
                 assertThat(connectionInfo.isEmergencyOnly).isFalse()
@@ -144,6 +147,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
         @Annotation.DataActivityType val activity: Int,
         val carrierNetworkChange: Boolean,
         val roaming: Boolean,
+        val name: String,
     ) {
         override fun toString(): String {
             return "INPUT(level=$level, " +
@@ -153,7 +157,8 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 "inflateStrength=$inflateStrength, " +
                 "activity=$activity, " +
                 "carrierNetworkChange=$carrierNetworkChange, " +
-                "roaming=$roaming)"
+                "roaming=$roaming, " +
+                "name=$name)"
         }
 
         // Convenience for iterating test data and creating new cases
@@ -166,6 +171,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
             @Annotation.DataActivityType activity: Int? = null,
             carrierNetworkChange: Boolean? = null,
             roaming: Boolean? = null,
+            name: String? = null,
         ): TestCase =
             TestCase(
                 level = level ?: this.level,
@@ -176,6 +182,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 activity = activity ?: this.activity,
                 carrierNetworkChange = carrierNetworkChange ?: this.carrierNetworkChange,
                 roaming = roaming ?: this.roaming,
+                name = name ?: this.name,
             )
     }
 
@@ -204,6 +211,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
         private val carrierNetworkChange = booleanList
         // false first so the base case doesn't have roaming set (more common)
         private val roaming = listOf(false, true)
+        private val names = listOf("name 1", "name 2")
 
         @Parameters(name = "{0}") @JvmStatic fun data() = testData()
 
@@ -239,6 +247,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                     activity.first(),
                     carrierNetworkChange.first(),
                     roaming.first(),
+                    names.first(),
                 )
 
             val tail =
@@ -249,7 +258,8 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                         inflateStrength.map { baseCase.modifiedBy(inflateStrength = it) },
                         activity.map { baseCase.modifiedBy(activity = it) },
                         carrierNetworkChange.map { baseCase.modifiedBy(carrierNetworkChange = it) },
-                        roaming.map { baseCase.modifiedBy(roaming = it) }
+                        roaming.map { baseCase.modifiedBy(roaming = it) },
+                        names.map { baseCase.modifiedBy(name = it) },
                     )
                     .flatten()
 

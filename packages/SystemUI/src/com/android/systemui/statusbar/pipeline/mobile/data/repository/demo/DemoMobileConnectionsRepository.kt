@@ -27,6 +27,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
@@ -187,6 +188,7 @@ constructor(
         // This is always true here, because we split out disabled states at the data-source level
         connection.dataEnabled.value = true
         connection.isDefaultDataSubscription.value = state.dataType != null
+        connection.networkName.value = NetworkNameModel.Derived(state.name)
 
         connection.cdmaRoaming.value = state.roaming
         connection.connectionInfo.value = state.toMobileConnectionModel()
@@ -266,4 +268,6 @@ class DemoMobileConnectionRepository(override val subId: Int) : MobileConnection
     override val isDefaultDataSubscription = MutableStateFlow(true)
 
     override val cdmaRoaming = MutableStateFlow(false)
+
+    override val networkName = MutableStateFlow(NetworkNameModel.Derived("demo network"))
 }

@@ -20,6 +20,7 @@ import android.telephony.CarrierConfigManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Connected
+import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.util.CarrierConfigTracker
@@ -55,6 +56,15 @@ interface MobileIconInteractor {
 
     /** Observable for RAT type (network type) indicator */
     val networkTypeIconGroup: StateFlow<MobileIconGroup>
+
+    /**
+     * Provider name for this network connection. The name can be one of 3 values:
+     * 1. The default network name, if one is configured
+     * 2. A derived name based off of the intent [ACTION_SERVICE_PROVIDERS_UPDATED]
+     * 3. Or, in the case where the repository sends us the default network name, we check for an
+     * override in [connectionInfo.operatorAlphaShort], a value that is derived from [ServiceState]
+     */
+    val networkName: StateFlow<NetworkNameModel>
 
     /** True if this line of service is emergency-only */
     val isEmergencyOnly: StateFlow<Boolean>
@@ -92,6 +102,22 @@ class MobileIconInteractorImpl(
     override val isDataEnabled: StateFlow<Boolean> = connectionRepository.dataEnabled
 
     override val isDefaultDataEnabled = defaultSubscriptionHasDataEnabled
+
+    override val networkName =
+        combine(connectionInfo, connectionRepository.networkName) { connection, networkName ->
+                if (
+                    networkName is NetworkNameModel.Default && connection.operatorAlphaShort != null
+                ) {
+                    NetworkNameModel.Derived(connection.operatorAlphaShort)
+                } else {
+                    networkName
+                }
+            }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                connectionRepository.networkName.value
+            )
 
     /** Observable for the current RAT indicator icon ([MobileIconGroup]) */
     override val networkTypeIconGroup: StateFlow<MobileIconGroup> =
