@@ -2006,6 +2006,19 @@ public class CarrierConfigManager {
             "include_lte_for_nr_advanced_threshold_bandwidth_bool";
 
     /**
+     * Indicating whether to ratchet the aggregated cell bandwidths on receiving new values when
+     * the device is in RRC IDLE mode.
+     * The aggregated cell bandwidths are used for determining NR advanced state.
+     *
+     * If this is {@code true}, we will only update the aggregate cell bandwidths if the new
+     * aggregate is higher than the current aggregate and the anchor NR cell is the same.
+     * If this is {@code false}, we will always update the aggregate cell bandwidths when receiving
+     * new values.
+     */
+    public static final String KEY_RATCHET_NR_ADVANCED_BANDWIDTH_IF_RRC_IDLE_BOOL =
+            "ratchet_nr_advanced_bandwidth_if_rrc_idle_bool";
+
+    /**
      * Boolean indicating if operator name should be shown in the status bar
      * @hide
      */
@@ -9939,6 +9952,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
         sDefaults.putInt(KEY_NR_ADVANCED_THRESHOLD_BANDWIDTH_KHZ_INT, 0);
         sDefaults.putBoolean(KEY_INCLUDE_LTE_FOR_NR_ADVANCED_THRESHOLD_BANDWIDTH_BOOL, false);
+        sDefaults.putBoolean(KEY_RATCHET_NR_ADVANCED_BANDWIDTH_IF_RRC_IDLE_BOOL, true);
         sDefaults.putIntArray(KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY,
                 new int[]{CARRIER_NR_AVAILABILITY_NSA, CARRIER_NR_AVAILABILITY_SA});
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
