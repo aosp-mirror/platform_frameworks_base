@@ -24,8 +24,17 @@
 
     <application>
         <uses-library android:name="android.test.runner" />
-        <activity android:label="@string/app_name" android:name="AudioPolicyTestActivity"
+        <activity android:label="@string/app_name" android:name="AudioVolumeTestActivity"
                   android:screenOrientation="landscape" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:label="@string/app_name" android:name="AudioPolicyDeathTestActivity"
+                  android:screenOrientation="landscape"
+                  android:process=":AudioPolicyDeathTestActivityProcess"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER"/>
