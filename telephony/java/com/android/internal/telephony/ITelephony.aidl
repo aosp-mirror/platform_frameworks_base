@@ -2628,5 +2628,12 @@ interface ITelephony {
       * {@code null} if the functionality is not supported.
       * @hide
       */
-      ComponentName getDefaultRespondViaMessageApplication(int subId, boolean updateIfNeeded);
+    ComponentName getDefaultRespondViaMessageApplication(int subId, boolean updateIfNeeded);
+
+    /**
+     * Get the SIM state for the logical SIM slot index.
+     *
+     * @param slotIndex Logical SIM slot index.
+     */
+    int getSimStateForSlotIndex(int slotIndex);
 }
