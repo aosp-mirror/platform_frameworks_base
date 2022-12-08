@@ -40,6 +40,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
+import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.WindowConfiguration;
@@ -387,6 +388,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             .addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
                     | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
                     | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
+
+    private static final Bundle USER_PRESENT_INTENT_OPTIONS =
+            BroadcastOptions.makeBasic()
+                    .setDeferUntilActive(true)
+                    .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                    .toBundle();
 
     /**
      * {@link #setKeyguardEnabled} waits on this condition when it re-enables
@@ -2300,7 +2307,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         Context.USER_SERVICE);
                 mUiBgExecutor.execute(() -> {
                     for (int profileId : um.getProfileIdsWithDisabled(currentUser.getIdentifier())) {
-                        mContext.sendBroadcastAsUser(USER_PRESENT_INTENT, UserHandle.of(profileId));
+                        mContext.sendBroadcastAsUser(USER_PRESENT_INTENT,
+                                UserHandle.of(profileId),
+                                null,
+                                USER_PRESENT_INTENT_OPTIONS);
                     }
                     mLockPatternUtils.userPresent(currentUserId);
                 });
