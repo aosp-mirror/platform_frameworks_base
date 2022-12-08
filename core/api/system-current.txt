@@ -12536,6 +12536,19 @@ package android.service.voice {
     field public static final int INITIALIZATION_STATUS_UNKNOWN = 100; // 0x64
   }
 
+  public abstract class VisualQueryDetectionService extends android.app.Service implements android.service.voice.SandboxedDetectionServiceBase {
+    ctor public VisualQueryDetectionService();
+    method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public void onStartDetection(@NonNull android.service.voice.VisualQueryDetectionService.Callback);
+    method public void onStopDetection();
+    method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
+    field public static final String SERVICE_INTERFACE = "android.service.voice.VisualQueryDetectionService";
+  }
+
+  public static final class VisualQueryDetectionService.Callback {
+    ctor public VisualQueryDetectionService.Callback();
+  }
+
   public class VoiceInteractionService extends android.app.Service {
     method @NonNull public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(String, java.util.Locale, android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(String, java.util.Locale, @Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, android.service.voice.AlwaysOnHotwordDetector.Callback);
