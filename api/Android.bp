@@ -121,6 +121,7 @@ combined_apis {
         "service-healthconnect",
         "service-media-s",
         "service-permission",
+        "service-rkp",
         "service-sdksandbox",
     ],
 }

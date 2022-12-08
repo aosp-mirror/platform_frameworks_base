@@ -132,6 +132,7 @@ java_library_static {
         "framework-tethering.stubs.module_lib",
         "service-art.stubs.system_server",
         "service-permission.stubs.system_server",
+        "service-rkp.stubs.system_server",
         "service-sdksandbox.stubs.system_server",
     ],
     plugins: ["ImmutabilityAnnotationProcessor"],
