@@ -2408,7 +2408,20 @@ public class StatsPullAtomService extends SystemService {
                         metrics.gpuTotalUsageKb,
                         metrics.gpuPrivateAllocationsKb,
                         metrics.dmaBufTotalExportedKb,
-                        metrics.shmemKb));
+                        metrics.shmemKb,
+                        metrics.totalKb,
+                        metrics.freeKb,
+                        metrics.availableKb,
+                        metrics.activeKb,
+                        metrics.inactiveKb,
+                        metrics.activeAnonKb,
+                        metrics.inactiveAnonKb,
+                        metrics.activeFileKb,
+                        metrics.inactiveFileKb,
+                        metrics.swapTotalKb,
+                        metrics.swapFreeKb,
+                        metrics.cmaTotalKb,
+                        metrics.cmaFreeKb));
         return StatsManager.PULL_SUCCESS;
     }
 
