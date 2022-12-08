@@ -331,15 +331,22 @@
     <dimen name="overlay_action_chip_spacing">8dp</dimen>
     <dimen name="overlay_action_chip_text_size">14sp</dimen>
     <dimen name="overlay_offset_x">16dp</dimen>
+    <!-- Used for both start and bottom margin of the preview, relative to the action container -->
+    <dimen name="overlay_preview_container_margin">8dp</dimen>
     <dimen name="overlay_action_container_margin_horizontal">8dp</dimen>
+    <dimen name="overlay_action_container_margin_bottom">4dp</dimen>
     <dimen name="overlay_bg_protection_height">242dp</dimen>
     <dimen name="overlay_action_container_corner_radius">18dp</dimen>
     <dimen name="overlay_action_container_padding_vertical">4dp</dimen>
     <dimen name="overlay_action_container_padding_right">8dp</dimen>
+    <dimen name="overlay_action_container_padding_end">8dp</dimen>
     <dimen name="overlay_dismiss_button_tappable_size">48dp</dimen>
     <dimen name="overlay_dismiss_button_margin">8dp</dimen>
+    <!-- must be kept aligned with overlay_border_width_neg, below;
+         overlay_border_width = overlay_border_width_neg * -1 -->
     <dimen name="overlay_border_width">4dp</dimen>
-    <!-- need a negative margin for some of the constraints. should be overlay_border_width * -1 -->
+    <!-- some constraints use a negative margin. must be aligned with overlay_border_width, above;
+         overlay_border_width_neg = overlay_border_width * -1 -->
     <dimen name="overlay_border_width_neg">-4dp</dimen>
 
     <dimen name="clipboard_preview_size">@dimen/overlay_x_scale</dimen>
