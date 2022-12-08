@@ -408,6 +408,31 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
+         * Flag to decide if authentication should ignore enrollment state.
+         * Defaults to false (not ignoring enrollment state)
+         * @param ignoreEnrollmentState
+         * @return This builder.
+         * @hide
+         */
+        @NonNull
+        public Builder setIgnoreEnrollmentState(boolean ignoreEnrollmentState) {
+            mPromptInfo.setIgnoreEnrollmentState(ignoreEnrollmentState);
+            return this;
+        }
+
+        /**
+         * Set if BiometricPrompt is being used by the legacy fingerprint manager API.
+         * @param sensorId sensor id
+         * @return This builder.
+         * @hide
+         */
+        @NonNull
+        public Builder setIsForLegacyFingerprintManager(int sensorId) {
+            mPromptInfo.setIsForLegacyFingerprintManager(sensorId);
+            return this;
+        }
+
+        /**
          * Creates a {@link BiometricPrompt}.
          *
          * @return An instance of {@link BiometricPrompt}.
@@ -841,26 +866,34 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback,
             int userId) {
-        authenticateUserForOperation(cancel, executor, callback, userId, 0 /* operationId */);
+        if (cancel == null) {
+            throw new IllegalArgumentException("Must supply a cancellation signal");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must supply an executor");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("Must supply a callback");
+        }
+
+        authenticateInternal(0 /* operationId */, cancel, executor, callback, userId);
     }
 
     /**
-     * Authenticates for the given user and keystore operation.
+     * Authenticates for the given keystore operation.
      *
      * @param cancel An object that can be used to cancel authentication
      * @param executor An executor to handle callback events
      * @param callback An object to receive authentication events
-     * @param userId The user to authenticate
      * @param operationId The keystore operation associated with authentication
      *
      * @hide
      */
-    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void authenticateUserForOperation(
+    @RequiresPermission(USE_BIOMETRIC)
+    public void authenticateForOperation(
             @NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback,
-            int userId,
             long operationId) {
         if (cancel == null) {
             throw new IllegalArgumentException("Must supply a cancellation signal");
@@ -871,7 +904,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         if (callback == null) {
             throw new IllegalArgumentException("Must supply a callback");
         }
-        authenticateInternal(operationId, cancel, executor, callback, userId);
+
+        authenticateInternal(operationId, cancel, executor, callback, mContext.getUserId());
     }
 
     /**
@@ -1005,7 +1039,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     private void cancelAuthentication() {
         if (mService != null) {
             try {
-                mService.cancelAuthentication(mToken, mContext.getOpPackageName());
+                mService.cancelAuthentication(mToken, mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to cancel authentication", e);
             }
@@ -1065,9 +1099,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
                 promptInfo = mPromptInfo;
             }
 
-            mService.authenticate(mToken, operationId, userId, mBiometricServiceReceiver,
-                    mContext.getOpPackageName(), promptInfo);
-
+            mService.authenticate(mToken, operationId, userId,
+                    mBiometricServiceReceiver, mContext.getPackageName(), promptInfo);
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception while authenticating", e);
             mExecutor.execute(() -> callback.onAuthenticationError(
