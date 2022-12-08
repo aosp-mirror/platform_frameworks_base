@@ -2099,6 +2099,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     // from the client organizer, so the PIP activity can get the correct config
                     // from the Task, and prevent conflict with the PipTaskOrganizer.
                     tf.updateRequestedOverrideConfiguration(EMPTY);
+                    tf.updateRelativeEmbeddedBounds();
                 }
             });
             rootTask.setWindowingMode(WINDOWING_MODE_PINNED);
