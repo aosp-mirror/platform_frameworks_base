@@ -6988,12 +6988,124 @@ public class CarrierConfigManager {
         public static final String KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY =
                 KEY_PREFIX + "sms_over_ims_supported_rats_int_array";
 
+        /**
+         * Maximum Retry Count for Failure, If the Retry Count exceeds this value,
+         * it must display to User Interface as sending failed
+         */
+        public static final String KEY_SMS_MAX_RETRY_COUNT_INT =
+                KEY_PREFIX + "sms_max_retry_count_int";
+
+        /**
+         * Maximum Retry Count for SMS over IMS on Failure, If the Retry Count exceeds this value,
+         * and if the retry count is less than KEY_SMS_MAX_RETRY_COUNT_INT
+         * sending SMS should fallback to CS
+         */
+        public static final String KEY_SMS_MAX_RETRY_COUNT_OVER_IMS_INT =
+                KEY_PREFIX + "sms_max_retry_count_over_ims_int";
+
+        /**
+         * Delay Timer Value in milliseconds
+         * Retry SMS over IMS after this Timer expires
+         */
+        public static final String KEY_SMS_OVER_IMS_SEND_RETRY_DELAY_MILLIS_INT =
+                KEY_PREFIX + "sms_rover_ims_send_retry_delay_millis_int";
+
+        /**
+         * TR1 Timer Value in milliseconds,
+         * Waits for RP-Ack from network for MO SMS.
+         */
+        public static final String KEY_SMS_TR1_TIMER_MILLIS_INT =
+                KEY_PREFIX + "sms_tr1_timer_millis_int";
+
+        /**
+         * TR2 Timer Value in milliseconds,
+         * Waits for RP-Ack from Transfer Layer for MT SMS.
+         */
+        public static final String KEY_SMS_TR2_TIMER_MILLIS_INT =
+                KEY_PREFIX + "sms_tr2_timer_millis_int";
+
+        /**
+         * SMS RP-Cause Values for which SMS should be retried over IMS
+         *
+         * <p>Possible values are,
+         * {@link SmsManager#SMS_RP_CAUSE_UNALLOCATED_NUMBER}
+         * {@link SmsManager#SMS_RP_CAUSE_OPERATOR_DETERMINED_BARRING}
+         * {@link SmsManager#SMS_RP_CAUSE_CALL_BARRING}
+         * {@link SmsManager#SMS_RP_CAUSE_RESERVED}
+         * {@link SmsManager#SMS_RP_CAUSE_SHORT_MESSAGE_TRANSFER_REJECTED}
+         * {@link SmsManager#SMS_RP_CAUSE_DESTINATION_OUT_OF_ORDER}
+         * {@link SmsManager#SMS_RP_CAUSE_UNIDENTIFIED_SUBSCRIBER}
+         * {@link SmsManager#SMS_RP_CAUSE_FACILITY_REJECTED}
+         * {@link SmsManager#SMS_RP_CAUSE_UNKNOWN_SUBSCRIBER}
+         * {@link SmsManager#SMS_RP_CAUSE_NETWORK_OUT_OF_ORDER}
+         * {@link SmsManager#SMS_RP_CAUSE_TEMPORARY_FAILURE}
+         * {@link SmsManager#SMS_RP_CAUSE_CONGESTION}
+         * {@link SmsManager#SMS_RP_CAUSE_RESOURCES_UNAVAILABLE}
+         * {@link SmsManager#SMS_RP_CAUSE_FACILITY_NOT_SUBSCRIBED}
+         * {@link SmsManager#SMS_RP_CAUSE_FACILITY_NOT_IMPLEMENTED}
+         * {@link SmsManager#SMS_RP_CAUSE_INVALID_MESSAGE_REFERENCE_VALUE}
+         * {@link SmsManager#SMS_RP_CAUSE_SEMANTICALLY_INCORRECT_MESSAGE}
+         * {@link SmsManager#SMS_RP_CAUSE_INVALID_MANDATORY_INFORMATION}
+         * {@link SmsManager#SMS_RP_CAUSE_MESSAGE_TYPE_NON_EXISTENT}
+         * {@link SmsManager#SMS_RP_CAUSE_MESSAGE_INCOMPATIBLE_WITH_PROTOCOL_STATE}
+         * {@link SmsManager#SMS_RP_CAUSE_INFORMATION_ELEMENT_NON_EXISTENT}
+         * {@link SmsManager#SMS_RP_CAUSE_PROTOCOL_ERROR}
+         * {@link SmsManager#SMS_RP_CAUSE_INTERWORKING_UNSPECIFIED
+         */
+        public static final String KEY_SMS_RP_CAUSE_VALUES_TO_RETRY_OVER_IMS_INT_ARRAY =
+                KEY_PREFIX + "sms_rp_cause_values_to_retry_over_ims_int_array";
+
+        /**
+         * SMS RP-Cause Values for which Sending SMS should fallback
+         */
+        public static final String KEY_SMS_RP_CAUSE_VALUES_TO_FALLBACK_INT_ARRAY =
+                KEY_PREFIX + "sms_rp_cause_values_to_fallback_int_array";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putBoolean(KEY_SMS_OVER_IMS_SUPPORTED_BOOL, true);
             defaults.putBoolean(KEY_SMS_CSFB_RETRY_ON_FAILURE_BOOL, true);
 
             defaults.putInt(KEY_SMS_OVER_IMS_FORMAT_INT, SMS_FORMAT_3GPP);
+
+            defaults.putInt(KEY_SMS_MAX_RETRY_COUNT_INT, 3);
+            defaults.putInt(KEY_SMS_MAX_RETRY_COUNT_OVER_IMS_INT, 3);
+            defaults.putInt(KEY_SMS_OVER_IMS_SEND_RETRY_DELAY_MILLIS_INT,
+                    2000);
+            defaults.putInt(KEY_SMS_TR1_TIMER_MILLIS_INT, 130000);
+            defaults.putInt(KEY_SMS_TR2_TIMER_MILLIS_INT, 15000);
+
+            defaults.putIntArray(
+                    KEY_SMS_RP_CAUSE_VALUES_TO_RETRY_OVER_IMS_INT_ARRAY,
+                    new int[] {
+                        SmsManager.SMS_RP_CAUSE_TEMPORARY_FAILURE
+                    });
+            defaults.putIntArray(
+                    KEY_SMS_RP_CAUSE_VALUES_TO_FALLBACK_INT_ARRAY,
+                    new int[] {
+                        SmsManager.SMS_RP_CAUSE_UNALLOCATED_NUMBER,
+                        SmsManager.SMS_RP_CAUSE_OPERATOR_DETERMINED_BARRING,
+                        SmsManager.SMS_RP_CAUSE_CALL_BARRING,
+                        SmsManager.SMS_RP_CAUSE_RESERVED,
+                        SmsManager.SMS_RP_CAUSE_SHORT_MESSAGE_TRANSFER_REJECTED,
+                        SmsManager.SMS_RP_CAUSE_DESTINATION_OUT_OF_ORDER,
+                        SmsManager.SMS_RP_CAUSE_UNIDENTIFIED_SUBSCRIBER,
+                        SmsManager.SMS_RP_CAUSE_FACILITY_REJECTED,
+                        SmsManager.SMS_RP_CAUSE_UNKNOWN_SUBSCRIBER,
+                        SmsManager.SMS_RP_CAUSE_NETWORK_OUT_OF_ORDER,
+                        SmsManager.SMS_RP_CAUSE_CONGESTION,
+                        SmsManager.SMS_RP_CAUSE_RESOURCES_UNAVAILABLE,
+                        SmsManager.SMS_RP_CAUSE_FACILITY_NOT_SUBSCRIBED,
+                        SmsManager.SMS_RP_CAUSE_FACILITY_NOT_IMPLEMENTED,
+                        SmsManager.SMS_RP_CAUSE_INVALID_MESSAGE_REFERENCE_VALUE,
+                        SmsManager.SMS_RP_CAUSE_SEMANTICALLY_INCORRECT_MESSAGE,
+                        SmsManager.SMS_RP_CAUSE_INVALID_MANDATORY_INFORMATION,
+                        SmsManager.SMS_RP_CAUSE_MESSAGE_TYPE_NON_EXISTENT,
+                        SmsManager.SMS_RP_CAUSE_MESSAGE_INCOMPATIBLE_WITH_PROTOCOL_STATE,
+                        SmsManager.SMS_RP_CAUSE_INFORMATION_ELEMENT_NON_EXISTENT,
+                        SmsManager.SMS_RP_CAUSE_PROTOCOL_ERROR,
+                        SmsManager.SMS_RP_CAUSE_INTERWORKING_UNSPECIFIED
+                    });
 
             defaults.putIntArray(
                     KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY,
