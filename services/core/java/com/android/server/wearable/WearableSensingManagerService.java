@@ -38,6 +38,7 @@ import android.provider.DeviceConfig;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.infra.AbstractMasterSystemService;
@@ -161,7 +162,7 @@ public class WearableSensingManagerService extends
         return null;
     }
 
-    // Used in testing.
+    @VisibleForTesting
     void provideDataStream(@UserIdInt int userId, ParcelFileDescriptor parcelFileDescriptor,
             RemoteCallback callback) {
         synchronized (mLock) {
@@ -174,7 +175,7 @@ public class WearableSensingManagerService extends
         }
     }
 
-    // Used in testing.
+    @VisibleForTesting
     void provideData(@UserIdInt int userId, PersistableBundle data, SharedMemory sharedMemory,
             RemoteCallback callback) {
         synchronized (mLock) {
