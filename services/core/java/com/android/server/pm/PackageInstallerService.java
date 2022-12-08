@@ -154,6 +154,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     /** Destroy sessions older than this on storage free request */
     private static final long MAX_SESSION_AGE_ON_LOW_STORAGE_MILLIS = 8 * DateUtils.HOUR_IN_MILLIS;
 
+    /** Threshold of historical sessions size */
+    private static final int HISTORICAL_SESSIONS_THRESHOLD = 500;
+    /** Size of historical sessions to be cleared when reaching threshold */
+    private static final int HISTORICAL_CLEAR_SIZE = 400;
+
     /**
      * Allow verification-skipping if it's a development app installed through ADB with
      * disable verification flag specified.
@@ -549,6 +554,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         CharArrayWriter writer = new CharArrayWriter();
         IndentingPrintWriter pw = new IndentingPrintWriter(writer, "    ");
         session.dump(pw);
+        if (mHistoricalSessions.size() > HISTORICAL_SESSIONS_THRESHOLD) {
+            Slog.d(TAG, "Historical sessions size reaches threshold, clear the oldest");
+            mHistoricalSessions.subList(0, HISTORICAL_CLEAR_SIZE).clear();
+        }
         mHistoricalSessions.add(writer.toString());
 
         int installerUid = session.getInstallerUid();
