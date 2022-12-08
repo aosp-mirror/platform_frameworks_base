@@ -44,6 +44,7 @@ import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
+import static android.app.AppOpsManager.OP_SCHEDULE_EXACT_ALARM;
 import static android.app.AppOpsManager.OP_VIBRATE;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_FAILED;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_STARTED;
@@ -130,6 +131,8 @@ import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemServerInitThreadPool;
+import com.android.server.pm.UserManagerInternal;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.component.ParsedAttribution;
 
@@ -163,12 +166,30 @@ class AppOpsServiceImpl implements AppOpsServiceInterface {
     static final String TAG = "AppOps";
     static final boolean DEBUG = false;
 
+    /**
+     * Sentinel integer version to denote that there was no appops.xml found on boot.
+     * This will happen when a device boots with no existing userdata.
+     */
+    private static final int NO_FILE_VERSION = -2;
+
+    /**
+     * Sentinel integer version to denote that there was no version in the appops.xml found on boot.
+     * This means the file is coming from a build before versioning was added.
+     */
     private static final int NO_VERSION = -1;
+
     /**
      * Increment by one every time and add the corresponding upgrade logic in
-     * {@link #upgradeLocked(int)} below. The first version was 1
+     * {@link #upgradeLocked(int)} below. The first version was 1.
      */
-    private static final int CURRENT_VERSION = 1;
+    @VisibleForTesting
+    static final int CURRENT_VERSION = 2;
+
+    /**
+     * This stores the version of appops.xml seen at boot. If this is smaller than
+     * {@link #CURRENT_VERSION}, then we will run {@link #upgradeLocked(int)} on startup.
+     */
+    private int mVersionAtBoot = NO_FILE_VERSION;
 
     // Write at most every 30 minutes.
     static final long WRITE_DELAY = DEBUG ? 1000 : 30 * 60 * 1000;
@@ -936,6 +957,10 @@ class AppOpsServiceImpl implements AppOpsServiceInterface {
 
     @Override
     public void systemReady() {
+        synchronized (this) {
+            upgradeLocked(mVersionAtBoot);
+        }
+
         mConstants.startMonitoring(mContext.getContentResolver());
         mHistoricalRegistry.systemReady(mContext.getContentResolver());
 
@@ -3191,7 +3216,6 @@ class AppOpsServiceImpl implements AppOpsServiceInterface {
 
     @Override
     public void readState() {
-        int oldVersion = NO_VERSION;
         synchronized (mFile) {
             synchronized (this) {
                 FileInputStream stream;
@@ -3216,7 +3240,7 @@ class AppOpsServiceImpl implements AppOpsServiceInterface {
                         throw new IllegalStateException("no start tag found");
                     }
 
-                    oldVersion = parser.getAttributeInt(null, "v", NO_VERSION);
+                    mVersionAtBoot = parser.getAttributeInt(null, "v", NO_VERSION);
 
                     int outerDepth = parser.getDepth();
                     while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -3261,12 +3285,11 @@ class AppOpsServiceImpl implements AppOpsServiceInterface {
                 }
             }
         }
-        synchronized (this) {
-            upgradeLocked(oldVersion);
-        }
     }
 
-    private void upgradeRunAnyInBackgroundLocked() {
+    @VisibleForTesting
+    @GuardedBy("this")
+    void upgradeRunAnyInBackgroundLocked() {
         for (int i = 0; i < mUidStates.size(); i++) {
             final UidState uidState = mUidStates.valueAt(i);
             if (uidState == null) {
@@ -3303,8 +3326,45 @@ class AppOpsServiceImpl implements AppOpsServiceInterface {
         }
     }
 
+    /**
+     * The interpretation of the default mode - MODE_DEFAULT - for OP_SCHEDULE_EXACT_ALARM is
+     * changing. Simultaneously, we want to change this op's mode from MODE_DEFAULT to MODE_ALLOWED
+     * for already installed apps. For newer apps, it will stay as MODE_DEFAULT.
+     */
+    @VisibleForTesting
+    @GuardedBy("this")
+    void upgradeScheduleExactAlarmLocked() {
+        final PermissionManagerServiceInternal pmsi = LocalServices.getService(
+                PermissionManagerServiceInternal.class);
+        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+        final PackageManagerInternal pmi = getPackageManagerInternal();
+
+        final String[] packagesDeclaringPermission = pmsi.getAppOpPermissionPackages(
+                AppOpsManager.opToPermission(OP_SCHEDULE_EXACT_ALARM));
+        final int[] userIds = umi.getUserIds();
+
+        for (final String pkg : packagesDeclaringPermission) {
+            for (int userId : userIds) {
+                final int uid = pmi.getPackageUid(pkg, 0, userId);
+
+                UidState uidState = mUidStates.get(uid);
+                if (uidState == null) {
+                    uidState = new UidState(uid);
+                    mUidStates.put(uid, uidState);
+                }
+                final int oldMode = uidState.getUidMode(OP_SCHEDULE_EXACT_ALARM);
+                if (oldMode == AppOpsManager.opToDefaultMode(OP_SCHEDULE_EXACT_ALARM)) {
+                    uidState.setUidMode(OP_SCHEDULE_EXACT_ALARM, MODE_ALLOWED);
+                }
+            }
+            // This appop is meant to be controlled at a uid level. So we leave package modes as
+            // they are.
+        }
+    }
+
+    @GuardedBy("this")
     private void upgradeLocked(int oldVersion) {
-        if (oldVersion >= CURRENT_VERSION) {
+        if (oldVersion == NO_FILE_VERSION || oldVersion >= CURRENT_VERSION) {
             return;
         }
         Slog.d(TAG, "Upgrading app-ops xml from version " + oldVersion + " to " + CURRENT_VERSION);
@@ -3313,6 +3373,9 @@ class AppOpsServiceImpl implements AppOpsServiceInterface {
                 upgradeRunAnyInBackgroundLocked();
                 // fall through
             case 1:
+                upgradeScheduleExactAlarmLocked();
+                // fall through
+            case 2:
                 // for future upgrades
         }
         scheduleFastWriteLocked();
