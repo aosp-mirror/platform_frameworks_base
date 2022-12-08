@@ -774,6 +774,9 @@
     <!-- Permissions required for CTS test - CtsAppFgsTestCases -->
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
+    <!-- Permission required for CTS test - CtsHardwareTestCases -->
+    <uses-permission android:name="android.permission.REMAP_MODIFIER_KEYS" />
+
     <!-- Permissions required for CTS test - CtsAppFgsTestCases -->
     <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
     <uses-permission android:name="android.permission.health.READ_BASAL_BODY_TEMPERATURE" />

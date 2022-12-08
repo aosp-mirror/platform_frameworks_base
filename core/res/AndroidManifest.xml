@@ -6776,6 +6776,14 @@
          @hide -->
     <permission android:name="android.permission.HANDLE_QUERY_PACKAGE_RESTART"
                 android:protectionLevel="signature" />
+
+    <!-- Allows low-level access to re-mapping modifier keys.
+         <p>Not for use by third-party applications.
+         @hide
+         @TestApi -->
+    <permission android:name="android.permission.REMAP_MODIFIER_KEYS"
+                android:protectionLevel="signature" />
+
     <uses-permission android:name="android.permission.HANDLE_QUERY_PACKAGE_RESTART" />
 
     <!-- Allows financed device kiosk apps to perform actions on the Device Lock service

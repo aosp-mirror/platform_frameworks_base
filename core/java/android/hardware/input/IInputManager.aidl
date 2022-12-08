@@ -123,6 +123,22 @@ interface IInputManager {
     String[] getKeyboardLayoutListForInputDevice(in InputDeviceIdentifier identifier, int userId,
             in InputMethodInfo imeInfo, in InputMethodSubtype imeSubtype);
 
+    // Modifier key remapping APIs.
+    @EnforcePermission("REMAP_MODIFIER_KEYS")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.REMAP_MODIFIER_KEYS)")
+    void remapModifierKey(int fromKey, int toKey);
+
+    @EnforcePermission("REMAP_MODIFIER_KEYS")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.REMAP_MODIFIER_KEYS)")
+    void clearAllModifierKeyRemappings();
+
+    @EnforcePermission("REMAP_MODIFIER_KEYS")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.REMAP_MODIFIER_KEYS)")
+    Map getModifierKeyRemapping();
+
     // Registers an input devices changed listener.
     void registerInputDevicesChangedListener(IInputDevicesChangedListener listener);
 
