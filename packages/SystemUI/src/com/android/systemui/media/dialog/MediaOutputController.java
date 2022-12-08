@@ -147,6 +147,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private int mColorConnectedItemBackground;
     private int mColorPositiveButtonText;
     private int mColorDialogBackground;
+    private int mItemMarginEndDefault;
+    private int mItemMarginEndSelectable;
     private float mInactiveRadius;
     private float mActiveRadius;
     private FeatureFlags mFeatureFlags;
@@ -200,6 +202,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 R.dimen.media_output_dialog_active_background_radius);
         mColorDialogBackground = Utils.getColorStateListDefaultColor(mContext,
                 R.color.media_dialog_background);
+        mItemMarginEndDefault = (int) mContext.getResources().getDimension(
+                R.dimen.media_output_dialog_default_margin_end);
+        mItemMarginEndSelectable = (int) mContext.getResources().getDimension(
+                R.dimen.media_output_dialog_selectable_margin_end);
     }
 
     void start(@NonNull Callback cb) {
@@ -530,6 +536,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     public float getActiveRadius() {
         return mActiveRadius;
+    }
+
+    public int getItemMarginEndDefault() {
+        return mItemMarginEndDefault;
+    }
+
+    public int getItemMarginEndSelectable() {
+        return mItemMarginEndSelectable;
     }
 
     private void buildMediaDevices(List<MediaDevice> devices) {
