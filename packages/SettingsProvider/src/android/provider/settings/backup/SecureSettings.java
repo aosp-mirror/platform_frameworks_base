@@ -29,7 +29,7 @@ public class SecureSettings {
      */
     @UnsupportedAppUsage
     public static final String[] SETTINGS_TO_BACKUP = {
-        Settings.Secure.BUGREPORT_IN_POWER_MENU,                            // moved to global
+        Settings.Secure.BUGREPORT_IN_POWER_MENU,
         Settings.Secure.ALLOW_MOCK_LOCATION,
         Settings.Secure.USB_MASS_STORAGE_ENABLED,                           // moved to global
         Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
@@ -225,6 +225,8 @@ public class SecureSettings {
         Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED,
         Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO,
         Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE,
-        Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME,
+        Settings.Secure.CUSTOM_BUGREPORT_HANDLER_APP,
+        Settings.Secure.CUSTOM_BUGREPORT_HANDLER_USER
     };
 }

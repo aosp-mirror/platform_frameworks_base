@@ -7434,11 +7434,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (shareDescription != null) {
             triggerShellBugreport.putExtra(EXTRA_DESCRIPTION, shareDescription);
         }
-        UserHandle callingUser = Binder.getCallingUserHandle();
         final long identity = Binder.clearCallingIdentity();
         try {
             // Send broadcast to shell to trigger bugreport using Bugreport API
-            mContext.sendBroadcastAsUser(triggerShellBugreport, callingUser);
+            // Always start the shell process on the current user to ensure that
+            // the foreground user can see all bugreport notifications.
+            mContext.sendBroadcastAsUser(triggerShellBugreport, getCurrentUser().getUserHandle());
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -7510,7 +7511,10 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public boolean launchBugReportHandlerApp() {
-        if (!BugReportHandlerUtil.isBugReportHandlerEnabled(mContext)) {
+
+        Context currentUserContext = mContext.createContextAsUser(getCurrentUser().getUserHandle(),
+                /* flags= */ 0);
+        if (!BugReportHandlerUtil.isBugReportHandlerEnabled(currentUserContext)) {
             return false;
         }
 
@@ -7519,7 +7523,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceCallingPermission(android.Manifest.permission.DUMP,
                 "launchBugReportHandlerApp");
 
-        return BugReportHandlerUtil.launchBugReportHandlerApp(mContext);
+        return BugReportHandlerUtil.launchBugReportHandlerApp(currentUserContext);
     }
 
     /**

@@ -6142,7 +6142,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.ADB_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.ASSISTED_GPS_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.BLUETOOTH_ON);
-            MOVED_TO_GLOBAL.add(Settings.Global.BUGREPORT_IN_POWER_MENU);
             MOVED_TO_GLOBAL.add(Settings.Global.CDMA_CELL_BROADCAST_SMS);
             MOVED_TO_GLOBAL.add(Settings.Global.CDMA_ROAMING_MODE);
             MOVED_TO_GLOBAL.add(Settings.Global.CDMA_SUBSCRIPTION_MODE);
@@ -6763,12 +6762,24 @@ public final class Settings {
         /**
          * When the user has enable the option to have a "bug report" command
          * in the power menu.
-         * @deprecated Use {@link android.provider.Settings.Global#BUGREPORT_IN_POWER_MENU} instead
          * @hide
          */
-        @Deprecated
         @Readable
         public static final String BUGREPORT_IN_POWER_MENU = "bugreport_in_power_menu";
+
+        /**
+         * The package name for the custom bugreport handler app. This app must be bugreport
+         * allow-listed. This is currently used only by Power Menu short press.
+         * @hide
+         */
+        public static final String CUSTOM_BUGREPORT_HANDLER_APP = "custom_bugreport_handler_app";
+
+        /**
+         * The user id for the custom bugreport handler app. This is currently used only by Power
+         * Menu short press.
+         * @hide
+         */
+        public static final String CUSTOM_BUGREPORT_HANDLER_USER = "custom_bugreport_handler_user";
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#ADB_ENABLED} instead
@@ -11713,26 +11724,32 @@ public final class Settings {
         /**
          * When the user has enable the option to have a "bug report" command
          * in the power menu.
+         * @deprecated Use {@link android.provider.Settings.Secure#BUGREPORT_IN_POWER_MENU} instead
          * @hide
          */
+        @Deprecated
         @Readable
         public static final String BUGREPORT_IN_POWER_MENU = "bugreport_in_power_menu";
 
         /**
          * The package name for the custom bugreport handler app. This app must be whitelisted.
          * This is currently used only by Power Menu short press.
-         *
+         * @deprecated Use {@link android.provider.Settings.Secure#CUSTOM_BUGREPORT_HANDLER_APP}
+         * instead
          * @hide
          */
+        @Deprecated
         @Readable
         public static final String CUSTOM_BUGREPORT_HANDLER_APP = "custom_bugreport_handler_app";
 
         /**
          * The user id for the custom bugreport handler app. This is currently used only by Power
          * Menu short press.
-         *
+         * @deprecated Use {@link android.provider.Settings.Secure#CUSTOM_BUGREPORT_HANDLER_USER}
+         * instead
          * @hide
          */
+        @Deprecated
         @Readable
         public static final String CUSTOM_BUGREPORT_HANDLER_USER = "custom_bugreport_handler_user";
 
@@ -16351,6 +16368,9 @@ public final class Settings {
             MOVED_TO_SECURE.add(Global.CHARGING_SOUNDS_ENABLED);
             MOVED_TO_SECURE.add(Global.CHARGING_VIBRATION_ENABLED);
             MOVED_TO_SECURE.add(Global.NOTIFICATION_BUBBLES);
+            MOVED_TO_SECURE.add(Global.BUGREPORT_IN_POWER_MENU);
+            MOVED_TO_SECURE.add(Global.CUSTOM_BUGREPORT_HANDLER_APP);
+            MOVED_TO_SECURE.add(Global.CUSTOM_BUGREPORT_HANDLER_USER);
         }
 
         // Certain settings have been moved from global to the per-user system namespace

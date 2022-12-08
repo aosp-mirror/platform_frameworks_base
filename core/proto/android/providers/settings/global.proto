@@ -160,7 +160,7 @@ message GlobalSettingsProto {
     optional Bluetooth bluetooth = 21;
 
     optional SettingProto boot_count = 22 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bugreport_in_power_menu = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    reserved 23; // Moved to secure settings bugreport_in_power_menu
     optional SettingProto cached_apps_freezer_enabled = 152 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto call_auto_retry = 24 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
