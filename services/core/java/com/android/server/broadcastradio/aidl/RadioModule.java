@@ -100,6 +100,7 @@ final class RadioModule {
                 synchronized (mLock) {
                     android.hardware.radio.ProgramSelector csel =
                             ConversionUtils.programSelectorFromHalProgramSelector(programSelector);
+                    int tunerResult = ConversionUtils.halResultToTunerResult(result);
                     fanoutAidlCallbackLocked((cb, sdkVersion) -> {
                         if (csel != null && !ConversionUtils
                                 .programSelectorMeetsSdkVersionRequirement(csel, sdkVersion)) {
@@ -107,7 +108,7 @@ final class RadioModule {
                                     + "requiring higher target SDK version");
                             return;
                         }
-                        cb.onTuneFailed(result, csel);
+                        cb.onTuneFailed(tunerResult, csel);
                     });
                 }
             });

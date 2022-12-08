@@ -98,7 +98,7 @@ public final class TunerAdapterTest {
                 throw new IllegalArgumentException();
             }
             if (program.getPrimaryId().getValue() < AM_LOWER_LIMIT_KHZ) {
-                mTunerCallback.onTuneFailed(RadioManager.STATUS_BAD_VALUE, program);
+                mTunerCallback.onTuneFailed(RadioTuner.TUNER_RESULT_INVALID_ARGUMENTS, program);
             } else {
                 mTunerCallback.onCurrentProgramInfoChanged(FM_PROGRAM_INFO);
             }
@@ -208,14 +208,14 @@ public final class TunerAdapterTest {
     @Test
     public void seek_forTunerAdapter_invokesOnErrorWhenTimeout() throws Exception {
         doAnswer(invocation -> {
-            mTunerCallback.onTuneFailed(RadioManager.STATUS_TIMED_OUT, FM_SELECTOR);
+            mTunerCallback.onTuneFailed(RadioTuner.TUNER_RESULT_TIMEOUT, FM_SELECTOR);
             return RadioManager.STATUS_OK;
         }).when(mTunerMock).seek(anyBoolean(), anyBoolean());
 
         mRadioTuner.scan(RadioTuner.DIRECTION_UP, /* skipSubChannel*/ true);
 
         verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onTuneFailed(
-                RadioManager.STATUS_TIMED_OUT, FM_SELECTOR);
+                RadioTuner.TUNER_RESULT_TIMEOUT, FM_SELECTOR);
     }
 
     @Test
@@ -246,7 +246,7 @@ public final class TunerAdapterTest {
         mRadioTuner.tune(invalidSelector);
 
         verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS))
-                .onTuneFailed(RadioManager.STATUS_BAD_VALUE, invalidSelector);
+                .onTuneFailed(RadioTuner.TUNER_RESULT_INVALID_ARGUMENTS, invalidSelector);
     }
 
     @Test

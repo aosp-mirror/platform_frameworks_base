@@ -409,7 +409,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
 
         for (int index = 0; index < numSessions; index++) {
             verify(mAidlTunerCallbackMocks[index], CALLBACK_TIMEOUT)
-                    .onTuneFailed(eq(Result.TIMEOUT), any());
+                    .onTuneFailed(eq(RadioTuner.TUNER_RESULT_TIMEOUT), any());
         }
     }
 
