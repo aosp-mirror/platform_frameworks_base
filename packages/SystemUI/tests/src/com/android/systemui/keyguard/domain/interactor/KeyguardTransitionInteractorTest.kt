@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -29,17 +30,17 @@ import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     private lateinit var underTest: KeyguardTransitionInteractor
@@ -53,7 +54,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     fun `transition collectors receives only appropriate events`() =
-        runBlocking(IMMEDIATE) {
+        runTest(UnconfinedTestDispatcher()) {
             var lockscreenToAodSteps = mutableListOf<TransitionStep>()
             val job1 =
                 underTest.lockscreenToAodTransition
@@ -87,10 +88,9 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     fun dozeAmountTransitionTest() =
-        runBlocking(IMMEDIATE) {
+        runTest(UnconfinedTestDispatcher()) {
             var dozeAmountSteps = mutableListOf<TransitionStep>()
-            val job =
-                underTest.dozeAmountTransition.onEach { dozeAmountSteps.add(it) }.launchIn(this)
+            val job = underTest.dozeAmountTransition.onEach { dozeAmountSteps.add(it) }.launchIn(this)
 
             val steps = mutableListOf<TransitionStep>()
 
@@ -119,10 +119,9 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     fun keyguardStateTests() =
-        runBlocking(IMMEDIATE) {
+        runTest(UnconfinedTestDispatcher()) {
             var finishedSteps = mutableListOf<KeyguardState>()
-            val job =
-                underTest.finishedKeyguardState.onEach { finishedSteps.add(it) }.launchIn(this)
+            val job = underTest.finishedKeyguardState.onEach { finishedSteps.add(it) }.launchIn(this)
 
             val steps = mutableListOf<TransitionStep>()
 
@@ -143,12 +142,10 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     fun finishedKeyguardTransitionStepTests() =
-        runBlocking(IMMEDIATE) {
+        runTest(UnconfinedTestDispatcher()) {
             var finishedSteps = mutableListOf<TransitionStep>()
             val job =
-                underTest.finishedKeyguardTransitionStep
-                    .onEach { finishedSteps.add(it) }
-                    .launchIn(this)
+                underTest.finishedKeyguardTransitionStep.onEach { finishedSteps.add(it) }.launchIn(this)
 
             val steps = mutableListOf<TransitionStep>()
 
@@ -169,12 +166,10 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     fun startedKeyguardTransitionStepTests() =
-        runBlocking(IMMEDIATE) {
+        runTest(UnconfinedTestDispatcher()) {
             var startedSteps = mutableListOf<TransitionStep>()
             val job =
-                underTest.startedKeyguardTransitionStep
-                    .onEach { startedSteps.add(it) }
-                    .launchIn(this)
+                underTest.startedKeyguardTransitionStep.onEach { startedSteps.add(it) }.launchIn(this)
 
             val steps = mutableListOf<TransitionStep>()
 
@@ -192,8 +187,4 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
             job.cancel()
         }
-
-    companion object {
-        private val IMMEDIATE = Dispatchers.Main.immediate
-    }
 }

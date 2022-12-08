@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.data.quickaffordance
 import android.app.StatusBarManager
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.camera.CameraGestureHelper
@@ -31,14 +32,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class CameraQuickAffordanceConfigTest : SysuiTestCase() {
 
     @Mock private lateinit var cameraGestureHelper: CameraGestureHelper
