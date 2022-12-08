@@ -22,7 +22,7 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.controls.FakeControlsSettingsRepository
+import com.android.systemui.controls.settings.FakeControlsSettingsRepository
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.ControlsTileResourceConfiguration
 import com.android.systemui.controls.management.ControlsListingController

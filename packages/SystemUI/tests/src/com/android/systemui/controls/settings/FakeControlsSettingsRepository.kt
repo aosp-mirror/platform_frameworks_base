@@ -15,7 +15,7 @@
  *
  */
 
-package com.android.systemui.controls
+package com.android.systemui.controls.settings
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
