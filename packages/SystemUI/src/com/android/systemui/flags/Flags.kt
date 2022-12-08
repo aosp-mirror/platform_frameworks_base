@@ -437,6 +437,11 @@ object Flags {
     val WARN_ON_BLOCKING_BINDER_TRANSACTIONS =
         unreleasedFlag(2400, "warn_on_blocking_binder_transactions")
 
+    // 2500 - output switcher
+    // TODO(b/261538825): Tracking Bug
+    @JvmField
+    val OUTPUT_SWITCHER_ADVANCED_LAYOUT = unreleasedFlag(2500, "output_switcher_advanced_layout")
+
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag(2, "exp_flag_release")
 }
