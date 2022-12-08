@@ -17,26 +17,18 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.demo
 
 import android.content.Context
-import android.telephony.Annotation
-import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
-import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_ADVANCED
-import android.telephony.TelephonyManager.NETWORK_TYPE_GSM
-import android.telephony.TelephonyManager.NETWORK_TYPE_LTE
-import android.telephony.TelephonyManager.NETWORK_TYPE_NR
-import android.telephony.TelephonyManager.NETWORK_TYPE_UMTS
-import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import android.util.Log
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
-import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
-import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
@@ -49,7 +41,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -67,61 +61,40 @@ constructor(
 
     private var demoCommandJob: Job? = null
 
-    private val connectionRepoCache = mutableMapOf<Int, DemoMobileConnectionRepository>()
-    private val subscriptionInfoCache = mutableMapOf<Int, SubscriptionInfo>()
+    private var connectionRepoCache = mutableMapOf<Int, DemoMobileConnectionRepository>()
+    private val subscriptionInfoCache = mutableMapOf<Int, SubscriptionModel>()
     val demoModeFinishedEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
-    private val _subscriptions = MutableStateFlow<List<SubscriptionInfo>>(listOf())
-    override val subscriptionsFlow =
+    private val _subscriptions = MutableStateFlow<List<SubscriptionModel>>(listOf())
+    override val subscriptions =
         _subscriptions
             .onEach { infos -> dropUnusedReposFromCache(infos) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), _subscriptions.value)
 
-    private fun dropUnusedReposFromCache(newInfos: List<SubscriptionInfo>) {
+    private fun dropUnusedReposFromCache(newInfos: List<SubscriptionModel>) {
         // Remove any connection repository from the cache that isn't in the new set of IDs. They
         // will get garbage collected once their subscribers go away
         val currentValidSubscriptionIds = newInfos.map { it.subscriptionId }
 
-        connectionRepoCache.keys.forEach {
-            if (!currentValidSubscriptionIds.contains(it)) {
-                connectionRepoCache.remove(it)
-            }
-        }
+        connectionRepoCache =
+            connectionRepoCache
+                .filter { currentValidSubscriptionIds.contains(it.key) }
+                .toMutableMap()
     }
 
     private fun maybeCreateSubscription(subId: Int) {
         if (!subscriptionInfoCache.containsKey(subId)) {
-            createSubscriptionForSubId(subId, subId).also { subscriptionInfoCache[subId] = it }
+            SubscriptionModel(subscriptionId = subId, isOpportunistic = false).also {
+                subscriptionInfoCache[subId] = it
+            }
 
             _subscriptions.value = subscriptionInfoCache.values.toList()
         }
     }
 
-    /** Mimics the old NetworkControllerImpl for now */
-    private fun createSubscriptionForSubId(subId: Int, slotIndex: Int): SubscriptionInfo {
-        return SubscriptionInfo(
-            subId,
-            "",
-            slotIndex,
-            "",
-            "",
-            0,
-            0,
-            "",
-            0,
-            null,
-            null,
-            null,
-            "",
-            false,
-            null,
-            null,
-        )
-    }
-
     // TODO(b/261029387): add a command for this value
     override val activeMobileDataSubscriptionId =
-        subscriptionsFlow
+        subscriptions
             .mapLatest { infos ->
                 // For now, active is just the first in the list
                 infos.firstOrNull()?.subscriptionId ?: INVALID_SUBSCRIPTION_ID
@@ -129,12 +102,35 @@ constructor(
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                subscriptionsFlow.value.firstOrNull()?.subscriptionId ?: INVALID_SUBSCRIPTION_ID
+                subscriptions.value.firstOrNull()?.subscriptionId ?: INVALID_SUBSCRIPTION_ID
             )
 
     /** Demo mode doesn't currently support modifications to the mobile mappings */
-    override val defaultDataSubRatConfig =
-        MutableStateFlow(MobileMappings.Config.readConfig(context))
+    val defaultDataSubRatConfig = MutableStateFlow(MobileMappings.Config.readConfig(context))
+
+    override val defaultMobileIconGroup = flowOf(TelephonyIcons.THREE_G)
+
+    override val defaultMobileIconMapping = MutableStateFlow(TelephonyIcons.ICON_NAME_TO_ICON)
+
+    /**
+     * In order to maintain compatibility with the old demo mode shell command API, reverse the
+     * [MobileMappings] lookup from (NetworkType: String -> Icon: MobileIconGroup), so that we can
+     * parse the string from the command line into a preferred icon group, and send _a_ valid
+     * network type for that icon through the pipeline.
+     *
+     * Note: collisions don't matter here, because the data source (the command line) only cares
+     * about the resulting icon, not the underlying network type.
+     */
+    private val mobileMappingsReverseLookup: StateFlow<Map<SignalIcon.MobileIconGroup, String>> =
+        defaultMobileIconMapping
+            .mapLatest { networkToIconMap -> networkToIconMap.reverse() }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                defaultMobileIconMapping.value.reverse()
+            )
+
+    private fun <K, V> Map<K, V>.reverse() = entries.associateBy({ it.value }) { it.key }
 
     // TODO(b/261029387): add a command for this value
     override val defaultDataSubId =
@@ -189,7 +185,7 @@ constructor(
         connection.dataEnabled.value = true
         connection.isDefaultDataSubscription.value = state.dataType != null
 
-        connection.subscriptionModelFlow.value = state.toMobileSubscriptionModel()
+        connection.connectionInfo.value = state.toMobileConnectionModel()
     }
 
     private fun processDisabledMobileState(state: MobileDisabled) {
@@ -229,47 +225,36 @@ constructor(
     private fun subIdsString(): String =
         _subscriptions.value.joinToString(",") { it.subscriptionId.toString() }
 
+    private fun Mobile.toMobileConnectionModel(): MobileConnectionModel {
+        return MobileConnectionModel(
+            isEmergencyOnly = false, // TODO(b/261029387): not yet supported
+            isGsm = false, // TODO(b/261029387): not yet supported
+            cdmaLevel = level ?: 0,
+            primaryLevel = level ?: 0,
+            dataConnectionState =
+                DataConnectionState.Connected, // TODO(b/261029387): not yet supported
+            dataActivityDirection = activity,
+            carrierNetworkChangeActive = carrierNetworkChange,
+            resolvedNetworkType = dataType.toResolvedNetworkType()
+        )
+    }
+
+    private fun SignalIcon.MobileIconGroup?.toResolvedNetworkType(): ResolvedNetworkType {
+        val key = mobileMappingsReverseLookup.value[this] ?: "dis"
+        return DefaultNetworkType(DEMO_NET_TYPE, key)
+    }
+
     companion object {
         private const val TAG = "DemoMobileConnectionsRepo"
 
         private const val DEFAULT_SUB_ID = 1
+
+        private const val DEMO_NET_TYPE = 1234
     }
 }
 
-private fun Mobile.toMobileSubscriptionModel(): MobileSubscriptionModel {
-    return MobileSubscriptionModel(
-        isEmergencyOnly = false, // TODO(b/261029387): not yet supported
-        isGsm = false, // TODO(b/261029387): not yet supported
-        cdmaLevel = level ?: 0,
-        primaryLevel = level ?: 0,
-        dataConnectionState = DataConnectionState.Connected, // TODO(b/261029387): not yet supported
-        dataActivityDirection = activity,
-        carrierNetworkChangeActive = carrierNetworkChange,
-        // TODO(b/261185097): once mobile mappings can be mocked at this layer, we can build our
-        //  own demo map
-        resolvedNetworkType = dataType.toResolvedNetworkType()
-    )
-}
-
-@Annotation.NetworkType
-private fun SignalIcon.MobileIconGroup?.toNetworkType(): Int =
-    when (this) {
-        TelephonyIcons.THREE_G -> NETWORK_TYPE_GSM
-        TelephonyIcons.LTE -> NETWORK_TYPE_LTE
-        TelephonyIcons.FOUR_G -> NETWORK_TYPE_UMTS
-        TelephonyIcons.NR_5G -> NETWORK_TYPE_NR
-        TelephonyIcons.NR_5G_PLUS -> OVERRIDE_NETWORK_TYPE_NR_ADVANCED
-        else -> NETWORK_TYPE_UNKNOWN
-    }
-
-private fun SignalIcon.MobileIconGroup?.toResolvedNetworkType(): ResolvedNetworkType =
-    when (this) {
-        TelephonyIcons.NR_5G_PLUS -> OverrideNetworkType(toNetworkType())
-        else -> DefaultNetworkType(toNetworkType())
-    }
-
-class DemoMobileConnectionRepository(val subId: Int) : MobileConnectionRepository {
-    override val subscriptionModelFlow = MutableStateFlow(MobileSubscriptionModel())
+class DemoMobileConnectionRepository(override val subId: Int) : MobileConnectionRepository {
+    override val connectionInfo = MutableStateFlow(MobileConnectionModel())
 
     override val dataEnabled = MutableStateFlow(true)
 

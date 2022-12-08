@@ -17,17 +17,16 @@
 package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
 import android.telephony.CarrierConfigManager
-import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
-import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -53,7 +52,7 @@ import kotlinx.coroutines.flow.stateIn
  */
 interface MobileIconsInteractor {
     /** List of subscriptions, potentially filtered for CBRS */
-    val filteredSubscriptions: Flow<List<SubscriptionInfo>>
+    val filteredSubscriptions: Flow<List<SubscriptionModel>>
     /** True if the active mobile data subscription has data enabled */
     val activeDataConnectionHasDataEnabled: StateFlow<Boolean>
     /** The icon mapping from network type to [MobileIconGroup] for the default subscription */
@@ -79,7 +78,6 @@ class MobileIconsInteractorImpl
 constructor(
     private val mobileConnectionsRepo: MobileConnectionsRepository,
     private val carrierConfigTracker: CarrierConfigTracker,
-    private val mobileMappingsProxy: MobileMappingsProxy,
     userSetupRepo: UserSetupRepository,
     @Application private val scope: CoroutineScope,
 ) : MobileIconsInteractor {
@@ -102,8 +100,8 @@ constructor(
             .flatMapLatest { it?.dataEnabled ?: flowOf(false) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
-    private val unfilteredSubscriptions: Flow<List<SubscriptionInfo>> =
-        mobileConnectionsRepo.subscriptionsFlow
+    private val unfilteredSubscriptions: Flow<List<SubscriptionModel>> =
+        mobileConnectionsRepo.subscriptions
 
     /**
      * Generally, SystemUI wants to show iconography for each subscription that is listed by
@@ -118,7 +116,7 @@ constructor(
      * [CarrierConfigManager.KEY_ALWAYS_SHOW_PRIMARY_SIGNAL_BAR_IN_OPPORTUNISTIC_NETWORK_BOOLEAN],
      * and by checking which subscription is opportunistic, or which one is active.
      */
-    override val filteredSubscriptions: Flow<List<SubscriptionInfo>> =
+    override val filteredSubscriptions: Flow<List<SubscriptionModel>> =
         combine(unfilteredSubscriptions, activeMobileDataSubscriptionId) { unfilteredSubs, activeId
             ->
             // Based on the old logic,
@@ -154,15 +152,19 @@ constructor(
      * subscription Id. This mapping is the same for every subscription.
      */
     override val defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>> =
-        mobileConnectionsRepo.defaultDataSubRatConfig
-            .mapLatest { mobileMappingsProxy.mapIconSets(it) }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue = mapOf())
+        mobileConnectionsRepo.defaultMobileIconMapping.stateIn(
+            scope,
+            SharingStarted.WhileSubscribed(),
+            initialValue = mapOf()
+        )
 
     /** If there is no mapping in [defaultMobileIconMapping], then use this default icon group */
     override val defaultMobileIconGroup: StateFlow<MobileIconGroup> =
-        mobileConnectionsRepo.defaultDataSubRatConfig
-            .mapLatest { mobileMappingsProxy.getDefaultIcons(it) }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue = TelephonyIcons.G)
+        mobileConnectionsRepo.defaultMobileIconGroup.stateIn(
+            scope,
+            SharingStarted.WhileSubscribed(),
+            initialValue = TelephonyIcons.G
+        )
 
     /**
      * We want to show an error state when cellular has actually failed to validate, but not if some
@@ -189,7 +191,6 @@ constructor(
             defaultMobileIconMapping,
             defaultMobileIconGroup,
             isDefaultConnectionFailed,
-            mobileMappingsProxy,
             mobileConnectionsRepo.getRepoForSubId(subId),
         )
 }

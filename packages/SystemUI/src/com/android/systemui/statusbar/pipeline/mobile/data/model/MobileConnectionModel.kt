@@ -27,7 +27,6 @@ import android.telephony.TelephonyCallback.ServiceStateListener
 import android.telephony.TelephonyCallback.SignalStrengthsListener
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyManager
-import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Disconnected
 
 /**
@@ -39,7 +38,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionS
  * any new field that needs to be tracked should be copied into this data class rather than
  * threading complex system objects through the pipeline.
  */
-data class MobileSubscriptionModel(
+data class MobileConnectionModel(
     /** From [ServiceStateListener.onServiceStateChanged] */
     val isEmergencyOnly: Boolean = false,
 
@@ -65,5 +64,5 @@ data class MobileSubscriptionModel(
      * [resolvedNetworkType] is the [TelephonyDisplayInfo.getOverrideNetworkType] if it exists or
      * [TelephonyDisplayInfo.getNetworkType]. This is used to look up the proper network type icon
      */
-    val resolvedNetworkType: ResolvedNetworkType = DefaultNetworkType(NETWORK_TYPE_UNKNOWN),
+    val resolvedNetworkType: ResolvedNetworkType = ResolvedNetworkType.UnknownNetworkType,
 )

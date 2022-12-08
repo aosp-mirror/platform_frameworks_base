@@ -16,22 +16,42 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
-import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
-import com.android.settingslib.mobile.MobileMappings.Config
+import android.telephony.TelephonyDisplayInfo
+import android.telephony.TelephonyManager
+import com.android.settingslib.SignalIcon
+import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
-import kotlinx.coroutines.flow.Flow
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
+import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class FakeMobileConnectionsRepository : MobileConnectionsRepository {
-    private val _subscriptionsFlow = MutableStateFlow<List<SubscriptionInfo>>(listOf())
-    override val subscriptionsFlow: Flow<List<SubscriptionInfo>> = _subscriptionsFlow
+// TODO(b/261632894): remove this in favor of the real impl or DemoMobileConnectionsRepository
+class FakeMobileConnectionsRepository(mobileMappings: MobileMappingsProxy) :
+    MobileConnectionsRepository {
+    val GSM_KEY = mobileMappings.toIconKey(GSM)
+    val LTE_KEY = mobileMappings.toIconKey(LTE)
+    val UMTS_KEY = mobileMappings.toIconKey(UMTS)
+    val LTE_ADVANCED_KEY = mobileMappings.toIconKeyOverride(LTE_ADVANCED_PRO)
+
+    /**
+     * To avoid a reliance on [MobileMappings], we'll build a simpler map from network type to
+     * mobile icon. See TelephonyManager.NETWORK_TYPES for a list of types and [TelephonyIcons] for
+     * the exhaustive set of icons
+     */
+    val TEST_MAPPING: Map<String, SignalIcon.MobileIconGroup> =
+        mapOf(
+            GSM_KEY to TelephonyIcons.THREE_G,
+            LTE_KEY to TelephonyIcons.LTE,
+            UMTS_KEY to TelephonyIcons.FOUR_G,
+            LTE_ADVANCED_KEY to TelephonyIcons.NR_5G,
+        )
+
+    private val _subscriptions = MutableStateFlow<List<SubscriptionModel>>(listOf())
+    override val subscriptions = _subscriptions
 
     private val _activeMobileDataSubscriptionId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
     override val activeMobileDataSubscriptionId = _activeMobileDataSubscriptionId
-
-    private val _defaultDataSubRatConfig = MutableStateFlow(Config())
-    override val defaultDataSubRatConfig = _defaultDataSubRatConfig
 
     private val _defaultDataSubId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
     override val defaultDataSubId = _defaultDataSubId
@@ -41,18 +61,21 @@ class FakeMobileConnectionsRepository : MobileConnectionsRepository {
 
     private val subIdRepos = mutableMapOf<Int, MobileConnectionRepository>()
     override fun getRepoForSubId(subId: Int): MobileConnectionRepository {
-        return subIdRepos[subId] ?: FakeMobileConnectionRepository().also { subIdRepos[subId] = it }
+        return subIdRepos[subId]
+            ?: FakeMobileConnectionRepository(subId).also { subIdRepos[subId] = it }
     }
 
     private val _globalMobileDataSettingChangedEvent = MutableStateFlow(Unit)
     override val globalMobileDataSettingChangedEvent = _globalMobileDataSettingChangedEvent
 
-    fun setSubscriptions(subs: List<SubscriptionInfo>) {
-        _subscriptionsFlow.value = subs
-    }
+    private val _defaultMobileIconMapping = MutableStateFlow(TEST_MAPPING)
+    override val defaultMobileIconMapping = _defaultMobileIconMapping
 
-    fun setDefaultDataSubRatConfig(config: Config) {
-        _defaultDataSubRatConfig.value = config
+    private val _defaultMobileIconGroup = MutableStateFlow(DEFAULT_ICON)
+    override val defaultMobileIconGroup = _defaultMobileIconGroup
+
+    fun setSubscriptions(subs: List<SubscriptionModel>) {
+        _subscriptions.value = subs
     }
 
     fun setDefaultDataSubId(id: Int) {
@@ -73,5 +96,15 @@ class FakeMobileConnectionsRepository : MobileConnectionsRepository {
 
     fun setMobileConnectionRepositoryMap(connections: Map<Int, MobileConnectionRepository>) {
         connections.forEach { entry -> subIdRepos[entry.key] = entry.value }
+    }
+
+    companion object {
+        val DEFAULT_ICON = TelephonyIcons.G
+
+        // Use [MobileMappings] to define some simple definitions
+        const val GSM = TelephonyManager.NETWORK_TYPE_GSM
+        const val LTE = TelephonyManager.NETWORK_TYPE_LTE
+        const val UMTS = TelephonyManager.NETWORK_TYPE_UMTS
+        const val LTE_ADVANCED_PRO = TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO
     }
 }
