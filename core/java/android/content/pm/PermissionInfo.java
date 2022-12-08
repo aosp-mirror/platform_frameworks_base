@@ -250,6 +250,16 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
 
     /**
      * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>module</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int PROTECTION_FLAG_MODULE = 0x400000;
+
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding
      * to the <code>companion</code> value of
      * {@link android.R.attr#protectionLevel}.
      *
@@ -320,6 +330,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
             PROTECTION_FLAG_RECENTS,
             PROTECTION_FLAG_ROLE,
             PROTECTION_FLAG_KNOWN_SIGNER,
+            PROTECTION_FLAG_MODULE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProtectionFlags {}
@@ -592,6 +603,9 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_KNOWN_SIGNER) != 0) {
             protLevel.append("|knownSigner");
+        }
+        if ((level & PermissionInfo.PROTECTION_FLAG_MODULE) != 0) {
+            protLevel.append(("|module"));
         }
         return protLevel.toString();
     }
