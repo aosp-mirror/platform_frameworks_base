@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2023 The Android Open Source Project
+<!--
+     Copyright (C) 2019 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,12 +14,11 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accessibilityFeedbackType="feedbackGeneric"
-    android:accessibilityFlags="flagRequestAccessibilityButton|flagRequestFilterKeyEvents"
-    android:canRequestFilterKeyEvents="true"
-    android:summary="@string/accessibility_menu_summary"
-    android:intro="@string/accessibility_menu_intro"
-    android:animatedImageDrawable="@drawable/a11ymenu_intro"
-    android:isAccessibilityTool="true"
-/>
+
+<resources>
+  <!--Adds the theme to support SnackBar component and user configurable theme. -->
+  <style name="ServiceTheme" parent="android:Theme.DeviceDefault.DayNight">
+    <item name="android:colorControlNormal">@color/colorControlNormal</item>
+  </style>
+
+</resources>

@@ -17,16 +17,39 @@
 package com.android.systemui.accessibility.accessibilitymenu;
 
 import android.accessibilityservice.AccessibilityService;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.systemui.accessibility.accessibilitymenu.view.A11yMenuOverlayLayout;
+
 /** @hide */
-public class AccessibilityMenuService extends AccessibilityService {
+public class AccessibilityMenuService extends AccessibilityService implements View.OnTouchListener {
+    private static final String TAG = "A11yMenuService";
+
+    private A11yMenuOverlayLayout mA11yMenuLayout;
 
     @Override
-    public void onAccessibilityEvent(AccessibilityEvent event) {
+    public void onCreate() {
+        super.onCreate();
     }
 
     @Override
+    protected void onServiceConnected() {
+        mA11yMenuLayout = new A11yMenuOverlayLayout(this);
+        super.onServiceConnected();
+        mA11yMenuLayout.toggleVisibility();
+    }
+
+    @Override
+    public void onAccessibilityEvent(AccessibilityEvent event) {}
+
+    @Override
     public void onInterrupt() {
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        return false;
     }
 }
