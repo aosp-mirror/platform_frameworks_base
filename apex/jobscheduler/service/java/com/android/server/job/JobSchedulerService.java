@@ -3824,6 +3824,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         @Override
         @EnforcePermission(allOf = {MANAGE_ACTIVITY_TASKS, INTERACT_ACROSS_USERS_FULL})
         public void registerUserVisibleJobObserver(@NonNull IUserVisibleJobObserver observer) {
+            super.registerUserVisibleJobObserver_enforcePermission();
             if (observer == null) {
                 throw new NullPointerException("observer");
             }
@@ -3835,6 +3836,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         @Override
         @EnforcePermission(allOf = {MANAGE_ACTIVITY_TASKS, INTERACT_ACROSS_USERS_FULL})
         public void unregisterUserVisibleJobObserver(@NonNull IUserVisibleJobObserver observer) {
+            super.unregisterUserVisibleJobObserver_enforcePermission();
             if (observer == null) {
                 throw new NullPointerException("observer");
             }
@@ -3842,8 +3844,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
-        @EnforcePermission(allOf = {"MANAGE_ACTIVITY_TASKS", "INTERACT_ACROSS_USERS_FULL"})
+        @EnforcePermission(allOf = {MANAGE_ACTIVITY_TASKS, INTERACT_ACROSS_USERS_FULL})
         public void stopUserVisibleJobsForUser(@NonNull String packageName, int userId) {
+            super.stopUserVisibleJobsForUser_enforcePermission();
             if (packageName == null) {
                 throw new NullPointerException("packageName");
             }
