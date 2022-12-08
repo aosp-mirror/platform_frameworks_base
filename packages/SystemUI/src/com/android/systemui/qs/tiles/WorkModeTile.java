@@ -98,7 +98,6 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
     @Override
     public void onManagedProfileRemoved() {
         mHost.removeTile(getTileSpec());
-        mHost.unmarkTileAsAutoAdded(getTileSpec());
     }
 
     @Override
