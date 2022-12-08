@@ -72,8 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Tính năng Smart Lock đã tắt"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"đã gửi hình ảnh"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Đang lưu ảnh chụp màn hình..."</string>
-    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
-    <skip />
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Đang lưu ảnh chụp màn hình vào hồ sơ công việc…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Đã lưu ảnh chụp màn hình"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Không thể lưu ảnh chụp màn hình"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Bạn phải mở khóa thiết bị để chúng tôi có thể lưu ảnh chụp màn hình"</string>
@@ -875,6 +874,8 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Dừng truyền"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Các thiết bị có sẵn để xuất âm thanh."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Âm lượng"</string>
+    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cách tính năng truyền hoạt động"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Truyền"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Những người ở gần có thiết bị Bluetooth tương thích có thể nghe nội dung nghe nhìn bạn đang truyền"</string>
@@ -988,6 +989,8 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Máy ảnh và micrô đang tắt"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# thông báo}other{# thông báo}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <!-- no translation found for note_task_button_label (8718616095800343136) -->
+    <skip />
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Phát sóng"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Dừng phát <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Nếu bạn phát <xliff:g id="SWITCHAPP">%1$s</xliff:g> hoặc thay đổi đầu ra, phiên truyền phát hiện tại sẽ dừng"</string>
