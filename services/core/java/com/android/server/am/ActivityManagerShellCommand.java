@@ -2006,12 +2006,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runSwitchUser(PrintWriter pw) throws RemoteException {
-        UserManager userManager = mInternal.mContext.getSystemService(UserManager.class);
-        final int userSwitchable = userManager.getUserSwitchability();
-        if (userSwitchable != UserManager.SWITCHABILITY_STATUS_OK) {
-            getErrPrintWriter().println("Error: " + userSwitchable);
-            return -1;
-        }
         boolean wait = false;
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -2024,6 +2018,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         int userId = Integer.parseInt(getNextArgRequired());
+
+        UserManager userManager = mInternal.mContext.getSystemService(UserManager.class);
+        final int userSwitchable = userManager.getUserSwitchability(UserHandle.of(userId));
+        if (userSwitchable != UserManager.SWITCHABILITY_STATUS_OK) {
+            getErrPrintWriter().println("Error: UserSwitchabilityResult=" + userSwitchable);
+            return -1;
+        }
+
         boolean switched;
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "shell_runSwitchUser");
         try {
