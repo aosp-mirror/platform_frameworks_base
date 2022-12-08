@@ -24,6 +24,7 @@ import androidx.slice.Slice
 import androidx.slice.SliceManager
 import androidx.slice.builders.ListBuilder
 import androidx.slice.builders.SliceAction
+import androidx.slice.core.R
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.slice.createBroadcastPendingIntent
 import com.android.settingslib.spa.slice.createBrowsePendingIntent
@@ -52,10 +53,7 @@ fun createDemoSlice(sliceUri: Uri, title: String, summary: String, intent: Pendi
 private fun createSliceAction(context: Context, intent: PendingIntent): SliceAction {
     return SliceAction.create(
         intent,
-        IconCompat.createWithResource(
-            context,
-            com.google.android.material.R.drawable.navigation_empty_icon
-        ),
+        IconCompat.createWithResource(context, R.drawable.notification_action_background),
         ListBuilder.ICON_IMAGE,
         "Enter app"
     )

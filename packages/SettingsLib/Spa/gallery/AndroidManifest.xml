@@ -38,7 +38,6 @@
         <provider
             android:name="com.android.settingslib.spa.search.SpaSearchProvider"
             android:authorities="com.android.spa.gallery.search.provider"
-            android:enabled="true"
             android:exported="false">
         </provider>
 
@@ -67,7 +66,6 @@
         <provider
             android:name="com.android.settingslib.spa.debug.DebugProvider"
             android:authorities="com.android.spa.gallery.debug.provider"
-            android:enabled="true"
             android:exported="false">
         </provider>
 
