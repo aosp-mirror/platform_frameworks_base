@@ -352,17 +352,6 @@ public class OverlayManager {
     }
 
     /**
-     * Get a OverlayManagerTransaction.Builder to build out a overlay manager transaction.
-     *
-     * @return a builder of the overlay manager transaction.
-     * @hide
-     */
-    @NonNull
-    public OverlayManagerTransaction.Builder beginTransaction() {
-        return new OverlayManagerTransaction.Builder(this);
-    }
-
-    /**
      * Commit the self-targeting transaction to register or unregister overlays.
      *
      * <p>Applications can request OverlayManager to register overlays and unregister the registered
