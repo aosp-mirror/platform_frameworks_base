@@ -3011,13 +3011,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     // When there are more than one changing containers, it may leave part of the
                     // screen empty. Show background color to cover that.
                     showBackdrop = getDisplayContent().mChangingContainers.size() > 1;
+                    backdropColor = appTransition.getNextAppTransitionBackgroundColor();
                 } else {
                     // Check whether the app has requested to show backdrop for open/close
                     // transition.
                     final Animation a = appTransition.getNextAppRequestedAnimation(enter);
-                    showBackdrop = a != null && a.getShowBackdrop();
+                    if (a != null) {
+                        showBackdrop = a.getShowBackdrop();
+                        backdropColor = a.getBackdropColor();
+                    }
                 }
-                backdropColor = appTransition.getNextAppTransitionBackgroundColor();
             }
             final Rect localBounds = new Rect(mTmpRect);
             localBounds.offsetTo(mTmpPoint.x, mTmpPoint.y);
