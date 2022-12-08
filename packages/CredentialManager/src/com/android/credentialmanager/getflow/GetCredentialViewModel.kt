@@ -221,7 +221,16 @@ private fun toGetScreenState(
 
 internal class CredentialEntryInfoComparator : Comparator<CredentialEntryInfo> {
   override fun compare(p0: CredentialEntryInfo, p1: CredentialEntryInfo): Int {
-    // First order by last used timestamp
+    // First prefer passkey type for its security benefits
+    if (p0.credentialType != p1.credentialType) {
+      if (PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL == p0.credentialType) {
+        return -1
+      } else if (PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL == p1.credentialType) {
+        return 1
+      }
+    }
+
+    // Then order by last used timestamp
     if (p0.lastUsedTimeMillis != null && p1.lastUsedTimeMillis != null) {
       if (p0.lastUsedTimeMillis < p1.lastUsedTimeMillis) {
         return 1
@@ -232,15 +241,6 @@ internal class CredentialEntryInfoComparator : Comparator<CredentialEntryInfo> {
       return -1
     } else if (p1.lastUsedTimeMillis != null && p1.lastUsedTimeMillis > 0) {
       return 1
-    }
-
-    // Then prefer passkey type for its security benefits
-    if (p0.credentialType != p1.credentialType) {
-      if (PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL == p0.credentialType) {
-        return -1
-      } else if (PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL == p1.credentialType) {
-        return 1
-      }
     }
     return 0
   }
