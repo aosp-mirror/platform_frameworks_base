@@ -16,17 +16,16 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
-import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
@@ -45,8 +44,8 @@ import org.mockito.MockitoAnnotations
 class MobileIconsInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconsInteractor
     private val userSetupRepository = FakeUserSetupRepository()
-    private val connectionsRepository = FakeMobileConnectionsRepository()
     private val mobileMappingsProxy = FakeMobileMappingsProxy()
+    private val connectionsRepository = FakeMobileConnectionsRepository(mobileMappingsProxy)
     private val scope = CoroutineScope(IMMEDIATE)
 
     @Mock private lateinit var carrierConfigTracker: CarrierConfigTracker
@@ -69,7 +68,6 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             MobileIconsInteractorImpl(
                 connectionsRepository,
                 carrierConfigTracker,
-                mobileMappingsProxy,
                 userSetupRepository,
                 scope
             )
@@ -80,10 +78,10 @@ class MobileIconsInteractorTest : SysuiTestCase() {
     @Test
     fun filteredSubscriptions_default() =
         runBlocking(IMMEDIATE) {
-            var latest: List<SubscriptionInfo>? = null
+            var latest: List<SubscriptionModel>? = null
             val job = underTest.filteredSubscriptions.onEach { latest = it }.launchIn(this)
 
-            assertThat(latest).isEqualTo(listOf<SubscriptionInfo>())
+            assertThat(latest).isEqualTo(listOf<SubscriptionModel>())
 
             job.cancel()
         }
@@ -93,7 +91,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         runBlocking(IMMEDIATE) {
             connectionsRepository.setSubscriptions(listOf(SUB_1, SUB_2))
 
-            var latest: List<SubscriptionInfo>? = null
+            var latest: List<SubscriptionModel>? = null
             val job = underTest.filteredSubscriptions.onEach { latest = it }.launchIn(this)
 
             assertThat(latest).isEqualTo(listOf(SUB_1, SUB_2))
@@ -109,7 +107,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             whenever(carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault)
                 .thenReturn(false)
 
-            var latest: List<SubscriptionInfo>? = null
+            var latest: List<SubscriptionModel>? = null
             val job = underTest.filteredSubscriptions.onEach { latest = it }.launchIn(this)
 
             // Filtered subscriptions should show the active one when the config is false
@@ -126,7 +124,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             whenever(carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault)
                 .thenReturn(false)
 
-            var latest: List<SubscriptionInfo>? = null
+            var latest: List<SubscriptionModel>? = null
             val job = underTest.filteredSubscriptions.onEach { latest = it }.launchIn(this)
 
             // Filtered subscriptions should show the active one when the config is false
@@ -143,7 +141,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             whenever(carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault)
                 .thenReturn(true)
 
-            var latest: List<SubscriptionInfo>? = null
+            var latest: List<SubscriptionModel>? = null
             val job = underTest.filteredSubscriptions.onEach { latest = it }.launchIn(this)
 
             // Filtered subscriptions should show the primary (non-opportunistic) if the config is
@@ -161,7 +159,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             whenever(carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault)
                 .thenReturn(true)
 
-            var latest: List<SubscriptionInfo>? = null
+            var latest: List<SubscriptionModel>? = null
             val job = underTest.filteredSubscriptions.onEach { latest = it }.launchIn(this)
 
             // Filtered subscriptions should show the primary (non-opportunistic) if the config is
@@ -261,29 +259,19 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         private val IMMEDIATE = Dispatchers.Main.immediate
 
         private const val SUB_1_ID = 1
-        private val SUB_1 =
-            mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_1_ID) }
-        private val CONNECTION_1 = FakeMobileConnectionRepository()
+        private val SUB_1 = SubscriptionModel(subscriptionId = SUB_1_ID)
+        private val CONNECTION_1 = FakeMobileConnectionRepository(SUB_1_ID)
 
         private const val SUB_2_ID = 2
-        private val SUB_2 =
-            mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_2_ID) }
-        private val CONNECTION_2 = FakeMobileConnectionRepository()
+        private val SUB_2 = SubscriptionModel(subscriptionId = SUB_2_ID)
+        private val CONNECTION_2 = FakeMobileConnectionRepository(SUB_2_ID)
 
         private const val SUB_3_ID = 3
-        private val SUB_3_OPP =
-            mock<SubscriptionInfo>().also {
-                whenever(it.subscriptionId).thenReturn(SUB_3_ID)
-                whenever(it.isOpportunistic).thenReturn(true)
-            }
-        private val CONNECTION_3 = FakeMobileConnectionRepository()
+        private val SUB_3_OPP = SubscriptionModel(subscriptionId = SUB_3_ID, isOpportunistic = true)
+        private val CONNECTION_3 = FakeMobileConnectionRepository(SUB_3_ID)
 
         private const val SUB_4_ID = 4
-        private val SUB_4_OPP =
-            mock<SubscriptionInfo>().also {
-                whenever(it.subscriptionId).thenReturn(SUB_4_ID)
-                whenever(it.isOpportunistic).thenReturn(true)
-            }
-        private val CONNECTION_4 = FakeMobileConnectionRepository()
+        private val SUB_4_OPP = SubscriptionModel(subscriptionId = SUB_4_ID, isOpportunistic = true)
+        private val CONNECTION_4 = FakeMobileConnectionRepository(SUB_4_ID)
     }
 }
