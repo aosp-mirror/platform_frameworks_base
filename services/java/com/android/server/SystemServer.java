@@ -186,6 +186,7 @@ import com.android.server.security.AttestationVerificationManagerService;
 import com.android.server.security.FileIntegrityService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
+import com.android.server.security.rkp.RemoteProvisioningService;
 import com.android.server.sensorprivacy.SensorPrivacyService;
 import com.android.server.sensors.SensorService;
 import com.android.server.signedconfig.SignedConfigService;
@@ -1390,9 +1391,14 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(BugreportManagerService.class);
         t.traceEnd();
 
-        // Serivce for GPU and GPU driver.
+        // Service for GPU and GPU driver.
         t.traceBegin("GpuService");
         mSystemServiceManager.startService(GpuService.class);
+        t.traceEnd();
+
+        // Handles system process requests for remotely provisioned keys & data.
+        t.traceBegin("StartRemoteProvisioningService");
+        mSystemServiceManager.startService(RemoteProvisioningService.class);
         t.traceEnd();
 
         t.traceEnd(); // startCoreServices
