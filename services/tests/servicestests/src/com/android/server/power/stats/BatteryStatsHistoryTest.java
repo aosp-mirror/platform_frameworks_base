@@ -309,10 +309,10 @@ public class BatteryStatsHistoryTest {
         mHistory.recordMeasuredEnergyDetails(200, 200, details);
 
         BatteryStatsHistoryIterator iterator = mHistory.iterate();
-        BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
-        assertThat(iterator.next(item)).isTrue(); // First item contains current time only
+        BatteryStats.HistoryItem item;
+        assertThat(item = iterator.next()).isNotNull(); // First item contains current time only
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
 
         String dump = toString(item, /* checkin */ false);
         assertThat(dump).contains("+200ms");
@@ -344,9 +344,9 @@ public class BatteryStatsHistoryTest {
 
         BatteryStatsHistoryIterator iterator = mHistory.iterate();
         BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
-        assertThat(iterator.next(item)).isTrue(); // First item contains current time only
+        assertThat(item = iterator.next()).isNotNull(); // First item contains current time only
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
 
         String dump = toString(item, /* checkin */ false);
         assertThat(dump).contains("+200ms");
@@ -361,7 +361,7 @@ public class BatteryStatsHistoryTest {
         assertThat(checkin).contains("XB,3,2,HIGH");
         assertThat(checkin).contains("XC,10123,100,200,300");
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
 
         dump = toString(item, /* checkin */ false);
         assertThat(dump).contains("+300ms");
