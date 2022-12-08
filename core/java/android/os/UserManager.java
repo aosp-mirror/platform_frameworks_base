@@ -2912,14 +2912,15 @@ public class UserManager {
     /**
      * @hide
      */
-    public static boolean isUsersOnSecondaryDisplaysEnabled() {
-        return SystemProperties.getBoolean("fw.users_on_secondary_displays",
+    public static boolean isVisibleBackgroundUsersEnabled() {
+        return SystemProperties.getBoolean("fw.visible_bg_users",
                 Resources.getSystem()
-                        .getBoolean(R.bool.config_multiuserUsersOnSecondaryDisplays));
+                        .getBoolean(R.bool.config_multiuserVisibleBackgroundUsers));
     }
 
     /**
-     * Returns whether the device allows users to run (and launch activities) on secondary displays.
+     * Returns whether the device allows (full) users to be started in background visible in a given
+     * display (which would allow them to launch activities in that display).
      *
      * @return {@code false} for most devices, except on automotive builds for vehiches with
      * passenger displays.
@@ -2927,8 +2928,8 @@ public class UserManager {
      * @hide
      */
     @TestApi
-    public boolean isUsersOnSecondaryDisplaysSupported() {
-        return isUsersOnSecondaryDisplaysEnabled();
+    public boolean isVisibleBackgroundUsersSupported() {
+        return isVisibleBackgroundUsersEnabled();
     }
 
     /**

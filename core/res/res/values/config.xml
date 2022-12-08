@@ -2667,9 +2667,9 @@
          will be locked. -->
     <bool name="config_multiuserDelayUserDataLocking">false</bool>
 
-    <!-- Whether the device allows users to start in background on secondary displays.
+    <!-- Whether the device allows users to start in background visible on displays.
          Should be false for most devices, except automotive vehicle with passenger displays. -->
-    <bool name="config_multiuserUsersOnSecondaryDisplays">false</bool>
+    <bool name="config_multiuserVisibleBackgroundUsers">false</bool>
 
     <!-- Whether to automatically switch to the designated Dock User (the user chosen for
          displaying dreams, etc.) after a timeout when the device is docked.  -->

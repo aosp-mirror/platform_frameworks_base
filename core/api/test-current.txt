@@ -125,7 +125,7 @@ package android.app {
   public class ActivityManager {
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void addHomeVisibilityListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.HomeVisibilityListener);
     method public void alwaysShowUnsupportedCompileSdkWarning(android.content.ComponentName);
-    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public int[] getSecondaryDisplayIdsForStartingBackgroundUsers();
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public int[] getDisplayIdsForStartingVisibleBackgroundUsers();
     method public long getTotalRam();
     method @RequiresPermission(allOf={android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional=true) public int getUidProcessCapabilities(int);
     method @RequiresPermission(allOf={android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional=true) public int getUidProcessState(int);
@@ -136,7 +136,7 @@ package android.app {
     method public static void resumeAppSwitches() throws android.os.RemoteException;
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public void setStopUserOnSwitch(int);
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public boolean startUserInBackgroundOnSecondaryDisplay(int, int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public boolean startUserInBackgroundVisibleOnDisplay(int, int);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean stopUser(int, boolean);
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.DUMP) public void waitForBroadcastIdle();
@@ -1933,7 +1933,7 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean hasBaseUserRestriction(@NonNull String, @NonNull android.os.UserHandle);
     method public static boolean isSplitSystemUser();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean isUserTypeEnabled(@NonNull String);
-    method public boolean isUsersOnSecondaryDisplaysSupported();
+    method public boolean isVisibleBackgroundUsersSupported();
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.content.pm.UserInfo preCreateUser(@NonNull String) throws android.os.UserManager.UserOperationException;
   }
 

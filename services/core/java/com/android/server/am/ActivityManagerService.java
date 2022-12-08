@@ -16595,8 +16595,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public boolean startUserInBackgroundOnSecondaryDisplay(int userId, int displayId) {
-        int[] displayIds = getSecondaryDisplayIdsForStartingBackgroundUsers();
+    public boolean startUserInBackgroundVisibleOnDisplay(int userId, int displayId) {
+        int[] displayIds = getDisplayIdsForStartingVisibleBackgroundUsers();
         boolean validDisplay = false;
         if (displayIds != null) {
             for (int i = 0; i < displayIds.length; i++) {
@@ -16616,14 +16616,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     displayId, mInjector);
         }
         // Permission check done inside UserController.
-        return mInjector.startUserOnSecondaryDisplay(userId, displayId);
+        return mInjector.startUserInBackgroundVisibleOnDisplay(userId, displayId);
     }
 
     @Override
-    public int[] getSecondaryDisplayIdsForStartingBackgroundUsers() {
-        enforceCallingHasAtLeastOnePermission("getSecondaryDisplayIdsForStartingBackgroundUsers()",
+    public int[] getDisplayIdsForStartingVisibleBackgroundUsers() {
+        enforceCallingHasAtLeastOnePermission("getDisplayIdsForStartingVisibleBackgroundUsers()",
                 MANAGE_USERS, INTERACT_ACROSS_USERS);
-        return mInjector.getSecondaryDisplayIdsForStartingBackgroundUsers();
+        return mInjector.getDisplayIdsForStartingVisibleBackgroundUsers();
     }
 
     /** @deprecated see the AIDL documentation {@inheritDoc} */
@@ -18812,7 +18812,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         /**
-         * Called by {@code AMS.getSecondaryDisplayIdsForStartingBackgroundUsers()}.
+         * Called by {@code AMS.getDisplayIdsForStartingVisibleBackgroundUsers()}.
          */
         // NOTE: ideally Injector should have no complex logic, but if this logic was moved to AMS,
         // it could not be tested with the existing ActivityManagerServiceTest (as DisplayManager,
@@ -18822,9 +18822,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         // was added on FrameworksMockingServicesTests and hence uses Extended Mockito to mock
         // final and static stuff)
         @Nullable
-        public int[] getSecondaryDisplayIdsForStartingBackgroundUsers() {
-            if (!UserManager.isUsersOnSecondaryDisplaysEnabled()) {
-                Slogf.w(TAG, "getSecondaryDisplayIdsForStartingBackgroundUsers(): not supported");
+        public int[] getDisplayIdsForStartingVisibleBackgroundUsers() {
+            if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+                Slogf.w(TAG, "getDisplayIdsForStartingVisibleBackgroundUsers(): not supported");
                 return null;
             }
 
@@ -18870,7 +18870,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // KitchenSink (or other app) can be used while running CTS tests on devices that
                 // don't have a real display.
                 // STOPSHIP: if not removed, it should at least be unit tested
-                String testingProp = "fw.secondary_display_for_starting_users_for_testing_purposes";
+                String testingProp = "fw.display_ids_for_starting_users_for_testing_purposes";
                 int displayId = SystemProperties.getInt(testingProp, Display.DEFAULT_DISPLAY);
                 if (displayId != Display.DEFAULT_DISPLAY && displayId > 0) {
                     Slogf.w(TAG, "getSecondaryDisplayIdsForStartingBackgroundUsers(): no valid "
@@ -18878,8 +18878,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             testingProp);
                     return new int[] { displayId };
                 }
-                Slogf.e(TAG, "getSecondaryDisplayIdsForStartingBackgroundUsers(): no valid display"
-                        + " on %s", Arrays.toString(allDisplays));
+                Slogf.e(TAG, "getDisplayIdsForStartingBackgroundUsers(): no valid display on %s",
+                        Arrays.toString(allDisplays));
                 return null;
             }
 
@@ -18887,7 +18887,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 int[] validDisplayIds = new int[numberValidDisplays];
                 System.arraycopy(displayIds, 0, validDisplayIds, 0, numberValidDisplays);
                 if (DEBUG_MU) {
-                    Slogf.d(TAG, "getSecondaryDisplayIdsForStartingBackgroundUsers(): returning "
+                    Slogf.d(TAG, "getDisplayIdsForStartingVisibleBackgroundUsers(): returning "
                             + "only valid displays (%d instead of %d): %s", numberValidDisplays,
                             displayIds.length, Arrays.toString(validDisplayIds));
                 }
@@ -18895,17 +18895,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (DEBUG_MU) {
-                Slogf.d(TAG, "getSecondaryDisplayIdsForStartingBackgroundUsers(): returning all "
-                        + "(but DEFAULT_DISPLAY) displays : %s", Arrays.toString(displayIds));
+                Slogf.d(TAG, "getDisplayIdsForStartingVisibleBackgroundUsers(): returning all (but "
+                        + "DEFAULT_DISPLAY) displays : %s", Arrays.toString(displayIds));
             }
             return displayIds;
         }
 
         /**
-         * Called by {@code AMS.startUserOnSecondaryDisplay()}.
+         * Called by {@code AMS.startUserInBackgroundVisibleOnDisplay()}.
          */
-        public boolean startUserOnSecondaryDisplay(int userId, int displayId) {
-            return mUserController.startUserOnSecondaryDisplay(userId, displayId);
+        public boolean startUserInBackgroundVisibleOnDisplay(int userId, int displayId) {
+            return mUserController.startUserVisibleOnDisplay(userId, displayId);
         }
 
         /**
