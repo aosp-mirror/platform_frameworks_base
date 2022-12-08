@@ -8,15 +8,19 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Shranjevanje na drugo mesto"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Uporabi drugo napravo"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Shrani v drugo napravo"</string>
-    <string name="passkey_creation_intro_title" msgid="402553911484409884">"Preprost način za varno prijavo"</string>
-    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Če se želite prijaviti z enoličnim ključem za dostop, ki ga ni mogoče pozabiti ali ukrasti, uporabite prstni odtis, obraz ali nastavljeni način za odklepanje zaslona. Več o tem"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"Izberite mesto za <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
     <skip />
+    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
+    <skip />
+    <string name="choose_provider_title" msgid="7245243990139698508">"Izberite mesto za <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <string name="create_your_passkeys" msgid="8901224153607590596">"ustvarjanje ključev za dostop"</string>
     <string name="save_your_password" msgid="6597736507991704307">"shranjevanje gesla"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"shranjevanje podatkov za prijavo"</string>
-    <!-- no translation found for choose_provider_body (8045759834416308059) -->
-    <skip />
+    <string name="choose_provider_body" msgid="8045759834416308059">"Nastavite privzetega upravitelja gesel za shranjevanje gesel in ključev za dostop, da se boste naslednjič lahko hitreje prijavili."</string>
     <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Želite ustvariti ključ za dostop pod »<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>«?"</string>
     <string name="choose_create_option_password_title" msgid="8812546498357380545">"Želite shraniti geslo pod »<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>«?"</string>
     <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Želite shraniti podatke za prijavo pod »<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>«?"</string>
@@ -24,17 +28,12 @@
     <string name="passkey" msgid="632353688396759522">"ključ za dostop"</string>
     <string name="password" msgid="6738570945182936667">"geslo"</string>
     <string name="sign_ins" msgid="4710739369149469208">"prijave"</string>
-    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
-    <skip />
-    <!-- no translation found for save_password_to_title (3450480045270186421) -->
-    <skip />
-    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
-    <skip />
-    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
-    <skip />
+    <string name="create_passkey_in_title" msgid="2714306562710897785">"Ustvarjanje ključa za dostop v"</string>
+    <string name="save_password_to_title" msgid="3450480045270186421">"Shranjevanje gesla v"</string>
+    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Shranjevanje podatkov za prijavo v"</string>
+    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Želite ustvariti ključ za dostop v drugi napravi?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Želite za vse prijave uporabiti »<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>«?"</string>
-    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="6560593199974037820">"V tem upravitelju gesel bodo shranjeni gesla in ključi za dostop, kar vam bo olajšalo prijavo."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Nastavi kot privzeto"</string>
     <string name="use_once" msgid="9027366575315399714">"Uporabi enkrat"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"Št. gesel: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>, št. ključev za dostop: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>

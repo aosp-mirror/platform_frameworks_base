@@ -8,15 +8,19 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"മറ്റൊരു സ്ഥലത്തേക്ക് സംരക്ഷിക്കുക"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"മറ്റൊരു ഉപകരണം ഉപയോഗിക്കുക"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"മറ്റൊരു ഉപകരണത്തിലേക്ക് സംരക്ഷിക്കുക"</string>
-    <string name="passkey_creation_intro_title" msgid="402553911484409884">"സുരക്ഷിതമായി സൈൻ ഇൻ ചെയ്യാനുള്ള ലളിതമായ മാർഗ്ഗം"</string>
-    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"മറന്നുപോകാനും മോഷ്‌ടിക്കാനും സാധ്യതയില്ലാത്ത തനത് പാസ്‌കീ ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യാൻ നിങ്ങളുടെ ഫിംഗർപ്രിന്റോ മുഖമോ സ്‌ക്രീൻ ലോക്കോ ഉപയോഗിക്കുക. കൂടുതലറിയുക"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"എവിടെ <xliff:g id="CREATETYPES">%1$s</xliff:g> എന്ന് തിരഞ്ഞെടുക്കുക"</string>
-    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
     <skip />
+    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
+    <skip />
+    <string name="choose_provider_title" msgid="7245243990139698508">"എവിടെ <xliff:g id="CREATETYPES">%1$s</xliff:g> എന്ന് തിരഞ്ഞെടുക്കുക"</string>
+    <string name="create_your_passkeys" msgid="8901224153607590596">"നിങ്ങളുടെ പാസ്‌കീകൾ സൃഷ്‌ടിക്കുക"</string>
     <string name="save_your_password" msgid="6597736507991704307">"നിങ്ങളുടെ പാസ്‌വേഡ് സംരക്ഷിക്കുക"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"നിങ്ങളുടെ സൈൻ ഇൻ വിവരങ്ങൾ സംരക്ഷിക്കുക"</string>
-    <!-- no translation found for choose_provider_body (8045759834416308059) -->
-    <skip />
+    <string name="choose_provider_body" msgid="8045759834416308059">"നിങ്ങളുടെ പാസ്‌വേഡുകളും പാസ്‌കീകളും സംരക്ഷിക്കാനും അടുത്ത തവണ വേഗത്തിൽ സൈൻ ഇൻ ചെയ്യാനും ഒരു ഡിഫോൾട്ട് പാസ്‌വേഡ് മാനേജർ സജ്ജീകരിക്കുക."</string>
     <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> എന്നതിൽ ഒരു പാസ്‌കീ സൃഷ്‌ടിക്കണോ?"</string>
     <string name="choose_create_option_password_title" msgid="8812546498357380545">"പാസ്‌വേഡ് <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
     <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"സൈൻ ഇൻ വിവരങ്ങൾ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
@@ -24,17 +28,12 @@
     <string name="passkey" msgid="632353688396759522">"പാസ്‌കീ"</string>
     <string name="password" msgid="6738570945182936667">"പാസ്‌വേഡ്"</string>
     <string name="sign_ins" msgid="4710739369149469208">"സൈൻ ഇന്നുകൾ"</string>
-    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
-    <skip />
-    <!-- no translation found for save_password_to_title (3450480045270186421) -->
-    <skip />
-    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
-    <skip />
-    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
-    <skip />
+    <string name="create_passkey_in_title" msgid="2714306562710897785">"ഇനിപ്പറയുന്നതിൽ പാസ്‌കീ സൃഷ്‌ടിക്കുക"</string>
+    <string name="save_password_to_title" msgid="3450480045270186421">"പാസ്‌വേഡ് ഇനിപ്പറയുന്നതിൽ സംരക്ഷിക്കുക"</string>
+    <string name="save_sign_in_to_title" msgid="8328143607671760232">"ഇനിപ്പറയുന്നതിലേക്ക് സൈൻ ഇൻ സംരക്ഷിക്കുക"</string>
+    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"മറ്റൊരു ഉപകരണത്തിൽ പാസ്‌കീ സൃഷ്ടിക്കണോ?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"നിങ്ങളുടെ എല്ലാ സൈൻ ഇന്നുകൾക്കും <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ഉപയോഗിക്കണോ?"</string>
-    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="6560593199974037820">"എളുപ്പത്തിൽ സൈൻ ഇൻ ചെയ്യാൻ സഹായിക്കുന്നതിന് ഈ പാസ്‌വേഡ് മാനേജർ നിങ്ങളുടെ പാസ്‌വേഡുകളും പാസ്‌കീകളും സംഭരിക്കും."</string>
     <string name="set_as_default" msgid="4415328591568654603">"ഡിഫോൾട്ടായി സജ്ജീകരിക്കുക"</string>
     <string name="use_once" msgid="9027366575315399714">"ഒരു തവണ ഉപയോഗിക്കുക"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> പാസ്‌വേഡുകൾ, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> പാസ്‌കീകൾ"</string>
