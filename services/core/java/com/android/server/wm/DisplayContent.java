@@ -3334,6 +3334,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             if (!controller.isCollecting(this)) {
                 controller.collect(this);
                 startAsyncRotationIfNeeded();
+                if (mFixedRotationLaunchingApp != null) {
+                    setSeamlessTransitionForFixedRotation(controller.getCollectingTransition());
+                }
             }
             return;
         }
@@ -3343,12 +3346,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mAtmService.startLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
             if (mFixedRotationLaunchingApp != null) {
                 // A fixed-rotation transition is done, then continue to start a seamless display
-                // transition. And be fore the start transaction is applied, the non-app windows
-                // need to keep in previous rotation to avoid showing inconsistent content.
-                t.setSeamlessRotation(this);
-                if (mAsyncRotationController != null) {
-                    mAsyncRotationController.keepAppearanceInPreviousRotation();
-                }
+                // transition.
+                setSeamlessTransitionForFixedRotation(t);
             } else if (isRotationChanging()) {
                 if (displayChange != null) {
                     final boolean seamless = mDisplayRotation.shouldRotateSeamlessly(
@@ -3364,6 +3363,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 startAsyncRotation(false /* shouldDebounce */);
             }
             t.setKnownConfigChanges(this, changes);
+        }
+    }
+
+    private void setSeamlessTransitionForFixedRotation(Transition t) {
+        t.setSeamlessRotation(this);
+        // Before the start transaction is applied, the non-app windows need to keep in previous
+        // rotation to avoid showing inconsistent content.
+        if (mAsyncRotationController != null) {
+            mAsyncRotationController.keepAppearanceInPreviousRotation();
         }
     }
 
