@@ -623,7 +623,7 @@ public class Notifier {
         } catch (RemoteException ex) {
             // Ignore
         }
-        FrameworkStatsLog.write(FrameworkStatsLog.DISPLAY_WAKE_REPORTED, reason);
+        FrameworkStatsLog.write(FrameworkStatsLog.DISPLAY_WAKE_REPORTED, reason, reasonUid);
     }
 
     /**
