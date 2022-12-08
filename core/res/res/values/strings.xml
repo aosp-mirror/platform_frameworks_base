@@ -1329,6 +1329,16 @@
     <!-- Description of the background body sensors permission, listed so the user can decide whether to allow the application to access data from body sensors in the background. [CHAR LIMIT=NONE] -->
     <string name="permdesc_bodySensors_background" product="default">Allows the app to access body sensor data, such as heart rate, temperature, and blood oxygen percentage, while the app is in the background.</string>
 
+    <!-- Title of the body sensors wrist temperature permission, listed so the user can decide whether to allow the application to access body sensor wrist temperature data. [CHAR LIMIT=NONE] -->
+    <string name="permlab_bodySensorsWristTemperature">Access body sensor wrist temperature data while the app is in use.</string>
+    <!-- Description of the body sensors wrist temperature permission, listed so the user can decide whether to allow the application to access data from body sensors. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_bodySensorsWristTemperature" product="default">Allows the app to access body sensor wrist temperature data, while the app is in use.</string>
+
+    <!-- Title of the body sensors wrist temperature permission, listed so the user can decide whether to allow the application to access body sensor wrist temperature data. [CHAR LIMIT=NONE] -->
+    <string name="permlab_bodySensors_wristTemperature_background">Access body sensor wrist temperature data while the app is in the background.</string>
+    <!-- Description of the body sensors wrist temperature permission, listed so the user can decide whether to allow the application to access data from body sensors. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default">Allows the app to access body sensor wrist temperature data, while the app is in the background.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCalendar">Read calendar events and details</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
