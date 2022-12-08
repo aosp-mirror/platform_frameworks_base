@@ -4715,6 +4715,9 @@
     <!-- Title of Reduce Brightness feature, shown in the warning dialog about the accessibility shortcut. [CHAR LIMIT=none] -->
     <string name="reduce_bright_colors_feature_name">Extra dim</string>
 
+    <!-- Title of hearing aids feature, shown in the warning dialog about the accessibility shortcut. [CHAR LIMIT=none] -->
+    <string name="hearing_aids_feature_name">Hearing devices</string>
+
     <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility service. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_enabling_service">Held volume keys. <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> turned on.</string>
 
