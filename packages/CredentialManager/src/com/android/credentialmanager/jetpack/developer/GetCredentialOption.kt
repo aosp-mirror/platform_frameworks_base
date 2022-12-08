@@ -28,9 +28,9 @@ import android.os.Bundle
  *                              otherwise
  */
 open class GetCredentialOption(
-        val type: String,
-        val data: Bundle,
-        val requireSystemProvider: Boolean,
+    val type: String,
+    val data: Bundle,
+    val requireSystemProvider: Boolean,
 ) {
     companion object {
         @JvmStatic
@@ -38,14 +38,20 @@ open class GetCredentialOption(
             return try {
                 when (from.type) {
                     Credential.TYPE_PASSWORD_CREDENTIAL ->
-                        GetPasswordOption.createFrom(from.data)
+                        GetPasswordOption.createFrom(from.credentialRetrievalData)
                     PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL ->
-                        GetPublicKeyCredentialBaseOption.createFrom(from.data)
+                        GetPublicKeyCredentialBaseOption.createFrom(from.credentialRetrievalData)
                     else ->
-                        GetCredentialOption(from.type, from.data, from.requireSystemProvider())
+                        GetCredentialOption(
+                            from.type, from.credentialRetrievalData, from.requireSystemProvider()
+                        )
                 }
             } catch (e: FrameworkClassParsingException) {
-                GetCredentialOption(from.type, from.data, from.requireSystemProvider())
+                GetCredentialOption(
+                    from.type,
+                    from.credentialRetrievalData,
+                    from.requireSystemProvider()
+                )
             }
         }
     }
