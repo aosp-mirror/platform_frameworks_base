@@ -20,7 +20,7 @@ import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -36,11 +36,13 @@ import kotlinx.coroutines.flow.StateFlow
  * eventually becomes a single icon in the status bar.
  */
 interface MobileConnectionRepository {
+    /** The subscriptionId that this connection represents */
+    val subId: Int
     /**
      * A flow that aggregates all necessary callbacks from [TelephonyCallback] into a single
      * listener + model.
      */
-    val subscriptionModelFlow: Flow<MobileSubscriptionModel>
+    val connectionInfo: Flow<MobileConnectionModel>
     /** Observable tracking [TelephonyManager.isDataConnectionAllowed] */
     val dataEnabled: StateFlow<Boolean>
     /**

@@ -32,6 +32,8 @@ import androidx.test.filters.SmallTest
 import com.android.internal.telephony.PhoneConstants
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
+import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -50,6 +52,7 @@ import org.junit.After
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -65,6 +68,8 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: ConnectivityPipelineLogger
 
+    private val mobileMappings = FakeMobileMappingsProxy()
+
     private val scope = CoroutineScope(IMMEDIATE)
     private val globalSettings = FakeSettings()
 
@@ -72,18 +77,37 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        // Set up so the individual connection repositories
+        whenever(telephonyManager.createForSubscriptionId(anyInt())).thenAnswer { invocation ->
+            telephonyManager.also {
+                whenever(telephonyManager.subscriptionId).thenReturn(invocation.getArgument(0))
+            }
+        }
+
+        val connectionFactory: MobileConnectionRepositoryImpl.Factory =
+            MobileConnectionRepositoryImpl.Factory(
+                context = context,
+                telephonyManager = telephonyManager,
+                bgDispatcher = IMMEDIATE,
+                globalSettings = globalSettings,
+                logger = logger,
+                mobileMappingsProxy = mobileMappings,
+                scope = scope,
+            )
+
         underTest =
             MobileConnectionsRepositoryImpl(
                 connectivityManager,
                 subscriptionManager,
                 telephonyManager,
                 logger,
+                mobileMappings,
                 fakeBroadcastDispatcher,
                 globalSettings,
                 context,
                 IMMEDIATE,
                 scope,
-                mock(),
+                connectionFactory,
             )
     }
 
@@ -95,21 +119,21 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun testSubscriptions_initiallyEmpty() =
         runBlocking(IMMEDIATE) {
-            assertThat(underTest.subscriptionsFlow.value).isEqualTo(listOf<SubscriptionInfo>())
+            assertThat(underTest.subscriptions.value).isEqualTo(listOf<SubscriptionModel>())
         }
 
     @Test
     fun testSubscriptions_listUpdates() =
         runBlocking(IMMEDIATE) {
-            var latest: List<SubscriptionInfo>? = null
+            var latest: List<SubscriptionModel>? = null
 
-            val job = underTest.subscriptionsFlow.onEach { latest = it }.launchIn(this)
+            val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
 
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
                 .thenReturn(listOf(SUB_1, SUB_2))
             getSubscriptionCallback().onSubscriptionsChanged()
 
-            assertThat(latest).isEqualTo(listOf(SUB_1, SUB_2))
+            assertThat(latest).isEqualTo(listOf(MODEL_1, MODEL_2))
 
             job.cancel()
         }
@@ -117,9 +141,9 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun testSubscriptions_removingSub_updatesList() =
         runBlocking(IMMEDIATE) {
-            var latest: List<SubscriptionInfo>? = null
+            var latest: List<SubscriptionModel>? = null
 
-            val job = underTest.subscriptionsFlow.onEach { latest = it }.launchIn(this)
+            val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
 
             // WHEN 2 networks show up
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
@@ -132,7 +156,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             getSubscriptionCallback().onSubscriptionsChanged()
 
             // THEN the subscriptions list represents the newest change
-            assertThat(latest).isEqualTo(listOf(SUB_2))
+            assertThat(latest).isEqualTo(listOf(MODEL_2))
 
             job.cancel()
         }
@@ -162,7 +186,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun testConnectionRepository_validSubId_isCached() =
         runBlocking(IMMEDIATE) {
-            val job = underTest.subscriptionsFlow.launchIn(this)
+            val job = underTest.subscriptions.launchIn(this)
 
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
                 .thenReturn(listOf(SUB_1))
@@ -179,7 +203,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun testConnectionCache_clearsInvalidSubscriptions() =
         runBlocking(IMMEDIATE) {
-            val job = underTest.subscriptionsFlow.launchIn(this)
+            val job = underTest.subscriptions.launchIn(this)
 
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
                 .thenReturn(listOf(SUB_1, SUB_2))
@@ -202,10 +226,36 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             job.cancel()
         }
 
+    /** Regression test for b/261706421 */
+    @Test
+    fun testConnectionsCache_clearMultipleSubscriptionsAtOnce_doesNotThrow() =
+        runBlocking(IMMEDIATE) {
+            val job = underTest.subscriptions.launchIn(this)
+
+            whenever(subscriptionManager.completeActiveSubscriptionInfoList)
+                .thenReturn(listOf(SUB_1, SUB_2))
+            getSubscriptionCallback().onSubscriptionsChanged()
+
+            // Get repos to trigger caching
+            val repo1 = underTest.getRepoForSubId(SUB_1_ID)
+            val repo2 = underTest.getRepoForSubId(SUB_2_ID)
+
+            assertThat(underTest.getSubIdRepoCache())
+                .containsExactly(SUB_1_ID, repo1, SUB_2_ID, repo2)
+
+            // All subscriptions disappear
+            whenever(subscriptionManager.completeActiveSubscriptionInfoList).thenReturn(listOf())
+            getSubscriptionCallback().onSubscriptionsChanged()
+
+            assertThat(underTest.getSubIdRepoCache()).isEmpty()
+
+            job.cancel()
+        }
+
     @Test
     fun testConnectionRepository_invalidSubId_throws() =
         runBlocking(IMMEDIATE) {
-            val job = underTest.subscriptionsFlow.launchIn(this)
+            val job = underTest.subscriptions.launchIn(this)
 
             assertThrows(IllegalArgumentException::class.java) {
                 underTest.getRepoForSubId(SUB_1_ID)
@@ -371,10 +421,12 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         private const val SUB_1_ID = 1
         private val SUB_1 =
             mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_1_ID) }
+        private val MODEL_1 = SubscriptionModel(subscriptionId = SUB_1_ID)
 
         private const val SUB_2_ID = 2
         private val SUB_2 =
             mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_2_ID) }
+        private val MODEL_2 = SubscriptionModel(subscriptionId = SUB_2_ID)
 
         private const val NET_ID = 123
         private val NETWORK = mock<Network>().apply { whenever(getNetId()).thenReturn(NET_ID) }
