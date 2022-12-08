@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util.condition
+package com.android.systemui.shared.condition
 
 /**
  * A higher order [Condition] which combines multiple conditions with a specified
