@@ -215,6 +215,20 @@ public class StateMachineTest {
     }
 
     @Test
+    public void testStateMachineTriggerStateActionDelegateRoot() {
+        final StringBuffer log = new StringBuffer();
+
+        StateMachine stateMachine = new StateMachine(0x2);
+        stateMachine.addStateHandler(0x0, new LoggingHandler(0x0, log));
+        stateMachine.addStateHandler(0x2,
+                new LoggingHandler(0x2, log, false /* handleSelf */));
+
+        // state 0x2 delegate the message handling to its parent state
+        stateMachine.handle(0, null);
+        assertEquals("h0;", log.toString());
+    }
+
+    @Test
     public void testStateMachineNestedTransition() {
         final StringBuffer log = new StringBuffer();
 
