@@ -571,4 +571,7 @@ interface IDevicePolicyManager {
 
     void setApplicationExemptions(String packageName, in int[]exemptions);
     int[] getApplicationExemptions(String packageName);
+
+    void setMtePolicy(int flag);
+    int getMtePolicy();
 }
