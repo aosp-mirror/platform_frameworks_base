@@ -133,7 +133,7 @@ public abstract class MediaOutputBaseAdapter extends
 
         private static final int ANIM_DURATION = 500;
 
-        final LinearLayout mContainerLayout;
+        final ViewGroup mContainerLayout;
         final FrameLayout mItemLayout;
         final FrameLayout mIconAreaLayout;
         final TextView mTitleText;
@@ -146,7 +146,7 @@ public abstract class MediaOutputBaseAdapter extends
         final LinearLayout mTwoLineLayout;
         final ImageView mStatusIcon;
         final CheckBox mCheckBox;
-        final LinearLayout mEndTouchArea;
+        final ViewGroup mEndTouchArea;
         private String mDeviceId;
         private ValueAnimator mCornerAnimator;
         private ValueAnimator mVolumeAnimator;
@@ -253,6 +253,13 @@ public abstract class MediaOutputBaseAdapter extends
             mTitleText.setVisibility(View.VISIBLE);
             mCheckBox.setVisibility(showCheckBox ? View.VISIBLE : View.GONE);
             mEndTouchArea.setVisibility(showEndTouchArea ? View.VISIBLE : View.GONE);
+            if (mController.isAdvancedLayoutSupported()) {
+                ViewGroup.MarginLayoutParams params =
+                        (ViewGroup.MarginLayoutParams) mItemLayout.getLayoutParams();
+                params.rightMargin = showEndTouchArea ? mController.getItemMarginEndSelectable()
+                        : mController.getItemMarginEndDefault();
+            }
+            mTitleIcon.setColorFilter(mController.getColorItemContent());
         }
 
         void setTwoLineLayout(MediaDevice device, boolean bFocused, boolean showSeekBar,
@@ -531,6 +538,7 @@ public abstract class MediaOutputBaseAdapter extends
                         return;
                     }
                     mTitleIcon.setImageIcon(icon);
+                    mTitleIcon.setColorFilter(mController.getColorItemContent());
                 });
             });
         }
