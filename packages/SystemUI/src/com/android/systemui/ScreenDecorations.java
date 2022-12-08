@@ -210,8 +210,10 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
                 (FaceScanningOverlay) getOverlayView(mFaceScanningViewId);
         if (faceScanningOverlay != null) {
             faceScanningOverlay.setHideOverlayRunnable(() -> {
+                Trace.beginSection("ScreenDecorations#hideOverlayRunnable");
                 updateOverlayWindowVisibilityIfViewExists(
                         faceScanningOverlay.findViewById(mFaceScanningViewId));
+                Trace.endSection();
             });
             faceScanningOverlay.enableShowProtection(false);
         }
@@ -273,16 +275,18 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             if (mOverlays == null || !shouldOptimizeVisibility()) {
                 return;
             }
-
+            Trace.beginSection("ScreenDecorations#updateOverlayWindowVisibilityIfViewExists");
             for (final OverlayWindow overlay : mOverlays) {
                 if (overlay == null) {
                     continue;
                 }
                 if (overlay.getView(view.getId()) != null) {
                     overlay.getRootView().setVisibility(getWindowVisibility(overlay, true));
+                    Trace.endSection();
                     return;
                 }
             }
+            Trace.endSection();
         });
     }
 
@@ -370,6 +374,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
     }
 
     private void startOnScreenDecorationsThread() {
+        Trace.beginSection("ScreenDecorations#startOnScreenDecorationsThread");
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mContext.getDisplay().getDisplayInfo(mDisplayInfo);
@@ -472,6 +477,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
 
         mDisplayManager.registerDisplayListener(mDisplayListener, mHandler);
         updateConfiguration();
+        Trace.endSection();
     }
 
     @VisibleForTesting
@@ -521,6 +527,12 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
     }
 
     private void setupDecorations() {
+        Trace.beginSection("ScreenDecorations#setupDecorations");
+        setupDecorationsInner();
+        Trace.endSection();
+    }
+
+    private void setupDecorationsInner() {
         if (hasRoundedCorners() || shouldDrawCutout() || isPrivacyDotEnabled()
                 || mFaceScanningFactory.getHasProviders()) {
 
@@ -573,7 +585,11 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
                 return;
             }
 
-            mMainExecutor.execute(() -> mTunerService.addTunable(this, SIZE));
+            mMainExecutor.execute(() -> {
+                Trace.beginSection("ScreenDecorations#addTunable");
+                mTunerService.addTunable(this, SIZE);
+                Trace.endSection();
+            });
 
             // Watch color inversion and invert the overlay as needed.
             if (mColorInversionSetting == null) {
@@ -593,7 +609,11 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             mUserTracker.addCallback(mUserChangedCallback, mExecutor);
             mIsRegistered = true;
         } else {
-            mMainExecutor.execute(() -> mTunerService.removeTunable(this));
+            mMainExecutor.execute(() -> {
+                Trace.beginSection("ScreenDecorations#removeTunable");
+                mTunerService.removeTunable(this);
+                Trace.endSection();
+            });
 
             if (mColorInversionSetting != null) {
                 mColorInversionSetting.setListening(false);
@@ -939,6 +959,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
         }
 
         mExecutor.execute(() -> {
+            Trace.beginSection("ScreenDecorations#onConfigurationChanged");
             int oldRotation = mRotation;
             mPendingConfigChange = false;
             updateConfiguration();
@@ -951,6 +972,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
                 // the updated rotation).
                 updateLayoutParams();
             }
+            Trace.endSection();
         });
     }
 
@@ -1119,6 +1141,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             if (mOverlays == null || !SIZE.equals(key)) {
                 return;
             }
+            Trace.beginSection("ScreenDecorations#onTuningChanged");
             try {
                 final int sizeFactor = Integer.parseInt(newValue);
                 mRoundedCornerResDelegate.setTuningSizeFactor(sizeFactor);
@@ -1132,6 +1155,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
                     R.id.rounded_corner_bottom_right
             });
             updateHwLayerRoundedCornerExistAndSize();
+            Trace.endSection();
         });
     }
 

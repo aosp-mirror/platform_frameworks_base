@@ -292,7 +292,13 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     void onResized(SurfaceControl.Transaction t) {
         if (mSplitDecorManager != null) {
-            mSplitDecorManager.onResized(t);
+            mSplitDecorManager.onResized(t, null);
+        }
+    }
+
+    void screenshotIfNeeded(SurfaceControl.Transaction t) {
+        if (mSplitDecorManager != null) {
+            mSplitDecorManager.screenshotIfNeeded(t);
         }
     }
 
@@ -302,6 +308,10 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         } else {
             finishedCallback.run();
         }
+    }
+
+    SplitDecorManager getSplitDecorManager() {
+        return mSplitDecorManager;
     }
 
     void addTask(ActivityManager.RunningTaskInfo task, WindowContainerTransaction wct) {

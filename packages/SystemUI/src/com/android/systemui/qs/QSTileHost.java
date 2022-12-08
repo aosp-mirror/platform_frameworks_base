@@ -608,7 +608,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
 
         if (TextUtils.isEmpty(tileList)) {
             tileList = res.getString(R.string.quick_settings_tiles);
-            if (DEBUG) Log.d(TAG, "Loaded tile specs from config: " + tileList);
+            if (DEBUG) Log.d(TAG, "Loaded tile specs from default config: " + tileList);
         } else {
             if (DEBUG) Log.d(TAG, "Loaded tile specs from setting: " + tileList);
         }

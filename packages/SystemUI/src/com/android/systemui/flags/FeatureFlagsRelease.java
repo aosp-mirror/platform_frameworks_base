@@ -61,7 +61,7 @@ public class FeatureFlagsRelease implements FeatureFlags {
             new ServerFlagReader.ChangeListener() {
                 @Override
                 public void onChange() {
-                    mRestarter.restart();
+                    mRestarter.restartSystemUI();
                 }
             };
 
