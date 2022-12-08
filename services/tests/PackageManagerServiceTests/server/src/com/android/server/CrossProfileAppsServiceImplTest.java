@@ -66,7 +66,7 @@ import java.util.List;
 
 /**
  * Build/Install/Run:
- * atest FrameworksServicesTests:com.android.server.pm.CrossProfileAppsServiceImplTest
+ * atest PackageManagerServiceServerTests:com.android.server.pm.CrossProfileAppsServiceImplTest
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner.class)
