@@ -19,6 +19,7 @@ package androidx.window.extensions.embedding;
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_CHANGING;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
+import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
@@ -253,6 +254,10 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
     @NonNull
     private List<TaskFragmentAnimationAdapter> createChangeAnimationAdapters(
             @NonNull RemoteAnimationTarget[] targets) {
+        if (shouldUseJumpCutForChangeAnimation(targets)) {
+            return new ArrayList<>();
+        }
+
         final List<TaskFragmentAnimationAdapter> adapters = new ArrayList<>();
         for (RemoteAnimationTarget target : targets) {
             if (target.mode == MODE_CHANGING) {
@@ -281,5 +286,25 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
             adapters.add(new TaskFragmentAnimationAdapter(animation, target));
         }
         return adapters;
+    }
+
+    /**
+     * Whether we should use jump cut for the change transition.
+     * This normally happens when opening a new secondary with the existing primary using a
+     * different split layout. This can be complicated, like from horizontal to vertical split with
+     * new split pairs.
+     * Uses a jump cut animation to simplify.
+     */
+    private boolean shouldUseJumpCutForChangeAnimation(@NonNull RemoteAnimationTarget[] targets) {
+        boolean hasOpeningWindow = false;
+        boolean hasClosingWindow = false;
+        for (RemoteAnimationTarget target : targets) {
+            if (target.hasAnimatingParent) {
+                continue;
+            }
+            hasOpeningWindow |= target.mode == MODE_OPENING;
+            hasClosingWindow |= target.mode == MODE_CLOSING;
+        }
+        return hasOpeningWindow && hasClosingWindow;
     }
 }
