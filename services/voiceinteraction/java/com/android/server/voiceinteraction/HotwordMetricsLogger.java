@@ -64,28 +64,28 @@ public final class HotwordMetricsLogger {
     /**
      * Logs information related to hotword detection service init result.
      */
-    public static void writeServiceInitResultEvent(int detectorType, int result) {
+    public static void writeServiceInitResultEvent(int detectorType, int result, int uid) {
         int metricsDetectorType = getInitMetricsDetectorType(detectorType);
         FrameworkStatsLog.write(FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED,
-                metricsDetectorType, result);
+                metricsDetectorType, result, uid);
     }
 
     /**
      * Logs information related to hotword detection service restarting.
      */
-    public static void writeServiceRestartEvent(int detectorType, int reason) {
+    public static void writeServiceRestartEvent(int detectorType, int reason, int uid) {
         int metricsDetectorType = getRestartMetricsDetectorType(detectorType);
         FrameworkStatsLog.write(FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_RESTARTED,
-                metricsDetectorType, reason);
+                metricsDetectorType, reason, uid);
     }
 
     /**
      * Logs information related to keyphrase trigger.
      */
-    public static void writeKeyphraseTriggerEvent(int detectorType, int result) {
+    public static void writeKeyphraseTriggerEvent(int detectorType, int result, int uid) {
         int metricsDetectorType = getKeyphraseMetricsDetectorType(detectorType);
         FrameworkStatsLog.write(FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED,
-                metricsDetectorType, result);
+                metricsDetectorType, result, uid);
     }
 
     /**
