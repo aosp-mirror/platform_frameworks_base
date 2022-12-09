@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"ভয়েসমেল"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"সংযোগ সমস্যা বা অবৈধ MMI কোড৷"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ফিচার কাজ করে না।"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"নির্দিষ্ট নম্বরে ডায়ালযোগ্য হিসেবে প্রক্রিয়াটি সীমিত করা হয়েছে৷"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"আপনি রোমিংয়ে থাকাকালীন আপনার ফোন থেকে \'কল ফরওয়ার্ড করার সেটিংস\' পরিবর্তন করা যাবে না৷"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"পরিষেবা সক্ষম করা ছিল৷"</string>

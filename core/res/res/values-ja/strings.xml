@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"留守番電話"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"接続に問題があるか、MMIコードが正しくありません。"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"サポートされていません。"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"発信番号制限で指定された番号に対してのみ操作できます。"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"ローミング中はスマートフォンから着信転送設定の変更はできません。"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"サービスが有効になりました。"</string>
