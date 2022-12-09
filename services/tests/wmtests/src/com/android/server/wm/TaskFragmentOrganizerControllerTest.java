@@ -370,7 +370,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onActivityReparentedToTask(activity);
         mController.dispatchPendingEvents();
 
-        assertTaskFragmentParentInfoChangedTransaction(task);
+        // There will not be TaskFragmentParentInfoChanged because Task visible request is changed
+        // before the organized TaskFragment is added to the Task.
         assertActivityReparentedToTaskTransaction(task.mTaskId, activity.intent, activity.token);
     }
 
@@ -1193,6 +1194,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         doReturn(false).when(task).shouldBeVisible(any());
 
         // Dispatch the initial event in the Task to update the Task visibility to the organizer.
+        clearInvocations(mOrganizer);
         mController.onTaskFragmentAppeared(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
         verify(mOrganizer).onTransactionReady(any());

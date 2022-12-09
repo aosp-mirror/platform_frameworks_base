@@ -2651,7 +2651,7 @@ class ActivityStarter {
                     // If the activity is visible in multi-windowing mode, it may already be on
                     // the top (visible to user but not the global top), then the result code
                     // should be START_DELIVERED_TO_TOP instead of START_TASK_TO_FRONT.
-                    final boolean wasTopOfVisibleRootTask = intentActivity.mVisibleRequested
+                    final boolean wasTopOfVisibleRootTask = intentActivity.isVisibleRequested()
                             && intentActivity.inMultiWindowMode()
                             && intentActivity == mTargetRootTask.topRunningActivity();
                     // We only want to move to the front, if we aren't going to launch on a

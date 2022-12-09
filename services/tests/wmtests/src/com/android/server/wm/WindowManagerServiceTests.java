@@ -191,7 +191,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         win.mViewVisibility = View.VISIBLE;
         win.mHasSurface = true;
         win.mActivityRecord.mAppStopped = true;
-        win.mActivityRecord.mVisibleRequested = false;
+        win.mActivityRecord.setVisibleRequested(false);
         win.mActivityRecord.setVisible(false);
         mWm.mWindowMap.put(win.mClient.asBinder(), win);
         final int w = 100;
