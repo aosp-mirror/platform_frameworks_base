@@ -986,7 +986,7 @@ public final class InputManager {
     @Nullable
     public String getKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
             @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
-            @NonNull InputMethodSubtype imeSubtype) {
+            @Nullable InputMethodSubtype imeSubtype) {
         try {
             return mIm.getKeyboardLayoutForInputDevice(identifier, userId, imeInfo, imeSubtype);
         } catch (RemoteException ex) {
@@ -1014,7 +1014,7 @@ public final class InputManager {
     @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
     public void setKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
             @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
-            @NonNull InputMethodSubtype imeSubtype, @NonNull String keyboardLayoutDescriptor) {
+            @Nullable InputMethodSubtype imeSubtype, @NonNull String keyboardLayoutDescriptor) {
         if (identifier == null) {
             throw new IllegalArgumentException("identifier must not be null");
         }
@@ -1031,8 +1031,8 @@ public final class InputManager {
     }
 
     /**
-     * Gets all keyboard layout descriptors that are enabled for the specified input device, userId,
-     * imeInfo and imeSubtype.
+     * Gets all keyboard layouts that are enabled for the specified input device, userId, imeInfo
+     * and imeSubtype.
      *
      * @param identifier The identifier for the input device.
      * @param userId user profile ID
@@ -1042,9 +1042,9 @@ public final class InputManager {
      *
      * @hide
      */
-    public String[] getKeyboardLayoutListForInputDevice(InputDeviceIdentifier identifier,
+    public KeyboardLayout[] getKeyboardLayoutListForInputDevice(InputDeviceIdentifier identifier,
             @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
-            @NonNull InputMethodSubtype imeSubtype) {
+            @Nullable InputMethodSubtype imeSubtype) {
         if (identifier == null) {
             throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
         }

@@ -120,8 +120,8 @@ interface IInputManager {
             in InputMethodInfo imeInfo, in InputMethodSubtype imeSubtype,
             String keyboardLayoutDescriptor);
 
-    String[] getKeyboardLayoutListForInputDevice(in InputDeviceIdentifier identifier, int userId,
-            in InputMethodInfo imeInfo, in InputMethodSubtype imeSubtype);
+    KeyboardLayout[] getKeyboardLayoutListForInputDevice(in InputDeviceIdentifier identifier,
+            int userId, in InputMethodInfo imeInfo, in InputMethodSubtype imeSubtype);
 
     // Modifier key remapping APIs.
     @EnforcePermission("REMAP_MODIFIER_KEYS")
