@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
@@ -30,6 +31,7 @@ import com.android.internal.annotations.GuardedBy;
 import java.io.PrintWriter;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.BiConsumer;
 
 /**
  * Collection of {@link Looper} that are known to be used for broadcast dispatch
@@ -73,19 +75,44 @@ public class BroadcastLoopers {
      * still in the future are ignored for the purposes of the idle test.
      */
     public static void waitForIdle(@Nullable PrintWriter pw) {
+        waitForCondition(pw, (looper, latch) -> {
+            final MessageQueue queue = looper.getQueue();
+            queue.addIdleHandler(() -> {
+                latch.countDown();
+                return false;
+            });
+        });
+    }
+
+    /**
+     * Wait for all registered {@link Looper} instances to handle currently waiting messages.
+     * Note that {@link Message#when} still in the future are ignored for the purposes
+     * of the idle test.
+     */
+    public static void waitForBarrier(@Nullable PrintWriter pw) {
+        waitForCondition(pw, (looper, latch) -> {
+            (new Handler(looper)).post(() -> {
+                latch.countDown();
+            });
+        });
+    }
+
+    /**
+     * Wait for all registered {@link Looper} instances to meet a certain condition.
+     */
+    private static void waitForCondition(@Nullable PrintWriter pw,
+            @NonNull BiConsumer<Looper, CountDownLatch> condition) {
         final CountDownLatch latch;
         synchronized (sLoopers) {
             final int N = sLoopers.size();
             latch = new CountDownLatch(N);
             for (int i = 0; i < N; i++) {
-                final MessageQueue queue = sLoopers.valueAt(i).getQueue();
+                final Looper looper = sLoopers.valueAt(i);
+                final MessageQueue queue = looper.getQueue();
                 if (queue.isIdle()) {
                     latch.countDown();
                 } else {
-                    queue.addIdleHandler(() -> {
-                        latch.countDown();
-                        return false;
-                    });
+                    condition.accept(looper, latch);
                 }
             }
         }

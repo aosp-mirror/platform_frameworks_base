@@ -16,11 +16,14 @@
 
 package com.android.server.job;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -31,6 +34,7 @@ import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.app.compat.CompatChanges;
 import android.app.job.IJobScheduler;
+import android.app.job.IUserVisibleJobObserver;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobProtoEnums;
@@ -38,6 +42,7 @@ import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
+import android.app.job.UserVisibleJobSummary;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.compat.annotation.ChangeId;
@@ -68,6 +73,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -248,6 +254,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     static final int MSG_UID_IDLE = 7;
     static final int MSG_CHECK_CHANGED_JOB_LIST = 8;
     static final int MSG_CHECK_MEDIA_EXEMPTION = 9;
+    static final int MSG_INFORM_OBSERVER_OF_ALL_USER_VISIBLE_JOBS = 10;
+    static final int MSG_INFORM_OBSERVERS_OF_USER_VISIBLE_JOB_CHANGE = 11;
 
     /** List of controllers that will notify this service of updates to jobs. */
     final List<StateController> mControllers;
@@ -278,6 +286,9 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     @GuardedBy("mLock")
     private final SparseArray<String> mCloudMediaProviderPackages = new SparseArray<>();
+
+    private final RemoteCallbackList<IUserVisibleJobObserver> mUserVisibleJobObservers =
+            new RemoteCallbackList<>();
 
     private final CountQuotaTracker mQuotaTracker;
     private static final String QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG = ".schedulePersisted()";
@@ -1501,6 +1512,14 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    private void stopUserVisibleJobsInternal(@NonNull String packageName, int userId) {
+        synchronized (mLock) {
+            mConcurrencyManager.stopUserVisibleJobsLocked(userId, packageName,
+                    JobParameters.STOP_REASON_USER,
+                    JobParameters.INTERNAL_STOP_REASON_USER_UI_STOP);
+        }
+    }
+
     private final Consumer<JobStatus> mCancelJobDueToUserRemovalConsumer = (toRemove) -> {
         // There's no guarantee that the process has been stopped by the time we get
         // here, but since this is a user-initiated action, it should be fine to just
@@ -2159,6 +2178,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
         delayMillis =
                 Math.min(delayMillis, JobInfo.MAX_BACKOFF_DELAY_MILLIS);
+        // TODO(255767350): demote all jobs to regular for user stops so they don't keep privileges
         JobStatus newJob = new JobStatus(failureToReschedule,
                 elapsedNowMillis + delayMillis,
                 JobStatus.NO_LATEST_RUNTIME, numFailures, numSystemStops,
@@ -2506,6 +2526,52 @@ public class JobSchedulerService extends com.android.server.SystemService
                             updateMediaBackupExemptionLocked(
                                     args.argi1, (String) args.arg1, (String) args.arg2);
                         }
+                        args.recycle();
+                        break;
+                    }
+
+                    case MSG_INFORM_OBSERVER_OF_ALL_USER_VISIBLE_JOBS: {
+                        final IUserVisibleJobObserver observer =
+                                (IUserVisibleJobObserver) message.obj;
+                        synchronized (mLock) {
+                            for (int i = mConcurrencyManager.mActiveServices.size() - 1; i >= 0;
+                                    --i) {
+                                JobServiceContext context =
+                                        mConcurrencyManager.mActiveServices.get(i);
+                                final JobStatus jobStatus = context.getRunningJobLocked();
+                                if (jobStatus != null && jobStatus.isUserVisibleJob()) {
+                                    try {
+                                        observer.onUserVisibleJobStateChanged(
+                                                jobStatus.getUserVisibleJobSummary(),
+                                                /* isRunning */ true);
+                                    } catch (RemoteException e) {
+                                        // Will be unregistered automatically by
+                                        // RemoteCallbackList's dead-object tracking,
+                                        // so don't need to remove it here.
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+
+                    case MSG_INFORM_OBSERVERS_OF_USER_VISIBLE_JOB_CHANGE: {
+                        final SomeArgs args = (SomeArgs) message.obj;
+                        final JobServiceContext context = (JobServiceContext) args.arg1;
+                        final JobStatus jobStatus = (JobStatus) args.arg2;
+                        final UserVisibleJobSummary summary = jobStatus.getUserVisibleJobSummary();
+                        final boolean isRunning = args.argi1 == 1;
+                        for (int i = mUserVisibleJobObservers.beginBroadcast() - 1; i >= 0; --i) {
+                            try {
+                                mUserVisibleJobObservers.getBroadcastItem(i)
+                                        .onUserVisibleJobStateChanged(summary, isRunning);
+                            } catch (RemoteException e) {
+                                // Will be unregistered automatically by RemoteCallbackList's
+                                // dead-object tracking, so nothing we need to do here.
+                            }
+                        }
+                        mUserVisibleJobObservers.finishBroadcast();
                         args.recycle();
                         break;
                     }
@@ -3020,6 +3086,16 @@ public class JobSchedulerService extends com.android.server.SystemService
             return adjustJobBias(override, job);
         }
         return adjustJobBias(bias, job);
+    }
+
+    void informObserversOfUserVisibleJobChange(JobServiceContext context, JobStatus jobStatus,
+            boolean isRunning) {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = context;
+        args.arg2 = jobStatus;
+        args.argi1 = isRunning ? 1 : 0;
+        mHandler.obtainMessage(MSG_INFORM_OBSERVERS_OF_USER_VISIBLE_JOB_CHANGE, args)
+                .sendToTarget();
     }
 
     private final class BatteryStateTracker extends BroadcastReceiver {
@@ -3743,6 +3819,35 @@ public class JobSchedulerService extends com.android.server.SystemService
                                 isReadyToBeExecutedLocked(job))));
                 return new ParceledListSlice<>(snapshots);
             }
+        }
+
+        @Override
+        @EnforcePermission(allOf = {MANAGE_ACTIVITY_TASKS, INTERACT_ACROSS_USERS_FULL})
+        public void registerUserVisibleJobObserver(@NonNull IUserVisibleJobObserver observer) {
+            if (observer == null) {
+                throw new NullPointerException("observer");
+            }
+            mUserVisibleJobObservers.register(observer);
+            mHandler.obtainMessage(MSG_INFORM_OBSERVER_OF_ALL_USER_VISIBLE_JOBS, observer)
+                    .sendToTarget();
+        }
+
+        @Override
+        @EnforcePermission(allOf = {MANAGE_ACTIVITY_TASKS, INTERACT_ACROSS_USERS_FULL})
+        public void unregisterUserVisibleJobObserver(@NonNull IUserVisibleJobObserver observer) {
+            if (observer == null) {
+                throw new NullPointerException("observer");
+            }
+            mUserVisibleJobObservers.unregister(observer);
+        }
+
+        @Override
+        @EnforcePermission(allOf = {"MANAGE_ACTIVITY_TASKS", "INTERACT_ACROSS_USERS_FULL"})
+        public void stopUserVisibleJobsForUser(@NonNull String packageName, int userId) {
+            if (packageName == null) {
+                throw new NullPointerException("packageName");
+            }
+            JobSchedulerService.this.stopUserVisibleJobsInternal(packageName, userId);
         }
     }
 

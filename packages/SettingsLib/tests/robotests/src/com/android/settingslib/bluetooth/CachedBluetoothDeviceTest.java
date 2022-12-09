@@ -998,10 +998,12 @@ public class CachedBluetoothDeviceTest {
 
         mCachedDevice.switchSubDeviceContent();
 
+        verify(mCachedDevice).release();
         assertThat(mCachedDevice.mRssi).isEqualTo(RSSI_2);
         assertThat(mCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_2);
         assertThat(mCachedDevice.mDevice).isEqualTo(mSubDevice);
         assertThat(mCachedDevice.getDeviceSide()).isEqualTo(HearingAidInfo.DeviceSide.SIDE_RIGHT);
+        verify(mSubCachedDevice).release();
         assertThat(mSubCachedDevice.mRssi).isEqualTo(RSSI_1);
         assertThat(mSubCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_1);
         assertThat(mSubCachedDevice.mDevice).isEqualTo(mDevice);

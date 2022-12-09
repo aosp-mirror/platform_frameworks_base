@@ -305,9 +305,13 @@ public class ResourcesManager {
             for (int i = mCachedApkAssets.size() - 1; i >= 0; i--) {
                 final ApkKey key = mCachedApkAssets.keyAt(i);
                 if (key.path.equals(path)) {
-                    WeakReference<ApkAssets> apkAssetsRef = mCachedApkAssets.removeAt(i);
-                    if (apkAssetsRef != null && apkAssetsRef.get() != null) {
-                        apkAssetsRef.get().close();
+                    final WeakReference<ApkAssets> apkAssetsRef = mCachedApkAssets.removeAt(i);
+                    if (apkAssetsRef == null) {
+                        continue;
+                    }
+                    final ApkAssets apkAssets = apkAssetsRef.get();
+                    if (apkAssets != null) {
+                        apkAssets.close();
                     }
                 }
             }
@@ -446,16 +450,14 @@ public class ResourcesManager {
         ApkAssets apkAssets;
 
         // Optimistically check if this ApkAssets exists somewhere else.
+        final WeakReference<ApkAssets> apkAssetsRef;
         synchronized (mLock) {
-            final WeakReference<ApkAssets> apkAssetsRef = mCachedApkAssets.get(key);
-            if (apkAssetsRef != null) {
-                apkAssets = apkAssetsRef.get();
-                if (apkAssets != null && apkAssets.isUpToDate()) {
-                    return apkAssets;
-                } else {
-                    // Clean up the reference.
-                    mCachedApkAssets.remove(key);
-                }
+            apkAssetsRef = mCachedApkAssets.get(key);
+        }
+        if (apkAssetsRef != null) {
+            apkAssets = apkAssetsRef.get();
+            if (apkAssets != null && apkAssets.isUpToDate()) {
+                return apkAssets;
             }
         }
 

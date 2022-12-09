@@ -977,7 +977,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         }
 
         // TODO(b/243765256): Disable this logging once b/243765256 is fixed.
-        Log.d(DEBUG_MISSING_GESTURE_TAG, "Config changed: newConfig=" + newConfig
+        Log.i(DEBUG_MISSING_GESTURE_TAG, "Config changed: newConfig=" + newConfig
                 + " lastReportedConfig=" + mLastReportedConfig);
         mLastReportedConfig.updateFrom(newConfig);
         updateDisplaySize();

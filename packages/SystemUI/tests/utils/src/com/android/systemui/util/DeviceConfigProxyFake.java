@@ -81,11 +81,6 @@ public class DeviceConfigProxyFake extends DeviceConfigProxy {
         properties.get(namespace).put(name, value);
     }
 
-    @Override
-    public void enforceReadPermission(String namespace) {
-        // no-op
-    }
-
     private Properties propsForNamespaceAndName(String namespace, String name) {
         if (mProperties.containsKey(namespace) && mProperties.get(namespace).containsKey(name)) {
             return new Properties.Builder(namespace)

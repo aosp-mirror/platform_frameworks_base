@@ -293,8 +293,6 @@ public final class GeoidHeightMap {
             try (InputStream is = context.getApplicationContext().getAssets().open(
                     "geoid_height_map/tile-" + diskTokens[i] + ".pb")) {
                 tile = S2TileProto.parseFrom(is.readAllBytes());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
             mergeFromDiskTile(params, tile, cacheKeys, diskTokens, i, loadedTiles);
         }

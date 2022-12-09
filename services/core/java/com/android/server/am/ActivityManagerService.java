@@ -18322,9 +18322,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    public void waitForBroadcastBarrier(@Nullable PrintWriter pw) {
+    public void waitForBroadcastBarrier(@Nullable PrintWriter pw, boolean flushBroadcastLoopers) {
         enforceCallingPermission(permission.DUMP, "waitForBroadcastBarrier()");
-        BroadcastLoopers.waitForIdle(pw);
+        if (flushBroadcastLoopers) {
+            BroadcastLoopers.waitForBarrier(pw);
+        }
         for (BroadcastQueue queue : mBroadcastQueues) {
             queue.waitForBarrier(pw);
         }

@@ -3366,7 +3366,7 @@ public final class Settings {
         public ArrayMap<String, String> getStringsForPrefix(ContentResolver cr, String prefix,
                 List<String> names) {
             String namespace = prefix.substring(0, prefix.length() - 1);
-            DeviceConfig.enforceReadPermission(namespace);
+            Config.enforceReadPermission(namespace);
             ArrayMap<String, String> keyValues = new ArrayMap<>();
             int currentGeneration = -1;
 
@@ -9370,6 +9370,14 @@ public final class Settings {
         public static final int DOCK_SETUP_PAUSED = 2;
 
         /**
+         * Indicates that the user has been prompted to start dock setup.
+         * One of the possible states for {@link #DOCK_SETUP_STATE}.
+         *
+         * @hide
+         */
+        public static final int DOCK_SETUP_PROMPTED = 3;
+
+        /**
          * Indicates that the user has completed dock setup.
          * One of the possible states for {@link #DOCK_SETUP_STATE}.
          *
@@ -9383,6 +9391,7 @@ public final class Settings {
                 DOCK_SETUP_NOT_STARTED,
                 DOCK_SETUP_STARTED,
                 DOCK_SETUP_PAUSED,
+                DOCK_SETUP_PROMPTED,
                 DOCK_SETUP_COMPLETED
         })
         public @interface DockSetupState {
@@ -18368,6 +18377,21 @@ public final class Settings {
         public static int checkCallingOrSelfPermission(@NonNull @PermissionName String permission) {
             return ActivityThread.currentApplication()
                .getApplicationContext().checkCallingOrSelfPermission(permission);
+        }
+
+        /**
+         * Enforces READ_DEVICE_CONFIG permission if namespace is not one of public namespaces.
+         * @hide
+         */
+        public static void enforceReadPermission(String namespace) {
+            if (ActivityThread.currentApplication().getApplicationContext()
+                    .checkCallingOrSelfPermission(Manifest.permission.READ_DEVICE_CONFIG)
+                    != PackageManager.PERMISSION_GRANTED) {
+                if (!DeviceConfig.getPublicNamespaces().contains(namespace)) {
+                    throw new SecurityException("Permission denial: reading from settings requires:"
+                        + Manifest.permission.READ_DEVICE_CONFIG);
+                }
+            }
         }
 
         private static void registerMonitorCallbackAsUser(

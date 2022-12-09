@@ -97,7 +97,7 @@ fun GetCredentialScreen(
                         onBackButtonClicked = viewModel::onBackToPrimarySelectionScreen,
                     )
                 }
-            } else if (uiState.hidden && uiState.selectedEntry != null) {
+            } else if (uiState.selectedEntry != null && !uiState.providerActivityPending) {
                 viewModel.launchProviderUi(providerActivityLauncher)
             }
         },

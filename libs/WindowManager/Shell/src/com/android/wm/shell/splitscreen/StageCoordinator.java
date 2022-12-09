@@ -456,8 +456,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     void startIntentLegacy(PendingIntent intent, Intent fillInIntent, @SplitPosition int position,
             @Nullable Bundle options) {
         final boolean isEnteringSplit = !isSplitActive();
-        final WindowContainerTransaction evictWct = new WindowContainerTransaction();
-        prepareEvictChildTasks(position, evictWct);
 
         LegacyTransitions.ILegacyTransition transition = new LegacyTransitions.ILegacyTransition() {
             @Override
@@ -465,22 +463,21 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
                     IRemoteAnimationFinishedCallback finishedCallback,
                     SurfaceControl.Transaction t) {
-                if (isEnteringSplit) {
-                    boolean openingToSide = false;
-                    if (apps != null) {
-                        for (int i = 0; i < apps.length; ++i) {
-                            if (apps[i].mode == MODE_OPENING
-                                    && mSideStage.containsTask(apps[i].taskId)) {
-                                openingToSide = true;
-                                break;
-                            }
+                boolean openingToSide = false;
+                if (apps != null) {
+                    for (int i = 0; i < apps.length; ++i) {
+                        if (apps[i].mode == MODE_OPENING
+                                && mSideStage.containsTask(apps[i].taskId)) {
+                            openingToSide = true;
+                            break;
                         }
                     }
-                    if (!openingToSide) {
-                        mMainExecutor.execute(() -> exitSplitScreen(
-                                mSideStage.getChildCount() == 0 ? mMainStage : mSideStage,
-                                EXIT_REASON_UNKNOWN));
-                    }
+                }
+
+                if (isEnteringSplit && !openingToSide) {
+                    mMainExecutor.execute(() -> exitSplitScreen(
+                            mSideStage.getChildCount() == 0 ? mMainStage : mSideStage,
+                            EXIT_REASON_UNKNOWN));
                 }
 
                 if (apps != null) {
@@ -500,7 +497,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     }
                 }
 
-                mSyncQueue.queue(evictWct);
+
+                if (!isEnteringSplit && openingToSide) {
+                    final WindowContainerTransaction evictWct = new WindowContainerTransaction();
+                    prepareEvictNonOpeningChildTasks(position, apps, evictWct);
+                    mSyncQueue.queue(evictWct);
+                }
             }
         };
 
@@ -1667,15 +1669,29 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     public void onLayoutSizeChanged(SplitLayout layout) {
         // Reset this flag every time onLayoutSizeChanged.
         mShowDecorImmediately = false;
+
+        if (!ENABLE_SHELL_TRANSITIONS) {
+            // Only need screenshot for legacy case because shell transition should screenshot
+            // itself during transition.
+            final SurfaceControl.Transaction startT = mTransactionPool.acquire();
+            mMainStage.screenshotIfNeeded(startT);
+            mSideStage.screenshotIfNeeded(startT);
+            mTransactionPool.release(startT);
+        }
+
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         updateWindowBounds(layout, wct);
         sendOnBoundsChanged();
-        mSyncQueue.queue(wct);
-        mSyncQueue.runInSync(t -> {
-            updateSurfaceBounds(layout, t, false /* applyResizingOffset */);
-            mMainStage.onResized(t);
-            mSideStage.onResized(t);
-        });
+        if (ENABLE_SHELL_TRANSITIONS) {
+            mSplitTransitions.startResizeTransition(wct, this, null /* callback */);
+        } else {
+            mSyncQueue.queue(wct);
+            mSyncQueue.runInSync(t -> {
+                updateSurfaceBounds(layout, t, false /* applyResizingOffset */);
+                mMainStage.onResized(t);
+                mSideStage.onResized(t);
+            });
+        }
         mLogger.logResize(mSplitLayout.getDividerPositionAsFraction());
     }
 
@@ -2029,6 +2045,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         } else if (mSplitTransitions.isPendingDismiss(transition)) {
             shouldAnimate = startPendingDismissAnimation(
                     mSplitTransitions.mPendingDismiss, info, startTransaction, finishTransaction);
+        } else if (mSplitTransitions.isPendingResize(transition)) {
+            mSplitTransitions.applyResizeTransition(transition, info, startTransaction,
+                    finishTransaction, finishCallback, mMainStage.mRootTaskInfo.token,
+                    mSideStage.mRootTaskInfo.token, mMainStage.getSplitDecorManager(),
+                    mSideStage.getSplitDecorManager());
+            return true;
         }
         if (!shouldAnimate) return false;
 

@@ -16,7 +16,6 @@
 
 package com.android.server.companion.virtual.audio;
 
-import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
 import static android.media.AudioAttributes.FLAG_SECURE;
 import static android.media.AudioPlaybackConfiguration.PLAYER_STATE_STARTED;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
@@ -86,8 +85,9 @@ public class VirtualAudioControllerTest {
                         /* pipBlockedCallback= */ null,
                         /* activityBlockedCallback= */ null,
                         /* secureWindowCallback= */ null,
-                        /* deviceProfile= */ DEVICE_PROFILE_APP_STREAMING,
-                        /* displayCategories= */ new ArrayList<>());
+                        /* displayCategories= */ new ArrayList<>(),
+                        /* recentsPolicy= */
+                        VirtualDeviceParams.RECENTS_POLICY_ALLOW_IN_HOST_DEVICE_RECENTS);
     }
 
 

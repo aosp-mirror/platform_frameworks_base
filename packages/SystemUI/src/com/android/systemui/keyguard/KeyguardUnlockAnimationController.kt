@@ -824,7 +824,11 @@ class KeyguardUnlockAnimationController @Inject constructor(
         surfaceBehindEntryAnimator.cancel()
         surfaceBehindAlpha = 1f
         setSurfaceBehindAppearAmount(1f)
-        launcherUnlockController?.setUnlockAmount(1f, false /* forceIfAnimating */)
+        try {
+            launcherUnlockController?.setUnlockAmount(1f, false /* forceIfAnimating */)
+        }  catch (e: RemoteException) {
+            Log.e(TAG, "Remote exception in notifyFinishedKeyguardExitAnimation", e)
+        }
 
         // That target is no longer valid since the animation finished, null it out.
         surfaceBehindRemoteAnimationTargets = null

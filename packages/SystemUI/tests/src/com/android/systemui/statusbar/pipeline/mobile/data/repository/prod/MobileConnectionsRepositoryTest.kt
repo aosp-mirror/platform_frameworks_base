@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.mobile.data.repository
+package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
 import android.content.Intent
 import android.net.ConnectivityManager

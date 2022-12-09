@@ -944,6 +944,9 @@ public final class JobServiceContext implements ServiceConnection {
                     return;
                 }
                 scheduleOpTimeOutLocked();
+                if (mRunningJob.isUserVisibleJob()) {
+                    mService.informObserversOfUserVisibleJobChange(this, mRunningJob, true);
+                }
                 break;
             default:
                 Slog.e(TAG, "Handling started job but job wasn't starting! Was "
@@ -1202,6 +1205,9 @@ public final class JobServiceContext implements ServiceConnection {
         mPendingDebugStopReason = null;
         mNotification = null;
         removeOpTimeOutLocked();
+        if (completedJob.isUserVisibleJob()) {
+            mService.informObserversOfUserVisibleJobChange(this, completedJob, false);
+        }
         mCompletedListener.onJobCompletedLocked(completedJob, internalStopReason, reschedule);
         mJobConcurrencyManager.onJobCompletedLocked(this, completedJob, workType);
     }

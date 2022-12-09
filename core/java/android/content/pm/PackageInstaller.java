@@ -867,10 +867,15 @@ public class PackageInstaller {
      */
     public void checkInstallConstraints(@NonNull List<String> packageNames,
             @NonNull InstallConstraints constraints,
+            @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<InstallConstraintsResult> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
         try {
             var remoteCallback = new RemoteCallback(b -> {
-                callback.accept(b.getParcelable("result", InstallConstraintsResult.class));
+                executor.execute(() -> {
+                    callback.accept(b.getParcelable("result", InstallConstraintsResult.class));
+                });
             });
             mInstaller.checkInstallConstraints(
                     mInstallerPackageName, packageNames, constraints, remoteCallback);
@@ -3675,7 +3680,7 @@ public class PackageInstaller {
     }
 
     /**
-     * The callback result of {@link #checkInstallConstraints(List, InstallConstraints, Consumer)}.
+     * The callback result of {@link #checkInstallConstraints(List, InstallConstraints, Executor, Consumer)}.
      */
     @DataClass(genParcelable = true, genHiddenConstructor = true)
     public static final class InstallConstraintsResult implements Parcelable {
@@ -3783,7 +3788,7 @@ public class PackageInstaller {
     /**
      * A class to encapsulate constraints for installation.
      *
-     * When used with {@link #checkInstallConstraints(List, InstallConstraints, Consumer)}, it
+     * When used with {@link #checkInstallConstraints(List, InstallConstraints, Executor, Consumer)}, it
      * specifies the conditions to check against for the packages in question. This can be used
      * by app stores to deliver auto updates without disrupting the user experience (referred as
      * gentle update) - for example, an app store might hold off updates when it find out the

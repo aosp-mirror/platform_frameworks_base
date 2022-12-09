@@ -72,6 +72,7 @@ import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.log.LogBuffer;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
@@ -245,6 +246,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 mFakeExecutor,
                 mCallbackHandler,
                 mock(AccessPointControllerImpl.class),
+                mock(StatusBarPipelineFlags.class),
                 mock(DataUsageController.class),
                 mMockSubDefaults,
                 mMockProvisionController,

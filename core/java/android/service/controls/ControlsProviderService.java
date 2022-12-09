@@ -69,6 +69,18 @@ public abstract class ControlsProviderService extends Service {
             "android.service.controls.META_DATA_PANEL_ACTIVITY";
 
     /**
+     * Boolean extra containing the value of
+     * {@link android.provider.Settings.Secure#LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS}.
+     *
+     * This is passed with the intent when the panel specified by {@link #META_DATA_PANEL_ACTIVITY}
+     * is launched.
+     *
+     * @hide
+     */
+    public static final String EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS =
+            "android.service.controls.EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS";
+
+    /**
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)

@@ -115,9 +115,9 @@ public abstract class JobService extends Service {
                 public long getTransferredDownloadBytes(@NonNull JobParameters params,
                         @Nullable JobWorkItem item) {
                     if (item == null) {
-                        return JobService.this.getTransferredDownloadBytes();
+                        return JobService.this.getTransferredDownloadBytes(params);
                     } else {
-                        return JobService.this.getTransferredDownloadBytes(item);
+                        return JobService.this.getTransferredDownloadBytes(params, item);
                     }
                 }
 
@@ -126,9 +126,9 @@ public abstract class JobService extends Service {
                 public long getTransferredUploadBytes(@NonNull JobParameters params,
                         @Nullable JobWorkItem item) {
                     if (item == null) {
-                        return JobService.this.getTransferredUploadBytes();
+                        return JobService.this.getTransferredUploadBytes(params);
                     } else {
-                        return JobService.this.getTransferredUploadBytes(item);
+                        return JobService.this.getTransferredUploadBytes(params, item);
                     }
                 }
             };
@@ -305,7 +305,7 @@ public abstract class JobService extends Service {
      */
     // TODO(255371817): specify the actual time JS will wait for progress before requesting
     @BytesLong
-    public long getTransferredDownloadBytes() {
+    public long getTransferredDownloadBytes(@NonNull JobParameters params) {
         if (Compatibility.isChangeEnabled(THROW_ON_INVALID_DATA_TRANSFER_IMPLEMENTATION)) {
             // Regular jobs don't have to implement this and JobScheduler won't call this API for
             // non-data transfer jobs.
@@ -329,7 +329,7 @@ public abstract class JobService extends Service {
      */
     // TODO(255371817): specify the actual time JS will wait for progress before requesting
     @BytesLong
-    public long getTransferredUploadBytes() {
+    public long getTransferredUploadBytes(@NonNull JobParameters params) {
         if (Compatibility.isChangeEnabled(THROW_ON_INVALID_DATA_TRANSFER_IMPLEMENTATION)) {
             // Regular jobs don't have to implement this and JobScheduler won't call this API for
             // non-data transfer jobs.
@@ -355,9 +355,10 @@ public abstract class JobService extends Service {
      */
     // TODO(255371817): specify the actual time JS will wait for progress before requesting
     @BytesLong
-    public long getTransferredDownloadBytes(@NonNull JobWorkItem item) {
+    public long getTransferredDownloadBytes(@NonNull JobParameters params,
+            @NonNull JobWorkItem item) {
         if (item == null) {
-            return getTransferredDownloadBytes();
+            return getTransferredDownloadBytes(params);
         }
         if (Compatibility.isChangeEnabled(THROW_ON_INVALID_DATA_TRANSFER_IMPLEMENTATION)) {
             // Regular jobs don't have to implement this and JobScheduler won't call this API for
@@ -384,9 +385,10 @@ public abstract class JobService extends Service {
      */
     // TODO(255371817): specify the actual time JS will wait for progress before requesting
     @BytesLong
-    public long getTransferredUploadBytes(@NonNull JobWorkItem item) {
+    public long getTransferredUploadBytes(@NonNull JobParameters params,
+            @NonNull JobWorkItem item) {
         if (item == null) {
-            return getTransferredUploadBytes();
+            return getTransferredUploadBytes(params);
         }
         if (Compatibility.isChangeEnabled(THROW_ON_INVALID_DATA_TRANSFER_IMPLEMENTATION)) {
             // Regular jobs don't have to implement this and JobScheduler won't call this API for

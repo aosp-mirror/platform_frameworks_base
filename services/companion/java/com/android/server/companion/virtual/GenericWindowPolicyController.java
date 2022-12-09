@@ -16,8 +16,7 @@
 
 package com.android.server.companion.virtual;
 
-import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
-import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
+import static android.companion.virtual.VirtualDeviceParams.RECENTS_POLICY_ALLOW_IN_HOST_DEVICE_RECENTS;
 import static android.content.pm.ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
@@ -26,10 +25,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.app.compat.CompatChanges;
-import android.companion.AssociationRequest;
 import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.VirtualDeviceParams.ActivityPolicy;
+import android.companion.virtual.VirtualDeviceParams.RecentsPolicy;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
@@ -127,10 +126,10 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     @GuardedBy("mGenericWindowPolicyControllerLock")
     private final ArraySet<RunningAppsChangedListener> mRunningAppsChangedListeners =
             new ArraySet<>();
-    @Nullable
-    private final @AssociationRequest.DeviceProfile String mDeviceProfile;
     @Nullable private final SecureWindowCallback mSecureWindowCallback;
     @Nullable private final List<String> mDisplayCategories;
+    @RecentsPolicy
+    private final int mDefaultRecentsPolicy;
 
     /**
      * Creates a window policy controller that is generic to the different use cases of virtual
@@ -156,7 +155,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
      *   launching.
      * @param secureWindowCallback Callback that is called when a secure window shows on the
      *   virtual display.
-     * @param deviceProfile The {@link AssociationRequest.DeviceProfile} of this virtual device.
+     * @param defaultRecentsPolicy a policy to indicate how to handle activities in recents.
      */
     public GenericWindowPolicyController(int windowFlags, int systemWindowFlags,
             @NonNull ArraySet<UserHandle> allowedUsers,
@@ -169,8 +168,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @NonNull PipBlockedCallback pipBlockedCallback,
             @NonNull ActivityBlockedCallback activityBlockedCallback,
             @NonNull SecureWindowCallback secureWindowCallback,
-            @AssociationRequest.DeviceProfile String deviceProfile,
-            @NonNull List<String> displayCategories) {
+            @NonNull List<String> displayCategories,
+            @RecentsPolicy int defaultRecentsPolicy) {
         super();
         mAllowedUsers = allowedUsers;
         mAllowedCrossTaskNavigations = new ArraySet<>(allowedCrossTaskNavigations);
@@ -181,10 +180,10 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         mActivityBlockedCallback = activityBlockedCallback;
         setInterestedWindowFlags(windowFlags, systemWindowFlags);
         mActivityListener = activityListener;
-        mDeviceProfile = deviceProfile;
         mPipBlockedCallback = pipBlockedCallback;
         mSecureWindowCallback = secureWindowCallback;
         mDisplayCategories = displayCategories;
+        mDefaultRecentsPolicy = defaultRecentsPolicy;
     }
 
     /**
@@ -318,18 +317,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     }
 
     @Override
-    public boolean canShowTasksInRecents() {
-        if (mDeviceProfile == null) {
-            return true;
-        }
-        // TODO(b/234075973) : Remove this once proper API is ready.
-        switch (mDeviceProfile) {
-            case DEVICE_PROFILE_AUTOMOTIVE_PROJECTION:
-                return false;
-            case DEVICE_PROFILE_APP_STREAMING:
-            default:
-                return true;
-        }
+    public boolean canShowTasksInHostDeviceRecents() {
+        return (mDefaultRecentsPolicy & RECENTS_POLICY_ALLOW_IN_HOST_DEVICE_RECENTS) != 0;
     }
 
     @Override

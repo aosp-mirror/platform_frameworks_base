@@ -32,8 +32,8 @@ import java.util.Set;
 /**
  * A virtual dpad representing a key input mechanism on a remote device.
  *
- * This registers an InputDevice that is interpreted like a physically-connected device and
- * dispatches received events to it.
+ * <p>This registers an InputDevice that is interpreted like a physically-connected device and
+ * dispatches received events to it.</p>
  *
  * @hide
  */
@@ -44,6 +44,7 @@ public class VirtualDpad extends VirtualInputDevice {
             Collections.unmodifiableSet(
                     new HashSet<>(
                             Arrays.asList(
+                                    KeyEvent.KEYCODE_BACK,
                                     KeyEvent.KEYCODE_DPAD_UP,
                                     KeyEvent.KEYCODE_DPAD_DOWN,
                                     KeyEvent.KEYCODE_DPAD_LEFT,
@@ -58,8 +59,15 @@ public class VirtualDpad extends VirtualInputDevice {
     /**
      * Sends a key event to the system.
      *
-     * Supported key codes are KEYCODE_DPAD_UP, KEYCODE_DPAD_DOWN, KEYCODE_DPAD_LEFT,
-     * KEYCODE_DPAD_RIGHT and KEYCODE_DPAD_CENTER,
+     * <p>Supported key codes are:
+     * <ul>
+     *     <li>{@link KeyEvent.KEYCODE_DPAD_UP}</li>
+     *     <li>{@link KeyEvent.KEYCODE_DPAD_DOWN}</li>
+     *     <li>{@link KeyEvent.KEYCODE_DPAD_LEFT}</li>
+     *     <li>{@link KeyEvent.KEYCODE_DPAD_RIGHT}</li>
+     *     <li>{@link KeyEvent.KEYCODE_DPAD_CENTER}</li>
+     *     <li>{@link KeyEvent.KEYCODE_BACK}</li>
+     * </ul>
      *
      * @param event the event to send
      */
