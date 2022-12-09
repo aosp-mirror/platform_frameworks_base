@@ -376,6 +376,34 @@ public class JobStatusTest {
         assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
     }
 
+    @Test
+    public void testShouldTreatAsUserInitiated() {
+        JobInfo jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .setUserInitiated(false)
+                .build();
+        JobStatus job = createJobStatus(jobInfo);
+
+        assertFalse(job.shouldTreatAsUserInitiatedJob());
+
+        jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .setUserInitiated(true)
+                .build();
+        job = createJobStatus(jobInfo);
+
+        assertTrue(job.shouldTreatAsUserInitiatedJob());
+
+        JobStatus rescheduledJob = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME,
+                0, 0, 0, 0);
+        assertTrue(rescheduledJob.shouldTreatAsUserInitiatedJob());
+
+        job.addInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+        assertFalse(job.shouldTreatAsUserInitiatedJob());
+
+        rescheduledJob = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME,
+                0, 0, 0, 0);
+        assertFalse(rescheduledJob.shouldTreatAsUserInitiatedJob());
+    }
+
     /**
      * Test {@link JobStatus#wouldBeReadyWithConstraint} on explicit constraints that weren't
      * requested.

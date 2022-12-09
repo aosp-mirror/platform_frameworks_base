@@ -1194,6 +1194,7 @@ public final class JobServiceContext implements ServiceConnection {
         applyStoppedReasonLocked(reason);
         completedJob = mRunningJob;
         final int internalStopReason = mParams.getInternalStopReasonCode();
+        final int stopReason = mParams.getStopReason();
         mPreviousJobHadSuccessfulFinish =
                 (internalStopReason == JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         if (!mPreviousJobHadSuccessfulFinish) {
@@ -1214,7 +1215,7 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.hasContentTriggerConstraint(),
                 completedJob.isRequestedExpeditedJob(),
                 completedJob.startedAsExpeditedJob,
-                mParams.getStopReason(),
+                stopReason,
                 completedJob.getJob().isPrefetch(),
                 completedJob.getJob().getPriority(),
                 completedJob.getEffectivePriority(),
@@ -1267,7 +1268,8 @@ public final class JobServiceContext implements ServiceConnection {
         if (completedJob.isUserVisibleJob()) {
             mService.informObserversOfUserVisibleJobChange(this, completedJob, false);
         }
-        mCompletedListener.onJobCompletedLocked(completedJob, internalStopReason, reschedule);
+        mCompletedListener.onJobCompletedLocked(completedJob, stopReason, internalStopReason,
+                reschedule);
         mJobConcurrencyManager.onJobCompletedLocked(this, completedJob, workType);
     }
 

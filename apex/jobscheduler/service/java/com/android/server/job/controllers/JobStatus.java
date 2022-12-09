@@ -373,6 +373,11 @@ public final class JobStatus {
      * @hide
      */
     public static final int INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION = 1 << 0;
+    /**
+     * Flag for {@link #mInternalFlags}: this job was stopped by the user for some reason
+     * and is thus considered demoted from whatever privileged state it had in the past.
+     */
+    public static final int INTERNAL_FLAG_DEMOTED_BY_USER = 1 << 1;
 
     /** Minimum difference between start and end time to have flexible constraint */
     @VisibleForTesting
@@ -1380,8 +1385,8 @@ public final class JobStatus {
      * for any reason.
      */
     public boolean shouldTreatAsUserInitiatedJob() {
-        // TODO(248386641): update implementation to handle loss of privilege
-        return getJob().isUserInitiated();
+        return getJob().isUserInitiated()
+                && (getInternalFlags() & INTERNAL_FLAG_DEMOTED_BY_USER) == 0;
     }
 
     /**
