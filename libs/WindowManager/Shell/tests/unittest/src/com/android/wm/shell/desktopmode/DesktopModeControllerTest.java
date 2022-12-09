@@ -100,7 +100,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
     @Before
     public void setUp() {
         mMockitoSession = mockitoSession().mockStatic(DesktopModeStatus.class).startMocking();
-        when(DesktopModeStatus.isSupported()).thenReturn(true);
+        when(DesktopModeStatus.isProto1Enabled()).thenReturn(true);
         when(DesktopModeStatus.isActive(any())).thenReturn(true);
 
         mShellInit = Mockito.spy(new ShellInit(mTestExecutor));
@@ -129,7 +129,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
 
     @Test
     public void instantiate_flagOff_doNotAddInitCallback() {
-        when(DesktopModeStatus.isSupported()).thenReturn(false);
+        when(DesktopModeStatus.isProto1Enabled()).thenReturn(false);
         clearInvocations(mShellInit);
 
         createController();
