@@ -35,12 +35,13 @@ import android.util.ArraySet;
 
 import androidx.test.filters.MediumTest;
 
+import com.google.common.truth.Correspondence;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Build/Install/Run:
@@ -52,6 +53,9 @@ import java.util.List;
 public class RunningTasksTest extends WindowTestsBase {
 
     private static final ArraySet<Integer> PROFILE_IDS = new ArraySet<>();
+    private static final Correspondence<RunningTaskInfo, Integer> TASKINFO_HAS_ID =
+            Correspondence.transforming((RunningTaskInfo t) -> t.taskId, "has id");
+
 
     private RunningTasks mRunningTasks;
 
@@ -77,7 +81,7 @@ public class RunningTasksTest extends WindowTestsBase {
         final int numFetchTasks = 5;
         final ArrayList<RunningTaskInfo> tasks = new ArrayList<>();
         mRunningTasks.getTasks(numFetchTasks, tasks, FLAG_ALLOWED | FLAG_CROSS_USERS,
-                mRootWindowContainer, -1 /* callingUid */, PROFILE_IDS);
+                mAtm.getRecentTasks(), mRootWindowContainer, -1 /* callingUid */, PROFILE_IDS);
         assertThat(tasks).hasSize(numFetchTasks);
         for (int i = 0; i < tasks.size(); i++) {
             final Bundle extras = tasks.get(i).baseIntent.getExtras();
@@ -102,8 +106,8 @@ public class RunningTasksTest extends WindowTestsBase {
         final int numFetchTasks = 5;
         final ArrayList<RunningTaskInfo> tasks = new ArrayList<>();
         mRunningTasks.getTasks(numFetchTasks, tasks,
-                FLAG_ALLOWED | FLAG_CROSS_USERS | FLAG_KEEP_INTENT_EXTRA, mRootWindowContainer,
-                -1 /* callingUid */, PROFILE_IDS);
+                FLAG_ALLOWED | FLAG_CROSS_USERS | FLAG_KEEP_INTENT_EXTRA,
+                mAtm.getRecentTasks(), mRootWindowContainer, -1 /* callingUid */, PROFILE_IDS);
         assertThat(tasks).hasSize(numFetchTasks);
         for (int i = 0; i < tasks.size(); i++) {
             final Bundle extras = tasks.get(i).baseIntent.getExtras();
@@ -142,8 +146,8 @@ public class RunningTasksTest extends WindowTestsBase {
         final int numFetchTasks = 5;
         final ArrayList<RunningTaskInfo> fetchTasks = new ArrayList<>();
         mRunningTasks.getTasks(numFetchTasks, fetchTasks,
-                FLAG_ALLOWED | FLAG_CROSS_USERS | FLAG_KEEP_INTENT_EXTRA, mRootWindowContainer,
-                -1 /* callingUid */, PROFILE_IDS);
+                FLAG_ALLOWED | FLAG_CROSS_USERS | FLAG_KEEP_INTENT_EXTRA,
+                mAtm.getRecentTasks(), mRootWindowContainer, -1 /* callingUid */, PROFILE_IDS);
         assertThat(fetchTasks).hasSize(numFetchTasks);
         for (int i = 0; i < numFetchTasks; i++) {
             assertEquals(numTasks - i - 1, fetchTasks.get(i).id);
@@ -153,8 +157,8 @@ public class RunningTasksTest extends WindowTestsBase {
         // and does not crash
         fetchTasks.clear();
         mRunningTasks.getTasks(100, fetchTasks,
-                FLAG_ALLOWED | FLAG_CROSS_USERS | FLAG_KEEP_INTENT_EXTRA, mRootWindowContainer,
-                -1 /* callingUid */, PROFILE_IDS);
+                FLAG_ALLOWED | FLAG_CROSS_USERS | FLAG_KEEP_INTENT_EXTRA,
+                mAtm.getRecentTasks(), mRootWindowContainer, -1 /* callingUid */, PROFILE_IDS);
         assertThat(fetchTasks).hasSize(numTasks);
         for (int i = 0; i < numTasks; i++) {
             assertEquals(numTasks - i - 1, fetchTasks.get(i).id);
@@ -177,5 +181,47 @@ public class RunningTasksTest extends WindowTestsBase {
                 .build();
         task.intent = activity.intent;
         return task;
+    }
+
+    @Test
+    public void testMultipleDisplays() {
+        final DisplayContent display0 = new TestDisplayContent.Builder(mAtm, 1000, 2500).build();
+        final DisplayContent display1 = new TestDisplayContent.Builder(mAtm, 1000, 2500).build();
+        final int numTasks = 10;
+        final ArrayList<Task> tasks = new ArrayList<>();
+        for (int i = 0; i < numTasks; i++) {
+            final Task stack = new TaskBuilder(mSupervisor)
+                    .setDisplay(i % 2 == 0 ? display0 : display1)
+                    .setOnTop(true)
+                    .build();
+            final Task task = createTask(stack, ".Task" + i, i, null);
+            tasks.add(task);
+        }
+
+        final int numFetchTasks = numTasks;
+        final ArrayList<RunningTaskInfo> fetchTasks = new ArrayList<>();
+
+        mRunningTasks.getTasks(numFetchTasks, fetchTasks,
+                FLAG_ALLOWED | FLAG_CROSS_USERS,
+                mAtm.getRecentTasks(), display0, -1 /* callingUid */, PROFILE_IDS);
+        assertThat(fetchTasks).hasSize(numTasks / 2);
+        assertThat(fetchTasks).comparingElementsUsing(TASKINFO_HAS_ID)
+                .containsExactly(0, 2, 4, 6, 8);
+
+        fetchTasks.clear();
+        mRunningTasks.getTasks(numFetchTasks, fetchTasks,
+                FLAG_ALLOWED | FLAG_CROSS_USERS,
+                mAtm.getRecentTasks(), display1, -1 /* callingUid */, PROFILE_IDS);
+        assertThat(fetchTasks).hasSize(numTasks / 2);
+        assertThat(fetchTasks).comparingElementsUsing(TASKINFO_HAS_ID)
+                .containsExactly(1, 3, 5, 7, 9);
+
+        fetchTasks.clear();
+        mRunningTasks.getTasks(numFetchTasks, fetchTasks,
+                FLAG_ALLOWED | FLAG_CROSS_USERS,
+                mAtm.getRecentTasks(), mRootWindowContainer, -1 /* callingUid */, PROFILE_IDS);
+        assertThat(fetchTasks).hasSize(numTasks);
+        assertThat(fetchTasks).comparingElementsUsing(TASKINFO_HAS_ID)
+                .containsExactly(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     }
 }

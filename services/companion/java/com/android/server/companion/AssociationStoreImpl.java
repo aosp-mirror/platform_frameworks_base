@@ -73,6 +73,9 @@ class AssociationStoreImpl implements AssociationStore {
     private final Set<OnChangeListener> mListeners = new LinkedHashSet<>();
 
     void addAssociation(@NonNull AssociationInfo association) {
+        // Validity check first.
+        checkNotRevoked(association);
+
         final int id = association.getId();
 
         if (DEBUG) {
@@ -99,6 +102,9 @@ class AssociationStoreImpl implements AssociationStore {
     }
 
     void updateAssociation(@NonNull AssociationInfo updated) {
+        // Validity check first.
+        checkNotRevoked(updated);
+
         final int id = updated.getId();
 
         if (DEBUG) {
@@ -292,6 +298,9 @@ class AssociationStoreImpl implements AssociationStore {
     }
 
     void setAssociations(Collection<AssociationInfo> allAssociations) {
+        // Validity check first.
+        allAssociations.forEach(AssociationStoreImpl::checkNotRevoked);
+
         if (DEBUG) {
             Log.i(TAG, "setAssociations() n=" + allAssociations.size());
             final StringJoiner stringJoiner = new StringJoiner(", ");
@@ -323,5 +332,12 @@ class AssociationStoreImpl implements AssociationStore {
         mIdMap.clear();
         mAddressMap.clear();
         mCachedPerUser.clear();
+    }
+
+    private static void checkNotRevoked(@NonNull AssociationInfo association) {
+        if (association.isRevoked()) {
+            throw new IllegalArgumentException(
+                    "Revoked (removed) associations MUST NOT appear in the AssociationStore");
+        }
     }
 }

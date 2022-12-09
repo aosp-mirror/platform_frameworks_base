@@ -78,7 +78,6 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.IDisplayFoldListener;
-import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -156,10 +155,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     int FINISH_LAYOUT_REDO_ANIM = 0x0008;
     /** Layer for the screen off animation */
     int COLOR_FADE_LAYER = 0x40000001;
-    /** Layer for Input overlays for capturing inputs for gesture detection, etc. */
-    int INPUT_DISPLAY_OVERLAY_LAYER = 0x7f000000;
-    /** Layer for Screen Decoration: The top most visible layer just below input overlay layers */
-    int SCREEN_DECOR_DISPLAY_OVERLAY_LAYER = INPUT_DISPLAY_OVERLAY_LAYER - 1;
 
     /**
      * Register shortcuts for window manager to dispatch.
@@ -347,6 +342,22 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * @return {@code true} if app transition state is idle on the default display.
          */
         boolean isAppTransitionStateIdle();
+
+        /**
+         * Enables the screen if all conditions are met.
+         */
+        void enableScreenIfNeeded();
+
+        /**
+         * Updates the current screen rotation based on the current state of the world.
+         *
+         * @param alwaysSendConfiguration Flag to force a new configuration to be evaluated.
+         *                                This can be used when there are other parameters in
+         *                                configuration that are changing.
+         * @param forceRelayout If true, the window manager will always do a relayout of its
+         *                      windows even if the rotation hasn't changed.
+         */
+        void updateRotation(boolean alwaysSendConfiguration, boolean forceRelayout);
     }
 
     /**
@@ -395,8 +406,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      *
      * @param context The system context we are running in.
      */
-    public void init(Context context, IWindowManager windowManager,
-            WindowManagerFuncs windowManagerFuncs);
+    void init(Context context, WindowManagerFuncs windowManagerFuncs);
 
     /**
      * Check permissions when adding a window.
@@ -996,7 +1006,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * Called when userActivity is signalled in the power manager.
      * This is safe to call from any thread, with any window manager locks held or not.
      */
-    public void userActivity();
+    void userActivity(int displayGroupId, int event);
 
     /**
      * Called when we have finished booting and can now display the home

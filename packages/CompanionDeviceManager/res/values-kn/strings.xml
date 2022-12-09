@@ -25,7 +25,7 @@
     <string name="permission_apps_summary" msgid="798718816711515431">"ನಿಮ್ಮ ಫೋನ್‍ನ ಆ್ಯಪ್‌ಗಳನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡಿ"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"ನಿಮ್ಮ ಫೋನ್ ಮೂಲಕ ಈ ಮಾಹಿತಿಯನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ಗೆ ಅನುಮತಿಸಿ"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"ಕ್ರಾಸ್-ಡಿವೈಸ್ ಸೇವೆಗಳು"</string>
-    <string name="helper_summary_app_streaming" msgid="7380294597268573523">"ನಿಮ್ಮ ಫೋನ್‌ನ ಫೋಟೋಗಳು, ಮೀಡಿಯಾ ಮತ್ತು ಅಧಿಸೂಚನೆಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ನಿಮ್ಮ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ನ ಪರವಾಗಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸಿಕೊಳ್ಳುತ್ತಿದೆ"</string>
+    <string name="helper_summary_app_streaming" msgid="5977509499890099">"ನಿಮ್ಮ ಸಾಧನಗಳ ನಡುವೆ ಆ್ಯಪ್‌ಗಳನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡಲು ನಿಮ್ಮ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ನ ಪರವಾಗಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸಿಕೊಳ್ಳುತ್ತಿದೆ"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"ನಿಮ್ಮ ಫೋನ್ ಮೂಲಕ ಈ ಮಾಹಿತಿಯನ್ನು ಪ್ರವೇಶಿಸಲು &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ಗೆ ಅನುಮತಿಸಿ"</string>
@@ -35,7 +35,7 @@
     <string name="permission_storage" msgid="6831099350839392343">"ಫೋಟೋಗಳು ಮತ್ತು ಮಾಧ್ಯಮ"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play ಸೇವೆಗಳು"</string>
-    <string name="helper_summary_computer" msgid="1676407599909474428">"ನಿಮ್ಮ ಸಾಧನಗಳ ನಡುವೆ ಆ್ಯಪ್‌ಗಳನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡಲು ನಿಮ್ಮ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ನ ಪರವಾಗಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸಿಕೊಳ್ಳುತ್ತಿದೆ"</string>
+    <string name="helper_summary_computer" msgid="9050724687678157852">"ನಿಮ್ಮ ಫೋನ್‌ನ ಫೋಟೋಗಳು, ಮೀಡಿಯಾ ಮತ್ತು ಅಧಿಸೂಚನೆಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ನಿಮ್ಮ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ನ ಪರವಾಗಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸಿಕೊಳ್ಳುತ್ತಿದೆ"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ಸಾಧನ"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"ಅನುಮತಿಸಿ"</string>

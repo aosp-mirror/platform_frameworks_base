@@ -104,19 +104,6 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     public static final int WINDOWING_MODE_FULLSCREEN = 1;
     /** Always on-top (always visible). of other siblings in its parent container. */
     public static final int WINDOWING_MODE_PINNED = 2;
-    /** The primary container driving the screen to be in split-screen mode. */
-    // TODO: Remove once split-screen is migrated to wm-shell.
-    public static final int WINDOWING_MODE_SPLIT_SCREEN_PRIMARY = 3;
-    /**
-     * The containers adjacent to the {@link #WINDOWING_MODE_SPLIT_SCREEN_PRIMARY} container in
-     * split-screen mode.
-     * NOTE: Containers launched with the windowing mode with APIs like
-     * {@link ActivityOptions#setLaunchWindowingMode(int)} will be launched in
-     * {@link #WINDOWING_MODE_FULLSCREEN} if the display isn't currently in split-screen windowing
-     * mode
-     */
-    // TODO: Remove once split-screen is migrated to wm-shell.
-    public static final int WINDOWING_MODE_SPLIT_SCREEN_SECONDARY = 4;
     /** Can be freely resized within its parent container. */
     // TODO: Remove once freeform is migrated to wm-shell.
     public static final int WINDOWING_MODE_FREEFORM = 5;
@@ -129,8 +116,6 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             WINDOWING_MODE_FULLSCREEN,
             WINDOWING_MODE_MULTI_WINDOW,
             WINDOWING_MODE_PINNED,
-            WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
-            WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
             WINDOWING_MODE_FREEFORM,
     })
     public @interface WindowingMode {}
@@ -473,6 +458,15 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         setAlwaysOnTop(ALWAYS_ON_TOP_UNDEFINED);
         setRotation(ROTATION_UNDEFINED);
         setDisplayWindowingMode(WINDOWING_MODE_UNDEFINED);
+    }
+
+    /** @hide */
+    public void scale(float scale) {
+        mBounds.scale(scale);
+        mMaxBounds.scale(scale);
+        if (mAppBounds != null) {
+            mAppBounds.scale(scale);
+        }
     }
 
     /**
@@ -890,9 +884,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     /**
-     * Returns true if this container can be put in either
-     * {@link #WINDOWING_MODE_SPLIT_SCREEN_PRIMARY} or
-     * {@link #WINDOWING_MODE_SPLIT_SCREEN_SECONDARY} windowing modes based on its current state.
+     * Returns true if this container can be put in {@link #WINDOWING_MODE_MULTI_WINDOW}
+     * windowing mode based on its current state.
      * @hide
      */
     public boolean supportSplitScreenWindowingMode() {
@@ -911,8 +904,6 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             case WINDOWING_MODE_FULLSCREEN: return "fullscreen";
             case WINDOWING_MODE_MULTI_WINDOW: return "multi-window";
             case WINDOWING_MODE_PINNED: return "pinned";
-            case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY: return "split-screen-primary";
-            case WINDOWING_MODE_SPLIT_SCREEN_SECONDARY: return "split-screen-secondary";
             case WINDOWING_MODE_FREEFORM: return "freeform";
         }
         return String.valueOf(windowingMode);

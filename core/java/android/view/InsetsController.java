@@ -314,6 +314,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             (int) (startValue.right + fraction * (endValue.right - startValue.right)),
             (int) (startValue.bottom + fraction * (endValue.bottom - startValue.bottom)));
 
+    /** Logging listener. */
+    private WindowInsetsAnimationControlListener mLoggingListener;
+
     /**
      * The default implementation of listener, to be used by InsetsController and InsetsPolicy to
      * animate insets.
@@ -330,6 +333,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         private final long mDurationMs;
         private final boolean mDisable;
         private final int mFloatingImeBottomInset;
+        private final WindowInsetsAnimationControlListener mLoggingListener;
 
         private final ThreadLocal<AnimationHandler> mSfAnimationHandlerThreadLocal =
                 new ThreadLocal<AnimationHandler>() {
@@ -343,7 +347,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
         public InternalAnimationControlListener(boolean show, boolean hasAnimationCallbacks,
                 @InsetsType int requestedTypes, @Behavior int behavior, boolean disable,
-                int floatingImeBottomInset) {
+                int floatingImeBottomInset, WindowInsetsAnimationControlListener loggingListener) {
             mShow = show;
             mHasAnimationCallbacks = hasAnimationCallbacks;
             mRequestedTypes = requestedTypes;
@@ -351,12 +355,16 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             mDurationMs = calculateDurationMs();
             mDisable = disable;
             mFloatingImeBottomInset = floatingImeBottomInset;
+            mLoggingListener = loggingListener;
         }
 
         @Override
         public void onReady(WindowInsetsAnimationController controller, int types) {
             mController = controller;
             if (DEBUG) Log.d(TAG, "default animation onReady types: " + types);
+            if (mLoggingListener != null) {
+                mLoggingListener.onReady(controller, types);
+            }
 
             if (mDisable) {
                 onAnimationFinish();
@@ -410,6 +418,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         public void onFinished(WindowInsetsAnimationController controller) {
             if (DEBUG) Log.d(TAG, "InternalAnimationControlListener onFinished types:"
                     + Type.toString(mRequestedTypes));
+            if (mLoggingListener != null) {
+                mLoggingListener.onFinished(controller);
+            }
         }
 
         @Override
@@ -420,6 +431,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
             if (DEBUG) Log.d(TAG, "InternalAnimationControlListener onCancelled types:"
                     + mRequestedTypes);
+            if (mLoggingListener != null) {
+                mLoggingListener.onCancelled(controller);
+            }
         }
 
         protected Interpolator getInsetsInterpolator() {
@@ -733,7 +747,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
         for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
             // Only update the server side insets here.
-            if (type == ITYPE_CAPTION_BAR) continue;
+            if (!CAPTION_ON_SHELL && type == ITYPE_CAPTION_BAR) continue;
             InsetsSource source = mState.peekSource(type);
             if (source == null) continue;
             if (newState.peekSource(type) == null) {
@@ -1147,6 +1161,13 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         updateRequestedVisibilities();
     }
 
+    // TODO(b/242962223): Make this setter restrictive.
+    @Override
+    public void setSystemDrivenInsetsAnimationLoggingListener(
+            @Nullable WindowInsetsAnimationControlListener listener) {
+        mLoggingListener = listener;
+    }
+
     /**
      * @return Pair of (types ready to animate, IME ready to animate).
      */
@@ -1460,7 +1481,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         boolean hasAnimationCallbacks = mHost.hasAnimationCallbacks();
         final InternalAnimationControlListener listener = new InternalAnimationControlListener(
                 show, hasAnimationCallbacks, types, mHost.getSystemBarsBehavior(),
-                skipAnim || mAnimationsDisabled, mHost.dipToPx(FLOATING_IME_BOTTOM_INSET_DP));
+                skipAnim || mAnimationsDisabled, mHost.dipToPx(FLOATING_IME_BOTTOM_INSET_DP),
+                mLoggingListener);
 
         // We are about to playing the default animation (show/hide). Passing a null frame indicates
         // the controlled types should be animated regardless of the frame.

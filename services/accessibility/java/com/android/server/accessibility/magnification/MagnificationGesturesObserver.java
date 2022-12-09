@@ -193,6 +193,6 @@ class MagnificationGesturesObserver implements GesturesObserver.Listener {
     @Override
     public String toString() {
         return "MagnificationGesturesObserver{"
-                + ", mDelayedEventQueue=" + mDelayedEventQueue + '}';
+                + "mDelayedEventQueue=" + mDelayedEventQueue + '}';
     }
 }

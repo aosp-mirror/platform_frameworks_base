@@ -18,8 +18,10 @@ package android.view;
 
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.ANIMATION_TYPE_USER;
+import static android.view.InsetsSourceConsumer.ShowResult.SHOW_IMMEDIATELY;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.statusBars;
 
 import static junit.framework.Assert.assertEquals;
@@ -28,6 +30,7 @@ import static junit.framework.TestCase.assertTrue;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -75,6 +78,7 @@ public class InsetsSourceConsumerTest {
     private boolean mRemoveSurfaceCalled = false;
     private InsetsController mController;
     private InsetsState mState;
+    private ViewRootImpl mViewRoot;
 
     @Before
     public void setup() {
@@ -86,10 +90,9 @@ public class InsetsSourceConsumerTest {
         instrumentation.runOnMainSync(() -> {
             final Context context = instrumentation.getTargetContext();
             // cannot mock ViewRootImpl since it's final.
-            final ViewRootImpl viewRootImpl = new ViewRootImpl(context,
-                    context.getDisplayNoVerify());
+            mViewRoot = new ViewRootImpl(context, context.getDisplayNoVerify());
             try {
-                viewRootImpl.setView(new TextView(context), new LayoutParams(), null);
+                mViewRoot.setView(new TextView(context), new LayoutParams(), null);
             } catch (BadTokenException e) {
                 // activity isn't running, lets ignore BadTokenException.
             }
@@ -97,7 +100,7 @@ public class InsetsSourceConsumerTest {
             mSpyInsetsSource = Mockito.spy(new InsetsSource(ITYPE_STATUS_BAR));
             mState.addSource(mSpyInsetsSource);
 
-            mController = new InsetsController(new ViewRootInsetsControllerHost(viewRootImpl));
+            mController = new InsetsController(new ViewRootInsetsControllerHost(mViewRoot));
             mConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR, mState,
                     () -> mMockTransaction, mController) {
                 @Override
@@ -110,7 +113,8 @@ public class InsetsSourceConsumerTest {
         instrumentation.waitForIdleSync();
 
         mConsumer.setControl(
-                new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point(), Insets.NONE),
+                new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, true /* initialVisible */,
+                        new Point(), Insets.NONE),
                 new int[1], new int[1]);
     }
 
@@ -180,7 +184,8 @@ public class InsetsSourceConsumerTest {
             verifyZeroInteractions(mMockTransaction);
             int[] hideTypes = new int[1];
             mConsumer.setControl(
-                    new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point(), Insets.NONE),
+                    new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, true /* initialVisible */,
+                            new Point(), Insets.NONE),
                     new int[1], hideTypes);
             assertEquals(statusBars(), hideTypes[0]);
             assertFalse(mRemoveSurfaceCalled);
@@ -191,18 +196,54 @@ public class InsetsSourceConsumerTest {
     public void testRestore_noAnimation() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mConsumer.hide();
-            mController.onStateChanged(mState);
             mConsumer.setControl(null, new int[1], new int[1]);
             reset(mMockTransaction);
             verifyZeroInteractions(mMockTransaction);
             mRemoveSurfaceCalled = false;
             int[] hideTypes = new int[1];
             mConsumer.setControl(
-                    new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point(), Insets.NONE),
+                    new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, false /* initialVisible */,
+                            new Point(), Insets.NONE),
                     new int[1], hideTypes);
             assertTrue(mRemoveSurfaceCalled);
             assertEquals(0, hideTypes[0]);
         });
 
+    }
+
+    @Test
+    public void testWontUpdateImeLeashVisibility_whenAnimation() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            InsetsState state = new InsetsState();
+            ViewRootInsetsControllerHost host = new ViewRootInsetsControllerHost(mViewRoot);
+            InsetsController insetsController = new InsetsController(host, (controller, type) -> {
+                if (type == ITYPE_IME) {
+                    return new InsetsSourceConsumer(ITYPE_IME, state,
+                            () -> mMockTransaction, controller) {
+                        @Override
+                        public int requestShow(boolean fromController) {
+                            return SHOW_IMMEDIATELY;
+                        }
+                    };
+                }
+                return new InsetsSourceConsumer(type, controller.getState(), Transaction::new,
+                        controller);
+            }, host.getHandler());
+            InsetsSourceConsumer imeConsumer = insetsController.getSourceConsumer(ITYPE_IME);
+
+            // Initial IME insets source control with its leash.
+            imeConsumer.setControl(new InsetsSourceControl(ITYPE_IME, mLeash,
+                    false /* initialVisible */, new Point(), Insets.NONE), new int[1], new int[1]);
+            reset(mMockTransaction);
+
+            // Verify when the app requests controlling show IME animation, the IME leash
+            // visibility won't be updated when the consumer received the same leash in setControl.
+            insetsController.controlWindowInsetsAnimation(ime(), 0L,
+                    null /* interpolator */, null /* cancellationSignal */, null /* listener */);
+            assertTrue(insetsController.getAnimationType(ITYPE_IME) == ANIMATION_TYPE_USER);
+            imeConsumer.setControl(new InsetsSourceControl(ITYPE_IME, mLeash,
+                    true /* initialVisible */, new Point(), Insets.NONE), new int[1], new int[1]);
+            verify(mMockTransaction, never()).show(mLeash);
+        });
     }
 }

@@ -19,11 +19,11 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 import android.content.Context
 import com.android.systemui.R
 import com.android.systemui.statusbar.notification.AssistantFeedbackController
-import com.android.systemui.statusbar.notification.SectionClassifier
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
+import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
 import com.android.systemui.statusbar.notification.collection.render.NotifRowController
 import javax.inject.Inject
 
@@ -35,7 +35,7 @@ import javax.inject.Inject
 class RowAppearanceCoordinator @Inject internal constructor(
     context: Context,
     private var mAssistantFeedbackController: AssistantFeedbackController,
-    private var mSectionClassifier: SectionClassifier
+    private var mSectionStyleProvider: SectionStyleProvider
 ) : Coordinator {
 
     private var entryToExpand: NotificationEntry? = null
@@ -55,7 +55,7 @@ class RowAppearanceCoordinator @Inject internal constructor(
 
     private fun onBeforeRenderList(list: List<ListEntry>) {
         entryToExpand = list.firstOrNull()?.representativeEntry?.takeIf { entry ->
-            !mSectionClassifier.isMinimizedSection(entry.section!!)
+            !mSectionStyleProvider.isMinimizedSection(entry.section!!)
         }
     }
 

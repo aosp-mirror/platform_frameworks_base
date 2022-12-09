@@ -916,7 +916,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.SEND_SMS"
@@ -930,7 +930,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.RECEIVE_SMS"
@@ -944,7 +944,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.READ_SMS"
@@ -958,7 +958,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.RECEIVE_WAP_PUSH"
@@ -972,7 +972,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.RECEIVE_MMS"
@@ -1007,7 +1007,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
 
          @hide Pending API council approval -->
@@ -1052,7 +1052,7 @@
       targetSdkVersion}</a> is 4 or higher.
 
       <p> This is a soft restricted permission which cannot be held by an app it its
-      full form until the installer on record whitelists the permission.
+      full form until the installer on record allowlists the permission.
       Specifically, if the permission is allowlisted the holder app can access
       external storage and the visual and aural media collections while if the
       permission is not allowlisted the holder app can only access to the visual
@@ -1232,7 +1232,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
@@ -1294,7 +1294,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.READ_CALL_LOG"
@@ -1318,7 +1318,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.WRITE_CALL_LOG"
@@ -1334,7 +1334,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
 
          @deprecated Applications should use {@link android.telecom.CallRedirectionService} instead
@@ -4744,7 +4744,7 @@
                 android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows an application to allowlist restricted permissions
-         on any of the whitelists.
+         on any of the allowlists.
     @hide -->
     <permission android:name="android.permission.WHITELIST_RESTRICTED_PERMISSIONS"
                 android:protectionLevel="signature|installer" />
@@ -6489,6 +6489,13 @@
     <permission android:name="android.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an app to set gesture exclusion without restrictions on the vertical extent of the
+         exclusions (see {@link android.view.View#setSystemGestureExclusionRects}).
+         @hide
+    -->
+    <permission android:name="android.permission.SET_UNRESTRICTED_GESTURE_EXCLUSION"
+                android:protectionLevel="signature|privileged|recents" />
+
     <!-- @SystemApi Allows TV input apps and TV apps to use TIS extension interfaces for
          domain-specific features.
          <p>Protection level: signature|privileged|vendorPrivileged
@@ -6767,8 +6774,9 @@
                   android:exported="false">
         </activity>
 
-        <activity android:name="com.android.server.logcat.LogAccessDialogActivity"
+        <activity android:name="com.android.internal.app.LogAccessDialogActivity"
                   android:theme="@style/Theme.Translucent.NoTitleBar"
+                  android:process=":ui"
                   android:excludeFromRecents="true"
                   android:exported="false">
         </activity>
@@ -7046,6 +7054,10 @@
 
         <service android:name="com.android.server.notification.ReviewNotificationPermissionsJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE">
+        </service>
+
+        <service android:name="com.android.server.notification.NotificationHistoryJobService"
+                 android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
         <service android:name="com.android.server.pm.PackageManagerShellCommandDataLoader"

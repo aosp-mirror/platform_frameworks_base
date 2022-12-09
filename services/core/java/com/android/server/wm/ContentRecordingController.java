@@ -56,9 +56,9 @@ final class ContentRecordingController {
      * Updates the current recording session. If a new display is taking over recording, then
      * stops the prior display from recording.
      *
-     * @param incomingSession the new recording session. Should either be {@code null}, to stop
-     *                        the current session, or a session on a new/different display than the
-     *                        current session.
+     * @param incomingSession the new recording session. Should either have a {@code null} token, to
+     *                        stop the current session, or a session on a new/different display
+     *                        than the current session.
      * @param wmService       the window manager service
      */
     void setContentRecordingSessionLocked(@Nullable ContentRecordingSession incomingSession,
@@ -81,8 +81,7 @@ final class ContentRecordingController {
         }
         if (mSession != null) {
             // Update the pre-existing display about the new session.
-            ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                    "Pause the recording session on display %s",
+            ProtoLog.v(WM_DEBUG_CONTENT_RECORDING, "Pause the recording session on display %s",
                     mDisplayContent.getDisplayId());
             mDisplayContent.pauseRecording();
             mDisplayContent.setContentRecordingSession(null);

@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.media.RoutingSessionInfo;
 import android.os.Build;
 import android.text.TextUtils;
@@ -83,6 +84,8 @@ public class LocalMediaManager implements BluetoothCallback {
     private InfoMediaManager mInfoMediaManager;
     private String mPackageName;
     private MediaDevice mOnTransferBluetoothDevice;
+    @VisibleForTesting
+    AudioManager mAudioManager;
 
     @VisibleForTesting
     List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
@@ -126,6 +129,7 @@ public class LocalMediaManager implements BluetoothCallback {
         mPackageName = packageName;
         mLocalBluetoothManager =
                 LocalBluetoothManager.getInstance(context, /* onInitCallback= */ null);
+        mAudioManager = context.getSystemService(AudioManager.class);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mLocalBluetoothManager == null) {
             Log.e(TAG, "Bluetooth is not supported on this device");
@@ -148,6 +152,7 @@ public class LocalMediaManager implements BluetoothCallback {
         mInfoMediaManager = infoMediaManager;
         mPackageName = packageName;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mAudioManager = context.getSystemService(AudioManager.class);
     }
 
     /**
@@ -527,13 +532,16 @@ public class LocalMediaManager implements BluetoothCallback {
             synchronized (mMediaDevicesLock) {
                 mMediaDevices.clear();
                 mMediaDevices.addAll(devices);
-                // Add disconnected bluetooth devices only when phone output device is available.
+                // Add muting expected bluetooth devices only when phone output device is available.
                 for (MediaDevice device : devices) {
                     final int type = device.getDeviceType();
                     if (type == MediaDevice.MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE
                             || type == MediaDevice.MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE
                             || type == MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE) {
-                        mMediaDevices.addAll(buildDisconnectedBluetoothDevice());
+                        MediaDevice mutingExpectedDevice = getMutingExpectedDevice();
+                        if (mutingExpectedDevice != null) {
+                            mMediaDevices.add(mutingExpectedDevice);
+                        }
                         break;
                     }
                 }
@@ -550,6 +558,34 @@ public class LocalMediaManager implements BluetoothCallback {
                         MediaDeviceState.STATE_CONNECTED);
                 mOnTransferBluetoothDevice = null;
             }
+        }
+
+        private MediaDevice getMutingExpectedDevice() {
+            if (mBluetoothAdapter == null
+                    || mAudioManager.getMutingExpectedDevice() == null) {
+                Log.w(TAG, "BluetoothAdapter is null or muting expected device not exist");
+                return null;
+            }
+            final List<BluetoothDevice> bluetoothDevices =
+                    mBluetoothAdapter.getMostRecentlyConnectedDevices();
+            final CachedBluetoothDeviceManager cachedDeviceManager =
+                    mLocalBluetoothManager.getCachedDeviceManager();
+            for (BluetoothDevice device : bluetoothDevices) {
+                final CachedBluetoothDevice cachedDevice =
+                        cachedDeviceManager.findDevice(device);
+                if (isBondedMediaDevice(cachedDevice) && isMutingExpectedDevice(cachedDevice)) {
+                    return new BluetoothMediaDevice(mContext,
+                            cachedDevice,
+                            null, null, mPackageName);
+                }
+            }
+            return null;
+        }
+
+        private boolean isMutingExpectedDevice(CachedBluetoothDevice cachedDevice) {
+            return mAudioManager.getMutingExpectedDevice() != null
+                    && cachedDevice.getAddress().equals(
+                    mAudioManager.getMutingExpectedDevice().getAddress());
         }
 
         private List<MediaDevice> buildDisconnectedBluetoothDevice() {
@@ -593,6 +629,13 @@ public class LocalMediaManager implements BluetoothCallback {
                 }
             }
             return new ArrayList<>(mDisconnectedMediaDevices);
+        }
+
+        private boolean isBondedMediaDevice(CachedBluetoothDevice cachedDevice) {
+            return cachedDevice != null
+                    && cachedDevice.getBondState() == BluetoothDevice.BOND_BONDED
+                    && !cachedDevice.isConnected()
+                    && isMediaDevice(cachedDevice);
         }
 
         private boolean isMediaDevice(CachedBluetoothDevice device) {

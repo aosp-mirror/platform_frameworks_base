@@ -3690,6 +3690,7 @@ android.icu.number.NumberFormatter$DecimalSeparatorDisplay
 android.icu.number.NumberFormatter$GroupingStrategy
 android.icu.number.NumberFormatter$RoundingPriority
 android.icu.number.NumberFormatter$SignDisplay
+android.icu.number.NumberFormatter$TrailingZeroDisplay
 android.icu.number.NumberFormatter$UnitWidth
 android.icu.number.NumberFormatter
 android.icu.number.NumberFormatterImpl
@@ -4666,6 +4667,7 @@ android.media.AudioTrack$2
 android.media.AudioTrack$TunerConfiguration
 android.media.AudioTrack
 android.media.AudioTrackRoutingProxy
+android.media.CallbackUtil$LazyListenerManager
 android.media.CamcorderProfile
 android.media.CameraProfile
 android.media.DecoderCapabilities
@@ -5908,6 +5910,7 @@ android.os.UserHandle$1
 android.os.UserHandle
 android.os.UserManager$1
 android.os.UserManager$2
+android.os.UserManager$3
 android.os.UserManager$EnforcingUser$1
 android.os.UserManager$EnforcingUser
 android.os.UserManager$UserOperationException
@@ -12944,6 +12947,7 @@ org.ccil.cowan.tagsoup.jaxp.SAXParserImpl
 [Landroid.icu.impl.number.CompactData$CompactType;
 [Landroid.icu.impl.number.DecimalFormatProperties$ParseMode;
 [Landroid.icu.impl.number.Modifier$Signum;
+[Landroid.icu.impl.number.Modifier;
 [Landroid.icu.impl.number.Padder$PadPosition;
 [Landroid.icu.impl.number.PatternStringUtils$PatternSignType;
 [Landroid.icu.impl.units.MeasureUnitImpl$CompoundPart;
@@ -12964,6 +12968,11 @@ org.ccil.cowan.tagsoup.jaxp.SAXParserImpl
 [Landroid.icu.number.NumberSkeletonImpl$ParseState;
 [Landroid.icu.number.NumberSkeletonImpl$StemEnum;
 [Landroid.icu.text.AlphabeticIndex$Bucket$LabelType;
+[Landroid.icu.text.Bidi$IsoRun;
+[Landroid.icu.text.Bidi$Isolate;
+[Landroid.icu.text.Bidi$Opening;
+[Landroid.icu.text.Bidi$Point;
+[Landroid.icu.text.BidiRun;
 [Landroid.icu.text.BidiTransform$Mirroring;
 [Landroid.icu.text.BidiTransform$Order;
 [Landroid.icu.text.BidiTransform$ReorderingScheme;
@@ -13064,6 +13073,7 @@ org.ccil.cowan.tagsoup.jaxp.SAXParserImpl
 [Landroid.os.SystemService$State;
 [Landroid.os.UserHandle;
 [Landroid.os.health.HealthKeys$SortedIntArray;
+[Landroid.os.storage.StorageVolume;
 [Landroid.renderscript.Element$DataKind;
 [Landroid.renderscript.Element$DataType;
 [Landroid.renderscript.RenderScript$ContextType;

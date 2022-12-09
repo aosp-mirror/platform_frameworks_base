@@ -50,13 +50,16 @@ interface IWindowSession {
     int addToDisplay(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, in InsetsVisibilities requestedVisibilities,
             out InputChannel outInputChannel, out InsetsState insetsState,
-            out InsetsSourceControl[] activeControls);
+            out InsetsSourceControl[] activeControls, out Rect attachedFrame,
+            out float[] sizeCompatScale);
     int addToDisplayAsUser(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, in int userId,
             in InsetsVisibilities requestedVisibilities, out InputChannel outInputChannel,
-            out InsetsState insetsState, out InsetsSourceControl[] activeControls);
+            out InsetsState insetsState, out InsetsSourceControl[] activeControls,
+            out Rect attachedFrame, out float[] sizeCompatScale);
     int addToDisplayWithoutInputChannel(IWindow window, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, in int layerStackId, out InsetsState insetsState);
+            in int viewVisibility, in int layerStackId, out InsetsState insetsState,
+            out Rect attachedFrame, out float[] sizeCompatScale);
     @UnsupportedAppUsage
     void remove(IWindow window);
 
@@ -72,75 +75,41 @@ interface IWindowSession {
      * @param requestedWidth The width the window wants to be.
      * @param requestedHeight The height the window wants to be.
      * @param viewVisibility Window root view's visibility.
-     * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING},
-     * {@link WindowManagerGlobal#RELAYOUT_DEFER_SURFACE_DESTROY}.
-     * @param outFrame Rect in which is placed the new position/size on
-     * screen.
-     * @param outContentInsets Rect in which is placed the offsets from
-     * <var>outFrame</var> in which the content of the window should be
-     * placed.  This can be used to modify the window layout to ensure its
-     * contents are visible to the user, taking into account system windows
-     * like the status bar or a soft keyboard.
-     * @param outVisibleInsets Rect in which is placed the offsets from
-     * <var>outFrame</var> in which the window is actually completely visible
-     * to the user.  This can be used to temporarily scroll the window's
-     * contents to make sure the user can see it.  This is different than
-     * <var>outContentInsets</var> in that these insets change transiently,
-     * so complex relayout of the window should not happen based on them.
-     * @param outOutsets Rect in which is placed the dead area of the screen that we would like to
-     * treat as real display. Example of such area is a chin in some models of wearable devices.
-     * @param outBackdropFrame Rect which is used draw the resizing background during a resize
-     * operation.
+     * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING}.
+     * @param seq The calling sequence of {@link #relayout} and {@link #relayoutAsync}.
+     * @param lastSyncSeqId The last SyncSeqId that the client applied.
+     * @param outFrames The window frames used by the client side for layout.
      * @param outMergedConfiguration New config container that holds global, override and merged
-     * config for window, if it is now becoming visible and the merged configuration has changed
-     * since it was last displayed.
-     * @param outSurface Object in which is placed the new display surface.
+     *                               config for window, if it is now becoming visible and the merged
+     *                               config has changed since it was last displayed.
+     * @param outSurfaceControl Object in which is placed the new display surface.
      * @param insetsState The current insets state in the system.
-     *
-     * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_SHOW_FOCUS},
-     * {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
+     * @param activeControls Objects which allow controlling {@link InsetsSource}s.
+     * @param bundle A temporary object to obtain the latest SyncSeqId.
+     * @return int Result flags, defined in {@link WindowManagerGlobal}.
      */
     int relayout(IWindow window, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, out ClientWindowFrames outFrames,
+            int flags, int seq, int lastSyncSeqId, out ClientWindowFrames outFrames,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
             out InsetsState insetsState, out InsetsSourceControl[] activeControls,
             out Bundle bundle);
 
     /**
-     * Changes the view visibility and the attributes of a window. This should only be called when
-     * the visibility of the root view is changed. This returns a valid surface if the root view is
-     * visible. This also returns the latest information for the caller to compute its window frame.
+     * Similar to {@link #relayout} but this is an oneway method which doesn't return anything.
      *
-     * @param window The window being updated.
+     * @param window The window being modified.
      * @param attrs If non-null, new attributes to apply to the window.
-     * @param viewVisibility Window root view's visibility.
-     * @param outMergedConfiguration New config container that holds global, override and merged
-     * config for window, if it is now becoming visible and the merged configuration has changed
-     * since it was last displayed.
-     * @param outSurfaceControl Object in which is placed the new display surface.
-     * @param outInsetsState The current insets state in the system.
-     * @param outActiveControls The insets source controls for the caller to override the insets
-     * state in the system.
-     *
-     * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
-     */
-    int updateVisibility(IWindow window, in WindowManager.LayoutParams attrs, int viewVisibility,
-            out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
-            out InsetsState outInsetsState, out InsetsSourceControl[] outActiveControls);
-
-    /**
-     * Reports the layout results and the attributes of a window to the server.
-     *
-     * @param window The window being reported.
-     * @param attrs If non-null, new attributes to apply to the window.
-     * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING}.
-     * @param clientFrames the window frames computed by the client.
      * @param requestedWidth The width the window wants to be.
      * @param requestedHeight The height the window wants to be.
+     * @param viewVisibility Window root view's visibility.
+     * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING}.
+     * @param seq The calling sequence of {@link #relayout} and {@link #relayoutAsync}.
+     * @param lastSyncSeqId The last SyncSeqId that the client applied.
      */
-    oneway void updateLayout(IWindow window, in WindowManager.LayoutParams attrs, int flags,
-            in ClientWindowFrames clientFrames, int requestedWidth, int requestedHeight);
+    oneway void relayoutAsync(IWindow window, in WindowManager.LayoutParams attrs,
+            int requestedWidth, int requestedHeight, int viewVisibility, int flags, int seq,
+            int lastSyncSeqId);
 
     /*
      * Notify the window manager that an application is relaunching and
@@ -384,4 +353,9 @@ interface IWindowSession {
      * Clears a touchable region set by {@link #setInsets}.
      */
     void clearTouchableRegion(IWindow window);
+
+    /**
+     * Returns whether this window needs to cancel draw and retry later.
+     */
+    boolean cancelDraw(IWindow window);
 }

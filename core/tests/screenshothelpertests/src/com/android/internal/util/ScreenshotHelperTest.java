@@ -80,13 +80,14 @@ public final class ScreenshotHelperTest {
 
     @Test
     public void testFullscreenScreenshot() {
-        mScreenshotHelper.takeScreenshot(TAKE_SCREENSHOT_FULLSCREEN, false, false, mHandler, null);
+        mScreenshotHelper.takeScreenshot(TAKE_SCREENSHOT_FULLSCREEN,
+                WindowManager.ScreenshotSource.SCREENSHOT_OTHER, mHandler, null);
     }
 
     @Test
     public void testSelectedRegionScreenshot() {
-        mScreenshotHelper.takeScreenshot(TAKE_SCREENSHOT_SELECTED_REGION, false, false, mHandler,
-                null);
+        mScreenshotHelper.takeScreenshot(TAKE_SCREENSHOT_SELECTED_REGION,
+                WindowManager.ScreenshotSource.SCREENSHOT_OTHER, mHandler, null);
     }
 
     @Test
@@ -101,8 +102,10 @@ public final class ScreenshotHelperTest {
         long timeoutMs = 10;
 
         CountDownLatch lock = new CountDownLatch(1);
-        mScreenshotHelper.takeScreenshot(TAKE_SCREENSHOT_FULLSCREEN, false, false, timeoutMs,
+        mScreenshotHelper.takeScreenshot(TAKE_SCREENSHOT_FULLSCREEN,
+                WindowManager.ScreenshotSource.SCREENSHOT_OTHER,
                 mHandler,
+                timeoutMs,
                 uri -> {
                     assertNull(uri);
                     lock.countDown();

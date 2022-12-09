@@ -1,6 +1,9 @@
 {
   "presubmit": [
     {
+      "name": "mediaroutertest"
+    },
+    {
       "name": "CtsCameraTestCases",
       "options" : [
         {
@@ -22,11 +25,15 @@
         }
       ],
       "file_patterns": ["(?i)drm|crypto"]
-    }
-  ],
-  "imports": [
+    },
     {
-      "path": "frameworks/av/drm/mediadrm/plugins"
+      "name": "CtsMediaDrmFrameworkTestCases",
+      "options" : [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        }
+      ],
+      "file_patterns": ["(?i)drm|crypto"]
     }
   ]
 }

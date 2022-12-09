@@ -47,6 +47,7 @@ import android.graphics.RenderNode;
 import android.hardware.HardwareBuffer;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
@@ -391,8 +392,10 @@ class TaskSnapshotController {
     SurfaceControl.ScreenshotHardwareBuffer createTaskSnapshot(@NonNull Task task,
             TaskSnapshot.Builder builder) {
         Point taskSize = new Point();
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "createTaskSnapshot");
         final SurfaceControl.ScreenshotHardwareBuffer taskSnapshot = createTaskSnapshot(task,
                 mHighResTaskSnapshotScale, builder.getPixelFormat(), taskSize, builder);
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         builder.setTaskSize(taskSize);
         return taskSnapshot;
     }

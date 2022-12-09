@@ -124,9 +124,6 @@
     <string name="accessibility_lock_icon" msgid="661492842417875775">"设备已锁定"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"正在扫描面孔"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"发送"</string>
-    <string name="phone_label" msgid="5715229948920451352">"打开电话"</string>
-    <string name="voice_assist_label" msgid="3725967093735929020">"打开语音助理"</string>
-    <string name="camera_label" msgid="8253821920931143699">"打开相机"</string>
     <string name="cancel" msgid="1089011503403416730">"取消"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"确认"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"重试"</string>
@@ -137,6 +134,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"已确认"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"点按“确认”即可完成"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"已通过面孔识别解锁。按下解锁图标即可继续。"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"已通过面孔识别解锁。点按即可继续。"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"识别出面孔。点按即可继续。"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"识别出面孔。按下解锁图标即可继续。"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"已经过身份验证"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"使用 PIN 码"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"使用图案"</string>
@@ -161,6 +161,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"无法识别人脸。请改用指纹。"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"人脸识别失败"</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"改用指纹"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"蓝牙已连接。"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"电池电量百分比未知。"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"已连接到<xliff:g id="BLUETOOTH">%s</xliff:g>。"</string>
@@ -202,10 +204,7 @@
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"传感器已关闭"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"清除所有通知。"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
-      <item quantity="other">此群组内还有 <xliff:g id="NUMBER_1">%s</xliff:g> 条通知。</item>
-      <item quantity="one">此群组内还有 <xliff:g id="NUMBER_0">%s</xliff:g> 条通知。</item>
-    </plurals>
+    <string name="notification_group_overflow_description" msgid="7176322877233433278">"{count,plural, =1{此群组内还有 # 条通知。}other{此群组内还有 # 条通知。}}"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"屏幕锁定为横屏模式。"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"屏幕锁定为纵向模式。"</string>
     <string name="dessert_case" msgid="9104973640704357717">"甜品盒"</string>
@@ -223,6 +222,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"自动旋转屏幕"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"自动旋转屏幕"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"位置信息"</string>
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"屏保"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"摄像头使用权限"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"麦克风使用权限"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"已允许"</string>
@@ -252,10 +252,7 @@
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"热点"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"正在开启…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"流量节省程序已开启"</string>
-    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
-      <item quantity="other">%d 台设备</item>
-      <item quantity="one">%d 台设备</item>
-    </plurals>
+    <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# 部设备}other{# 部设备}}"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"手电筒"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"相机正在使用中"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"移动数据"</string>
@@ -312,7 +309,13 @@
     <string name="tap_again" msgid="1315420114387908655">"请再点按一次"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"向上滑动即可打开"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"按下解锁图标即可打开"</string>
+    <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"已通过面孔识别解锁。向上滑动即可打开。"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"已通过面孔识别解锁。按下解锁图标即可打开。"</string>
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"已通过面孔识别解锁。点按即可打开。"</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"识别出面孔。点按即可打开。"</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"识别出面孔。按下解锁图标即可打开。"</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"已用面孔解锁"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"已识别出面孔"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"左移"</item>
     <item msgid="5558598599408514296">"下移"</item>
@@ -338,18 +341,19 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在充电 • 将于 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>后充满"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在快速充电 • 将于 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>后充满"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在慢速充电 • 将于 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>后充满"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在基座上充电 • 将于 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>后充满"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在充电 • 将于 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>后充满"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"切换用户"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"下拉菜单"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"此会话中的所有应用和数据都将被删除。"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"访客，欢迎回来！"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"要继续您的会话吗？"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"重新开始"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"是，继续"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"访客模式"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"您当前处于访客模式"</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"如果添加新用户，系统将退出访客模式并删除当前访客会话中的所有应用和数据。"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"已达到用户数上限"</string>
-    <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
-      <item quantity="other">您最多可以添加 <xliff:g id="COUNT">%d</xliff:g> 位用户。</item>
-      <item quantity="one">您只能创建一位用户。</item>
-    </plurals>
+    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{您只能创建一位用户。}other{您最多可添加 # 位用户。}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"是否移除用户？"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"此用户的所有应用和数据均将被删除。"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"移除"</string>
@@ -417,6 +421,8 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"字幕重叠显示"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"启用"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"停用"</string>
+    <string name="sound_settings" msgid="8874581353127418308">"提示音和振动"</string>
+    <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"设置"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"应用已固定"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“返回”和“概览”即可取消固定屏幕。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“返回”和“主屏幕”即可取消固定屏幕。"</string>
@@ -535,14 +541,8 @@
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"提醒我"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"撤消"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"已延后 <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
-      <item quantity="other">%d 小时</item>
-      <item quantity="one">%d 小时</item>
-    </plurals>
-    <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
-      <item quantity="other">%d 分钟</item>
-      <item quantity="one">%d 分钟</item>
-    </plurals>
+    <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# 小时}=2{# 小时}other{# 小时}}"</string>
+    <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# 分钟}other{# 分钟}}"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"省电模式"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g>按钮"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
@@ -598,7 +598,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"开启"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"关闭"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"不可用"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"已停用"</string>
+    <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"了解详情"</string>
     <string name="nav_bar" msgid="4642708685386136807">"导航栏"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"布局"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"其他向左按钮类型"</string>
@@ -671,8 +671,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"手机降温时，部分功能的使用会受限制。\n点按即可了解详情"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"您的手机将自动尝试降温。您依然可以使用您的手机，但是手机运行速度可能会更慢。\n\n手机降温后，就会恢复正常的运行速度。"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"查看处理步骤"</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"拔下充电器"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"为此设备充电时出现问题。这可能是由数据线太热所导致，请拔下电源适配器并采取相应的处理措施。"</string>
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"拔出设备"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"设备的充电接口附近在发热。如果该设备已连接到充电器或 USB 配件，请立即拔掉，并注意充电线也可能会发热。"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"查看处理步骤"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"向左快捷方式"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"向右快捷方式"</string>
@@ -691,7 +691,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"提醒"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"电池"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"屏幕截图"</string>
-    <string name="notification_channel_general" msgid="4384774889645929705">"常规消息"</string>
+    <string name="notification_channel_instant" msgid="7556135423486752680">"免安装应用"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"设置"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"存储空间"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"提示"</string>
     <string name="instant_apps" msgid="8337185853050247304">"免安装应用"</string>
@@ -765,10 +766,7 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"开启/关闭"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"设备控制器"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"选择要添加控制器的应用"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="other">已添加 <xliff:g id="NUMBER_1">%s</xliff:g> 个控件。</item>
-      <item quantity="one">已添加 <xliff:g id="NUMBER_0">%s</xliff:g> 个控件。</item>
-    </plurals>
+    <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{已添加 # 个控件。}other{已添加 # 个控件。}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"已移除"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"已收藏"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"已收藏，位置：<xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -840,7 +838,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"已选择 <xliff:g id="COUNT">%1$d</xliff:g> 个设备"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"（已断开连接）"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"无法切换。点按即可重试。"</string>
-    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"与新设备配对"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"连接设备"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"如需投放此会话，请打开相关应用。"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"未知应用"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"停止投放"</string>
@@ -925,10 +923,7 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"添加图块"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不添加图块"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"选择用户"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> 个应用正在运行</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> 个应用正在运行</item>
-    </plurals>
+    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# 个应用处于活动状态}other{# 个应用处于活动状态}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新信息"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"已开启的应用"</string>
     <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"这些应用正在保持活跃运行状态，即使您没有在使用它们。这可以改进它们的功能，但可能会影响到电池续航时间。"</string>
@@ -955,6 +950,18 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"WLAN 已关闭"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"优先模式"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"闹钟已设置"</string>
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"摄像头已关闭"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"麦克风已关闭"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"摄像头和麦克风已关闭"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# 条通知}other{# 条通知}}"</string>
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>，<xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"正在广播"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"要停止广播“<xliff:g id="APP_NAME">%1$s</xliff:g>”的内容吗？"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"如果广播“<xliff:g id="SWITCHAPP">%1$s</xliff:g>”的内容或更改输出来源，当前的广播就会停止"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"广播“<xliff:g id="SWITCHAPP">%1$s</xliff:g>”的内容"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"更改输出来源"</string>
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"未知"</string>
+    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
+    <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
+    <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
 </resources>

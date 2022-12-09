@@ -328,7 +328,6 @@ public class ZOrderingTests extends WindowTestsBase {
         assertWindowHigher(mImeWindow, imeSystemOverlayTarget);
         assertWindowHigher(mImeWindow, mChildAppWindowAbove);
         assertWindowHigher(mImeWindow, mAppWindow);
-        assertWindowHigher(mImeWindow, mDockedDividerWindow);
 
         // The IME has a higher base layer than the status bar so we may expect it to go
         // above the status bar once they are both in the Non-App layer, as past versions of this
@@ -349,7 +348,6 @@ public class ZOrderingTests extends WindowTestsBase {
 
         assertWindowHigher(mImeWindow, mChildAppWindowAbove);
         assertWindowHigher(mImeWindow, mAppWindow);
-        assertWindowHigher(mImeWindow, mDockedDividerWindow);
         assertWindowHigher(mImeWindow, mStatusBarWindow);
 
         // And, IME dialogs should always have an higher layer than the IME.
@@ -486,77 +484,6 @@ public class ZOrderingTests extends WindowTestsBase {
             assertThat(t.getLayer(childList.get(i).getSurfaceControl()))
                     .isGreaterThan(PRESERVED_SURFACE_LAYER);
         }
-    }
-
-    @Test
-    public void testDockedDividerPosition() {
-        final Task pinnedTask =
-                createTask(mDisplayContent, WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD);
-        final WindowState pinnedWindow =
-                createAppWindow(pinnedTask, ACTIVITY_TYPE_STANDARD, "pinnedWindow");
-
-        final Task belowTask =
-                createTask(mDisplayContent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final WindowState belowTaskWindow =
-                createAppWindow(belowTask, ACTIVITY_TYPE_STANDARD, "belowTaskWindow");
-
-        final Task splitScreenTask1 =
-                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        final WindowState splitWindow1 =
-                createAppWindow(splitScreenTask1, ACTIVITY_TYPE_STANDARD, "splitWindow1");
-        final Task splitScreenTask2 =
-                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        final WindowState splitWindow2 =
-                createAppWindow(splitScreenTask2, ACTIVITY_TYPE_STANDARD, "splitWindow2");
-        splitScreenTask1.setAdjacentTaskFragment(splitScreenTask2, true /* moveTogether */);
-        splitScreenTask2.setAdjacentTaskFragment(splitScreenTask1, true /* moveTogether */);
-
-        final Task aboveTask =
-                createTask(mDisplayContent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final WindowState aboveTaskWindow =
-                createAppWindow(aboveTask, ACTIVITY_TYPE_STANDARD, "aboveTaskWindow");
-
-        mDisplayContent.assignChildLayers(mTransaction);
-
-        assertWindowHigher(splitWindow1, belowTaskWindow);
-        assertWindowHigher(splitWindow2, belowTaskWindow);
-        assertWindowHigher(mDockedDividerWindow, splitWindow1);
-        assertWindowHigher(mDockedDividerWindow, splitWindow2);
-        assertWindowHigher(aboveTaskWindow, mDockedDividerWindow);
-        assertWindowHigher(pinnedWindow, aboveTaskWindow);
-    }
-
-
-    @Test
-    public void testDockedDividerPosition_noAboveTask() {
-        final Task pinnedTask =
-                createTask(mDisplayContent, WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD);
-        final WindowState pinnedWindow =
-                createAppWindow(pinnedTask, ACTIVITY_TYPE_STANDARD, "pinnedWindow");
-
-        final Task belowTask =
-                createTask(mDisplayContent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final WindowState belowTaskWindow =
-                createAppWindow(belowTask, ACTIVITY_TYPE_STANDARD, "belowTaskWindow");
-
-        final Task splitScreenTask1 =
-                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        final WindowState splitWindow1 =
-                createAppWindow(splitScreenTask1, ACTIVITY_TYPE_STANDARD, "splitWindow1");
-        final Task splitScreenTask2 =
-                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        final WindowState splitWindow2 =
-                createAppWindow(splitScreenTask2, ACTIVITY_TYPE_STANDARD, "splitWindow2");
-        splitScreenTask1.setAdjacentTaskFragment(splitScreenTask2, true /* moveTogether */);
-        splitScreenTask2.setAdjacentTaskFragment(splitScreenTask1, true /* moveTogether */);
-
-        mDisplayContent.assignChildLayers(mTransaction);
-
-        assertWindowHigher(splitWindow1, belowTaskWindow);
-        assertWindowHigher(splitWindow2, belowTaskWindow);
-        assertWindowHigher(mDockedDividerWindow, splitWindow1);
-        assertWindowHigher(mDockedDividerWindow, splitWindow2);
-        assertWindowHigher(pinnedWindow, mDockedDividerWindow);
     }
 
     @Test

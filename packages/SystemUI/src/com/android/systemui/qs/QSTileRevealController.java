@@ -17,7 +17,14 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-/** */
+/**
+ * Plays a animation to reveal newly added QS tiles.
+ *
+ * The aniumation is played when the user fully opens Quick Settings, and is only shown for
+ * <li> tiles added automatically (not through user customization)
+ * <li> tiles not have been revealed before (memoized via {@code QS_TILE_SPECS_REVEALED}
+ * preference)
+ */
 public class QSTileRevealController {
     private static final long QS_REVEAL_TILES_DELAY = 500L;
 
@@ -39,6 +46,7 @@ public class QSTileRevealController {
             });
         }
     };
+
     QSTileRevealController(Context context, QSPanelController qsPanelController,
             PagedTileLayout pagedTileLayout, QSCustomizerController qsCustomizerController) {
         mContext = context;

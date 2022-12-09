@@ -486,14 +486,6 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return WindowConfiguration.inMultiWindowMode(windowingMode);
     }
 
-    /**
-     * Returns true if this container supports split-screen multi-window and can be put in
-     * split-screen based on its current state.
-     */
-    public boolean supportsSplitScreenWindowingMode() {
-        return mFullConfiguration.windowConfiguration.supportSplitScreenWindowingMode();
-    }
-
     public boolean inPinnedWindowingMode() {
         return mFullConfiguration.windowConfiguration.getWindowingMode() == WINDOWING_MODE_PINNED;
     }

@@ -24,6 +24,7 @@ import android.app.Notification;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.view.accessibility.AccessibilityManager;
@@ -31,9 +32,9 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
@@ -79,11 +80,15 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         }
     }
 
-    public HeadsUpManager(@NonNull final Context context, HeadsUpManagerLogger logger) {
-        super(logger);
+    public HeadsUpManager(@NonNull final Context context,
+            HeadsUpManagerLogger logger,
+            @Main Handler handler,
+            AccessibilityManagerWrapper accessibilityManagerWrapper,
+            UiEventLogger uiEventLogger) {
+        super(logger, handler);
         mContext = context;
-        mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
-        mUiEventLogger = Dependency.get(UiEventLogger.class);
+        mAccessibilityMgr = accessibilityManagerWrapper;
+        mUiEventLogger = uiEventLogger;
         Resources resources = context.getResources();
         mMinimumDisplayTime = resources.getInteger(R.integer.heads_up_notification_minimum_time);
         mAutoDismissNotificationDecay = resources.getInteger(R.integer.heads_up_notification_decay);
@@ -142,7 +147,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
 
     protected void setEntryPinned(
             @NonNull HeadsUpManager.HeadsUpEntry headsUpEntry, boolean isPinned) {
-        mLogger.logSetEntryPinned(headsUpEntry.mEntry.getKey(), isPinned);
+        mLogger.logSetEntryPinned(headsUpEntry.mEntry, isPinned);
         NotificationEntry entry = headsUpEntry.mEntry;
         if (entry.isRowPinned() != isPinned) {
             entry.setRowPinned(isPinned);
@@ -183,7 +188,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         entry.setHeadsUp(false);
         setEntryPinned((HeadsUpEntry) alertEntry, false /* isPinned */);
         EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 0 /* visible */);
-        mLogger.logNotificationActuallyRemoved(entry.getKey());
+        mLogger.logNotificationActuallyRemoved(entry);
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpStateChanged(entry, false);
         }

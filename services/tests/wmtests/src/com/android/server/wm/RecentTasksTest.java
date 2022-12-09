@@ -1229,7 +1229,6 @@ public class RecentTasksTest extends WindowTestsBase {
         RecentTaskInfo info = mRecentTasks.createRecentTaskInfo(task, true);
 
         assertTrue(info.supportsMultiWindow);
-        assertTrue(info.supportsSplitScreenMultiWindow);
 
         // The task can be put in split screen even if it is not attached now.
         task.removeImmediately();
@@ -1237,7 +1236,6 @@ public class RecentTasksTest extends WindowTestsBase {
         info = mRecentTasks.createRecentTaskInfo(task, true);
 
         assertTrue(info.supportsMultiWindow);
-        assertTrue(info.supportsSplitScreenMultiWindow);
 
         // Test non-resizable.
         // The non-resizable task cannot be put in split screen because of the config.
@@ -1247,7 +1245,6 @@ public class RecentTasksTest extends WindowTestsBase {
         info = mRecentTasks.createRecentTaskInfo(task, true);
 
         assertFalse(info.supportsMultiWindow);
-        assertFalse(info.supportsSplitScreenMultiWindow);
 
         // Even if it is not attached, the non-resizable task can be put in split screen as long as
         // the device supports it.
@@ -1256,8 +1253,6 @@ public class RecentTasksTest extends WindowTestsBase {
         info = mRecentTasks.createRecentTaskInfo(task, true);
 
         assertTrue(info.supportsMultiWindow);
-        assertTrue(info.supportsSplitScreenMultiWindow);
-
     }
 
     private TaskSnapshot createSnapshot(Point taskSize, Point bufferSize) {
@@ -1337,7 +1332,7 @@ public class RecentTasksTest extends WindowTestsBase {
         });
         assertSecurityException(expectCallable,
                 () -> mAtm.startActivityFromRecents(0, new Bundle()));
-        assertSecurityException(expectCallable, () -> mAtm.getTaskSnapshot(0, true));
+        assertSecurityException(expectCallable, () -> mAtm.getTaskSnapshot(0, true, false));
         assertSecurityException(expectCallable, () -> mAtm.registerTaskStackListener(null));
         assertSecurityException(expectCallable,
                 () -> mAtm.unregisterTaskStackListener(null));
@@ -1536,10 +1531,10 @@ public class RecentTasksTest extends WindowTestsBase {
         public boolean mLastAllowed;
 
         @Override
-        void getTasks(int maxNum, List<RunningTaskInfo> list, int flags,
-                RootWindowContainer root, int callingUid, ArraySet<Integer> profileIds) {
+        void getTasks(int maxNum, List<RunningTaskInfo> list, int flags, RecentTasks recentTasks,
+                WindowContainer root, int callingUid, ArraySet<Integer> profileIds) {
             mLastAllowed = (flags & FLAG_ALLOWED) == FLAG_ALLOWED;
-            super.getTasks(maxNum, list, flags, root, callingUid, profileIds);
+            super.getTasks(maxNum, list, flags, recentTasks, root, callingUid, profileIds);
         }
     }
 }

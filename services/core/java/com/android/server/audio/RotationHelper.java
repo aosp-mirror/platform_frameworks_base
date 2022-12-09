@@ -21,12 +21,13 @@ import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
-import android.media.AudioSystem;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
+
+import java.util.function.Consumer;
 
 /**
  * Class to handle device rotation events for AudioService, and forward device rotation
@@ -53,6 +54,10 @@ class RotationHelper {
 
     private static AudioDisplayListener sDisplayListener;
     private static FoldStateListener sFoldStateListener;
+    /** callback to send rotation updates to AudioSystem */
+    private static Consumer<String> sRotationUpdateCb;
+    /** callback to send folded state updates to AudioSystem */
+    private static Consumer<String> sFoldUpdateCb;
 
     private static final Object sRotationLock = new Object();
     private static final Object sFoldStateLock = new Object();
@@ -67,13 +72,16 @@ class RotationHelper {
      * - sDisplayListener != null
      * - sContext != null
      */
-    static void init(Context context, Handler handler) {
+    static void init(Context context, Handler handler,
+            Consumer<String> rotationUpdateCb, Consumer<String> foldUpdateCb) {
         if (context == null) {
             throw new IllegalArgumentException("Invalid null context");
         }
         sContext = context;
         sHandler = handler;
         sDisplayListener = new AudioDisplayListener();
+        sRotationUpdateCb = rotationUpdateCb;
+        sFoldUpdateCb = foldUpdateCb;
         enable();
     }
 
@@ -115,21 +123,26 @@ class RotationHelper {
         if (DEBUG_ROTATION) {
             Log.i(TAG, "publishing device rotation =" + rotation + " (x90deg)");
         }
+        String rotationParam;
         switch (rotation) {
             case Surface.ROTATION_0:
-                AudioSystem.setParameters("rotation=0");
+                rotationParam = "rotation=0";
                 break;
             case Surface.ROTATION_90:
-                AudioSystem.setParameters("rotation=90");
+                rotationParam = "rotation=90";
                 break;
             case Surface.ROTATION_180:
-                AudioSystem.setParameters("rotation=180");
+                rotationParam = "rotation=180";
                 break;
             case Surface.ROTATION_270:
-                AudioSystem.setParameters("rotation=270");
+                rotationParam = "rotation=270";
                 break;
             default:
                 Log.e(TAG, "Unknown device rotation");
+                rotationParam = null;
+        }
+        if (rotationParam != null) {
+            sRotationUpdateCb.accept(rotationParam);
         }
     }
 
@@ -140,11 +153,13 @@ class RotationHelper {
         synchronized (sFoldStateLock) {
             if (sDeviceFold != newFolded) {
                 sDeviceFold = newFolded;
+                String foldParam;
                 if (newFolded) {
-                    AudioSystem.setParameters("device_folded=on");
+                    foldParam = "device_folded=on";
                 } else {
-                    AudioSystem.setParameters("device_folded=off");
+                    foldParam = "device_folded=off";
                 }
+                sFoldUpdateCb.accept(foldParam);
             }
         }
     }

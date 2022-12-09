@@ -53,8 +53,11 @@ import javax.inject.Inject;
 
 /**
  * Manages custom clock faces for AOD and lock screen.
+ *
+ * @deprecated Migrate to ClockRegistry
  */
 @SysUISingleton
+@Deprecated
 public final class ClockManager {
 
     private static final String TAG = "ClockOptsProvider";

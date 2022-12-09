@@ -31,6 +31,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.statusbar.policy.UserSwitcherController
+import com.android.systemui.user.data.source.UserRecord
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -39,8 +40,8 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -52,7 +53,6 @@ class UserDetailViewAdapterTest : SysuiTestCase() {
     @Mock private lateinit var mUserDetailItemView: UserDetailItemView
     @Mock private lateinit var mOtherView: View
     @Mock private lateinit var mInflatedUserDetailItemView: UserDetailItemView
-    @Mock private lateinit var mUserInfo: UserInfo
     @Mock private lateinit var mLayoutInflater: LayoutInflater
     private var falsingManagerFake: FalsingManagerFake = FalsingManagerFake()
     private lateinit var adapter: UserDetailView.Adapter
@@ -140,13 +140,14 @@ class UserDetailViewAdapterTest : SysuiTestCase() {
     }
 
     private fun createUserRecord(current: Boolean, guest: Boolean) =
-            UserSwitcherController.UserRecord(
-                    mUserInfo,
-                    mPicture,
-                    guest,
-                    current,
-                    false /* isAddUser */,
-                    false /* isRestricted */,
-                    true /* isSwitchToEnabled */,
-                    false /* isAddSupervisedUser */)
+        UserRecord(
+            UserInfo(0 /* id */, "name", 0 /* flags */),
+            mPicture,
+            guest,
+            current,
+            false /* isAddUser */,
+            false /* isRestricted */,
+            true /* isSwitchToEnabled */,
+            false /* isAddSupervisedUser */
+        )
 }

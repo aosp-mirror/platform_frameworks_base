@@ -816,10 +816,18 @@ public class DataManager {
     }
 
     private boolean isCachedRecentConversation(ConversationInfo conversationInfo) {
+        return isEligibleForCleanUp(conversationInfo)
+                && conversationInfo.getLastEventTimestamp() > 0L;
+    }
+
+    /**
+     * Conversations that are cached and not customized are eligible for clean-up, even if they
+     * don't have an associated notification event with them.
+     */
+    private boolean isEligibleForCleanUp(ConversationInfo conversationInfo) {
         return conversationInfo.isShortcutCachedForNotification()
                 && Objects.equals(conversationInfo.getNotificationChannelId(),
-                conversationInfo.getParentNotificationChannelId())
-                && conversationInfo.getLastEventTimestamp() > 0L;
+                conversationInfo.getParentNotificationChannelId());
     }
 
     private boolean hasActiveNotifications(String packageName, @UserIdInt int userId,
@@ -842,14 +850,14 @@ public class DataManager {
         }
         // pair of <package name, conversation info>
         List<Pair<String, ConversationInfo>> cachedConvos = new ArrayList<>();
-        userData.forAllPackages(packageData ->
+        userData.forAllPackages(packageData -> {
                 packageData.forAllConversations(conversationInfo -> {
-                    if (isCachedRecentConversation(conversationInfo)) {
+                    if (isEligibleForCleanUp(conversationInfo)) {
                         cachedConvos.add(
                                 Pair.create(packageData.getPackageName(), conversationInfo));
                     }
-                })
-        );
+                });
+        });
         if (cachedConvos.size() <= targetCachedCount) {
             return;
         }
@@ -858,7 +866,9 @@ public class DataManager {
         PriorityQueue<Pair<String, ConversationInfo>> maxHeap = new PriorityQueue<>(
                 numToUncache + 1,
                 Comparator.comparingLong((Pair<String, ConversationInfo> pair) ->
-                        pair.second.getLastEventTimestamp()).reversed());
+                        Math.max(
+                            pair.second.getLastEventTimestamp(),
+                            pair.second.getCreationTimestamp())).reversed());
         for (Pair<String, ConversationInfo> cached : cachedConvos) {
             if (hasActiveNotifications(cached.first, userId, cached.second.getShortcutId())) {
                 continue;
@@ -893,7 +903,7 @@ public class DataManager {
         }
         ConversationInfo.Builder builder = oldConversationInfo != null
                 ? new ConversationInfo.Builder(oldConversationInfo)
-                : new ConversationInfo.Builder();
+                : new ConversationInfo.Builder().setCreationTimestamp(System.currentTimeMillis());
 
         builder.setShortcutId(shortcutInfo.getId());
         builder.setLocusId(shortcutInfo.getLocusId());
@@ -1326,7 +1336,8 @@ public class DataManager {
         }
     }
 
-    private void updateConversationStoreThenNotifyListeners(ConversationStore cs,
+    @VisibleForTesting
+    void updateConversationStoreThenNotifyListeners(ConversationStore cs,
             ConversationInfo modifiedConv,
             String packageName, int userId) {
         cs.addOrUpdate(modifiedConv);

@@ -29,5 +29,5 @@ public interface CollectionReadyForBuildListener {
      * Called by the NotifCollection to indicate that something in the collection has changed and
      * that the list builder should regenerate the list.
      */
-    void onBuildList(Collection<NotificationEntry> entries);
+    void onBuildList(Collection<NotificationEntry> entries, String reason);
 }

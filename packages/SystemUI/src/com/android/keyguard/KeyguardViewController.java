@@ -23,10 +23,10 @@ import android.view.ViewRootImpl;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 
 /**

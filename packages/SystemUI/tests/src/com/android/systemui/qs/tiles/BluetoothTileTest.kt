@@ -10,6 +10,7 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
@@ -18,6 +19,7 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSTileHost
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.BluetoothController
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -25,6 +27,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -84,6 +87,53 @@ class BluetoothTileTest : SysuiTestCase() {
         assertThat(tile.restrictionChecked).isEqualTo(UserManager.DISALLOW_BLUETOOTH)
     }
 
+    @Test
+    fun testIcon_whenDisabled_isOffState() {
+        val state = QSTile.BooleanState()
+        disableBluetooth()
+
+        tile.handleUpdateState(state, /* arg= */ null)
+
+        assertThat(state.icon)
+                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_bluetooth_icon_off))
+    }
+
+    @Test
+    fun testIcon_whenDisconnected_isOffState() {
+        val state = QSTile.BooleanState()
+        enableBluetooth()
+        setBluetoothDisconnected()
+
+        tile.handleUpdateState(state, /* arg= */ null)
+
+        assertThat(state.icon)
+                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_bluetooth_icon_off))
+    }
+
+    @Test
+    fun testIcon_whenConnected_isOnState() {
+        val state = QSTile.BooleanState()
+        enableBluetooth()
+        setBluetoothConnected()
+
+        tile.handleUpdateState(state, /* arg= */ null)
+
+        assertThat(state.icon)
+                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_bluetooth_icon_on))
+    }
+
+    @Test
+    fun testIcon_whenConnecting_isSearchState() {
+        val state = QSTile.BooleanState()
+        enableBluetooth()
+        setBluetoothConnecting()
+
+        tile.handleUpdateState(state, /* arg= */ null)
+
+        assertThat(state.icon)
+                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_bluetooth_icon_search))
+    }
+
     private class FakeBluetoothTile(
         qsTileHost: QSTileHost,
         backgroundLooper: Looper,
@@ -113,5 +163,28 @@ class BluetoothTileTest : SysuiTestCase() {
         ) {
             restrictionChecked = userRestriction
         }
+    }
+
+    fun enableBluetooth() {
+        `when`(bluetoothController.isBluetoothEnabled).thenReturn(true)
+    }
+
+    fun disableBluetooth() {
+        `when`(bluetoothController.isBluetoothEnabled).thenReturn(false)
+    }
+
+    fun setBluetoothDisconnected() {
+        `when`(bluetoothController.isBluetoothConnecting).thenReturn(false)
+        `when`(bluetoothController.isBluetoothConnected).thenReturn(false)
+    }
+
+    fun setBluetoothConnected() {
+        `when`(bluetoothController.isBluetoothConnecting).thenReturn(false)
+        `when`(bluetoothController.isBluetoothConnected).thenReturn(true)
+    }
+
+    fun setBluetoothConnecting() {
+        `when`(bluetoothController.isBluetoothConnected).thenReturn(false)
+        `when`(bluetoothController.isBluetoothConnecting).thenReturn(true)
     }
 }

@@ -27,8 +27,6 @@ import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
-import com.android.server.policy.WindowManagerPolicy;
-
 final class HandwritingEventReceiverSurface {
 
     public static final String TAG = HandwritingEventReceiverSurface.class.getSimpleName();
@@ -38,8 +36,7 @@ final class HandwritingEventReceiverSurface {
     // is above gesture monitors, then edge-back and swipe-up gestures won't work when this surface
     // is intercepting.
     // TODO(b/217538817): Specify the ordering in WM by usage.
-    private static final int HANDWRITING_SURFACE_LAYER =
-            WindowManagerPolicy.INPUT_DISPLAY_OVERLAY_LAYER;
+    private static final int HANDWRITING_SURFACE_LAYER = Integer.MAX_VALUE - 1;
 
     private final InputWindowHandle mWindowHandle;
     private final InputChannel mClientChannel;

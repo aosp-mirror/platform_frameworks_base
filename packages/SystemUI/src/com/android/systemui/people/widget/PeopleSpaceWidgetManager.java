@@ -289,7 +289,7 @@ public class PeopleSpaceWidgetManager {
             if (DEBUG) Log.d(TAG, "Updating widget: " + appWidgetId);
             PeopleSpaceTile tile = getTileForExistingWidget(appWidgetId);
             if (tile == null) {
-                Log.e(TAG, "Matching conversation not found for shortcut ID");
+                Log.e(TAG, "Matching conversation not found for widget " + appWidgetId);
             }
             updateAppWidgetOptionsAndView(appWidgetId, tile);
             widgetIdToTile.put(appWidgetId, tile);
@@ -308,7 +308,7 @@ public class PeopleSpaceWidgetManager {
         if (DEBUG) Log.d(TAG, "Widget: " + appWidgetId + " for: " + key.toString());
 
         if (!PeopleTileKey.isValid(key)) {
-            Log.e(TAG, "Cannot update invalid widget");
+            Log.e(TAG, "Invalid tile key updating widget " + appWidgetId);
             return;
         }
         RemoteViews views = PeopleTileViewHelper.createRemoteViews(mContext, tile, appWidgetId,
@@ -330,7 +330,7 @@ public class PeopleSpaceWidgetManager {
     /** Updates tile in app widget options and the current view. */
     public void updateAppWidgetOptionsAndView(int appWidgetId, PeopleSpaceTile tile) {
         if (tile == null) {
-            if (DEBUG) Log.w(TAG, "Storing null tile");
+            Log.w(TAG, "Storing null tile for widget " + appWidgetId);
         }
         synchronized (mTiles) {
             mTiles.put(appWidgetId, tile);
@@ -348,7 +348,7 @@ public class PeopleSpaceWidgetManager {
         try {
             return getTileForExistingWidgetThrowing(appWidgetId);
         } catch (Exception e) {
-            Log.e(TAG, "failed to retrieve tile for widget ID " + appWidgetId, e);
+            Log.e(TAG, "failed to retrieve tile for existing widget " + appWidgetId, e);
             return null;
         }
     }
@@ -388,7 +388,7 @@ public class PeopleSpaceWidgetManager {
             boolean supplementFromStorage) throws
             PackageManager.NameNotFoundException {
         if (!PeopleTileKey.isValid(key)) {
-            Log.e(TAG, "PeopleTileKey invalid: " + key.toString());
+            Log.e(TAG, "Invalid tile key finding tile for existing widget " + appWidgetId);
             return null;
         }
 
@@ -423,7 +423,7 @@ public class PeopleSpaceWidgetManager {
             // Add current state.
             return getTileWithCurrentState(storedTile.build(), ACTION_BOOT_COMPLETED);
         } catch (RemoteException e) {
-            Log.e(TAG, "getTileFromPersistentStorage failing", e);
+            Log.e(TAG, "getTileFromPersistentStorage failing for widget " + appWidgetId, e);
             return null;
         }
     }
@@ -591,10 +591,7 @@ public class PeopleSpaceWidgetManager {
         if (DEBUG) Log.d(TAG, "Augmenting tile for existing widget: " + widgetId);
         PeopleSpaceTile tile = getTileForExistingWidget(widgetId);
         if (tile == null) {
-            if (DEBUG) {
-                Log.w(TAG, "Widget: " + widgetId
-                        + ". Null tile for existing widget, skipping update.");
-            }
+            Log.w(TAG, "Null tile for existing widget " + widgetId + ", skipping update.");
             return Optional.empty();
         }
         String contactUriString = mSharedPrefs.getString(String.valueOf(widgetId), null);
@@ -816,7 +813,7 @@ public class PeopleSpaceWidgetManager {
             tile = getTileFromPersistentStorage(key, appWidgetId,  /* supplementFromStorage= */
                     false);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Cannot add widget since app was uninstalled");
+            Log.e(TAG, "Cannot add widget " + appWidgetId + " since app was uninstalled");
             return;
         }
         if (tile == null) {
@@ -851,7 +848,7 @@ public class PeopleSpaceWidgetManager {
                     Collections.singletonList(tile.getId()),
                     tile.getUserHandle(), LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS);
         } catch (Exception e) {
-            Log.w(TAG, "failed to cache shortcut", e);
+            Log.w(TAG, "failed to cache shortcut for widget " + appWidgetId, e);
         }
         PeopleSpaceTile finalTile = tile;
         mBgExecutor.execute(
@@ -862,7 +859,7 @@ public class PeopleSpaceWidgetManager {
     public void registerConversationListenerIfNeeded(int widgetId, PeopleTileKey key) {
         // Retrieve storage needed for registration.
         if (!PeopleTileKey.isValid(key)) {
-            if (DEBUG) Log.w(TAG, "Could not register listener for widget: " + widgetId);
+            Log.w(TAG, "Invalid tile key registering listener for widget " + widgetId);
             return;
         }
         TileConversationListener newListener = new TileConversationListener();
@@ -911,7 +908,7 @@ public class PeopleSpaceWidgetManager {
                         widgetSp.getInt(USER_ID, INVALID_USER_ID),
                         widgetSp.getString(PACKAGE_NAME, null));
                 if (!PeopleTileKey.isValid(key)) {
-                    if (DEBUG) Log.e(TAG, "Could not delete " + widgetId);
+                    Log.e(TAG, "Invalid tile key trying to remove widget " + widgetId);
                     return;
                 }
                 storedWidgetIdsForKey = new HashSet<>(
@@ -1083,7 +1080,8 @@ public class PeopleSpaceWidgetManager {
                 synchronized (mLock) {
                     existingTile = getTileForExistingWidgetThrowing(appWidgetId);
                     if (existingTile == null) {
-                        Log.e(TAG, "Matching conversation not found for shortcut ID");
+                        Log.e(TAG, "Matching conversation not found for widget "
+                                + appWidgetId);
                         continue;
                     }
                     updatedTile = getTileWithCurrentState(existingTile, entryPoint);
@@ -1091,7 +1089,7 @@ public class PeopleSpaceWidgetManager {
                 }
             } catch (PackageManager.NameNotFoundException e) {
                 // Delete data for uninstalled widgets.
-                Log.e(TAG, "package no longer found for tile", e);
+                Log.e(TAG, "Package no longer found for widget " + appWidgetId, e);
                 JobScheduler jobScheduler = mContext.getSystemService(JobScheduler.class);
                 if (jobScheduler != null
                         && jobScheduler.getPendingJob(PeopleBackupFollowUpJob.JOB_ID) != null) {

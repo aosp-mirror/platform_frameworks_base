@@ -83,7 +83,9 @@ public class PipUtils {
     public static boolean remoteActionsMatch(RemoteAction action1, RemoteAction action2) {
         if (action1 == action2) return true;
         if (action1 == null || action2 == null) return false;
-        return Objects.equals(action1.getTitle(), action2.getTitle())
+        return action1.isEnabled() == action2.isEnabled()
+                && action1.shouldShowIcon() == action2.shouldShowIcon()
+                && Objects.equals(action1.getTitle(), action2.getTitle())
                 && Objects.equals(action1.getContentDescription(), action2.getContentDescription())
                 && Objects.equals(action1.getActionIntent(), action2.getActionIntent());
     }
@@ -116,7 +118,7 @@ public class PipUtils {
         if (taskId <= 0) return null;
         try {
             return ActivityTaskManager.getService().getTaskSnapshot(
-                    taskId, isLowResolution);
+                    taskId, isLowResolution, false /* takeSnapshotIfNeeded */);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get task snapshot, taskId=" + taskId, e);
             return null;

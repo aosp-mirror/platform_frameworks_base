@@ -141,4 +141,5 @@ interface ILocationManager
     // used by gts tests to verify whitelists
     String[] getBackgroundThrottlingWhitelist();
     PackageTagsList getIgnoreSettingsAllowlist();
+    PackageTagsList getAdasAllowlist();
 }

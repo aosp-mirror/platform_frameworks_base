@@ -17,11 +17,19 @@
 package com.android.systemui.navigationbar;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS;
 
 import static com.android.systemui.accessibility.SystemActions.SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON;
 import static com.android.systemui.accessibility.SystemActions.SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON_CHOOSER;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -40,6 +48,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 
+import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
@@ -50,6 +59,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.io.PrintWriter;
@@ -80,6 +90,7 @@ public final class NavBarHelper implements
     private final AccessibilityManager mAccessibilityManager;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
+    private final KeyguardViewController mKeyguardViewController;
     private final UserTracker mUserTracker;
     private final SystemActions mSystemActions;
     private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
@@ -114,6 +125,7 @@ public final class NavBarHelper implements
             OverviewProxyService overviewProxyService,
             Lazy<AssistManager> assistManagerLazy,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            KeyguardViewController keyguardViewController,
             NavigationModeController navigationModeController,
             UserTracker userTracker,
             DumpManager dumpManager) {
@@ -122,6 +134,7 @@ public final class NavBarHelper implements
         mAccessibilityManager = accessibilityManager;
         mAssistManagerLazy = assistManagerLazy;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
+        mKeyguardViewController = keyguardViewController;
         mUserTracker = userTracker;
         mSystemActions = systemActions;
         accessibilityManager.addAccessibilityServicesStateChangeListener(this);
@@ -308,8 +321,12 @@ public final class NavBarHelper implements
      * {@link InputMethodService} and the keyguard states.
      */
     public boolean isImeShown(int vis) {
-        View shadeWindowView = mCentralSurfacesOptionalLazy.get().get().getNotificationShadeWindowView();
-        boolean isKeyguardShowing = mCentralSurfacesOptionalLazy.get().get().isKeyguardShowing();
+        View shadeWindowView = null;
+        if (mCentralSurfacesOptionalLazy.get().isPresent()) {
+            shadeWindowView =
+                    mCentralSurfacesOptionalLazy.get().get().getNotificationShadeWindowView();
+        }
+        boolean isKeyguardShowing = mKeyguardViewController.isShowing();
         boolean imeVisibleOnShade = shadeWindowView != null && shadeWindowView.isAttachedToWindow()
                 && shadeWindowView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
         return imeVisibleOnShade
@@ -323,6 +340,23 @@ public final class NavBarHelper implements
     public interface NavbarTaskbarStateUpdater {
         void updateAccessibilityServicesState();
         void updateAssistantAvailable(boolean available);
+    }
+
+    static @TransitionMode int transitionMode(boolean isTransient, int appearance) {
+        final int lightsOutOpaque = APPEARANCE_LOW_PROFILE_BARS | APPEARANCE_OPAQUE_NAVIGATION_BARS;
+        if (isTransient) {
+            return MODE_SEMI_TRANSPARENT;
+        } else if ((appearance & lightsOutOpaque) == lightsOutOpaque) {
+            return MODE_LIGHTS_OUT;
+        } else if ((appearance & APPEARANCE_LOW_PROFILE_BARS) != 0) {
+            return MODE_LIGHTS_OUT_TRANSPARENT;
+        } else if ((appearance & APPEARANCE_OPAQUE_NAVIGATION_BARS) != 0) {
+            return MODE_OPAQUE;
+        } else if ((appearance & APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS) != 0) {
+            return MODE_SEMI_TRANSPARENT;
+        } else {
+            return MODE_TRANSPARENT;
+        }
     }
 
     @Override

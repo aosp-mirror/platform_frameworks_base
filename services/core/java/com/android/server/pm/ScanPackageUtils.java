@@ -427,8 +427,7 @@ final class ScanPackageUtils {
         pkgSetting.setLastModifiedTime(scanFileTime);
         // TODO(b/135203078): Remove, move to constructor
         pkgSetting.setPkg(parsedPackage)
-                .setFlags(PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting))
-                .setPrivateFlags(
+                .setPkgFlags(PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting),
                         PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting));
         if (parsedPackage.getLongVersionCode() != pkgSetting.getVersionCode()) {
             pkgSetting.setLongVersionCode(parsedPackage.getLongVersionCode());

@@ -57,8 +57,8 @@ class RunningTasks {
     private RecentTasks mRecentTasks;
     private boolean mKeepIntentExtra;
 
-    void getTasks(int maxNum, List<RunningTaskInfo> list, int flags,
-            RootWindowContainer root, int callingUid, ArraySet<Integer> profileIds) {
+    void getTasks(int maxNum, List<RunningTaskInfo> list, int flags, RecentTasks recentTasks,
+            WindowContainer root, int callingUid, ArraySet<Integer> profileIds) {
         // Return early if there are no tasks to fetch
         if (maxNum <= 0) {
             return;
@@ -71,7 +71,7 @@ class RunningTasks {
         mAllowed = (flags & FLAG_ALLOWED) == FLAG_ALLOWED;
         mFilterOnlyVisibleRecents =
                 (flags & FLAG_FILTER_ONLY_VISIBLE_RECENTS) == FLAG_FILTER_ONLY_VISIBLE_RECENTS;
-        mRecentTasks = root.mService.getRecentTasks();
+        mRecentTasks = recentTasks;
         mKeepIntentExtra = (flags & FLAG_KEEP_INTENT_EXTRA) == FLAG_KEEP_INTENT_EXTRA;
 
         if (root instanceof RootWindowContainer) {

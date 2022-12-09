@@ -19,12 +19,10 @@ package com.android.server.wm;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.hardware.input.InputManager.INJECT_INPUT_EVENT_MODE_ASYNC;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
@@ -41,7 +39,6 @@ import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
-import android.hardware.input.InputManager;
 import android.os.Binder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
@@ -54,26 +51,17 @@ import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
-import android.view.InputDevice;
 import android.view.InputWindowHandle;
-import android.view.KeyCharacterMap;
-import android.view.KeyEvent;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.WindowInsets.Type;
-import android.window.BackEvent;
-import android.window.IOnBackInvokedCallback;
-import android.window.OnBackInvokedCallbackInfo;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.inputmethod.SoftInputShowHideReason;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.internal.util.LatencyTracker;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
@@ -99,11 +87,6 @@ import java.util.stream.Collectors;
 public class RecentsAnimationController implements DeathRecipient {
     private static final String TAG = RecentsAnimationController.class.getSimpleName();
     private static final long FAILSAFE_DELAY = 1000;
-    /**
-     * If the recents animation is canceled before the delay since the window drawn, do not log the
-     * action because the duration is too small that may be just a mistouch.
-     */
-    private static final long LATENCY_TRACKER_LOG_DELAY_MS = 300;
 
     // Constant for a yet-to-be-calculated {@link RemoteAnimationTarget#Mode} state
     private static final int MODE_UNKNOWN = -1;
@@ -133,7 +116,7 @@ public class RecentsAnimationController implements DeathRecipient {
     private boolean mWillFinishToHome = false;
     private final Runnable mFailsafeRunnable = this::onFailsafe;
 
-    // The recents component app token that is shown behind the visibile tasks
+    // The recents component app token that is shown behind the visible tasks
     private ActivityRecord mTargetActivityRecord;
     private DisplayContent mDisplayContent;
     private int mTargetActivityType;
@@ -144,7 +127,7 @@ public class RecentsAnimationController implements DeathRecipient {
     private boolean mPendingStart = true;
 
     // Set when the animation has been canceled
-    private volatile boolean mCanceled;
+    private boolean mCanceled;
 
     // Whether or not the input consumer is enabled. The input consumer must be both registered and
     // enabled for it to start intercepting touch events.
@@ -200,46 +183,6 @@ public class RecentsAnimationController implements DeathRecipient {
                 mCancelOnNextTransitionStart = false;
                 cancelAnimationWithScreenshot(mCancelDeferredWithScreenshot);
             }
-        }
-    };
-
-    /**
-     * Back invoked callback for legacy recents transition with the new back dispatch system.
-     */
-    final IOnBackInvokedCallback mBackCallback = new IOnBackInvokedCallback.Stub() {
-        @Override
-        public void onBackStarted() {
-            // Do nothing
-        }
-
-        @Override
-        public void onBackProgressed(BackEvent backEvent) {
-            // Do nothing
-        }
-
-        @Override
-        public void onBackCancelled() {
-            // Do nothing
-        }
-
-        @Override
-        public void onBackInvoked() {
-            sendBackEvent(KeyEvent.ACTION_DOWN);
-            sendBackEvent(KeyEvent.ACTION_UP);
-        }
-
-        private void sendBackEvent(int action) {
-            if (mTargetActivityRecord == null) {
-                return;
-            }
-            long when = SystemClock.uptimeMillis();
-            final KeyEvent ev = new KeyEvent(when, when, action,
-                    KeyEvent.KEYCODE_BACK, 0 /* repeat */, 0 /* metaState */,
-                    KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /* scancode */,
-                    KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
-                    InputDevice.SOURCE_KEYBOARD);
-            ev.setDisplayId(mTargetActivityRecord.getDisplayId());
-            InputManager.getInstance().injectInputEvent(ev, INJECT_INPUT_EVENT_MODE_ASYNC);
         }
     };
 
@@ -333,26 +276,6 @@ public class RecentsAnimationController implements DeathRecipient {
                         }
                     }
                     InputMethodManagerInternal.get().maybeFinishStylusHandwriting();
-                    if (!behindSystemBars) {
-                        // Hiding IME if IME window is not attached to app.
-                        // Since some windowing mode is not proper to snapshot Task with IME window
-                        // while the app transitioning to the next task (e.g. split-screen mode)
-                        if (!mDisplayContent.isImeAttachedToApp()) {
-                            final InputMethodManagerInternal inputMethodManagerInternal =
-                                    LocalServices.getService(InputMethodManagerInternal.class);
-                            if (inputMethodManagerInternal != null) {
-                                inputMethodManagerInternal.hideCurrentInputMethod(
-                                        SoftInputShowHideReason.HIDE_RECENTS_ANIMATION);
-                            }
-                        } else {
-                            // Disable IME icon explicitly when IME attached to the app in case
-                            // IME icon might flickering while swiping to the next app task still
-                            // in animating before the next app window focused, or IME icon
-                            // persists on the bottom when swiping the task to recents.
-                            InputMethodManagerInternal.get().updateImeWindowStatus(
-                                    true /* disableImeIcon */);
-                        }
-                    }
                     mService.mWindowPlacerLocked.requestTraversal();
                 }
             } finally {
@@ -379,10 +302,6 @@ public class RecentsAnimationController implements DeathRecipient {
                 Binder.restoreCallingIdentity(token);
             }
         }
-
-        // TODO(b/166736352): Remove this method without the need to expose to launcher.
-        @Override
-        public void hideCurrentInputMethod() { }
 
         @Override
         public void setDeferCancelUntilNextTransition(boolean defer, boolean screenshot) {
@@ -538,6 +457,22 @@ public class RecentsAnimationController implements DeathRecipient {
         }
     }
 
+    /**
+     * Return whether the given window should still be considered interesting for the all-drawn
+     * state.  This is only interesting for the target app, which may have child windows that are
+     * not actually visible and should not be considered interesting and waited upon.
+     */
+    protected boolean isInterestingForAllDrawn(WindowState window) {
+        if (isTargetApp(window.getActivityRecord())) {
+            if (window.getWindowType() != TYPE_BASE_APPLICATION
+                    && window.getAttrs().alpha == 0f) {
+                // If there is a cihld window that is alpha 0, then ignore that window
+                return false;
+            }
+        }
+        // By default all windows are still interesting for all drawn purposes
+        return true;
+    }
 
     /**
      * Whether a task should be filtered from the recents animation. This can be true for tasks
@@ -783,15 +718,6 @@ public class RecentsAnimationController implements DeathRecipient {
                         "collectTaskRemoteAnimations, target: %s", target);
             }
         }, false /* traverseTopToBottom */);
-    }
-
-    void logRecentsAnimationStartTime(int durationMs) {
-        BackgroundThread.getHandler().postDelayed(() -> {
-            if (!mCanceled) {
-                mService.mLatencyTracker.logAction(LatencyTracker.ACTION_START_RECENTS_ANIMATION,
-                        durationMs);
-            }
-        }, LATENCY_TRACKER_LOG_DELAY_MS);
     }
 
     private boolean removeTaskInternal(int taskId) {
@@ -1153,10 +1079,6 @@ public class RecentsAnimationController implements DeathRecipient {
         return mTargetActivityRecord.findMainWindow();
     }
 
-    OnBackInvokedCallbackInfo getBackInvokedInfo() {
-        return new OnBackInvokedCallbackInfo(mBackCallback, PRIORITY_DEFAULT);
-    }
-
     DisplayArea getTargetAppDisplayArea() {
         if (mTargetActivityRecord == null) {
             return null;
@@ -1277,6 +1199,12 @@ public class RecentsAnimationController implements DeathRecipient {
                     mLocalBounds, mBounds, mTask.getWindowConfiguration(),
                     mIsRecentTaskInvisible, null, null, mTask.getTaskInfo(),
                     topApp.checkEnterPictureInPictureAppOpsState());
+
+            final ActivityRecord topActivity = mTask.getTopNonFinishingActivity();
+            if (topActivity != null && topActivity.mStartingData != null
+                    && topActivity.mStartingData.hasImeSurface()) {
+                mTarget.setWillShowImeOnTarget(true);
+            }
             return mTarget;
         }
 
@@ -1335,16 +1263,16 @@ public class RecentsAnimationController implements DeathRecipient {
                     mDisplayContent.mPinnedTaskController.setEnterPipTransaction(
                             mFinishTransaction);
                 }
+                // In the case where we are transferring the transform to the task in preparation
+                // for entering PIP, we disable the task being able to affect sysui flags otherwise
+                // it may cause a flash
+                if (mTask.getActivityType() != mTargetActivityType
+                        && mFinishTransaction.getShouldDisableCanAffectSystemUiFlags()) {
+                    mTask.setCanAffectSystemUiFlags(false);
+                }
                 mFinishTransaction = null;
                 mFinishOverlay = null;
                 pendingTransaction.apply();
-
-                // In the case where we are transferring the transform to the task in preparation 
-                // for entering PIP, we disable the task being able to affect sysui flags otherwise
-                // it may cause a flash
-                if (mTask.getActivityType() != mTargetActivityType) {
-                    mTask.setCanAffectSystemUiFlags(false);
-                }
             } else if (!mTask.isAttached()) {
                 // Apply the task's pending transaction in case it is detached and its transaction
                 // is not reachable.

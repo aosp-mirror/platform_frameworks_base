@@ -80,7 +80,8 @@ public class PipSurfaceTransactionHelper {
 
     public PictureInPictureSurfaceTransaction scaleAndCrop(
             SurfaceControl.Transaction tx, SurfaceControl leash,
-            Rect sourceRectHint, Rect sourceBounds, Rect destinationBounds, Rect insets) {
+            Rect sourceRectHint, Rect sourceBounds, Rect destinationBounds, Rect insets,
+            float progress) {
         mTmpSourceRectF.set(sourceBounds);
         mTmpDestinationRect.set(sourceBounds);
         mTmpDestinationRect.inset(insets);
@@ -93,9 +94,13 @@ public class PipSurfaceTransactionHelper {
                     : (float) destinationBounds.height() / sourceBounds.height();
         } else {
             // scale by sourceRectHint if it's not edge-to-edge
-            scale = sourceRectHint.width() <= sourceRectHint.height()
+            final float endScale = sourceRectHint.width() <= sourceRectHint.height()
                     ? (float) destinationBounds.width() / sourceRectHint.width()
                     : (float) destinationBounds.height() / sourceRectHint.height();
+            final float startScale = sourceRectHint.width() <= sourceRectHint.height()
+                    ? (float) destinationBounds.width() / sourceBounds.width()
+                    : (float) destinationBounds.height() / sourceBounds.height();
+            scale = (1 - progress) * startScale + progress * endScale;
         }
         final float left = destinationBounds.left - (insets.left + sourceBounds.left) * scale;
         final float top = destinationBounds.top - (insets.top + sourceBounds.top) * scale;
@@ -165,7 +170,7 @@ public class PipSurfaceTransactionHelper {
     /** @return {@link SurfaceControl.Transaction} instance with vsync-id */
     public static SurfaceControl.Transaction newSurfaceControlTransaction() {
         final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-        tx.setFrameTimelineVsync(Choreographer.getSfInstance().getVsyncId());
+        tx.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
         return tx;
     }
 }

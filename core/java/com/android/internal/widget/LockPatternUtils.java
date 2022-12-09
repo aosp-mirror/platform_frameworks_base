@@ -39,7 +39,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Build;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
@@ -47,7 +46,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -175,6 +173,7 @@ public class LockPatternUtils {
     private static final String LOCK_SCREEN_DEVICE_OWNER_INFO = "lockscreen.device_owner_info";
 
     private static final String ENABLED_TRUST_AGENTS = "lockscreen.enabledtrustagents";
+    private static final String KNOWN_TRUST_AGENTS = "lockscreen.knowntrustagents";
     private static final String IS_TRUST_USUALLY_MANAGED = "lockscreen.istrustusuallymanaged";
 
     public static final String PROFILE_KEY_NAME_ENCRYPT = "profile_key_name_encrypt_";
@@ -1106,31 +1105,50 @@ public class LockPatternUtils {
         return getString(LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS, userId) != null;
     }
 
+    /** Updates the list of enabled trust agent in LockSettings storage for the given user. */
     public void setEnabledTrustAgents(Collection<ComponentName> activeTrustAgents, int userId) {
+        setString(ENABLED_TRUST_AGENTS, serializeTrustAgents(activeTrustAgents), userId);
+        getTrustManager().reportEnabledTrustAgentsChanged(userId);
+    }
+
+    /** Returns the list of enabled trust agent in LockSettings storage for the given user. */
+    public List<ComponentName> getEnabledTrustAgents(int userId) {
+        return deserializeTrustAgents(getString(ENABLED_TRUST_AGENTS, userId));
+    }
+
+    /** Updates the list of known trust agent in LockSettings storage for the given user. */
+    public void setKnownTrustAgents(Collection<ComponentName> knownTrustAgents, int userId) {
+        setString(KNOWN_TRUST_AGENTS, serializeTrustAgents(knownTrustAgents), userId);
+    }
+
+    /** Returns the list of known trust agent in LockSettings storage for the given user. */
+    public List<ComponentName> getKnownTrustAgents(int userId) {
+        return deserializeTrustAgents(getString(KNOWN_TRUST_AGENTS, userId));
+    }
+
+    private String serializeTrustAgents(Collection<ComponentName> trustAgents) {
         StringBuilder sb = new StringBuilder();
-        for (ComponentName cn : activeTrustAgents) {
+        for (ComponentName cn : trustAgents) {
             if (sb.length() > 0) {
                 sb.append(',');
             }
             sb.append(cn.flattenToShortString());
         }
-        setString(ENABLED_TRUST_AGENTS, sb.toString(), userId);
-        getTrustManager().reportEnabledTrustAgentsChanged(userId);
+        return sb.toString();
     }
 
-    public List<ComponentName> getEnabledTrustAgents(int userId) {
-        String serialized = getString(ENABLED_TRUST_AGENTS, userId);
-        if (TextUtils.isEmpty(serialized)) {
-            return new ArrayList<ComponentName>();
+    private List<ComponentName> deserializeTrustAgents(String serializedTrustAgents) {
+        if (TextUtils.isEmpty(serializedTrustAgents)) {
+            return new ArrayList<>();
         }
-        String[] split = serialized.split(",");
-        ArrayList<ComponentName> activeTrustAgents = new ArrayList<ComponentName>(split.length);
+        String[] split = serializedTrustAgents.split(",");
+        ArrayList<ComponentName> trustAgents = new ArrayList<>(split.length);
         for (String s : split) {
             if (!TextUtils.isEmpty(s)) {
-                activeTrustAgents.add(ComponentName.unflattenFromString(s));
+                trustAgents.add(ComponentName.unflattenFromString(s));
             }
         }
-        return activeTrustAgents;
+        return trustAgents;
     }
 
     /**

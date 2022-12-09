@@ -19,17 +19,19 @@ package com.android.systemui.statusbar.notification.row
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.dagger.NotificationLog
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
 
 class RowContentBindStageLogger @Inject constructor(
     @NotificationLog private val buffer: LogBuffer
 ) {
-    fun logStageParams(notifKey: String, stageParams: String) {
+    fun logStageParams(entry: NotificationEntry, stageParams: RowContentBindParams) {
         buffer.log(TAG, INFO, {
-            str1 = notifKey
-            str2 = stageParams
+            str1 = entry.logKey
+            str2 = stageParams.toString()
         }, {
-            "Invalidated notif $str1 with params: \n$str2"
+            "Invalidated notif $str1 with params: $str2"
         })
     }
 }

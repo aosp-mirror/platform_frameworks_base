@@ -43,7 +43,7 @@ import java.util.function.Consumer;
 /**
  * A default provider for {@link BiometricContext}.
  */
-class BiometricContextProvider implements BiometricContext {
+final class BiometricContextProvider implements BiometricContext {
 
     private static final String TAG = "BiometricContextProvider";
 
@@ -76,7 +76,8 @@ class BiometricContextProvider implements BiometricContext {
     private final Map<Integer, InstanceId> mSession = new ConcurrentHashMap<>();
 
     private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
-    private boolean mIsDozing = false;
+    private boolean mIsAod = false;
+    private boolean mIsAwake = false;
 
     @VisibleForTesting
     BiometricContextProvider(@NonNull AmbientDisplayConfiguration ambientDisplayConfiguration,
@@ -85,9 +86,14 @@ class BiometricContextProvider implements BiometricContext {
         try {
             service.setBiometicContextListener(new IBiometricContextListener.Stub() {
                 @Override
-                public void onDozeChanged(boolean isDozing) {
-                    mIsDozing = isDozing;
-                    notifyChanged();
+                public void onDozeChanged(boolean isDozing, boolean isAwake) {
+                    isDozing = isDozing && isAodEnabled();
+                    final boolean changed = (mIsAod != isDozing) || (mIsAwake != isAwake);
+                    if (changed) {
+                        mIsAod = isDozing;
+                        mIsAwake = isAwake;
+                        notifyChanged();
+                    }
                 }
 
                 private void notifyChanged() {
@@ -96,6 +102,10 @@ class BiometricContextProvider implements BiometricContext {
                     } else {
                         notifySubscribers();
                     }
+                }
+
+                private boolean isAodEnabled() {
+                    return mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
                 }
             });
             service.registerSessionListener(SESSION_TYPES, new ISessionListener.Stub() {
@@ -161,7 +171,12 @@ class BiometricContextProvider implements BiometricContext {
 
     @Override
     public boolean isAod() {
-        return mIsDozing && mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
+        return mIsAod;
+    }
+
+    @Override
+    public boolean isAwake() {
+        return mIsAwake;
     }
 
     @Override

@@ -222,9 +222,9 @@
     <!-- Displayed to tell the user that they should switch their network preference. -->
     <string name="NetworkPreferenceSwitchSummary">Try changing preferred network. Tap to change.</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
-    <string name="EmergencyCallWarningTitle">Emergency calls may be unavailable</string>
+    <string name="EmergencyCallWarningTitle">Emergency calling unavailable</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
-    <string name="EmergencyCallWarningSummary"><xliff:g id="spn" example="Operator">%s</xliff:g> doesn\'t support emergency calls over Wi-Fi. Tap for details.</string>
+    <string name="EmergencyCallWarningSummary">Can\u2019t make emergency calls over Wi\u2011Fi</string>
 
     <!-- Telephony notification channel name for a channel containing network alert notifications. -->
     <string name="notification_channel_network_alert">Alerts</string>
@@ -1684,7 +1684,7 @@
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_partial">Press firmly on the sensor</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
-    <string name="fingerprint_acquired_insufficient">Couldn\'t process fingerprint. Please try again.</string>
+    <string name="fingerprint_acquired_insufficient">Can\u2019t recognize fingerprint. Try again.</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint sensor needs cleaning -->
     <string name="fingerprint_acquired_imager_dirty">Clean fingerprint sensor and try again</string>
     <string name="fingerprint_acquired_imager_dirty_alt">Clean sensor and try again</string>
@@ -1696,6 +1696,8 @@
     <string name="fingerprint_acquired_already_enrolled">Try another fingerprint</string>
     <!-- Message shown during fingerprint acquisition when fingerprint sensor detected too much light.[CHAR LIMIT=50] -->
     <string name="fingerprint_acquired_too_bright">Too bright</string>
+    <!-- Message shown during fingerprint acquisition when a Power press has been detected.[CHAR LIMIT=50] -->
+    <string name="fingerprint_acquired_power_press">Power press detected</string>
     <!-- Message shown during fingerprint acquisition when a fingerprint must be adjusted.[CHAR LIMIT=50] -->
     <string name="fingerprint_acquired_try_adjusting">Try adjusting</string>
     <!-- Message shown during fingerprint acquisition when a fingeprint area has already been captured during enrollment [CHAR LIMIT=100] -->
@@ -1720,17 +1722,17 @@
     <!-- Error message shown when the fingerprint hardware has run out of room for storing fingerprints -->
     <string name="fingerprint_error_no_space">Can\u2019t set up fingerprint</string>
     <!-- Error message shown when the fingerprint hardware timer has expired and the user needs to restart the operation. -->
-    <string name="fingerprint_error_timeout">Fingerprint time out reached. Try again.</string>
+    <string name="fingerprint_error_timeout">Fingerprint setup timed out. Try again.</string>
     <!-- Generic error message shown when the fingerprint operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user-->
     <string name="fingerprint_error_canceled">Fingerprint operation canceled.</string>
     <!-- Generic error message shown when the fingerprint authentication operation is canceled due to user input. Generally not shown to the user -->
     <string name="fingerprint_error_user_canceled">Fingerprint operation canceled by user.</string>
     <!-- Generic error message shown when the fingerprint operation fails because too many attempts have been made. -->
-    <string name="fingerprint_error_lockout">Too many attempts. Try again later.</string>
+    <string name="fingerprint_error_lockout">Too many attempts. Use screen lock instead.</string>
     <!-- Generic error message shown when the fingerprint operation fails because strong authentication is required -->
-    <string name="fingerprint_error_lockout_permanent">Too many attempts. Fingerprint sensor disabled.</string>
+    <string name="fingerprint_error_lockout_permanent">Too many attempts. Use screen lock instead.</string>
     <!-- Generic error message shown when the fingerprint hardware can't recognize the fingerprint -->
-    <string name="fingerprint_error_unable_to_process">Try again.</string>
+    <string name="fingerprint_error_unable_to_process">Can\u2019t process fingerprint. Try again.</string>
     <!-- Generic error message shown when the user has no enrolled fingerprints -->
     <string name="fingerprint_error_no_fingerprints">No fingerprints enrolled.</string>
     <!-- Generic error message shown when the app requests fingerprint authentication on a device without a sensor -->
@@ -1739,6 +1741,8 @@
     <string name="fingerprint_error_security_update_required">Sensor temporarily disabled.</string>
     <!-- Generic error message shown when fingerprint needs calibration [CHAR LIMIT=150] -->
     <string name="fingerprint_error_bad_calibration">Can\u2019t use fingerprint sensor. Visit a repair provider</string>
+    <!-- Generic error message shown when the power button has been pressed. [CHAR LIMIT=150] -->
+    <string name="fingerprint_error_power_pressed">Power button pressed</string>
 
     <!-- Template to be used to name enrolled fingerprints by default. -->
     <string name="fingerprint_name_template">Finger <xliff:g id="fingerId" example="1">%d</xliff:g></string>
@@ -1786,45 +1790,57 @@
     <string name="fingerprint_recalibrate_notification_content">Visit a repair provider.</string>
 
     <!-- Message shown during face acquisition when the face cannot be recognized [CHAR LIMIT=50] -->
-    <string name="face_acquired_insufficient">Couldn\u2019t capture accurate face data. Try again.</string>
+    <string name="face_acquired_insufficient">Can\u2019t create your face model. Try again.</string>
     <!-- Message shown during face acquisition when the image is too bright [CHAR LIMIT=50] -->
     <string name="face_acquired_too_bright">Too bright. Try gentler lighting.</string>
     <!-- Message shown during face acquisition when the image is too dark [CHAR LIMIT=50] -->
-    <string name="face_acquired_too_dark">Too dark. Try brighter lighting.</string>
+    <string name="face_acquired_too_dark">Not enough light</string>
     <!-- Message shown during face acquisition when the user is too close to sensor [CHAR LIMIT=50] -->
-    <string name="face_acquired_too_close">Move phone farther away.</string>
+    <string name="face_acquired_too_close">Move phone farther away</string>
     <!-- Message shown during face acquisition when the user is too far from sensor [CHAR LIMIT=50] -->
-    <string name="face_acquired_too_far">Move phone closer.</string>
+    <string name="face_acquired_too_far">Move phone closer</string>
     <!-- Message shown during face acquisition when the user is too high relatively to sensor [CHAR LIMIT=50] -->
-    <string name="face_acquired_too_high">Move phone higher.</string>
+    <string name="face_acquired_too_high">Move phone higher</string>
     <!-- Message shown during face acquisition when the user is too low relatively to sensor [CHAR LIMIT=50] -->
-    <string name="face_acquired_too_low">Move phone lower.</string>
+    <string name="face_acquired_too_low">Move phone lower</string>
     <!-- Message shown during face acquisition when only the right part of the user's face was detected [CHAR LIMIT=50] -->
-    <string name="face_acquired_too_right">Move phone to the left.</string>
+    <string name="face_acquired_too_right">Move phone to your left</string>
     <!-- Message shown during face acquisition when only the left part of the user's face was detected [CHAR LIMIT=50] -->
-    <string name="face_acquired_too_left">Move phone to the right.</string>
+    <string name="face_acquired_too_left">Move phone to your right</string>
     <!-- Message shown during face acquisition when the user is not front facing the sensor [CHAR LIMIT=50] -->
     <string name="face_acquired_poor_gaze">Please look more directly at your device.</string>
-    <!-- Message shown during face acquisition when the user is not detected [CHAR LIMIT=50] -->
-    <string name="face_acquired_not_detected">Position your face directly in front of the phone.</string>
+    <!-- Message shown during face acquisition when the user is not detected [CHAR LIMIT=75] -->
+    <string name="face_acquired_not_detected">Can\u2019t see your face. Hold your phone at eye level.</string>
     <!-- Message shown during face acquisition when the device is not steady [CHAR LIMIT=50] -->
     <string name="face_acquired_too_much_motion">Too much motion. Hold phone steady.</string>
     <!-- Message shown during face acquisition when the sensor needs to be recalibrated [CHAR LIMIT=50] -->
     <string name="face_acquired_recalibrate">Please re-enroll your face.</string>
     <!-- Message shown during face enrollment when a different person's face is detected [CHAR LIMIT=50] -->
-    <string name="face_acquired_too_different">No longer able to recognize face. Try again.</string>
+    <string name="face_acquired_too_different">Can\u2019t recognize face. Try again.</string>
     <!-- Message shown during face enrollment when the face is too similar to a previous acquisition [CHAR LIMIT=50] -->
-    <string name="face_acquired_too_similar">Too similar, please change your pose.</string>
+    <string name="face_acquired_too_similar">Change the position of your head slightly</string>
     <!-- Message shown during acqusition when the user's face is turned too far left or right [CHAR LIMIT=50] -->
-    <string name="face_acquired_pan_too_extreme">Turn your head a little less.</string>
+    <string name="face_acquired_pan_too_extreme">Look more directly at your phone</string>
     <!-- Message shown during acqusition when the user's face is tilted too high or too low [CHAR LIMIT=50] -->
-    <string name="face_acquired_tilt_too_extreme">Tilt your head a little less.</string>
+    <string name="face_acquired_tilt_too_extreme">Look more directly at your phone</string>
     <!-- Message shown during acquisiton when the user's face is tilted too far left or right [CHAR LIMIT=50] -->
-    <string name="face_acquired_roll_too_extreme">Turn your head a little less.</string>
+    <string name="face_acquired_roll_too_extreme">Look more directly at your phone</string>
     <!-- Message shown during acquisition when the user's face is obscured [CHAR LIMIT=50] -->
     <string name="face_acquired_obscured">Remove anything hiding your face.</string>
     <!-- Message shown during acquisition when the sensor is dirty [CHAR LIMIT=100] -->
     <string name="face_acquired_sensor_dirty">Clean the top of your screen, including the black bar</string>
+    <!-- Message shown during acquisition when dark glasses were detected [CHAR LIMIT=75] -->
+    <string name="face_acquired_dark_glasses_detected">@string/face_acquired_dark_glasses_detected_alt</string>
+    <!-- Message shown during acquisition when a mouth covering was detected [CHAR LIMIT=75] -->
+    <string name="face_acquired_mouth_covering_detected">@string/face_acquired_mouth_covering_detected_alt</string>
+
+    <!-- Message shown during face acquisition when the sensor needs to be recalibrated [CHAR LIMIT=75] -->
+    <string name="face_acquired_recalibrate_alt">Can\u2019t create your face model. Try again.</string>
+    <!-- Message shown during acquisition when dark glasses were detected [CHAR LIMIT=100] -->
+    <string name="face_acquired_dark_glasses_detected_alt">Dark glasses detected. Your face must be fully visible.</string>
+    <!-- Message shown during acquisition when a mouth covering was detected [CHAR LIMIT=100] -->
+    <string name="face_acquired_mouth_covering_detected_alt">Face covering detected. Your face must be fully visible.</string>
+
     <!-- Array containing custom messages shown during face acquisition from vendor.  Vendor is expected to add and translate these strings -->
     <string-array name="face_acquired_vendor">
     </string-array>
@@ -3542,21 +3558,17 @@
     <!-- [CHAR LIMIT=NONE] Message to show in upgrading dialog when the bulk of the upgrade work is done. -->
     <string name="android_upgrading_complete">Finishing boot.</string>
 
-    <!-- [CHAR LIMIT=40] Title of dialog shown to confirm device going to sleep if the power button
-    is pressed during fingerprint enrollment. -->
-    <string name="fp_power_button_enrollment_title">Continue setup?</string>
-
     <!-- [CHAR LIMIT=NONE] Message of dialog shown to confirm device going to sleep if the power
     button is pressed during fingerprint enrollment. -->
     <string name="fp_power_button_enrollment_message">You pressed the power button — this usually turns off the screen.\n\nTry tapping lightly while setting up your fingerprint.</string>
 
+    <!-- [CHAR LIMIT=40] Title of dialog shown to confirm device going to sleep if the power button
+    is pressed during fingerprint enrollment. -->
+    <string name="fp_power_button_enrollment_title">To end setup, turn off screen</string>
+
     <!-- [CHAR LIMIT=20] Positive button of dialog shown to confirm device going to sleep if the
     power button is pressed during fingerprint enrollment. -->
-    <string name="fp_power_button_enrollment_positive_button">Turn off screen</string>
-
-    <!-- [CHAR LIMIT=20] Negative button of dialog shown to confirm device going to sleep if the
-    power button is pressed during fingerprint enrollment. -->
-    <string name="fp_power_button_enrollment_negative_button">Continue setup</string>
+    <string name="fp_power_button_enrollment_button_text">Turn off</string>
 
     <!-- [CHAR LIMIT=40] Title of dialog shown to confirm device going to sleep if the power button
     is pressed during biometric prompt when a side fingerprint sensor is present. -->
@@ -3952,7 +3964,7 @@
     <string name="ext_media_new_notification_message" product="automotive">You may need to reformat the device. Tap to eject.</string>
 
     <!-- Notification body when external media is ready for use [CHAR LIMIT=NONE] -->
-    <string name="ext_media_ready_notification_message">For transferring photos and media</string>
+    <string name="ext_media_ready_notification_message">For storing  photos, videos, music and more</string>
     <!-- TV specific notification body when external media is ready for use [CHAR LIMIT=75] -->
     <string name="ext_media_ready_notification_message" product="tv">Browse media files</string>
 
@@ -3968,11 +3980,11 @@
     <string name="ext_media_unmountable_notification_message" product="automotive">You may need to reformat the device. Tap to eject.</string>
 
     <!-- Notification title when external media is unsupported [CHAR LIMIT=30] -->
-    <string name="ext_media_unsupported_notification_title">Unsupported <xliff:g id="name" example="SD card">%s</xliff:g></string>
+    <string name="ext_media_unsupported_notification_title"><xliff:g id="name" example="SD card">%s</xliff:g> detected </string>
     <!-- Automotive specific notification title when external media is unsupported [CHAR LIMIT=30] -->
     <string name="ext_media_unsupported_notification_title" product="automotive"><xliff:g id="name" example="SD card">%s</xliff:g> isn\u2019t working</string>
     <!-- Notification body when external media is unsupported [CHAR LIMIT=NONE] -->
-    <string name="ext_media_unsupported_notification_message">This device doesn\u2019t support this <xliff:g id="name" example="SD card">%s</xliff:g>. Tap to set up in a supported format.</string>
+    <string name="ext_media_unsupported_notification_message">Tap to set up .</string>
     <!-- TV-specific notification body when external media is unsupported [CHAR LIMIT=75] -->
     <string name="ext_media_unsupported_notification_message" product="tv">Select to set up <xliff:g id="name" example="SD card">%s</xliff:g> in a supported format.</string>
     <!-- Automotive specific notification body when external media is unsupported [CHAR LIMIT=NONE] -->
@@ -4003,7 +4015,7 @@
     <!-- Notification action to transfer media [CHAR LIMIT=40] -->
     <string name="ext_media_seamless_action">Switch output</string>
 
-    <!-- Notification title when external media is missing [CHAR LIMIT=30] -->
+    <!-- Notification title when adoptable storage media is ejected [CHAR LIMIT=30] -->
     <string name="ext_media_missing_title"><xliff:g id="name" example="SD card">%s</xliff:g> missing</string>
     <!-- Notification body when external media is missing [CHAR LIMIT=30] -->
     <string name="ext_media_missing_message">Insert device again</string>
@@ -5407,8 +5419,10 @@
     <!-- Hint text in a search edit box (used to filter long language / country lists) [CHAR LIMIT=25] -->
     <string name="search_language_hint">Type language name</string>
 
-    <!-- List section subheader for the language picker, containing a list of suggested languages determined by the default region [CHAR LIMIT=30] -->
+    <!-- List section subheader for the language picker, containing a list of suggested languages [CHAR LIMIT=30] -->
     <string name="language_picker_section_suggested">Suggested</string>
+    <!-- "List section subheader for the language picker, containing a list of suggested regions available for that language [CHAR LIMIT=30] -->
+    <string name="language_picker_regions_section_suggested">Suggested</string>
     <!-- List section subheader for the language picker, containing a list of all languages available [CHAR LIMIT=30] -->
     <string name="language_picker_section_all">All languages</string>
     <!-- List section subheader for the region picker, containing a list of all regions supported for the selected language.
@@ -5453,6 +5467,8 @@
     <string name="app_streaming_blocked_title_for_fingerprint_dialog">Continue on phone</string>
     <!-- Title of the dialog shown when the microphone permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_title_for_microphone_dialog">Microphone unavailable</string>
+    <!-- Title of the dialog shown when the play store is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_title_for_playstore_dialog">Play Store unavailable</string>
     <!-- Title of the dialog shown when the settings is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv">Android TV settings unavailable</string>
     <!-- Title of the dialog shown when the settings is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
@@ -5460,23 +5476,23 @@
     <!-- Title of the dialog shown when the settings is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default">Phone settings unavailable</string>
     <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
-    <string name="app_streaming_blocked_message" product="tv">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g>. Try on your Android TV device instead.</string>
+    <string name="app_streaming_blocked_message" product="tv">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your Android TV device instead.</string>
     <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
-    <string name="app_streaming_blocked_message" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g>. Try on your tablet instead.</string>
+    <string name="app_streaming_blocked_message" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your tablet instead.</string>
     <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
-    <string name="app_streaming_blocked_message" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g>. Try on your phone instead.</string>
-    <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your Android TV device instead.</string>
-    <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your tablet instead.</string>
-    <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your phone instead.</string>
+    <string name="app_streaming_blocked_message" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your phone instead.</string>
     <!-- Message shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv">This app is requesting additional security. Try on your Android TV device instead.</string>
     <!-- Message shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet">This app is requesting additional security. Try on your tablet instead.</string>
     <!-- Message shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default">This app is requesting additional security. Try on your phone instead.</string>
+    <!-- Message shown when the settings is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g>. Try on your Android TV device instead.</string>
+    <!-- Message shown when the settings is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g>. Try on your tablet instead.</string>
+    <!-- Message shown when the settings is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g>. Try on your phone instead.</string>
 
     <!-- Message displayed in dialog when app is too old to run on this verison of android. [CHAR LIMIT=NONE] -->
     <string name="deprecated_target_sdk_message">This app was built for an older version of Android and may not work properly. Try checking for updates, or contact the developer.</string>
@@ -5727,9 +5743,20 @@
     <string name="log_access_confirmation_deny">Don\u2019t allow</string>
 
     <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
-    <string name="log_access_confirmation_body">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
-        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device. Learn more
+    <string name="log_access_confirmation_body" product="default">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
+        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device.
     </string>
+
+    <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
+    <string name="log_access_confirmation_body" product="tv">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
+        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device.\n\nLearn more at g.co/android/devicelogs.
+    </string>
+
+    <!-- Learn more URL for the log access confirmation dialog. [DO NOT TRANSLATE]-->
+    <string name="log_access_confirmation_learn_more" product="default" translatable="false">&lt;a href="https://support.google.com/android?p=system_logs#topic=7313011"&gt;Learn more&lt;/a&gt;</string>
+
+    <!-- Learn more URL for the log access confirmation dialog. [DO NOT TRANSLATE]-->
+    <string name="log_access_confirmation_learn_more" product="tv" translatable="false"></string>
 
     <!-- Privacy notice do not show [CHAR LIMIT=20] -->
     <string name="log_access_do_not_show_again">Don\u2019t show again</string>
@@ -6299,6 +6326,8 @@ ul.</string>
     <string name="vdm_camera_access_denied" product="default">Can’t access the phone’s camera from your <xliff:g id="device" example="Chromebook">%1$s</xliff:g></string>
     <!-- Error message indicating the camera cannot be accessed when running on a virtual device. [CHAR LIMIT=NONE] -->
     <string name="vdm_camera_access_denied" product="tablet">Can’t access the tablet’s camera from your <xliff:g id="device" example="Chromebook">%1$s</xliff:g></string>
+    <!-- Error message indicating the user cannot access secure content when running on a virtual device. [CHAR LIMIT=NONE] -->
+    <string name="vdm_secure_window">This can’t be accessed while streaming. Try on your phone instead.</string>
 
     <!-- Title for preference of the system default locale. [CHAR LIMIT=50]-->
     <string name="system_locale_title">System default</string>

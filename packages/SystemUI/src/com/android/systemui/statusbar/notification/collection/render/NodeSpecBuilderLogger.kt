@@ -19,20 +19,24 @@ package com.android.systemui.statusbar.notification.collection.render
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.NotificationLog
+import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
 import com.android.systemui.util.Compile
 import javax.inject.Inject
 
 class NodeSpecBuilderLogger @Inject constructor(
+    notifPipelineFlags: NotifPipelineFlags,
     @NotificationLog private val buffer: LogBuffer
 ) {
+    private val devLoggingEnabled by lazy { notifPipelineFlags.isDevLoggingEnabled() }
+
     fun logBuildNodeSpec(
         oldSections: Set<NotifSection?>,
         newHeaders: Map<NotifSection?, NodeController?>,
         newCounts: Map<NotifSection?, Int>,
         newSectionOrder: List<NotifSection?>
     ) {
-        if (!Compile.IS_DEBUG)
+        if (!(Compile.IS_DEBUG && devLoggingEnabled))
             return
 
         buffer.log(TAG, LogLevel.DEBUG, {

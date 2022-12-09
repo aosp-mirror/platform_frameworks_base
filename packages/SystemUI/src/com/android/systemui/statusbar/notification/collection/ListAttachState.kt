@@ -90,6 +90,18 @@ data class ListAttachState private constructor(
         stableIndex = -1
     }
 
+    /**
+     * Erases bookkeeping traces stored on an entry when it is removed from the notif list.
+     * This can happen if the entry is removed from a group that was broken up or if the entry was
+     * filtered out during any of the filtering steps.
+     */
+    fun detach() {
+        parent = null
+        section = null
+        promoter = null
+        // stableIndex = -1  // TODO(b/241229236): Clear this once we fix the stability fragility
+    }
+
     companion object {
         @JvmStatic
         fun create(): ListAttachState {
