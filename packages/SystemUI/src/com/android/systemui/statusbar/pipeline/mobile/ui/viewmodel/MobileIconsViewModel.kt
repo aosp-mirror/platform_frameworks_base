@@ -18,6 +18,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
+import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
@@ -40,13 +41,17 @@ constructor(
     private val constants: ConnectivityConstants,
 ) {
     /** TODO: do we need to cache these? */
-    fun viewModelForSub(subId: Int): MobileIconViewModel =
-        MobileIconViewModel(
-            subId,
-            interactor.createMobileConnectionInteractorForSubId(subId),
-            logger,
-            constants,
-        )
+    fun viewModelForSub(subId: Int, location: StatusBarLocation): LocationBasedMobileViewModel {
+        val common =
+            MobileIconViewModel(
+                subId,
+                interactor.createMobileConnectionInteractorForSubId(subId),
+                logger,
+                constants,
+            )
+
+        return LocationBasedMobileViewModel.viewModelForLocation(common, location)
+    }
 
     class Factory
     @Inject

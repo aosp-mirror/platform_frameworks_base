@@ -340,16 +340,16 @@ class MobileIconViewModelTest : SysuiTestCase() {
             containerJob.cancel()
         }
 
-    /** Convenience constructor for these tests */
-    private fun defaultSignal(
-        level: Int = 1,
-        connected: Boolean = true,
-    ): Int {
-        return SignalDrawable.getState(level, /* numLevels */ 4, !connected)
-    }
-
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate
         private const val SUB_1_ID = 1
+
+        /** Convenience constructor for these tests */
+        fun defaultSignal(
+            level: Int = 1,
+            connected: Boolean = true,
+        ): Int {
+            return SignalDrawable.getState(level, /* numLevels */ 4, !connected)
+        }
     }
 }
