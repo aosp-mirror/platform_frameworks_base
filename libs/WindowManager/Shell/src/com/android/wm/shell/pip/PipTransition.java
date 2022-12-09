@@ -358,8 +358,10 @@ public class PipTransition extends PipTransitionController {
             WindowContainerTransaction wct = null;
             if (isOutPipDirection(direction)) {
                 // Only need to reset surface properties. The server-side operations were already
-                // done at the start.
-                if (tx != null) {
+                // done at the start. But if it is running fixed rotation, there will be a seamless
+                // display transition later. So the last rotation transform needs to be kept to
+                // avoid flickering, and then the display transition will reset the transform.
+                if (tx != null && !mInFixedRotation) {
                     mFinishTransaction.merge(tx);
                 }
             } else {
