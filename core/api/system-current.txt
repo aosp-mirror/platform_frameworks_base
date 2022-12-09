@@ -9474,7 +9474,7 @@ package android.net.wifi.nl80211 {
     method public void setOnServiceDeadCallback(@NonNull Runnable);
     method public boolean setupInterfaceForClientMode(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.ScanEventCallback, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.ScanEventCallback);
     method public boolean setupInterfaceForSoftApMode(@NonNull String);
-    method @Nullable public android.net.wifi.nl80211.WifiNl80211Manager.SignalPollResult signalPoll(@NonNull String);
+    method @Deprecated @Nullable public android.net.wifi.nl80211.WifiNl80211Manager.SignalPollResult signalPoll(@NonNull String);
     method public boolean startPnoScan(@NonNull String, @NonNull android.net.wifi.nl80211.PnoSettings, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.PnoScanRequestCallback);
     method @Deprecated public boolean startScan(@NonNull String, int, @Nullable java.util.Set<java.lang.Integer>, @Nullable java.util.List<byte[]>);
     method public boolean startScan(@NonNull String, int, @Nullable java.util.Set<java.lang.Integer>, @Nullable java.util.List<byte[]>, @Nullable android.os.Bundle);
@@ -9520,11 +9520,11 @@ package android.net.wifi.nl80211 {
     method public void onFailure(int);
   }
 
-  public static class WifiNl80211Manager.SignalPollResult {
-    field public final int associationFrequencyMHz;
-    field public final int currentRssiDbm;
-    field public final int rxBitrateMbps;
-    field public final int txBitrateMbps;
+  @Deprecated public static class WifiNl80211Manager.SignalPollResult {
+    field @Deprecated public final int associationFrequencyMHz;
+    field @Deprecated public final int currentRssiDbm;
+    field @Deprecated public final int rxBitrateMbps;
+    field @Deprecated public final int txBitrateMbps;
   }
 
   @Deprecated public static interface WifiNl80211Manager.SoftApCallback {
