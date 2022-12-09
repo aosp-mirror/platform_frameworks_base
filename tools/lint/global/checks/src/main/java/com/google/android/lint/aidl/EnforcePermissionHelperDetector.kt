@@ -28,8 +28,8 @@ import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.intellij.psi.PsiElement
 import org.jetbrains.uast.UBlockExpression
 import org.jetbrains.uast.UDeclarationsExpression
-import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UElement
+import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UMethod
 
 class EnforcePermissionHelperDetector : Detector(), SourceCodeScanner {
@@ -40,6 +40,7 @@ class EnforcePermissionHelperDetector : Detector(), SourceCodeScanner {
 
     private inner class AidlStubHandler(val context: JavaContext) : UElementHandler() {
         override fun visitMethod(node: UMethod) {
+            if (context.evaluator.isAbstract(node)) return
             if (!node.hasAnnotation(ANNOTATION_ENFORCE_PERMISSION)) return
 
             val targetExpression = "super.${node.name}$HELPER_SUFFIX()"
