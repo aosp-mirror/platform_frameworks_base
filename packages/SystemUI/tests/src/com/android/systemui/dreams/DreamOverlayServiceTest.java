@@ -46,8 +46,8 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
-import com.android.systemui.dreams.touch.BouncerSwipeTouchHandler;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -89,6 +89,12 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     WindowManagerImpl mWindowManager;
 
     @Mock
+    ComplicationComponent.Factory mComplicationComponentFactory;
+
+    @Mock
+    ComplicationComponent mComplicationComponent;
+
+    @Mock
     DreamOverlayComponent.Factory mDreamOverlayComponentFactory;
 
     @Mock
@@ -113,9 +119,6 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     ViewGroup mDreamOverlayContainerViewParent;
 
     @Mock
-    BouncerSwipeTouchHandler mBouncerSwipeTouchHandler;
-
-    @Mock
     UiEventLogger mUiEventLogger;
 
     @Captor
@@ -135,6 +138,9 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 .thenReturn(mLifecycleRegistry);
         when(mDreamOverlayComponent.getDreamOverlayTouchMonitor())
                 .thenReturn(mDreamOverlayTouchMonitor);
+        when(mComplicationComponentFactory
+                .create())
+                .thenReturn(mComplicationComponent);
         // TODO(b/261781069): A touch handler should be passed in from the complication component
         // when the complication component is introduced.
         when(mDreamOverlayComponentFactory
@@ -144,6 +150,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 .thenReturn(mDreamOverlayContainerView);
 
         mService = new DreamOverlayService(mContext, mMainExecutor, mWindowManager,
+                mComplicationComponentFactory,
                 mDreamOverlayComponentFactory,
                 mStateController,
                 mKeyguardUpdateMonitor,
