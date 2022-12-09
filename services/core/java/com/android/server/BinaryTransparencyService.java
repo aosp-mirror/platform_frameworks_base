@@ -542,7 +542,7 @@ public class BinaryTransparencyService extends SystemService {
                         }
                     }
                     pw.println("First install time (ms): " + packageInfo.firstInstallTime);
-                    pw.println("Last update time (ms): " + packageInfo.lastUpdateTime);
+                    pw.println("Last update time (ms):   " + packageInfo.lastUpdateTime);
                     // TODO(b/261493591): Determination of whether a package is preinstalled can be
                     // made more robust
                     boolean isPreloaded = (packageInfo.firstInstallTime
@@ -574,9 +574,10 @@ public class BinaryTransparencyService extends SystemService {
                         pw.println("ERROR: Package's signingInfo is null.");
                         return;
                     }
-                    // TODO(b/261501773): Handle printing of lineage of rotated keys.
                     pw.println("--- Package Signer Info ---");
                     pw.println("Has multiple signers: " + signerInfo.hasMultipleSigners());
+                    pw.println("Signing key has been rotated: "
+                            + signerInfo.hasPastSigningCertificates());
                     Signature[] packageSigners = signerInfo.getApkContentsSigners();
                     for (Signature packageSigner : packageSigners) {
                         byte[] packageSignerDigestBytes =
@@ -590,8 +591,31 @@ public class BinaryTransparencyService extends SystemService {
                         } catch (CertificateException e) {
                             Slog.e(TAG,
                                     "Failed to obtain public key of signer for cert with hash: "
-                                    + packageSignerDigestHextring);
-                            e.printStackTrace();
+                                    + packageSignerDigestHextring, e);
+                        }
+                    }
+
+                    if (!signerInfo.hasMultipleSigners()
+                            && signerInfo.hasPastSigningCertificates()) {
+                        pw.println("== Signing Cert Lineage (Excluding The Most Recent) ==");
+                        pw.println("(Certs are sorted in the order of rotation, beginning with the "
+                                   + "original signing cert)");
+                        Signature[] signingCertHistory = signerInfo.getSigningCertificateHistory();
+                        for (int i = 0; i < (signingCertHistory.length - 1); i++) {
+                            Signature signature = signingCertHistory[i];
+                            byte[] signatureDigestBytes = PackageUtils.computeSha256DigestBytes(
+                                    signature.toByteArray());
+                            String certHashHexString = HexEncoding.encodeToString(
+                                    signatureDigestBytes, false);
+                            pw.println("  ++ Signer cert #" + (i + 1) + " ++");
+                            pw.println("  Cert SHA256-digest: " + certHashHexString);
+                            try {
+                                PublicKey publicKey = signature.getPublicKey();
+                                pw.println("  Signing key algorithm: " + publicKey.getAlgorithm());
+                            } catch (CertificateException e) {
+                                Slog.e(TAG, "Failed to obtain public key of signer for cert "
+                                        + "with hash: " + certHashHexString, e);
+                            }
                         }
                     }
 
@@ -630,7 +654,7 @@ public class BinaryTransparencyService extends SystemService {
                     pw.println("Component factory: "
                             + packageInfo.applicationInfo.appComponentFactory);
                     pw.println("Process name: " + packageInfo.applicationInfo.processName);
-                    pw.println("Task affinity : " + packageInfo.applicationInfo.taskAffinity);
+                    pw.println("Task affinity: " + packageInfo.applicationInfo.taskAffinity);
                     pw.println("UID: " + packageInfo.applicationInfo.uid);
                     pw.println("Shared UID: " + packageInfo.sharedUserId);
 
