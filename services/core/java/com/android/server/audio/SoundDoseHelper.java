@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioSystem;
 import android.media.ISoundDoseCallback;
+import android.media.SoundDoseRecord;
 import android.os.Binder;
 import android.os.Message;
 import android.os.SystemClock;
@@ -133,10 +134,18 @@ public class SoundDoseHelper {
     private final Context mContext;
 
     private final ISoundDoseCallback.Stub mSoundDoseCallback = new ISoundDoseCallback.Stub() {
-        @Override
         public void onMomentaryExposure(float currentMel, int deviceId) {
             Log.w(TAG, "DeviceId " + deviceId + " triggered momentary exposure with value: "
                     + currentMel);
+        }
+
+        public void onNewCsdValue(float currentCsd, SoundDoseRecord[] records) {
+            Log.i(TAG, "onNewCsdValue: " + currentCsd);
+            for (SoundDoseRecord record : records) {
+                Log.i(TAG, "  new record: csd=" + record.value
+                        + " averageMel=" + record.averageMel + " timestamp=" + record.timestamp
+                        + " duration=" + record.duration);
+            }
         }
     };
 
