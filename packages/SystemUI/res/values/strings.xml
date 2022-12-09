@@ -849,7 +849,7 @@
     <string name="sensor_privacy_htt_blocked_dialog_content">To use the microphone button, enable microphone access in Settings.</string>
 
     <!-- Sensor privacy dialog: Button to open system settings [CHAR LIMIT=50] -->
-    <string name="sensor_privacy_dialog_open_settings">Open settings.</string>
+    <string name="sensor_privacy_dialog_open_settings">Open Settings</string>
 
     <!-- Default name for the media device shown in the output switcher when the name is not available [CHAR LIMIT=30] -->
     <string name="media_seamless_other_device">Other device</string>
