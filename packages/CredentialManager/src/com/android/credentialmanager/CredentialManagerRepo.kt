@@ -44,7 +44,6 @@ import com.android.credentialmanager.createflow.CreateCredentialUiState
 import com.android.credentialmanager.createflow.EnabledProviderInfo
 import com.android.credentialmanager.createflow.RemoteInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
-import com.android.credentialmanager.getflow.GetScreenState
 import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest.Companion.toBundle
 import com.android.credentialmanager.jetpack.developer.CreatePublicKeyCredentialRequest
 import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
@@ -124,11 +123,9 @@ class CredentialManagerRepo(
     val providerEnabledList = GetFlowUtils.toProviderList(
     // TODO: handle runtime cast error
       providerEnabledList as List<GetCredentialProviderData>, context)
-    // TODO: covert from real requestInfo
-    val requestDisplayInfo = com.android.credentialmanager.getflow.RequestDisplayInfo("the app")
+    val requestDisplayInfo = GetFlowUtils.toRequestDisplayInfo(requestInfo)
     return GetCredentialUiState(
       providerEnabledList,
-      GetScreenState.PRIMARY_SELECTION,
       requestDisplayInfo,
     )
   }
