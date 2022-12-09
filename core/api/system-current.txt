@@ -5804,8 +5804,9 @@ package android.location {
   }
 
   public final class Country implements android.os.Parcelable {
+    ctor public Country(@NonNull String, int);
     method public int describeContents();
-    method @NonNull public String getCountryIso();
+    method @NonNull public String getCountryCode();
     method public int getSource();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int COUNTRY_SOURCE_LOCALE = 3; // 0x3
@@ -5816,13 +5817,8 @@ package android.location {
   }
 
   public class CountryDetector {
-    method public void addCountryListener(@NonNull android.location.CountryListener, @Nullable android.os.Looper);
-    method @Nullable public android.location.Country detectCountry();
-    method public void removeCountryListener(@NonNull android.location.CountryListener);
-  }
-
-  public interface CountryListener {
-    method public void onCountryDetected(@NonNull android.location.Country);
+    method public void registerCountryDetectorCallback(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.location.Country>);
+    method public void unregisterCountryDetectorCallback(@NonNull java.util.function.Consumer<android.location.Country>);
   }
 
   public final class GnssCapabilities implements android.os.Parcelable {
