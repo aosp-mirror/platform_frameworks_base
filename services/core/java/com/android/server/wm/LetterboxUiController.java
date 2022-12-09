@@ -576,9 +576,8 @@ final class LetterboxUiController {
         // Rounded corners should be displayed above the taskbar.
         bounds.bottom =
                 Math.min(bounds.bottom, getTaskbarInsetsSource(mainWindow).getFrame().top);
-        if (mActivityRecord.inSizeCompatMode()
-                && mActivityRecord.getSizeCompatScale() < 1.0f) {
-            bounds.scale(1.0f / mActivityRecord.getSizeCompatScale());
+        if (mActivityRecord.inSizeCompatMode() && mActivityRecord.getCompatScale() < 1.0f) {
+            bounds.scale(1.0f / mActivityRecord.getCompatScale());
         }
     }
 
