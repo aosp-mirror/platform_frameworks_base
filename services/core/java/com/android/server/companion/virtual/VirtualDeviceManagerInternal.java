@@ -18,7 +18,6 @@ package com.android.server.companion.virtual;
 
 import android.annotation.NonNull;
 import android.companion.virtual.IVirtualDevice;
-import android.companion.virtual.VirtualDeviceParams;
 
 import java.util.Set;
 
@@ -94,12 +93,6 @@ public abstract class VirtualDeviceManagerInternal {
     public abstract int getBaseVirtualDisplayFlags(IVirtualDevice virtualDevice);
 
     /**
-     * Returns true if the given {@code uid} is the owner of any virtual devices that are
-     * currently active.
-     */
-    public abstract boolean isAppOwnerOfAnyVirtualDevice(int uid);
-
-    /**
      * Returns true if the given {@code uid} is currently running on any virtual devices. This is
      * determined by whether the app has any activities in the task stack on a virtual-device-owned
      * display.
@@ -110,14 +103,4 @@ public abstract class VirtualDeviceManagerInternal {
      * Returns true if the {@code displayId} is owned by any virtual device
      */
     public abstract boolean isDisplayOwnedByAnyVirtualDevice(int displayId);
-
-    /**
-     * Returns the device policy for the given virtual device and policy type.
-     *
-     * <p>In case the virtual device identifier is not valid, or there's no explicitly specified
-     * policy for that device and policy type, then
-     * {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT} is returned.
-     */
-    public abstract @VirtualDeviceParams.DevicePolicy int getDevicePolicy(
-            int deviceId, @VirtualDeviceParams.PolicyType int policyType);
 }

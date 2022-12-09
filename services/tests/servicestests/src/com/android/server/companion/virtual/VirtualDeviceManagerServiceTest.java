@@ -16,6 +16,8 @@
 
 package com.android.server.companion.virtual;
 
+import static android.companion.virtual.VirtualDeviceManager.DEFAULT_DEVICE_ID;
+import static android.companion.virtual.VirtualDeviceManager.INVALID_DEVICE_ID;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_SENSORS;
@@ -47,7 +49,6 @@ import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;
 import android.companion.virtual.IVirtualDeviceActivityListener;
-import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
@@ -179,6 +180,7 @@ public class VirtualDeviceManagerServiceTest {
     private AssociationInfo mAssociationInfo;
     private VirtualDeviceManagerService mVdms;
     private VirtualDeviceManagerInternal mLocalService;
+    private VirtualDeviceManagerService.VirtualDeviceManagerImpl mVdm;
     @Mock
     private InputController.NativeWrapper mNativeWrapperMock;
     @Mock
@@ -304,80 +306,68 @@ public class VirtualDeviceManagerServiceTest {
 
         mVdms = new VirtualDeviceManagerService(mContext);
         mLocalService = mVdms.getLocalServiceInstance();
+        mVdm = mVdms.new VirtualDeviceManagerImpl();
 
-        mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID);
+        VirtualDeviceParams params = new VirtualDeviceParams
+                .Builder()
+                .setBlockedActivities(getBlockedActivities())
+                .build();
+        mDeviceImpl = new VirtualDeviceImpl(mContext,
+                mAssociationInfo, new Binder(), /* ownerUid= */ 0, VIRTUAL_DEVICE_ID,
+                mInputController, mSensorController, (int associationId) -> {},
+                mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback, params);
+        mVdms.addVirtualDevice(mDeviceImpl);
     }
 
     @Test
     public void getDeviceIdForDisplayId_invalidDisplayId_returnsDefault() {
-        VirtualDeviceManagerService.VirtualDeviceManagerImpl vdm =
-                mVdms.new VirtualDeviceManagerImpl();
-
-        assertThat(
-                vdm.getDeviceIdForDisplayId(Display.INVALID_DISPLAY))
-                .isEqualTo(VirtualDeviceManager.DEFAULT_DEVICE_ID);
+        assertThat(mVdm.getDeviceIdForDisplayId(Display.INVALID_DISPLAY))
+                .isEqualTo(DEFAULT_DEVICE_ID);
     }
 
     @Test
     public void getDeviceIdForDisplayId_defaultDisplayId_returnsDefault() {
-        VirtualDeviceManagerService.VirtualDeviceManagerImpl vdm =
-                mVdms.new VirtualDeviceManagerImpl();
-
-        assertThat(
-                vdm.getDeviceIdForDisplayId(Display.DEFAULT_DISPLAY))
-                .isEqualTo(VirtualDeviceManager.DEFAULT_DEVICE_ID);
+        assertThat(mVdm.getDeviceIdForDisplayId(Display.DEFAULT_DISPLAY))
+                .isEqualTo(DEFAULT_DEVICE_ID);
     }
 
     @Test
     public void getDeviceIdForDisplayId_nonExistentDisplayId_returnsDefault() {
-        VirtualDeviceManagerService.VirtualDeviceManagerImpl vdm =
-                mVdms.new VirtualDeviceManagerImpl();
-        int nonExistentDisplayId = 999;
+        mDeviceImpl.mVirtualDisplayIds.remove(DISPLAY_ID);
 
-        assertThat(
-                vdm.getDeviceIdForDisplayId(nonExistentDisplayId))
-                .isEqualTo(VirtualDeviceManager.DEFAULT_DEVICE_ID);
+        assertThat(mVdm.getDeviceIdForDisplayId(DISPLAY_ID))
+                .isEqualTo(DEFAULT_DEVICE_ID);
     }
 
     @Test
     public void getDeviceIdForDisplayId_withValidVirtualDisplayId_returnsDeviceId() {
-        VirtualDeviceManagerService.VirtualDeviceManagerImpl vdm =
-                mVdms.new VirtualDeviceManagerImpl();
-        VirtualDeviceImpl virtualDevice = createVirtualDevice(/* virtualDeviceId */ 1000);
-        virtualDevice.mVirtualDisplayIds.add(DISPLAY_ID);
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
 
-        assertThat(
-                vdm.getDeviceIdForDisplayId(DISPLAY_ID))
-                .isEqualTo(1000);
+        assertThat(mVdm.getDeviceIdForDisplayId(DISPLAY_ID))
+                .isEqualTo(mDeviceImpl.getDeviceId());
     }
 
     @Test
     public void getDevicePolicy_invalidDeviceId_returnsDefault() {
-        assertThat(
-                mLocalService.getDevicePolicy(
-                        VirtualDeviceManager.INVALID_DEVICE_ID, POLICY_TYPE_SENSORS))
+        assertThat(mVdm.getDevicePolicy(INVALID_DEVICE_ID, POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_DEFAULT);
     }
 
     @Test
     public void getDevicePolicy_defaultDeviceId_returnsDefault() {
-        assertThat(
-                mLocalService.getDevicePolicy(
-                        VirtualDeviceManager.DEFAULT_DEVICE_ID, POLICY_TYPE_SENSORS))
+        assertThat(mVdm.getDevicePolicy(DEFAULT_DEVICE_ID, POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_DEFAULT);
     }
 
     @Test
     public void getDevicePolicy_nonExistentDeviceId_returnsDefault() {
-        assertThat(
-                mLocalService.getDevicePolicy(mDeviceImpl.getDeviceId() + 1, POLICY_TYPE_SENSORS))
+        assertThat(mVdm.getDevicePolicy(mDeviceImpl.getDeviceId() + 1, POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_DEFAULT);
     }
 
     @Test
     public void getDevicePolicy_unspecifiedPolicy_returnsDefault() {
-        assertThat(
-                mLocalService.getDevicePolicy(mDeviceImpl.getDeviceId(), POLICY_TYPE_SENSORS))
+        assertThat(mVdm.getDevicePolicy(mDeviceImpl.getDeviceId(), POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_DEFAULT);
     }
 
@@ -394,8 +384,7 @@ public class VirtualDeviceManagerServiceTest {
                 mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback, params);
         mVdms.addVirtualDevice(mDeviceImpl);
 
-        assertThat(
-                mLocalService.getDevicePolicy(mDeviceImpl.getDeviceId(), POLICY_TYPE_SENSORS))
+        assertThat(mVdm.getDevicePolicy(mDeviceImpl.getDeviceId(), POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_CUSTOM);
     }
 
@@ -1196,18 +1185,4 @@ public class VirtualDeviceManagerServiceTest {
         verify(mContext).startActivityAsUser(argThat(intent ->
                 intent.filterEquals(blockedAppIntent)), any(), any());
     }
-
-    private VirtualDeviceImpl createVirtualDevice(int virtualDeviceId) {
-        VirtualDeviceParams params = new VirtualDeviceParams
-                .Builder()
-                .setBlockedActivities(getBlockedActivities())
-                .build();
-        VirtualDeviceImpl virtualDeviceImpl = new VirtualDeviceImpl(mContext,
-                mAssociationInfo, new Binder(), /* ownerUid */ 0, virtualDeviceId,
-                mInputController, mSensorController, (int associationId) -> {},
-                mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback, params);
-        mVdms.addVirtualDevice(virtualDeviceImpl);
-        return virtualDeviceImpl;
-    }
-
 }
