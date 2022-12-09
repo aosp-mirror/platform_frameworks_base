@@ -31,6 +31,9 @@ data class Permission(
     inline val packageName: String
         get() = permissionInfo.packageName
 
+    inline val groupName: String?
+        get() = permissionInfo.group
+
     inline val isDynamic: Boolean
         get() = type == TYPE_DYNAMIC
 
@@ -39,6 +42,9 @@ data class Permission(
 
     inline val isRuntime: Boolean
         get() = permissionInfo.protection == PermissionInfo.PROTECTION_DANGEROUS
+
+    inline val isAppOp: Boolean
+        get() = permissionInfo.protection == PermissionInfo.PROTECTION_FLAG_APPOP
 
     inline val isSoftRestricted: Boolean
         get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.FLAG_SOFT_RESTRICTED)
@@ -108,6 +114,9 @@ data class Permission(
 
     inline val isKnownSigner: Boolean
         get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_KNOWN_SIGNER)
+
+    inline val hasGids: Boolean
+        get() = throw NotImplementedError()
 
     inline val protectionLevel: Int
         @Suppress("DEPRECATION")

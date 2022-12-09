@@ -829,11 +829,17 @@ class UidPermissionPolicy : SchemePolicy() {
         with(persistence) { this@serializeSystemState.serializeSystemState(systemState) }
     }
 
-    fun GetStateScope.getPermissionGroup(permissionGroupName: String): PermissionGroupInfo? =
-        state.systemState.permissionGroups[permissionGroupName]
+    /**
+     * returns all permission group definitions available in the system
+     */
+    fun GetStateScope.getPermissionGroups(): IndexedMap<String, PermissionGroupInfo> =
+        state.systemState.permissionGroups
 
-    fun GetStateScope.getPermission(permissionName: String): Permission? =
-        state.systemState.permissions[permissionName]
+    /**
+     * returns all permission definitions available in the system
+     */
+    fun GetStateScope.getPermissions(): IndexedMap<String, Permission> =
+        state.systemState.permissions
 
     fun GetStateScope.getUidPermissionFlags(appId: Int, userId: Int): IndexedMap<String, Int>? =
         state.userStates[userId]?.uidPermissionFlags?.get(appId)
