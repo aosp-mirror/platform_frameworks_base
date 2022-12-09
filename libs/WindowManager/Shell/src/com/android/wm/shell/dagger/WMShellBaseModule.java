@@ -702,7 +702,7 @@ public abstract class WMShellBaseModule {
         // Use optional-of-lazy for the dependency that this provider relies on.
         // Lazy ensures that this provider will not be the cause the dependency is created
         // when it will not be returned due to the condition below.
-        if (DesktopModeStatus.IS_SUPPORTED) {
+        if (DesktopModeStatus.isProto1Enabled()) {
             return desktopModeController.map(Lazy::get);
         }
         return Optional.empty();
@@ -719,7 +719,7 @@ public abstract class WMShellBaseModule {
         // Use optional-of-lazy for the dependency that this provider relies on.
         // Lazy ensures that this provider will not be the cause the dependency is created
         // when it will not be returned due to the condition below.
-        if (DesktopModeStatus.IS_SUPPORTED) {
+        if (DesktopModeStatus.isAnyEnabled()) {
             return desktopModeTaskRepository.map(Lazy::get);
         }
         return Optional.empty();

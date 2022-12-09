@@ -68,7 +68,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
 
     private void onInit() {
         mShellTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_FREEFORM);
-        if (DesktopModeStatus.IS_SUPPORTED) {
+        if (DesktopModeStatus.isAnyEnabled()) {
             mShellTaskOrganizer.addFocusListener(this);
         }
     }
@@ -90,7 +90,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
             t.apply();
         }
 
-        if (DesktopModeStatus.IS_SUPPORTED) {
+        if (DesktopModeStatus.isAnyEnabled()) {
             mDesktopModeTaskRepository.ifPresent(repository -> {
                 repository.addOrMoveFreeformTaskToTop(taskInfo.taskId);
                 if (taskInfo.isVisible) {
@@ -110,7 +110,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                 taskInfo.taskId);
         mTasks.remove(taskInfo.taskId);
 
-        if (DesktopModeStatus.IS_SUPPORTED) {
+        if (DesktopModeStatus.isAnyEnabled()) {
             mDesktopModeTaskRepository.ifPresent(repository -> {
                 repository.removeFreeformTask(taskInfo.taskId);
                 if (repository.removeActiveTask(taskInfo.taskId)) {
@@ -134,7 +134,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                 taskInfo.taskId);
         mWindowDecorationViewModel.onTaskInfoChanged(state.mTaskInfo);
 
-        if (DesktopModeStatus.IS_SUPPORTED) {
+        if (DesktopModeStatus.isAnyEnabled()) {
             mDesktopModeTaskRepository.ifPresent(repository -> {
                 if (taskInfo.isVisible) {
                     if (repository.addActiveTask(taskInfo.taskId)) {
@@ -152,7 +152,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG,
                 "Freeform Task Focus Changed: #%d focused=%b",
                 taskInfo.taskId, taskInfo.isFocused);
-        if (DesktopModeStatus.IS_SUPPORTED && taskInfo.isFocused) {
+        if (DesktopModeStatus.isAnyEnabled() && taskInfo.isFocused) {
             mDesktopModeTaskRepository.ifPresent(repository -> {
                 repository.addOrMoveFreeformTaskToTop(taskInfo.taskId);
             });
