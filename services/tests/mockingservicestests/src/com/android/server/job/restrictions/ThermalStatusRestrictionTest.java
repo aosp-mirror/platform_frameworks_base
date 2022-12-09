@@ -180,14 +180,47 @@ public class ThermalStatusRestrictionTest {
                 createJobBuilder(7).setExpedited(true).build());
         final JobStatus ej = spy(createJobStatus("testIsJobRestricted",
                 createJobBuilder(8).setExpedited(true).build()));
+        final JobStatus ejRetried = spy(createJobStatus("testIsJobRestricted",
+                createJobBuilder(11).setExpedited(true).build()));
+        final JobStatus ejRunning = spy(createJobStatus("testIsJobRestricted",
+                createJobBuilder(12).setExpedited(true).build()));
+        final JobStatus ejRunningLong = spy(createJobStatus("testIsJobRestricted",
+                createJobBuilder(13).setExpedited(true).build()));
+        final JobStatus ui = spy(createJobStatus("testIsJobRestricted",
+                createJobBuilder(14).build()));
+        final JobStatus uiRetried = spy(createJobStatus("testIsJobRestricted",
+                createJobBuilder(15).build()));
+        final JobStatus uiRunning = spy(createJobStatus("testIsJobRestricted",
+                createJobBuilder(16).build()));
+        final JobStatus uiRunningLong = spy(createJobStatus("testIsJobRestricted",
+                createJobBuilder(17).build()));
         when(ej.shouldTreatAsExpeditedJob()).thenReturn(true);
+        when(ejRetried.shouldTreatAsExpeditedJob()).thenReturn(true);
+        when(ejRunning.shouldTreatAsExpeditedJob()).thenReturn(true);
+        when(ejRunningLong.shouldTreatAsExpeditedJob()).thenReturn(true);
+        when(ui.shouldTreatAsUserInitiated()).thenReturn(true);
+        when(uiRetried.shouldTreatAsUserInitiated()).thenReturn(true);
+        when(uiRunning.shouldTreatAsUserInitiated()).thenReturn(true);
+        when(uiRunningLong.shouldTreatAsUserInitiated()).thenReturn(true);
+        when(ejRetried.getNumPreviousAttempts()).thenReturn(1);
+        when(uiRetried.getNumPreviousAttempts()).thenReturn(2);
         when(mJobSchedulerService.isCurrentlyRunningLocked(jobLowPriorityRunning)).thenReturn(true);
         when(mJobSchedulerService.isCurrentlyRunningLocked(jobHighPriorityRunning))
                 .thenReturn(true);
+        when(mJobSchedulerService.isCurrentlyRunningLocked(jobLowPriorityRunningLong))
+                .thenReturn(true);
+        when(mJobSchedulerService.isCurrentlyRunningLocked(jobHighPriorityRunningLong))
+                .thenReturn(true);
+        when(mJobSchedulerService.isCurrentlyRunningLocked(ejRunning)).thenReturn(true);
+        when(mJobSchedulerService.isCurrentlyRunningLocked(ejRunningLong)).thenReturn(true);
+        when(mJobSchedulerService.isCurrentlyRunningLocked(uiRunning)).thenReturn(true);
+        when(mJobSchedulerService.isCurrentlyRunningLocked(uiRunningLong)).thenReturn(true);
         when(mJobSchedulerService.isJobInOvertimeLocked(jobLowPriorityRunningLong))
                 .thenReturn(true);
         when(mJobSchedulerService.isJobInOvertimeLocked(jobHighPriorityRunningLong))
                 .thenReturn(true);
+        when(mJobSchedulerService.isJobInOvertimeLocked(ejRunningLong)).thenReturn(true);
+        when(mJobSchedulerService.isJobInOvertimeLocked(uiRunningLong)).thenReturn(true);
 
         assertFalse(mThermalStatusRestriction.isJobRestricted(jobMinPriority));
         assertFalse(mThermalStatusRestriction.isJobRestricted(jobLowPriority));
@@ -199,6 +232,13 @@ public class ThermalStatusRestrictionTest {
         assertFalse(mThermalStatusRestriction.isJobRestricted(jobHighPriorityRunningLong));
         assertFalse(mThermalStatusRestriction.isJobRestricted(ej));
         assertFalse(mThermalStatusRestriction.isJobRestricted(ejDowngraded));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(ejRetried));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(ejRunning));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(ejRunningLong));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(ui));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(uiRetried));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(uiRunning));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(uiRunningLong));
 
         mStatusChangedListener.onThermalStatusChanged(THERMAL_STATUS_LIGHT);
 
@@ -212,6 +252,13 @@ public class ThermalStatusRestrictionTest {
         assertFalse(mThermalStatusRestriction.isJobRestricted(jobHighPriorityRunningLong));
         assertFalse(mThermalStatusRestriction.isJobRestricted(ejDowngraded));
         assertFalse(mThermalStatusRestriction.isJobRestricted(ej));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(ejRetried));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(ejRunning));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(ejRunningLong));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(ui));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(uiRetried));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(uiRunning));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(uiRunningLong));
 
         mStatusChangedListener.onThermalStatusChanged(THERMAL_STATUS_MODERATE);
 
@@ -225,6 +272,13 @@ public class ThermalStatusRestrictionTest {
         assertTrue(mThermalStatusRestriction.isJobRestricted(jobHighPriorityRunningLong));
         assertTrue(mThermalStatusRestriction.isJobRestricted(ejDowngraded));
         assertFalse(mThermalStatusRestriction.isJobRestricted(ej));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(ejRetried));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(ejRunning));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(ejRunningLong));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(ui));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(uiRetried));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(uiRunning));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(uiRunningLong));
 
         mStatusChangedListener.onThermalStatusChanged(THERMAL_STATUS_SEVERE);
 
@@ -238,6 +292,13 @@ public class ThermalStatusRestrictionTest {
         assertTrue(mThermalStatusRestriction.isJobRestricted(jobHighPriorityRunningLong));
         assertTrue(mThermalStatusRestriction.isJobRestricted(ejDowngraded));
         assertTrue(mThermalStatusRestriction.isJobRestricted(ej));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(ejRetried));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(ejRunning));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(ejRunningLong));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(ui));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(uiRetried));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(uiRunning));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(uiRunningLong));
 
         mStatusChangedListener.onThermalStatusChanged(THERMAL_STATUS_CRITICAL);
 
@@ -251,6 +312,13 @@ public class ThermalStatusRestrictionTest {
         assertTrue(mThermalStatusRestriction.isJobRestricted(jobHighPriorityRunningLong));
         assertTrue(mThermalStatusRestriction.isJobRestricted(ejDowngraded));
         assertTrue(mThermalStatusRestriction.isJobRestricted(ej));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(ejRetried));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(ejRunning));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(ejRunningLong));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(ui));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(uiRetried));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(uiRunning));
+        assertTrue(mThermalStatusRestriction.isJobRestricted(uiRunningLong));
     }
 
     private JobInfo.Builder createJobBuilder(int jobId) {
