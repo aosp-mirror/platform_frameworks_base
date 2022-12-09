@@ -536,8 +536,7 @@ public interface StatusBarIconController {
             mGroup.addView(view, index, onCreateLayoutParams());
 
             if (mIsInDemoMode) {
-                // TODO (b/249790009): demo mode should be handled at the data layer in the
-                //  new pipeline
+                mDemoStatusIcons.addModernMobileView(mContext, subId);
             }
 
             return view;
@@ -565,11 +564,13 @@ public interface StatusBarIconController {
 
         private ModernStatusBarMobileView onCreateModernStatusBarMobileView(
                 String slot, int subId) {
+            Context mobileContext = mMobileContextProvider.getMobileContextForSub(subId, mContext);
             return ModernStatusBarMobileView
                     .constructAndBind(
-                            mContext,
+                            mobileContext,
                             slot,
-                            mMobileIconsViewModel.viewModelForSub(subId));
+                            mMobileIconsViewModel.viewModelForSub(subId)
+                        );
         }
 
         protected LinearLayout.LayoutParams onCreateLayoutParams() {
@@ -704,7 +705,7 @@ public interface StatusBarIconController {
         }
 
         protected DemoStatusIcons createDemoStatusIcons() {
-            return new DemoStatusIcons((LinearLayout) mGroup, mIconSize);
+            return new DemoStatusIcons((LinearLayout) mGroup, mMobileIconsViewModel, mIconSize);
         }
     }
 }

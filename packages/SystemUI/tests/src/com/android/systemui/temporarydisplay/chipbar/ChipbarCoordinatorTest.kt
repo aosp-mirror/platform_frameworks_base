@@ -35,6 +35,7 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -106,6 +107,35 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
                 fakeWakeLockBuilder,
             )
         underTest.start()
+    }
+
+    @Test
+    fun displayView_contentDescription_iconHasDescription() {
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.drawable.ic_cake, ContentDescription.Loaded("loadedCD")),
+                Text.Loaded("text"),
+                endItem = null,
+            )
+        )
+
+        val contentDescView = getChipbarView().requireViewById<ViewGroup>(R.id.chipbar_inner)
+        assertThat(contentDescView.contentDescription.toString()).contains("loadedCD")
+        assertThat(contentDescView.contentDescription.toString()).contains("text")
+    }
+
+    @Test
+    fun displayView_contentDescription_iconHasNoDescription() {
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.drawable.ic_cake, contentDescription = null),
+                Text.Loaded("text"),
+                endItem = null,
+            )
+        )
+
+        val contentDescView = getChipbarView().requireViewById<ViewGroup>(R.id.chipbar_inner)
+        assertThat(contentDescView.contentDescription.toString()).isEqualTo("text")
     }
 
     @Test
@@ -370,7 +400,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
         vibrationEffect: VibrationEffect? = null,
     ): ChipbarInfo {
         return ChipbarInfo(
-            startIcon,
+            TintedIcon(startIcon, tintAttr = null),
             text,
             endItem,
             vibrationEffect,

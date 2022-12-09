@@ -32,6 +32,8 @@ class ModernStatusBarMobileView(
     attrs: AttributeSet?,
 ) : BaseStatusBarFrameLayout(context, attrs) {
 
+    var subId: Int = -1
+
     private lateinit var slot: String
     override fun getSlot() = slot
 
@@ -76,6 +78,7 @@ class ModernStatusBarMobileView(
                     as ModernStatusBarMobileView)
                 .also {
                     it.slot = slot
+                    it.subId = viewModel.subscriptionId
                     MobileIconBinder.bind(it, viewModel)
                 }
         }

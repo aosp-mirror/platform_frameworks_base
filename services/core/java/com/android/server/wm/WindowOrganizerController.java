@@ -149,7 +149,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     @VisibleForTesting
     final ArrayMap<IBinder, TaskFragment> mLaunchTaskFragments = new ArrayMap<>();
 
-    private final Rect mTmpBounds = new Rect();
+    private final Rect mTmpBounds0 = new Rect();
+    private final Rect mTmpBounds1 = new Rect();
 
     WindowOrganizerController(ActivityTaskManagerService atm) {
         mService = atm;
@@ -804,14 +805,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         // When the TaskFragment is resized, we may want to create a change transition for it, for
         // which we want to defer the surface update until we determine whether or not to start
         // change transition.
-        mTmpBounds.set(taskFragment.getBounds());
+        mTmpBounds0.set(taskFragment.getBounds());
+        mTmpBounds1.set(taskFragment.getRelativeEmbeddedBounds());
         taskFragment.deferOrganizedTaskFragmentSurfaceUpdate();
         final int effects = applyChanges(taskFragment, c, errorCallbackToken);
-        if (taskFragment.shouldStartChangeTransition(mTmpBounds)) {
-            taskFragment.initializeChangeTransition(mTmpBounds);
+        taskFragment.updateRelativeEmbeddedBounds();
+        if (taskFragment.shouldStartChangeTransition(mTmpBounds0, mTmpBounds1)) {
+            taskFragment.initializeChangeTransition(mTmpBounds0);
         }
         taskFragment.continueOrganizedTaskFragmentSurfaceUpdate();
-        mTmpBounds.set(0, 0, 0, 0);
         return effects;
     }
 

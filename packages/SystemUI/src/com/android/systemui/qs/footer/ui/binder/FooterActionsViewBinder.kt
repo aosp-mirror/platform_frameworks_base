@@ -35,35 +35,31 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.people.ui.view.PeopleViewBinder.bind
-import com.android.systemui.qs.FooterActionsView
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsForegroundServicesButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsSecurityButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
+import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 /** A ViewBinder for [FooterActionsViewBinder]. */
 object FooterActionsViewBinder {
-    /**
-     * Create a [FooterActionsView] that can later be [bound][bind] to a [FooterActionsViewModel].
-     */
+    /** Create a view that can later be [bound][bind] to a [FooterActionsViewModel]. */
     @JvmStatic
-    fun create(context: Context): FooterActionsView {
+    fun create(context: Context): LinearLayout {
         return LayoutInflater.from(context).inflate(R.layout.footer_actions, /* root= */ null)
-            as FooterActionsView
+            as LinearLayout
     }
 
     /** Bind [view] to [viewModel]. */
     @JvmStatic
     fun bind(
-        view: FooterActionsView,
+        view: LinearLayout,
         viewModel: FooterActionsViewModel,
         qsVisibilityLifecycleOwner: LifecycleOwner,
     ) {
-        // Remove all children of the FooterActionsView that are used by the old implementation.
-        // TODO(b/242040009): Clean up the XML once the old implementation is removed.
-        view.removeAllViews()
+        view.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
 
         // Add the views used by this new implementation.
         val context = view.context
@@ -117,7 +113,11 @@ object FooterActionsViewBinder {
                 }
 
                 launch { viewModel.alpha.collect { view.alpha = it } }
-                launch { viewModel.backgroundAlpha.collect { view.backgroundAlpha = it } }
+                launch {
+                    viewModel.backgroundAlpha.collect {
+                        view.background?.alpha = (it * 255).roundToInt()
+                    }
+                }
             }
 
             // Listen for model changes only when QS are visible.

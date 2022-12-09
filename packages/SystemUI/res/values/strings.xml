@@ -2377,7 +2377,7 @@
     <!-- Controls menu, edit [CHAR_LIMIT=30] -->
     <string name="controls_menu_edit">Edit controls</string>
 
-    <!-- Title for the media output group dialog with media related devices [CHAR LIMIT=50] -->
+    <!-- Title for the media output dialog with media related devices [CHAR LIMIT=50] -->
     <string name="media_output_dialog_add_output">Add outputs</string>
     <!-- Title for the media output slice with group devices [CHAR LIMIT=50] -->
     <string name="media_output_dialog_group">Group</string>
@@ -2401,6 +2401,8 @@
     <string name="media_output_dialog_accessibility_title">Available devices for audio output.</string>
     <!-- Accessibility text describing purpose of seekbar in media output dialog. [CHAR LIMIT=NONE] -->
     <string name="media_output_dialog_accessibility_seekbar">Volume</string>
+    <!-- Summary for media output volume of a device in percentage [CHAR LIMIT=NONE] -->
+    <string name="media_output_dialog_volume_percentage"><xliff:g id="percentage" example="10">%1$d</xliff:g>%%</string>
 
     <!-- Media Output Broadcast Dialog -->
     <!-- Title for Broadcast First Notify Dialog [CHAR LIMIT=60] -->
