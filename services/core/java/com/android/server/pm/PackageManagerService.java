@@ -3211,6 +3211,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return isPackageDeviceAdmin(packageName, UserHandle.USER_ALL);
     }
 
+    // TODO(b/261957226): centralise this logic in DPM
     boolean isPackageDeviceAdmin(String packageName, int userId) {
         final IDevicePolicyManager dpm = getDevicePolicyManager();
         try {
@@ -3237,11 +3238,32 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     if (dpm.packageHasActiveAdmins(packageName, users[i])) {
                         return true;
                     }
+                    if (isDeviceManagementRoleHolder(packageName, users[i])) {
+                        return true;
+                    }
                 }
             }
         } catch (RemoteException e) {
         }
         return false;
+    }
+
+    private boolean isDeviceManagementRoleHolder(String packageName, int userId) {
+        return Objects.equals(packageName, getDevicePolicyManagementRoleHolderPackageName(userId));
+    }
+
+    @Nullable
+    private String getDevicePolicyManagementRoleHolderPackageName(int userId) {
+        return Binder.withCleanCallingIdentity(() -> {
+            RoleManager roleManager = mContext.getSystemService(RoleManager.class);
+            List<String> roleHolders =
+                    roleManager.getRoleHoldersAsUser(
+                            RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT, UserHandle.of(userId));
+            if (roleHolders.isEmpty()) {
+                return null;
+            }
+            return roleHolders.get(0);
+        });
     }
 
     /** Returns the device policy manager interface. */
