@@ -29,6 +29,7 @@ data class KeyguardQuickAffordanceViewModel(
     val onClicked: (OnClickedParameters) -> Unit = {},
     val isClickable: Boolean = false,
     val isActivated: Boolean = false,
+    val isSelected: Boolean = false,
 ) {
     data class OnClickedParameters(
         val configKey: String,

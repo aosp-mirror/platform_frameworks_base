@@ -39,7 +39,6 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewMod
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -84,7 +83,7 @@ object KeyguardBottomAreaViewBinder {
     fun bind(
         view: ViewGroup,
         viewModel: KeyguardBottomAreaViewModel,
-        falsingManager: FalsingManager,
+        falsingManager: FalsingManager?,
     ): Binding {
         val indicationArea: View = view.requireViewById(R.id.keyguard_indication_area)
         val ambientIndicationArea: View? = view.findViewById(R.id.ambient_indication_container)
@@ -225,7 +224,7 @@ object KeyguardBottomAreaViewBinder {
     private fun updateButton(
         view: ImageView,
         viewModel: KeyguardQuickAffordanceViewModel,
-        falsingManager: FalsingManager,
+        falsingManager: FalsingManager?,
     ) {
         if (!viewModel.isVisible) {
             view.isVisible = false
@@ -281,22 +280,29 @@ object KeyguardBottomAreaViewBinder {
                 },
             )
         )
+
         view.backgroundTintList =
-            Utils.getColorAttr(
-                view.context,
-                if (viewModel.isActivated) {
-                    com.android.internal.R.attr.colorAccentPrimary
-                } else {
-                    com.android.internal.R.attr.colorSurface
-                }
-            )
+            if (!viewModel.isSelected) {
+                Utils.getColorAttr(
+                    view.context,
+                    if (viewModel.isActivated) {
+                        com.android.internal.R.attr.colorAccentPrimary
+                    } else {
+                        com.android.internal.R.attr.colorSurface
+                    }
+                )
+            } else {
+                null
+            }
 
         view.isClickable = viewModel.isClickable
         if (viewModel.isClickable) {
-            view.setOnClickListener(OnClickListener(viewModel, falsingManager))
+            view.setOnClickListener(OnClickListener(viewModel, checkNotNull(falsingManager)))
         } else {
             view.setOnClickListener(null)
         }
+
+        view.isSelected = viewModel.isSelected
     }
 
     private class OnClickListener(

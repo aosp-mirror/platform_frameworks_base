@@ -34,7 +34,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentati
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderContract
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
@@ -67,7 +66,7 @@ constructor(
         position: KeyguardQuickAffordancePosition
     ): Flow<KeyguardQuickAffordanceModel> {
         return combine(
-            quickAffordanceInternal(position),
+            quickAffordanceAlwaysVisible(position),
             keyguardInteractor.isDozing,
             keyguardInteractor.isKeyguardShowing,
         ) { affordance, isDozing, isKeyguardShowing ->
@@ -77,6 +76,19 @@ constructor(
                 KeyguardQuickAffordanceModel.Hidden
             }
         }
+    }
+
+    /**
+     * Returns an observable for the quick affordance at the given position but always visible,
+     * regardless of lock screen state.
+     *
+     * This is useful for experiences like the lock screen preview mode, where the affordances must
+     * always be visible.
+     */
+    fun quickAffordanceAlwaysVisible(
+        position: KeyguardQuickAffordancePosition,
+    ): Flow<KeyguardQuickAffordanceModel> {
+        return quickAffordanceInternal(position)
     }
 
     /**
@@ -287,15 +299,6 @@ constructor(
                 expandable?.activityLaunchController(),
                 true /* showOverLockscreenWhenLocked */,
             )
-        }
-    }
-
-    private fun KeyguardQuickAffordancePosition.toSlotId(): String {
-        return when (this) {
-            KeyguardQuickAffordancePosition.BOTTOM_START ->
-                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
-            KeyguardQuickAffordancePosition.BOTTOM_END ->
-                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END
         }
     }
 
