@@ -118,10 +118,12 @@ class TaskFragmentContainer {
     /**
      * Creates a container with an existing activity that will be re-parented to it in a window
      * container transaction.
+     * @param pairedPrimaryContainer    when it is set, the new container will be add right above it
      */
     TaskFragmentContainer(@Nullable Activity pendingAppearedActivity,
             @Nullable Intent pendingAppearedIntent, @NonNull TaskContainer taskContainer,
-            @NonNull SplitController controller) {
+            @NonNull SplitController controller,
+            @Nullable TaskFragmentContainer pairedPrimaryContainer) {
         if ((pendingAppearedActivity == null && pendingAppearedIntent == null)
                 || (pendingAppearedActivity != null && pendingAppearedIntent != null)) {
             throw new IllegalArgumentException(
@@ -130,7 +132,16 @@ class TaskFragmentContainer {
         mController = controller;
         mToken = new Binder("TaskFragmentContainer");
         mTaskContainer = taskContainer;
-        taskContainer.mContainers.add(this);
+        if (pairedPrimaryContainer != null) {
+            if (pairedPrimaryContainer.getTaskContainer() != taskContainer) {
+                throw new IllegalArgumentException(
+                        "pairedPrimaryContainer must be in the same Task");
+            }
+            final int primaryIndex = taskContainer.mContainers.indexOf(pairedPrimaryContainer);
+            taskContainer.mContainers.add(primaryIndex + 1, this);
+        } else {
+            taskContainer.mContainers.add(this);
+        }
         if (pendingAppearedActivity != null) {
             addPendingAppearedActivity(pendingAppearedActivity);
         }
