@@ -2046,6 +2046,11 @@ public class MediaSessionService extends SystemService implements Monitor {
                 int controllerUid) {
             final int uid = Binder.getCallingUid();
             final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+            if (LocalServices.getService(PackageManagerInternal.class)
+                    .filterAppAccess(controllerPackageName, uid, userId)) {
+                // The controllerPackageName is not visible to the caller.
+                return false;
+            }
             final long token = Binder.clearCallingIdentity();
             try {
                 // Don't perform check between controllerPackageName and controllerUid.
