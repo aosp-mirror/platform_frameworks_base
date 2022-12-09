@@ -315,6 +315,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     private boolean mIsFocusable = true;
 
     /**
+     * This indicates whether this window is visible by policy. This can precede physical
+     * visibility ({@link #isVisible} - whether it has a surface showing on the screen) in
+     * cases where an animation is on-going.
+     */
+    protected boolean mVisibleRequested;
+
+    /**
      * Used as a unique, cross-process identifier for this Container. It also serves a minimal
      * interface to other processes.
      */
@@ -772,6 +779,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             parent.mTreeWeight += child.mTreeWeight;
             parent = parent.getParent();
         }
+        onChildVisibleRequestedChanged(child);
         onChildPositionChanged(child);
     }
 
@@ -800,6 +808,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             parent.mTreeWeight -= child.mTreeWeight;
             parent = parent.getParent();
         }
+        onChildVisibleRequestedChanged(null);
         onChildPositionChanged(child);
     }
 
@@ -1288,13 +1297,41 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * the transition is finished.
      */
     boolean isVisibleRequested() {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowContainer child = mChildren.get(i);
-            if (child.isVisibleRequested()) {
-                return true;
+        return mVisibleRequested;
+    }
+
+    /** @return `true` if visibleRequested changed. */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
+    boolean setVisibleRequested(boolean visible) {
+        if (mVisibleRequested == visible) return false;
+        mVisibleRequested = visible;
+        final WindowContainer parent = getParent();
+        if (parent != null) {
+            parent.onChildVisibleRequestedChanged(this);
+        }
+        return true;
+    }
+
+    /**
+     * @param child The changed or added child. `null` if a child was removed.
+     * @return `true` if visibleRequested changed.
+     */
+    protected boolean onChildVisibleRequestedChanged(@Nullable WindowContainer child) {
+        final boolean childVisReq = child != null && child.isVisibleRequested();
+        boolean newVisReq = mVisibleRequested;
+        if (childVisReq && !mVisibleRequested) {
+            newVisReq = true;
+        } else if (!childVisReq && mVisibleRequested) {
+            newVisReq = false;
+            for (int i = mChildren.size() - 1; i >= 0; --i) {
+                final WindowContainer wc = mChildren.get(i);
+                if (wc != child && wc.isVisibleRequested()) {
+                    newVisReq = true;
+                    break;
+                }
             }
         }
-        return false;
+        return setVisibleRequested(newVisReq);
     }
 
     /**

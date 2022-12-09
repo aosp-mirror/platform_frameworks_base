@@ -358,7 +358,6 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         assertActivityReparentedToTaskTransaction(task.mTaskId, activity.intent, activity.token);
 
         // Notify organizer if there is any embedded in the Task.
-        clearInvocations(mOrganizer);
         final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
                 .setParentTask(task)
                 .setOrganizer(mOrganizer)
@@ -367,11 +366,14 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME);
         activity.reparent(taskFragment, POSITION_TOP);
         activity.mLastTaskFragmentOrganizerBeforePip = null;
+
+        // Clear invocations now because there will be another transaction for the TaskFragment
+        // change above, triggered by the reparent. We only want to test onActivityReparentedToTask
+        // here.
+        clearInvocations(mOrganizer);
         mController.onActivityReparentedToTask(activity);
         mController.dispatchPendingEvents();
 
-        // There will not be TaskFragmentParentInfoChanged because Task visible request is changed
-        // before the organized TaskFragment is added to the Task.
         assertActivityReparentedToTaskTransaction(task.mTaskId, activity.intent, activity.token);
     }
 
