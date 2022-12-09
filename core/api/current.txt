@@ -13044,12 +13044,28 @@ package android.content.res.loader {
 
 package android.credentials {
 
+  public class ClearCredentialStateException extends java.lang.Exception {
+    ctor public ClearCredentialStateException(@NonNull String, @Nullable String);
+    ctor public ClearCredentialStateException(@NonNull String, @Nullable String, @Nullable Throwable);
+    ctor public ClearCredentialStateException(@NonNull String, @Nullable Throwable);
+    ctor public ClearCredentialStateException(@NonNull String);
+    field @NonNull public final String errorType;
+  }
+
   public final class ClearCredentialStateRequest implements android.os.Parcelable {
     ctor public ClearCredentialStateRequest(@NonNull android.os.Bundle);
     method public int describeContents();
     method @NonNull public android.os.Bundle getData();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.ClearCredentialStateRequest> CREATOR;
+  }
+
+  public class CreateCredentialException extends java.lang.Exception {
+    ctor public CreateCredentialException(@NonNull String, @Nullable String);
+    ctor public CreateCredentialException(@NonNull String, @Nullable String, @Nullable Throwable);
+    ctor public CreateCredentialException(@NonNull String, @Nullable Throwable);
+    ctor public CreateCredentialException(@NonNull String);
+    field @NonNull public final String errorType;
   }
 
   public final class CreateCredentialRequest implements android.os.Parcelable {
@@ -13081,18 +13097,17 @@ package android.credentials {
   }
 
   public final class CredentialManager {
-    method public void clearCredentialState(@NonNull android.credentials.ClearCredentialStateRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.credentials.CredentialManagerException>);
-    method public void executeCreateCredential(@NonNull android.credentials.CreateCredentialRequest, @NonNull android.app.Activity, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.credentials.CreateCredentialResponse,android.credentials.CredentialManagerException>);
-    method public void executeGetCredential(@NonNull android.credentials.GetCredentialRequest, @NonNull android.app.Activity, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.credentials.GetCredentialResponse,android.credentials.CredentialManagerException>);
+    method public void clearCredentialState(@NonNull android.credentials.ClearCredentialStateRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.credentials.ClearCredentialStateException>);
+    method public void executeCreateCredential(@NonNull android.credentials.CreateCredentialRequest, @NonNull android.app.Activity, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.credentials.CreateCredentialResponse,android.credentials.CreateCredentialException>);
+    method public void executeGetCredential(@NonNull android.credentials.GetCredentialRequest, @NonNull android.app.Activity, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.credentials.GetCredentialResponse,android.credentials.GetCredentialException>);
   }
 
-  public class CredentialManagerException extends java.lang.Exception {
-    ctor public CredentialManagerException(int, @Nullable String);
-    ctor public CredentialManagerException(int, @Nullable String, @Nullable Throwable);
-    ctor public CredentialManagerException(int, @Nullable Throwable);
-    ctor public CredentialManagerException(int);
-    field public static final int ERROR_UNKNOWN = 0; // 0x0
-    field public final int errorCode;
+  public class GetCredentialException extends java.lang.Exception {
+    ctor public GetCredentialException(@NonNull String, @Nullable String);
+    ctor public GetCredentialException(@NonNull String, @Nullable String, @Nullable Throwable);
+    ctor public GetCredentialException(@NonNull String, @Nullable Throwable);
+    ctor public GetCredentialException(@NonNull String);
+    field @NonNull public final String errorType;
   }
 
   public final class GetCredentialOption implements android.os.Parcelable {
