@@ -552,10 +552,9 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     @Test
     public void testApplyTransaction_enforceHierarchyChange_createTaskFragment() {
         final ActivityRecord ownerActivity = createActivityRecord(mDisplayContent);
-        final IBinder fragmentToken = new Binder();
 
         // Allow organizer to create TaskFragment and start/reparent activity to TaskFragment.
-        createTaskFragmentFromOrganizer(mTransaction, ownerActivity, fragmentToken);
+        createTaskFragmentFromOrganizer(mTransaction, ownerActivity, mFragmentToken);
         mTransaction.startActivityInTaskFragment(
                 mFragmentToken, null /* callerToken */, new Intent(), null /* activityOptions */);
         mTransaction.reparentActivityToTaskFragment(mFragmentToken, mock(IBinder.class));
@@ -564,7 +563,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         assertApplyTransactionAllowed(mTransaction);
 
         // Successfully created a TaskFragment.
-        final TaskFragment taskFragment = mWindowOrganizerController.getTaskFragment(fragmentToken);
+        final TaskFragment taskFragment = mWindowOrganizerController.getTaskFragment(
+                mFragmentToken);
         assertNotNull(taskFragment);
         assertEquals(ownerActivity.getTask(), taskFragment.getTask());
     }
@@ -700,6 +700,40 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         assertApplyTransactionAllowed(mTransaction);
 
         assertNotNull(mWindowOrganizerController.getTaskFragment(fragmentToken));
+    }
+
+    @Test
+    public void testApplyTransaction_createTaskFragment_withPairedPrimaryFragmentToken() {
+        final Task task = createTask(mDisplayContent);
+        mTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(mFragmentToken)
+                .createActivityCount(1)
+                .build();
+        mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
+        final ActivityRecord activityOnTop = createActivityRecord(task);
+        final int uid = Binder.getCallingUid();
+        activityOnTop.info.applicationInfo.uid = uid;
+        activityOnTop.getTask().effectiveUid = uid;
+        final IBinder fragmentToken1 = new Binder();
+        final TaskFragmentCreationParams params = new TaskFragmentCreationParams.Builder(
+                mOrganizerToken, fragmentToken1, activityOnTop.token)
+                .setPairedPrimaryFragmentToken(mFragmentToken)
+                .build();
+        mTransaction.setTaskFragmentOrganizer(mIOrganizer);
+        mTransaction.createTaskFragment(params);
+        assertApplyTransactionAllowed(mTransaction);
+
+        // Successfully created a TaskFragment.
+        final TaskFragment taskFragment = mWindowOrganizerController.getTaskFragment(
+                fragmentToken1);
+        assertNotNull(taskFragment);
+        // The new TaskFragment should be positioned right above the paired TaskFragment.
+        assertEquals(task.mChildren.indexOf(mTaskFragment) + 1,
+                task.mChildren.indexOf(taskFragment));
+        // The top activity should remain on top.
+        assertEquals(task.mChildren.indexOf(taskFragment) + 1,
+                task.mChildren.indexOf(activityOnTop));
     }
 
     @Test
