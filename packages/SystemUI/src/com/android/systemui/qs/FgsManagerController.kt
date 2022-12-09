@@ -122,10 +122,6 @@ interface FgsManagerController {
     /** Remove a [OnDialogDismissedListener]. */
     fun removeOnDialogDismissedListener(listener: OnDialogDismissedListener)
 
-    /** Whether we should update the footer visibility. */
-    // TODO(b/242040009): Remove this.
-    fun shouldUpdateFooterVisibility(): Boolean
-
     @VisibleForTesting
     fun visibleButtonsCount(): Int
 
@@ -374,8 +370,6 @@ class FgsManagerControllerImpl @Inject constructor(
             it.uiControl != UIControl.HIDE_BUTTON && currentProfileIds.contains(it.userId)
         }
     }
-
-    override fun shouldUpdateFooterVisibility() = dialog == null
 
     override fun showDialog(expandable: Expandable?) {
         synchronized(lock) {
