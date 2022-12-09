@@ -24,6 +24,7 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.Barrier
+import com.android.internal.widget.CachingIconView
 import com.android.systemui.R
 import com.android.systemui.media.controls.models.GutsViewHolder
 import com.android.systemui.surfaceeffects.ripple.MultiRippleView
@@ -44,6 +45,7 @@ class MediaViewHolder constructor(itemView: View) {
     val appIcon = itemView.requireViewById<ImageView>(R.id.icon)
     val titleText = itemView.requireViewById<TextView>(R.id.header_title)
     val artistText = itemView.requireViewById<TextView>(R.id.header_artist)
+    val explicitIndicator = itemView.requireViewById<CachingIconView>(R.id.media_explicit_indicator)
 
     // Output switcher
     val seamless = itemView.requireViewById<ViewGroup>(R.id.media_seamless)
@@ -123,6 +125,7 @@ class MediaViewHolder constructor(itemView: View) {
                 R.id.app_name,
                 R.id.header_title,
                 R.id.header_artist,
+                R.id.media_explicit_indicator,
                 R.id.media_seamless,
                 R.id.media_progress_bar,
                 R.id.actionPlayPause,
