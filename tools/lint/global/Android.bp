@@ -43,7 +43,7 @@ java_test_host {
     // compiled for java 15. The soong build doesn't support
     // java 15 yet, so we can't compile against "lint". Disable
     // the test until java 15 is supported.
-    // enabled: false,
+    enabled: false,
     srcs: ["checks/src/test/java/**/*.kt"],
     static_libs: [
         "AndroidGlobalLintChecker",
