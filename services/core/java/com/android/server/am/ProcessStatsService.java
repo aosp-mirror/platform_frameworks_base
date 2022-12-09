@@ -634,7 +634,6 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             if (files != null) {
                 String highWaterMarkStr =
                         DateFormat.format("yyyy-MM-dd-HH-mm-ss", highWaterMarkMs).toString();
-                ProcessStats stats = new ProcessStats(false);
                 for (int i = files.size() - 1; i >= 0; i--) {
                     String fileName = files.get(i);
                     try {
@@ -647,7 +646,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                                     new File(fileName),
                                     ParcelFileDescriptor.MODE_READ_ONLY);
                             InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
-                            stats.reset();
+                            final ProcessStats stats = new ProcessStats(false);
                             stats.read(is);
                             is.close();
                             if (stats.mTimePeriodStartClock > newHighWaterMark) {
