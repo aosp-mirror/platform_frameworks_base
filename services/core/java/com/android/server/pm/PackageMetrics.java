@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static android.os.Process.INVALID_UID;
 
 import android.annotation.IntDef;
+import android.app.admin.SecurityLog;
 import android.content.pm.PackageManager;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.util.Pair;
@@ -67,8 +68,8 @@ final class PackageMetrics {
         mInstallRequest = installRequest;
     }
 
-    public void onInstallSucceed() {
-        // TODO(b/239722919): report to SecurityLog if on work profile or managed device
+    public void onInstallSucceed(int userId) {
+        reportInstallationToSecurityLog(userId);
         reportInstallationStats(true /* success */);
     }
 
@@ -77,8 +78,13 @@ final class PackageMetrics {
     }
 
     private void reportInstallationStats(boolean success) {
-        UserManagerInternal userManagerInternal =
+        final UserManagerInternal userManagerInternal =
                 LocalServices.getService(UserManagerInternal.class);
+        if (userManagerInternal == null) {
+            // UserManagerService is not available. Skip metrics reporting.
+            return;
+        }
+
         final long installDurationMillis =
                 System.currentTimeMillis() - mInstallStartTimestampMillis;
         // write to stats
@@ -196,10 +202,15 @@ final class PackageMetrics {
         }
     }
 
-    public static void onUninstallSucceeded(PackageRemovedInfo info, int deleteFlags,
-            UserManagerInternal userManagerInternal) {
+    public static void onUninstallSucceeded(PackageRemovedInfo info, int deleteFlags, int userId) {
         if (info.mIsUpdate) {
             // Not logging uninstalls caused by app updates
+            return;
+        }
+        final UserManagerInternal userManagerInternal =
+                LocalServices.getService(UserManagerInternal.class);
+        if (userManagerInternal == null) {
+            // UserManagerService is not available. Skip metrics reporting.
             return;
         }
         final int[] removedUsers = info.mRemovedUsers;
@@ -210,6 +221,9 @@ final class PackageMetrics {
                 info.mUid, removedUsers, removedUserTypes, originalUsers, originalUserTypes,
                 deleteFlags, PackageManager.DELETE_SUCCEEDED, info.mIsRemovedPackageSystemUpdate,
                 !info.mRemovedForAllUsers);
+        final String packageName = info.mRemovedPackage;
+        final long versionCode = info.mRemovedPackageVersionCode;
+        reportUninstallationToSecurityLog(packageName, versionCode, userId);
     }
 
     public static void onVerificationFailed(VerifyingSession verifyingSession) {
@@ -241,5 +255,33 @@ final class PackageMetrics {
                 false /* is_move_install */,
                 verifyingSession.isStaged() /* is_staged */
         );
+    }
+
+    private void reportInstallationToSecurityLog(int userId) {
+        if (!SecurityLog.isLoggingEnabled()) {
+            return;
+        }
+        final PackageSetting ps = mInstallRequest.getScannedPackageSetting();
+        if (ps == null) {
+            return;
+        }
+        final String packageName = ps.getPackageName();
+        final long versionCode = ps.getVersionCode();
+        if (!mInstallRequest.isInstallReplace()) {
+            SecurityLog.writeEvent(SecurityLog.TAG_PACKAGE_INSTALLED, packageName, versionCode,
+                    userId);
+        } else {
+            SecurityLog.writeEvent(SecurityLog.TAG_PACKAGE_UPDATED, packageName, versionCode,
+                    userId);
+        }
+    }
+
+    private static void reportUninstallationToSecurityLog(String packageName, long versionCode,
+            int userId) {
+        if (!SecurityLog.isLoggingEnabled()) {
+            return;
+        }
+        SecurityLog.writeEvent(SecurityLog.TAG_PACKAGE_UNINSTALLED, packageName, versionCode,
+                userId);
     }
 }

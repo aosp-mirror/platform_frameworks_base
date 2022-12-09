@@ -96,6 +96,9 @@ public class SecurityLog {
             TAG_WIFI_DISCONNECTION,
             TAG_BLUETOOTH_CONNECTION,
             TAG_BLUETOOTH_DISCONNECTION,
+            TAG_PACKAGE_INSTALLED,
+            TAG_PACKAGE_UPDATED,
+            TAG_PACKAGE_UNINSTALLED,
     })
     public @interface SecurityLogTag {}
 
@@ -563,6 +566,39 @@ public class SecurityLog {
             SecurityLogTags.SECURITY_BLUETOOTH_DISCONNECTION;
 
     /**
+     * Indicates that a package is installed.
+     * The log entry contains the following information about the
+     * event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] Name of the package being installed ({@code String})
+     * <li> [1] Package version code ({@code Long})
+     * <li> [2] UserId of the user that installed this package ({@code Integer})
+     */
+    public static final int TAG_PACKAGE_INSTALLED = SecurityLogTags.SECURITY_PACKAGE_INSTALLED;
+
+    /**
+     * Indicates that a package is updated.
+     * The log entry contains the following information about the
+     * event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] Name of the package being updated ({@code String})
+     * <li> [1] Package version code ({@code Long})
+     * <li> [2] UserId of the user that updated this package ({@code Integer})
+     */
+    public static final int TAG_PACKAGE_UPDATED = SecurityLogTags.SECURITY_PACKAGE_UPDATED;
+
+    /**
+     * Indicates that a package is uninstalled.
+     * The log entry contains the following information about the
+     * event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] Name of the package being uninstalled ({@code String})
+     * <li> [1] Package version code ({@code Long})
+     * <li> [2] UserId of the user that uninstalled this package ({@code Integer})
+     */
+    public static final int TAG_PACKAGE_UNINSTALLED = SecurityLogTags.SECURITY_PACKAGE_UNINSTALLED;
+
+    /**
      * Event severity level indicating that the event corresponds to normal workflow.
      */
     public static final int LEVEL_INFO = 1;
@@ -772,6 +808,9 @@ public class SecurityLog {
                     break;
                 case SecurityLog.TAG_CERT_AUTHORITY_INSTALLED:
                 case SecurityLog.TAG_CERT_AUTHORITY_REMOVED:
+                case SecurityLog.TAG_PACKAGE_INSTALLED:
+                case SecurityLog.TAG_PACKAGE_UPDATED:
+                case SecurityLog.TAG_PACKAGE_UNINSTALLED:
                     try {
                         userId = getIntegerData(2);
                     } catch (Exception e) {

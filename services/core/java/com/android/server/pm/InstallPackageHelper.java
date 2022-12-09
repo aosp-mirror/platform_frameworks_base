@@ -1608,6 +1608,7 @@ final class InstallPackageHelper {
                             ps.getUninstallReason(userId));
                 }
                 removedInfo.mIsExternal = oldPackage.isExternalStorage();
+                removedInfo.mRemovedPackageVersionCode = oldPackage.getLongVersionCode();
                 request.setRemovedInfo(removedInfo);
 
                 sysPkg = oldPackage.isSystem();
