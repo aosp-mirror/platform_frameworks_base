@@ -1042,7 +1042,6 @@ package android {
     field public static final int max = 16843062; // 0x1010136
     field public static final int maxAspectRatio = 16844128; // 0x1010560
     field public static final int maxButtonHeight = 16844029; // 0x10104fd
-    field public static final int maxConcurrentSessionsCount;
     field public static final int maxDate = 16843584; // 0x1010340
     field public static final int maxEms = 16843095; // 0x1010157
     field public static final int maxHeight = 16843040; // 0x1010120
