@@ -906,6 +906,9 @@ public class PackageInstaller {
     /**
      * Similar to {@link #checkInstallConstraints(List, InstallConstraints, Executor, Consumer)},
      * but the callback is invoked only when the constraints are satisfied or after timeout.
+     * <p>
+     * Note: the device idle constraint might take a long time to evaluate. The system will
+     * ensure the constraint is evaluated completely before handling timeout.
      *
      * @param callback Called when the constraints are satisfied or after timeout.
      *                 Intents sent to this callback contain:
