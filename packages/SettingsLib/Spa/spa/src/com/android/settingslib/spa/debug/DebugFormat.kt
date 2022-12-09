@@ -40,7 +40,7 @@ private fun EntryStatusData.debugContent(): String {
 }
 
 fun SettingsPage.debugArguments(): String {
-    val normArguments = parameter.normalize(arguments)
+    val normArguments = parameter.normalize(arguments, eraseRuntimeValues = true)
     if (normArguments == null || normArguments.isEmpty) return "[No arguments]"
     return normArguments.toString().removeRange(0, 6)
 }

@@ -19,9 +19,9 @@ package com.android.audiopolicytest;
 import android.app.Activity;
 import android.os.Bundle;
 
-public class AudioPolicyTestActivity extends Activity  {
+public class AudioVolumeTestActivity extends Activity  {
 
-    public AudioPolicyTestActivity() {
+    public AudioVolumeTestActivity() {
     }
 
     /** Called when the activity is first created. */

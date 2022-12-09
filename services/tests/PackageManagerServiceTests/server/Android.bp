@@ -94,6 +94,7 @@ android_test {
         "libunwindstack",
         "libutils",
         "netd_aidl_interface-V5-cpp",
+        "libservices.core.settings.testonly",
     ],
 
     dxflags: ["--multi-dex"],

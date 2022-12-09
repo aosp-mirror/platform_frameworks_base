@@ -31,10 +31,8 @@ const ui::StaticDisplayInfo& getDisplayInfo() {
         const std::vector<PhysicalDisplayId> ids = SurfaceComposerClient::getPhysicalDisplayIds();
         LOG_ALWAYS_FATAL_IF(ids.empty(), "%s: No displays", __FUNCTION__);
 
-        const sp<IBinder> token = SurfaceComposerClient::getPhysicalDisplayToken(ids.front());
-        LOG_ALWAYS_FATAL_IF(!token, "%s: No internal display", __FUNCTION__);
-
-        const status_t status = SurfaceComposerClient::getStaticDisplayInfo(token, &info);
+        const status_t status =
+                SurfaceComposerClient::getStaticDisplayInfo(ids.front().value, &info);
         LOG_ALWAYS_FATAL_IF(status, "%s: Failed to get display info", __FUNCTION__);
 #endif
         return info;

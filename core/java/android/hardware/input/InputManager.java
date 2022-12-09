@@ -78,6 +78,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -252,6 +253,31 @@ public final class InputManager {
             SWITCH_STATE_ON
     })
     public @interface SwitchState {}
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "REMAPPABLE_MODIFIER_KEY_" }, value = {
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_CTRL_LEFT,
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_CTRL_RIGHT,
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_META_LEFT,
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_META_RIGHT,
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_ALT_LEFT,
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_ALT_RIGHT,
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_SHIFT_LEFT,
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_SHIFT_RIGHT,
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_CAPS_LOCK,
+    })
+    public @interface RemappableModifierKey {
+        int REMAPPABLE_MODIFIER_KEY_CTRL_LEFT = KeyEvent.KEYCODE_CTRL_LEFT;
+        int REMAPPABLE_MODIFIER_KEY_CTRL_RIGHT = KeyEvent.KEYCODE_CTRL_RIGHT;
+        int REMAPPABLE_MODIFIER_KEY_META_LEFT = KeyEvent.KEYCODE_META_LEFT;
+        int REMAPPABLE_MODIFIER_KEY_META_RIGHT = KeyEvent.KEYCODE_META_RIGHT;
+        int REMAPPABLE_MODIFIER_KEY_ALT_LEFT = KeyEvent.KEYCODE_ALT_LEFT;
+        int REMAPPABLE_MODIFIER_KEY_ALT_RIGHT = KeyEvent.KEYCODE_ALT_RIGHT;
+        int REMAPPABLE_MODIFIER_KEY_SHIFT_LEFT = KeyEvent.KEYCODE_SHIFT_LEFT;
+        int REMAPPABLE_MODIFIER_KEY_SHIFT_RIGHT = KeyEvent.KEYCODE_SHIFT_RIGHT;
+        int REMAPPABLE_MODIFIER_KEY_CAPS_LOCK = KeyEvent.KEYCODE_CAPS_LOCK;
+    }
 
     /**
      * Switch State: Unknown.
@@ -848,6 +874,60 @@ public final class InputManager {
 
         try {
             mIm.removeKeyboardLayoutForInputDevice(identifier, keyboardLayoutDescriptor);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Remaps modifier keys. Remapping a modifier key to itself will clear any previous remappings
+     * for that key.
+     *
+     * @param fromKey The modifier key getting remapped.
+     * @param toKey The modifier key that it is remapped to.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.REMAP_MODIFIER_KEYS)
+    public void remapModifierKey(@RemappableModifierKey int fromKey,
+            @RemappableModifierKey int toKey) {
+        try {
+            mIm.remapModifierKey(fromKey, toKey);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears all existing modifier key remappings
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.REMAP_MODIFIER_KEYS)
+    public void clearAllModifierKeyRemappings() {
+        try {
+            mIm.clearAllModifierKeyRemappings();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Provides the current modifier key remapping
+     *
+     * @return a {fromKey, toKey} map that contains the existing modifier key remappings..
+     * {@link RemappableModifierKey}
+     *
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    @RequiresPermission(Manifest.permission.REMAP_MODIFIER_KEYS)
+    public Map<Integer, Integer> getModifierKeyRemapping() {
+        try {
+            return mIm.getModifierKeyRemapping();
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

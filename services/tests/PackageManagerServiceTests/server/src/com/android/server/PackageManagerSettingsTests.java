@@ -111,6 +111,10 @@ public class PackageManagerSettingsTests {
     private static final String PACKAGE_NAME_3 = "com.android.app3";
     private static final int TEST_RESOURCE_ID = 2131231283;
 
+    static {
+        System.loadLibrary("services.core.settings.testonly");
+    }
+
     @Mock
     RuntimePermissionsPersistence mRuntimePermissionsPersistence;
     @Mock

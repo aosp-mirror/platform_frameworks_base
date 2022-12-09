@@ -174,14 +174,18 @@ constructor(
 
     open fun cujCompleted() {
         entireScreenCovered()
-        navBarLayerIsVisibleAtStartAndEnd()
-        navBarWindowIsAlwaysVisible()
-        taskBarLayerIsVisibleAtStartAndEnd()
-        taskBarWindowIsAlwaysVisible()
         statusBarLayerIsVisibleAtStartAndEnd()
         statusBarLayerPositionAtStartAndEnd()
         statusBarWindowIsAlwaysVisible()
         visibleLayersShownMoreThanOneConsecutiveEntry()
         visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+        if (flicker.scenario.isTablet) {
+            taskBarLayerIsVisibleAtStartAndEnd()
+            taskBarWindowIsAlwaysVisible()
+        } else {
+            navBarLayerIsVisibleAtStartAndEnd()
+            navBarWindowIsAlwaysVisible()
+        }
     }
 }

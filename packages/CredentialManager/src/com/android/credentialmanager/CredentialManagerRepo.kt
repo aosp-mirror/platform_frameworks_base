@@ -518,7 +518,7 @@ class CredentialManagerRepo(
       GetCredentialRequest.Builder()
         .addGetCredentialOption(
           GetCredentialOption(
-            TYPE_PUBLIC_KEY_CREDENTIAL, Bundle(), /*requireSystemProvider=*/ false)
+            TYPE_PUBLIC_KEY_CREDENTIAL, Bundle(), Bundle(), /*requireSystemProvider=*/ false)
         )
         .build(),
       /*isFirstUsage=*/false,

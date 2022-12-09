@@ -27,13 +27,12 @@ import android.view.Surface;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
-
-import com.android.modules.utils.TypedXmlPullParser;
-import com.android.modules.utils.TypedXmlSerializer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -64,6 +63,8 @@ import java.util.Set;
 final class PersistentDataStore {
     static final String TAG = "InputManager";
 
+    private static final int INVALID_VALUE = -1;
+
     // Input device state by descriptor.
     private final HashMap<String, InputDeviceState> mInputDevices =
             new HashMap<String, InputDeviceState>();
@@ -76,6 +77,9 @@ final class PersistentDataStore {
 
     // True if there are changes to be saved.
     private boolean mDirty;
+
+    // Storing key remapping
+    private Map<Integer, Integer> mKeyRemapping = new HashMap<>();
 
     public PersistentDataStore() {
         this(new Injector());
@@ -187,6 +191,30 @@ final class PersistentDataStore {
         return state.getKeyboardBacklightBrightness(lightId);
     }
 
+    public boolean remapKey(int fromKey, int toKey) {
+        loadIfNeeded();
+        if (mKeyRemapping.getOrDefault(fromKey, INVALID_VALUE) == toKey) {
+            return false;
+        }
+        mKeyRemapping.put(fromKey, toKey);
+        setDirty();
+        return true;
+    }
+
+    public boolean clearMappedKey(int key) {
+        loadIfNeeded();
+        if (mKeyRemapping.containsKey(key)) {
+            mKeyRemapping.remove(key);
+            setDirty();
+        }
+        return true;
+    }
+
+    public Map<Integer, Integer> getKeyRemapping() {
+        loadIfNeeded();
+        return new HashMap<>(mKeyRemapping);
+    }
+
     public boolean removeUninstalledKeyboardLayouts(Set<String> availableKeyboardLayouts) {
         boolean changed = false;
         for (InputDeviceState state : mInputDevices.values()) {
@@ -229,6 +257,7 @@ final class PersistentDataStore {
     }
 
     private void clearState() {
+        mKeyRemapping.clear();
         mInputDevices.clear();
     }
 
@@ -280,7 +309,9 @@ final class PersistentDataStore {
         XmlUtils.beginDocument(parser, "input-manager-state");
         final int outerDepth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
-            if (parser.getName().equals("input-devices")) {
+            if (parser.getName().equals("key-remapping")) {
+                loadKeyRemappingFromXml(parser);
+            } else if (parser.getName().equals("input-devices")) {
                 loadInputDevicesFromXml(parser);
             }
         }
@@ -307,10 +338,31 @@ final class PersistentDataStore {
         }
     }
 
+    private void loadKeyRemappingFromXml(TypedXmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        final int outerDepth = parser.getDepth();
+        while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+            if (parser.getName().equals("remap")) {
+                int fromKey = parser.getAttributeInt(null, "from-key");
+                int toKey = parser.getAttributeInt(null, "to-key");
+                mKeyRemapping.put(fromKey, toKey);
+            }
+        }
+    }
+
     private void saveToXml(TypedXmlSerializer serializer) throws IOException {
         serializer.startDocument(null, true);
         serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
         serializer.startTag(null, "input-manager-state");
+        serializer.startTag(null, "key-remapping");
+        for (int fromKey : mKeyRemapping.keySet()) {
+            int toKey = mKeyRemapping.get(fromKey);
+            serializer.startTag(null, "remap");
+            serializer.attributeInt(null, "from-key", fromKey);
+            serializer.attributeInt(null, "to-key", toKey);
+            serializer.endTag(null, "remap");
+        }
+        serializer.endTag(null, "key-remapping");
         serializer.startTag(null, "input-devices");
         for (Map.Entry<String, InputDeviceState> entry : mInputDevices.entrySet()) {
             final String descriptor = entry.getKey();
@@ -329,7 +381,6 @@ final class PersistentDataStore {
         private static final String[] CALIBRATION_NAME = { "x_scale",
                 "x_ymix", "x_offset", "y_xmix", "y_scale", "y_offset" };
 
-        private static final int INVALID_VALUE = -1;
         private final TouchCalibration[] mTouchCalibration = new TouchCalibration[4];
         @Nullable
         private String mCurrentKeyboardLayout;

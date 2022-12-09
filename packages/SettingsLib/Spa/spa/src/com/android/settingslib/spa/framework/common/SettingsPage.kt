@@ -69,7 +69,7 @@ data class SettingsPage(
             parameter: List<NamedNavArgument> = emptyList(),
             arguments: Bundle? = null
         ): String {
-            val normArguments = parameter.normalize(arguments)
+            val normArguments = parameter.normalize(arguments, eraseRuntimeValues = true)
             return "$name:${normArguments?.toString()}".toHashId()
         }
     }

@@ -267,6 +267,8 @@ public abstract class NotificationListenerService extends Service {
      * will be restored via NotificationListeners#notifyPostedLocked()
      */
     public static final int REASON_LOCKDOWN = 23;
+    // If adding a new notification cancellation reason, you must also add handling for it in
+    // NotificationCancelledEvent.fromCancelReason.
 
     /**
      * @hide

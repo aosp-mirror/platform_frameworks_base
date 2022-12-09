@@ -292,10 +292,10 @@ key SEMICOLON {
 
 key APOSTROPHE {
     label:                              '\''
-    base:                               '\''
-    shift:                              '"'
-    ralt:                               '\u0301'
-    shift+ralt:                         '\u0308'
+    base:                               '\u030D'
+    shift:                              '\u030E'
+    ralt:                               '\u00B4'
+    shift+ralt:                         '\u00A8'
 }
 
 ### ROW 4

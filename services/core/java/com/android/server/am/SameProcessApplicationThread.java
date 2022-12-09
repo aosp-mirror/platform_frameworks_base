@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import android.annotation.NonNull;
 import android.app.IApplicationThread;
+import android.app.ReceiverInfo;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -26,6 +27,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -69,5 +71,21 @@ public class SameProcessApplicationThread extends IApplicationThread.Default {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    @Override
+    public void scheduleReceiverList(List<ReceiverInfo> info) {
+        for (int i = 0; i < info.size(); i++) {
+            ReceiverInfo r = info.get(i);
+            if (r.registered) {
+                scheduleRegisteredReceiver(r.receiver, r.intent,
+                        r.resultCode, r.data, r.extras, r.ordered, r.sticky,
+                        r.sendingUser, r.processState);
+            } else {
+                scheduleReceiver(r.intent, r.activityInfo, r.compatInfo,
+                        r.resultCode, r.data, r.extras, r.sync,
+                        r.sendingUser, r.processState);
+            }
+        }
     }
 }

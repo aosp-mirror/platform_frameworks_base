@@ -48,7 +48,10 @@ internal fun SettingsPageProvider.PageEvent(arguments: Bundle? = null) {
                     extraData = bundleOf(
                         LOG_DATA_DISPLAY_NAME to page.displayName,
                         LOG_DATA_SESSION_NAME to navController.sessionSourceName,
-                    )
+                    ).apply {
+                        val normArguments = parameter.normalize(arguments)
+                        if (normArguments != null) putAll(normArguments)
+                    }
                 )
             }
             if (event == Lifecycle.Event.ON_START) {

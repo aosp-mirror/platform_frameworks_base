@@ -38,13 +38,20 @@ public final class GetCredentialOption implements Parcelable {
     private final String mType;
 
     /**
-     * The request data.
+     * The full request data.
      */
     @NonNull
-    private final Bundle mData;
+    private final Bundle mCredentialRetrievalData;
 
     /**
-     * Determines whether or not the request must only be fulfilled by a system provider.
+     * The partial request data that will be sent to the provider during the initial credential
+     * candidate query stage.
+     */
+    @NonNull
+    private final Bundle mCandidateQueryData;
+
+    /**
+     * Determines whether the request must only be fulfilled by a system provider.
      */
     private final boolean mRequireSystemProvider;
 
@@ -57,11 +64,27 @@ public final class GetCredentialOption implements Parcelable {
     }
 
     /**
-     * Returns the request data.
+     * Returns the full request data.
      */
     @NonNull
-    public Bundle getData() {
-        return mData;
+    public Bundle getCredentialRetrievalData() {
+        return mCredentialRetrievalData;
+    }
+
+    /**
+     * Returns the partial request data that will be sent to the provider during the initial
+     * credential candidate query stage.
+     *
+     * For security reason, a provider will receive the request data in two stages. First it gets
+     * this partial request that do not contain sensitive user information; it uses this
+     * information to provide credential candidates that the [@code CredentialManager] will show to
+     * the user. Next, the full request data, {@link #getCredentialRetrievalData()}, will be sent to
+     * a provider only if the user further grants the consent by choosing a candidate from the
+     * provider.
+     */
+    @NonNull
+    public Bundle getCandidateQueryData() {
+        return mCandidateQueryData;
     }
 
     /**
@@ -75,7 +98,8 @@ public final class GetCredentialOption implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mType);
-        dest.writeBundle(mData);
+        dest.writeBundle(mCredentialRetrievalData);
+        dest.writeBundle(mCandidateQueryData);
         dest.writeBoolean(mRequireSystemProvider);
     }
 
@@ -88,7 +112,8 @@ public final class GetCredentialOption implements Parcelable {
     public String toString() {
         return "GetCredentialOption {"
                 + "type=" + mType
-                + ", data=" + mData
+                + ", requestData=" + mCredentialRetrievalData
+                + ", candidateQueryData=" + mCandidateQueryData
                 + ", requireSystemProvider=" + mRequireSystemProvider
                 + "}";
     }
@@ -96,44 +121,52 @@ public final class GetCredentialOption implements Parcelable {
     /**
      * Constructs a {@link GetCredentialOption}.
      *
-     * @param type the requested credential type
-     * @param data the request data
-     * @param requireSystemProvider whether or not the request must only be fulfilled by a system
-     *                              provider
-     *
+     * @param type                    the requested credential type
+     * @param credentialRetrievalData the request data
+     * @param candidateQueryData      the partial request data that will be sent to the provider
+     *                                during the initial credential candidate query stage
+     * @param requireSystemProvider   whether the request must only be fulfilled by a system
+     *                                provider
      * @throws IllegalArgumentException If type is empty.
      */
     public GetCredentialOption(
             @NonNull String type,
-            @NonNull Bundle data,
+            @NonNull Bundle credentialRetrievalData,
+            @NonNull Bundle candidateQueryData,
             boolean requireSystemProvider) {
         mType = Preconditions.checkStringNotEmpty(type, "type must not be empty");
-        mData = requireNonNull(data, "data must not be null");
+        mCredentialRetrievalData = requireNonNull(credentialRetrievalData,
+                "requestData must not be null");
+        mCandidateQueryData = requireNonNull(candidateQueryData,
+                "candidateQueryData must not be null");
         mRequireSystemProvider = requireSystemProvider;
     }
 
     private GetCredentialOption(@NonNull Parcel in) {
         String type = in.readString8();
         Bundle data = in.readBundle();
+        Bundle candidateQueryData = in.readBundle();
         boolean requireSystemProvider = in.readBoolean();
 
         mType = type;
         AnnotationValidations.validate(NonNull.class, null, mType);
-        mData = data;
-        AnnotationValidations.validate(NonNull.class, null, mData);
+        mCredentialRetrievalData = data;
+        AnnotationValidations.validate(NonNull.class, null, mCredentialRetrievalData);
+        mCandidateQueryData = candidateQueryData;
+        AnnotationValidations.validate(NonNull.class, null, mCandidateQueryData);
         mRequireSystemProvider = requireSystemProvider;
     }
 
     public static final @NonNull Parcelable.Creator<GetCredentialOption> CREATOR =
             new Parcelable.Creator<GetCredentialOption>() {
-        @Override
-        public GetCredentialOption[] newArray(int size) {
-            return new GetCredentialOption[size];
-        }
+                @Override
+                public GetCredentialOption[] newArray(int size) {
+                    return new GetCredentialOption[size];
+                }
 
-        @Override
-        public GetCredentialOption createFromParcel(@NonNull Parcel in) {
-            return new GetCredentialOption(in);
-        }
-    };
+                @Override
+                public GetCredentialOption createFromParcel(@NonNull Parcel in) {
+                    return new GetCredentialOption(in);
+                }
+            };
 }
