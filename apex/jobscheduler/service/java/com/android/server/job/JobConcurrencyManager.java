@@ -761,8 +761,8 @@ class JobConcurrencyManager {
             if (js != null) {
                 mWorkCountTracker.incrementRunningJobCount(jsc.getRunningJobWorkType());
                 assignment.workType = jsc.getRunningJobWorkType();
-                if (js.startedAsExpeditedJob && js.lastEvaluatedBias == JobInfo.BIAS_TOP_APP) {
-                    info.numRunningTopEj++;
+                if (js.startedWithImmediacyPrivilege) {
+                    info.numRunningImmediacyPrivileged++;
                 }
             }
 
@@ -829,11 +829,9 @@ class JobConcurrencyManager {
                 continue;
             }
 
-            final boolean isTopEj = nextPending.shouldTreatAsExpeditedJob()
-                    && nextPending.lastEvaluatedBias == JobInfo.BIAS_TOP_APP;
+            final boolean hasImmediacyPrivilege = hasImmediacyPrivilegeLocked(nextPending);
             if (DEBUG && isSimilarJobRunningLocked(nextPending)) {
-                Slog.w(TAG, "Already running similar " + (isTopEj ? "TOP-EJ" : "job")
-                        + " to: " + nextPending);
+                Slog.w(TAG, "Already running similar job to: " + nextPending);
             }
 
             // Factoring minChangedWaitingTimeMs into the min waiting time effectively limits
@@ -876,23 +874,25 @@ class JobConcurrencyManager {
                     final JobStatus runningJob = assignment.context.getRunningJobLocked();
                     // Maybe stop the job if it has had its day in the sun. Only allow replacing
                     // for one of the following conditions:
-                    // 1. We're putting in the current TOP app's EJ
+                    // 1. We're putting in a job that has the privilege of running immediately
                     // 2. There aren't too many jobs running AND the current job started when the
                     //    app was in the background
                     // 3. There aren't too many jobs running AND the current job started when the
                     //    app was on TOP, but the app has since left TOP
                     // 4. There aren't too many jobs running AND the current job started when the
-                    //    app was on TOP, the app is still TOP, but there are too many TOP+EJs
+                    //    app was on TOP, the app is still TOP, but there are too many
+                    //    immediacy-privileged jobs
                     //    running (because we don't want them to starve out other apps and the
                     //    current job has already run for the minimum guaranteed time).
                     // 5. This new job could be waiting for too long for a slot to open up
-                    boolean canReplace = isTopEj; // Case 1
+                    boolean canReplace = hasImmediacyPrivilege; // Case 1
                     if (!canReplace && !isInOverage) {
                         final int currentJobBias = mService.evaluateJobBiasLocked(runningJob);
                         canReplace = runningJob.lastEvaluatedBias < JobInfo.BIAS_TOP_APP // Case 2
                                 || currentJobBias < JobInfo.BIAS_TOP_APP // Case 3
                                 // Case 4
-                                || info.numRunningTopEj > .5 * mWorkTypeConfig.getMaxTotal();
+                                || info.numRunningImmediacyPrivileged
+                                        > (mWorkTypeConfig.getMaxTotal() / 2);
                     }
                     if (!canReplace && mMaxWaitTimeBypassEnabled) { // Case 5
                         if (nextPending.shouldTreatAsExpeditedJob()) {
@@ -919,7 +919,7 @@ class JobConcurrencyManager {
                     }
                 }
             }
-            if (selectedContext == null && (!isInOverage || isTopEj)) {
+            if (selectedContext == null && (!isInOverage || hasImmediacyPrivilege)) {
                 int lowestBiasSeen = Integer.MAX_VALUE;
                 long newMinPreferredUidOnlyWaitingTimeMs = Long.MAX_VALUE;
                 for (int p = preferredUidOnly.size() - 1; p >= 0; --p) {
@@ -962,12 +962,13 @@ class JobConcurrencyManager {
                     info.minPreferredUidOnlyWaitingTimeMs = newMinPreferredUidOnlyWaitingTimeMs;
                 }
             }
-            // Make sure to run EJs for the TOP app immediately.
-            if (isTopEj) {
+            // Make sure to run jobs with special privilege immediately.
+            if (hasImmediacyPrivilege) {
                 if (selectedContext != null
                         && selectedContext.context.getRunningJobLocked() != null) {
-                    // We're "replacing" a currently running job, but we want TOP EJs to start
-                    // immediately, so we'll start the EJ on a fresh available context and
+                    // We're "replacing" a currently running job, but we want immediacy-privileged
+                    // jobs to start immediately, so we'll start the privileged jobs on a fresh
+                    // available context and
                     // stop this currently running job to replace in two steps.
                     changed.add(selectedContext);
                     projectedRunningCount--;
@@ -1029,6 +1030,7 @@ class JobConcurrencyManager {
                     projectedRunningCount--;
                 }
                 if (selectedContext.newJob != null) {
+                    selectedContext.newJob.startedWithImmediacyPrivilege = hasImmediacyPrivilege;
                     projectedRunningCount++;
                     minChangedWaitingTimeMs = Math.min(minChangedWaitingTimeMs,
                             mService.getMinJobExecutionGuaranteeMs(selectedContext.newJob));
@@ -1101,6 +1103,18 @@ class JobConcurrencyManager {
         assignmentInfo.clear();
         mWorkCountTracker.resetStagingCount();
         mActivePkgStats.forEach(mPackageStatsStagingCountClearer);
+    }
+
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    boolean hasImmediacyPrivilegeLocked(@NonNull JobStatus job) {
+        // EJs & user-initiated jobs for the TOP app should run immediately.
+        // However, even for user-initiated jobs, if the app has not recently been in TOP or BAL
+        // state, we don't give the immediacy privilege so that we can try and maintain
+        // reasonably concurrency behavior.
+        return job.lastEvaluatedBias == JobInfo.BIAS_TOP_APP
+                // TODO(): include BAL state for user-initiated jobs
+                && (job.shouldTreatAsExpeditedJob() || job.shouldTreatAsUserInitiated());
     }
 
     @GuardedBy("mLock")
@@ -1361,7 +1375,7 @@ class JobConcurrencyManager {
         mActiveServices.remove(worker);
         if (mIdleContexts.size() < MAX_RETAINED_OBJECTS) {
             // Don't need to save all new contexts, but keep some extra around in case we need
-            // extras for another TOP+EJ overage.
+            // extras for another immediacy privileged overage.
             mIdleContexts.add(worker);
         } else {
             mNumDroppedContexts++;
@@ -1403,7 +1417,8 @@ class JobConcurrencyManager {
             }
             if (respectConcurrencyLimit) {
                 worker.clearPreferredUid();
-                // We're over the limit (because the TOP app scheduled a lot of EJs), but we should
+                // We're over the limit (because there were a lot of immediacy-privileged jobs
+                // scheduled), but we should
                 // be able to stop the other jobs soon so don't start running anything new until we
                 // get back below the limit.
                 noteConcurrency();
@@ -1627,17 +1642,17 @@ class JobConcurrencyManager {
                 }
             } else if (mWorkCountTracker.getPendingJobCount(WORK_TYPE_EJ) > 0) {
                 return "blocking " + workTypeToString(WORK_TYPE_EJ) + " queue";
-            } else if (js.startedAsExpeditedJob && js.lastEvaluatedBias == JobInfo.BIAS_TOP_APP) {
-                // Try not to let TOP + EJ starve out other apps.
-                int topEjCount = 0;
+            } else if (js.startedWithImmediacyPrivilege) {
+                // Try not to let jobs with immediacy privilege starve out other apps.
+                int immediacyPrivilegeCount = 0;
                 for (int r = mRunningJobs.size() - 1; r >= 0; --r) {
                     JobStatus j = mRunningJobs.valueAt(r);
-                    if (j.startedAsExpeditedJob && j.lastEvaluatedBias == JobInfo.BIAS_TOP_APP) {
-                        topEjCount++;
+                    if (j.startedWithImmediacyPrivilege) {
+                        immediacyPrivilegeCount++;
                     }
                 }
-                if (topEjCount > .5 * mWorkTypeConfig.getMaxTotal()) {
-                    return "prevent top EJ dominance";
+                if (immediacyPrivilegeCount > mWorkTypeConfig.getMaxTotal() / 2) {
+                    return "prevent immediacy privilege dominance";
                 }
             }
             // No other pending EJs. Return null so we don't let regular jobs preempt an EJ.
@@ -2566,11 +2581,11 @@ class JobConcurrencyManager {
     @VisibleForTesting
     static final class AssignmentInfo {
         public long minPreferredUidOnlyWaitingTimeMs;
-        public int numRunningTopEj;
+        public int numRunningImmediacyPrivileged;
 
         void clear() {
             minPreferredUidOnlyWaitingTimeMs = 0;
-            numRunningTopEj = 0;
+            numRunningImmediacyPrivileged = 0;
         }
     }
 
