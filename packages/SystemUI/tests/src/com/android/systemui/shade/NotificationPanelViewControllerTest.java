@@ -173,6 +173,7 @@ import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -611,6 +612,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("b/261472011 - Test appears inconsistent across environments")
     public void getVerticalSpaceForLockscreenNotifications_useLockIconBottomPadding_returnsSpaceAvailable() {
         setBottomPadding(/* stackScrollLayoutBottom= */ 180,
                 /* lockIconPadding= */ 20,
@@ -622,6 +624,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("b/261472011 - Test appears inconsistent across environments")
     public void getVerticalSpaceForLockscreenNotifications_useIndicationBottomPadding_returnsSpaceAvailable() {
         setBottomPadding(/* stackScrollLayoutBottom= */ 180,
                 /* lockIconPadding= */ 0,
@@ -633,6 +636,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("b/261472011 - Test appears inconsistent across environments")
     public void getVerticalSpaceForLockscreenNotifications_useAmbientBottomPadding_returnsSpaceAvailable() {
         setBottomPadding(/* stackScrollLayoutBottom= */ 180,
                 /* lockIconPadding= */ 0,
