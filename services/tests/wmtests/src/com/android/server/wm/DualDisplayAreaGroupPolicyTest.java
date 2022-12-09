@@ -206,7 +206,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         assertThat(newTaskBounds).isEqualTo(newDagBounds);
 
         // Activity config bounds is unchanged, size compat bounds is (860x[860x860/1200=616])
-        assertThat(mFirstActivity.getSizeCompatScale()).isLessThan(1f);
+        assertThat(mFirstActivity.getCompatScale()).isLessThan(1f);
         assertThat(activityConfigBounds.width()).isEqualTo(activityBounds.width());
         assertThat(activityConfigBounds.height()).isEqualTo(activityBounds.height());
         assertThat(activitySizeCompatBounds.height()).isEqualTo(newTaskBounds.height());

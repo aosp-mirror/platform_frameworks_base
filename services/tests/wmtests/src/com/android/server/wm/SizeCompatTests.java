@@ -3205,7 +3205,7 @@ public class SizeCompatTests extends WindowTestsBase {
     /** Asserts that the size of activity is larger than its parent so it is scaling. */
     private void assertScaled() {
         assertTrue(mActivity.inSizeCompatMode());
-        assertNotEquals(1f, mActivity.getSizeCompatScale(), 0.0001f /* delta */);
+        assertNotEquals(1f, mActivity.getCompatScale(), 0.0001f /* delta */);
     }
 
     /** Asserts that the activity is best fitted in the parent. */
