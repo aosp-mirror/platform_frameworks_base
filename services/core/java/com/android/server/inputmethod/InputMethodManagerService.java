@@ -38,7 +38,6 @@ import static android.server.inputmethod.InputMethodManagerServiceProto.IS_INTER
 import static android.server.inputmethod.InputMethodManagerServiceProto.LAST_IME_TARGET_WINDOW_NAME;
 import static android.server.inputmethod.InputMethodManagerServiceProto.LAST_SWITCH_USER_ID;
 import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_IME_WITH_HARD_KEYBOARD;
-import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_REQUESTED;
 import static android.server.inputmethod.InputMethodManagerServiceProto.SYSTEM_READY;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
@@ -623,11 +622,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         return mBindingController.hasConnection();
     }
 
-    /**
-     * Set if the client has asked for the input method to be shown.
-     */
-    private boolean mShowRequested;
-
     /** The token tracking the current IME request or {@code null} otherwise. */
     @Nullable
     private ImeTracker.Token mCurStatsToken;
@@ -1168,12 +1162,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     mVisibilityStateComputer.getImePolicy().setA11yRequestNoSoftKeyboard(
                             accessibilitySoftKeyboardSetting);
                     if (mVisibilityStateComputer.getImePolicy().isA11yRequestNoSoftKeyboard()) {
-                        final boolean showRequested = mShowRequested;
                         hideCurrentInputLocked(mCurFocusedWindow, null /* statsToken */,
                                 0 /* flags */, null /* resultReceiver */,
                                 SoftInputShowHideReason.HIDE_SETTINGS_ON_CHANGE);
-                        mShowRequested = showRequested;
-                    } else if (mShowRequested) {
+                    } else if (isShowRequestedForCurrentWindow()) {
                         showCurrentInputImplicitLocked(mCurFocusedWindow,
                                 SoftInputShowHideReason.SHOW_SETTINGS_ON_CHANGE);
                     }
@@ -2293,14 +2285,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
-    void clearInputShowRequestLocked() {
-        mShowRequested = mVisibilityStateComputer.isInputShown();
+    void clearInputShownLocked() {
         mVisibilityStateComputer.setInputShown(false);
     }
 
     @GuardedBy("ImfLock.class")
     private boolean isInputShown() {
         return mVisibilityStateComputer.isInputShown();
+    }
+
+    @GuardedBy("ImfLock.class")
+    private boolean isShowRequestedForCurrentWindow() {
+        final ImeTargetWindowState state = mVisibilityStateComputer.getWindowStateOrNull(
+                mCurFocusedWindow);
+        return state != null && state.isRequestedImeVisible();
     }
 
     @GuardedBy("ImfLock.class")
@@ -2339,7 +2337,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         setEnabledSessionLocked(session);
         session.mMethod.startInput(startInputToken, mCurInputConnection, mCurEditorInfo, restarting,
                 navButtonFlags, mCurImeDispatcher);
-        if (mShowRequested) {
+        if (isShowRequestedForCurrentWindow()) {
             if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
             // Re-use current statsToken, if it exists.
             final ImeTracker.Token statsToken = mCurStatsToken;
@@ -2558,7 +2556,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (!mPreventImeStartupUnlessTextEditor) {
             return false;
         }
-        if (mShowRequested) {
+        if (isShowRequestedForCurrentWindow()) {
             return false;
         }
         if (isSoftInputModeStateVisibleAllowed(unverifiedTargetSdkVersion, startInputFlags)) {
@@ -3369,9 +3367,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     ImeTracker.ORIGIN_SERVER_START_INPUT, reason);
         }
 
-        // TODO(b/246309664): make mShowRequested as per-window state.
-        mShowRequested = true;
-
         if (!mVisibilityStateComputer.onImeShowFlags(statsToken, flags)) {
             return false;
         }
@@ -3466,7 +3461,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // application process as a valid request, and have even promised such a behavior with CTS
         // since Android Eclair.  That's why we need to accept IMM#hideSoftInput() even when only
         // IMMS#InputShown indicates that the software keyboard is shown.
-        // TODO(b/246309664): Clean up, IMMS#mInputShown, IMMS#mImeWindowVis and mShowRequested.
+        // TODO(b/246309664): Clean up IMMS#mImeWindowVis
         IInputMethodInvoker curMethod = getCurMethodLocked();
         final boolean shouldHideSoftInput = curMethod != null
                 && (isInputShown() || (mImeWindowVis & InputMethodService.IME_ACTIVE) != 0);
@@ -3484,7 +3479,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
         mBindingController.setCurrentMethodNotVisible();
         mVisibilityStateComputer.clearImeShowFlags();
-        mShowRequested = false;
         // Cancel existing statsToken for show IME as we got a hide request.
         ImeTracker.get().onCancelled(mCurStatsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
         mCurStatsToken = null;
@@ -3699,7 +3693,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final ImeVisibilityResult imeVisRes = mVisibilityStateComputer.computeState(windowState,
                 isSoftInputModeStateVisibleAllowed(unverifiedTargetSdkVersion, startInputFlags));
         if (imeVisRes != null) {
-            switch(imeVisRes.getReason()) {
+            switch (imeVisRes.getReason()) {
                 case SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY:
                 case SoftInputShowHideReason.SHOW_AUTO_EDITOR_FORWARD_NAV:
                 case SoftInputShowHideReason.SHOW_STATE_VISIBLE_FORWARD_NAV:
@@ -4502,7 +4496,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 mCurEditorInfo.dumpDebug(proto, CUR_ATTRIBUTE);
             }
             proto.write(CUR_ID, getCurIdLocked());
-            proto.write(SHOW_REQUESTED, mShowRequested);
             mVisibilityStateComputer.dumpDebug(proto, fieldId);
             proto.write(IN_FULLSCREEN_MODE, mInFullscreenMode);
             proto.write(CUR_TOKEN, Objects.toString(getCurTokenLocked()));
@@ -4750,7 +4743,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 synchronized (ImfLock.class) {
                     try {
                         if (mEnabledSession != null && mEnabledSession.mSession != null
-                                && !mShowRequested) {
+                                && !isShowRequestedForCurrentWindow()) {
                             mEnabledSession.mSession.removeImeSurface();
                         }
                     } catch (RemoteException e) {
@@ -5738,7 +5731,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             method = getCurMethodLocked();
             p.println("  mCurMethod=" + getCurMethodLocked());
             p.println("  mEnabledSession=" + mEnabledSession);
-            p.println("  mShowRequested=" + mShowRequested);
             mVisibilityStateComputer.dump(pw);
             p.println("  mInFullscreenMode=" + mInFullscreenMode);
             p.println("  mSystemReady=" + mSystemReady + " mInteractive=" + mIsInteractive);

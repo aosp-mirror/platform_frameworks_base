@@ -350,7 +350,7 @@ final class InputMethodBindingController {
                     // should now try to restart the service for us.
                     mLastBindTime = SystemClock.uptimeMillis();
                     clearCurMethodAndSessions();
-                    mService.clearInputShowRequestLocked();
+                    mService.clearInputShownLocked();
                     mService.unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME);
                 }
             }

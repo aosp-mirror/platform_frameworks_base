@@ -254,9 +254,16 @@ public final class ImeVisibilityStateComputer {
      *                            {@link #STATE_HIDE_IME}.
      */
     void requestImeVisibility(IBinder windowToken, boolean showIme) {
-        final ImeTargetWindowState state = getOrCreateWindowState(windowToken);
-        state.setRequestedImeVisible(showIme);
-        setWindowState(windowToken, state);
+        ImeTargetWindowState state = getOrCreateWindowState(windowToken);
+        if (!mPolicy.mPendingA11yRequestingHideKeyboard) {
+            state.setRequestedImeVisible(showIme);
+        } else {
+            // As A11y requests no IME is just a temporary, so we don't change the requested IME
+            // visible in case the last visibility state goes wrong after leaving from the a11y
+            // policy.
+            mPolicy.mPendingA11yRequestingHideKeyboard = false;
+        }
+        setWindowStateInner(windowToken, state);
     }
 
     ImeTargetWindowState getOrCreateWindowState(IBinder windowToken) {
@@ -276,12 +283,22 @@ public final class ImeVisibilityStateComputer {
         ImeTargetWindowState state = getWindowStateOrNull(windowToken);
         if (state != null) {
             state.setRequestImeToken(token);
-            setWindowState(windowToken, state);
+            setWindowStateInner(windowToken, state);
         }
     }
 
-    void setWindowState(IBinder windowToken, ImeTargetWindowState newState) {
-        if (DEBUG) Slog.d(TAG, "setWindowState, windowToken=" + windowToken
+    void setWindowState(IBinder windowToken, @NonNull ImeTargetWindowState newState) {
+        final ImeTargetWindowState state = mRequestWindowStateMap.get(windowToken);
+        if (state != null && newState.hasEdiorFocused()) {
+            // Inherit the last requested IME visible state when the target window is still
+            // focused with an editor.
+            newState.setRequestedImeVisible(state.mRequestedImeVisible);
+        }
+        setWindowStateInner(windowToken, newState);
+    }
+
+    private void setWindowStateInner(IBinder windowToken, @NonNull ImeTargetWindowState newState) {
+        if (DEBUG) Slog.d(TAG, "setWindowStateInner, windowToken=" + windowToken
                 + ", state=" + newState);
         mRequestWindowStateMap.put(windowToken, newState);
     }
@@ -330,6 +347,10 @@ public final class ImeVisibilityStateComputer {
         // UI for input.
         if (state.hasEdiorFocused() && shouldRestoreImeVisibility(state)) {
             if (DEBUG) Slog.v(TAG, "Will show input to restore visibility");
+            // Inherit the last requested IME visible state when the target window is still
+            // focused with an editor.
+            state.setRequestedImeVisible(true);
+            setWindowStateInner(getWindowTokenFrom(state), state);
             return new ImeVisibilityResult(STATE_SHOW_IME_IMPLICIT,
                     SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY);
         }
@@ -512,6 +533,14 @@ public final class ImeVisibilityStateComputer {
          */
         private boolean mA11yRequestingNoSoftKeyboard;
 
+        /**
+         * Used when A11y request to hide IME temporary when receiving
+         * {@link AccessibilityService#SHOW_MODE_HIDDEN} from
+         * {@link android.provider.Settings.Secure#ACCESSIBILITY_SOFT_KEYBOARD_MODE} without
+         * changing the requested IME visible state.
+         */
+        private boolean mPendingA11yRequestingHideKeyboard;
+
         void setImeHiddenByDisplayPolicy(boolean hideIme) {
             mImeHiddenByDisplayPolicy = hideIme;
         }
@@ -523,6 +552,9 @@ public final class ImeVisibilityStateComputer {
         void setA11yRequestNoSoftKeyboard(int keyboardShowMode) {
             mA11yRequestingNoSoftKeyboard =
                     (keyboardShowMode & AccessibilityService.SHOW_MODE_MASK) == SHOW_MODE_HIDDEN;
+            if (mA11yRequestingNoSoftKeyboard) {
+                mPendingA11yRequestingHideKeyboard = true;
+            }
         }
 
         boolean isA11yRequestNoSoftKeyboard() {
