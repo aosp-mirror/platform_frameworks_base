@@ -287,7 +287,7 @@ public class DisplayManagerServiceTest {
 
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
 
-        final int[] displayIds = bs.getDisplayIds(/* includeDisabled= */ false);
+        final int displayIds[] = bs.getDisplayIds();
         final int size = displayIds.length;
         assertTrue(size > 0);
 
@@ -297,9 +297,7 @@ public class DisplayManagerServiceTest {
         );
         for (int i = 0; i < size; i++) {
             DisplayInfo info = bs.getDisplayInfo(displayIds[i]);
-            if (info != null) {
-                assertTrue(expectedDisplayTypeToViewPortTypeMapping.keySet().contains(info.type));
-            }
+            assertTrue(expectedDisplayTypeToViewPortTypeMapping.keySet().contains(info.type));
         }
 
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
@@ -1176,8 +1174,7 @@ public class DisplayManagerServiceTest {
             DisplayManagerService.BinderService displayManagerBinderService,
             FakeDisplayDevice displayDevice) {
 
-        final int[] displayIds = displayManagerBinderService.getDisplayIds(
-                /* includeDisabled= */ false);
+        final int[] displayIds = displayManagerBinderService.getDisplayIds();
         assertTrue(displayIds.length > 0);
         int displayId = Display.INVALID_DISPLAY;
         for (int i = 0; i < displayIds.length; i++) {

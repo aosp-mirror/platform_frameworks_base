@@ -65,6 +65,8 @@ public class AudioSystem
 
     private static final String TAG = "AudioSystem";
 
+    private static final int SOURCE_CODEC_TYPE_OPUS = 6; // TODO remove in U
+
     // private constructor to prevent instantiating AudioSystem
     private AudioSystem() {
         throw new UnsupportedOperationException("Trying to instantiate AudioSystem");
@@ -243,6 +245,8 @@ public class AudioSystem
     public static final int AUDIO_FORMAT_LDAC           = 0x23000000;
     /** @hide */
     public static final int AUDIO_FORMAT_LC3            = 0x2B000000;
+    /** @hide */
+    public static final int AUDIO_FORMAT_OPUS           = 0x08000000;
 
 
     /** @hide */
@@ -254,7 +258,9 @@ public class AudioSystem
             AUDIO_FORMAT_APTX,
             AUDIO_FORMAT_APTX_HD,
             AUDIO_FORMAT_LDAC,
-            AUDIO_FORMAT_LC3}
+            AUDIO_FORMAT_LC3,
+            AUDIO_FORMAT_OPUS
+           }
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioFormatNativeEnumForBtCodec {}
@@ -287,6 +293,7 @@ public class AudioSystem
             case AUDIO_FORMAT_APTX_HD: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD;
             case AUDIO_FORMAT_LDAC: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC;
             case AUDIO_FORMAT_LC3: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_LC3;
+            case AUDIO_FORMAT_OPUS: return SOURCE_CODEC_TYPE_OPUS; // TODO update in U
             default:
                 Log.e(TAG, "Unknown audio format 0x" + Integer.toHexString(audioFormat)
                         + " for conversion to BT codec");
@@ -329,6 +336,8 @@ public class AudioSystem
                 return AudioSystem.AUDIO_FORMAT_LDAC;
             case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LC3:
                 return AudioSystem.AUDIO_FORMAT_LC3;
+            case SOURCE_CODEC_TYPE_OPUS: // TODO update in U
+                return AudioSystem.AUDIO_FORMAT_OPUS;
             default:
                 Log.e(TAG, "Unknown BT codec 0x" + Integer.toHexString(btCodec)
                         + " for conversion to audio format");
@@ -2305,10 +2314,10 @@ public class AudioSystem
     public static int[] DEFAULT_STREAM_VOLUME = new int[] {
         4,  // STREAM_VOICE_CALL
         7,  // STREAM_SYSTEM
-        5,  // STREAM_RING
+        5,  // STREAM_RING           // configured in AudioService by config_audio_notif_vol_default
         5, // STREAM_MUSIC
         6,  // STREAM_ALARM
-        5,  // STREAM_NOTIFICATION
+        5,  // STREAM_NOTIFICATION   // configured in AudioService by config_audio_ring_vol_default
         7,  // STREAM_BLUETOOTH_SCO
         7,  // STREAM_SYSTEM_ENFORCED
         5, // STREAM_DTMF

@@ -42,9 +42,11 @@ import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
+import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.hardware.SensorManager;
 import android.hardware.SensorPrivacyManager;
+import android.hardware.camera2.CameraManager;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.ColorDisplayManager;
@@ -90,6 +92,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
 import com.android.systemui.Prefs;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.TestHarness;
@@ -404,6 +407,12 @@ public class FrameworkServicesModule {
     }
 
     @Provides
+    @Application
+    static AssetManager provideAssetManager(@Application Context context) {
+        return context.getAssets();
+    }
+
+    @Provides
     @Singleton
     static RoleManager provideRoleManager(Context context) {
         return context.getSystemService(RoleManager.class);
@@ -552,5 +561,11 @@ public class FrameworkServicesModule {
     @Singleton
     static SafetyCenterManager provideSafetyCenterManager(Context context) {
         return context.getSystemService(SafetyCenterManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static CameraManager provideCameraManager(Context context) {
+        return context.getSystemService(CameraManager.class);
     }
 }

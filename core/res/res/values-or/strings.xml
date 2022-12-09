@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> ପାଇଁ ଆପଣଙ୍କ କେରିଅର୍ ଦ୍ୱାରା ଅସ୍ଥାୟୀ ରୂପେ ବନ୍ଦ କରାଯାଇଛି"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ମୋବାଇଲ୍‌ ନେଟ୍‌ୱର୍କ ମିଳୁନାହିଁ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ନିଜ ପସନ୍ଦର ନେଟ୍‌ୱର୍କକୁ ଯିବାପାଇଁ ଚେଷ୍ଟା କରନ୍ତୁ। ବଦଳାଇବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"ଜରୁରୀକାଳୀନ କଲଗୁଡ଼ିକ ଉପଲବ୍ଧ ହୋଇନପାରେ"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> ୱାଇ-ଫାଇ ମାଧ୍ୟମରେ ଜରୁରୀକାଳୀନ କଲଗୁଡ଼ିକୁ ସମର୍ଥନ କରେ ନାହିଁ। ବିବରଣୀ ପାଇଁ ଟାପ କରନ୍ତୁ।"</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ଜରୁରୀକାଳୀନ କଲ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"ୱାଇ-ଫାଇ ସାହାଯ୍ୟରେ ଜରୁରୀକାଳୀନ କଲ୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ଆଲର୍ଟ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"କଲ୍‌ ଫରୱାର୍ଡିଂ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ଜରୁରୀକାଳୀନ କଲବ୍ୟାକ୍‍ ମୋଡ୍‍"</string>
@@ -581,13 +581,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ସ୍କ୍ରିନ୍ ଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ଜାରି ରଖିବାକୁ ଆପଣଙ୍କ ସ୍କ୍ରିନ୍ ଲକ୍ ଏଣ୍ଟର୍ କରନ୍ତୁ"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"ସେନ୍ସର ଉପରେ ଦୃଢ଼ ଭାବେ ଦବାନ୍ତୁ"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ଟିପଚିହ୍ନ ପ୍ରୋସେସ୍‍ କରାଯାଇପାରିଲା ନାହିଁ। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ଟିପଚିହ୍ନକୁ ଚିହ୍ନଟ କରାଯାଇପାରିବ ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ଟିପଚିହ୍ନ ସେନ୍ସରକୁ ପରିଷ୍କାର କରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"ସେନ୍ସରକୁ ପରିଷ୍କାର କରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"ସେନ୍ସର ଉପରେ ଦୃଢ଼ ଭାବେ ଦବାନ୍ତୁ"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ଆଙ୍ଗୁଠି ଖୁବ୍‍ ଧୀରେ ନିଆଗଲା। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ଅନ୍ୟ ଏକ ଟିପଚିହ୍ନ ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ବହୁତ ଉଜ୍ଜ୍ୱଳ"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"ପାୱାର ବଟନ ଦବାଇବା ଚିହ୍ନଟ କରାଯାଇଛି"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ଆଡଜଷ୍ଟ କରି ଦେଖନ୍ତୁ"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ପ୍ରତି ଥର ଆପଣଙ୍କ ଆଙ୍ଗୁଠିର ସ୍ଥାନ ସାମାନ୍ୟ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -599,16 +600,17 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ମୁହଁ ଚିହ୍ନଟ ହୋଇଛି, ଦୟାକରି ସୁନିଶ୍ଚିତ ଦବାନ୍ତୁ"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ଟିପଚିହ୍ନ ହାର୍ଡୱେର୍‍ ଉପଲବ୍ଧ ନାହିଁ।"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ଟିପଚିହ୍ନକୁ ସେଟ୍ ଅପ୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"ଟିପଚିହ୍ନର ସମୟ ଶେଷ ହେଲା । ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ସେଟଅପର ସମୟସୀମା ସମାପ୍ତ ହୋଇଯାଇଛି। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ଟିପଚିହ୍ନ କାର୍ଯ୍ୟ ବାତିଲ୍ କରାଗଲା।"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ଉପଯୋଗକର୍ତ୍ତା ଟିପଚିହ୍ନ କାର୍ଯ୍ୟ ବାତିଲ୍ କରିଛନ୍ତି।"</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"ବହୁତ ପ୍ରୟାସ କରାଗଲା। ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"ବହୁଥର ପ୍ରୟାସ କରିଛନ୍ତି। ଟିପଚିହ୍ନ ସେନ୍ସର୍‍ ଅକ୍ଷମ କରାଯାଇଛି।"</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"ଅନେକଗୁଡ଼ିଏ ପ୍ରଚେଷ୍ଟା। ଏହା ପରିବର୍ତ୍ତେ ସ୍କ୍ରିନ ଲକ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"ଅନେକଗୁଡ଼ିଏ ପ୍ରଚେଷ୍ଟା। ଏହା ପରିବର୍ତ୍ତେ ସ୍କ୍ରିନ ଲକ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ଟିପଚିହ୍ନକୁ ପ୍ରକ୍ରିୟାନ୍ୱିତ କରାଯାଇପାରିବ ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"କୌଣସି ଆଙ୍ଗୁଠି ଚିହ୍ନ ପଞ୍ଜୀକୃତ ହୋଇନାହିଁ।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ଏହି ଡିଭାଇସ୍‌ରେ ଟିପଚିହ୍ନ ସେନ୍‍ସର୍ ନାହିଁ।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ସେନ୍ସରକୁ ଅସ୍ଥାୟୀ ଭାବେ ଅକ୍ଷମ କରାଯାଇଛି।"</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"ଟିପଚିହ୍ନ ସେନ୍ସରକୁ ବ୍ୟବହାର କରାଯାଇପାରିବ ନାହିଁ। ଏକ ମରାମତି କେନ୍ଦ୍ରକୁ ଭିଜିଟ୍ କରନ୍ତୁ"</string>
+    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"ପାୱାର ବଟନ ଦବାଯାଇଛି"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ଆଙ୍ଗୁଠି <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ଟିପଚିହ୍ନ ବା ସ୍କ୍ରିନ୍ ଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
@@ -629,26 +631,33 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଅନଲକ୍"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"ଟିପଚିହ୍ନ ସେନ୍ସରକୁ ବ୍ୟବହାର କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ଏକ ମରାମତି କେନ୍ଦ୍ରକୁ ଭିଜିଟ୍ କରନ୍ତୁ।"</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"ମୁହଁର ଡାଟା କ୍ୟାପଚର୍ ହେଲାନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"ଫେସର ମଡେଲ ତିଆରି କରାଯାଇପାରିବ ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କର।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ଅତ୍ୟଧିକ ଉଜ୍ଵଳ। କମ୍ ଉଜ୍ବଳକରଣରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"ଅତ୍ୟଧିକ ଅନ୍ଧକାର। ଉଜ୍ବଳ ଲାଇଟ୍ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"ଫୋନ୍‌କୁ ଟିକେ ଦୂରକୁ ନିଅନ୍ତୁ।"</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"ଫୋନକୁ ପାଖକୁ ଆଣନ୍ତୁ।"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"ଫୋନକୁ ଉପରକୁ ମୁଭ କରନ୍ତୁ।"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ଫୋନ୍‌କୁ ତଳକୁ ମୁଭ କରନ୍ତୁ।"</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"ବାମ ପଟକୁ ଫୋନ୍ ଘୁଞ୍ଚାନ୍ତୁ।"</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"ଡାହାଣ ପଟକୁ ଫୋନ୍ ଘୁଞ୍ଚାନ୍ତୁ।"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"ଯଥେଷ୍ଟ ଆଲୋକ ନାହିଁ"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"ଫୋନକୁ ଟିକେ ଦୂରକୁ ନିଅନ୍ତୁ"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"ଫୋନକୁ ପାଖକୁ ଆଣନ୍ତୁ"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ଫୋନକୁ ଉପରକୁ ମୁଭ କରନ୍ତୁ"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ଫୋନ୍‌କୁ ତଳକୁ ମୁଭ କରନ୍ତୁ"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"ଫୋନକୁ ଆପଣଙ୍କ ବାମ ପଟକୁ ମୁଭ କରନ୍ତୁ"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"ଫୋନକୁ ଆପଣଙ୍କ ଡାହାଣ ପଟକୁ ମୁଭ କରନ୍ତୁ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"ଦୟାକରି ଆପଣଙ୍କ ଡିଭାଇସ୍‌କୁ ସିଧାସଳଖ ଦେଖନ୍ତୁ।"</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"ଆପଣଙ୍କ ମୁହଁକୁ ଫୋନ୍ ସାମ୍ନାରେ ସିଧାସଳଖ ରଖନ୍ତୁ।"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"ଆପଣଙ୍କ ଫେସ ଦେଖାଯାଉନାହିଁ। ଆପଣଙ୍କ ଫୋନକୁ ଆଖି ସିଧାରେ ଧରି ରଖନ୍ତୁ।"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"ଅତ୍ୟଧିକ ଅସ୍ଥିର। ଫୋନ୍‍କୁ ସ୍ଥିର ଭାବେ ଧରନ୍ତୁ।"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"ଦୟାକରି ଆପଣଙ୍କର ମୁହଁ ପୁଣି-ଏନ୍‍ରୋଲ୍ କରନ୍ତୁ।"</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"ଆଉ ମୁହଁ ଚିହ୍ନଟ କରିହେଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"ଅତ୍ୟନ୍ତ ସମପରି, ଦୟାକରି ଆପଣଙ୍କର ପୋଜ୍ ବଦଳାନ୍ତୁ।"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"ଆପଣଙ୍କର ମୁଣ୍ଡକୁ ଟିକିଏ ବୁଲାନ୍ତୁ।"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"ଆପଣଙ୍କ ମୁଣ୍ଡକୁ ଟିକିଏ କମ୍ ଟିଲ୍ଟ କରନ୍ତୁ।"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"ଆପଣଙ୍କର ମୁଣ୍ଡକୁ ଟିକିଏ ବୁଲାନ୍ତୁ।"</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"ଫେସ ଚିହ୍ନଟ କରାଯାଇପାରିବ ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କର।"</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"ଆପଣଙ୍କ ମୁଣ୍ଡର ସ୍ଥିତି ସାମାନ୍ୟ ବଦଳାନ୍ତୁ"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"ଆପଣଙ୍କ ଫୋନକୁ ସମ୍ପୂର୍ଣ୍ଣ ସିଧା ଦେଖନ୍ତୁ"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"ଆପଣଙ୍କ ଫୋନକୁ ସମ୍ପୂର୍ଣ୍ଣ ସିଧା ଦେଖନ୍ତୁ"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"ଆପଣଙ୍କ ଫୋନକୁ ସମ୍ପୂର୍ଣ୍ଣ ସିଧା ଦେଖନ୍ତୁ"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"ଆପଣଙ୍କ ମୁହଁକୁ ଲୁଚାଉଥିବା ଯେ କୌଣସି ଜିନିଷକୁ କାଢ଼ି ଦିଅନ୍ତୁ।"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"କଳା ବାର୍ ସମେତ ଆପଣଙ୍କ ସ୍କ୍ରିନ୍‌ର ଶୀର୍ଷକୁ ସଫା କରନ୍ତୁ"</string>
+    <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
+    <skip />
+    <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
+    <skip />
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"ଫେସର ମଡେଲ ତିଆରି କରାଯାଇପାରିବ ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କର।"</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"କଳା ଚଷମା ଚିହ୍ନଟ କରାଯାଇଛି। ଆପଣଙ୍କ ଫେସ ସମ୍ପୂର୍ଣ୍ଣ ଭାବରେ ଦେଖାଯିବା ଆବଶ୍ଯକ।"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"ଫେସରେ କଭରିଂ ଚିହ୍ନଟ କରାଯାଇଛି। ଆପଣଙ୍କ ଫେସ ସମ୍ପୂର୍ଣ୍ଣ ଭାବରେ ଦେଖାଯିବା ଆବଶ୍ଯକ।"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ମୁହଁ ଚିହ୍ନଟ କରିପାରିଲା ନାହିଁ। ହାର୍ଡୱେୟାର୍ ଉପଲବ୍ଧ ନାହିଁ।"</string>
@@ -1236,10 +1245,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> ପ୍ରସ୍ତୁତ କରାଯାଉଛି।"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ଆପ୍‍ ଆରମ୍ଭ କରାଯାଉଛି।"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ବୁଟ୍‍ ସମାପ୍ତ କରୁଛି।"</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ସେଟଅପ କରିବା ଜାରି ରଖିବେ?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ଆପଣ ପାୱାର ବଟନ ଦବାଇଛନ୍ତି — ଏହା ସାଧାରଣତଃ ଆପଣଙ୍କ ସ୍କ୍ରିନକୁ ବନ୍ଦ କରିଥାଏ।\n\nଆପଣଙ୍କ ଟିପଚିହ୍ନ ସେଟ ଅପ କରିବା ସମୟରେ ଧୀରେ ଟାପ କରିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"ସ୍କ୍ରିନ ବନ୍ଦ କରନ୍ତୁ"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"ସେଟଅପ କରିବା ଜାରି ରଖ"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"ସେଟଅପ ସମାପ୍ତ କରିବାକୁ ସ୍କ୍ରିନ ବନ୍ଦ କରନ୍ତୁ"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ଆପଣଙ୍କ ଟିପଚିହ୍ନ ଯାଞ୍ଚ କରିବା ଜାରି ରଖିବେ?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ଆପଣ ପାୱାର ବଟନ ଦବାଇଛନ୍ତି — ଏହା ସାଧାରଣତଃ ଆପଣଙ୍କ ସ୍କ୍ରିନକୁ ବନ୍ଦ କରିଥାଏ।\n\nଆପଣଙ୍କ ଟିପଚିହ୍ନ ଯାଞ୍ଚ କରିବା ପାଇଁ ଧୀରେ ଟାପ କରିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"ସ୍କ୍ରିନ ବନ୍ଦ କରନ୍ତୁ"</string>
@@ -1392,16 +1400,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"ସେଟଅପ୍‌ କରିବା ପାଇଁ ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"ସେଟ୍ ଅପ୍ କରିବାକୁ ଚୟନ କରନ୍ତୁ"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"ଆପଣଙ୍କୁ ପୁଣି ଡିଭାଇସ୍ ଫର୍ମାଟ୍ କରିବାକୁ ପଡ଼ିପାରେ। ବାହାର କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ଫଟୋ ଓ ମିଡିଆ ସ୍ଥାନାନ୍ତର କରିବା ପାଇଁ"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"ଫଟୋ, ଭିଡିଓ, ମ୍ୟୁଜିକ ଏବଂ ଆହୁରି ଅନେକ କିଛି ଷ୍ଟୋର କରିବା ପାଇଁ"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"ମିଡିଆ ଫାଇଲଗୁଡ଼ିକୁ ବ୍ରାଉଜ୍ କରନ୍ତୁ"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> ସହ ସମସ୍ୟା"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> କାମ କରୁନାହିଁ"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ଠିକ୍‌ କରିବାକୁ ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> ଖରାପ ହୋଇଯାଇଛି। ଠିକ୍‍ କରିବାକୁ ଚୟନ କରନ୍ତୁ।"</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"ଆପଣଙ୍କୁ ପୁଣି ଡିଭାଇସ୍ ଫର୍ମାଟ୍ କରିବାକୁ ପଡ଼ିପାରେ। ବାହାର କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> ସପୋର୍ଟ କରୁନାହିଁ"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> ଚିହ୍ନଟ କରାଯାଇଛି"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> କାମ କରୁନାହିଁ"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ଏହି ଡିଭାଇସ୍ ଏହି <xliff:g id="NAME">%s</xliff:g>କୁ ସପୋର୍ଟ କରେନାହିଁ। ଗୋଟିଏ ସପୋର୍ଟ କରୁଥିବା ଫର୍ମାଟ୍‌ରେ ସେଟ୍‍ ଅପ୍‍ କରିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"ସେଟ ଅପ କରିବା ପାଇଁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"<xliff:g id="NAME">%s</xliff:g>କୁ ଏକ ସମର୍ଥିତ ଫର୍ମାଟରେ ସେଟ୍ ଅପ୍ କରିବାକୁ ଚୟନ କରନ୍ତୁ।"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"ଆପଣଙ୍କୁ ପୁଣି ଡିଭାଇସ୍ ଫର୍ମାଟ୍ କରିବାକୁ ପଡ଼ିପାରେ"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>କୁ ହଠାତ୍‌ କାଢ଼ିଦିଆଗଲା"</string>
@@ -1914,6 +1922,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"ପସନ୍ଦର ଅଞ୍ଚଳ"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ଭାଷାର ନାମ ଟାଇପ୍‍ କରନ୍ତୁ"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"ପ୍ରସ୍ତାବିତ"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"ପ୍ରସ୍ତାବିତ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"ସମସ୍ତ ଭାଷା"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"ସମସ୍ତ ଅଞ୍ଚଳ"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
@@ -1931,18 +1940,19 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"କ୍ୟାମେରା ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ଫୋନରେ ଜାରି ରଖନ୍ତୁ"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"ମାଇକ୍ରୋଫୋନ ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Store ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV ସେଟିଂସ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"ଟାବଲେଟ ସେଟିଂସ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"ଫୋନ ସେଟିଂସ ଉପଲବ୍ଧ ନାହିଁ"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ Android TV ଡିଭାଇସରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଟାବଲେଟରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଫୋନରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"ବର୍ତ୍ତମାନ ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ Android TV ଡିଭାଇସରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"ବର୍ତ୍ତମାନ ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଟାବଲେଟରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"ବର୍ତ୍ତମାନ ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଫୋନରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"ବର୍ତ୍ତମାନ ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ Android TV ଡିଭାଇସରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"ବର୍ତ୍ତମାନ ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଟାବଲେଟରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"ବର୍ତ୍ତମାନ ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଫୋନରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"ଏହି ଆପ ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ ଅନୁରୋଧ କରୁଛି। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ Android TV ଡିଭାଇସରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"ଏହି ଆପ ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ ଅନୁରୋଧ କରୁଛି। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଟାବଲେଟରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"ଏହି ଆପ ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ ଅନୁରୋଧ କରୁଛି। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଫୋନରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ Android TV ଡିଭାଇସରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଟାବଲେଟରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଫୋନରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ଏହି ଆପକୁ Androidର ପୁରୁଣା ସଂସ୍କରଣ ପାଇଁ ନିର୍ମାଣ କରାଯାଇଥିଲା ଏବଂ ଠିକ୍ ଭାବେ କାମ କରିନପାରେ। ଏଥିପାଇଁ ଅପଡେଟ ଅଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ କିମ୍ବା ଡେଭେଲପରଙ୍କ ସହିତ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ଅପଡେଟ୍‌ ପାଇଁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ଆପଣଙ୍କ ପାଖରେ ନୂଆ ମେସେଜ୍‍ ରହିଛି"</string>
@@ -2035,7 +2045,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ଗୋଟିଏ-ଥର ଆକ୍ସେସ ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ଅନୁମତି ଦିଅନ୍ତୁ ନାହିଁ"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଯାହା ହୁଏ ତାହା ଡିଭାଇସ ଲଗଗୁଡ଼ିକ ରେକର୍ଡ କରେ। ସମସ୍ୟାଗୁଡ଼ିକୁ ଖୋଜି ସମାଧାନ କରିବାକୁ ଆପ୍ସ ଏହି ଲଗଗୁଡ଼ିକୁ ବ୍ୟବହାର କରିପାରିବ।\n\nକିଛି ଲଗରେ ସମ୍ବେଦନଶୀଳ ସୂଚନା ଥାଇପାରେ, ତେଣୁ ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଆପଣ ବିଶ୍ୱାସ କରୁଥିବା ଆପ୍ସକୁ ହିଁ ଅନୁମତି ଦିଅନ୍ତୁ। \n\nଯଦି ଆପଣ ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଅନ୍ତି ନାହିଁ, ତେବେ ବି ଏହା ନିଜର ଡିଭାଇସ ଲଗଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିପାରିବ। ଆପଣଙ୍କ ଡିଭାଇସର ନିର୍ମାତା ଏବେ ବି ଆପଣଙ୍କର ଡିଭାଇସରେ କିଛି ଲଗ କିମ୍ବା ସୂଚନାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ସକ୍ଷମ ହୋଇପାରନ୍ତି। ଅଧିକ ଜାଣନ୍ତୁ"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଯାହା ହୁଏ ତାହା ଡିଭାଇସ ଲଗଗୁଡ଼ିକ ରେକର୍ଡ କରେ। ସମସ୍ୟାଗୁଡ଼ିକୁ ଖୋଜି ସମାଧାନ କରିବାକୁ ଆପ୍ସ ଏହି ଲଗଗୁଡ଼ିକୁ ବ୍ୟବହାର କରିପାରିବ।\n\nକିଛି ଲଗରେ ସମ୍ବେଦନଶୀଳ ସୂଚନା ଥାଇପାରେ, ତେଣୁ ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଆପଣ ବିଶ୍ୱାସ କରୁଥିବା ଆପ୍ସକୁ ହିଁ ଅନୁମତି ଦିଅନ୍ତୁ। \n\nଯଦି ଆପଣ ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଅନ୍ତି ନାହିଁ, ତେବେ ବି ଏହା ନିଜର ଡିଭାଇସ ଲଗଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିପାରିବ। ଆପଣଙ୍କ ଡିଭାଇସର ନିର୍ମାତା ଏବେ ବି ଆପଣଙ୍କର ଡିଭାଇସରେ କିଛି ଲଗ କିମ୍ବା ସୂଚନାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ସକ୍ଷମ ହୋଇପାରନ୍ତି।"</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଯାହା ହୁଏ ତାହା ଡିଭାଇସ ଲଗଗୁଡ଼ିକ ରେକର୍ଡ କରେ। ସମସ୍ୟାଗୁଡ଼ିକୁ ଖୋଜି ସମାଧାନ କରିବାକୁ ଆପ୍ସ ଏହି ଲଗଗୁଡ଼ିକୁ ବ୍ୟବହାର କରିପାରିବ।\n\nକିଛି ଲଗରେ ସମ୍ବେଦନଶୀଳ ସୂଚନା ଥାଇପାରେ, ତେଣୁ ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଆପଣ ବିଶ୍ୱାସ କରୁଥିବା ଆପ୍ସକୁ ହିଁ ଅନୁମତି ଦିଅନ୍ତୁ। \n\nଯଦି ଆପଣ ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଅନ୍ତି ନାହିଁ, ତେବେ ବି ଏହା ନିଜର ଡିଭାଇସ ଲଗଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିପାରିବ। ଆପଣଙ୍କ ଡିଭାଇସର ନିର୍ମାତା ଏବେ ବି ଆପଣଙ୍କର ଡିଭାଇସରେ କିଛି ଲଗ କିମ୍ବା ସୂଚନାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ସକ୍ଷମ ହୋଇପାରନ୍ତି।\n\ng.co/android/devicelogsରେ ଅଧିକ ଜାଣନ୍ତୁ।"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>, <xliff:g id="APP_2">%2$s</xliff:g> ସ୍ଲାଇସ୍‌କୁ ଦେଖାଇବା ପାଇଁ ଚାହେଁ"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ଏଡିଟ କରନ୍ତୁ"</string>
@@ -2276,5 +2287,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ସକ୍ରିୟ ଆପଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରୁ ଫୋନର କ୍ୟାମେରାକୁ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରୁ ଟାବଲେଟର କ୍ୟାମେରାକୁ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"ଷ୍ଟ୍ରିମ କରିବା ସମୟରେ ଏହାକୁ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଫୋନରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ସିଷ୍ଟମ ଡିଫଲ୍ଟ"</string>
 </resources>

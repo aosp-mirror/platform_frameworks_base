@@ -67,6 +67,7 @@ import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
+import com.android.server.biometrics.sensors.fingerprint.PowerPressHandler;
 import com.android.server.biometrics.sensors.fingerprint.ServiceProvider;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
 
@@ -388,6 +389,11 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                 }
 
                 @Override
+                public void onBiometricAction(int action) {
+                    mBiometricStateCallback.onBiometricAction(action);
+                }
+
+                @Override
                 public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                         boolean success) {
                     mBiometricStateCallback.onClientFinished(clientMonitor, success);
@@ -441,7 +447,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     mBiometricContext, isStrongBiometric,
                     mTaskStackListener, mSensors.get(sensorId).getLockoutCache(),
                     mUdfpsOverlayController, mSidefpsController, allowBackgroundAuthentication,
-                    mSensors.get(sensorId).getSensorProperties());
+                    mSensors.get(sensorId).getSensorProperties(), mHandler);
             scheduleForSensor(sensorId, client, mBiometricStateCallback);
         });
     }
@@ -611,6 +617,21 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @Override
     public void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller) {
         mUdfpsOverlayController = controller;
+    }
+
+    @Override
+    public void onPowerPressed() {
+        for (int i = 0; i < mSensors.size(); i++) {
+            final Sensor sensor = mSensors.valueAt(i);
+            BaseClientMonitor client = sensor.getScheduler().getCurrentClient();
+            if (client == null) {
+                return;
+            }
+            if (!(client instanceof PowerPressHandler)) {
+                continue;
+            }
+            ((PowerPressHandler) client).onPowerPressed();
+        }
     }
 
     @Override

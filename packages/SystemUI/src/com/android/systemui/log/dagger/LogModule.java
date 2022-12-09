@@ -27,6 +27,8 @@ import com.android.systemui.log.LogBufferFactory;
 import com.android.systemui.log.LogcatEchoTracker;
 import com.android.systemui.log.LogcatEchoTrackerDebug;
 import com.android.systemui.log.LogcatEchoTrackerProd;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
+import com.android.systemui.util.Compile;
 
 import dagger.Module;
 import dagger.Provides;
@@ -48,16 +50,38 @@ public class LogModule {
     @Provides
     @SysUISingleton
     @NotificationLog
-    public static LogBuffer provideNotificationsLogBuffer(LogBufferFactory factory) {
-        return factory.create("NotifLog", 1000 /* maxSize */, false /* systrace */);
+    public static LogBuffer provideNotificationsLogBuffer(
+            LogBufferFactory factory,
+            NotifPipelineFlags notifPipelineFlags) {
+        int maxSize = 1000;
+        if (Compile.IS_DEBUG && notifPipelineFlags.isDevLoggingEnabled()) {
+            maxSize *= 10;
+        }
+        return factory.create("NotifLog", maxSize, false /* systrace */);
     }
 
-    /** Provides a logging buffer for all logs related to the data layer of notifications. */
+    /** Provides a logging buffer for logs related to heads up presentation of notifications. */
     @Provides
     @SysUISingleton
     @NotificationHeadsUpLog
     public static LogBuffer provideNotificationHeadsUpLogBuffer(LogBufferFactory factory) {
         return factory.create("NotifHeadsUpLog", 1000);
+    }
+
+    /** Provides a logging buffer for notification interruption calculations. */
+    @Provides
+    @SysUISingleton
+    @NotificationInterruptLog
+    public static LogBuffer provideNotificationInterruptLogBuffer(LogBufferFactory factory) {
+        return factory.create("NotifInterruptLog", 100);
+    }
+
+    /** Provides a logging buffer for notification rendering events. */
+    @Provides
+    @SysUISingleton
+    @NotificationRenderLog
+    public static LogBuffer provideNotificationRenderLogBuffer(LogBufferFactory factory) {
+        return factory.create("NotifRenderLog", 100);
     }
 
     /** Provides a logging buffer for all logs for lockscreen to shade transition events. */
@@ -66,6 +90,14 @@ public class LogModule {
     @LSShadeTransitionLog
     public static LogBuffer provideLSShadeTransitionControllerBuffer(LogBufferFactory factory) {
         return factory.create("LSShadeTransitionLog", 50);
+    }
+
+    /** Provides a logging buffer for Shade messages. */
+    @Provides
+    @SysUISingleton
+    @ShadeLog
+    public static LogBuffer provideShadeLogBuffer(LogBufferFactory factory) {
+        return factory.create("ShadeLog", 500, false);
     }
 
     /** Provides a logging buffer for all logs related to managing notification sections. */
@@ -239,6 +271,16 @@ public class LogModule {
         return factory.create("MediaCarouselCtlrLog", 20);
     }
 
+    /**
+     * Provides a {@link LogBuffer} for use in the status bar connectivity pipeline
+     */
+    @Provides
+    @SysUISingleton
+    @StatusBarConnectivityLog
+    public static LogBuffer provideStatusBarConnectivityBuffer(LogBufferFactory factory) {
+        return factory.create("SbConnectivity", 64);
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton
@@ -250,5 +292,46 @@ public class LogModule {
         } else {
             return new LogcatEchoTrackerProd();
         }
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for use by
+     * {@link com.android.systemui.biometrics.FaceHelpMessageDeferral}.
+     */
+    @Provides
+    @SysUISingleton
+    @BiometricMessagesLog
+    public static LogBuffer provideBiometricMessagesLogBuffer(LogBufferFactory factory) {
+        return factory.create("BiometricMessagesLog", 150);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for use by the status bar network controller.
+     */
+    @Provides
+    @SysUISingleton
+    @StatusBarNetworkControllerLog
+    public static LogBuffer provideStatusBarNetworkControllerBuffer(LogBufferFactory factory) {
+        return factory.create("StatusBarNetworkControllerLog", 20);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for use by {@link com.android.keyguard.KeyguardUpdateMonitor}.
+     */
+    @Provides
+    @SysUISingleton
+    @KeyguardUpdateMonitorLog
+    public static LogBuffer provideKeyguardUpdateMonitorLogBuffer(LogBufferFactory factory) {
+        return factory.create("KeyguardUpdateMonitorLog", 200);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for bluetooth-related logs.
+     */
+    @Provides
+    @SysUISingleton
+    @BluetoothLog
+    public static LogBuffer providerBluetoothLogBuffer(LogBufferFactory factory) {
+        return factory.create("BluetoothLog", 50);
     }
 }

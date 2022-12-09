@@ -18,10 +18,13 @@
 package com.android.server.wm.flicker
 
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.traces.region.RegionSubject
 import com.android.server.wm.traces.common.FlickerComponentName
 
-val LAUNCHER_COMPONENT = FlickerComponentName("com.google.android.apps.nexuslauncher",
-        "com.google.android.apps.nexuslauncher.NexusLauncherActivity")
+val LAUNCHER_COMPONENT = FlickerComponentName(
+    "com.google.android.apps.nexuslauncher",
+    "com.google.android.apps.nexuslauncher.NexusLauncherActivity"
+)
 
 /**
  * Checks that [FlickerComponentName.STATUS_BAR] window is visible and above the app windows in
@@ -109,9 +112,9 @@ fun FlickerTestParameter.statusBarLayerIsVisible() {
 fun FlickerTestParameter.navBarLayerPositionStart() {
     assertLayersStart {
         val display = this.entry.displays.minByOrNull { it.id }
-                ?: throw RuntimeException("There is no display!")
+            ?: throw RuntimeException("There is no display!")
         this.visibleRegion(FlickerComponentName.NAV_BAR)
-                .coversExactly(WindowUtils.getNavigationBarPosition(display))
+            .coversExactly(WindowUtils.getNavigationBarPosition(display, isGesturalNavigation))
     }
 }
 
@@ -122,9 +125,9 @@ fun FlickerTestParameter.navBarLayerPositionStart() {
 fun FlickerTestParameter.navBarLayerPositionEnd() {
     assertLayersEnd {
         val display = this.entry.displays.minByOrNull { it.id }
-                ?: throw RuntimeException("There is no display!")
+            ?: throw RuntimeException("There is no display!")
         this.visibleRegion(FlickerComponentName.NAV_BAR)
-                .coversExactly(WindowUtils.getNavigationBarPosition(display))
+            .coversExactly(WindowUtils.getNavigationBarPosition(display, isGesturalNavigation))
     }
 }
 
@@ -173,6 +176,33 @@ fun FlickerTestParameter.statusBarLayerRotatesScales() {
 }
 
 /**
+ * Asserts that the visibleRegion of the [FlickerComponentName.SNAPSHOT] layer can cover
+ * the visibleRegion of the given app component exactly
+ */
+fun FlickerTestParameter.snapshotStartingWindowLayerCoversExactlyOnApp(
+        component: FlickerComponentName) {
+    assertLayers {
+        invoke("snapshotStartingWindowLayerCoversExactlyOnApp") {
+            val snapshotLayers = it.subjects.filter { subject ->
+                subject.name.contains(
+                        FlickerComponentName.SNAPSHOT.toLayerName()) && subject.isVisible
+            }
+            // Verify the size of snapshotRegion covers appVisibleRegion exactly in animation.
+            if (snapshotLayers.isNotEmpty()) {
+                val visibleAreas = snapshotLayers.mapNotNull { snapshotLayer ->
+                    snapshotLayer.layer?.visibleRegion
+                }.toTypedArray()
+                val snapshotRegion = RegionSubject.assertThat(visibleAreas, this, timestamp)
+                val appVisibleRegion = it.visibleRegion(component)
+                if (snapshotRegion.region.isNotEmpty) {
+                    snapshotRegion.coversExactly(appVisibleRegion.region)
+                }
+            }
+        }
+    }
+}
+
+/**
  * Asserts that:
  *     [originalLayer] is visible at the start of the trace
  *     [originalLayer] becomes invisible during the trace and (in the same entry) [newLayer]
@@ -216,11 +246,11 @@ fun FlickerTestParameter.replacesLayer(
 
     assertLayersStart {
         this.isVisible(originalLayer)
-                .isInvisible(newLayer)
+            .isInvisible(newLayer)
     }
 
     assertLayersEnd {
         this.isInvisible(originalLayer)
-                .isVisible(newLayer)
+            .isVisible(newLayer)
     }
 }

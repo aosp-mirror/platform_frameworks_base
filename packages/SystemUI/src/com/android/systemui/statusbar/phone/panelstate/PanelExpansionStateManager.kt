@@ -20,6 +20,7 @@ import android.annotation.IntDef
 import android.util.Log
 import androidx.annotation.FloatRange
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.util.Compile
 import javax.inject.Inject
 
 /**
@@ -109,12 +110,12 @@ class PanelExpansionStateManager @Inject constructor() {
 
         debugLog(
             "panelExpansionChanged:" +
-                    "start state=${oldState.stateToString()} " +
-                    "end state=${state.stateToString()} " +
+                    "start state=${oldState.panelStateToString()} " +
+                    "end state=${state.panelStateToString()} " +
                     "f=$fraction " +
                     "expanded=$expanded " +
-                    "tracking=$tracking" +
-                    "drawDownPxAmount=$dragDownPxAmount " +
+                    "tracking=$tracking " +
+                    "dragDownPxAmount=$dragDownPxAmount " +
                     "${if (fullyOpened) " fullyOpened" else ""} " +
                     if (fullyClosed) " fullyClosed" else ""
         )
@@ -126,14 +127,15 @@ class PanelExpansionStateManager @Inject constructor() {
 
     /** Updates the panel state if necessary. */
     fun updateState(@PanelState state: Int) {
-        debugLog("update state: ${this.state.stateToString()} -> ${state.stateToString()}")
+        debugLog(
+            "update state: ${this.state.panelStateToString()} -> ${state.panelStateToString()}")
         if (this.state != state) {
             updateStateInternal(state)
         }
     }
 
     private fun updateStateInternal(@PanelState state: Int) {
-        debugLog("go state: ${this.state.stateToString()} -> ${state.stateToString()}")
+        debugLog("go state: ${this.state.panelStateToString()} -> ${state.panelStateToString()}")
         this.state = state
         stateListeners.forEach { it.onPanelStateChanged(state) }
     }
@@ -154,7 +156,7 @@ const val STATE_OPENING = 1
 const val STATE_OPEN = 2
 
 @PanelState
-private fun Int.stateToString(): String {
+fun Int.panelStateToString(): String {
     return when (this) {
         STATE_CLOSED -> "CLOSED"
         STATE_OPENING -> "OPENING"
@@ -163,5 +165,5 @@ private fun Int.stateToString(): String {
     }
 }
 
-private const val DEBUG = false
 private val TAG = PanelExpansionStateManager::class.simpleName
+private val DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG)

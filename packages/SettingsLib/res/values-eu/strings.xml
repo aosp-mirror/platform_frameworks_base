@@ -117,8 +117,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Fitxategi-transferentzia"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Sarrerako gailua"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Interneteko konexioa"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Kontaktuak partekatzea"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Erabili kontaktuak partekatzeko"</string>
+    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Kontaktuak eta deien historia partekatzeko aukera"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Erabili kontaktuetarako eta deien historia partekatzeko"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Interneteko konexioa partekatzea"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Testu-mezuak"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIMerako sarbidea"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Eman aukera jarduera guztien tamaina doitzeko, hainbat leihotan erabili ahal izan daitezen, ezarritako balioak kontuan izan gabe"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Gaitu estilo libreko leihoak"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Onartu estilo libreko leiho esperimentalak"</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"Ordenagailuetarako modua"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Babeskopien pasahitz lokala"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Une honetan, ordenagailuko babeskopia osoak ez daude babestuta"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Ordenagailuko eduki guztiaren babeskopia egiteko erabiltzen den pasahitza aldatzeko edo kentzeko, sakatu hau"</string>
@@ -476,12 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> guztiz kargatu arte"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> guztiz kargatu arte"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Kargatzeko aukera mugatuta dago aldi baterako"</string>
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - Kargatze-prozesua etenda dago"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Ezezaguna"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Kargatzen"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Bizkor kargatzen"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Mantso kargatzen"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Hari gabe kargatzen"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Kargatzen"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ez da kargatzen ari"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Konektatuta dago, baina ez da kargatzen ari"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Kargatuta"</string>
@@ -598,6 +600,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Berrezarri"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Kendu"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Gonbidatuentzako saioa berrezartzen…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Gonbidatuentzako saioa berrezarri nahi duzu?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Gonbidatuentzako saio berri bat abiaraziko da, eta saio honetako aplikazio eta datu guztiak ezabatuko"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Gonbidatu modutik irten nahi duzu?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Gonbidatuentzako saio honetako aplikazioak eta datuak ezabatuko dira"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Irten"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Gonbidatuaren jarduerak gorde nahi dituzu?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Saio honetako jarduerak gorde ditzakezu, edo aplikazio eta datu guztiak ezabatu"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Ezabatu"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Gorde"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Irten gonbidatu modutik"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Berrezarri gonbidatuentzako saioa"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Irten gonbidatu modutik"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Irtetean, jarduera guztiak ezabatuko dira"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Irtetean, jarduerak gorde edo ezabatu egin ditzakezu"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Berrezarri saioa jarduerak ezabatzeko; bestela, aukeratu jarduerak irtetean gordetzea edo ezabatzea"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Atera argazki bat"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Aukeratu irudi bat"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Hautatu argazki bat"</string>
@@ -639,11 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet bidezko konexioa eten da."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Deirik ez."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"Ordua"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"Data"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"Eguraldia"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Airearen kalitatea"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Igorpenari buruzko informazioa"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Aukeratu profileko argazki bat"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Erabiltzaile lehenetsiaren ikonoa"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Teklatu fisikoa"</string>

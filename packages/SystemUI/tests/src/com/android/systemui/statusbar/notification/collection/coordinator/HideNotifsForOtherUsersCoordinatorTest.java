@@ -18,7 +18,9 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -51,7 +53,6 @@ public class HideNotifsForOtherUsersCoordinatorTest extends SysuiTestCase {
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private PluggableListener<NotifFilter> mInvalidationListener;
-    @Mock private SharedCoordinatorLogger mLogger;
 
     @Captor private ArgumentCaptor<UserChangedListener> mUserChangedListenerCaptor;
     @Captor private ArgumentCaptor<NotifFilter> mNotifFilterCaptor;
@@ -66,7 +67,7 @@ public class HideNotifsForOtherUsersCoordinatorTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         HideNotifsForOtherUsersCoordinator coordinator =
-                new HideNotifsForOtherUsersCoordinator(mLockscreenUserManager, mLogger);
+                new HideNotifsForOtherUsersCoordinator(mLockscreenUserManager);
         coordinator.attach(mNotifPipeline);
 
         verify(mLockscreenUserManager).addUserChangedListener(mUserChangedListenerCaptor.capture());
@@ -102,6 +103,6 @@ public class HideNotifsForOtherUsersCoordinatorTest extends SysuiTestCase {
         mCapturedUserChangeListener.onCurrentProfilesChanged(new SparseArray<>());
 
         // THEN the filter is invalidated
-        verify(mInvalidationListener).onPluggableInvalidated(mCapturedNotifFilter);
+        verify(mInvalidationListener).onPluggableInvalidated(eq(mCapturedNotifFilter), any());
     }
 }

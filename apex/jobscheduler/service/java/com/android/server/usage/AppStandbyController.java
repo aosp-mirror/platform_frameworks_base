@@ -23,6 +23,7 @@ import static android.app.usage.UsageStatsManager.REASON_MAIN_MASK;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_PREDICTED;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_TIMEOUT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
+import static android.app.usage.UsageStatsManager.REASON_SUB_DEFAULT_APP_RESTORED;
 import static android.app.usage.UsageStatsManager.REASON_SUB_DEFAULT_APP_UPDATE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY;
 import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_USER_FLAG_INTERACTION;
@@ -1602,6 +1603,26 @@ public class AppStandbyController
         final long nowElapsed = mInjector.elapsedRealtime();
         final int bucket = mAllowRestrictedBucket ? STANDBY_BUCKET_RESTRICTED : STANDBY_BUCKET_RARE;
         setAppStandbyBucket(packageName, userId, bucket, reason, nowElapsed, false);
+    }
+
+    @Override
+    public void restoreAppsToRare(Set<String> restoredApps, int userId) {
+        final int reason = REASON_MAIN_DEFAULT | REASON_SUB_DEFAULT_APP_RESTORED;
+        final long nowElapsed = mInjector.elapsedRealtime();
+        for (String packageName : restoredApps) {
+            // If the package is not installed, don't allow the bucket to be set.
+            if (!mInjector.isPackageInstalled(packageName, 0, userId)) {
+                Slog.e(TAG, "Tried to restore bucket for uninstalled app: " + packageName);
+                continue;
+            }
+
+            final int standbyBucket = getAppStandbyBucket(packageName, userId, nowElapsed, false);
+            // Only update the standby bucket to RARE if the app is still in the NEVER bucket.
+            if (standbyBucket == STANDBY_BUCKET_NEVER) {
+                setAppStandbyBucket(packageName, userId, STANDBY_BUCKET_RARE, reason,
+                        nowElapsed, false);
+            }
+        }
     }
 
     @Override

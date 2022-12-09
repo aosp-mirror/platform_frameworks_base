@@ -72,13 +72,16 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bublina"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Spravovat"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bublina byla zavřena."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Klepnutím aplikaci restartujete a přejdete na režim celé obrazovky"</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Klepnutím tuto aplikaci kvůli lepšímu zobrazení restartujete."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problémy s fotoaparátem?\nKlepnutím vyřešíte"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nepomohlo to?\nKlepnutím se vrátíte"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Žádné problémy s fotoaparátem? Klepnutím zavřete."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Některé aplikace fungují nejlépe na výšku"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Pokud chcete maximálně využít prostor, vyzkoušejte jednu z těchto možností"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Otočením zařízení přejděte do režimu celé obrazovky"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Dvojitým klepnutím vedle aplikace změňte její umístění"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Lepší zobrazení a více možností"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Přetáhnutím druhé aplikace použijete rozdělenou obrazovku"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dvojitým klepnutím mimo aplikaci změníte její umístění"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Rozbalením zobrazíte další informace."</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"Maximalizovat"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Minimalizovat"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"Zavřít"</string>
 </resources>

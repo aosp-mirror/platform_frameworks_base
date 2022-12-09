@@ -28,7 +28,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -43,6 +42,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.graphics.Color;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -57,8 +57,8 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
-import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 
 import org.junit.Assert;
@@ -107,6 +107,28 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         mGroupRow.setHeadsUpAnimatingAwayListener(
                 animatingAway -> mHeadsUpAnimatingAway = animatingAway);
 
+    }
+
+    @Test
+    public void testUpdateBackgroundColors_isRecursive() {
+        mGroupRow.setTintColor(Color.RED);
+        mGroupRow.getChildNotificationAt(0).setTintColor(Color.GREEN);
+        mGroupRow.getChildNotificationAt(1).setTintColor(Color.BLUE);
+
+        assertThat(mGroupRow.getCurrentBackgroundTint()).isEqualTo(Color.RED);
+        assertThat(mGroupRow.getChildNotificationAt(0).getCurrentBackgroundTint())
+                .isEqualTo(Color.GREEN);
+        assertThat(mGroupRow.getChildNotificationAt(1).getCurrentBackgroundTint())
+                .isEqualTo(Color.BLUE);
+
+        mGroupRow.updateBackgroundColors();
+
+        int resetTint = mGroupRow.getCurrentBackgroundTint();
+        assertThat(resetTint).isNotEqualTo(Color.RED);
+        assertThat(mGroupRow.getChildNotificationAt(0).getCurrentBackgroundTint())
+                .isEqualTo(resetTint);
+        assertThat(mGroupRow.getChildNotificationAt(1).getCurrentBackgroundTint())
+                .isEqualTo(resetTint);
     }
 
     @Test
@@ -234,17 +256,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         row.setSensitive(true, true);
         row.setHideSensitive(true, false, 0, 0);
         verify(row).updateShelfIconColor();
-    }
-
-    @Test
-    public void setNeedsRedactionFreesViewWhenFalse() throws Exception {
-        ExpandableNotificationRow row = mNotificationTestHelper.createRow(FLAG_CONTENT_VIEW_ALL);
-        row.setNeedsRedaction(true);
-        row.getPublicLayout().setVisibility(View.GONE);
-
-        row.setNeedsRedaction(false);
-        TestableLooper.get(this).processAllMessages();
-        assertNull(row.getPublicLayout().getContractedChild());
     }
 
     @Test

@@ -40,6 +40,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Trace;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.DisplayMetrics;
@@ -223,13 +224,21 @@ public final class ImageDecoder implements AutoCloseable {
         public ImageDecoder createImageDecoder(boolean preferAnimation) throws IOException {
             return nCreate(mData, mOffset, mLength, preferAnimation, this);
         }
+
+        @Override
+        public String toString() {
+            return "ByteArraySource{len=" + mLength + "}";
+        }
     }
 
     private static class ByteBufferSource extends Source {
         ByteBufferSource(@NonNull ByteBuffer buffer) {
             mBuffer = buffer;
+            mLength = mBuffer.limit() - mBuffer.position();
         }
+
         private final ByteBuffer mBuffer;
+        private final int mLength;
 
         @Override
         public ImageDecoder createImageDecoder(boolean preferAnimation) throws IOException {
@@ -240,6 +249,11 @@ public final class ImageDecoder implements AutoCloseable {
             }
             ByteBuffer buffer = mBuffer.slice();
             return nCreate(buffer, buffer.position(), buffer.limit(), preferAnimation, this);
+        }
+
+        @Override
+        public String toString() {
+            return "ByteBufferSource{len=" + mLength + "}";
         }
     }
 
@@ -284,6 +298,16 @@ public final class ImageDecoder implements AutoCloseable {
             }
 
             return createFromAssetFileDescriptor(assetFd, preferAnimation, this);
+        }
+
+        @Override
+        public String toString() {
+            String uri = mUri.toString();
+            if (uri.length() > 90) {
+                // We want to keep the Uri usable - usually the authority and the end is important.
+                uri = uri.substring(0, 80) + ".." + uri.substring(uri.length() - 10);
+            }
+            return "ContentResolverSource{uri=" + uri + "}";
         }
     }
 
@@ -399,6 +423,11 @@ public final class ImageDecoder implements AutoCloseable {
                 return createFromStream(is, false, preferAnimation, this);
             }
         }
+
+        @Override
+        public String toString() {
+            return "InputStream{s=" + mInputStream + "}";
+        }
     }
 
     /**
@@ -444,6 +473,11 @@ public final class ImageDecoder implements AutoCloseable {
                 return createFromAsset(ais, preferAnimation, this);
             }
         }
+
+        @Override
+        public String toString() {
+            return "AssetInputStream{s=" + mAssetInputStream + "}";
+        }
     }
 
     private static class ResourceSource extends Source {
@@ -485,6 +519,17 @@ public final class ImageDecoder implements AutoCloseable {
 
             return createFromAsset((AssetInputStream) is, preferAnimation, this);
         }
+
+        @Override
+        public String toString() {
+            // Try to return a human-readable name for debugging purposes.
+            try {
+                return "Resource{name=" + mResources.getResourceName(mResId) + "}";
+            } catch (Resources.NotFoundException e) {
+                // It's ok if we don't find it, fall back to ID.
+            }
+            return "Resource{id=" + mResId + "}";
+        }
     }
 
     /**
@@ -521,6 +566,11 @@ public final class ImageDecoder implements AutoCloseable {
             InputStream is = mAssets.open(mFileName);
             return createFromAsset((AssetInputStream) is, preferAnimation, this);
         }
+
+        @Override
+        public String toString() {
+            return "AssetSource{file=" + mFileName + "}";
+        }
     }
 
     private static class FileSource extends Source {
@@ -533,6 +583,11 @@ public final class ImageDecoder implements AutoCloseable {
         @Override
         public ImageDecoder createImageDecoder(boolean preferAnimation) throws IOException {
             return createFromFile(mFile, preferAnimation, this);
+        }
+
+        @Override
+        public String toString() {
+            return "FileSource{file=" + mFile + "}";
         }
     }
 
@@ -556,6 +611,11 @@ public final class ImageDecoder implements AutoCloseable {
                 }
             }
             return createFromAssetFileDescriptor(assetFd, preferAnimation, this);
+        }
+
+        @Override
+        public String toString() {
+            return "CallableSource{obj=" + mCallable.toString() + "}";
         }
     }
 
@@ -1763,61 +1823,65 @@ public final class ImageDecoder implements AutoCloseable {
     @NonNull
     private static Drawable decodeDrawableImpl(@NonNull Source src,
             @Nullable OnHeaderDecodedListener listener) throws IOException {
+        Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, "ImageDecoder#decodeDrawable");
         try (ImageDecoder decoder = src.createImageDecoder(true /*preferAnimation*/)) {
             decoder.mSource = src;
             decoder.callHeaderDecoded(listener, src);
 
-            if (decoder.mUnpremultipliedRequired) {
-                // Though this could be supported (ignored) for opaque images,
-                // it seems better to always report this error.
-                throw new IllegalStateException("Cannot decode a Drawable " +
-                                                "with unpremultiplied pixels!");
-            }
-
-            if (decoder.mMutable) {
-                throw new IllegalStateException("Cannot decode a mutable " +
-                                                "Drawable!");
-            }
-
-            // this call potentially manipulates the decoder so it must be performed prior to
-            // decoding the bitmap and after decode set the density on the resulting bitmap
-            final int srcDensity = decoder.computeDensity(src);
-            if (decoder.mAnimated) {
-                // AnimatedImageDrawable calls postProcessAndRelease only if
-                // mPostProcessor exists.
-                ImageDecoder postProcessPtr = decoder.mPostProcessor == null ?
-                        null : decoder;
-                decoder.checkState(true);
-                Drawable d = new AnimatedImageDrawable(decoder.mNativePtr,
-                        postProcessPtr, decoder.mDesiredWidth,
-                        decoder.mDesiredHeight, decoder.getColorSpacePtr(),
-                        decoder.checkForExtended(), srcDensity,
-                        src.computeDstDensity(), decoder.mCropRect,
-                        decoder.mInputStream, decoder.mAssetFd);
-                // d has taken ownership of these objects.
-                decoder.mInputStream = null;
-                decoder.mAssetFd = null;
-                return d;
-            }
-
-            Bitmap bm = decoder.decodeBitmapInternal();
-            bm.setDensity(srcDensity);
-
-            Resources res = src.getResources();
-            byte[] np = bm.getNinePatchChunk();
-            if (np != null && NinePatch.isNinePatchChunk(np)) {
-                Rect opticalInsets = new Rect();
-                bm.getOpticalInsets(opticalInsets);
-                Rect padding = decoder.mOutPaddingRect;
-                if (padding == null) {
-                    padding = new Rect();
+            try (ImageDecoderSourceTrace unused = new ImageDecoderSourceTrace(decoder)) {
+                if (decoder.mUnpremultipliedRequired) {
+                    // Though this could be supported (ignored) for opaque images,
+                    // it seems better to always report this error.
+                    throw new IllegalStateException(
+                            "Cannot decode a Drawable with unpremultiplied pixels!");
                 }
-                nGetPadding(decoder.mNativePtr, padding);
-                return new NinePatchDrawable(res, bm, np, padding,
-                        opticalInsets, null);
-            }
 
-            return new BitmapDrawable(res, bm);
+                if (decoder.mMutable) {
+                    throw new IllegalStateException("Cannot decode a mutable Drawable!");
+                }
+
+                // this call potentially manipulates the decoder so it must be performed prior to
+                // decoding the bitmap and after decode set the density on the resulting bitmap
+                final int srcDensity = decoder.computeDensity(src);
+                if (decoder.mAnimated) {
+                    // AnimatedImageDrawable calls postProcessAndRelease only if
+                    // mPostProcessor exists.
+                    ImageDecoder postProcessPtr = decoder.mPostProcessor == null ? null : decoder;
+                    decoder.checkState(true);
+                    Drawable d = new AnimatedImageDrawable(decoder.mNativePtr,
+                            postProcessPtr, decoder.mDesiredWidth,
+                            decoder.mDesiredHeight, decoder.getColorSpacePtr(),
+                            decoder.checkForExtended(), srcDensity,
+                            src.computeDstDensity(), decoder.mCropRect,
+                            decoder.mInputStream, decoder.mAssetFd);
+                    // d has taken ownership of these objects.
+                    decoder.mInputStream = null;
+                    decoder.mAssetFd = null;
+                    return d;
+                }
+
+                Bitmap bm = decoder.decodeBitmapInternal();
+                bm.setDensity(srcDensity);
+
+                Resources res = src.getResources();
+                byte[] np = bm.getNinePatchChunk();
+                if (np != null && NinePatch.isNinePatchChunk(np)) {
+                    Rect opticalInsets = new Rect();
+                    bm.getOpticalInsets(opticalInsets);
+                    Rect padding = decoder.mOutPaddingRect;
+                    if (padding == null) {
+                        padding = new Rect();
+                    }
+                    nGetPadding(decoder.mNativePtr, padding);
+                    return new NinePatchDrawable(res, bm, np, padding,
+                            opticalInsets, null);
+                }
+
+                return new BitmapDrawable(res, bm);
+            }
+        } finally {
+            // Close the ImageDecoder#decode trace.
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
     }
 
@@ -1867,26 +1931,51 @@ public final class ImageDecoder implements AutoCloseable {
     @NonNull
     private static Bitmap decodeBitmapImpl(@NonNull Source src,
             @Nullable OnHeaderDecodedListener listener) throws IOException {
+        Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, "ImageDecoder#decodeBitmap");
         try (ImageDecoder decoder = src.createImageDecoder(false /*preferAnimation*/)) {
             decoder.mSource = src;
             decoder.callHeaderDecoded(listener, src);
+            try (ImageDecoderSourceTrace unused = new ImageDecoderSourceTrace(decoder)) {
+                // this call potentially manipulates the decoder so it must be performed prior to
+                // decoding the bitmap
+                final int srcDensity = decoder.computeDensity(src);
+                Bitmap bm = decoder.decodeBitmapInternal();
+                bm.setDensity(srcDensity);
 
-            // this call potentially manipulates the decoder so it must be performed prior to
-            // decoding the bitmap
-            final int srcDensity = decoder.computeDensity(src);
-            Bitmap bm = decoder.decodeBitmapInternal();
-            bm.setDensity(srcDensity);
+                Rect padding = decoder.mOutPaddingRect;
+                if (padding != null) {
+                    byte[] np = bm.getNinePatchChunk();
+                    if (np != null && NinePatch.isNinePatchChunk(np)) {
+                        nGetPadding(decoder.mNativePtr, padding);
+                    }
+                }
+                return bm;
+            }
+        } finally {
+            // Close the ImageDecoder#decode trace.
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+        }
+    }
 
-            Rect padding = decoder.mOutPaddingRect;
-            if (padding != null) {
-                byte[] np = bm.getNinePatchChunk();
-                if (np != null && NinePatch.isNinePatchChunk(np)) {
-                    nGetPadding(decoder.mNativePtr, padding);
+    /**
+     * This describes the decoder in traces to ease debugging. It has to be called after
+     * header has been decoded and width/height have been populated. It should be used
+     * inside a try-with-resources call to automatically complete the trace.
+     */
+    private static AutoCloseable traceDecoderSource(ImageDecoder decoder) {
+        final boolean resourceTracingEnabled = Trace.isTagEnabled(Trace.TRACE_TAG_RESOURCES);
+        if (resourceTracingEnabled) {
+            Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, describeDecoderForTrace(decoder));
+        }
+
+        return new AutoCloseable() {
+            @Override
+            public void close() throws Exception {
+                if (resourceTracingEnabled) {
+                    Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
                 }
             }
-
-            return bm;
-        }
+        };
     }
 
     // This method may modify the decoder so it must be called prior to performing the decode
@@ -1991,6 +2080,66 @@ public final class ImageDecoder implements AutoCloseable {
         if (mOnPartialImageListener == null
                 || !mOnPartialImageListener.onPartialImage(exception)) {
             throw exception;
+        }
+    }
+
+    /**
+     * Returns a short string describing what passed ImageDecoder is loading -
+     * it reports image dimensions, desired dimensions (if any) and source resource.
+     *
+     * The string appears in perf traces to simplify search for slow or memory intensive
+     * image loads.
+     *
+     * Example: ID#w=300;h=250;dw=150;dh=150;src=Resource{name=@resource}
+     *
+     * @hide
+     */
+    private static String describeDecoderForTrace(@NonNull ImageDecoder decoder) {
+        StringBuilder builder = new StringBuilder();
+        // Source dimensions
+        builder.append("ID#w=");
+        builder.append(decoder.mWidth);
+        builder.append(";h=");
+        builder.append(decoder.mHeight);
+        // Desired dimensions (if present)
+        if (decoder.mDesiredWidth != decoder.mWidth
+                || decoder.mDesiredHeight != decoder.mHeight) {
+            builder.append(";dw=");
+            builder.append(decoder.mDesiredWidth);
+            builder.append(";dh=");
+            builder.append(decoder.mDesiredHeight);
+        }
+        // Source description
+        builder.append(";src=");
+        builder.append(decoder.mSource);
+        return builder.toString();
+    }
+
+    /**
+     * Records a trace with information about the source being decoded - dimensions,
+     * desired dimensions and source information.
+     *
+     * It significantly eases debugging of slow resource loads on main thread and
+     * possible large memory consumers.
+     *
+     * @hide
+     */
+    private static final class ImageDecoderSourceTrace implements AutoCloseable {
+
+        private final boolean mResourceTracingEnabled;
+
+        ImageDecoderSourceTrace(ImageDecoder decoder) {
+            mResourceTracingEnabled = Trace.isTagEnabled(Trace.TRACE_TAG_RESOURCES);
+            if (mResourceTracingEnabled) {
+                Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, describeDecoderForTrace(decoder));
+            }
+        }
+
+        @Override
+        public void close() {
+            if (mResourceTracingEnabled) {
+                Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+            }
         }
     }
 

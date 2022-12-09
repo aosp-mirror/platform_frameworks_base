@@ -16,6 +16,7 @@
 
 package com.android.systemui.media
 
+import android.app.PendingIntent
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
@@ -26,20 +27,26 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
+import javax.inject.Provider
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
-import javax.inject.Provider
 
 private val DATA = MediaTestUtils.emptyMediaData
 
@@ -64,6 +71,11 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var dumpManager: DumpManager
     @Mock lateinit var logger: MediaUiEventLogger
     @Mock lateinit var debugLogger: MediaCarouselControllerLogger
+    @Mock lateinit var mediaPlayer: MediaControlPanel
+    @Mock lateinit var mediaViewController: MediaViewController
+    @Mock lateinit var smartspaceMediaData: SmartspaceMediaData
+    @Captor lateinit var listener: ArgumentCaptor<MediaDataManager.Listener>
+    @Captor lateinit var visualStabilityCallback: ArgumentCaptor<OnReorderingAllowedListener>
 
     private val clock = FakeSystemClock()
     private lateinit var mediaCarouselController: MediaCarouselController
@@ -87,7 +99,12 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             logger,
             debugLogger
         )
-
+        verify(mediaDataManager).addListener(capture(listener))
+        verify(visualStabilityProvider)
+            .addPersistentReorderingAllowedListener(capture(visualStabilityCallback))
+        whenever(mediaControlPanelFactory.get()).thenReturn(mediaPlayer)
+        whenever(mediaPlayer.mediaViewController).thenReturn(mediaViewController)
+        whenever(mediaDataManager.smartspaceMediaData).thenReturn(smartspaceMediaData)
         MediaPlayerData.clear()
     }
 
@@ -257,5 +274,128 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         mediaCarouselController.removePlayer(SMARTSPACE_KEY)
 
         verify(logger).logRecommendationRemoved(eq(packageName), eq(instanceId!!))
+    }
+
+    fun testMediaLoaded_ScrollToActivePlayer() {
+        listener.value.onMediaDataLoaded("playing local",
+                null,
+                DATA.copy(active = true, isPlaying = true,
+                        playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = false)
+        )
+        listener.value.onMediaDataLoaded("paused local",
+                null,
+                DATA.copy(active = true, isPlaying = false,
+                        playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = false))
+        // adding a media recommendation card.
+        MediaPlayerData.addMediaRecommendation(SMARTSPACE_KEY, EMPTY_SMARTSPACE_MEDIA_DATA, panel,
+                false, clock)
+        mediaCarouselController.shouldScrollToActivePlayer = true
+        // switching between media players.
+        listener.value.onMediaDataLoaded("playing local",
+        "playing local",
+                DATA.copy(active = true, isPlaying = false,
+                        playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = true)
+        )
+        listener.value.onMediaDataLoaded("paused local",
+                "paused local",
+                DATA.copy(active = true, isPlaying = true,
+                        playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = false))
+
+        assertEquals(
+                MediaPlayerData.getMediaPlayerIndex("paused local"),
+                mediaCarouselController.mediaCarouselScrollHandler.visibleMediaIndex
+        )
+    }
+
+    @Test
+    fun testMediaLoadedFromRecommendationCard_ScrollToActivePlayer() {
+        MediaPlayerData.addMediaRecommendation(SMARTSPACE_KEY, EMPTY_SMARTSPACE_MEDIA_DATA, panel,
+                false, clock)
+        listener.value.onMediaDataLoaded("playing local",
+                null,
+                DATA.copy(active = true, isPlaying = true,
+                        playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = false)
+        )
+
+        var playerIndex = MediaPlayerData.getMediaPlayerIndex("playing local")
+        assertEquals(
+                playerIndex,
+                mediaCarouselController.mediaCarouselScrollHandler.visibleMediaIndex
+        )
+        assertEquals(playerIndex, 0)
+
+        // Replaying the same media player one more time.
+        // And check that the card stays in its position.
+        listener.value.onMediaDataLoaded("playing local",
+                null,
+                DATA.copy(active = true, isPlaying = true,
+                        playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = false)
+        )
+        playerIndex = MediaPlayerData.getMediaPlayerIndex("playing local")
+        assertEquals(playerIndex, 0)
+    }
+
+    @Test
+    fun testRecommendationRemovedWhileNotVisible_updateHostVisibility() {
+        var result = false
+        mediaCarouselController.updateHostVisibility = { result = true }
+
+        whenever(visualStabilityProvider.isReorderingAllowed).thenReturn(true)
+        listener.value.onSmartspaceMediaDataRemoved(SMARTSPACE_KEY, false)
+
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun testRecommendationRemovedWhileVisible_thenReorders_updateHostVisibility() {
+        var result = false
+        mediaCarouselController.updateHostVisibility = { result = true }
+
+        whenever(visualStabilityProvider.isReorderingAllowed).thenReturn(false)
+        listener.value.onSmartspaceMediaDataRemoved(SMARTSPACE_KEY, false)
+        assertEquals(false, result)
+
+        visualStabilityCallback.value.onReorderingAllowed()
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun testGetCurrentVisibleMediaContentIntent() {
+        val clickIntent1 = mock(PendingIntent::class.java)
+        val player1 = Triple("player1",
+                DATA.copy(clickIntent = clickIntent1),
+                1000L)
+        clock.setCurrentTimeMillis(player1.third)
+        MediaPlayerData.addMediaPlayer(player1.first,
+                player1.second.copy(notificationKey = player1.first),
+                panel, clock, isSsReactivated = false)
+
+        assertEquals(mediaCarouselController.getCurrentVisibleMediaContentIntent(), clickIntent1)
+
+        val clickIntent2 = mock(PendingIntent::class.java)
+        val player2 = Triple("player2",
+                DATA.copy(clickIntent = clickIntent2),
+                2000L)
+        clock.setCurrentTimeMillis(player2.third)
+        MediaPlayerData.addMediaPlayer(player2.first,
+                player2.second.copy(notificationKey = player2.first),
+                panel, clock, isSsReactivated = false)
+
+        // mediaCarouselScrollHandler.visibleMediaIndex is unchanged (= 0), and the new player is
+        // added to the front because it was active more recently.
+        assertEquals(mediaCarouselController.getCurrentVisibleMediaContentIntent(), clickIntent2)
+
+        val clickIntent3 = mock(PendingIntent::class.java)
+        val player3 = Triple("player3",
+                DATA.copy(clickIntent = clickIntent3),
+                500L)
+        clock.setCurrentTimeMillis(player3.third)
+        MediaPlayerData.addMediaPlayer(player3.first,
+                player3.second.copy(notificationKey = player3.first),
+                panel, clock, isSsReactivated = false)
+
+        // mediaCarouselScrollHandler.visibleMediaIndex is unchanged (= 0), and the new player is
+        // added to the end because it was active less recently.
+        assertEquals(mediaCarouselController.getCurrentVisibleMediaContentIntent(), clickIntent2)
     }
 }

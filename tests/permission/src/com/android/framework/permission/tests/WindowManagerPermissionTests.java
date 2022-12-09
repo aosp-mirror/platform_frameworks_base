@@ -124,16 +124,6 @@ public class WindowManagerPermissionTests extends TestCase {
     @SmallTest
     public void testSET_ORIENTATION() {
         try {
-            mWm.updateRotation(true, false);
-            fail("IWindowManager.updateRotation did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
             mWm.freezeRotation(-1);
             fail("IWindowManager.freezeRotation did not throw SecurityException as"
                     + " expected");

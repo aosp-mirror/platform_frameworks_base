@@ -62,7 +62,10 @@ message ConversationInfoProto {
   // The timestamp of the last event in millis.
   optional int64 last_event_timestamp = 9;
 
-  // Next tag: 10
+  // The timestamp this conversation was created in millis.
+  optional int64 creation_timestamp = 10;
+
+  // Next tag: 11
 }
 
 // On disk data of events.

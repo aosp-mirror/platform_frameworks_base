@@ -722,6 +722,25 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
+    public void testAlarmBroadcastOption() throws Exception {
+        final long triggerTime = mNowElapsedTest + 5000;
+        final PendingIntent alarmPi = getNewMockPendingIntent();
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, triggerTime, alarmPi);
+
+        mNowElapsedTest = mTestTimer.getElapsed();
+        mTestTimer.expire();
+
+        final ArgumentCaptor<PendingIntent.OnFinished> onFinishedCaptor =
+                ArgumentCaptor.forClass(PendingIntent.OnFinished.class);
+        final ArgumentCaptor<Bundle> optionsCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(alarmPi).send(eq(mMockContext), eq(0), any(Intent.class),
+                onFinishedCaptor.capture(), any(Handler.class), isNull(),
+                optionsCaptor.capture());
+        assertTrue(optionsCaptor.getValue()
+                .getBoolean(BroadcastOptions.KEY_ALARM_BROADCAST, false));
+    }
+
+    @Test
     public void testUpdateConstants() {
         setDeviceConfigLong(KEY_MIN_FUTURITY, 5);
         setDeviceConfigLong(KEY_MIN_INTERVAL, 10);
@@ -2338,10 +2357,15 @@ public class AlarmManagerServiceTest {
         mBinder.set(TEST_CALLING_PACKAGE, RTC_WAKEUP, 1234, WINDOW_EXACT, 0, 0,
                 alarmPi, null, null, null, alarmClock);
 
+        final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mService).setImpl(eq(RTC_WAKEUP), eq(1234L), eq(WINDOW_EXACT), eq(0L),
                 eq(alarmPi), isNull(), isNull(), eq(FLAG_STANDALONE | FLAG_WAKE_FROM_IDLE),
-                isNull(), eq(alarmClock), eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE), isNull(),
-                eq(EXACT_ALLOW_REASON_COMPAT));
+                isNull(), eq(alarmClock), eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE),
+                bundleCaptor.capture(), eq(EXACT_ALLOW_REASON_COMPAT));
+
+        final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
+        final int type = idleOptions.getTemporaryAppAllowlistType();
+        assertEquals(TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED, type);
     }
 
     @Test

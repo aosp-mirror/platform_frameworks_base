@@ -684,7 +684,7 @@
 
     <!-- Lighting and shadow properties -->
     <dimen name="light_y">0dp</dimen>
-    <dimen name="light_z">600dp</dimen>
+    <dimen name="light_z">500dp</dimen>
     <dimen name="light_radius">800dp</dimen>
     <item type="dimen" format="float" name="ambient_shadow_alpha">0.039</item>
     <item type="dimen" format="float" name="spot_shadow_alpha">0.19</item>

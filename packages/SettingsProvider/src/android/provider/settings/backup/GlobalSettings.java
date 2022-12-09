@@ -78,6 +78,7 @@ public class GlobalSettings {
         Settings.Global.POWER_BUTTON_LONG_PRESS,
         Settings.Global.AUTOMATIC_POWER_SAVE_MODE,
         Settings.Global.ADVANCED_BATTERY_USAGE_AMOUNT,
+        Settings.Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED,
         Settings.Global.POWER_BUTTON_LONG_PRESS_DURATION_MS,
         Settings.Global.USER_PREFERRED_REFRESH_RATE,
         Settings.Global.USER_PREFERRED_RESOLUTION_HEIGHT,

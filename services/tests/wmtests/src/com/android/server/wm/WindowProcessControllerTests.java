@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -39,24 +40,30 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
+import android.app.ActivityManager;
+import android.app.ClientTransactionHandler;
 import android.app.IApplicationThread;
+import android.app.servertransaction.ConfigurationChangeItem;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.LocaleList;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
@@ -279,6 +286,39 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         assertTrue(mWpc.registeredForActivityConfigChanges());
         assertEquals("Config seq of process should not be affected by activity",
                 mWpc.getConfiguration().seq, globalSeq);
+    }
+
+    @Test
+    public void testCachedStateConfigurationChange() throws RemoteException {
+        final ClientLifecycleManager clientManager = mAtm.getLifecycleManager();
+        doNothing().when(clientManager).scheduleTransaction(any(), any());
+        final IApplicationThread thread = mWpc.getThread();
+        final Configuration newConfig = new Configuration(mWpc.getConfiguration());
+        newConfig.densityDpi += 100;
+        // Non-cached state will send the change directly.
+        mWpc.setReportedProcState(ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+        clearInvocations(clientManager);
+        mWpc.onConfigurationChanged(newConfig);
+        verify(clientManager).scheduleTransaction(eq(thread), any());
+
+        // Cached state won't send the change.
+        clearInvocations(clientManager);
+        mWpc.setReportedProcState(ActivityManager.PROCESS_STATE_CACHED_ACTIVITY);
+        newConfig.densityDpi += 100;
+        mWpc.onConfigurationChanged(newConfig);
+        verify(clientManager, never()).scheduleTransaction(eq(thread), any());
+
+        // Cached -> non-cached will send the previous deferred config immediately.
+        mWpc.setReportedProcState(ActivityManager.PROCESS_STATE_RECEIVER);
+        final ArgumentCaptor<ConfigurationChangeItem> captor =
+                ArgumentCaptor.forClass(ConfigurationChangeItem.class);
+        verify(clientManager).scheduleTransaction(eq(thread), captor.capture());
+        final ClientTransactionHandler client = mock(ClientTransactionHandler.class);
+        captor.getValue().preExecute(client, null /* token */);
+        final ArgumentCaptor<Configuration> configCaptor =
+                ArgumentCaptor.forClass(Configuration.class);
+        verify(client).updatePendingConfiguration(configCaptor.capture());
+        assertEquals(newConfig, configCaptor.getValue());
     }
 
     @Test

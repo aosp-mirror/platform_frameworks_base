@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import static com.android.systemui.statusbar.notification.NotificationUtils.logKey;
 import static com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED;
 
 import static java.util.Objects.requireNonNull;
@@ -147,7 +148,8 @@ public class PreparationCoordinator implements Coordinator {
     @Override
     public void attach(NotifPipeline pipeline) {
         mNotifErrorManager.addInflationErrorListener(mInflationErrorListener);
-        mAdjustmentProvider.addDirtyListener(mNotifInflatingFilter::invalidateList);
+        mAdjustmentProvider.addDirtyListener(
+                () -> mNotifInflatingFilter.invalidateList("adjustmentProviderChanged"));
 
         pipeline.addCollectionListener(mNotifCollectionListener);
         // Inflate after grouping/sorting since that affects what views to inflate.
@@ -245,12 +247,13 @@ public class PreparationCoordinator implements Coordinator {
             } catch (RemoteException ex) {
                 // System server is dead, nothing to do about that
             }
-            mNotifInflationErrorFilter.invalidateList();
+            mNotifInflationErrorFilter.invalidateList("onNotifInflationError for " + logKey(entry));
         }
 
         @Override
         public void onNotifInflationErrorCleared(NotificationEntry entry) {
-            mNotifInflationErrorFilter.invalidateList();
+            mNotifInflationErrorFilter.invalidateList(
+                    "onNotifInflationErrorCleared for " + logKey(entry));
         }
     };
 
@@ -283,7 +286,7 @@ public class PreparationCoordinator implements Coordinator {
                 if (isInflated(child)) {
                     // TODO: May want to put an animation hint here so view manager knows to treat
                     //  this differently from a regular removal animation
-                    freeNotifViews(child);
+                    freeNotifViews(child, "Past last visible group child");
                 }
             }
         }
@@ -360,22 +363,26 @@ public class PreparationCoordinator implements Coordinator {
     }
 
     private void abortInflation(NotificationEntry entry, String reason) {
-        mLogger.logInflationAborted(entry.getKey(), reason);
-        mNotifInflater.abortInflation(entry);
-        mInflatingNotifs.remove(entry);
+        final boolean taskAborted = mNotifInflater.abortInflation(entry);
+        final boolean wasInflating = mInflatingNotifs.remove(entry);
+        if (taskAborted || wasInflating) {
+            mLogger.logInflationAborted(entry, reason);
+        }
     }
 
     private void onInflationFinished(NotificationEntry entry, NotifViewController controller) {
-        mLogger.logNotifInflated(entry.getKey());
+        mLogger.logNotifInflated(entry);
         mInflatingNotifs.remove(entry);
         mViewBarn.registerViewForEntry(entry, controller);
         mInflationStates.put(entry, STATE_INFLATED);
         mBindEventManager.notifyViewBound(entry);
-        mNotifInflatingFilter.invalidateList();
+        mNotifInflatingFilter.invalidateList("onInflationFinished for " + logKey(entry));
     }
 
-    private void freeNotifViews(NotificationEntry entry) {
+    private void freeNotifViews(NotificationEntry entry, String reason) {
+        mLogger.logFreeNotifViews(entry, reason);
         mViewBarn.removeViewForEntry(entry);
+        mNotifInflater.releaseViews(entry);
         // TODO: clear the entry's row here, or even better, stop setting the row on the entry!
         mInflationStates.put(entry, STATE_UNINFLATED);
     }
@@ -397,20 +404,20 @@ public class PreparationCoordinator implements Coordinator {
             return false;
         }
         if (isBeyondGroupInitializationWindow(group, now)) {
-            mLogger.logGroupInflationTookTooLong(group.getKey());
+            mLogger.logGroupInflationTookTooLong(group);
             return false;
         }
         if (mInflatingNotifs.contains(group.getSummary())) {
-            mLogger.logDelayingGroupRelease(group.getKey(), group.getSummary().getKey());
+            mLogger.logDelayingGroupRelease(group, group.getSummary());
             return true;
         }
         for (NotificationEntry child : group.getChildren()) {
             if (mInflatingNotifs.contains(child) && !child.wasAttachedInPreviousPass()) {
-                mLogger.logDelayingGroupRelease(group.getKey(), child.getKey());
+                mLogger.logDelayingGroupRelease(group, child);
                 return true;
             }
         }
-        mLogger.logDoneWaitingForGroupInflation(group.getKey());
+        mLogger.logDoneWaitingForGroupInflation(group);
         return false;
     }
 

@@ -207,25 +207,30 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
     }
 
     @Test
+    fun animatesInvisibleViews() {
+        rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
+        rootView.visibility = View.INVISIBLE
+
+        val success = ViewHierarchyAnimator.animate(rootView)
+        // Change all bounds.
+        rootView.layout(0 /* l */, 15 /* t */, 70 /* r */, 80 /* b */)
+
+        assertTrue(success)
+        assertNotNull(rootView.getTag(R.id.tag_animator))
+        // The initial values should be those of the previous layout.
+        checkBounds(rootView, l = 10, t = 10, r = 50, b = 50)
+        endAnimation(rootView)
+        assertNull(rootView.getTag(R.id.tag_animator))
+        // The end values should be those of the latest layout.
+        checkBounds(rootView, l = 0, t = 15, r = 70, b = 80)
+    }
+
+    @Test
     fun animatesAppearingViewsFromStartToEnd() {
         // Starting GONE.
         rootView.visibility = View.GONE
         rootView.layout(0 /* l */, 50 /* t */, 50 /* r */, 100 /* b */)
         var success = ViewHierarchyAnimator.animateAddition(rootView)
-        rootView.visibility = View.VISIBLE
-        rootView.layout(0 /* l */, 100 /* t */, 100 /* r */, 200 /* b */)
-
-        assertTrue(success)
-        assertNotNull(rootView.getTag(R.id.tag_animator))
-        checkBounds(rootView, l = 50, t = 150, r = 50, b = 150)
-        endAnimation(rootView)
-        assertNull(rootView.getTag(R.id.tag_animator))
-        checkBounds(rootView, l = 0, t = 100, r = 100, b = 200)
-
-        // Starting INVISIBLE.
-        rootView.visibility = View.INVISIBLE
-        rootView.layout(0 /* l */, 50 /* t */, 50 /* r */, 100 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(rootView)
         rootView.visibility = View.VISIBLE
         rootView.layout(0 /* l */, 100 /* t */, 100 /* r */, 200 /* b */)
 
@@ -520,6 +525,199 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         endAnimation(rootView)
     }
 
+    @Test
+    fun animatesAppearingViewsFadeIn_alphaStartsAtZero_endsAtOne() {
+        rootView.alpha = 0f
+        ViewHierarchyAnimator.animateAddition(rootView, includeFadeIn = true)
+        rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
+
+        advanceFadeInAnimation(rootView, fraction = 1f)
+        endFadeInAnimation(rootView)
+
+        assertNull(rootView.getTag(R.id.tag_alpha_animator))
+        assertEquals(1f, rootView.alpha)
+    }
+
+    @Test
+    fun animatesAppearingViewsFadeIn_alphaStartsAboveZero_endsAtOne() {
+        rootView.alpha = 0.2f
+        ViewHierarchyAnimator.animateAddition(rootView, includeFadeIn = true)
+        rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
+
+        advanceFadeInAnimation(rootView, fraction = 1f)
+        endFadeInAnimation(rootView)
+
+        assertNull(rootView.getTag(R.id.tag_alpha_animator))
+        assertEquals(1f, rootView.alpha)
+    }
+
+    @Test
+    fun animatesAppearingViewsFadeIn_alphaStartsAsZero_alphaUpdatedMidAnimation() {
+        rootView.alpha = 0f
+        ViewHierarchyAnimator.animateAddition(
+            rootView,
+            includeFadeIn = true,
+            fadeInInterpolator = Interpolators.LINEAR
+        )
+        rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
+
+        advanceFadeInAnimation(rootView, fraction = 0.42f)
+
+        assertEquals(0.42f, rootView.alpha)
+    }
+
+    @Test
+    fun animatesAppearingViewsFadeIn_alphaStartsAboveZero_alphaUpdatedMidAnimation() {
+        rootView.alpha = 0.6f
+        ViewHierarchyAnimator.animateAddition(
+            rootView,
+            includeFadeIn = true,
+            fadeInInterpolator = Interpolators.LINEAR
+        )
+        rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
+
+        advanceFadeInAnimation(rootView, fraction = 0.5f)
+
+        assertEquals(0.8f, rootView.alpha)
+    }
+
+    @Test
+    fun animatesAppearingViewsFadeIn_childViewAlphasAlsoAnimated() {
+        rootView.alpha = 0f
+        val firstChild = View(context)
+        firstChild.alpha = 0f
+        val secondChild = View(context)
+        secondChild.alpha = 0f
+        rootView.addView(firstChild)
+        rootView.addView(secondChild)
+
+        ViewHierarchyAnimator.animateAddition(
+            rootView,
+            includeFadeIn = true,
+            fadeInInterpolator = Interpolators.LINEAR
+        )
+        rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
+
+        advanceFadeInAnimation(rootView, fraction = 0.5f)
+
+        assertEquals(0.5f, rootView.alpha)
+        assertEquals(0.5f, firstChild.alpha)
+        assertEquals(0.5f, secondChild.alpha)
+    }
+
+    @Test
+    fun animatesAppearingViewsFadeIn_animatesFromPreviousAnimationProgress() {
+        rootView.alpha = 0f
+        ViewHierarchyAnimator.animateAddition(
+            rootView,
+            includeFadeIn = true,
+            fadeInInterpolator = Interpolators.LINEAR
+        )
+        rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
+
+        advanceFadeInAnimation(rootView, fraction = 0.5f)
+        assertEquals(0.5f, rootView.alpha)
+        assertNotNull(rootView.getTag(R.id.tag_alpha_animator))
+
+        // IF we request animation again
+        ViewHierarchyAnimator.animateAddition(
+            rootView,
+            includeFadeIn = true,
+            fadeInInterpolator = Interpolators.LINEAR
+        )
+
+        // THEN the alpha remains at its current value (it doesn't get reset to 0)
+        assertNotNull(rootView.getTag(R.id.tag_alpha_animator))
+        assertEquals(0.5f, rootView.alpha)
+
+        // IF we advance the new animation to the end
+        advanceFadeInAnimation(rootView, fraction = 1f)
+        endFadeInAnimation(rootView)
+
+        // THEN we still end at the correct value
+        assertNull(rootView.getTag(R.id.tag_alpha_animator))
+        assertEquals(1f, rootView.alpha)
+    }
+
+    @Test
+    fun animatesAppearingViews_fadeInFalse_alphasNotUpdated() {
+        rootView.alpha = 0.3f
+        val firstChild = View(context)
+        firstChild.alpha = 0.4f
+        val secondChild = View(context)
+        secondChild.alpha = 0.5f
+        rootView.addView(firstChild)
+        rootView.addView(secondChild)
+
+        ViewHierarchyAnimator.animateAddition(
+            rootView,
+            includeFadeIn = false,
+            fadeInInterpolator = Interpolators.LINEAR
+        )
+        rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
+
+        advanceFadeInAnimation(rootView, fraction = 1f)
+
+        assertEquals(0.3f, rootView.alpha)
+        assertEquals(0.4f, firstChild.alpha)
+        assertEquals(0.5f, secondChild.alpha)
+    }
+
+    @Test
+    fun animateAddition_runnableRunsWhenAnimationEnds() {
+        var runnableRun = false
+        val onAnimationEndRunnable = { runnableRun = true }
+
+        ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.CENTER,
+                includeMargins = true,
+                onAnimationEnd = onAnimationEndRunnable
+        )
+        rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
+
+        endAnimation(rootView)
+
+        assertEquals(true, runnableRun)
+    }
+
+    @Test
+    fun animateAddition_runnableDoesNotRunWhenAnimationCancelled() {
+        var runnableRun = false
+        val onAnimationEndRunnable = { runnableRun = true }
+
+        ViewHierarchyAnimator.animateAddition(
+            rootView,
+            origin = ViewHierarchyAnimator.Hotspot.CENTER,
+            includeMargins = true,
+            onAnimationEnd = onAnimationEndRunnable
+        )
+        rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
+
+        cancelAnimation(rootView)
+
+        assertEquals(false, runnableRun)
+    }
+
+    @Test
+    fun animationAddition_runnableDoesNotRunWhenOnlyPartwayThroughAnimation() {
+        var runnableRun = false
+        val onAnimationEndRunnable = { runnableRun = true }
+
+        ViewHierarchyAnimator.animateAddition(
+            rootView,
+            origin = ViewHierarchyAnimator.Hotspot.CENTER,
+            includeMargins = true,
+            onAnimationEnd = onAnimationEndRunnable
+        )
+        rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
+
+        advanceAnimation(rootView, 0.5f)
+
+        assertEquals(false, runnableRun)
+    }
+
+    @Test
     fun animatesViewRemovalFromStartToEnd() {
         setUpRootWithChildren()
 
@@ -798,7 +996,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun doesNotAnimateInvisibleViews() {
+    fun doesNotAnimateGoneViews() {
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
         // GONE
@@ -809,15 +1007,6 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         assertFalse(success)
         assertNull(rootView.getTag(R.id.tag_animator))
         checkBounds(rootView, l = 0, t = 15, r = 55, b = 80)
-
-        // INVISIBLE.
-        rootView.visibility = View.INVISIBLE
-        success = ViewHierarchyAnimator.animate(rootView)
-        rootView.layout(0 /* l */, 20 /* t */, 10 /* r */, 50 /* b */)
-
-        assertFalse(success)
-        assertNull(rootView.getTag(R.id.tag_animator))
-        checkBounds(rootView, l = 0, t = 20, r = 10, b = 50)
     }
 
     @Test
@@ -1003,12 +1192,42 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         }
     }
 
+    private fun advanceFadeInAnimation(rootView: View, fraction: Float) {
+        (rootView.getTag(R.id.tag_alpha_animator) as? ObjectAnimator)?.setCurrentFraction(fraction)
+
+        if (rootView is ViewGroup) {
+            for (i in 0 until rootView.childCount) {
+                advanceFadeInAnimation(rootView.getChildAt(i), fraction)
+            }
+        }
+    }
+
     private fun endAnimation(rootView: View) {
         (rootView.getTag(R.id.tag_animator) as? ObjectAnimator)?.end()
 
         if (rootView is ViewGroup) {
             for (i in 0 until rootView.childCount) {
                 endAnimation(rootView.getChildAt(i))
+            }
+        }
+    }
+
+    private fun cancelAnimation(rootView: View) {
+        (rootView.getTag(R.id.tag_animator) as? ObjectAnimator)?.cancel()
+
+        if (rootView is ViewGroup) {
+            for (i in 0 until rootView.childCount) {
+                cancelAnimation(rootView.getChildAt(i))
+            }
+        }
+    }
+
+    private fun endFadeInAnimation(rootView: View) {
+        (rootView.getTag(R.id.tag_alpha_animator) as? ObjectAnimator)?.end()
+
+        if (rootView is ViewGroup) {
+            for (i in 0 until rootView.childCount) {
+                endFadeInAnimation(rootView.getChildAt(i))
             }
         }
     }

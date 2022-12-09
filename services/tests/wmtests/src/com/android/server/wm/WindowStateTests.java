@@ -712,6 +712,25 @@ public class WindowStateTests extends WindowTestsBase {
         // Keyguard host window should be always contained. The drawn app or app with starting
         // window are unnecessary to draw.
         assertEquals(Arrays.asList(keyguardHostWindow, startingWindow), outWaitingForDrawn);
+
+        // No need to wait for a window of invisible activity even if the window has surface.
+        final WindowState invisibleApp = mAppWindow;
+        invisibleApp.mActivityRecord.mVisibleRequested = false;
+        invisibleApp.mActivityRecord.allDrawn = false;
+        outWaitingForDrawn.clear();
+        invisibleApp.requestDrawIfNeeded(outWaitingForDrawn);
+        assertTrue(outWaitingForDrawn.isEmpty());
+
+        // Drawn state should not be changed for insets change when screen is off.
+        spyOn(mWm.mPolicy);
+        doReturn(false).when(mWm.mPolicy).isScreenOn();
+        makeWindowVisibleAndDrawn(startingApp);
+        startingApp.getConfiguration().orientation = 0; // Reset to be the same as last reported.
+        startingApp.getWindowFrames().setInsetsChanged(true);
+        startingApp.updateResizingWindowIfNeeded();
+        assertTrue(mWm.mResizingWindows.contains(startingApp));
+        assertTrue(startingApp.isDrawn());
+        assertFalse(startingApp.getOrientationChanging());
     }
 
     @UseTestDisplay(addWindows = W_ABOVE_ACTIVITY)

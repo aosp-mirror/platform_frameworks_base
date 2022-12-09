@@ -35,11 +35,14 @@ interface IDreamManager {
     void testDream(int userId, in ComponentName componentName);
     @UnsupportedAppUsage
     boolean isDreaming();
+    @UnsupportedAppUsage
+    boolean isDreamingOrInPreview();
     void finishSelf(in IBinder token, boolean immediate);
     void startDozing(in IBinder token, int screenState, int screenBrightness);
     void stopDozing(in IBinder token);
     void forceAmbientDisplayEnabled(boolean enabled);
     ComponentName[] getDreamComponentsForUser(int userId);
     void setDreamComponentsForUser(int userId, in ComponentName[] componentNames);
+    void setSystemDreamComponent(in ComponentName componentName);
     void registerDreamOverlayService(in ComponentName componentName);
 }

@@ -101,6 +101,8 @@ public final class BackNavigationInfo implements Parcelable {
     @Nullable
     private final IOnBackInvokedCallback mOnBackInvokedCallback;
 
+    private final boolean mIsPrepareRemoteAnimation;
+
     /**
      * Create a new {@link BackNavigationInfo} instance.
      *
@@ -117,14 +119,18 @@ public final class BackNavigationInfo implements Parcelable {
      * @param onBackNavigationDone    The callback to be called once the client is done with the
      *                                back preview.
      * @param onBackInvokedCallback   The back callback registered by the current top level window.
+     * @param isPrepareRemoteAnimation  Return whether the core is preparing a back gesture
+     *                                  animation, if true, the caller of startBackNavigation should
+     *                                  be expected to receive an animation start callback.
      */
-    public BackNavigationInfo(@BackTargetType int type,
+    private BackNavigationInfo(@BackTargetType int type,
             @Nullable RemoteAnimationTarget departingAnimationTarget,
             @Nullable SurfaceControl screenshotSurface,
             @Nullable HardwareBuffer screenshotBuffer,
             @Nullable WindowConfiguration taskWindowConfiguration,
             @Nullable RemoteCallback onBackNavigationDone,
-            @Nullable IOnBackInvokedCallback onBackInvokedCallback) {
+            @Nullable IOnBackInvokedCallback onBackInvokedCallback,
+            boolean isPrepareRemoteAnimation) {
         mType = type;
         mDepartingAnimationTarget = departingAnimationTarget;
         mScreenshotSurface = screenshotSurface;
@@ -132,6 +138,7 @@ public final class BackNavigationInfo implements Parcelable {
         mTaskWindowConfiguration = taskWindowConfiguration;
         mOnBackNavigationDone = onBackNavigationDone;
         mOnBackInvokedCallback = onBackInvokedCallback;
+        mIsPrepareRemoteAnimation = isPrepareRemoteAnimation;
     }
 
     private BackNavigationInfo(@NonNull Parcel in) {
@@ -142,6 +149,7 @@ public final class BackNavigationInfo implements Parcelable {
         mTaskWindowConfiguration = in.readTypedObject(WindowConfiguration.CREATOR);
         mOnBackNavigationDone = in.readTypedObject(RemoteCallback.CREATOR);
         mOnBackInvokedCallback = IOnBackInvokedCallback.Stub.asInterface(in.readStrongBinder());
+        mIsPrepareRemoteAnimation = in.readBoolean();
     }
 
     @Override
@@ -153,6 +161,7 @@ public final class BackNavigationInfo implements Parcelable {
         dest.writeTypedObject(mTaskWindowConfiguration, flags);
         dest.writeTypedObject(mOnBackNavigationDone, flags);
         dest.writeStrongInterface(mOnBackInvokedCallback);
+        dest.writeBoolean(mIsPrepareRemoteAnimation);
     }
 
     /**
@@ -219,6 +228,10 @@ public final class BackNavigationInfo implements Parcelable {
     @Nullable
     public IOnBackInvokedCallback getOnBackInvokedCallback() {
         return mOnBackInvokedCallback;
+    }
+
+    public boolean isPrepareRemoteAnimation() {
+        return mIsPrepareRemoteAnimation;
     }
 
     /**
@@ -306,6 +319,8 @@ public final class BackNavigationInfo implements Parcelable {
         @Nullable
         private IOnBackInvokedCallback mOnBackInvokedCallback = null;
 
+        private boolean mPrepareAnimation;
+
         /**
          * @see BackNavigationInfo#getType()
          */
@@ -366,12 +381,20 @@ public final class BackNavigationInfo implements Parcelable {
         }
 
         /**
+         * @param prepareAnimation Whether core prepare animation for shell.
+         */
+        public Builder setPrepareAnimation(boolean prepareAnimation) {
+            mPrepareAnimation = prepareAnimation;
+            return this;
+        }
+
+        /**
          * Builds and returns an instance of {@link BackNavigationInfo}
          */
         public BackNavigationInfo build() {
             return new BackNavigationInfo(mType, mDepartingAnimationTarget, mScreenshotSurface,
                     mScreenshotBuffer, mTaskWindowConfiguration, mOnBackNavigationDone,
-                    mOnBackInvokedCallback);
+                    mOnBackInvokedCallback, mPrepareAnimation);
         }
     }
 }

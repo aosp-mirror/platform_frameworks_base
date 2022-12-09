@@ -22,8 +22,6 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 
-import android.app.WallpaperManager;
-import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -32,34 +30,30 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.colorextraction.ColorExtractor;
-import com.android.keyguard.clock.ClockManager;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
-import com.android.systemui.plugins.ClockPlugin;
+import com.android.systemui.plugins.Clock;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.clocks.ClockRegistry;
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
-import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
 import java.util.Locale;
-import java.util.TimeZone;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -69,48 +63,23 @@ import javax.inject.Inject;
  */
 public class KeyguardClockSwitchController extends ViewController<KeyguardClockSwitch>
         implements Dumpable {
-    private static final boolean CUSTOM_CLOCKS_ENABLED = true;
-
     private final StatusBarStateController mStatusBarStateController;
-    private final SysuiColorExtractor mColorExtractor;
-    private final ClockManager mClockManager;
+    private final ClockRegistry mClockRegistry;
     private final KeyguardSliceViewController mKeyguardSliceViewController;
     private final NotificationIconAreaController mNotificationIconAreaController;
-    private final BroadcastDispatcher mBroadcastDispatcher;
-    private final BatteryController mBatteryController;
     private final LockscreenSmartspaceController mSmartspaceController;
-    private final Resources mResources;
     private final SecureSettings mSecureSettings;
     private final DumpManager mDumpManager;
+    private final ClockEventController mClockEventController;
 
-    /**
-     * Clock for both small and large sizes
-     */
-    private AnimatableClockController mClockViewController;
-    private FrameLayout mClockFrame; // top aligned clock
-    private AnimatableClockController mLargeClockViewController;
+    private FrameLayout mSmallClockFrame; // top aligned clock
     private FrameLayout mLargeClockFrame; // centered clock
 
     @KeyguardClockSwitch.ClockSize
     private int mCurrentClockSize = SMALL;
 
-    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-
     private int mKeyguardClockTopMargin = 0;
-
-    /**
-     * Listener for changes to the color palette.
-     *
-     * The color palette changes when the wallpaper is changed.
-     */
-    private final ColorExtractor.OnColorsChangedListener mColorsListener =
-            (extractor, which) -> {
-                if ((which & WallpaperManager.FLAG_LOCK) != 0) {
-                    mView.updateColors(getGradientColors());
-                }
-            };
-
-    private final ClockManager.ClockChangedListener mClockChangedListener = this::setClockPlugin;
+    private final ClockRegistry.ClockChangeListener mClockChangedListener;
 
     private ViewGroup mStatusArea;
     // If set will replace keyguard_slice_view
@@ -119,9 +88,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
 
     private boolean mOnlyClock = false;
-    private Executor mUiExecutor;
+    private final Executor mUiExecutor;
     private boolean mCanShowDoubleLineClock = true;
-    private ContentObserver mDoubleLineClockObserver = new ContentObserver(null) {
+    private final ContentObserver mDoubleLineClockObserver = new ContentObserver(null) {
         @Override
         public void onChange(boolean change) {
             updateDoubleLineClock();
@@ -142,34 +111,32 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     public KeyguardClockSwitchController(
             KeyguardClockSwitch keyguardClockSwitch,
             StatusBarStateController statusBarStateController,
-            SysuiColorExtractor colorExtractor,
-            ClockManager clockManager,
+            ClockRegistry clockRegistry,
             KeyguardSliceViewController keyguardSliceViewController,
             NotificationIconAreaController notificationIconAreaController,
-            BroadcastDispatcher broadcastDispatcher,
-            BatteryController batteryController,
-            KeyguardUpdateMonitor keyguardUpdateMonitor,
             LockscreenSmartspaceController smartspaceController,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             SecureSettings secureSettings,
             @Main Executor uiExecutor,
-            @Main Resources resources,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            ClockEventController clockEventController,
+            FeatureFlags featureFlags) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
-        mColorExtractor = colorExtractor;
-        mClockManager = clockManager;
+        mClockRegistry = clockRegistry;
         mKeyguardSliceViewController = keyguardSliceViewController;
         mNotificationIconAreaController = notificationIconAreaController;
-        mBroadcastDispatcher = broadcastDispatcher;
-        mBatteryController = batteryController;
-        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mSmartspaceController = smartspaceController;
-        mResources = resources;
         mSecureSettings = secureSettings;
         mUiExecutor = uiExecutor;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mDumpManager = dumpManager;
+        mClockEventController = clockEventController;
+
+        mClockRegistry.setEnabled(featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS));
+        mClockChangedListener = () -> {
+            setClock(mClockRegistry.createCurrentClock());
+        };
     }
 
     /**
@@ -183,31 +150,11 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      * Attach the controller to the view it relates to.
      */
     @Override
-    public void onInit() {
+    protected void onInit() {
         mKeyguardSliceViewController.init();
 
-        mClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
+        mSmallClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
         mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
-
-        mClockViewController =
-                new AnimatableClockController(
-                        mView.findViewById(R.id.animatable_clock_view),
-                        mStatusBarStateController,
-                        mBroadcastDispatcher,
-                        mBatteryController,
-                        mKeyguardUpdateMonitor,
-                        mResources);
-        mClockViewController.init();
-
-        mLargeClockViewController =
-                new AnimatableClockController(
-                        mView.findViewById(R.id.animatable_clock_view_large),
-                        mStatusBarStateController,
-                        mBroadcastDispatcher,
-                        mBatteryController,
-                        mKeyguardUpdateMonitor,
-                        mResources);
-        mLargeClockViewController.init();
 
         mDumpManager.unregisterDumpable(getClass().toString()); // unregister previous clocks
         mDumpManager.registerDumpable(getClass().toString(), this);
@@ -215,11 +162,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     @Override
     protected void onViewAttached() {
-        if (CUSTOM_CLOCKS_ENABLED) {
-            mClockManager.addOnClockChangedListener(mClockChangedListener);
-        }
-        mColorExtractor.addOnColorsChangedListener(mColorsListener);
-        mView.updateColors(getGradientColors());
+        mClockRegistry.registerClockChangeListener(mClockChangedListener);
+        setClock(mClockRegistry.createCurrentClock());
+        mClockEventController.registerListeners();
         mKeyguardClockTopMargin =
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_clock_top_margin);
 
@@ -242,7 +187,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             ksv.setVisibility(View.GONE);
 
             addSmartspaceView(ksvIndex);
-            updateClockLayout();
         }
 
         mSecureSettings.registerContentObserverForUser(
@@ -264,11 +208,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     @Override
     protected void onViewDetached() {
-        if (CUSTOM_CLOCKS_ENABLED) {
-            mClockManager.removeOnClockChangedListener(mClockChangedListener);
-        }
-        mColorExtractor.removeOnColorsChangedListener(mColorsListener);
-        mView.setClockPlugin(null, mStatusBarStateController.getState());
+        mClockRegistry.unregisterClockChangeListener(mClockChangedListener);
+        mClockEventController.unregisterListeners();
+        setClock(null);
 
         mSecureSettings.unregisterContentObserver(mDoubleLineClockObserver);
 
@@ -307,18 +249,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mView.onDensityOrFontScaleChanged();
         mKeyguardClockTopMargin =
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_clock_top_margin);
-
-        updateClockLayout();
-    }
-
-    private void updateClockLayout() {
-        int largeClockTopMargin = getContext().getResources().getDimensionPixelSize(
-                R.dimen.keyguard_large_clock_top_margin)
-                - (int) mLargeClockViewController.getBottom();
-        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(MATCH_PARENT,
-                MATCH_PARENT);
-        lp.topMargin = largeClockTopMargin;
-        mLargeClockFrame.setLayoutParams(lp);
     }
 
     /**
@@ -332,46 +262,34 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         mCurrentClockSize = clockSize;
 
+        Clock clock = getClock();
         boolean appeared = mView.switchToClock(clockSize, animate);
-        if (animate && appeared && clockSize == LARGE) {
-            mLargeClockViewController.animateAppear();
-        }
-    }
-
-    public void animateFoldToAod() {
-        if (mClockViewController != null) {
-            mClockViewController.animateFoldAppear();
-            mLargeClockViewController.animateFoldAppear();
+        if (clock != null && animate && appeared && clockSize == LARGE) {
+            clock.getAnimations().enter();
         }
     }
 
     /**
-     * If we're presenting a custom clock of just the default one.
+     * Animates the clock view between folded and unfolded states
      */
-    public boolean hasCustomClock() {
-        return mView.hasCustomClock();
-    }
-
-    /**
-     * Get the clock text size.
-     */
-    public float getClockTextSize() {
-        return mView.getTextSize();
+    public void animateFoldToAod(float foldFraction) {
+        Clock clock = getClock();
+        if (clock != null) {
+            clock.getAnimations().fold(foldFraction);
+        }
     }
 
     /**
      * Refresh clock. Called in response to TIME_TICK broadcasts.
      */
     void refresh() {
-        if (mClockViewController != null) {
-            mClockViewController.refreshTime();
-            mLargeClockViewController.refreshTime();
-        }
         if (mSmartspaceController != null) {
             mSmartspaceController.requestSmartspaceUpdate();
         }
-
-        mView.refresh();
+        Clock clock = getClock();
+        if (clock != null) {
+            clock.getEvents().onTimeTick();
+        }
     }
 
     /**
@@ -383,7 +301,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     void updatePosition(int x, float scale, AnimationProperties props, boolean animate) {
         x = getCurrentLayoutDirection() == View.LAYOUT_DIRECTION_RTL ? -x : x;
 
-        PropertyAnimator.setProperty(mClockFrame, AnimatableProperty.TRANSLATION_X,
+        PropertyAnimator.setProperty(mSmallClockFrame, AnimatableProperty.TRANSLATION_X,
                 x, props, animate);
         PropertyAnimator.setProperty(mLargeClockFrame, AnimatableProperty.SCALE_X,
                 scale, props, animate);
@@ -396,36 +314,39 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
     }
 
-    void updateTimeZone(TimeZone timeZone) {
-        mView.onTimeZoneChanged(timeZone);
-        if (mClockViewController != null) {
-            mClockViewController.onTimeZoneChanged(timeZone);
-            mLargeClockViewController.onTimeZoneChanged(timeZone);
-        }
-    }
-
-    void refreshFormat() {
-        if (mClockViewController != null) {
-            mClockViewController.refreshFormat();
-            mLargeClockViewController.refreshFormat();
-        }
-    }
-
     /**
      * Get y-bottom position of the currently visible clock on the keyguard.
      * We can't directly getBottom() because clock changes positions in AOD for burn-in
      */
     int getClockBottom(int statusBarHeaderHeight) {
+        Clock clock = getClock();
+        if (clock == null) {
+            return 0;
+        }
+
         if (mLargeClockFrame.getVisibility() == View.VISIBLE) {
-            View clock = mLargeClockFrame.findViewById(
-                    com.android.systemui.R.id.animatable_clock_view_large);
             int frameHeight = mLargeClockFrame.getHeight();
-            int clockHeight = clock.getHeight();
+            int clockHeight = clock.getLargeClock().getHeight();
             return frameHeight / 2 + clockHeight / 2;
         } else {
-            return mClockFrame.findViewById(
-                    com.android.systemui.R.id.animatable_clock_view).getHeight()
-                    + statusBarHeaderHeight + mKeyguardClockTopMargin;
+            int clockHeight = clock.getSmallClock().getHeight();
+            return clockHeight + statusBarHeaderHeight + mKeyguardClockTopMargin;
+        }
+    }
+
+    /**
+     * Get the height of the currently visible clock on the keyguard.
+     */
+    int getClockHeight() {
+        Clock clock = getClock();
+        if (clock == null) {
+            return 0;
+        }
+
+        if (mLargeClockFrame.getVisibility() == View.VISIBLE) {
+            return clock.getLargeClock().getHeight();
+        } else {
+            return clock.getSmallClock().getHeight();
         }
     }
 
@@ -440,12 +361,13 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mNotificationIconAreaController.setupAodIcons(nic);
     }
 
-    private void setClockPlugin(ClockPlugin plugin) {
-        mView.setClockPlugin(plugin, mStatusBarStateController.getState());
+    private void setClock(Clock clock) {
+        mClockEventController.setClock(clock);
+        mView.setClock(clock, mStatusBarStateController.getState());
     }
 
-    private ColorExtractor.GradientColors getGradientColors() {
-        return mColorExtractor.getColors(WallpaperManager.FLAG_LOCK);
+    private Clock getClock() {
+        return mClockEventController.getClock();
     }
 
     private int getCurrentLayoutDirection() {
@@ -467,8 +389,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      * bounds during the unlock transition.
      */
     private void setClipChildrenForUnlock(boolean clip) {
-        mView.setClipChildren(clip);
-
         if (mStatusArea != null) {
             mStatusArea.setClipChildren(clip);
         }
@@ -478,8 +398,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("currentClockSizeLarge=" + (mCurrentClockSize == LARGE));
         pw.println("mCanShowDoubleLineClock=" + mCanShowDoubleLineClock);
-        mClockViewController.dump(pw);
-        mLargeClockViewController.dump(pw);
+        Clock clock = getClock();
+        if (clock != null) {
+            clock.dump(pw);
+        }
     }
 }
 

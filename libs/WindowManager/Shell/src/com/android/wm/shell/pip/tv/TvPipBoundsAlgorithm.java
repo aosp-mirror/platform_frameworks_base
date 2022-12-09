@@ -39,6 +39,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.pip.PipKeepClearAlgorithm;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.tv.TvPipKeepClearAlgorithm.Placement;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -63,7 +64,8 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
     public TvPipBoundsAlgorithm(Context context,
             @NonNull TvPipBoundsState tvPipBoundsState,
             @NonNull PipSnapAlgorithm pipSnapAlgorithm) {
-        super(context, tvPipBoundsState, pipSnapAlgorithm);
+        super(context, tvPipBoundsState, pipSnapAlgorithm,
+                new PipKeepClearAlgorithm() {});
         this.mTvPipBoundsState = tvPipBoundsState;
         this.mKeepClearAlgorithm = new TvPipKeepClearAlgorithm();
         reloadResources(context);

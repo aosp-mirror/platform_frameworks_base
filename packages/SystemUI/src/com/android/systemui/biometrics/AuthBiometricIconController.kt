@@ -22,15 +22,15 @@ import android.graphics.drawable.Animatable2
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
 import android.util.Log
-import android.widget.ImageView
+import com.airbnb.lottie.LottieAnimationView
 import com.android.systemui.biometrics.AuthBiometricView.BiometricState
 
 private const val TAG = "AuthIconController"
 
 /** Controller for animating the BiometricPrompt icon/affordance. */
 abstract class AuthIconController(
-    protected val context: Context,
-    protected val iconView: ImageView
+        protected val context: Context,
+        protected val iconView: LottieAnimationView
 ) : Animatable2.AnimationCallback() {
 
     /** If this controller should ignore events and pause. */

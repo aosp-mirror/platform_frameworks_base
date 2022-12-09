@@ -5,11 +5,16 @@
 -keep class com.android.systemui.statusbar.car.CarStatusBar
 -keep class com.android.systemui.statusbar.phone.CentralSurfaces
 -keep class com.android.systemui.statusbar.tv.TvStatusBar
--keep class com.android.systemui.car.CarSystemUIFactory
--keep class com.android.systemui.SystemUIFactory
--keep class com.android.systemui.tv.TvSystemUIFactory
+-keep class ** extends com.android.systemui.SystemUIInitializer {
+    *;
+}
 -keep class * extends com.android.systemui.CoreStartable
 -keep class * implements com.android.systemui.CoreStartable$Injector
+
+# Needed for builds to properly initialize KeyFrames from xml scene
+-keepclassmembers class * extends androidx.constraintlayout.motion.widget.Key {
+  public <init>();
+}
 
 -keepclasseswithmembers class * {
     public <init>(android.content.Context, android.util.AttributeSet);

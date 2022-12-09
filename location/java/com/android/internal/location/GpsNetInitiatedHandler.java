@@ -142,6 +142,14 @@ public class GpsNetInitiatedHandler {
         public int textEncoding;
     }
 
+    /** Callbacks for Emergency call events. */
+    public interface EmergencyCallCallback {
+        /** Callback invoked when an emergency call starts */
+        void onEmergencyCallStart(int subId);
+        /** Callback invoked when an emergency call ends */
+        void onEmergencyCallEnd();
+    }
+
     private class EmergencyCallListener extends TelephonyCallback implements
             TelephonyCallback.OutgoingEmergencyCallListener,
             TelephonyCallback.CallStateListener {
@@ -152,6 +160,7 @@ public class GpsNetInitiatedHandler {
                 int subscriptionId) {
             mIsInEmergencyCall = true;
             if (DEBUG) Log.d(TAG, "onOutgoingEmergencyCall(): inEmergency = " + getInEmergency());
+            mEmergencyCallCallback.onEmergencyCallStart(subscriptionId);
         }
 
         @Override
@@ -163,6 +172,7 @@ public class GpsNetInitiatedHandler {
                 if (mIsInEmergencyCall) {
                     mCallEndElapsedRealtimeMillis = SystemClock.elapsedRealtime();
                     mIsInEmergencyCall = false;
+                    mEmergencyCallCallback.onEmergencyCallEnd();
                 }
             }
         }
@@ -180,8 +190,11 @@ public class GpsNetInitiatedHandler {
      */
     private Notification.Builder mNiNotificationBuilder;
 
+    private final EmergencyCallCallback mEmergencyCallCallback;
+
     public GpsNetInitiatedHandler(Context context,
                                   INetInitiatedListener netInitiatedListener,
+                                  EmergencyCallCallback emergencyCallCallback,
                                   boolean isSuplEsEnabled) {
         mContext = context;
 
@@ -190,6 +203,7 @@ public class GpsNetInitiatedHandler {
         } else {
             mNetInitiatedListener = netInitiatedListener;
         }
+        mEmergencyCallCallback = emergencyCallCallback;
 
         setSuplEsEnabled(isSuplEsEnabled);
         mLocationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);

@@ -32,6 +32,7 @@ import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMenuController;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 /**
@@ -39,14 +40,16 @@ import com.android.wm.shell.transition.Transitions;
  * TODO: Implement animation once TV is using Transitions.
  */
 public class TvPipTransition extends PipTransitionController {
-    public TvPipTransition(PipBoundsState pipBoundsState,
+    public TvPipTransition(
+            @NonNull ShellInit shellInit,
+            @NonNull ShellTaskOrganizer shellTaskOrganizer,
+            @NonNull Transitions transitions,
+            PipBoundsState pipBoundsState,
             PipMenuController pipMenuController,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
-            PipAnimationController pipAnimationController,
-            Transitions transitions,
-            @NonNull ShellTaskOrganizer shellTaskOrganizer) {
-        super(pipBoundsState, pipMenuController, tvPipBoundsAlgorithm, pipAnimationController,
-                transitions, shellTaskOrganizer);
+            PipAnimationController pipAnimationController) {
+        super(shellInit, shellTaskOrganizer, transitions, pipBoundsState, pipMenuController,
+                tvPipBoundsAlgorithm, pipAnimationController);
     }
 
     @Override

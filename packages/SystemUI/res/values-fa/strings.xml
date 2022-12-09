@@ -124,9 +124,6 @@
     <string name="accessibility_lock_icon" msgid="661492842417875775">"دستگاه قفل است"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"درحال اسکن کردن چهره"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"ارسال"</string>
-    <string name="phone_label" msgid="5715229948920451352">"باز کردن تلفن"</string>
-    <string name="voice_assist_label" msgid="3725967093735929020">"«دستیار صوتی» را باز کنید"</string>
-    <string name="camera_label" msgid="8253821920931143699">"باز کردن دوربین"</string>
     <string name="cancel" msgid="1089011503403416730">"لغو"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"تأیید"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"امتحان مجدد"</string>
@@ -137,6 +134,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"تأیید شد"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"برای تکمیل، روی تأیید ضربه بزنید"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"قفلْ با چهره باز شد. برای ادامه، نماد قفل‌گشایی را فشار دهید."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"قفلْ با چهره باز شد. برای ادامه، فشار دهید."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"چهره شناسایی شد. برای ادامه، فشار دهید."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"چهره شناسایی شد. برای ادامه، نماد قفل‌گشایی را فشار دهید."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"راستی‌آزمایی‌شده"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"استفاده از پین"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"استفاده از الگو"</string>
@@ -161,6 +161,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"چهره شناسایی نشد. درعوض از اثر انگشت استفاده کنید."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"چهره شناسایی نشد"</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"از اثر انگشت استفاده کنید"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"بلوتوث متصل است."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"درصد شارژ باتری مشخص نیست."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"به <xliff:g id="BLUETOOTH">%s</xliff:g> متصل شد."</string>
@@ -202,10 +204,7 @@
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"«حسگرها خاموش» فعال است"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"پاک کردن تمام اعلان‌ها"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
-      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> اعلان دیگر در گروه.</item>
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> اعلان دیگر در گروه.</item>
-    </plurals>
+    <string name="notification_group_overflow_description" msgid="7176322877233433278">"{count,plural, =1{# اعلان دیگر در گروه وجود دارد.}one{# اعلان دیگر در گروه وجود دارد.}other{# اعلان دیگر در گروه وجود دارد.}}"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"صفحه اکنون در حالت افقی قفل است."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"صفحه اکنون در جهت عمودی قفل است."</string>
     <string name="dessert_case" msgid="9104973640704357717">"ویترین دسر"</string>
@@ -223,6 +222,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"چرخش خودکار"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"چرخش خودکار صفحه‌نمایش"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"مکان"</string>
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"محافظ صفحه"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"دسترسی به دوربین"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"دسترسی به میکروفون"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"دردسترس"</string>
@@ -252,10 +252,7 @@
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"نقطه اتصال"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"روشن کردن…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"صرفه‌جویی داده روشن است"</string>
-    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
-      <item quantity="one">‏%d دستگاه</item>
-      <item quantity="other">‏%d دستگاه</item>
-    </plurals>
+    <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# دستگاه}one{# دستگاه}other{# دستگاه}}"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"چراغ قوه"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"دوربین درحال استفاده"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"داده تلفن همراه"</string>
@@ -312,7 +309,13 @@
     <string name="tap_again" msgid="1315420114387908655">"دوباره ضربه بزنید"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"برای باز کردن، انگشتتان را تند به‌بالا بکشید"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"برای باز کردن، نماد قفل‌گشایی را فشار دهید"</string>
+    <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"قفلْ با چهره باز شد. برای باز کردن، تند به‌بالا بکشید."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"قفلْ با چهره باز شد. برای باز کردن، نماد قفل‌گشایی را فشار دهید."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"قفلْ با چهره باز شد. برای باز کردن، فشار دهید."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"چهره شناسایی شد. برای باز کردن، فشار دهید."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"چهره شناسایی شد. برای باز کردن، نماد قفل‌گشایی را فشار دهید."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"قفل با چهره باز شد"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"چهره شناسایی شد"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"انتقال به‌چپ"</item>
     <item msgid="5558598599408514296">"انتقال به‌پایین"</item>
@@ -338,18 +341,19 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • درحال شارژ کردن • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> تا شارژ کامل"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • درحال شارژ کردن سریع • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> تا شارژ کامل"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • درحال شارژ کردن آهسته • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> تا شارژ کامل"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • پایه شارژ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> تا شارژ کامل"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • درحال شارژ شدن • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> تا شارژ کامل"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"تغییر کاربر"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"منوی پایین‌پر"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"همه برنامه‌ها و داده‌های این جلسه حذف خواهد شد."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"مهمان گرامی، بازگشتتان را خوش آمد می‌گوییم!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"آیا می‌خواهید جلسه‌تان را ادامه دهید؟"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"شروع مجدد"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"بله، ادامه داده شود"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"حالت مهمان"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"در حالت مهمان هستید"</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"با افزودن کاربر جدید، از حالت مهمان خارج خواهید شد و همه برنامه‌ها و داده‌ها از جلسه مهمان کنونی حذف خواهند شد."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"به تعداد مجاز تعداد کاربر رسیده‌اید"</string>
-    <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
-      <item quantity="one">می‌توانید حداکثر <xliff:g id="COUNT">%d</xliff:g> کاربر اضافه کنید.</item>
-      <item quantity="other">می‌توانید حداکثر <xliff:g id="COUNT">%d</xliff:g> کاربر اضافه کنید.</item>
-    </plurals>
+    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{فقط یک کاربر می‌توان ایجاد کرد.}one{حداکثر # کاربر می‌توانید اضافه کنید.}other{حداکثر # کاربر می‌توانید اضافه کنید.}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"کاربر حذف شود؟"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"همه برنامه‌ها و داده‌های این کاربر حذف می‌شود."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"حذف"</string>
@@ -417,6 +421,8 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"همپوشانی زیرنویس ناشنوایان"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"فعال کردن"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"غیرفعال کردن"</string>
+    <string name="sound_settings" msgid="8874581353127418308">"صدا و لرزش"</string>
+    <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"تنظیمات"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"برنامه سنجاق شده است"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"تا زمانی که سنجاق را برندارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"تا برداشتن سنجاق، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
@@ -535,14 +541,8 @@
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"به من یادآوری شود"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"واگرد"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> به تعویق افتاد"</string>
-    <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
-      <item quantity="one">‏%d ساعت</item>
-      <item quantity="other">‏%d ساعت</item>
-    </plurals>
-    <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
-      <item quantity="one">‏%d دقیقه</item>
-      <item quantity="other">‏%d دقیقه</item>
-    </plurals>
+    <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# ساعت}=2{# ساعت}one{# ساعت}other{# ساعت}}"</string>
+    <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# دقیقه}one{# دقیقه}other{# دقیقه}}"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"بهینه‌سازی باتری"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"دکمه <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"ابتدا"</string>
@@ -598,7 +598,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"روشن"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"خاموش"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"در دسترس نیست"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"غیرفعال"</string>
+    <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"بیشتر بدانید"</string>
     <string name="nav_bar" msgid="4642708685386136807">"نوار پیمایش"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"طرح‌بندی"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"نوع دکمه منتهی‌الیه چپ"</string>
@@ -671,8 +671,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"وقتی تلفن درحال خنک شدن است، بعضی از ویژگی‌ها محدود می‌شوند.\nبرای اطلاعات بیشتر ضربه بزنید"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"تلفنتان به‌طور خودکار سعی می‌کند خنک شود. همچنان می‌توانید از تلفنتان استفاده کنید، اما ممکن است کندتر عمل کند.\n\nوقتی تلفن خنک شد، عملکرد عادی‌اش از سرگرفته می‌شود."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"دیدن اقدامات محافظتی"</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"جدا کردن شارژر از برق"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"مشکلی در شارژ کردن این دستگاه وجود دارد. آداپتور برق را از برق جدا کنید و مراقب باشید زیرا ممکن است کابل گرم باشد."</string>
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"دستگاه را جدا کنید"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"‏دستگاهتان کنار درگاه شارژ گرم شده است. اگر دستگاهتان به شارژر یا لوازم جانبی USB متصل است، آن را جدا کنید و مراقب باشید چون ممکن است کابل هم گرم باشد."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"مشاهده مراحل احتیاط"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"میان‌بر چپ"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"میان‌بر راست"</string>
@@ -691,7 +691,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"هشدارها"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"باتری"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"نماگرفت‌ها"</string>
-    <string name="notification_channel_general" msgid="4384774889645929705">"پیام‌های عمومی"</string>
+    <string name="notification_channel_instant" msgid="7556135423486752680">"برنامه‌های فوری"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"راه‌اندازی"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"فضای ذخیره‌سازی"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"نکات"</string>
     <string name="instant_apps" msgid="8337185853050247304">"برنامه‌های فوری"</string>
@@ -765,10 +766,7 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"روشن/ خاموش کردن"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"کنترل‌های دستگاه"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"انتخاب برنامه برای افزودن کنترل‌ها"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> کنترل اضافه شده است.</item>
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> کنترل اضافه شده است.</item>
-    </plurals>
+    <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# کنترل اضافه شد.}one{# کنترل اضافه شد.}other{# کنترل اضافه شد.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"حذف شد"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"به موارد دلخواه اضافه شد"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"اضافه‌شده به موارد دلخواه، جایگاه <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -840,7 +838,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> دستگاه انتخاب شد"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(اتصال قطع شد)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"عوض نمی‌شود. برای تلاش مجدد ضربه بزنید."</string>
-    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"مرتبط کردن دستگاه جدید"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"متصل کردن دستگاه"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"برای ارسال محتوای این جلسه، لطفاً برنامه را باز کنید."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"برنامه ناشناس"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"توقف پخش محتوا"</string>
@@ -925,10 +923,7 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"کاشی اضافه شود"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"کاشی اضافه نشود"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"انتخاب کاربر"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> برنامه فعال است</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> برنامه فعال است</item>
-    </plurals>
+    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# برنامه فعال است}one{# برنامه فعال است}other{# برنامه فعال است}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"اطلاعات جدید"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"برنامه‌های فعال"</string>
     <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"این برنامه‌ها فعال هستند و اجرا می‌شوند، حتی وقتی که از آن‌ها استفاده نکنید. این کار باعث بهبود عملکرد برنامه‌ها می‌شود، اما بر عمر باتری نیز تأثیر می‌گذارد."</string>
@@ -955,6 +950,18 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"‏Wi‑Fi دردسترس نیست"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"حالت اولویت"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"زنگ ساعت تنظیم شد"</string>
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"دوربین خاموش است"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"میکروفون خاموش است"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"دوربین و میکروفون خاموش هستند"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# اعلان}one{# اعلان}other{# اعلان}}"</string>
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>، <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"همه‌فرستی"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"همه‌فرستی <xliff:g id="APP_NAME">%1$s</xliff:g> متوقف شود؟"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"اگر <xliff:g id="SWITCHAPP">%1$s</xliff:g> را همه‌فرستی کنید یا خروجی را تغییر دهید، همه‌فرستی کنونی متوقف خواهد شد"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"همه‌فرستی <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"تغییر خروجی"</string>
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"نامشخص"</string>
+    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE d MMM"</string>
+    <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
+    <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
 </resources>

@@ -21,9 +21,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_BOUNDS;
-import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.createTestTaskContainer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -34,8 +35,10 @@ import static org.mockito.Mockito.mock;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.window.TaskFragmentParentInfo;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -66,7 +69,7 @@ public class TaskContainerTest {
 
     @Test
     public void testIsTaskBoundsInitialized() {
-        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskContainer taskContainer = createTestTaskContainer();
 
         assertFalse(taskContainer.isTaskBoundsInitialized());
 
@@ -77,7 +80,7 @@ public class TaskContainerTest {
 
     @Test
     public void testSetTaskBounds() {
-        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskContainer taskContainer = createTestTaskContainer();
 
         assertFalse(taskContainer.setTaskBounds(new Rect()));
 
@@ -87,30 +90,24 @@ public class TaskContainerTest {
     }
 
     @Test
-    public void testIsWindowingModeInitialized() {
-        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
-
-        assertFalse(taskContainer.isWindowingModeInitialized());
-
-        taskContainer.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-
-        assertTrue(taskContainer.isWindowingModeInitialized());
-    }
-
-    @Test
     public void testGetWindowingModeForSplitTaskFragment() {
-        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskContainer taskContainer = createTestTaskContainer();
         final Rect splitBounds = new Rect(0, 0, 500, 1000);
+        final Configuration configuration = new Configuration();
 
         assertEquals(WINDOWING_MODE_MULTI_WINDOW,
                 taskContainer.getWindowingModeForSplitTaskFragment(splitBounds));
 
-        taskContainer.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
+                DEFAULT_DISPLAY, true /* visible */));
 
         assertEquals(WINDOWING_MODE_MULTI_WINDOW,
                 taskContainer.getWindowingModeForSplitTaskFragment(splitBounds));
 
-        taskContainer.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
+                DEFAULT_DISPLAY, true /* visible */));
 
         assertEquals(WINDOWING_MODE_FREEFORM,
                 taskContainer.getWindowingModeForSplitTaskFragment(splitBounds));
@@ -123,22 +120,27 @@ public class TaskContainerTest {
 
     @Test
     public void testIsInPictureInPicture() {
-        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskContainer taskContainer = createTestTaskContainer();
+        final Configuration configuration = new Configuration();
 
         assertFalse(taskContainer.isInPictureInPicture());
 
-        taskContainer.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
+                DEFAULT_DISPLAY, true /* visible */));
 
         assertFalse(taskContainer.isInPictureInPicture());
 
-        taskContainer.setWindowingMode(WINDOWING_MODE_PINNED);
+        configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_PINNED);
+        taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
+                DEFAULT_DISPLAY, true /* visible */));
 
         assertTrue(taskContainer.isInPictureInPicture());
     }
 
     @Test
     public void testIsEmpty() {
-        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskContainer taskContainer = createTestTaskContainer();
 
         assertTrue(taskContainer.isEmpty());
 
@@ -155,7 +157,7 @@ public class TaskContainerTest {
 
     @Test
     public void testGetTopTaskFragmentContainer() {
-        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskContainer taskContainer = createTestTaskContainer();
         assertNull(taskContainer.getTopTaskFragmentContainer());
 
         final TaskFragmentContainer tf0 = new TaskFragmentContainer(null /* activity */,
@@ -169,7 +171,7 @@ public class TaskContainerTest {
 
     @Test
     public void testGetTopNonFinishingActivity() {
-        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskContainer taskContainer = createTestTaskContainer();
         assertNull(taskContainer.getTopNonFinishingActivity());
 
         final TaskFragmentContainer tf0 = mock(TaskFragmentContainer.class);

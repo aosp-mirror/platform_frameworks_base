@@ -214,7 +214,7 @@ import libcore.util.NativeAllocationRegistry;
  * uniform shader myShader;
  * vec4 main(vec2 canvas_coordinates) {
  *     // swap the red and blue color channels when sampling from myShader
- *     return myShader.sample(canvas_coordinates).bgra;
+ *     return myShader.eval(canvas_coordinates).bgra;
  * }</pre>
  *
  * <p>After creating a {@link RuntimeShader} with that program the shader uniform can

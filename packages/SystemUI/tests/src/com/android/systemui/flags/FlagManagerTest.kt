@@ -26,6 +26,7 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
+import java.util.function.Consumer
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
@@ -33,9 +34,8 @@ import org.mockito.Mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.MockitoAnnotations
-import java.util.function.Consumer
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 /**
  * NOTE: This test is for the version of FeatureFlagManager in src-release, which should not allow
@@ -64,14 +64,14 @@ class FlagManagerTest : SysuiTestCase() {
         verifyNoMoreInteractions(mFlagSettingsHelper)
 
         // adding the first listener registers the observer
-        mFlagManager.addListener(BooleanFlag(1, true), listener1)
+        mFlagManager.addListener(ReleasedFlag(1), listener1)
         val observer = withArgCaptor<ContentObserver> {
             verify(mFlagSettingsHelper).registerContentObserver(any(), any(), capture())
         }
         verifyNoMoreInteractions(mFlagSettingsHelper)
 
         // adding another listener does nothing
-        mFlagManager.addListener(BooleanFlag(2, true), listener2)
+        mFlagManager.addListener(ReleasedFlag(2), listener2)
         verifyNoMoreInteractions(mFlagSettingsHelper)
 
         // removing the original listener does nothing with second one still present
@@ -89,7 +89,7 @@ class FlagManagerTest : SysuiTestCase() {
         val listener = mock<FlagListenable.Listener>()
         val clearCacheAction = mock<Consumer<Int>>()
         mFlagManager.clearCacheAction = clearCacheAction
-        mFlagManager.addListener(BooleanFlag(1, true), listener)
+        mFlagManager.addListener(ReleasedFlag(1), listener)
         val observer = withArgCaptor<ContentObserver> {
             verify(mFlagSettingsHelper).registerContentObserver(any(), any(), capture())
         }
@@ -101,8 +101,8 @@ class FlagManagerTest : SysuiTestCase() {
     fun testObserverInvokesListeners() {
         val listener1 = mock<FlagListenable.Listener>()
         val listener10 = mock<FlagListenable.Listener>()
-        mFlagManager.addListener(BooleanFlag(1, true), listener1)
-        mFlagManager.addListener(BooleanFlag(10, true), listener10)
+        mFlagManager.addListener(ReleasedFlag(1), listener1)
+        mFlagManager.addListener(ReleasedFlag(10), listener10)
         val observer = withArgCaptor<ContentObserver> {
             verify(mFlagSettingsHelper).registerContentObserver(any(), any(), capture())
         }
@@ -127,8 +127,8 @@ class FlagManagerTest : SysuiTestCase() {
     fun testOnlySpecificFlagListenerIsInvoked() {
         val listener1 = mock<FlagListenable.Listener>()
         val listener10 = mock<FlagListenable.Listener>()
-        mFlagManager.addListener(BooleanFlag(1, true), listener1)
-        mFlagManager.addListener(BooleanFlag(10, true), listener10)
+        mFlagManager.addListener(ReleasedFlag(1), listener1)
+        mFlagManager.addListener(ReleasedFlag(10), listener10)
 
         mFlagManager.dispatchListenersAndMaybeRestart(1, null)
         val flagEvent1 = withArgCaptor<FlagListenable.FlagEvent> {
@@ -148,8 +148,8 @@ class FlagManagerTest : SysuiTestCase() {
     @Test
     fun testSameListenerCanBeUsedForMultipleFlags() {
         val listener = mock<FlagListenable.Listener>()
-        mFlagManager.addListener(BooleanFlag(1, true), listener)
-        mFlagManager.addListener(BooleanFlag(10, true), listener)
+        mFlagManager.addListener(ReleasedFlag(1), listener)
+        mFlagManager.addListener(ReleasedFlag(10), listener)
 
         mFlagManager.dispatchListenersAndMaybeRestart(1, null)
         val flagEvent1 = withArgCaptor<FlagListenable.FlagEvent> {
@@ -177,7 +177,7 @@ class FlagManagerTest : SysuiTestCase() {
     @Test
     fun testListenerCanSuppressRestart() {
         val restartAction = mock<Consumer<Boolean>>()
-        mFlagManager.addListener(BooleanFlag(1, true)) { event ->
+        mFlagManager.addListener(ReleasedFlag(1)) { event ->
             event.requestNoRestart()
         }
         mFlagManager.dispatchListenersAndMaybeRestart(1, restartAction)
@@ -188,7 +188,7 @@ class FlagManagerTest : SysuiTestCase() {
     @Test
     fun testListenerOnlySuppressesRestartForOwnFlag() {
         val restartAction = mock<Consumer<Boolean>>()
-        mFlagManager.addListener(BooleanFlag(10, true)) { event ->
+        mFlagManager.addListener(ReleasedFlag(10)) { event ->
             event.requestNoRestart()
         }
         mFlagManager.dispatchListenersAndMaybeRestart(1, restartAction)
@@ -199,10 +199,10 @@ class FlagManagerTest : SysuiTestCase() {
     @Test
     fun testRestartWhenNotAllListenersRequestSuppress() {
         val restartAction = mock<Consumer<Boolean>>()
-        mFlagManager.addListener(BooleanFlag(10, true)) { event ->
+        mFlagManager.addListener(ReleasedFlag(10)) { event ->
             event.requestNoRestart()
         }
-        mFlagManager.addListener(BooleanFlag(10, true)) {
+        mFlagManager.addListener(ReleasedFlag(10)) {
             // do not request
         }
         mFlagManager.dispatchListenersAndMaybeRestart(1, restartAction)

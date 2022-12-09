@@ -41,7 +41,6 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.InputConfig;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.util.DisplayMetrics;
@@ -222,8 +221,8 @@ class TaskPositioner implements IBinder.DeathRecipient {
         mDragWindowHandle.token = mClientChannel.getToken();
         mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
         mDragWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-        mDragWindowHandle.ownerPid = Process.myPid();
-        mDragWindowHandle.ownerUid = Process.myUid();
+        mDragWindowHandle.ownerPid = WindowManagerService.MY_PID;
+        mDragWindowHandle.ownerUid = WindowManagerService.MY_UID;
         mDragWindowHandle.scaleFactor = 1.0f;
         // When dragging the window around, we do not want to steal focus for the window.
         mDragWindowHandle.inputConfig = InputConfig.NOT_FOCUSABLE;

@@ -38,8 +38,8 @@ import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -89,8 +89,8 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
         val listener = mock(StatusBarStateController.StateListener::class.java)
         controller.addCallback(listener)
 
-        controller.setDozeAmount(0.5f, false /* animated */)
-        controller.setDozeAmount(0.5f, false /* animated */)
+        controller.setAndInstrumentDozeAmount(null, 0.5f, false /* animated */)
+        controller.setAndInstrumentDozeAmount(null, 0.5f, false /* animated */)
         verify(listener).onDozeAmountChanged(eq(0.5f), anyFloat())
     }
 
@@ -135,7 +135,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
     @Test
     fun testSetDozeAmount_immediatelyChangesDozeAmount_lockscreenTransitionFromAod() {
         // Put controller in AOD state
-        controller.setDozeAmount(1f, false)
+        controller.setAndInstrumentDozeAmount(null, 1f, false)
 
         // When waking from doze, CentralSurfaces#updateDozingState will update the dozing state
         // before the doze amount changes

@@ -87,6 +87,14 @@ public abstract class HotwordDetectionService extends Service {
     public static final int MAXIMUM_NUMBER_OF_INITIALIZATION_STATUS_CUSTOM_ERROR = 2;
 
     /**
+     * Feature flag for Attention Service.
+     *
+     * TODO(b/247920386): Add TestApi annotation
+     * @hide
+     */
+    public static final boolean ENABLE_PROXIMITY_RESULT = false;
+
+    /**
      * Indicates that the updated status is successful.
      */
     public static final int INITIALIZATION_STATUS_SUCCESS = 0;

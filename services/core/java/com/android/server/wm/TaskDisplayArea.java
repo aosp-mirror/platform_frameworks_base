@@ -29,7 +29,6 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static android.view.WindowManagerPolicyConstants.SPLIT_DIVIDER_LAYER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -90,20 +89,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * currently all task animation backgrounds are the same color.
      */
     private int mColorLayerCounter = 0;
-
-    /**
-     * Given that the split-screen divider does not have an AppWindowToken, it
-     * will have to live inside of a "NonAppWindowContainer". However, in visual Z order
-     * it will need to be interleaved with some of our children, appearing on top of
-     * both docked root tasks but underneath any assistant root tasks.
-     *
-     * To solve this problem we have this anchor control, which will always exist so
-     * we can always assign it the correct value in our {@link #assignChildLayers}.
-     * Likewise since it always exists, we can always
-     * assign the divider a layer relative to it. This way we prevent linking lifecycle
-     * events between tasks and the divider window.
-     */
-    private SurfaceControl mSplitScreenDividerAnchor;
 
     // Cached reference to some special tasks we tend to get a lot so we don't need to loop
     // through the list to find them.
@@ -186,6 +171,8 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * {@link WindowConfiguration#ACTIVITY_TYPE_HOME}
      */
     private final boolean mCanHostHomeTask;
+
+    private final Configuration mTempConfiguration = new Configuration();
 
     TaskDisplayArea(DisplayContent displayContent, WindowManagerService service, String name,
                     int displayAreaFeature) {
@@ -338,6 +325,10 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             // Clear preferred top because the adding focusable task has a higher z-order.
             mPreferredTopFocusableRootTask = null;
         }
+
+        // Update the top resumed activity because the preferred top focusable task may be changed.
+        mAtmService.mTaskSupervisor.updateTopResumedActivityIfNeeded("addChildTask");
+
         mAtmService.updateSleepIfNeededLocked();
         onRootTaskOrderChanged(task);
     }
@@ -422,19 +413,16 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // wasContained} restricts the preferred root task is set only when moving an existing
         // root task to top instead of adding a new root task that may be too early (e.g. in the
         // middle of launching or reparenting).
-        if (moveToTop && child.isFocusableAndVisible()) {
-            mPreferredTopFocusableRootTask = child;
+        final boolean isTopFocusableTask = moveToTop && child.isTopActivityFocusable();
+        if (isTopFocusableTask) {
+            mPreferredTopFocusableRootTask =
+                    child.shouldBeVisible(null /* starting */) ? child : null;
         } else if (mPreferredTopFocusableRootTask == child) {
             mPreferredTopFocusableRootTask = null;
         }
 
         // Update the top resumed activity because the preferred top focusable task may be changed.
-        mAtmService.mTaskSupervisor.updateTopResumedActivityIfNeeded();
-
-        final ActivityRecord r = child.getTopResumedActivity();
-        if (r != null && r == mRootWindowContainer.getTopResumedActivity()) {
-            mAtmService.setResumedActivityUncheckLocked(r, "positionChildAt");
-        }
+        mAtmService.mTaskSupervisor.updateTopResumedActivityIfNeeded("positionChildTaskAt");
 
         if (mChildren.indexOf(child) != oldPosition) {
             onRootTaskOrderChanged(child);
@@ -736,12 +724,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // Place root home tasks to the bottom.
         layer = adjustRootTaskLayer(t, mTmpHomeChildren, layer);
         layer = adjustRootTaskLayer(t, mTmpNormalChildren, layer);
-        // TODO(b/207185041): Remove this divider workaround after we full remove leagacy split and
-        //                    make app pair split only have single root then we can just attach the
-        //                    divider to the single root task in shell.
-        layer = Math.max(layer, SPLIT_DIVIDER_LAYER + 1);
         adjustRootTaskLayer(t, mTmpAlwaysOnTopChildren, layer);
-        t.setLayer(mSplitScreenDividerAnchor, SPLIT_DIVIDER_LAYER);
     }
 
     /**
@@ -769,19 +752,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 continue;
             }
 
-            final Task childTask = child.asTask();
-            final boolean inAdjacentTask = childTask != null
-                    && child.inMultiWindowMode()
-                    && childTask.getRootTask().getAdjacentTaskFragment() != null;
-
-            if (inAdjacentTask) {
-                hasAdjacentTask = true;
-            } else if (hasAdjacentTask && startLayer < SPLIT_DIVIDER_LAYER) {
-                // Task on top of adjacent tasks should be higher than split divider layer so
-                // set it as start.
-                startLayer = SPLIT_DIVIDER_LAYER + 1;
-            }
-
             child.assignLayer(t, startLayer++);
         }
 
@@ -806,31 +776,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             RemoteAnimationController.RemoteAnimationRecord record) {
         final ActivityRecord activity = getTopMostActivity();
         return activity != null ? activity.createRemoteAnimationTarget(record) : null;
-    }
-
-    SurfaceControl getSplitScreenDividerAnchor() {
-        return mSplitScreenDividerAnchor;
-    }
-
-    @Override
-    void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
-        if (getParent() != null) {
-            super.onParentChanged(newParent, oldParent, () -> {
-                mSplitScreenDividerAnchor = makeChildSurface(null)
-                        .setName("splitScreenDividerAnchor")
-                        .setCallsite("TaskDisplayArea.onParentChanged")
-                        .build();
-
-                getSyncTransaction()
-                        .show(mSplitScreenDividerAnchor);
-            });
-        } else {
-            super.onParentChanged(newParent, oldParent);
-            mWmService.mTransactionFactory.get()
-                    .remove(mSplitScreenDividerAnchor)
-                    .apply();
-            mSplitScreenDividerAnchor = null;
-        }
     }
 
     void setBackgroundColor(@ColorInt int colorInt) {
@@ -878,12 +823,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             setBackgroundColor(mBackgroundColor, true /* restore */);
         }
 
-        if (mSplitScreenDividerAnchor == null) {
-            return;
-        }
-
-        // As TaskDisplayArea is getting a new surface, reparent and reorder the child surfaces.
-        t.reparent(mSplitScreenDividerAnchor, mSurfaceControl);
         reassignLayer(t);
         scheduleAnimation();
     }
@@ -1176,7 +1115,10 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // If a task is launching from a created-by-organizer task, it should be launched into the
         // same created-by-organizer task as well. Unless, the candidate task is already positioned
         // in the another adjacent task.
-        if (sourceTask != null) {
+        if (sourceTask != null && (candidateTask == null
+                // A pinned task relaunching should be handled by its task organizer. Skip fallback
+                // launch target of a pinned task from source task.
+                || candidateTask.getWindowingMode() != WINDOWING_MODE_PINNED)) {
             Task launchTarget = sourceTask.getCreatedByOrganizerTask();
             if (launchTarget != null && launchTarget.getAdjacentTaskFragment() != null) {
                 if (candidateTask != null) {
@@ -1906,15 +1848,12 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 task.remove(false /* withTransition */, "removeTaskDisplayArea");
             } else {
                 // Reparent task to corresponding launch root or display area.
-                final WindowContainer launchRoot =
-                        task.supportsSplitScreenWindowingModeInDisplayArea(toDisplayArea)
-                                ? toDisplayArea.getLaunchRootTask(
+                final WindowContainer launchRoot = toDisplayArea.getLaunchRootTask(
                                         task.getWindowingMode(),
                                         task.getActivityType(),
                                         null /* options */,
                                         null /* sourceTask */,
-                                        0 /* launchFlags */)
-                                : null;
+                                        0 /* launchFlags */);
                 task.reparent(launchRoot == null ? toDisplayArea : launchRoot, POSITION_TOP);
 
                 // Set the windowing mode to undefined by default to let the root task inherited the
@@ -1951,6 +1890,15 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
 
     void clearPreferredTopFocusableRootTask() {
         mPreferredTopFocusableRootTask = null;
+    }
+
+    @Override
+    public void setWindowingMode(int windowingMode) {
+        mTempConfiguration.setTo(getRequestedOverrideConfiguration());
+        WindowConfiguration tempRequestWindowConfiguration = mTempConfiguration.windowConfiguration;
+        tempRequestWindowConfiguration.setWindowingMode(windowingMode);
+        tempRequestWindowConfiguration.setDisplayWindowingMode(windowingMode);
+        onRequestedOverrideConfigurationChanged(mTempConfiguration);
     }
 
     @Override
@@ -2002,7 +1950,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 continue;
             }
             final Task rootTask = child.asTask();
-            pw.println(doublePrefix + "* " + rootTask);
+            pw.println(doublePrefix + "* " + rootTask.toFullString());
             rootTask.dump(pw, triplePrefix, dumpAll);
         }
     }

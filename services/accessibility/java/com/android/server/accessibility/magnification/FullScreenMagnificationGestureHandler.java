@@ -184,7 +184,12 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         mPanningScalingState.mScrollGestureDetector.onTouchEvent(event);
         mPanningScalingState.mScaleGestureDetector.onTouchEvent(event);
 
-        stateHandler.onMotionEvent(event, rawEvent, policyFlags);
+        try {
+            stateHandler.onMotionEvent(event, rawEvent, policyFlags);
+        } catch (GestureException e) {
+            Slog.e(mLogTag, "Error processing motion event", e);
+            clearAndTransitionToStateDetecting();
+        }
     }
 
     @Override
@@ -281,7 +286,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
     }
 
     interface State {
-        void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags);
+        void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags)
+                throws GestureException;
 
         default void clear() {}
 
@@ -439,7 +445,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         private boolean mLastMoveOutsideMagnifiedRegion;
 
         @Override
-        public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags)
+                throws GestureException {
             final int action = event.getActionMasked();
             switch (action) {
                 case ACTION_POINTER_DOWN: {
@@ -449,7 +456,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 break;
                 case ACTION_MOVE: {
                     if (event.getPointerCount() != 1) {
-                        throw new IllegalStateException("Should have one pointer down.");
+                        throw new GestureException("Should have one pointer down.");
                     }
                     final float eventX = event.getX();
                     final float eventY = event.getY();
@@ -475,7 +482,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
                 case ACTION_DOWN:
                 case ACTION_POINTER_UP: {
-                    throw new IllegalArgumentException(
+                    throw new GestureException(
                             "Unexpected event type: " + MotionEvent.actionToString(action));
                 }
             }
@@ -1085,6 +1092,15 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         @Override
         public void onReceive(Context context, Intent intent) {
             mGestureHandler.mDetectingState.setShortcutTriggered(false);
+        }
+    }
+
+    /**
+     * Indicates an error with a gesture handler or state.
+     */
+    private static class GestureException extends Exception {
+        GestureException(String message) {
+            super(message);
         }
     }
 }

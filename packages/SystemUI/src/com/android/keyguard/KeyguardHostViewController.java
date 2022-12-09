@@ -337,6 +337,11 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
         mKeyguardSecurityContainerController.onStartingToHide();
     }
 
+    /** Called when bouncer visibility changes. */
+    public void onBouncerVisibilityChanged(@View.Visibility int visibility) {
+        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(visibility);
+    }
+
     public boolean hasDismissActions() {
         return mDismissAction != null || mCancelAction != null;
     }

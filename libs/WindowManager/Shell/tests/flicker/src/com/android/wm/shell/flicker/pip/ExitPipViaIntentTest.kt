@@ -80,7 +80,17 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
     /** {@inheritDoc}  */
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
+    override fun statusBarLayerRotatesScales() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        super.statusBarLayerRotatesScales()
+    }
+
+    @Presubmit
+    @Test
+    fun statusBarLayerRotatesScales_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        super.statusBarLayerRotatesScales()
+    }
 
     /** {@inheritDoc}  */
     @FlakyTest(bugId = 197726610)

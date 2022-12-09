@@ -66,4 +66,4 @@ option java_package com.android.server.wm
 31007 wm_boot_animation_done (time|2|3)
 
 # Request surface flinger to show / hide the wallpaper surface.
-33001 wm_wallpaper_surface (Display Id|1|5),(visible|1)
+33001 wm_wallpaper_surface (Display Id|1|5),(Visible|1),(Target|3)

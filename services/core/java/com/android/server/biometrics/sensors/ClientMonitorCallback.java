@@ -31,6 +31,11 @@ public interface ClientMonitorCallback {
     default void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {}
 
     /**
+     * Invoked when a biometric action has occurred.
+     */
+    default void onBiometricAction(int action) {}
+
+    /**
      * Invoked when the ClientMonitor operation is complete. This abstracts away asynchronous
      * (i.e. Authenticate, Enroll, Enumerate, Remove) and synchronous (i.e. generateChallenge,
      * revokeChallenge) so that a scheduler can process ClientMonitors regardless of their
