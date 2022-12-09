@@ -19,13 +19,13 @@ package com.android.server.voiceinteraction;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.service.voice.HotwordAudioStream.KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES;
 
-import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__AUDIO_EGRESS_CLOSE_ERROR_FROM_SYSTEM;
-import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__AUDIO_EGRESS_EMPTY_AUDIO_STREAM_LIST;
-import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__AUDIO_EGRESS_END;
-import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__AUDIO_EGRESS_ILLEGAL_COPY_BUFFER_SIZE;
-import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__AUDIO_EGRESS_INTERRUPTED_EXCEPTION;
-import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__AUDIO_EGRESS_NO_PERMISSION;
-import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__AUDIO_EGRESS_START;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__CLOSE_ERROR_FROM_SYSTEM;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__EMPTY_AUDIO_STREAM_LIST;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__ENDED;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__ILLEGAL_COPY_BUFFER_SIZE;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__INTERRUPTED_EXCEPTION;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__NO_PERMISSION;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__STARTED;
 import static com.android.server.voiceinteraction.HotwordDetectionConnection.DEBUG;
 
 import android.annotation.NonNull;
@@ -98,12 +98,14 @@ final class HotwordAudioStreamCopier {
             throws IOException {
         List<HotwordAudioStream> audioStreams = result.getAudioStreams();
         if (audioStreams.isEmpty()) {
-            HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
-                    HOTWORD_DETECTOR_EVENTS__EVENT__AUDIO_EGRESS_EMPTY_AUDIO_STREAM_LIST,
-                    mVoiceInteractorUid);
+            HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
+                    HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__EMPTY_AUDIO_STREAM_LIST,
+                    mVoiceInteractorUid, /* streamSizeBytes= */ 0, /* bundleSizeBytes= */ 0,
+                    /* streamCount= */ 0);
             return result;
         }
 
+        final int audioStreamCount = audioStreams.size();
         List<HotwordAudioStream> newAudioStreams = new ArrayList<>(audioStreams.size());
         List<CopyTaskInfo> copyTaskInfos = new ArrayList<>(audioStreams.size());
         for (HotwordAudioStream audioStream : audioStreams) {
@@ -120,9 +122,10 @@ final class HotwordAudioStreamCopier {
             if (metadata.containsKey(KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES)) {
                 copyBufferLength = metadata.getInt(KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES, -1);
                 if (copyBufferLength < 1 || copyBufferLength > MAX_COPY_BUFFER_LENGTH_BYTES) {
-                    HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
-                            HOTWORD_DETECTOR_EVENTS__EVENT__AUDIO_EGRESS_ILLEGAL_COPY_BUFFER_SIZE,
-                            mVoiceInteractorUid);
+                    HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
+                            HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__ILLEGAL_COPY_BUFFER_SIZE,
+                            mVoiceInteractorUid, /* streamSizeBytes= */ 0, /* bundleSizeBytes= */ 0,
+                            audioStreamCount);
                     Slog.w(TAG, "Attempted to set an invalid copy buffer length ("
                             + copyBufferLength + ") for: " + audioStream);
                     copyBufferLength = DEFAULT_COPY_BUFFER_LENGTH_BYTES;
@@ -183,18 +186,21 @@ final class HotwordAudioStreamCopier {
                     mVoiceInteractorUid, mVoiceInteractorPackageName,
                     mVoiceInteractorAttributionTag, OP_MESSAGE) == MODE_ALLOWED) {
                 try {
-                    HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
-                            HOTWORD_DETECTOR_EVENTS__EVENT__AUDIO_EGRESS_START,
-                            mVoiceInteractorUid);
+                    HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
+                            HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__STARTED,
+                            mVoiceInteractorUid, /* streamSizeBytes= */ 0, /* bundleSizeBytes= */ 0,
+                            size);
                     // TODO(b/244599891): Set timeout, close after inactivity
                     mExecutorService.invokeAll(tasks);
-                    HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
-                            HOTWORD_DETECTOR_EVENTS__EVENT__AUDIO_EGRESS_END,
-                            mVoiceInteractorUid);
+                    HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
+                            HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__ENDED,
+                            mVoiceInteractorUid, /* streamSizeBytes= */ 0, /* bundleSizeBytes= */ 0,
+                            size);
                 } catch (InterruptedException e) {
-                    HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
-                            HOTWORD_DETECTOR_EVENTS__EVENT__AUDIO_EGRESS_INTERRUPTED_EXCEPTION,
-                            mVoiceInteractorUid);
+                    HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
+                            HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__INTERRUPTED_EXCEPTION,
+                            mVoiceInteractorUid, /* streamSizeBytes= */ 0, /* bundleSizeBytes= */ 0,
+                            size);
                     Slog.e(TAG, mResultTaskId + ": Task was interrupted", e);
                     bestEffortPropagateError(e.getMessage());
                 } finally {
@@ -203,9 +209,10 @@ final class HotwordAudioStreamCopier {
                             mVoiceInteractorAttributionTag);
                 }
             } else {
-                HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
-                        HOTWORD_DETECTOR_EVENTS__EVENT__AUDIO_EGRESS_NO_PERMISSION,
-                        mVoiceInteractorUid);
+                HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
+                        HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__NO_PERMISSION,
+                        mVoiceInteractorUid, /* streamSizeBytes= */ 0, /* bundleSizeBytes= */ 0,
+                        size);
                 bestEffortPropagateError(
                         "Failed to obtain RECORD_AUDIO_HOTWORD permission for voice interactor with"
                                 + " uid=" + mVoiceInteractorUid
@@ -220,9 +227,10 @@ final class HotwordAudioStreamCopier {
                     copyTaskInfo.mSource.closeWithError(errorMessage);
                     copyTaskInfo.mSink.closeWithError(errorMessage);
                 }
-                HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
-                        HOTWORD_DETECTOR_EVENTS__EVENT__AUDIO_EGRESS_CLOSE_ERROR_FROM_SYSTEM,
-                        mVoiceInteractorUid);
+                HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
+                        HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__CLOSE_ERROR_FROM_SYSTEM,
+                        mVoiceInteractorUid, /* streamSizeBytes= */ 0, /* bundleSizeBytes= */ 0,
+                        mCopyTaskInfos.size());
             } catch (IOException e) {
                 Slog.e(TAG, mResultTaskId + ": Failed to propagate error", e);
             }
@@ -288,8 +296,10 @@ final class HotwordAudioStreamCopier {
                 mAudioSource.closeWithError(e.getMessage());
                 mAudioSink.closeWithError(e.getMessage());
                 Slog.e(TAG, mStreamTaskId + ": Failed to copy audio stream", e);
-                HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
-                        HOTWORD_DETECTOR_EVENTS__EVENT__AUDIO_EGRESS_CLOSE_ERROR_FROM_SYSTEM, mUid);
+                HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
+                        HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__CLOSE_ERROR_FROM_SYSTEM,
+                        mUid, /* streamSizeBytes= */ 0, /* bundleSizeBytes= */ 0,
+                        /* streamCount= */ 0);
             } finally {
                 if (fis != null) {
                     fis.close();
