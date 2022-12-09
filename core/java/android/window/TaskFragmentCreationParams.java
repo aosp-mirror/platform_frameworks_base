@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WindowingMode;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -57,14 +58,33 @@ public final class TaskFragmentCreationParams implements Parcelable {
 
     /** The initial windowing mode of the TaskFragment. Inherits from parent if not set. */
     @WindowingMode
-    private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
+    private final int mWindowingMode;
+
+    /**
+     * The fragment token of the paired primary TaskFragment.
+     * When it is set, the new TaskFragment will be positioned right above the paired TaskFragment.
+     * Otherwise, the new TaskFragment will be positioned on the top of the Task by default.
+     *
+     * This is different from {@link WindowContainerTransaction#setAdjacentTaskFragments} as we may
+     * set this when the pair of TaskFragments are stacked, while adjacent is only set on the pair
+     * of TaskFragments that are in split.
+     *
+     * This is needed in case we need to launch a placeholder Activity to split below a transparent
+     * always-expand Activity.
+     */
+    @Nullable
+    private final IBinder mPairedPrimaryFragmentToken;
 
     private TaskFragmentCreationParams(
-            @NonNull TaskFragmentOrganizerToken organizer,
-            @NonNull IBinder fragmentToken, @NonNull IBinder ownerToken) {
+            @NonNull TaskFragmentOrganizerToken organizer, @NonNull IBinder fragmentToken,
+            @NonNull IBinder ownerToken, @NonNull Rect initialBounds,
+            @WindowingMode int windowingMode, @Nullable IBinder pairedPrimaryFragmentToken) {
         mOrganizer = organizer;
         mFragmentToken = fragmentToken;
         mOwnerToken = ownerToken;
+        mInitialBounds.set(initialBounds);
+        mWindowingMode = windowingMode;
+        mPairedPrimaryFragmentToken = pairedPrimaryFragmentToken;
     }
 
     @NonNull
@@ -92,12 +112,22 @@ public final class TaskFragmentCreationParams implements Parcelable {
         return mWindowingMode;
     }
 
+    /**
+     * TODO(b/232476698): remove the hide with adding CTS for this in next release.
+     * @hide
+     */
+    @Nullable
+    public IBinder getPairedPrimaryFragmentToken() {
+        return mPairedPrimaryFragmentToken;
+    }
+
     private TaskFragmentCreationParams(Parcel in) {
         mOrganizer = TaskFragmentOrganizerToken.CREATOR.createFromParcel(in);
         mFragmentToken = in.readStrongBinder();
         mOwnerToken = in.readStrongBinder();
         mInitialBounds.readFromParcel(in);
         mWindowingMode = in.readInt();
+        mPairedPrimaryFragmentToken = in.readStrongBinder();
     }
 
     /** @hide */
@@ -108,6 +138,7 @@ public final class TaskFragmentCreationParams implements Parcelable {
         dest.writeStrongBinder(mOwnerToken);
         mInitialBounds.writeToParcel(dest, flags);
         dest.writeInt(mWindowingMode);
+        dest.writeStrongBinder(mPairedPrimaryFragmentToken);
     }
 
     @NonNull
@@ -132,6 +163,7 @@ public final class TaskFragmentCreationParams implements Parcelable {
                 + " ownerToken=" + mOwnerToken
                 + " initialBounds=" + mInitialBounds
                 + " windowingMode=" + mWindowingMode
+                + " pairedFragmentToken=" + mPairedPrimaryFragmentToken
                 + "}";
     }
 
@@ -159,6 +191,9 @@ public final class TaskFragmentCreationParams implements Parcelable {
         @WindowingMode
         private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
 
+        @Nullable
+        private IBinder mPairedPrimaryFragmentToken;
+
         public Builder(@NonNull TaskFragmentOrganizerToken organizer,
                 @NonNull IBinder fragmentToken, @NonNull IBinder ownerToken) {
             mOrganizer = organizer;
@@ -180,14 +215,29 @@ public final class TaskFragmentCreationParams implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets the fragment token of the paired primary TaskFragment.
+         * When it is set, the new TaskFragment will be positioned right above the paired
+         * TaskFragment. Otherwise, the new TaskFragment will be positioned on the top of the Task
+         * by default.
+         *
+         * This is needed in case we need to launch a placeholder Activity to split below a
+         * transparent always-expand Activity.
+         *
+         * TODO(b/232476698): remove the hide with adding CTS for this in next release.
+         * @hide
+         */
+        @NonNull
+        public Builder setPairedPrimaryFragmentToken(@Nullable IBinder fragmentToken) {
+            mPairedPrimaryFragmentToken = fragmentToken;
+            return this;
+        }
+
         /** Constructs the options to create TaskFragment with. */
         @NonNull
         public TaskFragmentCreationParams build() {
-            final TaskFragmentCreationParams result = new TaskFragmentCreationParams(
-                    mOrganizer, mFragmentToken, mOwnerToken);
-            result.mInitialBounds.set(mInitialBounds);
-            result.mWindowingMode = mWindowingMode;
-            return result;
+            return new TaskFragmentCreationParams(mOrganizer, mFragmentToken, mOwnerToken,
+                    mInitialBounds, mWindowingMode, mPairedPrimaryFragmentToken);
         }
     }
 }

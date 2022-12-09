@@ -73,6 +73,8 @@ import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.plugins.ActivityStarter;
@@ -145,8 +147,11 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private int mColorConnectedItemBackground;
     private int mColorPositiveButtonText;
     private int mColorDialogBackground;
+    private int mItemMarginEndDefault;
+    private int mItemMarginEndSelectable;
     private float mInactiveRadius;
     private float mActiveRadius;
+    private FeatureFlags mFeatureFlags;
 
     public enum BroadcastNotifyDialog {
         ACTION_FIRST_LAUNCH,
@@ -162,7 +167,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             Optional<NearbyMediaDevicesManager> nearbyMediaDevicesManagerOptional,
             AudioManager audioManager,
             PowerExemptionManager powerExemptionManager,
-            KeyguardManager keyGuardManager) {
+            KeyguardManager keyGuardManager,
+            FeatureFlags featureFlags) {
         mContext = context;
         mPackageName = packageName;
         mMediaSessionManager = mediaSessionManager;
@@ -172,6 +178,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mAudioManager = audioManager;
         mPowerExemptionManager = powerExemptionManager;
         mKeyGuardManager = keyGuardManager;
+        mFeatureFlags = featureFlags;
         InfoMediaManager imm = new InfoMediaManager(mContext, packageName, null, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
@@ -195,6 +202,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 R.dimen.media_output_dialog_active_background_radius);
         mColorDialogBackground = Utils.getColorStateListDefaultColor(mContext,
                 R.color.media_dialog_background);
+        mItemMarginEndDefault = (int) mContext.getResources().getDimension(
+                R.dimen.media_output_dialog_default_margin_end);
+        mItemMarginEndSelectable = (int) mContext.getResources().getDimension(
+                R.dimen.media_output_dialog_selectable_margin_end);
     }
 
     void start(@NonNull Callback cb) {
@@ -527,6 +538,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return mActiveRadius;
     }
 
+    public int getItemMarginEndDefault() {
+        return mItemMarginEndDefault;
+    }
+
+    public int getItemMarginEndSelectable() {
+        return mItemMarginEndSelectable;
+    }
+
     private void buildMediaDevices(List<MediaDevice> devices) {
         synchronized (mMediaDevicesLock) {
             attachRangeInfo(devices);
@@ -597,6 +616,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         MediaDevice currentConnectedMediaDevice = getCurrentConnectedMediaDevice();
         return currentConnectedMediaDevice != null && isActiveRemoteDevice(
                 currentConnectedMediaDevice);
+    }
+
+    public boolean isAdvancedLayoutSupported() {
+        return mFeatureFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT);
     }
 
     List<MediaDevice> getGroupMediaDevices() {
@@ -792,7 +815,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         MediaOutputController controller = new MediaOutputController(mContext, mPackageName,
                 mMediaSessionManager, mLocalBluetoothManager, mActivityStarter,
                 mNotifCollection, mDialogLaunchAnimator, Optional.of(mNearbyMediaDevicesManager),
-                mAudioManager, mPowerExemptionManager, mKeyGuardManager);
+                mAudioManager, mPowerExemptionManager, mKeyGuardManager, mFeatureFlags);
         MediaOutputBroadcastDialog dialog = new MediaOutputBroadcastDialog(mContext, true,
                 broadcastSender, controller);
         mDialogLaunchAnimator.showFromView(dialog, mediaOutputDialog);

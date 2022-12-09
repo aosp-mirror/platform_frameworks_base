@@ -12,22 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.android.systemui.qs
+package com.android.systemui.controls.settings
 
-import com.android.systemui.dagger.SysUISingleton
-import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 
-/** Controller for the footer actions. This manages the initialization of its dependencies. */
-@SysUISingleton
-class NewFooterActionsController
-@Inject
-// TODO(b/242040009): Rename this to FooterActionsController.
-constructor(
-    private val fgsManagerController: FgsManagerController,
-) {
-    fun init() {
-        fgsManagerController.init()
-    }
+/** Repository for Device controls related settings. */
+interface ControlsSettingsRepository {
+    /** Whether device controls activity can be shown above lockscreen for this user. */
+    val canShowControlsInLockscreen: StateFlow<Boolean>
+
+    /** Whether trivial controls can be actioned from the lockscreen for this user. */
+    val allowActionOnTrivialControlsInLockscreen: StateFlow<Boolean>
 }

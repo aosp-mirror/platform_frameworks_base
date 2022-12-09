@@ -328,6 +328,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.FeatureFlagUtils;
+import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
@@ -758,6 +759,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final AppErrors mAppErrors;
     final PackageWatchdog mPackageWatchdog;
+
+    @GuardedBy("mDeliveryGroupPolicyIgnoredActions")
+    private final ArraySet<String> mDeliveryGroupPolicyIgnoredActions = new ArraySet();
 
     /**
      * Uids of apps with current active camera sessions.  Access synchronized on
@@ -18336,6 +18340,37 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         for (BroadcastQueue queue : mBroadcastQueues) {
             queue.waitForBarrier(pw);
+        }
+    }
+
+    void setIgnoreDeliveryGroupPolicy(@NonNull String broadcastAction) {
+        Objects.requireNonNull(broadcastAction);
+        enforceCallingPermission(permission.DUMP, "waitForBroadcastBarrier()");
+        synchronized (mDeliveryGroupPolicyIgnoredActions) {
+            mDeliveryGroupPolicyIgnoredActions.add(broadcastAction);
+        }
+    }
+
+    void clearIgnoreDeliveryGroupPolicy(@NonNull String broadcastAction) {
+        Objects.requireNonNull(broadcastAction);
+        enforceCallingPermission(permission.DUMP, "waitForBroadcastBarrier()");
+        synchronized (mDeliveryGroupPolicyIgnoredActions) {
+            mDeliveryGroupPolicyIgnoredActions.remove(broadcastAction);
+        }
+    }
+
+    boolean shouldIgnoreDeliveryGroupPolicy(@Nullable String broadcastAction) {
+        if (broadcastAction == null) {
+            return false;
+        }
+        synchronized (mDeliveryGroupPolicyIgnoredActions) {
+            return mDeliveryGroupPolicyIgnoredActions.contains(broadcastAction);
+        }
+    }
+
+    void dumpDeliveryGroupPolicyIgnoredActions(IndentingPrintWriter ipw) {
+        synchronized (mDeliveryGroupPolicyIgnoredActions) {
+            ipw.println(mDeliveryGroupPolicyIgnoredActions);
         }
     }
 

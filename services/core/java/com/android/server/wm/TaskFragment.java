@@ -302,6 +302,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     private final IBinder mFragmentToken;
 
     /**
+     * The bounds of the embedded TaskFragment relative to the parent Task.
+     * {@code null} if it is not {@link #mIsEmbedded}
+     * TODO(b/261785978) cleanup with legacy app transition
+     */
+    @Nullable
+    private final Rect mRelativeEmbeddedBounds;
+
+    /**
      * Whether to delay the call to {@link #updateOrganizedTaskFragmentSurface()} when there is a
      * configuration change.
      */
@@ -383,6 +391,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mRootWindowContainer = mAtmService.mRootWindowContainer;
         mCreatedByOrganizer = createdByOrganizer;
         mIsEmbedded = isEmbedded;
+        mRelativeEmbeddedBounds = isEmbedded ? new Rect() : null;
         mTaskFragmentOrganizerController =
                 mAtmService.mWindowOrganizerController.mTaskFragmentOrganizerController;
         mFragmentToken = fragmentToken;
@@ -2410,16 +2419,53 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
     }
 
-    /** Whether we should prepare a transition for this {@link TaskFragment} bounds change. */
-    boolean shouldStartChangeTransition(Rect startBounds) {
+    /**
+     * Gets the relative bounds of this embedded TaskFragment. This should only be called on
+     * embedded TaskFragment.
+     */
+    @NonNull
+    Rect getRelativeEmbeddedBounds() {
+        if (mRelativeEmbeddedBounds == null) {
+            throw new IllegalStateException("The TaskFragment is not embedded");
+        }
+        return mRelativeEmbeddedBounds;
+    }
+
+    /**
+     * Updates the record of the relative bounds of this embedded TaskFragment. This should only be
+     * called when the embedded TaskFragment's override bounds are changed.
+     * Returns {@code true} if the bounds is changed.
+     */
+    void updateRelativeEmbeddedBounds() {
+        // We only record the override bounds, which means it will not be changed when it is filling
+        // Task, and resize with the parent.
+        getRequestedOverrideBounds(mTmpBounds);
+        getRelativePosition(mTmpPoint);
+        mTmpBounds.offsetTo(mTmpPoint.x, mTmpPoint.y);
+        mRelativeEmbeddedBounds.set(mTmpBounds);
+    }
+
+    /**
+     * Updates the record of relative bounds of this embedded TaskFragment, and checks whether we
+     * should prepare a transition for the bounds change.
+     */
+    boolean shouldStartChangeTransition(@NonNull Rect absStartBounds,
+            @NonNull Rect relStartBounds) {
         if (mTaskFragmentOrganizer == null || !canStartChangeTransition()) {
             return false;
         }
 
-        // Only take snapshot if the bounds are resized.
-        final Rect endBounds = getConfiguration().windowConfiguration.getBounds();
-        return endBounds.width() != startBounds.width()
-                || endBounds.height() != startBounds.height();
+        if (mTransitionController.isShellTransitionsEnabled()) {
+            // For Shell transition, the change will be collected anyway, so only take snapshot when
+            // the bounds are resized.
+            final Rect endBounds = getConfiguration().windowConfiguration.getBounds();
+            return endBounds.width() != absStartBounds.width()
+                    || endBounds.height() != absStartBounds.height();
+        } else {
+            // For legacy transition, we need to trigger a change transition as long as the bounds
+            // is changed, even if it is not resized.
+            return !relStartBounds.equals(mRelativeEmbeddedBounds);
+        }
     }
 
     /** Records the starting bounds of the closing organized TaskFragment. */

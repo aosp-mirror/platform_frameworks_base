@@ -849,8 +849,8 @@ class AppOpsServiceImpl implements AppOpsServiceInterface {
             mSwitchedOps.put(switchCode,
                     ArrayUtils.appendInt(mSwitchedOps.get(switchCode), switchedCode));
         }
-        mAppOpsServiceInterface =
-                new AppOpsCheckingServiceImpl(this, this, handler, context, mSwitchedOps);
+        mAppOpsServiceInterface = new AppOpsCheckingServiceTracingDecorator(
+                new AppOpsCheckingServiceImpl(this, this, handler, context, mSwitchedOps));
         mAppOpsRestrictions = new AppOpsRestrictionsImpl(context, handler,
                 mAppOpsServiceInterface);
 

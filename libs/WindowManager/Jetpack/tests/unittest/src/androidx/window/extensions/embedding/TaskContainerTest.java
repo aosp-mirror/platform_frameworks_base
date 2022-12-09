@@ -122,7 +122,7 @@ public class TaskContainerTest {
         assertTrue(taskContainer.isEmpty());
 
         final TaskFragmentContainer tf = new TaskFragmentContainer(null /* activity */,
-                new Intent(), taskContainer, mController);
+                new Intent(), taskContainer, mController, null /* pairedPrimaryContainer */);
 
         assertFalse(taskContainer.isEmpty());
 
@@ -138,11 +138,11 @@ public class TaskContainerTest {
         assertNull(taskContainer.getTopTaskFragmentContainer());
 
         final TaskFragmentContainer tf0 = new TaskFragmentContainer(null /* activity */,
-                new Intent(), taskContainer, mController);
+                new Intent(), taskContainer, mController, null /* pairedPrimaryContainer */);
         assertEquals(tf0, taskContainer.getTopTaskFragmentContainer());
 
         final TaskFragmentContainer tf1 = new TaskFragmentContainer(null /* activity */,
-                new Intent(), taskContainer, mController);
+                new Intent(), taskContainer, mController, null /* pairedPrimaryContainer */);
         assertEquals(tf1, taskContainer.getTopTaskFragmentContainer());
     }
 

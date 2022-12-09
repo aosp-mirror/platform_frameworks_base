@@ -107,18 +107,49 @@ public class TaskFragmentTest extends WindowTestsBase {
     }
 
     @Test
+    public void testShouldStartChangeTransition_relativePositionChange() {
+        mockSurfaceFreezerSnapshot(mTaskFragment.mSurfaceFreezer);
+        final Rect startBounds = new Rect(0, 0, 500, 1000);
+        final Rect endBounds = new Rect(500, 0, 1000, 1000);
+        mTaskFragment.setBounds(startBounds);
+        mTaskFragment.updateRelativeEmbeddedBounds();
+        doReturn(true).when(mTaskFragment).isVisible();
+        doReturn(true).when(mTaskFragment).isVisibleRequested();
+
+        // Do not resize, just change the relative position.
+        final Rect relStartBounds = new Rect(mTaskFragment.getRelativeEmbeddedBounds());
+        mTaskFragment.setBounds(endBounds);
+        mTaskFragment.updateRelativeEmbeddedBounds();
+        spyOn(mDisplayContent.mTransitionController);
+
+        // For Shell transition, we don't want to take snapshot when the bounds are not resized
+        doReturn(true).when(mDisplayContent.mTransitionController)
+                .isShellTransitionsEnabled();
+        assertFalse(mTaskFragment.shouldStartChangeTransition(startBounds, relStartBounds));
+
+        // For legacy transition, we want to request a change transition even if it is just relative
+        // bounds change.
+        doReturn(false).when(mDisplayContent.mTransitionController)
+                .isShellTransitionsEnabled();
+        assertTrue(mTaskFragment.shouldStartChangeTransition(startBounds, relStartBounds));
+    }
+
+    @Test
     public void testStartChangeTransition_resetSurface() {
         mockSurfaceFreezerSnapshot(mTaskFragment.mSurfaceFreezer);
         final Rect startBounds = new Rect(0, 0, 1000, 1000);
         final Rect endBounds = new Rect(500, 500, 1000, 1000);
         mTaskFragment.setBounds(startBounds);
+        mTaskFragment.updateRelativeEmbeddedBounds();
         doReturn(true).when(mTaskFragment).isVisible();
         doReturn(true).when(mTaskFragment).isVisibleRequested();
 
         clearInvocations(mTransaction);
+        final Rect relStartBounds = new Rect(mTaskFragment.getRelativeEmbeddedBounds());
         mTaskFragment.deferOrganizedTaskFragmentSurfaceUpdate();
         mTaskFragment.setBounds(endBounds);
-        assertTrue(mTaskFragment.shouldStartChangeTransition(startBounds));
+        mTaskFragment.updateRelativeEmbeddedBounds();
+        assertTrue(mTaskFragment.shouldStartChangeTransition(startBounds, relStartBounds));
         mTaskFragment.initializeChangeTransition(startBounds);
         mTaskFragment.continueOrganizedTaskFragmentSurfaceUpdate();
 
@@ -157,17 +188,20 @@ public class TaskFragmentTest extends WindowTestsBase {
         final Rect startBounds = new Rect(0, 0, 1000, 1000);
         final Rect endBounds = new Rect(500, 500, 1000, 1000);
         mTaskFragment.setBounds(startBounds);
+        mTaskFragment.updateRelativeEmbeddedBounds();
         doReturn(true).when(mTaskFragment).isVisible();
         doReturn(true).when(mTaskFragment).isVisibleRequested();
 
+        final Rect relStartBounds = new Rect(mTaskFragment.getRelativeEmbeddedBounds());
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
         displayPolicy.screenTurnedOff();
 
         assertFalse(mTaskFragment.okToAnimate());
 
         mTaskFragment.setBounds(endBounds);
+        mTaskFragment.updateRelativeEmbeddedBounds();
 
-        assertFalse(mTaskFragment.shouldStartChangeTransition(startBounds));
+        assertFalse(mTaskFragment.shouldStartChangeTransition(startBounds, relStartBounds));
     }
 
     /**

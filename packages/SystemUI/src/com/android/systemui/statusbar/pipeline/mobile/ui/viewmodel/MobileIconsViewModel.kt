@@ -23,7 +23,7 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMob
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import javax.inject.Inject
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * View model for describing the system's current mobile cellular connections. The result is a list
@@ -33,7 +33,7 @@ import kotlinx.coroutines.flow.Flow
 class MobileIconsViewModel
 @Inject
 constructor(
-    val subscriptionIdsFlow: Flow<List<Int>>,
+    val subscriptionIdsFlow: StateFlow<List<Int>>,
     private val interactor: MobileIconsInteractor,
     private val logger: ConnectivityPipelineLogger,
 ) {
@@ -51,7 +51,7 @@ constructor(
         private val interactor: MobileIconsInteractor,
         private val logger: ConnectivityPipelineLogger,
     ) {
-        fun create(subscriptionIdsFlow: Flow<List<Int>>): MobileIconsViewModel {
+        fun create(subscriptionIdsFlow: StateFlow<List<Int>>): MobileIconsViewModel {
             return MobileIconsViewModel(
                 subscriptionIdsFlow,
                 interactor,

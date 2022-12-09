@@ -12,18 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.android.systemui.controls
+package com.android.systemui.common.shared.model
 
-import kotlinx.coroutines.flow.StateFlow
+import androidx.annotation.AttrRes
 
-/** Repository for Device controls related settings. */
-interface ControlsSettingsRepository {
-    /** Whether device controls activity can be shown above lockscreen for this user. */
-    val canShowControlsInLockscreen: StateFlow<Boolean>
-
-    /** Whether trivial controls can be actioned from the lockscreen for this user. */
-    val allowActionOnTrivialControlsInLockscreen: StateFlow<Boolean>
-}
+/** Models an icon with a specific tint. */
+data class TintedIcon(
+    val icon: Icon,
+    @AttrRes val tintAttr: Int?,
+)

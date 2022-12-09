@@ -34,8 +34,8 @@ import com.android.systemui.animation.ViewHierarchyAnimator
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Text.Companion.loadText
-import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.common.ui.binder.TextViewBinder
+import com.android.systemui.common.ui.binder.TintedIconViewBinder
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.FalsingManager
@@ -121,7 +121,7 @@ open class ChipbarCoordinator @Inject constructor(
 
         // ---- Start icon ----
         val iconView = currentView.requireViewById<CachingIconView>(R.id.start_icon)
-        IconViewBinder.bind(newInfo.startIcon, iconView)
+        TintedIconViewBinder.bind(newInfo.startIcon, iconView)
 
         // ---- Text ----
         val textView = currentView.requireViewById<TextView>(R.id.text)
@@ -156,11 +156,14 @@ open class ChipbarCoordinator @Inject constructor(
         }
 
         // ---- Overall accessibility ----
-        currentView.requireViewById<ViewGroup>(
-                R.id.chipbar_inner
-        ).contentDescription =
-            "${newInfo.startIcon.contentDescription.loadContentDescription(context)} " +
-                "${newInfo.text.loadText(context)}"
+        val iconDesc = newInfo.startIcon.icon.contentDescription
+        val loadedIconDesc = if (iconDesc != null) {
+            "${iconDesc.loadContentDescription(context)} "
+        } else {
+            ""
+        }
+        currentView.requireViewById<ViewGroup>(R.id.chipbar_inner).contentDescription =
+            "$loadedIconDesc${newInfo.text.loadText(context)}"
 
         // ---- Haptics ----
         newInfo.vibrationEffect?.let {
