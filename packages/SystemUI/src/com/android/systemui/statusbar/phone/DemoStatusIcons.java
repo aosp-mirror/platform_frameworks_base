@@ -40,6 +40,8 @@ import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.connectivity.ui.MobileContextProvider;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
+import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView;
+import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,20 +52,25 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
 
     private final LinearLayout mStatusIcons;
     private final ArrayList<StatusBarMobileView> mMobileViews = new ArrayList<>();
+    private final ArrayList<ModernStatusBarMobileView> mModernMobileViews = new ArrayList<>();
     private final int mIconSize;
 
     private StatusBarWifiView mWifiView;
     private boolean mDemoMode;
     private int mColor;
 
+    private final MobileIconsViewModel mMobileIconsViewModel;
+
     public DemoStatusIcons(
             LinearLayout statusIcons,
+            MobileIconsViewModel mobileIconsViewModel,
             int iconSize
     ) {
         super(statusIcons.getContext());
         mStatusIcons = statusIcons;
         mIconSize = iconSize;
         mColor = DarkIconDispatcher.DEFAULT_ICON_TINT;
+        mMobileIconsViewModel = mobileIconsViewModel;
 
         if (statusIcons instanceof StatusIconContainer) {
             setShouldRestrictIcons(((StatusIconContainer) statusIcons).isRestrictingIcons());
@@ -71,7 +78,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
             setShouldRestrictIcons(false);
         }
         setLayoutParams(mStatusIcons.getLayoutParams());
-        setPadding(mStatusIcons.getPaddingLeft(),mStatusIcons.getPaddingTop(),
+        setPadding(mStatusIcons.getPaddingLeft(), mStatusIcons.getPaddingTop(),
                 mStatusIcons.getPaddingRight(), mStatusIcons.getPaddingBottom());
         setOrientation(mStatusIcons.getOrientation());
         setGravity(Gravity.CENTER_VERTICAL); // no LL.getGravity()
@@ -115,6 +122,8 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
     public void onDemoModeFinished() {
         mDemoMode = false;
         mStatusIcons.setVisibility(View.VISIBLE);
+        mModernMobileViews.clear();
+        mMobileViews.clear();
         setVisibility(View.GONE);
     }
 
@@ -269,6 +278,24 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
     }
 
     /**
+     * Add a {@link ModernStatusBarMobileView}
+     * @param mobileContext possibly mcc/mnc overridden mobile context
+     * @param subId the subscriptionId for this mobile view
+     */
+    public void addModernMobileView(Context mobileContext, int subId) {
+        Log.d(TAG, "addModernMobileView (subId=" + subId + ")");
+        ModernStatusBarMobileView view = ModernStatusBarMobileView.constructAndBind(
+                mobileContext,
+                "mobile",
+                mMobileIconsViewModel.viewModelForSub(subId)
+        );
+
+        // mobile always goes at the end
+        mModernMobileViews.add(view);
+        addView(view, getChildCount(), createLayoutParams());
+    }
+
+    /**
      * Apply an update to a mobile icon view for the given {@link MobileIconState}. For
      * compatibility with {@link MobileContextProvider}, we have to recreate the view every time we
      * update it, since the context (and thus the {@link Configuration}) may have changed
@@ -292,11 +319,18 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         if (view.getSlot().equals("wifi")) {
             removeView(mWifiView);
             mWifiView = null;
-        } else {
+        } else if (view instanceof StatusBarMobileView) {
             StatusBarMobileView mobileView = matchingMobileView(view);
             if (mobileView != null) {
                 removeView(mobileView);
                 mMobileViews.remove(mobileView);
+            }
+        } else if (view instanceof ModernStatusBarMobileView) {
+            ModernStatusBarMobileView mobileView = matchingModernMobileView(
+                    (ModernStatusBarMobileView) view);
+            if (mobileView != null) {
+                removeView(mobileView);
+                mModernMobileViews.remove(mobileView);
             }
         }
     }
@@ -310,6 +344,16 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         for (StatusBarMobileView view : mMobileViews) {
             if (view.getState().subId == v.getState().subId) {
                 return view;
+            }
+        }
+
+        return null;
+    }
+
+    private ModernStatusBarMobileView matchingModernMobileView(ModernStatusBarMobileView other) {
+        for (ModernStatusBarMobileView v : mModernMobileViews) {
+            if (v.getSubId() == other.getSubId()) {
+                return v;
             }
         }
 

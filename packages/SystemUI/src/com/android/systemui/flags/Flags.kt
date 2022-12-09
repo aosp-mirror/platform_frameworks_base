@@ -71,6 +71,9 @@ object Flags {
     val NOTIFICATION_MEMORY_MONITOR_ENABLED =
         releasedFlag(112, "notification_memory_monitor_enabled")
 
+    val NOTIFICATION_MEMORY_LOGGING_ENABLED =
+        unreleasedFlag(119, "notification_memory_logging_enabled", teamfood = true)
+
     // TODO(b/254512731): Tracking Bug
     @JvmField
     val NOTIFICATION_DISMISSAL_FADE =
@@ -91,6 +94,7 @@ object Flags {
         unreleasedFlag(259217907, "notification_group_dismissal_animation", teamfood = true)
 
     // TODO(b/257506350): Tracking Bug
+    @JvmField
     val FSI_CHROME = unreleasedFlag(117, "fsi_chrome")
 
     @JvmField
@@ -98,7 +102,7 @@ object Flags {
         unreleasedFlag(259395680, "simplified_appear_fraction", teamfood = true)
 
     // TODO(b/257315550): Tracking Bug
-    val NO_HUN_FOR_OLD_WHEN = unreleasedFlag(118, "no_hun_for_old_when")
+    val NO_HUN_FOR_OLD_WHEN = unreleasedFlag(118, "no_hun_for_old_when", teamfood = true)
 
     val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
         unreleasedFlag(254647461, "filter_unseen_notifs_on_keyguard", teamfood = true)
@@ -203,9 +207,6 @@ object Flags {
             R.bool.config_enableFullscreenUserSwitcher,
             "full_screen_user_switcher"
         )
-
-    // TODO(b/254512678): Tracking Bug
-    @JvmField val NEW_FOOTER_ACTIONS = releasedFlag(507, "new_footer_actions")
 
     // TODO(b/244064524): Tracking Bug
     @JvmField
@@ -436,6 +437,11 @@ object Flags {
     @JvmField
     val WARN_ON_BLOCKING_BINDER_TRANSACTIONS =
         unreleasedFlag(2400, "warn_on_blocking_binder_transactions")
+
+    // 2500 - output switcher
+    // TODO(b/261538825): Tracking Bug
+    @JvmField
+    val OUTPUT_SWITCHER_ADVANCED_LAYOUT = unreleasedFlag(2500, "output_switcher_advanced_layout")
 
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag(2, "exp_flag_release")

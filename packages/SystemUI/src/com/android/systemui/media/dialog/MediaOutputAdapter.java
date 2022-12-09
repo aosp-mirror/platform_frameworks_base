@@ -16,7 +16,6 @@
 
 package com.android.systemui.media.dialog;
 
-import android.annotation.DrawableRes;
 import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -122,17 +121,19 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 // Set different layout for each device
                 if (device.isMutingExpectedDevice()
                         && !mController.isCurrentConnectedDeviceRemote()) {
-                    updateTitleIcon(R.drawable.media_output_icon_volume,
-                            mController.getColorItemContent());
+                    if (!mController.isAdvancedLayoutSupported()) {
+                        updateTitleIcon(R.drawable.media_output_icon_volume,
+                                mController.getColorItemContent());
+                    }
                     initMutingExpectedDevice();
                     mCurrentActivePosition = position;
-                    updateContainerClickListener(v -> onItemClick(v, device));
+                    updateFullItemClickListener(v -> onItemClick(v, device));
                     setSingleLineLayout(getItemTitle(device));
                 } else if (device.getState() == MediaDeviceState.STATE_CONNECTING_FAILED) {
                     setUpDeviceIcon(device);
                     updateConnectionFailedStatusIcon();
                     mSubTitleText.setText(R.string.media_output_dialog_connect_failed);
-                    updateContainerClickListener(v -> onItemClick(v, device));
+                    updateFullItemClickListener(v -> onItemClick(v, device));
                     setTwoLineLayout(device, false /* bFocused */, false /* showSeekBar */,
                             false /* showProgressBar */, true /* showSubtitle */,
                             true /* showStatus */);
@@ -146,8 +147,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         && isDeviceIncluded(mController.getSelectedMediaDevice(), device)) {
                     boolean isDeviceDeselectable = isDeviceIncluded(
                             mController.getDeselectableMediaDevice(), device);
-                    updateTitleIcon(R.drawable.media_output_icon_volume,
-                            mController.getColorItemContent());
+                    if (!mController.isAdvancedLayoutSupported()) {
+                        updateTitleIcon(R.drawable.media_output_icon_volume,
+                                mController.getColorItemContent());
+                    }
                     updateGroupableCheckBox(true, isDeviceDeselectable, device);
                     updateEndClickArea(device, isDeviceDeselectable);
                     setUpContentDescriptionForView(mContainerLayout, false, device);
@@ -161,8 +164,22 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             && !mController.isCurrentConnectedDeviceRemote()) {
                         // mark as disconnected and set special click listener
                         setUpDeviceIcon(device);
-                        updateContainerClickListener(v -> cancelMuteAwaitConnection());
+                        updateFullItemClickListener(v -> cancelMuteAwaitConnection());
                         setSingleLineLayout(getItemTitle(device));
+                    } else if (mController.isCurrentConnectedDeviceRemote()
+                            && !mController.getSelectableMediaDevice().isEmpty()
+                            && mController.isAdvancedLayoutSupported()) {
+                        //If device is connected and there's other selectable devices, layout as
+                        // one of selected devices.
+                        boolean isDeviceDeselectable = isDeviceIncluded(
+                                mController.getDeselectableMediaDevice(), device);
+                        updateGroupableCheckBox(true, isDeviceDeselectable, device);
+                        updateEndClickArea(device, isDeviceDeselectable);
+                        setUpContentDescriptionForView(mContainerLayout, false, device);
+                        setSingleLineLayout(getItemTitle(device), true /* showSeekBar */,
+                                false /* showProgressBar */, true /* showCheckBox */,
+                                true /* showEndTouchArea */);
+                        initSeekbar(device, isCurrentSeekbarInvisible);
                     } else {
                         updateTitleIcon(R.drawable.media_output_icon_volume,
                                 mController.getColorItemContent());
@@ -176,14 +193,19 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 } else if (isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
                     setUpDeviceIcon(device);
                     updateGroupableCheckBox(false, true, device);
-                    updateContainerClickListener(v -> onGroupActionTriggered(true, device));
+                    if (mController.isAdvancedLayoutSupported()) {
+                        updateEndClickArea(device, true);
+                    }
+                    updateFullItemClickListener(mController.isAdvancedLayoutSupported()
+                            ? v -> onItemClick(v, device)
+                            : v -> onGroupActionTriggered(true, device));
                     setSingleLineLayout(getItemTitle(device), false /* showSeekBar */,
                             false /* showProgressBar */, true /* showCheckBox */,
                             true /* showEndTouchArea */);
                 } else {
                     setUpDeviceIcon(device);
                     setSingleLineLayout(getItemTitle(device));
-                    updateContainerClickListener(v -> onItemClick(v, device));
+                    updateFullItemClickListener(v -> onItemClick(v, device));
                 }
             }
         }
@@ -214,6 +236,11 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     isDeviceDeselectable ? (v) -> mCheckBox.performClick() : null);
             mEndTouchArea.setImportantForAccessibility(
                     View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+            if (mController.isAdvancedLayoutSupported()) {
+                mEndTouchArea.getBackground().setColorFilter(
+                        new PorterDuffColorFilter(mController.getColorItemBackground(),
+                                PorterDuff.Mode.SRC_IN));
+            }
             setUpContentDescriptionForView(mEndTouchArea, true, device);
         }
 
@@ -228,13 +255,9 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             setCheckBoxColor(mCheckBox, mController.getColorItemContent());
         }
 
-        private void updateTitleIcon(@DrawableRes int id, int color) {
-            mTitleIcon.setImageDrawable(mContext.getDrawable(id));
-            mTitleIcon.setColorFilter(color);
-        }
-
-        private void updateContainerClickListener(View.OnClickListener listener) {
+        private void updateFullItemClickListener(View.OnClickListener listener) {
             mContainerLayout.setOnClickListener(listener);
+            updateIconAreaClickListener(listener);
         }
 
         @Override
@@ -246,6 +269,11 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 final Drawable addDrawable = mContext.getDrawable(R.drawable.ic_add);
                 mTitleIcon.setImageDrawable(addDrawable);
                 mTitleIcon.setColorFilter(mController.getColorItemContent());
+                if (mController.isAdvancedLayoutSupported()) {
+                    mIconAreaLayout.getBackground().setColorFilter(
+                            new PorterDuffColorFilter(mController.getColorItemBackground(),
+                                    PorterDuff.Mode.SRC_IN));
+                }
                 mContainerLayout.setOnClickListener(mController::launchBluetoothPairing);
             }
         }
