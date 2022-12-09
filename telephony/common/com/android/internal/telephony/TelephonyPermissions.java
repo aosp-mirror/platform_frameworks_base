@@ -743,11 +743,23 @@ public final class TelephonyPermissions {
 
     /**
      * Given a list of permissions, check to see if the caller has at least one of them granted. If
-     * not, check to see if the caller has carrier privileges. If the caller does not have any  of
+     * not, check to see if the caller has carrier privileges. If the caller does not have any of
      * these permissions, throw a SecurityException.
      */
     public static void enforceAnyPermissionGrantedOrCarrierPrivileges(Context context, int subId,
             int uid, String message, String... permissions) {
+        enforceAnyPermissionGrantedOrCarrierPrivileges(
+                context, subId, uid, false, message, permissions);
+    }
+
+    /**
+     * Given a list of permissions, check to see if the caller has at least one of them granted. If
+     * not, check to see if the caller has carrier privileges on the specified subscription (or any
+     * subscription if {@code allowCarrierPrivilegeOnAnySub} is {@code true}. If the caller does not
+     * have any of these permissions, throw a {@link SecurityException}.
+     */
+    public static void enforceAnyPermissionGrantedOrCarrierPrivileges(Context context, int subId,
+            int uid, boolean allowCarrierPrivilegeOnAnySub, String message, String... permissions) {
         if (permissions.length == 0) return;
         boolean isGranted = false;
         for (String perm : permissions) {
@@ -758,7 +770,12 @@ public final class TelephonyPermissions {
         }
 
         if (isGranted) return;
-        if (checkCarrierPrivilegeForSubId(context, subId)) return;
+
+        if (allowCarrierPrivilegeOnAnySub) {
+            if (checkCarrierPrivilegeForAnySubId(context, Binder.getCallingUid())) return;
+        } else {
+            if (checkCarrierPrivilegeForSubId(context, subId)) return;
+        }
 
         StringBuilder b = new StringBuilder(message);
         b.append(": Neither user ");
@@ -769,7 +786,8 @@ public final class TelephonyPermissions {
             b.append(" or ");
             b.append(permissions[i]);
         }
-        b.append(" or carrier privileges");
+        b.append(" or carrier privileges. subId=" + subId + ", allowCarrierPrivilegeOnAnySub="
+                + allowCarrierPrivilegeOnAnySub);
         throw new SecurityException(b.toString());
     }
 
