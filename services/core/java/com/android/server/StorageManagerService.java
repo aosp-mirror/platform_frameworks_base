@@ -897,7 +897,15 @@ class StorageManagerService extends IStorageManager.Stub
                 if (Intent.ACTION_USER_ADDED.equals(action)) {
                     final UserManager um = mContext.getSystemService(UserManager.class);
                     final int userSerialNumber = um.getUserSerialNumber(userId);
-                    mVold.onUserAdded(userId, userSerialNumber);
+                    final UserInfo userInfo = um.getUserInfo(userId);
+                    if (userInfo.isCloneProfile()) {
+                        // Only clone profiles share storage with their parent
+                        mVold.onUserAdded(userId, userSerialNumber,
+                                userInfo.profileGroupId /* sharesStorageWithUserId */);
+                    } else {
+                        mVold.onUserAdded(userId, userSerialNumber,
+                                -1 /* shareStorageWithUserId */);
+                    }
                 } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                     synchronized (mVolumes) {
                         final int size = mVolumes.size();
@@ -1146,7 +1154,11 @@ class StorageManagerService extends IStorageManager.Stub
 
                 // Tell vold about all existing and started users
                 for (UserInfo user : users) {
-                    mVold.onUserAdded(user.id, user.serialNumber);
+                    if (user.isCloneProfile()) {
+                        mVold.onUserAdded(user.id, user.serialNumber, user.profileGroupId);
+                    } else {
+                        mVold.onUserAdded(user.id, user.serialNumber, -1);
+                    }
                 }
                 for (int userId : systemUnlockedUsers) {
                     mVold.onUserStarted(userId);
