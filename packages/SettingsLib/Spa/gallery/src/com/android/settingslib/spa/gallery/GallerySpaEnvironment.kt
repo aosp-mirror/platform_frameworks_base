@@ -17,7 +17,7 @@
 package com.android.settingslib.spa.gallery
 
 import android.content.Context
-import com.android.settingslib.spa.framework.common.LocalLogger
+import com.android.settingslib.spa.debug.DebugLogger
 import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
 import com.android.settingslib.spa.framework.common.SpaEnvironment
 import com.android.settingslib.spa.framework.common.createSettingsPage
@@ -83,7 +83,7 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
         )
     }
 
-    override val logger = LocalLogger()
+    override val logger = DebugLogger()
 
     override val browseActivityClass = GalleryMainActivity::class.java
     override val sliceBroadcastReceiverClass = SpaSliceBroadcastReceiver::class.java
