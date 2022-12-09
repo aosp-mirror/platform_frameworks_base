@@ -153,7 +153,9 @@ constructor(
 
         return ChipbarInfo(
             // Display the app's icon as the start icon
-            startIcon = MediaTttUtils.getIconFromPackageName(context, packageName, logger),
+            startIcon =
+                MediaTttUtils.getIconInfoFromPackageName(context, packageName, logger)
+                    .toTintedIcon(),
             text = chipStateSender.getChipTextString(context, otherDeviceName),
             endItem =
                 when (chipStateSender.endItem) {

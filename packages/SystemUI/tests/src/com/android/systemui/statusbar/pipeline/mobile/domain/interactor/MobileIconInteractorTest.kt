@@ -24,9 +24,9 @@ import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
-import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
-import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.OverrideNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.FIVE_G_OVERRIDE
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.FOUR_G
@@ -49,7 +49,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconInteractor
     private val mobileMappingsProxy = FakeMobileMappingsProxy()
     private val mobileIconsInteractor = FakeMobileIconsInteractor(mobileMappingsProxy)
-    private val connectionRepository = FakeMobileConnectionRepository()
+    private val connectionRepository = FakeMobileConnectionRepository(SUB_1_ID)
 
     private val scope = CoroutineScope(IMMEDIATE)
 
@@ -62,7 +62,6 @@ class MobileIconInteractorTest : SysuiTestCase() {
                 mobileIconsInteractor.defaultMobileIconMapping,
                 mobileIconsInteractor.defaultMobileIconGroup,
                 mobileIconsInteractor.isDefaultConnectionFailed,
-                mobileMappingsProxy,
                 connectionRepository,
             )
     }
@@ -70,8 +69,8 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun gsm_level_default_unknown() =
         runBlocking(IMMEDIATE) {
-            connectionRepository.setMobileSubscriptionModel(
-                MobileSubscriptionModel(isGsm = true),
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(isGsm = true),
             )
 
             var latest: Int? = null
@@ -85,8 +84,8 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun gsm_usesGsmLevel() =
         runBlocking(IMMEDIATE) {
-            connectionRepository.setMobileSubscriptionModel(
-                MobileSubscriptionModel(
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
                     isGsm = true,
                     primaryLevel = GSM_LEVEL,
                     cdmaLevel = CDMA_LEVEL
@@ -104,8 +103,8 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun cdma_level_default_unknown() =
         runBlocking(IMMEDIATE) {
-            connectionRepository.setMobileSubscriptionModel(
-                MobileSubscriptionModel(isGsm = false),
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(isGsm = false),
             )
 
             var latest: Int? = null
@@ -118,8 +117,8 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun cdma_usesCdmaLevel() =
         runBlocking(IMMEDIATE) {
-            connectionRepository.setMobileSubscriptionModel(
-                MobileSubscriptionModel(
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
                     isGsm = false,
                     primaryLevel = GSM_LEVEL,
                     cdmaLevel = CDMA_LEVEL
@@ -137,8 +136,11 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun iconGroup_three_g() =
         runBlocking(IMMEDIATE) {
-            connectionRepository.setMobileSubscriptionModel(
-                MobileSubscriptionModel(resolvedNetworkType = DefaultNetworkType(THREE_G)),
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
+                    resolvedNetworkType =
+                        DefaultNetworkType(THREE_G, mobileMappingsProxy.toIconKey(THREE_G))
+                ),
             )
 
             var latest: MobileIconGroup? = null
@@ -152,16 +154,23 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun iconGroup_updates_on_change() =
         runBlocking(IMMEDIATE) {
-            connectionRepository.setMobileSubscriptionModel(
-                MobileSubscriptionModel(resolvedNetworkType = DefaultNetworkType(THREE_G)),
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
+                    resolvedNetworkType =
+                        DefaultNetworkType(THREE_G, mobileMappingsProxy.toIconKey(THREE_G))
+                ),
             )
 
             var latest: MobileIconGroup? = null
             val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
 
-            connectionRepository.setMobileSubscriptionModel(
-                MobileSubscriptionModel(
-                    resolvedNetworkType = DefaultNetworkType(FOUR_G),
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
+                    resolvedNetworkType =
+                        DefaultNetworkType(
+                            FOUR_G,
+                            mobileMappingsProxy.toIconKey(FOUR_G),
+                        ),
                 ),
             )
             yield()
@@ -174,8 +183,14 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun iconGroup_5g_override_type() =
         runBlocking(IMMEDIATE) {
-            connectionRepository.setMobileSubscriptionModel(
-                MobileSubscriptionModel(resolvedNetworkType = OverrideNetworkType(FIVE_G_OVERRIDE)),
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
+                    resolvedNetworkType =
+                        OverrideNetworkType(
+                            FIVE_G_OVERRIDE,
+                            mobileMappingsProxy.toIconKeyOverride(FIVE_G_OVERRIDE)
+                        )
+                ),
             )
 
             var latest: MobileIconGroup? = null
@@ -189,9 +204,13 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun iconGroup_default_if_no_lookup() =
         runBlocking(IMMEDIATE) {
-            connectionRepository.setMobileSubscriptionModel(
-                MobileSubscriptionModel(
-                    resolvedNetworkType = DefaultNetworkType(NETWORK_TYPE_UNKNOWN),
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
+                    resolvedNetworkType =
+                        DefaultNetworkType(
+                            NETWORK_TYPE_UNKNOWN,
+                            mobileMappingsProxy.toIconKey(NETWORK_TYPE_UNKNOWN)
+                        ),
                 ),
             )
 
@@ -238,8 +257,8 @@ class MobileIconInteractorTest : SysuiTestCase() {
             var latest: Boolean? = null
             val job = underTest.isDataConnected.onEach { latest = it }.launchIn(this)
 
-            connectionRepository.setMobileSubscriptionModel(
-                MobileSubscriptionModel(dataConnectionState = DataConnectionState.Connected)
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(dataConnectionState = DataConnectionState.Connected)
             )
             yield()
 
@@ -254,8 +273,8 @@ class MobileIconInteractorTest : SysuiTestCase() {
             var latest: Boolean? = null
             val job = underTest.isDataConnected.onEach { latest = it }.launchIn(this)
 
-            connectionRepository.setMobileSubscriptionModel(
-                MobileSubscriptionModel(dataConnectionState = DataConnectionState.Disconnected)
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(dataConnectionState = DataConnectionState.Disconnected)
             )
 
             assertThat(latest).isFalse()

@@ -33,9 +33,12 @@ import android.view.accessibility.AccessibilityManager
 import com.android.internal.widget.CachingIconView
 import com.android.settingslib.Utils
 import com.android.systemui.R
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.ui.binder.TintedIconViewBinder
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.MediaTttFlags
+import com.android.systemui.media.taptotransfer.common.MediaTttIcon
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.statusbar.CommandQueue
@@ -161,11 +164,23 @@ open class MediaTttChipControllerReceiver @Inject constructor(
     }
 
     override fun updateView(newInfo: ChipReceiverInfo, currentView: ViewGroup) {
-        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(
+        var iconInfo = MediaTttUtils.getIconInfoFromPackageName(
             context, newInfo.routeInfo.clientPackageName, logger
         )
-        val iconDrawable = newInfo.appIconDrawableOverride ?: iconInfo.drawable
-        val iconContentDescription = newInfo.appNameOverride ?: iconInfo.contentDescription
+
+        if (newInfo.appNameOverride != null) {
+            iconInfo = iconInfo.copy(
+                contentDescription = ContentDescription.Loaded(newInfo.appNameOverride.toString())
+            )
+        }
+
+        if (newInfo.appIconDrawableOverride != null) {
+            iconInfo = iconInfo.copy(
+                icon = MediaTttIcon.Loaded(newInfo.appIconDrawableOverride),
+                isAppIcon = true,
+            )
+        }
+
         val iconPadding =
             if (iconInfo.isAppIcon) {
                 0
@@ -175,8 +190,7 @@ open class MediaTttChipControllerReceiver @Inject constructor(
 
         val iconView = currentView.getAppIconView()
         iconView.setPadding(iconPadding, iconPadding, iconPadding, iconPadding)
-        iconView.setImageDrawable(iconDrawable)
-        iconView.contentDescription = iconContentDescription
+        TintedIconViewBinder.bind(iconInfo.toTintedIcon(), iconView)
     }
 
     override fun animateViewIn(view: ViewGroup) {
