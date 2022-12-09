@@ -274,4 +274,9 @@ public abstract class DevicePolicyManagerInternal {
      * Returns whether new "turn off work" behavior is enabled via feature flag.
      */
     public abstract boolean isKeepProfilesRunningEnabled();
+
+    /**
+     * True if either the entire device or the user is organization managed.
+     */
+    public abstract boolean isUserOrganizationManaged(@UserIdInt int userId);
 }

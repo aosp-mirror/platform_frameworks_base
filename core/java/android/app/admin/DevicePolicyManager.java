@@ -165,6 +165,12 @@ import java.util.function.Consumer;
 @SuppressLint("UseIcu")
 public class DevicePolicyManager {
 
+    /** @hide */
+    public static final String DEPRECATE_USERMANAGERINTERNAL_DEVICEPOLICY_FLAG =
+            "deprecate_usermanagerinternal_devicepolicy";
+    /** @hide */
+    public static final boolean DEPRECATE_USERMANAGERINTERNAL_DEVICEPOLICY_DEFAULT = false;
+
     private static String TAG = "DevicePolicyManager";
 
     private final Context mContext;

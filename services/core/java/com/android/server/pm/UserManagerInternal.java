@@ -141,23 +141,39 @@ public abstract class UserManagerInternal {
     /**
      * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to update
      * whether the device is managed by device owner.
+     *
+     * @deprecated Use methods in {@link android.app.admin.DevicePolicyManagerInternal}.
      */
+    @Deprecated
+    // TODO(b/258213147): Remove
     public abstract void setDeviceManaged(boolean isManaged);
 
     /**
      * Returns whether the device is managed by device owner.
+     *
+     * @deprecated Use methods in {@link android.app.admin.DevicePolicyManagerInternal}.
      */
+    @Deprecated
+    // TODO(b/258213147): Remove
     public abstract boolean isDeviceManaged();
 
     /**
      * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to update
      * whether the user is managed by profile owner.
+     *
+     * @deprecated Use methods in {@link android.app.admin.DevicePolicyManagerInternal}.
      */
+    // TODO(b/258213147): Remove
+    @Deprecated
     public abstract void setUserManaged(int userId, boolean isManaged);
 
     /**
-     * whether a profile owner manages this user.
+     * Whether a profile owner manages this user.
+     *
+     * @deprecated Use methods in {@link android.app.admin.DevicePolicyManagerInternal}.
      */
+    // TODO(b/258213147): Remove
+    @Deprecated
     public abstract boolean isUserManaged(int userId);
 
     /**
