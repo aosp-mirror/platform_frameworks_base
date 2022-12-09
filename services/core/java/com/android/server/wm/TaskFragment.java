@@ -352,7 +352,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
 
         void process(ActivityRecord start, boolean preserveWindow) {
-            if (start == null || !start.mVisibleRequested) {
+            if (start == null || !start.isVisibleRequested()) {
                 return;
             }
             reset(preserveWindow);
@@ -1363,7 +1363,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (next.attachedToProcess()) {
             if (DEBUG_SWITCH) {
                 Slog.v(TAG_SWITCH, "Resume running: " + next + " stopped=" + next.stopped
-                        + " visibleRequested=" + next.mVisibleRequested);
+                        + " visibleRequested=" + next.isVisibleRequested());
             }
 
             // If the previous activity is translucent, force a visibility update of
@@ -1377,7 +1377,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     || mLastPausedActivity != null && !mLastPausedActivity.occludesParent();
 
             // This activity is now becoming visible.
-            if (!next.mVisibleRequested || next.stopped || lastActivityTranslucent) {
+            if (!next.isVisibleRequested() || next.stopped || lastActivityTranslucent) {
                 next.app.addToPendingTop();
                 next.setVisibility(true);
             }
@@ -1428,7 +1428,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     // Do over!
                     mTaskSupervisor.scheduleResumeTopActivities();
                 }
-                if (!next.mVisibleRequested || next.stopped) {
+                if (!next.isVisibleRequested() || next.stopped) {
                     next.setVisibility(true);
                 }
                 next.completeResumeLocked();
@@ -1739,7 +1739,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             } else if (prev.hasProcess()) {
                 ProtoLog.v(WM_DEBUG_STATES, "Enqueue pending stop if needed: %s "
                                 + "wasStopping=%b visibleRequested=%b",  prev,  wasStopping,
-                        prev.mVisibleRequested);
+                        prev.isVisibleRequested());
                 if (prev.deferRelaunchUntilPaused) {
                     // Complete the deferred relaunch that was waiting for pause to complete.
                     ProtoLog.v(WM_DEBUG_STATES, "Re-launching after pause: %s", prev);
@@ -1749,7 +1749,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     // We can't clobber it, because the stop confirmation will not be handled.
                     // We don't need to schedule another stop, we only need to let it happen.
                     prev.setState(STOPPING, "completePausedLocked");
-                } else if (!prev.mVisibleRequested || shouldSleepOrShutDownActivities()) {
+                } else if (!prev.isVisibleRequested() || shouldSleepOrShutDownActivities()) {
                     // Clear out any deferred client hide we might currently have.
                     prev.setDeferHidingClient(false);
                     // If we were visible then resumeTopActivities will release resources before

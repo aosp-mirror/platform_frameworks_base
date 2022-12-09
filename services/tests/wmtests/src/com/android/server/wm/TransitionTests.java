@@ -134,8 +134,8 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(closing, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
         fillChangeMap(changes, newTask);
         // End states.
-        closing.mVisibleRequested = false;
-        opening.mVisibleRequested = true;
+        closing.setVisibleRequested(false);
+        opening.setVisibleRequested(true);
 
         final int transit = transition.mType;
         int flags = 0;
@@ -198,9 +198,9 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(closing, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
         fillChangeMap(changes, newTask);
         // End states.
-        closing.mVisibleRequested = false;
-        opening.mVisibleRequested = true;
-        opening2.mVisibleRequested = true;
+        closing.setVisibleRequested(false);
+        opening.setVisibleRequested(true);
+        opening2.setVisibleRequested(true);
 
         final int transit = transition.mType;
         int flags = 0;
@@ -247,8 +247,8 @@ public class TransitionTests extends WindowTestsBase {
         fillChangeMap(changes, tda);
 
         // End states.
-        showing.mVisibleRequested = true;
-        showing2.mVisibleRequested = true;
+        showing.setVisibleRequested(true);
+        showing2.setVisibleRequested(true);
 
         final int transit = transition.mType;
         int flags = 0;
@@ -283,16 +283,16 @@ public class TransitionTests extends WindowTestsBase {
 
         final Task openTask = createTask(mDisplayContent);
         final ActivityRecord opening = createActivityRecord(openTask);
-        opening.mVisibleRequested = false; // starts invisible
+        opening.setVisibleRequested(false); // starts invisible
         final Task closeTask = createTask(mDisplayContent);
         final ActivityRecord closing = createActivityRecord(closeTask);
-        closing.mVisibleRequested = true; // starts visible
+        closing.setVisibleRequested(true); // starts visible
 
         transition.collectExistenceChange(openTask);
         transition.collect(opening);
         transition.collect(closing);
-        opening.mVisibleRequested = true;
-        closing.mVisibleRequested = false;
+        opening.setVisibleRequested(true);
+        closing.setVisibleRequested(false);
 
         ArrayList<WindowContainer> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
@@ -320,7 +320,7 @@ public class TransitionTests extends WindowTestsBase {
                     WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
             final ActivityRecord act = createActivityRecord(tasks[i]);
             // alternate so that the transition doesn't get promoted to the display area
-            act.mVisibleRequested = (i % 2) == 0; // starts invisible
+            act.setVisibleRequested((i % 2) == 0); // starts invisible
         }
 
         // doesn't matter which order collected since participants is a set
@@ -328,7 +328,7 @@ public class TransitionTests extends WindowTestsBase {
             transition.collectExistenceChange(tasks[i]);
             final ActivityRecord act = tasks[i].getTopMostActivity();
             transition.collect(act);
-            tasks[i].getTopMostActivity().mVisibleRequested = (i % 2) != 0;
+            tasks[i].getTopMostActivity().setVisibleRequested((i % 2) != 0);
         }
 
         ArrayList<WindowContainer> targets = Transition.calculateTargets(
@@ -357,7 +357,7 @@ public class TransitionTests extends WindowTestsBase {
                     WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
             final ActivityRecord act = createActivityRecord(tasks[i]);
             // alternate so that the transition doesn't get promoted to the display area
-            act.mVisibleRequested = (i % 2) == 0; // starts invisible
+            act.setVisibleRequested((i % 2) == 0); // starts invisible
             act.visibleIgnoringKeyguard = (i % 2) == 0;
             if (i == showWallpaperTask) {
                 doReturn(true).when(act).showWallpaper();
@@ -378,7 +378,7 @@ public class TransitionTests extends WindowTestsBase {
             transition.collectExistenceChange(tasks[i]);
             final ActivityRecord act = tasks[i].getTopMostActivity();
             transition.collect(act);
-            tasks[i].getTopMostActivity().mVisibleRequested = (i % 2) != 0;
+            tasks[i].getTopMostActivity().setVisibleRequested((i % 2) != 0);
         }
 
         ArrayList<WindowContainer> targets = Transition.calculateTargets(
@@ -414,9 +414,9 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(closing, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
         fillChangeMap(changes, topTask);
         // End states.
-        showing.mVisibleRequested = true;
-        closing.mVisibleRequested = false;
-        hiding.mVisibleRequested = false;
+        showing.setVisibleRequested(true);
+        closing.setVisibleRequested(false);
+        hiding.setVisibleRequested(false);
 
         participants.add(belowTask);
         participants.add(hiding);
@@ -446,9 +446,9 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(closing, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
         fillChangeMap(changes, topTask);
         // End states.
-        showing.mVisibleRequested = true;
-        opening.mVisibleRequested = true;
-        closing.mVisibleRequested = false;
+        showing.setVisibleRequested(true);
+        opening.setVisibleRequested(true);
+        closing.setVisibleRequested(false);
 
         participants.add(belowTask);
         participants.add(showing);
@@ -528,19 +528,19 @@ public class TransitionTests extends WindowTestsBase {
     @Test
     public void testOpenActivityInTheSameTaskWithDisplayChange() {
         final ActivityRecord closing = createActivityRecord(mDisplayContent);
-        closing.mVisibleRequested = true;
+        closing.setVisibleRequested(true);
         final Task task = closing.getTask();
         makeTaskOrganized(task);
         final ActivityRecord opening = createActivityRecord(task);
-        opening.mVisibleRequested = false;
+        opening.setVisibleRequested(false);
         makeDisplayAreaOrganized(mDisplayContent.getDefaultTaskDisplayArea(), mDisplayContent);
         final WindowContainer<?>[] wcs = { closing, opening, task, mDisplayContent };
         final Transition transition = createTestTransition(TRANSIT_OPEN);
         for (WindowContainer<?> wc : wcs) {
             transition.collect(wc);
         }
-        closing.mVisibleRequested = false;
-        opening.mVisibleRequested = true;
+        closing.setVisibleRequested(false);
+        opening.setVisibleRequested(true);
         final int newRotation = mDisplayContent.getWindowConfiguration().getRotation() + 1;
         for (WindowContainer<?> wc : wcs) {
             wc.getWindowConfiguration().setRotation(newRotation);
@@ -583,9 +583,9 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(changeInChange, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
         fillChangeMap(changes, openTask);
         // End states.
-        changeInChange.mVisibleRequested = true;
-        openInOpen.mVisibleRequested = true;
-        openInChange.mVisibleRequested = true;
+        changeInChange.setVisibleRequested(true);
+        openInOpen.setVisibleRequested(true);
+        openInChange.setVisibleRequested(true);
 
         final int transit = transition.mType;
         int flags = 0;
@@ -641,8 +641,8 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(closing, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
         fillChangeMap(changes, newTask);
         // End states.
-        closing.mVisibleRequested = true;
-        opening.mVisibleRequested = true;
+        closing.setVisibleRequested(true);
+        opening.setVisibleRequested(true);
 
         final int transit = transition.mType;
         int flags = 0;
@@ -682,8 +682,8 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(closing, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
         fillChangeMap(changes, newTask);
         // End states.
-        closing.mVisibleRequested = true;
-        opening.mVisibleRequested = true;
+        closing.setVisibleRequested(true);
+        opening.setVisibleRequested(true);
 
         final int transit = transition.mType;
         int flags = 0;
@@ -959,7 +959,7 @@ public class TransitionTests extends WindowTestsBase {
         home.mTransitionController.requestStartTransition(transition, home.getTask(),
                 null /* remoteTransition */, null /* displayChange */);
         transition.collectExistenceChange(home);
-        home.mVisibleRequested = true;
+        home.setVisibleRequested(true);
         mDisplayContent.setFixedRotationLaunchingAppUnchecked(home);
         doReturn(true).when(home).hasFixedRotationTransform(any());
         player.startTransition();
@@ -995,12 +995,12 @@ public class TransitionTests extends WindowTestsBase {
         // Start out with task2 visible and set up a transition that closes task2 and opens task1
         final Task task1 = createTask(mDisplayContent);
         final ActivityRecord activity1 = createActivityRecord(task1);
-        activity1.mVisibleRequested = false;
+        activity1.setVisibleRequested(false);
         activity1.setVisible(false);
         final Task task2 = createTask(mDisplayContent);
         makeTaskOrganized(task1, task2);
         final ActivityRecord activity2 = createActivityRecord(task1);
-        activity2.mVisibleRequested = true;
+        activity2.setVisibleRequested(true);
         activity2.setVisible(true);
 
         openTransition.collectExistenceChange(task1);
@@ -1008,9 +1008,9 @@ public class TransitionTests extends WindowTestsBase {
         openTransition.collectExistenceChange(task2);
         openTransition.collectExistenceChange(activity2);
 
-        activity1.mVisibleRequested = true;
+        activity1.setVisibleRequested(true);
         activity1.setVisible(true);
-        activity2.mVisibleRequested = false;
+        activity2.setVisibleRequested(false);
 
         // Using abort to force-finish the sync (since we can't wait for drawing in unit test).
         // We didn't call abort on the transition itself, so it will still run onTransactionReady
@@ -1026,8 +1026,8 @@ public class TransitionTests extends WindowTestsBase {
         closeTransition.collectExistenceChange(task2);
         closeTransition.collectExistenceChange(activity2);
 
-        activity1.mVisibleRequested = false;
-        activity2.mVisibleRequested = true;
+        activity1.setVisibleRequested(false);
+        activity2.setVisibleRequested(true);
 
         openTransition.finishTransition();
 
@@ -1069,12 +1069,12 @@ public class TransitionTests extends WindowTestsBase {
         // Start out with task2 visible and set up a transition that closes task2 and opens task1
         final Task task1 = createTask(mDisplayContent);
         final ActivityRecord activity1 = createActivityRecord(task1);
-        activity1.mVisibleRequested = false;
+        activity1.setVisibleRequested(false);
         activity1.setVisible(false);
         final Task task2 = createTask(mDisplayContent);
         makeTaskOrganized(task1, task2);
         final ActivityRecord activity2 = createActivityRecord(task2);
-        activity2.mVisibleRequested = true;
+        activity2.setVisibleRequested(true);
         activity2.setVisible(true);
 
         openTransition.collectExistenceChange(task1);
@@ -1082,9 +1082,9 @@ public class TransitionTests extends WindowTestsBase {
         openTransition.collectExistenceChange(task2);
         openTransition.collectExistenceChange(activity2);
 
-        activity1.mVisibleRequested = true;
+        activity1.setVisibleRequested(true);
         activity1.setVisible(true);
-        activity2.mVisibleRequested = false;
+        activity2.setVisibleRequested(false);
 
         // Using abort to force-finish the sync (since we can't wait for drawing in unit test).
         // We didn't call abort on the transition itself, so it will still run onTransactionReady
@@ -1104,8 +1104,8 @@ public class TransitionTests extends WindowTestsBase {
         closeTransition.collectExistenceChange(activity2);
         closeTransition.setTransientLaunch(activity2, null /* restoreBelow */);
 
-        activity1.mVisibleRequested = false;
-        activity2.mVisibleRequested = true;
+        activity1.setVisibleRequested(false);
+        activity2.setVisibleRequested(true);
         activity2.setVisible(true);
 
         // Using abort to force-finish the sync (since we obviously can't wait for drawing).
@@ -1163,8 +1163,8 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(activity0, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
         changes.put(activity1, new Transition.ChangeInfo(false /* vis */, false /* exChg */));
         // End states.
-        activity0.mVisibleRequested = false;
-        activity1.mVisibleRequested = true;
+        activity0.setVisibleRequested(false);
+        activity1.setVisibleRequested(true);
 
         participants.add(activity0);
         participants.add(activity1);
@@ -1207,9 +1207,9 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(nonEmbeddedActivity, new Transition.ChangeInfo(true /* vis */,
                 false /* exChg */));
         // End states.
-        closingActivity.mVisibleRequested = false;
-        openingActivity.mVisibleRequested = true;
-        nonEmbeddedActivity.mVisibleRequested = false;
+        closingActivity.setVisibleRequested(false);
+        openingActivity.setVisibleRequested(true);
+        nonEmbeddedActivity.setVisibleRequested(false);
 
         participants.add(closingActivity);
         participants.add(openingActivity);
@@ -1252,8 +1252,8 @@ public class TransitionTests extends WindowTestsBase {
                 false /* exChg */));
         changes.put(embeddedTf, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
         // End states.
-        nonEmbeddedActivity.mVisibleRequested = false;
-        embeddedActivity.mVisibleRequested = true;
+        nonEmbeddedActivity.setVisibleRequested(false);
+        embeddedActivity.setVisibleRequested(true);
         embeddedTf.setBounds(new Rect(0, 0, 500, 500));
 
         participants.add(nonEmbeddedActivity);
@@ -1282,11 +1282,11 @@ public class TransitionTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityRecord(task);
         // Start states: set bounds to make sure the start bounds is ignored if it is not visible.
         activity.getConfiguration().windowConfiguration.setBounds(new Rect(0, 0, 250, 500));
-        activity.mVisibleRequested = false;
+        activity.setVisibleRequested(false);
         changes.put(activity, new Transition.ChangeInfo(activity));
         // End states: reset bounds to fill Task.
         activity.getConfiguration().windowConfiguration.setBounds(taskBounds);
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
 
         participants.add(activity);
         final ArrayList<WindowContainer> targets = Transition.calculateTargets(
@@ -1310,11 +1310,11 @@ public class TransitionTests extends WindowTestsBase {
         task.getConfiguration().windowConfiguration.setBounds(taskBounds);
         final ActivityRecord activity = createActivityRecord(task);
         // Start states: fills Task without override.
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
         changes.put(activity, new Transition.ChangeInfo(activity));
         // End states: set bounds to make sure the start bounds is ignored if it is not visible.
         activity.getConfiguration().windowConfiguration.setBounds(new Rect(0, 0, 250, 500));
-        activity.mVisibleRequested = false;
+        activity.setVisibleRequested(false);
 
         participants.add(activity);
         final ArrayList<WindowContainer> targets = Transition.calculateTargets(
@@ -1337,12 +1337,12 @@ public class TransitionTests extends WindowTestsBase {
         final Task lastParent = createTask(mDisplayContent);
         final Task newParent = createTask(mDisplayContent);
         final ActivityRecord activity = createActivityRecord(lastParent);
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
         // Skip manipulate the SurfaceControl.
         doNothing().when(activity).setDropInputMode(anyInt());
         changes.put(activity, new Transition.ChangeInfo(activity));
         activity.reparent(newParent, POSITION_TOP);
-        activity.mVisibleRequested = false;
+        activity.setVisibleRequested(false);
 
         participants.add(activity);
         final ArrayList<WindowContainer> targets = Transition.calculateTargets(
@@ -1362,7 +1362,7 @@ public class TransitionTests extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         task.setBounds(new Rect(0, 0, 2000, 1000));
         final ActivityRecord activity = createActivityRecord(task);
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
         // Skip manipulate the SurfaceControl.
         doNothing().when(activity).setDropInputMode(anyInt());
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
@@ -1410,13 +1410,13 @@ public class TransitionTests extends WindowTestsBase {
         task.setTaskDescription(taskDescription);
 
         // Start states:
-        embeddedActivity.mVisibleRequested = true;
-        nonEmbeddedActivity.mVisibleRequested = false;
+        embeddedActivity.setVisibleRequested(true);
+        nonEmbeddedActivity.setVisibleRequested(false);
         changes.put(embeddedTf, new Transition.ChangeInfo(embeddedTf));
         changes.put(nonEmbeddedActivity, new Transition.ChangeInfo(nonEmbeddedActivity));
         // End states:
-        embeddedActivity.mVisibleRequested = false;
-        nonEmbeddedActivity.mVisibleRequested = true;
+        embeddedActivity.setVisibleRequested(false);
+        nonEmbeddedActivity.setVisibleRequested(true);
 
         participants.add(embeddedTf);
         participants.add(nonEmbeddedActivity);
@@ -1529,7 +1529,7 @@ public class TransitionTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityRecord(lastParent);
         doReturn(true).when(lastParent).shouldRemoveSelfOnLastChildRemoval();
         doNothing().when(activity).setDropInputMode(anyInt());
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
 
         final Transition transition = new Transition(TRANSIT_CHANGE, 0 /* flags */,
                 activity.mTransitionController, mWm.mSyncEngine);

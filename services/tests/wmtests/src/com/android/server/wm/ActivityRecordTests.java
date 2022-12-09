@@ -917,7 +917,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Prepare the activity record to be ready for immediate removal. It should be invisible and
         // have no process. Otherwise, request to finish it will send a message to client first.
         activity.setState(STOPPED, "test");
-        activity.mVisibleRequested = false;
+        activity.setVisibleRequested(false);
         activity.nowVisible = false;
         // Set process to 'null' to allow immediate removal, but don't call mActivity.setProcess() -
         // this will cause NPE when updating task's process.
@@ -927,7 +927,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // next activity reports idle to destroy it.
         final ActivityRecord topActivity = new ActivityBuilder(mAtm)
                 .setTask(activity.getTask()).build();
-        topActivity.mVisibleRequested = true;
+        topActivity.setVisibleRequested(true);
         topActivity.nowVisible = true;
         topActivity.setState(RESUMED, "test");
 
@@ -1082,7 +1082,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         clearInvocations(activity.mDisplayContent);
         activity.finishing = false;
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
         activity.setState(RESUMED, "test");
         activity.finishIfPossible("test", false /* oomAdj */);
 
@@ -1099,7 +1099,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         clearInvocations(activity.mDisplayContent);
         activity.finishing = false;
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
         activity.setState(PAUSED, "test");
         activity.finishIfPossible("test", false /* oomAdj */);
 
@@ -1118,7 +1118,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Put an activity on top of test activity to make it invisible and prevent us from
         // accidentally resuming the topmost one again.
         new ActivityBuilder(mAtm).build();
-        activity.mVisibleRequested = false;
+        activity.setVisibleRequested(false);
         activity.setState(STOPPED, "test");
 
         activity.finishIfPossible("test", false /* oomAdj */);
@@ -1136,7 +1136,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final TestTransitionPlayer testPlayer = registerTestTransitionPlayer();
         final ActivityRecord activity = createActivityWithTask();
         activity.finishing = false;
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
         activity.setState(RESUMED, "test");
         activity.finishIfPossible("test", false /* oomAdj */);
 
@@ -1273,7 +1273,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord currentTop = createActivityWithTask();
         final Task task = currentTop.getTask();
 
-        currentTop.mVisibleRequested = currentTop.nowVisible = true;
+        currentTop.setVisibleRequested(currentTop.nowVisible = true);
 
         // Simulates that {@code currentTop} starts an existing activity from background (so its
         // state is stopped) and the starting flow just goes to place it at top.
@@ -1300,7 +1300,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord bottomActivity = createActivityWithTask();
         final ActivityRecord topActivity = new ActivityBuilder(mAtm)
                 .setTask(bottomActivity.getTask()).build();
-        topActivity.mVisibleRequested = true;
+        topActivity.setVisibleRequested(true);
         // simulating bottomActivity as a trampoline activity.
         bottomActivity.setState(RESUMED, "test");
         bottomActivity.finishIfPossible("test", false);
@@ -1316,13 +1316,13 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         final ActivityRecord topActivity = new ActivityBuilder(mAtm)
                 .setTask(activity.getTask()).build();
-        topActivity.mVisibleRequested = true;
+        topActivity.setVisibleRequested(true);
         topActivity.nowVisible = true;
         topActivity.finishing = true;
         topActivity.setState(PAUSED, "true");
         // Mark the bottom activity as not visible, so that we will wait for it before removing
         // the top one.
-        activity.mVisibleRequested = false;
+        activity.setVisibleRequested(false);
         activity.nowVisible = false;
         activity.setState(STOPPED, "test");
 
@@ -1346,13 +1346,13 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord topActivity = createActivityWithTask();
         mDisplayContent.setIsSleeping(true);
         doReturn(true).when(activity).shouldBeVisible();
-        topActivity.mVisibleRequested = false;
+        topActivity.setVisibleRequested(false);
         topActivity.nowVisible = false;
         topActivity.finishing = true;
         topActivity.setState(STOPPED, "true");
 
         // Mark the activity behind (on a separate task) as not visible
-        activity.mVisibleRequested = false;
+        activity.setVisibleRequested(false);
         activity.nowVisible = false;
         activity.setState(STOPPED, "test");
 
@@ -1370,13 +1370,13 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         final ActivityRecord topActivity = new ActivityBuilder(mAtm)
                 .setTask(activity.getTask()).build();
-        topActivity.mVisibleRequested = false;
+        topActivity.setVisibleRequested(false);
         topActivity.nowVisible = false;
         topActivity.finishing = true;
         topActivity.setState(STOPPED, "true");
         // Mark the bottom activity as not visible, so that we would wait for it before removing
         // the top one.
-        activity.mVisibleRequested = false;
+        activity.setVisibleRequested(false);
         activity.nowVisible = false;
         activity.setState(STOPPED, "test");
 
@@ -1394,12 +1394,12 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         final ActivityRecord topActivity = new ActivityBuilder(mAtm)
                 .setTask(activity.getTask()).build();
-        topActivity.mVisibleRequested = true;
+        topActivity.setVisibleRequested(true);
         topActivity.nowVisible = true;
         topActivity.finishing = true;
         topActivity.setState(PAUSED, "true");
         // Mark the bottom activity as already visible, so that there is no need to wait for it.
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
         activity.nowVisible = true;
         activity.setState(RESUMED, "test");
 
@@ -1417,12 +1417,12 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         final ActivityRecord topActivity = new ActivityBuilder(mAtm)
                 .setTask(activity.getTask()).build();
-        topActivity.mVisibleRequested = false;
+        topActivity.setVisibleRequested(false);
         topActivity.nowVisible = false;
         topActivity.finishing = true;
         topActivity.setState(STOPPED, "true");
         // Mark the bottom activity as already visible, so that there is no need to wait for it.
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
         activity.nowVisible = true;
         activity.setState(RESUMED, "test");
 
@@ -1440,12 +1440,12 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         final ActivityRecord topActivity = new ActivityBuilder(mAtm)
                 .setTask(activity.getTask()).build();
-        topActivity.mVisibleRequested = true;
+        topActivity.setVisibleRequested(true);
         topActivity.nowVisible = true;
         topActivity.finishing = true;
         topActivity.setState(PAUSED, "true");
         // Mark the bottom activity as already visible, so that there is no need to wait for it.
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
         activity.nowVisible = true;
         activity.setState(RESUMED, "test");
 
@@ -1454,7 +1454,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord focusedActivity = stack.getTopMostActivity();
         focusedActivity.nowVisible = true;
-        focusedActivity.mVisibleRequested = true;
+        focusedActivity.setVisibleRequested(true);
         focusedActivity.setState(RESUMED, "test");
         stack.setResumedActivity(focusedActivity, "test");
 
@@ -1476,7 +1476,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         int displayId = activity.getDisplayId();
         doReturn(true).when(keyguardController).isKeyguardLocked(eq(displayId));
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(task).build();
-        topActivity.mVisibleRequested = true;
+        topActivity.setVisibleRequested(true);
         topActivity.nowVisible = true;
         topActivity.setState(RESUMED, "true");
         doCallRealMethod().when(mRootWindowContainer).ensureActivitiesVisible(
@@ -1515,12 +1515,12 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         final Task task = activity.getTask();
         final ActivityRecord firstActivity = new ActivityBuilder(mAtm).setTask(task).build();
-        firstActivity.mVisibleRequested = false;
+        firstActivity.setVisibleRequested(false);
         firstActivity.nowVisible = false;
         firstActivity.setState(STOPPED, "test");
 
         final ActivityRecord secondActivity = new ActivityBuilder(mAtm).setTask(task).build();
-        secondActivity.mVisibleRequested = true;
+        secondActivity.setVisibleRequested(true);
         secondActivity.nowVisible = true;
         secondActivity.setState(secondActivityState, "test");
 
@@ -1530,7 +1530,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         } else {
             translucentActivity = new ActivityBuilder(mAtm).setTask(task).build();
         }
-        translucentActivity.mVisibleRequested = true;
+        translucentActivity.setVisibleRequested(true);
         translucentActivity.nowVisible = true;
         translucentActivity.setState(RESUMED, "test");
 
@@ -1546,7 +1546,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Finish the first activity
         firstActivity.finishing = true;
-        firstActivity.mVisibleRequested = true;
+        firstActivity.setVisibleRequested(true);
         firstActivity.completeFinishing("test");
         verify(firstActivity.mDisplayContent, times(2)).ensureActivitiesVisible(null /* starting */,
                 0 /* configChanges */ , false /* preserveWindows */,
@@ -1614,7 +1614,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         }, true /* traverseTopToBottom */);
         activity.setState(STARTED, "test");
         activity.finishing = true;
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
 
         // Try to finish the last activity above the home stack.
         activity.completeFinishing("test");
@@ -1909,7 +1909,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Simulate that the activity requests the same orientation as display.
         activity.setOrientation(display.getConfiguration().orientation);
         // Skip the real freezing.
-        activity.mVisibleRequested = false;
+        activity.setVisibleRequested(false);
         clearInvocations(activity);
         activity.onCancelFixedRotationTransform(originalRotation);
         // The implementation of cancellation must be executed.
@@ -2536,7 +2536,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         activity.setOccludesParent(true);
         activity.setVisible(false);
-        activity.mVisibleRequested = false;
+        activity.setVisibleRequested(false);
         // Can not specify orientation if app isn't visible even though it occludes parent.
         assertEquals(SCREEN_ORIENTATION_UNSET, activity.getOrientation());
         // Can specify orientation if the current orientation candidate is orientation behind.
@@ -2913,7 +2913,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         task.addChild(taskFragment2, POSITION_TOP);
         final ActivityRecord activity2 = new ActivityBuilder(mAtm)
                 .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE).build();
-        activity2.mVisibleRequested = true;
+        activity2.setVisibleRequested(true);
         taskFragment2.addChild(activity2);
         assertTrue(activity2.isResizeable());
         activity1.reparent(taskFragment1, POSITION_TOP);
@@ -3059,7 +3059,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setCreateTask(true).build();
         // By default, activity is visible.
         assertTrue(activity.isVisible());
-        assertTrue(activity.mVisibleRequested);
+        assertTrue(activity.isVisibleRequested());
         assertTrue(activity.mDisplayContent.mOpeningApps.contains(activity));
         assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
 
@@ -3068,7 +3068,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // until we verify no logic relies on this behavior, we'll keep this as is.
         activity.setVisibility(true);
         assertTrue(activity.isVisible());
-        assertTrue(activity.mVisibleRequested);
+        assertTrue(activity.isVisibleRequested());
         assertTrue(activity.mDisplayContent.mOpeningApps.contains(activity));
         assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
     }
@@ -3079,7 +3079,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setCreateTask(true).build();
         // By default, activity is visible.
         assertTrue(activity.isVisible());
-        assertTrue(activity.mVisibleRequested);
+        assertTrue(activity.isVisibleRequested());
         assertTrue(activity.mDisplayContent.mOpeningApps.contains(activity));
         assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
 
@@ -3087,7 +3087,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // animation should be applied on this activity.
         activity.setVisibility(false);
         assertTrue(activity.isVisible());
-        assertFalse(activity.mVisibleRequested);
+        assertFalse(activity.isVisibleRequested());
         assertFalse(activity.mDisplayContent.mOpeningApps.contains(activity));
         assertTrue(activity.mDisplayContent.mClosingApps.contains(activity));
     }
@@ -3099,7 +3099,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Activiby is invisible. However ATMS requests it to become visible, since this is a top
         // activity.
         assertFalse(activity.isVisible());
-        assertTrue(activity.mVisibleRequested);
+        assertTrue(activity.isVisibleRequested());
         assertTrue(activity.mDisplayContent.mOpeningApps.contains(activity));
         assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
 
@@ -3107,7 +3107,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // animation should be applied on this activity.
         activity.setVisibility(true);
         assertFalse(activity.isVisible());
-        assertTrue(activity.mVisibleRequested);
+        assertTrue(activity.isVisibleRequested());
         assertTrue(activity.mDisplayContent.mOpeningApps.contains(activity));
         assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
 
@@ -3130,7 +3130,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Activiby is invisible. However ATMS requests it to become visible, since this is a top
         // activity.
         assertFalse(activity.isVisible());
-        assertTrue(activity.mVisibleRequested);
+        assertTrue(activity.isVisibleRequested());
         assertTrue(activity.mDisplayContent.mOpeningApps.contains(activity));
         assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
 
@@ -3138,7 +3138,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // transition should be applied on this activity.
         activity.setVisibility(false);
         assertFalse(activity.isVisible());
-        assertFalse(activity.mVisibleRequested);
+        assertFalse(activity.isVisibleRequested());
         assertFalse(activity.mDisplayContent.mOpeningApps.contains(activity));
         assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
     }
@@ -3555,12 +3555,12 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.reparent(taskFragment, POSITION_TOP);
 
         // Ensure the activity visibility is updated even it is not shown to current user.
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
         doReturn(false).when(activity).showToCurrentUser();
         spyOn(taskFragment);
         doReturn(false).when(taskFragment).shouldBeVisible(any());
         display.ensureActivitiesVisible(null, 0, false, false);
-        assertFalse(activity.mVisibleRequested);
+        assertFalse(activity.isVisibleRequested());
     }
 
     @Test

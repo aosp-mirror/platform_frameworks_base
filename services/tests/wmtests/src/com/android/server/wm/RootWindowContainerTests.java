@@ -172,7 +172,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
     public void testTaskLayerRank() {
         final Task rootTask = new TaskBuilder(mSupervisor).build();
         final Task task1 = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
-        new ActivityBuilder(mAtm).setTask(task1).build().mVisibleRequested = true;
+        new ActivityBuilder(mAtm).setTask(task1).build().setVisibleRequested(true);
         mWm.mRoot.rankTaskLayers();
 
         assertEquals(1, task1.mLayerRank);
@@ -180,7 +180,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertEquals(Task.LAYER_RANK_INVISIBLE, rootTask.mLayerRank);
 
         final Task task2 = new TaskBuilder(mSupervisor).build();
-        new ActivityBuilder(mAtm).setTask(task2).build().mVisibleRequested = true;
+        new ActivityBuilder(mAtm).setTask(task2).build().setVisibleRequested(true);
         mWm.mRoot.rankTaskLayers();
 
         // Note that ensureActivitiesVisible is disabled in SystemServicesTestRule, so both the
