@@ -650,8 +650,11 @@ public abstract class BatteryStats {
             return Uid.PROCESS_STATE_NONEXISTENT;
         } else if (procState == ActivityManager.PROCESS_STATE_TOP) {
             return Uid.PROCESS_STATE_TOP;
-        } else if (ActivityManager.isForegroundService(procState)) {
-            // State when app has put itself in the foreground.
+        } else if (procState == ActivityManager.PROCESS_STATE_BOUND_TOP) {
+            return Uid.PROCESS_STATE_BACKGROUND;
+        } else if (procState == ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+            return Uid.PROCESS_STATE_FOREGROUND_SERVICE;
+        } else if (procState == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
             return Uid.PROCESS_STATE_FOREGROUND_SERVICE;
         } else if (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
             // Persistent and other foreground states go here.
