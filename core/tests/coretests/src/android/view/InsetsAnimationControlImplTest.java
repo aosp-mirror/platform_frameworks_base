@@ -89,7 +89,8 @@ public class InsetsAnimationControlImplTest {
         mInsetsState = new InsetsState();
         mInsetsState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 500, 100));
         mInsetsState.getSource(ITYPE_NAVIGATION_BAR).setFrame(new Rect(400, 0, 500, 500));
-        InsetsSourceConsumer topConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR, mInsetsState,
+        InsetsSourceConsumer topConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR,
+                WindowInsets.Type.statusBars(), mInsetsState,
                 () -> mMockTransaction, mMockController);
         topConsumer.setControl(
                 new InsetsSourceControl(ITYPE_STATUS_BAR, WindowInsets.Type.statusBars(),
@@ -97,7 +98,8 @@ public class InsetsAnimationControlImplTest {
                 new int[1], new int[1]);
 
         InsetsSourceConsumer navConsumer = new InsetsSourceConsumer(ITYPE_NAVIGATION_BAR,
-                mInsetsState, () -> mMockTransaction, mMockController);
+                WindowInsets.Type.navigationBars(), mInsetsState,
+                () -> mMockTransaction, mMockController);
         navConsumer.setControl(
                 new InsetsSourceControl(ITYPE_NAVIGATION_BAR, WindowInsets.Type.navigationBars(),
                         mNavLeash, true, new Point(400, 0), Insets.of(0, 0, 100, 0)),

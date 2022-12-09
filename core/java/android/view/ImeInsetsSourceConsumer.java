@@ -20,7 +20,6 @@ import static android.view.ImeInsetsSourceConsumerProto.INSETS_SOURCE_CONSUMER;
 import static android.view.ImeInsetsSourceConsumerProto.IS_HIDE_ANIMATION_RUNNING;
 import static android.view.ImeInsetsSourceConsumerProto.IS_REQUESTED_VISIBLE_AWAITING_CONTROL;
 import static android.view.ImeInsetsSourceConsumerProto.IS_SHOW_REQUESTED_DURING_HIDE_ANIMATION;
-import static android.view.InsetsState.ITYPE_IME;
 
 import android.annotation.Nullable;
 import android.os.IBinder;
@@ -55,9 +54,9 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     private boolean mIsShowRequestedDuringHideAnimation;
 
     public ImeInsetsSourceConsumer(
-            InsetsState state, Supplier<Transaction> transactionSupplier,
+            int id, InsetsState state, Supplier<Transaction> transactionSupplier,
             InsetsController controller) {
-        super(ITYPE_IME, state, transactionSupplier, controller);
+        super(id, WindowInsets.Type.ime(), state, transactionSupplier, controller);
     }
 
     @Override
@@ -137,7 +136,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         // If we had a request before to show from IME (tracked with mImeRequestedShow), reaching
         // this code here means that we now got control, so we can start the animation immediately.
         // If client window is trying to control IME and IME is already visible, it is immediate.
-        if (fromIme || (mState.getSource(getInternalType()).isVisible() && getControl() != null)) {
+        if (fromIme || (mState.getSource(getId()).isVisible() && getControl() != null)) {
             return ShowResult.SHOW_IMMEDIATELY;
         }
 
