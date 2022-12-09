@@ -72,8 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock অক্ষম কৰা হৈছে"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"এখন প্ৰতিচ্ছবি পঠিয়াইছে"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"স্ক্ৰীণশ্বট ছেভ কৰি থকা হৈছে…"</string>
-    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
-    <skip />
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"কৰ্মস্থানৰ প্ৰ’ফাইলত স্ক্ৰীনশ্বট ছেভ কৰি থকা হৈছে…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"স্ক্ৰীণশ্বট ছেভ কৰা হ’ল"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"স্ক্ৰীণশ্বট ছেভ কৰিব পৰা নগ\'ল"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"স্ক্ৰীনশ্বট ছেভ কৰিবলৈ ডিভাইচটো আনলক কৰিবই লাগিব"</string>
@@ -875,6 +874,8 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"কাষ্ট বন্ধ কৰক"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"অডিঅ\' আউটপুটৰ বাবে উপলব্ধ ডিভাইচ।"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ভলিউম"</string>
+    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"সম্প্ৰচাৰ কৰাটোৱে কেনেকৈ কাম কৰে"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"সম্প্ৰচাৰ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"সমিল ব্লুটুথ ডিভাইচৰ সৈতে আপোনাৰ নিকটৱৰ্তী স্থানত থকা লোকসকলে আপুনি সম্প্ৰচাৰ কৰা মিডিয়াটো শুনিব পাৰে"</string>
@@ -988,6 +989,8 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"কেমেৰা আৰু মাইক অফ হৈ আছে"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# টা জাননী}one{# টা জাননী}other{# টা জাননী}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <!-- no translation found for note_task_button_label (8718616095800343136) -->
+    <skip />
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"সম্প্ৰচাৰণ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ সম্প্ৰচাৰ কৰা বন্ধ কৰিবনে?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"যদি আপুনি <xliff:g id="SWITCHAPP">%1$s</xliff:g>ৰ সম্প্ৰচাৰ কৰে অথবা আউটপুট সলনি কৰে, তেন্তে, আপোনাৰ বৰ্তমানৰ সম্প্ৰচাৰ বন্ধ হৈ যাব"</string>

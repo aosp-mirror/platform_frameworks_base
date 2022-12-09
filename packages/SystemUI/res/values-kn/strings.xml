@@ -72,8 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ಚಿತ್ರವನ್ನು ಕಳುಹಿಸಲಾಗಿದೆ"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
-    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
-    <skip />
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ಗೆ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಅನ್ನು ಉಳಿಸಲಾಗಿದೆ"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸುವ ಮೊದಲು ಸಾಧನವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಬೇಕು"</string>
@@ -875,6 +874,8 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ಬಿತ್ತರಿಸುವುದನ್ನು ನಿಲ್ಲಿಸಿ"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ಆಡಿಯೋ ಔಟ್‌ಪುಟ್‌ಗಾಗಿ ಲಭ್ಯವಿರುವ ಸಾಧನಗಳು."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ವಾಲ್ಯೂಮ್"</string>
+    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ಪ್ರಸಾರವು ಹೇಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ಪ್ರಸಾರ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ಹೊಂದಾಣಿಕೆಯಾಗುವ ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳನ್ನು ಹೊಂದಿರುವ ಸಮೀಪದಲ್ಲಿರುವ ಜನರು ನೀವು ಪ್ರಸಾರ ಮಾಡುತ್ತಿರುವ ಮಾಧ್ಯಮವನ್ನು ಆಲಿಸಬಹುದು"</string>
@@ -988,6 +989,8 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ಕ್ಯಾಮರಾ ಮತ್ತು ಮೈಕ್ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ಅಧಿಸೂಚನೆ}one{# ಅಧಿಸೂಚನೆಗಳು}other{# ಅಧಿಸೂಚನೆಗಳು}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <!-- no translation found for note_task_button_label (8718616095800343136) -->
+    <skip />
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ಪ್ರಸಾರ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನ ಪ್ರಸಾರವನ್ನು ನಿಲ್ಲಿಸಬೇಕೆ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"ನೀವು <xliff:g id="SWITCHAPP">%1$s</xliff:g> ಅನ್ನು ಪ್ರಸಾರ ಮಾಡಿದರೆ ಅಥವಾ ಔಟ್‌ಪುಟ್ ಅನ್ನು ಬದಲಾಯಿಸಿದರೆ, ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಪ್ರಸಾರವು ಸ್ಥಗಿತಗೊಳ್ಳುತ್ತದೆ"</string>

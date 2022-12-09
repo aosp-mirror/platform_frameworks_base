@@ -72,8 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock முடக்கப்பட்டது"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"படம் அனுப்பப்பட்டது"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ஸ்க்ரீன் ஷாட்டைச் சேமிக்கிறது…"</string>
-    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
-    <skip />
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"பணிக் கணக்கில் ஸ்கிரீன்ஷாட் சேமிக்கப்படுகிறது…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ஸ்கிரீன்ஷாட் சேமிக்கப்பட்டது"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"ஸ்கிரீன் ஷாட்டைச் சேமிக்க முடியவில்லை"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ஸ்கிரீன்ஷாட் சேமிக்கப்படுவதற்கு முன்பு சாதனம் அன்லாக் செய்யப்பட வேண்டும்"</string>
@@ -503,8 +502,7 @@
     <string name="wallet_error_generic" msgid="257704570182963611">"உங்கள் கார்டுகளின் விவரங்களைப் பெறுவதில் சிக்கல் ஏற்பட்டது, பிறகு முயலவும்"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"பூட்டுத் திரை அமைப்புகள்"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR குறியீடு ஸ்கேனர்"</string>
-    <!-- no translation found for qr_code_scanner_updating_secondary_label (8344598017007876352) -->
-    <skip />
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"புதுப்பிக்கிறது"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"பணிக் கணக்கு"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"விமானப் பயன்முறை"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"அடுத்த அலாரத்தை <xliff:g id="WHEN">%1$s</xliff:g> மணிக்கு கேட்க மாட்டீர்கள்"</string>
@@ -876,6 +874,8 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"அலைபரப்புவதை நிறுத்து"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ஆடியோ அவுட்புட்டுக்குக் கிடைக்கும் சாதனங்கள்."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ஒலியளவு"</string>
+    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"பிராட்காஸ்ட் எவ்வாறு செயல்படுகிறது?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"பிராட்காஸ்ட்"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"நீங்கள் பிராட்காஸ்ட் செய்யும் மீடியாவை அருகிலுள்ளவர்கள் இணக்கமான புளூடூத் சாதனங்கள் மூலம் கேட்கலாம்"</string>
@@ -989,6 +989,8 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"கேமராவும் மைக்கும் ஆஃப் செய்யப்பட்டுள்ளன"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# அறிவிப்பு}other{# அறிவிப்புகள்}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <!-- no translation found for note_task_button_label (8718616095800343136) -->
+    <skip />
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ஒலிபரப்புதல்"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் ஒலிபரப்பப்படுவதை நிறுத்தவா?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"நீங்கள் <xliff:g id="SWITCHAPP">%1$s</xliff:g> ஆப்ஸை ஒலிபரப்பினாலோ அவுட்புட்டை மாற்றினாலோ உங்களின் தற்போதைய ஒலிபரப்பு நிறுத்தப்படும்"</string>
@@ -998,20 +1000,13 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_action_template (8164857863036314664) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_message (2790910660524887941) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_wallet_instruction_1 (8439655049139819278) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_wallet_instruction_2 (4321089250629477835) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_qr_scanner_instruction (5355839079232119791) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_home_instruction_1 (8438311171750568633) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_home_instruction_2 (8308525385889021652) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸைத் திற"</string>
+    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"<xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸை ஷார்ட்கட்டாகச் சேர்க்க, இவற்றைச் செய்திருப்பதை உறுதிசெய்து கொள்ளவும்:"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• இந்த ஆப்ஸ் அமைக்கப்பட்டிருக்க வேண்டும்"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Walletடில் குறைந்தபட்சம் ஒரு கார்டாவது சேர்க்கப்பட்டிருக்க வேண்டும்"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• கேமரா ஆப்ஸ் நிறுவப்பட்டிருக்க வேண்டும்"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• இந்த ஆப்ஸ் அமைக்கப்பட்டிருக்க வேண்டும்"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• குறைந்தபட்சம் ஒரு சாதனமாவது கிடைக்க வேண்டும்"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ரத்துசெய்"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"இப்போது மாற்றவும்"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"சிறந்த செல்ஃபிக்கு மொபைலை மடக்காதீர்கள்"</string>
