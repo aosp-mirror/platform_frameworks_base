@@ -101,6 +101,10 @@ task coverageReport(type: JacocoReport, dependsOn: "connectedDebugAndroidTest") 
             excludes: [
                     "com/android/settingslib/spa/debug/**",
 
+                    // Excludes inline functions, which is not covered in Jacoco reports.
+                    "com/android/settingslib/spa/framework/util/Collections*",
+                    "com/android/settingslib/spa/framework/util/Flows*",
+
                     // Excludes files forked from AndroidX.
                     "com/android/settingslib/spa/widget/scaffold/CustomizedAppBar*",
                     "com/android/settingslib/spa/widget/scaffold/TopAppBarColors*",

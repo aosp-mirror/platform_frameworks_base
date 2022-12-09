@@ -151,7 +151,7 @@ data class SettingsEntry(
     }
 
     @Composable
-    fun provideLocalEntryData(arguments: Bundle): ProvidedValue<EntryData> {
+    private fun provideLocalEntryData(arguments: Bundle): ProvidedValue<EntryData> {
         val controller = LocalNavController.current
         return LocalEntryDataProvider provides remember {
             object : EntryData {
