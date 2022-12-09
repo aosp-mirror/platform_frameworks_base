@@ -1542,7 +1542,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int DISPATCH_SENDING_BROADCAST_EVENT = 74;
     static final int DISPATCH_BINDING_SERVICE_EVENT = 75;
     static final int SERVICE_SHORT_FGS_TIMEOUT_MSG = 76;
-    static final int SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG = 77;
+    static final int SERVICE_SHORT_FGS_PROCSTATE_TIMEOUT_MSG = 77;
+    static final int SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG = 78;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -1879,6 +1880,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } break;
                 case SERVICE_SHORT_FGS_TIMEOUT_MSG: {
                     mServices.onShortFgsTimeout((ServiceRecord) msg.obj);
+                } break;
+                case SERVICE_SHORT_FGS_PROCSTATE_TIMEOUT_MSG: {
+                    mServices.onShortFgsProcstateTimeout((ServiceRecord) msg.obj);
                 } break;
                 case SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG: {
                     mServices.onShortFgsAnrTimeout((ServiceRecord) msg.obj);
