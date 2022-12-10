@@ -1,13 +1,13 @@
 package android.service.credentials;
 
-import android.service.credentials.BeginCreateCredentialResponse;
+import android.service.credentials.BeginGetCredentialResponse;
 
 /**
  * Interface from the system to a credential provider service.
  *
  * @hide
  */
-oneway interface IBeginCreateCredentialCallback {
-    void onSuccess(in BeginCreateCredentialResponse request);
+oneway interface IBeginGetCredentialCallback {
+    void onSuccess(in BeginGetCredentialResponse response);
     void onFailure(String errorType, in CharSequence message);
 }

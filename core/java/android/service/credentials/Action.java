@@ -42,7 +42,7 @@ public final class Action implements Parcelable {
      * level authentication before displaying any content etc.
      *
      * <p> See details on usage of {@code Action} for various actionable entries in
-     * {@link BeginCreateCredentialResponse} and {@link BeginGetCredentialsResponse}.
+     * {@link BeginCreateCredentialResponse} and {@link BeginGetCredentialResponse}.
      *
      * @param slice the display content to be displayed on the UI, along with this action
      * @param pendingIntent the intent to be invoked when the user selects this action

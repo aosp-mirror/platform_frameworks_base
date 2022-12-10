@@ -29,28 +29,28 @@ import java.util.Objects;
  * Request for creating a credential.
  */
 public final class CreateCredentialRequest implements Parcelable {
-    private final @NonNull String mCallingPackage;
+    private final @NonNull CallingAppInfo mCallingAppInfo;
     private final @NonNull String mType;
     private final @NonNull Bundle mData;
 
     /**
      * Constructs a new instance.
      *
-     * @throws IllegalArgumentException If {@code callingPackage}, or {@code type} string is
+     * @throws IllegalArgumentException If {@code callingAppInfo}, or {@code type} string is
      * null or empty.
      * @throws NullPointerException If {@code data} is null.
      */
-    public CreateCredentialRequest(@NonNull String callingPackage,
+    public CreateCredentialRequest(@NonNull CallingAppInfo callingAppInfo,
             @NonNull String type, @NonNull Bundle data) {
-        mCallingPackage = Preconditions.checkStringNotEmpty(callingPackage,
-                "callingPackage must not be null or empty");
+        mCallingAppInfo = Objects.requireNonNull(callingAppInfo,
+                "callingAppInfo must not be null");
         mType = Preconditions.checkStringNotEmpty(type,
                 "type must not be null or empty");
         mData = Objects.requireNonNull(data, "data must not be null");
     }
 
     private CreateCredentialRequest(@NonNull Parcel in) {
-        mCallingPackage = in.readString8();
+        mCallingAppInfo = in.readTypedObject(CallingAppInfo.CREATOR);
         mType = in.readString8();
         mData = in.readTypedObject(Bundle.CREATOR);
     }
@@ -75,15 +75,15 @@ public final class CreateCredentialRequest implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString8(mCallingPackage);
+        dest.writeTypedObject(mCallingAppInfo, flags);
         dest.writeString8(mType);
         dest.writeTypedObject(mData, flags);
     }
 
-    /** Returns the calling package of the calling app. */
+    /** Returns info pertaining to the calling app. */
     @NonNull
-    public String getCallingPackage() {
-        return mCallingPackage;
+    public CallingAppInfo getCallingAppInfo() {
+        return mCallingAppInfo;
     }
 
     /** Returns the type of the credential to be created. */
