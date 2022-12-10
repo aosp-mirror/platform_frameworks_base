@@ -72,8 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock është çaktivizuar"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"dërgoi një imazh"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Po ruan pamjen e ekranit…"</string>
-    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
-    <skip />
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Pamja e ekranit po ruhet te profili i punës…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Pamja e ekranit u ruajt"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Pamja e ekranit nuk mund të ruhej"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Pajisja duhet të shkyçet para se të mund të ruhet pamja e ekranit"</string>
@@ -394,10 +393,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Njoftimet janë vendosur në pauzë nga modaliteti \"Mos shqetëso\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Fillo tani"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Asnjë njoftim"</string>
-    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
-    <skip />
-    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
-    <skip />
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"Nuk ka njoftime të reja"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Shkyç për të parë njoftimet e vjetra"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Kjo pajisje menaxhohet nga prindi yt"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organizata jote e zotëron këtë pajisje dhe mund të monitorojë trafikun e rrjetit"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e zotëron këtë pajisje dhe mund të monitorojë trafikun e rrjetit"</string>
@@ -875,6 +872,8 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Ndalo transmetimin"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Pajisjet që ofrohen për daljen e audios."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volumi"</string>
+    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Si funksionon transmetimi"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmetimi"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Personat në afërsi me ty me pajisje të përputhshme me Bluetooth mund të dëgjojnë median që ti po transmeton"</string>
@@ -988,6 +987,8 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera dhe mikrofoni janë joaktivë"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# njoftim}other{# njoftime}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <!-- no translation found for note_task_button_label (8718616095800343136) -->
+    <skip />
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Po transmeton"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Të ndalohet transmetimi i <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Nëse transmeton <xliff:g id="SWITCHAPP">%1$s</xliff:g> ose ndryshon daljen, transmetimi yt aktual do të ndalojë"</string>

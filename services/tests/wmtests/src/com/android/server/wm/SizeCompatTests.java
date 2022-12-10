@@ -167,7 +167,7 @@ public class SizeCompatTests extends WindowTestsBase {
     public void testRestartProcessIfVisible() {
         setUpDisplaySizeWithApp(1000, 2500);
         doNothing().when(mSupervisor).scheduleRestartTimeout(mActivity);
-        mActivity.mVisibleRequested = true;
+        mActivity.setVisibleRequested(true);
         mActivity.setSavedState(null /* savedState */);
         mActivity.setState(RESUMED, "testRestart");
         prepareUnresizable(mActivity, 1.5f /* maxAspect */, SCREEN_ORIENTATION_UNSPECIFIED);
@@ -551,7 +551,7 @@ public class SizeCompatTests extends WindowTestsBase {
         resizeDisplay(display, 900, 1800);
 
         mActivity.setState(STOPPED, "testSizeCompatMode");
-        mActivity.mVisibleRequested = false;
+        mActivity.setVisibleRequested(false);
         mActivity.visibleIgnoringKeyguard = false;
         mActivity.app.setReportedProcState(ActivityManager.PROCESS_STATE_CACHED_ACTIVITY);
         mActivity.app.computeProcessActivityState();
@@ -603,7 +603,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Make the activity resizable again by restarting it
         clearInvocations(mTask);
         mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
-        mActivity.mVisibleRequested = true;
+        mActivity.setVisibleRequested(true);
         mActivity.restartProcessIfVisible();
         // The full lifecycle isn't hooked up so manually set state to resumed
         mActivity.setState(RESUMED, "testHandleActivitySizeCompatModeChanged");
@@ -3185,7 +3185,7 @@ public class SizeCompatTests extends WindowTestsBase {
             task.mResizeMode = activity.info.resizeMode;
             task.getRootActivity().info.resizeMode = activity.info.resizeMode;
         }
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
         if (maxAspect >= 0) {
             activity.info.setMaxAspectRatio(maxAspect);
         }
@@ -3205,7 +3205,7 @@ public class SizeCompatTests extends WindowTestsBase {
     /** Asserts that the size of activity is larger than its parent so it is scaling. */
     private void assertScaled() {
         assertTrue(mActivity.inSizeCompatMode());
-        assertNotEquals(1f, mActivity.getSizeCompatScale(), 0.0001f /* delta */);
+        assertNotEquals(1f, mActivity.getCompatScale(), 0.0001f /* delta */);
     }
 
     /** Asserts that the activity is best fitted in the parent. */

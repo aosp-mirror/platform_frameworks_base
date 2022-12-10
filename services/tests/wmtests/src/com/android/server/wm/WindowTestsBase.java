@@ -715,7 +715,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         activity.onDisplayChanged(dc);
         activity.setOccludesParent(true);
         activity.setVisible(true);
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
     }
 
     static TaskFragment createTaskFragmentWithParentTask(@NonNull Task parentTask) {
@@ -1209,7 +1209,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     mTask.moveToFront("createActivity");
                 }
                 if (mVisible) {
-                    activity.mVisibleRequested = true;
+                    activity.setVisibleRequested(true);
                     activity.setVisible(true);
                 }
             }

@@ -108,7 +108,6 @@ public class ImageWallpaperTest extends SysuiTestCase {
     private FeatureFlags mFeatureFlags;
 
     FakeSystemClock mFakeSystemClock = new FakeSystemClock();
-    FakeExecutor mFakeMainExecutor = new FakeExecutor(mFakeSystemClock);
     FakeExecutor mFakeBackgroundExecutor = new FakeExecutor(mFakeSystemClock);
 
     private CountDownLatch mEventCountdown;
@@ -163,7 +162,7 @@ public class ImageWallpaperTest extends SysuiTestCase {
     }
 
     private ImageWallpaper createImageWallpaper() {
-        return new ImageWallpaper(mFeatureFlags, mFakeBackgroundExecutor, mFakeMainExecutor) {
+        return new ImageWallpaper(mFeatureFlags, mFakeBackgroundExecutor) {
             @Override
             public Engine onCreateEngine() {
                 return new GLEngine(mHandler) {
@@ -242,7 +241,7 @@ public class ImageWallpaperTest extends SysuiTestCase {
 
 
     private ImageWallpaper createImageWallpaperCanvas() {
-        return new ImageWallpaper(mFeatureFlags, mFakeBackgroundExecutor, mFakeMainExecutor) {
+        return new ImageWallpaper(mFeatureFlags, mFakeBackgroundExecutor) {
             @Override
             public Engine onCreateEngine() {
                 return new CanvasEngine() {
@@ -315,11 +314,10 @@ public class ImageWallpaperTest extends SysuiTestCase {
         assertThat(mFakeBackgroundExecutor.numPending()).isAtLeast(1);
 
         int n = 0;
-        while (mFakeBackgroundExecutor.numPending() + mFakeMainExecutor.numPending() >= 1) {
+        while (mFakeBackgroundExecutor.numPending() >= 1) {
             n++;
             assertThat(n).isAtMost(10);
             mFakeBackgroundExecutor.runNextReady();
-            mFakeMainExecutor.runNextReady();
             mFakeSystemClock.advanceTime(1000);
         }
 

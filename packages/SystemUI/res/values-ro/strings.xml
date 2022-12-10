@@ -72,8 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock dezactivat"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"a trimis o imagine"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Se salvează captura de ecran..."</string>
-    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
-    <skip />
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Se salvează captura în profilul de serviciu…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Captură de ecran salvată"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Nu s-a putut salva captura de ecran"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Pentru a salva captura de ecran, trebuie să deblochezi dispozitivul"</string>
@@ -875,6 +874,8 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Nu mai proiecta"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dispozitive disponibile pentru ieșire audio."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volum"</string>
+    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cum funcționează transmisia"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmite"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Persoanele din apropiere cu dispozitive Bluetooth compatibile pot asculta conținutul pe care îl transmiți"</string>
@@ -988,6 +989,8 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Camera și microfonul sunt dezactivate"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificare}few{# notificări}other{# de notificări}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <!-- no translation found for note_task_button_label (8718616095800343136) -->
+    <skip />
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Se difuzează"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Oprești transmisia <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Dacă transmiți <xliff:g id="SWITCHAPP">%1$s</xliff:g> sau schimbi ieșirea, transmisia actuală se va opri"</string>

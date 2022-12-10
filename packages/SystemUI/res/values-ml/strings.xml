@@ -72,8 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ചിത്രം അയച്ചു"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്നു..."</string>
-    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
-    <skip />
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ഔദ്യോഗിക പ്രൊഫൈലിലേക്ക് സ്ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്നു…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിച്ചു"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കാനായില്ല"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"സ്ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്നതിന് മുമ്പ് ഉപകരണം അൺലോക്ക് ചെയ്തിരിക്കണം"</string>
@@ -503,8 +502,7 @@
     <string name="wallet_error_generic" msgid="257704570182963611">"നിങ്ങളുടെ കാർഡുകൾ ലഭ്യമാക്കുന്നതിൽ ഒരു പ്രശ്‌നമുണ്ടായി, പിന്നീട് വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ലോക്ക് സ്ക്രീൻ ക്രമീകരണം"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR കോഡ് സ്കാനർ"</string>
-    <!-- no translation found for qr_code_scanner_updating_secondary_label (8344598017007876352) -->
-    <skip />
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"അപ്ഡേറ്റ് ചെയ്യുന്നു"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ഫ്ലൈറ്റ് മോഡ്"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g>-നുള്ള നിങ്ങളുടെ അടുത്ത അലാറം കേൾക്കില്ല"</string>
@@ -876,6 +874,8 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"കാസ്റ്റ് ചെയ്യുന്നത് നിർത്തുക"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ഓഡിയോ ഔട്ട്‌പുട്ടിന് ലഭ്യമായ ഉപകരണങ്ങൾ."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"വോളിയം"</string>
+    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ബ്രോഡ്‌കാസ്‌റ്റ് എങ്ങനെയാണ് പ്രവർത്തിക്കുന്നത്"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ബ്രോഡ്‌കാസ്റ്റ്"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"അനുയോജ്യമായ Bluetooth ഉപകരണങ്ങളോടെ സമീപമുള്ള ആളുകൾക്ക് നിങ്ങൾ ബ്രോഡ്‌കാസ്‌റ്റ് ചെയ്യുന്ന മീഡിയ കേൾക്കാനാകും"</string>
@@ -989,6 +989,8 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ക്യാമറയും മൈക്കും ഓഫാണ്"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# അറിയിപ്പ്}other{# അറിയിപ്പുകൾ}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <!-- no translation found for note_task_button_label (8718616095800343136) -->
+    <skip />
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"പ്രക്ഷേപണം ചെയ്യുന്നു"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> ബ്രോഡ്‌കാസ്റ്റ് ചെയ്യുന്നത് അവസാനിപ്പിക്കണോ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"നിങ്ങൾ <xliff:g id="SWITCHAPP">%1$s</xliff:g> ബ്രോഡ്‌കാസ്റ്റ് ചെയ്യുകയോ ഔട്ട്പുട്ട് മാറ്റുകയോ ചെയ്താൽ നിങ്ങളുടെ നിലവിലുള്ള ബ്രോഡ്‌കാസ്റ്റ് അവസാനിക്കും"</string>
@@ -998,20 +1000,13 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_action_template (8164857863036314664) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_message (2790910660524887941) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_wallet_instruction_1 (8439655049139819278) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_wallet_instruction_2 (4321089250629477835) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_qr_scanner_instruction (5355839079232119791) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_home_instruction_1 (8438311171750568633) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_home_instruction_2 (8308525385889021652) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> തുറക്കുക"</string>
+    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"കുറുക്കുവഴിയായി <xliff:g id="APPNAME">%1$s</xliff:g> ആപ്പ് ചേർക്കാൻ, ഇനിപ്പറയുന്ന കാര്യങ്ങൾ ഉറപ്പാക്കുക"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• ആപ്പ് സജ്ജീകരിച്ചിട്ടുണ്ട്"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet-ലേക്ക് ഒരു കാർഡെങ്കിലും ചേർത്തിട്ടുണ്ട്"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ഒരു ക്യാമറാ ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്തിട്ടുണ്ട്"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ആപ്പ് സജ്ജീകരിച്ചിട്ടുണ്ട്"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ഒരു ഉപകരണമെങ്കിലും ലഭ്യമാണ്"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"റദ്ദാക്കുക"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ഇപ്പോൾ ഫ്ലിപ്പ് ചെയ്യൂ"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"കൂടുതൽ മികച്ച സെൽഫി ലഭിക്കാൻ ഫോൺ അൺഫോൾഡ് ചെയ്യൂ"</string>

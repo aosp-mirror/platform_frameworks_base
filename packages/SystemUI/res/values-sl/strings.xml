@@ -72,8 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Storitev Smart Lock je onemogočena."</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"je poslal(-a) sliko"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Shranjevanje posnetka zaslona ..."</string>
-    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
-    <skip />
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Shranjevanje posnetka zaslona v delovni profil …"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Posnetek zaslona je shranjen"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Posnetka zaslona ni bilo mogoče shraniti"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Pred shranjevanjem posnetka zaslona morate odkleniti napravo"</string>
@@ -875,6 +874,8 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Ustavi predvajanje"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Razpoložljive naprave za zvočni izhod"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Glasnost"</string>
+    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kako deluje oddajanje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Oddajanje"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Osebe v bližini z združljivo napravo Bluetooth lahko poslušajo predstavnost, ki jo oddajate."</string>
@@ -988,6 +989,8 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Fotoaparat in mikrofon sta izklopljena."</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# obvestilo}one{# obvestilo}two{# obvestili}few{# obvestila}other{# obvestil}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <!-- no translation found for note_task_button_label (8718616095800343136) -->
+    <skip />
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Oddajanje"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Želite ustaviti oddajanje aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Če oddajate aplikacijo <xliff:g id="SWITCHAPP">%1$s</xliff:g> ali spremenite izhod, bo trenutno oddajanje ustavljeno."</string>

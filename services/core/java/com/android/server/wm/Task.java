@@ -1930,7 +1930,6 @@ class Task extends TaskFragment {
             mTaskSupervisor.scheduleUpdateMultiWindowMode(this);
         }
 
-        final int newWinMode = getWindowingMode();
         if (shouldStartChangeTransition(prevWinMode, mTmpPrevBounds)) {
             initializeChangeTransition(mTmpPrevBounds);
         }
@@ -1944,16 +1943,15 @@ class Task extends TaskFragment {
             }
         }
 
-        if (pipChanging && wasInPictureInPicture) {
+        if (pipChanging && wasInPictureInPicture
+                && !mTransitionController.isShellTransitionsEnabled()) {
             // If the top activity is changing from PiP to fullscreen with fixed rotation,
             // clear the crop and rotation matrix of task because fixed rotation will handle
             // the transformation on activity level. This also avoids flickering caused by the
             // latency of fullscreen task organizer configuring the surface.
             final ActivityRecord r = topRunningActivity();
             if (r != null && mDisplayContent.isFixedRotationLaunchingApp(r)) {
-                getSyncTransaction().setWindowCrop(mSurfaceControl, null)
-                        .setCornerRadius(mSurfaceControl, 0f)
-                        .setMatrix(mSurfaceControl, Matrix.IDENTITY_MATRIX, new float[9]);
+                resetSurfaceControlTransforms();
             }
         }
 
@@ -2474,7 +2472,7 @@ class Task extends TaskFragment {
 
         final String myReason = reason + " adjustFocusToNextFocusableTask";
         final ActivityRecord top = focusableTask.topRunningActivity();
-        if (focusableTask.isActivityTypeHome() && (top == null || !top.mVisibleRequested)) {
+        if (focusableTask.isActivityTypeHome() && (top == null || !top.isVisibleRequested())) {
             // If we will be focusing on the root home task next and its current top activity isn't
             // visible, then use the move the root home task to top to make the activity visible.
             focusableTask.getDisplayArea().moveHomeActivityToTop(myReason);
@@ -2786,7 +2784,7 @@ class Task extends TaskFragment {
      */
     private static void getMaxVisibleBounds(ActivityRecord token, Rect out, boolean[] foundTop) {
         // skip hidden (or about to hide) apps
-        if (token.mIsExiting || !token.isClientVisible() || !token.mVisibleRequested) {
+        if (token.mIsExiting || !token.isClientVisible() || !token.isVisibleRequested()) {
             return;
         }
         final WindowState win = token.findMainWindow();
@@ -3098,7 +3096,7 @@ class Task extends TaskFragment {
      * this activity.
      */
     ActivityRecord getTopVisibleActivity() {
-        return getActivity((r) -> !r.mIsExiting && r.isClientVisible() && r.mVisibleRequested);
+        return getActivity((r) -> !r.mIsExiting && r.isClientVisible() && r.isVisibleRequested());
     }
 
     /**
@@ -5806,7 +5804,7 @@ class Task extends TaskFragment {
             ActivityRecord r, ActivityRecord starting, String packageName) {
         if (r.info.packageName.equals(packageName)) {
             r.forceNewConfig = true;
-            if (starting != null && r == starting && r.mVisibleRequested) {
+            if (starting != null && r == starting && r.isVisibleRequested()) {
                 r.startFreezingScreenLocked(CONFIG_SCREEN_LAYOUT);
             }
         }

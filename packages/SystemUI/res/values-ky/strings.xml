@@ -72,8 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock өчүрүлдү"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"сүрөт жөнөттү"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Скриншот сакталууда..."</string>
-    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
-    <skip />
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Скриншот жумуш профилине сакталууда…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Скриншот сакталды"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Скриншот сакталган жок"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Скриншотту сактоо үчүн түзмөктүн кулпусун ачуу керек"</string>
@@ -436,7 +435,7 @@
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Жумуш колдонмолоруңуз Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турушат. Тармакта жумуш колдонмолору аркылуу жасаган аракеттериңиз, ошондой эле электрондук почтадагы жана серепчидеги нерселериңиз IT администраторуңузга жана VPN провайдерине көрүнөт."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Жеке колдонмолоруңуз Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турушат. Тармактагы аракеттериңиз, ошондой эле электрондук почтадагы жана серепчидеги нерселериңиз VPN провайдерине көрүнүп турат."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN жөндөөлөрүн ачуу"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN параметрлерин ачуу"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Бул түзмөктү ата-энең башкарат. Ата-энең сен иштеткен колдонмолорду, кайда жүргөнүңдү жана түзмөктү канча убакыт колдонгонуңду көрүп, башкарып турат."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Ишеним агенти кулпусун ачты"</string>
@@ -685,7 +684,7 @@
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> аккаунту менен кирди"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"колдонуучуну тандоо"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Интернет жок"</string>
-    <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> жөндөөлөрүн ачуу."</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> параметрлерин ачуу."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Жөндөөлөрдүн иретин өзгөртүү."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Кубат баскычынын менюсу"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> ичинен <xliff:g id="ID_1">%1$d</xliff:g>-бет"</string>
@@ -875,6 +874,8 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Тышкы экранга чыгарууну токтотуу"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Аудио чыгаруу үчүн жеткиликтүү түзмөктөр."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Үндүн катуулугу"</string>
+    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Кабарлоо кантип иштейт"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Кабарлоо"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Шайкеш Bluetooth түзмөктөрү болгон жакын жердеги кишилер кабарлап жаткан медиаңызды уга алышат"</string>
@@ -988,6 +989,8 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Камера жана микрофон өчүк"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# билдирме}other{# билдирме}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <!-- no translation found for note_task_button_label (8718616095800343136) -->
+    <skip />
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Кеңири таратуу"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунда кабарлоо токтотулсунбу?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Эгер <xliff:g id="SWITCHAPP">%1$s</xliff:g> колдонмосунда кабарласаңыз же аудионун чыгуусун өзгөртсөңүз, учурдагы кабарлоо токтотулат"</string>

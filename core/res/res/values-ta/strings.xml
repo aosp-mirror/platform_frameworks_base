@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"குரலஞ்சல்"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"இணைப்பு சிக்கல் அல்லது தவறான MMI குறியீடு."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"அம்சம் ஆதரிக்கப்படவில்லை."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"நிலையான அழைப்பு எண்களுக்கு மட்டுமே எனச் செயல்பாடு வரையறுக்கப்பட்டுள்ளது."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"ரோமிங்கில் இருக்கும் போது, உங்கள் மொபைலிலிருந்து அழைப்புப் பகிர்வு அமைப்புகளை மாற்ற முடியாது."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"சேவை இயக்கப்பட்டுள்ளது."</string>

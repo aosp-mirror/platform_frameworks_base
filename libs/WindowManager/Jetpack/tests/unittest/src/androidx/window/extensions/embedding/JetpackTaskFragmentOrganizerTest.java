@@ -102,7 +102,7 @@ public class JetpackTaskFragmentOrganizerTest {
     public void testExpandTaskFragment() {
         final TaskContainer taskContainer = createTestTaskContainer();
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
-                new Intent(), taskContainer, mSplitController);
+                new Intent(), taskContainer, mSplitController, null /* pairedPrimaryContainer */);
         final TaskFragmentInfo info = createMockInfo(container);
         mOrganizer.mFragmentInfos.put(container.getTaskFragmentToken(), info);
         container.setInfo(mTransaction, info);
