@@ -19,7 +19,6 @@ package com.android.carrierdefaultapp;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -81,8 +80,7 @@ public class SlicePurchaseActivity extends Activity {
                 + ", url=" + mUrl);
 
         // Cancel network boost notification
-        mApplicationContext.getSystemService(NotificationManager.class)
-                .cancel(SlicePurchaseBroadcastReceiver.NETWORK_BOOST_NOTIFICATION_TAG, mCapability);
+        SlicePurchaseBroadcastReceiver.cancelNotification(mApplicationContext, mCapability);
 
         // Verify intent and values are valid
         if (!SlicePurchaseBroadcastReceiver.isIntentValid(mIntent)) {
@@ -112,9 +110,6 @@ public class SlicePurchaseActivity extends Activity {
             finishAndRemoveTask();
             return;
         }
-
-        // Create a reference to this activity in SlicePurchaseBroadcastReceiver
-        SlicePurchaseBroadcastReceiver.updateSlicePurchaseActivity(mCapability, this);
 
         // Create and configure WebView
         setupWebView();
@@ -161,7 +156,6 @@ public class SlicePurchaseActivity extends Activity {
         logd("onDestroy: User canceled the purchase by closing the application.");
         SlicePurchaseBroadcastReceiver.sendSlicePurchaseAppResponse(
                 mIntent, SlicePurchaseController.EXTRA_INTENT_CANCELED);
-        SlicePurchaseBroadcastReceiver.removeSlicePurchaseActivity(mCapability);
         super.onDestroy();
     }
 

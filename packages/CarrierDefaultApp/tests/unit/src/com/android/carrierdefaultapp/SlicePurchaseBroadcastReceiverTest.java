@@ -19,9 +19,12 @@ package com.android.carrierdefaultapp;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
@@ -35,11 +38,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.UserHandle;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.util.DisplayMetrics;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -51,6 +54,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Locale;
 
 @RunWith(AndroidJUnit4.class)
 public class SlicePurchaseBroadcastReceiverTest {
@@ -67,24 +72,26 @@ public class SlicePurchaseBroadcastReceiverTest {
     @Mock PendingIntent mNotificationShownIntent;
     @Mock Context mContext;
     @Mock Resources mResources;
+    @Mock Configuration mConfiguration;
     @Mock NotificationManager mNotificationManager;
     @Mock ApplicationInfo mApplicationInfo;
     @Mock PackageManager mPackageManager;
-    @Mock DisplayMetrics mDisplayMetrics;
-    @Mock SlicePurchaseActivity mSlicePurchaseActivity;
 
     private SlicePurchaseBroadcastReceiver mSlicePurchaseBroadcastReceiver;
-    private ArgumentCaptor<Intent> mIntentCaptor;
-    private ArgumentCaptor<Notification> mNotificationCaptor;
+    private Resources mSpiedResources;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mSpiedResources = spy(Resources.getSystem());
+
+        doReturn("").when(mResources).getString(anyInt());
         doReturn(mNotificationManager).when(mContext)
                 .getSystemService(eq(NotificationManager.class));
+        doReturn(mApplicationInfo).when(mContext).getApplicationInfo();
+        doReturn(mPackageManager).when(mContext).getPackageManager();
+        doReturn(mSpiedResources).when(mContext).getResources();
 
-        mIntentCaptor = ArgumentCaptor.forClass(Intent.class);
-        mNotificationCaptor = ArgumentCaptor.forClass(Notification.class);
         mSlicePurchaseBroadcastReceiver = spy(new SlicePurchaseBroadcastReceiver());
     }
 
@@ -109,8 +116,9 @@ public class SlicePurchaseBroadcastReceiverTest {
                 eq(EXTRA), eq(PendingIntent.class));
         SlicePurchaseBroadcastReceiver.sendSlicePurchaseAppResponseWithData(
                 mContext, mIntent, EXTRA, mDataIntent);
-        verify(mPendingIntent).send(eq(mContext), eq(0), mIntentCaptor.capture());
-        assertEquals(mDataIntent, mIntentCaptor.getValue());
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mPendingIntent).send(eq(mContext), eq(0), captor.capture());
+        assertEquals(mDataIntent, captor.getValue());
     }
 
     @Test
@@ -138,17 +146,29 @@ public class SlicePurchaseBroadcastReceiverTest {
 
     @Test
     public void testDisplayNetworkBoostNotification() throws Exception {
-        // set up intent
-        doReturn(SlicePurchaseController.ACTION_START_SLICE_PURCHASE_APP).when(mIntent).getAction();
-        doReturn(PHONE_ID).when(mIntent).getIntExtra(
-                eq(SlicePurchaseController.EXTRA_PHONE_ID), anyInt());
-        doReturn(SubscriptionManager.getDefaultDataSubscriptionId()).when(mIntent).getIntExtra(
-                eq(SlicePurchaseController.EXTRA_SUB_ID), anyInt());
-        doReturn(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY).when(mIntent).getIntExtra(
-                eq(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY), anyInt());
-        doReturn(TAG).when(mIntent).getStringExtra(
-                eq(SlicePurchaseController.EXTRA_REQUESTING_APP_NAME));
+        displayNetworkBoostNotification();
 
+        // verify network boost notification was shown
+        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+        verify(mNotificationManager).notifyAsUser(
+                eq(SlicePurchaseBroadcastReceiver.NETWORK_BOOST_NOTIFICATION_TAG),
+                eq(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY),
+                captor.capture(),
+                eq(UserHandle.ALL));
+
+        // verify notification fields
+        Notification notification = captor.getValue();
+        assertEquals(mContentIntent1, notification.contentIntent);
+        assertEquals(mPendingIntent, notification.deleteIntent);
+        assertEquals(2, notification.actions.length);
+        assertEquals(mCanceledIntent, notification.actions[0].actionIntent);
+        assertEquals(mContentIntent2, notification.actions[1].actionIntent);
+
+        // verify SlicePurchaseController was notified
+        verify(mNotificationShownIntent).send();
+    }
+
+    private void displayNetworkBoostNotification() {
         // set up pending intents
         doReturn(TelephonyManager.PHONE_PROCESS_NAME).when(mPendingIntent).getCreatorPackage();
         doReturn(true).when(mPendingIntent).isBroadcast();
@@ -161,14 +181,7 @@ public class SlicePurchaseBroadcastReceiverTest {
                 eq(SlicePurchaseController.EXTRA_INTENT_NOTIFICATION_SHOWN),
                 eq(PendingIntent.class));
 
-        // set up notification
-        doReturn(mResources).when(mContext).getResources();
-        doReturn(mDisplayMetrics).when(mResources).getDisplayMetrics();
-        doReturn("").when(mResources).getString(anyInt());
-        doReturn(mApplicationInfo).when(mContext).getApplicationInfo();
-        doReturn(mPackageManager).when(mContext).getPackageManager();
-
-        // set up intents created by broadcast receiver
+        // spy notification intents to prevent PendingIntent issues
         doReturn(mContentIntent1).when(mSlicePurchaseBroadcastReceiver).createContentIntent(
                 eq(mContext), eq(mIntent), eq(1));
         doReturn(mContentIntent2).when(mSlicePurchaseBroadcastReceiver).createContentIntent(
@@ -176,35 +189,28 @@ public class SlicePurchaseBroadcastReceiverTest {
         doReturn(mCanceledIntent).when(mSlicePurchaseBroadcastReceiver).createCanceledIntent(
                 eq(mContext), eq(mIntent));
 
+        // spy resources to prevent resource not found issues
+        doReturn(mResources).when(mSlicePurchaseBroadcastReceiver).getResources(eq(mContext));
+
         // send ACTION_START_SLICE_PURCHASE_APP
+        doReturn(SlicePurchaseController.ACTION_START_SLICE_PURCHASE_APP).when(mIntent).getAction();
+        doReturn(PHONE_ID).when(mIntent).getIntExtra(
+                eq(SlicePurchaseController.EXTRA_PHONE_ID), anyInt());
+        doReturn(SubscriptionManager.getDefaultDataSubscriptionId()).when(mIntent).getIntExtra(
+                eq(SlicePurchaseController.EXTRA_SUB_ID), anyInt());
+        doReturn(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY).when(mIntent).getIntExtra(
+                eq(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY), anyInt());
+        doReturn(TAG).when(mIntent).getStringExtra(
+                eq(SlicePurchaseController.EXTRA_REQUESTING_APP_NAME));
         mSlicePurchaseBroadcastReceiver.onReceive(mContext, mIntent);
-
-        // verify network boost notification was shown
-        verify(mNotificationManager).notifyAsUser(
-                eq(SlicePurchaseBroadcastReceiver.NETWORK_BOOST_NOTIFICATION_TAG),
-                eq(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY),
-                mNotificationCaptor.capture(),
-                eq(UserHandle.ALL));
-
-        Notification notification = mNotificationCaptor.getValue();
-        assertEquals(mContentIntent1, notification.contentIntent);
-        assertEquals(mPendingIntent, notification.deleteIntent);
-        assertEquals(2, notification.actions.length);
-        assertEquals(mCanceledIntent, notification.actions[0].actionIntent);
-        assertEquals(mContentIntent2, notification.actions[1].actionIntent);
-
-        // verify SlicePurchaseController was notified
-        verify(mNotificationShownIntent).send();
     }
 
     @Test
     public void testNotificationCanceled() {
-        // set up intent
+        // send ACTION_NOTIFICATION_CANCELED
         doReturn("com.android.phone.slice.action.NOTIFICATION_CANCELED").when(mIntent).getAction();
         doReturn(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY).when(mIntent).getIntExtra(
                 eq(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY), anyInt());
-
-        // send ACTION_NOTIFICATION_CANCELED
         mSlicePurchaseBroadcastReceiver.onReceive(mContext, mIntent);
 
         // verify notification was canceled
@@ -215,14 +221,14 @@ public class SlicePurchaseBroadcastReceiverTest {
     }
 
     @Test
-    public void testNotificationTimeout() {
-        // set up intent
+    public void testNotificationTimeout() throws Exception {
+        displayNetworkBoostNotification();
+
+        // send ACTION_SLICE_PURCHASE_APP_RESPONSE_TIMEOUT
         doReturn(SlicePurchaseController.ACTION_SLICE_PURCHASE_APP_RESPONSE_TIMEOUT).when(mIntent)
                 .getAction();
         doReturn(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY).when(mIntent).getIntExtra(
                 eq(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY), anyInt());
-
-        // send ACTION_SLICE_PURCHASE_APP_RESPONSE_TIMEOUT
         mSlicePurchaseBroadcastReceiver.onReceive(mContext, mIntent);
 
         // verify notification was canceled
@@ -233,27 +239,52 @@ public class SlicePurchaseBroadcastReceiverTest {
     }
 
     @Test
-    // TODO: WebView/Activity should not close on timeout.
-    //  This test should be removed once implementation is fixed.
-    public void testActivityTimeout() {
-        // create and track activity
-        SlicePurchaseBroadcastReceiver.updateSlicePurchaseActivity(
-                TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY, mSlicePurchaseActivity);
+    public void testLocaleChanged() throws Exception {
+        // get previous locale
+        doReturn(mConfiguration).when(mSpiedResources).getConfiguration();
+        Locale before = getLocale();
 
-        // set up intent
-        doReturn(SlicePurchaseController.ACTION_SLICE_PURCHASE_APP_RESPONSE_TIMEOUT).when(mIntent)
-                .getAction();
-        doReturn(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY).when(mIntent).getIntExtra(
-                eq(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY), anyInt());
+        // display notification
+        displayNetworkBoostNotification();
+        clearInvocations(mNotificationManager);
+        clearInvocations(mNotificationShownIntent);
 
-        // send ACTION_SLICE_PURCHASE_APP_RESPONSE_TIMEOUT
+        // change current locale from previous value
+        Locale newLocale = Locale.forLanguageTag("en-US");
+        if (before.equals(newLocale)) {
+            newLocale = Locale.forLanguageTag("ko-KR");
+        }
+        doReturn(newLocale).when(mSlicePurchaseBroadcastReceiver).getCurrentLocale();
+
+        // send ACTION_LOCALE_CHANGED
+        doReturn(Intent.ACTION_LOCALE_CHANGED).when(mIntent).getAction();
         mSlicePurchaseBroadcastReceiver.onReceive(mContext, mIntent);
 
-        // verify activity was canceled
-        verify(mSlicePurchaseActivity).finishAndRemoveTask();
+        // verify notification was updated and SlicePurchaseController was not notified
+        verify(mNotificationManager).cancelAsUser(
+                eq(SlicePurchaseBroadcastReceiver.NETWORK_BOOST_NOTIFICATION_TAG),
+                eq(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY),
+                eq(UserHandle.ALL));
+        verify(mNotificationManager).notifyAsUser(
+                eq(SlicePurchaseBroadcastReceiver.NETWORK_BOOST_NOTIFICATION_TAG),
+                eq(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY),
+                any(Notification.class),
+                eq(UserHandle.ALL));
+        verify(mNotificationShownIntent, never()).send();
 
-        // untrack activity
-        SlicePurchaseBroadcastReceiver.removeSlicePurchaseActivity(
-                TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY);
+        // verify locale was changed successfully
+        doCallRealMethod().when(mSlicePurchaseBroadcastReceiver).getResources(eq(mContext));
+        assertEquals(newLocale, getLocale());
+    }
+
+    private Locale getLocale() {
+        try {
+            mSlicePurchaseBroadcastReceiver.getResources(mContext);
+            fail("getLocale should not have completed successfully.");
+        } catch (NullPointerException expected) { }
+        ArgumentCaptor<Locale> captor = ArgumentCaptor.forClass(Locale.class);
+        verify(mConfiguration).setLocale(captor.capture());
+        clearInvocations(mConfiguration);
+        return captor.getValue();
     }
 }

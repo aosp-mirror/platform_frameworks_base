@@ -37,5 +37,6 @@ android_test {
     // Include all test java files.
     srcs: ["src/**/*.java"],
     platform_apis: true,
+    use_embedded_native_libs: false,
     instrumentation_for: "CarrierDefaultApp",
 }
