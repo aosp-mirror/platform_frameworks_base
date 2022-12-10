@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"ข้อความเสียง"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"ปัญหาการเชื่อมต่อหรือรหัส MMI ไม่ถูกต้อง"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ไม่รองรับฟีเจอร์"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"การดำเนินการถูกจำกัดไว้ที่การจำกัดหมายเลขโทรออกเท่านั้น"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"ไม่สามารถเปลี่ยนการตั้งค่าการโอนสายจากโทรศัพท์ในขณะที่โรมมิ่ง"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"เปิดใช้งานบริการแล้ว"</string>

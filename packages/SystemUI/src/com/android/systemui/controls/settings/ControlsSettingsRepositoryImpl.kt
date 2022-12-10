@@ -15,7 +15,7 @@
  *
  */
 
-package com.android.systemui.controls
+package com.android.systemui.controls.settings
 
 import android.provider.Settings
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow

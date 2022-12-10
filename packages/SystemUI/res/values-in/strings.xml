@@ -72,8 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock dinonaktifkan"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"mengirim gambar"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Menyimpan screenshot..."</string>
-    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
-    <skip />
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Menyimpan screenshot ke profil kerja …"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Screenshot disimpan"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Tidak dapat menyimpan screenshot"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Perangkat harus dibuka kuncinya agar screenshot dapat disimpan"</string>
@@ -394,10 +393,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notifikasi dijeda oleh mode Jangan Ganggu"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Mulai sekarang"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Tidak ada notifikasi"</string>
-    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
-    <skip />
-    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
-    <skip />
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"Tidak ada notifikasi baru"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Buka kunci untuk melihat notifikasi lama"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Perangkat ini dikelola oleh orang tuamu"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organisasi Anda memiliki perangkat ini dan mungkin memantau traffic jaringan"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> memiliki perangkat ini dan mungkin memantau traffic jaringan"</string>
@@ -627,7 +624,7 @@
     <string name="tile_unavailable" msgid="3095879009136616920">"Tidak tersedia"</string>
     <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"pelajari lebih lanjut"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Bilah navigasi"</string>
-    <string name="nav_bar_layout" msgid="4716392484772899544">"Tata Letak"</string>
+    <string name="nav_bar_layout" msgid="4716392484772899544">"Tata letak"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Jenis tombol ekstra kiri"</string>
     <string name="right_nav_bar_button_type" msgid="4472566498647364715">"Jenis tombol ekstra kanan"</string>
   <string-array name="nav_bar_buttons">
@@ -875,6 +872,8 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Hentikan transmisi"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Perangkat yang tersedia untuk output audio."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
+    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cara kerja siaran"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Siaran"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Orang di dekat Anda dengan perangkat Bluetooth yang kompatibel dapat mendengarkan media yang sedang Anda siarkan"</string>
@@ -988,6 +987,8 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera dan mikrofon nonaktif"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notifikasi}other{# notifikasi}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <!-- no translation found for note_task_button_label (8718616095800343136) -->
+    <skip />
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Menyiarkan"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Hentikan siaran <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Jika Anda menyiarkan <xliff:g id="SWITCHAPP">%1$s</xliff:g> atau mengubah output, siaran saat ini akan dihentikan"</string>

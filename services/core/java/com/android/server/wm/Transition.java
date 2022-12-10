@@ -643,7 +643,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 // No need to clip the display in case seeing the clipped content when during the
                 // display rotation. No need to clip activities because they rely on clipping on
                 // task layers.
-                if (target.asDisplayContent() != null || target.asActivityRecord() != null) {
+                if (target.asTaskFragment() == null) {
                     t.setCrop(targetLeash, null /* crop */);
                 } else {
                     // Crop to the resolved override bounds.
@@ -993,7 +993,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // show here in the same way that we manually hide in finishTransaction.
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
-            if (ar == null || !ar.mVisibleRequested) continue;
+            if (ar == null || !ar.isVisibleRequested()) continue;
             transaction.show(ar.getSurfaceControl());
 
             // Also manually show any non-reported parents. This is necessary in a few cases
@@ -1274,7 +1274,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         ArrayMap<WindowContainer, Integer> reasons = new ArrayMap<>();
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             ActivityRecord r = mParticipants.valueAt(i).asActivityRecord();
-            if (r == null || !r.mVisibleRequested) continue;
+            if (r == null || !r.isVisibleRequested()) continue;
             int transitionReason = APP_TRANSITION_WINDOWS_DRAWN;
             // At this point, r is "ready", but if it's not "ALL ready" then it is probably only
             // ready due to starting-window.

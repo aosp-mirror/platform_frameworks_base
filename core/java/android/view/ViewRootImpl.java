@@ -720,7 +720,7 @@ public final class ViewRootImpl implements ViewParent,
     private final InsetsState mTempInsets = new InsetsState();
     private final InsetsSourceControl[] mTempControls = new InsetsSourceControl[SIZE];
     private final WindowConfiguration mTempWinConfig = new WindowConfiguration();
-    private float mInvSizeCompatScale = 1f;
+    private float mInvCompatScale = 1f;
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
 
@@ -1119,11 +1119,11 @@ public final class ViewRootImpl implements ViewParent,
 
     private WindowConfiguration getCompatWindowConfiguration() {
         final WindowConfiguration winConfig = getConfiguration().windowConfiguration;
-        if (mInvSizeCompatScale == 1f) {
+        if (mInvCompatScale == 1f) {
             return winConfig;
         }
         mTempWinConfig.setTo(winConfig);
-        mTempWinConfig.scale(mInvSizeCompatScale);
+        mTempWinConfig.scale(mInvCompatScale);
         return mTempWinConfig;
     }
 
@@ -1257,11 +1257,11 @@ public final class ViewRootImpl implements ViewParent,
                     controlInsetsForCompatibility(mWindowAttributes);
 
                     Rect attachedFrame = new Rect();
-                    final float[] sizeCompatScale = { 1f };
+                    final float[] compatScale = { 1f };
                     res = mWindowSession.addToDisplayAsUser(mWindow, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(), userId,
                             mInsetsController.getRequestedVisibilities(), inputChannel, mTempInsets,
-                            mTempControls, attachedFrame, sizeCompatScale);
+                            mTempControls, attachedFrame, compatScale);
                     if (!attachedFrame.isValid()) {
                         attachedFrame = null;
                     }
@@ -1271,8 +1271,8 @@ public final class ViewRootImpl implements ViewParent,
                         mTranslator.translateRectInScreenToAppWindow(attachedFrame);
                     }
                     mTmpFrames.attachedFrame = attachedFrame;
-                    mTmpFrames.sizeCompatScale = sizeCompatScale[0];
-                    mInvSizeCompatScale = 1f / sizeCompatScale[0];
+                    mTmpFrames.compatScale = compatScale[0];
+                    mInvCompatScale = 1f / compatScale[0];
                 } catch (RemoteException e) {
                     mAdded = false;
                     mView = null;
@@ -1794,24 +1794,24 @@ public final class ViewRootImpl implements ViewParent,
             mTranslator.translateRectInScreenToAppWindow(displayFrame);
             mTranslator.translateRectInScreenToAppWindow(attachedFrame);
         }
-        final float sizeCompatScale = frames.sizeCompatScale;
+        final float compatScale = frames.compatScale;
         final boolean frameChanged = !mWinFrame.equals(frame);
         final boolean configChanged = !mLastReportedMergedConfiguration.equals(mergedConfiguration);
         final boolean attachedFrameChanged = LOCAL_LAYOUT
                 && !Objects.equals(mTmpFrames.attachedFrame, attachedFrame);
         final boolean displayChanged = mDisplay.getDisplayId() != displayId;
         final boolean resizeModeChanged = mResizeMode != resizeMode;
-        final boolean sizeCompatScaleChanged = mTmpFrames.sizeCompatScale != sizeCompatScale;
+        final boolean compatScaleChanged = mTmpFrames.compatScale != compatScale;
         if (msg == MSG_RESIZED && !frameChanged && !configChanged && !attachedFrameChanged
                 && !displayChanged && !resizeModeChanged && !forceNextWindowRelayout
-                && !sizeCompatScaleChanged) {
+                && !compatScaleChanged) {
             return;
         }
 
         mPendingDragResizing = resizeMode != RESIZE_MODE_INVALID;
         mResizeMode = resizeMode;
-        mTmpFrames.sizeCompatScale = sizeCompatScale;
-        mInvSizeCompatScale = 1f / sizeCompatScale;
+        mTmpFrames.compatScale = compatScale;
+        mInvCompatScale = 1f / compatScale;
 
         if (configChanged) {
             // If configuration changed - notify about that and, maybe, about move to display.
@@ -8240,7 +8240,7 @@ public final class ViewRootImpl implements ViewParent,
                 mTranslator.translateInsetsStateInScreenToAppWindow(mTempInsets);
                 mTranslator.translateSourceControlsInScreenToAppWindow(mTempControls);
             }
-            mInvSizeCompatScale = 1f / mTmpFrames.sizeCompatScale;
+            mInvCompatScale = 1f / mTmpFrames.compatScale;
             mInsetsController.onStateChanged(mTempInsets);
             mInsetsController.onControlsChanged(mTempControls);
 
