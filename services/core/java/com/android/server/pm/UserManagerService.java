@@ -127,8 +127,11 @@ import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemService;
 import com.android.server.am.UserState;
+import com.android.server.pm.UserManagerInternal.UserAssignmentResult;
 import com.android.server.pm.UserManagerInternal.UserLifecycleListener;
 import com.android.server.pm.UserManagerInternal.UserRestrictionsListener;
+import com.android.server.pm.UserManagerInternal.UserStartMode;
+import com.android.server.pm.UserManagerInternal.UserVisibilityListener;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.utils.Slogf;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -6980,8 +6983,11 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
-        public int assignUserToDisplayOnStart(@UserIdInt int userId, @UserIdInt int profileGroupId,
-                boolean foreground, int displayId) {
+        @UserAssignmentResult
+        public int assignUserToDisplayOnStart(@UserIdInt int userId,
+                @UserIdInt int profileGroupId, @UserStartMode int userStartMode, int displayId) {
+            // TODO(245939659): change UserVisibilityMediator to take @UserStartMode
+            boolean foreground = userStartMode == UserManagerInternal.USER_START_MODE_FOREGROUND;
             return mUserVisibilityMediator.assignUserToDisplayOnStart(userId, profileGroupId,
                     foreground, displayId);
         }
