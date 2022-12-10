@@ -8,15 +8,19 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Saglabāt citur"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Izmantot citu ierīci"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Saglabāt citā ierīcē"</string>
-    <string name="passkey_creation_intro_title" msgid="402553911484409884">"Vienkāršs veids, kā droši pierakstīties"</string>
-    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Izmantojiet pirksta nospiedumu, autorizāciju pēc sejas vai ekrāna bloķēšanu, lai pierakstītos ar unikālu piekļuves atslēgu, ko nevar aizmirst vai nozagt. Uzziniet vairāk."</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"Izvēlieties, kur: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
     <skip />
+    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
+    <skip />
+    <string name="choose_provider_title" msgid="7245243990139698508">"Izvēlieties, kur: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <string name="create_your_passkeys" msgid="8901224153607590596">"veidot piekļuves atslēgas"</string>
     <string name="save_your_password" msgid="6597736507991704307">"saglabāt paroli"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"saglabāt pierakstīšanās informāciju"</string>
-    <!-- no translation found for choose_provider_body (8045759834416308059) -->
-    <skip />
+    <string name="choose_provider_body" msgid="8045759834416308059">"Iestatiet noklusējuma paroļu pārvaldnieku, lai saglabātu paroles un piekļuves atslēgas un nākamajā reizē pierakstītos ātrāk."</string>
     <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Vai izveidot piekļuves atslēgu šeit: <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="8812546498357380545">"Vai saglabāt paroli šeit: <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Vai saglabāt pierakstīšanās informāciju šeit: <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
@@ -24,17 +28,12 @@
     <string name="passkey" msgid="632353688396759522">"piekļuves atslēga"</string>
     <string name="password" msgid="6738570945182936667">"parole"</string>
     <string name="sign_ins" msgid="4710739369149469208">"pierakstīšanās informācija"</string>
-    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
-    <skip />
-    <!-- no translation found for save_password_to_title (3450480045270186421) -->
-    <skip />
-    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
-    <skip />
-    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
-    <skip />
+    <string name="create_passkey_in_title" msgid="2714306562710897785">"Izveidot piekļuves atslēgu šeit:"</string>
+    <string name="save_password_to_title" msgid="3450480045270186421">"Saglabāt paroli šeit:"</string>
+    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Saglabāt pierakstīšanās informāciju šeit:"</string>
+    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Vai izveidot piekļuves atslēgu citā ierīcē?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Vai vienmēr izmantot <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>, lai pierakstītos?"</string>
-    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="6560593199974037820">"Šis paroļu pārvaldnieks glabās jūsu paroles un piekļuves atslēgas, lai atvieglotu pierakstīšanos."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Iestatīt kā noklusējumu"</string>
     <string name="use_once" msgid="9027366575315399714">"Izmantot vienreiz"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> paroles, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> piekļuves atslēgas"</string>

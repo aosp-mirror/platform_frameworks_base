@@ -8,8 +8,14 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Save to another place"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Use another device"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Save to another device"</string>
-    <string name="passkey_creation_intro_title" msgid="402553911484409884">"A simple way to sign in safely"</string>
-    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Use your fingerprint, face or screen lock to sign in with a unique passkey that can’t be forgotten or stolen. Learn more"</string>
+    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
+    <skip />
     <string name="choose_provider_title" msgid="7245243990139698508">"Choose where to <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"create your passkeys"</string>
     <string name="save_your_password" msgid="6597736507991704307">"save your password"</string>

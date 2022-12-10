@@ -8,15 +8,19 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Guardar en otra ubicación"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Usar otro dispositivo"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Guardar en otro dispositivo"</string>
-    <string name="passkey_creation_intro_title" msgid="402553911484409884">"Un modo simple y seguro de ingresar"</string>
-    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Usa tu huella dactilar, tu rostro o el bloqueo de pantalla para acceder con una llave de acceso única que no olvidarás ni podrán robarte. Más información"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"Elige dónde <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
     <skip />
+    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
+    <skip />
+    <string name="choose_provider_title" msgid="7245243990139698508">"Elige dónde <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <string name="create_your_passkeys" msgid="8901224153607590596">"crea tus llaves de acceso"</string>
     <string name="save_your_password" msgid="6597736507991704307">"guardar tu contraseña"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"guardar tu información de acceso"</string>
-    <!-- no translation found for choose_provider_body (8045759834416308059) -->
-    <skip />
+    <string name="choose_provider_body" msgid="8045759834416308059">"Configura un administrador de contraseñas predeterminado para guardar tus contraseñas y llaves de acceso, y acceder más rápido la próxima vez."</string>
     <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"¿Quieres crear una llave de acceso en <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="8812546498357380545">"¿Quieres guardar tu contraseña de <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"¿Quieres guardar tu información de acceso a <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
@@ -24,17 +28,12 @@
     <string name="passkey" msgid="632353688396759522">"llave de acceso"</string>
     <string name="password" msgid="6738570945182936667">"contraseña"</string>
     <string name="sign_ins" msgid="4710739369149469208">"accesos"</string>
-    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
-    <skip />
-    <!-- no translation found for save_password_to_title (3450480045270186421) -->
-    <skip />
-    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
-    <skip />
-    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
-    <skip />
+    <string name="create_passkey_in_title" msgid="2714306562710897785">"Crear llave de acceso en"</string>
+    <string name="save_password_to_title" msgid="3450480045270186421">"Guardar contraseña en"</string>
+    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Guardar acceso en"</string>
+    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"¿Quieres crear una llave de acceso en otro dispositivo?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"¿Quieres usar <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> para todos tus accesos?"</string>
-    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="6560593199974037820">"Este administrador de contraseñas almacenará tus contraseñas y llaves de acceso para ayudarte a acceder fácilmente."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Establecer como predeterminado"</string>
     <string name="use_once" msgid="9027366575315399714">"Usar una vez"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> llaves de acceso, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> contraseñas"</string>

@@ -8,15 +8,19 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Gardar noutro lugar"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Usar outro dispositivo"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Gardar noutro dispositivo"</string>
-    <string name="passkey_creation_intro_title" msgid="402553911484409884">"Un xeito fácil de iniciar sesión de forma segura"</string>
-    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Usa a impresión dixital, a cara ou o bloqueo de pantalla para iniciar sesión cunha clave de acceso única que non podes esquecer nin cha poden roubar. Máis información"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"Escolle onde <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
     <skip />
+    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
+    <skip />
+    <string name="choose_provider_title" msgid="7245243990139698508">"Escolle onde <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <string name="create_your_passkeys" msgid="8901224153607590596">"crear as túas claves de acceso"</string>
     <string name="save_your_password" msgid="6597736507991704307">"gardar o contrasinal"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"gardar a información de inicio de sesión"</string>
-    <!-- no translation found for choose_provider_body (8045759834416308059) -->
-    <skip />
+    <string name="choose_provider_body" msgid="8045759834416308059">"Configura un xestor de contrasinais como predefinido para gardar os teus contrasinais e as túas claves de acceso, e iniciar sesión máis rápido a próxima vez."</string>
     <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Queres crear unha clave de acceso en <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="8812546498357380545">"Queres gardar o contrasinal en <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Queres gardar a información de inicio de sesión en <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
@@ -24,17 +28,12 @@
     <string name="passkey" msgid="632353688396759522">"clave de acceso"</string>
     <string name="password" msgid="6738570945182936667">"contrasinal"</string>
     <string name="sign_ins" msgid="4710739369149469208">"métodos de inicio de sesión"</string>
-    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
-    <skip />
-    <!-- no translation found for save_password_to_title (3450480045270186421) -->
-    <skip />
-    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
-    <skip />
-    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
-    <skip />
+    <string name="create_passkey_in_title" msgid="2714306562710897785">"Crear clave de acceso en"</string>
+    <string name="save_password_to_title" msgid="3450480045270186421">"Gardar contrasinal en"</string>
+    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Gardar método de inicio de sesión en"</string>
+    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Queres crear unha clave de acceso noutro dispositivo?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Queres usar <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> cada vez que inicies sesión?"</string>
-    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="6560593199974037820">"Este xestor de contrasinais almacenará os contrasinais e as claves de acceso para axudarche a iniciar sesión facilmente."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Establecer como predeterminado"</string>
     <string name="use_once" msgid="9027366575315399714">"Usar unha vez"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> contrasinais, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> claves de acceso"</string>
