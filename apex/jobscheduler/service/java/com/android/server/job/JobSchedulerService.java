@@ -3885,7 +3885,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             final int callingUid = Binder.getCallingUid();
             if (callingUid != uid && !UserHandle.isCore(callingUid)) {
                 throw new SecurityException("Uid " + callingUid
-                        + " cannot query canRunLongJobs for package " + packageName);
+                        + " cannot query hasRunLongJobsPermission for package " + packageName);
             }
 
             return checkRunLongJobsPermission(uid, packageName);
