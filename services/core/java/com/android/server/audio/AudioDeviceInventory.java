@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
 import android.media.AudioDeviceAttributes;
+import android.media.AudioDeviceInfo;
 import android.media.AudioDevicePort;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -532,6 +533,18 @@ public class AudioDeviceInventory {
                 .set(MediaMetrics.Property.STATE,
                         wdcs.mState == AudioService.CONNECTION_STATE_DISCONNECTED
                                 ? MediaMetrics.Value.DISCONNECTED : MediaMetrics.Value.CONNECTED);
+        AudioDeviceInfo info = null;
+        if (wdcs.mState == AudioService.CONNECTION_STATE_DISCONNECTED
+                && AudioSystem.DEVICE_OUT_ALL_USB_SET.contains(
+                        wdcs.mAttributes.getInternalType())) {
+            for (AudioDeviceInfo deviceInfo : AudioManager.getDevicesStatic(
+                    AudioManager.GET_DEVICES_OUTPUTS)) {
+                if (deviceInfo.getInternalType() == wdcs.mAttributes.getInternalType()) {
+                    info = deviceInfo;
+                    break;
+                }
+            }
+        }
         synchronized (mDevicesLock) {
             if ((wdcs.mState == AudioService.CONNECTION_STATE_DISCONNECTED)
                     && DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET.contains(type)) {
@@ -555,6 +568,11 @@ public class AudioDeviceInventory {
             }
             if (type == AudioSystem.DEVICE_OUT_HDMI) {
                 mDeviceBroker.checkVolumeCecOnHdmiConnection(wdcs.mState, wdcs.mCaller);
+            }
+            if (wdcs.mState == AudioService.CONNECTION_STATE_DISCONNECTED
+                    && AudioSystem.DEVICE_OUT_ALL_USB_SET.contains(
+                            wdcs.mAttributes.getInternalType())) {
+                mDeviceBroker.dispatchPreferredMixerAttributesChangedCausedByDeviceRemoved(info);
             }
             sendDeviceConnectionIntent(type, wdcs.mState,
                     wdcs.mAttributes.getAddress(), wdcs.mAttributes.getName());

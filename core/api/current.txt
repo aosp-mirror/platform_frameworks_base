@@ -20549,10 +20549,12 @@ package android.media {
     method public int abandonAudioFocusRequest(@NonNull android.media.AudioFocusRequest);
     method public void addOnCommunicationDeviceChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnCommunicationDeviceChangedListener);
     method public void addOnModeChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnModeChangedListener);
+    method public void addOnPreferredMixerAttributesChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnPreferredMixerAttributesChangedListener);
     method public void adjustStreamVolume(int, int, int);
     method public void adjustSuggestedStreamVolume(int, int, int);
     method public void adjustVolume(int, int);
     method public void clearCommunicationDevice();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS) public boolean clearPreferredMixerAttributes(@NonNull android.media.AudioAttributes, @NonNull android.media.AudioDeviceInfo);
     method public void dispatchMediaKeyEvent(android.view.KeyEvent);
     method public int generateAudioSessionId();
     method @NonNull public java.util.List<android.media.AudioPlaybackConfiguration> getActivePlaybackConfigurations();
@@ -20570,6 +20572,7 @@ package android.media {
     method public int getMode();
     method public String getParameters(String);
     method @Deprecated public static int getPlaybackOffloadSupport(@NonNull android.media.AudioFormat, @NonNull android.media.AudioAttributes);
+    method @Nullable public android.media.AudioMixerAttributes getPreferredMixerAttributes(@NonNull android.media.AudioAttributes, @NonNull android.media.AudioDeviceInfo);
     method public String getProperty(String);
     method public int getRingerMode();
     method @Deprecated public int getRouting(int);
@@ -20578,6 +20581,7 @@ package android.media {
     method public int getStreamMinVolume(int);
     method public int getStreamVolume(int);
     method public float getStreamVolumeDb(int, int, int);
+    method @NonNull public java.util.List<android.media.AudioMixerAttributes> getSupportedMixerAttributes(@NonNull android.media.AudioDeviceInfo);
     method @Deprecated public int getVibrateSetting(int);
     method @Deprecated public boolean isBluetoothA2dpOn();
     method public boolean isBluetoothScoAvailableOffCall();
@@ -20605,6 +20609,7 @@ package android.media {
     method @Deprecated public boolean registerRemoteController(android.media.RemoteController);
     method public void removeOnCommunicationDeviceChangedListener(@NonNull android.media.AudioManager.OnCommunicationDeviceChangedListener);
     method public void removeOnModeChangedListener(@NonNull android.media.AudioManager.OnModeChangedListener);
+    method public void removeOnPreferredMixerAttributesChangedListener(@NonNull android.media.AudioManager.OnPreferredMixerAttributesChangedListener);
     method @Deprecated public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int);
     method public int requestAudioFocus(@NonNull android.media.AudioFocusRequest);
     method public void setAllowedCapturePolicy(int);
@@ -20615,6 +20620,7 @@ package android.media {
     method public void setMicrophoneMute(boolean);
     method public void setMode(int);
     method public void setParameters(String);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS) public boolean setPreferredMixerAttributes(@NonNull android.media.AudioAttributes, @NonNull android.media.AudioDeviceInfo, @NonNull android.media.AudioMixerAttributes);
     method public void setRingerMode(int);
     method @Deprecated public void setRouting(int, int, int);
     method @Deprecated public void setSpeakerphoneOn(boolean);
@@ -20770,6 +20776,10 @@ package android.media {
     method public void onModeChanged(int);
   }
 
+  public static interface AudioManager.OnPreferredMixerAttributesChangedListener {
+    method public void onPreferredMixerAttributesChanged(@NonNull android.media.AudioAttributes, @NonNull android.media.AudioDeviceInfo, @Nullable android.media.AudioMixerAttributes);
+  }
+
   public final class AudioMetadata {
     method @NonNull public static android.media.AudioMetadataMap createMap();
   }
@@ -20803,6 +20813,21 @@ package android.media {
     method @NonNull public android.media.AudioMetadataMap dup();
     method @Nullable public <T> T get(@NonNull android.media.AudioMetadata.Key<T>);
     method @IntRange(from=0) public int size();
+  }
+
+  public final class AudioMixerAttributes implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.media.AudioFormat getFormat();
+    method public int getMixerBehavior();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioMixerAttributes> CREATOR;
+    field public static final int MIXER_BEHAVIOR_DEFAULT = 0; // 0x0
+  }
+
+  public static final class AudioMixerAttributes.Builder {
+    ctor public AudioMixerAttributes.Builder(@NonNull android.media.AudioFormat);
+    method @NonNull public android.media.AudioMixerAttributes build();
+    method @NonNull public android.media.AudioMixerAttributes.Builder setMixerBehavior(int);
   }
 
   public final class AudioPlaybackCaptureConfiguration {
