@@ -406,7 +406,7 @@
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Жумуш колдонмолоруңуз Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турушат. Тармакта жумуш колдонмолору аркылуу жасаган аракеттериңиз, ошондой эле электрондук почтадагы жана серепчидеги нерселериңиз IT администраторуңузга жана VPN провайдерине көрүнөт."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Жеке колдонмолоруңуз Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турушат. Тармактагы аракеттериңиз, ошондой эле электрондук почтадагы жана серепчидеги нерселериңиз VPN провайдерине көрүнүп турат."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN жөндөөлөрүн ачуу"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN параметрлерин ачуу"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Бул түзмөктү ата-энең башкарат. Ата-энең сен иштеткен колдонмолорду, кайда жүргөнүңдү жана түзмөктү канча убакыт колдонгонуңду көрүп, башкарып турат."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Ишеним агенти кулпусун ачты"</string>
@@ -658,7 +658,7 @@
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> аккаунту менен кирди"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"колдонуучуну тандоо"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Интернет жок"</string>
-    <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> жөндөөлөрүн ачуу."</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> параметрлерин ачуу."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Жөндөөлөрдүн иретин өзгөртүү."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Кубат баскычынын менюсу"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> ичинен <xliff:g id="ID_1">%1$d</xliff:g>-бет"</string>
