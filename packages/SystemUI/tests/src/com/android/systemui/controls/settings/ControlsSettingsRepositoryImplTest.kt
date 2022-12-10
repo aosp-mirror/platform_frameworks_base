@@ -15,7 +15,7 @@
  *
  */
 
-package com.android.systemui.controls
+package com.android.systemui.controls.settings
 
 import android.content.pm.UserInfo
 import android.provider.Settings

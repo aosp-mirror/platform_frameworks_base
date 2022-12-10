@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"વૉઇસમેઇલ"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"કનેક્શન સમસ્યા અથવા અમાન્ય MMI કોડ."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"સુવિધાને સપોર્ટ આપવામાં આવતો નથી."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"ઑપરેશન ફક્ત સ્થિર ડાયલિંગ નંબર્સ પર પ્રતિબંધિત છે."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"તમે રોમિંગમાં હો તે વખતે તમારા ફોન પરથી કૉલ ફૉરવર્ડિગ સેટિંગ બદલી શકતાં નથી."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"સેવા સક્ષમ હતી."</string>

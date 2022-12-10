@@ -36,6 +36,7 @@ import android.util.Size;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowMetrics;
+import android.window.TaskFragmentCreationParams;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.GuardedBy;
@@ -307,10 +308,13 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         }
 
         final int taskId = primaryContainer.getTaskId();
-        final TaskFragmentContainer secondaryContainer = mController.newContainer(activityIntent,
-                launchingActivity, taskId);
-        final int windowingMode = mController.getTaskContainer(taskId)
-                .getWindowingModeForSplitTaskFragment(primaryRectBounds);
+        final TaskFragmentContainer secondaryContainer = mController.newContainer(
+                null /* pendingAppearedActivity */, activityIntent, launchingActivity, taskId,
+                // Pass in the primary container to make sure it is added right above the primary.
+                primaryContainer);
+        final TaskContainer taskContainer = mController.getTaskContainer(taskId);
+        final int windowingMode = taskContainer.getWindowingModeForSplitTaskFragment(
+                primaryRectBounds);
         mController.registerSplit(wct, primaryContainer, launchingActivity, secondaryContainer,
                 rule, splitAttributes);
         startActivityToSide(wct, primaryContainer.getTaskFragmentToken(), primaryRectBounds,
@@ -412,17 +416,18 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     @Override
-    void createTaskFragment(@NonNull WindowContainerTransaction wct, @NonNull IBinder fragmentToken,
-            @NonNull IBinder ownerToken, @NonNull Rect bounds, @WindowingMode int windowingMode) {
-        final TaskFragmentContainer container = mController.getContainer(fragmentToken);
+    void createTaskFragment(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentCreationParams fragmentOptions) {
+        final TaskFragmentContainer container = mController.getContainer(
+                fragmentOptions.getFragmentToken());
         if (container == null) {
             throw new IllegalStateException(
                     "Creating a task fragment that is not registered with controller.");
         }
 
-        container.setLastRequestedBounds(bounds);
-        container.setLastRequestedWindowingMode(windowingMode);
-        super.createTaskFragment(wct, fragmentToken, ownerToken, bounds, windowingMode);
+        container.setLastRequestedBounds(fragmentOptions.getInitialBounds());
+        container.setLastRequestedWindowingMode(fragmentOptions.getWindowingMode());
+        super.createTaskFragment(wct, fragmentOptions);
     }
 
     @Override
