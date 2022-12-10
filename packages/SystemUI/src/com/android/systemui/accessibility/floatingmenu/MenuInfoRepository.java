@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED;
+import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT;
 import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY;
 import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE;
 import static android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES;
@@ -28,6 +29,7 @@ import static com.android.systemui.accessibility.floatingmenu.MenuFadeEffectInfo
 import static com.android.systemui.accessibility.floatingmenu.MenuViewAppearance.MenuSizeType.SMALL;
 
 import android.annotation.FloatRange;
+import android.annotation.IntDef;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
@@ -40,6 +42,8 @@ import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Prefs;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -52,11 +56,23 @@ class MenuInfoRepository {
     @FloatRange(from = 0.0, to = 1.0)
     private static final float DEFAULT_MENU_POSITION_Y_PERCENT = 0.77f;
     private static final boolean DEFAULT_MOVE_TO_TUCKED_VALUE = false;
+    private static final boolean DEFAULT_HAS_SEEN_DOCK_TOOLTIP_VALUE = false;
+    private static final int DEFAULT_MIGRATION_TOOLTIP_VALUE_PROMPT = MigrationPrompt.DISABLED;
 
     private final Context mContext;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final OnSettingsContentsChanged mSettingsContentsCallback;
     private Position mPercentagePosition;
+
+    @IntDef({
+            MigrationPrompt.DISABLED,
+            MigrationPrompt.ENABLED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface MigrationPrompt {
+        int DISABLED = 0;
+        int ENABLED = 1;
+    }
 
     private final ContentObserver mMenuTargetFeaturesContentObserver =
             new ContentObserver(mHandler) {
@@ -99,6 +115,19 @@ class MenuInfoRepository {
                         DEFAULT_MOVE_TO_TUCKED_VALUE));
     }
 
+    void loadDockTooltipVisibility(OnInfoReady<Boolean> callback) {
+        callback.onReady(Prefs.getBoolean(mContext,
+                Prefs.Key.HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP,
+                DEFAULT_HAS_SEEN_DOCK_TOOLTIP_VALUE));
+    }
+
+    void loadMigrationTooltipVisibility(OnInfoReady<Boolean> callback) {
+        callback.onReady(Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
+                DEFAULT_MIGRATION_TOOLTIP_VALUE_PROMPT, UserHandle.USER_CURRENT)
+                == MigrationPrompt.ENABLED);
+    }
+
     void loadMenuPosition(OnInfoReady<Position> callback) {
         callback.onReady(mPercentagePosition);
     }
@@ -129,6 +158,18 @@ class MenuInfoRepository {
         mPercentagePosition = percentagePosition;
         Prefs.putString(mContext, Prefs.Key.ACCESSIBILITY_FLOATING_MENU_POSITION,
                 percentagePosition.toString());
+    }
+
+    void updateDockTooltipVisibility(boolean hasSeen) {
+        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP,
+                hasSeen);
+    }
+
+    void updateMigrationTooltipVisibility(boolean visible) {
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
+                visible ? MigrationPrompt.ENABLED : MigrationPrompt.DISABLED,
+                UserHandle.USER_CURRENT);
     }
 
     private Position getStartPosition() {
