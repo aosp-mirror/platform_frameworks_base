@@ -163,6 +163,7 @@ public class OomAdjuster {
     static final int OOM_ADJ_REASON_ALLOWLIST = 10;
     static final int OOM_ADJ_REASON_PROCESS_BEGIN = 11;
     static final int OOM_ADJ_REASON_PROCESS_END = 12;
+    static final int OOM_ADJ_REASON_SHORT_FGS_TIMEOUT = 13;
 
     @IntDef(prefix = {"OOM_ADJ_REASON_"},
             value = {OOM_ADJ_REASON_NONE, OOM_ADJ_REASON_ACTIVITY, OOM_ADJ_REASON_FINISH_RECEIVER,
@@ -170,7 +171,8 @@ public class OomAdjuster {
                     OOM_ADJ_REASON_UNBIND_SERVICE, OOM_ADJ_REASON_START_SERVICE,
                     OOM_ADJ_REASON_GET_PROVIDER, OOM_ADJ_REASON_REMOVE_PROVIDER,
                     OOM_ADJ_REASON_UI_VISIBILITY, OOM_ADJ_REASON_ALLOWLIST,
-                    OOM_ADJ_REASON_PROCESS_BEGIN, OOM_ADJ_REASON_PROCESS_END})
+                    OOM_ADJ_REASON_PROCESS_BEGIN, OOM_ADJ_REASON_PROCESS_END,
+                    OOM_ADJ_REASON_SHORT_FGS_TIMEOUT})
     @Retention(RetentionPolicy.SOURCE)
     public @interface OomAdjReason {}
 
@@ -202,6 +204,7 @@ public class OomAdjuster {
                 return AppProtoEnums.OOM_ADJ_REASON_PROCESS_BEGIN;
             case OOM_ADJ_REASON_PROCESS_END:
                 return AppProtoEnums.OOM_ADJ_REASON_PROCESS_END;
+            case OOM_ADJ_REASON_SHORT_FGS_TIMEOUT: // TODO(short-service) add value to AppProtoEnums
             default:
                 return AppProtoEnums.OOM_ADJ_REASON_UNKNOWN_TO_PROTO;
         }
@@ -236,6 +239,8 @@ public class OomAdjuster {
                 return OOM_ADJ_REASON_METHOD + "_processBegin";
             case OOM_ADJ_REASON_PROCESS_END:
                 return OOM_ADJ_REASON_METHOD + "_processEnd";
+            case OOM_ADJ_REASON_SHORT_FGS_TIMEOUT:
+                return OOM_ADJ_REASON_METHOD + "_shortFgs";
             default:
                 return "_unknown";
         }
