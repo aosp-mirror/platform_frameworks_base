@@ -1049,6 +1049,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return;
         }
 
+        // Make sure the device locks. Unfortunately, this has the side-effect of briefly revealing
+        // the lock screen before the dream appears. Note that this locking behavior needs to
+        // happen regardless of whether we end up dreaming (below) or not.
+        // TODO(b/261662912): Find a better way to lock the device that doesn't result in jank.
+        lockNow(null);
+
+        // Don't dream if the user isn't user zero.
+        // TODO(b/261907079): Move this check to DreamManagerService#canStartDreamingInternal().
+        if (ActivityManager.getCurrentUser() != UserHandle.USER_SYSTEM) {
+            noDreamAction.run();
+            return;
+        }
+
         final DreamManagerInternal dreamManagerInternal = getDreamManagerInternal();
         if (dreamManagerInternal == null || !dreamManagerInternal.canStartDreaming(isScreenOn)) {
             noDreamAction.run();
