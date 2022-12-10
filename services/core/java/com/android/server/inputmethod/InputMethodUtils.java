@@ -212,9 +212,9 @@ final class InputMethodUtils {
                 new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
 
         @NonNull
-        private final Context mUserAwareContext;
-        private final Resources mRes;
-        private final ContentResolver mResolver;
+        private Context mUserAwareContext;
+        private Resources mRes;
+        private ContentResolver mResolver;
         private final ArrayMap<String, InputMethodInfo> mMethodMap;
 
         /**
@@ -272,15 +272,19 @@ final class InputMethodUtils {
             return imsList;
         }
 
-        InputMethodSettings(@NonNull Context context,
-                ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId,
-                boolean copyOnWrite) {
+        private void initContentWithUserContext(@NonNull Context context, @UserIdInt int userId) {
             mUserAwareContext = context.getUserId() == userId
                     ? context
                     : context.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
             mRes = mUserAwareContext.getResources();
             mResolver = mUserAwareContext.getContentResolver();
+        }
+
+        InputMethodSettings(@NonNull Context context,
+                ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId,
+                boolean copyOnWrite) {
             mMethodMap = methodMap;
+            initContentWithUserContext(context, userId);
             switchCurrentUser(userId, copyOnWrite);
         }
 
@@ -300,6 +304,9 @@ final class InputMethodUtils {
                 mCopyOnWriteDataStore.clear();
                 mEnabledInputMethodsStrCache = "";
                 // TODO: mCurrentProfileIds should be cleared here.
+            }
+            if (mUserAwareContext.getUserId() != userId) {
+                initContentWithUserContext(mUserAwareContext, userId);
             }
             mCurrentUserId = userId;
             mCopyOnWrite = copyOnWrite;
