@@ -25,6 +25,7 @@ import static com.android.server.vcn.util.PersistableBundleUtils.INTEGER_SERIALI
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -158,10 +159,9 @@ public final class VcnConfig implements Parcelable {
     }
 
     /**
-     * Retrieve the transports that need to be restricted by VCN.
+     * Retrieve the transports that will be restricted by the VCN.
      *
      * @see Builder#setRestrictedUnderlyingNetworkTransports(Set)
-     * @hide
      */
     @NonNull
     public Set<Integer> getRestrictedUnderlyingNetworkTransports() {
@@ -306,16 +306,15 @@ public final class VcnConfig implements Parcelable {
         }
 
         /**
-         * Sets transports that need to be restricted by VCN.
+         * Sets transports that will be restricted by the VCN.
          *
-         * @param transports transports that need to be restricted by VCN. Networks that include any
+         * @param transports transports that will be restricted by VCN. Networks that include any
          *     of the transports will be marked as restricted. Only {@link
          *     NetworkCapabilities#TRANSPORT_WIFI} and {@link
          *     NetworkCapabilities#TRANSPORT_CELLULAR} are allowed. {@link
          *     NetworkCapabilities#TRANSPORT_WIFI} is marked restricted by default.
          * @return this {@link Builder} instance, for chaining
          * @throws IllegalArgumentException if the input contains unsupported transport types.
-         * @hide
          */
         @NonNull
         public Builder setRestrictedUnderlyingNetworkTransports(@NonNull Set<Integer> transports) {
