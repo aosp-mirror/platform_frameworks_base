@@ -52,6 +52,7 @@ import com.android.systemui.user.data.source.UserRecord
 import com.android.systemui.user.domain.model.ShowDialogRequestModel
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.shared.model.UserModel
+import com.android.systemui.user.utils.MultiUserActionsEvent
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
@@ -74,6 +75,7 @@ import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -158,6 +160,7 @@ class UserInteractorTest : SysuiTestCase() {
                         resumeSessionReceiver = resumeSessionReceiver,
                         resetOrExitSessionReceiver = resetOrExitSessionReceiver,
                     ),
+                uiEventLogger = uiEventLogger,
                 featureFlags = featureFlags,
             )
     }
@@ -457,6 +460,9 @@ class UserInteractorTest : SysuiTestCase() {
             val dialogShower: UserSwitchDialogController.DialogShower = mock()
 
             underTest.executeAction(UserActionModel.ADD_USER, dialogShower)
+
+            verify(uiEventLogger, times(1))
+                .log(MultiUserActionsEvent.CREATE_USER_FROM_USER_SWITCHER)
             assertThat(dialogRequest)
                 .isEqualTo(
                     ShowDialogRequestModel.ShowAddUserDialog(
@@ -478,6 +484,8 @@ class UserInteractorTest : SysuiTestCase() {
         runBlocking(IMMEDIATE) {
             underTest.executeAction(UserActionModel.ADD_SUPERVISED_USER)
 
+            verify(uiEventLogger, times(1))
+                .log(MultiUserActionsEvent.CREATE_RESTRICTED_USER_FROM_USER_SWITCHER)
             val intentCaptor = kotlinArgumentCaptor<Intent>()
             verify(activityStarter).startActivity(intentCaptor.capture(), eq(true))
             assertThat(intentCaptor.value.action)
@@ -525,6 +533,8 @@ class UserInteractorTest : SysuiTestCase() {
 
             underTest.executeAction(UserActionModel.ENTER_GUEST_MODE)
 
+            verify(uiEventLogger, times(1))
+                .log(MultiUserActionsEvent.CREATE_GUEST_FROM_USER_SWITCHER)
             assertThat(dialogRequests)
                 .contains(
                     ShowDialogRequestModel.ShowUserCreationDialog(isGuest = true),

@@ -158,6 +158,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                             activityManager = activityManager,
                             refreshUsersScheduler = refreshUsersScheduler,
                             guestUserInteractor = guestUserInteractor,
+                            uiEventLogger = uiEventLogger,
                         ),
                     powerInteractor =
                         PowerInteractor(
