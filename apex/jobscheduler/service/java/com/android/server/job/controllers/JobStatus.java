@@ -1350,9 +1350,8 @@ public final class JobStatus {
      * @return true if the job was scheduled as a user-initiated job and it hasn't been downgraded
      * for any reason.
      */
-    public boolean shouldTreatAsUserInitiated() {
+    public boolean shouldTreatAsUserInitiatedJob() {
         // TODO(248386641): update implementation to handle loss of privilege
-        //  and also rename to `shouldTreatAsUserInitiatedJob` for consistency
         return getJob().isUserInitiated();
     }
 
@@ -1372,7 +1371,7 @@ public final class JobStatus {
      * @return true if this is a job whose execution should be made visible to the user.
      */
     public boolean isUserVisibleJob() {
-        return shouldTreatAsUserInitiated();
+        return shouldTreatAsUserInitiatedJob();
     }
 
     /**
@@ -1383,14 +1382,14 @@ public final class JobStatus {
         return appHasDozeExemption
                 || (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0
                 || ((shouldTreatAsExpeditedJob() || startedAsExpeditedJob)
-                || shouldTreatAsUserInitiated()
+                || shouldTreatAsUserInitiatedJob()
                 && (mDynamicConstraints & CONSTRAINT_DEVICE_NOT_DOZING) == 0);
     }
 
     boolean canRunInBatterySaver() {
         return (getInternalFlags() & INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION) != 0
                 || ((shouldTreatAsExpeditedJob() || startedAsExpeditedJob)
-                || shouldTreatAsUserInitiated()
+                || shouldTreatAsUserInitiatedJob()
                 && (mDynamicConstraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) == 0);
     }
 

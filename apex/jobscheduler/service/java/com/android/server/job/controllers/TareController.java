@@ -313,7 +313,7 @@ public class TareController extends StateController {
     @GuardedBy("mLock")
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
         final long nowElapsed = sElapsedRealtimeClock.millis();
-        if (jobStatus.shouldTreatAsUserInitiated()) {
+        if (jobStatus.shouldTreatAsUserInitiatedJob()) {
             // User-initiated jobs should always be allowed to run.
             jobStatus.setTareWealthConstraintSatisfied(nowElapsed, true);
             return;
@@ -331,7 +331,7 @@ public class TareController extends StateController {
     @Override
     @GuardedBy("mLock")
     public void prepareForExecutionLocked(JobStatus jobStatus) {
-        if (jobStatus.shouldTreatAsUserInitiated()) {
+        if (jobStatus.shouldTreatAsUserInitiatedJob()) {
             // TODO(202954395): consider noting execution with the EconomyManager even though it
             //                  won't affect this job
             return;
@@ -365,7 +365,7 @@ public class TareController extends StateController {
     @Override
     @GuardedBy("mLock")
     public void unprepareFromExecutionLocked(JobStatus jobStatus) {
-        if (jobStatus.shouldTreatAsUserInitiated()) {
+        if (jobStatus.shouldTreatAsUserInitiatedJob()) {
             return;
         }
         final int userId = jobStatus.getSourceUserId();
@@ -397,7 +397,7 @@ public class TareController extends StateController {
     @Override
     @GuardedBy("mLock")
     public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob) {
-        if (jobStatus.shouldTreatAsUserInitiated()) {
+        if (jobStatus.shouldTreatAsUserInitiatedJob()) {
             return;
         }
         final int userId = jobStatus.getSourceUserId();
@@ -653,7 +653,7 @@ public class TareController extends StateController {
         if (!mIsEnabled) {
             return true;
         }
-        if (jobStatus.shouldTreatAsUserInitiated()) {
+        if (jobStatus.shouldTreatAsUserInitiatedJob()) {
             // Always allow user-initiated jobs.
             return true;
         }

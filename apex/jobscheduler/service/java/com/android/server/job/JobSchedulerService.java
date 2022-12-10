@@ -2851,7 +2851,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
 
                 final boolean shouldForceBatchJob;
-                if (job.shouldTreatAsExpeditedJob() || job.shouldTreatAsUserInitiated()) {
+                if (job.shouldTreatAsExpeditedJob() || job.shouldTreatAsUserInitiatedJob()) {
                     // Never batch expedited or user-initiated jobs, even for RESTRICTED apps.
                     shouldForceBatchJob = false;
                 } else if (job.getEffectiveStandbyBucket() == RESTRICTED_INDEX) {
@@ -3176,7 +3176,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         synchronized (mLock) {
             final boolean shouldTreatAsDataTransfer = job.getJob().isDataTransfer()
                     && checkRunLongJobsPermission(job.getSourceUid(), job.getSourcePackageName());
-            if (job.shouldTreatAsUserInitiated()) {
+            if (job.shouldTreatAsUserInitiatedJob()) {
                 if (shouldTreatAsDataTransfer) {
                     final long estimatedTransferTimeMs =
                             mConnectivityController.getEstimatedTransferTimeMs(job);
@@ -3215,13 +3215,13 @@ public class JobSchedulerService extends com.android.server.SystemService
         synchronized (mLock) {
             final boolean allowLongerJob;
             final boolean isDataTransfer = job.getJob().isDataTransfer();
-            if (isDataTransfer || job.shouldTreatAsUserInitiated()) {
+            if (isDataTransfer || job.shouldTreatAsUserInitiatedJob()) {
                 allowLongerJob =
                         checkRunLongJobsPermission(job.getSourceUid(), job.getSourcePackageName());
             } else {
                 allowLongerJob = false;
             }
-            if (job.shouldTreatAsUserInitiated()) {
+            if (job.shouldTreatAsUserInitiatedJob()) {
                 if (isDataTransfer && allowLongerJob) {
                     return mConstants.RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS;
                 }
