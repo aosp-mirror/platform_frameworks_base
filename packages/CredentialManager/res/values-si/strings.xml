@@ -1,23 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_name (4539824758261855508) -->
-    <skip />
+    <string name="app_name" msgid="4539824758261855508">"අක්තපත්‍ර කළමනාකරු"</string>
     <string name="string_cancel" msgid="6369133483981306063">"අවලංගු කරන්න"</string>
     <string name="string_continue" msgid="1346732695941131882">"ඉදිරියට යන්න"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"වෙනත් ස්ථානයක තනන්න"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"වෙනත් ස්ථානයකට සුරකින්න"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"වෙනත් උපාංගයක් භාවිතා කරන්න"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"වෙනත් උපාංගයකට සුරකින්න"</string>
-    <string name="passkey_creation_intro_title" msgid="402553911484409884">"සුරක්ෂිතව පුරනය වීමට සරල ක්‍රමයක්"</string>
-    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"අමතක කළ නොහැකි හෝ සොරකම් කළ නොහැකි අනන්‍ය මුරයතුරක් සමග පුරනය වීමට ඔබේ ඇඟිලි සලකුණ, මුහුණ හෝ තිර අගුල භාවිතා කරන්න. තව දැන ගන්න⁠"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> කොතැනක ද යන්න තෝරා ගන්න"</string>
-    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
     <skip />
+    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
+    <skip />
+    <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> කොතැනක ද යන්න තෝරා ගන්න"</string>
+    <string name="create_your_passkeys" msgid="8901224153607590596">"ඔබේ මුරයතුරු තනන්න"</string>
     <string name="save_your_password" msgid="6597736507991704307">"ඔබේ මුරපදය සුරකින්න"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"ඔබේ පුරනය වීමේ තතු සුරකින්න"</string>
-    <!-- no translation found for choose_provider_body (8045759834416308059) -->
-    <skip />
+    <string name="choose_provider_body" msgid="8045759834416308059">"ඔබේ මුරපද සහ මුරයතුරු සුරැකීමට පෙරනිමි මුරපද කළමනාකරු සකසන්න සහ මීළඟ වතාවේ වේගයෙන් පුරනය වන්න."</string>
     <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> තුළ මුරයතුරක් තනන්න ද?"</string>
     <string name="choose_create_option_password_title" msgid="8812546498357380545">"ඔබේ මුරපදය <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> වෙත සුරකින්න ද?"</string>
     <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"ඔබේ පුරනය වීමේ තතු <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> වෙත සුරකින්න ද?"</string>
@@ -25,24 +28,18 @@
     <string name="passkey" msgid="632353688396759522">"මුරයතුර"</string>
     <string name="password" msgid="6738570945182936667">"මුරපදය"</string>
     <string name="sign_ins" msgid="4710739369149469208">"පුරනය වීම්"</string>
-    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
-    <skip />
-    <!-- no translation found for save_password_to_title (3450480045270186421) -->
-    <skip />
-    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
-    <skip />
-    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
-    <skip />
+    <string name="create_passkey_in_title" msgid="2714306562710897785">"මුරයතුර තනන්නේ"</string>
+    <string name="save_password_to_title" msgid="3450480045270186421">"මෙයට මුරපදය සුරකින්න"</string>
+    <string name="save_sign_in_to_title" msgid="8328143607671760232">"පුරනය වීම සුරකින්නේ"</string>
+    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"වෙනත් උපාංගයක මුරයතුරක් තනන්න ද?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"ඔබේ සියලු පුරනය වීම් සඳහා <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> භාවිතා කරන්න ද?"</string>
-    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="6560593199974037820">"මෙම මුරපද කළමනාකරු ඔබට පහසුවෙන් පුරනය වීමට උදවු කිරීම සඳහා ඔබේ මුරපද සහ මුරයතුරු ගබඩා කරනු ඇත."</string>
     <string name="set_as_default" msgid="4415328591568654603">"පෙරනිමි ලෙස සකසන්න"</string>
     <string name="use_once" msgid="9027366575315399714">"වරක් භාවිතා කරන්න"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"මුරපද <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>ක්, මුරයතුරු <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>ක්"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"මුරපද <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>ක්"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"මුරයතුරු <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>ක්"</string>
-    <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
-    <skip />
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"මුරයතුර"</string>
     <string name="another_device" msgid="5147276802037801217">"වෙනත් උපාංගයක්"</string>
     <string name="other_password_manager" msgid="565790221427004141">"වෙනත් මුරපද කළමනාකරුවන්"</string>
     <string name="close_sheet" msgid="1393792015338908262">"පත්‍රය වසන්න"</string>

@@ -2939,6 +2939,8 @@ public final class ActiveServices {
 
     void unscheduleShortFgsTimeoutLocked(ServiceRecord sr) {
         mAm.mHandler.removeMessages(ActivityManagerService.SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG, sr);
+        mAm.mHandler.removeMessages(ActivityManagerService.SERVICE_SHORT_FGS_PROCSTATE_TIMEOUT_MSG,
+                sr);
         mAm.mHandler.removeMessages(ActivityManagerService.SERVICE_SHORT_FGS_TIMEOUT_MSG, sr);
     }
 
@@ -2992,10 +2994,19 @@ public final class ActiveServices {
             } catch (RemoteException e) {
                 // TODO(short-service): Anything to do here?
             }
-            // Schedule the ANR timeout.
-            final Message msg = mAm.mHandler.obtainMessage(
-                    ActivityManagerService.SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG, sr);
-            mAm.mHandler.sendMessageAtTime(msg, sr.getShortFgsInfo().getAnrTime());
+            // Schedule the procstate demotion timeout and ANR timeout.
+            {
+                final Message msg = mAm.mHandler.obtainMessage(
+                        ActivityManagerService.SERVICE_SHORT_FGS_PROCSTATE_TIMEOUT_MSG, sr);
+                mAm.mHandler.sendMessageAtTime(
+                        msg, sr.getShortFgsInfo().getProcStateDemoteTime());
+            }
+
+            {
+                final Message msg = mAm.mHandler.obtainMessage(
+                        ActivityManagerService.SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG, sr);
+                mAm.mHandler.sendMessageAtTime(msg, sr.getShortFgsInfo().getAnrTime());
+            }
         }
     }
 
@@ -3010,6 +3021,21 @@ public final class ActiveServices {
             return sr.shouldTriggerShortFgsTimeout();
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    void onShortFgsProcstateTimeout(ServiceRecord sr) {
+        synchronized (mAm) {
+            if (!sr.shouldDemoteShortFgsProcState()) {
+                if (DEBUG_SHORT_SERVICE) {
+                    Slog.d(TAG_SERVICE, "[STALE] Short FGS procstate demotion: " + sr);
+                }
+                return;
+            }
+
+            Slog.e(TAG_SERVICE, "Short FGS procstate demoted: " + sr);
+
+            mAm.updateOomAdjLocked(sr.app, OomAdjuster.OOM_ADJ_REASON_SHORT_FGS_TIMEOUT);
         }
     }
 

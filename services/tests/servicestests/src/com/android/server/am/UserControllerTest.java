@@ -38,6 +38,8 @@ import static com.android.server.am.UserController.USER_COMPLETED_EVENT_MSG;
 import static com.android.server.am.UserController.USER_CURRENT_MSG;
 import static com.android.server.am.UserController.USER_START_MSG;
 import static com.android.server.am.UserController.USER_SWITCH_TIMEOUT_MSG;
+import static com.android.server.pm.UserManagerInternal.USER_START_MODE_BACKGROUND;
+import static com.android.server.pm.UserManagerInternal.USER_START_MODE_FOREGROUND;
 
 import static com.google.android.collect.Lists.newArrayList;
 import static com.google.android.collect.Sets.newHashSet;
@@ -190,7 +192,7 @@ public class UserControllerTest {
             // that's not the case, the test should call mockAssignUserToMainDisplay()
             doReturn(UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE)
                     .when(mInjector.mUserManagerInternalMock)
-                    .assignUserToDisplayOnStart(anyInt(), anyInt(), anyBoolean(), anyInt());
+                    .assignUserToDisplayOnStart(anyInt(), anyInt(), anyInt(), anyInt());
 
             mUserController = new UserController(mInjector);
             mUserController.setAllowUserUnlocking(true);
@@ -207,7 +209,7 @@ public class UserControllerTest {
 
     @Test
     public void testStartUser_foreground() {
-        mUserController.startUser(TEST_USER_ID, true /* foreground */);
+        mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
         verify(mInjector.getWindowManager()).startFreezingScreen(anyInt(), anyInt());
         verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
         verify(mInjector.getWindowManager(), times(1)).setSwitchingUser(anyBoolean());
@@ -219,7 +221,7 @@ public class UserControllerTest {
 
     @Test
     public void testStartUser_background() {
-        boolean started = mUserController.startUser(TEST_USER_ID, /* foreground= */ false);
+        boolean started = mUserController.startUser(TEST_USER_ID, USER_START_MODE_BACKGROUND);
         assertWithMessage("startUser(%s, foreground=false)", TEST_USER_ID).that(started).isTrue();
         verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
@@ -232,9 +234,10 @@ public class UserControllerTest {
     public void testStartUser_displayAssignmentFailed() {
         doReturn(UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE)
                 .when(mInjector.mUserManagerInternalMock)
-                .assignUserToDisplayOnStart(eq(TEST_USER_ID), anyInt(), eq(true), anyInt());
+                .assignUserToDisplayOnStart(eq(TEST_USER_ID), anyInt(),
+                        eq(USER_START_MODE_FOREGROUND), anyInt());
 
-        boolean started = mUserController.startUser(TEST_USER_ID, /* foreground= */ true);
+        boolean started = mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
 
         assertWithMessage("startUser(%s, foreground=true)", TEST_USER_ID).that(started).isFalse();
     }
@@ -266,7 +269,7 @@ public class UserControllerTest {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ false,
                 /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
 
-        mUserController.startUser(TEST_USER_ID, /* foreground= */ true);
+        mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
         verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
         verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
@@ -275,7 +278,8 @@ public class UserControllerTest {
 
     @Test
     public void testStartPreCreatedUser_foreground() {
-        assertFalse(mUserController.startUser(TEST_PRE_CREATED_USER_ID, /* foreground= */ true));
+        assertFalse(
+                mUserController.startUser(TEST_PRE_CREATED_USER_ID, USER_START_MODE_FOREGROUND));
         // Make sure no intents have been fired for pre-created users.
         assertTrue(mInjector.mSentIntents.isEmpty());
 
@@ -284,7 +288,7 @@ public class UserControllerTest {
 
     @Test
     public void testStartPreCreatedUser_background() throws Exception {
-        assertTrue(mUserController.startUser(TEST_PRE_CREATED_USER_ID, /* foreground= */ false));
+        assertTrue(mUserController.startUser(TEST_PRE_CREATED_USER_ID, USER_START_MODE_BACKGROUND));
         // Make sure no intents have been fired for pre-created users.
         assertTrue(mInjector.mSentIntents.isEmpty());
 
@@ -352,7 +356,7 @@ public class UserControllerTest {
         }).when(observer).onUserSwitching(anyInt(), any());
         mUserController.registerUserSwitchObserver(observer, "mock");
         // Start user -- this will update state of mUserController
-        mUserController.startUser(TEST_USER_ID, true);
+        mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
         UserState userState = (UserState) reportMsg.obj;
@@ -382,7 +386,7 @@ public class UserControllerTest {
         when(observer.asBinder()).thenReturn(new Binder());
         mUserController.registerUserSwitchObserver(observer, "mock");
         // Start user -- this will update state of mUserController
-        mUserController.startUser(TEST_USER_ID, true);
+        mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
         UserState userState = (UserState) reportMsg.obj;
@@ -408,7 +412,7 @@ public class UserControllerTest {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
                 /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
         // Start user -- this will update state of mUserController
-        mUserController.startUser(TEST_USER_ID, true);
+        mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
         UserState userState = (UserState) reportMsg.obj;
@@ -429,7 +433,7 @@ public class UserControllerTest {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
                 /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
         // Start user -- this will update state of mUserController
-        mUserController.startUser(TEST_USER_ID, /* foreground=*/ true);
+        mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
         UserState userState = (UserState) reportMsg.obj;
@@ -450,7 +454,7 @@ public class UserControllerTest {
                 /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
 
         // Start user -- this will update state of mUserController
-        mUserController.startUser(TEST_USER_ID, /* foreground=*/ true);
+        mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
         UserState userState = (UserState) reportMsg.obj;
@@ -487,7 +491,7 @@ public class UserControllerTest {
         when(observer.asBinder()).thenReturn(new Binder());
         mUserController.registerUserSwitchObserver(observer, "mock");
         // Start user -- this will update state of mUserController
-        mUserController.startUser(TEST_USER_ID, true);
+        mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
         int oldUserId = reportMsg.arg1;
@@ -511,7 +515,8 @@ public class UserControllerTest {
     public void testExplicitSystemUserStartInBackground() {
         setUpUser(UserHandle.USER_SYSTEM, 0);
         assertFalse(mUserController.isSystemUserStarted());
-        assertTrue(mUserController.startUser(UserHandle.USER_SYSTEM, false, null));
+        assertTrue(mUserController.startUser(UserHandle.USER_SYSTEM, USER_START_MODE_BACKGROUND,
+                null));
         assertTrue(mUserController.isSystemUserStarted());
     }
 
@@ -662,7 +667,7 @@ public class UserControllerTest {
     @Test
     public void testStopUser_currentUser() {
         setUpUser(TEST_USER_ID1, /* flags= */ 0);
-        mUserController.startUser(TEST_USER_ID1, /* foreground= */ true);
+        mUserController.startUser(TEST_USER_ID1, USER_START_MODE_FOREGROUND);
 
         int r = mUserController.stopUser(TEST_USER_ID1, /* force= */ true,
                 /* allowDelayedLocking= */ true, /* stopUserCallback= */ null,
@@ -701,7 +706,7 @@ public class UserControllerTest {
     public void testUserNotUnlockedBeforeAllowed() throws Exception {
         mUserController.setAllowUserUnlocking(false);
 
-        mUserController.startUser(TEST_USER_ID, /* foreground= */ false);
+        mUserController.startUser(TEST_USER_ID, USER_START_MODE_BACKGROUND);
 
         verify(mInjector.mStorageManagerMock, never())
                 .unlockUserKey(eq(TEST_USER_ID), anyInt(), any());
@@ -862,10 +867,10 @@ public class UserControllerTest {
         setUpUser(user1, 0);
         setUpUser(user2, 0);
 
-        mUserController.startUser(user1, /* foreground= */ true);
+        mUserController.startUser(user1, USER_START_MODE_FOREGROUND);
         mUserController.getStartedUserState(user1).setState(UserState.STATE_RUNNING_UNLOCKED);
 
-        mUserController.startUser(user2, /* foreground= */ false);
+        mUserController.startUser(user2, USER_START_MODE_BACKGROUND);
         mUserController.getStartedUserState(user2).setState(UserState.STATE_RUNNING_LOCKED);
 
         final int event1a = SystemService.UserCompletedEventType.EVENT_TYPE_USER_STARTING;
@@ -902,7 +907,7 @@ public class UserControllerTest {
 
     private void setUpAndStartUserInBackground(int userId) throws Exception {
         setUpUser(userId, 0);
-        mUserController.startUser(userId, /* foreground= */ false);
+        mUserController.startUser(userId, USER_START_MODE_BACKGROUND);
         verify(mInjector.mLockPatternUtilsMock, times(1)).unlockUserKeyIfUnsecured(userId);
         mUserStates.put(userId, mUserController.getStartedUserState(userId));
     }
@@ -946,7 +951,7 @@ public class UserControllerTest {
     private void addForegroundUserAndContinueUserSwitch(int newUserId, int expectedOldUserId,
             int expectedNumberOfCalls, boolean expectOldUserStopping) {
         // Start user -- this will update state of mUserController
-        mUserController.startUser(newUserId, true);
+        mUserController.startUser(newUserId, USER_START_MODE_FOREGROUND);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
         UserState userState = (UserState) reportMsg.obj;
@@ -1005,12 +1010,12 @@ public class UserControllerTest {
 
     private void verifyUserAssignedToDisplay(@UserIdInt int userId, int displayId) {
         verify(mInjector.getUserManagerInternal()).assignUserToDisplayOnStart(eq(userId), anyInt(),
-                anyBoolean(), eq(displayId));
+                anyInt(), eq(displayId));
     }
 
     private void verifyUserNeverAssignedToDisplay() {
         verify(mInjector.getUserManagerInternal(), never()).assignUserToDisplayOnStart(anyInt(),
-                anyInt(), anyBoolean(), anyInt());
+                anyInt(), anyInt(), anyInt());
     }
 
     private void verifyUserUnassignedFromDisplay(@UserIdInt int userId) {

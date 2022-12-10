@@ -513,7 +513,7 @@ final class ActivityManagerConstants extends ContentObserver {
 
     // Allow app just moving from TOP to FOREGROUND_SERVICE to stay in a higher adj value for
     // this long.
-    public long TOP_TO_FGS_GRACE_DURATION = DEFAULT_TOP_TO_FGS_GRACE_DURATION;
+    public volatile long TOP_TO_FGS_GRACE_DURATION = DEFAULT_TOP_TO_FGS_GRACE_DURATION;
 
     /**
      * Allow app just leaving TOP with an already running ALMOST_PERCEPTIBLE service to stay in
@@ -1142,6 +1142,8 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_LOW_SWAP_THRESHOLD_PERCENT:
                                 updateLowSwapThresholdPercent();
                                 break;
+                            case KEY_TOP_TO_FGS_GRACE_DURATION:
+                                updateTopToFgsGraceDuration();
                             default:
                                 break;
                         }
@@ -1359,8 +1361,6 @@ final class ActivityManagerConstants extends ContentObserver {
                     DEFAULT_PROCESS_START_ASYNC);
             MEMORY_INFO_THROTTLE_TIME = mParser.getLong(KEY_MEMORY_INFO_THROTTLE_TIME,
                     DEFAULT_MEMORY_INFO_THROTTLE_TIME);
-            TOP_TO_FGS_GRACE_DURATION = mParser.getDurationMillis(KEY_TOP_TO_FGS_GRACE_DURATION,
-                    DEFAULT_TOP_TO_FGS_GRACE_DURATION);
             TOP_TO_ALMOST_PERCEPTIBLE_GRACE_DURATION = mParser.getDurationMillis(
                     KEY_TOP_TO_ALMOST_PERCEPTIBLE_GRACE_DURATION,
                     DEFAULT_TOP_TO_ALMOST_PERCEPTIBLE_GRACE_DURATION);
@@ -1788,6 +1788,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_LOW_SWAP_THRESHOLD_PERCENT,
                 DEFAULT_LOW_SWAP_THRESHOLD_PERCENT);
+    }
+
+    private void updateTopToFgsGraceDuration() {
+        TOP_TO_FGS_GRACE_DURATION = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_TOP_TO_FGS_GRACE_DURATION,
+                DEFAULT_TOP_TO_FGS_GRACE_DURATION);
     }
 
     private void updateMinAssocLogDuration() {

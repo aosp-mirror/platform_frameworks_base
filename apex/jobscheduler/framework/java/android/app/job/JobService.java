@@ -416,6 +416,11 @@ public abstract class JobService extends Service {
      * JobScheduler will not remember this notification after the job has finished running,
      * so apps must call this every time the job is started (if required or desired).
      *
+     * <p>
+     * If separate jobs use the same notification ID with this API, the most recently provided
+     * notification will be shown to the user, and the
+     * {@code jobEndNotificationPolicy} of the last job to stop will be applied.
+     *
      * @param params                   The parameters identifying this job, as supplied to
      *                                 the job in the {@link #onStartJob(JobParameters)} callback.
      * @param notificationId           The ID for this notification, as per

@@ -8,8 +8,14 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Guardar noutro lugar"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Usar outro dispositivo"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Guardar noutro dispositivo"</string>
-    <string name="passkey_creation_intro_title" msgid="402553911484409884">"Uma forma simples de iniciar sessão em segurança"</string>
-    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Use a sua impressão digital, rosto ou bloqueio de ecrã para iniciar sessão com uma chave de acesso única que não pode ser esquecida nem perdida. Saiba mais"</string>
+    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
+    <skip />
     <string name="choose_provider_title" msgid="7245243990139698508">"Escolha onde quer guardar <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"criar as suas chaves de acesso"</string>
     <string name="save_your_password" msgid="6597736507991704307">"guardar a sua palavra-passe"</string>

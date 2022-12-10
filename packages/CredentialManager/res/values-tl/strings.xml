@@ -8,15 +8,19 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"I-save sa ibang lugar"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Gumamit ng ibang device"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"I-save sa ibang device"</string>
-    <string name="passkey_creation_intro_title" msgid="402553911484409884">"Simpleng paraan para mag-sign in lang ligtas"</string>
-    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Gamitin ang iyong fingerprint, mukha, o lock ng screen para mag-sign in gamit ang natatanging passkey na hindi makakalimutan o mananakaw. Matuto pa"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"Piliin kung saan <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
     <skip />
+    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
+    <skip />
+    <string name="choose_provider_title" msgid="7245243990139698508">"Piliin kung saan <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <string name="create_your_passkeys" msgid="8901224153607590596">"gawin ang iyong mga passkey"</string>
     <string name="save_your_password" msgid="6597736507991704307">"i-save ang iyong password"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"i-save ang iyong impormasyon sa pag-sign in"</string>
-    <!-- no translation found for choose_provider_body (8045759834416308059) -->
-    <skip />
+    <string name="choose_provider_body" msgid="8045759834416308059">"Magtakda ng default na password manager para i-save ang iyong mga password at passkey at mag-sign in nang mas mabilis sa susunod."</string>
     <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Gumawa ng passkey sa <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="8812546498357380545">"I-save ang iyong password sa <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"I-save ang iyong impormasyon sa pag-sign in sa <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
@@ -24,17 +28,12 @@
     <string name="passkey" msgid="632353688396759522">"passkey"</string>
     <string name="password" msgid="6738570945182936667">"password"</string>
     <string name="sign_ins" msgid="4710739369149469208">"mga sign-in"</string>
-    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
-    <skip />
-    <!-- no translation found for save_password_to_title (3450480045270186421) -->
-    <skip />
-    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
-    <skip />
-    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
-    <skip />
+    <string name="create_passkey_in_title" msgid="2714306562710897785">"Gumawa ng passkey sa"</string>
+    <string name="save_password_to_title" msgid="3450480045270186421">"I-save ang password sa"</string>
+    <string name="save_sign_in_to_title" msgid="8328143607671760232">"I-save ang sign-in sa"</string>
+    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Gumawa ng passkey sa ibang device?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Gamitin ang <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> para sa lahat ng iyong pag-sign in?"</string>
-    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="6560593199974037820">"Iso-store ng password manager na ito ang iyong mga password at passkey para madali kang makapag-sign in."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Itakda bilang default"</string>
     <string name="use_once" msgid="9027366575315399714">"Gamitin nang isang beses"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> (na) password, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> (na) passkey"</string>

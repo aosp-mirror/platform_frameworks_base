@@ -3078,6 +3078,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         info.mRemovedUsers = new int[] {userId};
         info.mBroadcastUsers = new int[] {userId};
         info.mUid = UserHandle.getUid(userId, packageState.getAppId());
+        info.mRemovedPackageVersionCode = packageState.getVersionCode();
         info.sendPackageRemovedBroadcasts(true /*killApp*/, false /*removedBySystem*/);
     }
 

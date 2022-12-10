@@ -2873,16 +2873,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         switch(keyCode) {
             case KeyEvent.KEYCODE_HOME:
-                // First we always handle the home key here, so applications
-                // can never break it, although if keyguard is on, we do let
-                // it handle it, because that gives us the correct 5 second
-                // timeout.
-                DisplayHomeButtonHandler handler = mDisplayHomeButtonHandlers.get(displayId);
-                if (handler == null) {
-                    handler = new DisplayHomeButtonHandler(displayId);
-                    mDisplayHomeButtonHandlers.put(displayId, handler);
-                }
-                return handler.handleHomeButton(focusedToken, event);
+                return handleHomeShortcuts(displayId, focusedToken, event);
             case KeyEvent.KEYCODE_MENU:
                 // Hijack modified menu keys for debugging features
                 final int chordBug = KeyEvent.META_SHIFT_ON;
@@ -2911,6 +2902,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             event.getDeviceId(),
                             event.getEventTime(), AssistUtils.INVOCATION_TYPE_UNKNOWN);
                     return key_consumed;
+                }
+                break;
+            case KeyEvent.KEYCODE_H:
+                if (down && event.isMetaPressed()) {
+                    return handleHomeShortcuts(displayId, focusedToken, event);
                 }
                 break;
             case KeyEvent.KEYCODE_I:
@@ -2952,12 +2948,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
                     enterStageSplitFromRunningApp(true /* leftOrTop */);
                     return key_consumed;
+                } else if (!down && event.isMetaPressed()) {
+                    boolean backKeyHandled = backKeyPress();
+                    if (backKeyHandled) {
+                        return key_consumed;
+                    }
                 }
                 break;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
                     enterStageSplitFromRunningApp(false /* leftOrTop */);
                     return key_consumed;
+                }
+                break;
+            case KeyEvent.KEYCODE_GRAVE:
+                if (!down && event.isMetaPressed()) {
+                    boolean backKeyHandled = backKeyPress();
+                    if (backKeyHandled) {
+                        return key_consumed;
+                    }
                 }
                 break;
             case KeyEvent.KEYCODE_SLASH:
@@ -3173,6 +3182,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Let the application handle the key.
         return key_not_consumed;
+    }
+
+    private int handleHomeShortcuts(int displayId, IBinder focusedToken, KeyEvent event) {
+        // First we always handle the home key here, so applications
+        // can never break it, although if keyguard is on, we do let
+        // it handle it, because that gives us the correct 5 second
+        // timeout.
+        DisplayHomeButtonHandler handler = mDisplayHomeButtonHandlers.get(displayId);
+        if (handler == null) {
+            handler = new DisplayHomeButtonHandler(displayId);
+            mDisplayHomeButtonHandlers.put(displayId, handler);
+        }
+        return handler.handleHomeButton(focusedToken, event);
     }
 
     private void toggleMicrophoneMuteFromKey() {

@@ -3,10 +3,6 @@ ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
     Method should return Collection<CharSequence> (or subclass) instead of raw array; was `java.lang.CharSequence[]`
 
 
-ExecutorRegistration: android.location.CountryDetector#addCountryListener(android.location.CountryListener, android.os.Looper):
-    Registration methods should have overload that accepts delivery Executor: `addCountryListener`
-
-
 GenericException: android.app.prediction.AppPredictor#finalize():
     Methods must not throw generic exceptions (`java.lang.Throwable`)
 GenericException: android.hardware.location.ContextHubClient#finalize():
@@ -131,8 +127,6 @@ SamShouldBeLast: android.content.pm.PackageItemInfo#dumpFront(android.util.Print
     SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.PackageItemInfo.dumpFront) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.content.pm.ResolveInfo#dump(android.util.Printer, String):
     SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.ResolveInfo.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.CountryDetector#addCountryListener(android.location.CountryListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 1, "listener", in android.location.CountryDetector.addCountryListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.location.Location#dump(android.util.Printer, String):
     SAM-compatible parameters (such as parameter 1, "pw", in android.location.Location.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.location.LocationManager#addNmeaListener(android.location.OnNmeaMessageListener, android.os.Handler):

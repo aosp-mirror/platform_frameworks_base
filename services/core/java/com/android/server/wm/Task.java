@@ -491,6 +491,9 @@ class Task extends TaskFragment {
     private int mForceHiddenFlags = 0;
     private boolean mForceTranslucent = false;
 
+    // The display category name for this task.
+    String mRequiredDisplayCategory;
+
     // TODO(b/160201781): Revisit double invocation issue in Task#removeChild.
     /**
      * Skip {@link ActivityTaskSupervisor#removeTask(Task, boolean, boolean, String)} execution if
@@ -1011,6 +1014,7 @@ class Task extends TaskFragment {
             // affinity -- we don't want it changing after initially set, but the initially
             // set value may be null.
             rootAffinity = affinity;
+            mRequiredDisplayCategory = info.requiredDisplayCategory;
         }
         effectiveUid = info.applicationInfo.uid;
         mIsEffectivelySystemApp = info.applicationInfo.isSystemApp();
@@ -1921,7 +1925,6 @@ class Task extends TaskFragment {
             mTaskSupervisor.scheduleUpdateMultiWindowMode(this);
         }
 
-        final int newWinMode = getWindowingMode();
         if (shouldStartChangeTransition(prevWinMode, mTmpPrevBounds)) {
             initializeChangeTransition(mTmpPrevBounds);
         }
@@ -1935,16 +1938,15 @@ class Task extends TaskFragment {
             }
         }
 
-        if (pipChanging && wasInPictureInPicture) {
+        if (pipChanging && wasInPictureInPicture
+                && !mTransitionController.isShellTransitionsEnabled()) {
             // If the top activity is changing from PiP to fullscreen with fixed rotation,
             // clear the crop and rotation matrix of task because fixed rotation will handle
             // the transformation on activity level. This also avoids flickering caused by the
             // latency of fullscreen task organizer configuring the surface.
             final ActivityRecord r = topRunningActivity();
             if (r != null && mDisplayContent.isFixedRotationLaunchingApp(r)) {
-                getSyncTransaction().setWindowCrop(mSurfaceControl, null)
-                        .setCornerRadius(mSurfaceControl, 0f)
-                        .setMatrix(mSurfaceControl, Matrix.IDENTITY_MATRIX, new float[9]);
+                resetSurfaceControlTransforms();
             }
         }
 
@@ -3536,13 +3538,10 @@ class Task extends TaskFragment {
     }
 
     @Override
-    void onActivityVisibleRequestedChanged() {
-        final boolean prevVisibleRequested = mVisibleRequested;
-        // mVisibleRequested is updated in super method.
-        super.onActivityVisibleRequestedChanged();
-        if (prevVisibleRequested != mVisibleRequested) {
-            sendTaskFragmentParentInfoChangedIfNeeded();
-        }
+    protected boolean onChildVisibleRequestedChanged(@Nullable WindowContainer child) {
+        if (!super.onChildVisibleRequestedChanged(child)) return false;
+        sendTaskFragmentParentInfoChangedIfNeeded();
+        return true;
     }
 
     void sendTaskFragmentParentInfoChangedIfNeeded() {
@@ -6081,6 +6080,15 @@ class Task extends TaskFragment {
         if (isOrganized()) {
             mReparentLeafTaskIfRelaunch = reparentLeafTaskIfRelaunch;
         }
+    }
+
+    /**
+     * Return true if the activityInfo has the same requiredDisplayCategory as this task.
+     */
+    boolean isSameRequiredDisplayCategory(@NonNull ActivityInfo info) {
+        return mRequiredDisplayCategory != null && mRequiredDisplayCategory.equals(
+                info.requiredDisplayCategory)
+                || (mRequiredDisplayCategory == null && info.requiredDisplayCategory == null);
     }
 
     @Override

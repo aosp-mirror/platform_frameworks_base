@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -24,6 +25,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Locale;
 
 /**
@@ -54,8 +57,22 @@ public final class Country implements Parcelable {
     public static final int COUNTRY_SOURCE_LOCALE = 3;
 
     /**
-     * The ISO 3166-1 two letters country code.
+     * Country source type
+     *
+     * @hide
      */
+    @IntDef(
+            prefix = {"COUNTRY_SOURCE_"},
+            value = {
+                    COUNTRY_SOURCE_NETWORK,
+                    COUNTRY_SOURCE_LOCATION,
+                    COUNTRY_SOURCE_SIM,
+                    COUNTRY_SOURCE_LOCALE
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CountrySource {}
+
+    /** The ISO 3166-1 two letters country code. */
     private final String mCountryIso;
 
     /**
@@ -73,21 +90,18 @@ public final class Country implements Parcelable {
 
     /**
      * @param countryIso the ISO 3166-1 two letters country code.
-     * @param source where the countryIso came from, could be one of below
-     *        values
-     *        <p>
-     *        <ul>
-     *        <li>{@link #COUNTRY_SOURCE_NETWORK}</li>
-     *        <li>{@link #COUNTRY_SOURCE_LOCATION}</li>
-     *        <li>{@link #COUNTRY_SOURCE_SIM}</li>
-     *        <li>{@link #COUNTRY_SOURCE_LOCALE}</li>
-     *        </ul>
-     *
-     * @hide
+     * @param source where the countryIso came from, could be one of below values
+     *     <p>
+     *     <ul>
+     *       <li>{@link #COUNTRY_SOURCE_NETWORK}
+     *       <li>{@link #COUNTRY_SOURCE_LOCATION}
+     *       <li>{@link #COUNTRY_SOURCE_SIM}
+     *       <li>{@link #COUNTRY_SOURCE_LOCALE}
+     *     </ul>
      */
-    @UnsupportedAppUsage
-    public Country(final String countryIso, final int source) {
-        if (countryIso == null || source < COUNTRY_SOURCE_NETWORK
+    public Country(@NonNull final String countryIso, @CountrySource final int source) {
+        if (countryIso == null
+                || source < COUNTRY_SOURCE_NETWORK
                 || source > COUNTRY_SOURCE_LOCALE) {
             throw new IllegalArgumentException();
         }
@@ -115,9 +129,24 @@ public final class Country implements Parcelable {
 
     /**
      * @return the ISO 3166-1 two letters country code
+     *
+     * @hide
+     *
+     * @deprecated clients using getCountryIso should use the {@link #getCountryCode()} API instead.
+     */
+    @UnsupportedAppUsage
+    @Deprecated
+    public String getCountryIso() {
+        return mCountryIso;
+    }
+
+    /**
+     * Retrieves country code.
+     *
+     * @return country code in ISO 3166-1:alpha2
      */
     @NonNull
-    public String getCountryIso() {
+    public String getCountryCode() {
         return mCountryIso;
     }
 
@@ -131,6 +160,7 @@ public final class Country implements Parcelable {
      *         <li>{@link #COUNTRY_SOURCE_LOCALE}</li>
      *         </ul>
      */
+    @CountrySource
     public int getSource() {
         return mSource;
     }

@@ -535,7 +535,7 @@ class InstallingSession {
             mInstallPackageHelper.installPackagesTraced(installRequests);
 
             for (InstallRequest request : installRequests) {
-                request.onInstallCompleted();
+                request.onInstallCompleted(mUser.getIdentifier());
                 doPostInstall(request);
             }
         }

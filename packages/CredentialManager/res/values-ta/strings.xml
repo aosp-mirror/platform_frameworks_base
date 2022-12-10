@@ -1,23 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_name (4539824758261855508) -->
-    <skip />
+    <string name="app_name" msgid="4539824758261855508">"அனுமதிச் சான்று நிர்வாகி"</string>
     <string name="string_cancel" msgid="6369133483981306063">"ரத்துசெய்"</string>
     <string name="string_continue" msgid="1346732695941131882">"தொடர்க"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"மற்றொரு இடத்தில் உருவாக்கவும்"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"மற்றொரு இடத்தில் சேமிக்கவும்"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"மற்றொரு சாதனத்தைப் பயன்படுத்தவும்"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"வேறொரு சாதனத்தில் சேமியுங்கள்"</string>
-    <string name="passkey_creation_intro_title" msgid="402553911484409884">"பாதுகாப்பாக உள்நுழைவதற்கான எளிய வழி"</string>
-    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"தனித்துவமான கடவுக்குறியீடு (மறக்காதவை அல்லது திருடமுடியாதவை) மூலம் உள்நுழைய, உங்கள் கைரேகை, முகம் அல்லது திரைப்பூட்டைப் பயன்படுத்தி உள்நுழையவும். மேலும் அறிக"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> எங்கே காட்டப்பட வேண்டும் என்பதைத் தேர்வுசெய்தல்"</string>
-    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
     <skip />
+    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
+    <skip />
+    <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> எங்கே காட்டப்பட வேண்டும் என்பதைத் தேர்வுசெய்தல்"</string>
+    <string name="create_your_passkeys" msgid="8901224153607590596">"உங்கள் கடவுச்சாவிகளை உருவாக்குங்கள்"</string>
     <string name="save_your_password" msgid="6597736507991704307">"உங்கள் கடவுச்சொல்லைச் சேமிக்கவும்"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"உங்கள் உள்நுழைவு தகவலைச் சேமிக்கவும்"</string>
-    <!-- no translation found for choose_provider_body (8045759834416308059) -->
-    <skip />
+    <string name="choose_provider_body" msgid="8045759834416308059">"கடவுச்சொற்கள் &amp; கடவுச்சாவிகளைச் சேமிக்கவும் அடுத்தமுறை விரைவாக உள்நுழையவும் ஓர் இயல்பான Password Managerரை அமையுங்கள்."</string>
     <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ல் கடவுக்குறியீட்டை உருவாக்க வேண்டுமா?"</string>
     <string name="choose_create_option_password_title" msgid="8812546498357380545">"உங்கள் கடவுச்சொல்லை <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ல் சேமிக்க வேண்டுமா?"</string>
     <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"உங்கள் உள்நுழைவுத் தகவலை <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ல் சேமிக்க வேண்டுமா?"</string>
@@ -25,24 +28,18 @@
     <string name="passkey" msgid="632353688396759522">"கடவுக்குறியீடு"</string>
     <string name="password" msgid="6738570945182936667">"கடவுச்சொல்"</string>
     <string name="sign_ins" msgid="4710739369149469208">"உள்நுழைவுகள்"</string>
-    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
-    <skip />
-    <!-- no translation found for save_password_to_title (3450480045270186421) -->
-    <skip />
-    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
-    <skip />
-    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
-    <skip />
+    <string name="create_passkey_in_title" msgid="2714306562710897785">"இதில் கடவுச்சாவியை உருவாக்குங்கள்:"</string>
+    <string name="save_password_to_title" msgid="3450480045270186421">"கடவுச்சொல்லை இதில் சேமியுங்கள்:"</string>
+    <string name="save_sign_in_to_title" msgid="8328143607671760232">"உள்நுழைவுத் தகவலை இதில் சேமியுங்கள்:"</string>
+    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"வேறொரு சாதனத்தில் கடவுச்சாவியை உருவாக்கவா?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"உங்கள் அனைத்து உள்நுழைவுகளுக்கும் <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ஐப் பயன்படுத்தவா?"</string>
-    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="6560593199974037820">"எளிதில் உள்நுழைவதற்கு உதவும் வகையில் இந்த Password Manager உங்கள் கடவுச்சொற்களையும் கடவுச்சாவிகளையும் சேமிக்கும்."</string>
     <string name="set_as_default" msgid="4415328591568654603">"இயல்பானதாக அமை"</string>
     <string name="use_once" msgid="9027366575315399714">"ஒருமுறை பயன்படுத்தவும்"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> கடவுச்சொற்கள், <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> கடவுக்குறியீடுகள்"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> கடவுச்சொற்கள்"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> கடவுக்குறியீடுகள்"</string>
-    <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
-    <skip />
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"கடவுக்குறியீடு"</string>
     <string name="another_device" msgid="5147276802037801217">"மற்றொரு சாதனம்"</string>
     <string name="other_password_manager" msgid="565790221427004141">"பிற கடவுச்சொல் நிர்வாகிகள்"</string>
     <string name="close_sheet" msgid="1393792015338908262">"ஷீட்டை மூடும்"</string>

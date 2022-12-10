@@ -61,7 +61,6 @@ public abstract class DevicePolicyCache {
      */
     public abstract boolean canAdminGrantSensorsPermissionsForUser(@UserIdInt int userHandle);
 
-
     /**
      * Empty implementation.
      */

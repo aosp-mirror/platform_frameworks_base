@@ -881,6 +881,13 @@ public class ScreenshotView extends FrameLayout implements
     }
 
     void addQuickShareChip(Notification.Action quickShareAction) {
+        if (mQuickShareChip != null) {
+            mSmartChips.remove(mQuickShareChip);
+            mActionsView.removeView(mQuickShareChip);
+        }
+        if (mPendingInteraction == PendingInteraction.QUICK_SHARE) {
+            mPendingInteraction = null;
+        }
         if (mPendingInteraction == null) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
             mQuickShareChip = (OverlayActionChip) inflater.inflate(

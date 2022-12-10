@@ -1998,4 +1998,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
             return mDeviceInventory.getDeviceSensorUuid(device);
         }
     }
+
+    void dispatchPreferredMixerAttributesChangedCausedByDeviceRemoved(AudioDeviceInfo info) {
+        // Currently, only media usage will be allowed to set preferred mixer attributes
+        mAudioService.dispatchPreferredMixerAttributesChanged(
+                new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA).build(),
+                info.getId(),
+                null /*mixerAttributes*/);
+    }
 }

@@ -22,6 +22,10 @@ import static android.os.Process.PROC_PARENS;
 import static android.os.Process.PROC_SPACE_TERM;
 import static android.os.Process.SYSTEM_UID;
 
+import static com.android.internal.util.FrameworkStatsLog.GET_TYPE_ACCESSED_WITHOUT_PERMISSION;
+import static com.android.internal.util.FrameworkStatsLog.GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__AM_CHECK_URI_PERMISSION;
+import static com.android.internal.util.FrameworkStatsLog.GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__AM_ERROR;
+import static com.android.internal.util.FrameworkStatsLog.GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__AM_FRAMEWORK_PERMISSION;
 import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED;
 import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
 import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
@@ -46,6 +50,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IContentProvider;
 import android.content.Intent;
+import android.content.PermissionChecker;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -1003,7 +1008,11 @@ public class ContentProviderHelper {
                 };
                 mService.mHandler.postDelayed(providerNotResponding, 1000);
                 try {
-                    return holder.provider.getType(uri);
+                    final String type = holder.provider.getType(uri);
+                    if (type != null) {
+                        backgroundLogging(callingUid, callingPid, userId, uri, holder, type);
+                    }
+                    return type;
                 } finally {
                     mService.mHandler.removeCallbacks(providerNotResponding);
                     // We need to clear the identity to call removeContentProviderExternalUnchecked
@@ -1060,6 +1069,10 @@ public class ContentProviderHelper {
                         Binder.restoreCallingIdentity(identity);
                     }
                     resultCallback.sendResult(result);
+                    final String type = result.getPairValue();
+                    if (type != null) {
+                        backgroundLogging(callingUid, callingPid, userId, uri, holder, type);
+                    }
                 }));
             } else {
                 resultCallback.sendResult(Bundle.EMPTY);
@@ -1067,6 +1080,63 @@ public class ContentProviderHelper {
         } catch (RemoteException e) {
             Log.w(TAG, "Content provider dead retrieving " + uri, e);
             resultCallback.sendResult(Bundle.EMPTY);
+        }
+    }
+
+    private void backgroundLogging(int callingUid, int callingPid, int userId, Uri uri,
+            ContentProviderHolder holder, String type) {
+        // Push the logging code in a different handlerThread.
+        try {
+            mService.mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    logGetTypeData(callingUid, callingPid, userId,
+                            uri, holder, type);
+                }
+            });
+        } catch (Exception e) {
+            // To ensure logging does not break the getType calls.
+        }
+    }
+
+    // Utility function to log the getTypeData calls
+    private void logGetTypeData(int callingUid, int callingPid, int userId, Uri uri,
+            ContentProviderHolder holder, String type) {
+        try {
+            boolean checkUser = true;
+            final String authority = uri.getAuthority();
+            if (isAuthorityRedirectedForCloneProfile(authority)) {
+                UserManagerInternal umInternal =
+                        LocalServices.getService(UserManagerInternal.class);
+                UserInfo userInfo = umInternal.getUserInfo(userId);
+
+                if (userInfo != null && userInfo.isCloneProfile()) {
+                    userId = umInternal.getProfileParentId(userId);
+                    checkUser = false;
+                }
+            }
+            final ProviderInfo cpi = holder.info;
+            final AttributionSource attributionSource =
+                    new AttributionSource.Builder(callingUid).build();
+            final String permissionCheck =
+                    checkContentProviderPermission(cpi, callingPid, callingUid,
+                            userId, checkUser, null);
+            if (permissionCheck != null) {
+                FrameworkStatsLog.write(GET_TYPE_ACCESSED_WITHOUT_PERMISSION,
+                        GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__AM_FRAMEWORK_PERMISSION,
+                        callingUid, authority, type);
+            } else if (cpi.forceUriPermissions
+                    && holder.provider.checkUriPermission(attributionSource,
+                            uri, callingUid, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            != PermissionChecker.PERMISSION_GRANTED) {
+                FrameworkStatsLog.write(GET_TYPE_ACCESSED_WITHOUT_PERMISSION,
+                        GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__AM_CHECK_URI_PERMISSION,
+                        callingUid, authority, type);
+            }
+        } catch (Exception e) {
+            FrameworkStatsLog.write(GET_TYPE_ACCESSED_WITHOUT_PERMISSION,
+                    GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__AM_ERROR, callingUid,
+                    uri.getAuthority(), type);
         }
     }
 

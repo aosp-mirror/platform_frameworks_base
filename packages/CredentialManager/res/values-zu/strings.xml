@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_name (4539824758261855508) -->
-    <skip />
+    <string name="app_name" msgid="4539824758261855508">"Umphathi Wezimfanelo"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Khansela"</string>
     <string name="string_continue" msgid="1346732695941131882">"Qhubeka"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Sungula kwenye indawo"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Londoloza kwenye indawo"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Sebenzisa enye idivayisi"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Londoloza kwenye idivayisi"</string>
-    <string name="passkey_creation_intro_title" msgid="402553911484409884">"Indlela elula yokungena ngemvume ngokuphephile"</string>
-    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Sebenzisa isigxivizo somunwe, ubuso noma ukukhiya isikrini ukuze ungene ngemvume ngokhiye wokudlula oyingqayizivele ongenakulibaleka noma owebiwe. Funda kabanzi"</string>
+    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
+    <skip />
     <string name="choose_provider_title" msgid="7245243990139698508">"Khetha lapho onga-<xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <!-- no translation found for create_your_passkeys (8901224153607590596) -->
     <skip />
@@ -41,8 +46,7 @@
     <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"Amaphasiwedi angu-<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>, okhiye bokudlula abangu-<xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"Amaphasiwedi angu-<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Okhiye bokudlula abangu-<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
-    <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
-    <skip />
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Ukhiye wokudlula"</string>
     <string name="another_device" msgid="5147276802037801217">"Enye idivayisi"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Abanye abaphathi bephasiwedi"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Vala ishidi"</string>

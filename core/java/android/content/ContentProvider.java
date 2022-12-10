@@ -21,6 +21,11 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.os.Process.myUserHandle;
 import static android.os.Trace.TRACE_TAG_DATABASE;
 
+import static com.android.internal.util.FrameworkStatsLog.GET_TYPE_ACCESSED_WITHOUT_PERMISSION;
+import static com.android.internal.util.FrameworkStatsLog.GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__PROVIDER_CHECK_URI_PERMISSION;
+import static com.android.internal.util.FrameworkStatsLog.GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__PROVIDER_ERROR;
+import static com.android.internal.util.FrameworkStatsLog.GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__PROVIDER_FRAMEWORK_PERMISSION;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -58,6 +63,7 @@ import android.util.Log;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -300,11 +306,57 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             uri = maybeGetUriWithoutUserId(uri);
             traceBegin(TRACE_TAG_DATABASE, "getType: ", uri.getAuthority());
             try {
-                return mInterface.getType(uri);
+                final String type = mInterface.getType(uri);
+                if (type != null) {
+                    logGetTypeData(Binder.getCallingUid(), uri, type);
+                }
+                return type;
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             } finally {
                 Trace.traceEnd(TRACE_TAG_DATABASE);
+            }
+        }
+
+        // Utility function to log the getTypeData calls
+        private void logGetTypeData(int callingUid, Uri uri, String type) {
+            final int enumFrameworkPermission =
+                    GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__PROVIDER_FRAMEWORK_PERMISSION;
+            final int enumCheckUriPermission =
+                    GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__PROVIDER_CHECK_URI_PERMISSION;
+            final int enumError = GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__PROVIDER_ERROR;
+
+            try {
+                final AttributionSource attributionSource = new AttributionSource.Builder(
+                        callingUid).build();
+                try {
+                    if (enforceReadPermission(attributionSource, uri)
+                            != PermissionChecker.PERMISSION_GRANTED) {
+                        FrameworkStatsLog.write(GET_TYPE_ACCESSED_WITHOUT_PERMISSION,
+                                enumFrameworkPermission,
+                                callingUid, uri.getAuthority(), type);
+                    } else {
+                        final ProviderInfo cpi = mContext.getPackageManager()
+                                .resolveContentProvider(uri.getAuthority(),
+                                PackageManager.ComponentInfoFlags.of(PackageManager.GET_META_DATA));
+                        if (cpi.forceUriPermissions
+                                && mInterface.checkUriPermission(uri,
+                                callingUid, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                != PermissionChecker.PERMISSION_GRANTED) {
+                            FrameworkStatsLog.write(GET_TYPE_ACCESSED_WITHOUT_PERMISSION,
+                                    enumCheckUriPermission,
+                                    callingUid, uri.getAuthority(), type);
+                        }
+                    }
+                } catch (SecurityException e) {
+                    FrameworkStatsLog.write(GET_TYPE_ACCESSED_WITHOUT_PERMISSION,
+                            enumFrameworkPermission,
+                            callingUid, uri.getAuthority(), type);
+                }
+            } catch (Exception e) {
+                FrameworkStatsLog.write(GET_TYPE_ACCESSED_WITHOUT_PERMISSION,
+                        enumError,
+                        callingUid, uri.getAuthority(), type);
             }
         }
 

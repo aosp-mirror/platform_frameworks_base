@@ -32,15 +32,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -65,6 +69,7 @@ import com.android.credentialmanager.common.ui.ContainerCard
 import com.android.credentialmanager.common.ui.TransparentBackgroundEntry
 import com.android.credentialmanager.jetpack.developer.PublicKeyCredential
 import com.android.credentialmanager.ui.theme.EntryShape
+import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 
 @Composable
 fun GetCredentialScreen(
@@ -75,39 +80,50 @@ fun GetCredentialScreen(
         initialValue = ModalBottomSheetValue.Expanded,
         skipHalfExpanded = true
     )
-    ModalBottomSheetLayout(
-        sheetBackgroundColor = MaterialTheme.colorScheme.surface,
-        modifier = Modifier.background(Color.Transparent),
-        sheetState = state,
-        sheetContent = {
-            val uiState = viewModel.uiState
-            if (!uiState.hidden) {
-                when (uiState.currentScreenState) {
-                    GetScreenState.PRIMARY_SELECTION -> PrimarySelectionCard(
-                        requestDisplayInfo = uiState.requestDisplayInfo,
-                        providerDisplayInfo = uiState.providerDisplayInfo,
-                        onEntrySelected = viewModel::onEntrySelected,
-                        onCancel = viewModel::onCancel,
-                        onMoreOptionSelected = viewModel::onMoreOptionSelected,
-                    )
-                    GetScreenState.ALL_SIGN_IN_OPTIONS -> AllSignInOptionCard(
-                        providerInfoList = uiState.providerInfoList,
-                        providerDisplayInfo = uiState.providerDisplayInfo,
-                        onEntrySelected = viewModel::onEntrySelected,
-                        onBackButtonClicked = viewModel::onBackToPrimarySelectionScreen,
-                    )
+    val uiState = viewModel.uiState
+    if (uiState.currentScreenState != GetScreenState.REMOTE_ONLY) {
+        ModalBottomSheetLayout(
+            sheetBackgroundColor = MaterialTheme.colorScheme.surface,
+            modifier = Modifier.background(Color.Transparent),
+            sheetState = state,
+            sheetContent = {
+                // TODO: hide UI at top level
+                if (!uiState.hidden) {
+                    if (uiState.currentScreenState == GetScreenState.PRIMARY_SELECTION) {
+                        PrimarySelectionCard(
+                            requestDisplayInfo = uiState.requestDisplayInfo,
+                            providerDisplayInfo = uiState.providerDisplayInfo,
+                            onEntrySelected = viewModel::onEntrySelected,
+                            onCancel = viewModel::onCancel,
+                            onMoreOptionSelected = viewModel::onMoreOptionSelected,
+                        )
+                    } else {
+                        AllSignInOptionCard(
+                            providerInfoList = uiState.providerInfoList,
+                            providerDisplayInfo = uiState.providerDisplayInfo,
+                            onEntrySelected = viewModel::onEntrySelected,
+                            onBackButtonClicked = viewModel::onBackToPrimarySelectionScreen,
+                            onCancel = viewModel::onCancel,
+                            isNoAccount = uiState.isNoAccount,
+                        )
+                    }
+                } else if (uiState.selectedEntry != null && !uiState.providerActivityPending) {
+                    viewModel.launchProviderUi(providerActivityLauncher)
                 }
-            } else if (uiState.selectedEntry != null && !uiState.providerActivityPending) {
-                viewModel.launchProviderUi(providerActivityLauncher)
+            },
+            scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.8f),
+            sheetShape = EntryShape.TopRoundedCorner,
+        ) {}
+        LaunchedEffect(state.currentValue) {
+            if (state.currentValue == ModalBottomSheetValue.Hidden) {
+                viewModel.onCancel()
             }
-        },
-        scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.8f),
-        sheetShape = EntryShape.TopRoundedCorner,
-    ) {}
-    LaunchedEffect(state.currentValue) {
-        if (state.currentValue == ModalBottomSheetValue.Hidden) {
-            viewModel.onCancel()
         }
+    } else {
+        SnackBarScreen(
+            onClick = viewModel::onMoreOptionOnSnackBarSelected,
+            onCancel = viewModel::onCancel,
+        )
     }
 }
 
@@ -195,6 +211,8 @@ fun AllSignInOptionCard(
     providerDisplayInfo: ProviderDisplayInfo,
     onEntrySelected: (EntryInfo) -> Unit,
     onBackButtonClicked: () -> Unit,
+    onCancel: () -> Unit,
+    isNoAccount: Boolean,
 ) {
     val sortedUserNameToCredentialEntryList =
         providerDisplayInfo.sortedUserNameToCredentialEntryList
@@ -212,7 +230,7 @@ fun AllSignInOptionCard(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBackButtonClicked) {
+                    IconButton(onClick = if (isNoAccount) onCancel else onBackButtonClicked) {
                         Icon(
                             Icons.Filled.ArrowBack,
                             contentDescription = stringResource(
@@ -517,4 +535,38 @@ fun SignInAnotherWayRow(onSelect: () -> Unit) {
             )
         }
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SnackBarScreen(
+    onClick: (Boolean) -> Unit,
+    onCancel: () -> Unit,
+) {
+    // TODO: Change the height, width and position according to the design
+    Snackbar (
+        modifier = Modifier.padding(horizontal = 80.dp).padding(top = 700.dp),
+        shape = EntryShape.FullMediumRoundedCorner,
+        containerColor = LocalAndroidColorScheme.current.colorBackground,
+        contentColor = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            TextButton(
+                onClick = {onClick(true)},
+            ) {
+                Text(text = stringResource(R.string.get_dialog_use_saved_passkey_for))
+            }
+            IconButton(onClick = onCancel) {
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = stringResource(
+                        R.string.accessibility_close_button
+                    )
+                )
+            }
+        }
+    }
 }

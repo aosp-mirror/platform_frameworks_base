@@ -574,8 +574,8 @@ public class TaskFragmentTest extends WindowTestsBase {
         tf1.setBounds(600, 0, 1200, 1000);
         final ActivityRecord activity0 = tf0.getTopMostActivity();
         final ActivityRecord activity1 = tf1.getTopMostActivity();
-        doReturn(true).when(activity0).isVisibleRequested();
-        doReturn(true).when(activity1).isVisibleRequested();
+        activity0.setVisibleRequested(true);
+        activity1.setVisibleRequested(true);
 
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, tf0.getOrientation(SCREEN_ORIENTATION_UNSET));
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, tf1.getOrientation(SCREEN_ORIENTATION_UNSET));

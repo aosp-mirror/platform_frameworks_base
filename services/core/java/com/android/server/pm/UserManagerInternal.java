@@ -59,6 +59,18 @@ public abstract class UserManagerInternal {
     })
     public @interface UserAssignmentResult {}
 
+    public static final int USER_START_MODE_FOREGROUND = 1;
+    public static final int USER_START_MODE_BACKGROUND = 2;
+    public static final int USER_START_MODE_BACKGROUND_VISIBLE = 3;
+
+    private static final String PREFIX_USER_START_MODE = "USER_START_MODE_";
+    @IntDef(flag = false, prefix = {PREFIX_USER_START_MODE}, value = {
+            USER_START_MODE_FOREGROUND,
+            USER_START_MODE_BACKGROUND,
+            USER_START_MODE_BACKGROUND_VISIBLE
+    })
+    public @interface UserStartMode {}
+
     public interface UserRestrictionsListener {
         /**
          * Called when a user restriction changes.
@@ -141,23 +153,39 @@ public abstract class UserManagerInternal {
     /**
      * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to update
      * whether the device is managed by device owner.
+     *
+     * @deprecated Use methods in {@link android.app.admin.DevicePolicyManagerInternal}.
      */
+    @Deprecated
+    // TODO(b/258213147): Remove
     public abstract void setDeviceManaged(boolean isManaged);
 
     /**
      * Returns whether the device is managed by device owner.
+     *
+     * @deprecated Use methods in {@link android.app.admin.DevicePolicyManagerInternal}.
      */
+    @Deprecated
+    // TODO(b/258213147): Remove
     public abstract boolean isDeviceManaged();
 
     /**
      * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to update
      * whether the user is managed by profile owner.
+     *
+     * @deprecated Use methods in {@link android.app.admin.DevicePolicyManagerInternal}.
      */
+    // TODO(b/258213147): Remove
+    @Deprecated
     public abstract void setUserManaged(int userId, boolean isManaged);
 
     /**
-     * whether a profile owner manages this user.
+     * Whether a profile owner manages this user.
+     *
+     * @deprecated Use methods in {@link android.app.admin.DevicePolicyManagerInternal}.
      */
+    // TODO(b/258213147): Remove
+    @Deprecated
     public abstract boolean isUserManaged(int userId);
 
     /**
@@ -367,8 +395,7 @@ public abstract class UserManagerInternal {
      * pass a valid display id.
      */
     public abstract @UserAssignmentResult int assignUserToDisplayOnStart(@UserIdInt int userId,
-            @UserIdInt int profileGroupId,
-            boolean foreground, int displayId);
+            @UserIdInt int profileGroupId, @UserStartMode int userStartMode, int displayId);
 
     /**
      * Unassigns a user from its current display when it's stopping.
@@ -427,6 +454,13 @@ public abstract class UserManagerInternal {
     public static String userAssignmentResultToString(@UserAssignmentResult int result) {
         return DebugUtils.constantToString(UserManagerInternal.class, PREFIX_USER_ASSIGNMENT_RESULT,
                 result);
+    }
+
+    /**
+     * Gets the user-friendly representation of a user start {@code mode}.
+     */
+    public static String userStartModeToString(@UserStartMode int mode) {
+        return DebugUtils.constantToString(UserManagerInternal.class, PREFIX_USER_START_MODE, mode);
     }
 
     /** Adds a {@link UserVisibilityListener}. */

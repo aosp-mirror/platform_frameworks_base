@@ -275,6 +275,7 @@ final class RemovePackageHelper {
             outInfo.populateUsers(deletedPs.queryInstalledUsers(
                     mUserManagerInternal.getUserIds(), true), deletedPs);
             outInfo.mIsExternal = deletedPs.isExternalStorage();
+            outInfo.mRemovedPackageVersionCode = deletedPs.getVersionCode();
         }
 
         removePackageLI(deletedPs.getPackageName(), (flags & PackageManager.DELETE_CHATTY) != 0);

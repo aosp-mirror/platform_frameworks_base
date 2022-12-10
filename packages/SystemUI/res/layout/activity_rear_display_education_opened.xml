@@ -34,7 +34,7 @@
             android:layout_width="@dimen/rear_display_animation_width"
             android:layout_height="@dimen/rear_display_animation_height"
             android:layout_gravity="center"
-            android:contentDescription="@null"
+            android:contentDescription="@string/rear_display_accessibility_unfolded_animation"
             android:scaleType="fitXY"
             app:lottie_rawRes="@raw/rear_display_turnaround"
             app:lottie_autoPlay="true"

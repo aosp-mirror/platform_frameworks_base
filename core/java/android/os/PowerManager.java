@@ -533,10 +533,7 @@ public final class PowerManager {
             BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM,
             BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT,
             BRIGHTNESS_CONSTRAINT_TYPE_DIM,
-            BRIGHTNESS_CONSTRAINT_TYPE_DOZE,
-            BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM_VR,
-            BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM_VR,
-            BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT_VR
+            BRIGHTNESS_CONSTRAINT_TYPE_DOZE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BrightnessConstraint{}
@@ -569,24 +566,6 @@ public final class PowerManager {
      * @hide
      */
     public static final int BRIGHTNESS_CONSTRAINT_TYPE_DOZE = 4;
-
-    /**
-     * Brightness constraint type: minimum allowed value.
-     * @hide
-     */
-    public static final int BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM_VR = 5;
-
-    /**
-     * Brightness constraint type: minimum allowed value.
-     * @hide
-     */
-    public static final int BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM_VR = 6;
-
-    /**
-     * Brightness constraint type: minimum allowed value.
-     * @hide
-     */
-    public static final int BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT_VR = 7;
 
     /**
      * @hide
@@ -1208,35 +1187,6 @@ public final class PowerManager {
     public int getDefaultScreenBrightnessSetting() {
         return mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_screenBrightnessSettingDefault);
-    }
-
-    /**
-     * Gets the minimum supported screen brightness setting for VR Mode.
-     * @hide
-     */
-    public int getMinimumScreenBrightnessForVrSetting() {
-        return mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_screenBrightnessForVrSettingMinimum);
-    }
-
-    /**
-     * Gets the maximum supported screen brightness setting for VR Mode.
-     * The screen may be allowed to become dimmer than this value but
-     * this is the maximum value that can be set by the user.
-     * @hide
-     */
-    public int getMaximumScreenBrightnessForVrSetting() {
-        return mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_screenBrightnessForVrSettingMaximum);
-    }
-
-    /**
-     * Gets the default screen brightness for VR setting.
-     * @hide
-     */
-    public int getDefaultScreenBrightnessForVrSetting() {
-        return mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_screenBrightnessForVrSettingDefault);
     }
 
     /**

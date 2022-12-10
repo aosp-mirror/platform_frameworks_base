@@ -8,15 +8,19 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Stoor in ’n ander plek"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Gebruik ’n ander toestel"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Stoor op ’n ander toestel"</string>
-    <string name="passkey_creation_intro_title" msgid="402553911484409884">"’n Maklike manier om veilig aan te meld"</string>
-    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"Gebruik jou vingerafdruk, gesig of skermslot om aan te meld met ’n unieke wagwoordsleutel wat nie vergeet of gesteel kan word nie. Kom meer te wete"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"Kies waar om <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
     <skip />
+    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
+    <skip />
+    <string name="choose_provider_title" msgid="7245243990139698508">"Kies waar om <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <string name="create_your_passkeys" msgid="8901224153607590596">"skep jou wagwoordsleutels"</string>
     <string name="save_your_password" msgid="6597736507991704307">"stoor jou wagwoord"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"stoor jou aanmeldinligting"</string>
-    <!-- no translation found for choose_provider_body (8045759834416308059) -->
-    <skip />
+    <string name="choose_provider_body" msgid="8045759834416308059">"Stel ’n verstekwagwoordbestuurder om jou wagwoorde en wagwoordsleutels te stoor, en meld volgende keer vinniger aan."</string>
     <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Skep ’n wagwoordsleutel in <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="8812546498357380545">"Stoor jou wagwoord in <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Stoor jou aanmeldinligting in <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
@@ -24,17 +28,12 @@
     <string name="passkey" msgid="632353688396759522">"wagwoordsleutel"</string>
     <string name="password" msgid="6738570945182936667">"wagwoord"</string>
     <string name="sign_ins" msgid="4710739369149469208">"aanmeldings"</string>
-    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
-    <skip />
-    <!-- no translation found for save_password_to_title (3450480045270186421) -->
-    <skip />
-    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
-    <skip />
-    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
-    <skip />
+    <string name="create_passkey_in_title" msgid="2714306562710897785">"Skep wagwoordsleutel in"</string>
+    <string name="save_password_to_title" msgid="3450480045270186421">"Stoor wagwoord in"</string>
+    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Stoor aanmelding in"</string>
+    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Skep ’n wagwoordsleutel op ’n ander toestel?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Gebruik <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> vir al jou aanmeldings?"</string>
-    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="6560593199974037820">"Hierdie wagwoordbestuurder sal jou wagwoorde en wagwoordsleutels berg om jou te help om maklik aan te meld."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Stel as verstek"</string>
     <string name="use_once" msgid="9027366575315399714">"Gebruik een keer"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> wagwoorde, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> wagwoordsleutels"</string>
