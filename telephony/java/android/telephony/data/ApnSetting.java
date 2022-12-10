@@ -1286,7 +1286,7 @@ public class ApnSetting implements Parcelable {
                 && xorEqualsInt(this.mMmsProxyPort, other.mMmsProxyPort))
                 && xorEqualsString(this.mUser, other.mUser)
                 && xorEqualsString(this.mPassword, other.mPassword)
-                && xorEqualsInt(this.mAuthType, other.mAuthType)
+                && Objects.equals(this.mAuthType, other.mAuthType)
                 && !typeSameAny(this, other)
                 && Objects.equals(this.mOperatorNumeric, other.mOperatorNumeric)
                 && Objects.equals(this.mProtocol, other.mProtocol)
