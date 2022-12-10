@@ -148,7 +148,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     @VisibleForTesting
     final ArrayMap<IBinder, TaskFragment> mLaunchTaskFragments = new ArrayMap<>();
 
-    private final Rect mTmpBounds = new Rect();
+    private final Rect mTmpBounds0 = new Rect();
+    private final Rect mTmpBounds1 = new Rect();
 
     WindowOrganizerController(ActivityTaskManagerService atm) {
         mService = atm;
@@ -797,14 +798,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         // When the TaskFragment is resized, we may want to create a change transition for it, for
         // which we want to defer the surface update until we determine whether or not to start
         // change transition.
-        mTmpBounds.set(taskFragment.getBounds());
+        mTmpBounds0.set(taskFragment.getBounds());
+        mTmpBounds1.set(taskFragment.getRelativeEmbeddedBounds());
         taskFragment.deferOrganizedTaskFragmentSurfaceUpdate();
         final int effects = applyChanges(taskFragment, c, errorCallbackToken);
-        if (taskFragment.shouldStartChangeTransition(mTmpBounds)) {
-            taskFragment.initializeChangeTransition(mTmpBounds);
+        taskFragment.updateRelativeEmbeddedBounds();
+        if (taskFragment.shouldStartChangeTransition(mTmpBounds0, mTmpBounds1)) {
+            taskFragment.initializeChangeTransition(mTmpBounds0);
         }
         taskFragment.continueOrganizedTaskFragmentSurfaceUpdate();
-        mTmpBounds.set(0, 0, 0, 0);
         return effects;
     }
 
@@ -1907,7 +1909,18 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         // actions.
         taskFragment.setTaskFragmentOrganizer(creationParams.getOrganizer(),
                 ownerActivity.getUid(), ownerActivity.info.processName);
-        ownerTask.addChild(taskFragment, POSITION_TOP);
+        final int position;
+        if (creationParams.getPairedPrimaryFragmentToken() != null) {
+            // When there is a paired primary TaskFragment, we want to place the new TaskFragment
+            // right above the paired one to make sure there is no other window in between.
+            final TaskFragment pairedPrimaryTaskFragment = getTaskFragment(
+                    creationParams.getPairedPrimaryFragmentToken());
+            final int pairedPosition = ownerTask.mChildren.indexOf(pairedPrimaryTaskFragment);
+            position = pairedPosition != -1 ? pairedPosition + 1 : POSITION_TOP;
+        } else {
+            position = POSITION_TOP;
+        }
+        ownerTask.addChild(taskFragment, position);
         taskFragment.setWindowingMode(creationParams.getWindowingMode());
         taskFragment.setBounds(creationParams.getInitialBounds());
         mLaunchTaskFragments.put(creationParams.getFragmentToken(), taskFragment);

@@ -28,7 +28,7 @@ android_test {
     ],
 
     srcs: [
-        "src/**/*.java",
+        "src/server/**/*.java",
     ],
 
     static_libs: [
@@ -50,6 +50,55 @@ android_test {
         "android.test.mock",
         "android.test.base",
         "android.test.runner",
+    ],
+
+    certificate: "platform",
+    platform_apis: true,
+    test_suites: ["device-tests"],
+
+    optimize: {
+        enabled: false,
+    },
+}
+
+android_test {
+    name: "FrameworksImeTests",
+    defaults: [
+        "modules-utils-testable-device-config-defaults",
+    ],
+
+    srcs: [
+        "src/com/android/inputmethodservice/**/*.java",
+    ],
+
+    manifest: "src/com/android/inputmethodservice/AndroidManifest.xml",
+    test_config: "src/com/android/inputmethodservice/AndroidTest.xml",
+
+    static_libs: [
+        "androidx.test.core",
+        "androidx.test.runner",
+        "androidx.test.espresso.core",
+        "androidx.test.espresso.contrib",
+        "androidx.test.ext.truth",
+        "frameworks-base-testutils",
+        "mockito-target-extended-minus-junit4",
+        "platform-test-annotations",
+        "services.core",
+        "servicestests-core-utils",
+        "servicestests-utils-mockito-extended",
+        "truth-prebuilt",
+        "SimpleImeTestingLib",
+        "SimpleImeImsLib",
+    ],
+
+    libs: [
+        "android.test.mock",
+        "android.test.base",
+        "android.test.runner",
+    ],
+
+    data: [
+        ":SimpleTestIme",
     ],
 
     certificate: "platform",

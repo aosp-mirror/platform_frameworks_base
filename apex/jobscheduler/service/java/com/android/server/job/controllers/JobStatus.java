@@ -1345,6 +1345,15 @@ public final class JobStatus {
     }
 
     /**
+     * @return true if the job was scheduled as a user-initiated job and it hasn't been downgraded
+     * for any reason.
+     */
+    public boolean shouldTreatAsUserInitiated() {
+        // TODO(248386641): implement
+        return false;
+    }
+
+    /**
      * Return a summary that uniquely identifies the underlying job.
      */
     @NonNull

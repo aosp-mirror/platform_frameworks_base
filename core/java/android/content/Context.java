@@ -5937,6 +5937,14 @@ public abstract class Context {
     public static final String FILE_INTEGRITY_SERVICE = "file_integrity";
 
     /**
+     * Binder service for remote key provisioning.
+     *
+     * @see android.frameworks.rkp.IRemoteProvisioning
+     * @hide
+     */
+    public static final String REMOTE_PROVISIONING_SERVICE = "remote_provisioning";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.hardware.lights.LightsManager} for controlling device lights.
      *

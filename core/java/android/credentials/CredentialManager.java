@@ -77,7 +77,7 @@ public final class CredentialManager {
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<
-                    GetCredentialResponse, CredentialManagerException> callback) {
+                    GetCredentialResponse, GetCredentialException> callback) {
         requireNonNull(request, "request must not be null");
         requireNonNull(activity, "activity must not be null");
         requireNonNull(executor, "executor must not be null");
@@ -121,7 +121,7 @@ public final class CredentialManager {
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<
-                    CreateCredentialResponse, CredentialManagerException> callback) {
+                    CreateCredentialResponse, CreateCredentialException> callback) {
         requireNonNull(request, "request must not be null");
         requireNonNull(activity, "activity must not be null");
         requireNonNull(executor, "executor must not be null");
@@ -167,7 +167,7 @@ public final class CredentialManager {
             @NonNull ClearCredentialStateRequest request,
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
-            @NonNull OutcomeReceiver<Void, CredentialManagerException> callback) {
+            @NonNull OutcomeReceiver<Void, ClearCredentialStateException> callback) {
         requireNonNull(executor, "executor must not be null");
         requireNonNull(callback, "callback must not be null");
 
@@ -196,10 +196,10 @@ public final class CredentialManager {
         private final Activity mActivity;
         private final Executor mExecutor;
         private final OutcomeReceiver<
-                GetCredentialResponse, CredentialManagerException> mCallback;
+                GetCredentialResponse, GetCredentialException> mCallback;
 
         private GetCredentialTransport(Activity activity, Executor executor,
-                OutcomeReceiver<GetCredentialResponse, CredentialManagerException> callback) {
+                OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
             mActivity = activity;
             mExecutor = executor;
             mCallback = callback;
@@ -222,9 +222,9 @@ public final class CredentialManager {
         }
 
         @Override
-        public void onError(int errorCode, String message) {
+        public void onError(String errorType, String message) {
             mExecutor.execute(
-                    () -> mCallback.onError(new CredentialManagerException(errorCode, message)));
+                    () -> mCallback.onError(new GetCredentialException(errorType, message)));
         }
     }
 
@@ -234,10 +234,10 @@ public final class CredentialManager {
         private final Activity mActivity;
         private final Executor mExecutor;
         private final OutcomeReceiver<
-                CreateCredentialResponse, CredentialManagerException> mCallback;
+                CreateCredentialResponse, CreateCredentialException> mCallback;
 
         private CreateCredentialTransport(Activity activity, Executor executor,
-                OutcomeReceiver<CreateCredentialResponse, CredentialManagerException> callback) {
+                OutcomeReceiver<CreateCredentialResponse, CreateCredentialException> callback) {
             mActivity = activity;
             mExecutor = executor;
             mCallback = callback;
@@ -260,9 +260,9 @@ public final class CredentialManager {
         }
 
         @Override
-        public void onError(int errorCode, String message) {
+        public void onError(String errorType, String message) {
             mExecutor.execute(
-                    () -> mCallback.onError(new CredentialManagerException(errorCode, message)));
+                    () -> mCallback.onError(new CreateCredentialException(errorType, message)));
         }
     }
 
@@ -271,10 +271,10 @@ public final class CredentialManager {
         // TODO: listen for cancellation to release callback.
 
         private final Executor mExecutor;
-        private final OutcomeReceiver<Void, CredentialManagerException> mCallback;
+        private final OutcomeReceiver<Void, ClearCredentialStateException> mCallback;
 
         private ClearCredentialStateTransport(Executor executor,
-                OutcomeReceiver<Void, CredentialManagerException> callback) {
+                OutcomeReceiver<Void, ClearCredentialStateException> callback) {
             mExecutor = executor;
             mCallback = callback;
         }
@@ -285,9 +285,9 @@ public final class CredentialManager {
         }
 
         @Override
-        public void onError(int errorCode, String message) {
+        public void onError(String errorType, String message) {
             mExecutor.execute(
-                    () -> mCallback.onError(new CredentialManagerException(errorCode, message)));
+                    () -> mCallback.onError(new ClearCredentialStateException(errorType, message)));
         }
     }
 }

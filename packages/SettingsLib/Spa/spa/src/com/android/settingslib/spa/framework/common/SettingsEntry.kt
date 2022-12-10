@@ -35,6 +35,8 @@ interface EntryData {
         get() = null
     val isHighlighted: Boolean
         get() = false
+    val arguments: Bundle?
+        get() = null
 }
 
 val LocalEntryDataProvider =
@@ -121,11 +123,11 @@ data class SettingsEntry(
     }
 
     private fun fullArgument(runtimeArguments: Bundle? = null): Bundle {
-        val arguments = Bundle()
-        if (owner.arguments != null) arguments.putAll(owner.arguments)
-        // Put runtime args later, which can override page args.
-        if (runtimeArguments != null) arguments.putAll(runtimeArguments)
-        return arguments
+        return Bundle().apply {
+            if (owner.arguments != null) putAll(owner.arguments)
+            // Put runtime args later, which can override page args.
+            if (runtimeArguments != null) putAll(runtimeArguments)
+        }
     }
 
     fun getStatusData(runtimeArguments: Bundle? = null): EntryStatusData? {
@@ -142,19 +144,21 @@ data class SettingsEntry(
 
     @Composable
     fun UiLayout(runtimeArguments: Bundle? = null) {
-        CompositionLocalProvider(provideLocalEntryData()) {
-            uiLayoutImpl(fullArgument(runtimeArguments))
+        val arguments = remember { fullArgument(runtimeArguments) }
+        CompositionLocalProvider(provideLocalEntryData(arguments)) {
+            uiLayoutImpl(arguments)
         }
     }
 
     @Composable
-    fun provideLocalEntryData(): ProvidedValue<EntryData> {
+    fun provideLocalEntryData(arguments: Bundle): ProvidedValue<EntryData> {
         val controller = LocalNavController.current
         return LocalEntryDataProvider provides remember {
             object : EntryData {
                 override val pageId = containerPage().id
                 override val entryId = id
                 override val isHighlighted = controller.highlightEntryId == id
+                override val arguments = arguments
             }
         }
     }

@@ -49,7 +49,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.ControlsServiceInfo
-import com.android.systemui.controls.ControlsSettingsRepository
+import com.android.systemui.controls.settings.ControlsSettingsRepository
 import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.StructureInfo

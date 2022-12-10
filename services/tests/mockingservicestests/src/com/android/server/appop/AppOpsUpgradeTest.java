@@ -16,23 +16,32 @@
 
 package com.android.server.appop;
 
+import static android.app.AppOpsManager.OP_SCHEDULE_EXACT_ALARM;
+
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.AssetManager;
 import android.os.Handler;
-import android.os.HandlerThread;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -42,11 +51,20 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.modules.utils.TypedXmlPullParser;
+import com.android.server.LocalServices;
+import com.android.server.SystemServerInitThreadPool;
+import com.android.server.pm.UserManagerInternal;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.io.File;
@@ -64,29 +82,39 @@ public class AppOpsUpgradeTest {
     private static final String TAG = AppOpsUpgradeTest.class.getSimpleName();
     private static final String APP_OPS_UNVERSIONED_ASSET_PATH =
             "AppOpsUpgradeTest/appops-unversioned.xml";
+    private static final String APP_OPS_VERSION_1_ASSET_PATH =
+            "AppOpsUpgradeTest/appops-version-1.xml";
     private static final String APP_OPS_FILENAME = "appops-test.xml";
     private static final int NON_DEFAULT_OPS_IN_FILE = 4;
-    private static final int CURRENT_VERSION = 1;
 
-    private File mAppOpsFile;
-    private Context mContext;
+    private static final Context sContext = InstrumentationRegistry.getTargetContext();
+    private static final File sAppOpsFile = new File(sContext.getFilesDir(), APP_OPS_FILENAME);
+
+    private Context mTestContext;
+    private MockitoSession mMockitoSession;
+
+    @Mock
+    private PackageManagerInternal mPackageManagerInternal;
+    @Mock
+    private PackageManager mPackageManager;
+    @Mock
+    private UserManagerInternal mUserManagerInternal;
+    @Mock
+    private PermissionManagerServiceInternal mPermissionManagerInternal;
+    @Mock
     private Handler mHandler;
 
-    private void extractAppOpsFile() {
-        mAppOpsFile.getParentFile().mkdirs();
-        if (mAppOpsFile.exists()) {
-            mAppOpsFile.delete();
-        }
-        try (FileOutputStream out = new FileOutputStream(mAppOpsFile);
-             InputStream in = mContext.getAssets().open(APP_OPS_UNVERSIONED_ASSET_PATH,
-                     AssetManager.ACCESS_BUFFER)) {
+    private static void extractAppOpsFile(String assetPath) {
+        sAppOpsFile.getParentFile().mkdirs();
+        try (FileOutputStream out = new FileOutputStream(sAppOpsFile);
+             InputStream in = sContext.getAssets().open(assetPath, AssetManager.ACCESS_BUFFER)) {
             byte[] buffer = new byte[4096];
             int bytesRead;
             while ((bytesRead = in.read(buffer)) >= 0) {
                 out.write(buffer, 0, bytesRead);
             }
             out.flush();
-            Log.d(TAG, "Successfully copied xml to " + mAppOpsFile.getAbsolutePath());
+            Log.d(TAG, "Successfully copied xml to " + sAppOpsFile.getAbsolutePath());
         } catch (IOException exc) {
             Log.e(TAG, "Exception while copying appops xml", exc);
             fail();
@@ -98,7 +126,7 @@ public class AppOpsUpgradeTest {
         int numberOfNonDefaultOps = 0;
         final int defaultModeOp1 = AppOpsManager.opToDefaultMode(op1);
         final int defaultModeOp2 = AppOpsManager.opToDefaultMode(op2);
-        for(int i = 0; i < uidStates.size(); i++) {
+        for (int i = 0; i < uidStates.size(); i++) {
             final AppOpsServiceImpl.UidState uidState = uidStates.valueAt(i);
             SparseIntArray opModes = uidState.getNonDefaultUidModes();
             if (opModes != null) {
@@ -132,41 +160,191 @@ public class AppOpsUpgradeTest {
 
     @Before
     public void setUp() {
-        mContext = InstrumentationRegistry.getTargetContext();
-        mAppOpsFile = new File(mContext.getFilesDir(), APP_OPS_FILENAME);
-        extractAppOpsFile();
-        HandlerThread handlerThread = new HandlerThread(TAG);
-        handlerThread.start();
-        mHandler = new Handler(handlerThread.getLooper());
+        if (sAppOpsFile.exists()) {
+            sAppOpsFile.delete();
+        }
+
+        mMockitoSession = mockitoSession()
+                .initMocks(this)
+                .spyStatic(LocalServices.class)
+                .mockStatic(SystemServerInitThreadPool.class)
+                .strictness(Strictness.LENIENT)
+                .startMocking();
+
+        doReturn(mPermissionManagerInternal).when(
+                () -> LocalServices.getService(PermissionManagerServiceInternal.class));
+        doReturn(mUserManagerInternal).when(
+                () -> LocalServices.getService(UserManagerInternal.class));
+        doReturn(mPackageManagerInternal).when(
+                () -> LocalServices.getService(PackageManagerInternal.class));
+
+        mTestContext = spy(sContext);
+
+        // Pretend everybody has all permissions
+        doNothing().when(mTestContext).enforcePermission(anyString(), anyInt(), anyInt(),
+                nullable(String.class));
+
+        doReturn(mPackageManager).when(mTestContext).getPackageManager();
+
+        // Stub out package calls to disable AppOpsService#updatePermissionRevokedCompat
+        doReturn(null).when(mPackageManager).getPackagesForUid(anyInt());
+    }
+
+    @After
+    public void tearDown() {
+        mMockitoSession.finishMocking();
     }
 
     @Test
-    public void testUpgradeFromNoVersion() throws Exception {
-        AppOpsDataParser parser = new AppOpsDataParser(mAppOpsFile);
+    public void upgradeRunAnyInBackground() {
+        extractAppOpsFile(APP_OPS_UNVERSIONED_ASSET_PATH);
+
+        AppOpsServiceImpl testService = new AppOpsServiceImpl(sAppOpsFile, mHandler, mTestContext);
+
+        testService.upgradeRunAnyInBackgroundLocked();
+        assertSameModes(testService.mUidStates, AppOpsManager.OP_RUN_IN_BACKGROUND,
+                AppOpsManager.OP_RUN_ANY_IN_BACKGROUND);
+    }
+
+    private static int getModeInFile(int uid) {
+        switch (uid) {
+            case 10198:
+                return 0;
+            case 10200:
+                return 1;
+            case 1110200:
+            case 10267:
+            case 1110181:
+                return 2;
+            default:
+                return AppOpsManager.opToDefaultMode(OP_SCHEDULE_EXACT_ALARM);
+        }
+    }
+
+    @Test
+    public void upgradeScheduleExactAlarm() {
+        extractAppOpsFile(APP_OPS_VERSION_1_ASSET_PATH);
+
+        String[] packageNames = {"p1", "package2", "pkg3", "package.4", "pkg-5", "pkg.6"};
+        int[] appIds = {10267, 10181, 10198, 10199, 10200, 4213};
+        int[] userIds = {0, 10, 11};
+
+        doReturn(userIds).when(mUserManagerInternal).getUserIds();
+
+        doReturn(packageNames).when(mPermissionManagerInternal).getAppOpPermissionPackages(
+                AppOpsManager.opToPermission(OP_SCHEDULE_EXACT_ALARM));
+
+        doAnswer(invocation -> {
+            String pkg = invocation.getArgument(0);
+            int index = ArrayUtils.indexOf(packageNames, pkg);
+            if (index < 0) {
+                return index;
+            }
+            int userId = invocation.getArgument(2);
+            return UserHandle.getUid(userId, appIds[index]);
+        }).when(mPackageManagerInternal).getPackageUid(anyString(), anyLong(), anyInt());
+
+        AppOpsServiceImpl testService = new AppOpsServiceImpl(sAppOpsFile, mHandler, mTestContext);
+
+        testService.upgradeScheduleExactAlarmLocked();
+
+        for (int userId : userIds) {
+            for (int appId : appIds) {
+                final int uid = UserHandle.getUid(userId, appId);
+                final int previousMode = getModeInFile(uid);
+
+                final int expectedMode;
+                if (previousMode == AppOpsManager.opToDefaultMode(OP_SCHEDULE_EXACT_ALARM)) {
+                    expectedMode = AppOpsManager.MODE_ALLOWED;
+                } else {
+                    expectedMode = previousMode;
+                }
+                final AppOpsServiceImpl.UidState uidState = testService.mUidStates.get(uid);
+                assertEquals(expectedMode, uidState.getUidMode(OP_SCHEDULE_EXACT_ALARM));
+            }
+        }
+
+        // These uids don't even declare the permission. So should stay as default / empty.
+        int[] unrelatedUidsInFile = {10225, 10178};
+
+        for (int uid : unrelatedUidsInFile) {
+            final AppOpsServiceImpl.UidState uidState = testService.mUidStates.get(uid);
+            assertEquals(AppOpsManager.opToDefaultMode(OP_SCHEDULE_EXACT_ALARM),
+                    uidState.getUidMode(OP_SCHEDULE_EXACT_ALARM));
+        }
+    }
+
+    @Test
+    public void upgradeFromNoFile() {
+        assertFalse(sAppOpsFile.exists());
+
+        AppOpsServiceImpl testService = spy(
+                new AppOpsServiceImpl(sAppOpsFile, mHandler, mTestContext));
+
+        doNothing().when(testService).upgradeRunAnyInBackgroundLocked();
+        doNothing().when(testService).upgradeScheduleExactAlarmLocked();
+
+        // trigger upgrade
+        testService.systemReady();
+
+        verify(testService, never()).upgradeRunAnyInBackgroundLocked();
+        verify(testService, never()).upgradeScheduleExactAlarmLocked();
+
+        testService.writeState();
+
+        assertTrue(sAppOpsFile.exists());
+
+        AppOpsDataParser parser = new AppOpsDataParser(sAppOpsFile);
+        assertTrue(parser.parse());
+        assertEquals(AppOpsServiceImpl.CURRENT_VERSION, parser.mVersion);
+    }
+
+    @Test
+    public void upgradeFromNoVersion() {
+        extractAppOpsFile(APP_OPS_UNVERSIONED_ASSET_PATH);
+        AppOpsDataParser parser = new AppOpsDataParser(sAppOpsFile);
         assertTrue(parser.parse());
         assertEquals(AppOpsDataParser.NO_VERSION, parser.mVersion);
 
-        // Use mock context and package manager to fake permision package manager calls.
-        Context testContext = spy(mContext);
-
-        // Pretent everybody has all permissions
-        doNothing().when(testContext).enforcePermission(anyString(), anyInt(), anyInt(),
-                nullable(String.class));
-
-        PackageManager testPM = mock(PackageManager.class);
-        when(testContext.getPackageManager()).thenReturn(testPM);
-
-        // Stub out package calls to disable AppOpsService#updatePermissionRevokedCompat
-        when(testPM.getPackagesForUid(anyInt())).thenReturn(null);
-
         AppOpsServiceImpl testService = spy(
-                new AppOpsServiceImpl(mAppOpsFile, mHandler, testContext)); // trigger upgrade
-        assertSameModes(testService.mUidStates, AppOpsManager.OP_RUN_IN_BACKGROUND,
-                AppOpsManager.OP_RUN_ANY_IN_BACKGROUND);
-        mHandler.removeCallbacks(testService.mWriteRunner);
+                new AppOpsServiceImpl(sAppOpsFile, mHandler, mTestContext));
+
+        doNothing().when(testService).upgradeRunAnyInBackgroundLocked();
+        doNothing().when(testService).upgradeScheduleExactAlarmLocked();
+
+        // trigger upgrade
+        testService.systemReady();
+
+        verify(testService).upgradeRunAnyInBackgroundLocked();
+        verify(testService).upgradeScheduleExactAlarmLocked();
+
         testService.writeState();
         assertTrue(parser.parse());
-        assertEquals(CURRENT_VERSION, parser.mVersion);
+        assertEquals(AppOpsServiceImpl.CURRENT_VERSION, parser.mVersion);
+    }
+
+    @Test
+    public void upgradeFromVersion1() {
+        extractAppOpsFile(APP_OPS_VERSION_1_ASSET_PATH);
+        AppOpsDataParser parser = new AppOpsDataParser(sAppOpsFile);
+        assertTrue(parser.parse());
+        assertEquals(1, parser.mVersion);
+
+        AppOpsServiceImpl testService = spy(
+                new AppOpsServiceImpl(sAppOpsFile, mHandler, mTestContext));
+
+        doNothing().when(testService).upgradeRunAnyInBackgroundLocked();
+        doNothing().when(testService).upgradeScheduleExactAlarmLocked();
+
+        // trigger upgrade
+        testService.systemReady();
+
+        verify(testService, never()).upgradeRunAnyInBackgroundLocked();
+        verify(testService).upgradeScheduleExactAlarmLocked();
+
+        testService.writeState();
+        assertTrue(parser.parse());
+        assertEquals(AppOpsServiceImpl.CURRENT_VERSION, parser.mVersion);
     }
 
     /**
@@ -174,7 +352,7 @@ public class AppOpsUpgradeTest {
      * Other fields may be added as and when required for testing.
      */
     private static final class AppOpsDataParser {
-        static final int NO_VERSION = -1;
+        static final int NO_VERSION = -123;
         int mVersion;
         private File mFile;
 

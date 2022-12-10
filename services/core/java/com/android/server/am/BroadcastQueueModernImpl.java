@@ -648,6 +648,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     private void applyDeliveryGroupPolicy(@NonNull BroadcastRecord r) {
+        if (mService.shouldIgnoreDeliveryGroupPolicy(r.intent.getAction())) {
+            return;
+        }
         final int policy = (r.options != null)
                 ? r.options.getDeliveryGroupPolicy() : BroadcastOptions.DELIVERY_GROUP_POLICY_ALL;
         final BroadcastConsumer broadcastConsumer;
@@ -1682,6 +1685,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 ipw.println("(none)");
             }
         }
+        ipw.decreaseIndent();
+        ipw.println();
+
+        ipw.println(" Broadcasts with ignored delivery group policies:");
+        ipw.increaseIndent();
+        mService.dumpDeliveryGroupPolicyIgnoredActions(ipw);
         ipw.decreaseIndent();
         ipw.println();
 

@@ -187,8 +187,8 @@ public final class SurfaceControl implements Parcelable {
             int L, int T, int R, int B);
     private static native void nativeSetDisplaySize(long transactionObj, IBinder displayToken,
             int width, int height);
-    private static native StaticDisplayInfo nativeGetStaticDisplayInfo(IBinder displayToken);
-    private static native DynamicDisplayInfo nativeGetDynamicDisplayInfo(IBinder displayToken);
+    private static native StaticDisplayInfo nativeGetStaticDisplayInfo(long displayId);
+    private static native DynamicDisplayInfo nativeGetDynamicDisplayInfo(long displayId);
     private static native DisplayedContentSamplingAttributes
             nativeGetDisplayedContentSamplingAttributes(IBinder displayToken);
     private static native boolean nativeSetDisplayedContentSamplingEnabled(IBinder displayToken,
@@ -1627,21 +1627,15 @@ public final class SurfaceControl implements Parcelable {
     /**
      * @hide
      */
-    public static StaticDisplayInfo getStaticDisplayInfo(IBinder displayToken) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-        return nativeGetStaticDisplayInfo(displayToken);
+    public static StaticDisplayInfo getStaticDisplayInfo(long displayId) {
+        return nativeGetStaticDisplayInfo(displayId);
     }
 
     /**
      * @hide
      */
-    public static DynamicDisplayInfo getDynamicDisplayInfo(IBinder displayToken) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-        return nativeGetDynamicDisplayInfo(displayToken);
+    public static DynamicDisplayInfo getDynamicDisplayInfo(long displayId) {
+        return nativeGetDynamicDisplayInfo(displayId);
     }
 
     /**

@@ -20,10 +20,7 @@ import android.telephony.CarrierConfigManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Connected
-import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
-import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
-import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -70,10 +67,9 @@ class MobileIconInteractorImpl(
     defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>,
     defaultMobileIconGroup: StateFlow<MobileIconGroup>,
     override val isDefaultConnectionFailed: StateFlow<Boolean>,
-    mobileMappingsProxy: MobileMappingsProxy,
     connectionRepository: MobileConnectionRepository,
 ) : MobileIconInteractor {
-    private val mobileStatusInfo = connectionRepository.subscriptionModelFlow
+    private val connectionInfo = connectionRepository.connectionInfo
 
     override val isDataEnabled: StateFlow<Boolean> = connectionRepository.dataEnabled
 
@@ -82,33 +78,27 @@ class MobileIconInteractorImpl(
     /** Observable for the current RAT indicator icon ([MobileIconGroup]) */
     override val networkTypeIconGroup: StateFlow<MobileIconGroup> =
         combine(
-                mobileStatusInfo,
+                connectionInfo,
                 defaultMobileIconMapping,
                 defaultMobileIconGroup,
             ) { info, mapping, defaultGroup ->
-                val lookupKey =
-                    when (val resolved = info.resolvedNetworkType) {
-                        is DefaultNetworkType -> mobileMappingsProxy.toIconKey(resolved.type)
-                        is OverrideNetworkType ->
-                            mobileMappingsProxy.toIconKeyOverride(resolved.type)
-                    }
-                mapping[lookupKey] ?: defaultGroup
+                mapping[info.resolvedNetworkType.lookupKey] ?: defaultGroup
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), defaultMobileIconGroup.value)
 
     override val isEmergencyOnly: StateFlow<Boolean> =
-        mobileStatusInfo
+        connectionInfo
             .mapLatest { it.isEmergencyOnly }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val level: StateFlow<Int> =
-        mobileStatusInfo
-            .mapLatest { mobileModel ->
+        connectionInfo
+            .mapLatest { connection ->
                 // TODO: incorporate [MobileMappings.Config.alwaysShowCdmaRssi]
-                if (mobileModel.isGsm) {
-                    mobileModel.primaryLevel
+                if (connection.isGsm) {
+                    connection.primaryLevel
                 } else {
-                    mobileModel.cdmaLevel
+                    connection.cdmaLevel
                 }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
@@ -120,7 +110,7 @@ class MobileIconInteractorImpl(
     override val numberOfLevels: StateFlow<Int> = MutableStateFlow(4)
 
     override val isDataConnected: StateFlow<Boolean> =
-        mobileStatusInfo
-            .mapLatest { subscriptionModel -> subscriptionModel.dataConnectionState == Connected }
+        connectionInfo
+            .mapLatest { connection -> connection.dataConnectionState == Connected }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 }

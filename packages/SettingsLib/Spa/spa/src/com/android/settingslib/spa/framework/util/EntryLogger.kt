@@ -28,9 +28,12 @@ import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 @Composable
 fun logEntryEvent(): (event: LogEvent, extraData: Bundle) -> Unit {
     val entryId = LocalEntryDataProvider.current.entryId ?: return { _, _ -> }
+    val arguments = LocalEntryDataProvider.current.arguments
     return { event, extraData ->
         SpaEnvironmentFactory.instance.logger.event(
-            entryId, event, category = LogCategory.VIEW, extraData = extraData
+            entryId, event, category = LogCategory.VIEW, extraData = extraData.apply {
+                if (arguments != null) putAll(arguments)
+            }
         )
     }
 }
@@ -40,7 +43,7 @@ fun wrapOnClickWithLog(onClick: (() -> Unit)?): (() -> Unit)? {
     if (onClick == null) return null
     val logEvent = logEntryEvent()
     return {
-        logEvent(LogEvent.ENTRY_CLICK, Bundle.EMPTY)
+        logEvent(LogEvent.ENTRY_CLICK, bundleOf())
         onClick()
     }
 }

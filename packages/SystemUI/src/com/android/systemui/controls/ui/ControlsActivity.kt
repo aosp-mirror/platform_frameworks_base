@@ -32,8 +32,10 @@ import androidx.activity.ComponentActivity
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.management.ControlsAnimations
+import com.android.systemui.controls.settings.ControlsSettingsDialogManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
 
 /**
@@ -47,7 +49,9 @@ class ControlsActivity @Inject constructor(
     private val uiController: ControlsUiController,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val dreamManager: IDreamManager,
-    private val featureFlags: FeatureFlags
+    private val featureFlags: FeatureFlags,
+    private val controlsSettingsDialogManager: ControlsSettingsDialogManager,
+    private val keyguardStateController: KeyguardStateController
 ) : ComponentActivity() {
 
     private lateinit var parent: ViewGroup
@@ -92,7 +96,13 @@ class ControlsActivity @Inject constructor(
 
         parent = requireViewById<ViewGroup>(R.id.global_actions_controls)
         parent.alpha = 0f
-        uiController.show(parent, { finishOrReturnToDream() }, this)
+        if (featureFlags.isEnabled(Flags.USE_APP_PANELS) && !keyguardStateController.isUnlocked) {
+            controlsSettingsDialogManager.maybeShowDialog(this) {
+                uiController.show(parent, { finishOrReturnToDream() }, this)
+            }
+        } else {
+            uiController.show(parent, { finishOrReturnToDream() }, this)
+        }
 
         ControlsAnimations.enterAnimation(parent).start()
     }
@@ -124,6 +134,7 @@ class ControlsActivity @Inject constructor(
         mExitToDream = false
 
         uiController.hide()
+        controlsSettingsDialogManager.closeDialog()
     }
 
     override fun onDestroy() {

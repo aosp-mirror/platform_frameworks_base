@@ -88,7 +88,7 @@ class ParameterTest {
         val emptyParam = navArguments.normalize()
         assertThat(emptyParam).isNotNull()
         assertThat(emptyParam.toString()).isEqualTo(
-            "Bundle[{rt_param=null, unset_string_param=null, unset_int_param=null}]"
+            "Bundle[{unset_rt_param=null, unset_string_param=null, unset_int_param=null}]"
         )
 
         val setPartialParam = navArguments.normalize(
@@ -99,7 +99,7 @@ class ParameterTest {
         )
         assertThat(setPartialParam).isNotNull()
         assertThat(setPartialParam.toString()).isEqualTo(
-            "Bundle[{rt_param=null, string_param=myStr, unset_int_param=null}]"
+            "Bundle[{rt_param=rtStr, string_param=myStr, unset_int_param=null}]"
         )
 
         val setAllParam = navArguments.normalize(
@@ -107,7 +107,8 @@ class ParameterTest {
                 "string_param" to "myStr",
                 "int_param" to 10,
                 "rt_param" to "rtStr",
-            )
+            ),
+            eraseRuntimeValues = true
         )
         assertThat(setAllParam).isNotNull()
         assertThat(setAllParam.toString()).isEqualTo(

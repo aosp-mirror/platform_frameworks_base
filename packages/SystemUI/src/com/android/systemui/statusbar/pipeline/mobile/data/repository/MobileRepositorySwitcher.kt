@@ -17,14 +17,14 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
 import android.os.Bundle
-import android.telephony.SubscriptionInfo
 import androidx.annotation.VisibleForTesting
-import com.android.settingslib.mobile.MobileMappings
+import com.android.settingslib.SignalIcon
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.DemoMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileConnectionsRepositoryImpl
 import javax.inject.Inject
@@ -109,14 +109,10 @@ constructor(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), realRepository)
 
-    override val subscriptionsFlow: StateFlow<List<SubscriptionInfo>> =
+    override val subscriptions: StateFlow<List<SubscriptionModel>> =
         activeRepo
-            .flatMapLatest { it.subscriptionsFlow }
-            .stateIn(
-                scope,
-                SharingStarted.WhileSubscribed(),
-                realRepository.subscriptionsFlow.value
-            )
+            .flatMapLatest { it.subscriptions }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), realRepository.subscriptions.value)
 
     override val activeMobileDataSubscriptionId: StateFlow<Int> =
         activeRepo
@@ -127,14 +123,11 @@ constructor(
                 realRepository.activeMobileDataSubscriptionId.value
             )
 
-    override val defaultDataSubRatConfig: StateFlow<MobileMappings.Config> =
-        activeRepo
-            .flatMapLatest { it.defaultDataSubRatConfig }
-            .stateIn(
-                scope,
-                SharingStarted.WhileSubscribed(),
-                realRepository.defaultDataSubRatConfig.value
-            )
+    override val defaultMobileIconMapping: Flow<Map<String, SignalIcon.MobileIconGroup>> =
+        activeRepo.flatMapLatest { it.defaultMobileIconMapping }
+
+    override val defaultMobileIconGroup: Flow<SignalIcon.MobileIconGroup> =
+        activeRepo.flatMapLatest { it.defaultMobileIconGroup }
 
     override val defaultDataSubId: StateFlow<Int> =
         activeRepo

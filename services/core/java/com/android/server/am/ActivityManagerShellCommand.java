@@ -345,6 +345,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runWaitForBroadcastIdle(pw);
                 case "wait-for-broadcast-barrier":
                     return runWaitForBroadcastBarrier(pw);
+                case "set-ignore-delivery-group-policy":
+                    return runSetIgnoreDeliveryGroupPolicy(pw);
+                case "clear-ignore-delivery-group-policy":
+                    return runClearIgnoreDeliveryGroupPolicy(pw);
                 case "compat":
                     return runCompat(pw);
                 case "refresh-settings-cache":
@@ -2006,12 +2010,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runSwitchUser(PrintWriter pw) throws RemoteException {
-        UserManager userManager = mInternal.mContext.getSystemService(UserManager.class);
-        final int userSwitchable = userManager.getUserSwitchability();
-        if (userSwitchable != UserManager.SWITCHABILITY_STATUS_OK) {
-            getErrPrintWriter().println("Error: " + userSwitchable);
-            return -1;
-        }
         boolean wait = false;
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -2024,6 +2022,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         int userId = Integer.parseInt(getNextArgRequired());
+
+        UserManager userManager = mInternal.mContext.getSystemService(UserManager.class);
+        final int userSwitchable = userManager.getUserSwitchability(UserHandle.of(userId));
+        if (userSwitchable != UserManager.SWITCHABILITY_STATUS_OK) {
+            getErrPrintWriter().println("Error: UserSwitchabilityResult=" + userSwitchable);
+            return -1;
+        }
+
         boolean switched;
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "shell_runSwitchUser");
         try {
@@ -3145,6 +3151,18 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    int runSetIgnoreDeliveryGroupPolicy(PrintWriter pw) throws RemoteException {
+        final String broadcastAction = getNextArgRequired();
+        mInternal.setIgnoreDeliveryGroupPolicy(broadcastAction);
+        return 0;
+    }
+
+    int runClearIgnoreDeliveryGroupPolicy(PrintWriter pw) throws RemoteException {
+        final String broadcastAction = getNextArgRequired();
+        mInternal.clearIgnoreDeliveryGroupPolicy(broadcastAction);
+        return 0;
+    }
+
     int runRefreshSettingsCache() throws RemoteException {
         mInternal.refreshSettingsCache();
         return 0;
@@ -4029,7 +4047,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     + "background.");
             pw.println("  set-foreground-service-delegate [--user <USER_ID>] <PACKAGE> start|stop");
             pw.println("         Start/stop an app's foreground service delegate.");
-            pw.println();
+            pw.println("  set-ignore-delivery-group-policy <ACTION>");
+            pw.println("         Start ignoring delivery group policy set for a broadcast action");
+            pw.println("  clear-ignore-delivery-group-policy <ACTION>");
+            pw.println("         Stop ignoring delivery group policy set for a broadcast action");
             Intent.printIntentArgsHelp(pw, "");
         }
     }

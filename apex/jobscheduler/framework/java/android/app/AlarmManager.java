@@ -27,7 +27,6 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -285,11 +284,10 @@ public class AlarmManager {
      * The permission {@link Manifest.permission#SCHEDULE_EXACT_ALARM} will be denied, unless the
      * user explicitly allows it from Settings.
      *
-     * TODO (b/226439802): Either enable it in the next SDK or replace it with a better alternative.
      * @hide
      */
     @ChangeId
-    @Disabled
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public static final long SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT = 226439802L;
 
     @UnsupportedAppUsage
