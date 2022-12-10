@@ -17,6 +17,7 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator
 
+import android.app.Notification
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -33,6 +34,7 @@ import com.android.systemui.statusbar.notification.collection.provider.SectionHe
 import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProvider
 import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProviderImpl
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
@@ -100,6 +102,50 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
             testScheduler.runCurrent()
 
             // THEN: The notification is shown regardless
+            assertThat(unseenFilter.shouldFilterOut(fakeEntry, 0L)).isFalse()
+        }
+    }
+
+    @Test
+    fun unseenFilterDoesNotSuppressSeenOngoingNotifWhileKeyguardShowing() {
+        whenever(notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard).thenReturn(true)
+
+        // GIVEN: Keyguard is not showing, and an ongoing notification is present
+        keyguardRepository.setKeyguardShowing(false)
+        runKeyguardCoordinatorTest {
+            val fakeEntry = NotificationEntryBuilder()
+                .setNotification(Notification.Builder(mContext).setOngoing(true).build())
+                .build()
+            collectionListener.onEntryAdded(fakeEntry)
+
+            // WHEN: The keyguard is now showing
+            keyguardRepository.setKeyguardShowing(true)
+            testScheduler.runCurrent()
+
+            // THEN: The notification is recognized as "ongoing" and is not filtered out.
+            assertThat(unseenFilter.shouldFilterOut(fakeEntry, 0L)).isFalse()
+        }
+    }
+
+    @Test
+    fun unseenFilterDoesNotSuppressSeenMediaNotifWhileKeyguardShowing() {
+        whenever(notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard).thenReturn(true)
+
+        // GIVEN: Keyguard is not showing, and a media notification is present
+        keyguardRepository.setKeyguardShowing(false)
+        runKeyguardCoordinatorTest {
+            val fakeEntry = NotificationEntryBuilder().build().apply {
+                row = mock<ExpandableNotificationRow>().apply {
+                    whenever(isMediaRow).thenReturn(true)
+                }
+            }
+            collectionListener.onEntryAdded(fakeEntry)
+
+            // WHEN: The keyguard is now showing
+            keyguardRepository.setKeyguardShowing(true)
+            testScheduler.runCurrent()
+
+            // THEN: The notification is recognized as "media" and is not filtered out.
             assertThat(unseenFilter.shouldFilterOut(fakeEntry, 0L)).isFalse()
         }
     }
