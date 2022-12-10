@@ -73,6 +73,7 @@ import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
@@ -185,6 +186,14 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             }
         }
     }
+
+    /**
+     * This single object allows the queue to dispatch receivers using scheduleReceiverList
+     * without constantly allocating new ReceiverInfo objects or ArrayLists.  This queue
+     * implementation is known to have a maximum size of one entry.
+     */
+    @VisibleForTesting
+    final BroadcastReceiverBatch mReceiverBatch = new BroadcastReceiverBatch(1);
 
     BroadcastQueueImpl(ActivityManagerService service, Handler handler,
             String name, BroadcastConstants constants, boolean allowDelayBehindServices,
@@ -388,10 +397,11 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     + ": " + r);
             mService.notifyPackageUse(r.intent.getComponent().getPackageName(),
                                       PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER);
-            thread.scheduleReceiver(prepareReceiverIntent(r.intent, r.curFilteredExtras),
+            thread.scheduleReceiverList(mReceiverBatch.manifestReceiver(
+                    prepareReceiverIntent(r.intent, r.curFilteredExtras),
                     r.curReceiver, null /* compatInfo (unused but need to keep method signature) */,
                     r.resultCode, r.resultData, r.resultExtras, r.ordered, r.userId,
-                    app.mState.getReportedProcState());
+                    app.mState.getReportedProcState()));
             if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                     "Process cur broadcast " + r + " DELIVERED for app " + app);
             started = true;
@@ -725,9 +735,10 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 // If we have an app thread, do the call through that so it is
                 // correctly ordered with other one-way calls.
                 try {
-                    thread.scheduleRegisteredReceiver(receiver, intent, resultCode,
+                    thread.scheduleReceiverList(mReceiverBatch.registeredReceiver(
+                            receiver, intent, resultCode,
                             data, extras, ordered, sticky, sendingUser,
-                            app.mState.getReportedProcState());
+                            app.mState.getReportedProcState()));
                 } catch (RemoteException ex) {
                     // Failed to call into the process. It's either dying or wedged. Kill it gently.
                     synchronized (mService) {
