@@ -82,7 +82,7 @@ bool Properties::isolatedProcess = false;
 int Properties::contextPriority = 0;
 float Properties::defaultSdrWhitePoint = 200.f;
 
-bool Properties::useHintManager = true;
+bool Properties::useHintManager = false;
 int Properties::targetCpuTimePercentage = 70;
 
 bool Properties::enableWebViewOverlays = true;
@@ -142,7 +142,7 @@ bool Properties::load() {
 
     runningInEmulator = base::GetBoolProperty(PROPERTY_IS_EMULATOR, false);
 
-    useHintManager = base::GetBoolProperty(PROPERTY_USE_HINT_MANAGER, true);
+    useHintManager = base::GetBoolProperty(PROPERTY_USE_HINT_MANAGER, false);
     targetCpuTimePercentage = base::GetIntProperty(PROPERTY_TARGET_CPU_TIME_PERCENTAGE, 70);
     if (targetCpuTimePercentage <= 0 || targetCpuTimePercentage > 100) targetCpuTimePercentage = 70;
 
