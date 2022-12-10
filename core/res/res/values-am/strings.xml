@@ -1193,7 +1193,7 @@
     <string name="use_a_different_app" msgid="4987790276170972776">"የተለየ መተግበሪያ ይጠቀሙ"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"ነባሪ አጽዳ በስርዓት ቅንብሮች  ውስጥ  &gt; Apps &amp;gt፤ወርዷል፡፡"</string>
     <string name="chooseActivity" msgid="8563390197659779956">"ድርጊት ምረጥ"</string>
-    <string name="chooseUsbActivity" msgid="2096269989990986612">"ለUSB መሳሪያ መተግበሪያ ምረጥ"</string>
+    <string name="chooseUsbActivity" msgid="2096269989990986612">"ለUSB መሣሪያ መተግበሪያ ምረጥ"</string>
     <string name="noApplications" msgid="1186909265235544019">"ምንም መተግበሪያዎች ይህን ድርጊት ማከናወን አይችሉም።"</string>
     <string name="aerr_application" msgid="4090916809370389109">"<xliff:g id="APPLICATION">%1$s</xliff:g> አቁሟል"</string>
     <string name="aerr_process" msgid="4268018696970966407">"<xliff:g id="PROCESS">%1$s</xliff:g> ቆሟል"</string>
@@ -1440,7 +1440,7 @@
     <string name="ext_media_status_missing" msgid="6520746443048867314">"አልገባም"</string>
     <string name="activity_list_empty" msgid="4219430010716034252">"ምንም ተመሳሳይ እንቅስቃሴዎች አልተገኙም።"</string>
     <string name="permlab_route_media_output" msgid="8048124531439513118">"የሚዲያ ውፅዓት ማዛወር"</string>
-    <string name="permdesc_route_media_output" msgid="1759683269387729675">"አንድ መተግበሪያ የሚዲያ ውፅአትን ወደ ሌላ ውጫዊ መሳሪያ እንዲመራ ይፈቅድለታል።"</string>
+    <string name="permdesc_route_media_output" msgid="1759683269387729675">"አንድ መተግበሪያ የሚዲያ ውፅአትን ወደ ሌላ ውጫዊ መሣሪያ እንዲመራ ይፈቅድለታል።"</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"የመጫን ክፍለ ጊዜዎችን ማንበብ"</string>
     <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"መተግበሪያው የመጫን ክፍለ ጊዜዎችን እንዲያነብ ይፈቅድለታል። ይህም ስለ ገቢር የጥቅል ጭነቶች ዝርዝር መረጃን እንዲያይ ይፈቅድለታል።"</string>
     <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"የጭነት ጥቅሎችን መጠየቅ"</string>
@@ -1826,7 +1826,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"አዲስ ፒን ያረጋግጡ"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"ገደቦችን ለመቀየር ፒን ይፍጠሩ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"ፒኖች አይዛመዱም። እንደገና ይሞክሩ።"</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ፒን በጣም አጭር ነው። ቢያንስ 4 አኃዝ መሆን አለበት።"</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ፒን በጣም አጭር ነው። ቢያንስ 4 አሃዝ መሆን አለበት።"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"ቆይተው እንደገና ይሞክሩ"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ሙሉ ገጽ በማሳየት ላይ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ለመውጣት፣ ከላይ ወደታች ጠረግ ያድርጉ።"</string>
