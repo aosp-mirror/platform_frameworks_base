@@ -113,7 +113,8 @@ public final class JobConcurrencyManagerTest {
 
         @Override
         JobServiceContext createJobServiceContext(JobSchedulerService service,
-                JobConcurrencyManager concurrencyManager, IBatteryStats batteryStats,
+                JobConcurrencyManager concurrencyManager,
+                JobNotificationCoordinator notificationCoordinator, IBatteryStats batteryStats,
                 JobPackageTracker tracker, Looper looper) {
             final JobServiceContext context = mock(JobServiceContext.class);
             doAnswer((Answer<Boolean>) invocationOnMock -> {
