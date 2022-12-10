@@ -653,7 +653,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"快捷设置编辑器。"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g>通知：<xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"打开设置。"</string>
-    <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"开启快捷设置。"</string>
+    <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"打开快捷设置。"</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"关闭快捷设置。"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"目前登录的用户名为<xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"选择用户"</string>
