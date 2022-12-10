@@ -45,13 +45,11 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.QuintConsumer;
 import com.android.internal.util.function.QuintFunction;
-import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.UndecFunction;
 import com.android.server.LocalServices;
 
@@ -256,14 +254,14 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     }
 
     @Override
-    public SyncNotedAppOp startProxyOperation(int code,
+    public SyncNotedAppOp startProxyOperation(@NonNull IBinder clientId, int code,
             @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
             boolean skipProxyOperation, @AttributionFlags int proxyAttributionFlags,
             @AttributionFlags int proxiedAttributionFlags, int attributionChainId,
-            @NonNull DecFunction<Integer, AttributionSource, Boolean, Boolean, String, Boolean,
-                    Boolean, Integer, Integer, Integer, SyncNotedAppOp> superImpl) {
-        return superImpl.apply(resolveDatasourceOp(code, attributionSource.getUid(),
+            @NonNull UndecFunction<IBinder, Integer, AttributionSource, Boolean, Boolean, String,
+                    Boolean, Boolean, Integer, Integer, Integer, SyncNotedAppOp> superImpl) {
+        return superImpl.apply(clientId, resolveDatasourceOp(code, attributionSource.getUid(),
                 attributionSource.getPackageName(), attributionSource.getAttributionTag()),
                 attributionSource, startIfModeDefault, shouldCollectAsyncNotedOp, message,
                 shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
@@ -279,10 +277,10 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     }
 
     @Override
-    public void finishProxyOperation(int code, @NonNull AttributionSource attributionSource,
-            boolean skipProxyOperation, @NonNull TriFunction<Integer, AttributionSource,
-            Boolean, Void> superImpl) {
-        superImpl.apply(resolveDatasourceOp(code, attributionSource.getUid(),
+    public void finishProxyOperation(@NonNull IBinder clientId, int code,
+            @NonNull AttributionSource attributionSource, boolean skipProxyOperation,
+            @NonNull QuadFunction<IBinder, Integer, AttributionSource, Boolean, Void> superImpl) {
+        superImpl.apply(clientId, resolveDatasourceOp(code, attributionSource.getUid(),
                 attributionSource.getPackageName(), attributionSource.getAttributionTag()),
                 attributionSource, skipProxyOperation);
     }
