@@ -665,7 +665,8 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_ENABLED,
                     Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_TYPE,
                     Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED,
-                    Settings.Global.Wearable.SCREENSHOT_ENABLED);
+                    Settings.Global.Wearable.SCREENSHOT_ENABLED,
+                    Settings.Global.Wearable.DISABLE_AOD_WHILE_PLUGGED);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(

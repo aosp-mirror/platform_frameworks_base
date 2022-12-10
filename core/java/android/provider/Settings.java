@@ -18487,6 +18487,13 @@ public final class Settings {
              * @hide
              */
             public static final int UPGRADE_DATA_MIGRATION_DONE = 2;
+
+            /**
+             * Whether to disable AOD while plugged.
+             * (0 = false, 1 = true)
+             * @hide
+             */
+            public static final String DISABLE_AOD_WHILE_PLUGGED = "disable_aod_while_plugged";
         }
     }
 
