@@ -255,6 +255,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
                     activityManager = activityManager,
                     refreshUsersScheduler = refreshUsersScheduler,
                     guestUserInteractor = guestUserInteractor,
+                    uiEventLogger = uiEventLogger,
                 )
         )
     }

@@ -386,7 +386,15 @@ public class VirtualDeviceManagerService extends SystemService {
         @Override // BinderCall
         @VirtualDeviceParams.DevicePolicy
         public int getDevicePolicy(int deviceId, @VirtualDeviceParams.PolicyType int policyType) {
-            return mLocalService.getDevicePolicy(deviceId, policyType);
+            synchronized (mVirtualDeviceManagerLock) {
+                for (int i = 0; i < mVirtualDevices.size(); i++) {
+                    final VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
+                    if (device.getDeviceId() == deviceId) {
+                        return device.getDevicePolicy(policyType);
+                    }
+                }
+            }
+            return VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
         }
 
 
@@ -487,20 +495,6 @@ public class VirtualDeviceManagerService extends SystemService {
         }
 
         @Override
-        @VirtualDeviceParams.DevicePolicy
-        public int getDevicePolicy(int deviceId, @VirtualDeviceParams.PolicyType int policyType) {
-            synchronized (mVirtualDeviceManagerLock) {
-                for (int i = 0; i < mVirtualDevices.size(); i++) {
-                    final VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
-                    if (device.getDeviceId() == deviceId) {
-                        return device.getDevicePolicy(policyType);
-                    }
-                }
-            }
-            return VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
-        }
-
-        @Override
         public void onVirtualDisplayCreated(int displayId) {
             final VirtualDisplayListener[] listeners;
             synchronized (mVirtualDeviceManagerLock) {
@@ -558,19 +552,6 @@ public class VirtualDeviceManagerService extends SystemService {
         @Override
         public int getBaseVirtualDisplayFlags(IVirtualDevice virtualDevice) {
             return ((VirtualDeviceImpl) virtualDevice).getBaseVirtualDisplayFlags();
-        }
-
-        @Override
-        public boolean isAppOwnerOfAnyVirtualDevice(int uid) {
-            synchronized (mVirtualDeviceManagerLock) {
-                int size = mVirtualDevices.size();
-                for (int i = 0; i < size; i++) {
-                    if (mVirtualDevices.valueAt(i).getOwnerUid() == uid) {
-                        return true;
-                    }
-                }
-                return false;
-            }
         }
 
         @Override

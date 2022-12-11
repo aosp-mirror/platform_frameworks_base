@@ -31,6 +31,7 @@ import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
 import android.util.Log
+import com.android.internal.logging.UiEventLogger
 import com.android.internal.util.UserIcons
 import com.android.systemui.R
 import com.android.systemui.SystemUISecondaryUserService
@@ -54,6 +55,7 @@ import com.android.systemui.user.domain.model.ShowDialogRequestModel
 import com.android.systemui.user.legacyhelper.data.LegacyUserDataHelper
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.shared.model.UserModel
+import com.android.systemui.user.utils.MultiUserActionsEvent
 import com.android.systemui.util.kotlin.pairwise
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -93,6 +95,7 @@ constructor(
     private val activityManager: ActivityManager,
     private val refreshUsersScheduler: RefreshUsersScheduler,
     private val guestUserInteractor: GuestUserInteractor,
+    private val uiEventLogger: UiEventLogger,
 ) {
     /**
      * Defines interface for classes that can be notified when the state of users on the device is
@@ -115,9 +118,7 @@ constructor(
     private val callbackMutex = Mutex()
     private val callbacks = mutableSetOf<UserCallback>()
     private val userInfos: Flow<List<UserInfo>> =
-        repository.userInfos.map { userInfos ->
-            userInfos.filter { it.isFull }
-        }
+        repository.userInfos.map { userInfos -> userInfos.filter { it.isFull } }
 
     /** List of current on-device users to select from. */
     val users: Flow<List<UserModel>>
@@ -427,14 +428,17 @@ constructor(
         dialogShower: UserSwitchDialogController.DialogShower? = null,
     ) {
         when (action) {
-            UserActionModel.ENTER_GUEST_MODE ->
+            UserActionModel.ENTER_GUEST_MODE -> {
+                uiEventLogger.log(MultiUserActionsEvent.CREATE_GUEST_FROM_USER_SWITCHER)
                 guestUserInteractor.createAndSwitchTo(
                     this::showDialog,
                     this::dismissDialog,
                 ) { userId ->
                     selectUser(userId, dialogShower)
                 }
+            }
             UserActionModel.ADD_USER -> {
+                uiEventLogger.log(MultiUserActionsEvent.CREATE_USER_FROM_USER_SWITCHER)
                 val currentUser = repository.getSelectedUserInfo()
                 showDialog(
                     ShowDialogRequestModel.ShowAddUserDialog(
@@ -445,7 +449,8 @@ constructor(
                     )
                 )
             }
-            UserActionModel.ADD_SUPERVISED_USER ->
+            UserActionModel.ADD_SUPERVISED_USER -> {
+                uiEventLogger.log(MultiUserActionsEvent.CREATE_RESTRICTED_USER_FROM_USER_SWITCHER)
                 activityStarter.startActivity(
                     Intent()
                         .setAction(UserManager.ACTION_CREATE_SUPERVISED_USER)
@@ -453,6 +458,7 @@ constructor(
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                     /* dismissShade= */ true,
                 )
+            }
             UserActionModel.NAVIGATE_TO_USER_MANAGEMENT ->
                 activityStarter.startActivity(
                     Intent(Settings.ACTION_USER_SETTINGS),
