@@ -379,6 +379,10 @@ public final class DreamManagerService extends SystemService {
                 return false;
             }
 
+            if (!dreamsEnabledForUser(ActivityManager.getCurrentUser())) {
+                return false;
+            }
+
             if ((mWhenToDream & DREAM_ON_CHARGE) == DREAM_ON_CHARGE) {
                 return mIsCharging;
             }
