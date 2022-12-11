@@ -1493,7 +1493,6 @@ public class TaskTests extends WindowTestsBase {
     public void testReorderActivityToFront() {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final Task task =  new TaskBuilder(mSupervisor).setCreateActivity(true).build();
-        doNothing().when(task).onActivityVisibleRequestedChanged();
         final ActivityRecord activity = task.getTopMostActivity();
 
         final TaskFragment fragment = createTaskFragmentWithEmbeddedActivity(task, organizer);

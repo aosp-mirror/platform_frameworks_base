@@ -4025,7 +4025,7 @@
          @hide
     -->
     <permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|module" />
 
     <!-- Allows an application to avoid all toast rate limiting restrictions.
          <p>Not for use by third-party applications.
@@ -7355,6 +7355,10 @@
         </service>
 
         <service android:name="com.android.server.notification.NotificationHistoryJobService"
+                 android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
+
+        <service android:name="com.android.server.healthconnect.storage.AutoDeleteService"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 

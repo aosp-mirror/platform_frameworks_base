@@ -46,7 +46,6 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.wallpapers.canvas.WallpaperLocalColorExtractor;
@@ -58,7 +57,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -89,17 +87,12 @@ public class ImageWallpaper extends WallpaperService {
     private final DelayableExecutor mBackgroundExecutor;
     private static final int DELAY_UNLOAD_BITMAP = 2000;
 
-    @Main
-    private final Executor mMainExecutor;
-
     @Inject
     public ImageWallpaper(FeatureFlags featureFlags,
-            @Background DelayableExecutor backgroundExecutor,
-            @Main Executor mainExecutor) {
+            @Background DelayableExecutor backgroundExecutor) {
         super();
         mFeatureFlags = featureFlags;
         mBackgroundExecutor = backgroundExecutor;
-        mMainExecutor = mainExecutor;
     }
 
     @Override
@@ -672,13 +665,9 @@ public class ImageWallpaper extends WallpaperService {
                 loadWallpaperAndDrawFrameInternal();
             } else {
                 mBitmapUsages++;
-
-                // drawing is done on the main thread
-                mMainExecutor.execute(() -> {
-                    drawFrameOnCanvas(mBitmap);
-                    reportEngineShown(false);
-                    unloadBitmapIfNotUsed();
-                });
+                drawFrameOnCanvas(mBitmap);
+                reportEngineShown(false);
+                unloadBitmapIfNotUsedInternal();
             }
         }
 
@@ -716,11 +705,15 @@ public class ImageWallpaper extends WallpaperService {
 
         private void unloadBitmapIfNotUsedSynchronized() {
             synchronized (mLock) {
-                mBitmapUsages -= 1;
-                if (mBitmapUsages <= 0) {
-                    mBitmapUsages = 0;
-                    unloadBitmapInternal();
-                }
+                unloadBitmapIfNotUsedInternal();
+            }
+        }
+
+        private void unloadBitmapIfNotUsedInternal() {
+            mBitmapUsages -= 1;
+            if (mBitmapUsages <= 0) {
+                mBitmapUsages = 0;
+                unloadBitmapInternal();
             }
         }
 

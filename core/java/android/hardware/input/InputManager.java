@@ -2044,6 +2044,217 @@ public final class InputManager {
     }
 
     /**
+     * Whether there is a gesture-compatible touchpad connected to the device.
+     * @hide
+     */
+    public boolean areTouchpadGesturesAvailable(@NonNull Context context) {
+        // TODO: implement the right logic
+        return true;
+    }
+
+    /**
+     * Gets the touchpad pointer speed.
+     *
+     * The returned value only applies to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @return The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
+     * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
+     *
+     * @hide
+     */
+    public int getTouchpadPointerSpeed(@NonNull Context context) {
+        int speed = DEFAULT_POINTER_SPEED;
+        // TODO: obtain the actual speed from the settings
+        return speed;
+    }
+
+    /**
+     * Sets the touchpad pointer speed, and saves it in the settings.
+     *
+     * The new speed will only apply to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @param speed The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
+     * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
+     *
+     * @hide
+     */
+    public void setTouchpadPointerSpeed(@NonNull Context context, int speed) {
+        if (speed < MIN_POINTER_SPEED || speed > MAX_POINTER_SPEED) {
+            throw new IllegalArgumentException("speed out of range");
+        }
+
+        // TODO: set the right setting
+    }
+
+    /**
+     * Changes the touchpad pointer speed temporarily, but does not save the setting.
+     *
+     * The new speed will only apply to gesture-compatible touchpads.
+     * Requires {@link android.Manifest.permission.SET_POINTER_SPEED}.
+     *
+     * @param speed The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
+     * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
+     *
+     * @hide
+     */
+    public void tryTouchpadPointerSpeed(int speed) {
+        if (speed < MIN_POINTER_SPEED || speed > MAX_POINTER_SPEED) {
+            throw new IllegalArgumentException("speed out of range");
+        }
+
+        // TODO: set the touchpad pointer speed on the gesture library
+    }
+
+    /**
+     * Returns true if the touchpad should use pointer acceleration.
+     *
+     * The returned value only applies to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @return Whether the touchpad should use pointer acceleration.
+     *
+     * @hide
+     */
+    public boolean useTouchpadPointerAcceleration(@NonNull Context context) {
+        // TODO: obtain the actual behavior from the settings
+        return true;
+    }
+
+    /**
+     * Sets the pointer acceleration behavior for the touchpad.
+     *
+     * The new behavior is only applied to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @param enabled Will enable pointer acceleration if true, disable it if false
+     *
+     * @hide
+     */
+    public void setTouchpadPointerAcceleration(@NonNull Context context, boolean enabled) {
+        // TODO: set the right setting
+    }
+
+    /**
+     * Returns true if moving two fingers upwards on the touchpad should
+     * scroll down, which is known as natural scrolling.
+     *
+     * The returned value only applies to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @return Whether the touchpad should use natural scrolling.
+     *
+     * @hide
+     */
+    public boolean useTouchpadNaturalScrolling(@NonNull Context context) {
+        // TODO: obtain the actual behavior from the settings
+        return true;
+    }
+
+    /**
+     * Sets the natural scroll behavior for the touchpad.
+     *
+     * If natural scrolling is enabled, moving two fingers upwards on the
+     * touchpad will scroll down.
+     *
+     * @param context The application context.
+     * @param enabled Will enable natural scroll if true, disable it if false
+     *
+     * @hide
+     */
+    public void setTouchpadNaturalScrolling(@NonNull Context context, boolean enabled) {
+        // TODO: set the right setting
+    }
+
+    /**
+     * Returns true if the touchpad should use tap to click.
+     *
+     * The returned value only applies to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @return Whether the touchpad should use tap to click.
+     *
+     * @hide
+     */
+    public boolean useTouchpadTapToClick(@NonNull Context context) {
+        // TODO: obtain the actual behavior from the settings
+        return true;
+    }
+
+    /**
+     * Sets the tap to click behavior for the touchpad.
+     *
+     * The new behavior is only applied to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @param enabled Will enable tap to click if true, disable it if false
+     *
+     * @hide
+     */
+    public void setTouchpadTapToClick(@NonNull Context context, boolean enabled) {
+        // TODO: set the right setting
+    }
+
+    /**
+     * Returns true if the touchpad should use tap dragging.
+     *
+     * The returned value only applies to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @return Whether the touchpad should use tap dragging.
+     *
+     * @hide
+     */
+    public boolean useTouchpadTapDragging(@NonNull Context context) {
+        // TODO: obtain the actual behavior from the settings
+        return true;
+    }
+
+    /**
+     * Sets the tap dragging behavior for the touchpad.
+     *
+     * The new behavior is only applied to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @param enabled Will enable tap dragging if true, disable it if false
+     *
+     * @hide
+     */
+    public void setTouchpadTapDragging(@NonNull Context context, boolean enabled) {
+        // TODO: set the right setting
+    }
+
+    /**
+     * Returns true if the touchpad should use the right click zone.
+     *
+     * The returned value only applies to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @return Whether the touchpad should use the right click zone.
+     *
+     * @hide
+     */
+    public boolean useTouchpadRightClickZone(@NonNull Context context) {
+        // TODO: obtain the actual behavior from the settings
+        return true;
+    }
+
+    /**
+     * Sets the right click zone behavior for the touchpad.
+     *
+     * The new behavior is only applied to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @param enabled Will enable the right click zone if true, disable it if false
+     *
+     * @hide
+     */
+    public void setTouchpadRightClickZone(@NonNull Context context, boolean enabled) {
+        // TODO: set the right setting
+    }
+
+    /**
      * A callback used to be notified about battery state changes for an input device. The
      * {@link #onBatteryStateChanged(int, long, BatteryState)} method will be called once after the
      * listener is successfully registered to provide the initial battery state of the device.

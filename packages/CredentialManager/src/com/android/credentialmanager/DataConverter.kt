@@ -88,6 +88,14 @@ class GetFlowUtils {
       }
     }
 
+    fun toRequestDisplayInfo(
+      requestInfo: RequestInfo,
+    ): com.android.credentialmanager.getflow.RequestDisplayInfo {
+      return com.android.credentialmanager.getflow.RequestDisplayInfo(
+        appDomainName = requestInfo.appPackageName
+      )
+    }
+
 
     /* From service data structure to UI credential entry list representation. */
     private fun getCredentialOptionInfoList(

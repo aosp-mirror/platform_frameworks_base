@@ -17,7 +17,6 @@
 package com.android.settingslib.spa.framework.common
 
 import android.os.Bundle
-import android.util.Log
 
 // Defines the category of the log, for quick filter
 enum class LogCategory {
@@ -60,16 +59,5 @@ interface SpaLogger {
         category: LogCategory = LogCategory.DEFAULT,
         extraData: Bundle = Bundle.EMPTY
     ) {
-    }
-}
-
-class LocalLogger : SpaLogger {
-    override fun message(tag: String, msg: String, category: LogCategory) {
-        Log.d("SpaMsg-$category", "[$tag] $msg")
-    }
-
-    override fun event(id: String, event: LogEvent, category: LogCategory, extraData: Bundle) {
-        val extraMsg = extraData.toString().removeRange(0, 6)
-        Log.d("SpaEvent-$category", "[$id] $event $extraMsg")
     }
 }

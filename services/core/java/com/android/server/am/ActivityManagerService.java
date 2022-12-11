@@ -137,6 +137,8 @@ import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_
 import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_SYSTEM;
 import static com.android.server.net.NetworkPolicyManagerInternal.updateBlockedReasonsWithProcState;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.pm.UserManagerInternal.USER_START_MODE_BACKGROUND;
+import static com.android.server.pm.UserManagerInternal.USER_START_MODE_FOREGROUND;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
@@ -1542,7 +1544,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int DISPATCH_SENDING_BROADCAST_EVENT = 74;
     static final int DISPATCH_BINDING_SERVICE_EVENT = 75;
     static final int SERVICE_SHORT_FGS_TIMEOUT_MSG = 76;
-    static final int SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG = 77;
+    static final int SERVICE_SHORT_FGS_PROCSTATE_TIMEOUT_MSG = 77;
+    static final int SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG = 78;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -1879,6 +1882,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } break;
                 case SERVICE_SHORT_FGS_TIMEOUT_MSG: {
                     mServices.onShortFgsTimeout((ServiceRecord) msg.obj);
+                } break;
+                case SERVICE_SHORT_FGS_PROCSTATE_TIMEOUT_MSG: {
+                    mServices.onShortFgsProcstateTimeout((ServiceRecord) msg.obj);
                 } break;
                 case SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG: {
                     mServices.onShortFgsAnrTimeout((ServiceRecord) msg.obj);
@@ -12671,7 +12677,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param platformCompat the instance of platform compat
      */
     private static void filterNonExportedComponents(Intent intent, int callingUid,
-            List query, PlatformCompat platformCompat, String callerPackage) {
+            List query, PlatformCompat platformCompat, String callerPackage, String resolvedType) {
         if (query == null
                 || intent.getPackage() != null
                 || intent.getComponent() != null
@@ -12698,19 +12704,24 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else {
                 continue;
             }
-            if (!platformCompat.isChangeEnabledByUid(
-                    IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS, callingUid)) {
-                Slog.w(TAG, "Non-exported component not filtered out "
-                        + "(will be filtered out once the app targets U+)- intent: "
-                        + intent.getAction() + ", component: "
-                        + componentInfo + ", sender: "
-                        + callerPackage);
+            boolean hasToBeExportedToMatch = platformCompat.isChangeEnabledByUid(
+                    ActivityManagerService.IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS,
+                    callingUid);
+            String[] categories = intent.getCategories() == null ? new String[0]
+                    : intent.getCategories().toArray(String[]::new);
+            FrameworkStatsLog.write(FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED,
+                    FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH,
+                    callingUid,
+                    componentInfo,
+                    callerPackage,
+                    intent.getAction(),
+                    categories,
+                    resolvedType,
+                    intent.getScheme(),
+                    hasToBeExportedToMatch);
+            if (!hasToBeExportedToMatch) {
                 return;
             }
-            Slog.w(TAG, "Non-exported component filtered out - intent: "
-                    + intent.getAction() + ", component: "
-                    + componentInfo + ", sender: "
-                    + callerPackage);
             query.remove(i);
         }
     }
@@ -14624,7 +14635,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         filterNonExportedComponents(intent, callingUid, registeredReceivers,
-                mPlatformCompat, callerPackage);
+                mPlatformCompat, callerPackage, resolvedType);
         int NR = registeredReceivers != null ? registeredReceivers.size() : 0;
         if (!ordered && NR > 0 && !mEnableModernQueue) {
             // If we are not serializing this broadcast, then send the
@@ -14730,7 +14741,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || resultTo != null) {
             BroadcastQueue queue = broadcastQueueForIntent(intent);
             filterNonExportedComponents(intent, callingUid, receivers,
-                    mPlatformCompat, callerPackage);
+                    mPlatformCompat, callerPackage, resolvedType);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp, callerPackage,
                     callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
                     requiredPermissions, excludedPermissions, excludedPackages, appOp, brOptions,
@@ -16570,14 +16581,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public boolean startUserInBackgroundWithListener(final int userId,
                 @Nullable IProgressListener unlockListener) {
-        return mUserController.startUser(userId, /* foreground */ false, unlockListener);
+        return mUserController.startUser(userId, USER_START_MODE_BACKGROUND, unlockListener);
     }
 
     @Override
     public boolean startUserInForegroundWithListener(final int userId,
             @Nullable IProgressListener unlockListener) {
         // Permission check done inside UserController.
-        return mUserController.startUser(userId, /* foreground */ true, unlockListener);
+        return mUserController.startUser(userId, USER_START_MODE_FOREGROUND, unlockListener);
     }
 
     @Override
@@ -18530,7 +18541,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public int restartUserInBackground(final int userId) {
-        return mUserController.restartUser(userId, /* foreground */ false);
+        return mUserController.restartUser(userId, USER_START_MODE_BACKGROUND);
     }
 
     @Override

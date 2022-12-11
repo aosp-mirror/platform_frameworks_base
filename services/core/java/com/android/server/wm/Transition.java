@@ -636,7 +636,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 // No need to clip the display in case seeing the clipped content when during the
                 // display rotation. No need to clip activities because they rely on clipping on
                 // task layers.
-                if (target.asDisplayContent() != null || target.asActivityRecord() != null) {
+                if (target.asTaskFragment() == null) {
                     t.setCrop(targetLeash, null /* crop */);
                 } else {
                     // Crop to the resolved override bounds.

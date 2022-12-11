@@ -84,6 +84,7 @@ import android.platform.test.annotations.Presubmit;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArraySet;
+import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.KeyEvent;
 import android.view.WindowManager;
@@ -304,15 +305,50 @@ public class VirtualDeviceManagerServiceTest {
         mVdms = new VirtualDeviceManagerService(mContext);
         mLocalService = mVdms.getLocalServiceInstance();
 
-        VirtualDeviceParams params = new VirtualDeviceParams
-                .Builder()
-                .setBlockedActivities(getBlockedActivities())
-                .build();
-        mDeviceImpl = new VirtualDeviceImpl(mContext,
-                mAssociationInfo, new Binder(), /* ownerUid */ 0, VIRTUAL_DEVICE_ID,
-                mInputController, mSensorController, (int associationId) -> {},
-                mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback, params);
-        mVdms.addVirtualDevice(mDeviceImpl);
+        mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID);
+    }
+
+    @Test
+    public void getDeviceIdForDisplayId_invalidDisplayId_returnsDefault() {
+        VirtualDeviceManagerService.VirtualDeviceManagerImpl vdm =
+                mVdms.new VirtualDeviceManagerImpl();
+
+        assertThat(
+                vdm.getDeviceIdForDisplayId(Display.INVALID_DISPLAY))
+                .isEqualTo(VirtualDeviceManager.DEFAULT_DEVICE_ID);
+    }
+
+    @Test
+    public void getDeviceIdForDisplayId_defaultDisplayId_returnsDefault() {
+        VirtualDeviceManagerService.VirtualDeviceManagerImpl vdm =
+                mVdms.new VirtualDeviceManagerImpl();
+
+        assertThat(
+                vdm.getDeviceIdForDisplayId(Display.DEFAULT_DISPLAY))
+                .isEqualTo(VirtualDeviceManager.DEFAULT_DEVICE_ID);
+    }
+
+    @Test
+    public void getDeviceIdForDisplayId_nonExistentDisplayId_returnsDefault() {
+        VirtualDeviceManagerService.VirtualDeviceManagerImpl vdm =
+                mVdms.new VirtualDeviceManagerImpl();
+        int nonExistentDisplayId = 999;
+
+        assertThat(
+                vdm.getDeviceIdForDisplayId(nonExistentDisplayId))
+                .isEqualTo(VirtualDeviceManager.DEFAULT_DEVICE_ID);
+    }
+
+    @Test
+    public void getDeviceIdForDisplayId_withValidVirtualDisplayId_returnsDeviceId() {
+        VirtualDeviceManagerService.VirtualDeviceManagerImpl vdm =
+                mVdms.new VirtualDeviceManagerImpl();
+        VirtualDeviceImpl virtualDevice = createVirtualDevice(/* virtualDeviceId */ 1000);
+        virtualDevice.mVirtualDisplayIds.add(DISPLAY_ID);
+
+        assertThat(
+                vdm.getDeviceIdForDisplayId(DISPLAY_ID))
+                .isEqualTo(1000);
     }
 
     @Test
@@ -1159,6 +1195,19 @@ public class VirtualDeviceManagerServiceTest {
         Intent blockedAppIntent = createRestrictedActivityBlockedIntent(List.of("abc"), "def");
         verify(mContext).startActivityAsUser(argThat(intent ->
                 intent.filterEquals(blockedAppIntent)), any(), any());
+    }
+
+    private VirtualDeviceImpl createVirtualDevice(int virtualDeviceId) {
+        VirtualDeviceParams params = new VirtualDeviceParams
+                .Builder()
+                .setBlockedActivities(getBlockedActivities())
+                .build();
+        VirtualDeviceImpl virtualDeviceImpl = new VirtualDeviceImpl(mContext,
+                mAssociationInfo, new Binder(), /* ownerUid */ 0, virtualDeviceId,
+                mInputController, mSensorController, (int associationId) -> {},
+                mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback, params);
+        mVdms.addVirtualDevice(virtualDeviceImpl);
+        return virtualDeviceImpl;
     }
 
 }

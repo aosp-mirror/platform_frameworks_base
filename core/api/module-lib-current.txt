@@ -418,41 +418,6 @@ package android.provider {
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public static java.util.Map<java.lang.String,java.util.List<android.content.ContentValues>> queryRawContactEntity(@NonNull android.content.ContentResolver, long);
   }
 
-  public final class DeviceConfig {
-    field public static final String NAMESPACE_ACTIVITY_MANAGER_COMPONENT_ALIAS = "activity_manager_ca";
-    field public static final String NAMESPACE_ALARM_MANAGER = "alarm_manager";
-    field public static final String NAMESPACE_APP_CLONING = "app_cloning";
-    field public static final String NAMESPACE_APP_STANDBY = "app_standby";
-    field public static final String NAMESPACE_ARC_APP_COMPAT = "arc_app_compat";
-    field public static final String NAMESPACE_CONFIGURATION = "configuration";
-    field public static final String NAMESPACE_CONNECTIVITY_THERMAL_POWER_MANAGER = "connectivity_thermal_power_manager";
-    field public static final String NAMESPACE_CONTACTS_PROVIDER = "contacts_provider";
-    field public static final String NAMESPACE_DEVICE_IDLE = "device_idle";
-    field public static final String NAMESPACE_DEVICE_POLICY_MANAGER = "device_policy_manager";
-    field public static final String NAMESPACE_GAME_OVERLAY = "game_overlay";
-    field public static final String NAMESPACE_INTELLIGENCE_CONTENT_SUGGESTIONS = "intelligence_content_suggestions";
-    field public static final String NAMESPACE_INTERACTION_JANK_MONITOR = "interaction_jank_monitor";
-    field public static final String NAMESPACE_LATENCY_TRACKER = "latency_tracker";
-    field public static final String NAMESPACE_MEMORY_SAFETY_NATIVE = "memory_safety_native";
-    field public static final String NAMESPACE_MGLRU_NATIVE = "mglru_native";
-    field public static final String NAMESPACE_REMOTE_KEY_PROVISIONING_NATIVE = "remote_key_provisioning_native";
-    field public static final String NAMESPACE_ROTATION_RESOLVER = "rotation_resolver";
-    field public static final String NAMESPACE_SETTINGS_STATS = "settings_stats";
-    field public static final String NAMESPACE_SETTINGS_UI = "settings_ui";
-    field public static final String NAMESPACE_TARE = "tare";
-    field public static final String NAMESPACE_VENDOR_SYSTEM_NATIVE = "vendor_system_native";
-    field public static final String NAMESPACE_VENDOR_SYSTEM_NATIVE_BOOT = "vendor_system_native_boot";
-    field public static final String NAMESPACE_VIRTUALIZATION_FRAMEWORK_NATIVE = "virtualization_framework_native";
-    field public static final String NAMESPACE_VOICE_INTERACTION = "voice_interaction";
-    field public static final String NAMESPACE_WEAR = "wear";
-    field public static final String NAMESPACE_WIDGET = "widget";
-    field public static final String NAMESPACE_WINDOW_MANAGER = "window_manager";
-  }
-
-  public static class DeviceConfig.Properties {
-    ctor public DeviceConfig.Properties(@NonNull String, @Nullable java.util.Map<java.lang.String,java.lang.String>);
-  }
-
   public final class Settings {
     field public static final int RESET_MODE_PACKAGE_DEFAULTS = 1; // 0x1
     field public static final int RESET_MODE_TRUSTED_DEFAULTS = 4; // 0x4

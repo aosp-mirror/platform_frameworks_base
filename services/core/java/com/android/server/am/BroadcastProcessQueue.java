@@ -796,6 +796,7 @@ class BroadcastProcessQueue {
      */
     private void updateRunnableAt() {
         final SomeArgs next = peekNextBroadcast();
+        mRunnableAtInvalidated = false;
         if (next != null) {
             final BroadcastRecord r = (BroadcastRecord) next.arg1;
             final int index = next.argi1;

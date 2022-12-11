@@ -150,6 +150,31 @@ class EnforcePermissionHelperDetectorTest : LintDetectorTest() {
             .expectClean()
     }
 
+    fun testInterfaceDefaultMethod_wouldStillReport() {
+        lint().files(
+                java(
+                    """
+                    public interface IProtected extends android.os.IInterface {
+                        @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE)
+                        default void PermissionProtected() throws android.os.RemoteException {
+                            String foo = "bar";
+                        }
+                    }
+                    """
+                ).indented(),
+                *stubs
+        )
+                .run()
+                .expect(
+                    """
+                    src/IProtected.java:2: Error: Method must start with super.PermissionProtected_enforcePermission() [MissingEnforcePermissionHelper]
+                        @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE)
+                        ^
+                    1 errors, 0 warnings
+                    """
+                )
+    }
+
     companion object {
         val stubs = arrayOf(aidlStub, contextStub, binderStub)
     }

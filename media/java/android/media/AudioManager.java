@@ -8518,6 +8518,221 @@ public class AudioManager {
         }
     }
 
+    //====================================================================
+    // Preferred mixer attributes
+
+    /**
+     * Returns the {@link AudioMixerAttributes} that can be used to set as preferred mixe
+     * attributes via {@link #setPreferredMixerAttributes(
+     * AudioAttributes, AudioDeviceInfo, AudioMixerAttributes)}.
+     * <p>Note that only USB devices are guaranteed to expose configurable mixer attributes, the
+     * returned list may be empty when devices do not allow dynamic configuration.
+     *
+     * @param device the device to query
+     * @return a list of {@link AudioMixerAttributes} that can be used as preferred mixer attributes
+     *         for the given device.
+     * @see #setPreferredMixerAttributes(AudioAttributes, AudioDeviceInfo, AudioMixerAttributes)
+     */
+    @NonNull
+    public List<AudioMixerAttributes> getSupportedMixerAttributes(@NonNull AudioDeviceInfo device) {
+        Objects.requireNonNull(device);
+        List<AudioMixerAttributes> mixerAttrs = new ArrayList<>();
+        return (AudioSystem.getSupportedMixerAttributes(device.getId(), mixerAttrs)
+                == AudioSystem.SUCCESS) ? mixerAttrs : new ArrayList<>();
+    }
+
+    /**
+     * Configures the mixer attributes for a particular {@link AudioAttributes} over a given
+     * {@link AudioDeviceInfo}.
+     * <p>When constructing an {@link AudioMixerAttributes} for setting preferred mixer attributes,
+     * the mixer format must be constructed from an {@link AudioProfile} that can be used to set
+     * preferred mixer attributes.
+     * <p>The ownership of preferred mixer attributes is recognized by uid. When a playback from the
+     * same uid is routed to the given audio device when calling this API, the output mixer/stream
+     * will be configured with the values previously set via this API.
+     * <p>Use {@link #clearPreferredMixerAttributes(AudioAttributes, AudioDeviceInfo)}
+     * to cancel setting mixer attributes for this {@link AudioAttributes}.
+     *
+     * @param attributes the {@link AudioAttributes} whose mixer attributes should be set.
+     *                   Currently, only {@link AudioAttributes#USAGE_MEDIA} is supported. When
+     *                   playing audio targeted at the given device, use the same attributes for
+     *                   playback.
+     * @param device the device to be routed. Currently, only USB device will be allowed.
+     * @param mixerAttributes the preferred mixer attributes. When playing audio targeted at the
+     *                        given device, use the same {@link AudioFormat} for both playback
+     *                        and the mixer attributes.
+     * @return true only if the preferred mixer attributes are set successfully.
+     * @see #getPreferredMixerAttributes(AudioAttributes, AudioDeviceInfo)
+     * @see #clearPreferredMixerAttributes(AudioAttributes, AudioDeviceInfo)
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS)
+    public boolean setPreferredMixerAttributes(@NonNull AudioAttributes attributes,
+            @NonNull AudioDeviceInfo device,
+            @NonNull AudioMixerAttributes mixerAttributes) {
+        Objects.requireNonNull(attributes);
+        Objects.requireNonNull(device);
+        Objects.requireNonNull(mixerAttributes);
+        try {
+            final int status = getService().setPreferredMixerAttributes(
+                    attributes, device.getId(), mixerAttributes);
+            return status == AudioSystem.SUCCESS;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns current preferred mixer attributes that is set via
+     * {@link #setPreferredMixerAttributes(AudioAttributes, AudioDeviceInfo, AudioMixerAttributes)}
+     *
+     * @param attributes the {@link AudioAttributes} whose mixer attributes should be set.
+     * @param device the expected routing device
+     * @return the preferred mixer attributes, which will be null when no preferred mixer attributes
+     *         have been set, or when they have been cleared.
+     * @see #setPreferredMixerAttributes(AudioAttributes, AudioDeviceInfo, AudioMixerAttributes)
+     * @see #clearPreferredMixerAttributes(AudioAttributes, AudioDeviceInfo)
+     */
+    @Nullable
+    public AudioMixerAttributes getPreferredMixerAttributes(
+            @NonNull AudioAttributes attributes,
+            @NonNull AudioDeviceInfo device) {
+        Objects.requireNonNull(attributes);
+        Objects.requireNonNull(device);
+        List<AudioMixerAttributes> mixerAttrList = new ArrayList<>();
+        int ret = AudioSystem.getPreferredMixerAttributes(
+                attributes, device.getId(), mixerAttrList);
+        if (ret == AudioSystem.SUCCESS) {
+            return mixerAttrList.isEmpty() ? null : mixerAttrList.get(0);
+        } else {
+            Log.e(TAG, "Failed calling getPreferredMixerAttributes, ret=" + ret);
+            return null;
+        }
+    }
+
+    /**
+     * Clears the current preferred mixer attributes that were previously set via
+     * {@link #setPreferredMixerAttributes(AudioAttributes, AudioDeviceInfo, AudioMixerAttributes)}
+     *
+     * @param attributes the {@link AudioAttributes} whose mixer attributes should be cleared.
+     * @param device the expected routing device
+     * @return true only if the preferred mixer attributes are removed successfully.
+     * @see #setPreferredMixerAttributes(AudioAttributes, AudioDeviceInfo, AudioMixerAttributes)
+     * @see #getPreferredMixerAttributes(AudioAttributes, AudioDeviceInfo)
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS)
+    public boolean clearPreferredMixerAttributes(
+            @NonNull AudioAttributes attributes,
+            @NonNull AudioDeviceInfo device) {
+        Objects.requireNonNull(attributes);
+        Objects.requireNonNull(device);
+        try {
+            final int status = getService().clearPreferredMixerAttributes(
+                    attributes, device.getId());
+            return status == AudioSystem.SUCCESS;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Interface to be notified of changes in the preferred mixer attributes.
+     * <p>Note that this listener will only be invoked whenever
+     * {@link #setPreferredMixerAttributes(AudioAttributes, AudioDeviceInfo, AudioMixerAttributes)}
+     * or {@link #clearPreferredMixerAttributes(AudioAttributes, AudioDeviceInfo)} or device
+     * disconnection causes a change in preferred mixer attributes.
+     * @see #setPreferredMixerAttributes(AudioAttributes, AudioDeviceInfo, AudioMixerAttributes)
+     * @see #clearPreferredMixerAttributes(AudioAttributes, AudioDeviceInfo)
+     */
+    public interface OnPreferredMixerAttributesChangedListener {
+        /**
+         * Called on the listener to indicate that the preferred mixer attributes for the audio
+         * attributes over the given device has changed.
+         *
+         * @param attributes the audio attributes for playback
+         * @param device the targeted device
+         * @param mixerAttributes the {@link AudioMixerAttributes} that contains information for
+         *                        preferred mixer attributes or null if preferred mixer attributes
+         *                        is cleared
+         */
+        void onPreferredMixerAttributesChanged(
+                @NonNull AudioAttributes attributes,
+                @NonNull AudioDeviceInfo device,
+                @Nullable AudioMixerAttributes mixerAttributes);
+    }
+
+    /**
+     * Manage the {@link OnPreferredMixerAttributesChangedListener} listeners and the
+     * {@link PreferredMixerAttributesDispatcherStub}.
+     */
+    private final CallbackUtil.LazyListenerManager<OnPreferredMixerAttributesChangedListener>
+            mPrefMixerAttributesListenerMgr = new CallbackUtil.LazyListenerManager();
+
+    /**
+     * Adds a listener for being notified of changes to the preferred mixer attributes.
+     * @param executor the executor to execute the callback
+     * @param listener the listener to be notified of changes in the preferred mixer attributes.
+     */
+    public void addOnPreferredMixerAttributesChangedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnPreferredMixerAttributesChangedListener listener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
+        mPrefMixerAttributesListenerMgr.addListener(executor, listener,
+                "addOnPreferredMixerAttributesChangedListener",
+                () -> new PreferredMixerAttributesDispatcherStub());
+    }
+
+    /**
+     * Removes a previously added listener of changes to the preferred mixer attributes.
+     * @param listener the listener to be notified of changes in the preferred mixer attributes,
+     *                 which were added via {@link #addOnPreferredMixerAttributesChangedListener(
+     *                 Executor, OnPreferredMixerAttributesChangedListener)}.
+     */
+    public void removeOnPreferredMixerAttributesChangedListener(
+            @NonNull OnPreferredMixerAttributesChangedListener listener) {
+        Objects.requireNonNull(listener);
+        mPrefMixerAttributesListenerMgr.removeListener(listener,
+                "removeOnPreferredMixerAttributesChangedListener");
+    }
+
+    private final class PreferredMixerAttributesDispatcherStub
+            extends IPreferredMixerAttributesDispatcher.Stub
+            implements CallbackUtil.DispatcherStub {
+
+        @Override
+        public void register(boolean register) {
+            try {
+                if (register) {
+                    getService().registerPreferredMixerAttributesDispatcher(this);
+                } else {
+                    getService().unregisterPreferredMixerAttributesDispatcher(this);
+                }
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+
+        @Override
+        public void dispatchPrefMixerAttributesChanged(@NonNull AudioAttributes attr,
+                                                       int deviceId,
+                                                       @Nullable AudioMixerAttributes mixerAttr) {
+            // TODO: If the device is disconnected, we may not be able to find the device with
+            // given device id. We need a better to carry the device information via binder.
+            AudioDeviceInfo device = getDeviceForPortId(deviceId, GET_DEVICES_OUTPUTS);
+            if (device == null) {
+                Log.d(TAG, "Drop preferred mixer attributes changed as the device("
+                        + deviceId + ") is disconnected");
+                return;
+            }
+            mPrefMixerAttributesListenerMgr.callListeners(
+                    (listener) -> listener.onPreferredMixerAttributesChanged(
+                            attr, device, mixerAttr));
+        }
+    }
+
+    //====================================================================
+    // Mute await connection
+
     private final Object mMuteAwaitConnectionListenerLock = new Object();
 
     @GuardedBy("mMuteAwaitConnectionListenerLock")

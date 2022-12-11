@@ -773,10 +773,10 @@ final class InstallRequest {
         }
     }
 
-    public void onInstallCompleted() {
+    public void onInstallCompleted(int userId) {
         if (getReturnCode() == INSTALL_SUCCEEDED) {
             if (mPackageMetrics != null) {
-                mPackageMetrics.onInstallSucceed();
+                mPackageMetrics.onInstallSucceed(userId);
             }
         }
     }

@@ -25,8 +25,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.IContentProvider;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -35,6 +43,9 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.LocaleList;
 import android.os.Parcel;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.test.mock.MockContentResolver;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.IntArray;
@@ -1214,6 +1225,42 @@ public class InputMethodUtilsTest {
                 StartInputFlags.VIEW_HAS_FOCUS | StartInputFlags.IS_TEXT_EDITOR));
     }
 
+    @Test
+    public void testInputMethodSettings_SwitchCurrentUser() {
+        TestContext ownerUserContext = createMockContext(0 /* userId */);
+        final InputMethodInfo systemIme = createFakeInputMethodInfo(
+                "SystemIme", "fake.latin", true /* isSystem */);
+        final InputMethodInfo nonSystemIme = createFakeInputMethodInfo("NonSystemIme",
+                "fake.voice0", false /* isSystem */);
+        final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+        methodMap.put(systemIme.getId(), systemIme);
+
+        // Init InputMethodSettings for the owner user (userId=0), verify calls can get the
+        // corresponding user's context, contentResolver and the resources configuration.
+        InputMethodUtils.InputMethodSettings settings = new InputMethodUtils.InputMethodSettings(
+                ownerUserContext, methodMap, 0 /* userId */, true);
+        assertEquals(0, settings.getCurrentUserId());
+
+        settings.isShowImeWithHardKeyboardEnabled();
+        verify(ownerUserContext.getContentResolver(), atLeastOnce()).getAttributionSource();
+
+        settings.getEnabledInputMethodSubtypeListLocked(nonSystemIme, true);
+        verify(ownerUserContext.getResources(), atLeastOnce()).getConfiguration();
+
+        // Calling switchCurrentUser to the secondary user (userId=10), verify calls can get the
+        // corresponding user's context, contentResolver and the resources configuration.
+        settings.switchCurrentUser(10 /* userId */, true);
+        assertEquals(10, settings.getCurrentUserId());
+
+        settings.isShowImeWithHardKeyboardEnabled();
+        verify(TestContext.getSecondaryUserContext().getContentResolver(),
+                atLeastOnce()).getAttributionSource();
+
+        settings.getEnabledInputMethodSubtypeListLocked(nonSystemIme, true);
+        verify(TestContext.getSecondaryUserContext().getResources(),
+                atLeastOnce()).getConfiguration();
+    }
+
     private static IntArray createSubtypeHashCodeArrayFromStr(String subtypeHashCodesStr) {
         final IntArray subtypes = new IntArray();
         final TextUtils.SimpleStringSplitter imeSubtypeSplitter =
@@ -1234,6 +1281,63 @@ public class InputMethodUtilsTest {
         assertEquals(expectedEnabledImeStr,
                 InputMethodUtils.InputMethodSettings.updateEnabledImeString(initialEnabledImeStr,
                         imeId, createSubtypeHashCodeArrayFromStr(enabledSubtypeHashCodesStr)));
+    }
+
+    private static TestContext createMockContext(int userId) {
+        return new TestContext(InstrumentationRegistry.getInstrumentation()
+                .getTargetContext(), userId);
+    }
+
+    private static class TestContext extends ContextWrapper {
+        private int mUserId;
+        private ContentResolver mResolver;
+        private Resources mResources;
+
+        private static TestContext sSecondaryUserContext;
+
+        TestContext(@NonNull Context context, int userId) {
+            super(context);
+            mUserId = userId;
+            mResolver = mock(MockContentResolver.class);
+            when(mResolver.acquireProvider(Settings.Secure.CONTENT_URI)).thenReturn(
+                    mock(IContentProvider.class));
+            mResources = mock(Resources.class);
+
+            final Configuration configuration = new Configuration();
+            if (userId == 0) {
+                configuration.setLocale(LOCALE_EN_US);
+            } else {
+                configuration.setLocale(LOCALE_FR_CA);
+            }
+            doReturn(configuration).when(mResources).getConfiguration();
+        }
+
+        @Override
+        public Context createContextAsUser(UserHandle user, int flags) {
+            if (user.getIdentifier() != UserHandle.USER_SYSTEM) {
+                return sSecondaryUserContext = new TestContext(this, user.getIdentifier());
+            }
+            return this;
+        }
+
+        @Override
+        public int getUserId() {
+            return mUserId;
+        }
+
+        @Override
+        public ContentResolver getContentResolver() {
+            return mResolver;
+        }
+
+        @Override
+        public Resources getResources() {
+            return mResources;
+        }
+
+        static Context getSecondaryUserContext() {
+            return sSecondaryUserContext;
+        }
     }
 
     @Test

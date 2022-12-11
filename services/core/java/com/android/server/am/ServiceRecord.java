@@ -1420,6 +1420,20 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     }
 
     /**
+     * @return true if it's a short FGS's procstate should be demoted.
+     */
+    public boolean shouldDemoteShortFgsProcState() {
+        if (!isAppAlive()) {
+            return false;
+        }
+        if (!this.startRequested || !isShortFgs() || mShortFgsInfo == null
+                || !mShortFgsInfo.isCurrent()) {
+            return false;
+        }
+        return mShortFgsInfo.getProcStateDemoteTime() <= SystemClock.uptimeMillis();
+    }
+
+    /**
      * @return true if it's a short FGS that's still up and running, and should be declared
      * an ANR.
      */

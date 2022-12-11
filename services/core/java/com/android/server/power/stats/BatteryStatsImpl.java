@@ -4658,10 +4658,10 @@ public class BatteryStatsImpl extends BatteryStats {
         final int mappedUid = mapUid(uid);
         if (type == WAKE_TYPE_PARTIAL) {
             mWakeLockNesting--;
+            if (historyName == null) {
+                historyName = name;
+            }
             if (mRecordAllHistory) {
-                if (historyName == null) {
-                    historyName = name;
-                }
                 if (mActiveEvents.updateState(HistoryItem.EVENT_WAKE_LOCK_FINISH, historyName,
                         mappedUid, 0)) {
                     mHistory.recordEvent(elapsedRealtimeMs, uptimeMs,
@@ -4669,8 +4669,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
             if (mWakeLockNesting == 0) {
-                mHistory.recordStateStopEvent(elapsedRealtimeMs, uptimeMs,
-                        HistoryItem.STATE_WAKE_LOCK_FLAG);
+                mHistory.recordWakelockStopEvent(elapsedRealtimeMs, uptimeMs, historyName,
+                        mappedUid);
             }
         }
         if (mappedUid >= 0) {

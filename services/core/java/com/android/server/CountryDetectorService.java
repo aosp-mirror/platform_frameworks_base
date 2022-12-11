@@ -148,6 +148,10 @@ public class CountryDetectorService extends ICountryDetector.Stub {
             Receiver r = new Receiver(listener);
             try {
                 listener.asBinder().linkToDeath(r, 0);
+                final Country country = detectCountry();
+                if (country != null) {
+                    listener.onCountryDetected(country);
+                }
                 mReceivers.put(listener.asBinder(), r);
                 if (mReceivers.size() == 1) {
                     Slog.d(TAG, "The first listener is added");

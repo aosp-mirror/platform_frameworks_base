@@ -52,6 +52,7 @@ import android.util.Slog;
 
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -102,7 +103,8 @@ final class ResolveIntentHelper {
     }
 
     private static void filterNonExportedComponents(Intent intent, int filterCallingUid,
-            List<ResolveInfo> query, PlatformCompat platformCompat, Computer computer) {
+            List<ResolveInfo> query, PlatformCompat platformCompat, String resolvedType,
+            Computer computer) {
         if (query == null
                 || intent.getPackage() != null
                 || intent.getComponent() != null
@@ -113,21 +115,24 @@ final class ResolveIntentHelper {
         String callerPackage = caller == null ? "Not specified" : caller.getPackageName();
         for (int i = query.size() - 1; i >= 0; i--) {
             if (!query.get(i).getComponentInfo().exported) {
-                if (!platformCompat.isChangeEnabledByUid(
+                boolean hasToBeExportedToMatch = platformCompat.isChangeEnabledByUid(
                         ActivityManagerService.IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS,
-                        filterCallingUid)) {
-                    Slog.w(TAG, "Non-exported component not filtered out "
-                            + "(will be filtered out once the app targets U+)- intent: "
-                            + intent.getAction() + ", component: "
-                            + query.get(i).getComponentInfo()
-                            .getComponentName().flattenToShortString()
-                            + ", starter: " + callerPackage);
+                        filterCallingUid);
+                String[] categories = intent.getCategories() == null ? new String[0]
+                        : intent.getCategories().toArray(String[]::new);
+                FrameworkStatsLog.write(FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED,
+                        FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH,
+                        filterCallingUid,
+                        query.get(i).getComponentInfo().getComponentName().flattenToShortString(),
+                        callerPackage,
+                        intent.getAction(),
+                        categories,
+                        resolvedType,
+                        intent.getScheme(),
+                        hasToBeExportedToMatch);
+                if (!hasToBeExportedToMatch) {
                     return;
                 }
-                Slog.w(TAG, "Non-exported component filtered out - intent: "
-                        + intent.getAction() + ", component: "
-                        + query.get(i).getComponentInfo().getComponentName().flattenToShortString()
-                        + ", starter: " + callerPackage);
                 query.remove(i);
             }
         }
@@ -173,7 +178,7 @@ final class ResolveIntentHelper {
                     resolveForStart, true /*allowDynamicSplits*/);
             if (exportedComponentsOnly) {
                 filterNonExportedComponents(intent, filterCallingUid, query,
-                        mPlatformCompat, computer);
+                        mPlatformCompat, resolvedType, computer);
             }
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 

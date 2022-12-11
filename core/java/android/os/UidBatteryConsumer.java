@@ -50,8 +50,7 @@ public final class UidBatteryConsumer extends BatteryConsumer {
     }
 
     /**
-     * The state of an application when it is either running a foreground (top) activity
-     * or a foreground service.
+     * The state of an application when it is either running a foreground (top) activity.
      */
     public static final int STATE_FOREGROUND = 0;
 
@@ -63,7 +62,8 @@ public final class UidBatteryConsumer extends BatteryConsumer {
      * {@link android.app.ActivityManager#PROCESS_STATE_TRANSIENT_BACKGROUND},
      * {@link android.app.ActivityManager#PROCESS_STATE_BACKUP},
      * {@link android.app.ActivityManager#PROCESS_STATE_SERVICE},
-     * {@link android.app.ActivityManager#PROCESS_STATE_RECEIVER}.
+     * {@link android.app.ActivityManager#PROCESS_STATE_RECEIVER},
+     * {@link android.app.ActivityManager#PROCESS_STATE_FOREGROUND_SERVICE}.
      */
     public static final int STATE_BACKGROUND = 1;
 

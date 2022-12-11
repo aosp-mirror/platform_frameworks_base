@@ -193,6 +193,7 @@ class JobConcurrencyManager {
     }
 
     private final Object mLock;
+    private final JobNotificationCoordinator mNotificationCoordinator;
     private final JobSchedulerService mService;
     private final Context mContext;
     private final Handler mHandler;
@@ -418,6 +419,7 @@ class JobConcurrencyManager {
         mLock = mService.getLock();
         mContext = service.getTestableContext();
         mInjector = injector;
+        mNotificationCoordinator = new JobNotificationCoordinator();
 
         mHandler = JobSchedulerBackgroundThread.getHandler();
 
@@ -451,7 +453,8 @@ class JobConcurrencyManager {
                 ServiceManager.getService(BatteryStats.SERVICE_NAME));
         for (int i = 0; i < STANDARD_CONCURRENCY_LIMIT; i++) {
             mIdleContexts.add(
-                    mInjector.createJobServiceContext(mService, this, batteryStats,
+                    mInjector.createJobServiceContext(mService, this,
+                            mNotificationCoordinator, batteryStats,
                             mService.mJobPackageTracker, mContext.getMainLooper()));
         }
     }
@@ -1687,7 +1690,7 @@ class JobConcurrencyManager {
 
     @NonNull
     private JobServiceContext createNewJobServiceContext() {
-        return mInjector.createJobServiceContext(mService, this,
+        return mInjector.createJobServiceContext(mService, this, mNotificationCoordinator,
                 IBatteryStats.Stub.asInterface(
                         ServiceManager.getService(BatteryStats.SERVICE_NAME)),
                 mService.mJobPackageTracker, mContext.getMainLooper());
@@ -2612,10 +2615,11 @@ class JobConcurrencyManager {
     static class Injector {
         @NonNull
         JobServiceContext createJobServiceContext(JobSchedulerService service,
-                JobConcurrencyManager concurrencyManager, IBatteryStats batteryStats,
+                JobConcurrencyManager concurrencyManager,
+                JobNotificationCoordinator notificationCoordinator, IBatteryStats batteryStats,
                 JobPackageTracker tracker, Looper looper) {
-            return new JobServiceContext(service, concurrencyManager, batteryStats,
-                    tracker, looper);
+            return new JobServiceContext(service, concurrencyManager, notificationCoordinator,
+                    batteryStats, tracker, looper);
         }
     }
 }

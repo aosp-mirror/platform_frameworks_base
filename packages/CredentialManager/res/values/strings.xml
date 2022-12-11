@@ -80,6 +80,8 @@
   <string name="close_sheet">"Close sheet"</string>
   <!-- Spoken content description of the back arrow button. -->
   <string name="accessibility_back_arrow_button">"Go back to the previous page"</string>
+  <!-- Spoken content description of the close button. -->
+  <string name="accessibility_close_button">"Close the Credential Manager action suggestion appearing at the bottom of the screen"</string>
 
   <!-- Strings for the get flow. -->
   <!-- This appears as the title of the modal bottom sheet asking for user confirmation to use the single previously saved passkey to sign in to the app. [CHAR LIMIT=200] -->

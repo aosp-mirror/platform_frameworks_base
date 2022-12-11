@@ -8,15 +8,19 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"অন্য ঠাইত ছেভ কৰক"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"অন্য ডিভাইচ ব্যৱহাৰ কৰক"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"অন্য এটা ডিভাইচত ছেভ কৰক"</string>
-    <string name="passkey_creation_intro_title" msgid="402553911484409884">"সুৰক্ষিতভাৱে ছাইন ইন কৰাৰ এক সৰল উপায়"</string>
-    <string name="passkey_creation_intro_body" msgid="7493320456005579290">"পাহৰি নোযোৱা অথবা চুৰি কৰিব নোৱৰা এটা অদ্বিতীয় পাছকী ব্যৱহাৰ কৰি ছাইন ইন কৰিবলৈ আপোনাৰ ফিংগাৰপ্ৰিণ্ট, মুখাৱয়ব অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰক। অধিক জানক"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"ক’ত <xliff:g id="CREATETYPES">%1$s</xliff:g> সেয়া বাছনি কৰক"</string>
-    <!-- no translation found for create_your_passkeys (8901224153607590596) -->
+    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
     <skip />
+    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
+    <skip />
+    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
+    <skip />
+    <string name="choose_provider_title" msgid="7245243990139698508">"ক’ত <xliff:g id="CREATETYPES">%1$s</xliff:g> সেয়া বাছনি কৰক"</string>
+    <string name="create_your_passkeys" msgid="8901224153607590596">"আপোনাৰ পাছকী সৃষ্টি কৰক"</string>
     <string name="save_your_password" msgid="6597736507991704307">"আপোনাৰ পাছৱৰ্ড ছেভ কৰক"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"আপোনাৰ ছাইন ইন কৰাৰ তথ্য ছেভ কৰক"</string>
-    <!-- no translation found for choose_provider_body (8045759834416308059) -->
-    <skip />
+    <string name="choose_provider_body" msgid="8045759834416308059">"আপোনাৰ পাছৱৰ্ড আৰু পাছকী ছেভ কৰিবলৈ এটা ডিফ’ল্ট পাছৱৰ্ড পৰিচালক ছেট কৰক আৰু পৰৱৰ্তী বাৰ দ্ৰুতভাৱে ছাইন ইন কৰক।"</string>
     <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ত পাছকী সৃষ্টি কৰিবনে?"</string>
     <string name="choose_create_option_password_title" msgid="8812546498357380545">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ত আপোনাৰ পাছৱৰ্ড ছেভ কৰিবনে?"</string>
     <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ত আপোনাৰ ছাইন ইন কৰাৰ তথ্য ছেভ কৰিবনে?"</string>
@@ -24,17 +28,12 @@
     <string name="passkey" msgid="632353688396759522">"পাছকী"</string>
     <string name="password" msgid="6738570945182936667">"পাছৱৰ্ড"</string>
     <string name="sign_ins" msgid="4710739369149469208">"ছাইন-ইন"</string>
-    <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
-    <skip />
-    <!-- no translation found for save_password_to_title (3450480045270186421) -->
-    <skip />
-    <!-- no translation found for save_sign_in_to_title (8328143607671760232) -->
-    <skip />
-    <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
-    <skip />
+    <string name="create_passkey_in_title" msgid="2714306562710897785">"ইয়াত পাছকী সৃষ্টি কৰক"</string>
+    <string name="save_password_to_title" msgid="3450480045270186421">"ইয়াত পাছৱৰ্ড ছেভ কৰক"</string>
+    <string name="save_sign_in_to_title" msgid="8328143607671760232">"ইয়াত ছাইন ইন কৰাৰ তথ্য ছেভ কৰক"</string>
+    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"অন্য এটা ডিভাইচত এটা পাছকী সৃষ্টি কৰিবনে?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"আপোনাৰ আটাইবোৰ ছাইন ইনৰ বাবে <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ব্যৱহাৰ কৰিবনে?"</string>
-    <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="6560593199974037820">"আপোনাক সহজে ছাইন ইন কৰাত সহায় কৰিবলৈ এই পাছৱৰ্ড পৰিচালকটোৱে আপোনাৰ পাছৱৰ্ড আৰু পাছকী ষ্ট’ৰ কৰিব।"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ডিফ’ল্ট হিচাপে ছেট কৰক"</string>
     <string name="use_once" msgid="9027366575315399714">"এবাৰ ব্যৱহাৰ কৰক"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> টা পাছৱৰ্ড, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> টা পাছকী"</string>

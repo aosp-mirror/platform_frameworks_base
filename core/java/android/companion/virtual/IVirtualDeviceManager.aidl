@@ -51,6 +51,11 @@ interface IVirtualDeviceManager {
      */
     List<VirtualDevice> getVirtualDevices();
 
+   /**
+     * Returns the ID of the device which owns the display with the given ID.
+     */
+    int getDeviceIdForDisplayId(int displayId);
+
     /**
      * Returns the device policy for the given virtual device and policy type.
      */

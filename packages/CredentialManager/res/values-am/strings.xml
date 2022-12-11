@@ -3,45 +3,34 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- no translation found for app_name (4539824758261855508) -->
     <skip />
-    <!-- no translation found for string_cancel (6369133483981306063) -->
-    <skip />
-    <!-- no translation found for string_continue (1346732695941131882) -->
-    <skip />
-    <!-- no translation found for string_create_in_another_place (1033635365843437603) -->
-    <skip />
-    <!-- no translation found for string_save_to_another_place (7590325934591079193) -->
-    <skip />
-    <!-- no translation found for string_use_another_device (8754514926121520445) -->
-    <skip />
+    <string name="string_cancel" msgid="6369133483981306063">"ይቅር"</string>
+    <string name="string_continue" msgid="1346732695941131882">"ቀጥል"</string>
+    <string name="string_create_in_another_place" msgid="1033635365843437603">"በሌላ ቦታ ውስጥ ይፍጠሩ"</string>
+    <string name="string_save_to_another_place" msgid="7590325934591079193">"ወደ ሌላ ቦታ ያስቀምጡ"</string>
+    <string name="string_use_another_device" msgid="8754514926121520445">"ሌላ መሣሪያ ይጠቀሙ"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"ወደ ሌላ መሣሪያ ያስቀምጡ"</string>
-    <!-- no translation found for passkey_creation_intro_title (402553911484409884) -->
+    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
     <skip />
-    <!-- no translation found for passkey_creation_intro_body (7493320456005579290) -->
+    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
     <skip />
-    <!-- no translation found for choose_provider_title (7245243990139698508) -->
+    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
     <skip />
+    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
+    <skip />
+    <string name="choose_provider_title" msgid="7245243990139698508">"የት <xliff:g id="CREATETYPES">%1$s</xliff:g> እንደሚሆን ይምረጡ"</string>
     <!-- no translation found for create_your_passkeys (8901224153607590596) -->
     <skip />
-    <!-- no translation found for save_your_password (6597736507991704307) -->
-    <skip />
-    <!-- no translation found for save_your_sign_in_info (7213978049817076882) -->
-    <skip />
+    <string name="save_your_password" msgid="6597736507991704307">"የይለፍ ቃልዎን ያስቀምጡ"</string>
+    <string name="save_your_sign_in_info" msgid="7213978049817076882">"የመግቢያ መረጃዎን ያስቀምጡ"</string>
     <!-- no translation found for choose_provider_body (8045759834416308059) -->
     <skip />
-    <!-- no translation found for choose_create_option_passkey_title (4146408187146573131) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (8812546498357380545) -->
-    <skip />
-    <!-- no translation found for choose_create_option_sign_in_title (6318246378475961834) -->
-    <skip />
-    <!-- no translation found for choose_create_option_description (4419171903963100257) -->
-    <skip />
-    <!-- no translation found for passkey (632353688396759522) -->
-    <skip />
-    <!-- no translation found for password (6738570945182936667) -->
-    <skip />
-    <!-- no translation found for sign_ins (4710739369149469208) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"በ<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ውስጥ የይለፍ ቁልፍ ይፈጠር?"</string>
+    <string name="choose_create_option_password_title" msgid="8812546498357380545">"የይለፍ ቃልዎ ወደ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ይቀመጥ?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"የመግቢያ መረጃዎ ወደ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ይቀመጥ?"</string>
+    <string name="choose_create_option_description" msgid="4419171903963100257">"የእርስዎን <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> በማንኛውም መሣሪያ ላይ መጠቀም ይችላሉ። ለ<xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> ወደ <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> ተቀምጧል"</string>
+    <string name="passkey" msgid="632353688396759522">"የይለፍ ቁልፍ"</string>
+    <string name="password" msgid="6738570945182936667">"የይለፍ ቃል"</string>
+    <string name="sign_ins" msgid="4710739369149469208">"መግቢያዎች"</string>
     <!-- no translation found for create_passkey_in_title (2714306562710897785) -->
     <skip />
     <!-- no translation found for save_password_to_title (3450480045270186421) -->
@@ -50,54 +39,31 @@
     <skip />
     <!-- no translation found for create_passkey_in_other_device_title (6372952459932674632) -->
     <skip />
-    <!-- no translation found for use_provider_for_all_title (4201020195058980757) -->
-    <skip />
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"ለሁሉም መግቢያዎችዎ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ን ይጠቀሙ?"</string>
     <!-- no translation found for use_provider_for_all_description (6560593199974037820) -->
     <skip />
-    <!-- no translation found for set_as_default (4415328591568654603) -->
-    <skip />
-    <!-- no translation found for use_once (9027366575315399714) -->
-    <skip />
-    <!-- no translation found for more_options_usage_passwords_passkeys (4794903978126339473) -->
-    <skip />
-    <!-- no translation found for more_options_usage_passwords (1632047277723187813) -->
-    <skip />
-    <!-- no translation found for more_options_usage_passkeys (5390320437243042237) -->
-    <skip />
+    <string name="set_as_default" msgid="4415328591568654603">"እንደ ነባሪ ያዋቅሩ"</string>
+    <string name="use_once" msgid="9027366575315399714">"አንዴ ይጠቀሙ"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> የይለፍ ቃሎች፣ <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> የይለፍ ቁልፎች"</string>
+    <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> የይለፍ ቃሎች"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> የይለፍ ቁልፎች"</string>
     <!-- no translation found for passkey_before_subtitle (2448119456208647444) -->
     <skip />
-    <!-- no translation found for another_device (5147276802037801217) -->
-    <skip />
-    <!-- no translation found for other_password_manager (565790221427004141) -->
-    <skip />
-    <!-- no translation found for close_sheet (1393792015338908262) -->
-    <skip />
-    <!-- no translation found for accessibility_back_arrow_button (3233198183497842492) -->
-    <skip />
-    <!-- no translation found for get_dialog_title_use_passkey_for (6236608872708021767) -->
-    <skip />
-    <!-- no translation found for get_dialog_title_use_sign_in_for (5283099528915572980) -->
-    <skip />
-    <!-- no translation found for get_dialog_title_choose_sign_in_for (1361715440877613701) -->
-    <skip />
-    <!-- no translation found for get_dialog_use_saved_passkey_for (4618100798664888512) -->
-    <skip />
-    <!-- no translation found for get_dialog_button_label_no_thanks (8114363019023838533) -->
-    <skip />
-    <!-- no translation found for get_dialog_button_label_continue (6446201694794283870) -->
-    <skip />
-    <!-- no translation found for get_dialog_title_sign_in_options (2092876443114893618) -->
-    <skip />
-    <!-- no translation found for get_dialog_heading_for_username (3456868514554204776) -->
-    <skip />
-    <!-- no translation found for get_dialog_heading_locked_password_managers (8911514851762862180) -->
-    <skip />
-    <!-- no translation found for locked_credential_entry_label_subtext (9213450912991988691) -->
-    <skip />
-    <!-- no translation found for get_dialog_heading_manage_sign_ins (3522556476480676782) -->
-    <skip />
-    <!-- no translation found for get_dialog_heading_from_another_device (1166697017046724072) -->
-    <skip />
-    <!-- no translation found for get_dialog_option_headline_use_a_different_device (8201578814988047549) -->
-    <skip />
+    <string name="another_device" msgid="5147276802037801217">"ሌላ መሣሪያ"</string>
+    <string name="other_password_manager" msgid="565790221427004141">"ሌሎች የይለፍ ቃል አስተዳዳሪዎች"</string>
+    <string name="close_sheet" msgid="1393792015338908262">"ሉህን ዝጋ"</string>
+    <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"ወደ ቀዳሚው ገፅ ይመለሱ"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"የተቀመጠ የይለፍ ቁልፍዎን ለ<xliff:g id="APP_NAME">%1$s</xliff:g> ይጠቀሙ?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"የተቀመጠ መግቢያዎን ለ<xliff:g id="APP_NAME">%1$s</xliff:g> ይጠቀሙ?"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> የተቀመጠ መግቢያ ይጠቀሙ"</string>
+    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"በሌላ መንገድ ይግቡ"</string>
+    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"አይ አመሰግናለሁ"</string>
+    <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ቀጥል"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"የመግቢያ አማራጮች"</string>
+    <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"ለ<xliff:g id="USERNAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"የተቆለፉ የሚስጥር ቁልፍ አስተዳዳሪዎች"</string>
+    <string name="locked_credential_entry_label_subtext" msgid="9213450912991988691">"ለመክፈት መታ ያድርጉ"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"መግቢያዎችን ያስተዳድሩ"</string>
+    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"ከሌላ መሣሪያ"</string>
+    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"የተለየ መሣሪያ ይጠቀሙ"</string>
 </resources>

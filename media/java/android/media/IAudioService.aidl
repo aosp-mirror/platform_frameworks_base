@@ -23,6 +23,7 @@ import android.media.AudioDeviceAttributes;
 import android.media.AudioFormat;
 import android.media.AudioFocusInfo;
 import android.media.AudioHalVersionInfo;
+import android.media.AudioMixerAttributes;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
@@ -37,6 +38,7 @@ import android.media.ICommunicationDeviceDispatcher;
 import android.media.IDeviceVolumeBehaviorDispatcher;
 import android.media.IMuteAwaitConnectionCallback;
 import android.media.IPlaybackConfigDispatcher;
+import android.media.IPreferredMixerAttributesDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.IStrategyPreferredDevicesDispatcher;
@@ -573,4 +575,14 @@ interface IAudioService {
             boolean handlesvolumeAdjustment);
 
     AudioHalVersionInfo getHalVersion();
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS)")
+    int setPreferredMixerAttributes(
+            in AudioAttributes aa, int portId, in AudioMixerAttributes mixerAttributes);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS)")
+    int clearPreferredMixerAttributes(in AudioAttributes aa, int portId);
+    void registerPreferredMixerAttributesDispatcher(
+            IPreferredMixerAttributesDispatcher dispatcher);
+    oneway void unregisterPreferredMixerAttributesDispatcher(
+            IPreferredMixerAttributesDispatcher dispatcher);
 }
