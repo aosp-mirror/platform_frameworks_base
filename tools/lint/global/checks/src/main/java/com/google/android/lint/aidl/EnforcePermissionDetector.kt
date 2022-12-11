@@ -31,7 +31,9 @@ import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.intellij.psi.PsiAnnotation
+import com.intellij.psi.PsiArrayInitializerMemberValue
 import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
 import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.UClass
@@ -65,6 +67,12 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
         return listOf(UAnnotation::class.java)
     }
 
+    private fun annotationValueGetChildren(elem: PsiElement): Array<PsiElement> {
+        if (elem is PsiArrayInitializerMemberValue)
+            return elem.getInitializers().map { it as PsiElement }.toTypedArray()
+        return elem.getChildren()
+    }
+
     private fun areAnnotationsEquivalent(
         context: JavaContext,
         anno1: PsiAnnotation,
@@ -82,18 +90,28 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
             if (attr1[i].name != attr2[i].name) {
                 return false
             }
-            val value1 = attr1[i].value
-            val value2 = attr2[i].value
-            if (value1 == null && value2 == null) {
-                continue
-            }
-            if (value1 == null || value2 == null) {
-                return false
-            }
+            val value1 = attr1[i].value ?: return false
+            val value2 = attr2[i].value ?: return false
+            // Try to compare values directly with each other.
             val v1 = ConstantEvaluator.evaluate(context, value1)
             val v2 = ConstantEvaluator.evaluate(context, value2)
-            if (v1 != v2) {
-                return false
+            if (v1 != null && v2 != null) {
+                if (v1 != v2) {
+                    return false
+                }
+            } else {
+                val children1 = annotationValueGetChildren(value1)
+                val children2 = annotationValueGetChildren(value2)
+                if (children1.size != children2.size) {
+                    return false
+                }
+                for (j in children1.indices) {
+                    val c1 = ConstantEvaluator.evaluate(context, children1[j])
+                    val c2 = ConstantEvaluator.evaluate(context, children2[j])
+                    if (c1 != c2) {
+                        return false
+                    }
+                }
             }
         }
         return true
