@@ -67,7 +67,8 @@ class GetFlowUtils {
           .getPackageInfo(packageName!!,
             PackageManager.PackageInfoFlags.of(0))
         val providerDisplayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString()
-        // TODO: decide what to do when failed to load a provider icon
+        // TODO: get the provider icon from the service
+        //  and decide what to do when failed to load a provider icon
         val providerIcon = pkgInfo.applicationInfo.loadIcon(packageManager)!!
         ProviderInfo(
           id = it.providerFlattenedComponentName,
@@ -83,7 +84,7 @@ class GetFlowUtils {
             it.authenticationEntry),
           remoteEntry = getRemoteEntry(it.providerFlattenedComponentName, it.remoteEntry),
           actionEntryList = getActionEntryList(
-            it.providerFlattenedComponentName, it.actionChips, context),
+            it.providerFlattenedComponentName, it.actionChips, providerIcon),
         )
       }
     }
@@ -119,7 +120,7 @@ class GetFlowUtils {
           displayName = credentialEntryUi.userDisplayName?.toString(),
           // TODO: proper fallback
           icon = credentialEntryUi.entryIcon?.loadDrawable(context)
-            ?: context.getDrawable(R.drawable.ic_passkey)!!,
+            ?: context.getDrawable(R.drawable.ic_other_sign_in)!!,
           lastUsedTimeMillis = credentialEntryUi.lastUsedTimeMillis,
         )
       }
@@ -164,7 +165,7 @@ class GetFlowUtils {
     private fun getActionEntryList(
       providerId: String,
       actionEntries: List<Entry>,
-      context: Context,
+      providerIcon: Drawable,
     ): List<ActionEntryInfo> {
       return actionEntries.map {
         val actionEntryUi = ActionUi.fromSlice(it.slice)
@@ -177,7 +178,7 @@ class GetFlowUtils {
           fillInIntent = it.frameworkExtrasIntent,
           title = actionEntryUi.text.toString(),
           // TODO: gracefully fail
-          icon = actionEntryUi.icon.loadDrawable(context)!!,
+          icon = providerIcon,
           subTitle = actionEntryUi.subtext?.toString(),
         )
       }
