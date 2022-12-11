@@ -203,10 +203,9 @@
     <string name="accessibility_clear_all" msgid="970525598287244592">"הסרת כל ההתראות."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
+      <item quantity="one">עוד <xliff:g id="NUMBER_1">%s</xliff:g> התראות נוספות.</item>
       <item quantity="two">עוד <xliff:g id="NUMBER_1">%s</xliff:g> התראות נוספות.</item>
-      <item quantity="many">עוד <xliff:g id="NUMBER_1">%s</xliff:g> התראות.</item>
       <item quantity="other">עוד <xliff:g id="NUMBER_1">%s</xliff:g> התראות נוספות.</item>
-      <item quantity="one">יש התראה נוספת.<xliff:g id="NUMBER_0">%s</xliff:g>.</item>
     </plurals>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"המסך נעול עכשיו לרוחב."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"המסך נעול כעת לאורך."</string>
@@ -255,10 +254,9 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"ההפעלה מתבצעת…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"חוסך הנתונים פועל"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
+      <item quantity="one">‏%d מכשירים</item>
       <item quantity="two">‏%d מכשירים</item>
-      <item quantity="many">‏%d מכשירים</item>
       <item quantity="other">‏%d מכשירים</item>
-      <item quantity="one">מכשיר אחד</item>
     </plurals>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"פנס"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"המצלמה בשימוש"</string>
@@ -351,10 +349,9 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"כן, להמשיך"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"הגעת למגבלת המשתמשים שניתן להוסיף"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
+      <item quantity="one">ניתן להוסיף עד <xliff:g id="COUNT">%d</xliff:g> משתמשים.</item>
       <item quantity="two">ניתן להוסיף עד <xliff:g id="COUNT">%d</xliff:g> משתמשים.</item>
-      <item quantity="many">ניתן להוסיף עד <xliff:g id="COUNT">%d</xliff:g> משתמשים.</item>
       <item quantity="other">ניתן להוסיף עד <xliff:g id="COUNT">%d</xliff:g> משתמשים.</item>
-      <item quantity="one">ניתן ליצור רק משתמש אחד.</item>
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"להסיר את המשתמש?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"כל האפליקציות והנתונים של המשתמש הזה יימחקו."</string>
@@ -542,16 +539,14 @@
     <string name="snooze_undo" msgid="2738844148845992103">"ביטול"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"נדחה לטיפול בעוד <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
+      <item quantity="one">‏%d שעות</item>
       <item quantity="two">שעתיים</item>
-      <item quantity="many">‏%d שעות</item>
       <item quantity="other">‏%d שעות</item>
-      <item quantity="one">שעה</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
+      <item quantity="one">‏%d דקות</item>
       <item quantity="two">‏%d דקות</item>
-      <item quantity="many">‏%d דקות</item>
       <item quantity="other">‏%d דקות</item>
-      <item quantity="one">דקה</item>
     </plurals>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"חיסכון בסוללה"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"לחצן <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -776,10 +771,9 @@
     <string name="quick_controls_title" msgid="6839108006171302273">"פקדי מכשירים"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"יש לבחור אפליקציה כדי להוסיף פקדים"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="one">נוספו <xliff:g id="NUMBER_1">%s</xliff:g> פקדים.</item>
       <item quantity="two">נוספו <xliff:g id="NUMBER_1">%s</xliff:g> פקדים.</item>
-      <item quantity="many">נוספו <xliff:g id="NUMBER_1">%s</xliff:g> פקדים.</item>
       <item quantity="other">נוספו <xliff:g id="NUMBER_1">%s</xliff:g> פקדים.</item>
-      <item quantity="one">נוסף פקד אחד (<xliff:g id="NUMBER_0">%s</xliff:g>).</item>
     </plurals>
     <string name="controls_removed" msgid="3731789252222856959">"הוסר"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"סומן כמועדף"</string>
@@ -938,10 +932,9 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"לא להוסיף אריח"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"בחירת משתמש"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> אפליקציות פעילות</item>
       <item quantity="two"><xliff:g id="COUNT_1">%s</xliff:g> אפליקציות פעילות</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> אפליקציות פעילות</item>
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> אפליקציות פעילות</item>
-      <item quantity="one">אפליקציה אחת (<xliff:g id="COUNT_0">%s</xliff:g>) פעילה</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"מידע חדש"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"אפליקציות פעילות"</string>
@@ -970,5 +963,5 @@
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"מצב עדיפות"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"ההתראה מוגדרת"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"המצלמה והמיקרופון כבויים"</string>
-    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{התראה אחת}two{# התראות}many{# התראות}other{# התראות}}"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{התראה אחת}one{# התראות}two{# התראות}other{# התראות}}"</string>
 </resources>
