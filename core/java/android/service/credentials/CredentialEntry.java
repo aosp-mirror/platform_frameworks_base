@@ -17,10 +17,9 @@
 package android.service.credentials;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.app.slice.Slice;
-import android.credentials.Credential;
+import android.credentials.GetCredentialResponse;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -41,32 +40,23 @@ public final class CredentialEntry implements Parcelable {
     private final @NonNull Slice mSlice;
 
     /** The pending intent to be invoked when this credential entry is selected. */
-    private final @Nullable PendingIntent mPendingIntent;
-
-    /**
-     * The underlying credential to be returned to the app when the user selects
-     * this credential entry.
-     */
-    private final @Nullable Credential mCredential;
+    private final @NonNull PendingIntent mPendingIntent;
 
     /** A flag denoting whether auto-select is enabled for this entry. */
     private final @NonNull boolean mAutoSelectAllowed;
 
     private CredentialEntry(@NonNull String type, @NonNull Slice slice,
-            @Nullable PendingIntent pendingIntent, @Nullable Credential credential,
-            @NonNull boolean autoSeletAllowed) {
+            @NonNull PendingIntent pendingIntent, @NonNull boolean autoSelectAllowed) {
         mType = type;
         mSlice = slice;
         mPendingIntent = pendingIntent;
-        mCredential = credential;
-        mAutoSelectAllowed = autoSeletAllowed;
+        mAutoSelectAllowed = autoSelectAllowed;
     }
 
     private CredentialEntry(@NonNull Parcel in) {
         mType = in.readString8();
         mSlice = in.readTypedObject(Slice.CREATOR);
         mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
-        mCredential = in.readTypedObject(Credential.CREATOR);
         mAutoSelectAllowed = in.readBoolean();
     }
 
@@ -93,7 +83,6 @@ public final class CredentialEntry implements Parcelable {
         dest.writeString8(mType);
         dest.writeTypedObject(mSlice, flags);
         dest.writeTypedObject(mPendingIntent, flags);
-        dest.writeTypedObject(mCredential, flags);
         dest.writeBoolean(mAutoSelectAllowed);
     }
 
@@ -114,15 +103,8 @@ public final class CredentialEntry implements Parcelable {
     /**
      * Returns the pending intent to be invoked if the user selects this entry.
      */
-    public @Nullable PendingIntent getPendingIntent() {
+    public @NonNull PendingIntent getPendingIntent() {
         return mPendingIntent;
-    }
-
-    /**
-     * Returns the credential associated with this entry.
-     */
-    public @Nullable Credential getCredential() {
-        return mCredential;
     }
 
     /**
@@ -138,8 +120,7 @@ public final class CredentialEntry implements Parcelable {
     public static final class Builder {
         private String mType;
         private Slice mSlice;
-        private PendingIntent mPendingIntent = null;
-        private Credential mCredential = null;
+        private PendingIntent mPendingIntent;
         private boolean mAutoSelectAllowed = false;
 
         /**
@@ -152,8 +133,8 @@ public final class CredentialEntry implements Parcelable {
          * Once the activity fulfills the required user engagement, the
          * {@link android.app.Activity} result should be set to
          * {@link android.app.Activity#RESULT_OK}, and the
-         * {@link CredentialProviderService#EXTRA_CREDENTIAL_RESULT} must be set with a
-         * {@link Credential} object.
+         * {@link CredentialProviderService#EXTRA_GET_CREDENTIAL_RESPONSE} must be set with a
+         * {@link GetCredentialResponse} object.
          *
          * @param type the type of credential underlying this credential entry
          * @param slice the content to be displayed with this entry on the UI
@@ -179,26 +160,6 @@ public final class CredentialEntry implements Parcelable {
         }
 
         /**
-         * Creates a builder for a {@link CredentialEntry} that contains a {@link Credential},
-         * and does not require further action.
-         * @param type the type of credential underlying this credential entry
-         * @param slice the content to be displayed with this entry on the UI
-         * @param credential the credential to be returned to the client app, when this entry is
-         *                   selected by the user
-         *
-         * @throws IllegalArgumentException If {@code type} is null or empty.
-         * @throws NullPointerException If {@code slice}, or {@code credential} is null.
-         */
-        public Builder(@NonNull String type, @NonNull Slice slice, @NonNull Credential credential) {
-            mType = Preconditions.checkStringNotEmpty(type, "type must not be "
-                    + "null, or empty");
-            mSlice = Objects.requireNonNull(slice,
-                    "slice must not be null");
-            mCredential = Objects.requireNonNull(credential,
-                    "credential must not be null");
-        }
-
-        /**
          * Sets whether the entry is allowed to be auto selected by the framework.
          * The default value is set to false.
          *
@@ -219,12 +180,9 @@ public final class CredentialEntry implements Parcelable {
          * is set, or if both are set.
          */
         public @NonNull CredentialEntry build() {
-            Preconditions.checkState(((mPendingIntent != null && mCredential == null)
-                            || (mPendingIntent == null && mCredential != null)),
-                    "Either pendingIntent or credential must be set, and both cannot"
-                            + "be set at the same time");
-            return new CredentialEntry(mType, mSlice, mPendingIntent,
-                    mCredential, mAutoSelectAllowed);
+            Preconditions.checkState(mPendingIntent != null,
+                    "pendingIntent must not be null");
+            return new CredentialEntry(mType, mSlice, mPendingIntent, mAutoSelectAllowed);
         }
     }
 }

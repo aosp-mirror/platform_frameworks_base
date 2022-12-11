@@ -21,6 +21,7 @@ import android.credentials.GetCredentialOption;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.util.AnnotationValidations;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ import java.util.Objects;
 /**
  * Request for getting user's credentials from a given credential provider.
  */
-public final class GetCredentialsRequest implements Parcelable {
+public final class GetCredentialRequest implements Parcelable {
     /** Calling package of the app requesting for credentials. */
     private final @NonNull String mCallingPackage;
 
@@ -40,29 +41,30 @@ public final class GetCredentialsRequest implements Parcelable {
      */
     private final @NonNull List<GetCredentialOption> mGetCredentialOptions;
 
-    private GetCredentialsRequest(@NonNull String callingPackage,
+    private GetCredentialRequest(@NonNull String callingPackage,
             @NonNull List<GetCredentialOption> getCredentialOptions) {
         this.mCallingPackage = callingPackage;
         this.mGetCredentialOptions = getCredentialOptions;
     }
 
-    private GetCredentialsRequest(@NonNull Parcel in) {
+    private GetCredentialRequest(@NonNull Parcel in) {
         mCallingPackage = in.readString8();
         List<GetCredentialOption> getCredentialOptions = new ArrayList<>();
         in.readTypedList(getCredentialOptions, GetCredentialOption.CREATOR);
         mGetCredentialOptions = getCredentialOptions;
+        AnnotationValidations.validate(NonNull.class, null, mGetCredentialOptions);
     }
 
-    public static final @NonNull Creator<GetCredentialsRequest> CREATOR =
-            new Creator<GetCredentialsRequest>() {
+    public static final @NonNull Creator<GetCredentialRequest> CREATOR =
+            new Creator<GetCredentialRequest>() {
                 @Override
-                public GetCredentialsRequest createFromParcel(Parcel in) {
-                    return new GetCredentialsRequest(in);
+                public GetCredentialRequest createFromParcel(Parcel in) {
+                    return new GetCredentialRequest(in);
                 }
 
                 @Override
-                public GetCredentialsRequest[] newArray(int size) {
-                    return new GetCredentialsRequest[size];
+                public GetCredentialRequest[] newArray(int size) {
+                    return new GetCredentialRequest[size];
                 }
             };
 
@@ -92,7 +94,7 @@ public final class GetCredentialsRequest implements Parcelable {
     }
 
     /**
-     * Builder for {@link GetCredentialsRequest}.
+     * Builder for {@link GetCredentialRequest}.
      */
     public static final class Builder {
         private String mCallingPackage;
@@ -139,18 +141,18 @@ public final class GetCredentialsRequest implements Parcelable {
         }
 
         /**
-         * Builds a new {@link GetCredentialsRequest} instance.
+         * Builds a new {@link GetCredentialRequest} instance.
          *
          * @throws NullPointerException If {@code getCredentialOptions} is null.
          * @throws IllegalArgumentException If {@code getCredentialOptions} is empty, or if
          * {@code callingPackage} is null or empty.
          */
-        public @NonNull GetCredentialsRequest build() {
+        public @NonNull GetCredentialRequest build() {
             Preconditions.checkStringNotEmpty(mCallingPackage,
                     "Must set the calling package");
             Preconditions.checkCollectionNotEmpty(mGetCredentialOptions,
                     "getCredentialOptions");
-            return new GetCredentialsRequest(mCallingPackage, mGetCredentialOptions);
+            return new GetCredentialRequest(mCallingPackage, mGetCredentialOptions);
         }
     }
 }
