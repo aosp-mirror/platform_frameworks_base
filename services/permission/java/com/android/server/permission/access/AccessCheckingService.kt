@@ -16,11 +16,23 @@
 
 package com.android.server.permission.access
 
+import android.content.Context
 import com.android.internal.annotations.Keep
-import com.android.server.permission.access.external.PackageState
+import com.android.server.LocalManagerRegistry
+import com.android.server.LocalServices
+import com.android.server.SystemService
+import com.android.server.appop.AppOpsCheckingServiceInterface
+import com.android.server.permission.access.appop.AppOpService
+import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.permission.PermissionService
+import com.android.server.pm.PackageManagerLocal
+import com.android.server.pm.UserManagerService
+import com.android.server.pm.permission.PermissionManagerServiceInterface
+import com.android.server.pm.permission.PermissionManagerServiceInternal
+import com.android.server.pm.pkg.PackageState
 
 @Keep
-class AccessCheckingService {
+class AccessCheckingService(context: Context) : SystemService(context) {
     @Volatile
     private lateinit var state: AccessState
     private val stateLock = Any()
@@ -29,14 +41,35 @@ class AccessCheckingService {
 
     private val persistence = AccessPersistence(policy)
 
-    fun init() {
+    private lateinit var appOpService: AppOpService
+    private lateinit var permissionService: PermissionService
+
+    private lateinit var packageManagerLocal: PackageManagerLocal
+    private lateinit var userManagerService: UserManagerService
+
+    override fun onStart() {
+        appOpService = AppOpService(this)
+        permissionService = PermissionService(this)
+
+        LocalServices.addService(AppOpsCheckingServiceInterface::class.java, appOpService)
+        LocalServices.addService(PermissionManagerServiceInterface::class.java, permissionService)
+    }
+
+    fun initialize() {
+        packageManagerLocal =
+            LocalManagerRegistry.getManagerOrThrow(PackageManagerLocal::class.java)
+        userManagerService = UserManagerService.getInstance()
+
+        val userIds = IntSet(userManagerService.userIdsIncludingPreCreated)
+        val packageStates = packageManagerLocal.packageStates
+
         val state = AccessState()
-        state.systemState.userIds.apply {
-            // TODO: Get and add all user IDs.
-            // TODO: Maybe get and add all packages?
-        }
+        policy.initialize(state, userIds, packageStates)
         persistence.read(state)
         this.state = state
+
+        appOpService.initialize()
+        permissionService.initialize()
     }
 
     fun getDecision(subject: AccessUri, `object`: AccessUri): Int =
@@ -50,29 +83,59 @@ class AccessCheckingService {
         }
     }
 
-    fun onUserAdded(userId: Int) {
+    internal fun onUserAdded(userId: Int) {
         mutateState {
             with(policy) { onUserAdded(userId) }
         }
     }
 
-    fun onUserRemoved(userId: Int) {
+    internal fun onUserRemoved(userId: Int) {
         mutateState {
             with(policy) { onUserRemoved(userId) }
         }
     }
 
-    fun onPackageAdded(packageState: PackageState) {
+    internal fun onStorageVolumeMounted(volumeUuid: String?, isSystemUpdated: Boolean) {
+        val packageStates = packageManagerLocal.packageStates
         mutateState {
-            with(policy) { onPackageAdded(packageState) }
+            with(policy) { onStorageVolumeMounted(packageStates, volumeUuid, isSystemUpdated) }
         }
     }
 
-    fun onPackageRemoved(packageState: PackageState) {
+    internal fun onPackageAdded(packageName: String) {
+        val packageStates = packageManagerLocal.packageStates
         mutateState {
-            with(policy) { onPackageRemoved(packageState) }
+            with(policy) { onPackageAdded(packageStates, packageName) }
         }
     }
+
+    internal fun onPackageRemoved(packageName: String, appId: Int) {
+        val packageStates = packageManagerLocal.packageStates
+        mutateState {
+            with(policy) { onPackageRemoved(packageStates, packageName, appId) }
+        }
+    }
+
+    internal fun onPackageInstalled(
+        packageName: String,
+        params: PermissionManagerServiceInternal.PackageInstalledParams,
+        userId: Int
+    ) {
+        val packageStates = packageManagerLocal.packageStates
+        mutateState {
+            with(policy) { onPackageInstalled(packageStates, packageName, params, userId) }
+        }
+    }
+
+    internal fun onPackageUninstalled(packageName: String, appId: Int, userId: Int) {
+        val packageStates = packageManagerLocal.packageStates
+        mutateState {
+            with(policy) { onPackageUninstalled(packageStates, packageName, appId, userId) }
+        }
+    }
+
+    private val PackageManagerLocal.packageStates: Map<String, PackageState>
+        get() = withUnfilteredSnapshot().use { it.packageStates }
 
     internal inline fun <T> getState(action: GetStateScope.() -> T): T =
         GetStateScope(state).action()

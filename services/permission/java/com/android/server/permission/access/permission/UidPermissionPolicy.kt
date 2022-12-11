@@ -20,9 +20,11 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.content.pm.PermissionGroupInfo
 import android.content.pm.PermissionInfo
+import android.content.pm.SigningDetails
 import android.os.Build
 import android.os.UserHandle
 import android.util.Log
+import com.android.internal.os.RoSystemProperties
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.permission.access.AccessState
@@ -35,16 +37,13 @@ import com.android.server.permission.access.SystemState
 import com.android.server.permission.access.UidUri
 import com.android.server.permission.access.UserState
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
-import com.android.server.permission.access.data.Permission
-import com.android.server.permission.access.external.AndroidPackage
-import com.android.server.permission.access.external.CompatibilityPermissionInfo
-import com.android.server.permission.access.external.KnownPackages
-import com.android.server.permission.access.external.PackageInfoUtils
-import com.android.server.permission.access.external.PackageState
-import com.android.server.permission.access.external.RoSystemProperties
-import com.android.server.permission.access.external.SigningDetails
 import com.android.server.permission.access.util.hasAnyBit
 import com.android.server.permission.access.util.hasBits
+import com.android.server.pm.KnownPackages
+import com.android.server.pm.parsing.PackageInfoUtils
+import com.android.server.pm.permission.CompatibilityPermissionInfo
+import com.android.server.pm.pkg.AndroidPackage
+import com.android.server.pm.pkg.PackageState
 
 class UidPermissionPolicy : SchemePolicy() {
     private val persistence = UidPermissionPersistence()
@@ -75,7 +74,7 @@ class UidPermissionPolicy : SchemePolicy() {
     }
 
     override fun MutateStateScope.onUserAdded(userId: Int) {
-        newState.systemState.packageStates.forEachValueIndexed { _, packageState ->
+        newState.systemState.packageStates.forEach { (_, packageState) ->
             evaluateAllPermissionStatesForPackageAndUser(packageState, null, userId)
             grantImplicitPermissions(packageState, userId)
         }
@@ -179,7 +178,7 @@ class UidPermissionPolicy : SchemePolicy() {
         packageState.androidPackage!!.permissionGroups.forEachIndexed { _, parsedPermissionGroup ->
             val newPermissionGroup = PackageInfoUtils.generatePermissionGroupInfo(
                 parsedPermissionGroup, PackageManager.GET_META_DATA.toLong()
-            )
+            )!!
             // TODO: Clear permission state on group take-over?
             val permissionGroupName = newPermissionGroup.name
             val oldPermissionGroup = newState.systemState.permissionGroups[permissionGroupName]
@@ -211,7 +210,7 @@ class UidPermissionPolicy : SchemePolicy() {
             // }
             val newPermissionInfo = PackageInfoUtils.generatePermissionInfo(
                 parsedPermission, PackageManager.GET_META_DATA.toLong()
-            )
+            )!!
             // TODO: newPermissionInfo.flags |= PermissionInfo.FLAG_INSTALLED
             val permissionName = newPermissionInfo.name
             val oldPermission = if (parsedPermission.isTree) {
@@ -573,23 +572,24 @@ class UidPermissionPolicy : SchemePolicy() {
         packageState: PackageState,
         permission: Permission
     ): Boolean {
-        // check if the package is allow to use this signature permission.  A package is allowed to
-        // use a signature permission if:
-        //     - it has the same set of signing certificates as the source package
-        //     - or its signing certificate was rotated from the source package's certificate
-        //     - or its signing certificate is a previous signing certificate of the defining
-        //       package, and the defining package still trusts the old certificate for permissions
-        //     - or it shares a common signing certificate in its lineage with the defining package,
-        //       and the defining package still trusts the old certificate for permissions
-        //     - or it shares the above relationships with the system package
+        // Check if the package is allowed to use this signature permission.  A package is allowed
+        // to use a signature permission if:
+        // - it has the same set of signing certificates as the source package
+        // - or its signing certificate was rotated from the source package's certificate
+        // - or its signing certificate is a previous signing certificate of the defining
+        //     package, and the defining package still trusts the old certificate for permissions
+        // - or it shares a common signing certificate in its lineage with the defining package,
+        //     and the defining package still trusts the old certificate for permissions
+        // - or it shares the above relationships with the system package
+        val packageSigningDetails = packageState.androidPackage!!.signingDetails
         val sourceSigningDetails = newState.systemState
-            .packageStates[permission.packageName]?.signingDetails
+            .packageStates[permission.packageName]?.androidPackage?.signingDetails
         val platformSigningDetails = newState.systemState
-            .packageStates[PLATFORM_PACKAGE_NAME]!!.signingDetails
-        return sourceSigningDetails?.hasCommonSignerWithCapability(packageState.signingDetails,
+            .packageStates[PLATFORM_PACKAGE_NAME]!!.androidPackage!!.signingDetails
+        return sourceSigningDetails?.hasCommonSignerWithCapability(packageSigningDetails,
             SigningDetails.CertCapabilities.PERMISSION) == true ||
-            packageState.signingDetails.hasAncestorOrSelf(platformSigningDetails) ||
-            platformSigningDetails.checkCapability(packageState.signingDetails,
+            packageSigningDetails.hasAncestorOrSelf(platformSigningDetails) ||
+            platformSigningDetails.checkCapability(packageSigningDetails,
                     SigningDetails.CertCapabilities.PERMISSION)
     }
 
@@ -629,7 +629,10 @@ class UidPermissionPolicy : SchemePolicy() {
         androidPackage: AndroidPackage,
         permissionName: String
     ): Boolean {
-        val apexModuleName = androidPackage.apexModuleName
+        // TODO(b/261913353): STOPSHIP: Add AndroidPackage.apexModuleName. The below is only for
+        //  passing compilation but won't actually work.
+        //val apexModuleName = androidPackage.apexModuleName
+        val apexModuleName = androidPackage.packageName
         val systemState = newState.systemState
         val packageName = androidPackage.packageName
         val permissionNames = when {
@@ -657,7 +660,10 @@ class UidPermissionPolicy : SchemePolicy() {
     ): Boolean {
         // Different from the previous implementation, which may incorrectly use the APEX package
         // name, we now use the APEX module name to be consistent with the allowlist.
-        val apexModuleName = androidPackage.apexModuleName
+        // TODO(b/261913353): STOPSHIP: Add AndroidPackage.apexModuleName. The below is only for
+        //  passing compilation but won't actually work.
+        //val apexModuleName = androidPackage.apexModuleName
+        val apexModuleName = androidPackage.packageName
         val systemState = newState.systemState
         val packageName = androidPackage.packageName
         val permissionNames = when {
@@ -741,7 +747,7 @@ class UidPermissionPolicy : SchemePolicy() {
             return true
         }
         if (permission.isKnownSigner &&
-            packageState.signingDetails.hasAncestorOrSelfWithDigest(permission.knownCerts)) {
+            androidPackage.signingDetails.hasAncestorOrSelfWithDigest(permission.knownCerts)) {
             // If the permission is to be granted to a known signer then check if any of this
             // app's signing certificates are in the trusted certificate digest Set.
             return true
@@ -840,7 +846,7 @@ class UidPermissionPolicy : SchemePolicy() {
         return uid == ownerUid
     }
 
-    override fun MutateStateScope.onPackageRemoved(packageState: PackageState) {
+    override fun MutateStateScope.onPackageRemoved(packageName: String, appId: Int) {
         // TODO
     }
 

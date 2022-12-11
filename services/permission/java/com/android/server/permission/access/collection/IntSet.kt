@@ -51,6 +51,8 @@ class IntSet private constructor(
     fun copy(): IntSet = IntSet(array.clone())
 }
 
+fun IntSet(values: IntArray): IntSet = IntSet().apply{ this += values }
+
 inline fun IntSet.allIndexed(predicate: (Int, Int) -> Boolean): Boolean {
     for (index in 0 until size) {
         if (!predicate(index, elementAt(index))) {
@@ -101,6 +103,14 @@ inline operator fun IntSet.plus(element: Int): IntSet = copy().apply { this += e
 @Suppress("NOTHING_TO_INLINE")
 inline operator fun IntSet.plusAssign(element: Int) {
     add(element)
+}
+
+operator fun IntSet.plusAssign(set: IntSet) {
+    set.forEachIndexed { _, it -> this += it }
+}
+
+operator fun IntSet.plusAssign(array: IntArray) {
+    array.forEach { this += it }
 }
 
 inline fun IntSet.removeAllIndexed(predicate: (Int, Int) -> Boolean) {

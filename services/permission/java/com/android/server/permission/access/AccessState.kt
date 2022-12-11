@@ -18,8 +18,8 @@ package com.android.server.permission.access
 
 import android.content.pm.PermissionGroupInfo
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
-import com.android.server.permission.access.data.Permission
-import com.android.server.permission.access.external.PackageState
+import com.android.server.permission.access.permission.Permission
+import com.android.server.pm.pkg.PackageState
 
 class AccessState private constructor(
     val systemState: SystemState,
@@ -32,8 +32,8 @@ class AccessState private constructor(
 
 class SystemState private constructor(
     val userIds: IntSet,
-    val packageStates: IndexedMap<String, PackageState>,
-    val disabledSystemPackageStates: IndexedMap<String, PackageState>,
+    var packageStates: Map<String, PackageState>,
+    var disabledSystemPackageStates: Map<String, PackageState>,
     val appIds: IntMap<IndexedListSet<String>>,
     // A map of KnownPackagesInt to a set of known package names
     val knownPackages: IntMap<IndexedListSet<String>>,
@@ -59,7 +59,7 @@ class SystemState private constructor(
     val permissions: IndexedMap<String, Permission>
 ) : WritableState() {
     constructor() : this(
-        IntSet(), IndexedMap(), IndexedMap(), IntMap(), IntMap(), IntMap(), IndexedMap(),
+        IntSet(), emptyMap(), emptyMap(), IntMap(), IntMap(), IntMap(), IndexedMap(),
         IndexedListSet(), IndexedMap(), IndexedMap(), IndexedMap(), IndexedMap(), IndexedMap(),
         IndexedMap(), IndexedMap(), IndexedMap(), IndexedMap(), IndexedMap(), IndexedMap(),
         IndexedMap(), IndexedMap(), IndexedMap()
@@ -68,8 +68,8 @@ class SystemState private constructor(
     fun copy(): SystemState =
         SystemState(
             userIds.copy(),
-            packageStates.copy { it },
-            disabledSystemPackageStates.copy { it },
+            packageStates,
+            disabledSystemPackageStates,
             appIds.copy { it.copy() },
             knownPackages.copy { it.copy() },
             deviceAndProfileOwners.copy { it },

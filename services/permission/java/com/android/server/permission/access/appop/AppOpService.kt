@@ -24,9 +24,13 @@ import com.android.server.appop.OnOpModeChangedListener
 import com.android.server.permission.access.AccessCheckingService
 import java.io.PrintWriter
 
-class AppOpsCheckingServiceCompatImpl(
-    private val accessCheckingService: AccessCheckingService
+class AppOpService(
+    private val service: AccessCheckingService
 ) : AppOpsCheckingServiceInterface {
+    fun initialize() {
+        TODO("Not yet implemented")
+    }
+
     override fun getNonDefaultUidModes(uid: Int): SparseIntArray {
         TODO("Not yet implemented")
     }
@@ -139,6 +143,6 @@ class AppOpsCheckingServiceCompatImpl(
     }
 
     companion object {
-        private val LOG_TAG = AppOpsCheckingServiceCompatImpl::class.java.simpleName
+        private val LOG_TAG = AppOpService::class.java.simpleName
     }
 }
