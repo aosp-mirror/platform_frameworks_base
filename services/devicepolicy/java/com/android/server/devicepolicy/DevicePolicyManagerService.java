@@ -336,7 +336,6 @@ import android.util.AtomicFile;
 import android.util.DebugUtils;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -1220,6 +1219,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                                 PackageManager.MATCH_DIRECT_BOOT_AWARE
                                         | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                                 userHandle) == null) {
+                            Slogf.e(LOG_TAG, String.format(
+                                    "Admin package %s not found for user %d, removing active admin",
+                                    packageName, userHandle));
                             removedAdmin = true;
                             policy.mAdminList.remove(i);
                             policy.mAdminMap.remove(aa.info.getComponent());
@@ -3162,7 +3164,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             userId = mOwners.getDeviceOwnerUserId();
         }
         if (VERBOSE_LOG) {
-            Log.v(LOG_TAG, "Starting non-system DO user: " + userId);
+            Slogf.v(LOG_TAG, "Starting non-system DO user: " + userId);
         }
         if (userId != UserHandle.USER_SYSTEM) {
             try {
