@@ -597,11 +597,9 @@ class UidPermissionPolicy : SchemePolicy() {
             newState.systemState.privilegedPermissionAllowlistSourcePackageNames) {
             return true
         }
-        if (isInSystemConfigPrivAppPermissions(androidPackage, permission.name)) {
-            return true
-        }
-        if (isInSystemConfigPrivAppDenyPermissions(androidPackage, permission.name)) {
-            return false
+        val allowlistState = getPrivilegedPermissionAllowlistState(androidPackage, permission.name)
+        if (allowlistState != null) {
+            return allowlistState
         }
         // Updated system apps do not need to be allowlisted
         if (packageState.isUpdatedSystemApp) {
@@ -611,66 +609,51 @@ class UidPermissionPolicy : SchemePolicy() {
         return !RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE
     }
 
-    private fun MutateStateScope.isInSystemConfigPrivAppPermissions(
+    /**
+     * Get the whether a privileged permission is explicitly allowed or denied for a package in the
+     * allowlist, or `null` if it's not in the allowlist.
+     */
+    private fun MutateStateScope.getPrivilegedPermissionAllowlistState(
         androidPackage: AndroidPackage,
         permissionName: String
-    ): Boolean {
+    ): Boolean? {
+        val permissionAllowlist = newState.systemState.permissionAllowlist
         // TODO(b/261913353): STOPSHIP: Add AndroidPackage.apexModuleName. The below is only for
         //  passing compilation but won't actually work.
         //val apexModuleName = androidPackage.apexModuleName
         val apexModuleName = androidPackage.packageName
-        val systemState = newState.systemState
         val packageName = androidPackage.packageName
-        val permissionNames = when {
-            androidPackage.isVendor -> systemState.vendorPrivAppPermissions[packageName]
-            androidPackage.isProduct -> systemState.productPrivAppPermissions[packageName]
-            androidPackage.isSystemExt -> systemState.systemExtPrivAppPermissions[packageName]
+        return when {
+            androidPackage.isVendor -> permissionAllowlist.getVendorPrivilegedAppAllowlistState(
+                packageName, permissionName
+            )
+            androidPackage.isProduct -> permissionAllowlist.getProductPrivilegedAppAllowlistState(
+                packageName, permissionName
+            )
+            androidPackage.isSystemExt ->
+                permissionAllowlist.getSystemExtPrivilegedAppAllowlistState(
+                    packageName, permissionName
+                )
             apexModuleName != null -> {
-                val apexPrivAppPermissions = systemState.apexPrivAppPermissions[apexModuleName]
-                    ?.get(packageName)
-                val privAppPermissions = systemState.privAppPermissions[packageName]
-                when {
-                    apexPrivAppPermissions == null -> privAppPermissions
-                    privAppPermissions == null -> apexPrivAppPermissions
-                    else -> apexPrivAppPermissions + privAppPermissions
+                val nonApexAllowlistState = permissionAllowlist.getPrivilegedAppAllowlistState(
+                    packageName, permissionName
+                )
+                if (nonApexAllowlistState != null) {
+                    // TODO(andreionea): Remove check as soon as all apk-in-apex
+                    // permission allowlists are migrated.
+                    Log.w(
+                        LOG_TAG, "Package $packageName is an APK in APEX but has permission" +
+                            " allowlist on the system image, please bundle the allowlist in the" +
+                            " $apexModuleName APEX instead"
+                    )
                 }
+                val apexAllowlistState = permissionAllowlist.getApexPrivilegedAppAllowlistState(
+                    apexModuleName, packageName, permissionName
+                )
+                apexAllowlistState ?: nonApexAllowlistState
             }
-            else -> systemState.privAppPermissions[packageName]
+            else -> permissionAllowlist.getPrivilegedAppAllowlistState(packageName, permissionName)
         }
-        return permissionNames?.contains(permissionName) == true
-    }
-
-    private fun MutateStateScope.isInSystemConfigPrivAppDenyPermissions(
-        androidPackage: AndroidPackage,
-        permissionName: String
-    ): Boolean {
-        // Different from the previous implementation, which may incorrectly use the APEX package
-        // name, we now use the APEX module name to be consistent with the allowlist.
-        // TODO(b/261913353): STOPSHIP: Add AndroidPackage.apexModuleName. The below is only for
-        //  passing compilation but won't actually work.
-        //val apexModuleName = androidPackage.apexModuleName
-        val apexModuleName = androidPackage.packageName
-        val systemState = newState.systemState
-        val packageName = androidPackage.packageName
-        val permissionNames = when {
-            androidPackage.isVendor -> systemState.vendorPrivAppDenyPermissions[packageName]
-            androidPackage.isProduct -> systemState.productPrivAppDenyPermissions[packageName]
-            androidPackage.isSystemExt -> systemState.systemExtPrivAppDenyPermissions[packageName]
-            // Different from the previous implementation, which ignores the regular priv app
-            // denylist in this case, we now respect it as well to be consistent with the allowlist.
-            apexModuleName != null -> {
-                val apexPrivAppDenyPermissions = systemState
-                    .apexPrivAppDenyPermissions[apexModuleName]?.get(packageName)
-                val privAppDenyPermissions = systemState.privAppDenyPermissions[packageName]
-                when {
-                    apexPrivAppDenyPermissions == null -> privAppDenyPermissions
-                    privAppDenyPermissions == null -> apexPrivAppDenyPermissions
-                    else -> apexPrivAppDenyPermissions + privAppDenyPermissions
-                }
-            }
-            else -> systemState.privAppDenyPermissions[packageName]
-        }
-        return permissionNames?.contains(permissionName) == true
     }
 
     private fun MutateStateScope.anyPackageInAppId(
@@ -811,13 +794,13 @@ class UidPermissionPolicy : SchemePolicy() {
             }
             permission.isOem -> {
                 if (androidPackage.isOem) {
-                    val isOemAllowlisted = newState.systemState
-                        .oemPermissions[packageName]?.get(permissionName)
-                    checkNotNull(isOemAllowlisted) {
+                    val allowlistState = newState.systemState.permissionAllowlist
+                        .getOemAppAllowlistState(packageName, permissionName)
+                    checkNotNull(allowlistState) {
                         "OEM permission $permissionName requested by package" +
                             " $packageName must be explicitly declared granted or not"
                     }
-                    return isOemAllowlisted
+                    return allowlistState
                 }
             }
         }

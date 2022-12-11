@@ -435,7 +435,8 @@ class PermissionService(
         } else {
             intArrayOf(userId)
         }
-        userIds.forEach { service.onPackageInstalled(androidPackage.packageName, params, it) }
+        userIds.forEach { service.onPackageInstalled(androidPackage.packageName, it) }
+        // TODO: Handle params.
     }
 
     override fun onPackageUninstalled(
