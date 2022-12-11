@@ -99,7 +99,6 @@ import android.system.Os;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
@@ -116,6 +115,7 @@ import com.android.server.SystemConfig;
 import com.android.server.art.ArtManagerLocal;
 import com.android.server.pm.PackageManagerShellCommandDataLoader.Metadata;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
+import com.android.server.pm.permission.PermissionAllowlist;
 import com.android.server.pm.verify.domain.DomainVerificationShell;
 
 import dalvik.system.DexFile;
@@ -2684,26 +2684,7 @@ class PackageManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: no package specified.");
             return 1;
         }
-
-        ArraySet<String> privAppPermissions = null;
-        if (isVendorApp(pkg)) {
-            privAppPermissions = SystemConfig.getInstance().getVendorPrivAppPermissions(pkg);
-        } else if (isProductApp(pkg)) {
-            privAppPermissions = SystemConfig.getInstance().getProductPrivAppPermissions(pkg);
-        } else if (isSystemExtApp(pkg)) {
-            privAppPermissions = SystemConfig.getInstance()
-                    .getSystemExtPrivAppPermissions(pkg);
-        } else if (isApexApp(pkg)) {
-            final String apexName = ApexManager.getInstance().getApexModuleNameForPackageName(
-                    getApexPackageNameContainingPackage(pkg));
-            privAppPermissions = SystemConfig.getInstance()
-                    .getApexPrivAppPermissions(apexName, pkg);
-        } else {
-            privAppPermissions = SystemConfig.getInstance().getPrivAppPermissions(pkg);
-        }
-
-        getOutPrintWriter().println(privAppPermissions == null
-                ? "{}" : privAppPermissions.toString());
+        getOutPrintWriter().println(getPrivAppPermissionsString(pkg, true));
         return 0;
     }
 
@@ -2713,27 +2694,52 @@ class PackageManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: no package specified.");
             return 1;
         }
-
-        ArraySet<String> privAppPermissions = null;
-        if (isVendorApp(pkg)) {
-            privAppPermissions = SystemConfig.getInstance().getVendorPrivAppDenyPermissions(pkg);
-        } else if (isProductApp(pkg)) {
-            privAppPermissions = SystemConfig.getInstance().getProductPrivAppDenyPermissions(pkg);
-        } else if (isSystemExtApp(pkg)) {
-            privAppPermissions = SystemConfig.getInstance()
-                    .getSystemExtPrivAppDenyPermissions(pkg);
-        } else if (isApexApp(pkg)) {
-            final String apexName = ApexManager.getInstance().getApexModuleNameForPackageName(
-                    getApexPackageNameContainingPackage(pkg));
-            privAppPermissions = SystemConfig.getInstance()
-                    .getApexPrivAppDenyPermissions(apexName, pkg);
-        } else {
-            privAppPermissions = SystemConfig.getInstance().getPrivAppDenyPermissions(pkg);
-        }
-
-        getOutPrintWriter().println(privAppPermissions == null
-                ? "{}" : privAppPermissions.toString());
+        getOutPrintWriter().println(getPrivAppPermissionsString(pkg, false));
         return 0;
+    }
+
+    @NonNull
+    private String getPrivAppPermissionsString(@NonNull String packageName, boolean allowed) {
+        final PermissionAllowlist permissionAllowlist =
+                SystemConfig.getInstance().getPermissionAllowlist();
+        final ArrayMap<String, ArrayMap<String, Boolean>> privAppPermissions;
+        if (isVendorApp(packageName)) {
+            privAppPermissions = permissionAllowlist.getVendorPrivilegedAppAllowlist();
+        } else if (isProductApp(packageName)) {
+            privAppPermissions = permissionAllowlist.getProductPrivilegedAppAllowlist();
+        } else if (isSystemExtApp(packageName)) {
+            privAppPermissions = permissionAllowlist.getSystemExtPrivilegedAppAllowlist();
+        } else if (isApexApp(packageName)) {
+            final String moduleName = ApexManager.getInstance().getApexModuleNameForPackageName(
+                    getApexPackageNameContainingPackage(packageName));
+            privAppPermissions = permissionAllowlist.getApexPrivilegedAppAllowlists()
+                    .get(moduleName);
+        } else {
+            privAppPermissions = permissionAllowlist.getPrivilegedAppAllowlist();
+        }
+        final ArrayMap<String, Boolean> permissions = privAppPermissions != null
+                ? privAppPermissions.get(packageName) : null;
+        if (permissions == null) {
+            return "{}";
+        }
+        final StringBuilder result = new StringBuilder("{");
+        boolean isFirstPermission = true;
+        final int permissionsSize = permissions.size();
+        for (int i = 0; i < permissionsSize; i++) {
+            boolean permissionAllowed = permissions.valueAt(i);
+            if (permissionAllowed != allowed) {
+                continue;
+            }
+            if (isFirstPermission) {
+                isFirstPermission = false;
+            } else {
+                result.append(", ");
+            }
+            String permissionName = permissions.keyAt(i);
+            result.append(permissionName);
+        }
+        result.append("}");
+        return result.toString();
     }
 
     private int runGetOemPermissions() {
@@ -2743,7 +2749,7 @@ class PackageManagerShellCommand extends ShellCommand {
             return 1;
         }
         final Map<String, Boolean> oemPermissions = SystemConfig.getInstance()
-                .getOemPermissions(pkg);
+                .getPermissionAllowlist().getOemAppAllowlist().get(pkg);
         if (oemPermissions == null || oemPermissions.isEmpty()) {
             getOutPrintWriter().println("{}");
         } else {

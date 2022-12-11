@@ -47,6 +47,7 @@ import android.util.Xml;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.build.UnboundedSdkLevel;
+import com.android.server.pm.permission.PermissionAllowlist;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
@@ -304,24 +305,7 @@ public class SystemConfig {
     final ArrayMap<String, List<CarrierAssociatedAppEntry>>
             mDisabledUntilUsedPreinstalledCarrierAssociatedApps = new ArrayMap<>();
 
-    final ArrayMap<String, ArraySet<String>> mPrivAppPermissions = new ArrayMap<>();
-    final ArrayMap<String, ArraySet<String>> mPrivAppDenyPermissions = new ArrayMap<>();
-
-    final ArrayMap<String, ArraySet<String>> mVendorPrivAppPermissions = new ArrayMap<>();
-    final ArrayMap<String, ArraySet<String>> mVendorPrivAppDenyPermissions = new ArrayMap<>();
-
-    final ArrayMap<String, ArraySet<String>> mProductPrivAppPermissions = new ArrayMap<>();
-    final ArrayMap<String, ArraySet<String>> mProductPrivAppDenyPermissions = new ArrayMap<>();
-
-    final ArrayMap<String, ArraySet<String>> mSystemExtPrivAppPermissions = new ArrayMap<>();
-    final ArrayMap<String, ArraySet<String>> mSystemExtPrivAppDenyPermissions = new ArrayMap<>();
-
-    final ArrayMap<String, ArrayMap<String, ArraySet<String>>> mApexPrivAppPermissions =
-            new ArrayMap<>();
-    final ArrayMap<String, ArrayMap<String, ArraySet<String>>> mApexPrivAppDenyPermissions =
-            new ArrayMap<>();
-
-    final ArrayMap<String, ArrayMap<String, Boolean>> mOemPermissions = new ArrayMap<>();
+    private final PermissionAllowlist mPermissionAllowlist = new PermissionAllowlist();
 
     // Allowed associations between applications.  If there are any entries
     // for an app, those are the only associations allowed; otherwise, all associations
@@ -459,64 +443,8 @@ public class SystemConfig {
         return mDisabledUntilUsedPreinstalledCarrierAssociatedApps;
     }
 
-    public ArraySet<String> getPrivAppPermissions(String packageName) {
-        return mPrivAppPermissions.get(packageName);
-    }
-
-    public ArraySet<String> getPrivAppDenyPermissions(String packageName) {
-        return mPrivAppDenyPermissions.get(packageName);
-    }
-
-    /** Get privapp permission allowlist for an apk-in-apex. */
-    public ArraySet<String> getApexPrivAppPermissions(String apexName, String apkPackageName) {
-        return mApexPrivAppPermissions.getOrDefault(apexName, EMPTY_PERMISSIONS)
-                .get(apkPackageName);
-    }
-
-    /** Get privapp permissions denylist for an apk-in-apex. */
-    public ArraySet<String> getApexPrivAppDenyPermissions(String apexName, String apkPackageName) {
-        return mApexPrivAppDenyPermissions.getOrDefault(apexName, EMPTY_PERMISSIONS)
-                .get(apkPackageName);
-    }
-
-    public ArraySet<String> getVendorPrivAppPermissions(String packageName) {
-        return mVendorPrivAppPermissions.get(packageName);
-    }
-
-    public ArraySet<String> getVendorPrivAppDenyPermissions(String packageName) {
-        return mVendorPrivAppDenyPermissions.get(packageName);
-    }
-
-    public ArraySet<String> getProductPrivAppPermissions(String packageName) {
-        return mProductPrivAppPermissions.get(packageName);
-    }
-
-    public ArraySet<String> getProductPrivAppDenyPermissions(String packageName) {
-        return mProductPrivAppDenyPermissions.get(packageName);
-    }
-
-    /**
-     * Read from "permission" tags in /system_ext/etc/permissions/*.xml
-     * @return Set of privileged permissions that are explicitly granted.
-     */
-    public ArraySet<String> getSystemExtPrivAppPermissions(String packageName) {
-        return mSystemExtPrivAppPermissions.get(packageName);
-    }
-
-    /**
-     * Read from "deny-permission" tags in /system_ext/etc/permissions/*.xml
-     * @return Set of privileged permissions that are explicitly denied.
-     */
-    public ArraySet<String> getSystemExtPrivAppDenyPermissions(String packageName) {
-        return mSystemExtPrivAppDenyPermissions.get(packageName);
-    }
-
-    public Map<String, Boolean> getOemPermissions(String packageName) {
-        final Map<String, Boolean> oemPermissions = mOemPermissions.get(packageName);
-        if (oemPermissions != null) {
-            return oemPermissions;
-        }
-        return Collections.emptyMap();
+    public PermissionAllowlist getPermissionAllowlist() {
+        return mPermissionAllowlist;
     }
 
     public ArrayMap<String, ArraySet<String>> getAllowedAssociations() {
@@ -1253,20 +1181,20 @@ public class SystemConfig {
                                     Environment.getApexDirectory().toPath() + "/")
                                     && ApexProperties.updatable().orElse(false);
                             if (vendor) {
-                                readPrivAppPermissions(parser, mVendorPrivAppPermissions,
-                                        mVendorPrivAppDenyPermissions);
+                                readPrivAppPermissions(parser,
+                                        mPermissionAllowlist.getVendorPrivilegedAppAllowlist());
                             } else if (product) {
-                                readPrivAppPermissions(parser, mProductPrivAppPermissions,
-                                        mProductPrivAppDenyPermissions);
+                                readPrivAppPermissions(parser,
+                                        mPermissionAllowlist.getProductPrivilegedAppAllowlist());
                             } else if (systemExt) {
-                                readPrivAppPermissions(parser, mSystemExtPrivAppPermissions,
-                                        mSystemExtPrivAppDenyPermissions);
+                                readPrivAppPermissions(parser,
+                                        mPermissionAllowlist.getSystemExtPrivilegedAppAllowlist());
                             } else if (apex) {
                                 readApexPrivAppPermissions(parser, permFile,
                                         Environment.getApexDirectory().toPath());
                             } else {
-                                readPrivAppPermissions(parser, mPrivAppPermissions,
-                                        mPrivAppDenyPermissions);
+                                readPrivAppPermissions(parser,
+                                        mPermissionAllowlist.getPrivilegedAppAllowlist());
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);
@@ -1589,50 +1517,10 @@ public class SystemConfig {
         }
     }
 
-    private void readPrivAppPermissions(XmlPullParser parser,
-            ArrayMap<String, ArraySet<String>> grantMap,
-            ArrayMap<String, ArraySet<String>> denyMap)
+    private void readPrivAppPermissions(@NonNull XmlPullParser parser,
+            @NonNull ArrayMap<String, ArrayMap<String, Boolean>> allowlist)
             throws IOException, XmlPullParserException {
-        String packageName = parser.getAttributeValue(null, "package");
-        if (TextUtils.isEmpty(packageName)) {
-            Slog.w(TAG, "package is required for <privapp-permissions> in "
-                    + parser.getPositionDescription());
-            return;
-        }
-
-        ArraySet<String> permissions = grantMap.get(packageName);
-        if (permissions == null) {
-            permissions = new ArraySet<>();
-        }
-        ArraySet<String> denyPermissions = denyMap.get(packageName);
-        int depth = parser.getDepth();
-        while (XmlUtils.nextElementWithin(parser, depth)) {
-            String name = parser.getName();
-            if ("permission".equals(name)) {
-                String permName = parser.getAttributeValue(null, "name");
-                if (TextUtils.isEmpty(permName)) {
-                    Slog.w(TAG, "name is required for <permission> in "
-                            + parser.getPositionDescription());
-                    continue;
-                }
-                permissions.add(permName);
-            } else if ("deny-permission".equals(name)) {
-                String permName = parser.getAttributeValue(null, "name");
-                if (TextUtils.isEmpty(permName)) {
-                    Slog.w(TAG, "name is required for <deny-permission> in "
-                            + parser.getPositionDescription());
-                    continue;
-                }
-                if (denyPermissions == null) {
-                    denyPermissions = new ArraySet<>();
-                }
-                denyPermissions.add(permName);
-            }
-        }
-        grantMap.put(packageName, permissions);
-        if (denyPermissions != null) {
-            denyMap.put(packageName, denyPermissions);
-        }
+        readPermissionAllowlist(parser, allowlist, "privapp-permissions");
     }
 
     private void readInstallInUserType(XmlPullParser parser,
@@ -1683,14 +1571,21 @@ public class SystemConfig {
     }
 
     void readOemPermissions(XmlPullParser parser) throws IOException, XmlPullParserException {
+        readPermissionAllowlist(parser, mPermissionAllowlist.getOemAppAllowlist(),
+                "oem-permissions");
+    }
+
+    private static void readPermissionAllowlist(@NonNull XmlPullParser parser,
+            @NonNull ArrayMap<String, ArrayMap<String, Boolean>> allowlist, @NonNull String tagName)
+            throws IOException, XmlPullParserException {
         final String packageName = parser.getAttributeValue(null, "package");
         if (TextUtils.isEmpty(packageName)) {
-            Slog.w(TAG, "package is required for <oem-permissions> in "
+            Slog.w(TAG, "package is required for <" + tagName + "> in "
                     + parser.getPositionDescription());
             return;
         }
 
-        ArrayMap<String, Boolean> permissions = mOemPermissions.get(packageName);
+        ArrayMap<String, Boolean> permissions = allowlist.get(packageName);
         if (permissions == null) {
             permissions = new ArrayMap<>();
         }
@@ -1698,24 +1593,24 @@ public class SystemConfig {
         while (XmlUtils.nextElementWithin(parser, depth)) {
             final String name = parser.getName();
             if ("permission".equals(name)) {
-                final String permName = parser.getAttributeValue(null, "name");
-                if (TextUtils.isEmpty(permName)) {
+                final String permissionName = parser.getAttributeValue(null, "name");
+                if (TextUtils.isEmpty(permissionName)) {
                     Slog.w(TAG, "name is required for <permission> in "
                             + parser.getPositionDescription());
                     continue;
                 }
-                permissions.put(permName, Boolean.TRUE);
+                permissions.put(permissionName, Boolean.TRUE);
             } else if ("deny-permission".equals(name)) {
-                String permName = parser.getAttributeValue(null, "name");
-                if (TextUtils.isEmpty(permName)) {
+                String permissionName = parser.getAttributeValue(null, "name");
+                if (TextUtils.isEmpty(permissionName)) {
                     Slog.w(TAG, "name is required for <deny-permission> in "
                             + parser.getPositionDescription());
                     continue;
                 }
-                permissions.put(permName, Boolean.FALSE);
+                permissions.put(permissionName, Boolean.FALSE);
             }
         }
-        mOemPermissions.put(packageName, permissions);
+        allowlist.put(packageName, permissions);
     }
 
     private void readSplitPermission(XmlPullParser parser, File permFile)
@@ -1865,21 +1760,14 @@ public class SystemConfig {
             Path apexDirectoryPath) throws IOException, XmlPullParserException {
         final String moduleName =
                 getApexModuleNameFromFilePath(permFile.toPath(), apexDirectoryPath);
-        final ArrayMap<String, ArraySet<String>> privAppPermissions;
-        if (mApexPrivAppPermissions.containsKey(moduleName)) {
-            privAppPermissions = mApexPrivAppPermissions.get(moduleName);
-        } else {
-            privAppPermissions = new ArrayMap<>();
-            mApexPrivAppPermissions.put(moduleName, privAppPermissions);
+        final ArrayMap<String, ArrayMap<String, ArrayMap<String, Boolean>>> allowlists =
+                mPermissionAllowlist.getApexPrivilegedAppAllowlists();
+        ArrayMap<String, ArrayMap<String, Boolean>> allowlist = allowlists.get(moduleName);
+        if (allowlist == null) {
+            allowlist = new ArrayMap<>();
+            allowlists.put(moduleName, allowlist);
         }
-        final ArrayMap<String, ArraySet<String>> privAppDenyPermissions;
-        if (mApexPrivAppDenyPermissions.containsKey(moduleName)) {
-            privAppDenyPermissions = mApexPrivAppDenyPermissions.get(moduleName);
-        } else {
-            privAppDenyPermissions = new ArrayMap<>();
-            mApexPrivAppDenyPermissions.put(moduleName, privAppDenyPermissions);
-        }
-        readPrivAppPermissions(parser, privAppPermissions, privAppDenyPermissions);
+        readPrivAppPermissions(parser, allowlist);
     }
 
     private static boolean isSystemProcess() {
