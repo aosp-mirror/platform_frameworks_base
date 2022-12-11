@@ -185,6 +185,10 @@ public class ComputerEngine implements Computer {
             return mSettings.getPackagesLocked().untrackedStorage();
         }
 
+        public ArrayMap<String, ? extends PackageStateInternal> getDisabledSystemPackages() {
+            return mSettings.getDisabledSystemPackagesLocked().untrackedStorage();
+        }
+
         public Settings(@NonNull com.android.server.pm.Settings settings) {
             mSettings = settings;
         }
@@ -3457,6 +3461,12 @@ public class ComputerEngine implements Computer {
     @Override
     public ArrayMap<String, ? extends PackageStateInternal> getPackageStates() {
         return mSettings.getPackages();
+    }
+
+    @NonNull
+    @Override
+    public ArrayMap<String, ? extends PackageStateInternal> getDisabledSystemPackageStates() {
+        return mSettings.getDisabledSystemPackages();
     }
 
     @Nullable

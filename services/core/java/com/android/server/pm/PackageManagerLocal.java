@@ -149,6 +149,16 @@ public interface PackageManagerLocal {
         @NonNull
         Map<String, PackageState> getPackageStates();
 
+        /**
+         * Returns a map of all disabled system {@link PackageState PackageStates} on the device.
+         *
+         * @return Mapping of package name to disabled system {@link PackageState}.
+         *
+         * @hide Pending API
+         */
+        @NonNull
+        Map<String, PackageState> getDisabledSystemPackageStates();
+
         @Override
         void close();
     }
