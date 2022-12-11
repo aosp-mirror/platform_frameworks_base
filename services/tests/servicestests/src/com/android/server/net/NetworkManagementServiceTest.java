@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.net;
 
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
@@ -51,14 +51,13 @@ import android.os.PermissionEnforcer;
 import android.os.Process;
 import android.os.RemoteException;
 import android.permission.PermissionCheckerManager;
+import android.platform.test.annotations.Presubmit;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArrayMap;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.server.NetworkManagementService.Dependencies;
-import com.android.server.net.BaseNetworkObserver;
 
 import org.junit.After;
 import org.junit.Before;
@@ -76,6 +75,7 @@ import java.util.function.BiFunction;
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public class NetworkManagementServiceTest {
     private NetworkManagementService mNMService;
     @Mock private Context mContext;
@@ -92,7 +92,7 @@ public class NetworkManagementServiceTest {
     private final MockDependencies mDeps = new MockDependencies();
     private final MockPermissionEnforcer mPermissionEnforcer = new MockPermissionEnforcer();
 
-    private final class MockDependencies extends Dependencies {
+    private final class MockDependencies extends NetworkManagementService.Dependencies {
         @Override
         public IBinder getService(String name) {
             switch (name) {
