@@ -545,7 +545,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     // to decide whether an existing policy in the {@link #DEVICE_POLICIES_XML} needs to
     // be upgraded. See {@link PolicyVersionUpgrader} on instructions how to add an upgrade
     // step.
-    static final int DPMS_VERSION = 3;
+    static final int DPMS_VERSION = 4;
 
     static {
         SECURE_SETTINGS_ALLOWLIST = new ArraySet<>();
@@ -1500,8 +1500,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         PackageManager getPackageManager(int userId) {
-            return mContext
-                    .createContextAsUser(UserHandle.of(userId), 0 /* flags */).getPackageManager();
+            try {
+                return createContextAsUser(UserHandle.of(userId)).getPackageManager();
+            } catch (NameNotFoundException e) {
+                throw new IllegalStateException(e);
+            }
         }
 
         PowerManagerInternal getPowerManagerInternal() {
@@ -3113,6 +3116,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         public int[] getUsersForUpgrade() {
             List<UserInfo> allUsers = mUserManager.getUsers();
             return allUsers.stream().mapToInt(u -> u.id).toArray();
+        }
+
+        @Override
+        public List<String> getPlatformSuspendedPackages(int userId) {
+            PackageManagerInternal pmi = mInjector.getPackageManagerInternal();
+            return mInjector.getPackageManager(userId)
+                    .getInstalledPackages(PackageManager.PackageInfoFlags.of(
+                            MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE))
+                    .stream()
+                    .map(packageInfo -> packageInfo.packageName)
+                    .filter(pkg ->
+                            PLATFORM_PACKAGE_NAME.equals(pmi.getSuspendingPackage(pkg, userId))
+                    )
+                    .collect(Collectors.toList());
         }
     }
 
@@ -11386,6 +11403,30 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Slogf.w(LOG_TAG, "PM failed to suspend packages (%s)", Arrays.toString(packageNames));
             return packageNames;
         }
+
+        ArraySet<String> changed = new ArraySet<>(packageNames);
+        if (suspended) {
+            // Only save those packages that are actually suspended. If a package is exempt or is
+            // unsuspendable, it is skipped.
+            changed.removeAll(List.of(nonSuspendedPackages));
+        } else {
+            // If an admin tries to unsuspend a package that is either exempt or is not
+            // suspendable, drop it from the stored list assuming it must be already unsuspended.
+            changed.addAll(exemptApps);
+        }
+
+        synchronized (getLockObject()) {
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller.getUserId());
+            ArraySet<String> current = new ArraySet<>(admin.suspendedPackages);
+            if (suspended) {
+                current.addAll(changed);
+            } else {
+                current.removeAll(changed);
+            }
+            admin.suspendedPackages = current.isEmpty() ? null : new ArrayList<>(current);
+            saveSettingsLocked(caller.getUserId());
+        }
+
         if (exemptApps.isEmpty()) {
             return nonSuspendedPackages;
         }
