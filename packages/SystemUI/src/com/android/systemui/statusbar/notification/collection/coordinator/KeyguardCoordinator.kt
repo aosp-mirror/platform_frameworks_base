@@ -119,6 +119,9 @@ constructor(
                     // Don't apply the filter to (non-promoted) group summaries
                     //  - summary will be pruned if necessary, depending on if children are filtered
                     entry.parent?.summary == entry -> false
+                    // Check that the entry satisfies certain characteristics that would bypass the
+                    // filter
+                    shouldIgnoreUnseenCheck(entry) -> false
                     else -> true
                 }.also { hasFiltered -> hasFilteredAnyNotifs = hasFilteredAnyNotifs || hasFiltered }
 
@@ -132,6 +135,13 @@ constructor(
         object : NotifFilter(TAG) {
             override fun shouldFilterOut(entry: NotificationEntry, now: Long): Boolean =
                 keyguardNotificationVisibilityProvider.shouldHideNotification(entry)
+        }
+
+    private fun shouldIgnoreUnseenCheck(entry: NotificationEntry): Boolean =
+        when {
+            entry.isMediaNotification -> true
+            entry.sbn.isOngoing -> true
+            else -> false
         }
 
     // TODO(b/206118999): merge this class with SensitiveContentCoordinator which also depends on
