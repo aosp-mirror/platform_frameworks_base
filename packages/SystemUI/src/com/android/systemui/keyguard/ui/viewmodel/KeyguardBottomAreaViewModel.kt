@@ -193,6 +193,7 @@ constructor(
                     isClickable = isClickable,
                     isActivated = activationState is ActivationState.Active,
                     isSelected = isSelected,
+                    useLongPress = quickAffordanceInteractor.useLongPress,
                 )
             is KeyguardQuickAffordanceModel.Hidden -> KeyguardQuickAffordanceViewModel()
         }

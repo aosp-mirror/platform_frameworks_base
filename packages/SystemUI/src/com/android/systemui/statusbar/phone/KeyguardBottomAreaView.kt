@@ -23,6 +23,7 @@ import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
 import android.widget.FrameLayout
+import androidx.annotation.StringRes
 import com.android.keyguard.LockIconViewController
 import com.android.systemui.R
 import com.android.systemui.keyguard.ui.binder.KeyguardBottomAreaViewBinder
@@ -50,6 +51,10 @@ constructor(
         defStyleRes,
     ) {
 
+    interface MessageDisplayer {
+        fun display(@StringRes stringResourceId: Int)
+    }
+
     private var ambientIndicationArea: View? = null
     private lateinit var binding: KeyguardBottomAreaViewBinder.Binding
     private var lockIconViewController: LockIconViewController? = null
@@ -59,13 +64,16 @@ constructor(
         viewModel: KeyguardBottomAreaViewModel,
         falsingManager: FalsingManager? = null,
         lockIconViewController: LockIconViewController? = null,
+        messageDisplayer: MessageDisplayer? = null,
     ) {
         binding =
             bind(
                 this,
                 viewModel,
                 falsingManager,
-            )
+            ) {
+                messageDisplayer?.display(it)
+            }
         this.lockIconViewController = lockIconViewController
     }
 

@@ -61,6 +61,14 @@ constructor(
     private val isUsingRepository: Boolean
         get() = featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES)
 
+    /**
+     * Whether the UI should use the long press gesture to activate quick affordances.
+     *
+     * If `false`, the UI goes back to using single taps.
+     */
+    val useLongPress: Boolean
+        get() = featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES)
+
     /** Returns an observable for the quick affordance at the given position. */
     fun quickAffordance(
         position: KeyguardQuickAffordancePosition
