@@ -30,8 +30,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.hardware.thermal.V2_0.TemperatureThreshold;
-import android.hardware.thermal.V2_0.ThrottlingSeverity;
+import android.hardware.thermal.TemperatureThreshold;
+import android.hardware.thermal.ThrottlingSeverity;
 import android.os.CoolingDevice;
 import android.os.IBinder;
 import android.os.IPowerManager;
