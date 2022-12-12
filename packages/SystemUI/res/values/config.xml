@@ -824,6 +824,8 @@
     slot. If the user did make a choice, even if the choice is the "None" option, the default is
     ignored. -->
     <string-array name="config_keyguardQuickAffordanceDefaults" translatable="false">
+        <item>bottom_start:home</item>
+        <item>bottom_end:wallet</item>
     </string-array>
 
 </resources>

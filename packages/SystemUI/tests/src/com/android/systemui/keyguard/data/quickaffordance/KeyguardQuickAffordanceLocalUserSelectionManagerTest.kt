@@ -165,6 +165,10 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
 
     @Test
     fun `remembers selections by user`() = runTest {
+        overrideResource(
+            R.array.config_keyguardQuickAffordanceDefaults,
+            arrayOf<String>(),
+        )
         val slot1 = "slot_1"
         val slot2 = "slot_2"
         val affordance1 = "affordance_1"
