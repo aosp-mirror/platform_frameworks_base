@@ -11,6 +11,7 @@ import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import javax.inject.Inject
+import com.android.systemui.statusbar.policy.DeviceProvisionedController
 
 interface ChipVisibilityListener {
     fun onChipVisibilityRefreshed(visible: Boolean)
@@ -32,7 +33,8 @@ class HeaderPrivacyIconsController @Inject constructor(
     private val privacyChip: OngoingPrivacyChip,
     private val privacyDialogController: PrivacyDialogController,
     private val privacyLogger: PrivacyLogger,
-    private val iconContainer: StatusIconContainer
+    private val iconContainer: StatusIconContainer,
+    private val deviceProvisionedController: DeviceProvisionedController
 ) {
 
     var chipVisibilityListener: ChipVisibilityListener? = null
@@ -75,6 +77,8 @@ class HeaderPrivacyIconsController @Inject constructor(
 
     fun onParentVisible() {
         privacyChip.setOnClickListener {
+            // Do not expand dialog while device is not provisioned
+            if (!deviceProvisionedController.isDeviceProvisioned) return@setOnClickListener
             // If the privacy chip is visible, it means there were some indicators
             uiEventLogger.log(PrivacyChipEvent.ONGOING_INDICATORS_CHIP_CLICK)
             privacyDialogController.showDialog(privacyChip.context)
