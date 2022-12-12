@@ -3,8 +3,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_description" msgid="8582605799129954556">"Please enter your password and continue to Dynamic System Updates"</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"Dynamic system is ready. To start using it, restart your device."</string>
-    <string name="notification_install_inprogress" msgid="7383334330065065017">"Installation in progress"</string>
-    <string name="notification_install_failed" msgid="4066039210317521404">"Installation failed"</string>
+    <string name="notification_install_inprogress" msgid="7383334330065065017">"Install in progress"</string>
+    <string name="notification_install_failed" msgid="4066039210317521404">"Install failed"</string>
     <string name="notification_image_validation_failed" msgid="2720357826403917016">"Image validation failed. Abort installation."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Currently running a dynamic system. Restart to use the original Android version."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Cancel"</string>
