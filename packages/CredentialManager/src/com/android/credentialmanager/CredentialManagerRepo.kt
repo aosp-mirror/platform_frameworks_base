@@ -41,8 +41,6 @@ import android.os.Bundle
 import android.os.ResultReceiver
 import android.service.credentials.CredentialProviderService
 import com.android.credentialmanager.createflow.CreateCredentialUiState
-import com.android.credentialmanager.createflow.EnabledProviderInfo
-import com.android.credentialmanager.createflow.RemoteInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest.Companion.toBundle
 import com.android.credentialmanager.jetpack.developer.CreatePublicKeyCredentialRequest
@@ -63,7 +61,7 @@ class CredentialManagerRepo(
     requestInfo = intent.extras?.getParcelable(
       RequestInfo.EXTRA_REQUEST_INFO,
       RequestInfo::class.java
-    ) ?: testGetRequestInfo()
+    ) ?: testCreatePasskeyRequestInfo()
 
     providerEnabledList = when (requestInfo.type) {
       RequestInfo.TYPE_CREATE ->
@@ -101,7 +99,7 @@ class CredentialManagerRepo(
   }
 
   fun onOptionSelected(
-    providerPackageName: String,
+    providerId: String,
     entryKey: String,
     entrySubkey: String,
     resultCode: Int? = null,
@@ -109,7 +107,7 @@ class CredentialManagerRepo(
   ) {
     val userSelectionDialogResult = UserSelectionDialogResult(
       requestInfo.token,
-      providerPackageName,
+      providerId,
       entryKey,
       entrySubkey,
       if (resultCode != null) ProviderPendingIntentResponse(resultCode, resultData) else null
@@ -138,36 +136,15 @@ class CredentialManagerRepo(
     val providerDisabledList = CreateFlowUtils.toDisabledProviderList(
       // Handle runtime cast error
       providerDisabledList, context)
-    var defaultProvider: EnabledProviderInfo? = null
-    var remoteEntry: RemoteInfo? = null
-    var createOptionSize = 0
-    var lastSeenProviderWithNonEmptyCreateOptions: EnabledProviderInfo? = null
     providerEnabledList.forEach{providerInfo -> providerInfo.createOptions =
       providerInfo.createOptions.sortedWith(compareBy { it.lastUsedTimeMillis }).reversed()
-      if (providerInfo.isDefault) {defaultProvider = providerInfo}
-      if (providerInfo.remoteEntry != null) {
-        remoteEntry = providerInfo.remoteEntry!!
-      }
-      if (providerInfo.createOptions.isNotEmpty()) {
-        createOptionSize += providerInfo.createOptions.size
-        lastSeenProviderWithNonEmptyCreateOptions = providerInfo
-      }
     }
-    return CreateCredentialUiState(
-      enabledProviders = providerEnabledList,
-      disabledProviders = providerDisabledList,
-      CreateFlowUtils.toCreateScreenState(
-        createOptionSize, false,
-        requestDisplayInfo, defaultProvider, remoteEntry),
-      requestDisplayInfo,
-      false,
-      CreateFlowUtils.toActiveEntry(
-        /*defaultProvider=*/defaultProvider, createOptionSize,
-        lastSeenProviderWithNonEmptyCreateOptions, remoteEntry),
-    )
+    return CreateFlowUtils.toCreateCredentialUiState(
+      providerEnabledList, providerDisabledList, requestDisplayInfo, false)
   }
 
   companion object {
+    // TODO: find a way to resolve this static field leak problem
     lateinit var repo: CredentialManagerRepo
 
     fun setup(
@@ -198,7 +175,6 @@ class CredentialManagerRepo(
         .setRemoteEntry(
           newRemoteEntry("key2", "subkey-1")
         )
-        .setIsDefaultProvider(true)
         .build(),
       CreateCredentialProviderData
         .Builder("com.dashlane")

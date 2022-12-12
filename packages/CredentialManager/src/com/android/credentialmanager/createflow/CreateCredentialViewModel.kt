@@ -29,6 +29,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.android.credentialmanager.CreateFlowUtils
 import com.android.credentialmanager.CredentialManagerRepo
+import com.android.credentialmanager.UserConfigRepo
 import com.android.credentialmanager.common.DialogResult
 import com.android.credentialmanager.common.ProviderActivityResult
 import com.android.credentialmanager.common.ResultState
@@ -61,32 +62,15 @@ class CreateCredentialViewModel(
   }
 
   fun onConfirmIntro() {
-    var createOptionSize = 0
-    var lastSeenProviderWithNonEmptyCreateOptions: EnabledProviderInfo? = null
-    var remoteEntry: RemoteInfo? = null
-    uiState.enabledProviders.forEach {
-      enabledProvider ->
-      if (enabledProvider.createOptions.isNotEmpty()) {
-        createOptionSize += enabledProvider.createOptions.size
-        lastSeenProviderWithNonEmptyCreateOptions = enabledProvider
-      }
-      if (enabledProvider.remoteEntry != null) {
-        remoteEntry = enabledProvider.remoteEntry!!
-      }
-    }
-    uiState = uiState.copy(
-      currentScreenState = CreateFlowUtils.toCreateScreenState(
-        createOptionSize, true,
-        uiState.requestDisplayInfo, null, remoteEntry),
-      showActiveEntryOnly = createOptionSize > 1,
-      activeEntry = CreateFlowUtils.toActiveEntry(
-        null, createOptionSize, lastSeenProviderWithNonEmptyCreateOptions, remoteEntry),
-    )
+    uiState = CreateFlowUtils.toCreateCredentialUiState(
+      uiState.enabledProviders, uiState.disabledProviders,
+      uiState.requestDisplayInfo, true)
+    UserConfigRepo.getInstance().setIsFirstUse(false)
   }
 
   fun getProviderInfoByName(providerName: String): EnabledProviderInfo {
     return uiState.enabledProviders.single {
-      it.name.equals(providerName)
+      it.name == providerName
     }
   }
 
@@ -116,6 +100,8 @@ class CreateCredentialViewModel(
       showActiveEntryOnly = true,
       activeEntry = activeEntry
     )
+    val providerId = uiState.activeEntry?.activeProvider?.name
+    onDefaultChanged(providerId)
   }
 
   fun onDisabledPasswordManagerSelected() {
@@ -127,11 +113,29 @@ class CreateCredentialViewModel(
     dialogResult.value = DialogResult(ResultState.CANCELED)
   }
 
-  fun onDefaultOrNotSelected() {
+  fun onChangeDefaultSelected() {
     uiState = uiState.copy(
       currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
     )
-    // TODO: implement the if choose as default or not logic later
+    val providerId = uiState.activeEntry?.activeProvider?.name
+    onDefaultChanged(providerId)
+  }
+
+  fun onUseOnceSelected() {
+    uiState = uiState.copy(
+      currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
+    )
+  }
+
+  fun onDefaultChanged(providerId: String?) {
+    if (providerId != null) {
+      Log.d(
+        "Account Selector", "Default provider changed to: " +
+                " {provider=$providerId")
+      UserConfigRepo.getInstance().setDefaultProvider(providerId)
+    } else {
+      Log.w("Account Selector", "Null provider is being changed")
+    }
   }
 
   fun onEntrySelected(selectedEntry: EntryInfo) {

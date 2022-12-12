@@ -31,7 +31,6 @@ class EnabledProviderInfo(
   name: String,
   displayName: String,
   var createOptions: List<CreateOptionInfo>,
-  val isDefault: Boolean,
   var remoteEntry: RemoteInfo?,
 ) : ProviderInfo(icon, name, displayName)
 
@@ -77,7 +76,6 @@ data class RequestDisplayInfo(
   val type: String,
   val appDomainName: String,
   val typeIcon: Drawable,
-  val isFirstUsage: Boolean,
 )
 
 /**
