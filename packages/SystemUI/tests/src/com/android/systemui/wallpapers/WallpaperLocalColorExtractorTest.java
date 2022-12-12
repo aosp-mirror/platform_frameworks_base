@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.wallpapers.canvas;
+package com.android.systemui.wallpapers;
 
 import static com.google.common.truth.Truth.assertThat;
 
