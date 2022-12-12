@@ -37682,6 +37682,7 @@ package android.security.identity {
   public abstract class CredentialDataResult {
     method @Nullable public abstract byte[] getDeviceMac();
     method @NonNull public abstract byte[] getDeviceNameSpaces();
+    method @Nullable public byte[] getDeviceSignature();
     method @NonNull public abstract android.security.identity.CredentialDataResult.Entries getDeviceSignedEntries();
     method @NonNull public abstract android.security.identity.CredentialDataResult.Entries getIssuerSignedEntries();
     method @NonNull public abstract byte[] getStaticAuthenticationData();
