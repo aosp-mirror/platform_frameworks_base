@@ -241,10 +241,6 @@ class AccessPolicy private constructor(
 }
 
 abstract class SchemePolicy {
-    @Volatile
-    private var onDecisionChangedListeners = IndexedListSet<OnDecisionChangedListener>()
-    private val onDecisionChangedListenersLock = Any()
-
     abstract val subjectScheme: String
 
     abstract val objectScheme: String
@@ -256,30 +252,6 @@ abstract class SchemePolicy {
         `object`: AccessUri,
         decision: Int
     )
-
-    fun addOnDecisionChangedListener(listener: OnDecisionChangedListener) {
-        synchronized(onDecisionChangedListenersLock) {
-            onDecisionChangedListeners = onDecisionChangedListeners + listener
-        }
-    }
-
-    fun removeOnDecisionChangedListener(listener: OnDecisionChangedListener) {
-        synchronized(onDecisionChangedListenersLock) {
-            onDecisionChangedListeners = onDecisionChangedListeners - listener
-        }
-    }
-
-    protected fun notifyOnDecisionChangedListeners(
-        subject: AccessUri,
-        `object`: AccessUri,
-        oldDecision: Int,
-        newDecision: Int
-    ) {
-        val listeners = onDecisionChangedListeners
-        listeners.forEachIndexed { _, it ->
-            it.onDecisionChanged(subject, `object`, oldDecision, newDecision)
-        }
-    }
 
     open fun MutateStateScope.onUserAdded(userId: Int) {}
 
@@ -313,13 +285,4 @@ abstract class SchemePolicy {
     open fun BinaryXmlPullParser.parseUserState(userId: Int, userState: UserState) {}
 
     open fun BinaryXmlSerializer.serializeUserState(userId: Int, userState: UserState) {}
-
-    fun interface OnDecisionChangedListener {
-        fun onDecisionChanged(
-            subject: AccessUri,
-            `object`: AccessUri,
-            oldDecision: Int,
-            newDecision: Int
-        )
-    }
 }

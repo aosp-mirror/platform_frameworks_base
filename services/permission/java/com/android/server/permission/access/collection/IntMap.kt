@@ -120,6 +120,18 @@ inline fun <T> IntMap<T>.putWithDefault(key: Int, value: T, defaultValue: T): T 
     }
 }
 
+// SparseArray.removeReturnOld() is @hide, so a backup once we move to APIs.
+fun <T> IntMap<T>.removeReturnOld(key: Int): T? {
+    val index = indexOfKey(key)
+    return if (index >= 0) {
+        val oldValue = valueAt(index)
+        removeAt(index)
+        oldValue
+    } else {
+        null
+    }
+}
+
 inline fun <T> IntMap<T>.removeAllIndexed(predicate: (Int, Int, T) -> Boolean): Boolean {
     var isChanged = false
     for (index in lastIndex downTo 0) {

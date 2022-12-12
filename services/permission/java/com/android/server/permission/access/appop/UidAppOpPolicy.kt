@@ -16,40 +16,104 @@
 
 package com.android.server.permission.access.appop
 
+import android.app.AppOpsManager
 import com.android.server.permission.access.AccessUri
 import com.android.server.permission.access.AppOpUri
 import com.android.server.permission.access.GetStateScope
 import com.android.server.permission.access.MutateStateScope
 import com.android.server.permission.access.UidUri
-import com.android.server.permission.access.UserState
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 
 class UidAppOpPolicy : BaseAppOpPolicy(UidAppOpPersistence()) {
+    @Volatile
+    private var onAppOpModeChangedListeners = IndexedListSet<OnAppOpModeChangedListener>()
+    private val onAppOpModeChangedListenersLock = Any()
+
     override val subjectScheme: String
         get() = UidUri.SCHEME
 
-    override val objectScheme: String
-        get() = AppOpUri.SCHEME
-
-    override fun GetStateScope.getModes(subject: AccessUri): IndexedMap<String, Int>? {
+    override fun GetStateScope.getDecision(subject: AccessUri, `object`: AccessUri): Int {
         subject as UidUri
-        return state.userStates[subject.userId]?.uidAppOpModes?.get(subject.appId)
+        `object` as AppOpUri
+        return getAppOpMode(subject.appId, subject.userId, `object`.appOpName)
     }
 
-    override fun MutateStateScope.getOrCreateModes(subject: AccessUri): IndexedMap<String, Int> {
+    override fun MutateStateScope.setDecision(
+        subject: AccessUri,
+        `object`: AccessUri,
+        decision: Int
+    ) {
         subject as UidUri
-        return newState.userStates.getOrPut(subject.userId) { UserState() }
-            .uidAppOpModes.getOrPut(subject.appId) { IndexedMap() }
-    }
-
-    override fun MutateStateScope.removeModes(subject: AccessUri) {
-        subject as UidUri
-        newState.userStates[subject.userId]?.uidAppOpModes?.remove(subject.appId)
+        `object` as AppOpUri
+        setAppOpMode(subject.appId, subject.userId, `object`.appOpName, decision)
     }
 
     override fun MutateStateScope.onAppIdRemoved(appId: Int) {
         newState.userStates.forEachIndexed { _, _, userState ->
             userState.uidAppOpModes -= appId
+            userState.requestWrite()
+            // Skip notifying the change listeners since the app ID no longer exists.
         }
+    }
+
+    fun GetStateScope.getAppOpModes(appId: Int, userId: Int): IndexedMap<String, Int>? =
+        state.userStates[userId].uidAppOpModes[appId]
+
+    fun MutateStateScope.removeAppOpModes(appId: Int, userId: Int): Boolean =
+        newState.userStates[userId].uidAppOpModes.removeReturnOld(appId) != null
+
+    fun GetStateScope.getAppOpMode(appId: Int, userId: Int, appOpName: String): Int =
+        state.userStates[userId].uidAppOpModes[appId]
+            .getWithDefault(appOpName, AppOpsManager.opToDefaultMode(appOpName))
+
+    fun MutateStateScope.setAppOpMode(
+        appId: Int,
+        userId: Int,
+        appOpName: String,
+        mode: Int
+    ): Boolean {
+        val userState = newState.userStates[userId]
+        val uidAppOpModes = userState.uidAppOpModes
+        var appOpModes = uidAppOpModes[appId]
+        val defaultMode = AppOpsManager.opToDefaultMode(appOpName)
+        val oldMode = appOpModes.getWithDefault(appOpName, defaultMode)
+        if (oldMode == mode) {
+            return false
+        }
+        if (appOpModes == null) {
+            appOpModes = IndexedMap()
+            uidAppOpModes[appId] = appOpModes
+        }
+        appOpModes.putWithDefault(appOpName, mode, defaultMode)
+        if (appOpModes.isEmpty()) {
+            uidAppOpModes -= appId
+        }
+        userState.requestWrite()
+        onAppOpModeChangedListeners.forEachIndexed { _, it ->
+            it.onAppOpModeChanged(appId, userId, appOpName, oldMode, mode)
+        }
+        return true
+    }
+
+    fun addOnAppOpModeChangedListener(listener: OnAppOpModeChangedListener) {
+        synchronized(onAppOpModeChangedListenersLock) {
+            onAppOpModeChangedListeners = onAppOpModeChangedListeners + listener
+        }
+    }
+
+    fun removeOnAppOpModeChangedListener(listener: OnAppOpModeChangedListener) {
+        synchronized(onAppOpModeChangedListenersLock) {
+            onAppOpModeChangedListeners = onAppOpModeChangedListeners - listener
+        }
+    }
+
+    fun interface OnAppOpModeChangedListener {
+        fun onAppOpModeChanged(
+            appId: Int,
+            userId: Int,
+            appOpName: String,
+            oldMode: Int,
+            newMode: Int
+        )
     }
 }
