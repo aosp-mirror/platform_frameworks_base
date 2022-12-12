@@ -97,6 +97,8 @@ import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.sensors.SensorManagerInternal;
 
+import com.google.android.collect.Sets;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -108,6 +110,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 @Presubmit
@@ -124,6 +127,9 @@ public class VirtualDeviceManagerServiceTest {
     private static final String GOOGLE_MAPS_PACKAGE_NAME = "com.google.android.apps.maps";
     private static final String DEVICE_NAME = "device name";
     private static final int DISPLAY_ID = 2;
+    private static final int DISPLAY_ID_2 = 3;
+    private static final int DEVICE_OWNER_UID_1 = 50;
+    private static final int DEVICE_OWNER_UID_2 = 51;
     private static final int UID_1 = 0;
     private static final int UID_2 = 10;
     private static final int UID_3 = 10000;
@@ -301,22 +307,13 @@ public class VirtualDeviceManagerServiceTest {
                 mContext.getSystemService(WindowManager.class), threadVerifier);
         mSensorController = new SensorController(new Object(), VIRTUAL_DEVICE_ID);
 
-        mAssociationInfo = new AssociationInfo(1, 0, null,
+        mAssociationInfo = new AssociationInfo(ASSOCIATION_ID_1, 0, null,
                 MacAddress.BROADCAST_ADDRESS, "", null, null, true, false, false, 0, 0);
 
         mVdms = new VirtualDeviceManagerService(mContext);
         mLocalService = mVdms.getLocalServiceInstance();
         mVdm = mVdms.new VirtualDeviceManagerImpl();
-
-        VirtualDeviceParams params = new VirtualDeviceParams
-                .Builder()
-                .setBlockedActivities(getBlockedActivities())
-                .build();
-        mDeviceImpl = new VirtualDeviceImpl(mContext,
-                mAssociationInfo, new Binder(), /* ownerUid= */ 0, VIRTUAL_DEVICE_ID,
-                mInputController, mSensorController, (int associationId) -> {},
-                mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback, params);
-        mVdms.addVirtualDevice(mDeviceImpl);
+        mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID, DEVICE_OWNER_UID_1, mAssociationInfo);
     }
 
     @Test
@@ -386,6 +383,112 @@ public class VirtualDeviceManagerServiceTest {
 
         assertThat(mVdm.getDevicePolicy(mDeviceImpl.getDeviceId(), POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_CUSTOM);
+    }
+
+    @Test
+    public void getDeviceOwnerUid_oneDevice_returnsCorrectId() {
+        int ownerUid = mLocalService.getDeviceOwnerUid(mDeviceImpl.getDeviceId());
+        assertThat(ownerUid).isEqualTo(mDeviceImpl.getOwnerUid());
+    }
+
+    @Test
+    public void getDeviceOwnerUid_twoDevices_returnsCorrectId() {
+        int firstDeviceId = mDeviceImpl.getDeviceId();
+        int secondDeviceId = VIRTUAL_DEVICE_ID + 1;
+
+        createVirtualDevice(secondDeviceId, DEVICE_OWNER_UID_2,
+                new AssociationInfo(ASSOCIATION_ID_2, 0, null,
+                        MacAddress.BROADCAST_ADDRESS, "", null, null, true, false, false, 0, 0));
+
+        int secondDeviceOwner = mLocalService.getDeviceOwnerUid(secondDeviceId);
+        assertThat(secondDeviceOwner).isEqualTo(DEVICE_OWNER_UID_2);
+
+        int firstDeviceOwner = mLocalService.getDeviceOwnerUid(firstDeviceId);
+        assertThat(firstDeviceOwner).isEqualTo(DEVICE_OWNER_UID_1);
+    }
+
+    @Test
+    public void getDeviceOwnerUid_nonExistentDevice_returnsInvalidUid() {
+        int nonExistentDeviceId = DEVICE_ID_DEFAULT;
+        int ownerUid = mLocalService.getDeviceOwnerUid(nonExistentDeviceId);
+        assertThat(ownerUid).isEqualTo(Process.INVALID_UID);
+    }
+
+    @Test
+    public void getDeviceIdsForUid_noRunningApps_returnsNull() {
+        Set<Integer> deviceIds = mLocalService.getDeviceIdsForUid(UID_1);
+        assertThat(deviceIds).isEmpty();
+    }
+
+    @Test
+    public void getDeviceIdsForUid_differentUidOnDevice_returnsNull() {
+        GenericWindowPolicyController gwpc =
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>());
+        mDeviceImpl.onVirtualDisplayCreatedLocked(gwpc, DISPLAY_ID);
+        gwpc.onRunningAppsChanged(Sets.newArraySet(UID_2));
+
+        Set<Integer> deviceIds = mLocalService.getDeviceIdsForUid(UID_1);
+        assertThat(deviceIds).isEmpty();
+    }
+
+    @Test
+    public void getDeviceIdsForUid_oneUidOnDevice_returnsCorrectId() {
+        GenericWindowPolicyController gwpc =
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>());
+        mDeviceImpl.onVirtualDisplayCreatedLocked(gwpc, DISPLAY_ID);
+        gwpc.onRunningAppsChanged(Sets.newArraySet(UID_1));
+
+        Set<Integer> deviceIds = mLocalService.getDeviceIdsForUid(UID_1);
+        assertThat(deviceIds).containsExactly(mDeviceImpl.getDeviceId());
+    }
+
+    @Test
+    public void getDeviceIdsForUid_twoUidsOnDevice_returnsCorrectId() {
+        GenericWindowPolicyController gwpc =
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>());
+        mDeviceImpl.onVirtualDisplayCreatedLocked(gwpc, DISPLAY_ID);
+        gwpc.onRunningAppsChanged(Sets.newArraySet(UID_1, UID_2));
+
+        Set<Integer> deviceIds = mLocalService.getDeviceIdsForUid(UID_1);
+        assertThat(deviceIds).containsExactly(mDeviceImpl.getDeviceId());
+    }
+
+    @Test
+    public void getDeviceIdsForUid_twoDevicesUidOnOne_returnsCorrectId() {
+        int secondDeviceId = VIRTUAL_DEVICE_ID + 1;
+
+        VirtualDeviceImpl secondDevice = createVirtualDevice(secondDeviceId, DEVICE_OWNER_UID_2,
+                new AssociationInfo(ASSOCIATION_ID_2, 0, null,
+                        MacAddress.BROADCAST_ADDRESS, "", null, null, true, false, false, 0, 0));
+
+        GenericWindowPolicyController gwpc =
+                secondDevice.createWindowPolicyController(new ArrayList<>());
+        secondDevice.onVirtualDisplayCreatedLocked(gwpc, DISPLAY_ID_2);
+        gwpc.onRunningAppsChanged(Sets.newArraySet(UID_1));
+
+        Set<Integer> deviceIds = mLocalService.getDeviceIdsForUid(UID_1);
+        assertThat(deviceIds).containsExactly(secondDevice.getDeviceId());
+    }
+
+    @Test
+    public void getDeviceIdsForUid_twoDevicesUidOnBoth_returnsCorrectId() {
+        int secondDeviceId = VIRTUAL_DEVICE_ID + 1;
+
+        VirtualDeviceImpl secondDevice = createVirtualDevice(secondDeviceId, DEVICE_OWNER_UID_2,
+                new AssociationInfo(ASSOCIATION_ID_2, 0, null,
+                        MacAddress.BROADCAST_ADDRESS, "", null, null, true, false, false, 0, 0));
+        GenericWindowPolicyController gwpc1 =
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>());
+        GenericWindowPolicyController gwpc2 =
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>());
+        mDeviceImpl.onVirtualDisplayCreatedLocked(gwpc1, DISPLAY_ID);
+        secondDevice.onVirtualDisplayCreatedLocked(gwpc2, DISPLAY_ID_2);
+        gwpc1.onRunningAppsChanged(Sets.newArraySet(UID_1));
+        gwpc2.onRunningAppsChanged(Sets.newArraySet(UID_1, UID_2));
+
+        Set<Integer> deviceIds = mLocalService.getDeviceIdsForUid(UID_1);
+        assertThat(deviceIds).containsExactly(
+                mDeviceImpl.getDeviceId(), secondDevice.getDeviceId());
     }
 
     @Test
@@ -1160,7 +1263,6 @@ public class VirtualDeviceManagerServiceTest {
                 /* targetDisplayCategory= */ null);
         verify(mContext).startActivityAsUser(argThat(intent ->
                 intent.filterEquals(blockedAppIntent)), any(), any());
-
     }
 
     @Test
@@ -1185,4 +1287,19 @@ public class VirtualDeviceManagerServiceTest {
         verify(mContext).startActivityAsUser(argThat(intent ->
                 intent.filterEquals(blockedAppIntent)), any(), any());
     }
+
+    private VirtualDeviceImpl createVirtualDevice(int virtualDeviceId, int ownerUid,
+            AssociationInfo associationInfo) {
+        VirtualDeviceParams params = new VirtualDeviceParams
+                .Builder()
+                .setBlockedActivities(getBlockedActivities())
+                .build();
+        VirtualDeviceImpl virtualDeviceImpl = new VirtualDeviceImpl(mContext,
+                associationInfo, new Binder(), ownerUid, virtualDeviceId,
+                mInputController, mSensorController, (int associationId) -> {},
+                mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback, params);
+        mVdms.addVirtualDevice(virtualDeviceImpl);
+        return virtualDeviceImpl;
+    }
+
 }
