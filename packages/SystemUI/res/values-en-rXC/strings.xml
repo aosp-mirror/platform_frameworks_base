@@ -1009,4 +1009,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‏‏‎‏‎‏‎‎‏‏‎‎‏‎‏‎‏‎‏‏‎‏‏‏‏‎‎‏‏‎‎‎‏‎‎‎‎‎‏‏‎‎‎‎‎‎‎‎‎‎‏‎‎‎‏‎‏‎Flip to front display for a better selfie?‎‏‎‎‏‎"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‏‏‎‏‏‎‏‎‏‏‏‏‏‏‎‏‏‎‎‏‎‏‎‏‎‏‏‎‎‎‎‏‏‎‏‎‎‏‏‏‏‏‏‎‎‎‏‎‏‎‏‏‏‎‎‎‎‎Use the rear-facing camera for a wider photo with higher resolution.‎‏‎‎‏‎"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‎‎‏‏‏‎‏‏‎‏‏‎‏‎‏‏‎‎‎‏‎‏‏‏‎‎‎‎‎‏‏‏‏‎‎‏‏‏‎‎‏‏‎‎‎‏‎‏‏‎‏‎‎‏‎‎‎‏‎‎‏‏‎"<b>"‎‏‎‎‏‏‏‎✱ This screen will turn off‎‏‎‎‏‏‎"</b>"‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

@@ -1011,4 +1011,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"要翻轉到前螢幕拍攝更優質的自拍照嗎？"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"使用後置鏡頭可拍攝視角較寬廣、解析度較高的相片。"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ 這麼做會關閉這個螢幕"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

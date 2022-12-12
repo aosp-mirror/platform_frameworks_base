@@ -72,7 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock je onemogućen"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"je poslao/la sliku"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Spašavanje snimka ekrana..."</string>
-    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Spremanje snimke zaslona na poslovni profil…"</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Pohranjivanje snimka ekrana na radni profil…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Snimak ekrana je sačuvan"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Nije moguće sačuvati snimak ekrana"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Morate otključati uređaj da možete sačuvati snimak ekrana"</string>
@@ -393,8 +393,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Obavještenja su pauzirana načinom rada Ne ometaj"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Započni odmah"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Nema obavještenja"</string>
-    <string name="no_unseen_notif_text" msgid="395512586119868682">"Nema novih obavijesti"</string>
-    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Otključajte za starije obavijesti"</string>
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"Nema novih obavještenja"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Otključajte da vidite starija obavještenja"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Ovim uređajem upravlja tvoj roditelj"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Vaša organizacija je vlasnik ovog uređaja i može nadzirati mrežni saobraćaj"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> upravlja ovim uređajem i može nadzirati mrežni saobraćaj"</string>
@@ -872,8 +872,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Zaustavi emitiranje"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dostupni uređaji za audio izlaz."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Jačina zvuka"</string>
-    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
-    <skip />
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kako funkcionira emitiranje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Emitirajte"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Osobe u vašoj blizini s kompatibilnim Bluetooth uređajima mogu slušati medijske sadržaje koje emitirate"</string>
@@ -987,8 +986,7 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera i mikrofon su isključeni"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# obavještenje}one{# obavještenje}few{# obavještenja}other{# obavještenja}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <!-- no translation found for note_task_button_label (8718616095800343136) -->
-    <skip />
+    <string name="note_task_button_label" msgid="8718616095800343136">"Pisanje bilježaka"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Emitiranje"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Zaustaviti emitiranje aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Ako emitirate aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g> ili promijenite izlaz, trenutno emitiranje će se zaustaviti"</string>
@@ -1011,4 +1009,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Obrnuti na prednji ekran radi boljeg selfija?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Koristite stražnju kameru za širu fotografiju veće rezolucije."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Ekran će se isključiti"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

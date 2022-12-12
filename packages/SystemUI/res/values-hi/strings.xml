@@ -393,10 +393,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'परेशान न करें\' सुविधा के ज़रिए कुछ समय के लिए सूचनाएं दिखाना रोक दिया गया है"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"अभी शुरू करें"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"कोई सूचना नहीं है"</string>
-    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
-    <skip />
-    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
-    <skip />
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"कोई नई सूचना नहीं है"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"पुरानी सूचाएं देखने के लिए अनलॉक करें"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"इस डिवाइस का प्रबंधन आपके अभिभावक करते हैं"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है. आपका संगठन, नेटवर्क के ट्रैफ़िक की निगरानी कर सकता है"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"इस डिवाइस का मालिकाना हक <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> के पास है. आपका संगठन, नेटवर्क के ट्रैफ़िक की निगरानी कर सकता है"</string>
@@ -502,8 +500,7 @@
     <string name="wallet_error_generic" msgid="257704570182963611">"आपके कार्ड की जानकारी पाने में कोई समस्या हुई है. कृपया बाद में कोशिश करें"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"लॉक स्क्रीन की सेटिंग"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"क्यूआर कोड स्कैनर"</string>
-    <!-- no translation found for qr_code_scanner_updating_secondary_label (8344598017007876352) -->
-    <skip />
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"अपडेट हो रहा है"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"वर्क प्रोफ़ाइल"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"हवाई जहाज़ मोड"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"आपको <xliff:g id="WHEN">%1$s</xliff:g> पर अपना अगला अलार्म नहीं सुनाई देगा"</string>
@@ -1001,24 +998,21 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_action_template (8164857863036314664) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_message (2790910660524887941) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_wallet_instruction_1 (8439655049139819278) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_wallet_instruction_2 (4321089250629477835) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_qr_scanner_instruction (5355839079232119791) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_home_instruction_1 (8438311171750568633) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_home_instruction_2 (8308525385889021652) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> खोलें"</string>
+    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"<xliff:g id="APPNAME">%1$s</xliff:g> ऐप्लिकेशन को शॉर्टकट के तौर पर जोड़ने के लिए, पक्का करें कि"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• ऐप्लिकेशन को सेट अप किया गया है"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet में कम से कम एक कार्ड जोड़ा गया है"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• कैमरा ऐप्लिकेशन इंस्टॉल किया गया है"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ऐप्लिकेशन को सेट अप किया गया है"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• कम से कम एक डिवाइस उपलब्ध है"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"रद्द करें"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"कैमरा अभी स्विच करें"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"बेहतर सेल्फ़ी के लिए फ़ोन को अनफ़ोल्ड करें"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"बेहतर सेल्फ़ी के लिए फ़्रंट डिसप्ले पर स्विच करें?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"वाइड ऐंगल में हाई रिज़ॉल्यूशन वाली फ़ोटो लेने के लिए, पीछे का कैमरा इस्तेमाल करें."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ यह स्क्रीन बंद हो जाएगी"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>
