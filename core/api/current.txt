@@ -20825,6 +20825,7 @@ package android.media {
     method public int getMixerBehavior();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioMixerAttributes> CREATOR;
+    field public static final int MIXER_BEHAVIOR_BIT_PERFECT = 1; // 0x1
     field public static final int MIXER_BEHAVIOR_DEFAULT = 0; // 0x0
   }
 
