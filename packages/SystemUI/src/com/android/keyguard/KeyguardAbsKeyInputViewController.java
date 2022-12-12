@@ -260,8 +260,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
         if (reason != PROMPT_REASON_NONE) {
             int promtReasonStringRes = mView.getPromptReasonStringRes(reason);
             if (promtReasonStringRes != 0) {
-                mMessageAreaController.setMessage(
-                        mView.getResources().getString(promtReasonStringRes), false);
+                mMessageAreaController.setMessage(promtReasonStringRes);
             }
         }
     }
