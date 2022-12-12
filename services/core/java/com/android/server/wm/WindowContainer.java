@@ -1020,10 +1020,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @param dc The display this container is on after changes.
      */
     void onDisplayChanged(DisplayContent dc) {
-        if (mDisplayContent != null) {
+        if (mDisplayContent != null && mDisplayContent != dc) {
+            // Cancel any change transition queued-up for this container on the old display when
+            // this container is moved from the old display.
             mDisplayContent.mClosingChangingContainers.remove(this);
             if (mDisplayContent.mChangingContainers.remove(this)) {
-                // Cancel any change transition queued-up for this container on the old display.
                 mSurfaceFreezer.unfreeze(getSyncTransaction());
             }
         }
