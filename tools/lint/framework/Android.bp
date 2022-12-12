@@ -31,8 +31,6 @@ java_library_host {
     ],
     static_libs: [
         "AndroidCommonLint",
-        // TODO: remove once b/236558918 is resolved and the below checks actually run globally
-        "AndroidGlobalLintChecker",
     ],
     kotlincflags: ["-Xjvm-default=all"],
 }
