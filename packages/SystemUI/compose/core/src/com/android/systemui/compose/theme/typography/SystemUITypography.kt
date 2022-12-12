@@ -25,21 +25,22 @@ import androidx.compose.material3.Typography
  * Do not use directly and call [MaterialTheme.typography] instead to access the different text
  * styles.
  */
-internal val SystemUITypography =
-    Typography(
-        displayLarge = TypographyTokens.DisplayLarge,
-        displayMedium = TypographyTokens.DisplayMedium,
-        displaySmall = TypographyTokens.DisplaySmall,
-        headlineLarge = TypographyTokens.HeadlineLarge,
-        headlineMedium = TypographyTokens.HeadlineMedium,
-        headlineSmall = TypographyTokens.HeadlineSmall,
-        titleLarge = TypographyTokens.TitleLarge,
-        titleMedium = TypographyTokens.TitleMedium,
-        titleSmall = TypographyTokens.TitleSmall,
-        bodyLarge = TypographyTokens.BodyLarge,
-        bodyMedium = TypographyTokens.BodyMedium,
-        bodySmall = TypographyTokens.BodySmall,
-        labelLarge = TypographyTokens.LabelLarge,
-        labelMedium = TypographyTokens.LabelMedium,
-        labelSmall = TypographyTokens.LabelSmall,
+internal fun systemUITypography(typographyTokens: TypographyTokens): Typography {
+    return Typography(
+        displayLarge = typographyTokens.displayLarge,
+        displayMedium = typographyTokens.displayMedium,
+        displaySmall = typographyTokens.displaySmall,
+        headlineLarge = typographyTokens.headlineLarge,
+        headlineMedium = typographyTokens.headlineMedium,
+        headlineSmall = typographyTokens.headlineSmall,
+        titleLarge = typographyTokens.titleLarge,
+        titleMedium = typographyTokens.titleMedium,
+        titleSmall = typographyTokens.titleSmall,
+        bodyLarge = typographyTokens.bodyLarge,
+        bodyMedium = typographyTokens.bodyMedium,
+        bodySmall = typographyTokens.bodySmall,
+        labelLarge = typographyTokens.labelLarge,
+        labelMedium = typographyTokens.labelMedium,
+        labelSmall = typographyTokens.labelSmall,
     )
+}
