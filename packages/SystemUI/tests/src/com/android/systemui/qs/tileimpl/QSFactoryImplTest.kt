@@ -28,7 +28,6 @@ import com.android.systemui.qs.tiles.BatterySaverTile
 import com.android.systemui.qs.tiles.BluetoothTile
 import com.android.systemui.qs.tiles.CameraToggleTile
 import com.android.systemui.qs.tiles.CastTile
-import com.android.systemui.qs.tiles.CellularTile
 import com.android.systemui.qs.tiles.ColorCorrectionTile
 import com.android.systemui.qs.tiles.ColorInversionTile
 import com.android.systemui.qs.tiles.DataSaverTile
@@ -49,7 +48,6 @@ import com.android.systemui.qs.tiles.ReduceBrightColorsTile
 import com.android.systemui.qs.tiles.RotationLockTile
 import com.android.systemui.qs.tiles.ScreenRecordTile
 import com.android.systemui.qs.tiles.UiModeNightTile
-import com.android.systemui.qs.tiles.WifiTile
 import com.android.systemui.qs.tiles.WorkModeTile
 import com.android.systemui.util.leak.GarbageMonitor
 import com.google.common.truth.Truth.assertThat
@@ -63,10 +61,8 @@ import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
 
 private val specMap = mapOf(
-        "wifi" to WifiTile::class.java,
         "internet" to InternetTile::class.java,
         "bt" to BluetoothTile::class.java,
-        "cell" to CellularTile::class.java,
         "dnd" to DndTile::class.java,
         "inversion" to ColorInversionTile::class.java,
         "airplane" to AirplaneModeTile::class.java,
@@ -102,10 +98,8 @@ class QSFactoryImplTest : SysuiTestCase() {
     @Mock(answer = Answers.RETURNS_SELF) private lateinit var customTileBuilder: CustomTile.Builder
     @Mock private lateinit var customTile: CustomTile
 
-    @Mock private lateinit var wifiTile: WifiTile
     @Mock private lateinit var internetTile: InternetTile
     @Mock private lateinit var bluetoothTile: BluetoothTile
-    @Mock private lateinit var cellularTile: CellularTile
     @Mock private lateinit var dndTile: DndTile
     @Mock private lateinit var colorInversionTile: ColorInversionTile
     @Mock private lateinit var airplaneTile: AirplaneModeTile
@@ -146,10 +140,8 @@ class QSFactoryImplTest : SysuiTestCase() {
         factory = QSFactoryImpl(
                 { qsHost },
                 { customTileBuilder },
-                { wifiTile },
                 { internetTile },
                 { bluetoothTile },
-                { cellularTile },
                 { dndTile },
                 { colorInversionTile },
                 { airplaneTile },
