@@ -462,7 +462,9 @@ class CredentialManagerRepo(
   private fun testGetRequestInfo(): RequestInfo {
     return RequestInfo.newGetRequestInfo(
       Binder(),
-      GetCredentialRequest.Builder()
+      GetCredentialRequest.Builder(
+        Bundle()
+      )
         .addGetCredentialOption(
           GetCredentialOption(
             TYPE_PUBLIC_KEY_CREDENTIAL, Bundle(), Bundle(), /*requireSystemProvider=*/ false)
