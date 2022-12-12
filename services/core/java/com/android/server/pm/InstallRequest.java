@@ -129,7 +129,7 @@ final class InstallRequest {
                 params.mTraceMethod, params.mTraceCookie, params.mSigningDetails,
                 params.mInstallReason, params.mInstallScenario, params.mForceQueryableOverride,
                 params.mDataLoaderType, params.mPackageSource,
-                params.mKeepApplicationEnabledSetting);
+                params.mApplicationEnabledSettingPersistent);
         mPackageMetrics = new PackageMetrics(this);
         mIsInstallInherit = params.mIsInherit;
         mSessionId = params.mSessionId;
@@ -499,8 +499,8 @@ final class InstallRequest {
         return mScanResult.mChangedAbiCodePath;
     }
 
-    public boolean isKeepApplicationEnabledSetting() {
-        return mInstallArgs == null ? false : mInstallArgs.mKeepApplicationEnabledSetting;
+    public boolean isApplicationEnabledSettingPersistent() {
+        return mInstallArgs == null ? false : mInstallArgs.mApplicationEnabledSettingPersistent;
     }
 
     public boolean isForceQueryableOverride() {
