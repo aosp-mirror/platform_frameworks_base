@@ -68,7 +68,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.LongRunning;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
@@ -225,15 +225,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     /**
      * Construct this controller object and register for updates.
-     *
-     * {@code @LongRunning} looper and bgExecutor instead {@code @Background} ones are used to
-     * address the b/246456655. This can be reverted after b/240663726 is fixed.
      */
     @Inject
     public NetworkControllerImpl(
             Context context,
-            @LongRunning Looper bgLooper,
-            @LongRunning Executor bgExecutor,
+            @Background Looper bgLooper,
+            @Background Executor bgExecutor,
             SubscriptionManager subscriptionManager,
             CallbackHandler callbackHandler,
             DeviceProvisionedController deviceProvisionedController,
