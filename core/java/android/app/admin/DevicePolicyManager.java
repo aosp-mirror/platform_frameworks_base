@@ -6311,13 +6311,12 @@ public class DevicePolicyManager {
      * personal use, removing the managed profile and all policies set by the profile owner.
      * </p>
      *
-     * <p>
-     * Calling this method from the primary user will only work if the calling app is targeting
-     * Android 13 or below, in which case it will cause the device to reboot, erasing all device
-     * data - including all the secondary users and their data - while booting up. If an app
-     * targeting Android 13+ is calling this method from the primary user or last full user,
-     * {@link IllegalStateException} will be thrown.
-     * </p>
+     * <p> Calling this method from the primary user will only work if the calling app is
+     * targeting SDK level {@link Build.VERSION_CODES#TIRAMISU} or below, in which case it will
+     * cause the device to reboot, erasing all device data - including all the secondary users
+     * and their data - while booting up. If an app targeting SDK level
+     * {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above is calling this method from the
+     * primary user or last full user, {@link IllegalStateException} will be thrown. </p>
      *
      * If an app wants to wipe the entire device irrespective of which user they are from, they
      * should use {@link #wipeDevice} instead.
