@@ -20,7 +20,9 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.util.time.SystemClock
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Before
 import org.junit.Test
@@ -30,10 +32,12 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class KeyguardBouncerRepositoryTest : SysuiTestCase() {
 
+    @Mock private lateinit var systemClock: SystemClock
     @Mock private lateinit var viewMediatorCallback: ViewMediatorCallback
     @Mock private lateinit var bouncerLogger: TableLogBuffer
     lateinit var underTest: KeyguardBouncerRepository
@@ -43,7 +47,12 @@ class KeyguardBouncerRepositoryTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         val testCoroutineScope = TestCoroutineScope()
         underTest =
-            KeyguardBouncerRepository(viewMediatorCallback, testCoroutineScope, bouncerLogger)
+            KeyguardBouncerRepository(
+                viewMediatorCallback,
+                systemClock,
+                testCoroutineScope,
+                bouncerLogger,
+            )
     }
 
     @Test
