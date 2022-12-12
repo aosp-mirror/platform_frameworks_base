@@ -223,7 +223,7 @@ public final class SensorPrivacyService extends SystemService {
     }
 
     class SensorPrivacyServiceImpl extends ISensorPrivacyManager.Stub implements
-            AppOpsManager.OnOpNotedListener, AppOpsManager.OnOpStartedListener,
+            AppOpsManager.OnOpNotedInternalListener, AppOpsManager.OnOpStartedListener,
             IBinder.DeathRecipient, UserManagerInternal.UserRestrictionsListener {
 
         private final SensorPrivacyHandler mHandler;
