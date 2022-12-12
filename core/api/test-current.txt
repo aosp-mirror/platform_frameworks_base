@@ -3433,14 +3433,20 @@ package android.window {
 
   public class TaskFragmentOrganizer extends android.window.WindowOrganizer {
     ctor public TaskFragmentOrganizer(@NonNull java.util.concurrent.Executor);
+    method public void applyTransaction(@NonNull android.window.WindowContainerTransaction, int, boolean);
     method @NonNull public java.util.concurrent.Executor getExecutor();
     method @NonNull public android.window.TaskFragmentOrganizerToken getOrganizerToken();
+    method public void onTransactionHandled(@NonNull android.os.IBinder, @NonNull android.window.WindowContainerTransaction, int, boolean);
     method public void onTransactionReady(@NonNull android.window.TaskFragmentTransaction);
     method @CallSuper public void registerOrganizer();
     method @CallSuper public void unregisterOrganizer();
     field public static final String KEY_ERROR_CALLBACK_OP_TYPE = "operation_type";
     field public static final String KEY_ERROR_CALLBACK_TASK_FRAGMENT_INFO = "task_fragment_info";
     field public static final String KEY_ERROR_CALLBACK_THROWABLE = "fragment_throwable";
+    field public static final int TASK_FRAGMENT_TRANSIT_CHANGE = 6; // 0x6
+    field public static final int TASK_FRAGMENT_TRANSIT_CLOSE = 2; // 0x2
+    field public static final int TASK_FRAGMENT_TRANSIT_NONE = 0; // 0x0
+    field public static final int TASK_FRAGMENT_TRANSIT_OPEN = 1; // 0x1
   }
 
   public final class TaskFragmentOrganizerToken implements android.os.Parcelable {
@@ -3562,8 +3568,8 @@ package android.window {
 
   public class WindowOrganizer {
     ctor public WindowOrganizer();
-    method @RequiresPermission(value=android.Manifest.permission.MANAGE_ACTIVITY_TASKS, conditional=true) public int applySyncTransaction(@NonNull android.window.WindowContainerTransaction, @NonNull android.window.WindowContainerTransactionCallback);
-    method @RequiresPermission(value=android.Manifest.permission.MANAGE_ACTIVITY_TASKS, conditional=true) public void applyTransaction(@NonNull android.window.WindowContainerTransaction);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public int applySyncTransaction(@NonNull android.window.WindowContainerTransaction, @NonNull android.window.WindowContainerTransactionCallback);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void applyTransaction(@NonNull android.window.WindowContainerTransaction);
   }
 
   @UiContext public abstract class WindowProviderService extends android.app.Service {

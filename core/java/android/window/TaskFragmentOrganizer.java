@@ -20,22 +20,20 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
 
 import android.annotation.CallSuper;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.app.WindowConfiguration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
 
-import java.util.List;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
 
 /**
@@ -61,6 +59,52 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * {@link TaskFragmentTransaction.Change#getErrorBundle()}.
      */
     public static final String KEY_ERROR_CALLBACK_OP_TYPE = "operation_type";
+
+    /**
+     * No change set.
+     */
+    @WindowManager.TransitionType
+    @TaskFragmentTransitionType
+    public static final int TASK_FRAGMENT_TRANSIT_NONE = TRANSIT_NONE;
+
+    /**
+     * A window that didn't exist before has been created and made visible.
+     */
+    @WindowManager.TransitionType
+    @TaskFragmentTransitionType
+    public static final int TASK_FRAGMENT_TRANSIT_OPEN = TRANSIT_OPEN;
+
+    /**
+     * A window that was visible no-longer exists (was finished or destroyed).
+     */
+    @WindowManager.TransitionType
+    @TaskFragmentTransitionType
+    public static final int TASK_FRAGMENT_TRANSIT_CLOSE = TRANSIT_CLOSE;
+
+    /**
+     * A window is visible before and after but changes in some way (eg. it resizes or changes
+     * windowing-mode).
+     */
+    @WindowManager.TransitionType
+    @TaskFragmentTransitionType
+    public static final int TASK_FRAGMENT_TRANSIT_CHANGE = TRANSIT_CHANGE;
+
+    /**
+     * Introduced a sub set of {@link WindowManager.TransitionType} for the types that are used for
+     * TaskFragment transition.
+     *
+     * Doing this instead of exposing {@link WindowManager.TransitionType} because we want to keep
+     * the Shell transition API hidden until it comes fully stable.
+     * @hide
+     */
+    @IntDef(prefix = { "TASK_FRAGMENT_TRANSIT_" }, value = {
+            TASK_FRAGMENT_TRANSIT_NONE,
+            TASK_FRAGMENT_TRANSIT_OPEN,
+            TASK_FRAGMENT_TRANSIT_CLOSE,
+            TASK_FRAGMENT_TRANSIT_CHANGE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TaskFragmentTransitionType {}
 
     /**
      * Creates a {@link Bundle} with an exception, operation type and TaskFragmentInfo (if any)
@@ -155,7 +199,7 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      *                          {@link #onTransactionReady(TaskFragmentTransaction)}
      * @param wct               {@link WindowContainerTransaction} that the server should apply for
      *                          update of the transaction.
-     * @param transitionType    {@link WindowManager.TransitionType} if it needs to start a
+     * @param transitionType    {@link TaskFragmentTransitionType} if it needs to start a
      *                          transition.
      * @param shouldApplyIndependently  If {@code true}, the {@code wct} will request a new
      *                                  transition, which will be queued until the sync engine is
@@ -163,11 +207,10 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      *                                  the {@code wct} will be directly applied to the active sync.
      * @see com.android.server.wm.WindowOrganizerController#enforceTaskFragmentOrganizerPermission
      * for permission enforcement.
-     * @hide
      */
     public void onTransactionHandled(@NonNull IBinder transactionToken,
             @NonNull WindowContainerTransaction wct,
-            @WindowManager.TransitionType int transitionType, boolean shouldApplyIndependently) {
+            @TaskFragmentTransitionType int transitionType, boolean shouldApplyIndependently) {
         wct.setTaskFragmentOrganizer(mInterface);
         try {
             getController().onTransactionHandled(transactionToken, wct, transitionType,
@@ -178,22 +221,19 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     }
 
     /**
-     * Routes to {@link ITaskFragmentOrganizerController#applyTransaction} instead of
-     * {@link IWindowOrganizerController#applyTransaction} for the different transition options.
-     *
+     * Must use {@link #applyTransaction(WindowContainerTransaction, int, boolean)} instead.
      * @see #applyTransaction(WindowContainerTransaction, int, boolean)
      */
     @Override
     public void applyTransaction(@NonNull WindowContainerTransaction wct) {
-        // TODO(b/207070762) doing so to keep CTS compatibility. Remove in the next release.
-        applyTransaction(wct, getTransitionType(wct), false /* shouldApplyIndependently */);
+        throw new RuntimeException("Not allowed!");
     }
 
     /**
      * Requests the server to apply the given {@link WindowContainerTransaction}.
      *
      * @param wct   {@link WindowContainerTransaction} to apply.
-     * @param transitionType    {@link WindowManager.TransitionType} if it needs to start a
+     * @param transitionType    {@link TaskFragmentTransitionType} if it needs to start a
      *                          transition.
      * @param shouldApplyIndependently  If {@code true}, the {@code wct} will request a new
      *                                  transition, which will be queued until the sync engine is
@@ -201,10 +241,9 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      *                                  the {@code wct} will be directly applied to the active sync.
      * @see com.android.server.wm.WindowOrganizerController#enforceTaskFragmentOrganizerPermission
      * for permission enforcement.
-     * @hide
      */
     public void applyTransaction(@NonNull WindowContainerTransaction wct,
-            @WindowManager.TransitionType int transitionType, boolean shouldApplyIndependently) {
+            @TaskFragmentTransitionType int transitionType, boolean shouldApplyIndependently) {
         if (wct.isEmpty()) {
             return;
         }
@@ -217,56 +256,13 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     }
 
     /**
-     * Gets the default {@link WindowManager.TransitionType} based on the requested
-     * {@link WindowContainerTransaction}.
-     * @hide
-     */
-    // TODO(b/207070762): let Extensions to set the transition type instead.
-    @WindowManager.TransitionType
-    public static int getTransitionType(@NonNull WindowContainerTransaction wct) {
-        if (wct.isEmpty()) {
-            return TRANSIT_NONE;
-        }
-        for (WindowContainerTransaction.Change change : wct.getChanges().values()) {
-            if ((change.getWindowSetMask() & WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0) {
-                // Treat as TRANSIT_CHANGE when there is TaskFragment resizing.
-                return TRANSIT_CHANGE;
-            }
-        }
-        boolean containsCreatingTaskFragment = false;
-        boolean containsDeleteTaskFragment = false;
-        final List<WindowContainerTransaction.HierarchyOp> ops = wct.getHierarchyOps();
-        for (int i = ops.size() - 1; i >= 0; i--) {
-            final int type = ops.get(i).getType();
-            if (type == HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT) {
-                // Treat as TRANSIT_CHANGE when there is activity reparent.
-                return TRANSIT_CHANGE;
-            }
-            if (type == HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT) {
-                containsCreatingTaskFragment = true;
-            } else if (type == HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT) {
-                containsDeleteTaskFragment = true;
-            }
-        }
-        if (containsCreatingTaskFragment) {
-            return TRANSIT_OPEN;
-        }
-        if (containsDeleteTaskFragment) {
-            return TRANSIT_CLOSE;
-        }
-
-        // Use TRANSIT_CHANGE as default.
-        return TRANSIT_CHANGE;
-    }
-
-    /**
      * Called when the transaction is ready so that the organizer can update the TaskFragments based
      * on the changes in transaction.
      */
     public void onTransactionReady(@NonNull TaskFragmentTransaction transaction) {
         // Notify the server to finish the transaction.
         onTransactionHandled(transaction.getTransactionToken(), new WindowContainerTransaction(),
-                TRANSIT_NONE, false /* shouldApplyIndependently */);
+                TASK_FRAGMENT_TRANSIT_NONE, false /* shouldApplyIndependently */);
     }
 
     private final ITaskFragmentOrganizer mInterface = new ITaskFragmentOrganizer.Stub() {
