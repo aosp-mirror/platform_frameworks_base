@@ -3314,13 +3314,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         final String permissionName = permission.getName();
         final String containingApexPackageName =
                 mApexManager.getActiveApexPackageNameContainingPackage(packageName);
-        if (isInSystemConfigPrivAppPermissions(pkg, permissionName,
-                containingApexPackageName)) {
-            return true;
-        }
-        if (isInSystemConfigPrivAppDenyPermissions(pkg, permissionName,
-                containingApexPackageName)) {
-            return false;
+        final Boolean allowlistState = getPrivilegedPermissionAllowlistState(pkg, permissionName,
+                containingApexPackageName);
+        if (allowlistState != null) {
+            return allowlistState;
         }
         // Updated system apps do not need to be allowlisted
         if (packageSetting.getTransientState().isUpdatedSystemApp()) {
@@ -3356,61 +3353,43 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         return !RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE;
     }
 
-    private boolean isInSystemConfigPrivAppPermissions(@NonNull AndroidPackage pkg,
-            @NonNull String permission, String containingApexPackageName) {
-        final SystemConfig systemConfig = SystemConfig.getInstance();
-        final Set<String> permissions;
+    @Nullable
+    private Boolean getPrivilegedPermissionAllowlistState(@NonNull AndroidPackage pkg,
+            @NonNull String permissionName, String containingApexPackageName) {
+        final PermissionAllowlist permissionAllowlist =
+                SystemConfig.getInstance().getPermissionAllowlist();
+        final String packageName = pkg.getPackageName();
         if (pkg.isVendor()) {
-            permissions = systemConfig.getVendorPrivAppPermissions(pkg.getPackageName());
+            return permissionAllowlist.getVendorPrivilegedAppAllowlistState(packageName,
+                    permissionName);
         } else if (pkg.isProduct()) {
-            permissions = systemConfig.getProductPrivAppPermissions(pkg.getPackageName());
+            return permissionAllowlist.getProductPrivilegedAppAllowlistState(packageName,
+                    permissionName);
         } else if (pkg.isSystemExt()) {
-            permissions = systemConfig.getSystemExtPrivAppPermissions(pkg.getPackageName());
+            return permissionAllowlist.getSystemExtPrivilegedAppAllowlistState(packageName,
+                    permissionName);
         } else if (containingApexPackageName != null) {
-            final String apexName = mApexManager.getApexModuleNameForPackageName(
-                    containingApexPackageName);
-            final Set<String> privAppPermissions = systemConfig.getPrivAppPermissions(
-                    pkg.getPackageName());
-            final Set<String> apexPermissions = systemConfig.getApexPrivAppPermissions(
-                    apexName, pkg.getPackageName());
-            if (privAppPermissions != null) {
+            final Boolean nonApexAllowlistState =
+                    permissionAllowlist.getPrivilegedAppAllowlistState(packageName, permissionName);
+            if (nonApexAllowlistState != null) {
                 // TODO(andreionea): Remove check as soon as all apk-in-apex
                 // permission allowlists are migrated.
                 Slog.w(TAG, "Package " + pkg.getPackageName() + " is an APK in APEX,"
                         + " but has permission allowlist on the system image. Please bundle the"
                         + " allowlist in the " + containingApexPackageName + " APEX instead.");
-                if (apexPermissions != null) {
-                    permissions = new ArraySet<>(privAppPermissions);
-                    permissions.addAll(apexPermissions);
-                } else {
-                    permissions = privAppPermissions;
-                }
-            } else {
-                permissions = apexPermissions;
             }
+            final String moduleName = mApexManager.getApexModuleNameForPackageName(
+                    containingApexPackageName);
+            final Boolean apexAllowlistState =
+                    permissionAllowlist.getApexPrivilegedAppAllowlistState(moduleName, packageName,
+                            permissionName);
+            if (apexAllowlistState != null) {
+                return apexAllowlistState;
+            }
+            return nonApexAllowlistState;
         } else {
-            permissions = systemConfig.getPrivAppPermissions(pkg.getPackageName());
+            return permissionAllowlist.getPrivilegedAppAllowlistState(packageName, permissionName);
         }
-        return CollectionUtils.contains(permissions, permission);
-    }
-
-    private boolean isInSystemConfigPrivAppDenyPermissions(@NonNull AndroidPackage pkg,
-            @NonNull String permission, String containingApexPackageName) {
-        final SystemConfig systemConfig = SystemConfig.getInstance();
-        final Set<String> permissions;
-        if (pkg.isVendor()) {
-            permissions = systemConfig.getVendorPrivAppDenyPermissions(pkg.getPackageName());
-        } else if (pkg.isProduct()) {
-            permissions = systemConfig.getProductPrivAppDenyPermissions(pkg.getPackageName());
-        } else if (pkg.isSystemExt()) {
-            permissions = systemConfig.getSystemExtPrivAppDenyPermissions(pkg.getPackageName());
-        } else if (containingApexPackageName != null) {
-            permissions = systemConfig.getApexPrivAppDenyPermissions(containingApexPackageName,
-                    pkg.getPackageName());
-        } else {
-            permissions = systemConfig.getPrivAppDenyPermissions(pkg.getPackageName());
-        }
-        return CollectionUtils.contains(permissions, permission);
     }
 
     private boolean shouldGrantPermissionBySignature(@NonNull AndroidPackage pkg,
@@ -3612,8 +3591,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             return false;
         }
         // all oem permissions must explicitly be granted or denied
-        final Boolean granted =
-                SystemConfig.getInstance().getOemPermissions(pkg.getPackageName()).get(permission);
+        final Boolean granted = SystemConfig.getInstance().getPermissionAllowlist()
+                .getOemAppAllowlistState(pkg.getPackageName(), permission);
         if (granted == null) {
             throw new IllegalStateException("OEM permission " + permission
                     + " requested by package " + pkg.getPackageName()
