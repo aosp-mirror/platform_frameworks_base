@@ -16,6 +16,7 @@
 
 package android.app.time;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -42,7 +43,7 @@ import java.util.Objects;
 @SystemApi
 public final class UnixEpochTime implements Parcelable {
     @ElapsedRealtimeLong private final long mElapsedRealtimeMillis;
-    private final long mUnixEpochTimeMillis;
+    @CurrentTimeMillisLong private final long mUnixEpochTimeMillis;
 
     public UnixEpochTime(@ElapsedRealtimeLong long elapsedRealtimeMillis,
             long unixEpochTimeMillis) {
@@ -91,11 +92,13 @@ public final class UnixEpochTime implements Parcelable {
     }
 
     /** Returns the elapsed realtime clock value. See {@link UnixEpochTime} for more information. */
-    public @ElapsedRealtimeLong long getElapsedRealtimeMillis() {
+    @ElapsedRealtimeLong
+    public long getElapsedRealtimeMillis() {
         return mElapsedRealtimeMillis;
     }
 
     /** Returns the unix epoch time value. See {@link UnixEpochTime} for more information. */
+    @CurrentTimeMillisLong
     public long getUnixEpochTimeMillis() {
         return mUnixEpochTimeMillis;
     }
