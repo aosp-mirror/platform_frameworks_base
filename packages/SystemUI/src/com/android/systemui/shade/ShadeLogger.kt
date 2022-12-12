@@ -98,6 +98,29 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         )
     }
 
+    fun logMotionEventStatusBarState(event: MotionEvent, statusBarState: Int, message: String) {
+        log(
+                LogLevel.VERBOSE,
+                {
+                    str1 = message
+                    long1 = event.eventTime
+                    long2 = event.downTime
+                    int1 = event.action
+                    int2 = statusBarState
+                    double1 = event.y.toDouble()
+                },
+                {
+                    "$str1\neventTime=$long1,downTime=$long2,y=$double1,action=$int1," +
+                            "statusBarState=${when (int2) {
+                                0 -> "SHADE"
+                                1 -> "KEYGUARD"
+                                2 -> "SHADE_LOCKED"
+                                else -> "UNKNOWN:$int2"
+                            }}"
+                }
+        )
+    }
+
     fun logExpansionChanged(
             message: String,
             fraction: Float,
@@ -162,6 +185,21 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         }, {
             "PulsingGestureListener#onSingleTapUp all of this must true for single " +
                     "tap to be detected: proximityIsNotNear: $bool1, isNotFalseTap: $bool2"
+        })
+    }
+
+    fun logNotInterceptingTouchInstantExpanding(
+            instantExpanding: Boolean,
+            notificationsDragEnabled: Boolean,
+            touchDisabled: Boolean
+    ) {
+        log(LogLevel.VERBOSE, {
+            bool1 = instantExpanding
+            bool2 = notificationsDragEnabled
+            bool3 = touchDisabled
+        }, {
+            "NPVC not intercepting touch, instantExpanding: $bool1, " +
+                    "!notificationsDragEnabled: $bool2, touchDisabled: $bool3"
         })
     }
 }
