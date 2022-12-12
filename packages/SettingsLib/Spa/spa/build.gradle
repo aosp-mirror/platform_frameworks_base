@@ -101,10 +101,6 @@ task coverageReport(type: JacocoReport, dependsOn: "connectedDebugAndroidTest") 
             excludes: [
                     "com/android/settingslib/spa/debug/**",
 
-                    // Excludes inline functions, which is not covered in Jacoco reports.
-                    "com/android/settingslib/spa/framework/util/Collections*",
-                    "com/android/settingslib/spa/framework/util/Flows*",
-
                     // Excludes files forked from AndroidX.
                     "com/android/settingslib/spa/widget/scaffold/CustomizedAppBar*",
                     "com/android/settingslib/spa/widget/scaffold/TopAppBarColors*",
@@ -112,6 +108,17 @@ task coverageReport(type: JacocoReport, dependsOn: "connectedDebugAndroidTest") 
                     // Excludes files forked from Accompanist.
                     "com/android/settingslib/spa/framework/compose/DrawablePainter*",
                     "com/android/settingslib/spa/framework/compose/Pager*",
+
+                    // Excludes inline functions, which is not covered in Jacoco reports.
+                    "com/android/settingslib/spa/framework/util/Collections*",
+                    "com/android/settingslib/spa/framework/util/Flows*",
+
+                    // Excludes debug functions
+                    "com/android/settingslib/spa/framework/compose/TimeMeasurer*",
+
+                    // Excludes slice demo presenter & provider
+                    "com/android/settingslib/spa/slice/presenter/Demo*",
+                    "com/android/settingslib/spa/slice/provider/Demo*",
             ],
     )
     executionData.from = fileTree(dir: "$buildDir/outputs/code_coverage/debugAndroidTest/connected")

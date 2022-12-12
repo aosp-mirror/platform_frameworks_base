@@ -22,7 +22,10 @@ android_test {
     name: "SpaLibTests",
     test_suites: ["device-tests"],
 
-    srcs: ["src/**/*.kt"],
+    srcs: [
+        ":SpaLib_srcs",
+        "src/**/*.kt",
+    ],
 
     static_libs: [
         "SpaLib",

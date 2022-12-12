@@ -30,8 +30,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-const val INJECT_ENTRY_NAME = "INJECT"
-const val ROOT_ENTRY_NAME = "ROOT"
+const val INJECT_ENTRY_NAME_TEST = "INJECT"
+const val ROOT_ENTRY_NAME_TEST = "ROOT"
 
 class MacroForTest(private val pageId: String, private val entryId: String) : EntryMacro {
     @Composable
@@ -98,12 +98,12 @@ class SettingsEntryTest {
         val entryInject = SettingsEntryBuilder.createInject(owner).build()
         assertThat(entryInject.id).isEqualTo(
             getUniqueEntryId(
-                INJECT_ENTRY_NAME,
+                INJECT_ENTRY_NAME_TEST,
                 owner,
                 toPage = owner
             )
         )
-        assertThat(entryInject.displayName).isEqualTo("${INJECT_ENTRY_NAME}_mySpp")
+        assertThat(entryInject.displayName).isEqualTo("${INJECT_ENTRY_NAME_TEST}_mySpp")
         assertThat(entryInject.fromPage).isNull()
         assertThat(entryInject.toPage).isNotNull()
     }
@@ -114,7 +114,7 @@ class SettingsEntryTest {
         val entryInject = SettingsEntryBuilder.createRoot(owner, "myRootEntry").build()
         assertThat(entryInject.id).isEqualTo(
             getUniqueEntryId(
-                ROOT_ENTRY_NAME,
+                ROOT_ENTRY_NAME_TEST,
                 owner,
                 toPage = owner
             )

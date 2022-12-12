@@ -29,6 +29,10 @@ private const val TAG = "SpaEnvironment"
 object SpaEnvironmentFactory {
     private var spaEnvironment: SpaEnvironment? = null
 
+    fun reset() {
+        spaEnvironment = null
+    }
+
     fun reset(env: SpaEnvironment) {
         spaEnvironment = env
         Log.d(TAG, "reset")

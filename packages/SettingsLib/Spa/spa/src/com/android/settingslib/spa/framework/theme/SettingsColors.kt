@@ -18,6 +18,7 @@ package com.android.settingslib.spa.framework.theme
 
 import android.content.Context
 import android.os.Build
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -64,7 +65,8 @@ internal fun settingsColorScheme(isDarkTheme: Boolean): SettingsColorScheme {
  *
  * @param context The context required to get system resource data.
  */
-private fun dynamicLightColorScheme(context: Context): SettingsColorScheme {
+@VisibleForTesting
+internal fun dynamicLightColorScheme(context: Context): SettingsColorScheme {
     val tonalPalette = dynamicTonalPalette(context)
     return SettingsColorScheme(
         background = tonalPalette.neutral95,
@@ -90,7 +92,8 @@ private fun dynamicLightColorScheme(context: Context): SettingsColorScheme {
  *
  * @param context The context required to get system resource data.
  */
-private fun dynamicDarkColorScheme(context: Context): SettingsColorScheme {
+@VisibleForTesting
+internal fun dynamicDarkColorScheme(context: Context): SettingsColorScheme {
     val tonalPalette = dynamicTonalPalette(context)
     return SettingsColorScheme(
         background = tonalPalette.neutral10,
@@ -107,7 +110,8 @@ private fun dynamicDarkColorScheme(context: Context): SettingsColorScheme {
     )
 }
 
-private fun darkColorScheme(): SettingsColorScheme {
+@VisibleForTesting
+internal fun darkColorScheme(): SettingsColorScheme {
     val tonalPalette = tonalPalette()
     return SettingsColorScheme(
         background = tonalPalette.neutral10,
@@ -124,7 +128,8 @@ private fun darkColorScheme(): SettingsColorScheme {
     )
 }
 
-private fun lightColorScheme(): SettingsColorScheme {
+@VisibleForTesting
+internal fun lightColorScheme(): SettingsColorScheme {
     val tonalPalette = tonalPalette()
     return SettingsColorScheme(
         background = tonalPalette.neutral95,
