@@ -17,7 +17,18 @@
 package android.os.storage;
 
 import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
+import static android.app.AppOpsManager.OP_MANAGE_EXTERNAL_STORAGE;
+import static android.app.AppOpsManager.OP_READ_EXTERNAL_STORAGE;
+import static android.app.AppOpsManager.OP_READ_MEDIA_AUDIO;
+import static android.app.AppOpsManager.OP_READ_MEDIA_IMAGES;
+import static android.app.AppOpsManager.OP_READ_MEDIA_VIDEO;
+import static android.app.AppOpsManager.OP_WRITE_EXTERNAL_STORAGE;
+import static android.app.AppOpsManager.OP_WRITE_MEDIA_AUDIO;
+import static android.app.AppOpsManager.OP_WRITE_MEDIA_IMAGES;
+import static android.app.AppOpsManager.OP_WRITE_MEDIA_VIDEO;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.UserHandle.PER_USER_RANGE;
@@ -1858,17 +1869,88 @@ public class StorageManager {
     // handle obscure cases like when an app targets Q but was installed on
     // a device that was originally running on P before being upgraded to Q.
 
-    /**
-     * @deprecated This method always returns false and should not be used.
-     * Clients should check the appropriate permissions directly instead
-     * (e.g. READ_MEDIA_IMAGES).
-     *
-     * {@hide}
-     */
-    @Deprecated
+    /** {@hide} */
+    public boolean checkPermissionReadAudio(boolean enforce,
+            int pid, int uid, String packageName, @Nullable String featureId) {
+        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) {
+            return false;
+        }
+        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
+                OP_READ_MEDIA_AUDIO);
+    }
+
+    /** {@hide} */
+    public boolean checkPermissionWriteAudio(boolean enforce,
+            int pid, int uid, String packageName, @Nullable String featureId) {
+        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) {
+            return false;
+        }
+        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
+                OP_WRITE_MEDIA_AUDIO);
+    }
+
+    /** {@hide} */
+    public boolean checkPermissionReadVideo(boolean enforce,
+            int pid, int uid, String packageName, @Nullable String featureId) {
+        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) {
+            return false;
+        }
+        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
+                OP_READ_MEDIA_VIDEO);
+    }
+
+    /** {@hide} */
+    public boolean checkPermissionWriteVideo(boolean enforce,
+            int pid, int uid, String packageName, @Nullable String featureId) {
+        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) {
+            return false;
+        }
+        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
+                OP_WRITE_MEDIA_VIDEO);
+    }
+
+    /** {@hide} */
     public boolean checkPermissionReadImages(boolean enforce,
             int pid, int uid, String packageName, @Nullable String featureId) {
-        return false;
+        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) {
+            return false;
+        }
+        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
+                OP_READ_MEDIA_IMAGES);
+    }
+
+    /** {@hide} */
+    public boolean checkPermissionWriteImages(boolean enforce,
+            int pid, int uid, String packageName, @Nullable String featureId) {
+        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) {
+            return false;
+        }
+        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
+                OP_WRITE_MEDIA_IMAGES);
+    }
+
+    private boolean checkExternalStoragePermissionAndAppOp(boolean enforce,
+            int pid, int uid, String packageName, @Nullable String featureId, String permission,
+            int op) {
+        // First check if app has MANAGE_EXTERNAL_STORAGE.
+        final int mode = mAppOps.noteOpNoThrow(OP_MANAGE_EXTERNAL_STORAGE, uid, packageName,
+                featureId, null);
+        if (mode == AppOpsManager.MODE_ALLOWED) {
+            return true;
+        }
+        if (mode == AppOpsManager.MODE_DEFAULT && mContext.checkPermission(
+                  MANAGE_EXTERNAL_STORAGE, pid, uid) == PERMISSION_GRANTED) {
+            return true;
+        }
+        // If app doesn't have MANAGE_EXTERNAL_STORAGE, then check if it has requested granular
+        // permission.
+        return checkPermissionAndAppOp(enforce, pid, uid, packageName, featureId, permission, op);
     }
 
     /** {@hide} */
