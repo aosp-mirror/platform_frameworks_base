@@ -172,7 +172,7 @@ object Flags {
      * new KeyguardTransitionRepository.
      */
     @JvmField
-    val LIGHT_REVEAL_MIGRATION = unreleasedFlag(218, "light_reveal_migration", teamfood = true)
+    val LIGHT_REVEAL_MIGRATION = unreleasedFlag(218, "light_reveal_migration", teamfood = false)
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
