@@ -86,6 +86,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardViewMediator mKeyguardViewMediator;
     @Mock
+    private ScrimController mScrimController;
+    @Mock
     private BiometricUnlockController.BiometricModeListener mBiometricModeListener;
     @Mock
     private KeyguardStateController mKeyguardStateController;
@@ -131,7 +133,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         when(mVibratorHelper.hasVibrator()).thenReturn(true);
         mDependency.injectTestDependency(NotificationMediaManager.class, mMediaManager);
         mBiometricUnlockController = new BiometricUnlockController(mDozeScrimController,
-                mKeyguardViewMediator,
+                mKeyguardViewMediator, mScrimController,
                 mNotificationShadeWindowController, mKeyguardStateController, mHandler,
                 mUpdateMonitor, res.getResources(), mKeyguardBypassController,
                 mMetricsLogger, mDumpManager, mPowerManager, mLogger,

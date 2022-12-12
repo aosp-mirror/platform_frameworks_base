@@ -332,7 +332,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         /**
          * @see IStatusBar#setBiometicContextListener(IBiometricContextListener)
          */
-        default void setBiometricContextListener(IBiometricContextListener listener) {
+        default void setBiometicContextListener(IBiometricContextListener listener) {
         }
 
         /**
@@ -1580,7 +1580,7 @@ public class CommandQueue extends IStatusBar.Stub implements
                 }
                 case MSG_SET_BIOMETRICS_LISTENER:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).setBiometricContextListener(
+                        mCallbacks.get(i).setBiometicContextListener(
                                 (IBiometricContextListener) msg.obj);
                     }
                     break;

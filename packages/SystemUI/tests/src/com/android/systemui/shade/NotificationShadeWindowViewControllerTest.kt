@@ -30,7 +30,6 @@ import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -98,8 +97,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     private lateinit var pulsingGestureListener: PulsingGestureListener
     @Mock
     private lateinit var notificationInsetsController: NotificationInsetsController
-    @Mock
-    private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
     @Mock lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
     @Mock lateinit var keyguardBouncerContainer: ViewGroup
     @Mock lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
@@ -135,8 +132,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             pulsingGestureListener,
             featureFlags,
             keyguardBouncerViewModel,
-            keyguardBouncerComponentFactory,
-            alternateBouncerInteractor
+            keyguardBouncerComponentFactory
         )
         underTest.setupExpandedStatusBar()
 

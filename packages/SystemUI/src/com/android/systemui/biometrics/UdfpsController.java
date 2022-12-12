@@ -74,7 +74,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.ScreenLifecycle;
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -151,7 +150,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final ActivityLaunchAnimator mActivityLaunchAnimator;
     @NonNull private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     @Nullable private final TouchProcessor mTouchProcessor;
-    @NonNull private final AlternateBouncerInteractor mAlternateBouncerInteractor;
 
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
@@ -239,12 +237,12 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                             mShadeExpansionStateManager, mKeyguardViewManager,
                             mKeyguardUpdateMonitor, mDialogManager, mDumpManager,
                             mLockscreenShadeTransitionController, mConfigurationController,
-                            mKeyguardStateController,
+                            mSystemClock, mKeyguardStateController,
                             mUnlockedScreenOffAnimationController,
                             mUdfpsDisplayMode, requestId, reason, callback,
                             (view, event, fromUdfpsView) -> onTouch(requestId, event,
                                     fromUdfpsView), mActivityLaunchAnimator, mFeatureFlags,
-                            mPrimaryBouncerInteractor, mAlternateBouncerInteractor)));
+                            mPrimaryBouncerInteractor)));
         }
 
         @Override
@@ -363,13 +361,13 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         if (!mOverlayParams.equals(overlayParams)) {
             mOverlayParams = overlayParams;
 
-            final boolean wasShowingAlternateBouncer = mAlternateBouncerInteractor.isVisibleState();
+            final boolean wasShowingAltAuth = mKeyguardViewManager.isShowingAlternateBouncer();
 
             // When the bounds change it's always necessary to re-create the overlay's window with
             // new LayoutParams. If the overlay needs to be shown, this will re-create and show the
             // overlay with the updated LayoutParams. Otherwise, the overlay will remain hidden.
             redrawOverlay();
-            if (wasShowingAlternateBouncer) {
+            if (wasShowingAltAuth) {
                 mKeyguardViewManager.showBouncer(true);
             }
         }
@@ -577,6 +575,9 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         final UdfpsView udfpsView = mOverlay.getOverlayView();
         boolean handled = false;
         switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_OUTSIDE:
+                udfpsView.onTouchOutsideView();
+                return true;
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_HOVER_ENTER:
                 Trace.beginSection("UdfpsController.onTouch.ACTION_DOWN");
@@ -750,8 +751,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull Optional<Provider<AlternateUdfpsTouchProvider>> alternateTouchProvider,
             @NonNull @BiometricsBackground Executor biometricsExecutor,
             @NonNull PrimaryBouncerInteractor primaryBouncerInteractor,
-            @NonNull SinglePointerTouchProcessor singlePointerTouchProcessor,
-            @NonNull AlternateBouncerInteractor alternateBouncerInteractor) {
+            @NonNull SinglePointerTouchProcessor singlePointerTouchProcessor) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -791,7 +791,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
         mBiometricExecutor = biometricsExecutor;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
-        mAlternateBouncerInteractor = alternateBouncerInteractor;
 
         mTouchProcessor = mFeatureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
                 ? singlePointerTouchProcessor : null;
@@ -886,7 +885,9 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 onFingerUp(mOverlay.getRequestId(), oldView);
             }
             final boolean removed = mOverlay.hide();
-            mKeyguardViewManager.hideAlternateBouncer(true);
+            if (mKeyguardViewManager.isShowingAlternateBouncer()) {
+                mKeyguardViewManager.hideAlternateBouncer(true);
+            }
             Log.v(TAG, "hideUdfpsOverlay | removing window: " + removed);
         } else {
             Log.v(TAG, "hideUdfpsOverlay | the overlay is already hidden");

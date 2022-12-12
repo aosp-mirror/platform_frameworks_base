@@ -38,7 +38,6 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.ui.binder.KeyguardBouncerViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -79,7 +78,6 @@ public class NotificationShadeWindowViewController {
     private final AmbientState mAmbientState;
     private final PulsingGestureListener mPulsingGestureListener;
     private final NotificationInsetsController mNotificationInsetsController;
-    private final AlternateBouncerInteractor mAlternateBouncerInteractor;
 
     private GestureDetector mPulsingWakeupGestureHandler;
     private View mBrightnessMirror;
@@ -120,8 +118,7 @@ public class NotificationShadeWindowViewController {
             PulsingGestureListener pulsingGestureListener,
             FeatureFlags featureFlags,
             KeyguardBouncerViewModel keyguardBouncerViewModel,
-            KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory,
-            AlternateBouncerInteractor alternateBouncerInteractor
+            KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory
     ) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
@@ -141,7 +138,6 @@ public class NotificationShadeWindowViewController {
         mAmbientState = ambientState;
         mPulsingGestureListener = pulsingGestureListener;
         mNotificationInsetsController = notificationInsetsController;
-        mAlternateBouncerInteractor = alternateBouncerInteractor;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -293,7 +289,7 @@ public class NotificationShadeWindowViewController {
                     return true;
                 }
 
-                if (mAlternateBouncerInteractor.isVisibleState()) {
+                if (mStatusBarKeyguardViewManager.isShowingAlternateBouncer()) {
                     // capture all touches if the alt auth bouncer is showing
                     return true;
                 }
@@ -331,7 +327,7 @@ public class NotificationShadeWindowViewController {
                     handled = !mService.isPulsing();
                 }
 
-                if (mAlternateBouncerInteractor.isVisibleState()) {
+                if (mStatusBarKeyguardViewManager.isShowingAlternateBouncer()) {
                     // eat the touch
                     handled = true;
                 }
