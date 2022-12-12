@@ -141,8 +141,11 @@ public final class TransitionInfo implements Parcelable {
     /** The window was animated by back gesture. */
     public static final int FLAG_BACK_GESTURE_ANIMATED = 1 << 17;
 
+    /** The window should have no animation (by policy). */
+    public static final int FLAG_NO_ANIMATION = 1 << 18;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 18;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 19;
 
     /** The change belongs to a window that won't contain activities. */
     public static final int FLAGS_IS_NON_APP_WINDOW =
@@ -169,6 +172,7 @@ public final class TransitionInfo implements Parcelable {
             FLAG_IS_OCCLUDED,
             FLAG_IS_SYSTEM_WINDOW,
             FLAG_BACK_GESTURE_ANIMATED,
+            FLAG_NO_ANIMATION,
             FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
@@ -386,6 +390,9 @@ public final class TransitionInfo implements Parcelable {
         }
         if ((flags & FLAG_BACK_GESTURE_ANIMATED) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("FLAG_BACK_GESTURE_ANIMATED");
+        }
+        if ((flags & FLAG_NO_ANIMATION) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("NO_ANIMATION");
         }
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("FIRST_CUSTOM");

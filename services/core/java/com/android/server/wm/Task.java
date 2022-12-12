@@ -5029,10 +5029,10 @@ class Task extends TaskFragment {
             final DisplayContent dc = mDisplayContent;
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
                     "Prepare open transition: starting " + r);
-            // TODO(shell-transitions): record NO_ANIMATION flag somewhere.
             if ((r.intent.getFlags() & Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
                 dc.prepareAppTransition(TRANSIT_NONE);
                 mTaskSupervisor.mNoAnimActivities.add(r);
+                mTransitionController.setNoAnimation(r);
             } else {
                 dc.prepareAppTransition(TRANSIT_OPEN);
                 mTaskSupervisor.mNoAnimActivities.remove(r);
