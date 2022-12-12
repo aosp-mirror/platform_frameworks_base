@@ -72,18 +72,24 @@ inline operator fun <T> IndexedList<T>.plusAssign(element: T) {
     add(element)
 }
 
-inline fun <T> IndexedList<T>.removeAllIndexed(predicate: (Int, T) -> Boolean) {
+inline fun <T> IndexedList<T>.removeAllIndexed(predicate: (Int, T) -> Boolean): Boolean {
+    var isChanged = false
     for (index in lastIndex downTo 0) {
         if (predicate(index, this[index])) {
             removeAt(index)
+            isChanged = true
         }
     }
+    return isChanged
 }
 
-inline fun <T> IndexedList<T>.retainAllIndexed(predicate: (Int, T) -> Boolean) {
+inline fun <T> IndexedList<T>.retainAllIndexed(predicate: (Int, T) -> Boolean): Boolean {
+    var isChanged = false
     for (index in lastIndex downTo 0) {
         if (!predicate(index, this[index])) {
             removeAt(index)
+            isChanged = true
         }
     }
+    return isChanged
 }

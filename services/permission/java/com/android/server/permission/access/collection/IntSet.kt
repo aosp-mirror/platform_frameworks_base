@@ -113,18 +113,24 @@ operator fun IntSet.plusAssign(array: IntArray) {
     array.forEach { this += it }
 }
 
-inline fun IntSet.removeAllIndexed(predicate: (Int, Int) -> Boolean) {
+inline fun IntSet.removeAllIndexed(predicate: (Int, Int) -> Boolean): Boolean {
+    var isChanged = false
     for (index in lastIndex downTo 0) {
         if (predicate(index, elementAt(index))) {
             removeAt(index)
+            isChanged = true
         }
     }
+    return isChanged
 }
 
-inline fun IntSet.retainAllIndexed(predicate: (Int, Int) -> Boolean) {
+inline fun IntSet.retainAllIndexed(predicate: (Int, Int) -> Boolean): Boolean {
+    var isChanged = false
     for (index in lastIndex downTo 0) {
         if (!predicate(index, elementAt(index))) {
             removeAt(index)
+            isChanged = true
         }
     }
+    return isChanged
 }
