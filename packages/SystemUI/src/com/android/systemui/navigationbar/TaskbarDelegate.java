@@ -55,6 +55,7 @@ import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.view.AppearanceRegion;
@@ -125,7 +126,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private final DisplayManager mDisplayManager;
     private Context mWindowContext;
     private ScreenPinningNotify mScreenPinningNotify;
-    private int mNavigationMode;
+    private int mNavigationMode = -1;
     private final Consumer<Rect> mPipListener;
 
     /**
@@ -217,8 +218,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         parseCurrentSysuiState();
         mCommandQueue.addCallback(this);
         mOverviewProxyService.addCallback(this);
-        mEdgeBackGestureHandler.onNavigationModeChanged(
-                mNavigationModeController.addListener(this));
+        onNavigationModeChanged(mNavigationModeController.addListener(this));
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mNavBarHelper.init();
         mEdgeBackGestureHandler.onNavBarAttached();
@@ -490,6 +490,11 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         }
         mScreenPinningNotify.showEscapeToast(QuickStepContract.isGesturalMode(mNavigationMode),
                 !QuickStepContract.isGesturalMode(mNavigationMode));
+    }
+
+    @VisibleForTesting
+    int getNavigationMode() {
+        return mNavigationMode;
     }
 
     @Override
