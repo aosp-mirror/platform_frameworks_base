@@ -38,7 +38,12 @@
         <provider
             android:name="com.android.settingslib.spa.search.SpaSearchProvider"
             android:authorities="com.android.spa.gallery.search.provider"
-            android:exported="false">
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.READ_SEARCH_INDEXABLES">
+            <intent-filter>
+                <action android:name="android.content.action.SPA_SEARCH_PROVIDER" />
+            </intent-filter>
         </provider>
 
         <provider android:name="com.android.settingslib.spa.slice.SpaSliceProvider"
