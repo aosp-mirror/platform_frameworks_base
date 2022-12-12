@@ -6252,6 +6252,7 @@ package android.location {
     method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean unregisterGnssBatchedLocationCallback(@NonNull android.location.BatchedLocationCallback);
     field public static final String ACTION_ADAS_GNSS_ENABLED_CHANGED = "android.location.action.ADAS_GNSS_ENABLED_CHANGED";
     field public static final String EXTRA_ADAS_GNSS_ENABLED = "android.location.extra.ADAS_GNSS_ENABLED";
+    field @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public static final String GPS_HARDWARE_PROVIDER = "gps_hardware";
   }
 
   public final class LocationRequest implements android.os.Parcelable {
@@ -6391,6 +6392,7 @@ package android.location.provider {
     method public void setAllowed(boolean);
     method public void setProperties(@NonNull android.location.provider.ProviderProperties);
     field public static final String ACTION_FUSED_PROVIDER = "com.android.location.service.FusedLocationProvider";
+    field public static final String ACTION_GNSS_PROVIDER = "android.location.provider.action.GNSS_PROVIDER";
     field public static final String ACTION_NETWORK_PROVIDER = "com.android.location.service.v3.NetworkLocationProvider";
   }
 
