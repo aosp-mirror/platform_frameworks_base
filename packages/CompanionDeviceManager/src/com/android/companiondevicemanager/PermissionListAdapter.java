@@ -50,6 +50,7 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
     static final int PERMISSION_CONTACTS = 5;
     static final int PERMISSION_CALENDAR = 6;
     static final int PERMISSION_NEARBY_DEVICES = 7;
+    static final int PERMISSION_NEARBY_DEVICE_STREAMING = 8;
 
     private static final Map<Integer, Integer> sTitleMap;
     static {
@@ -62,6 +63,7 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
         map.put(PERMISSION_CONTACTS, R.string.permission_contacts);
         map.put(PERMISSION_CALENDAR, R.string.permission_calendar);
         map.put(PERMISSION_NEARBY_DEVICES, R.string.permission_nearby_devices);
+        map.put(PERMISSION_NEARBY_DEVICE_STREAMING, R.string.permission_nearby_device_streaming);
         sTitleMap = unmodifiableMap(map);
     }
 
@@ -76,6 +78,8 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
         map.put(PERMISSION_CONTACTS, R.string.permission_contacts_summary);
         map.put(PERMISSION_CALENDAR, R.string.permission_calendar_summary);
         map.put(PERMISSION_NEARBY_DEVICES, R.string.permission_nearby_devices_summary);
+        map.put(PERMISSION_NEARBY_DEVICE_STREAMING,
+                R.string.permission_nearby_device_streaming_summary);
         sSummaryMap = unmodifiableMap(map);
     }
 
@@ -90,6 +94,8 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
         map.put(PERMISSION_CONTACTS, R.drawable.ic_permission_contacts);
         map.put(PERMISSION_CALENDAR, R.drawable.ic_permission_calendar);
         map.put(PERMISSION_NEARBY_DEVICES, R.drawable.ic_permission_nearby_devices);
+        map.put(PERMISSION_NEARBY_DEVICE_STREAMING,
+                R.drawable.ic_permission_nearby_device_streaming);
         sIconMap = unmodifiableMap(map);
     }
 

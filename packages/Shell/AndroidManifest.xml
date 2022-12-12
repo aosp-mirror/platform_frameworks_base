@@ -322,7 +322,9 @@
     <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING" />
     <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_COMPUTER" />
     <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION" />
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING" />
     <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_WATCH" />
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_GLASSES" />
     <uses-permission android:name="android.permission.REQUEST_COMPANION_SELF_MANAGED" />
 
     <uses-permission android:name="android.permission.MANAGE_APPOPS" />

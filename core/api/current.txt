@@ -176,6 +176,8 @@ package android {
     field public static final String REQUEST_COMPANION_PROFILE_APP_STREAMING = "android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING";
     field public static final String REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION = "android.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION";
     field public static final String REQUEST_COMPANION_PROFILE_COMPUTER = "android.permission.REQUEST_COMPANION_PROFILE_COMPUTER";
+    field public static final String REQUEST_COMPANION_PROFILE_GLASSES = "android.permission.REQUEST_COMPANION_PROFILE_GLASSES";
+    field public static final String REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING = "android.permission.REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING";
     field public static final String REQUEST_COMPANION_PROFILE_WATCH = "android.permission.REQUEST_COMPANION_PROFILE_WATCH";
     field public static final String REQUEST_COMPANION_RUN_IN_BACKGROUND = "android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND";
     field public static final String REQUEST_COMPANION_SELF_MANAGED = "android.permission.REQUEST_COMPANION_SELF_MANAGED";
@@ -9058,6 +9060,8 @@ package android.companion {
     field @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING) public static final String DEVICE_PROFILE_APP_STREAMING = "android.app.role.COMPANION_DEVICE_APP_STREAMING";
     field @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION) public static final String DEVICE_PROFILE_AUTOMOTIVE_PROJECTION = "android.app.role.SYSTEM_AUTOMOTIVE_PROJECTION";
     field @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER) public static final String DEVICE_PROFILE_COMPUTER = "android.app.role.COMPANION_DEVICE_COMPUTER";
+    field @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_PROFILE_GLASSES) public static final String DEVICE_PROFILE_GLASSES = "android.app.role.COMPANION_DEVICE_GLASSES";
+    field @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING) public static final String DEVICE_PROFILE_NEARBY_DEVICE_STREAMING = "android.app.role.COMPANION_DEVICE_NEARBY_DEVICE_STREAMING";
     field public static final String DEVICE_PROFILE_WATCH = "android.app.role.COMPANION_DEVICE_WATCH";
   }
 
