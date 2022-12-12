@@ -41,6 +41,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.Complication;
+import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 
@@ -79,6 +80,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
     // True if the service has been destroyed.
     private boolean mDestroyed = false;
+
+    private final ComplicationComponent mComplicationComponent;
 
     private final DreamOverlayComponent mDreamOverlayComponent;
 
@@ -128,6 +131,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             Context context,
             @Main Executor executor,
             WindowManager windowManager,
+            ComplicationComponent.Factory complicationComponentFactory,
             DreamOverlayComponent.Factory dreamOverlayComponentFactory,
             DreamOverlayStateController stateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -146,7 +150,9 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         final ViewModelStore viewModelStore = new ViewModelStore();
         final Complication.Host host =
                 () -> mExecutor.execute(DreamOverlayService.this::requestExit);
-        mDreamOverlayComponent = dreamOverlayComponentFactory.create(viewModelStore, host);
+
+        mComplicationComponent = complicationComponentFactory.create();
+        mDreamOverlayComponent = dreamOverlayComponentFactory.create(viewModelStore, host, null);
         mLifecycleRegistry = mDreamOverlayComponent.getLifecycleRegistry();
 
         mExecutor.execute(() -> setCurrentStateLocked(Lifecycle.State.CREATED));

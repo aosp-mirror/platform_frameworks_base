@@ -19,6 +19,7 @@ package com.android.systemui.dreams;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -45,6 +46,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -85,6 +87,12 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Mock
     WindowManagerImpl mWindowManager;
+
+    @Mock
+    ComplicationComponent.Factory mComplicationComponentFactory;
+
+    @Mock
+    ComplicationComponent mComplicationComponent;
 
     @Mock
     DreamOverlayComponent.Factory mDreamOverlayComponentFactory;
@@ -130,13 +138,19 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 .thenReturn(mLifecycleRegistry);
         when(mDreamOverlayComponent.getDreamOverlayTouchMonitor())
                 .thenReturn(mDreamOverlayTouchMonitor);
+        when(mComplicationComponentFactory
+                .create())
+                .thenReturn(mComplicationComponent);
+        // TODO(b/261781069): A touch handler should be passed in from the complication component
+        // when the complication component is introduced.
         when(mDreamOverlayComponentFactory
-                .create(any(), any()))
+                .create(any(), any(), isNull()))
                 .thenReturn(mDreamOverlayComponent);
         when(mDreamOverlayContainerViewController.getContainerView())
                 .thenReturn(mDreamOverlayContainerView);
 
         mService = new DreamOverlayService(mContext, mMainExecutor, mWindowManager,
+                mComplicationComponentFactory,
                 mDreamOverlayComponentFactory,
                 mStateController,
                 mKeyguardUpdateMonitor,
