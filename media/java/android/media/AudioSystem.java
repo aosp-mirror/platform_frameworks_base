@@ -2260,11 +2260,17 @@ public class AudioSystem
 
     /**
      * @hide
-     * Register the sound dose callback with the audio server.
+     * Register the sound dose callback with the audio server and returns the binder to the
+     * ISoundDose interface.
      *
-     * @return {@link #SUCCESS} if the callback was registered successfully.
+     * @return ISoundDose interface with registered callback.
      */
-    public static native int registerSoundDoseCallback(ISoundDoseCallback callback);
+    @Nullable
+    public static ISoundDose getSoundDoseInterface(ISoundDoseCallback callback) {
+        return ISoundDose.Stub.asInterface(nativeGetSoundDose(callback));
+    }
+
+    private static native IBinder nativeGetSoundDose(ISoundDoseCallback callback);
 
     /**
      * @hide
