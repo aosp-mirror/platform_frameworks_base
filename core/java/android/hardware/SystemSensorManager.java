@@ -17,7 +17,7 @@
 package android.hardware;
 
 import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED;
-import static android.companion.virtual.VirtualDeviceManager.DEFAULT_DEVICE_ID;
+import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_DEFAULT;
 import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_SENSORS;
@@ -530,7 +530,7 @@ public class SystemSensorManager extends SensorManager {
                     if (intent.getAction().equals(ACTION_VIRTUAL_DEVICE_REMOVED)) {
                         synchronized (mFullRuntimeSensorListByDevice) {
                             final int deviceId = intent.getIntExtra(
-                                    EXTRA_VIRTUAL_DEVICE_ID, DEFAULT_DEVICE_ID);
+                                    EXTRA_VIRTUAL_DEVICE_ID, DEVICE_ID_DEFAULT);
                             List<Sensor> removedSensors =
                                     mFullRuntimeSensorListByDevice.removeReturnOld(deviceId);
                             if (removedSensors != null) {
@@ -1134,7 +1134,7 @@ public class SystemSensorManager extends SensorManager {
     }
 
     private boolean isDeviceSensorPolicyDefault(int deviceId) {
-        if (deviceId == DEFAULT_DEVICE_ID) {
+        if (deviceId == DEVICE_ID_DEFAULT) {
             return true;
         }
         if (mVdm == null) {

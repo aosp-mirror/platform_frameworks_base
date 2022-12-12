@@ -38,9 +38,9 @@ public final class VirtualDevice implements Parcelable {
      * @hide
      */
     public VirtualDevice(int id, @Nullable String name) {
-        if (id <= VirtualDeviceManager.DEFAULT_DEVICE_ID) {
+        if (id <= VirtualDeviceManager.DEVICE_ID_DEFAULT) {
             throw new IllegalArgumentException("VirtualDevice ID mist be greater than "
-                    + VirtualDeviceManager.DEFAULT_DEVICE_ID);
+                    + VirtualDeviceManager.DEVICE_ID_DEFAULT);
         }
         mId = id;
         mName = name;
