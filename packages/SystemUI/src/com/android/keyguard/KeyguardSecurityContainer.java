@@ -36,11 +36,8 @@ import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
 
 import static java.lang.Integer.max;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
@@ -970,23 +967,11 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
             }
 
             mUserSwitcherViewGroup.setAlpha(0f);
-            ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
-            int yTrans = mView.getResources().getDimensionPixelSize(R.dimen.pin_view_trans_y_entry);
-            animator.setInterpolator(Interpolators.STANDARD_DECELERATE);
-            animator.setDuration(650);
-            animator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mUserSwitcherViewGroup.setAlpha(1f);
-                    mUserSwitcherViewGroup.setTranslationY(0f);
-                }
-            });
-            animator.addUpdateListener(animation -> {
-                float value = (float) animation.getAnimatedValue();
-                mUserSwitcherViewGroup.setAlpha(value);
-                mUserSwitcherViewGroup.setTranslationY(yTrans - yTrans * value);
-            });
-            animator.start();
+            ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(mUserSwitcherViewGroup, View.ALPHA,
+                    1f);
+            alphaAnim.setInterpolator(Interpolators.ALPHA_IN);
+            alphaAnim.setDuration(500);
+            alphaAnim.start();
         }
 
         @Override
