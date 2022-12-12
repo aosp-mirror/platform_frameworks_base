@@ -80,38 +80,46 @@ public final class UsbPortAidl implements UsbPortHal {
     /**
      * USB data status is not known.
      */
-    public static final int USB_DATA_STATUS_UNKNOWN = 0;
+    public static final int AIDL_USB_DATA_STATUS_UNKNOWN = 0;
 
     /**
      * USB data is enabled.
      */
-    public static final int USB_DATA_STATUS_ENABLED = 1;
+    public static final int AIDL_USB_DATA_STATUS_ENABLED = 1;
 
     /**
      * USB data is disabled as the port is too hot.
      */
-    public static final int USB_DATA_STATUS_DISABLED_OVERHEAT = 2;
+    public static final int AIDL_USB_DATA_STATUS_DISABLED_OVERHEAT = 2;
 
     /**
      * USB data is disabled due to contaminated port.
      */
-    public static final int USB_DATA_STATUS_DISABLED_CONTAMINANT = 3;
+    public static final int AIDL_USB_DATA_STATUS_DISABLED_CONTAMINANT = 3;
 
     /**
-     * USB data is disabled due to docking event.
+     * USB data(both host mode and device mode) is disabled due to docking event.
      */
-    public static final int USB_DATA_STATUS_DISABLED_DOCK = 4;
+    public static final int AIDL_USB_DATA_STATUS_DISABLED_DOCK = 4;
 
     /**
      * USB data is disabled by
      * {@link UsbPort#enableUsbData UsbPort.enableUsbData}.
      */
-    public static final int USB_DATA_STATUS_DISABLED_FORCE = 5;
+    public static final int AIDL_USB_DATA_STATUS_DISABLED_FORCE = 5;
 
     /**
      * USB data is disabled for debug.
      */
-    public static final int USB_DATA_STATUS_DISABLED_DEBUG = 6;
+    public static final int AIDL_USB_DATA_STATUS_DISABLED_DEBUG = 6;
+    /**
+     * USB host mode disabled due to docking event.
+     */
+    public static final int AIDL_USB_DATA_STATUS_DISABLED_DOCK_HOST_MODE = 7;
+    /**
+     * USB device mode disabled due to docking event.
+     */
+    public static final int AIDL_USB_DATA_STATUS_DISABLED_DOCK_DEVICE_MODE = 8;
 
     public @UsbHalVersion int getUsbHalVersion() throws RemoteException {
         synchronized (mLock) {
@@ -529,23 +537,42 @@ public final class UsbPortAidl implements UsbPortHal {
             int usbDataStatus = UsbPortStatus.DATA_STATUS_UNKNOWN;
             for (int i = 0; i < usbDataStatusHal.length; i++) {
                 switch (usbDataStatusHal[i]) {
-                    case USB_DATA_STATUS_ENABLED:
+                    case AIDL_USB_DATA_STATUS_ENABLED:
                         usbDataStatus |= UsbPortStatus.DATA_STATUS_ENABLED;
                         break;
-                    case USB_DATA_STATUS_DISABLED_OVERHEAT:
+                    case AIDL_USB_DATA_STATUS_DISABLED_OVERHEAT:
                         usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_OVERHEAT;
                         break;
-                    case USB_DATA_STATUS_DISABLED_CONTAMINANT:
+                    case AIDL_USB_DATA_STATUS_DISABLED_CONTAMINANT:
                         usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_CONTAMINANT;
                         break;
-                    case USB_DATA_STATUS_DISABLED_DOCK:
+                    /* Indicates both host and gadget mode being disabled. */
+                    case AIDL_USB_DATA_STATUS_DISABLED_DOCK:
                         usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DOCK;
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DOCK_HOST_MODE;
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DOCK_DEVICE_MODE;
                         break;
-                    case USB_DATA_STATUS_DISABLED_FORCE:
+                    case AIDL_USB_DATA_STATUS_DISABLED_FORCE:
                         usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_FORCE;
                         break;
-                    case USB_DATA_STATUS_DISABLED_DEBUG:
+                    case AIDL_USB_DATA_STATUS_DISABLED_DEBUG:
                         usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DEBUG;
+                        break;
+                    /*
+                     * Set DATA_STATUS_DISABLED_DOCK when DATA_STATUS_DISABLED_DOCK_HOST_MODE
+                     * is set.
+                     */
+                    case AIDL_USB_DATA_STATUS_DISABLED_DOCK_HOST_MODE:
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DOCK_HOST_MODE;
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DOCK;
+                        break;
+                    /*
+                     * Set DATA_STATUS_DISABLED_DOCK when DATA_STATUS_DISABLED_DEVICE_DOCK
+                     * is set.
+                     */
+                    case AIDL_USB_DATA_STATUS_DISABLED_DOCK_DEVICE_MODE:
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DOCK_DEVICE_MODE;
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DOCK;
                         break;
                     default:
                         usbDataStatus |= UsbPortStatus.DATA_STATUS_UNKNOWN;

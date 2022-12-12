@@ -5758,6 +5758,8 @@ package android.hardware.usb {
     field public static final int DATA_STATUS_DISABLED_CONTAMINANT = 4; // 0x4
     field public static final int DATA_STATUS_DISABLED_DEBUG = 32; // 0x20
     field public static final int DATA_STATUS_DISABLED_DOCK = 8; // 0x8
+    field public static final int DATA_STATUS_DISABLED_DOCK_DEVICE_MODE = 128; // 0x80
+    field public static final int DATA_STATUS_DISABLED_DOCK_HOST_MODE = 64; // 0x40
     field public static final int DATA_STATUS_DISABLED_FORCE = 16; // 0x10
     field public static final int DATA_STATUS_DISABLED_OVERHEAT = 2; // 0x2
     field public static final int DATA_STATUS_ENABLED = 1; // 0x1
