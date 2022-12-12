@@ -326,6 +326,7 @@ cc_library_shared {
                 "libdl",
                 "libdl_android",
                 "libtimeinstate",
+                "libtflite",
                 "server_configurable_flags",
                 "libimage_io",
                 "libjpegdecoder",
@@ -343,7 +344,9 @@ cc_library_shared {
             header_libs: [
                 "bionic_libc_platform_headers",
                 "dnsproxyd_protocol_headers",
+                "flatbuffer_headers",
                 "libtextclassifier_hash_headers",
+                "tensorflow_headers",
             ],
             runtime_libs: [
                 "libidmap2",
