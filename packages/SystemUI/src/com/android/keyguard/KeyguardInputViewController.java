@@ -144,7 +144,9 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     public void startAppearAnimation() {
         if (TextUtils.isEmpty(mMessageAreaController.getMessage())
                 && getInitialMessageResId() != 0) {
-            mMessageAreaController.setMessage(getInitialMessageResId());
+            mMessageAreaController.setMessage(
+                    mView.getResources().getString(getInitialMessageResId()),
+                    /* animate= */ false);
         }
         mView.startAppearAnimation();
     }
