@@ -106,7 +106,6 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
@@ -294,7 +293,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private WiredChargingRippleController mWiredChargingRippleController;
     @Mock private Lazy<CameraLauncher> mCameraLauncherLazy;
     @Mock private CameraLauncher mCameraLauncher;
-    @Mock private AlternateBouncerInteractor mAlternateBouncerInteractor;
     /**
      * The process of registering/unregistering a predictive back callback requires a
      * ViewRootImpl, which is present IRL, but may be missing during a Mockito unit test.
@@ -502,9 +500,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mWiredChargingRippleController,
                 mDreamManager,
                 mCameraLauncherLazy,
-                () -> mLightRevealScrimViewModel,
-                mAlternateBouncerInteractor
-        ) {
+                () -> mLightRevealScrimViewModel) {
             @Override
             protected ViewRootImpl getViewRootImpl() {
                 return mViewRootImpl;

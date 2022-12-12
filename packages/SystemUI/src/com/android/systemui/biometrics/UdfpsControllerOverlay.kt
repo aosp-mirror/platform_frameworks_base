@@ -50,7 +50,6 @@ import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionStateManager
@@ -60,6 +59,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.time.SystemClock
 
 private const val TAG = "UdfpsControllerOverlay"
 
@@ -86,6 +86,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         private val dumpManager: DumpManager,
         private val transitionController: LockscreenShadeTransitionController,
         private val configurationController: ConfigurationController,
+        private val systemClock: SystemClock,
         private val keyguardStateController: KeyguardStateController,
         private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
         private var udfpsDisplayModeProvider: UdfpsDisplayModeProvider,
@@ -96,8 +97,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         private val activityLaunchAnimator: ActivityLaunchAnimator,
         private val featureFlags: FeatureFlags,
         private val primaryBouncerInteractor: PrimaryBouncerInteractor,
-        private val alternateBouncerInteractor: AlternateBouncerInteractor,
-        private val isDebuggable: Boolean = Build.IS_DEBUGGABLE,
+        private val isDebuggable: Boolean = Build.IS_DEBUGGABLE
 ) {
     /** The view, when [isShowing], or null. */
     var overlayView: UdfpsView? = null
@@ -255,14 +255,14 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                     dumpManager,
                     transitionController,
                     configurationController,
+                    systemClock,
                     keyguardStateController,
                     unlockedScreenOffAnimationController,
                     dialogManager,
                     controller,
                     activityLaunchAnimator,
                     featureFlags,
-                    primaryBouncerInteractor,
-                    alternateBouncerInteractor,
+                    primaryBouncerInteractor
                 )
             }
             REASON_AUTH_BP -> {

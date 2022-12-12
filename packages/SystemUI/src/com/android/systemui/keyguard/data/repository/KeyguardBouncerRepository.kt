@@ -16,15 +16,14 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import com.android.systemui.statusbar.phone.KeyguardBouncer
-import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** Encapsulates app state for the lock screen primary and alternate bouncer. */
@@ -33,7 +32,7 @@ class KeyguardBouncerRepository
 @Inject
 constructor(
     private val viewMediatorCallback: ViewMediatorCallback,
-    private val clock: SystemClock,
+    keyguardUpdateMonitor: KeyguardUpdateMonitor,
 ) {
     /** Values associated with the PrimaryBouncer (pin/pattern/password) input. */
     private val _primaryBouncerVisible = MutableStateFlow(false)
@@ -78,33 +77,12 @@ constructor(
     val bouncerErrorMessage: CharSequence?
         get() = viewMediatorCallback.consumeCustomMessage()
 
-    /** Values associated with the AlternateBouncer */
-    private val _isAlternateBouncerVisible = MutableStateFlow(false)
-    val isAlternateBouncerVisible = _isAlternateBouncerVisible.asStateFlow()
-    var lastAlternateBouncerVisibleTime: Long = NOT_VISIBLE
-    private val _isAlternateBouncerUIAvailable = MutableStateFlow<Boolean>(false)
-    val isAlternateBouncerUIAvailable: StateFlow<Boolean> =
-        _isAlternateBouncerUIAvailable.asStateFlow()
-
     fun setPrimaryScrimmed(isScrimmed: Boolean) {
         _primaryBouncerScrimmed.value = isScrimmed
     }
 
     fun setPrimaryVisible(isVisible: Boolean) {
         _primaryBouncerVisible.value = isVisible
-    }
-
-    fun setAlternateVisible(isVisible: Boolean) {
-        if (isVisible && !_isAlternateBouncerVisible.value) {
-            lastAlternateBouncerVisibleTime = clock.uptimeMillis()
-        } else if (!isVisible) {
-            lastAlternateBouncerVisibleTime = NOT_VISIBLE
-        }
-        _isAlternateBouncerVisible.value = isVisible
-    }
-
-    fun setAlternateBouncerUIAvailable(isAvailable: Boolean) {
-        _isAlternateBouncerUIAvailable.value = isAvailable
     }
 
     fun setPrimaryShow(keyguardBouncerModel: KeyguardBouncerModel?) {
@@ -153,9 +131,5 @@ constructor(
 
     fun setOnScreenTurnedOff(onScreenTurnedOff: Boolean) {
         _onScreenTurnedOff.value = onScreenTurnedOff
-    }
-
-    companion object {
-        private const val NOT_VISIBLE = -1L
     }
 }

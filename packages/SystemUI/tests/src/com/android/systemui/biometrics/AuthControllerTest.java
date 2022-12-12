@@ -812,7 +812,7 @@ public class AuthControllerTest extends SysuiTestCase {
     public void testForwardsDozeEvents() throws RemoteException {
         when(mStatusBarStateController.isDozing()).thenReturn(true);
         when(mWakefulnessLifecycle.getWakefulness()).thenReturn(WAKEFULNESS_AWAKE);
-        mAuthController.setBiometricContextListener(mContextListener);
+        mAuthController.setBiometicContextListener(mContextListener);
 
         mStatusBarStateListenerCaptor.getValue().onDozingChanged(true);
         mStatusBarStateListenerCaptor.getValue().onDozingChanged(false);
@@ -827,7 +827,7 @@ public class AuthControllerTest extends SysuiTestCase {
     public void testForwardsWakeEvents() throws RemoteException {
         when(mStatusBarStateController.isDozing()).thenReturn(false);
         when(mWakefulnessLifecycle.getWakefulness()).thenReturn(WAKEFULNESS_AWAKE);
-        mAuthController.setBiometricContextListener(mContextListener);
+        mAuthController.setBiometicContextListener(mContextListener);
 
         mWakefullnessObserverCaptor.getValue().onStartedGoingToSleep();
         mWakefullnessObserverCaptor.getValue().onFinishedGoingToSleep();

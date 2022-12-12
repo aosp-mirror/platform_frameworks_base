@@ -56,7 +56,6 @@ import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.data.BouncerView;
 import com.android.systemui.keyguard.data.BouncerViewDelegate;
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -106,6 +105,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private KeyguardBouncer.Factory mKeyguardBouncerFactory;
     @Mock private KeyguardMessageAreaController.Factory mKeyguardMessageAreaFactory;
     @Mock private KeyguardMessageAreaController mKeyguardMessageAreaController;
+    @Mock private StatusBarKeyguardViewManager.AlternateBouncer mAlternateBouncer;
     @Mock private KeyguardMessageArea mKeyguardMessageArea;
     @Mock private ShadeController mShadeController;
     @Mock private SysUIUnfoldComponent mSysUiUnfoldComponent;
@@ -115,7 +115,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private KeyguardSecurityModel mKeyguardSecurityModel;
     @Mock private PrimaryBouncerCallbackInteractor mPrimaryBouncerCallbackInteractor;
     @Mock private PrimaryBouncerInteractor mPrimaryBouncerInteractor;
-    @Mock private AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock private BouncerView mBouncerView;
     @Mock private BouncerViewDelegate mBouncerViewDelegate;
 
@@ -164,8 +163,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mFeatureFlags,
                         mPrimaryBouncerCallbackInteractor,
                         mPrimaryBouncerInteractor,
-                        mBouncerView,
-                        mAlternateBouncerInteractor) {
+                        mBouncerView) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -436,35 +434,37 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
     @Test
     public void testShowing_whenAlternateAuthShowing() {
+        mStatusBarKeyguardViewManager.setAlternateBouncer(mAlternateBouncer);
         when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(false);
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+        when(mAlternateBouncer.isShowingAlternateBouncer()).thenReturn(true);
         assertTrue(
-                "Is showing not accurate when alternative bouncer is visible",
+                "Is showing not accurate when alternative auth showing",
                 mStatusBarKeyguardViewManager.isBouncerShowing());
     }
 
     @Test
     public void testWillBeShowing_whenAlternateAuthShowing() {
+        mStatusBarKeyguardViewManager.setAlternateBouncer(mAlternateBouncer);
         when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(false);
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+        when(mAlternateBouncer.isShowingAlternateBouncer()).thenReturn(true);
         assertTrue(
-                "Is or will be showing not accurate when alternate bouncer is visible",
+                "Is or will be showing not accurate when alternative auth showing",
                 mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing());
     }
 
     @Test
-    public void testHideAlternateBouncer_onShowPrimaryBouncer() {
-        reset(mAlternateBouncerInteractor);
-
-        // GIVEN alt bouncer is showing
+    public void testHideAlternateBouncer_onShowBouncer() {
+        // GIVEN alt auth is showing
+        mStatusBarKeyguardViewManager.setAlternateBouncer(mAlternateBouncer);
         when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(false);
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+        when(mAlternateBouncer.isShowingAlternateBouncer()).thenReturn(true);
+        reset(mAlternateBouncer);
 
         // WHEN showBouncer is called
         mStatusBarKeyguardViewManager.showPrimaryBouncer(true);
 
         // THEN alt bouncer should be hidden
-        verify(mAlternateBouncerInteractor).hide();
+        verify(mAlternateBouncer).hideAlternateBouncer();
     }
 
     @Test
@@ -479,9 +479,11 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
     @Test
     public void testShowAltAuth_unlockingWithBiometricNotAllowed() {
-        // GIVEN cannot use alternate bouncer
+        // GIVEN alt auth exists, unlocking with biometric isn't allowed
+        mStatusBarKeyguardViewManager.setAlternateBouncer(mAlternateBouncer);
         when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(false);
-        when(mAlternateBouncerInteractor.canShowAlternateBouncerForFingerprint()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean()))
+                .thenReturn(false);
 
         // WHEN showGenericBouncer is called
         final boolean scrimmed = true;
@@ -489,19 +491,21 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
         // THEN regular bouncer is shown
         verify(mPrimaryBouncerInteractor).show(eq(scrimmed));
+        verify(mAlternateBouncer, never()).showAlternateBouncer();
     }
 
     @Test
     public void testShowAlternateBouncer_unlockingWithBiometricAllowed() {
-        // GIVEN will show alternate bouncer
+        // GIVEN alt auth exists, unlocking with biometric is allowed
+        mStatusBarKeyguardViewManager.setAlternateBouncer(mAlternateBouncer);
         when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(false);
-        when(mAlternateBouncerInteractor.show()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
 
         // WHEN showGenericBouncer is called
         mStatusBarKeyguardViewManager.showBouncer(true);
 
         // THEN alt auth bouncer is shown
-        verify(mAlternateBouncerInteractor).show();
+        verify(mAlternateBouncer).showAlternateBouncer();
         verify(mPrimaryBouncerInteractor, never()).show(anyBoolean());
     }
 
@@ -609,8 +613,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mFeatureFlags,
                         mPrimaryBouncerCallbackInteractor,
                         mPrimaryBouncerInteractor,
-                        mBouncerView,
-                        mAlternateBouncerInteractor) {
+                        mBouncerView) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;

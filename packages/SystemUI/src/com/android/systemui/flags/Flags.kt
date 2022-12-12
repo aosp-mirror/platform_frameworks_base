@@ -175,13 +175,6 @@ object Flags {
     @JvmField
     val LIGHT_REVEAL_MIGRATION = unreleasedFlag(218, "light_reveal_migration", teamfood = true)
 
-    /**
-     * Whether to use the new alternate bouncer architecture, a refactor of and eventual replacement
-     * of the Alternate/Authentication Bouncer. No visual UI changes.
-     */
-    // TODO(b/260619425): Tracking Bug
-    @JvmField val MODERN_ALTERNATE_BOUNCER = unreleasedFlag(219, "modern_alternate_bouncer")
-
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")

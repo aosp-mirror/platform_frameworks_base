@@ -99,7 +99,6 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
 import com.android.systemui.keyguard.ScreenLifecycle;
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -177,8 +176,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private AccessibilityManager mAccessibilityManager;
     @Mock
     private FaceHelpMessageDeferral mFaceHelpMessageDeferral;
-    @Mock
-    private AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock
     private ScreenLifecycle mScreenLifecycle;
     @Mock
@@ -276,8 +273,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 mUserManager, mExecutor, mExecutor, mFalsingManager,
                 mAuthController, mLockPatternUtils, mScreenLifecycle,
                 mKeyguardBypassController, mAccessibilityManager,
-                mFaceHelpMessageDeferral, mock(KeyguardLogger.class),
-                mAlternateBouncerInteractor);
+                mFaceHelpMessageDeferral, mock(KeyguardLogger.class));
         mController.init();
         mController.setIndicationArea(mIndicationArea);
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
