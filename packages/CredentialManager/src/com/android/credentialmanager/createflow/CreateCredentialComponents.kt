@@ -313,7 +313,7 @@ fun ProviderSelectionCard(
                             }
                         }
                     }
-                    if (disabledProviderList != null) {
+                    if (disabledProviderList != null && disabledProviderList.isNotEmpty()) {
                         item {
                             MoreOptionsDisabledProvidersRow(
                                 disabledProviders = disabledProviderList,
@@ -431,14 +431,12 @@ fun MoreOptionsSelectionCard(
                             }
                         }
                     }
-                    if (disabledProviderList != null) {
-                        item {
-                            MoreOptionsDisabledProvidersRow(
-                                disabledProviders = disabledProviderList,
-                                onDisabledPasswordManagerSelected =
-                                onDisabledPasswordManagerSelected,
-                            )
-                        }
+                    item {
+                        MoreOptionsDisabledProvidersRow(
+                            disabledProviders = disabledProviderList,
+                            onDisabledPasswordManagerSelected =
+                            onDisabledPasswordManagerSelected,
+                        )
                     }
                     // TODO: handle the error situation that if multiple remoteInfos exists
                     enabledProviderList.forEach {
@@ -748,7 +746,7 @@ fun PrimaryCreateOptionRow(
                 },
                 contentDescription = null,
                 tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
-                modifier = Modifier.padding(horizontal = 18.dp).size(32.dp)
+                modifier = Modifier.padding(start = 10.dp).size(32.dp)
             )
         },
         label = {
@@ -759,7 +757,7 @@ fun PrimaryCreateOptionRow(
                         TextOnSurfaceVariant(
                             text = requestDisplayInfo.title,
                             style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(top = 16.dp),
+                            modifier = Modifier.padding(top = 16.dp, start = 5.dp),
                         )
                         TextSecondary(
                             text = if (requestDisplayInfo.subtitle != null) {
@@ -770,27 +768,27 @@ fun PrimaryCreateOptionRow(
                                 stringResource(R.string.passkey_before_subtitle)
                             },
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 16.dp),
+                            modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
                         )
                     }
                     TYPE_PASSWORD_CREDENTIAL -> {
                         TextOnSurfaceVariant(
                             text = requestDisplayInfo.title,
                             style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(top = 16.dp),
+                            modifier = Modifier.padding(top = 16.dp, start = 5.dp),
                         )
                         TextSecondary(
                             // This subtitle would never be null for create password
                             text = requestDisplayInfo.subtitle ?: "",
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 16.dp),
+                            modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
                         )
                     }
                     else -> {
                         TextOnSurfaceVariant(
                             text = requestDisplayInfo.title,
                             style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
+                            modifier = Modifier.padding(top = 16.dp, bottom = 16.dp, start = 5.dp),
                         )
                     }
                 }
@@ -810,7 +808,7 @@ fun MoreOptionsInfoRow(
         onClick = onOptionSelected,
         icon = {
             Image(
-                modifier = Modifier.padding(horizontal = 16.dp).size(32.dp),
+                modifier = Modifier.padding(start = 10.dp).size(32.dp),
                 bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
                 contentDescription = null
             )
@@ -820,12 +818,18 @@ fun MoreOptionsInfoRow(
                 TextOnSurfaceVariant(
                     text = providerInfo.displayName,
                     style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(top = 16.dp),
+                    modifier = Modifier.padding(top = 16.dp, start = 5.dp),
                 )
                 if (createOptionInfo.userProviderDisplayName != null) {
                     TextSecondary(
                         text = createOptionInfo.userProviderDisplayName,
                         style = MaterialTheme.typography.bodyMedium,
+                        // TODO: update the logic here for the case there is only total count
+                        modifier = if (
+                            createOptionInfo.passwordCount != null ||
+                            createOptionInfo.passkeyCount != null
+                        ) Modifier.padding(start = 5.dp) else Modifier
+                            .padding(bottom = 16.dp, start = 5.dp),
                     )
                 }
                 if (createOptionInfo.passwordCount != null &&
@@ -839,7 +843,7 @@ fun MoreOptionsInfoRow(
                             createOptionInfo.passkeyCount
                         ),
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 16.dp),
+                        modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
                     )
                 } else if (createOptionInfo.passwordCount != null) {
                     TextSecondary(
@@ -849,7 +853,7 @@ fun MoreOptionsInfoRow(
                             createOptionInfo.passwordCount
                         ),
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 16.dp),
+                        modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
                     )
                 } else if (createOptionInfo.passkeyCount != null) {
                     TextSecondary(
@@ -859,7 +863,7 @@ fun MoreOptionsInfoRow(
                             createOptionInfo.passkeyCount
                         ),
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 16.dp),
+                        modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
                     )
                 } else if (createOptionInfo.totalCredentialCount != null) {
                     // TODO: Handle the case when there is total count
@@ -873,34 +877,36 @@ fun MoreOptionsInfoRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreOptionsDisabledProvidersRow(
-    disabledProviders: List<ProviderInfo>,
+    disabledProviders: List<ProviderInfo>?,
     onDisabledPasswordManagerSelected: () -> Unit,
 ) {
-    Entry(
-        onClick = onDisabledPasswordManagerSelected,
-        icon = {
-            Icon(
-                Icons.Filled.Add,
-                contentDescription = null,
-                modifier = Modifier.padding(start = 16.dp)
-            )
-        },
-        label = {
-            Column() {
-                TextOnSurfaceVariant(
-                    text = stringResource(R.string.other_password_manager),
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(top = 16.dp, start = 16.dp),
+    if (disabledProviders != null && disabledProviders.isNotEmpty()) {
+        Entry(
+            onClick = onDisabledPasswordManagerSelected,
+            icon = {
+                Icon(
+                    Icons.Filled.Add,
+                    contentDescription = null,
+                    modifier = Modifier.padding(start = 16.dp)
                 )
-                // TODO: Update the subtitle once design is confirmed
-                TextSecondary(
-                    text = disabledProviders.joinToString(separator = ", ") { it.displayName },
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(bottom = 16.dp, start = 16.dp),
-                )
+            },
+            label = {
+                Column() {
+                    TextOnSurfaceVariant(
+                        text = stringResource(R.string.other_password_manager),
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(top = 16.dp, start = 5.dp),
+                    )
+                    // TODO: Update the subtitle once design is confirmed
+                    TextSecondary(
+                        text = disabledProviders.joinToString(separator = ", ") { it.displayName },
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
+                    )
+                }
             }
-        }
-    )
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

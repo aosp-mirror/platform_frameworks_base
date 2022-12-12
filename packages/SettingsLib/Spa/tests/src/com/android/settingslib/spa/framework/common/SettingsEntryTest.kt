@@ -16,10 +16,13 @@
 
 package com.android.settingslib.spa.framework.common
 
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.core.os.bundleOf
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.settingslib.spa.slice.appendSpaParams
+import com.android.settingslib.spa.slice.getEntryId
 import com.android.settingslib.spa.tests.testutils.getUniqueEntryId
 import com.android.settingslib.spa.tests.testutils.getUniquePageId
 import com.google.common.truth.Truth.assertThat
@@ -168,5 +171,26 @@ class SettingsEntryTest {
         assertThat(searchData?.keyword).isEmpty()
         assertThat(statusData?.isDisabled).isTrue()
         assertThat(statusData?.isSwitchOff).isTrue()
+    }
+
+    @Test
+    fun testSetSliceDataFn() {
+        val owner = SettingsPage.create("mySpp")
+        val entryId = getUniqueEntryId("myEntry", owner)
+        val emptySliceData = EntrySliceData()
+
+        val entryBuilder = SettingsEntryBuilder.create(owner, "myEntry")
+            .setSliceDataFn { uri, _ ->
+                return@setSliceDataFn if (uri.getEntryId() == entryId) emptySliceData else null
+            }
+        val entry = entryBuilder.build()
+        assertThat(entry.id).isEqualTo(entryId)
+        assertThat(entry.hasSliceSupport).isTrue()
+        assertThat(entry.getSliceData(Uri.EMPTY)).isNull()
+        assertThat(
+            entry.getSliceData(
+                Uri.Builder().scheme("content").appendSpaParams(entryId = entryId).build()
+            )
+        ).isEqualTo(emptySliceData)
     }
 }
