@@ -36,6 +36,8 @@ import android.app.job.JobScheduler;
 import android.app.role.RoleManager;
 import android.app.smartspace.SmartspaceManager;
 import android.app.trust.TrustManager;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -615,5 +617,17 @@ public class FrameworkServicesModule {
     @Singleton
     static CameraManager provideCameraManager(Context context) {
         return context.getSystemService(CameraManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static BluetoothManager provideBluetoothManager(Context context) {
+        return context.getSystemService(BluetoothManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static BluetoothAdapter provideBluetoothAdapter(BluetoothManager bluetoothManager) {
+        return bluetoothManager.getAdapter();
     }
 }
