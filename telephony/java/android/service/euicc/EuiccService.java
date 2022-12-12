@@ -490,6 +490,28 @@ public abstract class EuiccService extends Service {
             int slotId, DownloadableSubscription subscription, boolean forceDeactivateSim);
 
     /**
+     * Populate {@link DownloadableSubscription} metadata for the given downloadable subscription.
+     *
+     * @param slotId ID of the SIM slot to use for the operation.
+     * @param portIndex Index of the port from the slot. portIndex is used if the eUICC must
+     *     be activated to perform the operation.
+     * @param subscription A subscription whose metadata needs to be populated.
+     * @param forceDeactivateSim If true, and if an active SIM must be deactivated to access the
+     *     eUICC, perform this action automatically. Otherwise, {@link #RESULT_MUST_DEACTIVATE_SIM}
+     *     should be returned to allow the user to consent to this operation first.
+     * @return The result of the operation.
+     * @see android.telephony.euicc.EuiccManager#getDownloadableSubscriptionMetadata
+     */
+    @NonNull
+    public GetDownloadableSubscriptionMetadataResult onGetDownloadableSubscriptionMetadata(
+            int slotId, int portIndex, @NonNull DownloadableSubscription subscription,
+            boolean forceDeactivateSim) {
+        // stub implementation, LPA needs to implement this
+        throw new UnsupportedOperationException(
+                "LPA must override onGetDownloadableSubscriptionMetadata");
+    }
+
+    /**
      * Return metadata for subscriptions which are available for download for this device.
      *
      * @param slotId ID of the SIM slot to use for the operation.
@@ -833,16 +855,31 @@ public abstract class EuiccService extends Service {
         }
 
         @Override
-        public void getDownloadableSubscriptionMetadata(int slotId,
+        public void getDownloadableSubscriptionMetadata(int slotId, int portIndex,
                 DownloadableSubscription subscription,
-                boolean forceDeactivateSim,
+                boolean switchAfterDownload, boolean forceDeactivateSim,
                 IGetDownloadableSubscriptionMetadataCallback callback) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    GetDownloadableSubscriptionMetadataResult result =
-                            EuiccService.this.onGetDownloadableSubscriptionMetadata(
+                    GetDownloadableSubscriptionMetadataResult result;
+                    if (switchAfterDownload) {
+                        try {
+                            result = EuiccService.this.onGetDownloadableSubscriptionMetadata(
+                                    slotId, portIndex, subscription, forceDeactivateSim);
+                        } catch (UnsupportedOperationException | AbstractMethodError e) {
+                            Log.w(TAG, "The new onGetDownloadableSubscriptionMetadata(int, int, "
+                                    + "DownloadableSubscription, boolean) is not implemented."
+                                    + " Fall back to the old one.", e);
+                            result = EuiccService.this.onGetDownloadableSubscriptionMetadata(
                                     slotId, subscription, forceDeactivateSim);
+                        }
+                    } else {
+                        // When switchAfterDownload is false, this operation is port agnostic.
+                        // Call API without portIndex.
+                        result = EuiccService.this.onGetDownloadableSubscriptionMetadata(
+                                slotId, subscription, forceDeactivateSim);
+                    }
                     try {
                         callback.onComplete(result);
                     } catch (RemoteException e) {
