@@ -137,8 +137,6 @@ public final class VcnGatewayConnectionConfig {
      * <p>If set, the gatway connection will monitor the data stall detection of the VCN network.
      * When there is a suspected data stall, the gateway connection will attempt recovery by
      * performing a mobility update on the underlying IKE session.
-     *
-     * @hide
      */
     public static final int VCN_GATEWAY_OPTION_ENABLE_DATA_STALL_RECOVERY_WITH_MOBILITY = 0;
 
@@ -147,8 +145,7 @@ public final class VcnGatewayConnectionConfig {
     @IntDef(
             prefix = {"VCN_GATEWAY_OPTION_"},
             value = {
-                // TODO: b/261499808 Add VCN_GATEWAY_OPTION_ENABLE_DATA_STALL_RECOVERY_WITH_MOBILITY
-                // when it is exposed
+                VCN_GATEWAY_OPTION_ENABLE_DATA_STALL_RECOVERY_WITH_MOBILITY,
             })
     public @interface VcnGatewayOption {}
 
@@ -460,7 +457,8 @@ public final class VcnGatewayConnectionConfig {
      *
      * @param option the option to check.
      * @throws IllegalArgumentException if the provided option is invalid.
-     * @hide
+     * @see Builder#addGatewayOption(int)
+     * @see Builder#removeGatewayOption(int)
      */
     public boolean hasGatewayOption(@VcnGatewayOption int option) {
         validateGatewayOption(option);
@@ -711,7 +709,6 @@ public final class VcnGatewayConnectionConfig {
          * @param option the option to be enabled
          * @return this {@link Builder} instance, for chaining
          * @throws IllegalArgumentException if the provided option is invalid
-         * @hide
          */
         @NonNull
         public Builder addGatewayOption(@VcnGatewayOption int option) {
@@ -726,7 +723,6 @@ public final class VcnGatewayConnectionConfig {
          * @param option the option to be disabled
          * @return this {@link Builder} instance, for chaining
          * @throws IllegalArgumentException if the provided option is invalid
-         * @hide
          */
         @NonNull
         public Builder removeGatewayOption(@VcnGatewayOption int option) {
