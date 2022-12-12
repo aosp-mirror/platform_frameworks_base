@@ -99,6 +99,11 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
             public void onResume(int reason) {
                 super.onResume(reason);
             }
+
+            @Override
+            protected int getInitialMessageResId() {
+                return 0;
+            }
         };
         mKeyguardAbsKeyInputViewController.init();
         reset(mKeyguardMessageAreaController);  // Clear out implicit call to init.
