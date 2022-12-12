@@ -22,7 +22,6 @@ import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
@@ -30,10 +29,8 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
@@ -68,7 +65,7 @@ public class UninstallAppProgress extends Activity implements
 
     private ApplicationInfo mAppInfo;
     private boolean mAllUsers;
-    private IBinder mCallback;
+    private PackageManager.UninstallCompleteCallback mCallback;
 
     private volatile int mResultCode = -1;
 
@@ -122,13 +119,7 @@ public class UninstallAppProgress extends Activity implements
                 final String packageName = (String) msg.obj;
 
                 if (mCallback != null) {
-                    final IPackageDeleteObserver2 observer = IPackageDeleteObserver2.Stub
-                            .asInterface(mCallback);
-                    try {
-                        observer.onPackageDeleted(mAppInfo.packageName, mResultCode,
-                                packageName);
-                    } catch (RemoteException ignored) {
-                    }
+                    mCallback.onUninstallComplete(mAppInfo.packageName, mResultCode, packageName);
                     finish();
                     return;
                 }
@@ -252,7 +243,8 @@ public class UninstallAppProgress extends Activity implements
 
         Intent intent = getIntent();
         mAppInfo = intent.getParcelableExtra(PackageUtil.INTENT_ATTR_APPLICATION_INFO);
-        mCallback = intent.getIBinderExtra(PackageInstaller.EXTRA_CALLBACK);
+        mCallback = intent.getParcelableExtra(PackageInstaller.EXTRA_CALLBACK,
+                PackageManager.UninstallCompleteCallback.class);
 
         // This currently does not support going through a onDestroy->onCreate cycle. Hence if that
         // happened, just fail the operation for mysterious reasons.
@@ -260,12 +252,7 @@ public class UninstallAppProgress extends Activity implements
             mResultCode = PackageManager.DELETE_FAILED_INTERNAL_ERROR;
 
             if (mCallback != null) {
-                final IPackageDeleteObserver2 observer = IPackageDeleteObserver2.Stub
-                        .asInterface(mCallback);
-                try {
-                    observer.onPackageDeleted(mAppInfo.packageName, mResultCode, null);
-                } catch (RemoteException ignored) {
-                }
+                mCallback.onUninstallComplete(mAppInfo.packageName, mResultCode, null);
                 finish();
             } else {
                 setResultAndFinish();

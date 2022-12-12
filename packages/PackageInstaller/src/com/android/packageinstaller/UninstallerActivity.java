@@ -35,7 +35,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
@@ -43,9 +42,7 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
@@ -76,7 +73,7 @@ public class UninstallerActivity extends Activity {
         public ActivityInfo activityInfo;
         public boolean allUsers;
         public UserHandle user;
-        public IBinder callback;
+        public PackageManager.UninstallCompleteCallback callback;
     }
 
     private String mPackageName;
@@ -173,7 +170,8 @@ public class UninstallerActivity extends Activity {
             }
         }
 
-        mDialogInfo.callback = intent.getIBinderExtra(PackageInstaller.EXTRA_CALLBACK);
+        mDialogInfo.callback = intent.getParcelableExtra(PackageInstaller.EXTRA_CALLBACK,
+                                            PackageManager.UninstallCompleteCallback.class);
 
         try {
             mDialogInfo.appInfo = pm.getApplicationInfo(mPackageName,
@@ -306,7 +304,6 @@ public class UninstallerActivity extends Activity {
             newIntent.putExtra(UninstallUninstalling.EXTRA_APP_LABEL, label);
             newIntent.putExtra(UninstallUninstalling.EXTRA_KEEP_DATA, keepData);
             newIntent.putExtra(PackageInstaller.EXTRA_CALLBACK, mDialogInfo.callback);
-
             if (returnResult) {
                 newIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
             }
@@ -372,13 +369,8 @@ public class UninstallerActivity extends Activity {
 
     public void dispatchAborted() {
         if (mDialogInfo != null && mDialogInfo.callback != null) {
-            final IPackageDeleteObserver2 observer = IPackageDeleteObserver2.Stub.asInterface(
-                    mDialogInfo.callback);
-            try {
-                observer.onPackageDeleted(mPackageName,
-                        PackageManager.DELETE_FAILED_ABORTED, "Cancelled by user");
-            } catch (RemoteException ignored) {
-            }
+            mDialogInfo.callback.onUninstallComplete(mPackageName,
+                    PackageManager.DELETE_FAILED_ABORTED, "Cancelled by user");
         }
     }
 

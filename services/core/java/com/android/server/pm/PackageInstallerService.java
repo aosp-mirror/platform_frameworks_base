@@ -1211,7 +1211,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             // Take a short detour to confirm with user
             final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
             intent.setData(Uri.fromParts("package", versionedPackage.getPackageName(), null));
-            intent.putExtra(PackageInstaller.EXTRA_CALLBACK, adapter.getBinder().asBinder());
+            intent.putExtra(PackageInstaller.EXTRA_CALLBACK,
+                    new PackageManager.UninstallCompleteCallback(adapter.getBinder().asBinder()));
             adapter.onUserActionRequired(intent);
         }
     }
