@@ -1018,10 +1018,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private void dispatchAccessibilityEventLocked(AccessibilityEvent event) {
-        notifyAccessibilityServicesDelayedLocked(event, false);
-        notifyAccessibilityServicesDelayedLocked(event, true);
+        if (mProxyManager.isProxyed(event.getDisplayId())) {
+            mProxyManager.sendAccessibilityEventLocked(event);
+        } else {
+            notifyAccessibilityServicesDelayedLocked(event, false);
+            notifyAccessibilityServicesDelayedLocked(event, true);
+        }
         mUiAutomationManager.sendAccessibilityEventLocked(event);
-        mProxyManager.sendAccessibilityEvent(event);
     }
 
     private void sendAccessibilityEventToInputFilter(AccessibilityEvent event) {
@@ -1162,7 +1165,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
             List<AccessibilityServiceConnection> services =
                     getUserStateLocked(resolvedUserId).mBoundServices;
-            int numServices = services.size() + mProxyManager.getNumProxys();
+            int numServices = services.size() + mProxyManager.getNumProxysLocked();
             interfacesToInterrupt = new ArrayList<>(numServices);
             for (int i = 0; i < services.size(); i++) {
                 AccessibilityServiceConnection service = services.get(i);
@@ -1172,7 +1175,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     interfacesToInterrupt.add(a11yServiceInterface);
                 }
             }
-            mProxyManager.addServiceInterfaces(interfacesToInterrupt);
+            mProxyManager.addServiceInterfacesLocked(interfacesToInterrupt);
         }
         for (int i = 0, count = interfacesToInterrupt.size(); i < count; i++) {
             try {
@@ -1963,7 +1966,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mUiAutomationManager.getServiceInfo(), client)
                 ? mUiAutomationManager.getRelevantEventTypes()
                 : 0;
-        relevantEventTypes |= mProxyManager.getRelevantEventTypes();
+        relevantEventTypes |= mProxyManager.getRelevantEventTypesLocked();
         return relevantEventTypes;
     }
 
