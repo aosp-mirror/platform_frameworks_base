@@ -134,8 +134,6 @@ public class VirtualDeviceManagerServiceTest {
     private static final int UID_2 = 10;
     private static final int UID_3 = 10000;
     private static final int UID_4 = 10001;
-    private static final int ASSOCIATION_ID_1 = 1;
-    private static final int ASSOCIATION_ID_2 = 2;
     private static final int PRODUCT_ID = 10;
     private static final int VENDOR_ID = 5;
     private static final String UNIQUE_ID = "uniqueid";
@@ -307,13 +305,13 @@ public class VirtualDeviceManagerServiceTest {
                 mContext.getSystemService(WindowManager.class), threadVerifier);
         mSensorController = new SensorController(new Object(), VIRTUAL_DEVICE_ID);
 
-        mAssociationInfo = new AssociationInfo(ASSOCIATION_ID_1, 0, null,
+        mAssociationInfo = new AssociationInfo(/* associationId= */ 1, 0, null,
                 MacAddress.BROADCAST_ADDRESS, "", null, null, true, false, false, 0, 0);
 
         mVdms = new VirtualDeviceManagerService(mContext);
         mLocalService = mVdms.getLocalServiceInstance();
         mVdm = mVdms.new VirtualDeviceManagerImpl();
-        mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID, DEVICE_OWNER_UID_1, mAssociationInfo);
+        mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID, DEVICE_OWNER_UID_1);
     }
 
     @Test
@@ -377,7 +375,8 @@ public class VirtualDeviceManagerServiceTest {
                 .build();
         mDeviceImpl = new VirtualDeviceImpl(mContext,
                 mAssociationInfo, new Binder(), /* ownerUid */ 0, VIRTUAL_DEVICE_ID,
-                mInputController, mSensorController, (int associationId) -> {},
+                mInputController, mSensorController,
+                /* onDeviceCloseListener= */ (int deviceId) -> {},
                 mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback, params);
         mVdms.addVirtualDevice(mDeviceImpl);
 
@@ -396,9 +395,7 @@ public class VirtualDeviceManagerServiceTest {
         int firstDeviceId = mDeviceImpl.getDeviceId();
         int secondDeviceId = VIRTUAL_DEVICE_ID + 1;
 
-        createVirtualDevice(secondDeviceId, DEVICE_OWNER_UID_2,
-                new AssociationInfo(ASSOCIATION_ID_2, 0, null,
-                        MacAddress.BROADCAST_ADDRESS, "", null, null, true, false, false, 0, 0));
+        createVirtualDevice(secondDeviceId, DEVICE_OWNER_UID_2);
 
         int secondDeviceOwner = mLocalService.getDeviceOwnerUid(secondDeviceId);
         assertThat(secondDeviceOwner).isEqualTo(DEVICE_OWNER_UID_2);
@@ -457,9 +454,7 @@ public class VirtualDeviceManagerServiceTest {
     public void getDeviceIdsForUid_twoDevicesUidOnOne_returnsCorrectId() {
         int secondDeviceId = VIRTUAL_DEVICE_ID + 1;
 
-        VirtualDeviceImpl secondDevice = createVirtualDevice(secondDeviceId, DEVICE_OWNER_UID_2,
-                new AssociationInfo(ASSOCIATION_ID_2, 0, null,
-                        MacAddress.BROADCAST_ADDRESS, "", null, null, true, false, false, 0, 0));
+        VirtualDeviceImpl secondDevice = createVirtualDevice(secondDeviceId, DEVICE_OWNER_UID_2);
 
         GenericWindowPolicyController gwpc =
                 secondDevice.createWindowPolicyController(new ArrayList<>());
@@ -474,9 +469,7 @@ public class VirtualDeviceManagerServiceTest {
     public void getDeviceIdsForUid_twoDevicesUidOnBoth_returnsCorrectId() {
         int secondDeviceId = VIRTUAL_DEVICE_ID + 1;
 
-        VirtualDeviceImpl secondDevice = createVirtualDevice(secondDeviceId, DEVICE_OWNER_UID_2,
-                new AssociationInfo(ASSOCIATION_ID_2, 0, null,
-                        MacAddress.BROADCAST_ADDRESS, "", null, null, true, false, false, 0, 0));
+        VirtualDeviceImpl secondDevice = createVirtualDevice(secondDeviceId, DEVICE_OWNER_UID_2);
         GenericWindowPolicyController gwpc1 =
                 mDeviceImpl.createWindowPolicyController(new ArrayList<>());
         GenericWindowPolicyController gwpc2 =
@@ -526,7 +519,7 @@ public class VirtualDeviceManagerServiceTest {
         ArraySet<Integer> uids = new ArraySet<>(Arrays.asList(UID_1, UID_2));
         mLocalService.registerAppsOnVirtualDeviceListener(mAppsOnVirtualDeviceListener);
 
-        mVdms.notifyRunningAppsChanged(ASSOCIATION_ID_1, uids);
+        mVdms.notifyRunningAppsChanged(mDeviceImpl.getDeviceId(), uids);
         TestableLooper.get(this).processAllMessages();
 
         verify(mAppsOnVirtualDeviceListener).onAppsOnAnyVirtualDeviceChanged(uids);
@@ -539,13 +532,13 @@ public class VirtualDeviceManagerServiceTest {
         mLocalService.registerAppsOnVirtualDeviceListener(mAppsOnVirtualDeviceListener);
 
         // Notifies that the running apps on the first virtual device has changed.
-        mVdms.notifyRunningAppsChanged(ASSOCIATION_ID_1, uidsOnDevice1);
+        mVdms.notifyRunningAppsChanged(mDeviceImpl.getDeviceId(), uidsOnDevice1);
         TestableLooper.get(this).processAllMessages();
         verify(mAppsOnVirtualDeviceListener).onAppsOnAnyVirtualDeviceChanged(
                 new ArraySet<>(Arrays.asList(UID_1, UID_2)));
 
         // Notifies that the running apps on the second virtual device has changed.
-        mVdms.notifyRunningAppsChanged(ASSOCIATION_ID_2, uidsOnDevice2);
+        mVdms.notifyRunningAppsChanged(mDeviceImpl.getDeviceId() + 1, uidsOnDevice2);
         TestableLooper.get(this).processAllMessages();
         // The union of the apps running on both virtual devices are sent to the listeners.
         verify(mAppsOnVirtualDeviceListener).onAppsOnAnyVirtualDeviceChanged(
@@ -553,7 +546,7 @@ public class VirtualDeviceManagerServiceTest {
 
         // Notifies that the running apps on the first virtual device has changed again.
         uidsOnDevice1.remove(UID_2);
-        mVdms.notifyRunningAppsChanged(ASSOCIATION_ID_1, uidsOnDevice1);
+        mVdms.notifyRunningAppsChanged(mDeviceImpl.getDeviceId(), uidsOnDevice1);
         mLocalService.onAppsOnVirtualDeviceChanged();
         TestableLooper.get(this).processAllMessages();
         // The union of the apps running on both virtual devices are sent to the listeners.
@@ -562,7 +555,7 @@ public class VirtualDeviceManagerServiceTest {
 
         // Notifies that the running apps on the first virtual device has changed but with the same
         // set of UIDs.
-        mVdms.notifyRunningAppsChanged(ASSOCIATION_ID_1, uidsOnDevice1);
+        mVdms.notifyRunningAppsChanged(mDeviceImpl.getDeviceId(), uidsOnDevice1);
         mLocalService.onAppsOnVirtualDeviceChanged();
         TestableLooper.get(this).processAllMessages();
         // Listeners should not be notified.
@@ -1288,18 +1281,17 @@ public class VirtualDeviceManagerServiceTest {
                 intent.filterEquals(blockedAppIntent)), any(), any());
     }
 
-    private VirtualDeviceImpl createVirtualDevice(int virtualDeviceId, int ownerUid,
-            AssociationInfo associationInfo) {
+    private VirtualDeviceImpl createVirtualDevice(int virtualDeviceId, int ownerUid) {
         VirtualDeviceParams params = new VirtualDeviceParams
                 .Builder()
                 .setBlockedActivities(getBlockedActivities())
                 .build();
         VirtualDeviceImpl virtualDeviceImpl = new VirtualDeviceImpl(mContext,
-                associationInfo, new Binder(), ownerUid, virtualDeviceId,
-                mInputController, mSensorController, (int associationId) -> {},
+                mAssociationInfo, new Binder(), ownerUid, virtualDeviceId,
+                mInputController, mSensorController,
+                /* onDeviceCloseListener= */ (int deviceId) -> {},
                 mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback, params);
         mVdms.addVirtualDevice(virtualDeviceImpl);
         return virtualDeviceImpl;
     }
-
 }
