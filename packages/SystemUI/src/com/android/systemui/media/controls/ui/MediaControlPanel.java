@@ -404,7 +404,7 @@ public class MediaControlPanel {
         MultiRippleView multiRippleView = vh.getMultiRippleView();
         mMultiRippleController = new MultiRippleController(multiRippleView);
         mTurbulenceNoiseController = new TurbulenceNoiseController(vh.getTurbulenceNoiseView());
-        multiRippleView.addRipplesFinishedListener(
+        mMultiRippleController.addRipplesFinishedListener(
                 () -> {
                     if (mTurbulenceNoiseAnimationConfig == null) {
                         mTurbulenceNoiseAnimationConfig = createLingeringNoiseAnimation();
