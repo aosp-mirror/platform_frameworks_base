@@ -10719,6 +10719,49 @@ public final class Settings {
                 "back_gesture_inset_scale_right";
 
         /**
+         * Indicates whether the trackpad back gesture is enabled.
+         * <p>Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String TRACKPAD_GESTURE_BACK_ENABLED = "trackpad_gesture_back_enabled";
+
+        /**
+         * Indicates whether the trackpad home gesture is enabled.
+         * <p>Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String TRACKPAD_GESTURE_HOME_ENABLED = "trackpad_gesture_home_enabled";
+
+        /**
+         * Indicates whether the trackpad overview gesture is enabled.
+         * <p>Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String TRACKPAD_GESTURE_OVERVIEW_ENABLED =
+                "trackpad_gesture_overview_enabled";
+
+        /**
+         * Indicates whether the trackpad notification gesture is enabled.
+         * <p>Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String TRACKPAD_GESTURE_NOTIFICATION_ENABLED =
+                "trackpad_gesture_notification_enabled";
+
+        /**
+         * Indicates whether the trackpad quick switch gesture is enabled.
+         * <p>Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String TRACKPAD_GESTURE_QUICK_SWITCH_ENABLED =
+                "trackpad_gesture_quick_switch_enabled";
+
+        /**
          * Current provider of proximity-based sharing services.
          * Default value in @string/config_defaultNearbySharingComponent.
          * No VALIDATOR as this setting will not be backed up.
