@@ -21,6 +21,7 @@ import android.content.ComponentName;
 
 import com.android.internal.util.JournaledFile;
 
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -48,4 +49,9 @@ public interface PolicyUpgraderDataProvider {
      * Returns the users to upgrade.
      */
     int[] getUsersForUpgrade();
+
+    /**
+     * Returns packages suspended by platform for a given user.
+     */
+    List<String> getPlatformSuspendedPackages(int userId);
 }
