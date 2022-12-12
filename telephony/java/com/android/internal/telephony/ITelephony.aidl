@@ -2636,4 +2636,26 @@ interface ITelephony {
      * @param slotIndex Logical SIM slot index.
      */
     int getSimStateForSlotIndex(int slotIndex);
+
+    /**
+     * Set whether the radio is able to connect with null ciphering or integrity
+     * algorithms. This is a global setting and will apply to all active subscriptions
+     * and all new subscriptions after this.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @param enabled when true, null  cipher and integrity algorithms are allowed.
+     * @hide
+     */
+    void setNullCipherAndIntegrityEnabled(boolean enabled);
+
+    /**
+    * Get whether the radio is able to connect with null ciphering or integrity
+    * algorithms. Note that this retrieves the phone-global preference and not
+    * the state of the radio.
+    *
+    * @hide
+    */
+    boolean isNullCipherAndIntegrityPreferenceEnabled();
 }
