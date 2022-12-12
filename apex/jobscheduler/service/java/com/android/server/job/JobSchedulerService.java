@@ -3212,14 +3212,23 @@ public class JobSchedulerService extends com.android.server.SystemService
     /** Returns the maximum amount of time this job could run for. */
     public long getMaxJobExecutionTimeMs(JobStatus job) {
         synchronized (mLock) {
-            final boolean shouldTreatAsDataTransfer = job.getJob().isDataTransfer()
-                    && checkRunLongJobsPermission(job.getSourceUid(), job.getSourcePackageName());
+            final boolean allowLongerJob;
+            final boolean isDataTransfer = job.getJob().isDataTransfer();
+            if (isDataTransfer || job.shouldTreatAsUserInitiated()) {
+                allowLongerJob =
+                        checkRunLongJobsPermission(job.getSourceUid(), job.getSourcePackageName());
+            } else {
+                allowLongerJob = false;
+            }
             if (job.shouldTreatAsUserInitiated()) {
-                if (shouldTreatAsDataTransfer) {
+                if (isDataTransfer && allowLongerJob) {
                     return mConstants.RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS;
                 }
-                return mConstants.RUNTIME_USER_INITIATED_LIMIT_MS;
-            } else if (shouldTreatAsDataTransfer) {
+                if (allowLongerJob) {
+                    return mConstants.RUNTIME_USER_INITIATED_LIMIT_MS;
+                }
+                return mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
+            } else if (isDataTransfer && allowLongerJob) {
                 return mConstants.RUNTIME_DATA_TRANSFER_LIMIT_MS;
             }
             return Math.min(mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
@@ -4169,6 +4178,16 @@ public class JobSchedulerService extends com.android.server.SystemService
     @VisibleForTesting
     protected ConnectivityController getConnectivityController() {
         return mConnectivityController;
+    }
+
+    @VisibleForTesting
+    protected QuotaController getQuotaController() {
+        return mQuotaController;
+    }
+
+    @VisibleForTesting
+    protected TareController getTareController() {
+        return mTareController;
     }
 
     // Shell command infrastructure
