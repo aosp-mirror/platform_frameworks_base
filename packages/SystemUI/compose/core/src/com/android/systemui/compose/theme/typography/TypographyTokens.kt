@@ -18,125 +18,125 @@ package com.android.systemui.compose.theme.typography
 
 import androidx.compose.ui.text.TextStyle
 
-object TypographyTokens {
-    val BodyLarge =
+internal class TypographyTokens(typeScaleTokens: TypeScaleTokens) {
+    val bodyLarge =
         TextStyle(
-            fontFamily = TypeScaleTokens.BodyLargeFont,
-            fontWeight = TypeScaleTokens.BodyLargeWeight,
-            fontSize = TypeScaleTokens.BodyLargeSize,
-            lineHeight = TypeScaleTokens.BodyLargeLineHeight,
-            letterSpacing = TypeScaleTokens.BodyLargeTracking,
+            fontFamily = typeScaleTokens.bodyLargeFont,
+            fontWeight = typeScaleTokens.bodyLargeWeight,
+            fontSize = typeScaleTokens.bodyLargeSize,
+            lineHeight = typeScaleTokens.bodyLargeLineHeight,
+            letterSpacing = typeScaleTokens.bodyLargeTracking,
         )
-    val BodyMedium =
+    val bodyMedium =
         TextStyle(
-            fontFamily = TypeScaleTokens.BodyMediumFont,
-            fontWeight = TypeScaleTokens.BodyMediumWeight,
-            fontSize = TypeScaleTokens.BodyMediumSize,
-            lineHeight = TypeScaleTokens.BodyMediumLineHeight,
-            letterSpacing = TypeScaleTokens.BodyMediumTracking,
+            fontFamily = typeScaleTokens.bodyMediumFont,
+            fontWeight = typeScaleTokens.bodyMediumWeight,
+            fontSize = typeScaleTokens.bodyMediumSize,
+            lineHeight = typeScaleTokens.bodyMediumLineHeight,
+            letterSpacing = typeScaleTokens.bodyMediumTracking,
         )
-    val BodySmall =
+    val bodySmall =
         TextStyle(
-            fontFamily = TypeScaleTokens.BodySmallFont,
-            fontWeight = TypeScaleTokens.BodySmallWeight,
-            fontSize = TypeScaleTokens.BodySmallSize,
-            lineHeight = TypeScaleTokens.BodySmallLineHeight,
-            letterSpacing = TypeScaleTokens.BodySmallTracking,
+            fontFamily = typeScaleTokens.bodySmallFont,
+            fontWeight = typeScaleTokens.bodySmallWeight,
+            fontSize = typeScaleTokens.bodySmallSize,
+            lineHeight = typeScaleTokens.bodySmallLineHeight,
+            letterSpacing = typeScaleTokens.bodySmallTracking,
         )
-    val DisplayLarge =
+    val displayLarge =
         TextStyle(
-            fontFamily = TypeScaleTokens.DisplayLargeFont,
-            fontWeight = TypeScaleTokens.DisplayLargeWeight,
-            fontSize = TypeScaleTokens.DisplayLargeSize,
-            lineHeight = TypeScaleTokens.DisplayLargeLineHeight,
-            letterSpacing = TypeScaleTokens.DisplayLargeTracking,
+            fontFamily = typeScaleTokens.displayLargeFont,
+            fontWeight = typeScaleTokens.displayLargeWeight,
+            fontSize = typeScaleTokens.displayLargeSize,
+            lineHeight = typeScaleTokens.displayLargeLineHeight,
+            letterSpacing = typeScaleTokens.displayLargeTracking,
         )
-    val DisplayMedium =
+    val displayMedium =
         TextStyle(
-            fontFamily = TypeScaleTokens.DisplayMediumFont,
-            fontWeight = TypeScaleTokens.DisplayMediumWeight,
-            fontSize = TypeScaleTokens.DisplayMediumSize,
-            lineHeight = TypeScaleTokens.DisplayMediumLineHeight,
-            letterSpacing = TypeScaleTokens.DisplayMediumTracking,
+            fontFamily = typeScaleTokens.displayMediumFont,
+            fontWeight = typeScaleTokens.displayMediumWeight,
+            fontSize = typeScaleTokens.displayMediumSize,
+            lineHeight = typeScaleTokens.displayMediumLineHeight,
+            letterSpacing = typeScaleTokens.displayMediumTracking,
         )
-    val DisplaySmall =
+    val displaySmall =
         TextStyle(
-            fontFamily = TypeScaleTokens.DisplaySmallFont,
-            fontWeight = TypeScaleTokens.DisplaySmallWeight,
-            fontSize = TypeScaleTokens.DisplaySmallSize,
-            lineHeight = TypeScaleTokens.DisplaySmallLineHeight,
-            letterSpacing = TypeScaleTokens.DisplaySmallTracking,
+            fontFamily = typeScaleTokens.displaySmallFont,
+            fontWeight = typeScaleTokens.displaySmallWeight,
+            fontSize = typeScaleTokens.displaySmallSize,
+            lineHeight = typeScaleTokens.displaySmallLineHeight,
+            letterSpacing = typeScaleTokens.displaySmallTracking,
         )
-    val HeadlineLarge =
+    val headlineLarge =
         TextStyle(
-            fontFamily = TypeScaleTokens.HeadlineLargeFont,
-            fontWeight = TypeScaleTokens.HeadlineLargeWeight,
-            fontSize = TypeScaleTokens.HeadlineLargeSize,
-            lineHeight = TypeScaleTokens.HeadlineLargeLineHeight,
-            letterSpacing = TypeScaleTokens.HeadlineLargeTracking,
+            fontFamily = typeScaleTokens.headlineLargeFont,
+            fontWeight = typeScaleTokens.headlineLargeWeight,
+            fontSize = typeScaleTokens.headlineLargeSize,
+            lineHeight = typeScaleTokens.headlineLargeLineHeight,
+            letterSpacing = typeScaleTokens.headlineLargeTracking,
         )
-    val HeadlineMedium =
+    val headlineMedium =
         TextStyle(
-            fontFamily = TypeScaleTokens.HeadlineMediumFont,
-            fontWeight = TypeScaleTokens.HeadlineMediumWeight,
-            fontSize = TypeScaleTokens.HeadlineMediumSize,
-            lineHeight = TypeScaleTokens.HeadlineMediumLineHeight,
-            letterSpacing = TypeScaleTokens.HeadlineMediumTracking,
+            fontFamily = typeScaleTokens.headlineMediumFont,
+            fontWeight = typeScaleTokens.headlineMediumWeight,
+            fontSize = typeScaleTokens.headlineMediumSize,
+            lineHeight = typeScaleTokens.headlineMediumLineHeight,
+            letterSpacing = typeScaleTokens.headlineMediumTracking,
         )
-    val HeadlineSmall =
+    val headlineSmall =
         TextStyle(
-            fontFamily = TypeScaleTokens.HeadlineSmallFont,
-            fontWeight = TypeScaleTokens.HeadlineSmallWeight,
-            fontSize = TypeScaleTokens.HeadlineSmallSize,
-            lineHeight = TypeScaleTokens.HeadlineSmallLineHeight,
-            letterSpacing = TypeScaleTokens.HeadlineSmallTracking,
+            fontFamily = typeScaleTokens.headlineSmallFont,
+            fontWeight = typeScaleTokens.headlineSmallWeight,
+            fontSize = typeScaleTokens.headlineSmallSize,
+            lineHeight = typeScaleTokens.headlineSmallLineHeight,
+            letterSpacing = typeScaleTokens.headlineSmallTracking,
         )
-    val LabelLarge =
+    val labelLarge =
         TextStyle(
-            fontFamily = TypeScaleTokens.LabelLargeFont,
-            fontWeight = TypeScaleTokens.LabelLargeWeight,
-            fontSize = TypeScaleTokens.LabelLargeSize,
-            lineHeight = TypeScaleTokens.LabelLargeLineHeight,
-            letterSpacing = TypeScaleTokens.LabelLargeTracking,
+            fontFamily = typeScaleTokens.labelLargeFont,
+            fontWeight = typeScaleTokens.labelLargeWeight,
+            fontSize = typeScaleTokens.labelLargeSize,
+            lineHeight = typeScaleTokens.labelLargeLineHeight,
+            letterSpacing = typeScaleTokens.labelLargeTracking,
         )
-    val LabelMedium =
+    val labelMedium =
         TextStyle(
-            fontFamily = TypeScaleTokens.LabelMediumFont,
-            fontWeight = TypeScaleTokens.LabelMediumWeight,
-            fontSize = TypeScaleTokens.LabelMediumSize,
-            lineHeight = TypeScaleTokens.LabelMediumLineHeight,
-            letterSpacing = TypeScaleTokens.LabelMediumTracking,
+            fontFamily = typeScaleTokens.labelMediumFont,
+            fontWeight = typeScaleTokens.labelMediumWeight,
+            fontSize = typeScaleTokens.labelMediumSize,
+            lineHeight = typeScaleTokens.labelMediumLineHeight,
+            letterSpacing = typeScaleTokens.labelMediumTracking,
         )
-    val LabelSmall =
+    val labelSmall =
         TextStyle(
-            fontFamily = TypeScaleTokens.LabelSmallFont,
-            fontWeight = TypeScaleTokens.LabelSmallWeight,
-            fontSize = TypeScaleTokens.LabelSmallSize,
-            lineHeight = TypeScaleTokens.LabelSmallLineHeight,
-            letterSpacing = TypeScaleTokens.LabelSmallTracking,
+            fontFamily = typeScaleTokens.labelSmallFont,
+            fontWeight = typeScaleTokens.labelSmallWeight,
+            fontSize = typeScaleTokens.labelSmallSize,
+            lineHeight = typeScaleTokens.labelSmallLineHeight,
+            letterSpacing = typeScaleTokens.labelSmallTracking,
         )
-    val TitleLarge =
+    val titleLarge =
         TextStyle(
-            fontFamily = TypeScaleTokens.TitleLargeFont,
-            fontWeight = TypeScaleTokens.TitleLargeWeight,
-            fontSize = TypeScaleTokens.TitleLargeSize,
-            lineHeight = TypeScaleTokens.TitleLargeLineHeight,
-            letterSpacing = TypeScaleTokens.TitleLargeTracking,
+            fontFamily = typeScaleTokens.titleLargeFont,
+            fontWeight = typeScaleTokens.titleLargeWeight,
+            fontSize = typeScaleTokens.titleLargeSize,
+            lineHeight = typeScaleTokens.titleLargeLineHeight,
+            letterSpacing = typeScaleTokens.titleLargeTracking,
         )
-    val TitleMedium =
+    val titleMedium =
         TextStyle(
-            fontFamily = TypeScaleTokens.TitleMediumFont,
-            fontWeight = TypeScaleTokens.TitleMediumWeight,
-            fontSize = TypeScaleTokens.TitleMediumSize,
-            lineHeight = TypeScaleTokens.TitleMediumLineHeight,
-            letterSpacing = TypeScaleTokens.TitleMediumTracking,
+            fontFamily = typeScaleTokens.titleMediumFont,
+            fontWeight = typeScaleTokens.titleMediumWeight,
+            fontSize = typeScaleTokens.titleMediumSize,
+            lineHeight = typeScaleTokens.titleMediumLineHeight,
+            letterSpacing = typeScaleTokens.titleMediumTracking,
         )
-    val TitleSmall =
+    val titleSmall =
         TextStyle(
-            fontFamily = TypeScaleTokens.TitleSmallFont,
-            fontWeight = TypeScaleTokens.TitleSmallWeight,
-            fontSize = TypeScaleTokens.TitleSmallSize,
-            lineHeight = TypeScaleTokens.TitleSmallLineHeight,
-            letterSpacing = TypeScaleTokens.TitleSmallTracking,
+            fontFamily = typeScaleTokens.titleSmallFont,
+            fontWeight = typeScaleTokens.titleSmallWeight,
+            fontSize = typeScaleTokens.titleSmallSize,
+            lineHeight = typeScaleTokens.titleSmallLineHeight,
+            letterSpacing = typeScaleTokens.titleSmallTracking,
         )
 }
