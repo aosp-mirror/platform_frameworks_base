@@ -869,6 +869,28 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testOnDisplayChanged_cleanupChanging() {
+        final Task task = createTask(mDisplayContent);
+        spyOn(task.mSurfaceFreezer);
+        mDisplayContent.mChangingContainers.add(task);
+
+        // Don't remove the changing transition of this window when it is still the old display.
+        // This happens on display info changed.
+        task.onDisplayChanged(mDisplayContent);
+
+        assertTrue(mDisplayContent.mChangingContainers.contains(task));
+        verify(task.mSurfaceFreezer, never()).unfreeze(any());
+
+        // Remove the changing transition of this window when it is moved or reparented from the old
+        // display.
+        final DisplayContent newDc = createNewDisplay();
+        task.onDisplayChanged(newDc);
+
+        assertFalse(mDisplayContent.mChangingContainers.contains(task));
+        verify(task.mSurfaceFreezer).unfreeze(any());
+    }
+
+    @Test
     public void testHandleCompleteDeferredRemoval() {
         final DisplayContent displayContent = createNewDisplay();
         // Do not reparent activity to default display when removing the display.
