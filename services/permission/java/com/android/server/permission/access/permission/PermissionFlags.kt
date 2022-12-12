@@ -27,6 +27,7 @@ object PermissionFlags {
     // For the permissions that are implicit for the package
     const val IMPLICIT = 1 shl 5
 
+    const val MASK_ALL = 0.inv()
     const val MASK_GRANTED = INSTALL_GRANTED or PROTECTION_GRANTED or OTHER_GRANTED or ROLE_GRANTED
     const val MASK_RUNTIME = OTHER_GRANTED or IMPLICIT
 }

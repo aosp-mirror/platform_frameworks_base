@@ -33,8 +33,9 @@ import com.android.server.pm.permission.PermissionManagerServiceInterface
 import com.android.server.permission.access.AccessCheckingService
 import com.android.server.permission.access.PermissionUri
 import com.android.server.permission.access.UidUri
-import com.android.server.permission.access.data.Permission
+import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.hasBits
+import com.android.server.pm.UserManagerService
 import com.android.server.pm.permission.LegacyPermission
 import com.android.server.pm.permission.LegacyPermissionSettings
 import com.android.server.pm.permission.LegacyPermissionState
@@ -46,17 +47,24 @@ import java.io.PrintWriter
 /**
  * Modern implementation of [PermissionManagerServiceInterface].
  */
-class ModernPermissionManagerServiceImpl(
+class PermissionService(
     private val service: AccessCheckingService
 ) : PermissionManagerServiceInterface {
     private val policy =
         service.getSchemePolicy(UidUri.SCHEME, PermissionUri.SCHEME) as UidPermissionPolicy
 
-    private val packageManagerInternal =
-        LocalServices.getService(PackageManagerInternal::class.java)
+    private lateinit var packageManagerInternal: PackageManagerInternal
+    private lateinit var packageManagerLocal: PackageManagerLocal
+    private lateinit var userManagerService: UserManagerService
 
-    private val packageManagerLocal =
-        LocalManagerRegistry.getManagerOrThrow(PackageManagerLocal::class.java)
+    private val mountedStorageVolumes = IndexedSet<String?>()
+
+    fun initialize() {
+        packageManagerInternal = LocalServices.getService(PackageManagerInternal::class.java)
+        packageManagerLocal =
+            LocalManagerRegistry.getManagerOrThrow(PackageManagerLocal::class.java)
+        userManagerService = UserManagerService.getInstance()
+    }
 
     override fun getAllPermissionGroups(flags: Int): List<PermissionGroupInfo> {
         TODO("Not yet implemented")
@@ -351,6 +359,8 @@ class ModernPermissionManagerServiceImpl(
     }
 
     override fun readLegacyPermissionsTEMP(legacyPermissionSettings: LegacyPermissionSettings) {
+        // Package settings has been read when this method is called.
+        service.initialize()
         TODO("Not yet implemented")
     }
 
@@ -375,15 +385,18 @@ class ModernPermissionManagerServiceImpl(
     }
 
     override fun onUserCreated(userId: Int) {
-        TODO("Not yet implemented")
+        service.onUserAdded(userId)
     }
 
     override fun onUserRemoved(userId: Int) {
-        TODO("Not yet implemented")
+        service.onUserRemoved(userId)
     }
 
     override fun onStorageVolumeMounted(volumeUuid: String, fingerprintChanged: Boolean) {
-        TODO("Not yet implemented")
+        service.onStorageVolumeMounted(volumeUuid, fingerprintChanged)
+        synchronized(mountedStorageVolumes) {
+            mountedStorageVolumes += volumeUuid
+        }
     }
 
     override fun onPackageAdded(
@@ -391,7 +404,18 @@ class ModernPermissionManagerServiceImpl(
         isInstantApp: Boolean,
         oldPackage: AndroidPackage?
     ) {
-        TODO("Not yet implemented")
+        synchronized(mountedStorageVolumes) {
+            if (androidPackage.volumeUuid !in mountedStorageVolumes) {
+                // Wait for the storage volume to be mounted and batch the state mutation there.
+                return
+            }
+        }
+        service.onPackageAdded(androidPackage.packageName)
+    }
+
+    override fun onPackageRemoved(androidPackage: AndroidPackage) {
+        // This may not be a full removal so ignored - we'll figure out full removal in
+        // onPackageUninstalled().
     }
 
     override fun onPackageInstalled(
@@ -400,21 +424,37 @@ class ModernPermissionManagerServiceImpl(
         params: PermissionManagerServiceInternal.PackageInstalledParams,
         userId: Int
     ) {
-        TODO("Not yet implemented")
+        synchronized(mountedStorageVolumes) {
+            if (androidPackage.volumeUuid !in mountedStorageVolumes) {
+                // Wait for the storage volume to be mounted and batch the state mutation there.
+                return
+            }
+        }
+        val userIds = if (userId == UserHandle.USER_ALL) {
+            userManagerService.userIdsIncludingPreCreated
+        } else {
+            intArrayOf(userId)
+        }
+        userIds.forEach { service.onPackageInstalled(androidPackage.packageName, params, it) }
     }
 
     override fun onPackageUninstalled(
         packageName: String,
         appId: Int,
         androidPackage: AndroidPackage?,
-        sharedUserPkgs: MutableList<AndroidPackage>,
+        sharedUserPkgs: List<AndroidPackage>,
         userId: Int
     ) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onPackageRemoved(androidPackage: AndroidPackage) {
-        TODO("Not yet implemented")
+        val userIds = if (userId == UserHandle.USER_ALL) {
+            userManagerService.userIdsIncludingPreCreated
+        } else {
+            intArrayOf(userId)
+        }
+        userIds.forEach { service.onPackageUninstalled(packageName, appId, it) }
+        val packageState = packageManagerInternal.packageStates[packageName]
+        if (packageState == null) {
+            service.onPackageRemoved(packageName, appId)
+        }
     }
 
     /**

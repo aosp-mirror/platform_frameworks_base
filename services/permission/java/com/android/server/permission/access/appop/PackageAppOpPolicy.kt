@@ -23,7 +23,6 @@ import com.android.server.permission.access.MutateStateScope
 import com.android.server.permission.access.PackageUri
 import com.android.server.permission.access.UserState
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
-import com.android.server.permission.access.external.PackageState
 
 class PackageAppOpPolicy : BaseAppOpPolicy(PackageAppOpPersistence()) {
     override val subjectScheme: String
@@ -48,9 +47,9 @@ class PackageAppOpPolicy : BaseAppOpPolicy(PackageAppOpPersistence()) {
         newState.userStates[subject.userId]?.packageAppOpModes?.remove(subject.packageName)
     }
 
-    override fun MutateStateScope.onPackageRemoved(packageState: PackageState) {
+    override fun MutateStateScope.onPackageRemoved(packageName: String, appId: Int) {
         newState.userStates.forEachIndexed { _, _, userState ->
-            userState.packageAppOpModes -= packageState.packageName
+            userState.packageAppOpModes -= packageName
         }
     }
 }

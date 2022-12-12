@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.permission.access.data
+package com.android.server.permission.access.permission
 
 import android.content.pm.PermissionInfo
 import com.android.server.permission.access.util.hasBits
