@@ -109,7 +109,7 @@ public class TransitionTracer {
             final long changeEntryToken = outputStream.start(CHANGE);
 
             final int transitMode = changeInfo.getTransitMode(window);
-            final boolean hasChanged = changeInfo.hasChanged(window);
+            final boolean hasChanged = changeInfo.hasChanged();
             final int changeFlags = changeInfo.getChangeFlags(window);
 
             outputStream.write(TRANSIT_MODE, transitMode);
