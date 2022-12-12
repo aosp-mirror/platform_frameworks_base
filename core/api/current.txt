@@ -33245,6 +33245,7 @@ package android.os {
     field public static final String DISALLOW_DEBUGGING_FEATURES = "no_debugging_features";
     field public static final String DISALLOW_FACTORY_RESET = "no_factory_reset";
     field public static final String DISALLOW_FUN = "no_fun";
+    field public static final String DISALLOW_GRANT_ADMIN = "no_grant_admin";
     field public static final String DISALLOW_INSTALL_APPS = "no_install_apps";
     field public static final String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
     field public static final String DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY = "no_install_unknown_sources_globally";
