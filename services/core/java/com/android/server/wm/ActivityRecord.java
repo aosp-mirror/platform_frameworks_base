@@ -513,7 +513,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                                        // dies. After an activity is launched it follows the value
                                        // of #mIcicle.
     boolean launchFailed;   // set if a launched failed, to abort on 2nd try
-    boolean stopped;        // is activity pause finished?
     boolean delayedResume;  // not yet resumed because of stopped app switches?
     boolean finishing;      // activity in pending finish list?
     boolean deferRelaunchUntilPaused;   // relaunch of activity is being deferred until pause is
@@ -875,6 +874,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean mOverrideTaskTransition;
     boolean mDismissKeyguard;
 
+    /** True if the activity has reported stopped; False if the activity becomes visible. */
     boolean mAppStopped;
     // A hint to override the window specified rotation animation, or -1 to use the window specified
     // value. We use this so that we can select the right animation in the cases of starting
@@ -1135,7 +1135,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         pw.print(prefix); pw.print("mHaveState="); pw.print(mHaveState);
                 pw.print(" mIcicle="); pw.println(mIcicle);
         pw.print(prefix); pw.print("state="); pw.print(mState);
-                pw.print(" stopped="); pw.print(stopped);
                 pw.print(" delayedResume="); pw.print(delayedResume);
                 pw.print(" finishing="); pw.println(finishing);
         pw.print(prefix); pw.print("keysPaused="); pw.print(keysPaused);
@@ -2021,7 +2020,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         requestCode = _reqCode;
         setState(INITIALIZING, "ActivityRecord ctor");
         launchFailed = false;
-        stopped = false;
         delayedResume = false;
         finishing = false;
         deferRelaunchUntilPaused = false;
@@ -3871,7 +3869,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
             taskFragment.sendTaskFragmentInfoChanged();
         }
-        if (stopped) {
+        if (mAppStopped) {
             abortAndClearOptionsAnimation();
         }
     }
@@ -5707,11 +5705,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    void notifyAppResumed(boolean wasStopped) {
+    void notifyAppResumed() {
         if (getParent() == null) {
             Slog.w(TAG_WM, "Attempted to notify resumed of non-existing app token: " + token);
             return;
         }
+        final boolean wasStopped = mAppStopped;
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "notifyAppResumed: wasStopped=%b %s",
                 wasStopped, this);
         mAppStopped = false;
@@ -5723,32 +5722,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!wasStopped) {
             destroySurfaces(true /*cleanupOnResume*/);
         }
-    }
-
-    /**
-     * Notify that the app has stopped, and it is okay to destroy any surfaces which were
-     * keeping alive in case they were still being used.
-     */
-    void notifyAppStopped() {
-        ProtoLog.v(WM_DEBUG_ADD_REMOVE, "notifyAppStopped: %s", this);
-        mAppStopped = true;
-        firstWindowDrawn = false;
-        // This is to fix the edge case that auto-enter-pip is finished in Launcher but app calls
-        // setAutoEnterEnabled(false) and transitions to STOPPED state, see b/191930787.
-        // Clear any surface transactions and content overlay in this case.
-        if (task != null && task.mLastRecentsAnimationTransaction != null) {
-            task.clearLastRecentsAnimationTransaction(true /* forceRemoveOverlay */);
-        }
-        // Reset the last saved PiP snap fraction on app stop.
-        mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
-        mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
-        if (isClientVisible()) {
-            // Though this is usually unlikely to happen, still make sure the client is invisible.
-            setClientVisible(false);
-        }
-        destroySurfaces();
-        // Remove any starting window that was added for this app if they are still around.
-        removeStartingWindow();
     }
 
     /**
@@ -6111,7 +6084,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mLastNewIntent = newIntents.get(newIntents.size() - 1);
         }
         newIntents = null;
-        stopped = false;
 
         if (isActivityTypeHome()) {
             mTaskSupervisor.updateHomeProcess(task.getBottomMostActivity().app);
@@ -6233,7 +6205,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         resumeKeyDispatchingLocked();
         try {
-            stopped = false;
             ProtoLog.v(WM_DEBUG_STATES, "Moving to STOPPING: %s (stop requested)", this);
 
             setState(STOPPING, "stopIfPossible");
@@ -6251,7 +6222,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // notification will clean things up.
             Slog.w(TAG, "Exception thrown during pause", e);
             // Just in case, assume it to be stopped.
-            stopped = true;
+            mAppStopped = true;
             ProtoLog.v(WM_DEBUG_STATES, "Stop failed; moving to STOPPED: %s", this);
             setState(STOPPED, "stopIfPossible");
             if (deferRelaunchUntilPaused) {
@@ -6260,12 +6231,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    /**
+     * Notifies that the activity has stopped, and it is okay to destroy any surfaces which were
+     * keeping alive in case they were still being used.
+     */
     void activityStopped(Bundle newIcicle, PersistableBundle newPersistentState,
             CharSequence description) {
+        removeStopTimeout();
         final boolean isStopping = mState == STOPPING;
         if (!isStopping && mState != RESTARTING_PROCESS) {
             Slog.i(TAG, "Activity reported stop, but no longer stopping: " + this + " " + mState);
-            removeStopTimeout();
             return;
         }
         if (newPersistentState != null) {
@@ -6281,28 +6256,42 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             updateTaskDescription(description);
         }
         ProtoLog.i(WM_DEBUG_STATES, "Saving icicle of %s: %s", this, mIcicle);
-        if (!stopped) {
+
+        if (isStopping) {
             ProtoLog.v(WM_DEBUG_STATES, "Moving to STOPPED: %s (stop complete)", this);
-            removeStopTimeout();
-            stopped = true;
-            if (isStopping) {
-                setState(STOPPED, "activityStoppedLocked");
-            }
-
-            notifyAppStopped();
-
-            if (finishing) {
-                abortAndClearOptionsAnimation();
-            } else {
-                if (deferRelaunchUntilPaused) {
-                    destroyImmediately("stop-config");
-                    mRootWindowContainer.resumeFocusedTasksTopActivities();
-                } else {
-                    mAtmService.updatePreviousProcess(this);
-                }
-            }
-            mTaskSupervisor.checkReadyForSleepLocked(true /* allowDelay */);
+            setState(STOPPED, "activityStopped");
         }
+
+        mAppStopped = true;
+        firstWindowDrawn = false;
+        // This is to fix the edge case that auto-enter-pip is finished in Launcher but app calls
+        // setAutoEnterEnabled(false) and transitions to STOPPED state, see b/191930787.
+        // Clear any surface transactions and content overlay in this case.
+        if (task.mLastRecentsAnimationTransaction != null) {
+            task.clearLastRecentsAnimationTransaction(true /* forceRemoveOverlay */);
+        }
+        // Reset the last saved PiP snap fraction on app stop.
+        mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
+        mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
+        if (isClientVisible()) {
+            // Though this is usually unlikely to happen, still make sure the client is invisible.
+            setClientVisible(false);
+        }
+        destroySurfaces();
+        // Remove any starting window that was added for this app if they are still around.
+        removeStartingWindow();
+
+        if (finishing) {
+            abortAndClearOptionsAnimation();
+        } else {
+            if (deferRelaunchUntilPaused) {
+                destroyImmediately("stop-config");
+                mRootWindowContainer.resumeFocusedTasksTopActivities();
+            } else {
+                mAtmService.updatePreviousProcess(this);
+            }
+        }
+        mTaskSupervisor.checkReadyForSleepLocked(true /* allowDelay */);
     }
 
     void addToStopping(boolean scheduleIdle, boolean idleDelayed, String reason) {
@@ -6840,7 +6829,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private ActivityRecord getWaitingHistoryRecordLocked() {
         // First find the real culprit...  if this activity has stopped, then the key dispatching
         // timeout should not be caused by this.
-        if (stopped) {
+        if (mAppStopped) {
             final Task rootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
             if (rootTask == null) {
                 return this;
@@ -6921,7 +6910,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         if (isState(RESUMED) || getRootTask() == null
                 || this == getTaskFragment().getPausingActivity()
-                || !mHaveState || !stopped) {
+                || !mHaveState || !mAppStopped) {
             // We're not ready for this kind of thing.
             return false;
         }
