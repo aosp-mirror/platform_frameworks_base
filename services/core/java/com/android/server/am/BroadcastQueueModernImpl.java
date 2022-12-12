@@ -202,6 +202,14 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private final BroadcastConstants mBgConstants;
 
     /**
+     * This single object allows the queue to dispatch receivers using scheduleReceiverList
+     * without constantly allocating new ReceiverInfo objects or ArrayLists.  This queue
+     * implementation is known to have a maximum size of one entry.
+     */
+    @VisibleForTesting
+    final BroadcastReceiverBatch mReceiverBatch = new BroadcastReceiverBatch(1);
+
+    /**
      * Timestamp when last {@link #testAllProcessQueues} failure was observed;
      * used for throttling log messages.
      */
@@ -763,7 +771,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * Examine a receiver and possibly skip it.  The method returns true if the receiver is
      * skipped (and therefore no more work is required).
      */
-    private boolean maybeSkipReceiver(BroadcastProcessQueue queue, BroadcastRecord r, int index) {
+    private boolean maybeSkipReceiver(@NonNull BroadcastProcessQueue queue,
+            @NonNull BroadcastRecord r, int index) {
         final int oldDeliveryState = getDeliveryState(r, index);
         final ProcessRecord app = queue.app;
         final Object receiver = r.receivers.get(index);
@@ -803,14 +812,15 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     /**
      * Return true if this receiver should be assumed to have been delivered.
      */
-    private boolean isAssumedDelivered(BroadcastRecord r, int index) {
+    private boolean isAssumedDelivered(@NonNull BroadcastRecord r, int index) {
         return (r.receivers.get(index) instanceof BroadcastFilter) && !r.ordered;
     }
 
     /**
      * A receiver is about to be dispatched.  Start ANR timers, if necessary.
      */
-    private void dispatchReceivers(BroadcastProcessQueue queue, BroadcastRecord r, int index) {
+    private void dispatchReceivers(@NonNull BroadcastProcessQueue queue,
+            @NonNull BroadcastRecord r, int index) {
         final ProcessRecord app = queue.app;
         final Object receiver = r.receivers.get(index);
 
@@ -849,16 +859,16 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         setDeliveryState(queue, app, r, index, receiver, BroadcastRecord.DELIVERY_SCHEDULED,
                 "scheduleReceiverWarmLocked");
 
-        final Intent receiverIntent = r.getReceiverIntent(receiver);
         final IApplicationThread thread = app.getOnewayThread();
         if (thread != null) {
             try {
+                final Intent receiverIntent = r.getReceiverIntent(receiver);
                 if (receiver instanceof BroadcastFilter) {
                     notifyScheduleRegisteredReceiver(app, r, (BroadcastFilter) receiver);
-                    thread.scheduleRegisteredReceiver(
+                    thread.scheduleReceiverList(mReceiverBatch.registeredReceiver(
                             ((BroadcastFilter) receiver).receiverList.receiver, receiverIntent,
                             r.resultCode, r.resultData, r.resultExtras, r.ordered, r.initialSticky,
-                            r.userId, app.mState.getReportedProcState());
+                            r.userId, app.mState.getReportedProcState()));
 
                     // TODO: consider making registered receivers of unordered
                     // broadcasts report results to detect ANRs
@@ -868,9 +878,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     }
                 } else {
                     notifyScheduleReceiver(app, r, (ResolveInfo) receiver);
-                    thread.scheduleReceiver(receiverIntent, ((ResolveInfo) receiver).activityInfo,
+                    thread.scheduleReceiverList(mReceiverBatch.manifestReceiver(
+                            receiverIntent, ((ResolveInfo) receiver).activityInfo,
                             null, r.resultCode, r.resultData, r.resultExtras, r.ordered, r.userId,
-                            app.mState.getReportedProcState());
+                            app.mState.getReportedProcState()));
                 }
             } catch (RemoteException e) {
                 final String msg = "Failed to schedule " + r + " to " + receiver
@@ -898,9 +909,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(
                     app, OOM_ADJ_REASON_FINISH_RECEIVER);
             try {
-                thread.scheduleRegisteredReceiver(r.resultTo, r.intent,
+                thread.scheduleReceiverList(mReceiverBatch.registeredReceiver(r.resultTo, r.intent,
                         r.resultCode, r.resultData, r.resultExtras, false, r.initialSticky,
-                        r.userId, app.mState.getReportedProcState());
+                        r.userId, app.mState.getReportedProcState()));
             } catch (RemoteException e) {
                 final String msg = "Failed to schedule result of " + r + " via " + app + ": " + e;
                 logw(msg);
