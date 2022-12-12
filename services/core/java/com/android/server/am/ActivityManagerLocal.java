@@ -76,6 +76,8 @@ public interface ActivityManagerLocal {
      * @param conn Receives information as the service is started and stopped.
      *        This must be a valid ServiceConnection object; it must not be null.
      * @param clientAppUid Uid of the app for which the sdk sandbox process needs to be spawned.
+     * @param clientApplicationThread ApplicationThread object of the app for which the sdk sandboox
+     *                                is spawned.
      * @param clientAppPackage Package of the app for which the sdk sandbox process needs to
      *        be spawned. This package must belong to the clientAppUid.
      * @param processName Unique identifier for the service instance. Each unique name here will
@@ -88,6 +90,19 @@ public interface ActivityManagerLocal {
      *         have permission to bind to it.
      * @throws RemoteException If the service could not be brought up.
      * @see Context#bindService(Intent, ServiceConnection, int)
+     */
+    @SuppressLint("RethrowRemoteException")
+    boolean bindSdkSandboxService(@NonNull Intent service, @NonNull ServiceConnection conn,
+            int clientAppUid, @NonNull IBinder clientApplicationThread,
+            @NonNull String clientAppPackage, @NonNull String processName,
+            @Context.BindServiceFlags int flags)
+            throws RemoteException;
+
+    /**
+     * @deprecated Please use
+     * {@link #bindSdkSandboxService(Intent, ServiceConnection, int, IBinder, String, String, int)}
+     *
+     * This API can't be deleted yet because it can be used by early AdService module versions.
      */
     @SuppressLint("RethrowRemoteException")
     boolean bindSdkSandboxService(@NonNull Intent service, @NonNull ServiceConnection conn,
