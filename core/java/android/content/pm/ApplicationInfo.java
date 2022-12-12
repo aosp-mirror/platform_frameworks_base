@@ -1528,12 +1528,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * the application, e.g. the target SDK version.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int HIDDEN_API_ENFORCEMENT_DEFAULT = -1;
     /**
      * No API enforcement; the app can access the entire internal private API. Only for use by
      * system apps.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int HIDDEN_API_ENFORCEMENT_DISABLED = 0;
     /**
      * No API enforcement, but enable the detection logic and warnings. Observed behaviour is the
@@ -1541,11 +1543,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * APIs are accessed.
      * @hide
      * */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int HIDDEN_API_ENFORCEMENT_JUST_WARN = 1;
     /**
      * Dark grey list enforcement. Enforces the dark grey and black lists
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int HIDDEN_API_ENFORCEMENT_ENABLED = 2;
 
     private static final int HIDDEN_API_ENFORCEMENT_MIN = HIDDEN_API_ENFORCEMENT_DEFAULT;
