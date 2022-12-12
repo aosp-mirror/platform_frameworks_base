@@ -125,10 +125,10 @@ public interface SysUIComponent {
     default void init() {
         // Initialize components that have no direct tie to the dagger dependency graph,
         // but are critical to this component's operation
-        // TODO(b/205034537): I think this is a good idea?
         getSysUIUnfoldComponent().ifPresent(c -> {
             c.getUnfoldLightRevealOverlayAnimation().init();
             c.getUnfoldTransitionWallpaperController().init();
+            c.getUnfoldHapticsPlayer();
         });
         getNaturalRotationUnfoldProgressProvider().ifPresent(o -> o.init());
         // No init method needed, just needs to be gotten so that it's created.
