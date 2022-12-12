@@ -19,6 +19,8 @@ package com.android.server;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.apex.ApexInfo;
+import android.apex.IApexService;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
@@ -39,6 +41,7 @@ import android.content.pm.SigningInfo;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -61,7 +64,6 @@ import com.android.internal.util.FrameworkStatsLog;
 
 import libcore.util.HexEncoding;
 
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.security.PublicKey;
@@ -73,7 +75,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @hide
@@ -105,7 +106,6 @@ public class BinaryTransparencyService extends SystemService {
     @VisibleForTesting
     static final String BUNDLE_CONTENT_DIGEST = "content-digest";
 
-    static final String APEX_PRELOAD_LOCATION = "/system/apex/";
     static final String APEX_PRELOAD_LOCATION_ERROR = "could-not-be-determined";
 
     // used for indicating any type of error during MBA measurement
@@ -320,9 +320,7 @@ public class BinaryTransparencyService extends SystemService {
                     FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
                             packageInfo.packageName,
                             packageInfo.getLongVersionCode(),
-                            (cDigest != null) ? HexEncoding.encodeToString(
-                                    packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST),
-                                    false) : null,
+                            (cDigest != null) ? HexEncoding.encodeToString(cDigest, false) : null,
                             packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
                             signerDigestHexStrings, // signer_cert_digest
                             mba_status,             // mba_status
@@ -381,9 +379,7 @@ public class BinaryTransparencyService extends SystemService {
                     FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
                             packageInfo.packageName,
                             packageInfo.getLongVersionCode(),
-                            (cDigest != null) ? HexEncoding.encodeToString(
-                                    packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST),
-                                    false) : null,
+                            (cDigest != null) ? HexEncoding.encodeToString(cDigest, false) : null,
                             packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
                             signerDigestHexStrings,
                             MBA_STATUS_NEW_INSTALL,   // mba_status
@@ -1096,19 +1092,18 @@ public class BinaryTransparencyService extends SystemService {
 
     @NonNull
     private String getOriginalApexPreinstalledLocation(String packageName,
-                                                   String currentInstalledLocation) {
-        // get a listing of all apex files in /system/apex/
-        Set<String> originalApexs = Stream.of(new File(APEX_PRELOAD_LOCATION).listFiles())
-                                        .filter(f -> !f.isDirectory())
-                                        .map(File::getName)
-                                        .collect(Collectors.toSet());
-
-        for (String originalApex : originalApexs) {
-            if (originalApex.startsWith(packageName)) {
-                return APEX_PRELOAD_LOCATION + originalApex;
+            String currentInstalledLocation) {
+        try {
+            IApexService apexService = IApexService.Stub.asInterface(
+                    Binder.allowBlocking(ServiceManager.waitForService("apexservice")));
+            for (ApexInfo info : apexService.getAllPackages()) {
+                if (packageName.equals(info.moduleName)) {
+                    return info.preinstalledModulePath;
+                }
             }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to get package list from apexservice", e);
         }
-
         return APEX_PRELOAD_LOCATION_ERROR;
     }
 
