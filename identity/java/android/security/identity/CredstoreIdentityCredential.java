@@ -60,16 +60,19 @@ class CredstoreIdentityCredential extends IdentityCredential {
     private Context mContext;
     private ICredential mBinder;
     private CredstorePresentationSession mSession;
+    private int mFeatureVersion;
 
     CredstoreIdentityCredential(Context context, String credentialName,
             @IdentityCredentialStore.Ciphersuite int cipherSuite,
             ICredential binder,
-            @Nullable CredstorePresentationSession session) {
+            @Nullable CredstorePresentationSession session,
+            int featureVersion) {
         mContext = context;
         mCredentialName = credentialName;
         mCipherSuite = cipherSuite;
         mBinder = binder;
         mSession = session;
+        mFeatureVersion = featureVersion;
     }
 
     private KeyPair mEphemeralKeyPair = null;
@@ -347,12 +350,18 @@ class CredstoreIdentityCredential extends IdentityCredential {
             }
         }
 
+        byte[] signature = resultParcel.signature;
+        if (signature != null && signature.length == 0) {
+            signature = null;
+        }
+
         byte[] mac = resultParcel.mac;
         if (mac != null && mac.length == 0) {
             mac = null;
         }
         CredstoreResultData.Builder resultDataBuilder = new CredstoreResultData.Builder(
-                resultParcel.staticAuthenticationData, resultParcel.deviceNameSpaces, mac);
+                mFeatureVersion, resultParcel.staticAuthenticationData,
+                resultParcel.deviceNameSpaces, mac, signature);
 
         for (ResultNamespaceParcel resultNamespaceParcel : resultParcel.resultNamespaces) {
             for (ResultEntryParcel resultEntryParcel : resultNamespaceParcel.entries) {
