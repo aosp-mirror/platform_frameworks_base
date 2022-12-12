@@ -1906,6 +1906,11 @@ static jobject nativeGetDefaultApplyToken(JNIEnv* env, jclass clazz) {
     return javaObjectForIBinder(env, token);
 }
 
+static jboolean nativeBootFinished(JNIEnv* env, jclass clazz) {
+    status_t error = SurfaceComposerClient::bootFinished();
+    return error == OK ? JNI_TRUE : JNI_FALSE;
+}
+
 // ----------------------------------------------------------------------------
 
 SurfaceControl* android_view_SurfaceControl_getNativeSurfaceControl(JNIEnv* env,
@@ -2138,6 +2143,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
                 (void*)nativeSetDefaultApplyToken },
     {"nativeGetDefaultApplyToken", "()Landroid/os/IBinder;",
                 (void*)nativeGetDefaultApplyToken },
+    {"nativeBootFinished", "()Z",
+            (void*)nativeBootFinished },
         // clang-format on
 };
 
