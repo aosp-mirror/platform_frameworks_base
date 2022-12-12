@@ -1228,12 +1228,16 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return didSomething;
     }
 
-    private void forEachQueue(@NonNull Consumer<BroadcastProcessQueue> consumer) {
-        for (int i = 0; i < mProcessQueues.size(); ++i) {
+    private void forEachMatchingQueue(
+            @NonNull Predicate<BroadcastProcessQueue> queuePredicate,
+            @NonNull Consumer<BroadcastProcessQueue> queueConsumer) {
+        for (int i = 0; i < mProcessQueues.size(); i++) {
             BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
             while (leaf != null) {
-                consumer.accept(leaf);
-                updateRunnableList(leaf);
+                if (queuePredicate.test(leaf)) {
+                    queueConsumer.accept(leaf);
+                    updateRunnableList(leaf);
+                }
                 leaf = leaf.processNameNext;
             }
         }
@@ -1297,7 +1301,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final CountDownLatch latch = new CountDownLatch(1);
         synchronized (mService) {
             mWaitingFor.add(Pair.create(condition, latch));
-            forEachQueue(q -> q.setPrioritizeEarliest(true));
+            forEachMatchingQueue(QUEUE_PREDICATE_ANY,
+                    (q) -> q.setPrioritizeEarliest(true));
         }
         enqueueUpdateRunningList();
         try {
@@ -1307,9 +1312,20 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         } finally {
             synchronized (mService) {
                 if (mWaitingFor.isEmpty()) {
-                    forEachQueue(q -> q.setPrioritizeEarliest(false));
+                    forEachMatchingQueue(QUEUE_PREDICATE_ANY,
+                            (q) -> q.setPrioritizeEarliest(false));
                 }
             }
+        }
+    }
+
+    @Override
+    public void forceDelayBroadcastDelivery(@NonNull String targetPackage,
+            long delayedDurationMs) {
+        synchronized (mService) {
+            forEachMatchingQueue(
+                    (q) -> targetPackage.equals(q.getPackageName()),
+                    (q) -> q.forceDelayBroadcastDelivery(delayedDurationMs));
         }
     }
 

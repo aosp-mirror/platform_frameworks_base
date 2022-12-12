@@ -233,6 +233,16 @@ public abstract class BroadcastQueue {
     public abstract void waitForBarrier(@Nullable PrintWriter pw);
 
     /**
+     * Delays delivering broadcasts to the specified package.
+     *
+     * <p> Note that this is only valid for modern queue.
+     */
+    public void forceDelayBroadcastDelivery(@NonNull String targetPackage,
+            long delayedDurationMs) {
+        // No default implementation.
+    }
+
+    /**
      * Brief summary of internal state, useful for debugging purposes.
      */
     @GuardedBy("mService")

@@ -18389,6 +18389,25 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public void forceDelayBroadcastDelivery(@NonNull String targetPackage,
+            long delayedDurationMs) {
+        Objects.requireNonNull(targetPackage);
+        Preconditions.checkArgumentNonnegative(delayedDurationMs);
+        Preconditions.checkState(mEnableModernQueue, "Not valid in legacy queue");
+        enforceCallingPermission(permission.DUMP, "forceDelayBroadcastDelivery()");
+
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            queue.forceDelayBroadcastDelivery(targetPackage, delayedDurationMs);
+        }
+    }
+
+    @Override
+    public boolean isModernBroadcastQueueEnabled() {
+        enforceCallingPermission(permission.DUMP, "isModernBroadcastQueueEnabled()");
+        return mEnableModernQueue;
+    }
+
+    @Override
     @ReasonCode
     public int getBackgroundRestrictionExemptionReason(int uid) {
         enforceCallingPermission(android.Manifest.permission.DEVICE_POWER,
