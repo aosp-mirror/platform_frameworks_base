@@ -115,9 +115,11 @@ import com.android.internal.graphics.drawable.BackgroundBlurDrawable;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.view.RotationPolicy;
 import com.android.settingslib.Utils;
+import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialog;
@@ -146,7 +148,7 @@ import java.util.function.Consumer;
  *
  * Methods ending in "H" must be called on the (ui) handler.
  */
-public class VolumeDialogImpl implements VolumeDialog,
+public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         ConfigurationController.ConfigurationListener,
         ViewTreeObserver.OnComputeInternalInsetsListener {
     private static final String TAG = Util.logTag(VolumeDialogImpl.class);
@@ -302,7 +304,8 @@ public class VolumeDialogImpl implements VolumeDialog,
             ActivityStarter activityStarter,
             InteractionJankMonitor interactionJankMonitor,
             DeviceConfigProxy deviceConfigProxy,
-            Executor executor) {
+            Executor executor,
+            DumpManager dumpManager) {
         mContext =
                 new ContextThemeWrapper(context, R.style.volume_dialog_theme);
         mController = volumeDialogController;
@@ -328,6 +331,8 @@ public class VolumeDialogImpl implements VolumeDialog,
         mUseBackgroundBlur =
             mContext.getResources().getBoolean(R.bool.config_volumeDialogUseBackgroundBlur);
         mInteractionJankMonitor = interactionJankMonitor;
+
+        dumpManager.registerDumpable("VolumeDialogImpl", this);
 
         if (mUseBackgroundBlur) {
             final int dialogRowsViewColorAboveBlur = mContext.getColor(
@@ -793,7 +798,10 @@ public class VolumeDialogImpl implements VolumeDialog,
         return null;
     }
 
-    public void dump(PrintWriter writer) {
+    /**
+     * Print dump info for debugging.
+     */
+    public void dump(PrintWriter writer, String[] unusedArgs) {
         writer.println(VolumeDialogImpl.class.getSimpleName() + " state:");
         writer.print("  mShowing: "); writer.println(mShowing);
         writer.print("  mActiveStream: "); writer.println(mActiveStream);
