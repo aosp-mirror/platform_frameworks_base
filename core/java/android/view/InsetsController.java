@@ -47,7 +47,6 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSourceConsumer.ShowResult;
 import android.view.InsetsState.InternalInsetsType;
@@ -1179,6 +1178,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             // nothing to animate.
             listener.onCancelled(null);
             if (DEBUG) Log.d(TAG, "no types to animate in controlAnimationUnchecked");
+            Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApi", 0);
+            Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApiToImeReady", 0);
             return;
         }
         cancelExistingControllers(types);
@@ -1218,12 +1219,20 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             setRequestedVisibleTypes(mReportedRequestedVisibleTypes, types);
 
             Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApi", 0);
+            if (!fromIme) {
+                Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApiToImeReady", 0);
+            }
             return;
         }
 
         if (typesReady == 0) {
             if (DEBUG) Log.d(TAG, "No types ready. onCancelled()");
             listener.onCancelled(null);
+            reportRequestedVisibleTypes();
+            Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApi", 0);
+            if (!fromIme) {
+                Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApiToImeReady", 0);
+            }
             return;
         }
 
@@ -1571,6 +1580,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (types == 0) {
             // nothing to animate.
             if (DEBUG) Log.d(TAG, "applyAnimation, nothing to animate");
+            Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApi", 0);
+            if (!fromIme) {
+                Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApiToImeReady", 0);
+            }
             return;
         }
 
