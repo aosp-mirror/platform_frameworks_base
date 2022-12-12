@@ -142,7 +142,12 @@ public final class RouteListingPreference implements Parcelable {
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(
                 prefix = {"DISABLE_REASON_"},
-                value = {DISABLE_REASON_NONE, DISABLE_REASON_SUBSCRIPTION_REQUIRED})
+                value = {
+                    DISABLE_REASON_NONE,
+                    DISABLE_REASON_SUBSCRIPTION_REQUIRED,
+                    DISABLE_REASON_DOWNLOADED_CONTENT,
+                    DISABLE_REASON_AD
+                })
         public @interface DisableReason {}
 
         /** The corresponding route is available for routing. */
@@ -152,6 +157,13 @@ public final class RouteListingPreference implements Parcelable {
          * routing.
          */
         public static final int DISABLE_REASON_SUBSCRIPTION_REQUIRED = 1;
+        /**
+         * The corresponding route is not available because downloaded content cannot be routed to
+         * it.
+         */
+        public static final int DISABLE_REASON_DOWNLOADED_CONTENT = 2;
+        /** The corresponding route is not available because an ad is in progress. */
+        public static final int DISABLE_REASON_AD = 3;
 
         @NonNull
         public static final Creator<Item> CREATOR =
@@ -216,6 +228,8 @@ public final class RouteListingPreference implements Parcelable {
          *
          * @see #DISABLE_REASON_NONE
          * @see #DISABLE_REASON_SUBSCRIPTION_REQUIRED
+         * @see #DISABLE_REASON_DOWNLOADED_CONTENT
+         * @see #DISABLE_REASON_AD
          */
         @DisableReason
         public int getDisableReason() {

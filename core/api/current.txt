@@ -24058,6 +24058,8 @@ package android.media {
     method @NonNull public String getRouteId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.RouteListingPreference.Item> CREATOR;
+    field public static final int DISABLE_REASON_AD = 3; // 0x3
+    field public static final int DISABLE_REASON_DOWNLOADED_CONTENT = 2; // 0x2
     field public static final int DISABLE_REASON_NONE = 0; // 0x0
     field public static final int DISABLE_REASON_SUBSCRIPTION_REQUIRED = 1; // 0x1
     field public static final int FLAG_ONGOING_SESSION = 1; // 0x1
