@@ -516,3 +516,8 @@ java_library {
     name: "framework-configinfrastructure",
     sdk_version: "module_current",
 }
+
+java_library {
+    name: "framework-configinfrastructure.stubs.module_lib",
+    sdk_version: "module_current",
+}
