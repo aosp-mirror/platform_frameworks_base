@@ -40,6 +40,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_N
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
+import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
 import static com.android.systemui.statusbar.VibratorHelper.TOUCH_VIBRATION_ATTRIBUTES;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_FOLD_TO_AOD;
 import static com.android.systemui.util.DumpUtilsKt.asIndenting;
@@ -5478,6 +5479,15 @@ public final class NotificationPanelViewController implements Dumpable {
             mBarState = statusBarState;
             mKeyguardShowing = keyguardShowing;
 
+            boolean fromShadeToKeyguard = statusBarState == KEYGUARD
+                    && (oldState == SHADE || oldState == SHADE_LOCKED);
+            if (mSplitShadeEnabled && fromShadeToKeyguard) {
+                // user can go to keyguard from different shade states and closing animation
+                // may not fully run - we always want to make sure we close QS when that happens
+                // as we never need QS open in fresh keyguard state
+                closeQs();
+            }
+
             if (oldState == KEYGUARD && (goingToFullShade
                     || statusBarState == StatusBarState.SHADE_LOCKED)) {
 
@@ -5497,27 +5507,12 @@ public final class NotificationPanelViewController implements Dumpable {
                 mKeyguardStatusBarViewController.animateKeyguardStatusBarIn();
 
                 mNotificationStackScrollLayoutController.resetScrollPosition();
-                // Only animate header if the header is visible. If not, it will partially
-                // animate out
-                // the top of QS
-                if (!mQsExpanded) {
-                    // TODO(b/185683835) Nicer clipping when using new spacial model
-                    if (mSplitShadeEnabled) {
-                        mQs.animateHeaderSlidingOut();
-                    }
-                }
             } else {
                 // this else branch means we are doing one of:
                 //  - from KEYGUARD to SHADE (but not fully expanded as when swiping from the top)
                 //  - from SHADE to KEYGUARD
                 //  - from SHADE_LOCKED to SHADE
                 //  - getting notified again about the current SHADE or KEYGUARD state
-                if (mSplitShadeEnabled && oldState == SHADE && statusBarState == KEYGUARD) {
-                    // user can go to keyguard from different shade states and closing animation
-                    // may not fully run - we always want to make sure we close QS when that happens
-                    // as we never need QS open in fresh keyguard state
-                    closeQs();
-                }
                 final boolean animatingUnlockedShadeToKeyguard = oldState == SHADE
                         && statusBarState == KEYGUARD
                         && mScreenOffAnimationController.isKeyguardShowDelayed();
