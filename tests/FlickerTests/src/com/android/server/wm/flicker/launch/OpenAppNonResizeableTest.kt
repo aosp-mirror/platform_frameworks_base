@@ -146,6 +146,11 @@ open class OpenAppNonResizeableTest(flicker: FlickerTest) : OpenAppFromLockTrans
 
     /** {@inheritDoc} */
     @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarWindowIsVisibleAtStartAndEnd() = super.navBarWindowIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun statusBarWindowIsAlwaysVisible() {}
 
