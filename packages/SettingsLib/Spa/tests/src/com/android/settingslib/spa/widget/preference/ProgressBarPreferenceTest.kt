@@ -16,6 +16,9 @@
 
 package com.android.settingslib.spa.widget.preference
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Launch
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.SemanticsProperties.ProgressBarRangeInfo
 import androidx.compose.ui.test.SemanticsMatcher
@@ -49,6 +52,7 @@ class ProgressBarPreferenceTest {
             ProgressBarWithDataPreference(model = object : ProgressBarPreferenceModel {
                 override val title = "Title"
                 override val progress = 0.2f
+                override val icon: ImageVector = Icons.Outlined.Launch
             }, data = "Data")
         }
         composeTestRule.onNodeWithText("Title").assertIsDisplayed()
