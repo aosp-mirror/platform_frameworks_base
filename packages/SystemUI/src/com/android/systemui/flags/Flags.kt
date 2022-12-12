@@ -94,8 +94,7 @@ object Flags {
         unreleasedFlag(259217907, "notification_group_dismissal_animation", teamfood = true)
 
     // TODO(b/257506350): Tracking Bug
-    @JvmField
-    val FSI_CHROME = unreleasedFlag(117, "fsi_chrome")
+    @JvmField val FSI_CHROME = unreleasedFlag(117, "fsi_chrome")
 
     @JvmField
     val SIMPLIFIED_APPEAR_FRACTION =
@@ -420,6 +419,10 @@ object Flags {
 
     // 2000 - device controls
     @Keep @JvmField val USE_APP_PANELS = unreleasedFlag(2000, "use_app_panels", teamfood = true)
+
+    @JvmField
+    val APP_PANELS_ALL_APPS_ALLOWED =
+        unreleasedFlag(2001, "app_panels_all_apps_allowed", teamfood = true)
 
     // 2100 - Falsing Manager
     @JvmField val FALSING_FOR_LONG_TAPS = releasedFlag(2100, "falsing_for_long_taps")
