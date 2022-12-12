@@ -366,7 +366,7 @@ constructor(
         val dialog = animatedDialog.dialog
 
         // Don't animate if the dialog is not showing or if we are locked and going to show the
-        // bouncer.
+        // primary bouncer.
         if (
             !dialog.isShowing ||
                 (!callback.isUnlocked() && !callback.isShowingAlternateAuthOnUnlock())

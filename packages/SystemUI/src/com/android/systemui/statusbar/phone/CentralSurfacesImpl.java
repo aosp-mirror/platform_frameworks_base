@@ -157,6 +157,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.ui.binder.LightRevealScrimViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
 import com.android.systemui.navigationbar.NavigationBarController;
@@ -465,6 +466,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final ShadeController mShadeController;
     private final InitController mInitController;
     private final Lazy<CameraLauncher> mCameraLauncherLazy;
+    private final AlternateBouncerInteractor mAlternateBouncerInteractor;
 
     private final PluginDependencyProvider mPluginDependencyProvider;
     private final KeyguardDismissUtil mKeyguardDismissUtil;
@@ -743,7 +745,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             WiredChargingRippleController wiredChargingRippleController,
             IDreamManager dreamManager,
             Lazy<CameraLauncher> cameraLauncherLazy,
-            Lazy<LightRevealScrimViewModel> lightRevealScrimViewModelLazy) {
+            Lazy<LightRevealScrimViewModel> lightRevealScrimViewModelLazy,
+            AlternateBouncerInteractor alternateBouncerInteractor
+    ) {
         mContext = context;
         mNotificationsController = notificationsController;
         mFragmentService = fragmentService;
@@ -821,6 +825,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mWallpaperManager = wallpaperManager;
         mJankMonitor = jankMonitor;
         mCameraLauncherLazy = cameraLauncherLazy;
+        mAlternateBouncerInteractor = alternateBouncerInteractor;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -3222,8 +3227,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private void showBouncerOrLockScreenIfKeyguard() {
         // If the keyguard is animating away, we aren't really the keyguard anymore and should not
         // show the bouncer/lockscreen.
-        if (!mKeyguardViewMediator.isHiding()
-                && !mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()) {
+        if (!mKeyguardViewMediator.isHiding() && !mKeyguardUpdateMonitor.isKeyguardGoingAway()) {
             if (mState == StatusBarState.SHADE_LOCKED) {
                 // shade is showing while locked on the keyguard, so go back to showing the
                 // lock screen where users can use the UDFPS affordance to enter the device
@@ -3702,7 +3706,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         boolean launchingAffordanceWithPreview = mLaunchingAffordance;
         mScrimController.setLaunchingAffordanceWithPreview(launchingAffordanceWithPreview);
 
-        if (mStatusBarKeyguardViewManager.isShowingAlternateBouncer()) {
+        if (mAlternateBouncerInteractor.isVisibleState()) {
             if (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
                     || mTransitionToFullShadeProgress > 0f) {
                 mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED_SHADE);
