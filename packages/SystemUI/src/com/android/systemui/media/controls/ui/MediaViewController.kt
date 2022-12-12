@@ -82,6 +82,13 @@ constructor(
                 R.id.header_artist,
                 R.id.actionPlayPause,
             )
+
+        val backgroundIds =
+            setOf(
+                R.id.album_art,
+                R.id.turbulence_noise_view,
+                R.id.touch_ripple_view,
+            )
     }
 
     /** A listener when the current dimensions of the player change */
@@ -295,7 +302,8 @@ constructor(
         squishFraction: Float
     ): TransitionViewState {
         val squishedViewState = viewState.copy()
-        squishedViewState.height = (squishedViewState.height * squishFraction).toInt()
+        val squishedHeight = (squishedViewState.measureHeight * squishFraction).toInt()
+        squishedViewState.height = squishedHeight
         controlIds.forEach { id ->
             squishedViewState.widgetStates.get(id)?.let { state ->
                 state.alpha = calculateAlpha(squishFraction, CONTROLS_DELAY, DURATION)
@@ -305,6 +313,14 @@ constructor(
         detailIds.forEach { id ->
             squishedViewState.widgetStates.get(id)?.let { state ->
                 state.alpha = calculateAlpha(squishFraction, DETAILS_DELAY, DURATION)
+            }
+        }
+
+        // We are not overriding the squishedViewStates height but only the children to avoid
+        // them remeasuring the whole view. Instead it just remains as the original size
+        backgroundIds.forEach { id ->
+            squishedViewState.widgetStates.get(id)?.let { state ->
+                state.height = squishedHeight
             }
         }
 
@@ -421,10 +437,9 @@ constructor(
     fun getMeasurementsForState(hostState: MediaHostState): MeasurementOutput? =
         traceSection("MediaViewController#getMeasurementsForState") {
             // measurements should never factor in the squish fraction
-            val viewState =
-                obtainViewState(hostState.copy().also { it.squishFraction = 1.0f }) ?: return null
-            measurement.measuredWidth = viewState.width
-            measurement.measuredHeight = viewState.height
+            val viewState = obtainViewState(hostState) ?: return null
+            measurement.measuredWidth = viewState.measureWidth
+            measurement.measuredHeight = viewState.measureHeight
             return measurement
         }
 
@@ -453,7 +468,7 @@ constructor(
             // The view might not be bound yet or has never been measured and in that case will be
             // reset once the state is fully available
             var endViewState = obtainViewState(endHostState) ?: return
-            endViewState = updateViewStateToCarouselSize(endViewState, endLocation, tmpState2)!!
+            endViewState = updateViewStateSize(endViewState, endLocation, tmpState2)!!
             layoutController.setMeasureState(endViewState)
 
             // If the view isn't bound, we can drop the animation, otherwise we'll execute it
@@ -464,7 +479,7 @@ constructor(
 
             val result: TransitionViewState
             var startViewState = obtainViewState(startHostState)
-            startViewState = updateViewStateToCarouselSize(startViewState, startLocation, tmpState3)
+            startViewState = updateViewStateSize(startViewState, startLocation, tmpState3)
 
             if (!endHostState.visible) {
                 // Let's handle the case where the end is gone first. In this case we take the
@@ -517,18 +532,38 @@ constructor(
             )
         }
 
-    private fun updateViewStateToCarouselSize(
+    private fun updateViewStateSize(
         viewState: TransitionViewState?,
         location: Int,
         outState: TransitionViewState
     ): TransitionViewState? {
-        val result = viewState?.copy(outState) ?: return null
+        var result = viewState?.copy(outState) ?: return null
+        val state = mediaHostStatesManager.mediaHostStates[location]
         val overrideSize = mediaHostStatesManager.carouselSizes[location]
+        var overridden = false
         overrideSize?.let {
             // To be safe we're using a maximum here. The override size should always be set
             // properly though.
-            result.height = Math.max(it.measuredHeight, result.height)
-            result.width = Math.max(it.measuredWidth, result.width)
+            if (result.measureHeight != it.measuredHeight
+                    || result.measureWidth != it.measuredWidth) {
+                result.measureHeight = Math.max(it.measuredHeight, result.measureHeight)
+                result.measureWidth = Math.max(it.measuredWidth, result.measureWidth)
+                // The measureHeight and the shown height should both be set to the overridden height
+                result.height = result.measureHeight
+                result.width = result.measureWidth
+                // Make sure all background views are also resized such that their size is correct
+                backgroundIds.forEach { id ->
+                    result.widgetStates.get(id)?.let { state ->
+                        state.height = result.height
+                        state.width = result.width
+                    }
+                }
+                overridden = true
+            }
+        }
+        if (overridden && state != null && state.squishFraction <= 1f) {
+            // Let's squish the media player if our size was overridden
+            result = squishViewState(result, state.squishFraction)
         }
         logger.logMediaSize("update to carousel", result.width, result.height)
         return result
@@ -562,7 +597,13 @@ constructor(
      */
     private fun obtainViewStateForLocation(@MediaLocation location: Int): TransitionViewState? {
         val mediaHostState = mediaHostStatesManager.mediaHostStates[location] ?: return null
-        return obtainViewState(mediaHostState)
+        val viewState = obtainViewState(mediaHostState)
+        if (viewState != null) {
+            // update the size of the viewstate for the location with the override
+            updateViewStateSize(viewState, location, tmpState)
+            return tmpState
+        }
+        return viewState
     }
 
     /**

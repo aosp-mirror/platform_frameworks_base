@@ -59,8 +59,8 @@ class TransitionLayout @JvmOverloads constructor(
      */
     var measureState: TransitionViewState = TransitionViewState()
         set(value) {
-            val newWidth = value.width
-            val newHeight = value.height
+            val newWidth = value.measureWidth
+            val newHeight = value.measureHeight
             if (newWidth != desiredMeasureWidth || newHeight != desiredMeasureHeight) {
                 desiredMeasureWidth = newWidth
                 desiredMeasureHeight = newHeight
@@ -318,8 +318,28 @@ class TransitionLayout @JvmOverloads constructor(
 
 class TransitionViewState {
     var widgetStates: MutableMap<Int, WidgetState> = mutableMapOf()
+
+    /**
+     * The visible width of this ViewState. This may differ from the measuredWidth when e.g.
+     * squishing the view
+     */
     var width: Int = 0
+
+    /**
+     * The visible height of this ViewState. This may differ from the measuredHeight when e.g.
+     * squishing the view
+     */
     var height: Int = 0
+
+    /**
+     * The height that determines the measured dimensions of the view
+     */
+    var measureHeight: Int = 0
+
+    /**
+     * The width that determines the measured dimensions of the view
+     */
+    var measureWidth: Int = 0
     var alpha: Float = 1.0f
     val translation = PointF()
     val contentTranslation = PointF()
@@ -328,6 +348,8 @@ class TransitionViewState {
         val copy = reusedState ?: TransitionViewState()
         copy.width = width
         copy.height = height
+        copy.measureHeight = measureHeight
+        copy.measureWidth = measureWidth
         copy.alpha = alpha
         copy.translation.set(translation.x, translation.y)
         copy.contentTranslation.set(contentTranslation.x, contentTranslation.y)
@@ -348,6 +370,8 @@ class TransitionViewState {
         }
         width = transitionLayout.measuredWidth
         height = transitionLayout.measuredHeight
+        measureWidth = width
+        measureHeight = height
         translation.set(0.0f, 0.0f)
         contentTranslation.set(0.0f, 0.0f)
         alpha = 1.0f

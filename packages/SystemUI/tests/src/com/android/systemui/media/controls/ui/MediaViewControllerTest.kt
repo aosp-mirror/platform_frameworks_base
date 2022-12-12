@@ -58,6 +58,7 @@ class MediaViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var mockCopiedState: TransitionViewState
     @Mock private lateinit var detailWidgetState: WidgetState
     @Mock private lateinit var controlWidgetState: WidgetState
+    @Mock private lateinit var bgWidgetState: WidgetState
     @Mock private lateinit var mediaTitleWidgetState: WidgetState
     @Mock private lateinit var mediaContainerWidgetState: WidgetState
 
@@ -75,7 +76,10 @@ class MediaViewControllerTest : SysuiTestCase() {
     @Test
     fun testObtainViewState_applySquishFraction_toPlayerTransitionViewState_height() {
         mediaViewController.attach(player, MediaViewController.TYPE.PLAYER)
-        player.measureState = TransitionViewState().apply { this.height = 100 }
+        player.measureState = TransitionViewState().apply {
+            this.height = 100
+            this.measureHeight = 100
+        }
         mediaHostStateHolder.expansion = 1f
         val widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY)
         val heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY)
@@ -85,10 +89,12 @@ class MediaViewControllerTest : SysuiTestCase() {
         // Test no squish
         mediaHostStateHolder.squishFraction = 1f
         assertTrue(mediaViewController.obtainViewState(mediaHostStateHolder)!!.height == 100)
+        assertTrue(mediaViewController.obtainViewState(mediaHostStateHolder)!!.measureHeight == 100)
 
         // Test half squish
         mediaHostStateHolder.squishFraction = 0.5f
         assertTrue(mediaViewController.obtainViewState(mediaHostStateHolder)!!.height == 50)
+        assertTrue(mediaViewController.obtainViewState(mediaHostStateHolder)!!.measureHeight == 100)
     }
 
     @Test
@@ -104,10 +110,12 @@ class MediaViewControllerTest : SysuiTestCase() {
         // Test no squish
         mediaHostStateHolder.squishFraction = 1f
         assertTrue(mediaViewController.obtainViewState(mediaHostStateHolder)!!.height == 100)
+        assertTrue(mediaViewController.obtainViewState(mediaHostStateHolder)!!.measureHeight == 100)
 
         // Test half squish
         mediaHostStateHolder.squishFraction = 0.5f
         assertTrue(mediaViewController.obtainViewState(mediaHostStateHolder)!!.height == 50)
+        assertTrue(mediaViewController.obtainViewState(mediaHostStateHolder)!!.measureHeight == 100)
     }
 
     @Test
