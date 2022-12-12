@@ -6435,4 +6435,8 @@ ul.</string>
     <string name="permlab_startForegroundServicesFromBackground">Start foreground services from background</string>
     <!-- Description of start foreground services from background permission [CHAR LIMIT=NONE] -->
     <string name="permdesc_startForegroundServicesFromBackground">Allows a companion app to start foreground services from background.</string>
+    <!-- Toast message that is shown when the user unmutes the microphone from the keyboard. [CHAR LIMIT=TOAST] -->
+    <string name="mic_access_on_toast">Microphone is available</string>
+    <!-- Toast message that is shown when the user mutes the microphone from the keyboard. [CHAR LIMIT=TOAST] -->
+    <string name="mic_access_off_toast">Microphone is blocked</string>
 </resources>

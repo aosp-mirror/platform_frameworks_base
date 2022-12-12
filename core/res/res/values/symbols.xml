@@ -836,6 +836,8 @@
   <java-symbol type="string" name="lockscreen_emergency_call" />
   <java-symbol type="string" name="lockscreen_return_to_call" />
   <java-symbol type="string" name="low_memory" />
+  <java-symbol type="string" name="mic_access_off_toast" />
+  <java-symbol type="string" name="mic_access_on_toast" />
   <java-symbol type="string" name="midnight" />
   <java-symbol type="string" name="mismatchPin" />
   <java-symbol type="string" name="mmiComplete" />
