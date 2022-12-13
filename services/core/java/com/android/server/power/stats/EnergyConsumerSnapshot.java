@@ -123,6 +123,9 @@ public class EnergyConsumerSnapshot {
         /** The chargeUC for {@link EnergyConsumerType#WIFI}. */
         public long wifiChargeUC = UNAVAILABLE;
 
+        /** The chargeUC for {@link EnergyConsumerType#CAMERA}. */
+        public long cameraChargeUC = UNAVAILABLE;
+
         /** Map of {@link EnergyConsumerType#OTHER} ordinals to their total chargeUC. */
         public @Nullable long[] otherTotalChargeUC = null;
 
@@ -254,6 +257,10 @@ public class EnergyConsumerSnapshot {
 
                 case EnergyConsumerType.WIFI:
                     output.wifiChargeUC = deltaChargeUC;
+                    break;
+
+                case EnergyConsumerType.CAMERA:
+                    output.cameraChargeUC = deltaChargeUC;
                     break;
 
                 case EnergyConsumerType.OTHER:
@@ -457,6 +464,9 @@ public class EnergyConsumerSnapshot {
                     break;
                 case EnergyConsumerType.WIFI:
                     chargeUC[i] = delta.wifiChargeUC;
+                    break;
+                case EnergyConsumerType.CAMERA:
+                    chargeUC[i] = delta.cameraChargeUC;
                     break;
                 case EnergyConsumerType.OTHER:
                     if (delta.otherTotalChargeUC != null) {

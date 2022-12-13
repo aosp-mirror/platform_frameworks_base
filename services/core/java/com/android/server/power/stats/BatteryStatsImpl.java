@@ -178,7 +178,7 @@ public class BatteryStatsImpl extends BatteryStats {
     // TODO: remove "tcp" from network methods, since we measure total stats.
 
     // Current on-disk Parcel version. Must be updated when the format of the parcelable changes
-    public static final int VERSION = 210;
+    public static final int VERSION = 211;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -649,10 +649,12 @@ public class BatteryStatsImpl extends BatteryStats {
         int UPDATE_BT = 0x08;
         int UPDATE_RPM = 0x10;
         int UPDATE_DISPLAY = 0x20;
-        int RESET = 0x40;
+        int UPDATE_CAMERA = 0x40;
+        int RESET = 0x80;
 
         int UPDATE_ALL =
-                UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT | UPDATE_RPM | UPDATE_DISPLAY;
+                UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT | UPDATE_RPM | UPDATE_DISPLAY
+                        | UPDATE_CAMERA;
 
         int UPDATE_ON_PROC_STATE_CHANGE = UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT;
 
@@ -665,6 +667,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 UPDATE_BT,
                 UPDATE_RPM,
                 UPDATE_DISPLAY,
+                UPDATE_CAMERA,
                 UPDATE_ALL,
         })
         @Retention(RetentionPolicy.SOURCE)
@@ -6244,6 +6247,8 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
                 .noteCameraTurnedOnLocked(elapsedRealtimeMs);
+
+        scheduleSyncExternalStatsLocked("camera-on", ExternalStatsSync.UPDATE_CAMERA);
     }
 
     @GuardedBy("this")
@@ -6259,6 +6264,8 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
                 .noteCameraTurnedOffLocked(elapsedRealtimeMs);
+
+        scheduleSyncExternalStatsLocked("camera-off", ExternalStatsSync.UPDATE_CAMERA);
     }
 
     @GuardedBy("this")
@@ -6273,6 +6280,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 uid.noteResetCameraLocked(elapsedRealtimeMs);
             }
         }
+
+        scheduleSyncExternalStatsLocked("camera-reset", ExternalStatsSync.UPDATE_CAMERA);
     }
 
     @GuardedBy("this")
@@ -12899,6 +12908,32 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         distributeEnergyToUidsLocked(EnergyConsumerStats.POWER_BUCKET_GNSS, chargeUC,
                 gnssTimeUsArray, 0, elapsedRealtimeMs);
+    }
+
+    /**
+     * Accumulate camera charge consumption and distribute it to the correct state and the apps.
+     *
+     * @param chargeUC amount of charge (microcoulombs) used by the camera since this was last
+     *         called.
+     */
+    @GuardedBy("this")
+    public void updateCameraEnergyConsumerStatsLocked(long chargeUC, long elapsedRealtimeMs) {
+        if (DEBUG_ENERGY) Slog.d(TAG, "Updating camera stats: " + chargeUC);
+        if (mGlobalEnergyConsumerStats == null) {
+            return;
+        }
+
+        if (!mOnBatteryInternal || chargeUC <= 0) {
+            // There's nothing further to update.
+            return;
+        }
+
+        // TODO(b/258319905): Handle mIgnoreNextExternalStats
+
+        mGlobalEnergyConsumerStats.updateStandardBucket(
+                EnergyConsumerStats.POWER_BUCKET_CAMERA, chargeUC);
+
+        // TODO(b/258319905): Update per-UID stats.
     }
 
     /**
