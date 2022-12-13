@@ -4937,7 +4937,7 @@
     <!-- Allows an application to manage the companion devices.
          @hide -->
     <permission android:name="android.permission.MANAGE_COMPANION_DEVICES"
-                android:protectionLevel="signature|role" />
+                android:protectionLevel="module|signature|role" />
 
     <!-- Allows an application to subscribe to notifications about the presence status change
          of their associated companion device
