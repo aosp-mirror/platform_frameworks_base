@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -1039,6 +1040,42 @@ public class BackupManager {
                     + "BackupAgent");
         }
         return backupAgent.getBackupRestoreEventLogger();
+    }
+
+    /**
+     * Get an instance of {@link BackupRestoreEventLogger} to report B&R related events during a
+     * delayed restore operation.
+     *
+     * @return an instance of {@link BackupRestoreEventLogger}.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    public BackupRestoreEventLogger getDelayedRestoreLogger() {
+        return new BackupRestoreEventLogger(OperationType.RESTORE);
+    }
+
+    /**
+     * Report B&R related events following a delayed restore operation.
+     *
+     * @param logger an instance of {@link BackupRestoreEventLogger} to which the corresponding
+     *               events have been logged.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    public void reportDelayedRestoreResult(@NonNull BackupRestoreEventLogger logger) {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                sService.reportDelayedRestoreResult(mContext.getPackageName(),
+                        logger.getLoggingResults());
+            } catch (RemoteException e) {
+                Log.w(TAG, "reportDelayedRestoreResult() couldn't connect");
+            }
+        }
     }
 
     /*
