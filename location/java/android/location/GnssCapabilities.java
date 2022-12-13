@@ -240,7 +240,11 @@ public final class GnssCapabilities implements Parcelable {
     }
 
     /**
-     * Returns {@code true} if GNSS chipset supports on demand time, {@code false} otherwise.
+     * Returns {@code true} if GNSS chipset requests periodic time signal injection from the
+     * platform in addition to on-demand and occasional time updates, {@code false} otherwise.
+     *
+     * <p><em>Note: The naming of this capability and the behavior it controls differ substantially.
+     * This is the result of a historic implementation bug, b/73893222.</em>
      */
     public boolean hasOnDemandTime() {
         return (mTopFlags & TOP_HAL_CAPABILITY_ON_DEMAND_TIME) != 0;

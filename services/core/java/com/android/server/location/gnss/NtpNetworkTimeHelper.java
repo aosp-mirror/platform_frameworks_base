@@ -30,14 +30,11 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 /**
- * Handles inject NTP time to GNSS.
- *
- * <p>The client is responsible to call {@link #onNetworkAvailable()} when network is available
- * for retrieving NTP Time.
+ * Handles injecting network time to GNSS by explicitly making NTP requests when needed.
  */
-class NtpTimeHelper {
+class NtpNetworkTimeHelper extends NetworkTimeHelper {
 
-    private static final String TAG = "NtpTimeHelper";
+    private static final String TAG = "NtpNetworkTimeHelper";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     // states for injecting ntp
@@ -71,23 +68,19 @@ class NtpTimeHelper {
     private final WakeLock mWakeLock;
     private final Handler mHandler;
 
-    private final InjectNtpTimeCallback mCallback;
+    private final InjectTimeCallback mCallback;
 
     // flags to trigger NTP when network becomes available
     // initialized to STATE_PENDING_NETWORK so we do NTP when the network comes up after booting
     @GuardedBy("this")
     private int mInjectNtpTimeState = STATE_PENDING_NETWORK;
 
-    // set to true if the GPS engine requested on-demand NTP time requests
+    // Enables periodic time injection in addition to injection for other reasons.
     @GuardedBy("this")
-    private boolean mOnDemandTimeInjection;
-
-    interface InjectNtpTimeCallback {
-        void injectTime(long time, long timeReference, int uncertainty);
-    }
+    private boolean mPeriodicTimeInjection;
 
     @VisibleForTesting
-    NtpTimeHelper(Context context, Looper looper, InjectNtpTimeCallback callback,
+    NtpNetworkTimeHelper(Context context, Looper looper, InjectTimeCallback callback,
             NtpTrustedTime ntpTime) {
         mConnMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         mCallback = callback;
@@ -97,14 +90,23 @@ class NtpTimeHelper {
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
     }
 
-    NtpTimeHelper(Context context, Looper looper, InjectNtpTimeCallback callback) {
+    NtpNetworkTimeHelper(Context context, Looper looper, InjectTimeCallback callback) {
         this(context, looper, callback, NtpTrustedTime.getInstance(context));
     }
 
-    synchronized void enablePeriodicTimeInjection() {
-        mOnDemandTimeInjection = true;
+    @Override
+    synchronized void setPeriodicTimeInjectionMode(boolean periodicTimeInjectionEnabled) {
+        if (periodicTimeInjectionEnabled) {
+            mPeriodicTimeInjection = true;
+        }
     }
 
+    @Override
+    void demandUtcTimeInjection() {
+        retrieveAndInjectNtpTime();
+    }
+
+    @Override
     synchronized void onNetworkAvailable() {
         if (mInjectNtpTimeState == STATE_PENDING_NETWORK) {
             retrieveAndInjectNtpTime();
@@ -120,7 +122,7 @@ class NtpTimeHelper {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    synchronized void retrieveAndInjectNtpTime() {
+    private synchronized void retrieveAndInjectNtpTime() {
         if (mInjectNtpTimeState == STATE_RETRIEVING_AND_INJECTING) {
             // already downloading data
             return;
@@ -166,18 +168,15 @@ class NtpTimeHelper {
 
             if (DEBUG) {
                 Log.d(TAG, String.format(
-                        "onDemandTimeInjection=%s, refreshSuccess=%s, delay=%s",
-                        mOnDemandTimeInjection,
+                        "mPeriodicTimeInjection=%s, refreshSuccess=%s, delay=%s",
+                        mPeriodicTimeInjection,
                         refreshSuccess,
                         delay));
             }
-            // TODO(b/73893222): reconcile Capabilities bit 'on demand' name vs. de facto periodic
-            // injection.
-            if (mOnDemandTimeInjection || !refreshSuccess) {
-                /* Schedule next NTP injection.
-                 * Since this is delayed, the wake lock is released right away, and will be held
-                 * again when the delayed task runs.
-                 */
+            if (mPeriodicTimeInjection || !refreshSuccess) {
+                // Schedule next NTP injection.
+                // Since this is delayed, the wake lock is released right away, and will be held
+                // again when the delayed task runs.
                 mHandler.postDelayed(this::retrieveAndInjectNtpTime, delay);
             }
         }

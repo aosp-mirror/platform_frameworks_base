@@ -113,9 +113,8 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.HexDump;
 import com.android.server.FgThread;
 import com.android.server.location.gnss.GnssSatelliteBlocklistHelper.GnssSatelliteBlocklistCallback;
-import com.android.server.location.gnss.NtpTimeHelper.InjectNtpTimeCallback;
+import com.android.server.location.gnss.NetworkTimeHelper.InjectTimeCallback;
 import com.android.server.location.gnss.hal.GnssNative;
-import com.android.server.location.injector.Injector;
 import com.android.server.location.provider.AbstractLocationProvider;
 
 import java.io.FileDescriptor;
@@ -138,7 +137,7 @@ import java.util.concurrent.TimeUnit;
  * {@hide}
  */
 public class GnssLocationProvider extends AbstractLocationProvider implements
-        InjectNtpTimeCallback, GnssSatelliteBlocklistCallback, GnssNative.BaseCallbacks,
+        InjectTimeCallback, GnssSatelliteBlocklistCallback, GnssNative.BaseCallbacks,
         GnssNative.LocationCallbacks, GnssNative.SvStatusCallbacks, GnssNative.AGpsCallbacks,
         GnssNative.PsdsCallbacks, GnssNative.NotificationCallbacks,
         GnssNative.LocationRequestCallbacks, GnssNative.TimeCallbacks {
@@ -307,7 +306,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private boolean mSuplEsEnabled = false;
 
     private final LocationExtras mLocationExtras = new LocationExtras();
-    private final NtpTimeHelper mNtpTimeHelper;
+    private final NetworkTimeHelper mNetworkTimeHelper;
     private final GnssSatelliteBlocklistHelper mGnssSatelliteBlocklistHelper;
 
     // Available only on GNSS HAL 2.0 implementations and later.
@@ -398,7 +397,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    public GnssLocationProvider(Context context, Injector injector, GnssNative gnssNative,
+    public GnssLocationProvider(Context context, GnssNative gnssNative,
             GnssMetrics gnssMetrics) {
         super(FgThread.getExecutor(), CallerIdentity.fromContext(context), PROPERTIES,
                 Collections.emptySet());
@@ -470,7 +469,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 GnssLocationProvider.this::onNetworkAvailable,
                 mHandler.getLooper(), mNIHandler);
 
-        mNtpTimeHelper = new NtpTimeHelper(mContext, mHandler.getLooper(), this);
+        mNetworkTimeHelper = NetworkTimeHelper.create(mContext, mHandler.getLooper(), this);
         mGnssSatelliteBlocklistHelper =
                 new GnssSatelliteBlocklistHelper(mContext,
                         mHandler.getLooper(), this);
@@ -647,18 +646,19 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     /**
-     * Implements {@link InjectNtpTimeCallback#injectTime}
+     * Implements {@link InjectTimeCallback#injectTime}
      */
     @Override
-    public void injectTime(long time, long timeReference, int uncertainty) {
-        mGnssNative.injectTime(time, timeReference, uncertainty);
+    public void injectTime(long unixEpochTimeMillis, long elapsedRealtimeMillis,
+            int uncertaintyMillis) {
+        mGnssNative.injectTime(unixEpochTimeMillis, elapsedRealtimeMillis, uncertaintyMillis);
     }
 
     /**
      * Implements {@link GnssNetworkConnectivityHandler.GnssNetworkListener#onNetworkAvailable()}
      */
     private void onNetworkAvailable() {
-        mNtpTimeHelper.onNetworkAvailable();
+        mNetworkTimeHelper.onNetworkAvailable();
         // Download only if supported, (prevents an unnecessary on-boot download)
         if (mSupportsPsds) {
             synchronized (mLock) {
@@ -1145,7 +1145,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if ("delete_aiding_data".equals(command)) {
             deleteAidingData(extras);
         } else if ("force_time_injection".equals(command)) {
-            requestUtcTime();
+            demandUtcTimeInjection();
         } else if ("force_psds_injection".equals(command)) {
             if (mSupportsPsds) {
                 postWithWakeLockHeld(() -> handleDownloadPsdsData(
@@ -1514,9 +1514,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 /* userResponse= */ 0);
     }
 
-    private void requestUtcTime() {
-        if (DEBUG) Log.d(TAG, "utcTimeRequest");
-        postWithWakeLockHeld(mNtpTimeHelper::retrieveAndInjectNtpTime);
+    private void demandUtcTimeInjection() {
+        if (DEBUG) Log.d(TAG, "demandUtcTimeInjection");
+        postWithWakeLockHeld(mNetworkTimeHelper::demandUtcTimeInjection);
     }
 
 
@@ -1721,9 +1721,16 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     public void onCapabilitiesChanged(GnssCapabilities oldCapabilities,
             GnssCapabilities newCapabilities) {
         mHandler.post(() -> {
-            if (mGnssNative.getCapabilities().hasOnDemandTime()) {
-                mNtpTimeHelper.enablePeriodicTimeInjection();
-                requestUtcTime();
+            boolean useOnDemandTimeInjection = mGnssNative.getCapabilities().hasOnDemandTime();
+
+            // b/73893222: There is a historic bug on Android, which means that the capability
+            // "on demand time" is interpreted as "enable periodic injection" elsewhere but an
+            // on-demand injection is done here. GNSS developers may have come to rely on the
+            // periodic behavior, so it has been kept and all methods named to reflect what is
+            // actually done. "On demand" requests are supported regardless of the capability.
+            mNetworkTimeHelper.setPeriodicTimeInjectionMode(useOnDemandTimeInjection);
+            if (useOnDemandTimeInjection) {
+                demandUtcTimeInjection();
             }
 
             restartLocationRequest();
@@ -1857,7 +1864,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     @Override
     public void onRequestUtcTime() {
-        requestUtcTime();
+        demandUtcTimeInjection();
     }
 
     @Override
