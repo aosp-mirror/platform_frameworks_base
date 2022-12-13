@@ -23,14 +23,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import android.annotation.Nullable;
 
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ViewModelStore;
 
 import com.android.systemui.dreams.DreamOverlayContainerViewController;
-import com.android.systemui.dreams.complication.Complication;
-import com.android.systemui.dreams.complication.dagger.ComplicationModule;
+import com.android.systemui.dreams.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import com.android.systemui.dreams.touch.DreamTouchHandler;
 import com.android.systemui.dreams.touch.dagger.DreamTouchModule;
+import com.android.systemui.touch.TouchInsetManager;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
@@ -48,7 +47,6 @@ import javax.inject.Scope;
 @Subcomponent(modules = {
         DreamTouchModule.class,
         DreamOverlayModule.class,
-        ComplicationModule.class,
 })
 @DreamOverlayComponent.DreamOverlayScope
 public interface DreamOverlayComponent {
@@ -57,8 +55,8 @@ public interface DreamOverlayComponent {
     interface Factory {
         DreamOverlayComponent create(
                 @BindsInstance LifecycleOwner lifecycleOwner,
-                @BindsInstance ViewModelStore store,
-                @BindsInstance Complication.Host host,
+                @BindsInstance ComplicationHostViewController complicationHostViewController,
+                @BindsInstance TouchInsetManager touchInsetManager,
                 @BindsInstance @Named(DREAM_TOUCH_HANDLERS) @Nullable
                         Set<DreamTouchHandler> dreamTouchHandlers);
     }

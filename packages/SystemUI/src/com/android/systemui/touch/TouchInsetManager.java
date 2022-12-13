@@ -18,10 +18,13 @@ package com.android.systemui.touch;
 
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.util.Log;
+import android.view.AttachedSurfaceControl;
 import android.view.View;
-import android.view.ViewRootImpl;
 
 import androidx.concurrent.futures.CallbackToFutureAdapter;
+
+import com.android.systemui.dagger.qualifiers.Main;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -29,30 +32,44 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.Executor;
 
+import javax.inject.Inject;
+
 /**
  * {@link TouchInsetManager} handles setting the touchable inset regions for a given View. This
  * is useful for passing through touch events for all but select areas.
  */
 public class TouchInsetManager {
+    private static final String TAG = "TouchInsetManager";
     /**
      * {@link TouchInsetSession} provides an individualized session with the
      * {@link TouchInsetManager}, linking any action to the client.
      */
     public static class TouchInsetSession {
         private final TouchInsetManager mManager;
-
         private final HashSet<View> mTrackedViews;
         private final Executor mExecutor;
 
         private final View.OnLayoutChangeListener mOnLayoutChangeListener =
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom)
-                        -> updateTouchRegion();
+                        -> updateTouchRegions();
+
+        private final View.OnAttachStateChangeListener mAttachListener =
+                new View.OnAttachStateChangeListener() {
+                    @Override
+                    public void onViewAttachedToWindow(View v) {
+                        updateTouchRegions();
+                    }
+
+                    @Override
+                    public void onViewDetachedFromWindow(View v) {
+                        updateTouchRegions();
+                    }
+                };
 
         /**
          * Default constructor
          * @param manager The parent {@link TouchInsetManager} which will be affected by actions on
          *                this session.
-         * @param rootView The parent of views that will be tracked.
          * @param executor An executor for marshalling operations.
          */
         TouchInsetSession(TouchInsetManager manager, Executor executor) {
@@ -68,8 +85,9 @@ public class TouchInsetManager {
         public void addViewToTracking(View view) {
             mExecutor.execute(() -> {
                 mTrackedViews.add(view);
+                view.addOnAttachStateChangeListener(mAttachListener);
                 view.addOnLayoutChangeListener(mOnLayoutChangeListener);
-                updateTouchRegion();
+                updateTouchRegions();
             });
         }
 
@@ -81,22 +99,30 @@ public class TouchInsetManager {
             mExecutor.execute(() -> {
                 mTrackedViews.remove(view);
                 view.removeOnLayoutChangeListener(mOnLayoutChangeListener);
-                updateTouchRegion();
+                view.removeOnAttachStateChangeListener(mAttachListener);
+                updateTouchRegions();
             });
         }
 
-        private void updateTouchRegion() {
-            final Region cumulativeRegion = Region.obtain();
+        private void updateTouchRegions() {
+            mExecutor.execute(() -> {
+                final HashMap<AttachedSurfaceControl, Region> affectedSurfaces = new HashMap<>();
+                mTrackedViews.stream().forEach(view -> {
+                    if (!view.isAttachedToWindow()) {
+                        return;
+                    }
 
-            mTrackedViews.stream().forEach(view -> {
-                final Rect boundaries = new Rect();
-                view.getBoundsOnScreen(boundaries);
-                cumulativeRegion.op(boundaries, Region.Op.UNION);
+                    final AttachedSurfaceControl surface = view.getRootSurfaceControl();
+
+                    if (!affectedSurfaces.containsKey(surface)) {
+                        affectedSurfaces.put(surface, Region.obtain());
+                    }
+                    final Rect boundaries = new Rect();
+                    view.getBoundsOnScreen(boundaries);
+                    affectedSurfaces.get(surface).op(boundaries, Region.Op.UNION);
+                });
+                mManager.setTouchRegions(this, affectedSurfaces);
             });
-
-            mManager.setTouchRegion(this, cumulativeRegion);
-
-            cumulativeRegion.recycle();
         }
 
         /**
@@ -110,32 +136,18 @@ public class TouchInsetManager {
         }
     }
 
-    private final HashMap<TouchInsetSession, Region> mDefinedRegions = new HashMap<>();
+    private final HashMap<TouchInsetSession, HashMap<AttachedSurfaceControl, Region>>
+            mSessionRegions = new HashMap<>();
+    private final HashMap<AttachedSurfaceControl, Region> mLastAffectedSurfaces = new HashMap();
     private final Executor mExecutor;
-    private final View mRootView;
-
-    private final View.OnAttachStateChangeListener mAttachListener =
-            new View.OnAttachStateChangeListener() {
-                @Override
-                public void onViewAttachedToWindow(View v) {
-                    updateTouchInset();
-                }
-
-                @Override
-                public void onViewDetachedFromWindow(View v) {
-                }
-            };
 
     /**
      * Default constructor.
      * @param executor An {@link Executor} to marshal all operations on.
-     * @param rootView The root {@link View} for all views in sessions.
      */
-    public TouchInsetManager(Executor executor, View rootView) {
+    @Inject
+    public TouchInsetManager(@Main Executor executor) {
         mExecutor = executor;
-        mRootView = rootView;
-        mRootView.addOnAttachStateChangeListener(mAttachListener);
-
     }
 
     /**
@@ -151,47 +163,68 @@ public class TouchInsetManager {
     public ListenableFuture<Boolean> checkWithinTouchRegion(int x, int y) {
         return CallbackToFutureAdapter.getFuture(completer -> {
             mExecutor.execute(() -> completer.set(
-                    mDefinedRegions.values().stream().anyMatch(region -> region.contains(x, y))));
+                    mLastAffectedSurfaces.values().stream().anyMatch(
+                            region -> region.contains(x, y))));
 
             return "DreamOverlayTouchMonitor::checkWithinTouchRegion";
         });
     }
 
-    private void updateTouchInset() {
-        final ViewRootImpl viewRootImpl = mRootView.getViewRootImpl();
+    private void updateTouchInsets() {
+        // Get affected
+        final HashMap<AttachedSurfaceControl, Region> affectedSurfaces = new HashMap<>();
+        mSessionRegions.values().stream().forEach(regionMapping -> {
+            regionMapping.entrySet().stream().forEach(entry -> {
+                final AttachedSurfaceControl surface = entry.getKey();
+                if (!affectedSurfaces.containsKey(surface)) {
+                    affectedSurfaces.put(surface, Region.obtain());
+                }
 
-        if (viewRootImpl == null) {
+                affectedSurfaces.get(surface).op(entry.getValue(), Region.Op.UNION);
+            });
+        });
+
+        affectedSurfaces.entrySet().stream().forEach(entry -> {
+            entry.getKey().setTouchableRegion(entry.getValue());
+        });
+
+        mLastAffectedSurfaces.entrySet().forEach(entry -> {
+            final AttachedSurfaceControl surface = entry.getKey();
+            if (!affectedSurfaces.containsKey(surface)) {
+                surface.setTouchableRegion(null);
+            }
+            entry.getValue().recycle();
+        });
+
+        mLastAffectedSurfaces.clear();
+        mLastAffectedSurfaces.putAll(affectedSurfaces);
+    }
+
+    protected void setTouchRegions(TouchInsetSession session,
+            HashMap<AttachedSurfaceControl, Region> regions) {
+        mExecutor.execute(() -> {
+            recycleRegions(session);
+            mSessionRegions.put(session, regions);
+            updateTouchInsets();
+        });
+    }
+
+    private void recycleRegions(TouchInsetSession session) {
+        if (!mSessionRegions.containsKey(session)) {
+            Log.w(TAG,  "Removing a session with no regions:" + session);
             return;
         }
 
-        final Region aggregateRegion = Region.obtain();
-
-        for (Region region : mDefinedRegions.values()) {
-            aggregateRegion.op(region, Region.Op.UNION);
+        for (Region region : mSessionRegions.get(session).values()) {
+            region.recycle();
         }
-
-        viewRootImpl.setTouchableRegion(aggregateRegion);
-
-        aggregateRegion.recycle();
-    }
-
-    protected void setTouchRegion(TouchInsetSession session, Region region) {
-        final Region introducedRegion = Region.obtain(region);
-        mExecutor.execute(() -> {
-            mDefinedRegions.put(session, introducedRegion);
-            updateTouchInset();
-        });
     }
 
     private void clearRegion(TouchInsetSession session) {
         mExecutor.execute(() -> {
-            final Region storedRegion = mDefinedRegions.remove(session);
-
-            if (storedRegion != null) {
-                storedRegion.recycle();
-            }
-
-            updateTouchInset();
+            recycleRegions(session);
+            mSessionRegions.remove(session);
+            updateTouchInsets();
         });
     }
 }

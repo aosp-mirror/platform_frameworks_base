@@ -45,7 +45,10 @@ import com.android.systemui.dreams.complication.Complication;
 import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
+import com.android.systemui.touch.TouchInsetManager;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -83,6 +86,9 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private boolean mDestroyed = false;
 
     private final ComplicationComponent mComplicationComponent;
+
+    private final com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent
+            mDreamComplicationComponent;
 
     private final DreamOverlayComponent mDreamOverlayComponent;
 
@@ -135,10 +141,13 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             DreamOverlayLifecycleOwner lifecycleOwner,
             WindowManager windowManager,
             ComplicationComponent.Factory complicationComponentFactory,
+            com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent.Factory
+                    dreamComplicationComponentFactory,
             DreamOverlayComponent.Factory dreamOverlayComponentFactory,
             DreamOverlayStateController stateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             UiEventLogger uiEventLogger,
+            TouchInsetManager touchInsetManager,
             @Nullable @Named(LowLightDreamModule.LOW_LIGHT_DREAM_COMPONENT)
                     ComponentName lowLightDreamComponent) {
         mContext = context;
@@ -154,9 +163,14 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         final Complication.Host host =
                 () -> mExecutor.execute(DreamOverlayService.this::requestExit);
 
-        mComplicationComponent = complicationComponentFactory.create();
-        mDreamOverlayComponent =
-                dreamOverlayComponentFactory.create(lifecycleOwner, viewModelStore, host, null);
+        mComplicationComponent = complicationComponentFactory.create(lifecycleOwner, host,
+                viewModelStore, touchInsetManager);
+        mDreamComplicationComponent = dreamComplicationComponentFactory.create(
+                mComplicationComponent.getVisibilityController(), touchInsetManager);
+        mDreamOverlayComponent = dreamOverlayComponentFactory.create(lifecycleOwner,
+                mComplicationComponent.getComplicationHostViewController(), touchInsetManager,
+                new HashSet<>(Arrays.asList(
+                        mDreamComplicationComponent.getHideComplicationTouchHandler())));
         mLifecycleOwner = lifecycleOwner;
         mLifecycleRegistry = mLifecycleOwner.getRegistry();
 

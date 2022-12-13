@@ -29,20 +29,15 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayContainerView;
 import com.android.systemui.dreams.DreamOverlayStatusBarView;
-import com.android.systemui.dreams.complication.Complication;
-import com.android.systemui.dreams.dreamcomplication.HideComplicationTouchHandler;
-import com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.touch.DreamTouchHandler;
 import com.android.systemui.touch.TouchInsetManager;
 
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
-import dagger.multibindings.IntoSet;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 
@@ -104,14 +99,6 @@ public abstract class DreamOverlayModule {
     public static TouchInsetManager.TouchInsetSession providesTouchInsetSession(
             TouchInsetManager manager) {
         return manager.createSession();
-    }
-
-    /** */
-    @Provides
-    @DreamOverlayComponent.DreamOverlayScope
-    public static TouchInsetManager providesTouchInsetManager(@Main Executor executor,
-            DreamOverlayContainerView view) {
-        return new TouchInsetManager(executor, view);
     }
 
     /** */
@@ -263,19 +250,5 @@ public abstract class DreamOverlayModule {
     static Set<DreamTouchHandler> providesDreamTouchHandlers(
             @Named(DREAM_TOUCH_HANDLERS) @Nullable Set<DreamTouchHandler> touchHandlers) {
         return touchHandlers != null ? touchHandlers : new HashSet<>();
-    }
-
-    /**
-     * Provides {@link HideComplicationTouchHandler} for inclusion in touch handling over the dream.
-     */
-    @Provides
-    @IntoSet
-    public static DreamTouchHandler providesHideComplicationTouchHandler(
-            ComplicationComponent.Factory componentFactory,
-            Complication.VisibilityController visibilityController,
-            TouchInsetManager touchInsetManager) {
-        ComplicationComponent component =
-                componentFactory.create(visibilityController, touchInsetManager);
-        return component.getHideComplicationTouchHandler();
     }
 }
