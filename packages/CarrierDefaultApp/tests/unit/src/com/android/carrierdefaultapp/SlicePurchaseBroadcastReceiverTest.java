@@ -64,6 +64,7 @@ public class SlicePurchaseBroadcastReceiverTest {
     @Mock PendingIntent mCanceledIntent;
     @Mock PendingIntent mContentIntent1;
     @Mock PendingIntent mContentIntent2;
+    @Mock PendingIntent mNotificationShownIntent;
     @Mock Context mContext;
     @Mock Resources mResources;
     @Mock NotificationManager mNotificationManager;
@@ -136,7 +137,7 @@ public class SlicePurchaseBroadcastReceiverTest {
     }
 
     @Test
-    public void testDisplayBoosterNotification() {
+    public void testDisplayNetworkBoostNotification() throws Exception {
         // set up intent
         doReturn(SlicePurchaseController.ACTION_START_SLICE_PURCHASE_APP).when(mIntent).getAction();
         doReturn(PHONE_ID).when(mIntent).getIntExtra(
@@ -148,11 +149,17 @@ public class SlicePurchaseBroadcastReceiverTest {
         doReturn(TAG).when(mIntent).getStringExtra(
                 eq(SlicePurchaseController.EXTRA_REQUESTING_APP_NAME));
 
-        // set up pending intent
+        // set up pending intents
         doReturn(TelephonyManager.PHONE_PROCESS_NAME).when(mPendingIntent).getCreatorPackage();
         doReturn(true).when(mPendingIntent).isBroadcast();
         doReturn(mPendingIntent).when(mIntent).getParcelableExtra(
                 anyString(), eq(PendingIntent.class));
+        doReturn(TelephonyManager.PHONE_PROCESS_NAME).when(mNotificationShownIntent)
+                .getCreatorPackage();
+        doReturn(true).when(mNotificationShownIntent).isBroadcast();
+        doReturn(mNotificationShownIntent).when(mIntent).getParcelableExtra(
+                eq(SlicePurchaseController.EXTRA_INTENT_NOTIFICATION_SHOWN),
+                eq(PendingIntent.class));
 
         // set up notification
         doReturn(mResources).when(mContext).getResources();
@@ -185,8 +192,10 @@ public class SlicePurchaseBroadcastReceiverTest {
         assertEquals(2, notification.actions.length);
         assertEquals(mCanceledIntent, notification.actions[0].actionIntent);
         assertEquals(mContentIntent2, notification.actions[1].actionIntent);
-    }
 
+        // verify SlicePurchaseController was notified
+        verify(mNotificationShownIntent).send();
+    }
 
     @Test
     public void testNotificationCanceled() {
