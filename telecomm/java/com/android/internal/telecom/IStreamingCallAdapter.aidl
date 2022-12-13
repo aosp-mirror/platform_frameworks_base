@@ -16,17 +16,13 @@
 
 package com.android.internal.telecom;
 
-import android.telecom.CallControl;
-import android.telecom.DisconnectCause;
-import android.os.ResultReceiver;
-
 /**
+ * Internal remote callback interface for call streaming services.
+ *
+ * @see android.telecom.StreamingCallAdapter
+ *
  * {@hide}
  */
-oneway interface ICallControl {
-    void setActive(String callId, in ResultReceiver callback);
-    void setInactive(String callId, in ResultReceiver callback);
-    void disconnect(String callId, in DisconnectCause disconnectCause, in ResultReceiver callback);
-    void rejectCall(String callId, in ResultReceiver callback);
-    void startCallStreaming(String callId, in ResultReceiver callback);
+oneway interface IStreamingCallAdapter {
+    void setStreamingState(int state);
 }

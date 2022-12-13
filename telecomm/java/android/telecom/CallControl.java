@@ -191,6 +191,38 @@ public final class CallControl implements AutoCloseable {
     }
 
     /**
+     * Request start a call streaming session. On receiving valid request, telecom will bind to
+     * the {@link CallStreamingService} implemented by a general call streaming sender. So that the
+     * call streaming sender can perform streaming local device audio to another remote device and
+     * control the call during streaming.
+     *
+     * @param executor The {@link Executor} on which the {@link OutcomeReceiver} callback
+     *                 will be called on.
+     * @param callback that will be completed on the Telecom side that details success or failure
+     *                 of the requested operation.
+     *
+     *                 {@link OutcomeReceiver#onResult} will be called if Telecom has successfully
+     *                 rejected the incoming call.
+     *
+     *                 {@link OutcomeReceiver#onError} will be called if Telecom has failed to
+     *                 reject the incoming call.  A {@link CallException} will be passed that
+     *                 details why the operation failed.
+     */
+    public void startCallStreaming(@CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Void, CallException> callback) {
+        if (mServerInterface != null) {
+            try {
+                mServerInterface.startCallStreaming(mCallId,
+                        new CallControlResultReceiver("startCallStreaming", executor, callback));
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        } else {
+            throw new IllegalStateException(INTERFACE_ERROR_MSG);
+        }
+    }
+
+    /**
      * This method should be called after
      * {@link CallControl#disconnect(DisconnectCause, Executor, OutcomeReceiver)} or
      * {@link CallControl#rejectCall(Executor, OutcomeReceiver)}
