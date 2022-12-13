@@ -373,6 +373,8 @@ public final class AudioFormat implements Parcelable {
      * Use {@link #ENCODING_DTS_UHD_P2} to transmit DTS UHD Profile 2 (aka DTS:X Profile 2)
      * bitstream. */
     public static final int ENCODING_DTS_UHD_P2 = 30;
+    /** Audio data format: Direct Stream Digital */
+    public static final int ENCODING_DSD = 31;
 
     /** @hide */
     public static String toLogFriendlyEncoding(int enc) {
@@ -437,6 +439,8 @@ public final class AudioFormat implements Parcelable {
                 return "ENCODING_DTS_HD_MA";
             case ENCODING_DTS_UHD_P2:
                 return "ENCODING_DTS_UHD_P2";
+            case ENCODING_DSD:
+                return "ENCODING_DSD";
             default :
                 return "invalid encoding " + enc;
         }
@@ -798,6 +802,7 @@ public final class AudioFormat implements Parcelable {
             case ENCODING_DRA:
             case ENCODING_DTS_HD_MA:
             case ENCODING_DTS_UHD_P2:
+            case ENCODING_DSD:
                 return true;
             default:
                 return false;
@@ -837,6 +842,7 @@ public final class AudioFormat implements Parcelable {
             case ENCODING_DRA:
             case ENCODING_DTS_HD_MA:
             case ENCODING_DTS_UHD_P2:
+            case ENCODING_DSD:
                 return true;
             default:
                 return false;
@@ -1211,6 +1217,7 @@ public final class AudioFormat implements Parcelable {
                 case ENCODING_DRA:
                 case ENCODING_DTS_HD_MA:
                 case ENCODING_DTS_UHD_P2:
+                case ENCODING_DSD:
                     mEncoding = encoding;
                     break;
                 case ENCODING_INVALID:
@@ -1441,7 +1448,8 @@ public final class AudioFormat implements Parcelable {
         ENCODING_DTS_UHD_P1,
         ENCODING_DRA,
         ENCODING_DTS_HD_MA,
-        ENCODING_DTS_UHD_P2 }
+        ENCODING_DTS_UHD_P2,
+        ENCODING_DSD }
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface Encoding {}
