@@ -41,6 +41,14 @@ class SpaSearchProviderTest {
     private val pageOwner = spaEnvironment.createPage("SppForSearch")
 
     @Test
+    fun testQueryColumnSetup() {
+        Truth.assertThat(QueryEnum.SEARCH_STATIC_DATA_QUERY.columnNames)
+            .containsExactlyElementsIn(QueryEnum.SEARCH_DYNAMIC_DATA_QUERY.columnNames)
+        Truth.assertThat(QueryEnum.SEARCH_MUTABLE_STATUS_DATA_QUERY.columnNames)
+            .containsExactlyElementsIn(QueryEnum.SEARCH_IMMUTABLE_STATUS_DATA_QUERY.columnNames)
+    }
+
+    @Test
     fun testQuerySearchStatusData() {
         SpaEnvironmentFactory.reset(spaEnvironment)
 

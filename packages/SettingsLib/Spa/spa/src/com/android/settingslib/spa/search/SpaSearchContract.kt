@@ -76,6 +76,7 @@ enum class QueryEnum(
             ColumnEnum.SEARCH_PATH,
             ColumnEnum.INTENT_TARGET_PACKAGE,
             ColumnEnum.INTENT_TARGET_CLASS,
+            ColumnEnum.INTENT_EXTRAS,
             ColumnEnum.SLICE_URI,
             ColumnEnum.LEGACY_KEY
         )
