@@ -41,6 +41,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
@@ -1133,9 +1134,14 @@ public class PackageManagerServiceUtils {
                 continue;
             }
 
-            final boolean match = comp.getIntents().stream().anyMatch(
-                    f -> IntentResolver.intentMatchesFilter(f.getIntentFilter(), intent,
-                            resolvedType));
+            boolean match = false;
+            for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
+                IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
+                if (IntentResolver.intentMatchesFilter(intentFilter, intent, resolvedType)) {
+                    match = true;
+                    break;
+                }
+            }
             if (!match) {
                 Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
                 Slog.w(TAG, "Access blocked: " + comp.getComponentName());
