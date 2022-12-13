@@ -22,6 +22,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
@@ -53,6 +55,7 @@ public abstract class SystemUIInitializer {
         mContext = context;
     }
 
+    @Nullable
     protected abstract GlobalRootComponent.Builder getGlobalRootComponentBuilder();
 
     /**
@@ -69,6 +72,11 @@ public abstract class SystemUIInitializer {
      * Starts the initialization process. This stands up the Dagger graph.
      */
     public void init(boolean fromTest) throws ExecutionException, InterruptedException {
+        GlobalRootComponent.Builder globalBuilder = getGlobalRootComponentBuilder();
+        if (globalBuilder == null) {
+            return;
+        }
+
         mRootComponent = getGlobalRootComponentBuilder()
                 .context(mContext)
                 .instrumentationTest(fromTest)
@@ -119,6 +127,7 @@ public abstract class SystemUIInitializer {
                     .setBackAnimation(Optional.ofNullable(null))
                     .setDesktopMode(Optional.ofNullable(null));
         }
+
         mSysUIComponent = builder.build();
         if (initializeComponents) {
             mSysUIComponent.init();
