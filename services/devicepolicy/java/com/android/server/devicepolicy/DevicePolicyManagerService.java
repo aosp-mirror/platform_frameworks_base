@@ -2588,7 +2588,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         ensureLocked();
         // Try to find an admin which can use reqPolicy
         final ComponentName poAdminComponent = mOwners.getProfileOwnerComponent(userId);
-        final ComponentName doAdminComponent = mOwners.getDeviceOwnerComponent();
 
         if (poAdminComponent != null) {
             return getProfileOwnerLocked(userId);
@@ -7762,9 +7761,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     // be disabled device-wide.
     private void pushScreenCapturePolicy(int adminUserId) {
         // Update screen capture device-wide if disabled by the DO or COPE PO on the parent profile.
-        ActiveAdmin admin =
-                getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceParentLocked(
-                        UserHandle.USER_SYSTEM);
+        // TODO(b/261999445): remove
+        ActiveAdmin admin;
+        if (isHeadlessFlagEnabled()) {
+            admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceParentLocked(
+                    mUserManagerInternal.getProfileParentId(adminUserId));
+        } else {
+            admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceParentLocked(
+                    UserHandle.USER_SYSTEM);
+        }
         if (admin != null && admin.disableScreenCapture) {
             setScreenCaptureDisabled(UserHandle.USER_ALL);
         } else {
@@ -8817,10 +8822,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return admin;
     }
 
-    /**
-     * @deprecated Use the version which does not take a user id.
-     */
-    @Deprecated
     ActiveAdmin getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceParentLocked(int userId) {
         ensureLocked();
         ActiveAdmin admin = getDeviceOwnerAdminLocked();
@@ -8828,16 +8829,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return admin;
         }
         admin = getProfileOwnerOfOrganizationOwnedDeviceLocked(userId);
-        return admin != null ? admin.getParentActiveAdmin() : null;
-    }
-
-    ActiveAdmin getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceParentLocked() {
-        ensureLocked();
-        ActiveAdmin admin = getDeviceOwnerAdminLocked();
-        if (admin != null) {
-            return admin;
-        }
-        admin = getProfileOwnerOfOrganizationOwnedDeviceLocked();
         return admin != null ? admin.getParentActiveAdmin() : null;
     }
 
@@ -9374,10 +9365,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return admin;
     }
 
-    /**
-     * @deprecated use the version which does not take a user id.
-     */
-    @Deprecated
     @GuardedBy("getLockObject()")
     ActiveAdmin getProfileOwnerOfOrganizationOwnedDeviceLocked(int userHandle) {
         return mInjector.binderWithCleanCallingIdentity(() -> {
