@@ -269,6 +269,12 @@ public class MmTelFeature extends ImsFeature {
         }
 
         @Override
+        public void onMemoryAvailable(int token) {
+            executeMethodAsyncNoException(() -> MmTelFeature.this
+                    .onMemoryAvailable(token), "onMemoryAvailable");
+        }
+
+        @Override
         public void acknowledgeSms(int token, int messageRef, int result) {
             executeMethodAsyncNoException(() -> MmTelFeature.this
                     .acknowledgeSms(token, messageRef, result), "acknowledgeSms");
@@ -1087,6 +1093,10 @@ public class MmTelFeature extends ImsFeature {
     private void sendSms(int token, int messageRef, String format, String smsc, boolean isRetry,
             byte[] pdu) {
         getSmsImplementation().sendSms(token, messageRef, format, smsc, isRetry, pdu);
+    }
+
+    private void onMemoryAvailable(int token) {
+        getSmsImplementation().onMemoryAvailable(token);
     }
 
     private void acknowledgeSms(int token, int messageRef,

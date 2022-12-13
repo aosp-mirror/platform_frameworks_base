@@ -3422,6 +3422,11 @@
          phone object irrespective of this config -->
     <bool name="config_switch_phone_on_voice_reg_state_change">true</bool>
 
+    <!-- Config determines whether Memory Availability Notification is supported over Ims so that
+         the RP-SMMA Notification is sent over Ims to SMS Service center indicating that UE can now
+          start receiving SMS after failures due to Memory Full event -->
+    <bool name="config_smma_notification_supported_over_ims">false</bool>
+
     <bool name="config_sms_force_7bit_encoding">false</bool>
 
     <!-- Number of physical SIM slots on the device. This includes both eSIM and pSIM slots, and
