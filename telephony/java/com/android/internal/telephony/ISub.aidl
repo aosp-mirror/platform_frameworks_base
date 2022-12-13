@@ -242,8 +242,6 @@ interface ISub {
 
     int getDefaultSubId();
 
-    int clearSubInfo();
-
     int getPhoneId(int subId);
 
     /**

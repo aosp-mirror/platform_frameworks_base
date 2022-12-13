@@ -348,7 +348,7 @@ public class SubscriptionManager {
 
     /**
      * A content {@link Uri} used to receive updates on advanced calling user setting
-     * @see ImsMmTelManager#isAdvancedCallingSettingEnabled().
+     *
      * <p>
      * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
      * subscription advanced calling enabled
@@ -359,6 +359,9 @@ public class SubscriptionManager {
      * delivery of updates to the {@link Uri}.
      * To be notified of changes to a specific subId, append subId to the URI
      * {@link Uri#withAppendedPath(Uri, String)}.
+     *
+     * @see ImsMmTelManager#isAdvancedCallingSettingEnabled()
+     *
      * @hide
      */
     @NonNull
@@ -1143,7 +1146,7 @@ public class SubscriptionManager {
      *
      * An opportunistic subscription will default to data-centric.
      *
-     * {@see SubscriptionInfo#isOpportunistic}
+     * @see SubscriptionInfo#isOpportunistic
      */
     public static final int USAGE_SETTING_DEFAULT = 0;
 
@@ -1927,7 +1930,7 @@ public class SubscriptionManager {
      *
      * <p>Requires the {@link android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
      *
-     * @see {@link TelephonyManager#getCardIdForDefaultEuicc()} for more information on the card ID.
+     * @see TelephonyManager#getCardIdForDefaultEuicc() for more information on the card ID.
      *
      * @hide
      */
@@ -1957,7 +1960,7 @@ public class SubscriptionManager {
      *
      * @param cardId the card ID of the eUICC.
      *
-     * @see {@link TelephonyManager#getCardIdForDefaultEuicc()} for more information on the card ID.
+     * @see TelephonyManager#getCardIdForDefaultEuicc() for more information on the card ID.
      *
      * @hide
      */
@@ -2081,10 +2084,15 @@ public class SubscriptionManager {
     }
 
     /**
-     * Remove SubscriptionInfo record from the SubscriptionInfo database
+     * Remove subscription info record from the subscription database.
+     *
      * @param uniqueId This is the unique identifier for the subscription within the specific
-     *                 subscription type.
-     * @param subscriptionType the {@link #SUBSCRIPTION_TYPE}
+     * subscription type.
+     * @param subscriptionType the type of subscription to be removed.
+     *
+     * @throws NullPointerException if {@code uniqueId} is {@code null}.
+     * @throws SecurityException if callers do not hold the required permission.
+     *
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
@@ -2433,20 +2441,6 @@ public class SubscriptionManager {
     @UnsupportedAppUsage
     public SubscriptionInfo getDefaultDataSubscriptionInfo() {
         return getActiveSubscriptionInfo(getDefaultDataSubscriptionId());
-    }
-
-    /** @hide */
-    public void clearSubscriptionInfo() {
-        try {
-            ISub iSub = TelephonyManager.getSubscriptionService();
-            if (iSub != null) {
-                iSub.clearSubInfo();
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        return;
     }
 
     /**
@@ -3021,7 +3015,6 @@ public class SubscriptionManager {
      *            considered unmetered.
      * @param networkTypes the network types this override applies to. If no
      *            network types are specified, override values will be ignored.
-     *            {@see TelephonyManager#getAllNetworkTypes()}
      * @param expirationDurationMillis the duration after which the requested override
      *            will be automatically cleared, or {@code 0} to leave in the
      *            requested state until explicitly cleared, or the next reboot,
@@ -3082,17 +3075,14 @@ public class SubscriptionManager {
      * </ul>
      *
      * @param subId the subscriber this override applies to.
-     * @param overrideCongested set if the subscription should be considered
-     *            congested.
-     * @param networkTypes the network types this override applies to. If no
-     *            network types are specified, override values will be ignored.
-     *            {@see TelephonyManager#getAllNetworkTypes()}
+     * @param overrideCongested set if the subscription should be considered congested.
+     * @param networkTypes the network types this override applies to. If no network types are
+     * specified, override values will be ignored.
      * @param expirationDurationMillis the duration after which the requested override
-     *            will be automatically cleared, or {@code 0} to leave in the
-     *            requested state until explicitly cleared, or the next reboot,
-     *            whichever happens first.
-     * @throws SecurityException if the caller doesn't meet the requirements
-     *            outlined above.
+     * will be automatically cleared, or {@code 0} to leave in the requested state until explicitly
+     * cleared, or the next reboot, whichever happens first.
+     *
+     * @throws SecurityException if the caller doesn't meet the requirements outlined above.
      */
     public void setSubscriptionOverrideCongested(int subId, boolean overrideCongested,
             @NonNull @Annotation.NetworkType int[] networkTypes,
@@ -3108,10 +3098,11 @@ public class SubscriptionManager {
      *
      * Only supported for embedded subscriptions (if {@link SubscriptionInfo#isEmbedded} returns
      * true). To check for permissions for non-embedded subscription as well,
-     * {@see android.telephony.TelephonyManager#hasCarrierPrivileges}.
      *
      * @param info The subscription to check.
      * @return whether the app is authorized to manage this subscription per its metadata.
+     *
+     * @see android.telephony.TelephonyManager#hasCarrierPrivileges
      */
     public boolean canManageSubscription(SubscriptionInfo info) {
         return canManageSubscription(info, mContext.getPackageName());
@@ -3124,11 +3115,13 @@ public class SubscriptionManager {
      *
      * Only supported for embedded subscriptions (if {@link SubscriptionInfo#isEmbedded} returns
      * true). To check for permissions for non-embedded subscription as well,
-     * {@see android.telephony.TelephonyManager#hasCarrierPrivileges}.
      *
      * @param info The subscription to check.
      * @param packageName Package name of the app to check.
+     *
      * @return whether the app is authorized to manage this subscription per its access rules.
+     *
+     * @see android.telephony.TelephonyManager#hasCarrierPrivileges
      * @hide
      */
     @SystemApi
@@ -3441,21 +3434,20 @@ public class SubscriptionManager {
 
     /**
      * Remove a list of subscriptions from their subscription group.
-     * See {@link #createSubscriptionGroup(List)} for more details.
      *
      * Caller will either have {@link android.Manifest.permission#MODIFY_PHONE_STATE}
-     * permission or had carrier privilege permission on the subscriptions:
-     * {@link TelephonyManager#hasCarrierPrivileges()} or
-     * {@link #canManageSubscription(SubscriptionInfo)}
-     *
-     * @throws SecurityException if the caller doesn't meet the requirements
-     *             outlined above.
-     * @throws IllegalArgumentException if the some subscriptions in the list doesn't belong
-     *             the specified group.
-     * @throws IllegalStateException if Telephony service is in bad state.
+     * permission or has carrier privilege permission on all of the subscriptions provided in
+     * {@code subIdList}.
      *
      * @param subIdList list of subId that need removing from their groups.
+     * @param groupUuid The UUID of the subscription group.
      *
+     * @throws SecurityException if the caller doesn't meet the requirements outlined above.
+     * @throws IllegalArgumentException if the some subscriptions in the list doesn't belong the
+     * specified group.
+     * @throws IllegalStateException if Telephony service is in bad state.
+     *
+     * @see #createSubscriptionGroup(List)
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
@@ -3463,7 +3455,7 @@ public class SubscriptionManager {
             @NonNull ParcelUuid groupUuid) {
         Preconditions.checkNotNull(subIdList, "subIdList can't be null.");
         Preconditions.checkNotNull(groupUuid, "groupUuid can't be null.");
-        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        String callingPackage = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         if (VDBG) {
             logd("[removeSubscriptionsFromGroup]");
         }
@@ -3473,7 +3465,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
-                iSub.removeSubscriptionsFromGroup(subIdArray, groupUuid, pkgForDebug);
+                iSub.removeSubscriptionsFromGroup(subIdArray, groupUuid, callingPackage);
             } else {
                 if (!isSystemProcess()) {
                     throw new IllegalStateException("telephony service is null.");
@@ -4079,12 +4071,15 @@ public class SubscriptionManager {
      * security-related or other sensitive scenarios.
      *
      * @param subscriptionId the subscription ID, or {@link #DEFAULT_SUBSCRIPTION_ID}
-     *                       for the default one.
+     * for the default one.
      * @param source the source of the phone number, one of the PHONE_NUMBER_SOURCE_* constants.
+     *
      * @return the phone number, or an empty string if not available.
+     *
      * @throws IllegalArgumentException if {@code source} is invalid.
      * @throws IllegalStateException if the telephony process is not currently available.
      * @throws SecurityException if the caller doesn't have permissions required.
+     *
      * @see #PHONE_NUMBER_SOURCE_UICC
      * @see #PHONE_NUMBER_SOURCE_CARRIER
      * @see #PHONE_NUMBER_SOURCE_IMS
@@ -4137,8 +4132,10 @@ public class SubscriptionManager {
      * @param subscriptionId the subscription ID, or {@link #DEFAULT_SUBSCRIPTION_ID}
      *                       for the default one.
      * @return the phone number, or an empty string if not available.
+     *
      * @throws IllegalStateException if the telephony process is not currently available.
      * @throws SecurityException if the caller doesn't have permissions required.
+     *
      * @see #getPhoneNumber(int, int)
      */
     @RequiresPermission(anyOf = {
