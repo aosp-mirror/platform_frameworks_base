@@ -102,6 +102,7 @@ final class BootUserInitializer {
         switchToInitialUser(initialUserId);
     }
 
+    /* TODO(b/261791491): STOPSHIP - SUW should be responsible for this. */
     private void provisionHeadlessSystemUser() {
         if (isDeviceProvisioned()) {
             Slogf.d(TAG, "provisionHeadlessSystemUser(): already provisioned");

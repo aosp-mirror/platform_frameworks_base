@@ -36274,7 +36274,7 @@ package android.provider {
     field public static final String PARENTAL_CONTROL_LAST_UPDATE = "parental_control_last_update";
     field public static final String PARENTAL_CONTROL_REDIRECT_URL = "parental_control_redirect_url";
     field public static final String RTT_CALLING_MODE = "rtt_calling_mode";
-    field public static final String SECURE_FRP_MODE = "secure_frp_mode";
+    field @Deprecated public static final String SECURE_FRP_MODE = "secure_frp_mode";
     field public static final String SELECTED_INPUT_METHOD_SUBTYPE = "selected_input_method_subtype";
     field public static final String SETTINGS_CLASSNAME = "settings_classname";
     field public static final String SKIP_FIRST_USE_HINTS = "skip_first_use_hints";
