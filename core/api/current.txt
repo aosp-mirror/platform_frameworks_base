@@ -45443,6 +45443,7 @@ package android.telephony.ims.feature {
 package android.telephony.ims.stub {
 
   public class ImsRegistrationImplBase {
+    field public static final int REGISTRATION_TECH_3G = 4; // 0x4
     field public static final int REGISTRATION_TECH_CROSS_SIM = 2; // 0x2
     field public static final int REGISTRATION_TECH_IWLAN = 1; // 0x1
     field public static final int REGISTRATION_TECH_LTE = 0; // 0x0
