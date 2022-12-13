@@ -169,7 +169,12 @@ public class DevicePolicyManager {
     public static final String DEPRECATE_USERMANAGERINTERNAL_DEVICEPOLICY_FLAG =
             "deprecate_usermanagerinternal_devicepolicy";
     /** @hide */
-    public static final boolean DEPRECATE_USERMANAGERINTERNAL_DEVICEPOLICY_DEFAULT = false;
+    public static final boolean DEPRECATE_USERMANAGERINTERNAL_DEVICEPOLICY_DEFAULT = true;
+    /** @hide */
+    public static final String ADD_ISFINANCED_DEVICE_FLAG =
+            "add-isfinanced-device";
+    /** @hide */
+    public static final boolean ADD_ISFINANCED_FEVICE_DEFAULT = true;
 
     private static String TAG = "DevicePolicyManager";
 
@@ -15425,10 +15430,13 @@ public class DevicePolicyManager {
      *
      * @throws IllegalStateException When admin is not the device owner or there is no device owner.
      *
+     * @deprecated Use type-specific APIs (e.g. {@link #isFinancedDevice}).
      * @hide
      */
     @TestApi
     @DeviceOwnerType
+    @Deprecated
+    // TODO(b/259908270): remove
     public int getDeviceOwnerType(@NonNull ComponentName admin) {
         throwIfParentInstance("getDeviceOwnerType");
         if (mService != null) {
@@ -15439,6 +15447,20 @@ public class DevicePolicyManager {
             }
         }
         return DEVICE_OWNER_TYPE_DEFAULT;
+    }
+
+    /**
+     * {@code true} if this device is financed.
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
+    })
+    public boolean isFinancedDevice() {
+        return isDeviceManaged()
+                && getDeviceOwnerType(getDeviceOwnerComponentOnAnyUser())
+                == DEVICE_OWNER_TYPE_FINANCED;
     }
 
     /**
