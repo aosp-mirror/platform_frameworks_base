@@ -56,8 +56,10 @@ import android.os.Vibrator;
 import android.os.VibratorManager;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.util.DisplayUtils;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
@@ -69,6 +71,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
@@ -1582,6 +1585,66 @@ public final class InputManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Reports the version of the Universal Stylus Initiative (USI) protocol supported by the given
+     * display, if any.
+     *
+     * @return the USI version supported by the display, or null if the device does not support USI
+     * @see <a href="https://universalstylus.org">Universal Stylus Initiative</a>
+     */
+    @Nullable
+    public HostUsiVersion getHostUsiVersion(@NonNull Display display) {
+        Objects.requireNonNull(display, "display should not be null");
+
+        // Return the first valid USI version reported by any input device associated with
+        // the display.
+        synchronized (mInputDevicesLock) {
+            populateInputDevicesLocked();
+
+            for (int i = 0; i < mInputDevices.size(); i++) {
+                final InputDevice device = getInputDevice(mInputDevices.keyAt(i));
+                if (device != null && device.getAssociatedDisplayId() == display.getDisplayId()) {
+                    if (device.getHostUsiVersion() != null) {
+                        return device.getHostUsiVersion();
+                    }
+                }
+            }
+        }
+
+        // If there are no input devices that report a valid USI version, see if there is a config
+        // that specifies the USI version for the display. This is to handle cases where the USI
+        // input device is not registered by the kernel/driver all the time.
+        return findConfigUsiVersionForDisplay(display);
+    }
+
+    private HostUsiVersion findConfigUsiVersionForDisplay(@NonNull Display display) {
+        final Context context = Objects.requireNonNull(ActivityThread.currentApplication());
+        final String[] displayUniqueIds = context.getResources().getStringArray(
+                R.array.config_displayUniqueIdArray);
+        final int index;
+        if (displayUniqueIds.length == 0 && display.getDisplayId() == context.getDisplayId()) {
+            index = 0;
+        } else {
+            index = DisplayUtils.getDisplayUniqueIdConfigIndex(context.getResources(),
+                    display.getUniqueId());
+        }
+
+        final String[] versions = context.getResources().getStringArray(
+                R.array.config_displayUsiVersionArray);
+        if (index < 0 || index >= versions.length) {
+            return null;
+        }
+        final String version = versions[index];
+        if (version == null || version.isEmpty()) {
+            return null;
+        }
+        final String[] majorMinor = version.split("\\.");
+        if (majorMinor.length != 2) {
+            throw new IllegalStateException("Failed to parse USI version: " + version);
+        }
+        return new HostUsiVersion(Integer.parseInt(majorMinor[0]), Integer.parseInt(majorMinor[1]));
     }
 
     private void populateInputDevicesLocked() {

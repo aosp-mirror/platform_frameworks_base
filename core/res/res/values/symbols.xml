@@ -4776,6 +4776,7 @@
   <java-symbol type="array" name="config_mainBuiltInDisplayWaterfallCutout" />
   <java-symbol type="array" name="config_secondaryBuiltInDisplayWaterfallCutout" />
   <java-symbol type="array" name="config_waterfallCutoutArray" />
+  <java-symbol type="array" name="config_displayUsiVersionArray" />
 
   <java-symbol type="fraction" name="global_actions_vertical_padding_percentage" />
   <java-symbol type="fraction" name="global_actions_horizontal_padding_percentage" />

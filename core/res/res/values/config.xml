@@ -5795,6 +5795,7 @@
            - config_roundedCornerDrawableArray (config in SystemUI resource)
            - config_roundedCornerTopDrawableArray (config in SystemUI resource)
            - config_roundedCornerBottomDrawableArray (config in SystemUI resource)
+           - config_displayUsiVersionArray
 
          Leave this array empty for single display device and the system will load the default main
          built-in related configs.
@@ -6152,5 +6153,22 @@
         Connect Migration permissions. The digest should be computed over the DER encoding of the
         trusted certificate using the SHA-256 digest algorithm. -->
     <string-array name="config_healthConnectMigrationKnownSigners">
+    </string-array>
+
+    <!-- The Universal Stylus Initiative (USI) protocol version supported by each display.
+         (@see https://universalstylus.org/).
+
+         The i-th value in this array corresponds to the supported USI version of the i-th display
+         listed in config_displayUniqueIdArray. On a single-display device, the
+         config_displayUniqueIdArray may be empty, in which case the only value in this array should
+         be the USI version for the main built-in display.
+
+         If the display does not support USI, the version value should be an empty string. If the
+         display supports USI, the version must be in the following format:
+           "<major-version>.<minor-version>"
+
+         For example, "", "1.0", and "2.0" are valid values. -->
+    <string-array name="config_displayUsiVersionArray" translatable="false">
+        <item>""</item>
     </string-array>
 </resources>
