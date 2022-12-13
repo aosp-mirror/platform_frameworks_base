@@ -121,7 +121,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     public static final int EXIT_REASON_SCREEN_LOCKED = 7;
     public static final int EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP = 8;
     public static final int EXIT_REASON_CHILD_TASK_ENTER_PIP = 9;
-    public static final int EXIT_REASON_FULLSCREEN_SHORTCUT = 10;
+    public static final int EXIT_REASON_RECREATE_SPLIT = 10;
+    public static final int EXIT_REASON_FULLSCREEN_SHORTCUT = 11;
     @IntDef(value = {
             EXIT_REASON_UNKNOWN,
             EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW,
@@ -133,6 +134,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             EXIT_REASON_SCREEN_LOCKED,
             EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP,
             EXIT_REASON_CHILD_TASK_ENTER_PIP,
+            EXIT_REASON_RECREATE_SPLIT,
             EXIT_REASON_FULLSCREEN_SHORTCUT,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -470,7 +472,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      */
     public void startShortcut(String packageName, String shortcutId, @SplitPosition int position,
             @Nullable Bundle options, UserHandle user, @NonNull InstanceId instanceId) {
-        mStageCoordinator.getLogger().enterRequested(instanceId, ENTER_REASON_LAUNCHER);
+        mStageCoordinator.onRequestToSplit(instanceId, ENTER_REASON_LAUNCHER);
         startShortcut(packageName, shortcutId, position, options, user);
     }
 
@@ -518,7 +520,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      */
     public void startIntent(PendingIntent intent, @Nullable Intent fillInIntent,
             @SplitPosition int position, @Nullable Bundle options, @NonNull InstanceId instanceId) {
-        mStageCoordinator.getLogger().enterRequested(instanceId, ENTER_REASON_LAUNCHER);
+        mStageCoordinator.onRequestToSplit(instanceId, ENTER_REASON_LAUNCHER);
         startIntent(intent, fillInIntent, position, options);
     }
 
@@ -784,10 +786,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return splitTasksLayer;
     }
     /**
-     * Sets drag info to be logged when splitscreen is entered.
+     * Drop callback when splitscreen is entered.
      */
-    public void logOnDroppedToSplit(@SplitPosition int position, InstanceId dragSessionId) {
-        mStageCoordinator.logOnDroppedToSplit(position, dragSessionId);
+    public void onDroppedToSplit(@SplitPosition int position, InstanceId dragSessionId) {
+        mStageCoordinator.onDroppedToSplit(position, dragSessionId);
     }
 
     /**
@@ -815,6 +817,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 return "APP_DOES_NOT_SUPPORT_MULTIWINDOW";
             case EXIT_REASON_CHILD_TASK_ENTER_PIP:
                 return "CHILD_TASK_ENTER_PIP";
+            case EXIT_REASON_RECREATE_SPLIT:
+                return "RECREATE_SPLIT";
             default:
                 return "unknown reason, reason int = " + exitReason;
         }
