@@ -1125,11 +1125,12 @@ class Task extends TaskFragment {
         if (inMultiWindowMode() || !hasChild()) return false;
         if (intent != null) {
             final int returnHomeFlags = FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME;
+            if ((intent.getFlags() & returnHomeFlags) != returnHomeFlags) {
+                return false;
+            }
             final Task task = getDisplayArea() != null ? getDisplayArea().getRootHomeTask() : null;
-            final boolean isLockTaskModeViolation = task != null
-                    && mAtmService.getLockTaskController().isLockTaskModeViolation(task);
-            return (intent.getFlags() & returnHomeFlags) == returnHomeFlags
-                    && !isLockTaskModeViolation;
+            return !(task != null
+                    && mAtmService.getLockTaskController().isLockTaskModeViolation(task));
         }
         final Task bottomTask = getBottomMostTask();
         return bottomTask != this && bottomTask.returnsToHomeRootTask();
@@ -1612,10 +1613,18 @@ class Task extends TaskFragment {
             // removed. Otherwise, shell transitions wouldn't run because there would be no event
             // that sets the transition ready.
             final boolean traverseTopToBottom = !mTransitionController.isShellTransitionsEnabled();
-            forAllActivities((r) -> {
+            final ArrayList<ActivityRecord> finishingActivities = new ArrayList<>();
+            forAllActivities(r -> {
                 if (r.finishing || (excludingTaskOverlay && r.isTaskOverlay())) {
                     return;
                 }
+                finishingActivities.add(r);
+            }, traverseTopToBottom);
+
+
+            for (int i = 0; i < finishingActivities.size(); i++) {
+                final ActivityRecord r = finishingActivities.get(i);
+
                 // Prevent the transition from being executed too early if the top activity is
                 // resumed but the mVisibleRequested of any other activity is true, the transition
                 // should wait until next activity resumed.
@@ -1625,7 +1634,7 @@ class Task extends TaskFragment {
                 } else {
                     r.destroyIfPossible(reason);
                 }
-            }, traverseTopToBottom);
+            }
         }
     }
 

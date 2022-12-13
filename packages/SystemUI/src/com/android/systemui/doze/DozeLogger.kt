@@ -364,6 +364,14 @@ class DozeLogger @Inject constructor(
         })
     }
 
+    fun logSetIgnoreTouchWhilePulsing(ignoreTouchWhilePulsing: Boolean) {
+        buffer.log(TAG, DEBUG, {
+            bool1 = ignoreTouchWhilePulsing
+        }, {
+            "Prox changed while pulsing. setIgnoreTouchWhilePulsing=$bool1"
+        })
+    }
+
     fun log(@CompileTimeConstant msg: String) {
         buffer.log(TAG, DEBUG, msg)
     }

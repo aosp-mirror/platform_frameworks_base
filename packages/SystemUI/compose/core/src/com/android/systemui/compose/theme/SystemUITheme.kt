@@ -18,12 +18,17 @@ package com.android.systemui.compose.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Typography
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import com.android.systemui.compose.theme.typography.TypeScaleTokens
+import com.android.systemui.compose.theme.typography.TypefaceNames
+import com.android.systemui.compose.theme.typography.TypefaceTokens
+import com.android.systemui.compose.theme.typography.TypographyTokens
+import com.android.systemui.compose.theme.typography.systemUITypography
 
 /** The Material 3 theme that should wrap all SystemUI Composables. */
 @Composable
@@ -33,7 +38,7 @@ fun SystemUITheme(
 ) {
     val context = LocalContext.current
 
-    // TODO(b/230605885): Define our typography and color scheme.
+    // TODO(b/230605885): Define our color scheme.
     val colorScheme =
         if (isDarkTheme) {
             dynamicDarkColorScheme(context)
@@ -41,7 +46,11 @@ fun SystemUITheme(
             dynamicLightColorScheme(context)
         }
     val androidColorScheme = AndroidColorScheme(context)
-    val typography = Typography()
+    val typefaceNames = remember(context) { TypefaceNames.get(context) }
+    val typography =
+        remember(typefaceNames) {
+            systemUITypography(TypographyTokens(TypeScaleTokens(TypefaceTokens(typefaceNames))))
+        }
 
     MaterialTheme(colorScheme, typography = typography) {
         CompositionLocalProvider(

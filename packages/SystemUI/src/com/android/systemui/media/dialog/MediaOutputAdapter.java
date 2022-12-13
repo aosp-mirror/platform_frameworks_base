@@ -24,9 +24,11 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.widget.CompoundButtonCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.settingslib.media.LocalMediaManager.MediaDeviceState;
 import com.android.settingslib.media.MediaDevice;
@@ -48,29 +50,68 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     }
 
     @Override
-    public MediaDeviceBaseViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup,
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup,
             int viewType) {
         super.onCreateViewHolder(viewGroup, viewType);
-        return new MediaDeviceViewHolder(mHolderView);
+        if (mController.isAdvancedLayoutSupported()) {
+            switch (viewType) {
+                case MediaItem.MediaItemType.TYPE_GROUP_DIVIDER:
+                    return new MediaGroupDividerViewHolder(mHolderView);
+                case MediaItem.MediaItemType.TYPE_PAIR_NEW_DEVICE:
+                case MediaItem.MediaItemType.TYPE_DEVICE:
+                default:
+                    return new MediaDeviceViewHolder(mHolderView);
+            }
+        } else {
+            return new MediaDeviceViewHolder(mHolderView);
+        }
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MediaDeviceBaseViewHolder viewHolder, int position) {
-        final int size = mController.getMediaDevices().size();
-        if (position == size) {
-            viewHolder.onBind(CUSTOMIZED_ITEM_PAIR_NEW, false /* topMargin */,
-                    true /* bottomMargin */);
-        } else if (position < size) {
-            viewHolder.onBind(((List<MediaDevice>) (mController.getMediaDevices())).get(position),
-                    position == 0 /* topMargin */, position == (size - 1) /* bottomMargin */,
-                    position);
-        } else if (DEBUG) {
-            Log.d(TAG, "Incorrect position: " + position);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
+        if (mController.isAdvancedLayoutSupported()) {
+            MediaItem currentMediaItem = mController.getMediaItemList().get(position);
+            switch (currentMediaItem.getMediaItemType()) {
+                case MediaItem.MediaItemType.TYPE_GROUP_DIVIDER:
+                    ((MediaGroupDividerViewHolder) viewHolder).onBind(currentMediaItem.getTitle());
+                    break;
+                case MediaItem.MediaItemType.TYPE_PAIR_NEW_DEVICE:
+                    ((MediaDeviceViewHolder) viewHolder).onBind(CUSTOMIZED_ITEM_PAIR_NEW);
+                    break;
+                case MediaItem.MediaItemType.TYPE_DEVICE:
+                    ((MediaDeviceViewHolder) viewHolder).onBind(
+                            currentMediaItem.getMediaDevice().get(),
+                            position);
+                    break;
+                default:
+                    Log.d(TAG, "Incorrect position: " + position);
+            }
+        } else {
+            final int size = mController.getMediaDevices().size();
+            if (position == size) {
+                ((MediaDeviceViewHolder) viewHolder).onBind(CUSTOMIZED_ITEM_PAIR_NEW);
+            } else if (position < size) {
+                ((MediaDeviceViewHolder) viewHolder).onBind(
+                        ((List<MediaDevice>) (mController.getMediaDevices())).get(position),
+                        position);
+            } else if (DEBUG) {
+                Log.d(TAG, "Incorrect position: " + position);
+            }
         }
     }
 
     @Override
     public long getItemId(int position) {
+        if (mController.isAdvancedLayoutSupported()) {
+            if (position >= mController.getMediaItemList().size()) {
+                Log.d(TAG, "Incorrect position for item id: " + position);
+                return position;
+            }
+            MediaItem currentMediaItem = mController.getMediaItemList().get(position);
+            return currentMediaItem.getMediaDevice().isPresent()
+                    ? currentMediaItem.getMediaDevice().get().getId().hashCode()
+                    : position;
+        }
         final int size = mController.getMediaDevices().size();
         if (position == size) {
             return -1;
@@ -84,9 +125,18 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     }
 
     @Override
+    public int getItemViewType(int position) {
+        return mController.isAdvancedLayoutSupported()
+                ? mController.getMediaItemList().get(position).getMediaItemType()
+                : super.getItemViewType(position);
+    }
+
+    @Override
     public int getItemCount() {
         // Add extra one for "pair new"
-        return mController.getMediaDevices().size() + 1;
+        return mController.isAdvancedLayoutSupported()
+                ? mController.getMediaItemList().size()
+                : mController.getMediaDevices().size() + 1;
     }
 
     class MediaDeviceViewHolder extends MediaDeviceBaseViewHolder {
@@ -96,8 +146,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         }
 
         @Override
-        void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin, int position) {
-            super.onBind(device, topMargin, bottomMargin, position);
+        void onBind(MediaDevice device, int position) {
+            super.onBind(device, position);
             boolean isMutingExpectedDeviceExist = mController.hasMutingExpectedDevice();
             final boolean currentlyConnected = isCurrentlyConnected(device);
             boolean isCurrentSeekbarInvisible = mSeekBar.getVisibility() == View.GONE;
@@ -261,7 +311,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         }
 
         @Override
-        void onBind(int customizedItem, boolean topMargin, boolean bottomMargin) {
+        void onBind(int customizedItem) {
             if (customizedItem == CUSTOMIZED_ITEM_PAIR_NEW) {
                 mTitleText.setTextColor(mController.getColorItemContent());
                 mCheckBox.setVisibility(View.GONE);
@@ -316,6 +366,20 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             == MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE
                             ? R.string.accessibility_bluetooth_name
                             : R.string.accessibility_cast_name, device.getName()));
+        }
+    }
+
+    class MediaGroupDividerViewHolder extends RecyclerView.ViewHolder {
+        final TextView mTitleText;
+
+        MediaGroupDividerViewHolder(@NonNull View itemView) {
+            super(itemView);
+            mTitleText = itemView.requireViewById(R.id.title);
+        }
+
+        void onBind(String groupDividerTitle) {
+            mTitleText.setTextColor(mController.getColorItemContent());
+            mTitleText.setText(groupDividerTitle);
         }
     }
 }

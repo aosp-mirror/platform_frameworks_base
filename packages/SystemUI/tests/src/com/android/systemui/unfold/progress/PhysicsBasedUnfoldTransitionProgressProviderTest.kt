@@ -69,6 +69,22 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
     }
 
     @Test
+    fun testUnfold_emitsFinishingEvent() {
+        runOnMainThreadWithInterval(
+            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
+            { foldStateProvider.sendHingeAngleUpdate(10f) },
+            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE) },
+            { foldStateProvider.sendHingeAngleUpdate(90f) },
+            { foldStateProvider.sendHingeAngleUpdate(180f) },
+            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN) },
+        )
+
+        with(listener.ensureTransitionFinished()) {
+            assertHasSingleFinishingEvent()
+        }
+    }
+
+    @Test
     fun testUnfold_screenAvailableOnlyAfterFullUnfold_emitsIncreasingTransitionEvents() {
         runOnMainThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
@@ -157,6 +173,12 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
             currentRecording!!.addProgress(progress)
         }
 
+        override fun onTransitionFinishing() {
+            assertWithMessage("Received transition finishing event when it's not started")
+                    .that(currentRecording).isNotNull()
+            currentRecording!!.onFinishing()
+        }
+
         override fun onTransitionFinished() {
             assertWithMessage("Received transition finish event when it's not started")
                 .that(currentRecording).isNotNull()
@@ -171,12 +193,17 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
 
         class UnfoldTransitionRecording {
             private val progressHistory: MutableList<Float> = arrayListOf()
+            private var finishingInvocations: Int = 0
 
             fun addProgress(progress: Float) {
                 assertThat(progress).isAtMost(1.0f)
                 assertThat(progress).isAtLeast(0.0f)
 
                 progressHistory += progress
+            }
+
+            fun onFinishing() {
+                finishingInvocations++
             }
 
             fun assertIncreasingProgress() {
@@ -205,6 +232,11 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
                 assertThat(progressHistory.takeLast(MIN_ANIMATION_EVENTS))
                     .isInOrder(Comparator.reverseOrder<Float>())
                 assertThat(progressHistory.last()).isEqualTo(0.0f)
+            }
+
+            fun assertHasSingleFinishingEvent() {
+                assertWithMessage("onTransitionFinishing callback should be invoked exactly " +
+                        "one time").that(finishingInvocations).isEqualTo(1)
             }
         }
 
