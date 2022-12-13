@@ -190,8 +190,7 @@ public abstract class WMShellModule {
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             SyncTransactionQueue syncQueue,
-            Optional<DesktopModeController> desktopModeController,
-            Optional<DesktopTasksController> desktopTasksController) {
+            Optional<DesktopModeController> desktopModeController) {
         return new CaptionWindowDecorViewModel(
                     context,
                     mainHandler,
@@ -199,8 +198,7 @@ public abstract class WMShellModule {
                     taskOrganizer,
                     displayController,
                     syncQueue,
-                    desktopModeController,
-                    desktopTasksController);
+                    desktopModeController);
     }
 
     //

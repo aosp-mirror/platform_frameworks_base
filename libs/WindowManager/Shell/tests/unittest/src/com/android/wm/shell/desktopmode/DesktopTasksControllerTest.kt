@@ -17,9 +17,6 @@
 package com.android.wm.shell.desktopmode
 
 import android.app.ActivityManager.RunningTaskInfo
-import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
-import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
-import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.testing.AndroidTestingRunner
 import android.window.WindowContainerTransaction
 import android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER
@@ -32,7 +29,6 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
-import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
@@ -122,8 +118,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     fun showDesktopApps_allAppsInvisible_bringsToFront() {
         val homeTask = setUpHomeTask()
-        val task1 = setUpFreeformTask()
-        val task2 = setUpFreeformTask()
+        val task1 = setUpDesktopTask()
+        val task2 = setUpDesktopTask()
         markTaskHidden(task1)
         markTaskHidden(task2)
 
@@ -140,21 +136,25 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     fun showDesktopApps_appsAlreadyVisible_doesNothing() {
         setUpHomeTask()
-        val task1 = setUpFreeformTask()
-        val task2 = setUpFreeformTask()
+        val task1 = setUpDesktopTask()
+        val task2 = setUpDesktopTask()
         markTaskVisible(task1)
         markTaskVisible(task2)
 
         controller.showDesktopApps()
 
-        verifyWCTNotExecuted()
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            verify(transitions, never()).startTransition(anyInt(), any(), isNull())
+        } else {
+            verify(shellTaskOrganizer, never()).applyTransaction(any())
+        }
     }
 
     @Test
     fun showDesktopApps_someAppsInvisible_reordersAll() {
         val homeTask = setUpHomeTask()
-        val task1 = setUpFreeformTask()
-        val task2 = setUpFreeformTask()
+        val task1 = setUpDesktopTask()
+        val task2 = setUpDesktopTask()
         markTaskHidden(task1)
         markTaskVisible(task2)
 
@@ -179,49 +179,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         wct.assertReorderAt(index = 0, homeTask)
     }
 
-    @Test
-    fun moveToDesktop() {
-        val task = setUpFullscreenTask()
-        controller.moveToDesktop(task)
-        val wct = getLatestWct()
-        assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
-            .isEqualTo(WINDOWING_MODE_FREEFORM)
-    }
-
-    @Test
-    fun moveToDesktop_nonExistentTask_doesNothing() {
-        controller.moveToDesktop(999)
-        verifyWCTNotExecuted()
-    }
-
-    @Test
-    fun moveToFullscreen() {
-        val task = setUpFreeformTask()
-        controller.moveToFullscreen(task)
-        val wct = getLatestWct()
-        assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
-            .isEqualTo(WINDOWING_MODE_FULLSCREEN)
-    }
-
-    @Test
-    fun moveToFullscreen_nonExistentTask_doesNothing() {
-        controller.moveToFullscreen(999)
-        verifyWCTNotExecuted()
-    }
-
-    @Test
-    fun getTaskWindowingMode() {
-        val fullscreenTask = setUpFullscreenTask()
-        val freeformTask = setUpFreeformTask()
-
-        assertThat(controller.getTaskWindowingMode(fullscreenTask.taskId))
-            .isEqualTo(WINDOWING_MODE_FULLSCREEN)
-        assertThat(controller.getTaskWindowingMode(freeformTask.taskId))
-            .isEqualTo(WINDOWING_MODE_FREEFORM)
-        assertThat(controller.getTaskWindowingMode(999)).isEqualTo(WINDOWING_MODE_UNDEFINED)
-    }
-
-    private fun setUpFreeformTask(): RunningTaskInfo {
+    private fun setUpDesktopTask(): RunningTaskInfo {
         val task = createFreeformTask()
         whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
         desktopModeTaskRepository.addActiveTask(task.taskId)
@@ -232,13 +190,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     private fun setUpHomeTask(): RunningTaskInfo {
         val task = createHomeTask()
-        whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
-        runningTasks.add(task)
-        return task
-    }
-
-    private fun setUpFullscreenTask(): RunningTaskInfo {
-        val task = createFullscreenTask()
         whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
         runningTasks.add(task)
         return task
@@ -260,14 +211,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
             verify(shellTaskOrganizer).applyTransaction(arg.capture())
         }
         return arg.value
-    }
-
-    private fun verifyWCTNotExecuted() {
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            verify(transitions, never()).startTransition(anyInt(), any(), isNull())
-        } else {
-            verify(shellTaskOrganizer, never()).applyTransaction(any())
-        }
     }
 }
 
