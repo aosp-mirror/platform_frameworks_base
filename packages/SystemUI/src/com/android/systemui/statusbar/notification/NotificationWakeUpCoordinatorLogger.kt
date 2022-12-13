@@ -16,22 +16,33 @@ package com.android.systemui.statusbar.notification
 import com.android.systemui.log.dagger.NotificationLog
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel.DEBUG
+import com.android.systemui.statusbar.StatusBarState
 import javax.inject.Inject
 
 class NotificationWakeUpCoordinatorLogger
 @Inject
 constructor(@NotificationLog private val buffer: LogBuffer) {
-    fun logSetDozeAmount(linear: String, eased: String, source: String, state: Int) {
+    fun logSetDozeAmount(
+        linear: Float,
+        eased: Float,
+        source: String,
+        state: Int,
+        changed: Boolean,
+    ) {
         buffer.log(
             TAG,
             DEBUG,
             {
-                str1 = linear
-                str2 = eased
+                double1 = linear.toDouble()
+                str2 = eased.toString()
                 str3 = source
                 int1 = state
+                bool1 = changed
             },
-            { "setDozeAmount: linear: $str1, eased: $str2, source: $str3, state: $int1" }
+            {
+                "setDozeAmount(linear=$double1, eased=$str2, source=$str3)" +
+                    " state=${StatusBarState.toString(int1)} changed=$bool1"
+            }
         )
     }
 
@@ -43,12 +54,23 @@ constructor(@NotificationLog private val buffer: LogBuffer) {
                 double1 = linear.toDouble()
                 str2 = eased.toString()
             },
-            { "onDozeAmountChanged($double1, $str2)" }
+            { "onDozeAmountChanged(linear=$double1, eased=$str2)" }
         )
     }
 
-    fun logOnStateChanged(newState: Int) {
-        buffer.log(TAG, DEBUG, { int1 = newState }, { "onStateChanged($int1)" })
+    fun logOnStateChanged(newState: Int, storedState: Int) {
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                int1 = newState
+                int2 = storedState
+            },
+            {
+                "onStateChanged(newState=${StatusBarState.toString(int1)})" +
+                    " stored=${StatusBarState.toString(int2)}"
+            }
+        )
     }
 }
 
