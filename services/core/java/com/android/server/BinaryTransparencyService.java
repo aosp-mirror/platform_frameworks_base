@@ -119,7 +119,7 @@ public class BinaryTransparencyService extends SystemService {
     // used for indicating newly installed MBAs that are updated (but unused currently)
     static final int MBA_STATUS_UPDATED_NEW_INSTALL = 4;
 
-    private static final boolean DEBUG = true;     // set this to false upon submission
+    private static final boolean DEBUG = false;     // toggle this for local debug
 
     private final Context mContext;
     private String mVbmetaDigest;
