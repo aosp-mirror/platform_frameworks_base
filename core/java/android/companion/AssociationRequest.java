@@ -73,6 +73,21 @@ public final class AssociationRequest implements Parcelable {
     public static final String DEVICE_PROFILE_WATCH = "android.app.role.COMPANION_DEVICE_WATCH";
 
     /**
+     * Device profile: glasses.
+     *
+     * If specified, the current request may have a modified UI to highlight that the device being
+     * set up is a glasses device, and some extra permissions may be granted to the app
+     * as a result.
+     *
+     * Using it requires declaring uses-permission
+     * {@link android.Manifest.permission#REQUEST_COMPANION_PROFILE_GLASSES} in the manifest.
+     *
+     * @see AssociationRequest.Builder#setDeviceProfile
+     */
+    @RequiresPermission(Manifest.permission.REQUEST_COMPANION_PROFILE_GLASSES)
+    public static final String DEVICE_PROFILE_GLASSES = "android.app.role.COMPANION_DEVICE_GLASSES";
+
+    /**
      * Device profile: a virtual display capable of rendering Android applications, and sending back
      * input events.
      *
@@ -85,6 +100,20 @@ public final class AssociationRequest implements Parcelable {
     @RequiresPermission(Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING)
     public static final String DEVICE_PROFILE_APP_STREAMING =
             "android.app.role.COMPANION_DEVICE_APP_STREAMING";
+
+    /**
+     * Device profile: a virtual device capable of rendering content from an Android host to a
+     * nearby device.
+     *
+     * Only applications that have been granted
+     * {@link android.Manifest.permission#REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING}
+     * are allowed to request to be associated with such devices.
+     *
+     * @see AssociationRequest.Builder#setDeviceProfile
+     */
+    @RequiresPermission(Manifest.permission.REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING)
+    public static final String DEVICE_PROFILE_NEARBY_DEVICE_STREAMING =
+            "android.app.role.COMPANION_DEVICE_NEARBY_DEVICE_STREAMING";
 
     /**
      * Device profile: Android Automotive Projection
@@ -116,7 +145,8 @@ public final class AssociationRequest implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef(value = { DEVICE_PROFILE_WATCH, DEVICE_PROFILE_COMPUTER,
-            DEVICE_PROFILE_AUTOMOTIVE_PROJECTION, DEVICE_PROFILE_APP_STREAMING })
+            DEVICE_PROFILE_AUTOMOTIVE_PROJECTION, DEVICE_PROFILE_APP_STREAMING,
+            DEVICE_PROFILE_GLASSES, DEVICE_PROFILE_NEARBY_DEVICE_STREAMING })
     public @interface DeviceProfile {}
 
     /**

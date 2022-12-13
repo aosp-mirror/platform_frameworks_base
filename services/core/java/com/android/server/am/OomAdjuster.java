@@ -709,7 +709,9 @@ public class OomAdjuster {
                 ConnectionRecord cr = psr.getConnectionAt(i);
                 ProcessRecord service = (cr.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0
                         ? cr.binding.service.isolationHostProc : cr.binding.service.app;
-                if (service == null || service == pr) {
+                if (service == null || service == pr
+                        || ((service.mState.getMaxAdj() >= ProcessList.SYSTEM_ADJ)
+                                && (service.mState.getMaxAdj() < FOREGROUND_APP_ADJ))) {
                     continue;
                 }
                 containsCycle |= service.mState.isReachable();
@@ -729,7 +731,9 @@ public class OomAdjuster {
             for (int i = ppr.numberOfProviderConnections() - 1; i >= 0; i--) {
                 ContentProviderConnection cpc = ppr.getProviderConnectionAt(i);
                 ProcessRecord provider = cpc.provider.proc;
-                if (provider == null || provider == pr) {
+                if (provider == null || provider == pr
+                        || ((provider.mState.getMaxAdj() >= ProcessList.SYSTEM_ADJ)
+                                && (provider.mState.getMaxAdj() < FOREGROUND_APP_ADJ))) {
                     continue;
                 }
                 containsCycle |= provider.mState.isReachable();
@@ -1962,25 +1966,37 @@ public class OomAdjuster {
                 }
             }
         }
-
         if (state.getCachedIsPreviousProcess() && state.getCachedHasActivities()) {
-            if (adj > PREVIOUS_APP_ADJ) {
-                // This was the previous process that showed UI to the user.
-                // We want to try to keep it around more aggressively, to give
-                // a good experience around switching between two apps.
-                adj = PREVIOUS_APP_ADJ;
-                schedGroup = SCHED_GROUP_BACKGROUND;
-                state.setCached(false);
-                state.setAdjType("previous");
-                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to prev: " + app);
-                }
-            }
-            if (procState > PROCESS_STATE_LAST_ACTIVITY) {
+            // This was the previous process that showed UI to the user.  We want to
+            // try to keep it around more aggressively, to give a good experience
+            // around switching between two apps. However, we don't want to keep the
+            // process in this privileged state indefinitely. Eventually, allow the
+            // app to be demoted to cached.
+            if ((state.getSetProcState() == PROCESS_STATE_LAST_ACTIVITY
+                    && (state.getLastStateTime() + mConstants.MAX_PREVIOUS_TIME) < now)) {
                 procState = PROCESS_STATE_LAST_ACTIVITY;
-                state.setAdjType("previous");
+                schedGroup = SCHED_GROUP_BACKGROUND;
+                state.setAdjType("previous-expired");
+                adj = CACHED_APP_MIN_ADJ;
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise procstate to prev: " + app);
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Expire prev adj: " + app);
+                }
+            } else {
+                if (adj > PREVIOUS_APP_ADJ) {
+                    adj = PREVIOUS_APP_ADJ;
+                    schedGroup = SCHED_GROUP_BACKGROUND;
+                    state.setCached(false);
+                    state.setAdjType("previous");
+                    if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                        reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to prev: " + app);
+                    }
+                }
+                if (procState > PROCESS_STATE_LAST_ACTIVITY) {
+                    procState = PROCESS_STATE_LAST_ACTIVITY;
+                    state.setAdjType("previous");
+                    if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                        reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise procstate to prev: " + app);
+                    }
                 }
             }
         }

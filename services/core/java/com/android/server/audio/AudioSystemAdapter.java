@@ -22,6 +22,7 @@ import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioMixerAttributes;
 import android.media.AudioSystem;
+import android.media.ISoundDose;
 import android.media.ISoundDoseCallback;
 import android.media.audiopolicy.AudioMix;
 import android.os.SystemClock;
@@ -497,12 +498,12 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     }
 
     /**
-     * Same as {@link AudioSystem#registerSoundDoseCallback(ISoundDoseCallback)}
+     * Same as {@link AudioSystem#getSoundDoseInterface(ISoundDoseCallback)}
      * @param callback
      * @return
      */
-    public int registerSoundDoseCallback(ISoundDoseCallback callback) {
-        return AudioSystem.registerSoundDoseCallback(callback);
+    public ISoundDose getSoundDoseInterface(ISoundDoseCallback callback) {
+        return AudioSystem.getSoundDoseInterface(callback);
     }
 
     /**

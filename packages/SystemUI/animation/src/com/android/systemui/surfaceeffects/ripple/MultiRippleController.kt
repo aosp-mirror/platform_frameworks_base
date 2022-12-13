@@ -21,9 +21,20 @@ import androidx.annotation.VisibleForTesting
 /** Controller that handles playing [RippleAnimation]. */
 class MultiRippleController(private val multipleRippleView: MultiRippleView) {
 
+    private val ripplesFinishedListeners = ArrayList<RipplesFinishedListener>()
+
     companion object {
         /** Max number of ripple animations at a time. */
         @VisibleForTesting const val MAX_RIPPLE_NUMBER = 10
+
+        interface RipplesFinishedListener {
+            /** Triggered when all the ripples finish running. */
+            fun onRipplesFinish()
+        }
+    }
+
+    fun addRipplesFinishedListener(listener: RipplesFinishedListener) {
+        ripplesFinishedListeners.add(listener)
     }
 
     /** Updates all the ripple colors during the animation. */
@@ -38,8 +49,13 @@ class MultiRippleController(private val multipleRippleView: MultiRippleView) {
 
         multipleRippleView.ripples.add(rippleAnimation)
 
-        // Remove ripple once the animation is done
-        rippleAnimation.play { multipleRippleView.ripples.remove(rippleAnimation) }
+        rippleAnimation.play {
+            // Remove ripple once the animation is done
+            multipleRippleView.ripples.remove(rippleAnimation)
+            if (multipleRippleView.ripples.isEmpty()) {
+                ripplesFinishedListeners.forEach { listener -> listener.onRipplesFinish() }
+            }
+        }
 
         // Trigger drawing
         multipleRippleView.invalidate()

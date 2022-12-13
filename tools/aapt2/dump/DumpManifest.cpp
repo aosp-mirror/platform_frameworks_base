@@ -901,7 +901,7 @@ class UsesConfiguarion : public ManifestExtractor::Element {
   }
 
   void ToProto(pb::Badging* out_badging) override {
-    auto out_configuration = out_badging->mutable_uses_configuration();
+    auto out_configuration = out_badging->add_uses_configurations();
     out_configuration->set_req_touch_screen(req_touch_screen);
     out_configuration->set_req_keyboard_type(req_keyboard_type);
     out_configuration->set_req_hard_keyboard(req_hard_keyboard);

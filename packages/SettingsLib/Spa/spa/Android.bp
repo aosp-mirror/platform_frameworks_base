@@ -44,3 +44,9 @@ android_library {
     ],
     min_sdk_version: "31",
 }
+
+// Expose the srcs to tests, so the tests can access the internal classes.
+filegroup {
+    name: "SpaLib_srcs",
+    srcs: ["src/**/*.kt"],
+}

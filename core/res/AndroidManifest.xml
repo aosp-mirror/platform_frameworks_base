@@ -3349,6 +3349,14 @@
                 android:description="@string/permdesc_companionProfileWatch"
                 android:protectionLevel="normal" />
 
+    <!-- Allows app to request to be associated with a device via
+         {@link android.companion.CompanionDeviceManager}
+         as "glasses"
+         <p>Protection level: normal
+     -->
+    <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_GLASSES"
+        android:protectionLevel="normal" />
+
     <!-- Allows application to request to be associated with a virtual display capable of streaming
          Android applications
          ({@link android.companion.AssociationRequest#DEVICE_PROFILE_APP_STREAMING})
@@ -3357,6 +3365,14 @@
     -->
     <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING"
                 android:protectionLevel="signature|privileged" />
+
+    <!-- Allows application to request to stream content from an Android host to a nearby device
+         ({@link android.companion.AssociationRequest#DEVICE_PROFILE_NEARBY_DEVICE_STREAMING})
+         by {@link android.companion.CompanionDeviceManager}.
+        <p>Not for use by third-party applications.
+    -->
+    <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING"
+        android:protectionLevel="signature|privileged" />
 
     <!-- Allows application to request to be associated with a vehicle head unit capable of
          automotive projection

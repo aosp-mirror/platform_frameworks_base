@@ -20,11 +20,11 @@ import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.TRANSIT_CLOSE;
-import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_OP_TYPE;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_TASK_FRAGMENT_INFO;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_THROWABLE;
+import static android.window.TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CLOSE;
+import static android.window.TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_OPEN;
 import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENTED_TO_TASK;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_ERROR;
@@ -340,7 +340,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         container.setInfo(wct, taskFragmentInfo);
         if (container.isFinished()) {
-            mTransactionManager.getCurrentTransactionRecord().setOriginType(TRANSIT_CLOSE);
+            mTransactionManager.getCurrentTransactionRecord()
+                    .setOriginType(TASK_FRAGMENT_TRANSIT_CLOSE);
             mPresenter.cleanupContainer(wct, container, false /* shouldFinishDependent */);
         } else {
             // Update with the latest Task configuration.
@@ -376,22 +377,27 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 // Do not finish the dependents if the last activity is reparented to PiP.
                 // Instead, the original split should be cleanup, and the dependent may be
                 // expanded to fullscreen.
-                mTransactionManager.getCurrentTransactionRecord().setOriginType(TRANSIT_CLOSE);
+                mTransactionManager.getCurrentTransactionRecord()
+                        .setOriginType(TASK_FRAGMENT_TRANSIT_CLOSE);
                 cleanupForEnterPip(wct, container);
                 mPresenter.cleanupContainer(wct, container, false /* shouldFinishDependent */);
             } else if (taskFragmentInfo.isTaskClearedForReuse()) {
                 // Do not finish the dependents if this TaskFragment was cleared due to
                 // launching activity in the Task.
-                mTransactionManager.getCurrentTransactionRecord().setOriginType(TRANSIT_CLOSE);
+                mTransactionManager.getCurrentTransactionRecord()
+                        .setOriginType(TASK_FRAGMENT_TRANSIT_CLOSE);
                 mPresenter.cleanupContainer(wct, container, false /* shouldFinishDependent */);
             } else if (taskFragmentInfo.isClearedForReorderActivityToFront()) {
                 // Do not finish the dependents if this TaskFragment was cleared to reorder
                 // the launching Activity to front of the Task.
+                mTransactionManager.getCurrentTransactionRecord()
+                        .setOriginType(TASK_FRAGMENT_TRANSIT_CLOSE);
                 mPresenter.cleanupContainer(wct, container, false /* shouldFinishDependent */);
             } else if (!container.isWaitingActivityAppear()) {
                 // Do not finish the container before the expected activity appear until
                 // timeout.
-                mTransactionManager.getCurrentTransactionRecord().setOriginType(TRANSIT_CLOSE);
+                mTransactionManager.getCurrentTransactionRecord()
+                        .setOriginType(TASK_FRAGMENT_TRANSIT_CLOSE);
                 mPresenter.cleanupContainer(wct, container, true /* shouldFinishDependent */);
             }
         } else if (wasInPip && isInPip) {
@@ -585,7 +591,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 container.setInfo(wct, taskFragmentInfo);
                 container.clearPendingAppearedActivities();
                 if (container.isEmpty()) {
-                    mTransactionManager.getCurrentTransactionRecord().setOriginType(TRANSIT_CLOSE);
+                    mTransactionManager.getCurrentTransactionRecord()
+                            .setOriginType(TASK_FRAGMENT_TRANSIT_CLOSE);
                     mPresenter.cleanupContainer(wct, container, false /* shouldFinishDependent */);
                 }
                 break;
@@ -1000,7 +1007,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     void onTaskFragmentAppearEmptyTimeout(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer container) {
-        mTransactionManager.getCurrentTransactionRecord().setOriginType(TRANSIT_CLOSE);
+        mTransactionManager.getCurrentTransactionRecord()
+                .setOriginType(TASK_FRAGMENT_TRANSIT_CLOSE);
         mPresenter.cleanupContainer(wct, container, false /* shouldFinishDependent */);
     }
 
@@ -1566,7 +1574,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         // (not resumed yet).
         if (isOnCreated || primaryActivity.isResumed()) {
             // Only set trigger type if the launch happens in foreground.
-            mTransactionManager.getCurrentTransactionRecord().setOriginType(TRANSIT_OPEN);
+            mTransactionManager.getCurrentTransactionRecord()
+                    .setOriginType(TASK_FRAGMENT_TRANSIT_OPEN);
             return null;
         }
         final ActivityOptions options = ActivityOptions.makeBasic();
@@ -1594,7 +1603,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return false;
         }
 
-        mTransactionManager.getCurrentTransactionRecord().setOriginType(TRANSIT_CLOSE);
+        mTransactionManager.getCurrentTransactionRecord()
+                .setOriginType(TASK_FRAGMENT_TRANSIT_CLOSE);
         mPresenter.cleanupContainer(wct, splitContainer.getSecondaryContainer(),
                 false /* shouldFinishDependent */);
         return true;
@@ -1894,7 +1904,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             synchronized (mLock) {
                 final TransactionRecord transactionRecord = mTransactionManager
                         .startNewTransaction();
-                transactionRecord.setOriginType(TRANSIT_OPEN);
+                transactionRecord.setOriginType(TASK_FRAGMENT_TRANSIT_OPEN);
                 SplitController.this.onActivityCreated(transactionRecord.getTransaction(),
                         activity);
                 // The WCT should be applied and merged to the activity launch transition.
@@ -1983,7 +1993,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             synchronized (mLock) {
                 final TransactionRecord transactionRecord = mTransactionManager
                         .startNewTransaction();
-                transactionRecord.setOriginType(TRANSIT_OPEN);
+                transactionRecord.setOriginType(TASK_FRAGMENT_TRANSIT_OPEN);
                 final WindowContainerTransaction wct = transactionRecord.getTransaction();
                 final TaskFragmentContainer launchedInTaskFragment;
                 if (launchingActivity != null) {

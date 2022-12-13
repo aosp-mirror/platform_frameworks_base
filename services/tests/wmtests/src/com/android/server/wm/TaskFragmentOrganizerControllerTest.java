@@ -19,9 +19,16 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_OP_TYPE;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_THROWABLE;
-import static android.window.TaskFragmentOrganizer.getTransitionType;
+import static android.window.TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CHANGE;
+import static android.window.TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CLOSE;
+import static android.window.TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_NONE;
+import static android.window.TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_OPEN;
 import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENTED_TO_TASK;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_ERROR;
@@ -583,7 +590,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
         mTransaction.startActivityInTaskFragment(
                 mFragmentToken, ownerActivity.token, new Intent(), null /* activityOptions */);
-        mOrganizer.applyTransaction(mTransaction);
+        mOrganizer.applyTransaction(mTransaction, TASK_FRAGMENT_TRANSIT_OPEN,
+                false /* shouldApplyIndependently */);
 
         // Not allowed because TaskFragment is not organized by the caller organizer.
         assertApplyTransactionDisallowed(mTransaction);
@@ -604,7 +612,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 .build();
         mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
         mTransaction.reparentActivityToTaskFragment(mFragmentToken, activity.token);
-        mOrganizer.applyTransaction(mTransaction);
+        mOrganizer.applyTransaction(mTransaction, TASK_FRAGMENT_TRANSIT_CHANGE,
+                false /* shouldApplyIndependently */);
 
         // Not allowed because TaskFragment is not organized by the caller organizer.
         assertApplyTransactionDisallowed(mTransaction);
@@ -630,7 +639,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 .build();
         mWindowOrganizerController.mLaunchTaskFragments.put(fragmentToken2, taskFragment2);
         mTransaction.setAdjacentTaskFragments(mFragmentToken, fragmentToken2, null /* params */);
-        mOrganizer.applyTransaction(mTransaction);
+        mOrganizer.applyTransaction(mTransaction, TASK_FRAGMENT_TRANSIT_CHANGE,
+                false /* shouldApplyIndependently */);
 
         // Not allowed because TaskFragments are not organized by the caller organizer.
         assertApplyTransactionDisallowed(mTransaction);
@@ -663,7 +673,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 .build();
         mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
         mTransaction.requestFocusOnTaskFragment(mFragmentToken);
-        mOrganizer.applyTransaction(mTransaction);
+        mOrganizer.applyTransaction(mTransaction, TASK_FRAGMENT_TRANSIT_CHANGE,
+                false /* shouldApplyIndependently */);
 
         // Not allowed because TaskFragment is not organized by the caller organizer.
         assertApplyTransactionDisallowed(mTransaction);
@@ -765,7 +776,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final ActivityRecord activity = createActivityRecord(task);
         // Skip manipulate the SurfaceControl.
         doNothing().when(activity).setDropInputMode(anyInt());
-        mOrganizer.applyTransaction(mTransaction);
+        mOrganizer.applyTransaction(mTransaction, TASK_FRAGMENT_TRANSIT_CHANGE,
+                false /* shouldApplyIndependently */);
         mTaskFragment = new TaskFragmentBuilder(mAtm)
                 .setParentTask(task)
                 .setFragmentToken(mFragmentToken)
@@ -866,8 +878,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Allow organizer to create TaskFragment and start/reparent activity to TaskFragment.
         createTaskFragmentFromOrganizer(mTransaction, ownerActivity, fragmentToken);
-        mController.onTransactionHandled(new Binder(), mTransaction,
-                getTransitionType(mTransaction), false /* shouldApplyIndependently */);
+        mController.onTransactionHandled(new Binder(), mTransaction, TASK_FRAGMENT_TRANSIT_CHANGE,
+                false /* shouldApplyIndependently */);
 
         // Nothing should happen as the organizer is not registered.
         assertNull(mWindowOrganizerController.getTaskFragment(fragmentToken));
@@ -1415,10 +1427,29 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final IBinder transactionToken = tokenCaptor.getValue();
         final WindowContainerTransaction wct = wctCaptor.getValue();
         wct.setTaskFragmentOrganizer(mIOrganizer);
-        mController.onTransactionHandled(transactionToken, wct, getTransitionType(wct),
+        mController.onTransactionHandled(transactionToken, wct, TASK_FRAGMENT_TRANSIT_CHANGE,
                 false /* shouldApplyIndependently */);
 
         verify(mTransitionController).continueTransitionReady();
+    }
+
+    @Test
+    public void testWindowOrganizerApplyTransaction_throwException() {
+        // Not allow to use #applyTransaction(WindowContainerTransaction).
+        assertThrows(RuntimeException.class, () -> mOrganizer.applyTransaction(mTransaction));
+
+        // Allow to use the overload method.
+        mOrganizer.applyTransaction(mTransaction, TASK_FRAGMENT_TRANSIT_CHANGE,
+                false /* shouldApplyIndependently */);
+    }
+
+    @Test
+    public void testTaskFragmentTransitionType() {
+        // 1-1 relationship with WindowManager.TransitionType
+        assertEquals(TRANSIT_NONE, TASK_FRAGMENT_TRANSIT_NONE);
+        assertEquals(TRANSIT_OPEN, TASK_FRAGMENT_TRANSIT_OPEN);
+        assertEquals(TRANSIT_CLOSE, TASK_FRAGMENT_TRANSIT_CLOSE);
+        assertEquals(TRANSIT_CHANGE, TASK_FRAGMENT_TRANSIT_CHANGE);
     }
 
     /**
@@ -1442,13 +1473,14 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     /** Asserts that applying the given transaction will throw a {@link SecurityException}. */
     private void assertApplyTransactionDisallowed(WindowContainerTransaction t) {
         assertThrows(SecurityException.class, () ->
-                mController.applyTransaction(t, getTransitionType(t),
+                mController.applyTransaction(t, TASK_FRAGMENT_TRANSIT_CHANGE,
                         false /* shouldApplyIndependently */));
     }
 
     /** Asserts that applying the given transaction will not throw any exception. */
     private void assertApplyTransactionAllowed(WindowContainerTransaction t) {
-        mController.applyTransaction(t, getTransitionType(t), false /* shouldApplyIndependently */);
+        mController.applyTransaction(t, TASK_FRAGMENT_TRANSIT_CHANGE,
+                false /* shouldApplyIndependently */);
     }
 
     /** Asserts that there will be a transaction for TaskFragment appeared. */

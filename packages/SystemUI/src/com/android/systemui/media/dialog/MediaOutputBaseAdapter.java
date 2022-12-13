@@ -58,7 +58,7 @@ import java.util.List;
  * Base adapter for media output dialog.
  */
 public abstract class MediaOutputBaseAdapter extends
-        RecyclerView.Adapter<MediaOutputBaseAdapter.MediaDeviceBaseViewHolder> {
+        RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     static final int CUSTOMIZED_ITEM_PAIR_NEW = 1;
     static final int CUSTOMIZED_ITEM_GROUP = 2;
@@ -80,11 +80,12 @@ public abstract class MediaOutputBaseAdapter extends
     }
 
     @Override
-    public MediaDeviceBaseViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup,
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup,
             int viewType) {
         mContext = viewGroup.getContext();
         mHolderView = LayoutInflater.from(mContext).inflate(
-                mController.isAdvancedLayoutSupported() ? R.layout.media_output_list_item_advanced
+                mController.isAdvancedLayoutSupported() ? MediaItem.getMediaLayoutId(
+                        viewType) /*R.layout.media_output_list_item_advanced*/
                         : R.layout.media_output_list_item, viewGroup, false);
 
         return null;
@@ -175,7 +176,7 @@ public abstract class MediaOutputBaseAdapter extends
             initAnimator();
         }
 
-        void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin, int position) {
+        void onBind(MediaDevice device, int position) {
             mDeviceId = device.getId();
             mCheckBox.setVisibility(View.GONE);
             mStatusIcon.setVisibility(View.GONE);
@@ -196,7 +197,7 @@ public abstract class MediaOutputBaseAdapter extends
                             PorterDuff.Mode.SRC_IN));
         }
 
-        abstract void onBind(int customizedItem, boolean topMargin, boolean bottomMargin);
+        abstract void onBind(int customizedItem);
 
         void setSingleLineLayout(CharSequence title) {
             setSingleLineLayout(title, false, false, false, false);

@@ -2141,7 +2141,6 @@ public final class NotificationPanelViewController implements Dumpable {
                 if ((h > touchSlop || (h < -touchSlop && mQsExpanded))
                         && Math.abs(h) > Math.abs(x - mInitialTouchX)
                         && shouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, h)) {
-                    debugLog("onQsIntercept - start tracking expansion");
                     mView.getParent().requestDisallowInterceptTouchEvent(true);
                     mShadeLog.onQsInterceptMoveQsTrackingEnabled(h);
                     mQsTracking = true;
@@ -2352,7 +2351,7 @@ public final class NotificationPanelViewController implements Dumpable {
         if (!mSplitShadeEnabled
                 && computeQsExpansionFraction() <= 0.01 && getExpandedFraction() < 1.0) {
             mShadeLog.logMotionEvent(event,
-                    "handleQsTouch: QQS touched while shade collapsing");
+                    "handleQsTouch: QQS touched while shade collapsing, QS tracking disabled");
             mQsTracking = false;
         }
         if (!mQsExpandImmediate && mQsTracking) {
@@ -5796,12 +5795,9 @@ public final class NotificationPanelViewController implements Dumpable {
         /** @see ViewGroup#onInterceptTouchEvent(MotionEvent) */
         public boolean onInterceptTouchEvent(MotionEvent event) {
             mShadeLog.logMotionEvent(event, "NPVC onInterceptTouchEvent");
-            if (SPEW_LOGCAT) {
-                Log.v(TAG,
-                        "NPVC onInterceptTouchEvent (" + event.getId() + "): (" + event.getX()
-                                + "," + event.getY() + ")");
-            }
             if (mQs.disallowPanelTouches()) {
+                mShadeLog.logMotionEvent(event,
+                        "NPVC not intercepting touch, panel touches disallowed");
                 return false;
             }
             initDownStates(event);
@@ -5834,8 +5830,15 @@ public final class NotificationPanelViewController implements Dumpable {
                         + "QsIntercept");
                 return true;
             }
-            if (mInstantExpanding || !mNotificationsDragEnabled || mTouchDisabled || (mMotionAborted
-                    && event.getActionMasked() != MotionEvent.ACTION_DOWN)) {
+
+            if (mInstantExpanding || !mNotificationsDragEnabled || mTouchDisabled) {
+                mShadeLog.logNotInterceptingTouchInstantExpanding(mInstantExpanding,
+                        !mNotificationsDragEnabled, mTouchDisabled);
+                return false;
+            }
+            if (mMotionAborted && event.getActionMasked() != MotionEvent.ACTION_DOWN) {
+                mShadeLog.logMotionEventStatusBarState(event, mStatusBarStateController.getState(),
+                        "NPVC MotionEvent not intercepted: non-down action, motion was aborted");
                 return false;
             }
 
@@ -5890,6 +5893,9 @@ public final class NotificationPanelViewController implements Dumpable {
                     }
                     break;
                 case MotionEvent.ACTION_POINTER_DOWN:
+                    mShadeLog.logMotionEventStatusBarState(event,
+                            mStatusBarStateController.getState(),
+                            "onInterceptTouchEvent: pointer down action");
                     if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                         mMotionAborted = true;
                         mVelocityTracker.clear();
@@ -5931,7 +5937,8 @@ public final class NotificationPanelViewController implements Dumpable {
                     // events are received in this handler with identical downTimes. Until the
                     // source of the issue can be located, detect this case and ignore.
                     // see b/193350347
-                    Log.w(TAG, "Duplicate down event detected... ignoring");
+                    mShadeLog.logMotionEvent(event,
+                            "onTouch: duplicate down event detected... ignoring");
                     return true;
                 }
                 mLastTouchDownTime = event.getDownTime();
@@ -5939,6 +5946,8 @@ public final class NotificationPanelViewController implements Dumpable {
 
 
             if (mQsFullyExpanded && mQs != null && mQs.disallowPanelTouches()) {
+                mShadeLog.logMotionEvent(event,
+                        "onTouch: ignore touch, panel touches disallowed and qs fully expanded");
                 return false;
             }
 
@@ -5946,6 +5955,8 @@ public final class NotificationPanelViewController implements Dumpable {
             // otherwise user would be able to pull down QS or expand the shade.
             if (mCentralSurfaces.isBouncerShowingScrimmed()
                     || mCentralSurfaces.isBouncerShowingOverDream()) {
+                mShadeLog.logMotionEvent(event,
+                        "onTouch: ignore touch, bouncer scrimmed or showing over dream");
                 return false;
             }
 
@@ -6003,15 +6014,17 @@ public final class NotificationPanelViewController implements Dumpable {
 
         private boolean handleTouch(MotionEvent event) {
             if (mInstantExpanding) {
-                mShadeLog.logMotionEvent(event, "onTouch: touch ignored due to instant expanding");
+                mShadeLog.logMotionEvent(event,
+                        "handleTouch: touch ignored due to instant expanding");
                 return false;
             }
             if (mTouchDisabled && event.getActionMasked() != MotionEvent.ACTION_CANCEL) {
-                mShadeLog.logMotionEvent(event, "onTouch: non-cancel action, touch disabled");
+                mShadeLog.logMotionEvent(event, "handleTouch: non-cancel action, touch disabled");
                 return false;
             }
             if (mMotionAborted && event.getActionMasked() != MotionEvent.ACTION_DOWN) {
-                mShadeLog.logMotionEvent(event, "onTouch: non-down action, motion was aborted");
+                mShadeLog.logMotionEventStatusBarState(event, mStatusBarStateController.getState(),
+                        "handleTouch: non-down action, motion was aborted");
                 return false;
             }
 
@@ -6021,7 +6034,7 @@ public final class NotificationPanelViewController implements Dumpable {
                     // Turn off tracking if it's on or the shade can get stuck in the down position.
                     onTrackingStopped(true /* expand */);
                 }
-                mShadeLog.logMotionEvent(event, "onTouch: drag not enabled");
+                mShadeLog.logMotionEvent(event, "handleTouch: drag not enabled");
                 return false;
             }
 
@@ -6094,6 +6107,9 @@ public final class NotificationPanelViewController implements Dumpable {
                     }
                     break;
                 case MotionEvent.ACTION_POINTER_DOWN:
+                    mShadeLog.logMotionEventStatusBarState(event,
+                            mStatusBarStateController.getState(),
+                            "handleTouch: pointer down action");
                     if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                         mMotionAborted = true;
                         endMotionEvent(event, x, y, true /* forceCancel */);

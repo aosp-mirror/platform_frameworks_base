@@ -6903,7 +6903,7 @@ public abstract class Context {
      * <p>
      * Applications that run on virtual devices may use this method to access the default device
      * capabilities and functionality (by passing
-     * {@link android.companion.virtual.VirtualDeviceManager#DEFAULT_DEVICE_ID}. Similarly,
+     * {@link android.companion.virtual.VirtualDeviceManager#DEVICE_ID_DEFAULT}. Similarly,
      * applications running on the default device may access the functionality of virtual devices.
      * </p>
      * @param deviceId The ID of the device to associate with this context.
@@ -7245,7 +7245,7 @@ public abstract class Context {
      * determine whether they are running on a virtual device and identify that device.
      *
      * The device ID of the host device is
-     * {@link android.companion.virtual.VirtualDeviceManager#DEFAULT_DEVICE_ID}
+     * {@link android.companion.virtual.VirtualDeviceManager#DEVICE_ID_DEFAULT}
      *
      * @return the ID of the device this context is associated with.
      * @see #createDeviceContext(int)

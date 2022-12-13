@@ -548,6 +548,8 @@ package android.app {
     method @Nullable public static String opToPermission(@NonNull String);
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(@NonNull String, int, @Nullable String, int);
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setUidMode(@NonNull String, int, int);
+    method @RequiresPermission(value="android.permission.WATCH_APPOPS", conditional=true) public void startWatchingNoted(@NonNull String[], @NonNull android.app.AppOpsManager.OnOpNotedListener);
+    method public void stopWatchingNoted(@NonNull android.app.AppOpsManager.OnOpNotedListener);
     field public static final int HISTORY_FLAGS_ALL = 3; // 0x3
     field public static final int HISTORY_FLAG_AGGREGATE = 1; // 0x1
     field public static final int HISTORY_FLAG_DISCRETE = 2; // 0x2
@@ -733,6 +735,10 @@ package android.app {
     method public int getUid();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalUidOps> CREATOR;
+  }
+
+  public static interface AppOpsManager.OnOpNotedListener {
+    method public void onOpNoted(@NonNull String, int, @NonNull String, @Nullable String, int, int);
   }
 
   public static final class AppOpsManager.OpEntry implements android.os.Parcelable {

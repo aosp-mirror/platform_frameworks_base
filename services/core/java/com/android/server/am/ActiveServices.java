@@ -2787,8 +2787,8 @@ public final class ActiveServices {
             }
         }
 
-        private final AppOpsManager.OnOpNotedListener mOpNotedCallback =
-                new AppOpsManager.OnOpNotedListener() {
+        private final AppOpsManager.OnOpNotedInternalListener mOpNotedCallback =
+                new AppOpsManager.OnOpNotedInternalListener() {
                     @Override
                     public void onOpNoted(int op, int uid, String pkgName,
                             String attributionTag, int flags, int result) {

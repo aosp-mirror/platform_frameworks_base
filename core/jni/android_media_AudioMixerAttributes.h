@@ -21,6 +21,7 @@
 
 // Keep sync with AudioMixerAttributes.java
 #define MIXER_BEHAVIOR_DEFAULT 0
+#define MIXER_BEHAVIOR_BIT_PERFECT 1
 // Invalid value is not added in JAVA API, but keep sync with native value
 #define MIXER_BEHAVIOR_INVALID -1
 
@@ -28,6 +29,8 @@ static inline audio_mixer_behavior_t audioMixerBehaviorToNative(int mixerBehavio
     switch (mixerBehavior) {
         case MIXER_BEHAVIOR_DEFAULT:
             return AUDIO_MIXER_BEHAVIOR_DEFAULT;
+        case MIXER_BEHAVIOR_BIT_PERFECT:
+            return AUDIO_MIXER_BEHAVIOR_BIT_PERFECT;
         default:
             return AUDIO_MIXER_BEHAVIOR_INVALID;
     }
@@ -37,6 +40,8 @@ static inline jint audioMixerBehaviorFromNative(audio_mixer_behavior_t mixerBeha
     switch (mixerBehavior) {
         case AUDIO_MIXER_BEHAVIOR_DEFAULT:
             return MIXER_BEHAVIOR_DEFAULT;
+        case AUDIO_MIXER_BEHAVIOR_BIT_PERFECT:
+            return MIXER_BEHAVIOR_BIT_PERFECT;
         case AUDIO_MIXER_BEHAVIOR_INVALID:
         default:
             return MIXER_BEHAVIOR_INVALID;

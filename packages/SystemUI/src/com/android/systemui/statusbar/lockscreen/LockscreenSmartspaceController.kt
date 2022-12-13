@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.lockscreen
 
 import android.app.PendingIntent
+import android.app.WallpaperManager
 import android.app.smartspace.SmartspaceConfig
 import android.app.smartspace.SmartspaceManager
 import android.app.smartspace.SmartspaceSession
@@ -390,7 +391,8 @@ class LockscreenSmartspaceController @Inject constructor(
     }
 
     private fun updateTextColorFromWallpaper() {
-        if (!regionSamplingEnabled) {
+        val wallpaperManager = WallpaperManager.getInstance(context)
+        if (!regionSamplingEnabled || wallpaperManager.lockScreenWallpaperExists()) {
             val wallpaperTextColor =
                     Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColor)
             smartspaceViews.forEach { it.setPrimaryTextColor(wallpaperTextColor) }

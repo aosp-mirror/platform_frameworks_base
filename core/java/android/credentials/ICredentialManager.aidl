@@ -16,12 +16,15 @@
 
 package android.credentials;
 
+import java.util.List;
+
 import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CreateCredentialRequest;
 import android.credentials.GetCredentialRequest;
 import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ICreateCredentialCallback;
 import android.credentials.IGetCredentialCallback;
+import android.credentials.ISetEnabledProvidersCallback;
 import android.os.ICancellationSignal;
 
 /**
@@ -36,4 +39,6 @@ interface ICredentialManager {
     @nullable ICancellationSignal executeCreateCredential(in CreateCredentialRequest request, in ICreateCredentialCallback callback, String callingPackage);
 
     @nullable ICancellationSignal clearCredentialState(in ClearCredentialStateRequest request, in IClearCredentialStateCallback callback, String callingPackage);
+
+    void setEnabledProviders(in List<String> providers, in int userId, in ISetEnabledProvidersCallback callback);
 }

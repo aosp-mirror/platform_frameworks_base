@@ -94,8 +94,7 @@ object Flags {
         unreleasedFlag(259217907, "notification_group_dismissal_animation", teamfood = true)
 
     // TODO(b/257506350): Tracking Bug
-    @JvmField
-    val FSI_CHROME = unreleasedFlag(117, "fsi_chrome")
+    @JvmField val FSI_CHROME = unreleasedFlag(117, "fsi_chrome")
 
     @JvmField
     val SIMPLIFIED_APPEAR_FRACTION =
@@ -173,7 +172,7 @@ object Flags {
      * new KeyguardTransitionRepository.
      */
     @JvmField
-    val LIGHT_REVEAL_MIGRATION = unreleasedFlag(218, "light_reveal_migration", teamfood = true)
+    val LIGHT_REVEAL_MIGRATION = unreleasedFlag(218, "light_reveal_migration", teamfood = false)
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -251,11 +250,7 @@ object Flags {
 
     // 801 - region sampling
     // TODO(b/254512848): Tracking Bug
-    val REGION_SAMPLING = unreleasedFlag(801, "region_sampling")
-
-    // 802 - wallpaper rendering
-    // TODO(b/254512923): Tracking Bug
-    @JvmField val USE_CANVAS_RENDERER = unreleasedFlag(802, "use_canvas_renderer")
+    val REGION_SAMPLING = unreleasedFlag(801, "region_sampling", teamfood = true)
 
     // 803 - screen contents translation
     // TODO(b/254513187): Tracking Bug
@@ -419,6 +414,10 @@ object Flags {
     // 2000 - device controls
     @Keep @JvmField val USE_APP_PANELS = unreleasedFlag(2000, "use_app_panels", teamfood = true)
 
+    @JvmField
+    val APP_PANELS_ALL_APPS_ALLOWED =
+        unreleasedFlag(2001, "app_panels_all_apps_allowed", teamfood = true)
+
     // 2100 - Falsing Manager
     @JvmField val FALSING_FOR_LONG_TAPS = releasedFlag(2100, "falsing_for_long_taps")
 
@@ -430,6 +429,7 @@ object Flags {
 
     // 2300 - stylus
     @JvmField val TRACK_STYLUS_EVER_USED = unreleasedFlag(2300, "track_stylus_ever_used")
+    @JvmField val ENABLE_STYLUS_CHARGING_UI = unreleasedFlag(2301, "enable_stylus_charging_ui")
 
     // 2400 - performance tools and debugging info
     // TODO(b/238923086): Tracking Bug

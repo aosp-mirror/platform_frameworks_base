@@ -337,12 +337,10 @@ public class BootReceiver extends BroadcastReceiver {
             return;
         }
 
-        // Check if we should rate limit and abort early if needed. Do this for both proto and
-        // non-proto tombstones, even though proto tombstones do not support including the counter
-        // of events dropped since rate limiting activated yet.
+        // Check if we should rate limit and abort early if needed.
         DropboxRateLimiter.RateLimitResult rateLimitResult =
                 sDropboxRateLimiter.shouldRateLimit(
-                       proto ? TAG_TOMBSTONE_PROTO : TAG_TOMBSTONE, processName);
+                        proto ? TAG_TOMBSTONE_PROTO_WITH_HEADERS : TAG_TOMBSTONE, processName);
         if (rateLimitResult.shouldRateLimit()) return;
 
         HashMap<String, Long> timestamps = readTimestamps();

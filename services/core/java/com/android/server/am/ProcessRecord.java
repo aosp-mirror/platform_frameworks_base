@@ -1016,6 +1016,11 @@ class ProcessRecord implements WindowProcessListener {
         return mWindowProcessController.hasRecentTasks();
     }
 
+    @GuardedBy("mService")
+    public ApplicationInfo getApplicationInfo() {
+        return info;
+    }
+
     @GuardedBy({"mService", "mProcLock"})
     boolean onCleanupApplicationRecordLSP(ProcessStatsService processStats, boolean allowRestart,
             boolean unlinkDeath) {

@@ -88,12 +88,12 @@ public final class VirtualDeviceManager {
     /**
      * The default device ID, which is the ID of the primary (non-virtual) device.
      */
-    public static final int DEFAULT_DEVICE_ID = 0;
+    public static final int DEVICE_ID_DEFAULT = 0;
 
     /**
      * Invalid device ID.
      */
-    public static final int INVALID_DEVICE_ID = -1;
+    public static final int DEVICE_ID_INVALID = -1;
 
     /**
      * Broadcast Action: A Virtual Device was removed.
@@ -238,7 +238,7 @@ public final class VirtualDeviceManager {
     public int getDeviceIdForDisplayId(int displayId) {
         if (mService == null) {
             Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
-            return DEFAULT_DEVICE_ID;
+            return DEVICE_ID_DEFAULT;
         }
         try {
             return mService.getDeviceIdForDisplayId(displayId);

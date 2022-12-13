@@ -75,7 +75,7 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
     /**
      * Detect hotword from an externally supplied stream of data.
      *
-     * @return true if the request to start recognition succeeded
+     * @return {@code true} if the request to start recognition succeeded
      */
     @Override
     public boolean startRecognition(
@@ -102,23 +102,7 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
         return true;
     }
 
-    /**
-     * Set configuration and pass read-only data to hotword detection service.
-     *
-     * @param options Application configuration data to provide to the
-     *         {@link HotwordDetectionService}. PersistableBundle does not allow any remotable
-     *         objects or other contents that can be used to communicate with other processes.
-     * @param sharedMemory The unrestricted data blob to provide to the
-     *         {@link HotwordDetectionService}. Use this to provide the hotword models data or other
-     *         such data to the trusted process.
-     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of
-     *         Android Tiramisu or above and attempts to start a recognition when the detector is
-     *         not able based on the state. Because the caller receives updates via an asynchronous
-     *         callback and the state of the detector can change without caller's knowledge, a
-     *         checked exception is thrown.
-     * @throws IllegalStateException if this HotwordDetector wasn't specified to use a
-     *         {@link HotwordDetectionService} when it was created.
-     */
+    /** {@inheritDoc} */
     @Override
     public void updateState(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) throws IllegalDetectorStateException {

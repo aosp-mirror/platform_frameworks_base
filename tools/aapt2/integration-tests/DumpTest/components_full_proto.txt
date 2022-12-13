@@ -40,13 +40,6 @@ badging {
     min_sdk_version: 21
     target_sdk_version: 31
   }
-  uses_configuration {
-    req_touch_screen: 3
-    req_keyboard_type: 2
-    req_hard_keyboard: -1
-    req_navigation: 3
-    req_five_way_nav: -1
-  }
   supports_screen {
     screens: NORMAL
     screens: LARGE
@@ -101,6 +94,13 @@ badging {
   densities: 480
   densities: 640
   densities: 65534
+  uses_configurations {
+    req_touch_screen: 3
+    req_keyboard_type: 2
+    req_hard_keyboard: -1
+    req_navigation: 3
+    req_five_way_nav: -1
+  }
   feature_groups {
     features {
       name: "android.hardware.bluetooth"

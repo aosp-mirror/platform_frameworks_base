@@ -111,20 +111,26 @@ inline fun <K, V> IndexedMap<K, V>.putWithDefault(key: K, value: V, defaultValue
     }
 }
 
-inline fun <K, V> IndexedMap<K, V>.removeAllIndexed(predicate: (Int, K, V) -> Boolean) {
+inline fun <K, V> IndexedMap<K, V>.removeAllIndexed(predicate: (Int, K, V) -> Boolean): Boolean {
+    var isChanged = false
     for (index in lastIndex downTo 0) {
         if (predicate(index, keyAt(index), valueAt(index))) {
             removeAt(index)
+            isChanged = true
         }
     }
+    return isChanged
 }
 
-inline fun <K, V> IndexedMap<K, V>.retainAllIndexed(predicate: (Int, K, V) -> Boolean) {
+inline fun <K, V> IndexedMap<K, V>.retainAllIndexed(predicate: (Int, K, V) -> Boolean): Boolean {
+    var isChanged = false
     for (index in lastIndex downTo 0) {
         if (!predicate(index, keyAt(index), valueAt(index))) {
             removeAt(index)
+            isChanged = true
         }
     }
+    return isChanged
 }
 
 @Suppress("NOTHING_TO_INLINE")

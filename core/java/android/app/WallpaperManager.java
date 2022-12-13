@@ -809,14 +809,7 @@ public class WallpaperManager {
     @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     @Nullable
     public Drawable getDrawable() {
-        final ColorManagementProxy cmProxy = getColorManagementProxy();
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM, cmProxy);
-        if (bm != null) {
-            Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
-            dr.setDither(false);
-            return dr;
-        }
-        return null;
+        return getDrawable(FLAG_SYSTEM);
     }
 
     /**
@@ -835,13 +828,20 @@ public class WallpaperManager {
      * @return Returns a Drawable object that will draw the requested wallpaper,
      *     or {@code null} if the requested wallpaper does not exist or if the calling application
      *     is not able to access the wallpaper.
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     @Nullable
     public Drawable getDrawable(@SetWallpaperFlags int which) {
-        return getDrawable();
+        final ColorManagementProxy cmProxy = getColorManagementProxy();
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, which, cmProxy);
+        if (bm != null) {
+            Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
+            dr.setDither(false);
+            return dr;
+        }
+        return null;
     }
+
     /**
      * Obtain a drawable for the built-in static system wallpaper.
      */
@@ -1059,18 +1059,11 @@ public class WallpaperManager {
      * wallpaper the user has currently set.
      *
      * @return Returns a Drawable object that will draw the wallpaper or a
-     * null pointer if these is none.
+     * null pointer if wallpaper is unset.
      */
     @Nullable
     public Drawable peekDrawable() {
-        final ColorManagementProxy cmProxy = getColorManagementProxy();
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, FLAG_SYSTEM, cmProxy);
-        if (bm != null) {
-            Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
-            dr.setDither(false);
-            return dr;
-        }
-        return null;
+        return peekDrawable(FLAG_SYSTEM);
     }
 
     /**
@@ -1081,13 +1074,19 @@ public class WallpaperManager {
      *
      * @param which The {@code FLAG_*} identifier of a valid wallpaper type.  Throws
      *     IllegalArgumentException if an invalid wallpaper is requested.
-     * @return Returns a Drawable object that will draw the wallpaper or a null pointer if these
-     * is none.
-     * @hide
+     * @return Returns a Drawable object that will draw the wallpaper or a null pointer if
+     * wallpaper is unset.
      */
     @Nullable
     public Drawable peekDrawable(@SetWallpaperFlags int which) {
-        return peekDrawable();
+        final ColorManagementProxy cmProxy = getColorManagementProxy();
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, which, cmProxy);
+        if (bm != null) {
+            Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
+            dr.setDither(false);
+            return dr;
+        }
+        return null;
     }
 
     /**
@@ -1106,12 +1105,7 @@ public class WallpaperManager {
     @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     @Nullable
     public Drawable getFastDrawable() {
-        final ColorManagementProxy cmProxy = getColorManagementProxy();
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM, cmProxy);
-        if (bm != null) {
-            return new FastBitmapDrawable(bm);
-        }
-        return null;
+        return getFastDrawable(FLAG_SYSTEM);
     }
 
     /**
@@ -1128,12 +1122,16 @@ public class WallpaperManager {
      * @param which The {@code FLAG_*} identifier of a valid wallpaper type.  Throws
      *     IllegalArgumentException if an invalid wallpaper is requested.
      * @return Returns a Drawable object that will draw the wallpaper.
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     @Nullable
     public Drawable getFastDrawable(@SetWallpaperFlags int which) {
-        return getFastDrawable();
+        final ColorManagementProxy cmProxy = getColorManagementProxy();
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, which, cmProxy);
+        if (bm != null) {
+            return new FastBitmapDrawable(bm);
+        }
+        return null;
     }
 
     /**
@@ -1146,12 +1144,7 @@ public class WallpaperManager {
     @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     @Nullable
     public Drawable peekFastDrawable() {
-        final ColorManagementProxy cmProxy = getColorManagementProxy();
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, FLAG_SYSTEM, cmProxy);
-        if (bm != null) {
-            return new FastBitmapDrawable(bm);
-        }
-        return null;
+        return peekFastDrawable(FLAG_SYSTEM);
     }
 
     /**
@@ -1162,12 +1155,16 @@ public class WallpaperManager {
      *     IllegalArgumentException if an invalid wallpaper is requested.
      * @return Returns an optimized Drawable object that will draw the
      * wallpaper or a null pointer if these is none.
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     @Nullable
     public Drawable peekFastDrawable(@SetWallpaperFlags int which) {
-        return peekFastDrawable();
+        final ColorManagementProxy cmProxy = getColorManagementProxy();
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, which, cmProxy);
+        if (bm != null) {
+            return new FastBitmapDrawable(bm);
+        }
+        return null;
     }
 
     /**

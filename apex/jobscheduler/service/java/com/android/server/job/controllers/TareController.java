@@ -313,6 +313,11 @@ public class TareController extends StateController {
     @GuardedBy("mLock")
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
         final long nowElapsed = sElapsedRealtimeClock.millis();
+        if (jobStatus.shouldTreatAsUserInitiated()) {
+            // User-initiated jobs should always be allowed to run.
+            jobStatus.setTareWealthConstraintSatisfied(nowElapsed, true);
+            return;
+        }
         jobStatus.setTareWealthConstraintSatisfied(nowElapsed, hasEnoughWealthLocked(jobStatus));
         setExpeditedTareApproved(jobStatus, nowElapsed,
                 jobStatus.isRequestedExpeditedJob() && canAffordExpeditedBillLocked(jobStatus));
@@ -326,6 +331,11 @@ public class TareController extends StateController {
     @Override
     @GuardedBy("mLock")
     public void prepareForExecutionLocked(JobStatus jobStatus) {
+        if (jobStatus.shouldTreatAsUserInitiated()) {
+            // TODO(202954395): consider noting execution with the EconomyManager even though it
+            //                  won't affect this job
+            return;
+        }
         final int userId = jobStatus.getSourceUserId();
         final String pkgName = jobStatus.getSourcePackageName();
         ArrayMap<ActionBill, ArraySet<JobStatus>> billToJobMap =
@@ -355,6 +365,9 @@ public class TareController extends StateController {
     @Override
     @GuardedBy("mLock")
     public void unprepareFromExecutionLocked(JobStatus jobStatus) {
+        if (jobStatus.shouldTreatAsUserInitiated()) {
+            return;
+        }
         final int userId = jobStatus.getSourceUserId();
         final String pkgName = jobStatus.getSourcePackageName();
         // If this method is called, then jobStatus.madeActive was never updated, so don't use it
@@ -384,6 +397,9 @@ public class TareController extends StateController {
     @Override
     @GuardedBy("mLock")
     public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob) {
+        if (jobStatus.shouldTreatAsUserInitiated()) {
+            return;
+        }
         final int userId = jobStatus.getSourceUserId();
         final String pkgName = jobStatus.getSourcePackageName();
         if (!mTopStartedJobs.remove(jobStatus) && jobStatus.madeActive > 0) {
@@ -635,6 +651,10 @@ public class TareController extends StateController {
     @GuardedBy("mLock")
     private boolean hasEnoughWealthLocked(@NonNull JobStatus jobStatus) {
         if (!mIsEnabled) {
+            return true;
+        }
+        if (jobStatus.shouldTreatAsUserInitiated()) {
+            // Always allow user-initiated jobs.
             return true;
         }
         if (mService.getUidBias(jobStatus.getSourceUid()) == JobInfo.BIAS_TOP_APP

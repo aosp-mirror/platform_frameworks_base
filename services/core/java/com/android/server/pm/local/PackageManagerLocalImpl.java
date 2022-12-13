@@ -104,6 +104,9 @@ public class PackageManagerLocalImpl implements PackageManagerLocal {
         @Nullable
         private Map<String, PackageState> mCachedUnmodifiablePackageStates;
 
+        @Nullable
+        private Map<String, PackageState> mCachedUnmodifiableDisabledSystemPackageStates;
+
         private UnfilteredSnapshotImpl(@NonNull PackageDataSnapshot snapshot) {
             super(snapshot);
         }
@@ -126,10 +129,24 @@ public class PackageManagerLocalImpl implements PackageManagerLocal {
             return mCachedUnmodifiablePackageStates;
         }
 
+        @SuppressWarnings("RedundantSuppression")
+        @NonNull
+        @Override
+        public Map<String, PackageState> getDisabledSystemPackageStates() {
+            checkClosed();
+
+            if (mCachedUnmodifiableDisabledSystemPackageStates == null) {
+                mCachedUnmodifiableDisabledSystemPackageStates =
+                        Collections.unmodifiableMap(mSnapshot.getDisabledSystemPackageStates());
+            }
+            return mCachedUnmodifiableDisabledSystemPackageStates;
+        }
+
         @Override
         public void close() {
             super.close();
             mCachedUnmodifiablePackageStates = null;
+            mCachedUnmodifiableDisabledSystemPackageStates = null;
         }
     }
 

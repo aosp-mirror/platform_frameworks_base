@@ -16,7 +16,7 @@
 
 package android.content;
 
-import static android.companion.virtual.VirtualDeviceManager.DEFAULT_DEVICE_ID;
+import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_DEFAULT;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -216,7 +216,7 @@ public class ContextTest {
         final Context systemContext =
                 ActivityThread.currentActivityThread().getSystemContext();
 
-        assertEquals(systemContext.getDeviceId(), DEFAULT_DEVICE_ID);
+        assertEquals(systemContext.getDeviceId(), DEVICE_ID_DEFAULT);
     }
 
     @Test
@@ -224,7 +224,7 @@ public class ContextTest {
         final Context systemUiContext =
                 ActivityThread.currentActivityThread().getSystemUiContext();
 
-        assertEquals(systemUiContext.getDeviceId(), DEFAULT_DEVICE_ID);
+        assertEquals(systemUiContext.getDeviceId(), DEVICE_ID_DEFAULT);
     }
 
     @Test
@@ -232,7 +232,7 @@ public class ContextTest {
         final Context testContext =
                 InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        assertEquals(testContext.getDeviceId(), DEFAULT_DEVICE_ID);
+        assertEquals(testContext.getDeviceId(), DEVICE_ID_DEFAULT);
     }
 
     private Context createUiContext() {

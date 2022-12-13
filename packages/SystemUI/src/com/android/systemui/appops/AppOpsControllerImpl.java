@@ -64,7 +64,7 @@ import javax.inject.Inject;
 @SysUISingleton
 public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsController,
         AppOpsManager.OnOpActiveChangedListener,
-        AppOpsManager.OnOpNotedListener, IndividualSensorPrivacyController.Callback,
+        AppOpsManager.OnOpNotedInternalListener, IndividualSensorPrivacyController.Callback,
         Dumpable {
 
     // This is the minimum time that we will keep AppOps that are noted on record. If multiple

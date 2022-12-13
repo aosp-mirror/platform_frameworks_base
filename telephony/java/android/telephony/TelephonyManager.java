@@ -17767,4 +17767,58 @@ public class TelephonyManager {
         }
         return TelephonyManager.SIM_STATE_UNKNOWN;
     }
+
+    /**
+     * Set the UE's ability to accept/reject null ciphered and null integrity-protected connections.
+     *
+     * The modem is required to ignore this in case of an emergency call.
+     *
+     * <p>Requires permission: android.Manifest.MODIFY_PHONE_STATE</p>
+     *
+     * @param enabled if null ciphered and null integrity protected connections are permitted
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support disabling null ciphers.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setNullCipherAndIntegrityEnabled(boolean enabled) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setNullCipherAndIntegrityEnabled(enabled);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setNullCipherAndIntegrityEnabled RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the value of the global preference for null cipher and integriy enablement.
+     * Note: This does not return the state of the modem, only the persisted global preference.
+     *
+     * <p>Requires permission: android.Manifest.READ_PHONE_STATE</p>
+     *
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support disabling null ciphers.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+    public void isNullCipherAndIntegrityPreferenceEnabled() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.isNullCipherAndIntegrityPreferenceEnabled();
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "isNullCipherAndIntegrityPreferenceEnabled RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
 }

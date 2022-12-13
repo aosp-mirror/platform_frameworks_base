@@ -357,6 +357,44 @@ public class DozeTriggersTest extends SysuiTestCase {
         verify(mDozeLog).tracePulseDropped(anyString(), eq(null));
     }
 
+    @Test
+    public void udfpsLongPress_triggeredWhenAodPaused() {
+        // GIVEN device is DOZE_AOD_PAUSED
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE_AOD_PAUSED);
+
+        // WHEN udfps long-press is triggered
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS, 100, 100,
+                new float[]{0, 1, 2, 3, 4});
+
+        // THEN the pulse is NOT dropped
+        verify(mDozeLog, never()).tracePulseDropped(anyString(), any());
+
+        // WHEN the screen state is ON
+        mTriggers.onScreenState(Display.STATE_ON);
+
+        // THEN aod interrupt is sent
+        verify(mAuthController).onAodInterrupt(anyInt(), anyInt(), anyFloat(), anyFloat());
+    }
+
+    @Test
+    public void udfpsLongPress_triggeredWhenAodPausing() {
+        // GIVEN device is DOZE_AOD_PAUSED
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE_AOD_PAUSING);
+
+        // WHEN udfps long-press is triggered
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS, 100, 100,
+                new float[]{0, 1, 2, 3, 4});
+
+        // THEN the pulse is NOT dropped
+        verify(mDozeLog, never()).tracePulseDropped(anyString(), any());
+
+        // WHEN the screen state is ON
+        mTriggers.onScreenState(Display.STATE_ON);
+
+        // THEN aod interrupt is sent
+        verify(mAuthController).onAodInterrupt(anyInt(), anyInt(), anyFloat(), anyFloat());
+    }
+
     private void waitForSensorManager() {
         mExecutor.runAllReady();
     }

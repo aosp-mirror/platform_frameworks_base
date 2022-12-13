@@ -16,8 +16,7 @@
 
 package com.android.server.permission.access
 
-import com.android.server.permission.access.external.UserHandle
-import com.android.server.permission.access.external.UserHandleCompat
+import android.os.UserHandle
 
 sealed class AccessUri(
     val scheme: String
@@ -70,7 +69,7 @@ data class UidUri(
     val uid: Int
 ) : AccessUri(SCHEME) {
     val userId: Int
-        get() = UserHandleCompat.getUserId(uid)
+        get() = UserHandle.getUserId(uid)
 
     val appId: Int
         get() = UserHandle.getAppId(uid)
