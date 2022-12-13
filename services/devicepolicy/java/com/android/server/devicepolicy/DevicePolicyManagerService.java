@@ -1235,6 +1235,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     }
                 } catch (RemoteException re) {
                     // Shouldn't happen.
+                    Slogf.wtf(LOG_TAG, "Error handling package changes", re);
                 }
             }
             if (removedAdmin) {
@@ -1292,6 +1293,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     && mIPackageManager.getPackageInfo(targetPackage, 0, userHandle) == null;
         } catch (RemoteException e) {
             // Shouldn't happen
+            Slogf.wtf(LOG_TAG, "Error checking isRemovedPackage", e);
         }
 
         return false;
@@ -1314,6 +1316,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     null, null, null, PLATFORM_PACKAGE_NAME, userHandle);
         } catch (RemoteException ignored) {
             // shouldn't happen.
+            Slogf.wtf(LOG_TAG, "Error handling new package installed", ignored);
         }
     }
 
@@ -2232,6 +2235,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     packageName, MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId);
         } catch (RemoteException e) {
             // Shouldn't happen.
+            Slogf.wtf(LOG_TAG, "Error getting application info", e);
             return;
         }
         if (appInfo == null) {
@@ -2866,6 +2870,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
             } catch (RemoteException e) {
                 // shouldn't happen.
+                Slogf.wtf(LOG_TAG, "Error getting receiver info", e);
                 return null;
             }
         });
@@ -6773,6 +6778,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         } catch (RemoteException re) {
             // Shouldn't happen
+            Slogf.wtf(LOG_TAG, "Error forcing wipe user", re);
         } finally {
             if (!success) SecurityLog.writeEvent(SecurityLog.TAG_WIPE_FAILURE);
         }
@@ -9120,6 +9126,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             pushUserRestrictions(userId);
         } catch (RemoteException re) {
             // Shouldn't happen.
+            Slogf.wtf(LOG_TAG, "Failing in updatePermissionFlagsForAllApps", re);
         }
     }
 
@@ -9859,7 +9866,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             return currentUser.id;
         } catch (RemoteException e) {
-            Slogf.wtf(LOG_TAG, "cannot get current user");
+            Slogf.wtf(LOG_TAG, "cannot get current user", e);
         }
         return UserHandle.USER_NULL;
     }
@@ -10089,6 +10096,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mIPackageManager.flushPackageRestrictionsAsUser(userHandle);
             } catch (RemoteException re) {
                 // Shouldn't happen
+                Slog.wtf(LOG_TAG, "Error adding persistent preferred activity", re);
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
             }
@@ -10117,6 +10125,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mIPackageManager.flushPackageRestrictionsAsUser(userHandle);
             } catch (RemoteException re) {
                 // Shouldn't happen
+                Slogf.wtf(
+                        LOG_TAG, "Error when clearing package persistent preferred activities", re);
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
             }
@@ -10314,6 +10324,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
             } catch (RemoteException re) {
                 // Shouldn't happen
+                Slogf.wtf(LOG_TAG, "Error adding cross profile intent filter", re);
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
             }
@@ -10364,6 +10375,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mIPackageManager.clearCrossProfileIntentFilters(parent.id, who.getPackageName());
             } catch (RemoteException re) {
                 // Shouldn't happen
+                Slogf.wtf(LOG_TAG, "Error clearing cross profile intent filters", re);
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
             }
@@ -11888,7 +11900,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         } catch (RemoteException e) {
             // shouldn't happen
-            Slogf.wtf(LOG_TAG, "Failed to resolve intent for: " + intent);
+            Slogf.wtf(LOG_TAG, "Failed to resolve intent for: " + intent, e);
             return 0;
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
@@ -11942,6 +11954,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         == PackageManager.INSTALL_SUCCEEDED;
             } catch (RemoteException re) {
                 // shouldn't happen
+                Slogf.wtf(LOG_TAG, "Error installing package", re);
                 return false;
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
@@ -14585,6 +14598,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return ai == null ? 0 : ai.targetSdkVersion;
         } catch (RemoteException e) {
             // Shouldn't happen
+            Slogf.wtf(LOG_TAG, "Error getting application info", e);
             return 0;
         }
     }
@@ -18301,6 +18315,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         } catch (RemoteException e) {
             // Shouldn't happen.
+            Slogf.wtf(LOG_TAG, "Error setting application enabled", e);
         }
     }
 
@@ -18336,6 +18351,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     callerPackage);
         } catch (RemoteException e) {
             // Shouldn't happen.
+            Slogf.wtf(LOG_TAG, "Error starting user", e);
         } finally {
             mContext.unregisterReceiver(unlockedReceiver);
         }
@@ -18658,6 +18674,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
             } catch (RemoteException e) {
                 // Shouldn't happen.
+                Slogf.wtf(LOG_TAG, "Error resetting default cross profile intent filters", e);
             }
         });
     }
