@@ -19,14 +19,14 @@ package com.android.server.permission.access.appop
 import android.util.ArraySet
 import android.util.SparseBooleanArray
 import android.util.SparseIntArray
-import com.android.server.appop.AppOpsServiceInterface
+import com.android.server.appop.AppOpsCheckingServiceInterface
 import com.android.server.appop.OnOpModeChangedListener
 import com.android.server.permission.access.AccessCheckingService
 import java.io.PrintWriter
 
 class AppOpService(
     private val service: AccessCheckingService
-) : AppOpsServiceInterface {
+) : AppOpsCheckingServiceInterface {
     fun initialize() {
         TODO("Not yet implemented")
     }

@@ -383,7 +383,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     private @Nullable PackageManagerInternal mPackageManagerInternal;
 
     /** Interface for app-op modes.*/
-    @VisibleForTesting AppOpsServiceInterface mAppOpsServiceInterface;
+    @VisibleForTesting
+    AppOpsCheckingServiceInterface mAppOpsCheckingService;
 
     /** Interface for app-op restrictions.*/
     @VisibleForTesting AppOpsRestrictions mAppOpsRestrictions;
@@ -514,10 +515,10 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         }
 
         public void clear() {
-            mAppOpsServiceInterface.removeUid(uid);
+            mAppOpsCheckingService.removeUid(uid);
             if (pkgOps != null) {
                 for (String packageName : pkgOps.keySet()) {
-                    mAppOpsServiceInterface.removePackage(packageName, UserHandle.getUserId(uid));
+                    mAppOpsCheckingService.removePackage(packageName, UserHandle.getUserId(uid));
                 }
             }
             pkgOps = null;
@@ -527,7 +528,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             boolean areAllPackageModesDefault = true;
             if (pkgOps != null) {
                 for (String packageName : pkgOps.keySet()) {
-                    if (!mAppOpsServiceInterface.arePackageModesDefault(packageName,
+                    if (!mAppOpsCheckingService.arePackageModesDefault(packageName,
                             UserHandle.getUserId(uid))) {
                         areAllPackageModesDefault = false;
                         break;
@@ -535,21 +536,21 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 }
             }
             return (pkgOps == null || pkgOps.isEmpty())
-                    && mAppOpsServiceInterface.areUidModesDefault(uid)
+                    && mAppOpsCheckingService.areUidModesDefault(uid)
                     && areAllPackageModesDefault;
         }
 
         // Functions for uid mode access and manipulation.
         public SparseIntArray getNonDefaultUidModes() {
-            return mAppOpsServiceInterface.getNonDefaultUidModes(uid);
+            return mAppOpsCheckingService.getNonDefaultUidModes(uid);
         }
 
         public int getUidMode(int op) {
-            return mAppOpsServiceInterface.getUidMode(uid, op);
+            return mAppOpsCheckingService.getUidMode(uid, op);
         }
 
         public boolean setUidMode(int op, int mode) {
-            return mAppOpsServiceInterface.setUidMode(uid, op, mode);
+            return mAppOpsCheckingService.setUidMode(uid, op, mode);
         }
 
         @SuppressWarnings("GuardedBy")
@@ -559,10 +560,10 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
 
         public void evalForegroundOps() {
             foregroundOps = null;
-            foregroundOps = mAppOpsServiceInterface.evalForegroundUidOps(uid, foregroundOps);
+            foregroundOps = mAppOpsCheckingService.evalForegroundUidOps(uid, foregroundOps);
             if (pkgOps != null) {
                 for (int i = pkgOps.size() - 1; i >= 0; i--) {
-                    foregroundOps = mAppOpsServiceInterface
+                    foregroundOps = mAppOpsCheckingService
                             .evalForegroundPackageOps(pkgOps.valueAt(i).packageName, foregroundOps,
                                     UserHandle.getUserId(uid));
                 }
@@ -643,11 +644,11 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         }
 
         @Mode int getMode() {
-            return mAppOpsServiceInterface.getPackageMode(packageName, this.op,
+            return mAppOpsCheckingService.getPackageMode(packageName, this.op,
                     UserHandle.getUserId(this.uid));
         }
         void setMode(@Mode int mode) {
-            mAppOpsServiceInterface.setPackageMode(packageName, this.op, mode,
+            mAppOpsCheckingService.setPackageMode(packageName, this.op, mode,
                     UserHandle.getUserId(this.uid));
         }
 
@@ -952,10 +953,10 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             mSwitchedOps.put(switchCode,
                     ArrayUtils.appendInt(mSwitchedOps.get(switchCode), switchedCode));
         }
-        mAppOpsServiceInterface =
-                new LegacyAppOpsServiceInterfaceImpl(this, this, handler, context, mSwitchedOps);
+        mAppOpsCheckingService =
+                new AppOpsCheckingServiceImpl(this, this, handler, context, mSwitchedOps);
         mAppOpsRestrictions = new AppOpsRestrictionsImpl(context, handler,
-                mAppOpsServiceInterface);
+                mAppOpsCheckingService);
 
         LockGuard.installLock(this, LockGuard.INDEX_APP_OPS);
         mFile = new AtomicFile(storagePath, "appops");
@@ -990,7 +991,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     if (uidState == null || uidState.pkgOps == null) {
                         return;
                     }
-                    mAppOpsServiceInterface.removePackage(pkgName, UserHandle.getUserId(uid));
+                    mAppOpsCheckingService.removePackage(pkgName, UserHandle.getUserId(uid));
                     Ops removedOps = uidState.pkgOps.remove(pkgName);
                     if (removedOps != null) {
                         scheduleFastWriteLocked();
@@ -1134,7 +1135,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     ArraySet<OnOpModeChangedListener> onModeChangedListeners;
                     synchronized (AppOpsService.this) {
                         onModeChangedListeners =
-                                mAppOpsServiceInterface.getOpModeChangedListeners(code);
+                                mAppOpsCheckingService.getOpModeChangedListeners(code);
                         if (onModeChangedListeners == null) {
                             continue;
                         }
@@ -1221,7 +1222,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             // Remove any package state if such.
             if (uidState.pkgOps != null) {
                 removedOps = uidState.pkgOps.remove(packageName);
-                mAppOpsServiceInterface.removePackage(packageName, UserHandle.getUserId(uid));
+                mAppOpsCheckingService.removePackage(packageName, UserHandle.getUserId(uid));
             }
 
             // If we just nuked the last package state check if the UID is valid.
@@ -1287,7 +1288,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                                 this, code, uidState.uid, true, null));
                     } else if (uidState.pkgOps != null) {
                         final ArraySet<OnOpModeChangedListener> listenerSet =
-                                mAppOpsServiceInterface.getOpModeChangedListeners(code);
+                                mAppOpsCheckingService.getOpModeChangedListeners(code);
                         if (listenerSet != null) {
                             for (int cbi = listenerSet.size() - 1; cbi >= 0; cbi--) {
                                 final OnOpModeChangedListener listener = listenerSet.valueAt(cbi);
@@ -1680,7 +1681,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     ArrayMap<String, Ops> pkgOps = uidState.pkgOps;
                     if (pkgOps != null) {
                         pkgOps.remove(ops.packageName);
-                        mAppOpsServiceInterface.removePackage(ops.packageName,
+                        mAppOpsCheckingService.removePackage(ops.packageName,
                                 UserHandle.getUserId(uidState.uid));
                         if (pkgOps.isEmpty()) {
                             uidState.pkgOps = null;
@@ -1776,7 +1777,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             @Nullable IAppOpsCallback callbackToIgnore) {
         ModeCallback listenerToIgnore = callbackToIgnore != null
                 ? mModeWatchers.get(callbackToIgnore.asBinder()) : null;
-        mAppOpsServiceInterface.notifyOpChangedForAllPkgsInUid(code, uid, onlyForeground,
+        mAppOpsCheckingService.notifyOpChangedForAllPkgsInUid(code, uid, onlyForeground,
                 listenerToIgnore);
     }
 
@@ -1925,14 +1926,14 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                         uidState.evalForegroundOps();
                     }
                     ArraySet<OnOpModeChangedListener> cbs =
-                            mAppOpsServiceInterface.getOpModeChangedListeners(code);
+                            mAppOpsCheckingService.getOpModeChangedListeners(code);
                     if (cbs != null) {
                         if (repCbs == null) {
                             repCbs = new ArraySet<>();
                         }
                         repCbs.addAll(cbs);
                     }
-                    cbs = mAppOpsServiceInterface.getPackageModeChangedListeners(packageName);
+                    cbs = mAppOpsCheckingService.getPackageModeChangedListeners(packageName);
                     if (cbs != null) {
                         if (repCbs == null) {
                             repCbs = new ArraySet<>();
@@ -1973,7 +1974,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
 
     private void notifyOpChanged(OnOpModeChangedListener callback, int code,
             int uid, String packageName) {
-        mAppOpsServiceInterface.notifyOpChanged(callback, code, uid, packageName);
+        mAppOpsCheckingService.notifyOpChanged(callback, code, uid, packageName);
     }
 
     private static ArrayList<ChangeRec> addChange(ArrayList<ChangeRec> reports,
@@ -2071,9 +2072,9 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                             for (String packageName : getPackagesForUid(uidState.uid)) {
                                 callbacks = addCallbacks(callbacks, code, uidState.uid, packageName,
                                         previousMode,
-                                        mAppOpsServiceInterface.getOpModeChangedListeners(code));
+                                        mAppOpsCheckingService.getOpModeChangedListeners(code));
                                 callbacks = addCallbacks(callbacks, code, uidState.uid, packageName,
-                                        previousMode, mAppOpsServiceInterface
+                                        previousMode, mAppOpsCheckingService
                                                 .getPackageModeChangedListeners(packageName));
 
                                 allChanges = addChange(allChanges, code, uidState.uid,
@@ -2119,9 +2120,9 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                             final int uid = curOp.uidState.uid;
                             callbacks = addCallbacks(callbacks, curOp.op, uid, packageName,
                                     previousMode,
-                                    mAppOpsServiceInterface.getOpModeChangedListeners(curOp.op));
+                                    mAppOpsCheckingService.getOpModeChangedListeners(curOp.op));
                             callbacks = addCallbacks(callbacks, curOp.op, uid, packageName,
-                                    previousMode, mAppOpsServiceInterface
+                                    previousMode, mAppOpsCheckingService
                                             .getPackageModeChangedListeners(packageName));
 
                             allChanges = addChange(allChanges, curOp.op, uid, packageName,
@@ -2134,7 +2135,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     }
                     if (pkgOps.size() == 0) {
                         it.remove();
-                        mAppOpsServiceInterface.removePackage(packageName,
+                        mAppOpsCheckingService.removePackage(packageName,
                                 UserHandle.getUserId(uidState.uid));
                     }
                 }
@@ -2238,10 +2239,10 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 mModeWatchers.put(callback.asBinder(), cb);
             }
             if (switchOp != AppOpsManager.OP_NONE) {
-                mAppOpsServiceInterface.startWatchingOpModeChanged(cb, switchOp);
+                mAppOpsCheckingService.startWatchingOpModeChanged(cb, switchOp);
             }
             if (mayWatchPackageName) {
-                mAppOpsServiceInterface.startWatchingPackageModeChanged(cb, packageName);
+                mAppOpsCheckingService.startWatchingPackageModeChanged(cb, packageName);
             }
             evalAllForegroundOpsLocked();
         }
@@ -2256,7 +2257,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             ModeCallback cb = mModeWatchers.remove(callback.asBinder());
             if (cb != null) {
                 cb.unlinkToDeath();
-                mAppOpsServiceInterface.removeListener(cb);
+                mAppOpsCheckingService.removeListener(cb);
             }
 
             evalAllForegroundOpsLocked();
@@ -3911,7 +3912,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 }
                 boolean success = false;
                 mUidStates.clear();
-                mAppOpsServiceInterface.clearAllModes();
+                mAppOpsCheckingService.clearAllModes();
                 try {
                     TypedXmlPullParser parser = Xml.resolvePullParser(stream);
                     int type;
@@ -3960,7 +3961,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 } finally {
                     if (!success) {
                         mUidStates.clear();
-                        mAppOpsServiceInterface.clearAllModes();
+                        mAppOpsCheckingService.clearAllModes();
                     }
                     try {
                         stream.close();
@@ -5131,7 +5132,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             }
 
             if (!dumpHistory) {
-                needSep |= mAppOpsServiceInterface.dumpListeners(dumpOp, dumpUid, dumpPackage, pw);
+                needSep |= mAppOpsCheckingService.dumpListeners(dumpOp, dumpUid, dumpPackage, pw);
             }
 
             if (mModeWatchers.size() > 0 && dumpOp < 0 && !dumpHistory) {
@@ -5559,7 +5560,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     private void notifyWatchersOfChange(int code, int uid) {
         final ArraySet<OnOpModeChangedListener> modeChangedListenerSet;
         synchronized (this) {
-            modeChangedListenerSet = mAppOpsServiceInterface.getOpModeChangedListeners(code);
+            modeChangedListenerSet = mAppOpsCheckingService.getOpModeChangedListeners(code);
             if (modeChangedListenerSet == null) {
                 return;
             }
@@ -5661,7 +5662,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 return;
             }
             Ops removedOps = uidState.pkgOps.remove(packageName);
-            mAppOpsServiceInterface.removePackage(packageName, UserHandle.getUserId(uid));
+            mAppOpsCheckingService.removePackage(packageName, UserHandle.getUserId(uid));
             if (removedOps != null) {
                 scheduleFastWriteLocked();
             }

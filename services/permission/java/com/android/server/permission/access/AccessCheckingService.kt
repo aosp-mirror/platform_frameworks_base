@@ -21,7 +21,7 @@ import com.android.internal.annotations.Keep
 import com.android.server.LocalManagerRegistry
 import com.android.server.LocalServices
 import com.android.server.SystemService
-import com.android.server.appop.AppOpsServiceInterface
+import com.android.server.appop.AppOpsCheckingServiceInterface
 import com.android.server.permission.access.appop.AppOpService
 import com.android.server.permission.access.collection.IntSet
 import com.android.server.permission.access.permission.PermissionService
@@ -51,7 +51,7 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         appOpService = AppOpService(this)
         permissionService = PermissionService(this)
 
-        LocalServices.addService(AppOpsServiceInterface::class.java, appOpService)
+        LocalServices.addService(AppOpsCheckingServiceInterface::class.java, appOpService)
         LocalServices.addService(PermissionManagerServiceInterface::class.java, permissionService)
     }
 

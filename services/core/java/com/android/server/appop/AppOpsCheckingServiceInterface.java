@@ -30,7 +30,7 @@ import java.io.PrintWriter;
  * This interface also includes functions for added and removing op mode watchers.
  * In the future this interface will also include op restrictions.
  */
-public interface AppOpsServiceInterface {
+public interface AppOpsCheckingServiceInterface {
     /**
      * Returns a copy of non-default app-ops with op as keys and their modes as values for a uid.
      * Returns an empty SparseIntArray if nothing is set.

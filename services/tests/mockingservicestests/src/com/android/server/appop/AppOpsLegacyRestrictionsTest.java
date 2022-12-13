@@ -57,7 +57,7 @@ public class AppOpsLegacyRestrictionsTest {
     Handler mHandler;
 
     @Mock
-    AppOpsServiceInterface mLegacyAppOpsService;
+    AppOpsCheckingServiceInterface mLegacyAppOpsService;
 
     AppOpsRestrictions mAppOpsRestrictions;
 
