@@ -19,9 +19,11 @@ package com.android.settingslib.spaprivileged.model.app
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.graphics.drawable.Drawable
+import android.os.UserManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.android.settingslib.Utils
 import com.android.settingslib.spa.framework.compose.rememberContext
@@ -36,12 +38,24 @@ interface AppRepository {
     fun loadLabel(app: ApplicationInfo): String
 
     @Composable
-    fun produceLabel(app: ApplicationInfo) =
-        produceState(initialValue = stringResource(R.string.summary_placeholder), app) {
+    fun produceLabel(app: ApplicationInfo, isClonedAppPage: Boolean = false): State<String> {
+        val context = LocalContext.current
+        return produceState(initialValue = stringResource(R.string.summary_placeholder), app) {
             withContext(Dispatchers.IO) {
-                value = loadLabel(app)
+                if (isClonedAppPage || isCloneApp(context, app)) {
+                    value = context.getString(R.string.cloned_app_info_label, loadLabel(app))
+                } else {
+                    value = loadLabel(app)
+                }
             }
         }
+    }
+
+    private fun isCloneApp(context: Context, app: ApplicationInfo): Boolean {
+        val userManager = context.getSystemService(UserManager::class.java)!!
+        val userInfo = userManager.getUserInfo(app.userId)
+        return userInfo != null && userInfo.isCloneProfile
+    }
 
     @Composable
     fun produceIcon(app: ApplicationInfo): State<Drawable?>

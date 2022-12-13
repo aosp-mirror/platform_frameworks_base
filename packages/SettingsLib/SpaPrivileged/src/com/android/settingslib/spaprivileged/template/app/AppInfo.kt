@@ -43,7 +43,7 @@ import com.android.settingslib.spaprivileged.model.app.rememberAppRepository
 
 class AppInfoProvider(private val packageInfo: PackageInfo) {
     @Composable
-    fun AppInfo(displayVersion: Boolean = false) {
+    fun AppInfo(displayVersion: Boolean = false, isClonedAppPage: Boolean = false) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -57,7 +57,7 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
             Box(modifier = Modifier.padding(SettingsDimension.itemPaddingAround)) {
                 AppIcon(app = app, size = SettingsDimension.appIconInfoSize)
             }
-            AppLabel(app)
+            AppLabel(app, isClonedAppPage)
             InstallType(app)
             if (displayVersion) AppVersion()
         }
@@ -99,7 +99,7 @@ internal fun AppIcon(app: ApplicationInfo, size: Dp) {
 }
 
 @Composable
-internal fun AppLabel(app: ApplicationInfo) {
+internal fun AppLabel(app: ApplicationInfo, isClonedAppPage: Boolean = false) {
     val appRepository = rememberAppRepository()
-    SettingsTitle(title = appRepository.produceLabel(app), useMediumWeight = true)
+    SettingsTitle(title = appRepository.produceLabel(app, isClonedAppPage), useMediumWeight = true)
 }
