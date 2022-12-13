@@ -33,21 +33,6 @@ class EnforcePermissionDetectorTest : LintDetectorTest() {
 
     override fun lint(): TestLintTask = super.lint().allowMissingSdk(true)
 
-    fun testDoesNotDetectIssuesCorrectAnnotationOnClass() {
-        lint().files(java(
-            """
-            package test.pkg;
-            @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE)
-            public class TestClass1 extends IFoo.Stub {
-                public void testMethod() {}
-            }
-            """).indented(),
-                *stubs
-        )
-        .run()
-        .expectClean()
-    }
-
     fun testDoesNotDetectIssuesCorrectAnnotationOnMethod() {
         lint().files(java(
             """
@@ -131,28 +116,6 @@ class EnforcePermissionDetectorTest : LintDetectorTest() {
         )
         .run()
         .expectClean()
-    }
-
-    fun testDetectIssuesMismatchingAnnotationOnClass() {
-        lint().files(java(
-            """
-            package test.pkg;
-            @android.annotation.EnforcePermission(android.Manifest.permission.INTERNET)
-            public class TestClass3 extends IFoo.Stub {
-                public void testMethod() {}
-            }
-            """).indented(),
-                *stubs
-        )
-        .run()
-        .expect("""src/test/pkg/TestClass3.java:3: Error: The class test.pkg.TestClass3 is \
-annotated with @android.annotation.EnforcePermission(android.Manifest.permission.INTERNET) \
-which differs from the parent class IFoo.Stub: \
-@android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE). The \
-same annotation must be used for both classes. [MismatchingEnforcePermissionAnnotation]
-public class TestClass3 extends IFoo.Stub {
-                                ~~~~~~~~~
-1 errors, 0 warnings""".addLineContinuation())
     }
 
     fun testDetectIssuesMismatchingAnnotationOnMethod() {
@@ -295,25 +258,6 @@ annotation must be used for both methods. [MismatchingEnforcePermissionAnnotatio
                 """.addLineContinuation())
     }
 
-    fun testDetectIssuesMissingAnnotationOnClass() {
-        lint().files(java(
-            """
-            package test.pkg;
-            public class TestClass5 extends IFoo.Stub {
-                public void testMethod() {}
-            }
-            """).indented(),
-                *stubs
-        )
-        .run()
-        .expect("""src/test/pkg/TestClass5.java:2: Error: The class test.pkg.TestClass5 extends \
-the class IFoo.Stub which is annotated with @EnforcePermission. The same annotation must be \
-used on test.pkg.TestClass5. [MissingEnforcePermissionAnnotation]
-public class TestClass5 extends IFoo.Stub {
-                                ~~~~~~~~~
-1 errors, 0 warnings""".addLineContinuation())
-    }
-
     fun testDetectIssuesMissingAnnotationOnMethod() {
         lint().files(java(
             """
@@ -354,27 +298,6 @@ annotation must be used on Stub.testMethod. Did you forget to annotate the AIDL 
 1 errors, 0 warnings""".addLineContinuation())
     }
 
-    fun testDetectIssuesExtraAnnotationInterface() {
-        lint().files(java(
-            """
-            package test.pkg;
-            @android.annotation.EnforcePermission(android.Manifest.permission.INTERNET)
-            public class TestClass8 extends IBar.Stub {
-                public void testMethod() {}
-            }
-            """).indented(),
-                *stubs
-        )
-        .run()
-        .expect("""src/test/pkg/TestClass8.java:2: Error: The class test.pkg.TestClass8 \
-extends the class IBar.Stub which is not annotated with @EnforcePermission. The same annotation \
-must be used on IBar.Stub. Did you forget to annotate the AIDL definition? \
-[MissingEnforcePermissionAnnotation]
-@android.annotation.EnforcePermission(android.Manifest.permission.INTERNET)
-^
-1 errors, 0 warnings""".addLineContinuation())
-    }
-
     fun testDetectIssuesMissingAnnotationOnMethodWhenClassIsCalledDefault() {
         lint().files(java(
             """
@@ -398,21 +321,6 @@ must be used on IBar.Stub. Did you forget to annotate the AIDL definition? \
     }
 
     /* Stubs */
-
-    // A service with permission annotation on the class.
-    private val interfaceIFooStub: TestFile = java(
-        """
-        @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE)
-        public interface IFoo {
-         @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE)
-         public static abstract class Stub extends android.os.Binder implements IFoo {
-           @Override
-           public void testMethod() {}
-         }
-         public void testMethod();
-        }
-        """
-    ).indented()
 
     // A service with permission annotation on the method.
     private val interfaceIFooMethodStub: TestFile = java(
@@ -480,7 +388,7 @@ must be used on IBar.Stub. Did you forget to annotate the AIDL definition? \
         """
     ).indented()
 
-    private val stubs = arrayOf(interfaceIFooStub, interfaceIFooMethodStub, interfaceIBarStub,
+    private val stubs = arrayOf(interfaceIFooMethodStub, interfaceIBarStub,
             manifestPermissionStub, enforcePermissionAnnotationStub)
 
     // Substitutes "backslash + new line" with an empty string to imitate line continuation

@@ -36,7 +36,6 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
 import org.jetbrains.uast.UAnnotation
-import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UMethod
 
@@ -158,50 +157,13 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
         }
     }
 
-    private fun compareClasses(
-        context: JavaContext,
-        element: UElement,
-        newClass: PsiClass,
-        extendedClass: PsiClass,
-        checkEquivalence: Boolean = true
-    ) {
-        val newAnnotation = newClass.getAnnotation(ANNOTATION_ENFORCE_PERMISSION)
-        val extendedAnnotation = extendedClass.getAnnotation(ANNOTATION_ENFORCE_PERMISSION)
-
-        val location = context.getLocation(element)
-        val newClassName = newClass.qualifiedName
-        val extendedClassName = extendedClass.qualifiedName
-        if (newAnnotation == null) {
-            val msg = "The class $newClassName extends the class $extendedClassName which " +
-                "is annotated with @EnforcePermission. The same annotation must be used " +
-                "on $newClassName."
-            context.report(ISSUE_MISSING_ENFORCE_PERMISSION, element, location, msg)
-        } else if (extendedAnnotation == null) {
-            val msg = "The class $newClassName extends the class $extendedClassName which " +
-                "is not annotated with @EnforcePermission. The same annotation must be used " +
-                "on $extendedClassName. Did you forget to annotate the AIDL definition?"
-            context.report(ISSUE_MISSING_ENFORCE_PERMISSION, element, location, msg)
-        } else if (checkEquivalence && !areAnnotationsEquivalent(
-            context, newAnnotation, extendedAnnotation)) {
-            val msg = "The class $newClassName is annotated with ${newAnnotation.text} " +
-                "which differs from the parent class $extendedClassName: " +
-                "${extendedAnnotation.text}. The same annotation must be used for " +
-                "both classes."
-            context.report(ISSUE_MISMATCHING_ENFORCE_PERMISSION, element, location, msg)
-        }
-    }
-
     override fun visitAnnotationUsage(
         context: JavaContext,
         element: UElement,
         annotationInfo: AnnotationInfo,
         usageInfo: AnnotationUsageInfo
     ) {
-        if (usageInfo.type == AnnotationUsageType.EXTENDS) {
-            val newClass = element.sourcePsi?.parent?.parent as PsiClass
-            val extendedClass: PsiClass = usageInfo.referenced as PsiClass
-            compareClasses(context, element, newClass, extendedClass)
-        } else if (usageInfo.type == AnnotationUsageType.METHOD_OVERRIDE &&
+        if (usageInfo.type == AnnotationUsageType.METHOD_OVERRIDE &&
             annotationInfo.origin == AnnotationOrigin.METHOD) {
             val overridingMethod = element.sourcePsi as PsiMethod
             val overriddenMethod = usageInfo.referenced as PsiMethod
@@ -216,17 +178,7 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
                     return
                 }
                 val method = node.uastParent as? UMethod
-                val klass = node.uastParent as? UClass
-                if (klass != null) {
-                    val newClass = klass as PsiClass
-                    val extendedClass = newClass.getSuperClass()
-                    if (extendedClass != null && extendedClass.qualifiedName != JAVA_OBJECT) {
-                        // The equivalence check can be skipped, if both classes are
-                        // annotated, it will be verified by visitAnnotationUsage.
-                        compareClasses(context, klass, newClass,
-                            extendedClass, checkEquivalence = false)
-                    }
-                } else if (method != null) {
+                if (method != null) {
                     val overridingMethod = method as PsiMethod
                     val parents = overridingMethod.findSuperMethods()
                     for (overriddenMethod in parents) {
