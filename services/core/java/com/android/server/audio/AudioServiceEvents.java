@@ -476,4 +476,53 @@ public class AudioServiceEvents {
             }
         }
     }
+
+    static final class SoundDoseEvent extends EventLogger.Event {
+        static final int MOMENTARY_EXPOSURE = 0;
+        static final int DOSE_UPDATE = 1;
+        static final int DOSE_REPEAT_5X = 2;
+        static final int DOSE_ACCUMULATION_START = 3;
+        final int mEventType;
+        final float mFloatValue;
+        final long mLongValue;
+
+        private SoundDoseEvent(int event, float f, long l) {
+            mEventType = event;
+            mFloatValue = f;
+            mLongValue = l;
+        }
+
+        static SoundDoseEvent getMomentaryExposureEvent(float mel) {
+            return new SoundDoseEvent(MOMENTARY_EXPOSURE, mel, 0 /*ignored*/);
+        }
+
+        static SoundDoseEvent getDoseUpdateEvent(float csd, long totalDuration) {
+            return new SoundDoseEvent(DOSE_UPDATE, csd, totalDuration);
+        }
+
+        static SoundDoseEvent getDoseRepeat5xEvent() {
+            return new SoundDoseEvent(DOSE_REPEAT_5X, 0 /*ignored*/, 0 /*ignored*/);
+        }
+
+        static SoundDoseEvent getDoseAccumulationStartEvent() {
+            return new SoundDoseEvent(DOSE_ACCUMULATION_START, 0 /*ignored*/, 0 /*ignored*/);
+        }
+
+        @Override
+        public String eventToString() {
+            switch (mEventType) {
+                case MOMENTARY_EXPOSURE:
+                    return String.format("momentary exposure MEL=%.2f", mFloatValue);
+                case DOSE_UPDATE:
+                    return String.format(java.util.Locale.US,
+                            "dose update CSD=%.1f%% total duration=%d",
+                            mFloatValue * 100.0f, mLongValue);
+                case DOSE_REPEAT_5X:
+                    return "CSD reached 500%";
+                case DOSE_ACCUMULATION_START:
+                    return "CSD accumulating: RS2 entered";
+            }
+            return new StringBuilder("FIXME invalid event type:").append(mEventType).toString();
+        }
+    }
 }
