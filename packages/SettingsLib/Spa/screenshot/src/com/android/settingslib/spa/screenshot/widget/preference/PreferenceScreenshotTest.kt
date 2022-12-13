@@ -52,7 +52,7 @@ class PreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
         )
 
     @Test
-    fun testPreference() {
+    fun test() {
         screenshotRule.screenshotTest("preference") {
             RegularScaffold(title = "Preference") {
                 Preference(object : PreferenceModel {
