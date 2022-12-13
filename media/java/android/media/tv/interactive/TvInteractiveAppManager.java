@@ -526,6 +526,18 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
+            public void onRequestTvRecordingInfo(String recordingId, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestTvRecordingInfo(recordingId);
+                }
+            }
+
+            @Override
             public void onRequestSigning(
                     String id, String algorithm, String alias, byte[] data, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
@@ -1813,6 +1825,15 @@ public final class TvInteractiveAppManager {
             });
         }
 
+        void postRequestTvRecordingInfo(String recordingId) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestTvRecordingInfo(mSession, recordingId);
+                }
+            });
+        }
+
         void postSetTvRecordingInfo(String recordingId, TvRecordingInfo recordingInfo) {
             mHandler.post(new Runnable() {
                 @Override
@@ -2005,6 +2026,16 @@ public final class TvInteractiveAppManager {
          */
         public void onSetTvRecordingInfo(Session session, String recordingId,
                 TvRecordingInfo recordingInfo) {
+        }
+
+        /**
+         * This is called when {@link TvInteractiveAppService.Session#requestTvRecordingInfo} is
+         * called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         * @param recordingId The recordingId of the recording to be stopped.
+         */
+        public void onRequestTvRecordingInfo(Session session, String recordingId) {
         }
 
         /**

@@ -1011,6 +1011,27 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Gets the recording info for the specified recording
+         *
+         * @hide
+         */
+        @CallSuper
+        public void requestTvRecordingInfo(@NonNull String recordingId) {
+            executeOrPostRunnableOnMainThread(() -> {
+                try {
+                    if (DEBUG) {
+                        Log.d(TAG, "requestTvRecordingInfo");
+                    }
+                    if (mSessionCallback != null) {
+                        mSessionCallback.onRequestTvRecordingInfo(recordingId);
+                    }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "error in requestTvRecordingInfo", e);
+                }
+            });
+        }
+
+        /**
          * Requests signing of the given data.
          *
          * <p>This is used when the corresponding server of the broadcast-independent interactive

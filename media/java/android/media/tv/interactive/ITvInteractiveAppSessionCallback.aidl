@@ -49,6 +49,7 @@ oneway interface ITvInteractiveAppSessionCallback {
     void onRequestStartRecording(in Uri programUri);
     void onRequestStopRecording(in String recordingId);
     void onSetTvRecordingInfo(in String recordingId, in TvRecordingInfo recordingInfo);
+    void onRequestTvRecordingInfo(in String recordingId);
     void onRequestSigning(in String id, in String algorithm, in String alias, in byte[] data);
     void onAdRequest(in AdRequest request);
 }
