@@ -18,6 +18,7 @@ package com.android.carrierdefaultapp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
@@ -55,6 +56,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.net.URL;
 import java.util.Locale;
 
 @RunWith(AndroidJUnit4.class)
@@ -132,6 +134,8 @@ public class SlicePurchaseBroadcastReceiverTest {
                 eq(SlicePurchaseController.EXTRA_SUB_ID), anyInt());
         doReturn(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY).when(mIntent).getIntExtra(
                 eq(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY), anyInt());
+        doReturn(SlicePurchaseController.SLICE_PURCHASE_TEST_FILE).when(mIntent).getStringExtra(
+                eq(SlicePurchaseController.EXTRA_PURCHASE_URL));
         doReturn(TAG).when(mIntent).getStringExtra(
                 eq(SlicePurchaseController.EXTRA_REQUESTING_APP_NAME));
         assertFalse(SlicePurchaseBroadcastReceiver.isIntentValid(mIntent));
@@ -142,6 +146,29 @@ public class SlicePurchaseBroadcastReceiverTest {
         doReturn(mPendingIntent).when(mIntent).getParcelableExtra(
                 anyString(), eq(PendingIntent.class));
         assertTrue(SlicePurchaseBroadcastReceiver.isIntentValid(mIntent));
+    }
+
+    @Test
+    public void testGetPurchaseUrl() {
+        String[] invalidUrls = new String[] {
+                null,
+                "",
+                "www.google.com",
+                "htt://www.google.com",
+                "http//www.google.com",
+                "http:/www.google.com",
+                "file:///android_asset/",
+                "file:///android_asset/slice_store_test.html"
+        };
+
+        for (String url : invalidUrls) {
+            URL purchaseUrl = SlicePurchaseBroadcastReceiver.getPurchaseUrl(url);
+            assertNull(purchaseUrl);
+        }
+
+        assertEquals(SlicePurchaseController.SLICE_PURCHASE_TEST_FILE,
+                SlicePurchaseBroadcastReceiver.getPurchaseUrl(
+                        SlicePurchaseController.SLICE_PURCHASE_TEST_FILE).toString());
     }
 
     @Test
@@ -200,6 +227,8 @@ public class SlicePurchaseBroadcastReceiverTest {
                 eq(SlicePurchaseController.EXTRA_SUB_ID), anyInt());
         doReturn(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY).when(mIntent).getIntExtra(
                 eq(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY), anyInt());
+        doReturn(SlicePurchaseController.SLICE_PURCHASE_TEST_FILE).when(mIntent).getStringExtra(
+                eq(SlicePurchaseController.EXTRA_PURCHASE_URL));
         doReturn(TAG).when(mIntent).getStringExtra(
                 eq(SlicePurchaseController.EXTRA_REQUESTING_APP_NAME));
         mSlicePurchaseBroadcastReceiver.onReceive(mContext, mIntent);

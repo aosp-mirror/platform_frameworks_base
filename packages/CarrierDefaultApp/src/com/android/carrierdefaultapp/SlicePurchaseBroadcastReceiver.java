@@ -16,6 +16,7 @@
 package com.android.carrierdefaultapp;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -35,11 +36,15 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.URLUtil;
 import android.webkit.WebView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.phone.slice.SlicePurchaseController;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -140,7 +145,7 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
      * Check whether the Intent is valid and can be used to complete purchases in the slice purchase
      * application. This checks that all necessary extras exist and that the values are valid.
      *
-     * @param intent The intent to check
+     * @param intent The intent to check.
      * @return {@code true} if the intent is valid and {@code false} otherwise.
      */
     public static boolean isIntentValid(@NonNull Intent intent) {
@@ -165,6 +170,12 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
             return false;
         }
 
+        String purchaseUrl = intent.getStringExtra(SlicePurchaseController.EXTRA_PURCHASE_URL);
+        if (getPurchaseUrl(purchaseUrl) == null) {
+            loge("isIntentValid: invalid purchase URL: " + purchaseUrl);
+            return false;
+        }
+
         String appName = intent.getStringExtra(SlicePurchaseController.EXTRA_REQUESTING_APP_NAME);
         if (TextUtils.isEmpty(appName)) {
             loge("isIntentValid: empty requesting application name: " + appName);
@@ -179,6 +190,30 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
                 && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_SUCCESS)
                 && isPendingIntentValid(intent,
                         SlicePurchaseController.EXTRA_INTENT_NOTIFICATION_SHOWN);
+    }
+
+    /**
+     * Get the {@link URL} from the given purchase URL String, if it is valid.
+     *
+     * @param purchaseUrl The purchase URL String to use to create the URL.
+     * @return The purchase URL from the given String or {@code null} if it is invalid.
+     */
+    @Nullable public static URL getPurchaseUrl(@Nullable String purchaseUrl) {
+        if (!URLUtil.isValidUrl(purchaseUrl)) {
+            return null;
+        }
+        if (URLUtil.isAssetUrl(purchaseUrl)
+                && !purchaseUrl.equals(SlicePurchaseController.SLICE_PURCHASE_TEST_FILE)) {
+            return null;
+        }
+        URL url = null;
+        try {
+            url = new URL(purchaseUrl);
+            url.toURI();
+        } catch (MalformedURLException | URISyntaxException e) {
+            loge("Invalid purchase URL: " + purchaseUrl + ", " + e);
+        }
+        return url;
     }
 
     private static boolean isPendingIntentValid(@NonNull Intent intent, @NonNull String extra) {
