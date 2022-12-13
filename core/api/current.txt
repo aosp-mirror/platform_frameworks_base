@@ -52645,8 +52645,10 @@ package android.view {
   }
 
   public final class WindowMetrics {
-    ctor public WindowMetrics(@NonNull android.graphics.Rect, @NonNull android.view.WindowInsets);
+    ctor @Deprecated public WindowMetrics(@NonNull android.graphics.Rect, @NonNull android.view.WindowInsets);
+    ctor public WindowMetrics(@NonNull android.graphics.Rect, @NonNull android.view.WindowInsets, float);
     method @NonNull public android.graphics.Rect getBounds();
+    method public float getDensity();
     method @NonNull public android.view.WindowInsets getWindowInsets();
   }
 

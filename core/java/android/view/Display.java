@@ -1469,7 +1469,8 @@ public final class Display {
      * @param outMetrics A {@link DisplayMetrics} object which receives the display metrics.
      *
      * @deprecated Use {@link WindowMetrics#getBounds()} to get the dimensions of the application
-     *     window. Use {@link Configuration#densityDpi} to get the display density.
+     *     window. Use {@link WindowMetrics#getDensity()} to get the density of the application
+     *     window.
      */
     @Deprecated
     public void getMetrics(DisplayMetrics outMetrics) {
