@@ -36,7 +36,7 @@ import android.os.ICancellationSignal;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.credentials.BeginCreateCredentialRequest;
-import android.service.credentials.GetCredentialsRequest;
+import android.service.credentials.BeginGetCredentialsRequest;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -169,8 +169,8 @@ public final class CredentialManagerService extends
 
             // Iterate over all provider sessions and invoke the request
             providerSessions.forEach(providerGetSession -> {
-                providerGetSession.getRemoteCredentialService().onGetCredentials(
-                        (GetCredentialsRequest) providerGetSession.getProviderRequest(),
+                providerGetSession.getRemoteCredentialService().onBeginGetCredentials(
+                        (BeginGetCredentialsRequest) providerGetSession.getProviderRequest(),
                         /*callback=*/providerGetSession);
             });
             return cancelTransport;

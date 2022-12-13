@@ -19,19 +19,23 @@ package com.android.server.credentials;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.PendingIntent;
 import android.content.Context;
-import android.credentials.Credential;
+import android.content.Intent;
 import android.credentials.GetCredentialOption;
 import android.credentials.GetCredentialResponse;
 import android.credentials.ui.Entry;
 import android.credentials.ui.GetCredentialProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
 import android.service.credentials.Action;
+import android.service.credentials.BeginGetCredentialOption;
+import android.service.credentials.BeginGetCredentialsRequest;
+import android.service.credentials.BeginGetCredentialsResponse;
 import android.service.credentials.CredentialEntry;
 import android.service.credentials.CredentialProviderInfo;
+import android.service.credentials.CredentialProviderService;
 import android.service.credentials.CredentialsResponseContent;
-import android.service.credentials.GetCredentialsRequest;
-import android.service.credentials.GetCredentialsResponse;
+import android.service.credentials.GetCredentialRequest;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -41,6 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Central provider session that listens for provider callbacks, and maintains provider state.
@@ -48,10 +53,10 @@ import java.util.UUID;
  *
  * @hide
  */
-public final class ProviderGetSession extends ProviderSession<GetCredentialsRequest,
-        GetCredentialsResponse>
+public final class ProviderGetSession extends ProviderSession<BeginGetCredentialsRequest,
+        BeginGetCredentialsResponse>
         implements
-        RemoteCredentialService.ProviderCallbacks<GetCredentialsResponse> {
+        RemoteCredentialService.ProviderCallbacks<BeginGetCredentialsResponse> {
     private static final String TAG = "ProviderGetSession";
 
     // Key to be used as an entry key for a credential entry
@@ -69,6 +74,9 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsRequ
     @Nullable
     private Pair<String, Action> mUiAuthenticationAction = null;
 
+    /** The complete request to be used in the second round. */
+    private final GetCredentialRequest mCompleteRequest;
+
     /** Creates a new provider session to be used by the request session. */
     @Nullable public static ProviderGetSession createNewSession(
             Context context,
@@ -76,20 +84,34 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsRequ
             CredentialProviderInfo providerInfo,
             GetRequestSession getRequestSession,
             RemoteCredentialService remoteCredentialService) {
-        GetCredentialsRequest providerRequest =
+        GetCredentialRequest completeRequest =
                 createProviderRequest(providerInfo.getCapabilities(),
                         getRequestSession.mClientRequest,
                         getRequestSession.mClientCallingPackage);
-        if (providerRequest != null) {
+        if (completeRequest != null) {
+            // TODO: Update to using query data when ready
+            BeginGetCredentialsRequest beginGetCredentialsRequest =
+                    new BeginGetCredentialsRequest.Builder(
+                            completeRequest.getCallingPackage())
+                            .setBeginGetCredentialOptions(
+                                    completeRequest.getGetCredentialOptions().stream().map(
+                                            option -> {
+                                                //TODO : Replace with option.getCandidateQueryData
+                                                // when ready
+                                                return new BeginGetCredentialOption(
+                                                    option.getType(),
+                                                        option.getCandidateQueryData());
+                                            }).collect(Collectors.toList()))
+                            .build();
             return new ProviderGetSession(context, providerInfo, getRequestSession, userId,
-                    remoteCredentialService, providerRequest);
+                    remoteCredentialService, beginGetCredentialsRequest, completeRequest);
         }
         Log.i(TAG, "Unable to create provider session");
         return null;
     }
 
     @Nullable
-    private static GetCredentialsRequest createProviderRequest(List<String> providerCapabilities,
+    private static GetCredentialRequest createProviderRequest(List<String> providerCapabilities,
             android.credentials.GetCredentialRequest clientRequest,
             String clientCallingPackage) {
         List<GetCredentialOption> filteredOptions = new ArrayList<>();
@@ -104,7 +126,7 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsRequ
             }
         }
         if (!filteredOptions.isEmpty()) {
-            return new GetCredentialsRequest.Builder(clientCallingPackage).setGetCredentialOptions(
+            return new GetCredentialRequest.Builder(clientCallingPackage).setGetCredentialOptions(
                     filteredOptions).build();
         }
         Log.i(TAG, "In createProviderRequest - returning null");
@@ -115,8 +137,10 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsRequ
             CredentialProviderInfo info,
             ProviderInternalCallback callbacks,
             int userId, RemoteCredentialService remoteCredentialService,
-            GetCredentialsRequest request) {
-        super(context, info, request, callbacks, userId, remoteCredentialService);
+            BeginGetCredentialsRequest beginGetRequest,
+            GetCredentialRequest completeGetRequest) {
+        super(context, info, beginGetRequest, callbacks, userId, remoteCredentialService);
+        mCompleteRequest = completeGetRequest;
         setStatus(Status.PENDING);
     }
 
@@ -128,7 +152,7 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsRequ
 
     /** Called when the provider response has been updated by an external source. */
     @Override // Callback from the remote provider
-    public void onProviderResponseSuccess(@Nullable GetCredentialsResponse response) {
+    public void onProviderResponseSuccess(@Nullable BeginGetCredentialsResponse response) {
         Log.i(TAG, "in onProviderResponseSuccess");
         onUpdateResponse(response);
     }
@@ -254,17 +278,24 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsRequ
             mUiCredentialEntries.put(entryId, credentialEntry);
             Log.i(TAG, "in prepareUiProviderData creating ui entry with id " + entryId);
             if (credentialEntry.getPendingIntent() != null) {
+                setUpFillInIntent(credentialEntry.getPendingIntent());
                 credentialUiEntries.add(new Entry(CREDENTIAL_ENTRY_KEY, entryId,
                         credentialEntry.getSlice(), credentialEntry.getPendingIntent(),
                         /*fillInIntent=*/null));
-            } else if (credentialEntry.getCredential() != null) {
-                credentialUiEntries.add(new Entry(CREDENTIAL_ENTRY_KEY, entryId,
-                        credentialEntry.getSlice()));
             } else {
-                Log.i(TAG, "No credential or pending intent. Should not happen.");
+                Log.i(TAG, "No pending intent. Should not happen.");
             }
         }
         return credentialUiEntries;
+    }
+
+    private Intent setUpFillInIntent(PendingIntent pendingIntent) {
+        Intent intent = pendingIntent.getIntent();
+        intent.putExtra(
+                CredentialProviderService
+                        .EXTRA_GET_CREDENTIAL_REQUEST,
+                mCompleteRequest);
+        return intent;
     }
 
     private List<Entry> prepareUiActionEntries(@Nullable List<Action> actions) {
@@ -292,17 +323,14 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsRequ
 
     private void onCredentialEntrySelected(CredentialEntry credentialEntry,
             ProviderPendingIntentResponse providerPendingIntentResponse) {
-        if (credentialEntry.getCredential() != null) {
-            mCallbacks.onFinalResponseReceived(mComponentName, new GetCredentialResponse(
-                    credentialEntry.getCredential()));
-            return;
-        } else if (providerPendingIntentResponse != null) {
+        if (providerPendingIntentResponse != null) {
             if (PendingIntentResultHandler.isSuccessfulResponse(providerPendingIntentResponse)) {
-                Credential credential = PendingIntentResultHandler.extractCredential(
-                        providerPendingIntentResponse.getResultData());
-                if (credential != null) {
-                    mCallbacks.onFinalResponseReceived(mComponentName,
-                            new GetCredentialResponse(credential));
+                // TODO: Remove credential extraction when flow is fully transitioned
+                GetCredentialResponse getCredentialResponse = PendingIntentResultHandler
+                        .extractGetCredentialResponse(
+                                providerPendingIntentResponse.getResultData());
+                if (getCredentialResponse != null) {
+                    mCallbacks.onFinalResponseReceived(mComponentName, getCredentialResponse);
                     return;
                 }
             }
@@ -320,7 +348,8 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsRequ
                         .extractResponseContent(providerPendingIntentResponse
                                 .getResultData());
                 if (content != null) {
-                    onUpdateResponse(GetCredentialsResponse.createWithResponseContent(content));
+                    onUpdateResponse(
+                            BeginGetCredentialsResponse.createWithResponseContent(content));
                     return;
                 }
             }
@@ -337,7 +366,7 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsRequ
 
 
     /** Updates the response being maintained in state by this provider session. */
-    private void onUpdateResponse(GetCredentialsResponse response) {
+    private void onUpdateResponse(BeginGetCredentialsResponse response) {
         mProviderResponse = response;
         if (response.getAuthenticationAction() != null) {
             Log.i(TAG , "updateResponse with authentication entry");

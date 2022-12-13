@@ -18,7 +18,6 @@ package com.android.credentialmanager.jetpack.provider
 
 import android.app.slice.Slice
 import android.credentials.ui.Entry
-import android.graphics.drawable.Icon
 
 /**
  * UI representation for a credential entry used during the get credential flow.
@@ -26,28 +25,24 @@ import android.graphics.drawable.Icon
  * TODO: move to jetpack.
  */
 class ActionUi(
-  val icon: Icon,
   val text: CharSequence,
   val subtext: CharSequence?,
 ) {
   companion object {
     fun fromSlice(slice: Slice): ActionUi {
-      var icon: Icon? = null
       var text: CharSequence? = null
       var subtext: CharSequence? = null
 
       val items = slice.items
       items.forEach {
-        if (it.hasHint(Entry.HINT_ACTION_ICON)) {
-          icon = it.icon
-        } else if (it.hasHint(Entry.HINT_ACTION_TITLE)) {
+        if (it.hasHint(Entry.HINT_ACTION_TITLE)) {
           text = it.text
         } else if (it.hasHint(Entry.HINT_ACTION_SUBTEXT)) {
           subtext = it.text
         }
       }
       // TODO: fail NPE more elegantly.
-      return ActionUi(icon!!, text!!, subtext)
+      return ActionUi(text!!, subtext)
     }
   }
 }

@@ -63,7 +63,7 @@ class CredentialManagerRepo(
     requestInfo = intent.extras?.getParcelable(
       RequestInfo.EXTRA_REQUEST_INFO,
       RequestInfo::class.java
-    ) ?: testCreatePasskeyRequestInfo()
+    ) ?: testGetRequestInfo()
 
     providerEnabledList = when (requestInfo.type) {
       RequestInfo.TYPE_CREATE ->
@@ -245,12 +245,10 @@ class CredentialManagerRepo(
           listOf(
             newActionEntry(
               "key3", "subkey-1", TYPE_PASSWORD_CREDENTIAL,
-              Icon.createWithResource(context, R.drawable.ic_manage_accounts),
               "Open Google Password Manager", "elisa.beckett@gmail.com"
             ),
             newActionEntry(
               "key3", "subkey-2", TYPE_PASSWORD_CREDENTIAL,
-              Icon.createWithResource(context, R.drawable.ic_manage_accounts),
               "Open Google Password Manager", "beckett-family@gmail.com"
             ),
           )
@@ -275,7 +273,6 @@ class CredentialManagerRepo(
           listOf(
             newActionEntry(
               "key3", "subkey-1", TYPE_PASSWORD_CREDENTIAL,
-              Icon.createWithResource(context, R.drawable.ic_face),
               "Open Enpass"
             ),
           )
@@ -287,7 +284,6 @@ class CredentialManagerRepo(
     key: String,
     subkey: String,
     credentialType: String,
-    icon: Icon,
     text: String,
     subtext: String? = null,
   ): Entry {
@@ -295,7 +291,7 @@ class CredentialManagerRepo(
       Entry.CREDENTIAL_MANAGER_ENTRY_URI, SliceSpec(credentialType, 1)
     ).addText(
       text, null, listOf(Entry.HINT_ACTION_TITLE)
-    ).addIcon(icon, null, listOf(Entry.HINT_ACTION_ICON))
+    )
     if (subtext != null) {
       slice.addText(subtext, null, listOf(Entry.HINT_ACTION_SUBTEXT))
     }

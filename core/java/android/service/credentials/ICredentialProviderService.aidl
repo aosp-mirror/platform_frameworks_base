@@ -17,9 +17,9 @@
 package android.service.credentials;
 
 import android.os.ICancellationSignal;
-import android.service.credentials.GetCredentialsRequest;
+import android.service.credentials.BeginGetCredentialsRequest;
 import android.service.credentials.BeginCreateCredentialRequest;
-import android.service.credentials.IGetCredentialsCallback;
+import android.service.credentials.IBeginGetCredentialsCallback;
 import android.service.credentials.IBeginCreateCredentialCallback;
 import android.os.ICancellationSignal;
 
@@ -29,6 +29,6 @@ import android.os.ICancellationSignal;
  * @hide
  */
 interface ICredentialProviderService {
-    ICancellationSignal onGetCredentials(in GetCredentialsRequest request, in IGetCredentialsCallback callback);
+    ICancellationSignal onBeginGetCredentials(in BeginGetCredentialsRequest request, in IBeginGetCredentialsCallback callback);
     ICancellationSignal onBeginCreateCredential(in BeginCreateCredentialRequest request, in IBeginCreateCredentialCallback callback);
 }

@@ -127,7 +127,7 @@ public final class BeginCreateCredentialResponse implements Parcelable {
          *
          * <p> Once the remote credential flow is complete, the {@link android.app.Activity}
          * result should be set to {@link android.app.Activity#RESULT_OK} and an extra with the
-         * {@link CredentialProviderService#EXTRA_CREATE_CREDENTIAL_RESULT} key should be populated
+         * {@link CredentialProviderService#EXTRA_CREATE_CREDENTIAL_RESPONSE} key should be populated
          * with a {@link android.credentials.CreateCredentialResponse} object.
          */
         public @NonNull Builder setRemoteCreateEntry(@Nullable CreateEntry remoteCreateEntry) {

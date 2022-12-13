@@ -27,7 +27,7 @@ import java.util.Objects;
  * Response from a credential provider, containing credential entries and other associated
  * data to be shown on the account selector UI.
  */
-public final class GetCredentialsResponse implements Parcelable {
+public final class BeginGetCredentialsResponse implements Parcelable {
     /** Content to be used for the UI. */
     private final @Nullable CredentialsResponseContent mCredentialsResponseContent;
 
@@ -38,14 +38,15 @@ public final class GetCredentialsResponse implements Parcelable {
     private final @Nullable Action mAuthenticationAction;
 
     /**
-     * Creates a {@link GetCredentialsResponse} instance with an authentication {@link Action} set.
-     * Providers must use this method when no content can be shown before authentication.
+     * Creates a {@link BeginGetCredentialsResponse} instance with an authentication
+     * {@link Action} set. Providers must use this method when no content can be shown
+     * before authentication.
      *
      * <p> When the user selects this {@code authenticationAction}, the system invokes the
      * corresponding {@code pendingIntent}. Once the authentication flow is complete,
      * the {@link android.app.Activity} result should be set
      * to {@link android.app.Activity#RESULT_OK} and the
-     * {@link CredentialProviderService#EXTRA_GET_CREDENTIALS_CONTENT_RESULT} extra should be set
+     * {@link CredentialProviderService#EXTRA_CREDENTIALS_RESPONSE_CONTENT} extra should be set
      * with a fully populated {@link CredentialsResponseContent} object.
      * the authentication action activity is launched, and the user is authenticated, providers
      * should create another response with {@link CredentialsResponseContent} using
@@ -54,48 +55,49 @@ public final class GetCredentialsResponse implements Parcelable {
      *
      * @throws NullPointerException If {@code authenticationAction} is null.
      */
-    public static @NonNull GetCredentialsResponse createWithAuthentication(
+    public static @NonNull BeginGetCredentialsResponse createWithAuthentication(
             @NonNull Action authenticationAction) {
         Objects.requireNonNull(authenticationAction,
                 "authenticationAction must not be null");
-        return new GetCredentialsResponse(null, authenticationAction);
+        return new BeginGetCredentialsResponse(null, authenticationAction);
     }
 
     /**
-     * Creates a {@link GetCredentialsRequest} instance with content to be shown on the UI.
+     * Creates a {@link BeginGetCredentialsRequest} instance with content to be shown on the UI.
      * Providers must use this method when there is content to be shown without top level
      * authentication required, including credential entries, action entries or a remote entry,
      *
      * @throws NullPointerException If {@code credentialsResponseContent} is null.
      */
-    public static @NonNull GetCredentialsResponse createWithResponseContent(
+    public static @NonNull BeginGetCredentialsResponse createWithResponseContent(
             @NonNull CredentialsResponseContent credentialsResponseContent) {
         Objects.requireNonNull(credentialsResponseContent,
                 "credentialsResponseContent must not be null");
-        return new GetCredentialsResponse(credentialsResponseContent, null);
+        return new BeginGetCredentialsResponse(credentialsResponseContent, null);
     }
 
-    private GetCredentialsResponse(@Nullable CredentialsResponseContent credentialsResponseContent,
+    private BeginGetCredentialsResponse(@Nullable CredentialsResponseContent
+            credentialsResponseContent,
             @Nullable Action authenticationAction) {
         mCredentialsResponseContent = credentialsResponseContent;
         mAuthenticationAction = authenticationAction;
     }
 
-    private GetCredentialsResponse(@NonNull Parcel in) {
+    private BeginGetCredentialsResponse(@NonNull Parcel in) {
         mCredentialsResponseContent = in.readTypedObject(CredentialsResponseContent.CREATOR);
         mAuthenticationAction = in.readTypedObject(Action.CREATOR);
     }
 
-    public static final @NonNull Creator<GetCredentialsResponse> CREATOR =
-            new Creator<GetCredentialsResponse>() {
+    public static final @NonNull Creator<BeginGetCredentialsResponse> CREATOR =
+            new Creator<BeginGetCredentialsResponse>() {
                 @Override
-                public GetCredentialsResponse createFromParcel(Parcel in) {
-                    return new GetCredentialsResponse(in);
+                public BeginGetCredentialsResponse createFromParcel(Parcel in) {
+                    return new BeginGetCredentialsResponse(in);
                 }
 
                 @Override
-                public GetCredentialsResponse[] newArray(int size) {
-                    return new GetCredentialsResponse[size];
+                public BeginGetCredentialsResponse[] newArray(int size) {
+                    return new BeginGetCredentialsResponse[size];
                 }
             };
 

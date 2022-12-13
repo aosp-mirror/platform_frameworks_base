@@ -33,6 +33,7 @@ import android.content.pm.ApplicationInfo;
 import android.os.IpcDataCache;
 import android.os.Parcel;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
@@ -47,29 +48,42 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 @RunWith(JUnit4.class)
 public class PolicyVersionUpgraderTest extends DpmTestBase {
     // NOTE: Only change this value if the corresponding CL also adds a test to test the upgrade
     // to the new version.
-    private static final int LATEST_TESTED_VERSION = 3;
+    private static final int LATEST_TESTED_VERSION = 4;
     public static final String PERMISSIONS_TAG = "admin-can-grant-sensors-permissions";
     public static final String DEVICE_OWNER_XML = "device_owner_2.xml";
     private ComponentName mFakeAdmin;
 
     private class FakePolicyUpgraderDataProvider implements PolicyUpgraderDataProvider {
         Map<ComponentName, DeviceAdminInfo> mComponentToDeviceAdminInfo = new HashMap<>();
+        ArrayList<String> mPlatformSuspendedPackages = new ArrayList<>();
         int[] mUsers;
 
         private JournaledFile makeJournaledFile(int userId, String fileName) {
@@ -97,6 +111,11 @@ public class PolicyVersionUpgraderTest extends DpmTestBase {
         @Override
         public int[] getUsersForUpgrade() {
             return mUsers;
+        }
+
+        @Override
+        public List<String> getPlatformSuspendedPackages(int userId) {
+            return mPlatformSuspendedPackages;
         }
     }
 
@@ -257,8 +276,69 @@ public class PolicyVersionUpgraderTest extends DpmTestBase {
     }
 
     @Test
+    public void testAdminPackageSuspensionSaved() throws Exception {
+        final int ownerUser = 0;
+        mProvider.mUsers = new int[]{ownerUser};
+        getServices().addUser(ownerUser, FLAG_PRIMARY, USER_TYPE_FULL_SYSTEM);
+        setUpPackageManagerForAdmin(admin1, UserHandle.getUid(ownerUser, 123 /* admin app ID */));
+        writeVersionToXml(3);
+        preparePoliciesFile(ownerUser, "device_policies.xml");
+        prepareDeviceOwnerFile(ownerUser, "device_owner_2.xml");
+
+        // Pretend package manager thinks these packages are suspended by the platform.
+        Set<String> suspendedPkgs = Set.of("com.some.app", "foo.bar.baz");
+        mProvider.mPlatformSuspendedPackages.addAll(suspendedPkgs);
+
+        mUpgrader.upgradePolicy(4);
+
+        assertThat(readVersionFromXml()).isAtLeast(4);
+
+        assertAdminSuspendedPackages(ownerUser, suspendedPkgs);
+    }
+
+    private void assertAdminSuspendedPackages(int ownerUser, Set<String> suspendedPkgs)
+            throws Exception {
+        Document policies = readPolicies(ownerUser);
+        Element adminElem =
+                (Element) policies.getDocumentElement().getElementsByTagName("admin").item(0);
+        Element suspendedElem =
+                (Element) adminElem.getElementsByTagName("suspended-packages").item(0);
+        NodeList pkgsNodes = suspendedElem.getElementsByTagName("item");
+        Set<String> storedSuspendedPkgs = new ArraySet<>();
+        for (int i = 0; i < pkgsNodes.getLength(); i++) {
+            Element item = (Element) pkgsNodes.item(i);
+            storedSuspendedPkgs.add(item.getAttribute("value"));
+        }
+        assertThat(storedSuspendedPkgs).isEqualTo(suspendedPkgs);
+    }
+
+    @Test
     public void isLatestVersionTested() {
         assertThat(DevicePolicyManagerService.DPMS_VERSION).isEqualTo(LATEST_TESTED_VERSION);
+    }
+
+    /**
+     * Reads ABX binary XML, converts it to text, and returns as an input stream.
+     */
+    private InputStream abxToXmlStream(File file) throws Exception {
+        FileInputStream fileIn = new FileInputStream(file);
+        XmlPullParser in = Xml.newBinaryPullParser();
+        in.setInput(fileIn, StandardCharsets.UTF_8.name());
+
+        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+        XmlSerializer out = Xml.newSerializer();
+        out.setOutput(byteOut, StandardCharsets.UTF_8.name());
+
+        Xml.copy(in, out);
+        out.flush();
+
+        return new ByteArrayInputStream(byteOut.toByteArray());
+    }
+
+    private Document readPolicies(int userId) throws Exception {
+        File policiesFile = mProvider.makeDevicePoliciesJournaledFile(userId).chooseForRead();
+        InputStream is = abxToXmlStream(policiesFile);
+        return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
     }
 
     private void writeVersionToXml(int dpmsVersion) throws IOException {
