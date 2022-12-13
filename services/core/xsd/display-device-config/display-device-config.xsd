@@ -44,9 +44,11 @@
                 </xs:element>
                 <xs:element type="highBrightnessMode" name="highBrightnessMode" minOccurs="0"
                             maxOccurs="1"/>
-                <xs:element type="displayQuirks" name="quirks" minOccurs="0" maxOccurs="1" />
+                <xs:element type="displayQuirks" name="quirks" minOccurs="0" maxOccurs="1"/>
                 <xs:element type="autoBrightness" name="autoBrightness" minOccurs="0"
-                            maxOccurs="1" />
+                            maxOccurs="1"/>
+                <xs:element type="refreshRateConfigs" name="refreshRate" minOccurs="0"
+                            maxOccurs="1"/>
                 <xs:element type="nonNegativeDecimal" name="screenBrightnessRampFastDecrease">
                     <xs:annotation name="final"/>
                 </xs:element>
@@ -324,7 +326,7 @@
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
-      </xs:complexType>
+    </xs:complexType>
 
     <!-- Thresholds for brightness changes. -->
     <xs:complexType name="thresholds">
@@ -448,6 +450,37 @@
              This must be a non-negative integer -->
             <xs:element name="nits" type="nonNegativeDecimal"
                         minOccurs="1" maxOccurs="1">
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="refreshRateConfigs">
+        <xs:element name="lowerBlockingZoneConfigs" type="blockingZoneConfig"
+                    minOccurs="0" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="higherBlockingZoneConfigs" type="blockingZoneConfig"
+                    minOccurs="0" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+    </xs:complexType>
+
+    <xs:complexType name="blockingZoneConfig">
+        <xs:element name="defaultRefreshRate" type="xs:nonNegativeInteger"
+                    minOccurs="1" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="blockingZoneThreshold" type="blockingZoneThreshold"
+                    minOccurs="1" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+    </xs:complexType>
+
+    <xs:complexType name="blockingZoneThreshold">
+        <xs:sequence>
+            <xs:element name="displayBrightnessPoint" type="displayBrightnessPoint"
+                        minOccurs="1" maxOccurs="unbounded">
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
