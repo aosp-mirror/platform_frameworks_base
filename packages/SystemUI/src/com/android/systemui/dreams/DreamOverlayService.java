@@ -30,6 +30,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 import androidx.lifecycle.ViewModelStore;
 
@@ -85,6 +86,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
     private final DreamOverlayComponent mDreamOverlayComponent;
 
+    private final DreamOverlayLifecycleOwner mLifecycleOwner;
     private final LifecycleRegistry mLifecycleRegistry;
 
     private DreamOverlayTouchMonitor mDreamOverlayTouchMonitor;
@@ -130,6 +132,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     public DreamOverlayService(
             Context context,
             @Main Executor executor,
+            DreamOverlayLifecycleOwner lifecycleOwner,
             WindowManager windowManager,
             ComplicationComponent.Factory complicationComponentFactory,
             DreamOverlayComponent.Factory dreamOverlayComponentFactory,
@@ -152,8 +155,10 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 () -> mExecutor.execute(DreamOverlayService.this::requestExit);
 
         mComplicationComponent = complicationComponentFactory.create();
-        mDreamOverlayComponent = dreamOverlayComponentFactory.create(viewModelStore, host, null);
-        mLifecycleRegistry = mDreamOverlayComponent.getLifecycleRegistry();
+        mDreamOverlayComponent =
+                dreamOverlayComponentFactory.create(lifecycleOwner, viewModelStore, host, null);
+        mLifecycleOwner = lifecycleOwner;
+        mLifecycleRegistry = mLifecycleOwner.getRegistry();
 
         mExecutor.execute(() -> setCurrentStateLocked(Lifecycle.State.CREATED));
     }

@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.touch.dagger;
+package com.android.systemui.dreams
 
-import dagger.Module;
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import javax.inject.Inject
 
 /**
- * {@link DreamTouchModule} encapsulates dream touch-related components.
+ * {@link DreamOverlayLifecycleOwner} is a concrete implementation of {@link LifecycleOwner}, which
+ * provides access to an associated {@link LifecycleRegistry}.
  */
-@Module(includes = {
-            BouncerSwipeModule.class,
-        }, subcomponents = {
-            InputSessionComponent.class,
-})
-public interface DreamTouchModule {
-    String INPUT_SESSION_NAME = "INPUT_SESSION_NAME";
-    String PILFER_ON_GESTURE_CONSUME = "PILFER_ON_GESTURE_CONSUME";
+class DreamOverlayLifecycleOwner @Inject constructor() : LifecycleOwner {
+    val registry: LifecycleRegistry = LifecycleRegistry(this)
+
+    override fun getLifecycle(): Lifecycle {
+        return registry
+    }
 }

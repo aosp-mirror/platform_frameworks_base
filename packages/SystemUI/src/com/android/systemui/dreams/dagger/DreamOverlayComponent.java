@@ -23,7 +23,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import android.annotation.Nullable;
 
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.LifecycleRegistry;
 import androidx.lifecycle.ViewModelStore;
 
 import com.android.systemui.dreams.DreamOverlayContainerViewController;
@@ -56,7 +55,9 @@ public interface DreamOverlayComponent {
     /** Simple factory for {@link DreamOverlayComponent}. */
     @Subcomponent.Factory
     interface Factory {
-        DreamOverlayComponent create(@BindsInstance ViewModelStore store,
+        DreamOverlayComponent create(
+                @BindsInstance LifecycleOwner lifecycleOwner,
+                @BindsInstance ViewModelStore store,
                 @BindsInstance Complication.Host host,
                 @BindsInstance @Named(DREAM_TOUCH_HANDLERS) @Nullable
                         Set<DreamTouchHandler> dreamTouchHandlers);
@@ -70,12 +71,6 @@ public interface DreamOverlayComponent {
 
     /** Builds a {@link DreamOverlayContainerViewController}. */
     DreamOverlayContainerViewController getDreamOverlayContainerViewController();
-
-    /** Builds a {@link androidx.lifecycle.LifecycleRegistry} */
-    LifecycleRegistry getLifecycleRegistry();
-
-    /** Builds a {@link androidx.lifecycle.LifecycleOwner} */
-    LifecycleOwner getLifecycleOwner();
 
     /** Builds a {@link DreamOverlayTouchMonitor} */
     DreamOverlayTouchMonitor getDreamOverlayTouchMonitor();
