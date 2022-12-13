@@ -24007,9 +24007,10 @@ package android.media {
   }
 
   public final class RouteListingPreference implements android.os.Parcelable {
-    ctor public RouteListingPreference(@NonNull java.util.List<android.media.RouteListingPreference.Item>);
+    ctor public RouteListingPreference(@NonNull java.util.List<android.media.RouteListingPreference.Item>, boolean);
     method public int describeContents();
     method @NonNull public java.util.List<android.media.RouteListingPreference.Item> getItems();
+    method public boolean getUseSystemOrdering();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.RouteListingPreference> CREATOR;
   }
