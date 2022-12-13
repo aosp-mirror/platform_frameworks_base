@@ -16,6 +16,7 @@
 
 package com.android.settingslib.spa.screenshot
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.SystemUpdate
@@ -23,7 +24,6 @@ import androidx.compose.runtime.Composable
 import com.android.settingslib.spa.widget.preference.ProgressBarPreference
 import com.android.settingslib.spa.widget.preference.ProgressBarPreferenceModel
 import com.android.settingslib.spa.widget.preference.ProgressBarWithDataPreference
-import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.CircularProgressBar
 import org.junit.Rule
 import org.junit.Test
@@ -37,7 +37,7 @@ class ProgressBarPreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getTestSpecs() = DeviceEmulationSpec.PhoneAndTabletFull
+        fun getTestSpecs() = DeviceEmulationSpec.PhoneAndTabletMinimal
     }
 
     @get:Rule
@@ -50,7 +50,7 @@ class ProgressBarPreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     @Test
     fun test() {
         screenshotRule.screenshotTest("progressBar") {
-            RegularScaffold(title = "ProgressBar") {
+            Column {
                 LargeProgressBar()
                 SimpleProgressBar()
                 ProgressBarWithData()

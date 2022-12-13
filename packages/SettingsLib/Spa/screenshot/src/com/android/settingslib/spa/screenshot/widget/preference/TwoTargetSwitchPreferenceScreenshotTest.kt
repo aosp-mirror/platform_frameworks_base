@@ -16,10 +16,10 @@
 
 package com.android.settingslib.spa.screenshot
 
+import androidx.compose.foundation.layout.Column
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.widget.preference.TwoTargetSwitchPreference
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
-import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,7 +32,7 @@ class TwoTargetSwitchPreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getTestSpecs() = DeviceEmulationSpec.PhoneAndTabletFull
+        fun getTestSpecs() = DeviceEmulationSpec.PhoneAndTabletMinimal
     }
 
     @get:Rule
@@ -45,7 +45,7 @@ class TwoTargetSwitchPreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec
     @Test
     fun test() {
         screenshotRule.screenshotTest("twoTargetSwitchPreference") {
-            RegularScaffold(title = "TwoTargetSwitchPreference") {
+            Column {
                 TwoTargetSwitchPreference(object : SwitchPreferenceModel {
                     override val title = "TwoTargetSwitchPreference"
                     override val checked = stateOf(false)
