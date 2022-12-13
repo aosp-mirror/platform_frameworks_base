@@ -36,7 +36,7 @@ public class WeaverBasedSyntheticPasswordTests extends SyntheticPasswordTests {
         assertEquals(Sets.newHashSet(), mPasswordSlotManager.getUsedSlots());
         mStorage.writePersistentDataBlock(PersistentData.TYPE_SP_WEAVER, frpWeaverSlot, 0,
                 new byte[1]);
-        initializeSyntheticPassword(userId); // This should allocate a Weaver slot.
+        mService.initializeSyntheticPassword(userId); // This should allocate a Weaver slot.
         assertEquals(Sets.newHashSet(1), mPasswordSlotManager.getUsedSlots());
     }
 
@@ -52,7 +52,7 @@ public class WeaverBasedSyntheticPasswordTests extends SyntheticPasswordTests {
         assertEquals(Sets.newHashSet(), mPasswordSlotManager.getUsedSlots());
         mStorage.writePersistentDataBlock(PersistentData.TYPE_SP_WEAVER, frpWeaverSlot, 0,
                 new byte[1]);
-        initializeSyntheticPassword(userId); // This should allocate a Weaver slot.
+        mService.initializeSyntheticPassword(userId); // This should allocate a Weaver slot.
         assertEquals(Sets.newHashSet(0), mPasswordSlotManager.getUsedSlots());
     }
 }

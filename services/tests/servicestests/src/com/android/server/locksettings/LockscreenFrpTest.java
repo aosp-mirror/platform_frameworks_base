@@ -42,14 +42,13 @@ import org.junit.runner.RunWith;
 public class LockscreenFrpTest extends BaseLockSettingsServiceTests {
 
     @Before
-    public void setDeviceNotProvisioned() throws Exception {
+    public void setUp() throws Exception {
+        PropertyInvalidatedCache.disableForTestMode();
+
         // FRP credential can only be verified prior to provisioning
         setDeviceProvisioned(false);
-    }
 
-    @Before
-    public void disableProcessCaches() {
-        PropertyInvalidatedCache.disableForTestMode();
+        mService.initializeSyntheticPassword(PRIMARY_USER_ID);
     }
 
     @Test
