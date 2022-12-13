@@ -283,7 +283,8 @@ object Flags {
     // TODO(b/254513168): Tracking Bug
     @JvmField val UMO_SURFACE_RIPPLE = unreleasedFlag(907, "umo_surface_ripple")
 
-    @JvmField val MEDIA_FALSING_PENALTY = unreleasedFlag(908, "media_falsing_media")
+    @JvmField
+    val MEDIA_FALSING_PENALTY = unreleasedFlag(908, "media_falsing_media", teamfood = true)
 
     // TODO(b/261734857): Tracking Bug
     @JvmField val UMO_TURBULENCE_NOISE = unreleasedFlag(909, "umo_turbulence_noise")
