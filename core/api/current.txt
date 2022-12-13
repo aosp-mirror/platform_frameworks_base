@@ -49564,6 +49564,7 @@ package android.view {
     field public static final int KEYCODE_PROG_YELLOW = 185; // 0xb9
     field public static final int KEYCODE_Q = 45; // 0x2d
     field public static final int KEYCODE_R = 46; // 0x2e
+    field public static final int KEYCODE_RECENT_APPS = 312; // 0x138
     field public static final int KEYCODE_REFRESH = 285; // 0x11d
     field public static final int KEYCODE_RIGHT_BRACKET = 72; // 0x48
     field public static final int KEYCODE_RO = 217; // 0xd9

@@ -139,7 +139,7 @@ key 116   POWER
 key 117   NUMPAD_EQUALS
 # key 118 "KEY_KPPLUSMINUS"
 key 119   BREAK
-# key 120 (undefined)
+key 120   RECENT_APPS
 key 121   NUMPAD_COMMA
 key 122   KANA
 key 123   EISU

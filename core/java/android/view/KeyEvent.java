@@ -892,13 +892,18 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * The use of this button does not usually correspond to the function of an eraser.
      */
     public static final int KEYCODE_STYLUS_BUTTON_TAIL = 311;
+    /**
+     * Key code constant: To open recent apps view (a.k.a. Overview).
+     * This key is handled by the framework and is never delivered to applications.
+     */
+    public static final int KEYCODE_RECENT_APPS = 312;
 
    /**
      * Integer value of the last KEYCODE. Increases as new keycodes are added to KeyEvent.
      * @hide
      */
     @TestApi
-    public static final int LAST_KEYCODE = KEYCODE_STYLUS_BUTTON_TAIL;
+    public static final int LAST_KEYCODE = KEYCODE_RECENT_APPS;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -2021,6 +2026,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
             case KeyEvent.KEYCODE_MENU:
             case KeyEvent.KEYCODE_SOFT_RIGHT:
             case KeyEvent.KEYCODE_HOME:
+            case KeyEvent.KEYCODE_RECENT_APPS:
             case KeyEvent.KEYCODE_BACK:
             case KeyEvent.KEYCODE_CALL:
             case KeyEvent.KEYCODE_ENDCALL:
