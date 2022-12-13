@@ -83,7 +83,7 @@ object Flags {
     val STABILITY_INDEX_FIX = releasedFlag(114, "stability_index_fix")
 
     // TODO(b/259559750): Tracking Bug
-    val SEMI_STABLE_SORT = unreleasedFlag(115, "semi_stable_sort", teamfood = true)
+    val SEMI_STABLE_SORT = releasedFlag(115, "semi_stable_sort")
 
     @JvmField
     val USE_ROUNDNESS_SOURCETYPES = unreleasedFlag(116, "use_roundness_sourcetype", teamfood = true)
