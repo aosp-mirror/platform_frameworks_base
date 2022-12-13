@@ -1487,7 +1487,7 @@
     <string name="accessibility_binding_label" msgid="1974602776545801715">"נגישות"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"טפט"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"שינוי טפט"</string>
-    <string name="notification_listener_binding_label" msgid="2702165274471499713">"מאזין להתראות"</string>
+    <string name="notification_listener_binding_label" msgid="2702165274471499713">"האזנה להתראות"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"‏VR ליסנר"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"ספק תנאי"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"שירות של דירוג התראות"</string>
