@@ -70,6 +70,14 @@ class HeadsUpCoordinatorLogger constructor(
         })
     }
 
+    fun logEntryUpdatedToFullScreen(key: String) {
+        buffer.log(TAG, LogLevel.DEBUG, {
+            str1 = key
+        }, {
+            "updating entry to launch full screen intent: $str1"
+        })
+    }
+
     fun logSummaryMarkedInterrupted(summaryKey: String, childKey: String) {
         buffer.log(TAG, LogLevel.DEBUG, {
             str1 = summaryKey
