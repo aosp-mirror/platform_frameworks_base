@@ -16,19 +16,21 @@
 
 package com.android.settingslib.spa.widget.scaffold
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.android.settingslib.spa.framework.compose.HorizontalPager
-import com.android.settingslib.spa.framework.compose.rememberPagerState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SettingsPager(titles: List<String>, content: @Composable (page: Int) -> Unit) {
     check(titles.isNotEmpty())
@@ -52,7 +54,7 @@ fun SettingsPager(titles: List<String>, content: @Composable (page: Int) -> Unit
                 SettingsTab(
                     title = title,
                     selected = pagerState.currentPage == page,
-                    currentPageOffset = pagerState.currentPageOffset.absoluteValue,
+                    currentPageOffset = pagerState.currentPageOffsetFraction.absoluteValue,
                     onClick = {
                         coroutineScope.launch {
                             pagerState.animateScrollToPage(page)
@@ -62,7 +64,7 @@ fun SettingsPager(titles: List<String>, content: @Composable (page: Int) -> Unit
             }
         }
 
-        HorizontalPager(count = titles.size, state = pagerState) { page ->
+        HorizontalPager(pageCount = titles.size, state = pagerState) { page ->
             content(page)
         }
     }

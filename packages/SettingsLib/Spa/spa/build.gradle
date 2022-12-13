@@ -108,7 +108,6 @@ task coverageReport(type: JacocoReport, dependsOn: "connectedDebugAndroidTest") 
 
                     // Excludes files forked from Accompanist.
                     "com/android/settingslib/spa/framework/compose/DrawablePainter*",
-                    "com/android/settingslib/spa/framework/compose/Pager*",
 
                     // Excludes inline functions, which is not covered in Jacoco reports.
                     "com/android/settingslib/spa/framework/util/Collections*",
