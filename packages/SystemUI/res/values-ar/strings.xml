@@ -393,10 +393,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"تم إيقاف الإشعارات مؤقتًا وفقًا لإعداد \"عدم الإزعاج\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"البدء الآن"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ليس هناك أي اشعارات"</string>
-    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
-    <skip />
-    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
-    <skip />
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"ما مِن إشعارات جديدة"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"افتَح قفل الشاشة لعرض الإشعارات الأقدم."</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"يتولّى أحد الوالدين إدارة هذا الجهاز."</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"تملك مؤسستك هذا الجهاز ويمكنها تتبّع حركة بيانات الشبكة."</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"تملك مؤسسة <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> هذا الجهاز ويمكنها تتبّع حركة بيانات الشبكة"</string>
@@ -1013,4 +1011,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"أتريد استخدام الكاميرا الأمامية لصورة ذاتية أفضل؟"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"استخدِم الكاميرا الخلفية لالتقاط صورة أعرض وبدرجة دقة أعلى."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"* سيتم إطفاء هذه الشاشة."</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>
