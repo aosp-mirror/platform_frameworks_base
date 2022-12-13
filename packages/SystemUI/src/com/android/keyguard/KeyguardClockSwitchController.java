@@ -78,6 +78,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private int mCurrentClockSize = SMALL;
 
     private int mKeyguardSmallClockTopMargin = 0;
+    private int mKeyguardLargeClockTopMargin = 0;
     private final ClockRegistry.ClockChangeListener mClockChangedListener;
 
     private ViewGroup mStatusArea;
@@ -164,6 +165,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mClockEventController.registerListeners(mView);
         mKeyguardSmallClockTopMargin =
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_clock_top_margin);
+        mKeyguardLargeClockTopMargin =
+                mView.getResources().getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin);
 
         if (mOnlyClock) {
             View ksv = mView.findViewById(R.id.keyguard_slice_view);
@@ -246,6 +249,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mView.onDensityOrFontScaleChanged();
         mKeyguardSmallClockTopMargin =
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_clock_top_margin);
+        mKeyguardLargeClockTopMargin =
+                mView.getResources().getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin);
         mView.updateClockTargetRegions();
     }
 
@@ -324,10 +329,18 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
 
         if (mLargeClockFrame.getVisibility() == View.VISIBLE) {
+            // This gets the expected clock bottom if mLargeClockFrame had a top margin, but it's
+            // top margin only contributed to height and didn't move the top of the view (as this
+            // was the computation previously). As we no longer have a margin, we add this back
+            // into the computation manually.
             int frameHeight = mLargeClockFrame.getHeight();
             int clockHeight = clock.getLargeClock().getView().getHeight();
-            return frameHeight / 2 + clockHeight / 2;
+            return frameHeight / 2 + clockHeight / 2 + mKeyguardLargeClockTopMargin / -2;
         } else {
+            // This is only called if we've never shown the large clock as the frame is inflated
+            // with 'gone', but then the visibility is never set when it is animated away by
+            // KeyguardClockSwitch, instead it is removed from the view hierarchy.
+            // TODO(b/261755021): Cleanup Large Frame Visibility
             int clockHeight = clock.getSmallClock().getView().getHeight();
             return clockHeight + statusBarHeaderHeight + mKeyguardSmallClockTopMargin;
         }
@@ -345,11 +358,15 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         if (mLargeClockFrame.getVisibility() == View.VISIBLE) {
             return clock.getLargeClock().getView().getHeight();
         } else {
+            // Is not called except in certain edge cases, see comment in getClockBottom
+            // TODO(b/261755021): Cleanup Large Frame Visibility
             return clock.getSmallClock().getView().getHeight();
         }
     }
 
     boolean isClockTopAligned() {
+        // Returns false except certain edge cases, see comment in getClockBottom
+        // TODO(b/261755021): Cleanup Large Frame Visibility
         return mLargeClockFrame.getVisibility() != View.VISIBLE;
     }
 
