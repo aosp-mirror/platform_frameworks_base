@@ -167,6 +167,34 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testVolumeChangeW_deviceOutFromBLEHeadset_doStateChanged() {
+        mVolumeController.setDeviceInteractive(false);
+        when(mWakefullnessLifcycle.getWakefulness()).thenReturn(
+                WakefulnessLifecycle.WAKEFULNESS_AWAKE);
+        when(mAudioManager.getDevicesForStream(AudioManager.STREAM_VOICE_CALL)).thenReturn(
+                AudioManager.DEVICE_OUT_BLE_HEADSET);
+
+        mVolumeController.onVolumeChangedW(
+                AudioManager.STREAM_VOICE_CALL, AudioManager.FLAG_SHOW_UI);
+
+        verify(mCallback, times(1)).onStateChanged(any());
+    }
+
+    @Test
+    public void testVolumeChangeW_deviceOutFromA2DP_doStateChanged() {
+        mVolumeController.setDeviceInteractive(false);
+        when(mWakefullnessLifcycle.getWakefulness()).thenReturn(
+                WakefulnessLifecycle.WAKEFULNESS_AWAKE);
+        when(mAudioManager.getDevicesForStream(AudioManager.STREAM_VOICE_CALL)).thenReturn(
+                AudioManager.DEVICE_OUT_BLUETOOTH_A2DP);
+
+        mVolumeController.onVolumeChangedW(
+                AudioManager.STREAM_VOICE_CALL, AudioManager.FLAG_SHOW_UI);
+
+        verify(mCallback, never()).onStateChanged(any());
+    }
+
+    @Test
     public void testOnRemoteVolumeChanged_newStream_noNullPointer() {
         MediaSession.Token token = new MediaSession.Token(Process.myUid(), null);
         mVolumeController.mMediaSessionsCallbacksW.onRemoteVolumeChanged(token, 0);
