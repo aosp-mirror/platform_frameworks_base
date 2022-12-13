@@ -579,6 +579,17 @@ public class MmTelFeature extends ImsFeature {
         public void onVoiceMessageCountUpdate(int count) {
 
         }
+
+        /**
+         * Called to set the audio handler for this connection.
+         * @param imsAudioHandler an {@link ImsAudioHandler} used to handle the audio
+         *        for this IMS call.
+         * @hide
+         */
+        @Override
+        public void onAudioModeIsVoipChanged(int imsAudioHandler) {
+
+        }
     }
 
     /**
@@ -627,6 +638,29 @@ public class MmTelFeature extends ImsFeature {
     @SystemApi
     public static final String EXTRA_IS_UNKNOWN_CALL =
             "android.telephony.ims.feature.extra.IS_UNKNOWN_CALL";
+
+    /** @hide */
+    @IntDef(flag = true,
+            value = {
+                    AUDIO_HANDLER_ANDROID,
+                    AUDIO_HANDLER_BASEBAND
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ImsAudioHandler {}
+
+    /**
+    * Audio Handler - Android
+    * @hide
+    */
+    @SystemApi
+    public static final int AUDIO_HANDLER_ANDROID = 0;
+
+    /**
+    * Audio Handler - Baseband
+    * @hide
+    */
+    @SystemApi
+    public static final int AUDIO_HANDLER_BASEBAND = 1;
 
     private IImsMmTelListener mListener;
 
@@ -768,6 +802,28 @@ public class MmTelFeature extends ImsFeature {
         }
         try {
             listener.onVoiceMessageCountUpdate(count);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Sets the audio handler for this connection. The vendor IMS stack will invoke this API
+     * to inform Telephony/Telecom layers about which audio handlers i.e. either Android or Modem
+     * shall be used for handling the IMS call audio.
+     *
+     * @param imsAudioHandler {@link MmTelFeature#ImsAudioHandler} used to handle the audio
+     *        for this IMS call.
+     * @hide
+     */
+    @SystemApi
+    public final void setCallAudioHandler(@ImsAudioHandler int imsAudioHandler) {
+        IImsMmTelListener listener = getListener();
+        if (listener == null) {
+            throw new IllegalStateException("Session is not available.");
+        }
+        try {
+            listener.onAudioModeIsVoipChanged(imsAudioHandler);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
