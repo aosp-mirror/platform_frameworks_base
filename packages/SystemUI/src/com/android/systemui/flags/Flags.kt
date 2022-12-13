@@ -411,8 +411,7 @@ object Flags {
 
     // 1800 - shade container
     @JvmField
-    val LEAVE_SHADE_OPEN_FOR_BUGREPORT =
-        unreleasedFlag(1800, "leave_shade_open_for_bugreport", teamfood = true)
+    val LEAVE_SHADE_OPEN_FOR_BUGREPORT = releasedFlag(1800, "leave_shade_open_for_bugreport")
 
     // 1900
     @JvmField val NOTE_TASKS = unreleasedFlag(1900, "keycode_flag")
