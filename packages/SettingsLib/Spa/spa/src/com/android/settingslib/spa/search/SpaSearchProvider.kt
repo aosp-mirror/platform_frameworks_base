@@ -28,7 +28,6 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import com.android.settingslib.spa.framework.common.EntryStatusData
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.util.SESSION_SEARCH
@@ -49,6 +48,8 @@ private const val TAG = "SpaSearchProvider"
  *   $ adb shell content query --uri content://<AuthorityPath>/search_dynamic_data
  *   $ adb shell content query --uri content://<AuthorityPath>/search_immutable_status
  *   $ adb shell content query --uri content://<AuthorityPath>/search_mutable_status
+ *   $ adb shell content query --uri content://<AuthorityPath>/search_static_row
+ *   $ adb shell content query --uri content://<AuthorityPath>/search_dynamic_row
  */
 class SpaSearchProvider : ContentProvider() {
     private val spaEnvironment get() = SpaEnvironmentFactory.instance
@@ -58,7 +59,9 @@ class SpaSearchProvider : ContentProvider() {
         SEARCH_STATIC_DATA to 301,
         SEARCH_DYNAMIC_DATA to 302,
         SEARCH_MUTABLE_STATUS to 303,
-        SEARCH_IMMUTABLE_STATUS to 304
+        SEARCH_IMMUTABLE_STATUS to 304,
+        SEARCH_STATIC_ROW to 305,
+        SEARCH_DYNAMIC_ROW to 306
     )
 
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
@@ -114,6 +117,8 @@ class SpaSearchProvider : ContentProvider() {
                     querySearchMutableStatusData()
                 queryMatchCode[SEARCH_IMMUTABLE_STATUS] ->
                     querySearchImmutableStatusData()
+                queryMatchCode[SEARCH_STATIC_ROW] -> querySearchStaticRow()
+                queryMatchCode[SEARCH_DYNAMIC_ROW] -> querySearchDynamicRow()
                 else -> throw UnsupportedOperationException("Unknown Uri $uri")
             }
         } catch (e: UnsupportedOperationException) {
@@ -168,6 +173,31 @@ class SpaSearchProvider : ContentProvider() {
         return cursor
     }
 
+    @VisibleForTesting
+    fun querySearchStaticRow(): Cursor {
+        val entryRepository by spaEnvironment.entryRepository
+        val cursor = MatrixCursor(QueryEnum.SEARCH_STATIC_ROW_QUERY.getColumns())
+        for (entry in entryRepository.getAllEntries()) {
+            if (!entry.isAllowSearch || entry.isSearchDataDynamic || entry.hasMutableStatus)
+                continue
+            fetchSearchRow(entry, cursor)
+        }
+        return cursor
+    }
+
+    @VisibleForTesting
+    fun querySearchDynamicRow(): Cursor {
+        val entryRepository by spaEnvironment.entryRepository
+        val cursor = MatrixCursor(QueryEnum.SEARCH_DYNAMIC_ROW_QUERY.getColumns())
+        for (entry in entryRepository.getAllEntries()) {
+            if (!entry.isAllowSearch || (!entry.isSearchDataDynamic && !entry.hasMutableStatus))
+                continue
+            fetchSearchRow(entry, cursor)
+        }
+        return cursor
+    }
+
+
     private fun fetchSearchData(entry: SettingsEntry, cursor: MatrixCursor) {
         val entryRepository by spaEnvironment.entryRepository
 
@@ -196,10 +226,40 @@ class SpaSearchProvider : ContentProvider() {
 
     private fun fetchStatusData(entry: SettingsEntry, cursor: MatrixCursor) {
         // Fetch status data. We can add runtime arguments later if necessary
-        val statusData = entry.getStatusData() ?: EntryStatusData()
+        val statusData = entry.getStatusData() ?: return
         cursor.newRow()
             .add(ColumnEnum.ENTRY_ID.id, entry.id)
             .add(ColumnEnum.ENTRY_DISABLED.id, statusData.isDisabled)
+    }
+
+    private fun fetchSearchRow(entry: SettingsEntry, cursor: MatrixCursor) {
+        val entryRepository by spaEnvironment.entryRepository
+
+        // Fetch search data. We can add runtime arguments later if necessary
+        val searchData = entry.getSearchData() ?: return
+        val intent = entry.createIntent(SESSION_SEARCH)
+        val row = cursor.newRow().add(ColumnEnum.ENTRY_ID.id, entry.id)
+            .add(ColumnEnum.SEARCH_TITLE.id, searchData.title)
+            .add(ColumnEnum.SEARCH_KEYWORD.id, searchData.keyword)
+            .add(
+                ColumnEnum.SEARCH_PATH.id,
+                entryRepository.getEntryPathWithTitle(entry.id, searchData.title)
+            )
+        intent?.let {
+            row.add(ColumnEnum.INTENT_TARGET_PACKAGE.id, spaEnvironment.appContext.packageName)
+                .add(ColumnEnum.INTENT_TARGET_CLASS.id, spaEnvironment.browseActivityClass?.name)
+                .add(ColumnEnum.INTENT_EXTRAS.id, marshall(intent.extras))
+        }
+        if (entry.hasSliceSupport)
+            row.add(
+                ColumnEnum.SLICE_URI.id, Uri.Builder()
+                    .fromEntry(entry, spaEnvironment.sliceProviderAuthorities)
+            )
+        // TODO: support legacy key
+
+        // Fetch status data. We can add runtime arguments later if necessary
+        val statusData = entry.getStatusData() ?: return
+        row.add(ColumnEnum.ENTRY_DISABLED.id, statusData.isDisabled)
     }
 
     private fun QueryEnum.getColumns(): Array<String> {
