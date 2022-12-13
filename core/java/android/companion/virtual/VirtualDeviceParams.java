@@ -129,7 +129,7 @@ public final class VirtualDeviceParams implements Parcelable {
      * a given policy type.
      * @hide
      */
-    @IntDef(prefix = "POLICY_TYPE_",  value = {POLICY_TYPE_SENSORS})
+    @IntDef(prefix = "POLICY_TYPE_",  value = {POLICY_TYPE_SENSORS, POLICY_TYPE_AUDIO})
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
     public @interface PolicyType {}
@@ -146,6 +146,21 @@ public final class VirtualDeviceParams implements Parcelable {
      * </ul>
      */
     public static final int POLICY_TYPE_SENSORS = 0;
+
+    /**
+     * Tells the audio framework whether to configure the players ({@link android.media.AudioTrack},
+     * {@link android.media.MediaPlayer}, {@link android.media.SoundPool} and recorders
+     * {@link android.media.AudioRecord}) to use specific session ids re-routed to
+     * VirtualAudioDevice.
+     *
+     * <ul>
+     *     <li>{@link #DEVICE_POLICY_DEFAULT}: fall back to default session id handling.
+     *     <li>{@link #DEVICE_POLICY_CUSTOM}: audio framework will assign device specific session
+     *     ids to players and recorders constructed within device context. The session ids are
+     *     used to re-route corresponding audio streams to VirtualAudioDevice.
+     * <ul/>
+     */
+    public static final int POLICY_TYPE_AUDIO = 1;
 
     /** @hide */
     @IntDef(flag = true, prefix = "RECENTS_POLICY_",

@@ -17,6 +17,7 @@
 package com.android.server.companion.virtual;
 
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_SENSORS;
 import static android.hardware.Sensor.TYPE_ACCELEROMETER;
 
@@ -47,6 +48,7 @@ public class VirtualDeviceParamsTest {
                 .setLockState(VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED)
                 .setUsersWithMatchingAccounts(Set.of(UserHandle.of(123), UserHandle.of(456)))
                 .setDevicePolicy(POLICY_TYPE_SENSORS, DEVICE_POLICY_CUSTOM)
+                .setDevicePolicy(POLICY_TYPE_AUDIO, DEVICE_POLICY_CUSTOM)
                 .addVirtualSensorConfig(
                         new VirtualSensorConfig.Builder(TYPE_ACCELEROMETER, SENSOR_NAME)
                                 .setVendor(SENSOR_VENDOR)
@@ -62,6 +64,7 @@ public class VirtualDeviceParamsTest {
         assertThat(params.getUsersWithMatchingAccounts())
                 .containsExactly(UserHandle.of(123), UserHandle.of(456));
         assertThat(params.getDevicePolicy(POLICY_TYPE_SENSORS)).isEqualTo(DEVICE_POLICY_CUSTOM);
+        assertThat(params.getDevicePolicy(POLICY_TYPE_AUDIO)).isEqualTo(DEVICE_POLICY_CUSTOM);
 
         List<VirtualSensorConfig> sensorConfigs = params.getVirtualSensorConfigs();
         assertThat(sensorConfigs).hasSize(1);
