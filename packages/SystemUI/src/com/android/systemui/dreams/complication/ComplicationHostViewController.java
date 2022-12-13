@@ -138,19 +138,27 @@ public class ComplicationHostViewController extends ViewController<ConstraintLay
                     final ComplicationId id = complication.getId();
                     final Complication.ViewHolder viewHolder = complication.getComplication()
                             .createView(complication);
+
+                    final View view = viewHolder.getView();
+
+                    if (view == null) {
+                        Log.e(TAG, "invalid complication view. null view supplied by ViewHolder");
+                        return;
+                    }
+
                     // Complications to be added before dream entry animations are finished are set
                     // to invisible and are animated in.
                     if (!mEntryAnimationsFinished) {
-                        viewHolder.getView().setVisibility(View.INVISIBLE);
+                        view.setVisibility(View.INVISIBLE);
                     }
                     mComplications.put(id, viewHolder);
-                    if (viewHolder.getView().getParent() != null) {
+                    if (view.getParent() != null) {
                         Log.e(TAG, "View for complication "
                                 + complication.getComplication().getClass()
                                 + " already has a parent. Make sure not to reuse complication "
                                 + "views!");
                     }
-                    mLayoutEngine.addComplication(id, viewHolder.getView(),
+                    mLayoutEngine.addComplication(id, view,
                             viewHolder.getLayoutParams(), viewHolder.getCategory());
                 });
     }
