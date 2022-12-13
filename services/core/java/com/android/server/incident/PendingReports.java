@@ -16,7 +16,6 @@
 
 package com.android.server.incident;
 
-import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.content.ComponentName;
@@ -273,19 +272,15 @@ class PendingReports {
             return;
         }
 
-        // Find the current user of the device and check if they are an admin.
-        final int currentAdminUser = getCurrentUserIfAdmin();
-
-        // Deny the report if the current admin user is null
-        // or not the user who requested the report.
-        if (currentAdminUser == UserHandle.USER_NULL
-                || currentAdminUser != UserHandle.getUserId(callingUid)) {
+        // Find the primary user of this device.
+        final int primaryUser = getAndValidateUser();
+        if (primaryUser == UserHandle.USER_NULL) {
             denyReportBeforeAddingRec(listener, callingPackage);
             return;
         }
 
         // Find the approver app (hint: it's PermissionController).
-        final ComponentName receiver = getApproverComponent(currentAdminUser);
+        final ComponentName receiver = getApproverComponent(primaryUser);
         if (receiver == null) {
             // We couldn't find an approver... so deny the request here and now, before we
             // do anything else.
@@ -303,26 +298,26 @@ class PendingReports {
         try {
             listener.asBinder().linkToDeath(() -> {
                 Log.i(TAG, "Got death notification listener=" + listener);
-                cancelReportImpl(listener, receiver, currentAdminUser);
+                cancelReportImpl(listener, receiver, primaryUser);
             }, 0);
         } catch (RemoteException ex) {
             Log.e(TAG, "Remote died while trying to register death listener: " + rec.getUri());
             // First, remove from our list.
-            cancelReportImpl(listener, receiver, currentAdminUser);
+            cancelReportImpl(listener, receiver, primaryUser);
         }
 
         // Go tell Permission controller to start asking the user.
-        sendBroadcast(receiver, currentAdminUser);
+        sendBroadcast(receiver, primaryUser);
     }
 
     /**
      * Cancel a pending report request (because of an explicit call to cancel)
      */
     private void cancelReportImpl(IIncidentAuthListener listener) {
-        final int currentAdminUser = getCurrentUserIfAdmin();
-        final ComponentName receiver = getApproverComponent(currentAdminUser);
-        if (currentAdminUser != UserHandle.USER_NULL && receiver != null) {
-            cancelReportImpl(listener, receiver, currentAdminUser);
+        final int primaryUser = getAndValidateUser();
+        final ComponentName receiver = getApproverComponent(primaryUser);
+        if (primaryUser != UserHandle.USER_NULL && receiver != null) {
+            cancelReportImpl(listener, receiver, primaryUser);
         }
     }
 
@@ -331,13 +326,13 @@ class PendingReports {
      * by the calling app, or because of a binder death).
      */
     private void cancelReportImpl(IIncidentAuthListener listener, ComponentName receiver,
-            @UserIdInt int user) {
+            int primaryUser) {
         // First, remove from our list.
         synchronized (mLock) {
             removePendingReportRecLocked(listener);
         }
         // Second, call back to PermissionController to say it's canceled.
-        sendBroadcast(receiver, user);
+        sendBroadcast(receiver, primaryUser);
     }
 
     /**
@@ -347,21 +342,21 @@ class PendingReports {
      * cleanup cases to keep the apps' list in sync with ours.
      */
     private void sendBroadcast() {
-        final int currentAdminUser = getCurrentUserIfAdmin();
-        if (currentAdminUser == UserHandle.USER_NULL) {
+        final int primaryUser = getAndValidateUser();
+        if (primaryUser == UserHandle.USER_NULL) {
             return;
         }
-        final ComponentName receiver = getApproverComponent(currentAdminUser);
+        final ComponentName receiver = getApproverComponent(primaryUser);
         if (receiver == null) {
             return;
         }
-        sendBroadcast(receiver, currentAdminUser);
+        sendBroadcast(receiver, primaryUser);
     }
 
     /**
      * Send the confirmation broadcast.
      */
-    private void sendBroadcast(ComponentName receiver, int currentUser) {
+    private void sendBroadcast(ComponentName receiver, int primaryUser) {
         final Intent intent = new Intent(Intent.ACTION_PENDING_INCIDENT_REPORTS_CHANGED);
         intent.setComponent(receiver);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -369,8 +364,8 @@ class PendingReports {
         final BroadcastOptions options = BroadcastOptions.makeBasic();
         options.setBackgroundActivityStartsAllowed(true);
 
-        // Send it to the current user.
-        mContext.sendBroadcastAsUser(intent, UserHandle.of(currentUser),
+        // Send it to the primary user.
+        mContext.sendBroadcastAsUser(intent, UserHandle.getUserHandleForUid(primaryUser),
                 android.Manifest.permission.APPROVE_INCIDENT_REPORTS, options.toBundle());
     }
 
@@ -425,11 +420,11 @@ class PendingReports {
     }
 
     /**
-     * Check whether the current user is an admin user, and return the user id if they are.
+     * Check whether the current user is the primary user, and return the user id if they are.
      * Returns UserHandle.USER_NULL if not valid.
      */
-    private int getCurrentUserIfAdmin() {
-        return IncidentCompanionService.getCurrentUserIfAdmin();
+    private int getAndValidateUser() {
+        return IncidentCompanionService.getAndValidateUser(mContext);
     }
 
     /**
