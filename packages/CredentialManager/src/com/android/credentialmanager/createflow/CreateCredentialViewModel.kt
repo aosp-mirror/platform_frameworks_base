@@ -39,18 +39,39 @@ data class CreateCredentialUiState(
   val disabledProviders: List<DisabledProviderInfo>? = null,
   val currentScreenState: CreateScreenState,
   val requestDisplayInfo: RequestDisplayInfo,
-  val showActiveEntryOnly: Boolean,
+  // Should not change with the real time update of default provider, only determine whether we're
+  // showing provider selection page at the beginning
+  val hasDefaultProvider: Boolean,
   val activeEntry: ActiveEntry? = null,
   val selectedEntry: EntryInfo? = null,
   val hidden: Boolean = false,
   val providerActivityPending: Boolean = false,
+  val isFromProviderSelection: Boolean? = null,
 )
 
 class CreateCredentialViewModel(
-  credManRepo: CredentialManagerRepo = CredentialManagerRepo.getInstance()
+  credManRepo: CredentialManagerRepo = CredentialManagerRepo.getInstance(),
+  userConfigRepo: UserConfigRepo = UserConfigRepo.getInstance()
 ) : ViewModel() {
 
-  var uiState by mutableStateOf(credManRepo.createCredentialInitialUiState())
+  var providerEnableListUiState = credManRepo.getCreateProviderEnableListInitialUiState()
+
+  var providerDisableListUiState = credManRepo.getCreateProviderDisableListInitialUiState()
+
+  var requestDisplayInfoUiState = credManRepo.getCreateRequestDisplayInfoInitialUiState()
+
+  var defaultProviderId = userConfigRepo.getDefaultProviderId()
+
+  var isPasskeyFirstUse = userConfigRepo.getIsPasskeyFirstUse()
+
+  var uiState by mutableStateOf(
+    CreateFlowUtils.toCreateCredentialUiState(
+      providerEnableListUiState,
+      providerDisableListUiState,
+      defaultProviderId,
+      requestDisplayInfoUiState,
+      false,
+      isPasskeyFirstUse))
     private set
 
   val dialogResult: MutableLiveData<DialogResult> by lazy {
@@ -63,9 +84,9 @@ class CreateCredentialViewModel(
 
   fun onConfirmIntro() {
     uiState = CreateFlowUtils.toCreateCredentialUiState(
-      uiState.enabledProviders, uiState.disabledProviders,
-      uiState.requestDisplayInfo, true)
-    UserConfigRepo.getInstance().setIsFirstUse(false)
+      providerEnableListUiState, providerDisableListUiState, defaultProviderId,
+      requestDisplayInfoUiState, true, isPasskeyFirstUse)
+    UserConfigRepo.getInstance().setIsPasskeyFirstUse(false)
   }
 
   fun getProviderInfoByName(providerName: String): EnabledProviderInfo {
@@ -74,22 +95,35 @@ class CreateCredentialViewModel(
     }
   }
 
-  fun onMoreOptionsSelected() {
+  fun onMoreOptionsSelectedOnProviderSelection() {
     uiState = uiState.copy(
       currentScreenState = CreateScreenState.MORE_OPTIONS_SELECTION,
+      isFromProviderSelection = true
     )
   }
 
-  fun onBackButtonSelected() {
+  fun onMoreOptionsSelectedOnCreationSelection() {
     uiState = uiState.copy(
-        currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
+      currentScreenState = CreateScreenState.MORE_OPTIONS_SELECTION,
+      isFromProviderSelection = false
+    )
+  }
+
+  fun onBackProviderSelectionButtonSelected() {
+    uiState = uiState.copy(
+        currentScreenState = CreateScreenState.PROVIDER_SELECTION,
+    )
+  }
+
+  fun onBackCreationSelectionButtonSelected() {
+    uiState = uiState.copy(
+      currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
     )
   }
 
   fun onEntrySelectedFromMoreOptionScreen(activeEntry: ActiveEntry) {
     uiState = uiState.copy(
       currentScreenState = CreateScreenState.MORE_OPTIONS_ROW_INTRO,
-      showActiveEntryOnly = false,
       activeEntry = activeEntry
     )
   }
@@ -97,7 +131,6 @@ class CreateCredentialViewModel(
   fun onEntrySelectedFromFirstUseScreen(activeEntry: ActiveEntry) {
     uiState = uiState.copy(
       currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
-      showActiveEntryOnly = true,
       activeEntry = activeEntry
     )
     val providerId = uiState.activeEntry?.activeProvider?.name
