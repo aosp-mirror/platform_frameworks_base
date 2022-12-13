@@ -780,17 +780,17 @@ public class InteractionJankMonitor {
         // 2. The returned string should be the same with the name defined in atoms.proto.
         switch (cujType) {
             case CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE:
-                return "SHADE_EXPAND_COLLAPSE";
+                return "NOTIFICATION_SHADE_EXPAND_COLLAPSE";
             case CUJ_NOTIFICATION_SHADE_SCROLL_FLING:
-                return "SHADE_SCROLL_FLING";
+                return "NOTIFICATION_SHADE_SCROLL_FLING";
             case CUJ_NOTIFICATION_SHADE_ROW_EXPAND:
-                return "SHADE_ROW_EXPAND";
+                return "NOTIFICATION_SHADE_ROW_EXPAND";
             case CUJ_NOTIFICATION_SHADE_ROW_SWIPE:
-                return "SHADE_ROW_SWIPE";
+                return "NOTIFICATION_SHADE_ROW_SWIPE";
             case CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE:
-                return "SHADE_QS_EXPAND_COLLAPSE";
+                return "NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE";
             case CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE:
-                return "SHADE_QS_SCROLL_SWIPE";
+                return "NOTIFICATION_SHADE_QS_SCROLL_SWIPE";
             case CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS:
                 return "LAUNCHER_APP_LAUNCH_FROM_RECENTS";
             case CUJ_LAUNCHER_APP_LAUNCH_FROM_ICON:
@@ -880,9 +880,9 @@ public class InteractionJankMonitor {
             case CUJ_SPLIT_SCREEN_EXIT:
                 return "SPLIT_SCREEN_EXIT";
             case CUJ_LOCKSCREEN_LAUNCH_CAMERA:
-                return "CUJ_LOCKSCREEN_LAUNCH_CAMERA";
+                return "LOCKSCREEN_LAUNCH_CAMERA";
             case CUJ_SPLIT_SCREEN_RESIZE:
-                return "CUJ_SPLIT_SCREEN_RESIZE";
+                return "SPLIT_SCREEN_RESIZE";
             case CUJ_SETTINGS_SLIDER:
                 return "SETTINGS_SLIDER";
             case CUJ_TAKE_SCREENSHOT:
