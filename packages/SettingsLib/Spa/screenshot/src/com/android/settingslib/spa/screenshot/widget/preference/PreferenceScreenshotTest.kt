@@ -16,6 +16,7 @@
 
 package com.android.settingslib.spa.screenshot
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Autorenew
 import androidx.compose.material.icons.outlined.DisabledByDefault
@@ -23,7 +24,6 @@ import androidx.compose.runtime.Composable
 import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
-import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.SettingsIcon
 import org.junit.Rule
 import org.junit.Test
@@ -37,7 +37,7 @@ class PreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getTestSpecs() = DeviceEmulationSpec.PhoneAndTabletFull
+        fun getTestSpecs() = DeviceEmulationSpec.PhoneAndTabletMinimal
         private const val TITLE = "Title"
         private const val SUMMARY = "Summary"
         private const val LONG_SUMMARY =
@@ -54,7 +54,7 @@ class PreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     @Test
     fun test() {
         screenshotRule.screenshotTest("preference") {
-            RegularScaffold(title = "Preference") {
+            Column {
                 Preference(object : PreferenceModel {
                     override val title = TITLE
                 })

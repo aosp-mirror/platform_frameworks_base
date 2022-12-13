@@ -16,11 +16,11 @@
 
 package com.android.settingslib.spa.screenshot
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccessAlarm
 import com.android.settingslib.spa.widget.preference.SliderPreference
 import com.android.settingslib.spa.widget.preference.SliderPreferenceModel
-import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,7 +33,7 @@ class SliderPreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getTestSpecs() = DeviceEmulationSpec.PhoneAndTabletFull
+        fun getTestSpecs() = DeviceEmulationSpec.PhoneAndTabletMinimal
     }
 
     @get:Rule
@@ -46,7 +46,7 @@ class SliderPreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     @Test
     fun test() {
         screenshotRule.screenshotTest("slider") {
-            RegularScaffold(title = "Slider") {
+            Column {
                 SliderPreference(object : SliderPreferenceModel {
                     override val title = "Simple Slider"
                     override val initValue = 40

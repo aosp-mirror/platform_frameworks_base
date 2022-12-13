@@ -16,10 +16,10 @@
 
 package com.android.settingslib.spa.screenshot
 
+import androidx.compose.foundation.layout.Column
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.widget.preference.MainSwitchPreference
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
-import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,7 +32,7 @@ class MainSwitchPreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getTestSpecs() = DeviceEmulationSpec.PhoneAndTabletFull
+        fun getTestSpecs() = DeviceEmulationSpec.PhoneAndTabletMinimal
     }
 
     @get:Rule
@@ -45,7 +45,7 @@ class MainSwitchPreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     @Test
     fun test() {
         screenshotRule.screenshotTest("mainSwitchPreference") {
-            RegularScaffold(title = "MainSwitchPreference") {
+            Column {
                 MainSwitchPreference(
                     object : SwitchPreferenceModel {
                         override val title = "MainSwitchPreference"
