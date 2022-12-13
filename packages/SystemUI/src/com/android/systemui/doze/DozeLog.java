@@ -28,6 +28,8 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 
+import com.google.errorprone.annotations.CompileTimeConstant;
+
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -80,12 +82,23 @@ public class DozeLog implements Dumpable {
     }
 
     /**
+     * Log debug message to LogBuffer.
+     */
+    public void d(@CompileTimeConstant String msg) {
+        mLogger.log(msg);
+    }
+
+    /**
      * Appends pickup wakeup event to the logs
      */
     public void tracePickupWakeUp(boolean withinVibrationThreshold) {
         mLogger.logPickupWakeup(withinVibrationThreshold);
         (withinVibrationThreshold ? mPickupPulseNearVibrationStats
                 : mPickupPulseNotNearVibrationStats).append();
+    }
+
+    public void traceSetIgnoreTouchWhilePulsing(boolean ignoreTouch) {
+        mLogger.logSetIgnoreTouchWhilePulsing(ignoreTouch);
     }
 
     /**

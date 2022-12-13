@@ -102,6 +102,7 @@
         android:layout_margin="@dimen/overlay_border_width"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        app:layout_constraintHorizontal_bias="0"
         app:layout_constraintBottom_toBottomOf="@id/preview_border"
         app:layout_constraintStart_toStartOf="@id/preview_border"
         app:layout_constraintEnd_toEndOf="@id/preview_border"

@@ -15,6 +15,7 @@
  */
 package com.android.keyguard
 
+import android.app.WallpaperManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -100,9 +101,13 @@ open class ClockEventController @Inject constructor(
     private val regionSamplingEnabled = featureFlags.isEnabled(REGION_SAMPLING)
 
     private fun updateColors() {
+
         if (regionSamplingEnabled && smallRegionSampler != null && largeRegionSampler != null) {
-            smallClockIsDark = smallRegionSampler!!.currentRegionDarkness().isDark
-            largeClockIsDark = largeRegionSampler!!.currentRegionDarkness().isDark
+            val wallpaperManager = WallpaperManager.getInstance(context)
+            if (!wallpaperManager.lockScreenWallpaperExists()) {
+                smallClockIsDark = smallRegionSampler!!.currentRegionDarkness().isDark
+                largeClockIsDark = largeRegionSampler!!.currentRegionDarkness().isDark
+            }
         } else {
             val isLightTheme = TypedValue()
             context.theme.resolveAttribute(android.R.attr.isLightTheme, isLightTheme, true)

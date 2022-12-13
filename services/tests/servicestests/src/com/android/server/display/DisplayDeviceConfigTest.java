@@ -148,6 +148,8 @@ public final class DisplayDeviceConfigTest {
         assertArrayEquals(new float[]{23, 24, 25},
                 mDisplayDeviceConfig.getAmbientDarkeningPercentagesIdle(), ZERO_DELTA);
 
+        assertEquals("ProximitySensor123", mDisplayDeviceConfig.getProximitySensor().name);
+        assertEquals("prox_type_1", mDisplayDeviceConfig.getProximitySensor().type);
 
         // Todo(brup): Add asserts for BrightnessThrottlingData, DensityMapping,
         // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
@@ -420,6 +422,10 @@ public final class DisplayDeviceConfigTest {
                 +           "</brightnessThrottlingPoint>\n"
                 +       "</brightnessThrottlingMap>\n"
                 +   "</thermalThrottling>\n"
+                +   "<proxSensor>\n"
+                +       "<name>ProximitySensor123</name>\n"
+                +       "<type>prox_type_1</type>\n"
+                +   "</proxSensor>\n"
                 + "</displayConfiguration>\n";
     }
 
