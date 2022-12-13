@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.desktopmode;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -26,9 +28,6 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
-import static com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask;
-import static com.android.wm.shell.desktopmode.DesktopTestHelpers.createFullscreenTask;
-import static com.android.wm.shell.desktopmode.DesktopTestHelpers.createHomeTask;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -48,6 +47,7 @@ import android.os.IBinder;
 import android.testing.AndroidTestingRunner;
 import android.window.DisplayAreaInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransaction.Change;
 import android.window.WindowContainerTransaction.HierarchyOp;
@@ -58,6 +58,7 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.sysui.ShellController;
@@ -353,7 +354,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
     @Test
     public void testHandleTransitionRequest_returnsWct() {
         RunningTaskInfo trigger = new RunningTaskInfo();
-        trigger.token = new MockToken().token();
+        trigger.token = new MockToken().mToken;
         trigger.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
         WindowContainerTransaction wct = mController.handleRequest(
                 mock(IBinder.class),
@@ -368,11 +369,38 @@ public class DesktopModeControllerTest extends ShellTestCase {
     }
 
     private DisplayAreaInfo createMockDisplayArea() {
-        DisplayAreaInfo displayAreaInfo = new DisplayAreaInfo(new MockToken().token(),
+        DisplayAreaInfo displayAreaInfo = new DisplayAreaInfo(new MockToken().mToken,
                 mContext.getDisplayId(), 0);
         when(mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(mContext.getDisplayId()))
                 .thenReturn(displayAreaInfo);
         return displayAreaInfo;
+    }
+
+    private RunningTaskInfo createFreeformTask() {
+        return new TestRunningTaskInfoBuilder()
+                .setToken(new MockToken().token())
+                .setActivityType(ACTIVITY_TYPE_STANDARD)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM)
+                .setLastActiveTime(100)
+                .build();
+    }
+
+    private RunningTaskInfo createFullscreenTask() {
+        return new TestRunningTaskInfoBuilder()
+                .setToken(new MockToken().token())
+                .setActivityType(ACTIVITY_TYPE_STANDARD)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
+                .setLastActiveTime(100)
+                .build();
+    }
+
+    private RunningTaskInfo createHomeTask() {
+        return new TestRunningTaskInfoBuilder()
+                .setToken(new MockToken().token())
+                .setActivityType(ACTIVITY_TYPE_HOME)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
+                .setLastActiveTime(100)
+                .build();
     }
 
     private WindowContainerTransaction getDesktopModeSwitchTransaction() {
@@ -402,4 +430,18 @@ public class DesktopModeControllerTest extends ShellTestCase {
         assertThat(change.getConfiguration().windowConfiguration.getBounds().isEmpty()).isTrue();
     }
 
+    private static class MockToken {
+        private final WindowContainerToken mToken;
+        private final IBinder mBinder;
+
+        MockToken() {
+            mToken = mock(WindowContainerToken.class);
+            mBinder = mock(IBinder.class);
+            when(mToken.asBinder()).thenReturn(mBinder);
+        }
+
+        WindowContainerToken token() {
+            return mToken;
+        }
+    }
 }
