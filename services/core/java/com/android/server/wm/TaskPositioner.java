@@ -27,7 +27,6 @@ import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_NONE;
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_RIGHT;
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_TOP;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
-import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -368,7 +367,7 @@ class TaskPositioner implements IBinder.DeathRecipient {
 
     private void endDragLocked() {
         mResizing = false;
-        mTask.setDragResizing(false, DRAG_RESIZE_MODE_FREEFORM);
+        mTask.setDragResizing(false);
     }
 
     /** Returns true if the move operation should be ended. */
@@ -380,7 +379,7 @@ class TaskPositioner implements IBinder.DeathRecipient {
 
         if (mCtrlType != CTRL_NONE) {
             resizeDrag(x, y);
-            mTask.setDragResizing(true, DRAG_RESIZE_MODE_FREEFORM);
+            mTask.setDragResizing(true);
             return false;
         }
 

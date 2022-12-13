@@ -274,7 +274,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private boolean mApplyFloatingVerticalInsets = false;
     private boolean mApplyFloatingHorizontalInsets = false;
 
-    private int mResizeMode = RESIZE_MODE_INVALID;
     private final int mResizeShadowSize;
     private final Paint mVerticalResizeShadowPaint = new Paint();
     private final Paint mHorizontalResizeShadowPaint = new Paint();
@@ -808,9 +807,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         updateElevation();
         mAllowUpdateElevation = true;
 
-        if (changed
-                && (mResizeMode == RESIZE_MODE_DOCKED_DIVIDER
-                    || mDrawLegacyNavigationBarBackground)) {
+        if (changed && mDrawLegacyNavigationBarBackground) {
             getViewRootImpl().requestInvalidateRootRenderNode();
         }
     }
@@ -2392,7 +2389,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     @Override
     public void onWindowDragResizeStart(Rect initialBounds, boolean fullscreen, Rect systemInsets,
-            Rect stableInsets, int resizeMode) {
+            Rect stableInsets) {
         if (mWindow.isDestroyed()) {
             // If the owner's window is gone, we should not be able to come here anymore.
             releaseThreadedRenderer();
@@ -2418,7 +2415,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
             updateColorViews(null /* insets */, false);
         }
-        mResizeMode = resizeMode;
         getViewRootImpl().requestInvalidateRootRenderNode();
     }
 
@@ -2426,7 +2422,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     public void onWindowDragResizeEnd() {
         releaseThreadedRenderer();
         updateColorViews(null /* insets */, false);
-        mResizeMode = RESIZE_MODE_INVALID;
         getViewRootImpl().requestInvalidateRootRenderNode();
     }
 
@@ -2471,9 +2466,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     private void drawResizingShadowIfNeeded(RecordingCanvas canvas) {
-        if (mResizeMode != RESIZE_MODE_DOCKED_DIVIDER || mWindow.mIsFloating
-                || mWindow.isTranslucent()
-                || mWindow.isShowingWallpaper()) {
+        if (mWindow.mIsFloating || mWindow.isTranslucent() || mWindow.isShowingWallpaper()) {
             return;
         }
         canvas.save();
