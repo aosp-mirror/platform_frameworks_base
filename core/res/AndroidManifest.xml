@@ -5046,6 +5046,12 @@
     <permission android:name="android.permission.MANAGE_ROLE_HOLDERS"
                 android:protectionLevel="signature|installer" />
 
+    <!-- @SystemApi Allows an application to manage the holders of roles associated with default
+         applications.
+         @hide -->
+    <permission android:name="android.permission.MANAGE_DEFAULT_APPLICATIONS"
+                android:protectionLevel="signature|role" />
+
     <!-- @SystemApi Allows an application to bypass role qualification. This allows switching role
          holders to otherwise non eligible holders. Only the shell is allowed to do this, the
          qualification for the shell role itself cannot be bypassed, and each role needs to
