@@ -456,6 +456,7 @@ package android {
     field public static final int config_systemUi = 17039418; // 0x104003a
     field public static final int config_systemUiIntelligence = 17039410; // 0x1040032
     field public static final int config_systemVisualIntelligence = 17039415; // 0x1040037
+    field public static final int config_systemWearHealthService;
     field public static final int config_systemWellbeing = 17039408; // 0x1040030
     field public static final int config_systemWifiCoexManager = 17039407; // 0x104002f
     field public static final int safety_protection_display_text = 17039425; // 0x1040041
