@@ -32,18 +32,18 @@ import android.util.SparseLongArray;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.server.power.stats.MeasuredEnergySnapshot.MeasuredEnergyDeltaData;
+import com.android.server.power.stats.EnergyConsumerSnapshot.EnergyConsumerDeltaData;
 
 import org.junit.Test;
 
 /**
- * Test class for {@link MeasuredEnergySnapshot}.
+ * Test class for {@link EnergyConsumerSnapshot}.
  *
  * To run the tests, use
  * atest FrameworksServicesTests:com.android.server.power.stats.MeasuredEnergySnapshotTest
  */
 @SmallTest
-public final class MeasuredEnergySnapshotTest {
+public final class EnergyConsumerSnapshotTest {
     private static final EnergyConsumer CONSUMER_DISPLAY = createEnergyConsumer(
             0, 0, EnergyConsumerType.DISPLAY, "Display");
     private static final  EnergyConsumer CONSUMER_OTHER_0 = createEnergyConsumer(
@@ -107,17 +107,17 @@ public final class MeasuredEnergySnapshotTest {
 
     @Test
     public void testUpdateAndGetDelta_empty() {
-        final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(ALL_ID_CONSUMER_MAP);
+        final EnergyConsumerSnapshot snapshot = new EnergyConsumerSnapshot(ALL_ID_CONSUMER_MAP);
         assertNull(snapshot.updateAndGetDelta(null, VOLTAGE_0));
         assertNull(snapshot.updateAndGetDelta(new EnergyConsumerResult[0], VOLTAGE_0));
     }
 
     @Test
     public void testUpdateAndGetDelta() {
-        final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(ALL_ID_CONSUMER_MAP);
+        final EnergyConsumerSnapshot snapshot = new EnergyConsumerSnapshot(ALL_ID_CONSUMER_MAP);
 
         // results0
-        MeasuredEnergyDeltaData delta = snapshot.updateAndGetDelta(RESULTS_0, VOLTAGE_0);
+        EnergyConsumerDeltaData delta = snapshot.updateAndGetDelta(RESULTS_0, VOLTAGE_0);
         if (delta != null) { // null is fine here. If non-null, it better be uninteresting though.
             assertNull(delta.displayChargeUC);
             assertNull(delta.otherTotalChargeUC);
@@ -204,10 +204,10 @@ public final class MeasuredEnergySnapshotTest {
     /** Test updateAndGetDelta() when the results have consumers absent from idToConsumerMap. */
     @Test
     public void testUpdateAndGetDelta_some() {
-        final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(SOME_ID_CONSUMER_MAP);
+        final EnergyConsumerSnapshot snapshot = new EnergyConsumerSnapshot(SOME_ID_CONSUMER_MAP);
 
         // results0
-        MeasuredEnergyDeltaData delta = snapshot.updateAndGetDelta(RESULTS_0, VOLTAGE_0);
+        EnergyConsumerDeltaData delta = snapshot.updateAndGetDelta(RESULTS_0, VOLTAGE_0);
         if (delta != null) { // null is fine here. If non-null, it better be uninteresting though.
             assertNull(delta.displayChargeUC);
             assertNull(delta.otherTotalChargeUC);
@@ -226,23 +226,23 @@ public final class MeasuredEnergySnapshotTest {
 
     @Test
     public void testGetOtherOrdinalNames() {
-        final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(ALL_ID_CONSUMER_MAP);
+        final EnergyConsumerSnapshot snapshot = new EnergyConsumerSnapshot(ALL_ID_CONSUMER_MAP);
         assertThat(snapshot.getOtherOrdinalNames()).asList()
                 .containsExactly("GPU", "HPU", "IPU &_");
     }
 
     @Test
     public void testGetOtherOrdinalNames_none() {
-        final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(SOME_ID_CONSUMER_MAP);
+        final EnergyConsumerSnapshot snapshot = new EnergyConsumerSnapshot(SOME_ID_CONSUMER_MAP);
         assertEquals(0, snapshot.getOtherOrdinalNames().length);
     }
 
     @Test
     public void getMeasuredEnergyDetails() {
-        final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(ALL_ID_CONSUMER_MAP);
+        final EnergyConsumerSnapshot snapshot = new EnergyConsumerSnapshot(ALL_ID_CONSUMER_MAP);
         snapshot.updateAndGetDelta(RESULTS_0, VOLTAGE_0);
-        MeasuredEnergyDeltaData delta = snapshot.updateAndGetDelta(RESULTS_1, VOLTAGE_1);
-        BatteryStats.MeasuredEnergyDetails details = snapshot.getMeasuredEnergyDetails(delta);
+        EnergyConsumerDeltaData delta = snapshot.updateAndGetDelta(RESULTS_1, VOLTAGE_1);
+        BatteryStats.EnergyConsumerDetails details = snapshot.getEnergyConsumerDetails(delta);
         assertThat(details.consumers).hasLength(4);
         assertThat(details.chargeUC).isEqualTo(new long[]{2667, 3200000, 0, 0});
         assertThat(details.toString()).isEqualTo("DISPLAY=2667 HPU=3200000 GPU=0 IPU &_=0");

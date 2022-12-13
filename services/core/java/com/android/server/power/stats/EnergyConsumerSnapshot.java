@@ -23,7 +23,7 @@ import android.hardware.power.stats.EnergyConsumer;
 import android.hardware.power.stats.EnergyConsumerAttribution;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
-import android.os.BatteryStats.MeasuredEnergyDetails;
+import android.os.BatteryStats.EnergyConsumerDetails;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -34,8 +34,8 @@ import java.io.PrintWriter;
 /**
  * Keeps snapshots of data from previously pulled EnergyConsumerResults.
  */
-public class MeasuredEnergySnapshot {
-    private static final String TAG = "MeasuredEnergySnapshot";
+public class EnergyConsumerSnapshot {
+    private static final String TAG = "EnergyConsumerSnapshot";
 
     private static final int MILLIVOLTS_PER_VOLT = 1000;
 
@@ -63,13 +63,13 @@ public class MeasuredEnergySnapshot {
      *
      * If an id is not present yet, it is treated as uninitialized (energy {@link #UNAVAILABLE}).
      */
-    private final SparseLongArray mMeasuredEnergySnapshots;
+    private final SparseLongArray mEnergyConsumerSnapshots;
 
     /**
      * Voltage snapshots, mapping {@link EnergyConsumer#id} to voltage (mV) from the last time
      * each {@link EnergyConsumer} was updated.
      *
-     * see {@link mMeasuredEnergySnapshots}.
+     * see {@link #mEnergyConsumerSnapshots}.
      */
     private final SparseIntArray mVoltageSnapshots;
 
@@ -85,15 +85,15 @@ public class MeasuredEnergySnapshot {
      */
     private final SparseArray<SparseLongArray> mAttributionSnapshots;
 
-    private MeasuredEnergyDetails mMeasuredEnergyDetails;
+    private EnergyConsumerDetails mEnergyConsumerDetails;
 
     /**
      * Constructor that initializes to the given id->EnergyConsumer map, indicating which consumers
      * exist and what their details are.
      */
-    MeasuredEnergySnapshot(@NonNull SparseArray<EnergyConsumer> idToConsumerMap) {
+    EnergyConsumerSnapshot(@NonNull SparseArray<EnergyConsumer> idToConsumerMap) {
         mEnergyConsumers = idToConsumerMap;
-        mMeasuredEnergySnapshots = new SparseLongArray(mEnergyConsumers.size());
+        mEnergyConsumerSnapshots = new SparseLongArray(mEnergyConsumers.size());
         mVoltageSnapshots = new SparseIntArray(mEnergyConsumers.size());
 
         mNumCpuClusterOrdinals = calculateNumOrdinals(EnergyConsumerType.CPU_CLUSTER,
@@ -103,8 +103,8 @@ public class MeasuredEnergySnapshot {
         mAttributionSnapshots = new SparseArray<>(mNumOtherOrdinals);
     }
 
-    /** Class for returning the relevant data calculated from the measured energy delta */
-    static class MeasuredEnergyDeltaData {
+    /** Class for returning the relevant data calculated from the energy consumer delta */
+    static class EnergyConsumerDeltaData {
         /** The chargeUC for {@link EnergyConsumerType#BLUETOOTH}. */
         public long bluetoothChargeUC = UNAVAILABLE;
 
@@ -153,14 +153,14 @@ public class MeasuredEnergySnapshot {
     }
 
     /**
-     * Update with the some freshly measured energies and return the difference (delta)
+     * Update with the freshly retrieved energy consumers and return the difference (delta)
      * between the previously stored values and the passed-in values.
      *
      * @param ecrs EnergyConsumerResults for some (possibly not all) {@link EnergyConsumer}s.
      *             Consumers that are not present are ignored (they are *not* treated as 0).
      * @param voltageMV current voltage.
      *
-     * @return a MeasuredEnergyDeltaData, containing maps from the updated consumers to
+     * @return an EnergyConsumerDeltaData, containing maps from the updated consumers to
      *         their corresponding charge deltas.
      *         Fields with no interesting data (consumers not present in ecrs or with no energy
      *         difference) will generally be left as their default values.
@@ -168,19 +168,19 @@ public class MeasuredEnergySnapshot {
      *         length {@link #getOtherOrdinalNames().length}.
      *         Returns null, if ecrs is null or empty.
      */
-    public @Nullable MeasuredEnergyDeltaData updateAndGetDelta(EnergyConsumerResult[] ecrs,
-            int voltageMV) {
+    @Nullable
+    public EnergyConsumerDeltaData updateAndGetDelta(EnergyConsumerResult[] ecrs, int voltageMV) {
         if (ecrs == null || ecrs.length == 0) {
             return null;
         }
         if (voltageMV <= 0) {
             Slog.wtf(TAG, "Unexpected battery voltage (" + voltageMV
-                    + " mV) when taking measured energy snapshot");
+                    + " mV) when taking energy consumer snapshot");
             // TODO (b/181685156): consider adding the nominal voltage to power profile and
             //  falling back to it if measured voltage is unavailable.
             return null;
         }
-        final MeasuredEnergyDeltaData output = new MeasuredEnergyDeltaData();
+        final EnergyConsumerDeltaData output = new EnergyConsumerDeltaData();
 
         for (final EnergyConsumerResult ecr : ecrs) {
             // Extract the new energy data for the current consumer.
@@ -198,9 +198,9 @@ public class MeasuredEnergySnapshot {
             final int ordinal = consumer.ordinal;
 
             // Look up, and update, the old energy and voltage information about this consumer.
-            final long oldEnergyUJ = mMeasuredEnergySnapshots.get(consumerId, UNAVAILABLE);
+            final long oldEnergyUJ = mEnergyConsumerSnapshots.get(consumerId, UNAVAILABLE);
             final int oldVoltageMV = mVoltageSnapshots.get(consumerId);
-            mMeasuredEnergySnapshots.put(consumerId, newEnergyUJ);
+            mEnergyConsumerSnapshots.put(consumerId, newEnergyUJ);
             mVoltageSnapshots.put(consumerId, voltageMV);
 
             final int avgVoltageMV = (oldVoltageMV + voltageMV + 1) / 2;
@@ -275,8 +275,8 @@ public class MeasuredEnergySnapshot {
 
     /**
      * For a consumer of type {@link EnergyConsumerType#OTHER}, updates
-     * {@link #mAttributionSnapshots} with freshly measured energies (per uid) and returns the
-     * charge consumed (in microcoulombs) between the previously stored values and the passed-in
+     * {@link #mAttributionSnapshots} with freshly retrieved energy consumers (per uid) and returns
+     * the charge consumed (in microcoulombs) between the previously stored values and the passed-in
      * values.
      *
      * @param consumerInfo a consumer of type {@link EnergyConsumerType#OTHER}.
@@ -284,7 +284,7 @@ public class MeasuredEnergySnapshot {
      *                        Any uid not present is treated as having energy 0.
      *                        If null or empty, all uids are treated as having energy 0.
      * @param avgVoltageMV The average voltage since the last snapshot.
-     * @return A map (in the sense of {@link MeasuredEnergyDeltaData#otherUidChargesUC} for this
+     * @return A map (in the sense of {@link EnergyConsumerDeltaData#otherUidChargesUC} for this
      *         consumer) of uid -> chargeDelta, with all uids that have a non-zero chargeDelta.
      *         Returns null if no delta available to calculate.
      */
@@ -342,7 +342,7 @@ public class MeasuredEnergySnapshot {
 
     /** Dump debug data. */
     public void dump(PrintWriter pw) {
-        pw.println("Measured energy snapshot");
+        pw.println("Energy consumer snapshot");
         pw.println("List of EnergyConsumers:");
         for (int i = 0; i < mEnergyConsumers.size(); i++) {
             final int id = mEnergyConsumers.keyAt(i);
@@ -351,9 +351,9 @@ public class MeasuredEnergySnapshot {
                     consumer.id, consumer.ordinal, consumer.type, consumer.name));
         }
         pw.println("Map of consumerIds to energy (in microjoules):");
-        for (int i = 0; i < mMeasuredEnergySnapshots.size(); i++) {
-            final int id = mMeasuredEnergySnapshots.keyAt(i);
-            final long energyUJ = mMeasuredEnergySnapshots.valueAt(i);
+        for (int i = 0; i < mEnergyConsumerSnapshots.size(); i++) {
+            final int id = mEnergyConsumerSnapshots.keyAt(i);
+            final long energyUJ = mEnergyConsumerSnapshots.valueAt(i);
             final long voltageMV = mVoltageSnapshots.valueAt(i);
             pw.println(String.format("    Consumer %d has energy %d uJ at %d mV", id, energyUJ,
                     voltageMV));
@@ -418,19 +418,19 @@ public class MeasuredEnergySnapshot {
     }
 
     /**
-     * Converts the MeasuredEnergyDeltaData object to MeasuredEnergyDetails, which can
+     * Converts the EnergyConsumerDeltaData object to EnergyConsumerDetails, which can
      * be saved in battery history.
      */
-    MeasuredEnergyDetails getMeasuredEnergyDetails(
-            MeasuredEnergySnapshot.MeasuredEnergyDeltaData delta) {
-        if (mMeasuredEnergyDetails == null) {
-            mMeasuredEnergyDetails = createMeasuredEnergyDetails();
+    EnergyConsumerDetails getEnergyConsumerDetails(
+            EnergyConsumerDeltaData delta) {
+        if (mEnergyConsumerDetails == null) {
+            mEnergyConsumerDetails = createEnergyConsumerDetails();
         }
 
-        final long[] chargeUC = mMeasuredEnergyDetails.chargeUC;
-        for (int i = 0; i < mMeasuredEnergyDetails.consumers.length; i++) {
-            MeasuredEnergyDetails.EnergyConsumer energyConsumer =
-                    mMeasuredEnergyDetails.consumers[i];
+        final long[] chargeUC = mEnergyConsumerDetails.chargeUC;
+        for (int i = 0; i < mEnergyConsumerDetails.consumers.length; i++) {
+            EnergyConsumerDetails.EnergyConsumer energyConsumer =
+                    mEnergyConsumerDetails.consumers[i];
             switch (energyConsumer.type) {
                 case EnergyConsumerType.BLUETOOTH:
                     chargeUC[i] = delta.bluetoothChargeUC;
@@ -470,17 +470,17 @@ public class MeasuredEnergySnapshot {
                     break;
             }
         }
-        return mMeasuredEnergyDetails;
+        return mEnergyConsumerDetails;
     }
 
-    private MeasuredEnergyDetails createMeasuredEnergyDetails() {
-        MeasuredEnergyDetails details = new MeasuredEnergyDetails();
+    private EnergyConsumerDetails createEnergyConsumerDetails() {
+        EnergyConsumerDetails details = new EnergyConsumerDetails();
         details.consumers =
-                new MeasuredEnergyDetails.EnergyConsumer[mEnergyConsumers.size()];
+                new EnergyConsumerDetails.EnergyConsumer[mEnergyConsumers.size()];
         for (int i = 0; i < mEnergyConsumers.size(); i++) {
             EnergyConsumer energyConsumer = mEnergyConsumers.valueAt(i);
-            MeasuredEnergyDetails.EnergyConsumer consumer =
-                    new MeasuredEnergyDetails.EnergyConsumer();
+            EnergyConsumerDetails.EnergyConsumer consumer =
+                    new EnergyConsumerDetails.EnergyConsumer();
             consumer.type = energyConsumer.type;
             consumer.ordinal = energyConsumer.ordinal;
             switch (consumer.type) {

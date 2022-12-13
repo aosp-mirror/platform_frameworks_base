@@ -42,7 +42,7 @@ import com.android.internal.os.KernelCpuUidTimeReader;
 import com.android.internal.os.KernelSingleUidTimeReader;
 import com.android.internal.os.LongArrayMultiStateCounter;
 import com.android.internal.os.PowerProfile;
-import com.android.internal.power.MeasuredEnergyStats;
+import com.android.internal.power.EnergyConsumerStats;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -100,8 +100,8 @@ public class CpuPowerCalculatorTest {
         MockitoAnnotations.initMocks(this);
 
         final boolean[] supportedPowerBuckets =
-                new boolean[MeasuredEnergyStats.NUMBER_STANDARD_POWER_BUCKETS];
-        supportedPowerBuckets[MeasuredEnergyStats.POWER_BUCKET_CPU] = true;
+                new boolean[EnergyConsumerStats.NUMBER_STANDARD_POWER_BUCKETS];
+        supportedPowerBuckets[EnergyConsumerStats.POWER_BUCKET_CPU] = true;
 
         when(mMockCpuUidFreqTimeReader.isFastCpuTimesReader()).thenReturn(true);
 
@@ -114,7 +114,7 @@ public class CpuPowerCalculatorTest {
                 .setKernelCpuUidActiveTimeReader(mMockKerneCpuUidActiveTimeReader)
                 .setKernelSingleUidTimeReader(mMockKernelSingleUidTimeReader)
                 .setSystemServerCpuThreadReader(mMockSystemServerCpuThreadReader)
-                .initMeasuredEnergyStatsLocked(supportedPowerBuckets, new String[0]);
+                .initEnergyConsumerStatsLocked(supportedPowerBuckets, new String[0]);
     }
 
     @Test
@@ -257,7 +257,7 @@ public class CpuPowerCalculatorTest {
         assertThat(uidConsumer1.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU))
                 .isWithin(PRECISION).of(3.18877);
         assertThat(uidConsumer1.getPowerModel(BatteryConsumer.POWER_COMPONENT_CPU))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
         assertThat(uidConsumer1.getPackageWithHighestDrain()).isEqualTo("bar");
 
         UidBatteryConsumer uidConsumer2 = mStatsRule.getUidBatteryConsumer(APP_UID2);
@@ -266,20 +266,20 @@ public class CpuPowerCalculatorTest {
         assertThat(uidConsumer2.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU))
                 .isWithin(PRECISION).of(7.44072);
         assertThat(uidConsumer2.getPowerModel(BatteryConsumer.POWER_COMPONENT_CPU))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
         assertThat(uidConsumer2.getPackageWithHighestDrain()).isNull();
 
         final BatteryConsumer deviceBatteryConsumer = mStatsRule.getDeviceBatteryConsumer();
         assertThat(deviceBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU))
                 .isWithin(PRECISION).of(10.62949);
         assertThat(deviceBatteryConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_CPU))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
 
         final BatteryConsumer appsBatteryConsumer = mStatsRule.getDeviceBatteryConsumer();
         assertThat(appsBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU))
                 .isWithin(PRECISION).of(10.62949);
         assertThat(appsBatteryConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_CPU))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
     }
 
     @Test

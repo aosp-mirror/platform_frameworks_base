@@ -35,7 +35,7 @@ import android.util.SparseArray;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.os.PowerProfile;
-import com.android.internal.power.MeasuredEnergyStats;
+import com.android.internal.power.EnergyConsumerStats;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -146,11 +146,13 @@ public class BatteryUsageStatsRule implements TestRule {
     public BatteryUsageStatsRule initMeasuredEnergyStatsLocked(
             String[] customPowerComponentNames) {
         final boolean[] supportedStandardBuckets =
-                new boolean[MeasuredEnergyStats.NUMBER_STANDARD_POWER_BUCKETS];
+                new boolean[EnergyConsumerStats.NUMBER_STANDARD_POWER_BUCKETS];
         Arrays.fill(supportedStandardBuckets, true);
-        mBatteryStats.initMeasuredEnergyStatsLocked(supportedStandardBuckets,
-                customPowerComponentNames);
-        mBatteryStats.informThatAllExternalStatsAreFlushed();
+        synchronized (mBatteryStats) {
+            mBatteryStats.initEnergyConsumerStatsLocked(supportedStandardBuckets,
+                    customPowerComponentNames);
+            mBatteryStats.informThatAllExternalStatsAreFlushed();
+        }
         return this;
     }
 

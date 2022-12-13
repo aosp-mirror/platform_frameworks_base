@@ -32,7 +32,8 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class CustomMeasuredPowerCalculatorTest {
+@SuppressWarnings("GuardedBy")
+public class CustomEnergyConsumerPowerCalculatorTest {
     private static final double PRECISION = 0.00001;
 
     private static final int APP_UID = Process.FIRST_APPLICATION_UID + 42;
@@ -50,13 +51,13 @@ public class CustomMeasuredPowerCalculatorTest {
 
         SparseLongArray uidEnergies = new SparseLongArray();
         uidEnergies.put(APP_UID, 30_000_000);
-        batteryStats.updateCustomMeasuredEnergyStatsLocked(0, 100_000_000, uidEnergies);
+        batteryStats.updateCustomEnergyConsumerStatsLocked(0, 100_000_000, uidEnergies);
 
         uidEnergies.put(APP_UID, 120_000_000);
-        batteryStats.updateCustomMeasuredEnergyStatsLocked(1, 200_000_000, uidEnergies);
+        batteryStats.updateCustomEnergyConsumerStatsLocked(1, 200_000_000, uidEnergies);
 
-        CustomMeasuredPowerCalculator calculator =
-                new CustomMeasuredPowerCalculator(mStatsRule.getPowerProfile());
+        CustomEnergyConsumerPowerCalculator calculator =
+                new CustomEnergyConsumerPowerCalculator(mStatsRule.getPowerProfile());
 
         mStatsRule.apply(calculator);
 

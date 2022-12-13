@@ -27,8 +27,8 @@ import android.content.Context;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.CpuUsageDetails;
+import android.os.BatteryStats.EnergyConsumerDetails;
 import android.os.BatteryStats.HistoryItem;
-import android.os.BatteryStats.MeasuredEnergyDetails;
 import android.os.Parcel;
 import android.util.Log;
 
@@ -272,33 +272,33 @@ public class BatteryStatsHistoryTest {
         mHistory.setBatteryState(true /* charging */, BatteryManager.BATTERY_STATUS_CHARGING, 80,
                 1234);
 
-        MeasuredEnergyDetails details = new MeasuredEnergyDetails();
-        MeasuredEnergyDetails.EnergyConsumer consumer1 =
-                new MeasuredEnergyDetails.EnergyConsumer();
+        EnergyConsumerDetails details = new EnergyConsumerDetails();
+        EnergyConsumerDetails.EnergyConsumer consumer1 =
+                new EnergyConsumerDetails.EnergyConsumer();
         consumer1.type = 42;
         consumer1.ordinal = 0;
         consumer1.name = "A";
 
-        MeasuredEnergyDetails.EnergyConsumer consumer2 =
-                new MeasuredEnergyDetails.EnergyConsumer();
+        EnergyConsumerDetails.EnergyConsumer consumer2 =
+                new EnergyConsumerDetails.EnergyConsumer();
         consumer2.type = 777;
         consumer2.ordinal = 0;
         consumer2.name = "B/0";
 
-        MeasuredEnergyDetails.EnergyConsumer consumer3 =
-                new MeasuredEnergyDetails.EnergyConsumer();
+        EnergyConsumerDetails.EnergyConsumer consumer3 =
+                new EnergyConsumerDetails.EnergyConsumer();
         consumer3.type = 777;
         consumer3.ordinal = 1;
         consumer3.name = "B/1";
 
-        MeasuredEnergyDetails.EnergyConsumer consumer4 =
-                new MeasuredEnergyDetails.EnergyConsumer();
+        EnergyConsumerDetails.EnergyConsumer consumer4 =
+                new EnergyConsumerDetails.EnergyConsumer();
         consumer4.type = 314;
         consumer4.ordinal = 1;
         consumer4.name = "C";
 
         details.consumers =
-                new MeasuredEnergyDetails.EnergyConsumer[]{consumer1, consumer2, consumer3,
+                new EnergyConsumerDetails.EnergyConsumer[]{consumer1, consumer2, consumer3,
                         consumer4};
         details.chargeUC = new long[details.consumers.length];
         for (int i = 0; i < details.chargeUC.length; i++) {
@@ -306,7 +306,7 @@ public class BatteryStatsHistoryTest {
         }
         details.chargeUC[3] = BatteryStats.POWER_DATA_UNAVAILABLE;
 
-        mHistory.recordMeasuredEnergyDetails(200, 200, details);
+        mHistory.recordEnergyConsumerDetails(200, 200, details);
 
         BatteryStatsHistoryIterator iterator = mHistory.iterate();
         BatteryStats.HistoryItem item;

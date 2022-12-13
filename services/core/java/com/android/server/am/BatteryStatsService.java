@@ -136,7 +136,7 @@ import java.util.concurrent.TimeUnit;
 public final class BatteryStatsService extends IBatteryStats.Stub
         implements PowerManagerInternal.LowPowerModeListener,
         BatteryStatsImpl.PlatformIdleStateCallback,
-        BatteryStatsImpl.MeasuredEnergyRetriever,
+        BatteryStatsImpl.EnergyStatsRetriever,
         Watchdog.Monitor {
     static final String TAG = "BatteryStatsService";
     static final boolean DBG = false;
@@ -2531,7 +2531,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         awaitCompletion();
         syncStats("dump", BatteryExternalStatsWorker.UPDATE_ALL);
         synchronized (mStats) {
-            mStats.dumpMeasuredEnergyStatsLocked(pw);
+            mStats.dumpEnergyConsumerStatsLocked(pw);
         }
     }
 
