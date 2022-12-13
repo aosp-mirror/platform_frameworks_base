@@ -24,6 +24,7 @@ import android.content.Context;
 import android.os.Handler;
 
 import com.android.server.timezonedetector.CurrentUserIdentityInjector;
+import com.android.server.timezonedetector.StateChangeListener;
 
 import java.util.Objects;
 
@@ -84,6 +85,19 @@ public class TimeDetectorInternalImpl implements TimeDetectorInternal {
         Objects.requireNonNull(suggestion);
 
         mHandler.post(() -> mTimeDetectorStrategy.suggestNetworkTime(suggestion));
+    }
+
+    @Override
+    public void addNetworkTimeUpdateListener(
+            @NonNull StateChangeListener networkTimeUpdateListener) {
+        Objects.requireNonNull(networkTimeUpdateListener);
+        mTimeDetectorStrategy.addNetworkTimeUpdateListener(networkTimeUpdateListener);
+    }
+
+    @Override
+    @NonNull
+    public NetworkTimeSuggestion getLatestNetworkSuggestion() {
+        return mTimeDetectorStrategy.getLatestNetworkSuggestion();
     }
 
     @Override
