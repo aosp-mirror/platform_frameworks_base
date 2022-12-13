@@ -42017,9 +42017,11 @@ package android.telephony {
   }
 
   public class CarrierConfigManager {
-    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfig();
+    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfig();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, "carrier privileges"}) public android.os.PersistableBundle getConfig(@NonNull java.lang.String...);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfigByComponentForSubId(@NonNull String, int);
-    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfigForSubId(int);
+    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfigForSubId(int);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, "carrier privileges"}) public android.os.PersistableBundle getConfigForSubId(int, @NonNull java.lang.String...);
     method public static boolean isConfigForIdentifiedCarrier(android.os.PersistableBundle);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyConfigChangedForSubId(int);
     field public static final String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
