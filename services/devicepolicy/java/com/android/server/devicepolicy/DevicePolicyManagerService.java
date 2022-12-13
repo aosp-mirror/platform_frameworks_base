@@ -721,6 +721,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final String KEEP_PROFILES_RUNNING_FLAG = "enable_keep_profiles_running";
     private static final boolean DEFAULT_KEEP_PROFILES_RUNNING_FLAG = false;
 
+    // TODO(b/261999445) remove the flag after rollout.
+    private static final String HEADLESS_FLAG = "headless";
+    private static final boolean DEFAULT_HEADLESS_FLAG = true;
+
     /**
      * This feature flag is checked once after boot and this value us used until the next reboot to
      * avoid needing to handle the flag changing on the fly.
@@ -7063,8 +7067,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Preconditions.checkCallAuthorization(frpManagementAgentUid == caller.getUid()
                                 || hasCallingPermission(permission.MASTER_CLEAR),
                         "Must be called by the FRP management agent on device");
-                admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                        UserHandle.getUserId(frpManagementAgentUid));
+                // TODO(b/261999445): Remove
+                if (isHeadlessFlagEnabled()) {
+                    admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
+                } else {
+                    admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                            UserHandle.getUserId(frpManagementAgentUid));
+                }
             } else {
                 Preconditions.checkCallAuthorization(
                         isDefaultDeviceOwner(caller)
@@ -7105,8 +7114,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 hasCallingOrSelfPermission(permission.TRIGGER_LOST_MODE));
 
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                    UserHandle.USER_SYSTEM);
+            // TODO(b/261999445): Remove
+            ActiveAdmin admin;
+            if (isHeadlessFlagEnabled()) {
+                admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
+            } else {
+                admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                        UserHandle.USER_SYSTEM);
+            }
             Preconditions.checkState(admin != null,
                     "Lost mode location updates can only be sent on an organization-owned device.");
             mInjector.binderWithCleanCallingIdentity(() -> {
@@ -8774,6 +8789,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return null;
     }
 
+    /**
+     * @deprecated Use the version which does not take a user id.
+     */
+    @Deprecated
     ActiveAdmin getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(int userId) {
         ensureLocked();
         ActiveAdmin admin = getDeviceOwnerAdminLocked();
@@ -8783,6 +8802,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return admin;
     }
 
+    ActiveAdmin getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked() {
+        ensureLocked();
+        ActiveAdmin admin = getDeviceOwnerAdminLocked();
+        if (admin == null) {
+            admin = getProfileOwnerOfOrganizationOwnedDeviceLocked();
+        }
+        return admin;
+    }
+
+    /**
+     * @deprecated Use the version which does not take a user id.
+     */
+    @Deprecated
     ActiveAdmin getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceParentLocked(int userId) {
         ensureLocked();
         ActiveAdmin admin = getDeviceOwnerAdminLocked();
@@ -8790,6 +8822,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return admin;
         }
         admin = getProfileOwnerOfOrganizationOwnedDeviceLocked(userId);
+        return admin != null ? admin.getParentActiveAdmin() : null;
+    }
+
+    ActiveAdmin getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceParentLocked() {
+        ensureLocked();
+        ActiveAdmin admin = getDeviceOwnerAdminLocked();
+        if (admin != null) {
+            return admin;
+        }
+        admin = getProfileOwnerOfOrganizationOwnedDeviceLocked();
         return admin != null ? admin.getParentActiveAdmin() : null;
     }
 
@@ -9325,10 +9367,30 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return admin;
     }
 
+    /**
+     * @deprecated use the version which does not take a user id.
+     */
+    @Deprecated
     @GuardedBy("getLockObject()")
     ActiveAdmin getProfileOwnerOfOrganizationOwnedDeviceLocked(int userHandle) {
         return mInjector.binderWithCleanCallingIdentity(() -> {
             for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
+                if (userInfo.isManagedProfile()) {
+                    if (getProfileOwnerAsUser(userInfo.id) != null
+                            && isProfileOwnerOfOrganizationOwnedDevice(userInfo.id)) {
+                        ComponentName who = getProfileOwnerAsUser(userInfo.id);
+                        return getActiveAdminUncheckedLocked(who, userInfo.id);
+                    }
+                }
+            }
+            return null;
+        });
+    }
+
+    @GuardedBy("getLockObject()")
+    ActiveAdmin getProfileOwnerOfOrganizationOwnedDeviceLocked() {
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            for (UserInfo userInfo : mUserManager.getUsers()) {
                 if (userInfo.isManagedProfile()) {
                     if (getProfileOwnerAsUser(userInfo.id) != null
                             && isProfileOwnerOfOrganizationOwnedDevice(userInfo.id)) {
@@ -17415,8 +17477,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             // Only DO or COPE PO can turn on CC mode, so take a shortcut here and only look at
             // their ActiveAdmin, instead of iterating through all admins.
-            final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                    UserHandle.USER_SYSTEM);
+            ActiveAdmin admin;
+            // TODO(b/261999445): remove
+            if (isHeadlessFlagEnabled()) {
+                admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
+            } else {
+                admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                        UserHandle.USER_SYSTEM);
+            }
             return admin != null ? admin.mCommonCriteriaMode : false;
         }
     }
@@ -18819,8 +18887,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private boolean isUsbDataSignalingEnabledInternalLocked() {
-        final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                UserHandle.USER_SYSTEM);
+        // TODO(b/261999445): remove
+        ActiveAdmin admin;
+        if (isHeadlessFlagEnabled()) {
+            admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
+        } else {
+            admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                    UserHandle.USER_SYSTEM);
+        }
         return admin == null || admin.mUsbDataSignalingEnabled;
     }
 
@@ -18870,8 +18944,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public int getMinimumRequiredWifiSecurityLevel() {
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                    UserHandle.USER_SYSTEM);
+            ActiveAdmin admin;
+            // TODO(b/261999445): remove
+            if (isHeadlessFlagEnabled()) {
+                admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
+            } else {
+                admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                        UserHandle.USER_SYSTEM);
+            }
             return (admin == null) ? DevicePolicyManager.WIFI_SECURITY_OPEN
                     : admin.mWifiMinimumSecurityLevel;
         }
@@ -18887,8 +18967,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         + "a profile owner on an organization-owned device or "
                         + "an app with the QUERY_ADMIN_POLICY permission.");
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                    UserHandle.USER_SYSTEM);
+            ActiveAdmin admin;
+            // TODO(b/261999445): remove
+            if (isHeadlessFlagEnabled()) {
+                admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
+            } else {
+                admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                        UserHandle.USER_SYSTEM);
+            }
             return admin != null ? admin.mWifiSsidPolicy : null;
         }
     }
@@ -19260,9 +19346,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             || isProfileOwnerOfOrganizationOwnedDevice(caller));
         }
         synchronized (getLockObject()) {
-            ActiveAdmin admin =
-                    getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                            UserHandle.USER_SYSTEM);
+            // TODO(b/261999445): Remove
+            ActiveAdmin admin;
+            if (isHeadlessFlagEnabled()) {
+                admin =
+                        getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
+            } else {
+                admin =
+                        getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                                UserHandle.USER_SYSTEM);
+            }
+
             if (admin != null) {
                 final String memtagProperty = "arm64.memtag.bootctl";
                 if (flags == DevicePolicyManager.MTE_ENABLED) {
@@ -19284,12 +19378,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         || isProfileOwnerOfOrganizationOwnedDevice(caller)
                         || isSystemUid(caller));
         synchronized (getLockObject()) {
-            ActiveAdmin admin =
-                    getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                            UserHandle.USER_SYSTEM);
+            // TODO(b/261999445): Remove
+            ActiveAdmin admin;
+            if (isHeadlessFlagEnabled()) {
+                admin =
+                        getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
+            } else {
+                admin =
+                        getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                                UserHandle.USER_SYSTEM);
+            }
             return admin != null
                     ? admin.mtePolicy
                     : DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY;
         }
+    }
+
+    private boolean isHeadlessFlagEnabled() {
+        return DeviceConfig.getBoolean(
+                NAMESPACE_DEVICE_POLICY_MANAGER,
+                HEADLESS_FLAG,
+                DEFAULT_HEADLESS_FLAG);
     }
 }
