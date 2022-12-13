@@ -1537,7 +1537,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> new BackgroundDexOptService(i.getContext(), i.getDexManager(), pm),
                 (i, pm) -> IBackupManager.Stub.asInterface(ServiceManager.getService(
                         Context.BACKUP_SERVICE)),
-                (i, pm) -> new SharedLibrariesImpl(pm, i));
+                (i, pm) -> new SharedLibrariesImpl(pm, i),
+                (i, pm) -> new CrossProfileIntentFilterHelper(i.getSettings(),
+                        i.getUserManagerService(), i.getLock(), i.getUserManagerInternal(),
+                        context));
 
         if (Build.VERSION.SDK_INT <= 0) {
             Slog.w(TAG, "**** ro.build.version.sdk not set!");
@@ -2029,13 +2032,21 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final WatchedArrayMap<String, PackageSetting> packageSettings =
                 mSettings.getPackagesLocked();
 
-            // Save the names of pre-existing packages prior to scanning, so we can determine
-            // which system packages are completely new due to an upgrade.
             if (isDeviceUpgrading()) {
+                // Save the names of pre-existing packages prior to scanning, so we can determine
+                // which system packages are completely new due to an upgrade.
                 mExistingPackages = new ArraySet<>(packageSettings.size());
                 for (PackageSetting ps : packageSettings.values()) {
                     mExistingPackages.add(ps.getPackageName());
                 }
+
+                // Triggering {@link com.android.server.pm.crossprofile.
+                // CrossProfileIntentFilterHelper.updateDefaultCrossProfileIntentFilter} to update
+                // {@link  CrossProfileIntentFilter}s between eligible users and their parent
+                t.traceBegin("cross profile intent filter update");
+                mInjector.getCrossProfileIntentFilterHelper()
+                        .updateDefaultCrossProfileIntentFilter();
+                t.traceEnd();
             }
 
             mCacheDir = PackageManagerServiceUtils.preparePackageParserCache(
@@ -3448,6 +3459,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         scheduleWritePackageRestrictions(sourceUserId);
     }
 
+
     // Enforcing that callingUid is owning pkg on userId
     private void enforceOwnerRights(@NonNull Computer snapshot, String pkg, int callingUid) {
         // The system owns everything.
@@ -4638,21 +4650,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             enforceOwnerRights(snapshot, ownerPackage, callingUid);
             PackageManagerServiceUtils.enforceShellRestriction(mInjector.getUserManagerInternal(),
                     UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, sourceUserId);
-            synchronized (mLock) {
-                CrossProfileIntentResolver resolver =
-                        mSettings.editCrossProfileIntentResolverLPw(sourceUserId);
-                ArraySet<CrossProfileIntentFilter> set =
-                        new ArraySet<>(resolver.filterSet());
-                for (CrossProfileIntentFilter filter : set) {
-                    //Only remove if calling user is allowed based on access control of
-                    // {@link CrossProfileIntentFilter}
-                    if (filter.getOwnerPackage().equals(ownerPackage)
-                            && mUserManager.isCrossProfileIntentFilterAccessible(sourceUserId,
-                            filter.mTargetUserId, /* addCrossProfileIntentFilter */ false)) {
-                        resolver.removeFilter(filter);
-                    }
-                }
-            }
+            PackageManagerService.this.mInjector.getCrossProfileIntentFilterHelper()
+                            .clearCrossProfileIntentFilters(sourceUserId, ownerPackage,
+                                    null);
             scheduleWritePackageRestrictions(sourceUserId);
         }
 

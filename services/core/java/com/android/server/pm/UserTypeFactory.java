@@ -132,7 +132,8 @@ public final class UserTypeFactory {
                         .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_WITH_PARENT)
                         .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_WITH_PARENT)
                         .setInheritDevicePolicy(UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT)
-                        .setUseParentsContacts(true));
+                        .setUseParentsContacts(true)
+                        .setUpdateCrossProfileIntentFiltersOnOTA(true));
     }
 
     /**
