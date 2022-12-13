@@ -1413,6 +1413,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 mPw.println("shortMsg: " + shortMsg);
                 mPw.println("longMsg: " + longMsg);
                 mPw.println("timeMillis: " + timeMillis);
+                mPw.println("uptime: " + SystemClock.uptimeMillis());
                 mPw.println("stack:");
                 mPw.print(stackTrace);
                 mPw.println("#");
@@ -1429,6 +1430,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 mPw.println("processName: " + processName);
                 mPw.println("processPid: " + pid);
                 mPw.println("annotation: " + annotation);
+                mPw.println("uptime: " + SystemClock.uptimeMillis());
                 mPw.flush();
                 int result = waitControllerLocked(pid, STATE_EARLY_ANR);
                 if (result == RESULT_EARLY_ANR_KILL) return -1;
@@ -1442,6 +1444,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 mPw.println("** ERROR: PROCESS NOT RESPONDING");
                 mPw.println("processName: " + processName);
                 mPw.println("processPid: " + pid);
+                mPw.println("uptime: " + SystemClock.uptimeMillis());
                 mPw.println("processStats:");
                 mPw.print(processStats);
                 mPw.println("#");
