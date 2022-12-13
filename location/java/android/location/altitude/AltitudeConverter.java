@@ -169,4 +169,28 @@ public final class AltitudeConverter {
         double[] geoidHeightsMeters = mGeoidHeightMap.readGeoidHeights(params, context, s2CellIds);
         addMslAltitude(params, s2CellIds, geoidHeightsMeters, location);
     }
+
+    /**
+     * Same as {@link #addMslAltitudeToLocation(Context, Location)} except that data will not be
+     * loaded from raw assets. Returns true if a Mean Sea Level altitude is added to the
+     * {@code location}; otherwise, returns false and leaves the {@code location} unchanged.
+     *
+     * @hide
+     */
+    public boolean addMslAltitudeToLocation(@NonNull Location location) {
+        validate(location);
+        MapParamsProto params = GeoidHeightMap.getParams();
+        if (params == null) {
+            return false;
+        }
+
+        long[] s2CellIds = findMapSquare(params, location);
+        double[] geoidHeightsMeters = mGeoidHeightMap.readGeoidHeights(params, s2CellIds);
+        if (geoidHeightsMeters == null) {
+            return false;
+        }
+
+        addMslAltitude(params, s2CellIds, geoidHeightsMeters, location);
+        return true;
+    }
 }
