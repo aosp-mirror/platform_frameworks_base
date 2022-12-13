@@ -101,6 +101,8 @@ class LargeScreenShadeHeaderController @Inject constructor(
         @VisibleForTesting
         internal val HEADER_TRANSITION_ID = R.id.header_transition
         @VisibleForTesting
+        internal val LARGE_SCREEN_HEADER_TRANSITION_ID = R.id.large_screen_header_transition
+        @VisibleForTesting
         internal val QQS_HEADER_CONSTRAINT = R.id.qqs_header_constraint
         @VisibleForTesting
         internal val QS_HEADER_CONSTRAINT = R.id.qs_header_constraint
@@ -429,8 +431,11 @@ class LargeScreenShadeHeaderController @Inject constructor(
         }
         header as MotionLayout
         if (largeScreenActive) {
-            header.getConstraintSet(LARGE_SCREEN_HEADER_CONSTRAINT).applyTo(header)
+            logInstantEvent("Large screen constraints set")
+            header.setTransition(HEADER_TRANSITION_ID)
+            header.transitionToStart()
         } else {
+            logInstantEvent("Small screen constraints set")
             header.setTransition(HEADER_TRANSITION_ID)
             header.transitionToStart()
             updatePosition()
@@ -440,13 +445,17 @@ class LargeScreenShadeHeaderController @Inject constructor(
 
     private fun updatePosition() {
         if (header is MotionLayout && !largeScreenActive && visible) {
-            Trace.instantForTrack(
-                TRACE_TAG_APP,
-                "LargeScreenHeaderController - updatePosition",
-                "position: $qsExpandedFraction"
-            )
+            logInstantEvent("updatePosition: $qsExpandedFraction")
             header.progress = qsExpandedFraction
         }
+    }
+
+    private fun logInstantEvent(message: String) {
+        Trace.instantForTrack(
+                TRACE_TAG_APP,
+                "LargeScreenHeaderController",
+                message
+        )
     }
 
     private fun updateListeners() {
