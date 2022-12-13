@@ -298,6 +298,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
+import android.os.LocaleList;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
@@ -7998,6 +7999,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         super.resolveOverrideConfiguration(newParentConfiguration);
         final Configuration resolvedConfig = getResolvedOverrideConfiguration();
+
+        applyLocaleOverrideIfNeeded(resolvedConfig);
+
         if (isFixedRotationTransforming()) {
             // The resolved configuration is applied with rotated display configuration. If this
             // activity matches its parent (the following resolving procedures are no-op), then it
@@ -10158,6 +10162,35 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (pictureInPictureArgs != null && pictureInPictureArgs.hasSourceBoundsHint()) {
             pictureInPictureArgs.getSourceRectHint().offset(windowBounds.left, windowBounds.top);
         }
+    }
+
+    private void applyLocaleOverrideIfNeeded(Configuration resolvedConfig) {
+        // We always align the locale for ActivityEmbedding apps. System apps or some apps which
+        // has set known cert apps can embed across different uid activity.
+        boolean shouldAlignLocale = isEmbedded()
+                || (task != null && task.mAlignActivityLocaleWithTask);
+        if (!shouldAlignLocale) {
+            return;
+        }
+
+        boolean differentPackage = task != null
+                && task.realActivity != null
+                && !task.realActivity.getPackageName().equals(packageName);
+        if (!differentPackage) {
+            return;
+        }
+
+        LocaleList locale;
+        final ActivityTaskManagerInternal.PackageConfig appConfig =
+                mAtmService.mPackageConfigPersister.findPackageConfiguration(
+                        task.realActivity.getPackageName(), mUserId);
+        // if there is no app locale for the package, clear the target activity's locale.
+        if (appConfig == null || appConfig.mLocales == null || appConfig.mLocales.isEmpty()) {
+            locale = LocaleList.getEmptyLocaleList();
+        } else {
+            locale = appConfig.mLocales;
+        }
+        resolvedConfig.setLocales(locale);
     }
 
     /**
