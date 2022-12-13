@@ -1193,7 +1193,7 @@ public class InputManagerService extends IInputManager.Stub
     @Override // Binder call
     public String getKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
-            @NonNull InputMethodSubtype imeSubtype) {
+            @Nullable InputMethodSubtype imeSubtype) {
         return mKeyboardLayoutManager.getKeyboardLayoutForInputDevice(identifier, userId,
                 imeInfo, imeSubtype);
     }
@@ -1202,16 +1202,16 @@ public class InputManagerService extends IInputManager.Stub
     @Override // Binder call
     public void setKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
-            @NonNull InputMethodSubtype imeSubtype, String keyboardLayoutDescriptor) {
+            @Nullable InputMethodSubtype imeSubtype, String keyboardLayoutDescriptor) {
         super.setKeyboardLayoutForInputDevice_enforcePermission();
         mKeyboardLayoutManager.setKeyboardLayoutForInputDevice(identifier, userId, imeInfo,
                 imeSubtype, keyboardLayoutDescriptor);
     }
 
     @Override // Binder call
-    public String[] getKeyboardLayoutListForInputDevice(InputDeviceIdentifier identifier,
+    public KeyboardLayout[] getKeyboardLayoutListForInputDevice(InputDeviceIdentifier identifier,
             @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
-            @NonNull InputMethodSubtype imeSubtype) {
+            @Nullable InputMethodSubtype imeSubtype) {
         return mKeyboardLayoutManager.getKeyboardLayoutListForInputDevice(identifier, userId,
                 imeInfo, imeSubtype);
     }
