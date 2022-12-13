@@ -16,6 +16,7 @@
 
 package android.app.activity;
 
+import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_INVALID;
 import static android.content.Intent.ACTION_EDIT;
 import static android.content.Intent.ACTION_VIEW;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
@@ -204,7 +205,8 @@ public class ActivityThreadTest {
         try {
             // Send process level config change.
             ClientTransaction transaction = newTransaction(activityThread, null);
-            transaction.addCallback(ConfigurationChangeItem.obtain(new Configuration(newConfig)));
+            transaction.addCallback(ConfigurationChangeItem.obtain(
+                    new Configuration(newConfig), DEVICE_ID_INVALID));
             appThread.scheduleTransaction(transaction);
             InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
@@ -413,12 +415,14 @@ public class ActivityThreadTest {
         activity.mTestLatch = new CountDownLatch(1);
 
         ClientTransaction transaction = newTransaction(activityThread, null);
-        transaction.addCallback(ConfigurationChangeItem.obtain(processConfigLandscape));
+        transaction.addCallback(ConfigurationChangeItem.obtain(
+                processConfigLandscape, DEVICE_ID_INVALID));
         appThread.scheduleTransaction(transaction);
 
         transaction = newTransaction(activityThread, activity.getActivityToken());
         transaction.addCallback(ActivityConfigurationChangeItem.obtain(activityConfigLandscape));
-        transaction.addCallback(ConfigurationChangeItem.obtain(processConfigPortrait));
+        transaction.addCallback(ConfigurationChangeItem.obtain(
+                processConfigPortrait, DEVICE_ID_INVALID));
         transaction.addCallback(ActivityConfigurationChangeItem.obtain(activityConfigPortrait));
         appThread.scheduleTransaction(transaction);
 
@@ -530,7 +534,7 @@ public class ActivityThreadTest {
                     ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
 
             activityThread.updatePendingConfiguration(newAppConfig);
-            activityThread.handleConfigurationChanged(newAppConfig);
+            activityThread.handleConfigurationChanged(newAppConfig, DEVICE_ID_INVALID);
 
             try {
                 assertEquals("Virtual display orientation must not change when process"
@@ -548,7 +552,7 @@ public class ActivityThreadTest {
     private static void restoreConfig(ActivityThread thread, Configuration originalConfig) {
         thread.getConfiguration().seq = originalConfig.seq - 1;
         ResourcesManager.getInstance().getConfiguration().seq = originalConfig.seq - 1;
-        thread.handleConfigurationChanged(originalConfig);
+        thread.handleConfigurationChanged(originalConfig, DEVICE_ID_INVALID);
     }
 
     @Test
@@ -626,7 +630,7 @@ public class ActivityThreadTest {
             newAppConfig.seq++;
 
             final ActivityThread activityThread = activity.getActivityThread();
-            activityThread.handleConfigurationChanged(newAppConfig);
+            activityThread.handleConfigurationChanged(newAppConfig, DEVICE_ID_INVALID);
 
             // Verify that application config update was applied, but didn't change activity config.
             assertEquals("Activity config must not change if the process config changes",

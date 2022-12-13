@@ -58,6 +58,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     private ActivityInfo mInfo;
     private Configuration mCurConfig;
     private Configuration mOverrideConfig;
+    private int mDeviceId;
     private String mReferrer;
     private IVoiceInteractor mVoiceInteractor;
     private int mProcState;
@@ -95,7 +96,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStart");
         ActivityClientRecord r = new ActivityClientRecord(token, mIntent, mIdent, mInfo,
-                mOverrideConfig, mReferrer, mVoiceInteractor, mState, mPersistentState,
+                mOverrideConfig, mDeviceId, mReferrer, mVoiceInteractor, mState, mPersistentState,
                 mPendingResults, mPendingNewIntents, mActivityOptions, mIsForward, mProfilerInfo,
                 client, mAssistToken, mShareableActivityToken, mLaunchedFromBubble,
                 mTaskFragmentToken);
@@ -116,7 +117,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
 
     /** Obtain an instance initialized with provided params. */
     public static LaunchActivityItem obtain(Intent intent, int ident, ActivityInfo info,
-            Configuration curConfig, Configuration overrideConfig,
+            Configuration curConfig, Configuration overrideConfig, int deviceId,
             String referrer, IVoiceInteractor voiceInteractor, int procState, Bundle state,
             PersistableBundle persistentState, List<ResultInfo> pendingResults,
             List<ReferrerIntent> pendingNewIntents, ActivityOptions activityOptions,
@@ -127,7 +128,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         if (instance == null) {
             instance = new LaunchActivityItem();
         }
-        setValues(instance, intent, ident, info, curConfig, overrideConfig, referrer,
+        setValues(instance, intent, ident, info, curConfig, overrideConfig, deviceId, referrer,
                 voiceInteractor, procState, state, persistentState, pendingResults,
                 pendingNewIntents, activityOptions, isForward, profilerInfo, assistToken,
                 activityClientController, shareableActivityToken,
@@ -138,7 +139,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
 
     @Override
     public void recycle() {
-        setValues(this, null, 0, null, null, null, null, null, 0, null, null, null, null,
+        setValues(this, null, 0, null, null, null, 0, null, null, 0, null, null, null, null,
                 null, false, null, null, null, null, false, null);
         ObjectPool.recycle(this);
     }
@@ -154,6 +155,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         dest.writeTypedObject(mInfo, flags);
         dest.writeTypedObject(mCurConfig, flags);
         dest.writeTypedObject(mOverrideConfig, flags);
+        dest.writeInt(mDeviceId);
         dest.writeString(mReferrer);
         dest.writeStrongInterface(mVoiceInteractor);
         dest.writeInt(mProcState);
@@ -175,7 +177,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     private LaunchActivityItem(Parcel in) {
         setValues(this, in.readTypedObject(Intent.CREATOR), in.readInt(),
                 in.readTypedObject(ActivityInfo.CREATOR), in.readTypedObject(Configuration.CREATOR),
-                in.readTypedObject(Configuration.CREATOR), in.readString(),
+                in.readTypedObject(Configuration.CREATOR), in.readInt(), in.readString(),
                 IVoiceInteractor.Stub.asInterface(in.readStrongBinder()), in.readInt(),
                 in.readBundle(getClass().getClassLoader()),
                 in.readPersistableBundle(getClass().getClassLoader()),
@@ -215,6 +217,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         return intentsEqual && mIdent == other.mIdent
                 && activityInfoEqual(other.mInfo) && Objects.equals(mCurConfig, other.mCurConfig)
                 && Objects.equals(mOverrideConfig, other.mOverrideConfig)
+                && mDeviceId == other.mDeviceId
                 && Objects.equals(mReferrer, other.mReferrer)
                 && mProcState == other.mProcState && areBundlesEqualRoughly(mState, other.mState)
                 && areBundlesEqualRoughly(mPersistentState, other.mPersistentState)
@@ -235,6 +238,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         result = 31 * result + mIdent;
         result = 31 * result + Objects.hashCode(mCurConfig);
         result = 31 * result + Objects.hashCode(mOverrideConfig);
+        result = 31 * result + mDeviceId;
         result = 31 * result + Objects.hashCode(mReferrer);
         result = 31 * result + Objects.hashCode(mProcState);
         result = 31 * result + getRoughBundleHashCode(mState);
@@ -279,16 +283,17 @@ public class LaunchActivityItem extends ClientTransactionItem {
     public String toString() {
         return "LaunchActivityItem{intent=" + mIntent + ",ident=" + mIdent + ",info=" + mInfo
                 + ",curConfig=" + mCurConfig + ",overrideConfig=" + mOverrideConfig
-                + ",referrer=" + mReferrer + ",procState=" + mProcState + ",state=" + mState
-                + ",persistentState=" + mPersistentState + ",pendingResults=" + mPendingResults
-                + ",pendingNewIntents=" + mPendingNewIntents + ",options=" + mActivityOptions
-                + ",profilerInfo=" + mProfilerInfo + ",assistToken=" + mAssistToken
-                + ",shareableActivityToken=" + mShareableActivityToken + "}";
+                + ",deviceId=" + mDeviceId + ",referrer=" + mReferrer + ",procState=" + mProcState
+                + ",state=" + mState + ",persistentState=" + mPersistentState
+                + ",pendingResults=" + mPendingResults + ",pendingNewIntents=" + mPendingNewIntents
+                + ",options=" + mActivityOptions + ",profilerInfo=" + mProfilerInfo
+                + ",assistToken=" + mAssistToken + ",shareableActivityToken="
+                + mShareableActivityToken + "}";
     }
 
     // Using the same method to set and clear values to make sure we don't forget anything
     private static void setValues(LaunchActivityItem instance, Intent intent, int ident,
-            ActivityInfo info, Configuration curConfig, Configuration overrideConfig,
+            ActivityInfo info, Configuration curConfig, Configuration overrideConfig, int deviceId,
             String referrer, IVoiceInteractor voiceInteractor,
             int procState, Bundle state, PersistableBundle persistentState,
             List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
@@ -300,6 +305,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         instance.mInfo = info;
         instance.mCurConfig = curConfig;
         instance.mOverrideConfig = overrideConfig;
+        instance.mDeviceId = deviceId;
         instance.mReferrer = referrer;
         instance.mVoiceInteractor = voiceInteractor;
         instance.mProcState = procState;

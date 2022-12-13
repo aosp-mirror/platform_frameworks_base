@@ -46,6 +46,7 @@ import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
@@ -98,6 +99,7 @@ import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.LaunchActivityItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -252,6 +254,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     private WindowManagerService mWindowManager;
 
     private AppOpsManager mAppOpsManager;
+    private VirtualDeviceManager mVirtualDeviceManager;
 
     /** Common synchronization logic used to save things to disks. */
     PersisterQueue mPersisterQueue;
@@ -894,12 +897,14 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
                 final boolean isTransitionForward = r.isTransitionForward();
                 final IBinder fragmentToken = r.getTaskFragment().getFragmentToken();
+
+                final int deviceId = getDeviceIdForDisplayId(r.getDisplayId());
                 clientTransaction.addCallback(LaunchActivityItem.obtain(new Intent(r.intent),
                         System.identityHashCode(r), r.info,
                         // TODO: Have this take the merged configuration instead of separate global
                         // and override configs.
                         mergedConfiguration.getGlobalConfiguration(),
-                        mergedConfiguration.getOverrideConfiguration(),
+                        mergedConfiguration.getOverrideConfiguration(), deviceId,
                         r.getFilteredReferrer(r.launchedFromPackage), task.voiceInteractor,
                         proc.getReportedProcState(), r.getSavedState(), r.getPersistentSavedState(),
                         results, newIntents, r.takeOptions(), isTransitionForward,
@@ -1213,6 +1218,17 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    int getDeviceIdForDisplayId(int displayId) {
+        if (displayId == DEFAULT_DISPLAY || displayId == INVALID_DISPLAY)  {
+            return VirtualDeviceManager.DEVICE_ID_DEFAULT;
+        }
+        if (mVirtualDeviceManager == null) {
+            mVirtualDeviceManager =
+                    mService.mContext.getSystemService(VirtualDeviceManager.class);
+        }
+        return mVirtualDeviceManager.getDeviceIdForDisplayId(displayId);
     }
 
     private AppOpsManager getAppOpsManager() {

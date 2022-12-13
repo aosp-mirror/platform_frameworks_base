@@ -347,7 +347,7 @@ public class ActivityThreadClientTest {
             doNothing().when(packageInfo).updateApplicationInfo(any(), any());
 
             return new ActivityClientRecord(mock(IBinder.class), Intent.makeMainActivity(component),
-                    0 /* ident */, info, new Configuration(), null /* referrer */,
+                    0 /* ident */, info, new Configuration(), 0 /*deviceId */, null /* referrer */,
                     null /* voiceInteractor */, null /* state */, null /* persistentState */,
                     null /* pendingResults */, null /* pendingNewIntents */,
                     null /* activityOptions */, true /* isForward */, null /* profilerInfo */,

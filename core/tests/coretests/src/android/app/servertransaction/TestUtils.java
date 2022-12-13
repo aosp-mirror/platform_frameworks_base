@@ -95,6 +95,7 @@ class TestUtils {
         private ActivityInfo mInfo;
         private Configuration mCurConfig;
         private Configuration mOverrideConfig;
+        private int mDeviceId;
         private String mReferrer;
         private IVoiceInteractor mVoiceInteractor;
         private int mProcState;
@@ -132,6 +133,11 @@ class TestUtils {
 
         LaunchActivityItemBuilder setOverrideConfig(Configuration overrideConfig) {
             mOverrideConfig = overrideConfig;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setDeviceId(int deviceId) {
+            mDeviceId = deviceId;
             return this;
         }
 
@@ -207,7 +213,7 @@ class TestUtils {
 
         LaunchActivityItem build() {
             return LaunchActivityItem.obtain(mIntent, mIdent, mInfo,
-                    mCurConfig, mOverrideConfig, mReferrer, mVoiceInteractor,
+                    mCurConfig, mOverrideConfig, mDeviceId, mReferrer, mVoiceInteractor,
                     mProcState, mState, mPersistentState, mPendingResults, mPendingNewIntents,
                     mActivityOptions, mIsForward, mProfilerInfo, mAssistToken,
                     null /* activityClientController */, mShareableActivityToken,
