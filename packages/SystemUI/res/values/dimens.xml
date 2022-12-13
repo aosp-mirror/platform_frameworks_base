@@ -1505,6 +1505,8 @@
     <dimen name="dream_overlay_status_bar_extra_margin">8dp</dimen>
 
     <!-- Dream overlay complications related dimensions -->
+    <!-- The blur radius applied to the dream overlay when entering and exiting dreams -->
+    <dimen name="dream_overlay_anim_blur_radius">50dp</dimen>
     <dimen name="dream_overlay_complication_clock_time_text_size">86dp</dimen>
     <dimen name="dream_overlay_complication_clock_time_translation_y">28dp</dimen>
     <dimen name="dream_overlay_complication_home_controls_padding">28dp</dimen>
@@ -1558,6 +1560,7 @@
     <dimen name="dream_overlay_complication_margin">0dp</dimen>
 
     <dimen name="dream_overlay_y_offset">80dp</dimen>
+    <dimen name="dream_overlay_entry_y_offset">40dp</dimen>
     <dimen name="dream_overlay_exit_y_offset">40dp</dimen>
 
     <dimen name="dream_aqi_badge_corner_radius">28dp</dimen>

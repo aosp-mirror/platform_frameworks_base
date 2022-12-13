@@ -23,11 +23,11 @@ import org.mockito.MockitoAnnotations
 class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
 
     companion object {
+        private const val DREAM_BLUR_RADIUS = 50
         private const val DREAM_IN_BLUR_ANIMATION_DURATION = 1L
-        private const val DREAM_IN_BLUR_ANIMATION_DELAY = 2L
         private const val DREAM_IN_COMPLICATIONS_ANIMATION_DURATION = 3L
-        private const val DREAM_IN_TOP_COMPLICATIONS_ANIMATION_DELAY = 4L
-        private const val DREAM_IN_BOTTOM_COMPLICATIONS_ANIMATION_DELAY = 5L
+        private const val DREAM_IN_TRANSLATION_Y_DISTANCE = 6
+        private const val DREAM_IN_TRANSLATION_Y_DURATION = 7L
         private const val DREAM_OUT_TRANSLATION_Y_DISTANCE = 6
         private const val DREAM_OUT_TRANSLATION_Y_DURATION = 7L
         private const val DREAM_OUT_TRANSLATION_Y_DELAY_BOTTOM = 8L
@@ -54,11 +54,11 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
                 hostViewController,
                 statusBarViewController,
                 stateController,
+                DREAM_BLUR_RADIUS,
                 DREAM_IN_BLUR_ANIMATION_DURATION,
-                DREAM_IN_BLUR_ANIMATION_DELAY,
                 DREAM_IN_COMPLICATIONS_ANIMATION_DURATION,
-                DREAM_IN_TOP_COMPLICATIONS_ANIMATION_DELAY,
-                DREAM_IN_BOTTOM_COMPLICATIONS_ANIMATION_DELAY,
+                DREAM_IN_TRANSLATION_Y_DISTANCE,
+                DREAM_IN_TRANSLATION_Y_DURATION,
                 DREAM_OUT_TRANSLATION_Y_DISTANCE,
                 DREAM_OUT_TRANSLATION_Y_DURATION,
                 DREAM_OUT_TRANSLATION_Y_DELAY_BOTTOM,
