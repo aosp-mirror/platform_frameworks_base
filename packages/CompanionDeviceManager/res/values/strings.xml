@@ -140,6 +140,9 @@
     <!-- Calendar permission will be granted of corresponding profile [CHAR LIMIT=30] -->
     <string name="permission_calendar">Calendar</string>
 
+    <!-- Microphone permission will be granted to corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_microphone">Microphone</string>
+
     <!-- Nearby devices permission will be granted of corresponding profile [CHAR LIMIT=30] -->
     <string name="permission_nearby_devices">Nearby devices</string>
 
@@ -168,6 +171,10 @@
     <!-- Description of calendar permission of corresponding profile [CHAR LIMIT=NONE] -->
     <!-- TODO(b/253644212) Need the description for calendar permission  -->
     <string name="permission_calendar_summary"></string>
+
+    <!-- Description of microphone permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <!-- TODO(b/256140614) Need the description for microphone permission  -->
+    <string name="permission_microphone_summary">Can record audio using the microphone</string>
 
     <!-- Description of nearby devices' permission of corresponding profile [CHAR LIMIT=NONE] -->
     <!-- TODO(b/253644212) Need the description for nearby devices' permission  -->
