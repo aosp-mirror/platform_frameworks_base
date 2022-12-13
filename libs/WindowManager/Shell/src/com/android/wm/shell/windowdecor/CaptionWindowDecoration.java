@@ -16,9 +16,8 @@
 
 package com.android.wm.shell.windowdecor;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-
 import android.app.ActivityManager;
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -118,7 +117,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                 ? R.dimen.freeform_decor_shadow_focused_thickness
                 : R.dimen.freeform_decor_shadow_unfocused_thickness;
         final boolean isFreeform =
-                taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
+                taskInfo.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_FREEFORM;
         final boolean isDragResizeable = isFreeform && taskInfo.isResizeable;
 
         WindowDecorLinearLayout oldRootView = mResult.mRootView;
@@ -168,17 +167,11 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         // If this task is not focused, do not show caption.
         setCaptionVisibility(mTaskInfo.isFocused);
 
-        if (mTaskInfo.isFocused) {
-            if (DesktopModeStatus.isProto2Enabled()) {
-                updateButtonVisibility();
-            } else if (DesktopModeStatus.isProto1Enabled()) {
-                // Only handle should show if Desktop Mode is inactive.
-                boolean desktopCurrentStatus = DesktopModeStatus.isActive(mContext);
-                if (mDesktopActive != desktopCurrentStatus) {
-                    mDesktopActive = desktopCurrentStatus;
-                    setButtonVisibility(mDesktopActive);
-                }
-            }
+        // Only handle should show if Desktop Mode is inactive.
+        boolean desktopCurrentStatus = DesktopModeStatus.isActive(mContext);
+        if (mDesktopActive != desktopCurrentStatus && mTaskInfo.isFocused) {
+            mDesktopActive = desktopCurrentStatus;
+            setButtonVisibility();
         }
 
         if (!isDragResizeable) {
@@ -221,7 +214,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         View handle = caption.findViewById(R.id.caption_handle);
         handle.setOnTouchListener(mOnCaptionTouchListener);
         handle.setOnClickListener(mOnCaptionButtonClickListener);
-        updateButtonVisibility();
+        setButtonVisibility();
     }
 
     private void setupHandleMenu() {
@@ -251,25 +244,14 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     /**
      * Sets the visibility of buttons and color of caption based on desktop mode status
      */
-    void updateButtonVisibility() {
-        if (DesktopModeStatus.isProto2Enabled()) {
-            setButtonVisibility(mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM);
-        } else if (DesktopModeStatus.isProto1Enabled()) {
-            mDesktopActive = DesktopModeStatus.isActive(mContext);
-            setButtonVisibility(mDesktopActive);
-        }
-    }
-
-    /**
-     * Show or hide buttons
-     */
-    void setButtonVisibility(boolean visible) {
-        int visibility = visible ? View.VISIBLE : View.GONE;
+    void setButtonVisibility() {
+        mDesktopActive = DesktopModeStatus.isActive(mContext);
+        int v = mDesktopActive ? View.VISIBLE : View.GONE;
         View caption = mResult.mRootView.findViewById(R.id.caption);
         View back = caption.findViewById(R.id.back_button);
         View close = caption.findViewById(R.id.close_window);
-        back.setVisibility(visibility);
-        close.setVisibility(visibility);
+        back.setVisibility(v);
+        close.setVisibility(v);
         int buttonTintColorRes =
                 mDesktopActive ? R.color.decor_button_dark_color
                         : R.color.decor_button_light_color;
@@ -278,7 +260,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         View handle = caption.findViewById(R.id.caption_handle);
         VectorDrawable handleBackground = (VectorDrawable) handle.getBackground();
         handleBackground.setTintList(buttonTintColor);
-        caption.getBackground().setTint(visible ? Color.WHITE : Color.TRANSPARENT);
+        caption.getBackground().setTint(v == View.VISIBLE ? Color.WHITE : Color.TRANSPARENT);
     }
 
     boolean isHandleMenuActive() {
