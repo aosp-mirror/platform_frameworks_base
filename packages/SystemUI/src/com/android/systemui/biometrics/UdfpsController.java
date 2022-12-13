@@ -115,7 +115,7 @@ import kotlin.Unit;
 @SysUISingleton
 public class UdfpsController implements DozeReceiver, Dumpable {
     private static final String TAG = "UdfpsController";
-    private static final long AOD_INTERRUPT_TIMEOUT_MILLIS = 1000;
+    private static final long AOD_SEND_FINGER_UP_DELAY_MILLIS = 1000;
 
     // Minimum required delay between consecutive touch logs in milliseconds.
     private static final long MIN_TOUCH_LOG_INTERVAL = 50;
@@ -178,7 +178,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     // interrupt is being tracked and a timeout is used as a last resort to turn off high brightness
     // mode.
     private boolean mIsAodInterruptActive;
-    @Nullable private Runnable mCancelAodTimeoutAction;
+    @Nullable private Runnable mCancelAodFingerUpAction;
     private boolean mScreenOn;
     private Runnable mAodInterruptRunnable;
     private boolean mOnFingerDown;
@@ -272,6 +272,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     if (view != null && isOptical()) {
                         unconfigureDisplay(view);
                     }
+                    tryAodSendFingerUp();
                     if (acquiredGood) {
                         mOverlay.onAcquiredGood();
                     }
@@ -868,12 +869,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     private void unconfigureDisplay(@NonNull UdfpsView view) {
         if (view.isDisplayConfigured()) {
             view.unconfigureDisplay();
-
-            if (mCancelAodTimeoutAction != null) {
-                mCancelAodTimeoutAction.run();
-                mCancelAodTimeoutAction = null;
-            }
-            mIsAodInterruptActive = false;
         }
     }
 
@@ -913,8 +908,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             // ACTION_UP/ACTION_CANCEL,  we need to be careful about not letting the screen
             // accidentally remain in high brightness mode. As a mitigation, queue a call to
             // cancel the fingerprint scan.
-            mCancelAodTimeoutAction = mFgExecutor.executeDelayed(this::cancelAodInterrupt,
-                    AOD_INTERRUPT_TIMEOUT_MILLIS);
+            mCancelAodFingerUpAction = mFgExecutor.executeDelayed(this::tryAodSendFingerUp,
+                    AOD_SEND_FINGER_UP_DELAY_MILLIS);
             // using a hard-coded value for major and minor until it is available from the sensor
             onFingerDown(requestId, screenX, screenY, minor, major);
         };
@@ -948,15 +943,27 @@ public class UdfpsController implements DozeReceiver, Dumpable {
      * sensors, this can result in illumination persisting for longer than necessary.
      */
     @VisibleForTesting
-    void cancelAodInterrupt() {
+    void tryAodSendFingerUp() {
         if (!mIsAodInterruptActive) {
             return;
         }
+        cancelAodSendFingerUpAction();
         if (mOverlay != null && mOverlay.getOverlayView() != null) {
             onFingerUp(mOverlay.getRequestId(), mOverlay.getOverlayView());
         }
-        mCancelAodTimeoutAction = null;
+    }
+
+    /**
+     * Cancels any scheduled AoD finger-up actions without triggered the finger-up action. Only
+     * call this method if the finger-up event has been guaranteed to have already occurred.
+     */
+    @VisibleForTesting
+    void cancelAodSendFingerUpAction() {
         mIsAodInterruptActive = false;
+        if (mCancelAodFingerUpAction != null) {
+            mCancelAodFingerUpAction.run();
+            mCancelAodFingerUpAction = null;
+        }
     }
 
     private boolean isOptical() {
@@ -1118,6 +1125,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         if (isOptical()) {
             unconfigureDisplay(view);
         }
+        cancelAodSendFingerUpAction();
     }
 
     /**
