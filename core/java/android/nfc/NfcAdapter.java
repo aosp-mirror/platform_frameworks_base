@@ -30,6 +30,7 @@ import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.nfc.tech.MifareClassic;
@@ -525,6 +526,66 @@ public final class NfcAdapter {
     }
 
     /**
+     * Helper to check if this device has FEATURE_NFC_BEAM, but without using
+     * a context.
+     * Equivalent to
+     * context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC_BEAM)
+     */
+    private static boolean hasBeamFeature() {
+        IPackageManager pm = ActivityThread.getPackageManager();
+        if (pm == null) {
+            Log.e(TAG, "Cannot get package manager, assuming no Android Beam feature");
+            return false;
+        }
+        try {
+            return pm.hasSystemFeature(PackageManager.FEATURE_NFC_BEAM, 0);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Package manager query failed, assuming no Android Beam feature", e);
+            return false;
+        }
+    }
+
+    /**
+     * Helper to check if this device has FEATURE_NFC, but without using
+     * a context.
+     * Equivalent to
+     * context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC)
+     */
+    private static boolean hasNfcFeature() {
+        IPackageManager pm = ActivityThread.getPackageManager();
+        if (pm == null) {
+            Log.e(TAG, "Cannot get package manager, assuming no NFC feature");
+            return false;
+        }
+        try {
+            return pm.hasSystemFeature(PackageManager.FEATURE_NFC, 0);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Package manager query failed, assuming no NFC feature", e);
+            return false;
+        }
+    }
+
+    /**
+     * Helper to check if this device is NFC HCE capable, by checking for
+     * FEATURE_NFC_HOST_CARD_EMULATION and/or FEATURE_NFC_HOST_CARD_EMULATION_NFCF,
+     * but without using a context.
+     */
+    private static boolean hasNfcHceFeature() {
+        IPackageManager pm = ActivityThread.getPackageManager();
+        if (pm == null) {
+            Log.e(TAG, "Cannot get package manager, assuming no NFC feature");
+            return false;
+        }
+        try {
+            return pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION, 0)
+                || pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION_NFCF, 0);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Package manager query failed, assuming no NFC feature", e);
+            return false;
+        }
+    }
+
+    /**
      * Return list of Secure Elements which support off host card emulation.
      *
      * @return List<String> containing secure elements on the device which supports
@@ -533,21 +594,23 @@ public final class NfcAdapter {
      * @hide
      */
     public @NonNull List<String> getSupportedOffHostSecureElements() {
-        if (mContext == null) {
-            throw new UnsupportedOperationException("You need a context on NfcAdapter to use the "
-                    + " getSupportedOffHostSecureElements APIs");
-        }
         List<String> offHostSE = new ArrayList<String>();
-        PackageManager pm = mContext.getPackageManager();
+        IPackageManager pm = ActivityThread.getPackageManager();
         if (pm == null) {
             Log.e(TAG, "Cannot get package manager, assuming no off-host CE feature");
             return offHostSE;
         }
-        if (pm.hasSystemFeature(PackageManager.FEATURE_NFC_OFF_HOST_CARD_EMULATION_UICC)) {
-            offHostSE.add("SIM");
-        }
-        if (pm.hasSystemFeature(PackageManager.FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE)) {
-            offHostSE.add("eSE");
+        try {
+            if (pm.hasSystemFeature(PackageManager.FEATURE_NFC_OFF_HOST_CARD_EMULATION_UICC, 0)) {
+                offHostSE.add("SIM");
+            }
+            if (pm.hasSystemFeature(PackageManager.FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE, 0)) {
+                offHostSE.add("eSE");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Package manager query failed, assuming no off-host CE feature", e);
+            offHostSE.clear();
+            return offHostSE;
         }
         return offHostSE;
     }
@@ -559,19 +622,10 @@ public final class NfcAdapter {
      */
     @UnsupportedAppUsage
     public static synchronized NfcAdapter getNfcAdapter(Context context) {
-        if (context == null) {
-            if (sNullContextNfcAdapter == null) {
-                sNullContextNfcAdapter = new NfcAdapter(null);
-            }
-            return sNullContextNfcAdapter;
-        }
         if (!sIsInitialized) {
-            PackageManager pm = context.getPackageManager();
-            sHasNfcFeature = pm.hasSystemFeature(PackageManager.FEATURE_NFC);
-            sHasBeamFeature = pm.hasSystemFeature(PackageManager.FEATURE_NFC_BEAM);
-            boolean hasHceFeature =
-                    pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)
-                    || pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION_NFCF);
+            sHasNfcFeature = hasNfcFeature();
+            sHasBeamFeature = hasBeamFeature();
+            boolean hasHceFeature = hasNfcHceFeature();
             /* is this device meant to have NFC */
             if (!sHasNfcFeature && !hasHceFeature) {
                 Log.v(TAG, "this device does not have NFC support");
@@ -607,6 +661,12 @@ public final class NfcAdapter {
 
             sIsInitialized = true;
         }
+        if (context == null) {
+            if (sNullContextNfcAdapter == null) {
+                sNullContextNfcAdapter = new NfcAdapter(null);
+            }
+            return sNullContextNfcAdapter;
+        }
         NfcAdapter adapter = sNfcAdapters.get(context);
         if (adapter == null) {
             adapter = new NfcAdapter(context);
@@ -617,12 +677,8 @@ public final class NfcAdapter {
 
     /** get handle to NFC service interface */
     private static INfcAdapter getServiceInterface() {
-        if (!sHasNfcFeature) {
-            /* NFC is not supported */
-            return null;
-        }
         /* get a handle to NFC service */
-        IBinder b = ServiceManager.waitForService("nfc");
+        IBinder b = ServiceManager.getService("nfc");
         if (b == null) {
             return null;
         }
@@ -652,15 +708,6 @@ public final class NfcAdapter {
                     "context not associated with any application (using a mock context?)");
         }
 
-        synchronized (NfcAdapter.class) {
-            if (!sIsInitialized) {
-                PackageManager pm = context.getPackageManager();
-                sHasNfcFeature = pm.hasSystemFeature(PackageManager.FEATURE_NFC);
-            }
-            if (!sHasNfcFeature) {
-                return null;
-            }
-        }
         if (getServiceInterface() == null) {
             // NFC is not available
             return null;
