@@ -18,6 +18,11 @@ package android.hardware.camera2;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.hardware.camera2.impl.PublicKey;
+import android.hardware.camera2.utils.TypeReference;
+import android.util.Pair;
+import android.util.Range;
 
 import java.util.concurrent.Executor;
 
@@ -420,6 +425,28 @@ public abstract class CameraExtensionSession implements AutoCloseable {
      * @see #setRepeatingRequest
      */
     public void stopRepeating() throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
+
+    /**
+     * Return the realtime still {@link #capture} latency.
+     *
+     * <p>The pair will be in milliseconds with the first value indicating the capture latency from
+     * the {@link ExtensionCaptureCallback#onCaptureStarted} until
+     * {@link ExtensionCaptureCallback#onCaptureProcessStarted}
+     * and the second value containing the estimated post-processing latency from
+     * {@link ExtensionCaptureCallback#onCaptureProcessStarted} until the processed frame returns
+     * to the client.</p>
+     *
+     * <p>The estimations will take into account the current environment conditions, the camera
+     * state and will include the time spent processing the multi-frame capture request along with
+     * any additional time for encoding of the processed buffer if necessary.</p>
+     *
+     * @return The realtime still capture latency,
+     * or {@code null} if the estimation is not supported.
+     */
+    @Nullable
+    public Pair<Long, Long> getRealtimeStillCaptureLatency() throws CameraAccessException {
         throw new UnsupportedOperationException("Subclasses must override this method");
     }
 

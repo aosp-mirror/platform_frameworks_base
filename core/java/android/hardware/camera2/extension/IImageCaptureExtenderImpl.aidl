@@ -19,6 +19,7 @@ import android.hardware.camera2.impl.CameraMetadataNative;
 
 import android.hardware.camera2.extension.CaptureStageImpl;
 import android.hardware.camera2.extension.ICaptureProcessorImpl;
+import android.hardware.camera2.extension.LatencyPair;
 import android.hardware.camera2.extension.LatencyRange;
 import android.hardware.camera2.extension.Size;
 import android.hardware.camera2.extension.SizeList;
@@ -43,4 +44,5 @@ interface IImageCaptureExtenderImpl
     CameraMetadataNative getAvailableCaptureRequestKeys();
     CameraMetadataNative getAvailableCaptureResultKeys();
     boolean isCaptureProcessProgressAvailable();
+    @nullable LatencyPair getRealtimeCaptureLatency();
 }
