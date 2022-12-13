@@ -362,8 +362,7 @@ public class PluginActionManager<T extends Plugin> {
         nb.addAction(new Action.Builder(null, "Disable plugin", pi).build());
         mNotificationManager.notify(SystemMessage.NOTE_PLUGIN, nb.build());
         // TODO: Warn user.
-        Log.w(TAG, "Plugin has invalid interface version " + e.getActualVersion()
-                + ", expected " + e.getExpectedVersion());
+        Log.w(TAG, "Error loading plugin; " + e.getMessage());
     }
 
     /**
