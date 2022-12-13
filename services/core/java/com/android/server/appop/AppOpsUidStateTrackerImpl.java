@@ -59,7 +59,7 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
     private final DelayableExecutor mExecutor;
     private final Clock mClock;
     private ActivityManagerInternal mActivityManagerInternal;
-    private AppOpsServiceImpl.Constants mConstants;
+    private AppOpsService.Constants mConstants;
 
     private SparseIntArray mUidStates = new SparseIntArray();
     private SparseIntArray mPendingUidStates = new SparseIntArray();
@@ -85,7 +85,7 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
 
     AppOpsUidStateTrackerImpl(ActivityManagerInternal activityManagerInternal,
             Handler handler, Executor lockingExecutor, Clock clock,
-            AppOpsServiceImpl.Constants constants) {
+            AppOpsService.Constants constants) {
 
         this(activityManagerInternal, new DelayableExecutor() {
             @Override
@@ -102,7 +102,7 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
 
     @VisibleForTesting
     AppOpsUidStateTrackerImpl(ActivityManagerInternal activityManagerInternal,
-            DelayableExecutor executor, Clock clock, AppOpsServiceImpl.Constants constants,
+            DelayableExecutor executor, Clock clock, AppOpsService.Constants constants,
             Thread executorThread) {
         mActivityManagerInternal = activityManagerInternal;
         mExecutor = executor;
