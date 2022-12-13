@@ -105,17 +105,17 @@ public final class RadioManagerTest {
     private static final int INFO_FLAGS = 0b110001;
     private static final int SIGNAL_QUALITY = 2;
     private static final ProgramSelector.Identifier DAB_SID_EXT_IDENTIFIER =
-            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT,
-                    /* value= */ 0x10000111);
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT,
+                    /* value= */ 0xA000000111L);
     private static final ProgramSelector.Identifier DAB_SID_EXT_IDENTIFIER_RELATED =
-            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT,
-                    /* value= */ 0x10000113);
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT,
+                    /* value= */ 0xA000000113L);
     private static final ProgramSelector.Identifier DAB_ENSEMBLE_IDENTIFIER =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE,
                     /* value= */ 0x1013);
     private static final ProgramSelector.Identifier DAB_FREQUENCY_IDENTIFIER =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY,
-                    /* value= */ 95500);
+                    /* value= */ 220352);
     private static final ProgramSelector DAB_SELECTOR =
             new ProgramSelector(ProgramSelector.PROGRAM_TYPE_DAB, DAB_SID_EXT_IDENTIFIER,
                     new ProgramSelector.Identifier[]{
@@ -859,13 +859,13 @@ public final class RadioManagerTest {
     @Test
     public void getLogicallyTunedTo_forProgramInfo() {
         assertWithMessage("Identifier logically tuned to in DAB program info")
-                .that(DAB_PROGRAM_INFO.getLogicallyTunedTo()).isEqualTo(DAB_FREQUENCY_IDENTIFIER);
+                .that(DAB_PROGRAM_INFO.getLogicallyTunedTo()).isEqualTo(DAB_SID_EXT_IDENTIFIER);
     }
 
     @Test
     public void getPhysicallyTunedTo_forProgramInfo() {
         assertWithMessage("Identifier physically tuned to DAB program info")
-                .that(DAB_PROGRAM_INFO.getPhysicallyTunedTo()).isEqualTo(DAB_SID_EXT_IDENTIFIER);
+                .that(DAB_PROGRAM_INFO.getPhysicallyTunedTo()).isEqualTo(DAB_FREQUENCY_IDENTIFIER);
     }
 
     @Test
@@ -1104,8 +1104,8 @@ public final class RadioManagerTest {
     }
 
     private static RadioManager.ProgramInfo createDabProgramInfo(ProgramSelector selector) {
-        return new RadioManager.ProgramInfo(selector, DAB_FREQUENCY_IDENTIFIER,
-                DAB_SID_EXT_IDENTIFIER, Arrays.asList(DAB_SID_EXT_IDENTIFIER_RELATED), INFO_FLAGS,
+        return new RadioManager.ProgramInfo(selector, DAB_SID_EXT_IDENTIFIER,
+                DAB_FREQUENCY_IDENTIFIER, Arrays.asList(DAB_SID_EXT_IDENTIFIER_RELATED), INFO_FLAGS,
                 SIGNAL_QUALITY, METADATA, /* vendorInfo= */ null);
     }
 

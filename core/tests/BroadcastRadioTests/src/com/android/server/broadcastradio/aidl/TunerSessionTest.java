@@ -330,16 +330,38 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
     @Test
     public void tune_withUnsupportedSelector_throwsException() throws Exception {
+        ProgramSelector.Identifier dabPrimaryId =
+                new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT,
+                        /* value= */ 0xA000000111L);
+        ProgramSelector.Identifier[] dabSecondaryIds =  new ProgramSelector.Identifier[]{
+                new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE,
+                        /* value= */ 1337),
+                new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY,
+                        /* value= */ 225648)};
+        ProgramSelector unsupportedSelector = new ProgramSelector(ProgramSelector.PROGRAM_TYPE_DAB,
+                dabPrimaryId, dabSecondaryIds, /* vendorIds= */ null);
         openAidlClients(/* numClients= */ 1);
-        ProgramSelector unsupportedSelector = AidlTestUtils.makeProgramSelector(
-                ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY, new ProgramSelector.Identifier(
-                        ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY, /* value= */ 300));
 
         UnsupportedOperationException thrown = assertThrows(UnsupportedOperationException.class,
                 () -> mTunerSessions[0].tune(unsupportedSelector));
 
         assertWithMessage("Exception for tuning on unsupported program selector")
                 .that(thrown).hasMessageThat().contains("tune: NOT_SUPPORTED");
+    }
+
+    @Test
+    public void tune_withInvalidSelector_throwsIllegalArgumentException() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramSelector.Identifier invalidDabId = new ProgramSelector.Identifier(
+                ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE, /* value= */ 0x1001);
+        ProgramSelector invalidSel = new ProgramSelector(ProgramSelector.PROGRAM_TYPE_DAB,
+                invalidDabId, new ProgramSelector.Identifier[0], new long[0]);
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> mTunerSessions[0].tune(invalidSel));
+
+        assertWithMessage("Exception for tuning on DAB selector without DAB_SID_EXT primary id")
+                .that(thrown).hasMessageThat().contains("tune: INVALID_ARGUMENTS");
     }
 
     @Test

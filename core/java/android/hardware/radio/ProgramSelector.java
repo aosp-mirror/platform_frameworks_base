@@ -65,12 +65,12 @@ public final class ProgramSelector implements Parcelable {
      */
     @Deprecated
     public static final int PROGRAM_TYPE_INVALID = 0;
-    /** Analogue AM radio (with or without RDS).
+    /** Analog AM radio (with or without RDS).
      * @deprecated use {@link ProgramIdentifier} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_AM = 1;
-    /** analogue FM radio (with or without RDS).
+    /** analog FM radio (with or without RDS).
      * @deprecated use {@link ProgramIdentifier} instead
      */
     @Deprecated
@@ -125,25 +125,50 @@ public final class ProgramSelector implements Parcelable {
     public @interface ProgramType {}
 
     public static final int IDENTIFIER_TYPE_INVALID = 0;
-    /** kHz */
+    /**
+     * Primary identifier for analog (without RDS) AM/FM stations:
+     * frequency in kHz.
+     *
+     * <p>This identifier also contains band information:
+     * <li>
+     *     <ul><500kHz: AM LW.
+     *     <ul>500kHz - 1705kHz: AM MW.
+     *     <ul>1.71MHz - 30MHz: AM SW.
+     *     <ul>>60MHz: FM.
+     * </li>
+     */
     public static final int IDENTIFIER_TYPE_AMFM_FREQUENCY = 1;
-    /** 16bit */
+    /**
+     * 16bit primary identifier for FM RDS station.
+     */
     public static final int IDENTIFIER_TYPE_RDS_PI = 2;
     /**
      * 64bit compound primary identifier for HD Radio.
      *
-     * Consists of (from the LSB):
-     * - 32bit: Station ID number;
-     * - 4bit: HD_SUBCHANNEL;
-     * - 18bit: AMFM_FREQUENCY.
-     * The remaining bits should be set to zeros when writing on the chip side
+     * <p>Consists of (from the LSB):
+     * <li>
+     *     <ul>132bit: Station ID number.
+     *     <ul>14bit: HD_SUBCHANNEL.
+     *     <ul>18bit: AMFM_FREQUENCY.
+     * </li>
+     *
+     * <p>While station ID number should be unique globally, it sometimes gets
+     * abused by broadcasters (i.e. not being set at all). To ensure local
+     * uniqueness, AMFM_FREQUENCY_KHZ was added here. Global uniqueness is
+     * a best-effort - see {@link IDENTIFIER_TYPE_HD_STATION_NAME}.
+     *
+     * <p>HD Radio subchannel is a value in range of 0-7.
+     * This index is 0-based (where 0 is MPS and 1..7 are SPS),
+     * as opposed to HD Radio standard (where it's 1-based).
+     *
+     * <p>The remaining bits should be set to zeros when writing on the chip side
      * and ignored when read.
      */
     public static final int IDENTIFIER_TYPE_HD_STATION_ID_EXT = 3;
     /**
-     * HD Radio subchannel - a value of range 0-7.
+     * HD Radio subchannel - a value in range of 0-7.
      *
-     * The subchannel index is 0-based (where 0 is MPS and 1..7 are SPS),
+     * <p>The subchannel index is 0-based (where 0 is MPS and 1..7 are SPS),
      * as opposed to HD Radio standard (where it's 1-based).
      *
      * @deprecated use IDENTIFIER_TYPE_HD_STATION_ID_EXT instead
@@ -153,16 +178,16 @@ public final class ProgramSelector implements Parcelable {
     /**
      * 64bit additional identifier for HD Radio.
      *
-     * Due to Station ID abuse, some HD_STATION_ID_EXT identifiers may be not
+     * <p>Due to Station ID abuse, some HD_STATION_ID_EXT identifiers may be not
      * globally unique. To provide a best-effort solution, a short version of
      * station name may be carried as additional identifier and may be used
      * by the tuner hardware to double-check tuning.
      *
-     * The name is limited to the first 8 A-Z0-9 characters (lowercase letters
-     * must be converted to uppercase). Encoded in little-endian ASCII:
-     * the first character of the name is the LSB.
+     * <p>The name is limited to the first 8 A-Z0-9 characters (lowercase
+     * letters must be converted to uppercase). Encoded in little-endian
+     * ASCII: the first character of the name is the LSB.
      *
-     * For example: "Abc" is encoded as 0x434241.
+     * <p>For example: "Abc" is encoded as 0x434241.
      */
     public static final int IDENTIFIER_TYPE_HD_STATION_NAME = 10004;
     /**
@@ -175,17 +200,19 @@ public final class ProgramSelector implements Parcelable {
     /**
      * 28bit compound primary identifier for Digital Audio Broadcasting.
      *
-     * Consists of (from the LSB):
-     * - 16bit: SId;
-     * - 8bit: ECC code;
-     * - 4bit: SCIdS.
+     * <p>Consists of (from the LSB):
+     * <li>
+     *     <ul>16bit: SId.
+     *     <ul>8bit: ECC code.
+     *     <ul>4bit: SCIdS.
+     * </li>
      *
-     * SCIdS (Service Component Identifier within the Service) value
+     * <p>SCIdS (Service Component Identifier within the Service) value
      * of 0 represents the main service, while 1 and above represents
      * secondary services.
      *
-     * The remaining bits should be set to zeros when writing on the chip side
-     * and ignored when read.
+     * <p>The remaining bits should be set to zeros when writing on the chip
+     * side and ignored when read.
      *
      * @deprecated use {@link #IDENTIFIER_TYPE_DAB_DMB_SID_EXT} instead
      */
@@ -197,7 +224,9 @@ public final class ProgramSelector implements Parcelable {
     public static final int IDENTIFIER_TYPE_DAB_SCID = 7;
     /** kHz */
     public static final int IDENTIFIER_TYPE_DAB_FREQUENCY = 8;
-    /** 24bit */
+    /**
+     * 24bit primary identifier for Digital Radio Mondiale.
+     */
     public static final int IDENTIFIER_TYPE_DRMO_SERVICE_ID = 9;
     /** kHz */
     public static final int IDENTIFIER_TYPE_DRMO_FREQUENCY = 10;
@@ -207,7 +236,9 @@ public final class ProgramSelector implements Parcelable {
      */
     @Deprecated
     public static final int IDENTIFIER_TYPE_DRMO_MODULATION = 11;
-    /** 32bit */
+    /**
+     * 32bit primary identifier for SiriusXM Satellite Radio.
+     */
     public static final int IDENTIFIER_TYPE_SXM_SERVICE_ID = 12;
     /** 0-999 range */
     public static final int IDENTIFIER_TYPE_SXM_CHANNEL = 13;
@@ -224,15 +255,15 @@ public final class ProgramSelector implements Parcelable {
      * of 0 represents the main service, while 1 and above represents
      * secondary services.
      *
-     * The remaining bits should be set to zeros when writing on the chip side
-     * and ignored when read.
+     * <p>The remaining bits should be set to zeros when writing on the chip
+     * side and ignored when read.
      */
     public static final int IDENTIFIER_TYPE_DAB_DMB_SID_EXT = 14;
     /**
      * Primary identifier for vendor-specific radio technology.
      * The value format is determined by a vendor.
      *
-     * It must not be used in any other programType than corresponding VENDOR
+     * <p>It must not be used in any other programType than corresponding VENDOR
      * type between VENDOR_START and VENDOR_END (eg. identifier type 1015 must
      * not be used in any program type other than 1015).
      */

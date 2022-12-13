@@ -20,6 +20,8 @@ import android.hardware.broadcastradio.AmFmBandRange;
 import android.hardware.broadcastradio.AmFmRegionConfig;
 import android.hardware.broadcastradio.DabTableEntry;
 import android.hardware.broadcastradio.IdentifierType;
+import android.hardware.broadcastradio.ProgramIdentifier;
+import android.hardware.broadcastradio.ProgramInfo;
 import android.hardware.broadcastradio.Properties;
 import android.hardware.broadcastradio.VendorKeyValue;
 import android.hardware.radio.Announcement;
@@ -56,6 +58,27 @@ public final class ConversionUtilsTest {
     private static final String TEST_PRODUCT = "productMock";
     private static final String TEST_VERSION = "versionMock";
     private static final String TEST_SERIAL = "serialMock";
+
+    private static final int TEST_SIGNAL_QUALITY = 1;
+    private static final long TEST_DAB_DMB_SID_EXT_VALUE = 0xA000000111L;
+    private static final long TEST_DAB_ENSEMBLE_VALUE = 0x1001;
+    private static final long TEST_DAB_FREQUENCY_VALUE = 220352;
+    private static final ProgramSelector.Identifier TEST_DAB_SID_EXT_ID =
+            new ProgramSelector.Identifier(
+                    ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT, TEST_DAB_DMB_SID_EXT_VALUE);
+    private static final ProgramSelector.Identifier TEST_DAB_ENSEMBLE_ID =
+            new ProgramSelector.Identifier(
+                    ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE, TEST_DAB_ENSEMBLE_VALUE);
+    private static final ProgramSelector.Identifier TEST_DAB_FREQUENCY_ID =
+            new ProgramSelector.Identifier(
+                    ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY, TEST_DAB_FREQUENCY_VALUE);
+    private static final ProgramIdentifier TEST_HAL_DAB_SID_EXT_ID =
+            AidlTestUtils.makeHalIdentifier(IdentifierType.DAB_SID_EXT, TEST_DAB_DMB_SID_EXT_VALUE);
+    private static final ProgramIdentifier TEST_HAL_DAB_ENSEMBLE_ID =
+            AidlTestUtils.makeHalIdentifier(IdentifierType.DAB_ENSEMBLE, TEST_DAB_ENSEMBLE_VALUE);
+    private static final ProgramIdentifier TEST_HAL_DAB_FREQUENCY_ID =
+            AidlTestUtils.makeHalIdentifier(IdentifierType.DAB_FREQUENCY_KHZ,
+                    TEST_DAB_FREQUENCY_VALUE);
 
     private static final int TEST_ENABLED_TYPE = Announcement.TYPE_EMERGENCY;
     private static final int TEST_ANNOUNCEMENT_FREQUENCY = FM_LOWER_LIMIT + FM_SPACING;
@@ -156,6 +179,142 @@ public final class ConversionUtilsTest {
                 .that(bands[1].getUpperLimit()).isEqualTo(AM_UPPER_LIMIT);
         expect.withMessage("AM band frequency spacing")
                 .that(bands[1].getSpacing()).isEqualTo(AM_SPACING);
+    }
+
+    @Test
+    public void identifierToHalProgramIdentifier_withDabId() {
+        ProgramIdentifier halDabId =
+                ConversionUtils.identifierToHalProgramIdentifier(TEST_DAB_SID_EXT_ID);
+
+        expect.withMessage("Converted HAL DAB identifier").that(halDabId)
+                .isEqualTo(TEST_HAL_DAB_SID_EXT_ID);
+    }
+
+    @Test
+    public void identifierFromHalProgramIdentifier_withDabId() {
+        ProgramSelector.Identifier dabId =
+                ConversionUtils.identifierFromHalProgramIdentifier(TEST_HAL_DAB_SID_EXT_ID);
+
+        expect.withMessage("Converted DAB identifier").that(dabId).isEqualTo(TEST_DAB_SID_EXT_ID);
+    }
+
+    @Test
+    public void programSelectorToHalProgramSelector_withValidSelector() {
+        ProgramSelector dabSelector = new ProgramSelector(
+                ProgramSelector.PROGRAM_TYPE_DAB, TEST_DAB_SID_EXT_ID,
+                new ProgramSelector.Identifier[]{TEST_DAB_ENSEMBLE_ID, TEST_DAB_FREQUENCY_ID},
+                new long[0]);
+
+        android.hardware.broadcastradio.ProgramSelector halDabSelector =
+                ConversionUtils.programSelectorToHalProgramSelector(dabSelector);
+
+        expect.withMessage("Primary identifier of converted HAL DAB selector")
+                .that(halDabSelector.primaryId).isEqualTo(TEST_HAL_DAB_SID_EXT_ID);
+        expect.withMessage("Secondary identifiers of converted HAL DAB selector")
+                .that(halDabSelector.secondaryIds).asList()
+                .containsExactly(TEST_HAL_DAB_FREQUENCY_ID, TEST_HAL_DAB_ENSEMBLE_ID);
+    }
+
+    @Test
+    public void programSelectorToHalProgramSelector_withInvalidDabSelector_returnsNull() {
+        ProgramSelector invalidDbSelector = new ProgramSelector(ProgramSelector.PROGRAM_TYPE_DAB,
+                TEST_DAB_SID_EXT_ID,
+                new ProgramSelector.Identifier[0],
+                new long[0]);
+
+        android.hardware.broadcastradio.ProgramSelector invalidHalDabSelector =
+                ConversionUtils.programSelectorToHalProgramSelector(invalidDbSelector);
+
+        expect.withMessage("Invalid HAL DAB selector without required secondary ids")
+                .that(invalidHalDabSelector).isNull();
+    }
+
+    @Test
+    public void programSelectorFromHalProgramSelector_withValidSelector() {
+        android.hardware.broadcastradio.ProgramSelector halDabSelector =
+                AidlTestUtils.makeHalSelector(TEST_HAL_DAB_SID_EXT_ID, new ProgramIdentifier[]{
+                        TEST_HAL_DAB_ENSEMBLE_ID, TEST_HAL_DAB_FREQUENCY_ID});
+
+        ProgramSelector dabSelector =
+                ConversionUtils.programSelectorFromHalProgramSelector(halDabSelector);
+
+        expect.withMessage("Primary identifier of converted DAB selector")
+                .that(dabSelector.getPrimaryId()).isEqualTo(TEST_DAB_SID_EXT_ID);
+        expect.withMessage("Secondary identifiers of converted DAB selector")
+                .that(dabSelector.getSecondaryIds()).asList()
+                .containsExactly(TEST_DAB_FREQUENCY_ID, TEST_DAB_ENSEMBLE_ID);
+    }
+
+    @Test
+    public void programSelectorFromHalProgramSelector_withInvalidSelector_returnsNull() {
+        android.hardware.broadcastradio.ProgramSelector invalidHalDabSelector =
+                AidlTestUtils.makeHalSelector(TEST_HAL_DAB_SID_EXT_ID, new ProgramIdentifier[]{});
+
+        ProgramSelector invalidDabSelector =
+                ConversionUtils.programSelectorFromHalProgramSelector(invalidHalDabSelector);
+
+        expect.withMessage("Invalid DAB selector without required secondary ids")
+                .that(invalidDabSelector).isNull();
+    }
+
+    @Test
+    public void programInfoFromHalProgramInfo_withValidProgramInfo() {
+        android.hardware.broadcastradio.ProgramSelector halDabSelector =
+                AidlTestUtils.makeHalSelector(TEST_HAL_DAB_SID_EXT_ID, new ProgramIdentifier[]{
+                        TEST_HAL_DAB_ENSEMBLE_ID, TEST_HAL_DAB_FREQUENCY_ID});
+        ProgramInfo halProgramInfo = AidlTestUtils.makeHalProgramInfo(halDabSelector,
+                TEST_HAL_DAB_SID_EXT_ID, TEST_HAL_DAB_FREQUENCY_ID, TEST_SIGNAL_QUALITY);
+
+        RadioManager.ProgramInfo programInfo =
+                ConversionUtils.programInfoFromHalProgramInfo(halProgramInfo);
+
+        expect.withMessage("Primary id of selector of converted program info")
+                .that(programInfo.getSelector().getPrimaryId()).isEqualTo(TEST_DAB_SID_EXT_ID);
+        expect.withMessage("Secondary id of selector of converted program info")
+                .that(programInfo.getSelector().getSecondaryIds()).asList()
+                .containsExactly(TEST_DAB_ENSEMBLE_ID, TEST_DAB_FREQUENCY_ID);
+        expect.withMessage("Logically tuned identifier of converted program info")
+                .that(programInfo.getLogicallyTunedTo()).isEqualTo(TEST_DAB_SID_EXT_ID);
+        expect.withMessage("Physically tuned identifier of converted program info")
+                .that(programInfo.getPhysicallyTunedTo()).isEqualTo(TEST_DAB_FREQUENCY_ID);
+        expect.withMessage("Signal quality of converted program info")
+                .that(programInfo.getSignalStrength()).isEqualTo(TEST_SIGNAL_QUALITY);
+    }
+
+    @Test
+    public void programInfoFromHalProgramInfo_withInvalidDabProgramInfo() {
+        android.hardware.broadcastradio.ProgramSelector invalidHalDabSelector =
+                AidlTestUtils.makeHalSelector(TEST_HAL_DAB_SID_EXT_ID,
+                new ProgramIdentifier[]{TEST_HAL_DAB_ENSEMBLE_ID, TEST_HAL_DAB_FREQUENCY_ID});
+        ProgramInfo halProgramInfo = AidlTestUtils.makeHalProgramInfo(invalidHalDabSelector,
+                TEST_HAL_DAB_SID_EXT_ID, TEST_HAL_DAB_ENSEMBLE_ID, TEST_SIGNAL_QUALITY);
+
+        RadioManager.ProgramInfo programInfo =
+                ConversionUtils.programInfoFromHalProgramInfo(halProgramInfo);
+
+        expect.withMessage("Invalid DAB program info with incorrect type of physically tuned to id")
+                .that(programInfo).isNull();
+    }
+
+    @Test
+    public void programSelectorMeetsSdkVersionRequirement_withLowerVersionId_returnsFalse() {
+        ProgramSelector dabSelector = new ProgramSelector(
+                ProgramSelector.PROGRAM_TYPE_DAB, TEST_DAB_SID_EXT_ID,
+                new ProgramSelector.Identifier[]{TEST_DAB_ENSEMBLE_ID, TEST_DAB_FREQUENCY_ID},
+                new long[0]);
+
+        expect.withMessage("Selector %s not meeting required SDK version", dabSelector)
+                .that(ConversionUtils.programSelectorMeetsSdkVersionRequirement(dabSelector,
+                        Build.VERSION_CODES.TIRAMISU)).isFalse();
+    }
+
+    @Test
+    public void programSelectorMeetsSdkVersionRequirement_withRequiredVersionId_returnsTrue() {
+        ProgramSelector fmSelector = AidlTestUtils.makeFmSelector(/* freq= */ 97100);
+
+        expect.withMessage("Selector %s meeting required SDK version", fmSelector)
+                .that(ConversionUtils.programSelectorMeetsSdkVersionRequirement(fmSelector,
+                        Build.VERSION_CODES.TIRAMISU)).isTrue();
     }
 
     @Test
