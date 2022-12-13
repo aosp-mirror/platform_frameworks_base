@@ -129,6 +129,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_KILL_BG_RESTRICTED_CACHED_IDLE = "kill_bg_restricted_cached_idle";
     static final String KEY_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME =
             "kill_bg_restricted_cached_idle_settle_time";
+    static final String KEY_MAX_PREVIOUS_TIME = "max_previous_time";
     /**
      * Note this key is on {@link DeviceConfig#NAMESPACE_ACTIVITY_MANAGER_COMPONENT_ALIAS}.
      * @see #mEnableComponentAlias
@@ -192,6 +193,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final float DEFAULT_FGS_START_DENIED_LOG_SAMPLE_RATE = 1; // 100%
     private static final long DEFAULT_PROCESS_KILL_TIMEOUT_MS = 10 * 1000;
     private static final long DEFAULT_NETWORK_ACCESS_TIMEOUT_MS = 200; // 0.2 sec
+    private static final long DEFAULT_MAX_PREVIOUS_TIME = 60 * 1000; // 60s
 
     static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60 * 1000;
     static final long DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS = 60 * 1000;
@@ -533,6 +535,9 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     public long TOP_TO_ALMOST_PERCEPTIBLE_GRACE_DURATION =
             DEFAULT_TOP_TO_ALMOST_PERCEPTIBLE_GRACE_DURATION;
+
+    // How long a process can remain at previous oom_adj before dropping to cached
+    public static long MAX_PREVIOUS_TIME = DEFAULT_MAX_PREVIOUS_TIME;
 
     /**
      * The minimum time we allow between crashes, for us to consider this
@@ -1170,6 +1175,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION:
                                 updateEnableWaitForFinishAttachApplication();
+                                break;
+                            case KEY_MAX_PREVIOUS_TIME:
+                                updateMaxPreviousTime();
                                 break;
                             default:
                                 break;
@@ -1825,11 +1833,19 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_LOW_SWAP_THRESHOLD_PERCENT);
     }
 
+
     private void updateTopToFgsGraceDuration() {
         TOP_TO_FGS_GRACE_DURATION = DeviceConfig.getLong(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_TOP_TO_FGS_GRACE_DURATION,
                 DEFAULT_TOP_TO_FGS_GRACE_DURATION);
+    }
+
+    private void updateMaxPreviousTime() {
+        MAX_PREVIOUS_TIME = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_MAX_PREVIOUS_TIME,
+                DEFAULT_MAX_PREVIOUS_TIME);
     }
 
     private void updateMinAssocLogDuration() {
