@@ -100,3 +100,46 @@ fun Flow<Boolean>.logDiffsForTable(
         newVal
     }
 }
+/**
+ * Each time the Int flow is updated with a new value that's different from the previous value, logs
+ * the new value to the given [tableLogBuffer].
+ */
+fun Flow<Int>.logDiffsForTable(
+    tableLogBuffer: TableLogBuffer,
+    columnPrefix: String,
+    columnName: String,
+    initialValue: Int,
+): Flow<Int> {
+    val initialValueFun = {
+        tableLogBuffer.logChange(columnPrefix, columnName, initialValue)
+        initialValue
+    }
+    return this.pairwiseBy(initialValueFun) { prevVal, newVal: Int ->
+        if (prevVal != newVal) {
+            tableLogBuffer.logChange(columnPrefix, columnName, newVal)
+        }
+        newVal
+    }
+}
+
+/**
+ * Each time the String? flow is updated with a new value that's different from the previous value,
+ * logs the new value to the given [tableLogBuffer].
+ */
+fun Flow<String?>.logDiffsForTable(
+    tableLogBuffer: TableLogBuffer,
+    columnPrefix: String,
+    columnName: String,
+    initialValue: String?,
+): Flow<String?> {
+    val initialValueFun = {
+        tableLogBuffer.logChange(columnPrefix, columnName, initialValue)
+        initialValue
+    }
+    return this.pairwiseBy(initialValueFun) { prevVal, newVal: String? ->
+        if (prevVal != newVal) {
+            tableLogBuffer.logChange(columnPrefix, columnName, newVal)
+        }
+        newVal
+    }
+}
