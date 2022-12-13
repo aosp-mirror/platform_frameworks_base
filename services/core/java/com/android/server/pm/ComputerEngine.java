@@ -159,6 +159,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -5327,29 +5328,42 @@ public class ComputerEngine implements Computer {
     }
 
     @Override
-    public boolean canPackageQuery(@NonNull String sourcePackageName,
-            @NonNull String targetPackageName, @UserIdInt int userId) {
-        if (!mUserManager.exists(userId)) return false;
+    @NonNull
+    public boolean[] canPackageQuery(@NonNull String sourcePackageName,
+            @NonNull String[] targetPackageNames, @UserIdInt int userId) {
+        final int targetSize = targetPackageNames.length;
+        final boolean[] results = new boolean[targetSize];
+        if (!mUserManager.exists(userId)) {
+            return results;
+        }
         final int callingUid = Binder.getCallingUid();
         enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
-                false /*checkShell*/, "may package query");
+                false /*checkShell*/, "can package query");
+
         final PackageStateInternal sourceSetting = getPackageStateInternal(sourcePackageName);
-        final PackageStateInternal targetSetting = getPackageStateInternal(targetPackageName);
-        boolean throwException = sourceSetting == null || targetSetting == null;
-        if (!throwException) {
-            final boolean filterSource =
-                    shouldFilterApplicationIncludingUninstalled(sourceSetting, callingUid, userId);
-            final boolean filterTarget =
-                    shouldFilterApplicationIncludingUninstalled(targetSetting, callingUid, userId);
-            // The caller must have visibility of the both packages
-            throwException = filterSource || filterTarget;
+        final PackageStateInternal[] targetSettings = new PackageStateInternal[targetSize];
+        // Throw exception if the caller without the visibility of source package
+        boolean throwException =
+                (sourceSetting == null || shouldFilterApplicationIncludingUninstalled(
+                        sourceSetting, callingUid, userId));
+        for (int i = 0; !throwException && i < targetSize; i++) {
+            targetSettings[i] = getPackageStateInternal(targetPackageNames[i]);
+            // Throw exception if the caller without the visibility of target package
+            throwException =
+                    (targetSettings[i] == null || shouldFilterApplicationIncludingUninstalled(
+                            targetSettings[i], callingUid, userId));
         }
         if (throwException) {
             throw new ParcelableException(new PackageManager.NameNotFoundException("Package(s) "
-                    + sourcePackageName + " and/or " + targetPackageName + " not found."));
+                    + sourcePackageName + " and/or " + Arrays.toString(targetPackageNames)
+                    + " not found."));
         }
+
         final int sourcePackageUid = UserHandle.getUid(userId, sourceSetting.getAppId());
-        return !shouldFilterApplication(targetSetting, sourcePackageUid, userId);
+        for (int i = 0; i < targetSize; i++) {
+            results[i] = !shouldFilterApplication(targetSettings[i], sourcePackageUid, userId);
+        }
+        return results;
     }
 
     /*

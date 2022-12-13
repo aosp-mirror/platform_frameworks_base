@@ -10388,6 +10388,30 @@ public abstract class PackageManager {
     }
 
     /**
+     * Same as {@link #canPackageQuery(String, String)} but accepts an array of target packages to
+     * be queried.
+     *
+     * @param sourcePackageName The source package that would receive details about the
+     *                          target package.
+     * @param targetPackageNames An array of target packages whose details would be shared with the
+     *                           source package.
+     * @return An array of booleans where each member specifies whether the source package is able
+     * to query for details about the target package given by the corresponding value at the same
+     * index in the array of target packages.
+     * @throws NameNotFoundException if either a given package can not be found on the
+     * system, or if the caller is not able to query for details about the source or
+     * target packages.
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public boolean[] canPackageQuery(@NonNull String sourcePackageName,
+            @NonNull String[] targetPackageNames) throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "canPackageQuery not implemented in subclass");
+    }
+
+    /**
      * Makes a package that provides an authority {@code visibleAuthority} become visible to the
      * application {@code recipientUid}.
      *
