@@ -130,14 +130,14 @@ class EnforcePermissionDetectorTest : LintDetectorTest() {
                 *stubs
         )
         .run()
-        .expect("""src/test/pkg/TestClass4.java:4: Error: The method TestClass4.testMethod is \
-annotated with @android.annotation.EnforcePermission(android.Manifest.permission.INTERNET) \
-which differs from the overridden method Stub.testMethod: \
-@android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE). The same \
-annotation must be used for both methods. [MismatchingEnforcePermissionAnnotation]
-    public void testMethod() {}
-                ~~~~~~~~~~
-1 errors, 0 warnings""".addLineContinuation())
+        .expect("""
+                src/test/pkg/TestClass4.java:4: Error: The method TestClass4.testMethod is annotated with @android.annotation.EnforcePermission(android.Manifest.permission.INTERNET) \
+                which differs from the overridden method Stub.testMethod: @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE). \
+                The same annotation must be used for both methods. [MismatchingEnforcePermissionAnnotation]
+                    public void testMethod() {}
+                                ~~~~~~~~~~
+                1 errors, 0 warnings
+                """.addLineContinuation())
     }
 
     fun testDetectIssuesEmptyAnnotationOnMethod() {
@@ -269,12 +269,13 @@ annotation must be used for both methods. [MismatchingEnforcePermissionAnnotatio
                 *stubs
         )
         .run()
-        .expect("""src/test/pkg/TestClass6.java:3: Error: The method TestClass6.testMethod \
-overrides the method Stub.testMethod which is annotated with @EnforcePermission. The same \
-annotation must be used on TestClass6.testMethod [MissingEnforcePermissionAnnotation]
-    public void testMethod() {}
-                ~~~~~~~~~~
-1 errors, 0 warnings""".addLineContinuation())
+        .expect("""
+                src/test/pkg/TestClass6.java:3: Error: The method TestClass6.testMethod overrides the method Stub.testMethod which is annotated with @EnforcePermission. \
+                The same annotation must be used on TestClass6.testMethod [MissingEnforcePermissionAnnotation]
+                    public void testMethod() {}
+                                ~~~~~~~~~~
+                1 errors, 0 warnings
+                """.addLineContinuation())
     }
 
     fun testDetectIssuesExtraAnnotationMethod() {
@@ -289,13 +290,13 @@ annotation must be used on TestClass6.testMethod [MissingEnforcePermissionAnnota
                 *stubs
         )
         .run()
-        .expect("""src/test/pkg/TestClass7.java:4: Error: The method TestClass7.testMethod \
-overrides the method Stub.testMethod which is not annotated with @EnforcePermission. The same \
-annotation must be used on Stub.testMethod. Did you forget to annotate the AIDL definition? \
-[MissingEnforcePermissionAnnotation]
-    public void testMethod() {}
-                ~~~~~~~~~~
-1 errors, 0 warnings""".addLineContinuation())
+        .expect("""
+                src/test/pkg/TestClass7.java:4: Error: The method TestClass7.testMethod overrides the method Stub.testMethod which is not annotated with @EnforcePermission. \
+                The same annotation must be used on Stub.testMethod. Did you forget to annotate the AIDL definition? [MissingEnforcePermissionAnnotation]
+                    public void testMethod() {}
+                                ~~~~~~~~~~
+                1 errors, 0 warnings
+                """.addLineContinuation())
     }
 
     fun testDetectIssuesMissingAnnotationOnMethodWhenClassIsCalledDefault() {
