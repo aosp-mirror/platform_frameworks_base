@@ -48,10 +48,6 @@ int enableFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath, jbyteArra
     if (rfd.get() < 0) {
         return errno;
     }
-    ScopedByteArrayRO signature_bytes(env, signature);
-    if (signature_bytes.get() == nullptr) {
-        return EINVAL;
-    }
 
     fsverity_enable_arg arg = {};
     arg.version = 1;
@@ -59,8 +55,18 @@ int enableFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath, jbyteArra
     arg.block_size = 4096;
     arg.salt_size = 0;
     arg.salt_ptr = reinterpret_cast<uintptr_t>(nullptr);
-    arg.sig_size = signature_bytes.size();
-    arg.sig_ptr = reinterpret_cast<uintptr_t>(signature_bytes.get());
+
+    if (signature != nullptr) {
+        ScopedByteArrayRO signature_bytes(env, signature);
+        if (signature_bytes.get() == nullptr) {
+            return EINVAL;
+        }
+        arg.sig_size = signature_bytes.size();
+        arg.sig_ptr = reinterpret_cast<uintptr_t>(signature_bytes.get());
+    } else {
+        arg.sig_size = 0;
+        arg.sig_ptr = reinterpret_cast<uintptr_t>(nullptr);
+    }
 
     if (ioctl(rfd.get(), FS_IOC_ENABLE_VERITY, &arg) < 0) {
         return errno;
