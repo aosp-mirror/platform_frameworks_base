@@ -951,6 +951,11 @@ static void nativeSetDropInputMode(JNIEnv* env, jclass clazz, jlong transactionO
     transaction->setDropInputMode(ctrl, static_cast<gui::DropInputMode>(mode));
 }
 
+static void nativeSurfaceFlushJankData(JNIEnv* env, jclass clazz, jlong nativeObject) {
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    SurfaceComposerClient::Transaction::sendSurfaceFlushJankDataTransaction(ctrl);
+}
+
 static void nativeSanitize(JNIEnv* env, jclass clazz, jlong transactionObj) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     transaction->sanitize();
@@ -2246,6 +2251,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetLayerId },
     {"nativeSetDropInputMode", "(JJI)V",
              (void*)nativeSetDropInputMode },
+    {"nativeSurfaceFlushJankData", "(J)V",
+            (void*)nativeSurfaceFlushJankData },
     {"nativeAddTransactionCommittedListener", "(JLandroid/view/SurfaceControl$TransactionCommittedListener;)V",
             (void*) nativeAddTransactionCommittedListener },
     {"nativeSetTrustedPresentationCallback", "(JJJLandroid/view/SurfaceControl$TrustedPresentationThresholds;)V",
