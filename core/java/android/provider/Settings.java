@@ -224,6 +224,7 @@ public final class Settings {
      * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
     public static final String ACTION_USER_SETTINGS =
             "android.settings.USER_SETTINGS";
 

@@ -11765,6 +11765,7 @@ package android.content.pm {
     method public void registerSessionCallback(@NonNull android.content.pm.PackageInstaller.SessionCallback, @NonNull android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.DELETE_PACKAGES, android.Manifest.permission.REQUEST_DELETE_PACKAGES}) public void uninstall(@NonNull String, @NonNull android.content.IntentSender);
     method @RequiresPermission(anyOf={android.Manifest.permission.DELETE_PACKAGES, android.Manifest.permission.REQUEST_DELETE_PACKAGES}) public void uninstall(@NonNull android.content.pm.VersionedPackage, @NonNull android.content.IntentSender);
+    method @RequiresPermission(anyOf={android.Manifest.permission.DELETE_PACKAGES, android.Manifest.permission.REQUEST_DELETE_PACKAGES}) public void uninstall(@NonNull android.content.pm.VersionedPackage, int, @NonNull android.content.IntentSender);
     method @RequiresPermission(android.Manifest.permission.DELETE_PACKAGES) public void uninstallExistingPackage(@NonNull String, @Nullable android.content.IntentSender);
     method public void unregisterSessionCallback(@NonNull android.content.pm.PackageInstaller.SessionCallback);
     method public void updateSessionAppIcon(int, @Nullable android.graphics.Bitmap);
@@ -11893,6 +11894,8 @@ package android.content.pm {
     method public int getInstallReason();
     method @Nullable public String getInstallerAttributionTag();
     method @Nullable public String getInstallerPackageName();
+    method public int getInstallerUid();
+    method @NonNull public boolean getIsPreApprovalRequested();
     method public int getMode();
     method public int getOriginatingUid();
     method @Nullable public android.net.Uri getOriginatingUri();
@@ -11943,6 +11946,7 @@ package android.content.pm {
     method public void setInstallLocation(int);
     method public void setInstallReason(int);
     method public void setInstallScenario(int);
+    method public void setInstallerPackageName(@Nullable String);
     method public void setKeepApplicationEnabledSetting();
     method public void setMultiPackage();
     method public void setOriginatingUid(int);
