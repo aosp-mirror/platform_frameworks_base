@@ -37652,7 +37652,7 @@ package android.security.identity {
     ctor public AlreadyPersonalizedException(@NonNull String, @NonNull Throwable);
   }
 
-  public class AuthenticationKeyMetadata {
+  public final class AuthenticationKeyMetadata {
     method @NonNull public java.time.Instant getExpirationDate();
     method @IntRange(from=0) public int getUsageCount();
   }
