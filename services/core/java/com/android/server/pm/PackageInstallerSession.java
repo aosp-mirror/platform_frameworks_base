@@ -2785,6 +2785,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Default to require only if existing base apk has fs-verity signature.
         mVerityFoundForApks = PackageManagerServiceUtils.isApkVerityEnabled()
                 && params.mode == SessionParams.MODE_INHERIT_EXISTING
+                && VerityUtils.hasFsverity(pkgInfo.applicationInfo.getBaseCodePath())
                 && (new File(VerityUtils.getFsveritySignatureFilePath(
                         pkgInfo.applicationInfo.getBaseCodePath()))).exists();
 
