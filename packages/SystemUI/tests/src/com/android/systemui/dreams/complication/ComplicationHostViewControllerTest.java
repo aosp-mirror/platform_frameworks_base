@@ -15,6 +15,8 @@
  */
 package com.android.systemui.dreams.complication;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -136,6 +138,21 @@ public class ComplicationHostViewControllerTest extends SysuiTestCase {
         observer.onChanged(new HashSet<>());
 
         verify(mLayoutEngine).removeComplication(eq(mComplicationId));
+    }
+
+    @Test
+    public void testMalformedComplicationAddition() {
+        final Observer<Collection<ComplicationViewModel>> observer =
+                captureComplicationViewModelsObserver();
+
+        // Add a complication and ensure it is added to the view.
+        final HashSet<ComplicationViewModel> complications = new HashSet<>(
+                Collections.singletonList(mComplicationViewModel));
+        when(mViewHolder.getView()).thenReturn(null);
+        observer.onChanged(complications);
+
+        verify(mLayoutEngine, never()).addComplication(any(), any(), any(), anyInt());
+
     }
 
     @Test
