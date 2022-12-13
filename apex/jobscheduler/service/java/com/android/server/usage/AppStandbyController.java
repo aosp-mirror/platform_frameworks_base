@@ -2116,8 +2116,10 @@ public class AppStandbyController
                 }
                 // component-level enable/disable can affect bucketing, so we always
                 // reevaluate that for any PACKAGE_CHANGED
-                mHandler.obtainMessage(MSG_CHECK_PACKAGE_IDLE_STATE, userId, -1, pkgName)
-                    .sendToTarget();
+                if (Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
+                    mHandler.obtainMessage(MSG_CHECK_PACKAGE_IDLE_STATE, userId, -1, pkgName)
+                            .sendToTarget();
+                }
             }
             if ((Intent.ACTION_PACKAGE_REMOVED.equals(action) ||
                     Intent.ACTION_PACKAGE_ADDED.equals(action))) {
