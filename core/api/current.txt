@@ -27851,6 +27851,7 @@ package android.net.vcn {
   public final class VcnConfig implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public java.util.Set<android.net.vcn.VcnGatewayConnectionConfig> getGatewayConnectionConfigs();
+    method @NonNull public java.util.Set<java.lang.Integer> getRestrictedUnderlyingNetworkTransports();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.vcn.VcnConfig> CREATOR;
   }
@@ -27859,6 +27860,7 @@ package android.net.vcn {
     ctor public VcnConfig.Builder(@NonNull android.content.Context);
     method @NonNull public android.net.vcn.VcnConfig.Builder addGatewayConnectionConfig(@NonNull android.net.vcn.VcnGatewayConnectionConfig);
     method @NonNull public android.net.vcn.VcnConfig build();
+    method @NonNull public android.net.vcn.VcnConfig.Builder setRestrictedUnderlyingNetworkTransports(@NonNull java.util.Set<java.lang.Integer>);
   }
 
   public final class VcnGatewayConnectionConfig {
