@@ -70,8 +70,8 @@ class IndexedListSet<T> private constructor(
 }
 
 inline fun <T> IndexedListSet<T>.allIndexed(predicate: (Int, T) -> Boolean): Boolean {
-    for (index in 0 until size) {
-        if (!predicate(index, elementAt(index))) {
+    forEachIndexed { index, element ->
+        if (!predicate(index, element)) {
             return false
         }
     }
@@ -79,8 +79,8 @@ inline fun <T> IndexedListSet<T>.allIndexed(predicate: (Int, T) -> Boolean): Boo
 }
 
 inline fun <T> IndexedListSet<T>.anyIndexed(predicate: (Int, T) -> Boolean): Boolean {
-    for (index in 0 until size) {
-        if (predicate(index, elementAt(index))) {
+    forEachIndexed { index, element ->
+        if (predicate(index, element)) {
             return true
         }
     }
@@ -89,6 +89,12 @@ inline fun <T> IndexedListSet<T>.anyIndexed(predicate: (Int, T) -> Boolean): Boo
 
 inline fun <T> IndexedListSet<T>.forEachIndexed(action: (Int, T) -> Unit) {
     for (index in indices) {
+        action(index, elementAt(index))
+    }
+}
+
+inline fun <T> IndexedListSet<T>.forEachReversedIndexed(action: (Int, T) -> Unit) {
+    for (index in lastIndex downTo 0) {
         action(index, elementAt(index))
     }
 }
@@ -106,8 +112,8 @@ inline operator fun <T> IndexedListSet<T>.minusAssign(element: T) {
 }
 
 inline fun <T> IndexedListSet<T>.noneIndexed(predicate: (Int, T) -> Boolean): Boolean {
-    for (index in 0 until size) {
-        if (predicate(index, elementAt(index))) {
+    forEachIndexed { index, element ->
+        if (predicate(index, element)) {
             return false
         }
     }
@@ -125,8 +131,8 @@ inline operator fun <T> IndexedListSet<T>.plusAssign(element: T) {
 
 inline fun <T> IndexedListSet<T>.removeAllIndexed(predicate: (Int, T) -> Boolean): Boolean {
     var isChanged = false
-    for (index in lastIndex downTo 0) {
-        if (predicate(index, elementAt(index))) {
+    forEachReversedIndexed { index, element ->
+        if (predicate(index, element)) {
             removeAt(index)
             isChanged = true
         }
@@ -136,8 +142,8 @@ inline fun <T> IndexedListSet<T>.removeAllIndexed(predicate: (Int, T) -> Boolean
 
 inline fun <T> IndexedListSet<T>.retainAllIndexed(predicate: (Int, T) -> Boolean): Boolean {
     var isChanged = false
-    for (index in lastIndex downTo 0) {
-        if (!predicate(index, elementAt(index))) {
+    forEachReversedIndexed { index, element ->
+        if (!predicate(index, element)) {
             removeAt(index)
             isChanged = true
         }
