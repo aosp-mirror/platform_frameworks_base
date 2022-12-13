@@ -3487,7 +3487,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mChildrenContainer.requestRoundness(
                         /* top = */ getTopRoundness(),
                         /* bottom = */ getBottomRoundness(),
-                        FROM_PARENT);
+                        /* sourceType = */ FROM_PARENT,
+                        /* animate = */ false);
             } else {
                 mChildrenContainer.requestBottomRoundness(
                         getBottomRoundness(),
