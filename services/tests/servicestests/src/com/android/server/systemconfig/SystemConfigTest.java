@@ -594,6 +594,58 @@ public class SystemConfigTest {
         assertFooIsOnlySharedLibrary();
     }
 
+    /**
+     * Tests that readPermissions works correctly for the tag: {@code update-ownership}.
+     */
+    @Test
+    public void readPermissions_updateOwnership_successful() throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <update-ownership package=\"com.foo\" installer=\"com.bar\" />\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "update_ownership.xml", contents);
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getSystemAppUpdateOwnerPackageName("com.foo"))
+                .isEqualTo("com.bar");
+    }
+
+    /**
+     * Tests that readPermissions works correctly for the tag: {@code update-ownership}.
+     */
+    @Test
+    public void readPermissions_updateOwnership_noPackage() throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <update-ownership />\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "update_ownership.xml", contents);
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getSystemAppUpdateOwnerPackageName("com.foo")).isNull();
+    }
+
+    /**
+     * Tests that readPermissions works correctly for the tag: {@code update-ownership}.
+     */
+    @Test
+    public void readPermissions_updateOwnership_noInstaller() throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <update-ownership package=\"com.foo\" />\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "update_ownership.xml", contents);
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getSystemAppUpdateOwnerPackageName("com.foo")).isNull();
+    }
+
     private void parseSharedLibraries(String contents) throws IOException {
         File folder = createTempSubfolder("permissions_folder");
         createTempFile(folder, "permissions.xml", contents);
