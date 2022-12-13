@@ -722,7 +722,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
         @Override
         public void keyguardDone(boolean strongAuth, int targetUserId) {
-            if (targetUserId != mUserTracker.getUserId()) {
+            if (targetUserId != KeyguardUpdateMonitor.getCurrentUser()) {
                 return;
             }
             if (DEBUG) Log.d(TAG, "keyguardDone");
@@ -745,7 +745,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         public void keyguardDonePending(boolean strongAuth, int targetUserId) {
             Trace.beginSection("KeyguardViewMediator.mViewMediatorCallback#keyguardDonePending");
             if (DEBUG) Log.d(TAG, "keyguardDonePending");
-            if (targetUserId != mUserTracker.getUserId()) {
+            if (targetUserId != KeyguardUpdateMonitor.getCurrentUser()) {
                 Trace.endSection();
                 return;
             }
