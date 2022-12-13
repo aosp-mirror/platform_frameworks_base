@@ -2935,7 +2935,7 @@ public class TelephonyManager {
     public static final int NETWORK_TYPE_HSPA = TelephonyProtoEnums.NETWORK_TYPE_HSPA; // = 10.
     /**
      * Current network is iDen
-     * @deprecated Legacy network type no longer being used.
+     * @deprecated Legacy network type no longer being used starting in Android U.
      */
     @Deprecated
     public static final int NETWORK_TYPE_IDEN = TelephonyProtoEnums.NETWORK_TYPE_IDEN; // = 11.
@@ -13960,7 +13960,7 @@ public class TelephonyManager {
      * If used, will be converted to {@link #NETWORK_TYPE_BITMASK_LTE}.
      * network type bitmask indicating the support of radio tech LTE CA (carrier aggregation).
      *
-     * @deprecated Please use {@link #NETWORK_TYPE_BITMASK_LTE} instead.
+     * @deprecated Please use {@link #NETWORK_TYPE_BITMASK_LTE} instead. Deprecated in Android U.
      */
     @Deprecated
     public static final long NETWORK_TYPE_BITMASK_LTE_CA = (1 << (NETWORK_TYPE_LTE_CA -1));
