@@ -37,7 +37,6 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -203,12 +202,15 @@ public interface RegistrationManager {
             }
 
             @Override
-            public void onDeregistered(ImsReasonInfo info, @SuggestedAction int suggestedAction) {
+            public void onDeregistered(ImsReasonInfo info,
+                    @SuggestedAction int suggestedAction,
+                    @ImsRegistrationImplBase.ImsRegistrationTech int imsRadioTech) {
                 if (mLocalCallback == null) return;
 
                 final long callingIdentity = Binder.clearCallingIdentity();
                 try {
-                    mExecutor.execute(() -> mLocalCallback.onUnregistered(info, suggestedAction));
+                    mExecutor.execute(() -> mLocalCallback.onUnregistered(info,
+                            suggestedAction, imsRadioTech));
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
@@ -296,14 +298,17 @@ public interface RegistrationManager {
         /**
          * Notifies the framework when the IMS Provider is unregistered from the IMS network.
          *
+         * Since this callback is only required for the communication between telephony framework
+         * and ImsService, it is made hidden.
+         *
          * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
          * @param suggestedAction the expected behavior of radio protocol stack.
-         *
+         * @param imsRadioTech the network type on which IMS registration has failed.
          * @hide
          */
-        @SystemApi
         public void onUnregistered(@NonNull ImsReasonInfo info,
-                @SuggestedAction int suggestedAction) {
+                @SuggestedAction int suggestedAction,
+                @ImsRegistrationImplBase.ImsRegistrationTech int imsRadioTech) {
             // Default impl to keep backwards compatibility with old implementations
             onUnregistered(info);
         }

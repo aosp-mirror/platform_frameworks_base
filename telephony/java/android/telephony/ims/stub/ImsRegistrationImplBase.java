@@ -309,6 +309,7 @@ public class ImsRegistrationImplBase {
     private ImsReasonInfo mLastDisconnectCause = new ImsReasonInfo();
     // Locked on mLock
     private int mLastDisconnectSuggestedAction = RegistrationManager.SUGGESTED_ACTION_NONE;
+    private int mLastDisconnectRadioTech = REGISTRATION_TECH_NONE;
 
     // We hold onto the uris each time they change so that we can send it to a callback when its
     // first added.
@@ -476,7 +477,7 @@ public class ImsRegistrationImplBase {
     @SystemApi
     public final void onDeregistered(ImsReasonInfo info) {
         // Default impl to keep backwards compatibility with old implementations
-        onDeregistered(info, RegistrationManager.SUGGESTED_ACTION_NONE);
+        onDeregistered(info, RegistrationManager.SUGGESTED_ACTION_NONE, REGISTRATION_TECH_NONE);
     }
 
     /**
@@ -495,17 +496,19 @@ public class ImsRegistrationImplBase {
      *
      * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
      * @param suggestedAction the expected behavior of radio protocol stack.
+     * @param imsRadioTech the network type on which IMS registration has failed.
      * @hide This API is not part of the Android public SDK API
      */
     @SystemApi
     public final void onDeregistered(@Nullable ImsReasonInfo info,
-            @RegistrationManager.SuggestedAction int suggestedAction) {
-        updateToDisconnectedState(info, suggestedAction);
+            @RegistrationManager.SuggestedAction int suggestedAction,
+            @ImsRegistrationTech int imsRadioTech) {
+        updateToDisconnectedState(info, suggestedAction, imsRadioTech);
         // ImsReasonInfo should never be null.
         final ImsReasonInfo reasonInfo = (info != null) ? info : new ImsReasonInfo();
         mCallbacks.broadcastAction((c) -> {
             try {
-                c.onDeregistered(reasonInfo, suggestedAction);
+                c.onDeregistered(reasonInfo, suggestedAction, imsRadioTech);
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, e + "onDeregistered() - Skipping callback.");
             }
@@ -565,11 +568,13 @@ public class ImsRegistrationImplBase {
             mRegistrationState = newState;
             mLastDisconnectCause = null;
             mLastDisconnectSuggestedAction = RegistrationManager.SUGGESTED_ACTION_NONE;
+            mLastDisconnectRadioTech = REGISTRATION_TECH_NONE;
         }
     }
 
     private void updateToDisconnectedState(ImsReasonInfo info,
-            @RegistrationManager.SuggestedAction int suggestedAction) {
+            @RegistrationManager.SuggestedAction int suggestedAction,
+            @ImsRegistrationTech int imsRadioTech) {
         synchronized (mLock) {
             //We don't want to send this info over if we are disconnected
             mUrisSet = false;
@@ -580,6 +585,7 @@ public class ImsRegistrationImplBase {
             if (info != null) {
                 mLastDisconnectCause = info;
                 mLastDisconnectSuggestedAction = suggestedAction;
+                mLastDisconnectRadioTech = imsRadioTech;
             } else {
                 Log.w(LOG_TAG, "updateToDisconnectedState: no ImsReasonInfo provided.");
                 mLastDisconnectCause = new ImsReasonInfo();
@@ -597,6 +603,7 @@ public class ImsRegistrationImplBase {
         ImsRegistrationAttributes attributes;
         ImsReasonInfo disconnectInfo;
         int suggestedAction;
+        int imsDisconnectRadioTech;
         boolean urisSet;
         Uri[] uris;
         synchronized (mLock) {
@@ -604,12 +611,13 @@ public class ImsRegistrationImplBase {
             attributes = mRegistrationAttributes;
             disconnectInfo = mLastDisconnectCause;
             suggestedAction = mLastDisconnectSuggestedAction;
+            imsDisconnectRadioTech = mLastDisconnectRadioTech;
             urisSet = mUrisSet;
             uris = mUris;
         }
         switch (state) {
             case RegistrationManager.REGISTRATION_STATE_NOT_REGISTERED: {
-                c.onDeregistered(disconnectInfo, suggestedAction);
+                c.onDeregistered(disconnectInfo, suggestedAction, imsDisconnectRadioTech);
                 break;
             }
             case RegistrationManager.REGISTRATION_STATE_REGISTERING: {
