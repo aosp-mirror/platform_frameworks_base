@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.test.filters.SmallTest
+import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
@@ -251,6 +252,38 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             yield()
 
             assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun alwaysShowDataRatIcon_configHasTrue() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.alwaysShowDataRatIcon.onEach { latest = it }.launchIn(this)
+
+            val config = MobileMappings.Config()
+            config.alwaysShowDataRatIcon = true
+            connectionsRepository.defaultDataSubRatConfig.value = config
+            yield()
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun alwaysShowDataRatIcon_configHasFalse() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.alwaysShowDataRatIcon.onEach { latest = it }.launchIn(this)
+
+            val config = MobileMappings.Config()
+            config.alwaysShowDataRatIcon = false
+            connectionsRepository.defaultDataSubRatConfig.value = config
+            yield()
+
+            assertThat(latest).isFalse()
 
             job.cancel()
         }

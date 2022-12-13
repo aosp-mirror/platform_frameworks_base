@@ -55,6 +55,8 @@ interface MobileIconsInteractor {
     val filteredSubscriptions: Flow<List<SubscriptionModel>>
     /** True if the active mobile data subscription has data enabled */
     val activeDataConnectionHasDataEnabled: StateFlow<Boolean>
+    /** True if the RAT icon should always be displayed and false otherwise. */
+    val alwaysShowDataRatIcon: StateFlow<Boolean>
     /** The icon mapping from network type to [MobileIconGroup] for the default subscription */
     val defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>
     /** Fallback [MobileIconGroup] in the case where there is no icon in the mapping */
@@ -158,6 +160,11 @@ constructor(
             initialValue = mapOf()
         )
 
+    override val alwaysShowDataRatIcon: StateFlow<Boolean> =
+        mobileConnectionsRepo.defaultDataSubRatConfig
+            .mapLatest { it.alwaysShowDataRatIcon }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
     /** If there is no mapping in [defaultMobileIconMapping], then use this default icon group */
     override val defaultMobileIconGroup: StateFlow<MobileIconGroup> =
         mobileConnectionsRepo.defaultMobileIconGroup.stateIn(
@@ -188,6 +195,7 @@ constructor(
         MobileIconInteractorImpl(
             scope,
             activeDataConnectionHasDataEnabled,
+            alwaysShowDataRatIcon,
             defaultMobileIconMapping,
             defaultMobileIconGroup,
             isDefaultConnectionFailed,
