@@ -566,7 +566,8 @@ public final class NfcAdapter {
             return sNullContextNfcAdapter;
         }
         if (!sIsInitialized) {
-            PackageManager pm = context.getPackageManager();
+            PackageManager pm;
+            pm = context.getPackageManager();
             sHasNfcFeature = pm.hasSystemFeature(PackageManager.FEATURE_NFC);
             sHasBeamFeature = pm.hasSystemFeature(PackageManager.FEATURE_NFC_BEAM);
             boolean hasHceFeature =
@@ -617,12 +618,8 @@ public final class NfcAdapter {
 
     /** get handle to NFC service interface */
     private static INfcAdapter getServiceInterface() {
-        if (!sHasNfcFeature) {
-            /* NFC is not supported */
-            return null;
-        }
         /* get a handle to NFC service */
-        IBinder b = ServiceManager.waitForService("nfc");
+        IBinder b = ServiceManager.getService("nfc");
         if (b == null) {
             return null;
         }
@@ -652,15 +649,6 @@ public final class NfcAdapter {
                     "context not associated with any application (using a mock context?)");
         }
 
-        synchronized (NfcAdapter.class) {
-            if (!sIsInitialized) {
-                PackageManager pm = context.getPackageManager();
-                sHasNfcFeature = pm.hasSystemFeature(PackageManager.FEATURE_NFC);
-            }
-            if (!sHasNfcFeature) {
-                return null;
-            }
-        }
         if (getServiceInterface() == null) {
             // NFC is not available
             return null;
