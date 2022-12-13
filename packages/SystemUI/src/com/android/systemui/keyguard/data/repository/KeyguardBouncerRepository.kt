@@ -16,23 +16,36 @@
 
 package com.android.systemui.keyguard.data.repository
 
-import com.android.keyguard.KeyguardUpdateMonitor
+import android.os.Build
 import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
+import com.android.systemui.log.dagger.BouncerLog
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.phone.KeyguardBouncer
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 
-/** Encapsulates app state for the lock screen primary and alternate bouncer. */
+/**
+ * Encapsulates app state for the lock screen primary and alternate bouncer.
+ *
+ * Make sure to add newly added flows to the logger.
+ */
 @SysUISingleton
 class KeyguardBouncerRepository
 @Inject
 constructor(
     private val viewMediatorCallback: ViewMediatorCallback,
-    keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    @Application private val applicationScope: CoroutineScope,
+    @BouncerLog private val buffer: TableLogBuffer,
 ) {
     /** Values associated with the PrimaryBouncer (pin/pattern/password) input. */
     private val _primaryBouncerVisible = MutableStateFlow(false)
@@ -76,6 +89,10 @@ constructor(
         get() = viewMediatorCallback.bouncerPromptReason
     val bouncerErrorMessage: CharSequence?
         get() = viewMediatorCallback.consumeCustomMessage()
+
+    init {
+        setUpLogging()
+    }
 
     fun setPrimaryScrimmed(isScrimmed: Boolean) {
         _primaryBouncerScrimmed.value = isScrimmed
@@ -131,5 +148,58 @@ constructor(
 
     fun setOnScreenTurnedOff(onScreenTurnedOff: Boolean) {
         _onScreenTurnedOff.value = onScreenTurnedOff
+    }
+
+    /** Sets up logs for state flows. */
+    private fun setUpLogging() {
+        if (!Build.IS_DEBUGGABLE) {
+            return
+        }
+
+        primaryBouncerVisible
+            .logDiffsForTable(buffer, "", "PrimaryBouncerVisible", false)
+            .launchIn(applicationScope)
+        primaryBouncerShow
+            .map { it != null }
+            .logDiffsForTable(buffer, "", "PrimaryBouncerShow", false)
+            .launchIn(applicationScope)
+        primaryBouncerShowingSoon
+            .logDiffsForTable(buffer, "", "PrimaryBouncerShowingSoon", false)
+            .launchIn(applicationScope)
+        primaryBouncerHide
+            .logDiffsForTable(buffer, "", "PrimaryBouncerHide", false)
+            .launchIn(applicationScope)
+        primaryBouncerStartingToHide
+            .logDiffsForTable(buffer, "", "PrimaryBouncerStartingToHide", false)
+            .launchIn(applicationScope)
+        primaryBouncerStartingDisappearAnimation
+            .map { it != null }
+            .logDiffsForTable(buffer, "", "PrimaryBouncerStartingDisappearAnimation", false)
+            .launchIn(applicationScope)
+        primaryBouncerScrimmed
+            .logDiffsForTable(buffer, "", "PrimaryBouncerScrimmed", false)
+            .launchIn(applicationScope)
+        panelExpansionAmount
+            .map { (it * 1000).toInt() }
+            .logDiffsForTable(buffer, "", "PanelExpansionAmountMillis", -1)
+            .launchIn(applicationScope)
+        keyguardPosition
+            .map { it.toInt() }
+            .logDiffsForTable(buffer, "", "KeyguardPosition", -1)
+            .launchIn(applicationScope)
+        onScreenTurnedOff
+            .logDiffsForTable(buffer, "", "OnScreenTurnedOff", false)
+            .launchIn(applicationScope)
+        isBackButtonEnabled
+            .filterNotNull()
+            .logDiffsForTable(buffer, "", "IsBackButtonEnabled", false)
+            .launchIn(applicationScope)
+        showMessage
+            .map { it?.message }
+            .logDiffsForTable(buffer, "", "ShowMessage", null)
+            .launchIn(applicationScope)
+        resourceUpdateRequests
+            .logDiffsForTable(buffer, "", "ResourceUpdateRequests", false)
+            .launchIn(applicationScope)
     }
 }
