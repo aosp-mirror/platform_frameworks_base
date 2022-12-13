@@ -2071,7 +2071,7 @@ package android.os.storage {
 
   public class StorageManager {
     method public long computeStorageCacheBytes(@NonNull java.io.File);
-    method @NonNull public static java.util.UUID convert(@NonNull String);
+    method @NonNull public static java.util.UUID convert(@Nullable String);
     method @NonNull public static String convert(@NonNull java.util.UUID);
     method @Nullable public String getCloudMediaProvider();
     method public boolean isAppIoBlocked(@NonNull java.util.UUID, int, int, int);
