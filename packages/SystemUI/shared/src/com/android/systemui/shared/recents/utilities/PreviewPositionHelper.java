@@ -39,7 +39,6 @@ public class PreviewPositionHelper {
     private boolean mIsOrientationChanged;
     private SplitBounds mSplitBounds;
     private int mDesiredStagePosition;
-    private boolean mTaskbarInApp;
 
     public Matrix getMatrix() {
         return mMatrix;
@@ -56,10 +55,6 @@ public class PreviewPositionHelper {
     public void setSplitBounds(SplitBounds splitBounds, int desiredStagePosition) {
         mSplitBounds = splitBounds;
         mDesiredStagePosition = desiredStagePosition;
-    }
-
-    public void setTaskbarInApp(boolean taskbarInApp) {
-        mTaskbarInApp = taskbarInApp;
     }
 
     /**
@@ -79,34 +74,21 @@ public class PreviewPositionHelper {
         float scaledTaskbarSize;
         float canvasScreenRatio;
         if (mSplitBounds != null) {
-            float fullscreenTaskWidth;
-            float fullscreenTaskHeight;
-
-            float taskPercent;
             if (mSplitBounds.appsStackedVertically) {
-                taskPercent = mDesiredStagePosition != STAGE_POSITION_TOP_OR_LEFT
-                        ? mSplitBounds.topTaskPercent
-                        : (1 - (mSplitBounds.topTaskPercent + mSplitBounds.dividerHeightPercent));
-                // Scale portrait height to that of the actual screen
-                fullscreenTaskHeight = screenHeightPx * taskPercent;
-                if (mTaskbarInApp) {
-                    canvasScreenRatio = canvasHeight / fullscreenTaskHeight;
+                if (mDesiredStagePosition == STAGE_POSITION_TOP_OR_LEFT) {
+                    // Top app isn't cropped at all by taskbar
+                    canvasScreenRatio = 0;
                 } else {
-                    if (mDesiredStagePosition == STAGE_POSITION_TOP_OR_LEFT) {
-                        // Top app isn't cropped at all by taskbar
-                        canvasScreenRatio = 0;
-                    } else {
-                        // Same as fullscreen ratio
-                        canvasScreenRatio = (float) canvasWidth / screenWidthPx;
-                    }
+                    // Same as fullscreen ratio
+                    canvasScreenRatio = (float) canvasWidth / screenWidthPx;
                 }
             } else {
                 // For landscape, scale the width
-                taskPercent = mDesiredStagePosition == STAGE_POSITION_TOP_OR_LEFT
+                float taskPercent = mDesiredStagePosition == STAGE_POSITION_TOP_OR_LEFT
                         ? mSplitBounds.leftTaskPercent
                         : (1 - (mSplitBounds.leftTaskPercent + mSplitBounds.dividerWidthPercent));
                 // Scale landscape width to that of actual screen
-                fullscreenTaskWidth = screenWidthPx * taskPercent;
+                float fullscreenTaskWidth = screenWidthPx * taskPercent;
                 canvasScreenRatio = canvasWidth / fullscreenTaskWidth;
             }
         } else {
