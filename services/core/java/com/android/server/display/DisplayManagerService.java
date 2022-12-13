@@ -1414,12 +1414,20 @@ public final class DisplayManagerService extends SystemService {
         // LogicalDisplayMapper aware of the link between the new display and its associated virtual
         // device before triggering DISPLAY_DEVICE_EVENT_ADDED.
         if ((flags & VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP) != 0) {
-            try {
-                final int virtualDeviceId = virtualDevice.getDeviceId();
-                mLogicalDisplayMapper.associateDisplayDeviceWithVirtualDevice(
-                        device, virtualDeviceId);
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
+            if (virtualDevice != null) {
+                try {
+                    final int virtualDeviceId = virtualDevice.getDeviceId();
+                    mLogicalDisplayMapper.associateDisplayDeviceWithVirtualDevice(
+                            device, virtualDeviceId);
+                } catch (RemoteException e) {
+                    e.rethrowFromSystemServer();
+                }
+            } else {
+                Slog.i(
+                        TAG,
+                        "Display created with VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP set, but no"
+                            + " virtual device. The display will not be added to a device display"
+                            + " group.");
             }
         }
 
