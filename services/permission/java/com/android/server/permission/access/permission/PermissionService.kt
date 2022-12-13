@@ -232,7 +232,12 @@ class PermissionService(
     }
 
     override fun getPermissionFlags(packageName: String, permissionName: String, userId: Int): Int {
-        TODO("Not yet implemented")
+        // TODO: Implement permission checks.
+        val appId = 0
+        val flags = service.getState {
+            with(policy) { getPermissionFlags(appId, userId, permissionName) }
+        }
+        return PermissionFlags.toApiFlags(flags)
     }
 
     override fun isPermissionRevokedByPolicy(
@@ -244,7 +249,12 @@ class PermissionService(
     }
 
     override fun isPermissionsReviewRequired(packageName: String, userId: Int): Boolean {
-        TODO("Not yet implemented")
+        val packageState = packageManagerLocal.withUnfilteredSnapshot()
+            .use { it.packageStates[packageName] } ?: return false
+        val permissionFlags = service.getState {
+            with(policy) { getUidPermissionFlags(packageState.appId, userId) }
+        } ?: return false
+        return permissionFlags.anyIndexed { _, _, flags -> PermissionFlags.isReviewRequired(flags) }
     }
 
     override fun shouldShowRequestPermissionRationale(
