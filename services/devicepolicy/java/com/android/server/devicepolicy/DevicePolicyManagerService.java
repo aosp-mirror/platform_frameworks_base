@@ -5387,7 +5387,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         }
                         if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()) {
                             throw new UnsupportedOperationException(
-                                    "FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY only applies to FBE devices");
+                                    "FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY only applies to FBE"
+                                        + " devices");
                         }
                         mUserManager.evictCredentialEncryptionKey(callingUserId);
                     }
@@ -19239,5 +19240,56 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 NAMESPACE_DEVICE_POLICY_MANAGER,
                 KEEP_PROFILES_RUNNING_FLAG,
                 DEFAULT_KEEP_PROFILES_RUNNING_FLAG);
+    }
+
+    @Override
+    public void setMtePolicy(int flags) {
+        final Set<Integer> allowedModes =
+                Set.of(
+                        DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY,
+                        DevicePolicyManager.MTE_DISABLED,
+                        DevicePolicyManager.MTE_ENABLED);
+        Preconditions.checkArgument(
+                allowedModes.contains(flags), "Provided mode is not one of the allowed values.");
+        final CallerIdentity caller = getCallerIdentity();
+        if (flags == DevicePolicyManager.MTE_DISABLED) {
+            Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller));
+        } else {
+            Preconditions.checkCallAuthorization(
+                    isDefaultDeviceOwner(caller)
+                            || isProfileOwnerOfOrganizationOwnedDevice(caller));
+        }
+        synchronized (getLockObject()) {
+            ActiveAdmin admin =
+                    getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                            UserHandle.USER_SYSTEM);
+            if (admin != null) {
+                final String memtagProperty = "arm64.memtag.bootctl";
+                if (flags == DevicePolicyManager.MTE_ENABLED) {
+                    mInjector.systemPropertiesSet(memtagProperty, "memtag");
+                } else if (flags == DevicePolicyManager.MTE_DISABLED) {
+                    mInjector.systemPropertiesSet(memtagProperty, "memtag-off");
+                }
+                admin.mtePolicy = flags;
+                saveSettingsLocked(caller.getUserId());
+            }
+        }
+    }
+
+    @Override
+    public int getMtePolicy() {
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(
+                isDefaultDeviceOwner(caller)
+                        || isProfileOwnerOfOrganizationOwnedDevice(caller)
+                        || isSystemUid(caller));
+        synchronized (getLockObject()) {
+            ActiveAdmin admin =
+                    getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                            UserHandle.USER_SYSTEM);
+            return admin != null
+                    ? admin.mtePolicy
+                    : DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY;
+        }
     }
 }

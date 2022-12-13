@@ -163,6 +163,7 @@ class ActiveAdmin {
             "preferential_network_service_config";
     private static final String TAG_PROTECTED_PACKAGES = "protected_packages";
     private static final String TAG_SUSPENDED_PACKAGES = "suspended-packages";
+    private static final String TAG_MTE_POLICY = "mte-policy";
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
     private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
@@ -221,6 +222,8 @@ class ActiveAdmin {
     static final int DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN = 2;
     int numNetworkLoggingNotifications = 0;
     long lastNetworkLoggingNotificationTimeMs = 0; // Time in milliseconds since epoch
+
+    @DevicePolicyManager.MtePolicy int mtePolicy = DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY;
 
     ActiveAdmin parentAdmin;
     final boolean isParent;
@@ -620,6 +623,9 @@ class ActiveAdmin {
             }
             out.endTag(null, TAG_PREFERENTIAL_NETWORK_SERVICE_CONFIGS);
         }
+        if (mtePolicy != DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY) {
+            writeAttributeValueToXml(out, TAG_MTE_POLICY, mtePolicy);
+        }
     }
 
     private List<String> ssidsToStrings(Set<WifiSsid> ssids) {
@@ -906,6 +912,8 @@ class ActiveAdmin {
                 if (!configs.isEmpty()) {
                     mPreferentialNetworkServiceConfigs = configs;
                 }
+            } else if (TAG_MTE_POLICY.equals(tag)) {
+                mtePolicy = parser.getAttributeInt(null, ATTR_VALUE);
             } else {
                 Slogf.w(LOG_TAG, "Unknown admin tag: %s", tag);
                 XmlUtils.skipCurrentTag(parser);
@@ -1338,5 +1346,8 @@ class ActiveAdmin {
             }
             pw.decreaseIndent();
         }
+
+        pw.print("mtePolicy=");
+        pw.println(mtePolicy);
     }
 }

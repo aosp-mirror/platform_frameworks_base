@@ -3918,34 +3918,46 @@ public class DevicePolicyManager {
     public static @interface MtePolicy {}
 
     /**
-     * Set MTE policy for device. MTE_ENABLED does not necessarily enable MTE if set on a device
-     * that does not support MTE.
-     *
-     * The default policy is MTE_NOT_CONTROLLED_BY_POLICY.
-     *
-     * Memory Tagging Extension (MTE) is a CPU extension that allows to protect against certain
+     * Called by a device owner or profile owner of an organization-owned device to set the Memory
+     * Tagging Extension (MTE) policy. MTE is a CPU extension that allows to protect against certain
      * classes of security problems at a small runtime performance cost overhead.
      *
-     * @param policy the policy to be set
+     * <p>The MTE policy can only be set to {@link #MTE_DISABLED} if called by a device owner.
+     * Otherwise a {@link SecurityException} will be thrown.
+     *
+     * @throws SecurityException if caller is not device owner or profile owner of org-owned device
+     *     or if called on a parent instance
+     * @param policy the MTE policy to be set
      */
     public void setMtePolicy(@MtePolicy int policy) {
-        // TODO(b/244290023): implement
-        // This is SecurityException to temporarily make ParentProfileTest happy.
-        // This is not used.
-        throw new SecurityException("not implemented");
+        throwIfParentInstance("setMtePolicy");
+        if (mService != null) {
+            try {
+                mService.setMtePolicy(policy);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
-     * Get currently set MTE policy. This is not necessarily the same as the state of MTE on the
-     * device, as the device might not support MTE.
+     * Called by a device owner, a profile owner of an organization-owned device or the system to
+     * get the Memory Tagging Extension (MTE) policy
      *
-     * @return the currently set policy
+     * @throws SecurityException if caller is not device owner or profile owner of org-owned device
+     *                           or system uid, or if called on a parent instance
+     * @return the currently set MTE policy
      */
     public @MtePolicy int getMtePolicy() {
-        // TODO(b/244290023): implement
-        // This is SecurityException to temporarily make ParentProfileTest happy.
-        // This is not used.
-        throw new SecurityException("not implemented");
+        throwIfParentInstance("setMtePolicy");
+        if (mService != null) {
+            try {
+                return mService.getMtePolicy();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return MTE_NOT_CONTROLLED_BY_POLICY;
     }
 
     // TODO: Expose this as SystemAPI once we add the query API
