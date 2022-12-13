@@ -3266,7 +3266,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(app2.mActivityRecord.mImeInsetsFrozenUntilStartInput);
         verify(app2.mClient, atLeastOnce()).resized(any(), anyBoolean(), any(),
                 insetsStateCaptor.capture(), anyBoolean(), anyBoolean(), anyInt(), anyInt(),
-                anyBoolean());
+                anyInt());
         assertFalse(app2.getInsetsState().getSource(ITYPE_IME).isVisible());
     }
 

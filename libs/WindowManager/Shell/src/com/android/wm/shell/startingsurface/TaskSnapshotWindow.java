@@ -536,7 +536,7 @@ public class TaskSnapshotWindow {
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, InsetsState insetsState,
                 boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int seqId,
-                boolean dragResizing) {
+                int resizeMode) {
             final TaskSnapshotWindow snapshot = mOuter.get();
             if (snapshot == null) {
                 return;

@@ -57,7 +57,7 @@ oneway interface IWindow {
     void resized(in ClientWindowFrames frames, boolean reportDraw,
             in MergedConfiguration newMergedConfiguration, in InsetsState insetsState,
             boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId,
-            int syncSeqId, boolean dragResizing);
+            int syncSeqId, int resizeMode);
 
     /**
      * Called when this window retrieved control over a specified set of insets sources.

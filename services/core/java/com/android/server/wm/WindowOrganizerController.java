@@ -49,6 +49,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANI
 import static com.android.server.wm.ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
 import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
@@ -718,7 +719,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         if ((c.getChangeMask() & WindowContainerTransaction.Change.CHANGE_DRAG_RESIZING) != 0) {
-            tr.setDragResizing(c.getDragResizing());
+            tr.setDragResizing(c.getDragResizing(), DRAG_RESIZE_MODE_FREEFORM);
         }
 
         final int childWindowingMode = c.getActivityWindowingMode();
