@@ -1102,6 +1102,17 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
         mStatusBarStateController.setState(KEYGUARD);
 
+        assertThat(mNotificationPanelViewController.isQsExpanded()).isEqualTo(false);
+        assertThat(mNotificationPanelViewController.isQsExpandImmediate()).isEqualTo(false);
+    }
+
+    @Test
+    public void testLockedSplitShadeTransitioningToKeyguard_closesQS() {
+        enableSplitShade(true);
+        mStatusBarStateController.setState(SHADE_LOCKED);
+        mNotificationPanelViewController.setQsExpanded(true);
+
+        mStatusBarStateController.setState(KEYGUARD);
 
         assertThat(mNotificationPanelViewController.isQsExpanded()).isEqualTo(false);
         assertThat(mNotificationPanelViewController.isQsExpandImmediate()).isEqualTo(false);
