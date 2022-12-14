@@ -16,14 +16,19 @@
 
 package com.android.systemui.keyguard.ui.binder
 
+import android.annotation.SuppressLint
 import android.graphics.drawable.Animatable2
 import android.util.Size
 import android.util.TypedValue
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.animation.CycleInterpolator
+import androidx.core.animation.ObjectAnimator
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
@@ -38,8 +43,10 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
+import kotlin.math.pow
+import kotlin.math.sqrt
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -52,6 +59,7 @@ import kotlinx.coroutines.launch
  * view-binding, binding each view only once. It is okay and expected for the same instance of the
  * view-model to be reused for multiple view/view-binder bindings.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 object KeyguardBottomAreaViewBinder {
 
     private const val EXIT_DOZE_BUTTON_REVEAL_ANIMATION_DURATION_MS = 250L
@@ -84,7 +92,8 @@ object KeyguardBottomAreaViewBinder {
     fun bind(
         view: ViewGroup,
         viewModel: KeyguardBottomAreaViewModel,
-        falsingManager: FalsingManager,
+        falsingManager: FalsingManager?,
+        messageDisplayer: (Int) -> Unit,
     ): Binding {
         val indicationArea: View = view.requireViewById(R.id.keyguard_indication_area)
         val ambientIndicationArea: View? = view.findViewById(R.id.ambient_indication_container)
@@ -108,6 +117,7 @@ object KeyguardBottomAreaViewBinder {
                             view = startButton,
                             viewModel = buttonModel,
                             falsingManager = falsingManager,
+                            messageDisplayer = messageDisplayer,
                         )
                     }
                 }
@@ -118,6 +128,7 @@ object KeyguardBottomAreaViewBinder {
                             view = endButton,
                             viewModel = buttonModel,
                             falsingManager = falsingManager,
+                            messageDisplayer = messageDisplayer,
                         )
                     }
                 }
@@ -222,10 +233,12 @@ object KeyguardBottomAreaViewBinder {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun updateButton(
         view: ImageView,
         viewModel: KeyguardQuickAffordanceViewModel,
-        falsingManager: FalsingManager,
+        falsingManager: FalsingManager?,
+        messageDisplayer: (Int) -> Unit,
     ) {
         if (!viewModel.isVisible) {
             view.isVisible = false
@@ -281,21 +294,126 @@ object KeyguardBottomAreaViewBinder {
                 },
             )
         )
+
         view.backgroundTintList =
-            Utils.getColorAttr(
-                view.context,
-                if (viewModel.isActivated) {
-                    com.android.internal.R.attr.colorAccentPrimary
-                } else {
-                    com.android.internal.R.attr.colorSurface
-                }
-            )
+            if (!viewModel.isSelected) {
+                Utils.getColorAttr(
+                    view.context,
+                    if (viewModel.isActivated) {
+                        com.android.internal.R.attr.colorAccentPrimary
+                    } else {
+                        com.android.internal.R.attr.colorSurface
+                    }
+                )
+            } else {
+                null
+            }
 
         view.isClickable = viewModel.isClickable
         if (viewModel.isClickable) {
-            view.setOnClickListener(OnClickListener(viewModel, falsingManager))
+            if (viewModel.useLongPress) {
+                view.setOnTouchListener(OnTouchListener(view, viewModel, messageDisplayer))
+            } else {
+                view.setOnClickListener(OnClickListener(viewModel, checkNotNull(falsingManager)))
+            }
         } else {
             view.setOnClickListener(null)
+            view.setOnTouchListener(null)
+        }
+
+        view.isSelected = viewModel.isSelected
+    }
+
+    private class OnTouchListener(
+        private val view: View,
+        private val viewModel: KeyguardQuickAffordanceViewModel,
+        private val messageDisplayer: (Int) -> Unit,
+    ) : View.OnTouchListener {
+
+        private val longPressDurationMs = ViewConfiguration.getLongPressTimeout().toLong()
+        private var longPressAnimator: ViewPropertyAnimator? = null
+        private var downTimestamp = 0L
+
+        @SuppressLint("ClickableViewAccessibility")
+        override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+            return when (event?.actionMasked) {
+                MotionEvent.ACTION_DOWN ->
+                    if (viewModel.configKey != null) {
+                        downTimestamp = System.currentTimeMillis()
+                        longPressAnimator =
+                            view
+                                .animate()
+                                .scaleX(PRESSED_SCALE)
+                                .scaleY(PRESSED_SCALE)
+                                .setDuration(longPressDurationMs)
+                                .withEndAction {
+                                    view.setOnClickListener {
+                                        viewModel.onClicked(
+                                            KeyguardQuickAffordanceViewModel.OnClickedParameters(
+                                                configKey = viewModel.configKey,
+                                                expandable = Expandable.fromView(view),
+                                            )
+                                        )
+                                    }
+                                    view.performClick()
+                                    view.setOnClickListener(null)
+                                }
+                        true
+                    } else {
+                        false
+                    }
+                MotionEvent.ACTION_MOVE -> {
+                    if (event.historySize > 0) {
+                        val distance =
+                            sqrt(
+                                (event.y - event.getHistoricalY(0)).pow(2) +
+                                    (event.x - event.getHistoricalX(0)).pow(2)
+                            )
+                        if (distance > ViewConfiguration.getTouchSlop()) {
+                            cancel()
+                        }
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    if (System.currentTimeMillis() - downTimestamp < longPressDurationMs) {
+                        messageDisplayer.invoke(R.string.keyguard_affordance_press_too_short)
+                        val shakeAnimator =
+                            ObjectAnimator.ofFloat(
+                                view,
+                                "translationX",
+                                0f,
+                                view.context.resources
+                                    .getDimensionPixelSize(
+                                        R.dimen.keyguard_affordance_shake_amplitude
+                                    )
+                                    .toFloat(),
+                                0f,
+                            )
+                        shakeAnimator.duration = 300
+                        shakeAnimator.interpolator = CycleInterpolator(5f)
+                        shakeAnimator.start()
+                    }
+                    cancel()
+                    true
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    cancel()
+                    true
+                }
+                else -> false
+            }
+        }
+
+        private fun cancel() {
+            downTimestamp = 0L
+            longPressAnimator?.cancel()
+            longPressAnimator = null
+            view.animate().scaleX(1f).scaleY(1f)
+        }
+
+        companion object {
+            private const val PRESSED_SCALE = 1.5f
         }
     }
 
