@@ -64,7 +64,8 @@ public class ImsRegistrationImplBase {
                     REGISTRATION_TECH_LTE,
                     REGISTRATION_TECH_IWLAN,
                     REGISTRATION_TECH_CROSS_SIM,
-                    REGISTRATION_TECH_NR
+                    REGISTRATION_TECH_NR,
+                    REGISTRATION_TECH_3G
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ImsRegistrationTech {}
@@ -92,10 +93,15 @@ public class ImsRegistrationImplBase {
     public static final int REGISTRATION_TECH_NR = 3;
 
     /**
+     * This ImsService is registered to IMS via 3G.
+     */
+    public static final int REGISTRATION_TECH_3G = 4;
+
+    /**
      * This is used to check the upper range of registration tech
      * @hide
      */
-    public static final int REGISTRATION_TECH_MAX = REGISTRATION_TECH_NR + 1;
+    public static final int REGISTRATION_TECH_MAX = REGISTRATION_TECH_3G + 1;
 
     // Registration states, used to notify new ImsRegistrationImplBase#Callbacks of the current
     // state.
@@ -301,6 +307,8 @@ public class ImsRegistrationImplBase {
     private int mRegistrationState = REGISTRATION_STATE_UNKNOWN;
     // Locked on mLock, create unspecified disconnect cause.
     private ImsReasonInfo mLastDisconnectCause = new ImsReasonInfo();
+    // Locked on mLock
+    private int mLastDisconnectSuggestedAction = RegistrationManager.SUGGESTED_ACTION_NONE;
 
     // We hold onto the uris each time they change so that we can send it to a callback when its
     // first added.
@@ -467,12 +475,37 @@ public class ImsRegistrationImplBase {
      */
     @SystemApi
     public final void onDeregistered(ImsReasonInfo info) {
-        updateToDisconnectedState(info);
+        // Default impl to keep backwards compatibility with old implementations
+        onDeregistered(info, RegistrationManager.SUGGESTED_ACTION_NONE);
+    }
+
+    /**
+     * Notify the framework that the device is disconnected from the IMS network.
+     * <p>
+     * Note: Prior to calling {@link #onDeregistered(ImsReasonInfo,int)}, you should ensure that any
+     * changes to {@link android.telephony.ims.feature.ImsFeature} capability availability is sent
+     * to the framework.  For example,
+     * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO}
+     * and
+     * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE}
+     * may be set to unavailable to ensure the framework knows these services are no longer
+     * available due to de-registration.  If you do not report capability changes impacted by
+     * de-registration, the framework will not know which features are no longer available as a
+     * result.
+     *
+     * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
+     * @param suggestedAction the expected behavior of radio protocol stack.
+     * @hide This API is not part of the Android public SDK API
+     */
+    @SystemApi
+    public final void onDeregistered(@Nullable ImsReasonInfo info,
+            @RegistrationManager.SuggestedAction int suggestedAction) {
+        updateToDisconnectedState(info, suggestedAction);
         // ImsReasonInfo should never be null.
         final ImsReasonInfo reasonInfo = (info != null) ? info : new ImsReasonInfo();
         mCallbacks.broadcastAction((c) -> {
             try {
-                c.onDeregistered(reasonInfo);
+                c.onDeregistered(reasonInfo, suggestedAction);
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, e + "onDeregistered() - Skipping callback.");
             }
@@ -531,10 +564,12 @@ public class ImsRegistrationImplBase {
             mRegistrationAttributes = attributes;
             mRegistrationState = newState;
             mLastDisconnectCause = null;
+            mLastDisconnectSuggestedAction = RegistrationManager.SUGGESTED_ACTION_NONE;
         }
     }
 
-    private void updateToDisconnectedState(ImsReasonInfo info) {
+    private void updateToDisconnectedState(ImsReasonInfo info,
+            @RegistrationManager.SuggestedAction int suggestedAction) {
         synchronized (mLock) {
             //We don't want to send this info over if we are disconnected
             mUrisSet = false;
@@ -544,6 +579,7 @@ public class ImsRegistrationImplBase {
                     RegistrationManager.REGISTRATION_STATE_NOT_REGISTERED);
             if (info != null) {
                 mLastDisconnectCause = info;
+                mLastDisconnectSuggestedAction = suggestedAction;
             } else {
                 Log.w(LOG_TAG, "updateToDisconnectedState: no ImsReasonInfo provided.");
                 mLastDisconnectCause = new ImsReasonInfo();
@@ -560,18 +596,20 @@ public class ImsRegistrationImplBase {
         int state;
         ImsRegistrationAttributes attributes;
         ImsReasonInfo disconnectInfo;
+        int suggestedAction;
         boolean urisSet;
         Uri[] uris;
         synchronized (mLock) {
             state = mRegistrationState;
             attributes = mRegistrationAttributes;
             disconnectInfo = mLastDisconnectCause;
+            suggestedAction = mLastDisconnectSuggestedAction;
             urisSet = mUrisSet;
             uris = mUris;
         }
         switch (state) {
             case RegistrationManager.REGISTRATION_STATE_NOT_REGISTERED: {
-                c.onDeregistered(disconnectInfo);
+                c.onDeregistered(disconnectInfo, suggestedAction);
                 break;
             }
             case RegistrationManager.REGISTRATION_STATE_REGISTERING: {

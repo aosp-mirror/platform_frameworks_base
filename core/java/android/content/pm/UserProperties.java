@@ -46,6 +46,8 @@ public final class UserProperties implements Parcelable {
     private static final String ATTR_SHOW_IN_SETTINGS = "showInSettings";
     private static final String ATTR_INHERIT_DEVICE_POLICY = "inheritDevicePolicy";
     private static final String ATTR_USE_PARENTS_CONTACTS = "useParentsContacts";
+    private static final String ATTR_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA =
+            "updateCrossProfileIntentFiltersOnOTA";
 
     /** Index values of each property (to indicate whether they are present in this object). */
     @IntDef(prefix = "INDEX_", value = {
@@ -54,6 +56,7 @@ public final class UserProperties implements Parcelable {
             INDEX_SHOW_IN_SETTINGS,
             INDEX_INHERIT_DEVICE_POLICY,
             INDEX_USE_PARENTS_CONTACTS,
+            INDEX_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA
     })
     @Retention(RetentionPolicy.SOURCE)
     private @interface PropertyIndex {
@@ -63,6 +66,7 @@ public final class UserProperties implements Parcelable {
     private static final int INDEX_SHOW_IN_SETTINGS = 2;
     private static final int INDEX_INHERIT_DEVICE_POLICY = 3;
     private static final int INDEX_USE_PARENTS_CONTACTS = 4;
+    private static final int INDEX_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA = 5;
     /** A bit set, mapping each PropertyIndex to whether it is present (1) or absent (0). */
     private long mPropertiesPresent = 0;
 
@@ -199,6 +203,7 @@ public final class UserProperties implements Parcelable {
             // Add items that require exposeAllFields to be true (strictest permission level).
             setStartWithParent(orig.getStartWithParent());
             setInheritDevicePolicy(orig.getInheritDevicePolicy());
+            setUpdateCrossProfileIntentFiltersOnOTA(orig.getUpdateCrossProfileIntentFiltersOnOTA());
         }
         if (hasManagePermission) {
             // Add items that require MANAGE_USERS or stronger.
@@ -354,6 +359,34 @@ public final class UserProperties implements Parcelable {
      */
     private boolean mUseParentsContacts;
 
+    /**
+     * Returns true if user needs to update default
+     * {@link com.android.server.pm.CrossProfileIntentFilter} with its parents during an OTA update
+     * @hide
+     */
+    public boolean getUpdateCrossProfileIntentFiltersOnOTA() {
+        if (isPresent(INDEX_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA)) {
+            return mUpdateCrossProfileIntentFiltersOnOTA;
+        }
+        if (mDefaultProperties != null) {
+            return mDefaultProperties.mUpdateCrossProfileIntentFiltersOnOTA;
+        }
+        throw new SecurityException("You don't have permission to query "
+                + "updateCrossProfileIntentFiltersOnOTA");
+    }
+
+    /** @hide */
+    public void setUpdateCrossProfileIntentFiltersOnOTA(boolean val) {
+        this.mUpdateCrossProfileIntentFiltersOnOTA = val;
+        setPresent(INDEX_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA);
+    }
+
+    /*
+     Indicate if {@link com.android.server.pm.CrossProfileIntentFilter}s need to be updated during
+     OTA update between user-parent
+     */
+    private boolean mUpdateCrossProfileIntentFiltersOnOTA;
+
     @Override
     public String toString() {
         // Please print in increasing order of PropertyIndex.
@@ -364,6 +397,8 @@ public final class UserProperties implements Parcelable {
                 + ", mShowInSettings=" + getShowInSettings()
                 + ", mInheritDevicePolicy=" + getInheritDevicePolicy()
                 + ", mUseParentsContacts=" + getUseParentsContacts()
+                + ", mUpdateCrossProfileIntentFiltersOnOTA="
+                + getUpdateCrossProfileIntentFiltersOnOTA()
                 + "}";
     }
 
@@ -380,6 +415,8 @@ public final class UserProperties implements Parcelable {
         pw.println(prefix + "    mShowInSettings=" + getShowInSettings());
         pw.println(prefix + "    mInheritDevicePolicy=" + getInheritDevicePolicy());
         pw.println(prefix + "    mUseParentsContacts=" + getUseParentsContacts());
+        pw.println(prefix + "    mUpdateCrossProfileIntentFiltersOnOTA="
+                + getUpdateCrossProfileIntentFiltersOnOTA());
     }
 
     /**
@@ -428,6 +465,9 @@ public final class UserProperties implements Parcelable {
                 case ATTR_USE_PARENTS_CONTACTS:
                     setUseParentsContacts(parser.getAttributeBoolean(i));
                     break;
+                case ATTR_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA:
+                    setUpdateCrossProfileIntentFiltersOnOTA(parser.getAttributeBoolean(i));
+                    break;
                 default:
                     Slog.w(LOG_TAG, "Skipping unknown property " + attributeName);
             }
@@ -462,6 +502,11 @@ public final class UserProperties implements Parcelable {
             serializer.attributeBoolean(null, ATTR_USE_PARENTS_CONTACTS,
                     mUseParentsContacts);
         }
+        if (isPresent(INDEX_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA)) {
+            serializer.attributeBoolean(null,
+                    ATTR_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA,
+                    mUpdateCrossProfileIntentFiltersOnOTA);
+        }
     }
 
     // For use only with an object that has already had any permission-lacking fields stripped out.
@@ -473,6 +518,7 @@ public final class UserProperties implements Parcelable {
         dest.writeInt(mShowInSettings);
         dest.writeInt(mInheritDevicePolicy);
         dest.writeBoolean(mUseParentsContacts);
+        dest.writeBoolean(mUpdateCrossProfileIntentFiltersOnOTA);
     }
 
     /**
@@ -488,6 +534,7 @@ public final class UserProperties implements Parcelable {
         mShowInSettings = source.readInt();
         mInheritDevicePolicy = source.readInt();
         mUseParentsContacts = source.readBoolean();
+        mUpdateCrossProfileIntentFiltersOnOTA = source.readBoolean();
     }
 
     @Override
@@ -517,6 +564,7 @@ public final class UserProperties implements Parcelable {
         private @ShowInSettings int mShowInSettings = SHOW_IN_SETTINGS_WITH_PARENT;
         private @InheritDevicePolicy int mInheritDevicePolicy = INHERIT_DEVICE_POLICY_NO;
         private boolean mUseParentsContacts = false;
+        private boolean mUpdateCrossProfileIntentFiltersOnOTA = false;
 
         public Builder setShowInLauncher(@ShowInLauncher int showInLauncher) {
             mShowInLauncher = showInLauncher;
@@ -546,6 +594,13 @@ public final class UserProperties implements Parcelable {
             return this;
         }
 
+        /** Sets the value for {@link #mUpdateCrossProfileIntentFiltersOnOTA} */
+        public Builder setUpdateCrossProfileIntentFiltersOnOTA(boolean
+                updateCrossProfileIntentFiltersOnOTA) {
+            mUpdateCrossProfileIntentFiltersOnOTA = updateCrossProfileIntentFiltersOnOTA;
+            return this;
+        }
+
         /** Builds a UserProperties object with *all* values populated. */
         public UserProperties build() {
             return new UserProperties(
@@ -553,7 +608,8 @@ public final class UserProperties implements Parcelable {
                     mStartWithParent,
                     mShowInSettings,
                     mInheritDevicePolicy,
-                    mUseParentsContacts);
+                    mUseParentsContacts,
+                    mUpdateCrossProfileIntentFiltersOnOTA);
         }
     } // end Builder
 
@@ -563,7 +619,7 @@ public final class UserProperties implements Parcelable {
             boolean startWithParent,
             @ShowInSettings int showInSettings,
             @InheritDevicePolicy int inheritDevicePolicy,
-            boolean useParentsContacts) {
+            boolean useParentsContacts, boolean updateCrossProfileIntentFiltersOnOTA) {
 
         mDefaultProperties = null;
         setShowInLauncher(showInLauncher);
@@ -571,5 +627,6 @@ public final class UserProperties implements Parcelable {
         setShowInSettings(showInSettings);
         setInheritDevicePolicy(inheritDevicePolicy);
         setUseParentsContacts(useParentsContacts);
+        setUpdateCrossProfileIntentFiltersOnOTA(updateCrossProfileIntentFiltersOnOTA);
     }
 }

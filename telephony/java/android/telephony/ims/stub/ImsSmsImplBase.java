@@ -171,6 +171,20 @@ public class ImsSmsImplBase {
     }
 
     /**
+     * This method will be triggered by the platform when memory becomes available to receive SMS
+     * after a memory full event. This method should be implemented by IMS providers to
+     * send RP-SMMA notification from SMS Relay Layer to server over IMS as per section 7.3.2 of
+     * TS 124.11. Once the RP-SMMA Notification is sent to the network. The network will deliver all
+     * the pending messages which failed due to Unavailability of Memory.
+     *
+     * @param token unique token generated in {@link ImsSmsDispatcher#onMemoryAvailable(void)} that
+     *  should be used when triggering callbacks for this specific message.
+     */
+    public void onMemoryAvailable(int token) {
+        // Base Implementation - Should be overridden
+    }
+
+    /**
      * This method will be triggered by the platform after
      * {@link #onSmsReceived(int, String, byte[])} has been called to deliver the result to the IMS
      * provider.

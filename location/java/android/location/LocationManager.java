@@ -195,6 +195,21 @@ public class LocationManager {
     public static final String GPS_PROVIDER = "gps";
 
     /**
+     * Standard name of the GNSS hardware location provider.
+     *
+     * <p>This provider is similar to {@link LocationManager#GPS_PROVIDER}, but it directly uses the
+     * HAL GNSS implementation and doesn't go through any provider overrides that may exist. This
+     * provider will only be available when the GPS_PROVIDER is overridden with a proxy using {@link
+     * android.location.provider.LocationProviderBase#ACTION_GNSS_PROVIDER}, and is intended only
+     * for use internally by the location provider system.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
+    public static final String GPS_HARDWARE_PROVIDER = "gps_hardware";
+
+    /**
      * A special location provider for receiving locations without actively initiating a location
      * fix. This location provider is always present.
      *

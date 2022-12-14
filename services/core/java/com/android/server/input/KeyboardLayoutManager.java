@@ -17,6 +17,7 @@
 package com.android.server.input;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -550,7 +551,7 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
 
     public String getKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
-            @NonNull InputMethodSubtype imeSubtype) {
+            @Nullable InputMethodSubtype imeSubtype) {
         // TODO(b/259530132): Implement the new keyboard layout API: Returning non-IME specific
         //  layout for now.
         return getCurrentKeyboardLayoutForInputDevice(identifier);
@@ -558,23 +559,18 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
 
     public void setKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
-            @NonNull InputMethodSubtype imeSubtype, String keyboardLayoutDescriptor) {
+            @Nullable InputMethodSubtype imeSubtype, String keyboardLayoutDescriptor) {
         // TODO(b/259530132): Implement the new keyboard layout API: setting non-IME specific
         //  layout for now.
         setCurrentKeyboardLayoutForInputDevice(identifier, keyboardLayoutDescriptor);
     }
 
-    public String[] getKeyboardLayoutListForInputDevice(InputDeviceIdentifier identifier,
+    public KeyboardLayout[] getKeyboardLayoutListForInputDevice(InputDeviceIdentifier identifier,
             @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
-            @NonNull InputMethodSubtype imeSubtype) {
+            @Nullable InputMethodSubtype imeSubtype) {
         // TODO(b/259530132): Implement the new keyboard layout API: Returning list of all
         //  layouts for now.
-        KeyboardLayout[] allLayouts = getKeyboardLayouts();
-        String[] allLayoutDesc = new String[allLayouts.length];
-        for (int i = 0; i < allLayouts.length; i++) {
-            allLayoutDesc[i] = allLayouts[i].getDescriptor();
-        }
-        return allLayoutDesc;
+        return getKeyboardLayouts();
     }
 
     public void switchKeyboardLayout(int deviceId, int direction) {

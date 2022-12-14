@@ -99,6 +99,10 @@ package android.content.pm {
 
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
     method @NonNull public java.util.List<android.content.pm.SharedLibraryInfo> getSharedLibraryInfos();
+    field public static final int HIDDEN_API_ENFORCEMENT_DEFAULT = -1; // 0xffffffff
+    field public static final int HIDDEN_API_ENFORCEMENT_DISABLED = 0; // 0x0
+    field public static final int HIDDEN_API_ENFORCEMENT_ENABLED = 2; // 0x2
+    field public static final int HIDDEN_API_ENFORCEMENT_JUST_WARN = 1; // 0x1
   }
 
   public abstract class PackageManager {

@@ -1,0 +1,3 @@
+set noparent
+
+include /services/companion/java/com/android/server/companion/virtual/OWNERS

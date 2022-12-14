@@ -33,6 +33,13 @@ const val SEARCH_IMMUTABLE_STATUS = "search_immutable_status"
 /** ContentProvider path for search mutable status */
 const val SEARCH_MUTABLE_STATUS = "search_mutable_status"
 
+/** ContentProvider path for search static row */
+const val SEARCH_STATIC_ROW = "search_static_row"
+
+/** ContentProvider path for search dynamic row */
+const val SEARCH_DYNAMIC_ROW = "search_dynamic_row"
+
+
 /** Enum to define all column names in provider. */
 enum class ColumnEnum(val id: String) {
     ENTRY_ID("entryId"),
@@ -76,6 +83,7 @@ enum class QueryEnum(
             ColumnEnum.SEARCH_PATH,
             ColumnEnum.INTENT_TARGET_PACKAGE,
             ColumnEnum.INTENT_TARGET_CLASS,
+            ColumnEnum.INTENT_EXTRAS,
             ColumnEnum.SLICE_URI,
             ColumnEnum.LEGACY_KEY
         )
@@ -91,6 +99,36 @@ enum class QueryEnum(
         SEARCH_MUTABLE_STATUS,
         listOf(
             ColumnEnum.ENTRY_ID,
+            ColumnEnum.ENTRY_DISABLED,
+        )
+    ),
+    SEARCH_STATIC_ROW_QUERY(
+        SEARCH_STATIC_ROW,
+        listOf(
+            ColumnEnum.ENTRY_ID,
+            ColumnEnum.SEARCH_TITLE,
+            ColumnEnum.SEARCH_KEYWORD,
+            ColumnEnum.SEARCH_PATH,
+            ColumnEnum.INTENT_TARGET_PACKAGE,
+            ColumnEnum.INTENT_TARGET_CLASS,
+            ColumnEnum.INTENT_EXTRAS,
+            ColumnEnum.SLICE_URI,
+            ColumnEnum.LEGACY_KEY,
+            ColumnEnum.ENTRY_DISABLED,
+        )
+    ),
+    SEARCH_DYNAMIC_ROW_QUERY(
+        SEARCH_DYNAMIC_ROW,
+        listOf(
+            ColumnEnum.ENTRY_ID,
+            ColumnEnum.SEARCH_TITLE,
+            ColumnEnum.SEARCH_KEYWORD,
+            ColumnEnum.SEARCH_PATH,
+            ColumnEnum.INTENT_TARGET_PACKAGE,
+            ColumnEnum.INTENT_TARGET_CLASS,
+            ColumnEnum.INTENT_EXTRAS,
+            ColumnEnum.SLICE_URI,
+            ColumnEnum.LEGACY_KEY,
             ColumnEnum.ENTRY_DISABLED,
         )
     ),

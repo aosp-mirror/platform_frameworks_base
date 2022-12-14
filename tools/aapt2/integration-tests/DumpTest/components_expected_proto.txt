@@ -80,6 +80,7 @@ badging {
     provided_components: "wallpaper"
     provided_components: "accessibility"
     provided_components: "print-service"
+    provided_components: "payment"
     provided_components: "search"
     provided_components: "document-provider"
     provided_components: "notification-listener"

@@ -25,22 +25,64 @@ import android.graphics.Rect;
  * <p>
  * This is usually obtained from {@link WindowManager#getCurrentWindowMetrics()} and
  * {@link WindowManager#getMaximumWindowMetrics()}.
+ * </p>
+ * After {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, it also provides density.
+ * <h3>Obtains Window Dimensions in Density-independent Pixel(DP)</h3>
+ * <p>
+ * While {@link #getDensity()} is provided, the dimension in density-independent pixel could also be
+ * calculated with {@code WindowMetrics} properties, which is similar to
+ * {@link android.content.res.Configuration#screenWidthDp}
+ * <pre class="prettyprint">
+ * float widthInDp = windowMetrics.getBounds().width() / windowMetrics.getDensity();
+ * float heightInDp = windowMetrics.getBounds().height() / windowMetrics.getDensity();
+ * </pre>
+ * Also, the density in DPI can be obtained by:
+ * <pre class="prettyprint">
+ * float densityDp = DisplayMetrics.DENSITY_DEFAULT * windowMetrics.getDensity();
+ * </pre>
+ * </p>
  *
  * @see WindowInsets#getInsets(int)
  * @see WindowManager#getCurrentWindowMetrics()
  * @see WindowManager#getMaximumWindowMetrics()
+ * @see android.annotation.UiContext
  */
 public final class WindowMetrics {
-    private final @NonNull Rect mBounds;
-    private final @NonNull WindowInsets mWindowInsets;
+    @NonNull
+    private final Rect mBounds;
+    @NonNull
+    private final WindowInsets mWindowInsets;
 
+    /** @see android.util.DisplayMetrics#density */
+    private final float mDensity;
+
+    /** @deprecated use {@link #WindowMetrics(Rect, WindowInsets, float)} instead. */
+    @Deprecated
     public WindowMetrics(@NonNull Rect bounds, @NonNull WindowInsets windowInsets) {
-        mBounds = bounds;
-        mWindowInsets = windowInsets;
+        this(bounds, windowInsets, 1.0f);
     }
 
     /**
-     * Returns the bounds of the area associated with this window or visual context.
+     * The constructor to create a {@link WindowMetrics} instance.
+     * <p>
+     * Note that in most cases {@link WindowMetrics} is obtained from
+     * {@link WindowManager#getCurrentWindowMetrics()} or
+     * {@link WindowManager#getMaximumWindowMetrics()}.
+     * </p>
+     *
+     * @param bounds The window bounds
+     * @param windowInsets The {@link WindowInsets} of the window
+     * @param density The window density
+     */
+    public WindowMetrics(@NonNull Rect bounds, @NonNull WindowInsets windowInsets, float density) {
+        mBounds = bounds;
+        mWindowInsets = windowInsets;
+        mDensity = density;
+    }
+
+    /**
+     * Returns the bounds of the area associated with this window or
+     * {@link android.annotation.UiContext}.
      * <p>
      * <b>Note that the size of the reported bounds can have different size than
      * {@link Display#getSize(Point)}.</b> This method reports the window size including all system
@@ -66,16 +108,40 @@ public final class WindowMetrics {
      *
      * @return window bounds in pixels.
      */
-    public @NonNull Rect getBounds() {
+    @NonNull
+    public Rect getBounds() {
         return mBounds;
     }
 
     /**
-     * Returns the {@link WindowInsets} of the area associated with this window or visual context.
+     * Returns the {@link WindowInsets} of the area associated with this window or
+     * {@link android.annotation.UiContext}.
      *
      * @return the {@link WindowInsets} of the visual area.
      */
-    public @NonNull WindowInsets getWindowInsets() {
+    @NonNull
+    public WindowInsets getWindowInsets() {
         return mWindowInsets;
+    }
+
+    /**
+     * Returns the density of the area associated with this window or
+     * {@link android.annotation.UiContext}, which uses the same units as
+     * {@link android.util.DisplayMetrics#density}.
+     *
+     * @see android.util.DisplayMetrics#DENSITY_DEFAULT
+     * @see android.util.DisplayMetrics#density
+     */
+    public float getDensity() {
+        return mDensity;
+    }
+
+    @Override
+    public String toString() {
+        return WindowMetrics.class.getSimpleName() + ":{"
+                + "bounds=" + mBounds
+                + ", windowInsets=" + mWindowInsets
+                + ", density" + mDensity
+                + "}";
     }
 }

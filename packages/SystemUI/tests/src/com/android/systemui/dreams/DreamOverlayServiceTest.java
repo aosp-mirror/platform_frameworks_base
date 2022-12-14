@@ -38,15 +38,18 @@ import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 
 import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dreams.complication.ComplicationLayoutEngine;
+import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
+import com.android.systemui.dreams.dreamcomplication.HideComplicationTouchHandler;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
+import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
@@ -70,7 +73,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     private final FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
 
     @Mock
-    LifecycleOwner mLifecycleOwner;
+    DreamOverlayLifecycleOwner mLifecycleOwner;
 
     @Mock
     LifecycleRegistry mLifecycleRegistry;
@@ -85,6 +88,26 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Mock
     WindowManagerImpl mWindowManager;
+
+    @Mock
+    ComplicationComponent.Factory mComplicationComponentFactory;
+
+    @Mock
+    ComplicationComponent mComplicationComponent;
+
+    @Mock
+    ComplicationLayoutEngine mComplicationVisibilityController;
+
+    @Mock
+    com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent.Factory
+            mDreamComplicationComponentFactory;
+
+    @Mock
+    com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent
+            mDreamComplicationComponent;
+
+    @Mock
+    HideComplicationTouchHandler mHideComplicationTouchHandler;
 
     @Mock
     DreamOverlayComponent.Factory mDreamOverlayComponentFactory;
@@ -111,6 +134,9 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     ViewGroup mDreamOverlayContainerViewParent;
 
     @Mock
+    TouchInsetManager mTouchInsetManager;
+
+    @Mock
     UiEventLogger mUiEventLogger;
 
     @Captor
@@ -124,23 +150,38 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
         when(mDreamOverlayComponent.getDreamOverlayContainerViewController())
                 .thenReturn(mDreamOverlayContainerViewController);
-        when(mDreamOverlayComponent.getLifecycleOwner())
-                .thenReturn(mLifecycleOwner);
-        when(mDreamOverlayComponent.getLifecycleRegistry())
+        when(mLifecycleOwner.getRegistry())
                 .thenReturn(mLifecycleRegistry);
         when(mDreamOverlayComponent.getDreamOverlayTouchMonitor())
                 .thenReturn(mDreamOverlayTouchMonitor);
-        when(mDreamOverlayComponentFactory
+        when(mComplicationComponentFactory
+                .create(any(), any(), any(), any()))
+                .thenReturn(mComplicationComponent);
+        when(mComplicationComponent.getVisibilityController())
+                .thenReturn(mComplicationVisibilityController);
+        when(mDreamComplicationComponent.getHideComplicationTouchHandler())
+                .thenReturn(mHideComplicationTouchHandler);
+        when(mDreamComplicationComponentFactory
                 .create(any(), any()))
+                .thenReturn(mDreamComplicationComponent);
+        when(mDreamOverlayComponentFactory
+                .create(any(), any(), any(), any()))
                 .thenReturn(mDreamOverlayComponent);
         when(mDreamOverlayContainerViewController.getContainerView())
                 .thenReturn(mDreamOverlayContainerView);
 
-        mService = new DreamOverlayService(mContext, mMainExecutor, mWindowManager,
+        mService = new DreamOverlayService(
+                mContext,
+                mMainExecutor,
+                mLifecycleOwner,
+                mWindowManager,
+                mComplicationComponentFactory,
+                mDreamComplicationComponentFactory,
                 mDreamOverlayComponentFactory,
                 mStateController,
                 mKeyguardUpdateMonitor,
                 mUiEventLogger,
+                mTouchInsetManager,
                 LOW_LIGHT_COMPONENT);
     }
 

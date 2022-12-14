@@ -16,11 +16,12 @@
 
 package com.android.systemui.globalactions;
 
+import static android.content.pm.UserInfo.FLAG_ADMIN;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -32,11 +33,13 @@ import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -552,10 +555,32 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
 
     @Test
     public void testBugreportAction_whenDebugMode_shouldOfferBugreportButtonBeforeProvisioning() {
-        doReturn(1).when(mGlobalSettings).getInt(anyString(), anyInt());
+        UserInfo currentUser = mockCurrentUser(FLAG_ADMIN);
+
+        when(mGlobalActionsDialogLite.getCurrentUser()).thenReturn(currentUser);
+        doReturn(1).when(mGlobalSettings)
+                .getIntForUser(Settings.Global.BUGREPORT_IN_POWER_MENU, 0, currentUser.id);
 
         GlobalActionsDialogLite.BugReportAction bugReportAction =
                 mGlobalActionsDialogLite.makeBugReportActionForTesting();
         assertThat(bugReportAction.showBeforeProvisioning()).isTrue();
+    }
+
+    @Test
+    public void testBugreportAction_whenUserIsNotAdmin_noBugReportActionBeforeProvisioning() {
+        UserInfo currentUser = mockCurrentUser(0);
+
+        when(mGlobalActionsDialogLite.getCurrentUser()).thenReturn(currentUser);
+        doReturn(1).when(mGlobalSettings)
+                .getIntForUser(Settings.Global.BUGREPORT_IN_POWER_MENU, 0, currentUser.id);
+
+        GlobalActionsDialogLite.BugReportAction bugReportAction =
+                mGlobalActionsDialogLite.makeBugReportActionForTesting();
+        assertThat(bugReportAction.showBeforeProvisioning()).isFalse();
+    }
+
+    private UserInfo mockCurrentUser(int flags) {
+        return new UserInfo(10, "A User", flags);
+
     }
 }

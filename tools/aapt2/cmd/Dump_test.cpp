@@ -108,4 +108,21 @@ TEST_F(DumpTest, DumpBadgingPermissionsOnly) {
   ASSERT_EQ(output, expected);
 }
 
+TEST_F(DumpTest, DumpBadgingApkBuiltWithAaptAndTagsInWrongPlace) {
+  auto apk_path = file::BuildPath({android::base::GetExecutableDirectory(), "integration-tests",
+                                   "DumpTest", "built_with_aapt.apk"});
+  auto loaded_apk = LoadedApk::LoadApkFromPath(apk_path, &noop_diag);
+
+  std::string output;
+  DumpBadgingToString(loaded_apk.get(), &output, /* include_meta_data= */ false,
+                      /* only_permissions= */ false);
+
+  std::string expected;
+  auto expected_path =
+      file::BuildPath({android::base::GetExecutableDirectory(), "integration-tests", "DumpTest",
+                       "built_with_aapt_expected.txt"});
+  ::android::base::ReadFileToString(expected_path, &expected);
+  ASSERT_EQ(output, expected);
+}
+
 }  // namespace aapt

@@ -139,9 +139,9 @@
     <!-- Displayed when a SIM PUK password is too short. -->
     <string name="invalidPuk">Type a PUK that is 8 numbers or longer.</string>
     <!-- Displayed to prompt the user to type the PUK password to unlock
-         the SIM card. -->
-    <string name="needPuk">Your SIM card is PUK-locked. Type the PUK code to unlock it.</string>
-    <string name="needPuk2">Type PUK2 to unblock SIM card.</string>
+         the SIM. -->
+    <string name="needPuk">Your SIM is PUK-locked. Type the PUK code to unlock it.</string>
+    <string name="needPuk2">Type PUK2 to unblock SIM.</string>
     <!-- Displayed when user attempts to change SIM PIN1 without enabling PIN1. -->
     <string name="enablePin">Unsuccessful, enable SIM/RUIM Lock.</string>
     <!-- Displayed when a SIM PIN/PUK is entered incorrectly. -->
@@ -2529,23 +2529,23 @@
     <!-- Shown when face unlock failed multiple times so we're just using the backup -->
     <string name="faceunlock_multiple_failures">Maximum Face Unlock attempts exceeded</string>
 
-    <!-- Shown in the lock screen when there is no SIM card. -->
-    <string name="lockscreen_missing_sim_message_short">No SIM card</string>
-    <!-- Shown in the lock screen when there is no SIM card. -->
-    <string name="lockscreen_missing_sim_message" product="tablet">No SIM card in tablet.</string>
-    <!-- Shown in the lock screen when there is no SIM card. -->
-    <string name="lockscreen_missing_sim_message" product="tv">No SIM card in your Android TV device.</string>
-    <!-- Shown in the lock screen when there is no SIM card. -->
-    <string name="lockscreen_missing_sim_message" product="default">No SIM card in phone.</string>
-    <!-- Shown in the lock screen to ask the user to insert a SIM card. -->
-    <string name="lockscreen_missing_sim_instructions">Insert a SIM card.</string>
-    <!-- Shown in the lock screen to ask the user to insert a SIM card when sim is missing or not readable. -->
-    <string name="lockscreen_missing_sim_instructions_long">The SIM card is missing or not readable. Insert a SIM card.</string>
-    <!-- Shown in the lock screen when SIM card is permanently disabled. -->
-    <string name="lockscreen_permanent_disabled_sim_message_short">Unusable SIM card.</string>
-    <!-- Shown in the lock screen to inform the user to SIM card is permanently disabled. -->
-    <string name="lockscreen_permanent_disabled_sim_instructions">Your SIM card has been permanently disabled.\n
-    Contact your wireless service provider for another SIM card.</string>
+    <!-- Shown in the lock screen when there is no SIM. -->
+    <string name="lockscreen_missing_sim_message_short">No SIM</string>
+    <!-- Shown in the lock screen when there is no SIM. -->
+    <string name="lockscreen_missing_sim_message" product="tablet">No SIM in tablet.</string>
+    <!-- Shown in the lock screen when there is no SIM. -->
+    <string name="lockscreen_missing_sim_message" product="tv">No SIM in your Android TV device.</string>
+    <!-- Shown in the lock screen when there is no SIM. -->
+    <string name="lockscreen_missing_sim_message" product="default">No SIM in phone.</string>
+    <!-- Shown in the lock screen to ask the user to add a SIM. -->
+    <string name="lockscreen_missing_sim_instructions">Add a SIM.</string>
+    <!-- Shown in the lock screen to ask the user to add a SIM when sim is missing or not readable. -->
+    <string name="lockscreen_missing_sim_instructions_long">The SIM is missing or not readable. Add a SIM.</string>
+    <!-- Shown in the lock screen when SIM is permanently disabled. -->
+    <string name="lockscreen_permanent_disabled_sim_message_short">Unusable SIM.</string>
+    <!-- Shown in the lock screen to inform the user to SIM is permanently deactivated. -->
+    <string name="lockscreen_permanent_disabled_sim_instructions">Your SIM has been permanently deactivated.\n
+    Contact your wireless service provider for another SIM.</string>
 
     <!-- Shown on transport control of lockscreen. Pressing button goes to previous track. -->
     <string name="lockscreen_transport_prev_description">Previous track</string>
@@ -2572,17 +2572,17 @@
 
     <!-- When the user enters a wrong sim pin too many times, it becomes
          PUK locked (Pin Unlock Kode) -->
-    <string name="lockscreen_sim_puk_locked_message">SIM card is PUK-locked.</string>
+    <string name="lockscreen_sim_puk_locked_message">SIM is PUK-locked.</string>
     <!-- Shown in the lock screen when the SIM has become PUK locked and the user must call customer care to unlock it. -->
     <string name="lockscreen_sim_puk_locked_instructions">See the User Guide or contact Customer Care.</string>
 
     <!-- Shown in the lock screen to tell the user that their SIM is locked and they must unlock it. -->
-    <string name="lockscreen_sim_locked_message">SIM card is locked.</string>
+    <string name="lockscreen_sim_locked_message">SIM is locked.</string>
 
     <!-- For the unlock screen, When the user enters a sim unlock code, it takes a little while to check
          whether it is valid, and to unlock the sim if it is valid.  we display a
          progress dialog in the meantime.  this is the emssage. -->
-    <string name="lockscreen_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message">Unlocking SIM\u2026</string>
 
     <!-- For the unlock screen, Information message shown in dialog when user has too many failed attempts at
          drawing the unlock pattern -->
@@ -3883,13 +3883,13 @@
 
     <!-- SIM swap and device reboot Dialog --> <skip />
     <!-- See SIM_REMOVED_DIALOG.  This is the title of that dialog. -->
-    <string name="sim_removed_title">SIM card removed</string>
+    <string name="sim_removed_title">SIM removed</string>
     <!-- See SIM_REMOVED_DIALOG.  This is the message of that dialog. -->
-    <string name="sim_removed_message">The mobile network will be unavailable until you restart with a valid SIM card inserted.</string>
+    <string name="sim_removed_message">The mobile network will be unavailable until you restart with a valid SIM.</string>
     <!-- See SIM_REMOVED_DIALOG.  This is the button of that dialog. -->
     <string name="sim_done_button">Done</string>
     <!-- See SIM_ADDED_DIALOG.  This is the title of that dialog. -->
-    <string name="sim_added_title">SIM card added</string>
+    <string name="sim_added_title">SIM added</string>
     <!-- See SIM_ADDED_DIALOG.  This is the message of that dialog. -->
     <string name="sim_added_message">Restart your device to access the mobile network.</string>
     <!-- See SIM_ADDED_DIALOG.  This is the button of that dialog. -->
@@ -4713,8 +4713,8 @@
     <string name="kg_puk_enter_pin_hint">Enter desired PIN code</string>
     <!-- Message shown when the user needs to confirm the PIN they just entered in the PUK screen -->
     <string name="kg_enter_confirm_pin_hint">Confirm desired PIN code</string>
-    <!-- Message shown in dialog while the device is unlocking the SIM card -->
-    <string name="kg_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
+    <!-- Message shown in dialog while the device is unlocking the SIM -->
+    <string name="kg_sim_unlock_progress_dialog_message">Unlocking SIM\u2026</string>
     <!-- Message shown when the user enters the wrong PIN code -->
     <string name="kg_password_wrong_pin_code">Incorrect PIN code.</string>
     <!-- Message shown when the user enters an invalid SIM pin password in PUK screen -->

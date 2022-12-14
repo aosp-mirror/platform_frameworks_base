@@ -27,16 +27,19 @@ import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.KeyguardBouncer
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.yield
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
@@ -45,6 +48,7 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper
 class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControllerBaseTest() {
     lateinit var keyguardBouncerRepository: KeyguardBouncerRepository
+    @Mock private lateinit var bouncerLogger: TableLogBuffer
 
     @Before
     override fun setUp() {
@@ -53,7 +57,8 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
         keyguardBouncerRepository =
             KeyguardBouncerRepository(
                 mock(com.android.keyguard.ViewMediatorCallback::class.java),
-                mKeyguardUpdateMonitor
+                TestCoroutineScope(),
+                bouncerLogger,
             )
         super.setUp()
     }

@@ -20,12 +20,23 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.FontScaleConverter;
 import android.os.SystemProperties;
+import android.view.WindowManager;
 
 /**
  * A structure describing general information about a display, such as its
  * size, density, and font scaling.
  * <p>To access the DisplayMetrics members, retrieve display metrics like this:</p>
  * <pre>context.getResources().getDisplayMetrics();</pre>
+ *
+ * <p>
+ * For UI layout, obtain {@link android.view.WindowMetrics} from
+ * {@link WindowManager#getCurrentWindowMetrics()}. {@code DisplayMetrics} should only be used for
+ * obtaining display related properties, such as {@link #xdpi} and {@link #ydpi}
+ * </p><p>
+ * See {@link #density} for more information about the differences between {@link #xdpi},
+ * {@link #ydpi} and {@link #density}.
+ * </p>
+ *
  */
 public class DisplayMetrics {
     /**

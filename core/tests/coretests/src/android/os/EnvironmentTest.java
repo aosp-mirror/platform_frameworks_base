@@ -22,12 +22,12 @@ import static android.os.Environment.HAS_DOWNLOADS;
 import static android.os.Environment.HAS_OTHER;
 import static android.os.Environment.classifyExternalStorageDirectory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
-import android.app.AppOpsManager;
+import static org.junit.Assert.assertEquals;
+
 import android.content.Context;
+import android.os.storage.StorageManager;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -38,6 +38,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.UUID;
+import java.util.function.BiFunction;
 
 @RunWith(AndroidJUnit4.class)
 public class EnvironmentTest {
@@ -103,5 +106,43 @@ public class EnvironmentTest {
     public void testClassify_otherRoot() throws Exception {
         Environment.buildPath(dir, "Taxes.pdf").createNewFile();
         assertEquals(HAS_OTHER, classifyExternalStorageDirectory(dir));
+    }
+
+    @Test
+    public void testDataCePackageDirectoryForUser() {
+        testDataPackageDirectoryForUser(
+                (uuid, userHandle) -> Environment.getDataCePackageDirectoryForUser(
+                        uuid, userHandle, getContext().getPackageName()),
+                (uuid, user) -> Environment.getDataUserCePackageDirectory(
+                        uuid, user, getContext().getPackageName())
+        );
+    }
+
+    @Test
+    public void testDataDePackageDirectoryForUser() {
+        testDataPackageDirectoryForUser(
+                (uuid, userHandle) -> Environment.getDataDePackageDirectoryForUser(
+                        uuid, userHandle, getContext().getPackageName()),
+                (uuid, user) -> Environment.getDataUserDePackageDirectory(
+                        uuid, user, getContext().getPackageName())
+        );
+    }
+
+    private void testDataPackageDirectoryForUser(
+            BiFunction<UUID, UserHandle, File> publicApi,
+            BiFunction<String, Integer, File> hideApi) {
+        var uuids = new ArrayList<String>();
+        uuids.add(null); // Private internal
+        uuids.add("primary_physical");
+        uuids.add("system");
+        uuids.add("3939-3939"); // FAT Volume
+        uuids.add("57554103-df3e-4475-ae7a-8feba49353ac"); // Random valid UUID
+        var userHandle = UserHandle.of(0);
+
+        // Check that the @hide method is consistent with the public API
+        for (String uuid : uuids) {
+            assertThat(publicApi.apply(StorageManager.convert(uuid), userHandle))
+                    .isEqualTo(hideApi.apply(uuid, 0));
+        }
     }
 }

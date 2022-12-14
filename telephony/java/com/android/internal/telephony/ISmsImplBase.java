@@ -192,6 +192,16 @@ public class ISmsImplBase extends ISms.Stub {
     }
 
     @Override
+    public void setStorageMonitorMemoryStatusOverride(int subId, boolean storageAvailable) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void clearStorageMonitorMemoryStatusOverride(int subId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public int checkSmsShortCodeDestination(int subid, String callingPackage,
             String callingFeatureId, String destAddress, String countryIso) {
         throw new UnsupportedOperationException();

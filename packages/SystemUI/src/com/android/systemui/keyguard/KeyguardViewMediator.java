@@ -1614,7 +1614,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         // TODO: Rename all screen off/on references to interactive/sleeping
         synchronized (this) {
             mDeviceInteractive = true;
-            if (mPendingLock && !cameraGestureTriggered) {
+            if (mPendingLock && !cameraGestureTriggered && !mWakeAndUnlocking) {
                 doKeyguardLocked(null);
             }
             mAnimatingScreenOff = false;

@@ -29,7 +29,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -47,6 +46,8 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.plugins.ClockController;
+import com.android.systemui.plugins.ClockEvents;
+import com.android.systemui.plugins.ClockFaceController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.clocks.AnimatableClockView;
 import com.android.systemui.shared.clocks.ClockRegistry;
@@ -88,7 +89,15 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     @Mock
     KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock
-    private ClockController mClock;
+    private ClockController mClockController;
+    @Mock
+    private ClockFaceController mLargeClockController;
+    @Mock
+    private ClockFaceController mSmallClockController;
+    @Mock
+    private ClockAnimations mClockAnimations;
+    @Mock
+    private ClockEvents mClockEvents;
     @Mock
     DumpManager mDumpManager;
     @Mock
@@ -97,9 +106,11 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     @Mock
     private NotificationIconContainer mNotificationIcons;
     @Mock
-    private AnimatableClockView mClockView;
+    private AnimatableClockView mSmallClockView;
     @Mock
     private AnimatableClockView mLargeClockView;
+    @Mock
+    private FrameLayout mSmallClockFrame;
     @Mock
     private FrameLayout mLargeClockFrame;
     @Mock
@@ -121,9 +132,14 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 mock(RelativeLayout.LayoutParams.class));
         when(mView.getContext()).thenReturn(getContext());
         when(mView.getResources()).thenReturn(mResources);
+        when(mResources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin))
+                .thenReturn(100);
+        when(mResources.getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin))
+                .thenReturn(-200);
 
         when(mView.findViewById(R.id.lockscreen_clock_view_large)).thenReturn(mLargeClockFrame);
-        when(mClockView.getContext()).thenReturn(getContext());
+        when(mView.findViewById(R.id.lockscreen_clock_view)).thenReturn(mSmallClockFrame);
+        when(mSmallClockView.getContext()).thenReturn(getContext());
         when(mLargeClockView.getContext()).thenReturn(getContext());
 
         when(mView.isAttachedToWindow()).thenReturn(true);
@@ -144,7 +160,14 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         );
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
-        when(mClockRegistry.createCurrentClock()).thenReturn(mClock);
+        when(mLargeClockController.getView()).thenReturn(mLargeClockView);
+        when(mSmallClockController.getView()).thenReturn(mSmallClockView);
+        when(mClockController.getLargeClock()).thenReturn(mLargeClockController);
+        when(mClockController.getSmallClock()).thenReturn(mSmallClockController);
+        when(mClockController.getEvents()).thenReturn(mClockEvents);
+        when(mClockController.getAnimations()).thenReturn(mClockAnimations);
+        when(mClockRegistry.createCurrentClock()).thenReturn(mClockController);
+        when(mClockEventController.getClock()).thenReturn(mClockController);
 
         mSliceView = new View(getContext());
         when(mView.findViewById(R.id.keyguard_slice_view)).thenReturn(mSliceView);
@@ -203,8 +226,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         verify(mClockRegistry).registerClockChangeListener(listenerArgumentCaptor.capture());
 
         listenerArgumentCaptor.getValue().onClockChanged();
-        verify(mView, times(2)).setClock(mClock, StatusBarState.SHADE);
-        verify(mClockEventController, times(2)).setClock(mClock);
+        verify(mView, times(2)).setClock(mClockController, StatusBarState.SHADE);
+        verify(mClockEventController, times(2)).setClock(mClockController);
     }
 
     @Test
@@ -262,16 +285,39 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
     @Test
     public void testGetClockAnimationsForwardsToClock() {
-        ClockController mockClockController = mock(ClockController.class);
-        ClockAnimations mockClockAnimations = mock(ClockAnimations.class);
-        when(mClockEventController.getClock()).thenReturn(mockClockController);
-        when(mockClockController.getAnimations()).thenReturn(mockClockAnimations);
-
-        Rect r1 = new Rect(1, 2, 3, 4);
-        Rect r2 = new Rect(5, 6, 7, 8);
-        mController.getClockAnimations().onPositionUpdated(r1, r2, 0.2f);
-        verify(mockClockAnimations).onPositionUpdated(r1, r2, 0.2f);
+        assertEquals(mClockAnimations, mController.getClockAnimations());
     }
+
+    @Test
+    public void testGetLargeClockBottom_returnsExpectedValue() {
+        when(mLargeClockFrame.getVisibility()).thenReturn(View.VISIBLE);
+        when(mLargeClockFrame.getHeight()).thenReturn(100);
+        when(mSmallClockFrame.getHeight()).thenReturn(50);
+        when(mLargeClockView.getHeight()).thenReturn(40);
+        when(mSmallClockView.getHeight()).thenReturn(20);
+        mController.init();
+
+        assertEquals(170, mController.getClockBottom(1000));
+    }
+
+    @Test
+    public void testGetSmallLargeClockBottom_returnsExpectedValue() {
+        when(mLargeClockFrame.getVisibility()).thenReturn(View.GONE);
+        when(mLargeClockFrame.getHeight()).thenReturn(100);
+        when(mSmallClockFrame.getHeight()).thenReturn(50);
+        when(mLargeClockView.getHeight()).thenReturn(40);
+        when(mSmallClockView.getHeight()).thenReturn(20);
+        mController.init();
+
+        assertEquals(1120, mController.getClockBottom(1000));
+    }
+
+    @Test
+    public void testGetClockBottom_nullClock_returnsZero() {
+        when(mClockEventController.getClock()).thenReturn(null);
+        assertEquals(0, mController.getClockBottom(10));
+    }
+
 
     private void verifyAttachment(VerificationMode times) {
         verify(mClockRegistry, times).registerClockChangeListener(

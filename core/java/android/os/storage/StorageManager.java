@@ -2742,7 +2742,8 @@ public class StorageManager {
 
     /** {@hide} */
     @TestApi
-    public static @NonNull UUID convert(@NonNull String uuid) {
+    public static @NonNull UUID convert(@Nullable String uuid) {
+        // UUID_PRIVATE_INTERNAL is null, so this accepts nullable input
         if (Objects.equals(uuid, UUID_PRIVATE_INTERNAL)) {
             return UUID_DEFAULT;
         } else if (Objects.equals(uuid, UUID_PRIMARY_PHYSICAL)) {

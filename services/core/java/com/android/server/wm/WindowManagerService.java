@@ -7128,20 +7128,6 @@ public class WindowManagerService extends IWindowManager.Stub
         return 0;
     }
 
-    void setDockedRootTaskResizing(boolean resizing) {
-        getDefaultDisplayContentLocked().getDockedDividerController().setResizing(resizing);
-        requestTraversal();
-    }
-
-    @Override
-    public void setDockedTaskDividerTouchRegion(Rect touchRegion) {
-        synchronized (mGlobalLock) {
-            final DisplayContent dc = getDefaultDisplayContentLocked();
-            dc.getDockedDividerController().setTouchRegion(touchRegion);
-            dc.updateTouchExcludeRegion();
-        }
-    }
-
     void setForceDesktopModeOnExternalDisplays(boolean forceDesktopModeOnExternalDisplays) {
         synchronized (mGlobalLock) {
             mForceDesktopModeOnExternalDisplays = forceDesktopModeOnExternalDisplays;

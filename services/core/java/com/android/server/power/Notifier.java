@@ -25,7 +25,6 @@ import android.app.trust.TrustManager;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.hardware.display.DisplayManagerInternal;
 import android.media.AudioManager;
 import android.media.Ringtone;
@@ -67,6 +66,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.PrintWriter;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -140,9 +140,8 @@ public class Notifier {
     private final NotifierHandler mHandler;
     private final Executor mBackgroundExecutor;
     private final Intent mScreenOnIntent;
-    private final Bundle mScreenOnOptions;
     private final Intent mScreenOffIntent;
-    private final Bundle mScreenOffOptions;
+    private final Bundle mScreenOnOffOptions;
 
     // True if the device should suspend when the screen is off due to proximity.
     private final boolean mSuspendWhenScreenOffDueToProximityConfig;
@@ -204,14 +203,11 @@ public class Notifier {
         mScreenOnIntent.addFlags(
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND
                 | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-        mScreenOnOptions = BroadcastOptions.makeRemovingMatchingFilter(
-                new IntentFilter(Intent.ACTION_SCREEN_OFF)).toBundle();
         mScreenOffIntent = new Intent(Intent.ACTION_SCREEN_OFF);
         mScreenOffIntent.addFlags(
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND
                 | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-        mScreenOffOptions = BroadcastOptions.makeRemovingMatchingFilter(
-                new IntentFilter(Intent.ACTION_SCREEN_ON)).toBundle();
+        mScreenOnOffOptions = createScreenOnOffBroadcastOptions();
 
         mSuspendWhenScreenOffDueToProximityConfig = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_suspendWhenScreenOffDueToProximity);
@@ -226,6 +222,25 @@ public class Notifier {
         } catch (RemoteException ex) { }
         FrameworkStatsLog.write(FrameworkStatsLog.INTERACTIVE_STATE_CHANGED,
                 FrameworkStatsLog.INTERACTIVE_STATE_CHANGED__STATE__ON);
+    }
+
+    /**
+     * Create the {@link BroadcastOptions} bundle that will be used with sending the
+     * {@link Intent#ACTION_SCREEN_ON} and {@link Intent#ACTION_SCREEN_OFF} broadcasts.
+     */
+    private Bundle createScreenOnOffBroadcastOptions() {
+        final BroadcastOptions options = BroadcastOptions.makeBasic();
+        // This allows the broadcasting system to discard any older broadcasts
+        // waiting to be delivered to a process.
+        options.setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
+        // Set namespace and key to identify which older broadcasts can be discarded.
+        // We could use any strings here but namespace needs to be unlikely to be reused with in
+        // the system_server process, as that could result in potentially discarding some
+        // non-screen on/off related broadcast.
+        options.setDeliveryGroupMatchingKey(
+                UUID.randomUUID().toString(),
+                Intent.ACTION_SCREEN_ON);
+        return options.toBundle();
     }
 
     /**
@@ -798,7 +813,7 @@ public class Notifier {
         if (mActivityManagerInternal.isSystemReady()) {
             final boolean ordered = !mActivityManagerInternal.isModernQueueEnabled();
             mActivityManagerInternal.broadcastIntent(mScreenOnIntent, mWakeUpBroadcastDone,
-                    null, ordered, UserHandle.USER_ALL, null, null, mScreenOnOptions);
+                    null, ordered, UserHandle.USER_ALL, null, null, mScreenOnOffOptions);
         } else {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_STOP, 2, 1);
             sendNextBroadcast();
@@ -823,7 +838,7 @@ public class Notifier {
         if (mActivityManagerInternal.isSystemReady()) {
             final boolean ordered = !mActivityManagerInternal.isModernQueueEnabled();
             mActivityManagerInternal.broadcastIntent(mScreenOffIntent, mGoToSleepBroadcastDone,
-                    null, ordered, UserHandle.USER_ALL, null, null, mScreenOffOptions);
+                    null, ordered, UserHandle.USER_ALL, null, null, mScreenOnOffOptions);
         } else {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_STOP, 3, 1);
             sendNextBroadcast();

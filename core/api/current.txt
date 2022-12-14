@@ -17936,6 +17936,7 @@ package android.hardware.camera2 {
     method public int capture(@NonNull android.hardware.camera2.CaptureRequest, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraExtensionSession.ExtensionCaptureCallback) throws android.hardware.camera2.CameraAccessException;
     method public void close() throws android.hardware.camera2.CameraAccessException;
     method @NonNull public android.hardware.camera2.CameraDevice getDevice();
+    method @Nullable public android.util.Pair<java.lang.Long,java.lang.Long> getRealtimeStillCaptureLatency() throws android.hardware.camera2.CameraAccessException;
     method public int setRepeatingRequest(@NonNull android.hardware.camera2.CaptureRequest, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraExtensionSession.ExtensionCaptureCallback) throws android.hardware.camera2.CameraAccessException;
     method public void stopRepeating() throws android.hardware.camera2.CameraAccessException;
   }
@@ -26785,6 +26786,7 @@ package android.media.tv.interactive {
     method public boolean onKeyUp(int, @NonNull android.view.KeyEvent);
     method public void onMediaViewSizeChanged(@Px int, @Px int);
     method public void onRecordingStarted(@NonNull String);
+    method public void onRecordingStopped(@NonNull String);
     method public abstract void onRelease();
     method public void onResetInteractiveApp();
     method public abstract boolean onSetSurface(@Nullable android.view.Surface);
@@ -26811,6 +26813,7 @@ package android.media.tv.interactive {
     method @CallSuper public void requestCurrentTvInputId();
     method @CallSuper public void requestSigning(@NonNull String, @NonNull String, @NonNull String, @NonNull byte[]);
     method @CallSuper public void requestStartRecording(@Nullable android.net.Uri);
+    method @CallSuper public void requestStopRecording(@NonNull String);
     method @CallSuper public void requestStreamVolume();
     method @CallSuper public void requestTrackInfoList();
     method @CallSuper public void sendPlaybackCommandRequest(@NonNull String, @Nullable android.os.Bundle);
@@ -26843,6 +26846,7 @@ package android.media.tv.interactive {
     method @Nullable public android.media.tv.interactive.TvInteractiveAppView.OnUnhandledInputEventListener getOnUnhandledInputEventListener();
     method public void notifyError(@NonNull String, @NonNull android.os.Bundle);
     method public void notifyRecordingStarted(@NonNull String);
+    method public void notifyRecordingStopped(@NonNull String);
     method public void onAttachedToWindow();
     method public void onDetachedFromWindow();
     method public void onLayout(boolean, int, int, int, int);
@@ -26885,6 +26889,7 @@ package android.media.tv.interactive {
     method public void onRequestCurrentTvInputId(@NonNull String);
     method public void onRequestSigning(@NonNull String, @NonNull String, @NonNull String, @NonNull String, @NonNull byte[]);
     method public void onRequestStartRecording(@NonNull String, @Nullable android.net.Uri);
+    method public void onRequestStopRecording(@NonNull String, @NonNull String);
     method public void onRequestStreamVolume(@NonNull String);
     method public void onRequestTrackInfoList(@NonNull String);
     method public void onSetVideoBounds(@NonNull String, @NonNull android.graphics.Rect);
@@ -27851,6 +27856,7 @@ package android.net.vcn {
   public final class VcnConfig implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public java.util.Set<android.net.vcn.VcnGatewayConnectionConfig> getGatewayConnectionConfigs();
+    method @NonNull public java.util.Set<java.lang.Integer> getRestrictedUnderlyingNetworkTransports();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.vcn.VcnConfig> CREATOR;
   }
@@ -27859,6 +27865,7 @@ package android.net.vcn {
     ctor public VcnConfig.Builder(@NonNull android.content.Context);
     method @NonNull public android.net.vcn.VcnConfig.Builder addGatewayConnectionConfig(@NonNull android.net.vcn.VcnGatewayConnectionConfig);
     method @NonNull public android.net.vcn.VcnConfig build();
+    method @NonNull public android.net.vcn.VcnConfig.Builder setRestrictedUnderlyingNetworkTransports(@NonNull java.util.Set<java.lang.Integer>);
   }
 
   public final class VcnGatewayConnectionConfig {
@@ -38263,6 +38270,11 @@ package android.security.identity {
     ctor public AlreadyPersonalizedException(@NonNull String, @NonNull Throwable);
   }
 
+  public class AuthenticationKeyMetadata {
+    method @NonNull public java.time.Instant getExpirationDate();
+    method @IntRange(from=0) public int getUsageCount();
+  }
+
   public class CipherSuiteNotSupportedException extends android.security.identity.IdentityCredentialException {
     ctor public CipherSuiteNotSupportedException(@NonNull String);
     ctor public CipherSuiteNotSupportedException(@NonNull String, @NonNull Throwable);
@@ -38293,6 +38305,7 @@ package android.security.identity {
   public abstract class CredentialDataResult {
     method @Nullable public abstract byte[] getDeviceMac();
     method @NonNull public abstract byte[] getDeviceNameSpaces();
+    method @Nullable public byte[] getDeviceSignature();
     method @NonNull public abstract android.security.identity.CredentialDataResult.Entries getDeviceSignedEntries();
     method @NonNull public abstract android.security.identity.CredentialDataResult.Entries getIssuerSignedEntries();
     method @NonNull public abstract byte[] getStaticAuthenticationData();
@@ -38329,13 +38342,15 @@ package android.security.identity {
     method @NonNull public byte[] delete(@NonNull byte[]);
     method @Deprecated @NonNull public abstract byte[] encryptMessageToReader(@NonNull byte[]);
     method @NonNull public abstract java.util.Collection<java.security.cert.X509Certificate> getAuthKeysNeedingCertification();
-    method @NonNull public abstract int[] getAuthenticationDataUsageCount();
+    method @Deprecated @NonNull public abstract int[] getAuthenticationDataUsageCount();
+    method @NonNull public java.util.List<android.security.identity.AuthenticationKeyMetadata> getAuthenticationKeyMetadata();
     method @NonNull public abstract java.util.Collection<java.security.cert.X509Certificate> getCredentialKeyCertificateChain();
     method @Deprecated @NonNull public abstract android.security.identity.ResultData getEntries(@Nullable byte[], @NonNull java.util.Map<java.lang.String,java.util.Collection<java.lang.String>>, @Nullable byte[], @Nullable byte[]) throws android.security.identity.EphemeralPublicKeyNotFoundException, android.security.identity.InvalidReaderSignatureException, android.security.identity.InvalidRequestMessageException, android.security.identity.NoAuthenticationKeyAvailableException, android.security.identity.SessionTranscriptMismatchException;
     method @NonNull public byte[] proveOwnership(@NonNull byte[]);
     method @Deprecated public abstract void setAllowUsingExhaustedKeys(boolean);
     method @Deprecated public void setAllowUsingExpiredKeys(boolean);
-    method public abstract void setAvailableAuthenticationKeys(int, int);
+    method @Deprecated public abstract void setAvailableAuthenticationKeys(int, int);
+    method public void setAvailableAuthenticationKeys(@IntRange(from=0) int, @IntRange(from=1) int, @IntRange(from=0) long);
     method @Deprecated public abstract void setReaderEphemeralPublicKey(@NonNull java.security.PublicKey) throws java.security.InvalidKeyException;
     method @Deprecated public abstract void storeStaticAuthenticationData(@NonNull java.security.cert.X509Certificate, @NonNull byte[]) throws android.security.identity.UnknownAuthenticationKeyException;
     method public void storeStaticAuthenticationData(@NonNull java.security.cert.X509Certificate, @NonNull java.time.Instant, @NonNull byte[]) throws android.security.identity.UnknownAuthenticationKeyException;
@@ -42009,9 +42024,11 @@ package android.telephony {
   }
 
   public class CarrierConfigManager {
-    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfig();
+    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfig();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, "carrier privileges"}) public android.os.PersistableBundle getConfig(@NonNull java.lang.String...);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfigByComponentForSubId(@NonNull String, int);
-    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfigForSubId(int);
+    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfigForSubId(int);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, "carrier privileges"}) public android.os.PersistableBundle getConfigForSubId(int, @NonNull java.lang.String...);
     method public static boolean isConfigForIdentifiedCarrier(android.os.PersistableBundle);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyConfigChangedForSubId(int);
     field public static final String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
@@ -45435,6 +45452,7 @@ package android.telephony.ims.feature {
 package android.telephony.ims.stub {
 
   public class ImsRegistrationImplBase {
+    field public static final int REGISTRATION_TECH_3G = 4; // 0x4
     field public static final int REGISTRATION_TECH_CROSS_SIM = 2; // 0x2
     field public static final int REGISTRATION_TECH_IWLAN = 1; // 0x1
     field public static final int REGISTRATION_TECH_LTE = 0; // 0x0
@@ -49555,6 +49573,7 @@ package android.view {
     field public static final int KEYCODE_PROG_YELLOW = 185; // 0xb9
     field public static final int KEYCODE_Q = 45; // 0x2d
     field public static final int KEYCODE_R = 46; // 0x2e
+    field public static final int KEYCODE_RECENT_APPS = 312; // 0x138
     field public static final int KEYCODE_REFRESH = 285; // 0x11d
     field public static final int KEYCODE_RIGHT_BRACKET = 72; // 0x48
     field public static final int KEYCODE_RO = 217; // 0xd9
@@ -52636,8 +52655,10 @@ package android.view {
   }
 
   public final class WindowMetrics {
-    ctor public WindowMetrics(@NonNull android.graphics.Rect, @NonNull android.view.WindowInsets);
+    ctor @Deprecated public WindowMetrics(@NonNull android.graphics.Rect, @NonNull android.view.WindowInsets);
+    ctor public WindowMetrics(@NonNull android.graphics.Rect, @NonNull android.view.WindowInsets, float);
     method @NonNull public android.graphics.Rect getBounds();
+    method public float getDensity();
     method @NonNull public android.view.WindowInsets getWindowInsets();
   }
 
@@ -54530,6 +54551,8 @@ package android.view.inputmethod {
     method @NonNull public android.text.SegmentFinder getGraphemeSegmentFinder();
     method @NonNull public android.text.SegmentFinder getLineSegmentFinder();
     method @NonNull public android.graphics.Matrix getMatrix();
+    method public int getOffsetForPosition(float, float);
+    method @Nullable public int[] getRangeForRect(@NonNull android.graphics.RectF, @NonNull android.text.SegmentFinder, @NonNull android.text.Layout.TextInclusionStrategy);
     method public int getStart();
     method @NonNull public android.text.SegmentFinder getWordSegmentFinder();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
