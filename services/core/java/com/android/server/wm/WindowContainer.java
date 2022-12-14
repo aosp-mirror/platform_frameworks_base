@@ -642,7 +642,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (showSurfaceOnCreation()) {
             getSyncTransaction().show(mSurfaceControl);
         }
-        onSurfaceShown(getSyncTransaction());
         updateSurfacePositionNonOrganized();
         if (mLastMagnificationSpec != null) {
             applyMagnificationSpec(getSyncTransaction(), mLastMagnificationSpec);
@@ -695,13 +694,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         scheduleAnimation();
-    }
-
-    /**
-     * Called when the surface is shown for the first time.
-     */
-    void onSurfaceShown(Transaction t) {
-        // do nothing
     }
 
     // Temp. holders for a chain of containers we are currently processing.
