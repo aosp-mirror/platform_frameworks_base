@@ -30,9 +30,11 @@ import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger;
+import com.android.systemui.media.taptotransfer.receiver.ChipReceiverInfo;
 import com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogger;
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderLogger;
 import com.android.systemui.plugins.log.LogBuffer;
+import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo;
 
 import java.util.Optional;
 
@@ -95,19 +97,19 @@ public interface MediaModule {
     @Provides
     @SysUISingleton
     @MediaTttSenderLogger
-    static MediaTttLogger providesMediaTttSenderLogger(
+    static MediaTttLogger<ChipbarInfo> providesMediaTttSenderLogger(
             @MediaTttSenderLogBuffer LogBuffer buffer
     ) {
-        return new MediaTttLogger("Sender", buffer);
+        return new MediaTttLogger<>("Sender", buffer);
     }
 
     @Provides
     @SysUISingleton
     @MediaTttReceiverLogger
-    static MediaTttLogger providesMediaTttReceiverLogger(
+    static MediaTttLogger<ChipReceiverInfo> providesMediaTttReceiverLogger(
             @MediaTttReceiverLogBuffer LogBuffer buffer
     ) {
-        return new MediaTttLogger("Receiver", buffer);
+        return new MediaTttLogger<>("Receiver", buffer);
     }
 
     /** */
