@@ -363,6 +363,9 @@ public class InternetDialog extends SystemUIDialog implements
                     if (!isChecked && shouldShowMobileDialog()) {
                         showTurnOffMobileDialog();
                     } else if (!shouldShowMobileDialog()) {
+                        if (mInternetDialogController.isMobileDataEnabled() == isChecked) {
+                            return;
+                        }
                         mInternetDialogController.setMobileDataEnabled(mContext, mDefaultDataSubId,
                                 isChecked, false);
                     }
