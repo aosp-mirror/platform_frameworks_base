@@ -168,6 +168,45 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     }
 
     @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void testOnStartedWakingUp_whileSleeping_ifWakeAndUnlocking_doesNotShowKeyguard() {
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false);
+        when(mLockPatternUtils.getPowerButtonInstantlyLocks(anyInt())).thenReturn(true);
+        mViewMediator.onSystemReady();
+        TestableLooper.get(this).processAllMessages();
+
+        mViewMediator.setShowingLocked(false);
+        TestableLooper.get(this).processAllMessages();
+
+        mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
+        mViewMediator.onWakeAndUnlocking();
+        mViewMediator.onStartedWakingUp(OFF_BECAUSE_OF_USER, false);
+        TestableLooper.get(this).processAllMessages();
+
+        assertFalse(mViewMediator.isShowingAndNotOccluded());
+        verify(mKeyguardStateController, never()).notifyKeyguardState(eq(true), anyBoolean());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void testOnStartedWakingUp_whileSleeping_ifNotWakeAndUnlocking_showsKeyguard() {
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false);
+        when(mLockPatternUtils.getPowerButtonInstantlyLocks(anyInt())).thenReturn(true);
+        mViewMediator.onSystemReady();
+        TestableLooper.get(this).processAllMessages();
+
+        mViewMediator.setShowingLocked(false);
+        TestableLooper.get(this).processAllMessages();
+
+        mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
+        mViewMediator.onStartedWakingUp(OFF_BECAUSE_OF_USER, false);
+
+        TestableLooper.get(this).processAllMessages();
+
+        assertTrue(mViewMediator.isShowingAndNotOccluded());
+    }
+
+    @Test
     public void testRegisterDumpable() {
         verify(mDumpManager).registerDumpable(KeyguardViewMediator.class.getName(), mViewMediator);
         verify(mStatusBarKeyguardViewManager, never()).setKeyguardGoingAwayState(anyBoolean());

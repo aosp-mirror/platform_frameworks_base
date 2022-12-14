@@ -872,8 +872,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"કાસ્ટ કરવાનું રોકો"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ઑડિયો આઉટપુટ માટે ઉપલબ્ધ ડિવાઇસ."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"વૉલ્યૂમ"</string>
-    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
-    <skip />
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"બ્રોડકાસ્ટ પ્રક્રિયાની કામ કરવાની રીત"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"બ્રોડકાસ્ટ કરો"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"સુસંગત બ્લૂટૂથ ડિવાઇસ ધરાવતા નજીકના લોકો તમે જે મીડિયા બ્રોડકાસ્ટ કરી રહ્યાં છો તે સાંભળી શકે છે"</string>
@@ -987,8 +986,7 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"કૅમેરા અને માઇક બંધ છે"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# નોટિફિકેશન}one{# નોટિફિકેશન}other{# નોટિફિકેશન}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <!-- no translation found for note_task_button_label (8718616095800343136) -->
-    <skip />
+    <string name="note_task_button_label" msgid="8718616095800343136">"નોંધ લેવી"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"બ્રૉડકાસ્ટ કરી રહ્યાં છે"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> બ્રોડકાસ્ટ કરવાનું રોકીએ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"જો તમે <xliff:g id="SWITCHAPP">%1$s</xliff:g> બ્રોડકાસ્ટ કરો અથવા આઉટપુટ બદલો, તો તમારું હાલનું બ્રોડકાસ્ટ બંધ થઈ જશે"</string>
@@ -1011,4 +1009,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"બહેતર સેલ્ફી લેવા ફ્રન્ટ ડિસ્પ્લે પર ફ્લિપ કરીએ?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"વધુ ઉચ્ચ રિઝોલ્યુશનવાળો વિશાળ ફોટો લેવા માટે પાછલા કૅમેરાનો ઉપયોગ કરો."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ આ સ્ક્રીન બંધ થઈ જશે"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

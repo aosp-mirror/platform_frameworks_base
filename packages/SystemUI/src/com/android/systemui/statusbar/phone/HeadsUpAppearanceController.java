@@ -22,6 +22,8 @@ import android.graphics.Rect;
 import android.util.MathUtils;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.R;
@@ -194,6 +196,11 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     public void onHeadsUpPinned(NotificationEntry entry) {
         updateTopEntry();
         updateHeader(entry);
+        updateHeadsUpAndPulsingRoundness(entry);
+    }
+
+    @Override
+    public void onHeadsUpStateChanged(@NonNull NotificationEntry entry, boolean isHeadsUp) {
         updateHeadsUpAndPulsingRoundness(entry);
     }
 

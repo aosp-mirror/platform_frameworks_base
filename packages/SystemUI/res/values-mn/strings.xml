@@ -1011,4 +1011,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Сайн сельфи авахаар урд талын дэлгэц рүү хөнтрөх үү?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Илүү өндөр нягтаршилтай илүү өргөн зураг авахын тулд арын камерыг ашиглана уу."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Энэ дэлгэц унтарна"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

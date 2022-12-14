@@ -403,5 +403,10 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
             }
             return true;
         }
+
+        @Override
+        public boolean onDoubleTapEvent(@NonNull MotionEvent e) {
+            return true;
+        }
     }
 }

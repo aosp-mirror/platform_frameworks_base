@@ -393,10 +393,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ବିକଳ୍ପ ଦ୍ୱାରା ବିଜ୍ଞପ୍ତି ପଜ୍‍ ହୋଇଛି"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ବର୍ତ୍ତମାନ ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"କୌଣସି ବିଜ୍ଞପ୍ତି ନାହିଁ"</string>
-    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
-    <skip />
-    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
-    <skip />
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"କୌଣସି ନୂଆ ବିଜ୍ଞପ୍ତି ନାହିଁ"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"ପୁରୁଣା ବିଜ୍ଞପ୍ତି ଦେଖିବାକୁ ଅନଲକ କରନ୍ତୁ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ଏହି ଡିଭାଇସ୍ ଆପଣଙ୍କ ବାପାମାଙ୍କ ଦ୍ୱାରା ପରିଚାଳିତ"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ଏହି ଡିଭାଇସର ମାଲିକାନା ଆପଣଙ୍କ ସଂସ୍ଥା ପାଖରେ ଅଛି ଏବଂ ଏହା ନେଟୱାର୍କ ଟ୍ରାଫିକର ନିରୀକ୍ଷଣ କରିପାରେ"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ର ଅଟେ ଏବଂ ଏହା ନେଟୱାର୍କ ଟ୍ରାଫିକକୁ ନିରୀକ୍ଷଣ କରିପାରେ"</string>
@@ -1013,4 +1011,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"ଏକ ଉନ୍ନତ ସେଲ୍ଫି ପାଇଁ ସାମ୍ନା ଡିସପ୍ଲେକୁ ଫ୍ଲିପ କରିବେ?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ଉଚ୍ଚ ରିଜୋଲ୍ୟୁସନ ସହ ଅଧିକ ଚଉଡ଼ାର ଏକ ଫଟୋ ନେବା ପାଇଁ ପଛ-ପଟର କେମେରା ବ୍ୟବହାର କରନ୍ତୁ।"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ଏହି ସ୍କ୍ରିନ ବନ୍ଦ ହୋଇଯିବ"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>
