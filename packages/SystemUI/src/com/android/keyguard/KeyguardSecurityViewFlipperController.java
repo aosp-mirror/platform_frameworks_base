@@ -156,5 +156,10 @@ public class KeyguardSecurityViewFlipperController
         @Override
         public void onStartingToHide() {
         }
+
+        @Override
+        protected int getInitialMessageResId() {
+            return 0;
+        }
     }
 }
