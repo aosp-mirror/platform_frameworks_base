@@ -17,6 +17,7 @@ package android.hardware.radio.tests.functional;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -335,8 +336,10 @@ public class RadioTunerTest {
         assertEquals(RadioManager.STATUS_OK, scanRet);
         assertEquals(RadioManager.STATUS_OK, cancelRet);
 
-        verify(mCallback, after(kCancelTimeoutMs).atMost(1)).onError(RadioTuner.ERROR_CANCELLED);
+        verify(mCallback, after(kCancelTimeoutMs).atMost(1))
+                .onTuneFailed(eq(RadioTuner.TUNER_RESULT_CANCELED), any());
         verify(mCallback, atMost(1)).onProgramInfoChanged(any());
+        Mockito.reset(mCallback);
     }
 
     @Test

@@ -169,7 +169,7 @@ public final class BroadcastRadioService {
     }
 
     public ITuner openSession(int moduleId, @Nullable RadioManager.BandConfig legacyConfig,
-        boolean withAudio, @NonNull ITunerCallback callback) throws RemoteException {
+            boolean withAudio, @NonNull ITunerCallback callback) throws RemoteException {
         Slog.v(TAG, "Open HIDL 2.0 session with module id " + moduleId);
         if (!RadioServiceUserController.isCurrentOrSystemUser()) {
             Slogf.e(TAG, "Cannot open tuner on HAL 2.0 client for non-current user");

@@ -87,8 +87,9 @@ final class RadioModule {
             fireLater(() -> {
                 android.hardware.radio.ProgramSelector csel =
                         Convert.programSelectorFromHal(programSelector);
+                int tunerResult = Convert.halResultToTunerResult(result);
                 synchronized (mLock) {
-                    fanoutAidlCallbackLocked(cb -> cb.onTuneFailed(result, csel));
+                    fanoutAidlCallbackLocked(cb -> cb.onTuneFailed(tunerResult, csel));
                 }
             });
         }

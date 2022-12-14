@@ -384,49 +384,49 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    public void scan_withDirectionUp() throws Exception {
+    public void seek_withDirectionUp() throws Exception {
         long initFreq = AM_FM_FREQUENCY_LIST[2];
         ProgramSelector initialSel = TestUtils.makeFmSelector(initFreq);
-        RadioManager.ProgramInfo scanUpInfo = TestUtils.makeProgramInfo(
+        RadioManager.ProgramInfo seekUpInfo = TestUtils.makeProgramInfo(
                 TestUtils.makeFmSelector(getSeekFrequency(initFreq, /* seekDown= */ false)),
                 SIGNAL_QUALITY);
         openAidlClients(/* numClients= */ 1);
         mHalCurrentInfo = TestUtils.makeHalProgramInfo(
                 Convert.programSelectorToHal(initialSel), SIGNAL_QUALITY);
 
-        mTunerSessions[0].scan(/* directionDown= */ false, /* skipSubChannel= */ false);
+        mTunerSessions[0].seek(/* directionDown= */ false, /* skipSubChannel= */ false);
 
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT)
-                .onCurrentProgramInfoChanged(scanUpInfo);
+                .onCurrentProgramInfoChanged(seekUpInfo);
     }
 
     @Test
-    public void scan_callsOnTuneFailedWhenTimeout() throws Exception {
+    public void seek_callsOnTuneFailedWhenTimeout() throws Exception {
         int numSessions = 2;
         openAidlClients(numSessions);
 
-        mTunerSessions[0].scan(/* directionDown= */ false, /* skipSubChannel= */ false);
+        mTunerSessions[0].seek(/* directionDown= */ false, /* skipSubChannel= */ false);
 
         for (int index = 0; index < numSessions; index++) {
             verify(mAidlTunerCallbackMocks[index], CALLBACK_TIMEOUT)
-                    .onTuneFailed(eq(Result.TIMEOUT), any());
+                    .onTuneFailed(eq(RadioTuner.TUNER_RESULT_TIMEOUT), any());
         }
     }
 
     @Test
-    public void scan_withDirectionDown() throws Exception {
+    public void seek_withDirectionDown() throws Exception {
         long initFreq = AM_FM_FREQUENCY_LIST[2];
         ProgramSelector initialSel = TestUtils.makeFmSelector(initFreq);
-        RadioManager.ProgramInfo scanUpInfo = TestUtils.makeProgramInfo(
+        RadioManager.ProgramInfo seekUpInfo = TestUtils.makeProgramInfo(
                 TestUtils.makeFmSelector(getSeekFrequency(initFreq, /* seekDown= */ true)),
                 SIGNAL_QUALITY);
         openAidlClients(/* numClients= */ 1);
         mHalCurrentInfo = TestUtils.makeHalProgramInfo(
                 Convert.programSelectorToHal(initialSel), SIGNAL_QUALITY);
 
-        mTunerSessions[0].scan(/* directionDown= */ true, /* skipSubChannel= */ false);
+        mTunerSessions[0].seek(/* directionDown= */ true, /* skipSubChannel= */ false);
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT)
-                .onCurrentProgramInfoChanged(scanUpInfo);
+                .onCurrentProgramInfoChanged(seekUpInfo);
     }
 
     @Test

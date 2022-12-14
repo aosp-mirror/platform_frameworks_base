@@ -36,6 +36,7 @@ import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.IServiceCallback;
 import android.os.RemoteException;
@@ -53,6 +54,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTestCase {
+
+    private static final int TARGET_SDK_VERSION = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
     private static final int FM_RADIO_MODULE_ID = 0;
     private static final int DAB_RADIO_MODULE_ID = 1;
@@ -137,7 +140,8 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
         createBroadcastRadioService();
 
         ITuner session = mBroadcastRadioService.openSession(FM_RADIO_MODULE_ID,
-                /* legacyConfig= */ null, /* withAudio= */ true, mTunerCallbackMock);
+                /* legacyConfig= */ null, /* withAudio= */ true, mTunerCallbackMock,
+                TARGET_SDK_VERSION);
 
         assertWithMessage("Session opened in FM radio module")
                 .that(session).isEqualTo(mFmTunerSessionMock);
@@ -148,7 +152,8 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
         createBroadcastRadioService();
 
         ITuner session = mBroadcastRadioService.openSession(DAB_RADIO_MODULE_ID + 1,
-                /* legacyConfig= */ null, /* withAudio= */ true, mTunerCallbackMock);
+                /* legacyConfig= */ null, /* withAudio= */ true, mTunerCallbackMock,
+                TARGET_SDK_VERSION);
 
         assertWithMessage("Session opened with id not found").that(session).isNull();
     }
@@ -160,7 +165,8 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
 
         IllegalStateException thrown = assertThrows(IllegalStateException.class,
                 () -> mBroadcastRadioService.openSession(FM_RADIO_MODULE_ID,
-                        /* legacyConfig= */ null, /* withAudio= */ true, mTunerCallbackMock));
+                        /* legacyConfig= */ null, /* withAudio= */ true, mTunerCallbackMock,
+                        TARGET_SDK_VERSION));
 
         assertWithMessage("Exception for opening session by non-current user")
                 .that(thrown).hasMessageThat().contains("Cannot open session for non-current user");
@@ -228,7 +234,7 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
             return null;
         }).when(mFmBinderMock).linkToDeath(any(), anyInt());
 
-        when(mFmRadioModuleMock.openSession(eq(mTunerCallbackMock)))
+        when(mFmRadioModuleMock.openSession(eq(mTunerCallbackMock), eq(TARGET_SDK_VERSION)))
                 .thenReturn(mFmTunerSessionMock);
     }
 }
