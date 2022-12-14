@@ -3212,6 +3212,104 @@
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SAFE_BOOT"
                 android:protectionLevel="internal|role" />
 
+    <!-- Allows an application to set policy related to restricting a user's ability to use or
+    enable and disable the microphone.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_MICROPHONE"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to restricting a user's ability to use or
+    enable and disable the camera.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_CAMERA"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage policy related to keyguard.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_KEYGUARD"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to account management.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to hiding and suspending packages.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_PACKAGE_STATE"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to force set a new device unlock password or a managed profile
+    challenge on current user.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_RESET_PASSWORD"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to the status bar.-->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_STATUS_BAR"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to bluetooth.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_BLUETOOTH"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to fun.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_FUN"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to airplane mode.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_AIRPLANE_MODE"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to mobile networks.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_MOBILE_NETWORK"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to physical media.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_PHYSICAL_MEDIA"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to sms.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SMS"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to usb file transfers.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER"
+                android:protectionLevel="internal|role" />
+
     <!-- Allows an application to set device policies outside the current user
         that are critical for securing data within the current user.
         <p>Holding this permission allows the use of other held MANAGE_DEVICE_POLICY_*
