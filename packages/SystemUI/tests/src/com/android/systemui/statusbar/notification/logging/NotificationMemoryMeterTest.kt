@@ -23,6 +23,7 @@ import android.app.Person
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Icon
+import android.stats.sysui.NotificationEnums
 import android.testing.AndroidTestingRunner
 import android.widget.RemoteViews
 import androidx.test.filters.SmallTest
@@ -50,7 +51,27 @@ class NotificationMemoryMeterTest : SysuiTestCase() {
             extras = 3316,
             bigPicture = 0,
             extender = 0,
-            style = null,
+            style = NotificationEnums.STYLE_NONE,
+            styleIcon = 0,
+            hasCustomView = false,
+        )
+    }
+
+    @Test
+    fun currentNotificationMemoryUse_rankerGroupNotification() {
+        val notification = createBasicNotification().build()
+        val memoryUse =
+            NotificationMemoryMeter.notificationMemoryUse(
+                createNotificationEntry(createBasicNotification().setGroup("ranker_group").build())
+            )
+        assertNotificationObjectSizes(
+            memoryUse,
+            smallIcon = notification.smallIcon.bitmap.allocationByteCount,
+            largeIcon = notification.getLargeIcon().bitmap.allocationByteCount,
+            extras = 3316,
+            bigPicture = 0,
+            extender = 0,
+            style = NotificationEnums.STYLE_RANKER_GROUP,
             styleIcon = 0,
             hasCustomView = false,
         )
@@ -69,7 +90,7 @@ class NotificationMemoryMeterTest : SysuiTestCase() {
             extras = 3316,
             bigPicture = 0,
             extender = 0,
-            style = null,
+            style = NotificationEnums.STYLE_NONE,
             styleIcon = 0,
             hasCustomView = false,
         )
@@ -92,7 +113,7 @@ class NotificationMemoryMeterTest : SysuiTestCase() {
             extras = 3384,
             bigPicture = 0,
             extender = 0,
-            style = null,
+            style = NotificationEnums.STYLE_NONE,
             styleIcon = 0,
             hasCustomView = true,
         )
@@ -112,7 +133,7 @@ class NotificationMemoryMeterTest : SysuiTestCase() {
             extras = 3212,
             bigPicture = 0,
             extender = 0,
-            style = null,
+            style = NotificationEnums.STYLE_NONE,
             styleIcon = 0,
             hasCustomView = false,
         )
@@ -141,7 +162,7 @@ class NotificationMemoryMeterTest : SysuiTestCase() {
             extras = 4092,
             bigPicture = bigPicture.bitmap.allocationByteCount,
             extender = 0,
-            style = "BigPictureStyle",
+            style = NotificationEnums.STYLE_BIG_PICTURE,
             styleIcon = bigPictureIcon.bitmap.allocationByteCount,
             hasCustomView = false,
         )
@@ -167,7 +188,7 @@ class NotificationMemoryMeterTest : SysuiTestCase() {
             extras = 4084,
             bigPicture = 0,
             extender = 0,
-            style = "CallStyle",
+            style = NotificationEnums.STYLE_CALL,
             styleIcon = personIcon.bitmap.allocationByteCount,
             hasCustomView = false,
         )
@@ -203,7 +224,7 @@ class NotificationMemoryMeterTest : SysuiTestCase() {
             extras = 5024,
             bigPicture = 0,
             extender = 0,
-            style = "MessagingStyle",
+            style = NotificationEnums.STYLE_MESSAGING,
             styleIcon =
                 personIcon.bitmap.allocationByteCount +
                     historicPersonIcon.bitmap.allocationByteCount,
@@ -225,7 +246,7 @@ class NotificationMemoryMeterTest : SysuiTestCase() {
             extras = 3612,
             bigPicture = 0,
             extender = 556656,
-            style = null,
+            style = NotificationEnums.STYLE_NONE,
             styleIcon = 0,
             hasCustomView = false,
         )
@@ -246,7 +267,7 @@ class NotificationMemoryMeterTest : SysuiTestCase() {
             extras = 3820,
             bigPicture = 0,
             extender = 388 + wearBackground.allocationByteCount,
-            style = null,
+            style = NotificationEnums.STYLE_NONE,
             styleIcon = 0,
             hasCustomView = false,
         )
@@ -272,7 +293,7 @@ class NotificationMemoryMeterTest : SysuiTestCase() {
         extras: Int,
         bigPicture: Int,
         extender: Int,
-        style: String?,
+        style: Int,
         styleIcon: Int,
         hasCustomView: Boolean,
     ) {
@@ -282,11 +303,7 @@ class NotificationMemoryMeterTest : SysuiTestCase() {
         assertThat(memoryUse.objectUsage.smallIcon).isEqualTo(smallIcon)
         assertThat(memoryUse.objectUsage.largeIcon).isEqualTo(largeIcon)
         assertThat(memoryUse.objectUsage.bigPicture).isEqualTo(bigPicture)
-        if (style == null) {
-            assertThat(memoryUse.objectUsage.style).isNull()
-        } else {
-            assertThat(memoryUse.objectUsage.style).isEqualTo(style)
-        }
+        assertThat(memoryUse.objectUsage.style).isEqualTo(style)
         assertThat(memoryUse.objectUsage.styleIcon).isEqualTo(styleIcon)
         assertThat(memoryUse.objectUsage.hasCustomView).isEqualTo(hasCustomView)
     }
