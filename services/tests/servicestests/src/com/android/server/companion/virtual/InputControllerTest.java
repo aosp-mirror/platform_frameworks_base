@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -143,4 +144,38 @@ public class InputControllerTest {
         verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(eq(1));
     }
 
+    @Test
+    public void createNavigationTouchpad_hasDeviceId() {
+        final IBinder deviceToken = new Binder();
+        mInputController.createNavigationTouchpad("name", /*vendorId= */ 1, /*productId= */ 1,
+                deviceToken, /* displayId= */ 1, /* touchpadHeight= */ 50, /* touchpadWidth= */ 50);
+
+        int deviceId = mInputController.getInputDeviceId(deviceToken);
+        int[] deviceIds = InputManager.getInstance().getInputDeviceIds();
+
+        assertWithMessage("InputManager's deviceIds list should contain id of the device").that(
+            deviceIds).asList().contains(deviceId);
+    }
+
+    @Test
+    public void createNavigationTouchpad_setsTypeAssociation() {
+        final IBinder deviceToken = new Binder();
+        mInputController.createNavigationTouchpad("name", /*vendorId= */ 1, /*productId= */ 1,
+                deviceToken, /* displayId= */ 1, /* touchpadHeight= */ 50, /* touchpadWidth= */ 50);
+
+        verify(mInputManagerInternalMock).setTypeAssociation(
+                startsWith("virtualNavigationTouchpad:"), eq("touchNavigation"));
+    }
+
+    @Test
+    public void createAndUnregisterNavigationTouchpad_unsetsTypeAssociation() {
+        final IBinder deviceToken = new Binder();
+        mInputController.createNavigationTouchpad("name", /*vendorId= */ 1, /*productId= */ 1,
+                deviceToken, /* displayId= */ 1, /* touchpadHeight= */ 50, /* touchpadWidth= */ 50);
+
+        mInputController.unregisterInputDevice(deviceToken);
+
+        verify(mInputManagerInternalMock).unsetTypeAssociation(
+                startsWith("virtualNavigationTouchpad:"));
+    }
 }

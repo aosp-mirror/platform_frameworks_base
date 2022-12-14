@@ -49,6 +49,8 @@ import android.hardware.input.VirtualKeyboard;
 import android.hardware.input.VirtualKeyboardConfig;
 import android.hardware.input.VirtualMouse;
 import android.hardware.input.VirtualMouseConfig;
+import android.hardware.input.VirtualNavigationTouchpad;
+import android.hardware.input.VirtualNavigationTouchpadConfig;
 import android.hardware.input.VirtualTouchscreen;
 import android.hardware.input.VirtualTouchscreenConfig;
 import android.os.Binder;
@@ -654,6 +656,30 @@ public final class VirtualDeviceManager {
                         "android.hardware.input.VirtualTouchscreen:" + config.getInputDeviceName());
                 mVirtualDevice.createVirtualTouchscreen(config, token);
                 return new VirtualTouchscreen(mVirtualDevice, token);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Creates a virtual touchpad in navigation mode.
+         *
+         * A touchpad in navigation mode means that its events are interpreted as navigation events
+         * (up, down, etc) instead of using them to update a cursor's absolute position. If the
+         * events are not consumed they are converted to DPAD events.
+         *
+         * @param config the configurations of the virtual navigation touchpad.
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        public VirtualNavigationTouchpad createVirtualNavigationTouchpad(
+                 @NonNull VirtualNavigationTouchpadConfig config) {
+            try {
+                final IBinder token = new Binder(
+                        "android.hardware.input.VirtualNavigationTouchpad:"
+                            + config.getInputDeviceName());
+                mVirtualDevice.createVirtualNavigationTouchpad(config, token);
+                return new VirtualNavigationTouchpad(mVirtualDevice, token);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

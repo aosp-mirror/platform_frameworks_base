@@ -248,6 +248,13 @@ public class InputManagerService extends IInputManager.Stub
     @GuardedBy("mAssociationsLock")
     private final Map<String, String> mUniqueIdAssociations = new ArrayMap<>();
 
+    // Stores input ports associated with device types. For example, adding an association
+    // {"123", "touchNavigation"} here would mean that a touch device appearing at port "123" would
+    // enumerate as a "touch navigation" device rather than the default "touchpad as a mouse
+    // pointer" device.
+    @GuardedBy("mAssociationsLock")
+    private final Map<String, String> mDeviceTypeAssociations = new ArrayMap<>();
+
     // Guards per-display input properties and properties relating to the mouse pointer.
     // Threads can wait on this lock to be notified the next time the display on which the mouse
     // pointer is shown has changed.
@@ -1905,6 +1912,23 @@ public class InputManagerService extends IInputManager.Stub
         mNative.changeUniqueIdAssociation();
     }
 
+    void setTypeAssociationInternal(@NonNull String inputPort, @NonNull String type) {
+        Objects.requireNonNull(inputPort);
+        Objects.requireNonNull(type);
+        synchronized (mAssociationsLock) {
+            mDeviceTypeAssociations.put(inputPort, type);
+        }
+        mNative.changeTypeAssociation();
+    }
+
+    void unsetTypeAssociationInternal(@NonNull String inputPort) {
+        Objects.requireNonNull(inputPort);
+        synchronized (mAssociationsLock) {
+            mDeviceTypeAssociations.remove(inputPort);
+        }
+        mNative.changeTypeAssociation();
+    }
+
     @Override // Binder call
     public InputSensorInfo[] getSensorList(int deviceId) {
         return mNative.getSensorList(deviceId);
@@ -2219,6 +2243,13 @@ public class InputManagerService extends IInputManager.Stub
                 mUniqueIdAssociations.forEach((k, v) -> {
                     pw.print("  port: " + k);
                     pw.println("  uniqueId: " + v);
+                });
+            }
+            if (!mDeviceTypeAssociations.isEmpty()) {
+                pw.println("Type Associations:");
+                mDeviceTypeAssociations.forEach((k, v) -> {
+                    pw.print("  port: " + k);
+                    pw.println("  type: " + v);
                 });
             }
         }
@@ -2625,6 +2656,18 @@ public class InputManagerService extends IInputManager.Stub
         final Map<String, String> associations;
         synchronized (mAssociationsLock) {
             associations = new HashMap<>(mUniqueIdAssociations);
+        }
+
+        return flatten(associations);
+    }
+
+    // Native callback
+    @SuppressWarnings("unused")
+    @VisibleForTesting
+    String[] getDeviceTypeAssociations() {
+        final Map<String, String> associations;
+        synchronized (mAssociationsLock) {
+            associations = new HashMap<>(mDeviceTypeAssociations);
         }
 
         return flatten(associations);
@@ -3262,6 +3305,16 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public void decrementKeyboardBacklight(int deviceId) {
             mKeyboardBacklightController.decrementKeyboardBacklight(deviceId);
+        }
+
+        @Override
+        public void setTypeAssociation(@NonNull String inputPort, @NonNull String type) {
+            setTypeAssociationInternal(inputPort, type);
+        }
+
+        @Override
+        public void unsetTypeAssociation(@NonNull String inputPort) {
+            unsetTypeAssociationInternal(inputPort);
         }
     }
 

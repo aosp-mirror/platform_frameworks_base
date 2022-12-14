@@ -69,6 +69,7 @@ import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
+import android.hardware.input.VirtualNavigationTouchpadConfig;
 import android.hardware.input.VirtualTouchEvent;
 import android.hardware.input.VirtualTouchscreenConfig;
 import android.net.MacAddress;
@@ -174,6 +175,14 @@ public class VirtualDeviceManagerServiceTest {
                     .setAssociatedDisplayId(DISPLAY_ID)
                     .setWidthInPixels(WIDTH)
                     .setHeightInPixels(HEIGHT)
+                    .build();
+    private static final VirtualNavigationTouchpadConfig NAVIGATION_TOUCHPAD_CONFIG =
+            new VirtualNavigationTouchpadConfig.Builder(
+                    /* touchpadHeight= */ HEIGHT, /* touchpadWidth= */ WIDTH)
+                    .setVendorId(VENDOR_ID)
+                    .setProductId(PRODUCT_ID)
+                    .setInputDeviceName(DEVICE_NAME)
+                    .setAssociatedDisplayId(DISPLAY_ID)
                     .build();
 
     private Context mContext;
@@ -700,8 +709,67 @@ public class VirtualDeviceManagerServiceTest {
                         .build();
         mDeviceImpl.createVirtualTouchscreen(positiveConfig, BINDER);
         assertWithMessage(
-                "Virtual touchscreen should create input device descriptor on successful creation"
-                        + ".").that(mInputController.getInputDeviceDescriptors()).isNotEmpty();
+            "Virtual touchscreen should create input device descriptor on successful creation"
+                + ".").that(mInputController.getInputDeviceDescriptors()).isNotEmpty();
+    }
+
+    @Test
+    public void createVirtualNavigationTouchpad_noDisplay_failsSecurityException() {
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.createVirtualNavigationTouchpad(NAVIGATION_TOUCHPAD_CONFIG,
+                        BINDER));
+    }
+
+    @Test
+    public void createVirtualNavigationTouchpad_zeroDisplayDimension_failsWithException() {
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
+        assertThrows(IllegalArgumentException.class,
+                () -> {
+                final VirtualNavigationTouchpadConfig zeroConfig =
+                        new VirtualNavigationTouchpadConfig.Builder(
+                                /* touchpadHeight= */ 0, /* touchpadWidth= */ 0)
+                                .setVendorId(VENDOR_ID)
+                                .setProductId(PRODUCT_ID)
+                                .setInputDeviceName(DEVICE_NAME)
+                                .setAssociatedDisplayId(DISPLAY_ID)
+                                .build();
+                mDeviceImpl.createVirtualNavigationTouchpad(zeroConfig, BINDER);
+            });
+    }
+
+    @Test
+    public void createVirtualNavigationTouchpad_negativeDisplayDimension_failsWithException() {
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
+        assertThrows(IllegalArgumentException.class,
+                () -> {
+                    final VirtualNavigationTouchpadConfig zeroConfig =
+                            new VirtualNavigationTouchpadConfig.Builder(
+                                    /* touchpadHeight= */ -50, /* touchpadWidth= */ 50)
+                                    .setVendorId(VENDOR_ID)
+                                    .setProductId(PRODUCT_ID)
+                                    .setInputDeviceName(DEVICE_NAME)
+                                    .setAssociatedDisplayId(DISPLAY_ID)
+                                    .build();
+                mDeviceImpl.createVirtualNavigationTouchpad(zeroConfig, BINDER);
+            });
+    }
+
+    @Test
+    public void createVirtualNavigationTouchpad_positiveDisplayDimension_successful() {
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
+        VirtualNavigationTouchpadConfig positiveConfig =
+                new VirtualNavigationTouchpadConfig.Builder(
+                            /* touchpadHeight= */ 50, /* touchpadWidth= */ 50)
+                        .setVendorId(VENDOR_ID)
+                        .setProductId(PRODUCT_ID)
+                        .setInputDeviceName(DEVICE_NAME)
+                        .setAssociatedDisplayId(DISPLAY_ID)
+                        .build();
+        mDeviceImpl.createVirtualNavigationTouchpad(positiveConfig, BINDER);
+        assertWithMessage(
+            "Virtual navigation touchpad should create input device descriptor on successful "
+            + "creation"
+                + ".").that(mInputController.getInputDeviceDescriptors()).isNotEmpty();
     }
 
     @Test
@@ -745,6 +813,16 @@ public class VirtualDeviceManagerServiceTest {
                 eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
         assertThrows(SecurityException.class,
                 () -> mDeviceImpl.createVirtualTouchscreen(TOUCHSCREEN_CONFIG, BINDER));
+    }
+
+    @Test
+    public void createVirtualNavigationTouchpad_noPermission_failsSecurityException() {
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
+        doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
+                eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.createVirtualNavigationTouchpad(NAVIGATION_TOUCHPAD_CONFIG,
+                        BINDER));
     }
 
     @Test
@@ -811,7 +889,18 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
         mDeviceImpl.createVirtualTouchscreen(TOUCHSCREEN_CONFIG, BINDER);
         assertWithMessage("Virtual touchscreen should register fd when the display matches").that(
-                mInputController.getInputDeviceDescriptors()).isNotEmpty();
+            mInputController.getInputDeviceDescriptors()).isNotEmpty();
+        verify(mNativeWrapperMock).openUinputTouchscreen(eq(DEVICE_NAME), eq(VENDOR_ID),
+                eq(PRODUCT_ID), anyString(), eq(HEIGHT), eq(WIDTH));
+    }
+
+    @Test
+    public void createVirtualNavigationTouchpad_hasDisplay_obtainFileDescriptor() {
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
+        mDeviceImpl.createVirtualNavigationTouchpad(NAVIGATION_TOUCHPAD_CONFIG, BINDER);
+        assertWithMessage("Virtual navigation touchpad should register fd when the display matches")
+            .that(
+            mInputController.getInputDeviceDescriptors()).isNotEmpty();
         verify(mNativeWrapperMock).openUinputTouchscreen(eq(DEVICE_NAME), eq(VENDOR_ID),
                 eq(PRODUCT_ID), anyString(), eq(HEIGHT), eq(WIDTH));
     }
