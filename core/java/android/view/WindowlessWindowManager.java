@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.Nullable;
+import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -53,13 +54,21 @@ public class WindowlessWindowManager implements IWindowSession {
         IBinder mInputChannelToken;
         Region mInputRegion;
         IWindow mClient;
-        State(SurfaceControl sc, WindowManager.LayoutParams p, int displayId,
-              IBinder inputChannelToken, IWindow client) {
+        SurfaceControl mLeash;
+        Rect mFrame;
+        Rect mAttachedFrame;
+
+        State(SurfaceControl sc, WindowManager.LayoutParams p,
+                int displayId, IBinder inputChannelToken, IWindow client, SurfaceControl leash,
+                Rect frame, Rect attachedFrame) {
             mSurfaceControl = sc;
             mParams.copyFrom(p);
             mDisplayId = displayId;
             mInputChannelToken = inputChannelToken;
             mClient = client;
+            mLeash = leash;
+            mFrame = frame;
+            mAttachedFrame = attachedFrame;
         }
     };
 
@@ -85,6 +94,7 @@ public class WindowlessWindowManager implements IWindowSession {
     private InsetsState mInsetsState;
     private final ClientWindowFrames mTmpFrames = new ClientWindowFrames();
     private final MergedConfiguration mTmpConfig = new MergedConfiguration();
+    private final WindowlessWindowLayout mLayout = new WindowlessWindowLayout();
 
     public WindowlessWindowManager(Configuration c, SurfaceControl rootSurface,
             IBinder hostInputToken) {
@@ -137,8 +147,15 @@ public class WindowlessWindowManager implements IWindowSession {
         }
     }
 
-    protected void attachToParentSurface(IWindow window, SurfaceControl.Builder b) {
-        b.setParent(mRootSurface);
+    protected SurfaceControl getParentSurface(IWindow window, WindowManager.LayoutParams attrs) {
+        // If this is the first window, the state map is empty and the parent surface is the
+        // root. Otherwise, the parent surface is in the state map.
+        synchronized (this) {
+            if (mStateForWindow.isEmpty()) {
+                return mRootSurface;
+            }
+            return mStateForWindow.get(attrs.token).mLeash;
+        }
     }
 
     /**
@@ -150,13 +167,20 @@ public class WindowlessWindowManager implements IWindowSession {
             InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl.Array outActiveControls, Rect outAttachedFrame,
             float[] outSizeCompatScale) {
-        final SurfaceControl.Builder b = new SurfaceControl.Builder(mSurfaceSession)
+        final SurfaceControl leash = new SurfaceControl.Builder(mSurfaceSession)
+                .setName(attrs.getTitle().toString() + "Leash")
+                .setCallsite("WindowlessWindowManager.addToDisplay")
+                .setParent(getParentSurface(window, attrs))
+                .build();
+
+        final SurfaceControl sc = new SurfaceControl.Builder(mSurfaceSession)
                 .setFormat(attrs.format)
                 .setBLASTLayer()
                 .setName(attrs.getTitle().toString())
-                .setCallsite("WindowlessWindowManager.addToDisplay");
-        attachToParentSurface(window, b);
-        final SurfaceControl sc = b.build();
+                .setCallsite("WindowlessWindowManager.addToDisplay")
+                .setHidden(false)
+                .setParent(leash)
+                .build();
 
         if (((attrs.inputFeatures &
                 WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL) == 0)) {
@@ -178,11 +202,22 @@ public class WindowlessWindowManager implements IWindowSession {
         }
 
         final State state = new State(sc, attrs, displayId,
-            outInputChannel != null ? outInputChannel.getToken() : null, window);
+                outInputChannel != null ? outInputChannel.getToken() : null, window,
+                leash, /* frame= */ new Rect(), /* attachedFrame= */ null);
+        Rect parentFrame = null;
         synchronized (this) {
+            State parentState = mStateForWindow.get(attrs.token);
+            if (parentState != null) {
+                parentFrame = parentState.mFrame;
+            }
             mStateForWindow.put(window.asBinder(), state);
         }
-        outAttachedFrame.set(0, 0, -1, -1);
+        state.mAttachedFrame = parentFrame;
+        if (parentFrame == null) {
+            outAttachedFrame.set(0, 0, -1, -1);
+        } else {
+            outAttachedFrame.set(parentFrame);
+        }
         outSizeCompatScale[0] = 1f;
 
         final int res = WindowManagerGlobal.ADD_OKAY | WindowManagerGlobal.ADD_FLAG_APP_VISIBLE |
@@ -227,6 +262,7 @@ public class WindowlessWindowManager implements IWindowSession {
                     "Invalid window token (never added or removed already)");
         }
         removeSurface(state.mSurfaceControl);
+        removeSurface(state.mLeash);
     }
 
     /** Separate from {@link #remove} so that subclasses can put removal on a sync transaction. */
@@ -301,6 +337,7 @@ public class WindowlessWindowManager implements IWindowSession {
                     "Invalid window token (never added or removed already)");
         }
         SurfaceControl sc = state.mSurfaceControl;
+        SurfaceControl leash = state.mLeash;
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
 
         int attrChanges = 0;
@@ -309,20 +346,36 @@ public class WindowlessWindowManager implements IWindowSession {
         }
         WindowManager.LayoutParams attrs = state.mParams;
 
+        ClientWindowFrames frames = new ClientWindowFrames();
+        frames.attachedFrame = state.mAttachedFrame;
+
+        mLayout.computeFrames(attrs, null, null, null, WindowConfiguration.WINDOWING_MODE_UNDEFINED,
+                requestedWidth, requestedHeight, 0, 0,
+                frames);
+
+        state.mFrame.set(frames.frame);
+        if (outFrames != null) {
+            outFrames.frame.set(frames.frame);
+            outFrames.parentFrame.set(frames.parentFrame);
+            outFrames.displayFrame.set(frames.displayFrame);
+        }
+
+        t.setPosition(leash, frames.frame.left, frames.frame.top);
+        t.setWindowCrop(leash, frames.frame.width(), frames.frame.height());
+
         if (viewFlags == View.VISIBLE) {
-            t.setOpaque(sc, isOpaque(attrs)).show(sc).apply();
+            // TODO(b/262892794) ViewRootImpl modifies the app's rendering SurfaceControl
+            // opaqueness. We shouldn't need to modify opaqueness for this SurfaceControl here or
+            // in the real WindowManager.
+            t.setOpaque(sc, isOpaque(attrs)).show(leash).apply();
             if (outSurfaceControl != null) {
                 outSurfaceControl.copyFrom(sc, "WindowlessWindowManager.relayout");
             }
         } else {
-            t.hide(sc).apply();
+            t.hide(leash).apply();
             if (outSurfaceControl != null) {
                 outSurfaceControl.release();
             }
-        }
-        if (outFrames != null) {
-            outFrames.frame.set(0, 0, attrs.width, attrs.height);
-            outFrames.displayFrame.set(outFrames.frame);
         }
 
         if (outMergedConfiguration != null) {
