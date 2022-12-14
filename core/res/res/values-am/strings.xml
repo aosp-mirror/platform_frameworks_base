@@ -28,8 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"የድምፅ መልዕክት"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"የተያያዥ ችግር ወይም  ትክከል ያልሆነየMMI ኮድ ባህሪ።"</string>
-    <!-- no translation found for mmiErrorNotSupported (5001803469335286099) -->
-    <skip />
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ባህሪ አይደገፍም።"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"ክዋኔ ለቋሚ መደወያ ቁጥሮች ብቻ ተገድቧል።"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Can not change call forwarding settings from your phone while you are roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"አገልግሎት ነቅቶ ነበር።"</string>
@@ -44,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"ያስገባሃቸው ፒኖች አይዛመዱም"</string>
     <string name="invalidPin" msgid="7542498253319440408">"ከ4 እስከ 8 ቁጥሮች የያዘ ፒን  ተይብ"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"8 ወይም ከዛ በላይ የሆኑ ቁጥሮችንPUK ተይብ።"</string>
-    <string name="needPuk" msgid="7321876090152422918">"SIM ካርድዎ PUK-የተቆለፈ ነው።የPUK ኮዱን በመተየብ ይክፈቱት።"</string>
-    <string name="needPuk2" msgid="7032612093451537186">" SIM ለመክፈት PUK2 ተይብ።"</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"አልተሳካም፣ የሲም/RUIM ቁልፍን አንቃ።"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">ሲምዎ ከመቆለፉ በፊት <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀሩዎታል።</item>
@@ -391,6 +392,14 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"ይህ መተግበሪያ በጀርባ ላይ ማሄድ ይችላል። ይሄ ባትሪውን በይበልጥ ሊጨርሰው ይችላል።"</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"በጀርባ ላይ ውሂብ ይጠቀማል"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"ይህ መተግበሪያ በጀርባ ላይ ውሂብ ሊጠቀም ይችላል። ይሄ የውሂብ ፍጆታን ሊጨምር ይችላል።"</string>
+    <!-- no translation found for permlab_schedule_exact_alarm (6683283918033029730) -->
+    <skip />
+    <!-- no translation found for permdesc_schedule_exact_alarm (8198009212013211497) -->
+    <skip />
+    <!-- no translation found for permlab_use_exact_alarm (348045139777131552) -->
+    <skip />
+    <!-- no translation found for permdesc_use_exact_alarm (7033761461886938912) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="464970041740567970">"ትግበራ ሁልጊዜ አሂድ ላይ አድርግ"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"መተግበሪያው የራሱን ክፍሎች በማህደረ ትውስታ ውስጥ በቋሚነት የሚቀጥሉ እንዲያደርግ ይፈቅድለታል። ይህ ለሌላ መተግበሪያዎች ያለውን ማህደረ ትውስታ በመገደብ ጡባዊ ተኮውን ሊያንቀራፍፈው ይችላል።"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"መተግበሪያው የራሱን ክፍሎች በማህደረ ትውስታ ውስጥ በቋሚነት የሚቀጥሉ እንዲያደርግ ይፈቅድለታል። ይህ ለሌላ መተግበሪያዎች ያለውን ማህደረ ትውስታ በመገደብ የእርስዎን Android TV ሊያንቀራፍፈው ይችላል።"</string>
@@ -419,6 +428,10 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"መተግበሪያው የፊት አገልግሎትን በ«remoteMessaging» ዓይነት እንዲጠቀም ይፈቅዳል"</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"የፊት አገልግሎትን በ«systemExempted» ዓይነት ማስሄድ"</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"መተግበሪያው የፊት አገልግሎትን በ«systemExempted» ዓይነት እንዲጠቀም ይፈቅዳል"</string>
+    <!-- no translation found for permlab_foregroundServiceFileManagement (2585000987966045030) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceFileManagement (417103601269698508) -->
+    <skip />
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"የፊት አገልግሎትን በ«specialUse» ዓይነት ማስሄድ"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"መተግበሪያው የፊት አገልግሎትን በ«specialUse» ዓይነት እንዲጠቀም ይፈቅዳል"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"የመተግበሪያ ማከማቻ ቦታ ለካ"</string>
@@ -956,14 +969,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"እንደገና ሞክር"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"ለሁሉም ባህሪያት እና ውሂብ ያስከፍቱ"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"የመጨረሻውን በመልክ መክፈት ሙከራዎችን አልፏል"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"ምንም ሲም ካርድ የለም"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"በጡባዊ ውስጥ ምንም SIM ካርድ የለም።"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"በእርስዎ Android TV መሣሪያ ላይ ምንም ሲም ካርድ የለም።"</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"በስልክ ውስጥ ምንም SIM ካርድ የለም።"</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"ሲም ካርድ አስገባ፡፡"</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM ካርዱ ጠፍቷል ወይም መነበብ አይችልም።እባክህ SIM ካርድ አስገባ።"</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"የማይሰራ ሲም ካርድ።"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM ካርድህ በቋሚነት ቦዝኗል።\n  ለሌላ SIM ካርድ  የገመድ አልባ አገልግሎት አቅራቢህ ጋር ተገናኝ።"</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"ቀዳሚ ትራክ"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"ቀጣይ ትራክ"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"ለአፍታ አቁም"</string>
@@ -973,10 +994,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"በፍጥነት አሳልፍ"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"የአደጋ ጊዜ ጥሪ ብቻ"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"አውታረመረብ ተሸንጉሯል"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM ካርድበPUK ተዘግቷል።"</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"እባክህ የተጠቃሚ መመሪያን ተመልከት ወይም የደንበኞች አገልግሎትአግኝ።"</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM ካርድ ተዘግቷል።"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"የSIM  ካርድ በመክፈት ላይ..."</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"የመክፈቻ ስርዓተ ጥለቱን <xliff:g id="NUMBER_0">%1$d</xliff:g>ጊዜ በስህተት ስለውታል።\n\nእባክህ እንደገና ከ<xliff:g id="NUMBER_1">%2$d</xliff:g>ሰከንዶች በኋላ ሞክር።"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"<xliff:g id="NUMBER_0">%1$d</xliff:g>ጊዚያቶች የይለፍ ቃልህን በስህተት ተይበኻል፡፡በ<xliff:g id="NUMBER_1">%2$d</xliff:g> ሰኮንዶች ውስጥ \n\nእንደገና ሞክር፡፡"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"<xliff:g id="NUMBER_0">%1$d</xliff:g>ጊዚያቶች ፒንህን በስህተት ተይበኻል፡፡በ\nሰኮንዶች ውስጥ \n<xliff:g id="NUMBER_1">%2$d</xliff:g>እንደገና ሞክር፡፡"</string>
@@ -1231,7 +1255,7 @@
     <string name="use_a_different_app" msgid="4987790276170972776">"የተለየ መተግበሪያ ይጠቀሙ"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"ነባሪ አጽዳ በስርዓት ቅንብሮች  ውስጥ  &gt; Apps &amp;gt፤ወርዷል፡፡"</string>
     <string name="chooseActivity" msgid="8563390197659779956">"ድርጊት ምረጥ"</string>
-    <string name="chooseUsbActivity" msgid="2096269989990986612">"ለUSB መሳሪያ መተግበሪያ ምረጥ"</string>
+    <string name="chooseUsbActivity" msgid="2096269989990986612">"ለUSB መሣሪያ መተግበሪያ ምረጥ"</string>
     <string name="noApplications" msgid="1186909265235544019">"ምንም መተግበሪያዎች ይህን ድርጊት ማከናወን አይችሉም።"</string>
     <string name="aerr_application" msgid="4090916809370389109">"<xliff:g id="APPLICATION">%1$s</xliff:g> አቁሟል"</string>
     <string name="aerr_process" msgid="4268018696970966407">"<xliff:g id="PROCESS">%1$s</xliff:g> ቆሟል"</string>
@@ -1360,10 +1384,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"ይሄንን በኋላ ላይ በቅንብሮች &gt; መተግበሪያዎች ውስጥ ሊቀይሩት ይችላሉ"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"ሁልጊዜ ፍቀድ"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"በጭራሽ አትፍቀድ"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"SIM ካርድ ተወግዷል"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"በትክክል የገባ SIM ካርድ ድጋሚ እስኪያስጀምሩ የተንቀሳቃሽ ስልክ አውታረመረብ አይገኝም።"</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"ተከናውኗል"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"SIM ካርድ አክል"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"የተንቀሳቃሽ አውታረ መረብን ለመድረስ መሣሪያህን ድጋሚ አስነሳ።"</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"ዳግም ጀምር"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"የሞባይል አገልግሎትን አግብር"</string>
@@ -1477,7 +1504,7 @@
     <string name="ext_media_status_missing" msgid="6520746443048867314">"አልገባም"</string>
     <string name="activity_list_empty" msgid="4219430010716034252">"ምንም ተመሳሳይ እንቅስቃሴዎች አልተገኙም።"</string>
     <string name="permlab_route_media_output" msgid="8048124531439513118">"የሚዲያ ውፅዓት ማዛወር"</string>
-    <string name="permdesc_route_media_output" msgid="1759683269387729675">"አንድ መተግበሪያ የሚዲያ ውፅአትን ወደ ሌላ ውጫዊ መሳሪያ እንዲመራ ይፈቅድለታል።"</string>
+    <string name="permdesc_route_media_output" msgid="1759683269387729675">"አንድ መተግበሪያ የሚዲያ ውፅአትን ወደ ሌላ ውጫዊ መሣሪያ እንዲመራ ይፈቅድለታል።"</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"የመጫን ክፍለ ጊዜዎችን ማንበብ"</string>
     <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"መተግበሪያው የመጫን ክፍለ ጊዜዎችን እንዲያነብ ይፈቅድለታል። ይህም ስለ ገቢር የጥቅል ጭነቶች ዝርዝር መረጃን እንዲያይ ይፈቅድለታል።"</string>
     <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"የጭነት ጥቅሎችን መጠየቅ"</string>
@@ -1675,7 +1702,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ለዝርዝር ድምጸ ተያያዥ ሞደምን ያግኙ።"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"የተፈለገውን የፒን ኮድ ያስገቡ"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"የተፈለገውን የፒን ኮድ ያረጋግጡ"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"ሲም ካርዱን በመክፈት ላይ…"</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"ትክክል ያልሆነ ፒን ኮድ።"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"ከ4 እስከ 8 ቁጥሮች የያዘ ፒን ይተይቡ።"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"የPUK ኮድ 8 ቁጥሮች ነው መሆን ያለበት።"</string>
@@ -1732,7 +1760,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"አቋራጩን አጥፋ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"አቋራጭ ይጠቀሙ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ተቃራኒ ቀለም"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"የቀለም ማስተካከያ"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"የአንድ እጅ ሁነታ"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ተጨማሪ ደብዛዛ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"የድምፅ ቁልፎችን ይዟል። <xliff:g id="SERVICE_NAME">%1$s</xliff:g> በርቷል።"</string>
@@ -1863,7 +1892,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"አዲስ ፒን ያረጋግጡ"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"ገደቦችን ለመቀየር ፒን ይፍጠሩ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"ፒኖች አይዛመዱም። እንደገና ይሞክሩ።"</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ፒን በጣም አጭር ነው። ቢያንስ 4 አኃዝ መሆን አለበት።"</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ፒን በጣም አጭር ነው። ቢያንስ 4 አሃዝ መሆን አለበት።"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"ቆይተው እንደገና ይሞክሩ"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ሙሉ ገጽ በማሳየት ላይ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ለመውጣት፣ ከላይ ወደታች ጠረግ ያድርጉ።"</string>
@@ -2318,7 +2347,23 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"የስልኩን ካሜራ ከእርስዎ <xliff:g id="DEVICE">%1$s</xliff:g> መድረስ አይቻልም"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ጡባዊውን ካሜራ ከእርስዎ <xliff:g id="DEVICE">%1$s</xliff:g> መድረስ አይቻልም"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ዥረት በመልቀቅ ላይ ሳለ ይህ ሊደረስበት አይችልም። በምትኩ በስልክዎ ላይ ይሞክሩ።"</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"በዥረት በመልቀቅ ወቅት በስዕል-ላይ-ስዕል ማየት አይችሉም"</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"በዥረት በመልቀቅ ወቅት በሥዕል-ላይ-ሥዕል ማየት አይችሉም"</string>
     <string name="system_locale_title" msgid="711882686834677268">"የሥርዓት ነባሪ"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ካርድ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <!-- no translation found for permlab_companionProfileWatch (2457738382085872542) -->
+    <skip />
+    <!-- no translation found for permdesc_companionProfileWatch (5655698581110449397) -->
+    <skip />
+    <!-- no translation found for permlab_observeCompanionDevicePresence (9008994909653990465) -->
+    <skip />
+    <!-- no translation found for permdesc_observeCompanionDevicePresence (3011699826788697852) -->
+    <skip />
+    <!-- no translation found for permlab_deliverCompanionMessages (3931552294842980887) -->
+    <skip />
+    <!-- no translation found for permdesc_deliverCompanionMessages (2170847384281412850) -->
+    <skip />
+    <!-- no translation found for permlab_startForegroundServicesFromBackground (6363004936218638382) -->
+    <skip />
+    <!-- no translation found for permdesc_startForegroundServicesFromBackground (4071826571656001537) -->
+    <skip />
 </resources>

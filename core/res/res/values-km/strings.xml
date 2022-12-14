@@ -43,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"កូដ​ PIN ដែល​អ្នក​បាន​បញ្ចូល​​មិន​ដូច​គ្នា។"</string>
     <string name="invalidPin" msgid="7542498253319440408">"បញ្ចូល​កូដ PIN ដែល​មាន​​​ពី ៤ ដល់ ៨​លេខ"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"បញ្ចូល​កូដ PUK ដែល​មាន​ពី​ ៨ លេខ​ ឬ​វែង​ជាង​នេះ។"</string>
-    <string name="needPuk" msgid="7321876090152422918">"ស៊ីមកាត​​របស់​អ្នក​ជាប់​កូដ PUK ។ បញ្ចូល​កូដ PUK ដើម្បី​ដោះ​សោ។"</string>
-    <string name="needPuk2" msgid="7032612093451537186">"បញ្ចូល​កូដ PUK2 ដើម្បី​ដោះ​សោ​ស៊ីម​កាត។"</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"បរាជ័យ, បើក​ការ​ចាក់សោ​ស៊ី​ម / RUIM ។"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">អ្នកនៅសល់ការព្យាយាម <xliff:g id="NUMBER_1">%d</xliff:g> ដងទៀត មុនពេលស៊ីមត្រូវចាក់សោ។</item>
@@ -390,6 +392,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"កម្មវិធី​នេះ​អាច​ដំណើរការ​នៅផ្ទៃ​ខាងក្រោយ។ វា​អាច​បណ្តាល​ឲ្យ​ឆាប់​អស់​ថ្ម។"</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"ប្រើប្រាស់​ទិន្នន័យ​នៅផ្ទៃ​ខាង​ក្រោយ"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"កម្មវិធី​នេះ​អាច​ប្រើប្រាស់​ទិន្នន័យ​នៅផ្ទៃ​ខាង​ក្រោយ។ វា​អាច​បណ្តាល​ឲ្យ​ការប្រើប្រាស់​ទិន្នន័យ​កើន​ឡើង។"</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"កំណត់ពេលធ្វើសកម្មភាពតាមពេលវេលាច្បាស់លាស់"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"កម្មវិធីនេះ​អាច​កំណត់​ពេល​ការងារ​ឱ្យ​កើត​ឡើង​នៅ​ពេល​វេលាដែល​ចង់​បាន​ក្នុង​ពេល​អនាគត។ បែបនេះក៏មានន័យថា កម្មវិធីអាចដំណើរការនៅពេលដែលអ្នកមិនកំពុងប្រើឧបករណ៍យ៉ាងសកម្ម។"</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"កំណត់ម៉ោងរោទិ៍ ឬការរំលឹកព្រឹត្តិការណ៍"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"កម្មវិធីនេះអាចកំណត់ពេលធ្វើសកម្មភាពដូចជាម៉ោងរោទ៍ និងការរំលឹក ដើម្បីជូនដំណឹងដល់អ្នកនៅពេលវេលាដែលចង់បានក្នុងពេលអនាគត។"</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"ធ្វើ​ឲ្យ​កម្មវិធី​ដំណើរការ​ជា​និច្ច"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"ឲ្យ​កម្មវិធី​ធ្វើជា​ផ្នែក​​ស្ថិតស្ថេរ​ដោយ​ខ្លួន​ឯង​ក្នុង​អង្គ​ចងចាំ។ វា​អាច​កំណត់​អង្គ​ចងចាំ​ដែល​អាច​ប្រើ​បាន​ចំពោះ​កម្មវិធី​ផ្សេងៗ​ ដោយ​ធ្វើឲ្យ​កុំព្យូទ័រ​បន្ទះ​យឺត។"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"អនុញ្ញាតឱ្យ​កម្មវិធីធ្វើឱ្យ​ផ្នែក​របស់វាបន្តមាននៅ​ក្នុងអង្គចងចាំ។ ការធ្វើបែបនេះអាច​ដាក់កំហិតលើអង្គ​ចងចាំ​ដែលមានសម្រាប់កម្មវិធី​ផ្សេងទៀត ​ដែល​ធ្វើឱ្យឧបករណ៍​ Android TV របស់អ្នក​ដំណើរការយឺត។"</string>
@@ -418,6 +424,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"អនុញ្ញាតឱ្យកម្មវិធីប្រើប្រាស់សេវាកម្មផ្ទៃខាងមុខជាមួយនឹងប្រភេទ \"remoteMessaging\""</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"ដំណើរការសេវាកម្មផ្ទៃខាងមុខជាមួយនឹងប្រភេទ \"systemExempted\""</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"អនុញ្ញាតឱ្យកម្មវិធីប្រើប្រាស់សេវាកម្មផ្ទៃខាងមុខជាមួយនឹងប្រភេទ \"systemExempted\""</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"ដំណើរការសេវាកម្មផ្ទៃខាងមុខជាមួយនឹងប្រភេទ \"fileManagement\""</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"អនុញ្ញាតឱ្យកម្មវិធីប្រើប្រាស់សេវាកម្មផ្ទៃខាងមុខជាមួយនឹងប្រភេទ \"fileManagement\""</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"ដំណើរការសេវាកម្មផ្ទៃខាងមុខជាមួយនឹងប្រភេទ \"specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"អនុញ្ញាតឱ្យកម្មវិធីប្រើប្រាស់សេវាកម្មផ្ទៃខាងមុខជាមួយនឹងប្រភេទ \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"វាស់​ទំហំ​ការ​ផ្ទុក​​កម្មវិធី"</string>
@@ -955,14 +963,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"ព្យាយាម​ម្ដង​ទៀត"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"ដោះសោលក្ខណៈពិសេស និងទិន្នន័យទាំងអស់"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"បាន​លើស​ការ​ព្យាយាម​ដោះ​សោ​តាម​ទម្រង់​មុខ"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"គ្មាន​ស៊ី​ម​កាត"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"គ្មាន​ស៊ីម​កាត​ក្នុង​កុំព្យូទ័រ​បន្ទះ។"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"មិនមានស៊ីមកាត​នៅក្នុង​ឧបករណ៍ Android TV របស់អ្នកទេ។"</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"គ្មាន​ស៊ីម​កាត​ក្នុង​ទូរស័ព្ទ។"</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"បញ្ចូល​​ស៊ី​ម​កាត។"</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"បាត់​ ឬ​មិន​អាច​អាន​ស៊ីម​កាត។ បញ្ចូល​ស៊ីម​កាត។"</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"ស៊ី​ម​កាត​មិន​អាច​ប្រើ​បាន​។"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"ស៊ីម​កាត​របស់​អ្នក​ត្រូវ​បាន​បិទ​ជា​អចិន្ត្រៃយ៍។\n ទាក់ទង​ក្រុមហ៊ុន​ផ្ដល់​សេវាកម្ម​ឥត​ខ្សែ​របស់​អ្នក​សម្រាប់​ស៊ីម​កាត​ផ្សេង។"</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"បទ​មុន"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"បទ​បន្ទាប់"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"ផ្អាក"</string>
@@ -972,10 +988,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"ទៅ​មុខ​​​រហ័ស"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"ការហៅទៅលេខសង្គ្រោះបន្ទាន់​តែប៉ុណ្ណោះ"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"បណ្ដាញ​ជាប់​សោ"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"ស៊ីម​កាត​ជាប់​សោ PUK។"</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"មើល​មគ្គុទ្ទេសក៍​អ្នក​ប្រើ ឬ​ទាក់ទង​សេវា​អតិថិជន។"</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"ស៊ីមកាត​​ជាប់​សោ។"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"កំពុង​ដោះ​សោ​ស៊ីមកាត..."</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"អ្នក​បាន​គូរ​លំនាំ​ដោះ​សោ​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។ \n\nព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_1">%2$d</xliff:g> វិនាទី។"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"អ្នក​បាន​បញ្ចូល​ពាក្យ​សម្ងាត់​របស់​អ្នក​មិន​ត្រឹមត្រូវ <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។ \n\nព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_1">%2$d</xliff:g> វិនាទី។"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"អ្នក​បាន​បញ្ចូល​កូដ​ PIN មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។ \n\n ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_1">%2$d</xliff:g> វិនាទី។"</string>
@@ -1359,10 +1378,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"អ្នក​អាច​ប្ដូរ​វា​ពេល​ក្រោយ​ក្នុង​ការ​កំណត់ &gt; កម្មវិធី"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"អនុញ្ញាត​ជា​និច្ច"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"កុំ​អនុញ្ញាត"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"បាន​ដក​ស៊ីម​កាត​ចេញ"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"បណ្ដាញ​ចល័ត​នឹង​ប្រើ​លែង​បាន​រហូត​ដល់​អ្នក​ចាប់ផ្ដើម​ជា​មួយ​ស៊ីម​កាត​ដែល​បា​បញ្ចូល​ត្រឹមត្រូវ។​"</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"រួចរាល់"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"បាន​បន្ថែម​ស៊ីម​កាត"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"ចាប់ផ្ដើម​ឧបករណ៍​របស់​អ្នក​ឡើង​វិញ ដើម្បី​ចូល​ដំណើរការ​បណ្ដាញ​ចល័ត។"</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"ចាប់ផ្ដើម​ឡើងវិញ"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"បើក​ដំណើរការ​សេវាកម្ម​ទូរសព្ទ​ចល័ត"</string>
@@ -1674,7 +1696,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"ឥឡូវ​ស៊ីមកាត​ត្រូវ​បាន​បិទ។ បញ្ចូល​កូដ PUK ដើម្បី​បន្ត។ ចំពោះ​ព័ត៌មាន​លម្អិត​ទាក់ទង​ក្រុមហ៊ុន​បញ្ជូន​របស់​អ្នក។"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"បញ្ចូល​កូដ PIN ដែល​ចង់​បាន"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"បញ្ជាក់​កូដ PIN ដែល​ចង់​បាន"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"កំពុង​ដោះ​សោ​​ស៊ីម​កាត..."</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"កូដ PIN មិន​ត្រឹមត្រូវ។"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"បញ្ចូល​កូដ PIN ដែល​មាន​ពី ៤ ដល់ ៨ លេខ។"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"លេខ​កូដ PUK គួរតែ​មាន ៨ខ្ទង់"</string>
@@ -1731,7 +1754,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"បិទ​ផ្លូវកាត់"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ប្រើប្រាស់​ផ្លូវកាត់"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"បញ្ច្រាស​ពណ៌"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"ការ​កែតម្រូវ​ពណ៌"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"មុខងារប្រើដៃម្ខាង"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ពន្លឺតិចខ្លាំង"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
@@ -2320,4 +2344,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"មិនអាចមើលរូបក្នុងរូបខណៈពេលកំពុងផ្សាយបានទេ"</string>
     <string name="system_locale_title" msgid="711882686834677268">"លំនាំ​ដើម​ប្រព័ន្ធ"</string>
     <string name="default_card_name" msgid="9198284935962911468">"កាត <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"ការអនុញ្ញាតពីកម្រងព័ត៌មាននាឡិកាដៃគូ ដើម្បីគ្រប់គ្រងនាឡិកា"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"អនុញ្ញាតឱ្យកម្មវិធីដៃគូគ្រប់គ្រងនាឡិកា។"</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"សង្កេតមើលវត្តមានឧបករណ៍ដៃគូ"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"អនុញ្ញាតឱ្យកម្មវិធីដៃគូសង្កេតមើលវត្តមានឧបករណ៍ដៃគូ នៅពេលដែលឧបករណ៍នៅជិត ឬនៅឆ្ងាយ។"</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"បញ្ជូនសារដៃគូ"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"អនុញ្ញាតឱ្យកម្មវិធីដៃគូបញ្ជូនសារដៃគូទៅកាន់ឧបករណ៍ផ្សេងទៀត។"</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"ចាប់ផ្តើមសេវាកម្មផ្ទៃខាងមុខពីផ្ទៃខាងក្រោយ"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"អនុញ្ញាតឱ្យកម្មវិធីដៃគូចាប់ផ្តើមសេវាកម្មផ្ទៃខាងមុខពីផ្ទៃខាងក្រោយ។"</string>
 </resources>

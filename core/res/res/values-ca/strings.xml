@@ -43,10 +43,13 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Els PIN que has introduït no coincideixen."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Escriviu un PIN que tingui de 4 a 8 números."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Introdueix un PUK compost com a mínim de 8 nombres."</string>
-    <string name="needPuk" msgid="7321876090152422918">"La targeta SIM està bloquejada pel PUK. Escriviu el codi PUK per desbloquejar-la."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"Escriviu el PUK2 per desbloquejar la targeta SIM."</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"No és correcte; activa el bloqueig de RUIM/SIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
+      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
       <item quantity="other">Et queden <xliff:g id="NUMBER_1">%d</xliff:g> intents; si no l\'encertes, la SIM es bloquejarà.</item>
       <item quantity="one">Et queda <xliff:g id="NUMBER_0">%d</xliff:g> intent; si no l\'encertes, la SIM es bloquejarà.</item>
     </plurals>
@@ -178,7 +181,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"L\'emmagatzematge del rellotge està ple. Suprimeix uns quants fitxers per alliberar espai."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"L\'espai d\'emmagatzematge del dispositiu Android TV és ple. Suprimeix alguns fitxers per alliberar espai."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"L\'emmagatzematge del telèfon és ple. Suprimeix uns quants fitxers per alliberar espai."</string>
-    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{L\'autoritat de certificació s\'ha instal·lat}other{Les autoritats de certificació s\'han instal·lat}}"</string>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{L\'autoritat de certificació s\'ha instal·lat}many{Certificate authorities installed}other{Les autoritats de certificació s\'han instal·lat}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Per un tercer desconegut"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Per l\'administrador del teu perfil de treball"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Per <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -252,7 +255,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Utilitza aquesta opció en la majoria de circumstàncies. Et permet fer un seguiment del progrés de l\'informe, introduir més dades sobre el problema i fer captures de pantalla. És possible que ometi seccions poc utilitzades que requereixen molt de temps."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Informe complet"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Utilitza aquesta opció perquè la interferència en el sistema sigui mínima si el dispositiu no respon o va massa lent, o bé si necessites totes les seccions de l\'informe. No et permet introduir més dades ni fer més captures de pantalla."</string>
-    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Es farà una captura de pantalla de l\'informe d\'errors d\'aquí a # segon.}other{Es farà una captura de pantalla de l\'informe d\'errors d\'aquí a # segons.}}"</string>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Es farà una captura de pantalla de l\'informe d\'errors d\'aquí a # segon.}many{Taking screenshot for bug report in # seconds.}other{Es farà una captura de pantalla de l\'informe d\'errors d\'aquí a # segons.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"S\'ha fet la captura de pantalla amb l\'informe d\'errors"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"No s\'ha pogut fer la captura de pantalla amb l\'informe d\'errors"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Mode silenciós"</string>
@@ -390,6 +393,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Aquesta aplicació es pot executar en segon pla. Això pot exhaurir la bateria més ràpidament."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"Utilitzar dades en segon pla"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Aquesta aplicació utilitza dades en segon pla. Això incrementa l\'ús de dades."</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"Programa accions amb precisió temporal"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Aquesta aplicació pot programar la feina perquè es faci quan tu vulguis en el futur. Això també significa que l\'aplicació pot executar-se quan no utilitzes activament el dispositiu."</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"Programa alarmes o recordatoris d\'esdeveniments"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Aquesta aplicació pot programar accions, com ara alarmes i recordatoris, per notificar-te quan tu vulguis en el futur."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"fes que l\'aplicació s\'executi sempre"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Permet que l\'aplicació faci que parts de la seva memòria siguin persistents. Aquesta acció pot limitar la memòria disponible per a altres aplicacions i alentir la tauleta."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Permet que l\'aplicació faci que algunes de les seves parts siguin persistents a la memòria. Aquesta acció pot limitar la memòria disponible per a altres aplicacions i alentir el dispositiu Android TV."</string>
@@ -418,6 +425,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Permet que l\'aplicació utilitzi serveis en primer pla amb el tipus \"remoteMessaging\""</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"executa serveis en primer pla amb el tipus \"systemExempted\""</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Permet que l\'aplicació utilitzi serveis en primer pla amb el tipus \"systemExempted\""</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"executa serveis en primer pla amb el tipus \"fileManagement\""</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Permet que l\'aplicació utilitzi serveis en primer pla amb el tipus \"fileManagement\""</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"executa serveis en primer pla amb el tipus \"specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Permet que l\'aplicació utilitzi serveis en primer pla amb el tipus \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"mesura l\'espai d\'emmagatzematge d\'aplicacions"</string>
@@ -955,14 +964,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Torna-ho a provar"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desbl. per accedir a totes les funcions i dades"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"S\'ha superat el nombre màxim d\'intents de Desbloqueig facial"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"No hi ha cap SIM"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"No hi ha cap SIM a la tauleta."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"No hi ha cap targeta SIM al dispositiu Android TV."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"No hi ha cap SIM al telèfon."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Insereix una targeta SIM."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"Falta la targeta SIM o no es pot llegir. Insereix-ne una."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Targeta SIM no utilitzable."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"La targeta SIM està desactivada permanentment.\n Contacta amb el teu proveïdor de serveis sense fil per obtenir-ne una altra."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Pista anterior"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Pista següent"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Posa en pausa"</string>
@@ -972,10 +989,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Avança ràpidament"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Només trucades d\'emergència"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Xarxa bloquejada"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"La targeta SIM està bloquejada pel PUK."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Consulta la guia d\'usuari o posa\'t en contacte amb el servei d\'atenció al client."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"La targeta SIM està bloquejada."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"S\'està desbloquejant la targeta SIM..."</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Has dibuixat el patró de desbloqueig de manera incorrecta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Has escrit malament la contrasenya <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Has escrit malament la contrasenya <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
@@ -1115,7 +1135,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'exploració tàctil. Quan l\'exploració per tàctil està activada, pots escoltar o veure les descripcions del contingut seleccionat o utilitzar gestos per interaccionar amb el telèfon."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"Fa 1 mes"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Fa més d\'1 mes"</string>
-    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Darrer dia (#)}other{# darrers dies}}"</string>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Darrer dia (#)}many{Last # days}other{# darrers dies}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Darrer mes"</string>
     <string name="older" msgid="1645159827884647400">"Més antigues"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"el <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1142,14 +1162,14 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"d\'aquí a <xliff:g id="COUNT">%d</xliff:g> h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"d\'aquí a <xliff:g id="COUNT">%d</xliff:g> d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"d\'aquí a <xliff:g id="COUNT">%d</xliff:g> a"</string>
-    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Fa # minut}other{Fa # minuts}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Fa # hora}other{Fa # hores}}"</string>
-    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Fa # dia}other{Fa # dies}}"</string>
-    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Fa # any}other{Fa # anys}}"</string>
-    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minut}other{# minuts}}"</string>
-    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# hora}other{# hores}}"</string>
-    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# dia}other{# dies}}"</string>
-    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# any}other{# anys}}"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Fa # minut}many{# minutes ago}other{Fa # minuts}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Fa # hora}many{# hours ago}other{Fa # hores}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Fa # dia}many{# days ago}other{Fa # dies}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Fa # any}many{# years ago}other{Fa # anys}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minut}many{# minutes}other{# minuts}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# hora}many{# hours}other{# hores}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# dia}many{# days}other{# dies}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# any}many{# years}other{# anys}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Problema amb el vídeo"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Aquest vídeo no és vàlid per a la reproducció en aquest dispositiu."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"No es pot reproduir aquest vídeo."</string>
@@ -1192,13 +1212,13 @@
     <string name="no" msgid="5122037903299899715">"Cancel·la"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Atenció"</string>
     <string name="loading" msgid="3138021523725055037">"S\'està carregant…"</string>
-    <string name="capital_on" msgid="2770685323900821829">"SÍ"</string>
-    <string name="capital_off" msgid="7443704171014626777">"NO"</string>
+    <string name="capital_on" msgid="2770685323900821829">"ACTIVAT"</string>
+    <string name="capital_off" msgid="7443704171014626777">"DESACTIVAT"</string>
     <string name="checked" msgid="9179896827054513119">"seleccionat"</string>
     <string name="not_checked" msgid="7972320087569023342">"no seleccionat"</string>
     <string name="selected" msgid="6614607926197755875">"seleccionat"</string>
     <string name="not_selected" msgid="410652016565864475">"no seleccionat"</string>
-    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{1 estrella de {max}}other{# estrelles de {max}}}"</string>
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{1 estrella de {max}}many{# stars out of {max}}other{# estrelles de {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"en curs"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Completa l\'acció mitjançant"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Completa l\'acció amb %1$s"</string>
@@ -1359,10 +1379,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Pots canviar aquesta opció més endavant a Configuració &gt; Aplicacions"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Permet sempre"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"No permetis mai"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"Extracció de la targeta SIM"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"La xarxa mòbil no estarà disponible fins que no reiniciïs amb una targeta SIM vàlida inserida."</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"Fet"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"Addició de la targeta SIM"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"Reinicia el dispositiu per accedir a la xarxa mòbil."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Reinicia"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Activa el servei mòbil"</string>
@@ -1537,7 +1560,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Omet"</string>
     <string name="no_matches" msgid="6472699895759164599">"No s\'ha trobat cap coincidència"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Troba-ho a la pàgina"</string>
-    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# coincidència}other{# de {total}}}"</string>
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# coincidència}many{# of {total}}other{# de {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Fet"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"S\'està esborrant l\'emmagatzematge compartit…"</string>
     <string name="share" msgid="4157615043345227321">"Comparteix"</string>
@@ -1674,7 +1697,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"La SIM està desactivada. Introdueix el codi PUK per continuar. Contacta amb l\'operador de telefonia mòbil per obtenir detalls."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Introdueix el codi PIN"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Confirma el codi PIN"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"S\'està desbloquejant la targeta SIM..."</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Codi PIN incorrecte."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Escriu un PIN que tingui de 4 a 8 números."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"El codi PUK ha de tenir 8 números."</string>
@@ -1731,7 +1755,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactiva la drecera"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilitza la drecera"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversió de colors"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Correcció de color"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Mode d\'una mà"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Atenuació extra"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"S\'han mantingut premudes les tecles de volum. S\'ha activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
@@ -1890,14 +1915,14 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Per reduir l\'ús de dades, la funció Estalvi de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vols activar l\'Estalvi de dades?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activa"</string>
-    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Durant 1 minut (fins a les {formattedTime})}other{Durant # minuts (fins a les {formattedTime})}}"</string>
-    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Durant 1 min (fins a les {formattedTime})}other{Durant # min (fins a les {formattedTime})}}"</string>
-    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Durant 1 hora (fins a les {formattedTime})}other{Durant # hores (fins a les {formattedTime})}}"</string>
-    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Durant 1 h (fins a les {formattedTime})}other{Durant # h (fins a les {formattedTime})}}"</string>
-    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Durant 1 minut}other{Durant # minuts}}"</string>
-    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Durant 1 min}other{Durant # min}}"</string>
-    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Durant 1 hora}other{Durant # hores}}"</string>
-    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Durant 1 h}other{Durant # h}}"</string>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Durant 1 minut (fins a les {formattedTime})}many{For # minutes (until {formattedTime})}other{Durant # minuts (fins a les {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Durant 1 min (fins a les {formattedTime})}many{For # min (until {formattedTime})}other{Durant # min (fins a les {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Durant 1 hora (fins a les {formattedTime})}many{For # hours (until {formattedTime})}other{Durant # hores (fins a les {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Durant 1 h (fins a les {formattedTime})}many{For # hr (until {formattedTime})}other{Durant # h (fins a les {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Durant 1 minut}many{For # minutes}other{Durant # minuts}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Durant 1 min}many{For # min}other{Durant # min}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Durant 1 hora}many{For # hours}other{Durant # hores}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Durant 1 h}many{For # hr}other{Durant # h}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Finalitza: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (propera alarma)"</string>
@@ -2030,7 +2055,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Desa per a emplenament automàtic"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"El contingut no es pot emplenar automàticament"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Cap suggeriment d\'emplenament automàtic"</string>
-    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{1 suggeriment d\'emplenament automàtic}other{# suggeriments d\'emplenament automàtic}}"</string>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{1 suggeriment d\'emplenament automàtic}many{# autofill suggestions}other{# suggeriments d\'emplenament automàtic}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Vols desar-ho a "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Vols desar <xliff:g id="TYPE">%1$s</xliff:g> a "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Vols desar <xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> a "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
@@ -2135,7 +2160,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Presentació <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"El Bluetooth es mantindrà activat durant el mode d\'avió"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"S\'està carregant"</string>
-    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} i # fitxer}other{{file_name} i # fitxers}}"</string>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} i # fitxer}many{{file_name} + # files}other{{file_name} i # fitxers}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"No hi ha cap suggeriment de persones amb qui compartir"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Llista d\'aplicacions"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Aquesta aplicació no té permís de gravació, però pot capturar àudio a través d\'aquest dispositiu USB."</string>
@@ -2320,4 +2345,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"No es pot veure el mode de pantalla en pantalla durant la reproducció en continu"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Valor predeterminat del sistema"</string>
     <string name="default_card_name" msgid="9198284935962911468">"TARGETA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Permís del perfil del rellotge perquè l\'aplicació complementària gestioni els rellotges"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"Permet que una aplicació complementària gestioni els rellotges."</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"Detecta la presència de dispositius complementaris"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"Permet que una aplicació complementària detecti la presència de dispositius complementaris quan aquests dispositius estan a prop o lluny."</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"Envia missatges complementaris"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"Permet que una aplicació complementària enviï missatges complementaris a altres dispositius."</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"Inicia serveis en primer pla des d\'un segon pla"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permet que una aplicació complementària iniciï serveis en primer pla des d\'un segon pla."</string>
 </resources>

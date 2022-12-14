@@ -43,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Antamasi PIN-koodit eivät täsmää."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Anna 4–8-numeroinen PIN-koodi."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Kirjoita vähintään 8 numeron pituinen PUK-koodi."</string>
-    <string name="needPuk" msgid="7321876090152422918">"SIM-korttisi on PUK-lukittu. Poista lukitus antamalla PUK-koodi."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"Pura SIM-kortin esto antamalla PUK2-koodi."</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"Epäonnistui, ota SIM-/RUIM-lukitus käyttöön."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">Sinulla on <xliff:g id="NUMBER_1">%d</xliff:g> yritystä jäljellä, ennen kuin SIM-kortti lukitaan.</item>
@@ -390,6 +392,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Tämä sovellus voi toimia taustalla. Tämä saattaa kuluttaa enemmän akkua."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"käyttää dataa taustalla"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Tämä sovellus voi käyttää dataa taustalla. Tämä saattaa lisätä datankulutusta."</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"Toimintojen tarkka ajoittaminen"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Sovellus voi ajoittaa työtä haluttuun aikaan tulevaisuudessa. Tämä tarkoittaa myös sitä, että sovellus voi olla käynnissä myös, kun et käytä laitetta."</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"Hälytysten tai tapahtumamuistutusten ajoittaminen"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Sovellus voi ajoittaa toimintoja, esimerkiksi hälytyksiä ja muistutuksia, haluttuun aikaan tulevaisuudessa."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"sovelluksen asettaminen aina käynnissä olevaksi"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Antaa sovelluksen lisätä omia osiaan muistiin pysyvästi. Tämä voi rajoittaa muiden sovellusten käytettävissä olevaa muistia ja hidastaa tablet-laitteen toimintaa."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Antaa sovelluksen lisätä omia osiaan muistiin pysyvästi. Tämä voi rajoittaa muiden sovellusten käytettävissä olevaa muistia ja hidastaa Android TV ‑laitteen toimintaa."</string>
@@ -418,6 +424,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Sallii sovelluksen käyttää etualan palveluja, joiden tyyppi on \"remoteMessaging\""</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"käyttää etualan palveluja, joiden tyyppi on \"systemExempted\""</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Sallii sovelluksen käyttää etualan palveluja, joiden tyyppi on \"systemExempted\""</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"käyttää etualan palveluja, joiden tyyppi on \"fileManagement\""</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Sallii sovelluksen käyttää etualan palveluja, joiden tyyppi on \"fileManagement\""</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"käyttää etualan palveluja, joiden tyyppi on \"specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Sallii sovelluksen käyttää etualan palveluja, joiden tyyppi on \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"sovellusten tallennustilan mittaaminen"</string>
@@ -955,14 +963,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Yritä uudelleen"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Käytä kaikkia ominaisuuksia avaamalla lukitus."</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Kasvojentunnistusavauksen yrityksiä tehty suurin sallittu määrä."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Ei SIM-korttia"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Tablet-laitteessa ei ole SIM-korttia."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Android TV ‑laitteessa ei ole SIM-korttia."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Puhelimessa ei ole SIM-korttia."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Aseta SIM-kortti."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM-korttia ei löydy tai ei voi lukea. Kytke SIM-kortti."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"SIM-kortti ei kelpaa."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM-kortti on poistettu pysyvästi käytöstä.\n Ota yhteyttä operaattoriisi ja hanki uusi SIM-kortti."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Edellinen raita"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Seuraava raita"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Tauko"</string>
@@ -972,10 +988,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Kelaa eteen"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Vain hätäpuhelut"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Verkko lukittu"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM-kortti on PUK-lukittu."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Katso ohjeita käyttöoppaasta tai ota yhteyttä asiakaspalveluun."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM-kortti on lukittu."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM-kortin lukitusta poistetaan…"</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Olet piirtänyt lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunnin kuluttua."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Olet kirjoittanut salasanan väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunnin kuluttua."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Olet kirjoittanut PIN-koodin väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunnin kuluttua."</string>
@@ -1359,10 +1378,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Muuta kohd. Asetukset &gt; Sovellukset"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Salli aina"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Älä koskaan salli"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"SIM-kortti poistettu"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"Mobiiliverkko ei ole käytettävissä, ennen kuin käynnistät uudelleen kelvollisella laitteeseen kytketyllä SIM-kortilla."</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"Valmis"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"SIM-kortti lisätty"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"Muodosta mobiiliverkkoyhteys käynnistämällä laite uudelleen."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Käynnistä uudelleen"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Aktivoi mobiilipalvelu"</string>
@@ -1674,7 +1696,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM-kortti on nyt poistettu käytöstä. Jatka antamalla PUK-koodi. Saat lisätietoja ottamalla yhteyttä operaattoriin."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Anna haluamasi PIN-koodi"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Vahvista haluamasi PIN-koodi"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM-kortin lukitusta poistetaan…"</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Virheellinen PIN-koodi."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Anna 4–8-numeroinen PIN-koodi."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK-koodissa tulee olla 8 numeroa."</string>
@@ -1731,7 +1754,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Poista pikanäppäin käytöstä"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Käytä pikanäppäintä"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Käänteiset värit"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Värinkorjaus"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Yhden käden moodi"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Erittäin himmeä"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Äänenvoimakkuuspainikkeita painettiin pitkään. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> laitettiin päälle."</string>
@@ -2320,4 +2344,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"Pikkuruutua ei voi nähdä striimauksen aikana"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Järjestelmän oletusarvo"</string>
     <string name="default_card_name" msgid="9198284935962911468">"Kortti: <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Kumppanin kelloprofiilin hallintalupa"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"Sallii kumppanisovelluksen hallita kelloja."</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"Kumppanilaitteen läsnaolon tarkkailu"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"Sallii kumppanisovelluksen tarkkailla kumppanilaitteiden läsnäoloa, kun ne ovat lähellä tai kaukana."</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"Kumppaniviestien toimittaminen"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"Sallii kumppanisovelluksen toimittaa kumppaniviestejä muille laitteille."</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"Etualan palvelujen aloittaminen taustalla"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Sallii kumppanisovelluksen aloittaa etualan palveluja taustalla."</string>
 </resources>

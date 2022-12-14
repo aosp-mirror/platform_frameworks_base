@@ -43,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Впишаните PIN-броеви не се совпаѓаат."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Внеси PIN од 4 до 8 броеви."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Внеси ПУК од 8 броеви или повеќе."</string>
-    <string name="needPuk" msgid="7321876090152422918">"Вашата SIM картичка е заклучена со ПУК код. Внесете го ПУК кодот за да се отклучи."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"Внесете го ПУК2 кодот за да се одблокира SIM картичката."</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"Неуспешно, овозможи заклучување на SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Ви преостануваат уште <xliff:g id="NUMBER_1">%d</xliff:g> обид пред SIM-картичката да се заклучи.</item>
@@ -390,6 +392,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Апликацијава може да работи во заднина. Тоа може побрзо да ја троши батеријата."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"користење мобилен интернет во заднина"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Апликацијава може да користи мобилен интернет во заднина. Тоа може да го зголеми користењето мобилен интернет."</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"Закажување дејства во конкретно време"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Апликацијава може да закажува работа во сакано време во иднината. Ова значи и дека апликацијата може да се извршува кога не го користите телефонот активно."</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"Закажување аларми или потсетници за настани"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Апликацијава може да закажува дејства како аларми и потсетници за да ве извести во сакано време во иднината."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"направи апликацијата постојано да биде активна"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Овозможува апликацијата да прави трајни делови од себеси во меморијата. Ова може да ја ограничи расположливата меморија на други апликации што го забавува таблетот."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Дозволува апликацијата да направи делови од неа да бидат постојани во меморијата. Тоа може да ја ограничи меморијата достапна на други апликации и да го забави вашиот уред Android TV."</string>
@@ -418,6 +424,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Дозволува апликацијата да ги користи во преден план услугите со типот „remoteMessaging“"</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"да извршува во преден план услуга со типот „systemExempted“"</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Дозволува апликацијата да ги користи во преден план услугите со типот „systemExempted“"</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"Извршување услуга во преден план со типот „fileManagement“"</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Дозволува апликацијата да ги користи услугите во преден план со типот „fileManagement“"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"да извршува во преден план услуга со типот „specialUse“"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Дозволува апликацијата да ги користи во преден план услугите со типот „specialUse“"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"измери простор за складирање на апликацијата"</string>
@@ -955,14 +963,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Обидете се повторно"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Отклучи за сите функции и податоци"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Максималниот број обиди на отклучување со лик е надминат"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Нема SIM картичка"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Во таблетот нема SIM картичка."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Нема SIM-картичка во вашиот уред Android TV."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Во телефонот нема SIM картичка."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Вметнете SIM-картичка."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"Нема SIM-картичка или не може да се прочита. Вметнете SIM-картичка."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Неупотреблива SIM картичка."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Вашата SIM-картичка е трајно оневозможена.\nКонтактирајте со давателот на услуги за безжична мрежа за друга SIM-картичка."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Претходна песна"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Следна песна"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Пауза"</string>
@@ -972,10 +988,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Брзо премотај напред"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Само итни повици"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Мрежата е заклучена"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM картичката е заклучена со ПУК код."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Погледнете го Упатството за корисници или контактирајте со Грижа за корисници."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM картичката е заклучена."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM картичката се отклучува..."</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Погрешно сте ја употребиле вашата шема за отклучување <xliff:g id="NUMBER_0">%1$d</xliff:g> пати. \n\nОбидете се повторно за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунди."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Погрешно сте ја впишале вашата лозинка <xliff:g id="NUMBER_0">%1$d</xliff:g> пати. \n\nОбидете се повторно за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунди."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Погрешно сте го впишале вашиот PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> пати. \n\nОбидете се повторно за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунди."</string>
@@ -1359,10 +1378,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Може да го променш ова подоцна во Поставувања &gt; Апликации"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Секогаш дозволувај"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Никогаш не дозволувај"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"SIM картичката е отстранета"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"Мобилната мрежа ќе биде недостапна додека се рестартира со вметната важечка SIM картичка."</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"Готово"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"Додадена е SIM картичка"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"Рестартирај го својот уред за да пристапиш на мобилната мрежа."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Рестартирај"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Активирајте мобилна услуга"</string>
@@ -1674,7 +1696,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM картичката е сега оневозможена. Внесете ПУК код за да продолжите. Контактирајте го операторот за детали."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Внеси посакуван PIN код"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Потврди го саканиот PIN код"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM картичката се отклучува..."</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Погрешен PIN код."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Внесете PIN кој содржи 4-8 броеви."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"ПУК кодот треба да има 8 броеви."</string>
@@ -1731,7 +1754,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Исклучи ја кратенката"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Користи кратенка"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инверзија на бои"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Корекција на бои"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим со една рака"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Дополнително затемнување"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Ги задржавте копчињата за јачина на звук. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е вклучена."</string>
@@ -2320,4 +2344,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"Не може да се прикажува слика во слика при стримување"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Стандардно за системот"</string>
     <string name="default_card_name" msgid="9198284935962911468">"КАРТИЧКА <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Дозвола за профилот на придружен часовник за управување со часовници"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"Дозволува придружна апликација да управува со часовници."</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"Набљудување присуство на придружен уред"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"Дозволува придружна апликација да набљудува присуство на придружни уреди кога тие се во близина или подалеку."</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"Доставување придружни пораки"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"Дозволува придружна апликација да доставува придружни пораки до други уреди."</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"Стартување услуги во преден план од заднина"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Дозволува придружна апликација да започне услуги во преден план од заднината."</string>
 </resources>

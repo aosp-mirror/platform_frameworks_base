@@ -43,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"तुम्ही टाइप केलेले पिन जुळत नाहीत."</string>
     <string name="invalidPin" msgid="7542498253319440408">"4 ते 8 अंकांचा पिन टाइप करा."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"8 अंकांचा किंवा मोठा PUK टाइप करा."</string>
-    <string name="needPuk" msgid="7321876090152422918">"तुमचे सिम कार्ड PUK-लॉक केलेले आहे. ते अनलॉक करण्यासाठी PUK कोड टाइप करा."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"सिम कार्ड अनब्लॉक करण्यासाठी PUK2 टाइप करा."</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"अयशस्वी, सिम/RUIM लॉक सुरू करा."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">सिम लॉक होण्यापूर्वी आपल्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न उर्वरित आहेत.</item>
@@ -390,6 +392,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"हे अ‍ॅप पार्श्वभूमीत सुरू शकते. हे बॅटरी अधिक जलद संपवू शकते."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"पार्श्वभूमीत डेटा वापरा"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"हे अ‍ॅप पार्श्वभूमीत डेटा वापरू शकते. हे डेटाचा वापर वाढवू शकते."</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"अचूक वेळ नमूद केलेल्या कृती शेड्युल करा"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"हे अ‍ॅप हव्या असलेल्या आगामी वेळेसाठी काम करण्याचे शेड्युल करू शकते. याचा अर्थ असादेखील होतो, की तुम्ही सक्रियपणे डिव्हाइस वापरत नसताना अ‍ॅप रन होऊ शकते."</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"अलार्म किंवा इव्हेंट रिमाइंडर शेड्युल करा"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"आगामी वेळेमध्ये तुम्हाला हव्या असलेल्या वेळेला सूचित करण्यासाठी हे अ‍ॅप अलार्म आणि रिमाइंडर यांसारख्या कृती शेड्युल करते."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"अ‍ॅप नेहमी चालवा"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"अ‍ॅप ला मेमरीमध्ये कायम असलेले त्याचे स्वतःचे भाग बनविण्यास अनुमती देते. हे टॅबलेट धीमा करून अन्य अ‍ॅप्सवर उपलब्ध असलेल्या मेमरीवर मर्यादा घालू शकते."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"ॲपला मेमरीमध्ये कायम असलेले त्याचे स्वतःचे भाग बनवण्याची अनुमती देते. हे Android TV डिव्हाइस धीमे करून अन्य ॲप्सवर उपलब्ध असलेल्या मेमरीवर मर्यादा घालू शकते."</string>
@@ -418,6 +424,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"\"remoteMessaging\" प्रकारासोबत अ‍ॅपला फोरग्राउंड सेवांचा वापर करण्याची अनुमती देते"</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"\"systemExempted\" प्रकारासोबत फोरग्राउंड सेवा रन करा"</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"\"systemExempted\" प्रकारासोबत अ‍ॅपला फोरग्राउंड सेवांचा वापर करण्याची अनुमती देते"</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"\"fileManagement\" प्रकारासोबत फोरग्राउंड सेवा रन करा"</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"\"fileManagement\" प्रकारासोबत अ‍ॅपला फोरग्राउंड सेवांचा वापर करण्याची अनुमती देते"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"specialUse\" प्रकारासोबत फोरग्राउंड सेवा रन करा"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"\"specialUse\" प्रकारासोबत अ‍ॅपला फोरग्राउंड सेवांचा वापर करण्याची अनुमती देते"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"अ‍ॅप संचयन स्थान मोजा"</string>
@@ -955,14 +963,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"पुन्हा प्रयत्न करा"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"सर्व वैशिष्‍ट्ये आणि डेटासाठी अनलॉक करा"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"कमाल फेस अनलॉक प्रयत्न ओलांडले"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"सिम कार्ड नाही"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"टॅब्लेटमध्ये सिम कार्ड नाही."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"तुमच्या Android TV डिव्हाइसमध्ये सिम कार्ड नाही."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"फोनमध्ये सिम कार्ड नाही."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"एक सिम कार्ड घाला."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"सिम कार्ड गहाळ झाले आहे किंवा ते वाचनीय नाही. एक सिम कार्ड घाला."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"निरुपयोगी सिम कार्ड."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"तुमचे सिम कार्ड कायमचे अक्षम केले गेले आहे.\n दुसर्‍या सिम कार्डसाठी आपल्‍या वायरलेस सेवा प्रदात्‍यासह संपर्क साधा."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"मागील ट्रॅक"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"पुढील ट्रॅक"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"विराम द्या"</string>
@@ -972,10 +988,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"फास्ट फॉरवर्ड करा"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"फक्त आणीबाणीचे कॉल"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"नेटवर्क लॉक केले"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"सिम कार्ड PUK-लॉक केलेले आहे."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"वापरकर्ता मार्गदर्शक पहा किंवा कस्टमर केअरशी संपर्क साधा."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"सिम कार्ड लॉक केलेले आहे."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"सिम कार्ड अनलॉक करत आहे…"</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"तुम्ही तुमचा अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने काढला. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"तुम्ही तुमचा पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"तुम्ही तुमचा पिन <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
@@ -1359,10 +1378,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"तुम्ही हे नंतर सेटिंग्ज आणि अ‍ॅप्स मध्ये बदलू शकता"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"नेहमी अनुमती द्या"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"कधीही अनुमती देऊ नका"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"सिम कार्ड काढले"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"तुम्ही एक वैध सिम कार्ड घालून सुरू करेपर्यंत मोबाइल नेटवर्क अनुपलब्ध असेल."</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"पूर्ण झाले"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"सिम कार्ड जोडले"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"मोबाइल नेटवर्कवर अ‍ॅक्सेस करण्यासाठी तुमचे डिव्हाइस रीस्टार्ट करा."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"रीस्टार्ट"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"मोबाइल सेवा अ‍ॅक्टिव्हेट करा"</string>
@@ -1674,7 +1696,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"सिम आता अक्षम केले आहे. सुरू ठेवण्यासाठी PUK कोड एंटर करा. तपशीलांसाठी वाहकाशी संपर्क साधा."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"इच्छित पिन कोड एंटर करा"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"इच्छित पिन कोड ची पुष्टी करा"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"सिम कार्ड अनलॉक करत आहे…"</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"अयोग्य पिन कोड."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"4 ते 8 अंक असलेला पिन टाइप करा."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK कोड 8 संख्‍येचा असावा."</string>
@@ -1731,7 +1754,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"शॉर्टकट बंद करा"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"शॉर्टकट वापरा"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रंगांची उलटापालट"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"रंग सुधारणा"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"एकहाती मोड"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"आणखी डिम"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू केला आहे."</string>
@@ -2320,4 +2344,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"स्ट्रीम होत असताना चित्रात-चित्र पाहू शकत नाही"</string>
     <string name="system_locale_title" msgid="711882686834677268">"सिस्टीम डीफॉल्ट"</string>
     <string name="default_card_name" msgid="9198284935962911468">"कार्ड <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"वॉच व्यवस्थापित करण्यासाठी सहयोगी वॉच प्रोफाइलची परवानगी"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"सहयोगी अ‍ॅपला वॉच व्यवस्थापित करण्याची अनुमती देते."</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"सहयोगी डिव्हाइसच्या प्रेझेन्सचे निरीक्षण करा"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"डिव्हाइस जवळपास किंवा दूर असतात, तेव्हा सहयोगी अ‍ॅपला सहयोगी डिव्हाइसच्या प्रेझेन्सचे निरीक्षण करण्याची अनुमती देते."</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"सहयोगी मेसेज डिलिव्हर करा"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"सहयोगी अ‍ॅपला इतर डिव्हाइसवर सहयोगी मेसेज डिलिव्हर करण्याची अनुमती देते."</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"बॅकग्राउंडमधून फोरग्राउंड सेवा सुरू करा"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"सहयोगी अ‍ॅपला बॅकग्राउंडमधून फोरग्राउंड सेवा सुरू करण्याची अनुमती देते."</string>
 </resources>
