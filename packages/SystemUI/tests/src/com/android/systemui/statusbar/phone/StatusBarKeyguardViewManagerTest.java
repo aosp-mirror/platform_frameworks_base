@@ -60,6 +60,7 @@ import com.android.systemui.keyguard.data.BouncerView;
 import com.android.systemui.keyguard.data.BouncerViewDelegate;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
@@ -122,7 +123,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private BouncerViewDelegate mBouncerViewDelegate;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    private KeyguardBouncer.PrimaryBouncerExpansionCallback mBouncerExpansionCallback;
+    private PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback
+            mBouncerExpansionCallback;
     private FakeKeyguardStateController mKeyguardStateController =
             spy(new FakeKeyguardStateController());
 
@@ -183,8 +185,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mNotificationContainer,
                 mBypassController);
         mStatusBarKeyguardViewManager.show(null);
-        ArgumentCaptor<KeyguardBouncer.PrimaryBouncerExpansionCallback> callbackArgumentCaptor =
-                ArgumentCaptor.forClass(KeyguardBouncer.PrimaryBouncerExpansionCallback.class);
+        ArgumentCaptor<PrimaryBouncerExpansionCallback> callbackArgumentCaptor =
+                ArgumentCaptor.forClass(PrimaryBouncerExpansionCallback.class);
         verify(mPrimaryBouncerCallbackInteractor).addBouncerExpansionCallback(
                 callbackArgumentCaptor.capture());
         mBouncerExpansionCallback = callbackArgumentCaptor.getValue();
