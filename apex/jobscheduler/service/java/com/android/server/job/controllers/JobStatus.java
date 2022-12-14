@@ -1382,12 +1382,14 @@ public final class JobStatus {
         return appHasDozeExemption
                 || (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0
                 || ((shouldTreatAsExpeditedJob() || startedAsExpeditedJob)
+                || shouldTreatAsUserInitiated()
                 && (mDynamicConstraints & CONSTRAINT_DEVICE_NOT_DOZING) == 0);
     }
 
     boolean canRunInBatterySaver() {
         return (getInternalFlags() & INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION) != 0
                 || ((shouldTreatAsExpeditedJob() || startedAsExpeditedJob)
+                || shouldTreatAsUserInitiated()
                 && (mDynamicConstraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) == 0);
     }
 
