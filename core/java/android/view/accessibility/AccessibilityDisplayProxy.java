@@ -242,11 +242,7 @@ public abstract class AccessibilityDisplayProxy {
             super(context, executor, new AccessibilityService.Callbacks() {
                 @Override
                 public void onAccessibilityEvent(AccessibilityEvent event) {
-                    // TODO(254545943): Remove check when event processing is done more upstream in
-                    // AccessibilityManagerService.
-                    if (event.getDisplayId() == mDisplayId) {
-                        AccessibilityDisplayProxy.this.onAccessibilityEvent(event);
-                    }
+                    AccessibilityDisplayProxy.this.onAccessibilityEvent(event);
                 }
 
                 @Override
