@@ -776,11 +776,11 @@ public final class VirtualDeviceManager {
 
         private String getVirtualDisplayName() {
             try {
-                // Currently this just use the association ID, which means all of the virtual
-                // displays created using the same virtual device will have the same name. The name
-                // should only be used for informational purposes, and not for identifying the
-                // display in code.
-                return "VirtualDevice_" + mVirtualDevice.getAssociationId();
+                // Currently this just use the device ID, which means all of the virtual displays
+                // created using the same virtual device will have the same name. The name should
+                // only be used for informational purposes, and not for identifying the display in
+                // code.
+                return "VirtualDevice_" + mVirtualDevice.getDeviceId();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
