@@ -23,6 +23,7 @@ import android.app.ActivityThread;
 import android.app.usage.NetworkStats;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
+import android.content.pm.PackageManagerInternal;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.net.ConnectivityManager;
@@ -36,6 +37,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -157,6 +159,56 @@ public class AppStateHelper {
         return false;
     }
 
+    private static boolean containsAny(Collection<String> list, Collection<String> which) {
+        if (list.isEmpty()) {
+            return false;
+        }
+        for (var element : which) {
+            if (list.contains(element)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void addLibraryDependency(ArraySet<String> results, List<String> libPackageNames) {
+        var pmInternal = LocalServices.getService(PackageManagerInternal.class);
+
+        var libraryNames = new ArraySet<String>();
+        var staticSharedLibraryNames = new ArraySet<String>();
+        var sdkLibraryNames = new ArraySet<String>();
+        for (var packageName : libPackageNames) {
+            var pkg = pmInternal.getAndroidPackage(packageName);
+            if (pkg == null) {
+                continue;
+            }
+            libraryNames.addAll(pkg.getLibraryNames());
+            var libraryName = pkg.getStaticSharedLibraryName();
+            if (libraryName != null) {
+                staticSharedLibraryNames.add(libraryName);
+            }
+            libraryName = pkg.getSdkLibraryName();
+            if (libraryName != null) {
+                sdkLibraryNames.add(libraryName);
+            }
+        }
+
+        if (libraryNames.isEmpty()
+                && staticSharedLibraryNames.isEmpty()
+                && sdkLibraryNames.isEmpty()) {
+            return;
+        }
+
+        pmInternal.forEachPackage(pkg -> {
+            if (containsAny(pkg.getUsesLibraries(), libraryNames)
+                    || containsAny(pkg.getUsesOptionalLibraries(), libraryNames)
+                    || containsAny(pkg.getUsesStaticLibraries(), staticSharedLibraryNames)
+                    || containsAny(pkg.getUsesSdkLibraries(), sdkLibraryNames)) {
+                results.add(pkg.getPackageName());
+            }
+        });
+    }
+
     /**
      * True if any app has sent or received network data over the past
      * {@link #ACTIVE_NETWORK_DURATION_MILLIS} milliseconds.
@@ -225,6 +277,7 @@ public class AppStateHelper {
      */
     public List<String> getDependencyPackages(List<String> packageNames) {
         var results = new ArraySet<String>();
+        // Include packages sharing the same process
         var am = mContext.getSystemService(ActivityManager.class);
         for (var info : am.getRunningAppProcesses()) {
             for (var packageName : packageNames) {
@@ -236,10 +289,14 @@ public class AppStateHelper {
                 }
             }
         }
+        // Include packages using bounded services
         var amInternal = LocalServices.getService(ActivityManagerInternal.class);
         for (var packageName : packageNames) {
             results.addAll(amInternal.getClientPackages(packageName));
         }
+        // Include packages using libraries
+        addLibraryDependency(results, packageNames);
+
         return new ArrayList<>(results);
     }
 }
