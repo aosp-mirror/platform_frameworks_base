@@ -202,6 +202,12 @@ public class ActivityOptions extends ComponentOptions {
     private static final String KEY_LOCK_TASK_MODE = "android:activity.lockTaskMode";
 
     /**
+     * Whether the launching app's identity should be available to the launched activity.
+     * @see #setShareIdentityEnabled(boolean)
+     */
+    private static final String KEY_SHARE_IDENTITY = "android:activity.shareIdentity";
+
+    /**
      * The display id the activity should be launched into.
      * @see #setLaunchDisplayId(int)
      * @hide
@@ -457,6 +463,7 @@ public class ActivityOptions extends ComponentOptions {
     private int mLaunchTaskId = -1;
     private int mPendingIntentLaunchFlags;
     private boolean mLockTaskMode = false;
+    private boolean mShareIdentity = false;
     private boolean mDisallowEnterPictureInPictureWhileLaunching;
     private boolean mApplyActivityFlagsForBubbles;
     private boolean mTaskAlwaysOnTop;
@@ -1238,6 +1245,7 @@ public class ActivityOptions extends ComponentOptions {
                 break;
         }
         mLockTaskMode = opts.getBoolean(KEY_LOCK_TASK_MODE, false);
+        mShareIdentity = opts.getBoolean(KEY_SHARE_IDENTITY, false);
         mLaunchDisplayId = opts.getInt(KEY_LAUNCH_DISPLAY_ID, INVALID_DISPLAY);
         mCallerDisplayId = opts.getInt(KEY_CALLER_DISPLAY_ID, INVALID_DISPLAY);
         mLaunchTaskDisplayArea = opts.getParcelable(KEY_LAUNCH_TASK_DISPLAY_AREA_TOKEN, android.window.WindowContainerToken.class);
@@ -1488,6 +1496,20 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /**
+     * Returns whether the launching app has opted-in to sharing its identity with the launched
+     * activity.
+     *
+     * @see #setShareIdentityEnabled(boolean)
+     * @see Activity#getLaunchedFromUid()
+     * @see Activity#getLaunchedFromPackage()
+     *
+     * @hide
+     */
+    public boolean getShareIdentity() {
+        return mShareIdentity;
+    }
+
+    /**
      * Gets whether the activity want to be launched as other theme for the splash screen.
      * @hide
      */
@@ -1556,6 +1578,33 @@ public class ActivityOptions extends ComponentOptions {
      */
     public ActivityOptions setLockTaskEnabled(boolean lockTaskMode) {
         mLockTaskMode = lockTaskMode;
+        return this;
+    }
+
+    /**
+     * Sets whether the identity of the launching app should be shared with the activity.
+     *
+     * <p>Use this option when starting an activity that needs to know the identity of the
+     * launching app; with this set to {@code true}, the activity will have access to the launching
+     * app's package name and uid.
+     *
+     * <p>Defaults to {@code false} if not set.
+     *
+     * <p>Note, even if the launching app does not explicitly enable sharing of its identity, if
+     * the activity is started with {@code Activity#startActivityForResult}, then {@link
+     * Activity#getCallingPackage()} will still return the launching app's package name to
+     * allow validation of the result's recipient. Also, an activity running within a package
+     * signed by the same key used to sign the platform (some system apps such as Settings will
+     * be signed with the platform's key) will have access to the launching app's identity.
+     *
+     * @param shareIdentity whether the launching app's identity should be shared with the activity
+     * @return {@code this} {@link ActivityOptions} instance.
+     * @see Activity#getLaunchedFromPackage()
+     * @see Activity#getLaunchedFromUid()
+     */
+    @NonNull
+    public ActivityOptions setShareIdentityEnabled(boolean shareIdentity) {
+        mShareIdentity = shareIdentity;
         return this;
     }
 
@@ -2039,6 +2088,7 @@ public class ActivityOptions extends ComponentOptions {
                 break;
         }
         mLockTaskMode = otherOptions.mLockTaskMode;
+        mShareIdentity = otherOptions.mShareIdentity;
         mAnimSpecs = otherOptions.mAnimSpecs;
         mAnimationFinishedListener = otherOptions.mAnimationFinishedListener;
         mSpecsFuture = otherOptions.mSpecsFuture;
@@ -2122,6 +2172,9 @@ public class ActivityOptions extends ComponentOptions {
         }
         if (mLockTaskMode) {
             b.putBoolean(KEY_LOCK_TASK_MODE, mLockTaskMode);
+        }
+        if (mShareIdentity) {
+            b.putBoolean(KEY_SHARE_IDENTITY, mShareIdentity);
         }
         if (mLaunchDisplayId != INVALID_DISPLAY) {
             b.putInt(KEY_LAUNCH_DISPLAY_ID, mLaunchDisplayId);

@@ -873,6 +873,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean mEnteringAnimation;
     boolean mOverrideTaskTransition;
     boolean mDismissKeyguard;
+    boolean mShareIdentity;
 
     /** True if the activity has reported stopped; False if the activity becomes visible. */
     boolean mAppStopped;
@@ -1998,6 +1999,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             mOverrideTaskTransition = options.getOverrideTaskTransition();
             mDismissKeyguard = options.getDismissKeyguard();
+            mShareIdentity = options.getShareIdentity();
         }
 
         ColorDisplayService.ColorDisplayServiceInternal cds = LocalServices.getService(

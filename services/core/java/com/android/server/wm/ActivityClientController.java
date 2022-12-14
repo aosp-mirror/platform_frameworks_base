@@ -687,29 +687,32 @@ class ActivityClientController extends IActivityClientController.Stub {
 
     @Override
     public int getLaunchedFromUid(IBinder token) {
-        if (!canGetLaunchedFrom()) {
-            return INVALID_UID;
-        }
+        final int uid = Binder.getCallingUid();
+        final boolean isInternalCaller = isInternalCallerGetLaunchedFrom(uid);
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            return r != null ? r.launchedFromUid : INVALID_UID;
+            if (r != null && (isInternalCaller || r.mShareIdentity || r.launchedFromUid == uid)) {
+                return r.launchedFromUid;
+            }
         }
+        return INVALID_UID;
     }
 
     @Override
     public String getLaunchedFromPackage(IBinder token) {
-        if (!canGetLaunchedFrom()) {
-            return null;
-        }
+        final int uid = Binder.getCallingUid();
+        final boolean isInternalCaller = isInternalCallerGetLaunchedFrom(uid);
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            return r != null ? r.launchedFromPackage : null;
+            if (r != null && (isInternalCaller || r.mShareIdentity || r.launchedFromUid == uid)) {
+                return r.launchedFromPackage;
+            }
         }
+        return null;
     }
 
-    /** Whether the caller can get the package or uid that launched its activity. */
-    private boolean canGetLaunchedFrom() {
-        final int uid = Binder.getCallingUid();
+    /** Whether the call to one of the getLaunchedFrom APIs is performed by an internal caller. */
+    private boolean isInternalCallerGetLaunchedFrom(int uid) {
         if (UserHandle.getAppId(uid) == SYSTEM_UID) {
             return true;
         }

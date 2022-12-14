@@ -6654,16 +6654,64 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Returns the uid who started this activity.
-     * @hide
+     * Returns the uid of the app that initially launched this activity.
+     *
+     * <p>In order to receive the launching app's uid, at least one of the following has to
+     * be met:
+     * <ul>
+     *     <li>The app must call {@link ActivityOptions#setShareIdentityEnabled(boolean)} with a
+     *     value of {@code true} and launch this activity with the resulting {@code
+     *     ActivityOptions}.
+     *     <li>The launched activity has the same uid as the launching app.
+     *     <li>The launched activity is running in a package that is signed with the same key
+     *     used to sign the platform (typically only system packages such as Settings will
+     *     meet this requirement).
+     * </ul>.
+     * These are the same requirements for {@link #getLaunchedFromPackage()}; if any of these are
+     * met, then these methods can be used to obtain the uid and package name of the launching
+     * app. If none are met, then {@link Process#INVALID_UID} is returned.
+     *
+     * <p>Note, even if the above conditions are not met, the launching app's identity may
+     * still be available from {@link #getCallingPackage()} if this activity was started with
+     * {@code Activity#startActivityForResult} to allow validation of the result's recipient.
+     *
+     * @return the uid of the launching app or {@link Process#INVALID_UID} if the current
+     * activity cannot access the identity of the launching app
+     *
+     * @see ActivityOptions#setShareIdentityEnabled(boolean)
+     * @see #getLaunchedFromPackage()
      */
     public int getLaunchedFromUid() {
         return ActivityClient.getInstance().getLaunchedFromUid(getActivityToken());
     }
 
     /**
-     * Returns the package who started this activity.
-     * @hide
+     * Returns the package name of the app that initially launched this activity.
+     *
+     * <p>In order to receive the launching app's package name, at least one of the following has
+     * to be met:
+     * <ul>
+     *     <li>The app must call {@link ActivityOptions#setShareIdentityEnabled(boolean)} with a
+     *     value of {@code true} and launch this activity with the resulting
+     *     {@code ActivityOptions}.
+     *     <li>The launched activity has the same uid as the launching app.
+     *     <li>The launched activity is running in a package that is signed with the same key
+     *     used to sign the platform (typically only system packages such as Settings will
+     *     meet this requirement).
+     * </ul>.
+     * These are the same requirements for {@link #getLaunchedFromUid()}; if any of these are
+     * met, then these methods can be used to obtain the uid and package name of the launching
+     * app. If none are met, then {@code null} is returned.
+     *
+     * <p>Note, even if the above conditions are not met, the launching app's identity may
+     * still be available from {@link #getCallingPackage()} if this activity was started with
+     * {@code Activity#startActivityForResult} to allow validation of the result's recipient.
+     *
+     * @return the package name of the launching app or null if the current activity
+     * cannot access the identity of the launching app
+     *
+     * @see ActivityOptions#setShareIdentityEnabled(boolean)
+     * @see #getLaunchedFromUid()
      */
     @Nullable
     public String getLaunchedFromPackage() {
