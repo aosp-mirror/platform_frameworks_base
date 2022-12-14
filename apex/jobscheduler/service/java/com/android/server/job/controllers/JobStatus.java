@@ -1369,9 +1369,7 @@ public final class JobStatus {
      * @return true if this is a job whose execution should be made visible to the user.
      */
     public boolean isUserVisibleJob() {
-        // TODO(255767350): limit to user-initiated jobs
-        // Placeholder implementation until we have the code in
-        return shouldTreatAsExpeditedJob();
+        return shouldTreatAsUserInitiated();
     }
 
     /**
