@@ -1627,12 +1627,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-576580969": {
-      "message": "viewServerWindowCommand: bootFinished() failed.",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "-576070986": {
       "message": "Performing post-rotate rotation after seamless rotation",
       "level": "INFO",
@@ -1974,6 +1968,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "-254406860": {
+      "message": "Unable to tell MediaProjectionManagerService about visibility change on the active projection: %s",
+      "level": "ERROR",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecorder.java"
     },
     "-251259736": {
       "message": "No longer freezing: %s",
@@ -4152,12 +4152,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
-    },
-    "1903353011": {
-      "message": "notifyAppStopped: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "1912291550": {
       "message": "Sleep still waiting to pause %s",

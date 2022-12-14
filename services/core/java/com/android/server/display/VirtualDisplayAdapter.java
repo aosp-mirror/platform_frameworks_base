@@ -608,6 +608,13 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             // expect), and there will still be letterboxing on the output content since the
             // Surface and VirtualDisplay would then have different aspect ratios.
         }
+
+        @Override
+        public void onCapturedContentVisibilityChanged(boolean isVisible) {
+            // Do nothing when we tell the client that the content has a visibility change - it is
+            // up to them to decide to pause recording, and update their own UI, depending on their
+            // use case.
+        }
     }
 
     @VisibleForTesting
