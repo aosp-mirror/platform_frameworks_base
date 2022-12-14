@@ -1098,6 +1098,18 @@ public final class TvInteractiveAppManager {
             }
         }
 
+        void sendTvRecordingInfo(@Nullable TvRecordingInfo recordingInfo) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendTvRecordingInfo(mToken, recordingInfo, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
         void notifyRecordingStarted(String recordingId) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");

@@ -1370,6 +1370,32 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
+        public void sendTvRecordingInfo(IBinder sessionToken, TvRecordingInfo recordingInfo,
+                int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "sendTvRecordingInfo(recordingInfo=%s)", recordingInfo);
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "sendTvRecordingInfo");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).sendTvRecordingInfo(recordingInfo);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in sendTvRecordingInfo", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void sendSigningResult(
                 IBinder sessionToken, String signingId, byte[] result, int userId) {
             if (DEBUG) {

@@ -23,6 +23,7 @@ import android.media.tv.AdBuffer;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvTrackInfo;
+import android.media.tv.TvRecordingInfo;
 import android.os.Bundle;
 import android.view.Surface;
 
@@ -44,6 +45,7 @@ oneway interface ITvInteractiveAppSession {
     void sendTrackInfoList(in List<TvTrackInfo> tracks);
     void sendCurrentTvInputId(in String inputId);
     void sendSigningResult(in String signingId, in byte[] result);
+    void sendTvRecordingInfo(in TvRecordingInfo recordingInfo);
     void notifyError(in String errMsg, in Bundle params);
     void release();
     void notifyTuned(in Uri channelUri);

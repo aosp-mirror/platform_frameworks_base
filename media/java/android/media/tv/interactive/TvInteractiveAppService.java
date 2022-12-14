@@ -457,6 +457,15 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Receives requested recording info.
+         *
+         * @param recordingInfo The requested recordingh info. Null if recording not found.
+         * @hide
+         */
+        public void onRecordingInfo(@Nullable TvRecordingInfo recordingInfo) {
+        }
+
+        /**
          * Receives started recording's ID.
          *
          * @param recordingId The ID of the recording started. The TV app should provide and
@@ -1139,6 +1148,10 @@ public abstract class TvInteractiveAppService extends Service {
 
         void sendCurrentTvInputId(@Nullable String inputId) {
             onCurrentTvInputId(inputId);
+        }
+
+        void sendTvRecordingInfo(@Nullable TvRecordingInfo recordingInfo) {
+            onRecordingInfo(recordingInfo);
         }
 
         void sendSigningResult(String signingId, byte[] result) {
