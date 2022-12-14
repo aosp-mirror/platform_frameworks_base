@@ -1560,10 +1560,6 @@
     <dimen name="dream_overlay_y_offset">80dp</dimen>
     <dimen name="dream_overlay_exit_y_offset">40dp</dimen>
 
-    <dimen name="dream_aqi_badge_corner_radius">28dp</dimen>
-    <dimen name="dream_aqi_badge_padding_vertical">6dp</dimen>
-    <dimen name="dream_aqi_badge_padding_horizontal">16dp</dimen>
-
     <dimen name="status_view_margin_horizontal">0dp</dimen>
 
     <!-- Media output broadcast dialog QR code picture size -->
