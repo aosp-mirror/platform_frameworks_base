@@ -52,6 +52,7 @@ import android.util.MathUtils;
 import android.util.MutableFloat;
 import android.util.MutableInt;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.Display;
 
 import com.android.internal.R;
@@ -409,6 +410,13 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     private boolean mIsEnabled;
     private boolean mIsInTransition;
+
+    // DPCs following the brightness of this DPC. This is used in concurrent displays mode - there
+    // is one lead display, the additional displays follow the brightness value of the lead display.
+    @GuardedBy("mLock")
+    private SparseArray<DisplayPowerControllerInterface> mDisplayBrightnessFollowers =
+            new SparseArray();
+
     /**
      * Creates the display power controller.
      */
@@ -1110,6 +1118,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         boolean mustInitialize = false;
         int brightnessAdjustmentFlags = 0;
         mTempBrightnessEvent.reset();
+        SparseArray<DisplayPowerControllerInterface> displayBrightnessFollowers;
         synchronized (mLock) {
             if (mStopped) {
                 return;
@@ -1138,6 +1147,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             }
 
             mustNotify = !mDisplayReadyLocked;
+
+            displayBrightnessFollowers = mDisplayBrightnessFollowers.clone();
         }
 
         int state = mDisplayStateController
@@ -1319,6 +1330,11 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             mAppliedThrottling = true;
         } else if (mAppliedThrottling) {
             mAppliedThrottling = false;
+        }
+
+        for (int i = 0; i < displayBrightnessFollowers.size(); i++) {
+            DisplayPowerControllerInterface follower = displayBrightnessFollowers.valueAt(i);
+            follower.setBrightnessToFollow(brightnessState, convertToNits(brightnessState));
         }
 
         if (updateScreenBrightnessSetting) {
@@ -2097,6 +2113,27 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mDisplayBrightnessController.setBrightness(brightnessValue);
     }
 
+    @Override
+    public int getDisplayId() {
+        return mDisplayId;
+    }
+
+    @Override
+    public void setBrightnessToFollow(float leadDisplayBrightness, float nits) {
+        if (mAutomaticBrightnessController == null || nits < 0) {
+            mDisplayBrightnessController.setBrightnessToFollow(leadDisplayBrightness);
+        } else {
+            float brightness = mAutomaticBrightnessController.convertToFloatScale(nits);
+            if (BrightnessUtils.isValidBrightnessValue(brightness)) {
+                mDisplayBrightnessController.setBrightnessToFollow(brightness);
+            } else {
+                // The device does not support nits
+                mDisplayBrightnessController.setBrightnessToFollow(leadDisplayBrightness);
+            }
+        }
+        sendUpdatePowerState();
+    }
+
     private void putAutoBrightnessAdjustmentSetting(float adjustment) {
         if (mDisplayId == Display.DEFAULT_DISPLAY) {
             mAutoBrightnessAdjustment = adjustment;
@@ -2144,6 +2181,27 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             return -1f;
         }
         return mAutomaticBrightnessController.convertToNits(brightness);
+    }
+
+    @Override
+    public void addDisplayBrightnessFollower(DisplayPowerControllerInterface follower) {
+        synchronized (mLock) {
+            mDisplayBrightnessFollowers.append(follower.getDisplayId(), follower);
+        }
+        sendUpdatePowerState();
+    }
+
+    @Override
+    public void clearDisplayBrightnessFollowers() {
+        SparseArray<DisplayPowerControllerInterface> followers;
+        synchronized (mLock) {
+            followers = mDisplayBrightnessFollowers.clone();
+            mDisplayBrightnessFollowers.clear();
+        }
+        for (int i = 0; i < followers.size(); i++) {
+            DisplayPowerControllerInterface follower = followers.valueAt(i);
+            follower.setBrightnessToFollow(PowerManager.BRIGHTNESS_INVALID_FLOAT, /* nits= */ -1);
+        }
     }
 
     @Override

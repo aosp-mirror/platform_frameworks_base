@@ -30,7 +30,8 @@ public class ScreenOffBrightnessStrategy implements DisplayBrightnessStrategy {
     @Override
     public DisplayBrightnessState updateBrightness(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
-        // Todo(brup): Introduce a validator class and add validations before setting the brightness
+        // Todo(b/241308599): Introduce a validator class and add validations before setting
+        // the brightness
         return BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_SCREEN_OFF,
                 PowerManager.BRIGHTNESS_OFF_FLOAT,
                 PowerManager.BRIGHTNESS_OFF_FLOAT);

@@ -16,10 +16,10 @@
 
 package com.android.server.display.brightness.strategy;
 
-
 import static org.junit.Assert.assertEquals;
 
 import android.hardware.display.DisplayManagerInternal;
+import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -33,32 +33,31 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-
-public class OverrideBrightnessStrategyTest {
-    private OverrideBrightnessStrategy mOverrideBrightnessStrategy;
+public class FollowerBrightnessStrategyTest {
+    private FollowerBrightnessStrategy mFollowerBrightnessStrategy;
 
     @Before
     public void before() {
-        mOverrideBrightnessStrategy = new OverrideBrightnessStrategy();
+        mFollowerBrightnessStrategy = new FollowerBrightnessStrategy(Display.DEFAULT_DISPLAY);
     }
 
     @Test
-    public void testUpdateBrightnessWhenScreenDozeStateIsRequested() {
+    public void testUpdateBrightness() {
         DisplayManagerInternal.DisplayPowerRequest
                 displayPowerRequest = new DisplayManagerInternal.DisplayPowerRequest();
-        float overrideBrightness = 0.2f;
-        displayPowerRequest.screenBrightnessOverride = overrideBrightness;
+        float brightnessToFollow = 0.2f;
+        mFollowerBrightnessStrategy.setBrightnessToFollow(brightnessToFollow);
         BrightnessReason brightnessReason = new BrightnessReason();
-        brightnessReason.setReason(BrightnessReason.REASON_OVERRIDE);
+        brightnessReason.setReason(BrightnessReason.REASON_FOLLOWER);
         DisplayBrightnessState expectedDisplayBrightnessState =
                 new DisplayBrightnessState.Builder()
-                        .setBrightness(overrideBrightness)
+                        .setBrightness(brightnessToFollow)
                         .setBrightnessReason(brightnessReason)
-                        .setSdrBrightness(overrideBrightness)
+                        .setSdrBrightness(brightnessToFollow)
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
-                mOverrideBrightnessStrategy.updateBrightness(displayPowerRequest);
-        assertEquals(updatedDisplayBrightnessState, expectedDisplayBrightnessState);
+                mFollowerBrightnessStrategy.updateBrightness(displayPowerRequest);
+        assertEquals(expectedDisplayBrightnessState, updatedDisplayBrightnessState);
     }
 
 }

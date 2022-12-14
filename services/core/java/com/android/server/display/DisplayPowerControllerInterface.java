@@ -161,4 +161,31 @@ public interface DisplayPowerControllerInterface {
      * @param newUserId The new userId
      */
     void onSwitchUser(int newUserId);
+
+    /**
+     * Get the ID of the display associated with this DPC.
+     * @return The display ID
+     */
+    int getDisplayId();
+
+    /**
+     * Set the brightness to follow if this is an additional display in a set of concurrent
+     * displays.
+     * @param leadDisplayBrightness The brightness of the lead display in the set of concurrent
+     *                              displays
+     * @param nits The brightness value in nits if the device supports nits
+     */
+    void setBrightnessToFollow(float leadDisplayBrightness, float nits);
+
+    /**
+     * Add an additional display that will copy the brightness value from this display. This is used
+     * when the device is in concurrent displays mode.
+     * @param follower The DPC that should copy the brightness value from this DPC
+     */
+    void addDisplayBrightnessFollower(DisplayPowerControllerInterface follower);
+
+    /**
+     * Clear all the additional displays following the brightness value of this display.
+     */
+    void clearDisplayBrightnessFollowers();
 }
