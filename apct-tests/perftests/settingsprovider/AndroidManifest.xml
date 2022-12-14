@@ -15,7 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.perftests.multiuser">
+        package="com.android.perftests.settingsprovider">
 
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
@@ -26,6 +26,6 @@
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-            android:targetPackage="com.android.perftests.multiuser"/>
+            android:targetPackage="com.android.perftests.settingsprovider"/>
 
 </manifest>
