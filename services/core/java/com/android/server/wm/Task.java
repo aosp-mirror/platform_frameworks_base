@@ -469,6 +469,7 @@ class Task extends TaskFragment {
 
     // Whether the task is currently being drag-resized
     private boolean mDragResizing;
+    private int mDragResizeMode;
 
     // This represents the last resolved activity values for this task
     // NOTE: This value needs to be persisted with each task
@@ -2809,6 +2810,11 @@ class Task extends TaskFragment {
         }
 
         final Task rootTask = getRootTask();
+        final DisplayContent displayContent = rootTask.getDisplayContent();
+        // It doesn't matter if we in particular are part of the resize, since we couldn't have
+        // a DimLayer anyway if we weren't visible.
+        final boolean dockedResizing = displayContent != null
+                && displayContent.mDividerControllerLocked.isResizing();
         if (inFreeformWindowingMode()) {
             boolean[] foundTop = { false };
             forAllActivities(a -> { getMaxVisibleBounds(a, out, foundTop); });
@@ -2819,10 +2825,18 @@ class Task extends TaskFragment {
 
         if (!matchParentBounds()) {
             // When minimizing the root docked task when going home, we don't adjust the task bounds
-            // so we need to intersect the task bounds with the root task bounds here..
-            rootTask.getBounds(mTmpRect);
-            mTmpRect.intersect(getBounds());
-            out.set(mTmpRect);
+            // so we need to intersect the task bounds with the root task bounds here.
+            //
+            // If we are Docked Resizing with snap points, the task bounds could be smaller than the
+            // root task bounds and so we don't even want to use them. Even if the app should not be
+            // resized the Dim should keep up with the divider.
+            if (dockedResizing) {
+                rootTask.getBounds(out);
+            } else {
+                rootTask.getBounds(mTmpRect);
+                mTmpRect.intersect(getBounds());
+                out.set(mTmpRect);
+            }
         } else {
             out.set(getBounds());
         }
@@ -2853,21 +2867,26 @@ class Task extends TaskFragment {
         }
     }
 
-    void setDragResizing(boolean dragResizing) {
+    void setDragResizing(boolean dragResizing, int dragResizeMode) {
         if (mDragResizing != dragResizing) {
-            // No need to check if allowed if it's leaving dragResize
+            // No need to check if the mode is allowed if it's leaving dragResize
             if (dragResizing
-                    && !(getRootTask().getWindowingMode() == WINDOWING_MODE_FREEFORM)) {
-                throw new IllegalArgumentException("Drag resize not allow for root task id="
-                        + getRootTaskId());
+                    && !DragResizeMode.isModeAllowedForRootTask(getRootTask(), dragResizeMode)) {
+                throw new IllegalArgumentException("Drag resize mode not allow for root task id="
+                        + getRootTaskId() + " dragResizeMode=" + dragResizeMode);
             }
             mDragResizing = dragResizing;
+            mDragResizeMode = dragResizeMode;
             resetDragResizingChangeReported();
         }
     }
 
     boolean isDragResizing() {
         return mDragResizing;
+    }
+
+    int getDragResizeMode() {
+        return mDragResizeMode;
     }
 
     void adjustBoundsForDisplayChangeIfNeeded(final DisplayContent displayContent) {
