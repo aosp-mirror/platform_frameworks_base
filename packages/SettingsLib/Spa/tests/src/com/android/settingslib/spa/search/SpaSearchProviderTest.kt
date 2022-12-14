@@ -41,24 +41,22 @@ class SpaSearchProviderTest {
     private val pageOwner = spaEnvironment.createPage("SppForSearch")
 
     @Test
+    fun testQueryColumnSetup() {
+        Truth.assertThat(QueryEnum.SEARCH_STATIC_DATA_QUERY.columnNames)
+            .containsExactlyElementsIn(QueryEnum.SEARCH_DYNAMIC_DATA_QUERY.columnNames)
+        Truth.assertThat(QueryEnum.SEARCH_MUTABLE_STATUS_DATA_QUERY.columnNames)
+            .containsExactlyElementsIn(QueryEnum.SEARCH_IMMUTABLE_STATUS_DATA_QUERY.columnNames)
+        Truth.assertThat(QueryEnum.SEARCH_STATIC_ROW_QUERY.columnNames)
+            .containsExactlyElementsIn(QueryEnum.SEARCH_DYNAMIC_ROW_QUERY.columnNames)
+    }
+
+    @Test
     fun testQuerySearchStatusData() {
         SpaEnvironmentFactory.reset(spaEnvironment)
 
         val immutableStatus = searchProvider.querySearchImmutableStatusData()
-        Truth.assertThat(immutableStatus.count).isEqualTo(2)
+        Truth.assertThat(immutableStatus.count).isEqualTo(1)
         immutableStatus.moveToFirst()
-        immutableStatus.checkValue(
-            QueryEnum.SEARCH_IMMUTABLE_STATUS_DATA_QUERY,
-            ColumnEnum.ENTRY_ID,
-            pageOwner.getEntryId("SearchStaticWithNoStatus")
-        )
-        immutableStatus.checkValue(
-            QueryEnum.SEARCH_IMMUTABLE_STATUS_DATA_QUERY,
-            ColumnEnum.ENTRY_DISABLED,
-            false.toString()
-        )
-
-        immutableStatus.moveToNext()
         immutableStatus.checkValue(
             QueryEnum.SEARCH_IMMUTABLE_STATUS_DATA_QUERY,
             ColumnEnum.ENTRY_ID,
@@ -161,6 +159,97 @@ class SpaSearchProviderTest {
             QueryEnum.SEARCH_DYNAMIC_DATA_QUERY,
             ColumnEnum.SEARCH_KEYWORD,
             listOf("kw1", "kw2").toString()
+        )
+    }
+
+    @Test
+    fun testQuerySearchIndexRow() {
+        SpaEnvironmentFactory.reset(spaEnvironment)
+
+        val staticRow = searchProvider.querySearchStaticRow()
+        Truth.assertThat(staticRow.count).isEqualTo(1)
+        staticRow.moveToFirst()
+        staticRow.checkValue(
+            QueryEnum.SEARCH_STATIC_ROW_QUERY,
+            ColumnEnum.ENTRY_ID,
+            pageOwner.getEntryId("SearchStaticWithNoStatus")
+        )
+        staticRow.checkValue(
+            QueryEnum.SEARCH_STATIC_ROW_QUERY, ColumnEnum.SEARCH_TITLE, "SearchStaticWithNoStatus"
+        )
+        staticRow.checkValue(
+            QueryEnum.SEARCH_STATIC_ROW_QUERY, ColumnEnum.SEARCH_KEYWORD, listOf("").toString()
+        )
+        staticRow.checkValue(
+            QueryEnum.SEARCH_STATIC_ROW_QUERY,
+            ColumnEnum.SEARCH_PATH,
+            listOf("SearchStaticWithNoStatus", "SppForSearch").toString()
+        )
+        staticRow.checkValue(
+            QueryEnum.SEARCH_STATIC_ROW_QUERY,
+            ColumnEnum.INTENT_TARGET_PACKAGE,
+            spaEnvironment.appContext.packageName
+        )
+        staticRow.checkValue(
+            QueryEnum.SEARCH_STATIC_ROW_QUERY,
+            ColumnEnum.INTENT_TARGET_CLASS,
+            "com.android.settingslib.spa.tests.testutils.BlankActivity"
+        )
+
+        // Check extras in intent
+        val bundle =
+            staticRow.getExtras(QueryEnum.SEARCH_STATIC_ROW_QUERY, ColumnEnum.INTENT_EXTRAS)
+        Truth.assertThat(bundle).isNotNull()
+        Truth.assertThat(bundle!!.size()).isEqualTo(3)
+        Truth.assertThat(bundle.getString("spaActivityDestination")).isEqualTo("SppForSearch")
+        Truth.assertThat(bundle.getString("highlightEntry"))
+            .isEqualTo(pageOwner.getEntryId("SearchStaticWithNoStatus"))
+        Truth.assertThat(bundle.getString("sessionSource")).isEqualTo("search")
+
+        Truth.assertThat(
+            staticRow.getString(
+                QueryEnum.SEARCH_STATIC_ROW_QUERY.columnNames.indexOf(
+                    ColumnEnum.ENTRY_DISABLED
+                )
+            )
+        ).isNull()
+
+        val dynamicRow = searchProvider.querySearchDynamicRow()
+        Truth.assertThat(dynamicRow.count).isEqualTo(3)
+        dynamicRow.moveToFirst()
+        dynamicRow.checkValue(
+            QueryEnum.SEARCH_DYNAMIC_ROW_QUERY,
+            ColumnEnum.ENTRY_ID,
+            pageOwner.getEntryId("SearchStaticWithMutableStatus")
+        )
+        dynamicRow.checkValue(
+            QueryEnum.SEARCH_DYNAMIC_ROW_QUERY, ColumnEnum.ENTRY_DISABLED, false.toString()
+        )
+
+        dynamicRow.moveToNext()
+        dynamicRow.checkValue(
+            QueryEnum.SEARCH_DYNAMIC_ROW_QUERY,
+            ColumnEnum.ENTRY_ID,
+            pageOwner.getEntryId("SearchDynamicWithMutableStatus")
+        )
+        dynamicRow.checkValue(
+            QueryEnum.SEARCH_DYNAMIC_ROW_QUERY, ColumnEnum.ENTRY_DISABLED, true.toString()
+        )
+
+
+        dynamicRow.moveToNext()
+        dynamicRow.checkValue(
+            QueryEnum.SEARCH_DYNAMIC_ROW_QUERY,
+            ColumnEnum.ENTRY_ID,
+            pageOwner.getEntryId("SearchDynamicWithImmutableStatus")
+        )
+        dynamicRow.checkValue(
+            QueryEnum.SEARCH_DYNAMIC_ROW_QUERY,
+            ColumnEnum.SEARCH_KEYWORD,
+            listOf("kw1", "kw2").toString()
+        )
+        dynamicRow.checkValue(
+            QueryEnum.SEARCH_DYNAMIC_ROW_QUERY, ColumnEnum.ENTRY_DISABLED, true.toString()
         )
     }
 }

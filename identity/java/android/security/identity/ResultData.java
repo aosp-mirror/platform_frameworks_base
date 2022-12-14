@@ -134,6 +134,10 @@ public abstract class ResultData {
      */
     public abstract @Nullable byte[] getMessageAuthenticationCode();
 
+    @Nullable byte[] getSignature() {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Returns the static authentication data associated with the dynamic authentication
      * key used to sign or MAC the data returned by {@link #getAuthenticatedData()}.

@@ -3422,6 +3422,11 @@
          phone object irrespective of this config -->
     <bool name="config_switch_phone_on_voice_reg_state_change">true</bool>
 
+    <!-- Config determines whether Memory Availability Notification is supported over Ims so that
+         the RP-SMMA Notification is sent over Ims to SMS Service center indicating that UE can now
+          start receiving SMS after failures due to Memory Full event -->
+    <bool name="config_smma_notification_supported_over_ims">false</bool>
+
     <bool name="config_sms_force_7bit_encoding">false</bool>
 
     <!-- Number of physical SIM slots on the device. This includes both eSIM and pSIM slots, and
@@ -4765,11 +4770,11 @@
     <integer name="config_defaultPeakRefreshRate">0</integer>
 
     <!-- The display uses different gamma curves for different refresh rates. It's hard for panel
-         vendor to tune the curves to have exact same brightness for different refresh rate. So
+         vendors to tune the curves to have exact same brightness for different refresh rate. So
          flicker could be observed at switch time. The issue is worse at the gamma lower end.
          In addition, human eyes are more sensitive to the flicker at darker environment.
          To prevent flicker, we only support higher refresh rates if the display brightness is above
-         a threshold. And the darker environment could have higher threshold.
+         a threshold.
          For example, no higher refresh rate if
              display brightness <= disp0 && ambient brightness <= amb0
              || display brightness <= disp1 && ambient brightness <= amb1 -->
@@ -4791,13 +4796,12 @@
     <integer name="config_defaultRefreshRateInZone">0</integer>
 
     <!-- The display uses different gamma curves for different refresh rates. It's hard for panel
-         vendor to tune the curves to have exact same brightness for different refresh rate. So
+         vendors to tune the curves to have exact same brightness for different refresh rate. So
          flicker could be observed at switch time. The issue can be observed on the screen with
          even full white content at the high brightness. To prevent flickering, we support fixed
          refresh rates if the display and ambient brightness are equal to or above the provided
          thresholds. You can define multiple threshold levels as higher brightness environments
-         may have lower display brightness requirements for the flickering is visible. And the
-         high brightness environment could have higher threshold.
+         may have lower display brightness requirements for the flickering is visible.
          For example, fixed refresh rate if
              display brightness >= disp0 && ambient brightness >= amb0
              || display brightness >= disp1 && ambient brightness >= amb1 -->

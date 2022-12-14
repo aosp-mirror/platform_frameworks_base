@@ -113,6 +113,6 @@
     <bool name="config_dimNonImeAttachedSide">true</bool>
 
     <!-- Components support to launch multiple instances into split-screen -->
-    <string-array name="config_componentsSupportMultiInstancesSplit">
+    <string-array name="config_appsSupportMultiInstancesSplit">
     </string-array>
 </resources>

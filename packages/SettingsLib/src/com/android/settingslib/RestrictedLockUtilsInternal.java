@@ -17,6 +17,7 @@
 package com.android.settingslib;
 
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE;
+import static android.app.admin.DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
 
 import android.annotation.NonNull;
@@ -730,6 +731,26 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
             textView.setCompoundDrawables(null, null, null, null);
         }
         textView.setText(sb);
+    }
+
+    /**
+     * Checks whether MTE (Advanced memory protection) controls are disabled by the enterprise
+     * policy.
+     */
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static EnforcedAdmin checkIfMteIsDisabled(Context context) {
+        final DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        if (dpm.getMtePolicy() == MTE_NOT_CONTROLLED_BY_POLICY) {
+            return null;
+        }
+        EnforcedAdmin admin =
+                RestrictedLockUtils.getProfileOrDeviceOwner(
+                        context, UserHandle.of(UserHandle.USER_SYSTEM));
+        if (admin != null) {
+            return admin;
+        }
+        int profileId = getManagedProfileId(context, UserHandle.USER_SYSTEM);
+        return RestrictedLockUtils.getProfileOrDeviceOwner(context, UserHandle.of(profileId));
     }
 
     /**

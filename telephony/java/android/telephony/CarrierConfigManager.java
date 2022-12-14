@@ -52,6 +52,7 @@ import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -9957,10 +9958,13 @@ public class CarrierConfigManager {
      * @param subId the subscription ID, normally obtained from {@link SubscriptionManager}.
      * @return A {@link PersistableBundle} containing the config for the given subId, or default
      *         values for an invalid subId.
+     *
+     * @deprecated Use {@link #getConfigForSubId(int, String...)} instead.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     @Nullable
+    @Deprecated
     public PersistableBundle getConfigForSubId(int subId) {
         try {
             ICarrierConfigLoader loader = getICarrierConfigLoader();
@@ -9976,6 +9980,58 @@ public class CarrierConfigManager {
                     + ex.toString());
         }
         return null;
+    }
+
+    /**
+     * Gets the configuration values of the specified keys for a particular subscription.
+     *
+     * <p>If an invalid subId is used, the returned configuration will contain default values for
+     * the specified keys.
+     *
+     * <p>After using this method to get the configuration bundle,
+     * {@link #isConfigForIdentifiedCarrier(PersistableBundle)} should be called to confirm whether
+     * any carrier specific configuration has been applied.
+     *
+     * <p>Note that on success, the key/value for {@link #KEY_CARRIER_CONFIG_VERSION_STRING} and
+     * {@link #KEY_CARRIER_CONFIG_APPLIED_BOOL} are always in the returned bundle, no matter if they
+     * were explicitly requested.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}, or the calling app
+     * has carrier privileges on the specified subscription (see
+     * {@link TelephonyManager#hasCarrierPrivileges()}).
+     *
+     * @param subId The subscription ID on which the carrier config should be retrieved.
+     * @param keys  The carrier config keys to retrieve values.
+     * @return A {@link PersistableBundle} with key/value mapping for the specified configuration
+     * on success, or an empty (but never null) bundle on failure (for example, when no value for
+     * the specified key can be found).
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            "carrier privileges",
+    })
+    @NonNull
+    public PersistableBundle getConfigForSubId(int subId, @NonNull String... keys) {
+        Objects.requireNonNull(keys, "Config keys should be non-null");
+        for (String key : keys) {
+            Objects.requireNonNull(key, "Config key should be non-null");
+        }
+
+        try {
+            ICarrierConfigLoader loader = getICarrierConfigLoader();
+            if (loader == null) {
+                Rlog.w(TAG, "Error getting config for subId " + subId
+                        + " ICarrierConfigLoader is null");
+                throw new IllegalStateException("Carrier config loader is not available.");
+            }
+            return loader.getConfigSubsetForSubIdWithFeature(subId, mContext.getOpPackageName(),
+                    mContext.getAttributionTag(), keys);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "Error getting config for subId " + subId + ": " + ex);
+            ex.rethrowAsRuntimeException();
+        }
+        return new PersistableBundle();
     }
 
     /**
@@ -10052,12 +10108,47 @@ public class CarrierConfigManager {
      * has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges()}).
      *
      * @see #getConfigForSubId
+     * @see #getConfig(String...)
+     * @deprecated use {@link #getConfig(String...)} instead.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     @Nullable
+    @Deprecated
     public PersistableBundle getConfig() {
         return getConfigForSubId(SubscriptionManager.getDefaultSubscriptionId());
+    }
+
+    /**
+     * Gets the configuration values of the specified config keys applied for the default
+     * subscription.
+     *
+     * <p>After using this method to get the configuration bundle, {@link
+     * #isConfigForIdentifiedCarrier(PersistableBundle)} should be called to confirm whether any
+     * carrier specific configuration has been applied.
+     *
+     * <p>Note that on success, the key/value for {@link #KEY_CARRIER_CONFIG_VERSION_STRING} and
+     * {@link #KEY_CARRIER_CONFIG_APPLIED_BOOL} are always in the returned bundle, no matter if
+     * they were explicitly requested.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}, or the calling app
+     * has carrier privileges for the default subscription (see
+     * {@link TelephonyManager#hasCarrierPrivileges()}).
+     *
+     * @param keys The config keys to retrieve values
+     * @return A {@link PersistableBundle} with key/value mapping for the specified carrier
+     * configs on success, or an empty (but never null) bundle on failure.
+     * @see #getConfigForSubId(int, String...)
+     * @see SubscriptionManager#getDefaultSubscriptionId()
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            "carrier privileges",
+    })
+    @NonNull
+    public PersistableBundle getConfig(@NonNull String... keys) {
+        return getConfigForSubId(SubscriptionManager.getDefaultSubscriptionId(), keys);
     }
 
     /**

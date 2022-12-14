@@ -43,6 +43,7 @@ import android.hardware.camera2.extension.IInitializeSessionCallback;
 import android.hardware.camera2.extension.IPreviewExtenderImpl;
 import android.hardware.camera2.extension.IProcessResultImpl;
 import android.hardware.camera2.extension.IRequestUpdateProcessorImpl;
+import android.hardware.camera2.extension.LatencyPair;
 import android.hardware.camera2.extension.ParcelImage;
 import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
@@ -59,6 +60,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pair;
+import android.util.Range;
 import android.util.Size;
 import android.view.Surface;
 
@@ -462,6 +464,28 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     public @NonNull CameraDevice getDevice() {
         synchronized (mInterfaceLock) {
             return mCameraDevice;
+        }
+    }
+
+    @Override
+    public Pair<Long, Long> getRealtimeStillCaptureLatency() throws CameraAccessException {
+        synchronized (mInterfaceLock) {
+            if (!mInitialized) {
+                throw new IllegalStateException("Uninitialized component");
+            }
+
+            try {
+                LatencyPair latency = mImageExtender.getRealtimeCaptureLatency();
+                if (latency != null) {
+                    return new Pair<>(latency.first, latency.second);
+                }
+
+                return null;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to query realtime latency! Extension service does not "
+                        + "respond");
+                throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);
+            }
         }
     }
 

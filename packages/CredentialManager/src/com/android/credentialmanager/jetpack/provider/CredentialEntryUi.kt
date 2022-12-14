@@ -16,8 +16,8 @@
 
 package com.android.credentialmanager.jetpack.provider
 
+import android.app.PendingIntent
 import android.app.slice.Slice
-import android.credentials.ui.Entry
 import android.graphics.drawable.Icon
 
 /**
@@ -32,38 +32,57 @@ class CredentialEntryUi(
   val userDisplayName: CharSequence?,
   val entryIcon: Icon?,
   val lastUsedTimeMillis: Long?,
+  // TODO: Remove note
   val note: CharSequence?,
 ) {
   companion object {
-    fun fromSlice(slice: Slice): CredentialEntryUi {
-      var credentialType = slice.spec!!.type
-      var credentialTypeDisplayName: CharSequence? = null
-      var userName: CharSequence? = null
-      var userDisplayName: CharSequence? = null
-      var entryIcon: Icon? = null
-      var lastUsedTimeMillis: Long? = null
-      var note: CharSequence? = null
+    // Copied over from jetpack
+    const val SLICE_HINT_TYPE_DISPLAY_NAME =
+            "androidx.credentials.provider.credentialEntry.SLICE_HINT_TYPE_DISPLAY_NAME"
+    const val SLICE_HINT_USERNAME =
+            "androidx.credentials.provider.credentialEntry.SLICE_HINT_USER_NAME"
+    const val SLICE_HINT_DISPLAYNAME =
+            "androidx.credentials.provider.credentialEntry.SLICE_HINT_CREDENTIAL_TYPE_DISPLAY_NAME"
+    const val SLICE_HINT_LAST_USED_TIME_MILLIS =
+            "androidx.credentials.provider.credentialEntry.SLICE_HINT_LAST_USED_TIME_MILLIS"
+    const val SLICE_HINT_ICON =
+            "androidx.credentials.provider.credentialEntry.SLICE_HINT_PROFILE_ICON"
+    const val SLICE_HINT_PENDING_INTENT =
+            "androidx.credentials.provider.credentialEntry.SLICE_HINT_PENDING_INTENT"
 
-      val items = slice.items
-      items.forEach {
-        if (it.hasHint(Entry.HINT_CREDENTIAL_TYPE_DISPLAY_NAME)) {
-          credentialTypeDisplayName = it.text
-        } else if (it.hasHint(Entry.HINT_USER_NAME)) {
-          userName = it.text
-        } else if (it.hasHint(Entry.HINT_PASSKEY_USER_DISPLAY_NAME)) {
-          userDisplayName = it.text
-        } else if (it.hasHint(Entry.HINT_PROFILE_ICON)) {
-          entryIcon = it.icon
-        } else if (it.hasHint(Entry.HINT_LAST_USED_TIME_MILLIS)) {
+    /**
+     * Returns an instance of [CredentialEntryUi] derived from a [Slice] object.
+     *
+     * @param slice the [Slice] object constructed through jetpack library
+     */
+    @JvmStatic
+    fun fromSlice(slice: Slice): CredentialEntryUi {
+      var username: CharSequence? = null
+      var displayName: CharSequence = ""
+      var icon: Icon? = null
+      var pendingIntent: PendingIntent? = null
+      var lastUsedTimeMillis: Long = 0
+      var note: CharSequence? = null
+      var typeDisplayName: CharSequence = ""
+
+      slice.items.forEach {
+        if (it.hasHint(SLICE_HINT_TYPE_DISPLAY_NAME)) {
+          typeDisplayName = it.text
+        } else if (it.hasHint(SLICE_HINT_USERNAME)) {
+          username = it.text
+        } else if (it.hasHint(SLICE_HINT_DISPLAYNAME)) {
+          displayName = it.text
+        } else if (it.hasHint(SLICE_HINT_ICON)) {
+          icon = it.icon
+        } else if (it.hasHint(SLICE_HINT_PENDING_INTENT)) {
+          pendingIntent = it.action
+        } else if (it.hasHint(SLICE_HINT_LAST_USED_TIME_MILLIS)) {
           lastUsedTimeMillis = it.long
-        } else if (it.hasHint(Entry.HINT_NOTE)) {
-          note = it.text
         }
       }
-
       return CredentialEntryUi(
-        credentialType, credentialTypeDisplayName!!, userName!!, userDisplayName, entryIcon,
-        lastUsedTimeMillis, note,
+              slice.spec!!.type, typeDisplayName, username!!, displayName, icon,
+              lastUsedTimeMillis, note,
       )
     }
   }

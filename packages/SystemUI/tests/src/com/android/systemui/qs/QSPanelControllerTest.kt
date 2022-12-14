@@ -1,9 +1,12 @@
 package com.android.systemui.qs
 
+import android.content.res.Configuration
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
+import android.testing.TestableResources
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
@@ -26,10 +29,11 @@ import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.any
+import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -54,8 +58,11 @@ class QSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var otherTile: QSTile
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock private lateinit var featureFlags: FeatureFlags
+    @Mock private lateinit var configuration: Configuration
+    @Mock private lateinit var pagedTileLayout: PagedTileLayout
 
     private lateinit var controller: QSPanelController
+    private val testableResources: TestableResources = mContext.orCreateTestableResources
 
     @Before
     fun setUp() {
@@ -63,7 +70,9 @@ class QSPanelControllerTest : SysuiTestCase() {
 
         whenever(brightnessSliderFactory.create(any(), any())).thenReturn(brightnessSlider)
         whenever(brightnessControllerFactory.create(any())).thenReturn(brightnessController)
-        whenever(qsPanel.resources).thenReturn(mContext.orCreateTestableResources.resources)
+        testableResources.addOverride(R.bool.config_use_split_notification_shade, false)
+        whenever(qsPanel.resources).thenReturn(testableResources.resources)
+        whenever(qsPanel.getOrCreateTileLayout()).thenReturn(pagedTileLayout)
         whenever(statusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(false)
         whenever(qsPanel.setListening(anyBoolean())).then {
             whenever(qsPanel.isListening).thenReturn(it.getArgument(0))
@@ -120,5 +129,16 @@ class QSPanelControllerTest : SysuiTestCase() {
         assertThat(controller.isBouncerInTransit()).isEqualTo(true)
         whenever(statusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(false)
         assertThat(controller.isBouncerInTransit()).isEqualTo(false)
+    }
+
+    @Test
+    fun configurationChange_onlySplitShadeConfigChanges_tileAreRedistributed() {
+        testableResources.addOverride(R.bool.config_use_split_notification_shade, false)
+        controller.mOnConfigurationChangedListener.onConfigurationChange(configuration)
+        verify(pagedTileLayout, never()).forceTilesRedistribution()
+
+        testableResources.addOverride(R.bool.config_use_split_notification_shade, true)
+        controller.mOnConfigurationChangedListener.onConfigurationChange(configuration)
+        verify(pagedTileLayout).forceTilesRedistribution()
     }
 }

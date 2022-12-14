@@ -18,6 +18,8 @@ package com.android.server.pm;
 
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.os.Binder;
+import android.provider.DeviceConfig;
 
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.resolution.ComponentResolverApi;
@@ -31,6 +33,30 @@ import java.util.function.Function;
  * Cross Profile intent resolution strategy used for and to clone profile.
  */
 public class CloneProfileResolver extends CrossProfileResolver {
+
+    /**
+     * Feature flag to allow/restrict intent redirection from/to clone profile.
+     * Default value is false,this is to ensure that framework is not impacted by intent redirection
+     * till we are ready to launch.
+     * From Android U onwards, this would be set to true and eventually removed.
+     * @hide
+     */
+    private static final String FLAG_ALLOW_INTENT_REDIRECTION_FOR_CLONE_PROFILE =
+            "allow_intent_redirection_for_clone_profile";
+
+    /**
+     * Returns true if intent redirection for clone profile feature flag is set
+     * @return value of flag allow_intent_redirection_for_clone_profile
+     */
+    public static boolean isIntentRedirectionForCloneProfileAllowed() {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_APP_CLONING,
+                    FLAG_ALLOW_INTENT_REDIRECTION_FOR_CLONE_PROFILE, false /* defaultValue */);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
 
     public CloneProfileResolver(ComponentResolverApi componentResolver,
             UserManagerService userManagerService) {

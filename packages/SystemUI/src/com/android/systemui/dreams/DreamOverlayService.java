@@ -30,6 +30,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 import androidx.lifecycle.ViewModelStore;
 
@@ -41,9 +42,13 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.Complication;
+import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
+import com.android.systemui.touch.TouchInsetManager;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -80,8 +85,14 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     // True if the service has been destroyed.
     private boolean mDestroyed = false;
 
+    private final ComplicationComponent mComplicationComponent;
+
+    private final com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent
+            mDreamComplicationComponent;
+
     private final DreamOverlayComponent mDreamOverlayComponent;
 
+    private final DreamOverlayLifecycleOwner mLifecycleOwner;
     private final LifecycleRegistry mLifecycleRegistry;
 
     private DreamOverlayTouchMonitor mDreamOverlayTouchMonitor;
@@ -127,11 +138,16 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     public DreamOverlayService(
             Context context,
             @Main Executor executor,
+            DreamOverlayLifecycleOwner lifecycleOwner,
             WindowManager windowManager,
+            ComplicationComponent.Factory complicationComponentFactory,
+            com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent.Factory
+                    dreamComplicationComponentFactory,
             DreamOverlayComponent.Factory dreamOverlayComponentFactory,
             DreamOverlayStateController stateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             UiEventLogger uiEventLogger,
+            TouchInsetManager touchInsetManager,
             @Nullable @Named(LowLightDreamModule.LOW_LIGHT_DREAM_COMPONENT)
                     ComponentName lowLightDreamComponent) {
         mContext = context;
@@ -146,8 +162,17 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         final ViewModelStore viewModelStore = new ViewModelStore();
         final Complication.Host host =
                 () -> mExecutor.execute(DreamOverlayService.this::requestExit);
-        mDreamOverlayComponent = dreamOverlayComponentFactory.create(viewModelStore, host);
-        mLifecycleRegistry = mDreamOverlayComponent.getLifecycleRegistry();
+
+        mComplicationComponent = complicationComponentFactory.create(lifecycleOwner, host,
+                viewModelStore, touchInsetManager);
+        mDreamComplicationComponent = dreamComplicationComponentFactory.create(
+                mComplicationComponent.getVisibilityController(), touchInsetManager);
+        mDreamOverlayComponent = dreamOverlayComponentFactory.create(lifecycleOwner,
+                mComplicationComponent.getComplicationHostViewController(), touchInsetManager,
+                new HashSet<>(Arrays.asList(
+                        mDreamComplicationComponent.getHideComplicationTouchHandler())));
+        mLifecycleOwner = lifecycleOwner;
+        mLifecycleRegistry = mLifecycleOwner.getRegistry();
 
         mExecutor.execute(() -> setCurrentStateLocked(Lifecycle.State.CREATED));
     }

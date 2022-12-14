@@ -57,6 +57,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
@@ -770,13 +771,6 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
         }
     }
 
-    private boolean isFinancedDevice() {
-        return mSecurityController.isDeviceManaged()
-                && mSecurityController.getDeviceOwnerType(
-                mSecurityController.getDeviceOwnerComponentOnAnyUser())
-                == DEVICE_OWNER_TYPE_FINANCED;
-    }
-
     protected class VpnSpan extends ClickableSpan {
         @Override
         public void onClick(View widget) {
@@ -795,6 +789,20 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
         @Override
         public int hashCode() {
             return 314159257; // prime
+        }
+    }
+
+    // TODO(b/259908270): remove and inline direct call to mSecurityController.isFinancedDevice()
+    private boolean isFinancedDevice() {
+        if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
+                DevicePolicyManager.ADD_ISFINANCED_DEVICE_FLAG,
+                DevicePolicyManager.ADD_ISFINANCED_FEVICE_DEFAULT)) {
+            return mSecurityController.isFinancedDevice();
+        } else {
+            return mSecurityController.isDeviceManaged()
+                    && mSecurityController.getDeviceOwnerType(
+                    mSecurityController.getDeviceOwnerComponentOnAnyUser())
+                    == DEVICE_OWNER_TYPE_FINANCED;
         }
     }
 }

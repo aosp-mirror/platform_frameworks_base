@@ -29,11 +29,14 @@ import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.virtual.audio.VirtualAudioDevice;
 import android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChangeCallback;
+import android.companion.virtual.camera.VirtualCameraDevice;
+import android.companion.virtual.camera.VirtualCameraInput;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Point;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.VirtualDisplayFlag;
 import android.hardware.display.DisplayManagerGlobal;
@@ -293,9 +296,11 @@ public final class VirtualDeviceManager {
                     }
                 };
         @Nullable
-        private VirtualAudioDevice mVirtualAudioDevice;
+        private VirtualCameraDevice mVirtualCameraDevice;
         @NonNull
-        private List<VirtualSensor> mVirtualSensors = new ArrayList<>();
+        private final List<VirtualSensor> mVirtualSensors = new ArrayList<>();
+        @Nullable
+        private VirtualAudioDevice mVirtualAudioDevice;
 
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         private VirtualDevice(
@@ -713,6 +718,34 @@ public final class VirtualDeviceManager {
                         executor, callback, () -> mVirtualAudioDevice = null);
             }
             return mVirtualAudioDevice;
+        }
+
+        /**
+         * Creates a new virtual camera. If a virtual camera was already created, it will be closed.
+         *
+         * @param cameraName name of the virtual camera.
+         * @param characteristics camera characteristics.
+         * @param virtualCameraInput callback that provides input to camera.
+         * @param executor Executor on which camera input will be sent into system. Don't
+         *         use the Main Thread for this executor.
+         * @return newly created camera;
+         *
+         * @hide
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        public VirtualCameraDevice createVirtualCameraDevice(
+                @NonNull String cameraName,
+                @NonNull CameraCharacteristics characteristics,
+                @NonNull VirtualCameraInput virtualCameraInput,
+                @NonNull Executor executor) {
+            if (mVirtualCameraDevice != null) {
+                mVirtualCameraDevice.close();
+            }
+            int deviceId = getDeviceId();
+            mVirtualCameraDevice = new VirtualCameraDevice(
+                    deviceId, cameraName, characteristics, virtualCameraInput, executor);
+            return mVirtualCameraDevice;
         }
 
         /**

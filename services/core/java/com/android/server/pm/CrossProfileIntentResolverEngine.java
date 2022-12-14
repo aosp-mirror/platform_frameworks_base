@@ -32,7 +32,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.os.Process;
 import android.text.TextUtils;
-import android.util.FeatureFlagUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -250,8 +249,7 @@ public class CrossProfileIntentResolverEngine {
          * SETTINGS_ALLOW_INTENT_REDIRECTION_FOR_CLONE_PROFILE is enabled
          */
         if (sourceUserInfo.isCloneProfile() || targetUserInfo.isCloneProfile()) {
-            if (FeatureFlagUtils.isEnabled(mContext,
-                    FeatureFlagUtils.SETTINGS_ALLOW_INTENT_REDIRECTION_FOR_CLONE_PROFILE)) {
+            if (CloneProfileResolver.isIntentRedirectionForCloneProfileAllowed()) {
                 return new CloneProfileResolver(computer.getComponentResolver(),
                         mUserManager);
             } else {

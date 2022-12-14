@@ -175,7 +175,9 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
                 && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED)
                 && isPendingIntentValid(intent,
                         SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUBSCRIPTION)
-                && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_SUCCESS);
+                && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_SUCCESS)
+                && isPendingIntentValid(intent,
+                        SlicePurchaseController.EXTRA_INTENT_NOTIFICATION_SHOWN);
     }
 
     private static boolean isPendingIntentValid(@NonNull Intent intent, @NonNull String extra) {
@@ -208,6 +210,8 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
             case SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUBSCRIPTION:
                 return "not default data subscription";
             case SlicePurchaseController.EXTRA_INTENT_SUCCESS: return "success";
+            case SlicePurchaseController.EXTRA_INTENT_NOTIFICATION_SHOWN:
+                return "notification shown";
             default: {
                 loge("Unknown pending intent extra: " + extra);
                 return "unknown(" + extra + ")";
@@ -220,7 +224,7 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
         logd("onReceive intent: " + intent.getAction());
         switch (intent.getAction()) {
             case SlicePurchaseController.ACTION_START_SLICE_PURCHASE_APP:
-                onDisplayBoosterNotification(context, intent);
+                onDisplayNetworkBoostNotification(context, intent);
                 break;
             case SlicePurchaseController.ACTION_SLICE_PURCHASE_APP_RESPONSE_TIMEOUT:
                 onTimeout(context, intent);
@@ -233,7 +237,8 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
         }
     }
 
-    private void onDisplayBoosterNotification(@NonNull Context context, @NonNull Intent intent) {
+    private void onDisplayNetworkBoostNotification(@NonNull Context context,
+            @NonNull Intent intent) {
         if (!isIntentValid(intent)) {
             sendSlicePurchaseAppResponse(intent,
                     SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED);
@@ -280,10 +285,12 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
 
         int capability = intent.getIntExtra(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY,
                 SlicePurchaseController.PREMIUM_CAPABILITY_INVALID);
-        logd("Display the booster notification for capability "
+        logd("Display the network boost notification for capability "
                 + TelephonyManager.convertPremiumCapabilityToString(capability));
         context.getSystemService(NotificationManager.class).notifyAsUser(
                 NETWORK_BOOST_NOTIFICATION_TAG, capability, notification, UserHandle.ALL);
+        sendSlicePurchaseAppResponse(intent,
+                SlicePurchaseController.EXTRA_INTENT_NOTIFICATION_SHOWN);
     }
 
     /**
@@ -338,7 +345,7 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
                 + " timed out.");
         if (sSlicePurchaseActivities.get(capability) == null) {
             // Notification is still active
-            logd("Closing booster notification since the user did not respond in time.");
+            logd("Closing network boost notification since the user did not respond in time.");
             context.getSystemService(NotificationManager.class).cancelAsUser(
                     NETWORK_BOOST_NOTIFICATION_TAG, capability, UserHandle.ALL);
         } else {

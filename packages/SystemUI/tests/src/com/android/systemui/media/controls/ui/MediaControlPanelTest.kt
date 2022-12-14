@@ -214,6 +214,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private val fakeFeatureFlag =
         FakeFeatureFlags().apply {
             this.set(Flags.UMO_SURFACE_RIPPLE, false)
+            this.set(Flags.UMO_TURBULENCE_NOISE, false)
             this.set(Flags.MEDIA_FALSING_PENALTY, true)
         }
 
@@ -2060,6 +2061,26 @@ public class MediaControlPanelTest : SysuiTestCase() {
         viewHolder.actionPlayPause.callOnClick()
 
         assertThat(viewHolder.multiRippleView.ripples.size).isEqualTo(0)
+    }
+
+    @Test
+    fun onButtonClick_turbulenceNoiseFlagEnabled_createsRipplesFinishedListener() {
+        fakeFeatureFlag.set(Flags.UMO_SURFACE_RIPPLE, true)
+        fakeFeatureFlag.set(Flags.UMO_TURBULENCE_NOISE, true)
+
+        player.attachPlayer(viewHolder)
+
+        assertThat(player.mRipplesFinishedListener).isNotNull()
+    }
+
+    @Test
+    fun onButtonClick_turbulenceNoiseFlagDisabled_doesNotCreateRipplesFinishedListener() {
+        fakeFeatureFlag.set(Flags.UMO_SURFACE_RIPPLE, true)
+        fakeFeatureFlag.set(Flags.UMO_TURBULENCE_NOISE, false)
+
+        player.attachPlayer(viewHolder)
+
+        assertThat(player.mRipplesFinishedListener).isNull()
     }
 
     private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener =

@@ -1720,7 +1720,7 @@ final class InstallPackageHelper {
         final boolean onIncremental = mPm.mIncrementalManager != null
                 && isIncrementalPath(beforeCodeFile.getAbsolutePath());
         try {
-            makeDirRecursive(afterCodeFile.getParentFile(), 0775);
+            makeDirRecursive(afterCodeFile.getParentFile(), 0771);
             if (onIncremental) {
                 // Just link files here. The stage dir will be removed when the installation
                 // session is completed.

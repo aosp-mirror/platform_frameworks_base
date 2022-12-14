@@ -39,6 +39,8 @@ import android.annotation.Nullable;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Slog;
@@ -55,6 +57,7 @@ import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.utils.WatchedArrayMap;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -227,6 +230,24 @@ final class InitAppsHelper {
     }
 
     /**
+     * Fix up the previously-installed app directory mode - they can't be readable by non-system
+     * users to prevent them from listing the dir to discover installed package names.
+     */
+    void fixInstalledAppDirMode() {
+        try (var files = Files.newDirectoryStream(mPm.getAppInstallDir().toPath())) {
+            files.forEach(dir -> {
+                try {
+                    Os.chmod(dir.toString(), 0771);
+                } catch (ErrnoException e) {
+                    Slog.w(TAG, "Failed to fix an installed app dir mode", e);
+                }
+            });
+        } catch (Exception e) {
+            Slog.w(TAG, "Failed to walk the app install directory to fix the modes", e);
+        }
+    }
+
+    /**
      * Install apps/updates from data dir and fix system apps that are affected.
      */
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
@@ -234,6 +255,11 @@ final class InitAppsHelper {
             long startTime) {
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
                 SystemClock.uptimeMillis());
+
+        if ((mScanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) == SCAN_FIRST_BOOT_OR_UPGRADE) {
+            fixInstalledAppDirMode();
+        }
+
         scanDirTracedLI(mPm.getAppInstallDir(), 0,
                 mScanFlags | SCAN_REQUIRE_KNOWN, packageParser, mExecutorService);
 

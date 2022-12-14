@@ -28,6 +28,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.ParentalControlsUtilsInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.text.TextUtils;
 
 /**
@@ -82,6 +83,12 @@ public final class ActionDisabledByAdminControllerFactory {
 
     private static boolean isFinancedDevice(Context context) {
         DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        // TODO(b/259908270): remove
+        if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
+                DevicePolicyManager.ADD_ISFINANCED_DEVICE_FLAG,
+                DevicePolicyManager.ADD_ISFINANCED_FEVICE_DEFAULT)) {
+            return dpm.isFinancedDevice();
+        }
         return dpm.isDeviceManaged() && dpm.getDeviceOwnerType(
                 dpm.getDeviceOwnerComponentOnAnyUser()) == DEVICE_OWNER_TYPE_FINANCED;
     }

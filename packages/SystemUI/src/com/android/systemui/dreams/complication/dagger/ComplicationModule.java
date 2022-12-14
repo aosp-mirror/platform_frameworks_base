@@ -24,16 +24,16 @@ import androidx.lifecycle.ViewModelStore;
 import com.android.systemui.dreams.complication.Complication;
 import com.android.systemui.dreams.complication.ComplicationCollectionViewModel;
 import com.android.systemui.dreams.complication.ComplicationLayoutEngine;
+import com.android.systemui.touch.TouchInsetManager;
+
+import dagger.Module;
+import dagger.Provides;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 
 import javax.inject.Named;
 import javax.inject.Scope;
-
-import dagger.Module;
-import dagger.Provides;
-
 /**
  * Module for housing components related to rendering complications.
  */
@@ -72,5 +72,14 @@ public interface ComplicationModule {
     static Complication.VisibilityController providesVisibilityController(
             ComplicationLayoutEngine engine) {
         return engine;
+    }
+
+    /**
+     * Provides a new touch inset session instance for complication logic.
+     */
+    @Provides
+    static TouchInsetManager.TouchInsetSession providesTouchInsetSession(
+            TouchInsetManager manager) {
+        return manager.createSession();
     }
 }

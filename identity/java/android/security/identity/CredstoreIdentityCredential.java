@@ -60,16 +60,19 @@ class CredstoreIdentityCredential extends IdentityCredential {
     private Context mContext;
     private ICredential mBinder;
     private CredstorePresentationSession mSession;
+    private int mFeatureVersion;
 
     CredstoreIdentityCredential(Context context, String credentialName,
             @IdentityCredentialStore.Ciphersuite int cipherSuite,
             ICredential binder,
-            @Nullable CredstorePresentationSession session) {
+            @Nullable CredstorePresentationSession session,
+            int featureVersion) {
         mContext = context;
         mCredentialName = credentialName;
         mCipherSuite = cipherSuite;
         mBinder = binder;
         mSession = session;
+        mFeatureVersion = featureVersion;
     }
 
     private KeyPair mEphemeralKeyPair = null;
@@ -347,12 +350,18 @@ class CredstoreIdentityCredential extends IdentityCredential {
             }
         }
 
+        byte[] signature = resultParcel.signature;
+        if (signature != null && signature.length == 0) {
+            signature = null;
+        }
+
         byte[] mac = resultParcel.mac;
         if (mac != null && mac.length == 0) {
             mac = null;
         }
         CredstoreResultData.Builder resultDataBuilder = new CredstoreResultData.Builder(
-                resultParcel.staticAuthenticationData, resultParcel.deviceNameSpaces, mac);
+                mFeatureVersion, resultParcel.staticAuthenticationData,
+                resultParcel.deviceNameSpaces, mac, signature);
 
         for (ResultNamespaceParcel resultNamespaceParcel : resultParcel.resultNamespaces) {
             for (ResultEntryParcel resultEntryParcel : resultNamespaceParcel.entries) {
@@ -371,8 +380,14 @@ class CredstoreIdentityCredential extends IdentityCredential {
 
     @Override
     public void setAvailableAuthenticationKeys(int keyCount, int maxUsesPerKey) {
+        setAvailableAuthenticationKeys(keyCount, maxUsesPerKey, 0);
+    }
+
+    @Override
+    public void setAvailableAuthenticationKeys(int keyCount, int maxUsesPerKey,
+                                               long minValidTimeMillis) {
         try {
-            mBinder.setAvailableAuthenticationKeys(keyCount, maxUsesPerKey);
+            mBinder.setAvailableAuthenticationKeys(keyCount, maxUsesPerKey, minValidTimeMillis);
         } catch (android.os.RemoteException e) {
             throw new RuntimeException("Unexpected RemoteException ", e);
         } catch (android.os.ServiceSpecificException e) {
@@ -467,6 +482,34 @@ class CredstoreIdentityCredential extends IdentityCredential {
             throw new RuntimeException("Unexpected RemoteException ", e);
         } catch (android.os.ServiceSpecificException e) {
             throw new RuntimeException("Unexpected ServiceSpecificException with code "
+                    + e.errorCode, e);
+        }
+    }
+
+    @Override
+    public @NonNull List<AuthenticationKeyMetadata> getAuthenticationKeyMetadata() {
+        try {
+            int[] usageCount = mBinder.getAuthenticationDataUsageCount();
+            long[] expirationsMillis = mBinder.getAuthenticationDataExpirations();
+            if (usageCount.length != expirationsMillis.length) {
+                throw new IllegalStateException("Size og usageCount and expirationMillis differ");
+            }
+            List<AuthenticationKeyMetadata> mds = new ArrayList<>();
+            for (int n = 0; n < expirationsMillis.length; n++) {
+                AuthenticationKeyMetadata md = null;
+                long expirationMillis = expirationsMillis[n];
+                if (expirationMillis != Long.MAX_VALUE) {
+                    md = new AuthenticationKeyMetadata(
+                        usageCount[n],
+                        Instant.ofEpochMilli(expirationMillis));
+                }
+                mds.add(md);
+            }
+            return mds;
+        } catch (android.os.RemoteException e) {
+            throw new IllegalStateException("Unexpected RemoteException ", e);
+        } catch (android.os.ServiceSpecificException e) {
+            throw new IllegalStateException("Unexpected ServiceSpecificException with code "
                     + e.errorCode, e);
         }
     }

@@ -145,6 +145,16 @@ public final class DisplayDeviceConfigTest {
         assertArrayEquals(new float[]{23, 24, 25},
                 mDisplayDeviceConfig.getAmbientDarkeningPercentagesIdle(), ZERO_DELTA);
 
+        assertEquals(75, mDisplayDeviceConfig.getDefaultLowRefreshRate());
+        assertEquals(90, mDisplayDeviceConfig.getDefaultHighRefreshRate());
+        assertArrayEquals(new int[]{45, 55},
+                mDisplayDeviceConfig.getLowDisplayBrightnessThresholds());
+        assertArrayEquals(new int[]{50, 60},
+                mDisplayDeviceConfig.getLowAmbientBrightnessThresholds());
+        assertArrayEquals(new int[]{65, 75},
+                mDisplayDeviceConfig.getHighDisplayBrightnessThresholds());
+        assertArrayEquals(new int[]{70, 80},
+                mDisplayDeviceConfig.getHighAmbientBrightnessThresholds());
 
         // Todo(brup): Add asserts for BrightnessThrottlingData, DensityMapping,
         // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
@@ -207,8 +217,8 @@ public final class DisplayDeviceConfigTest {
                 mDisplayDeviceConfig.getAmbientDarkeningLevelsIdle(), ZERO_DELTA);
         assertArrayEquals(new float[]{29, 30, 31},
                 mDisplayDeviceConfig.getAmbientDarkeningPercentagesIdle(), ZERO_DELTA);
-        assertEquals(mDisplayDeviceConfig.getDefaultRefreshRate(), DEFAULT_REFRESH_RATE);
-        assertEquals(mDisplayDeviceConfig.getDefaultPeakRefreshRate(), DEFAULT_PEAK_REFRESH_RATE);
+        assertEquals(mDisplayDeviceConfig.getDefaultLowRefreshRate(), DEFAULT_REFRESH_RATE);
+        assertEquals(mDisplayDeviceConfig.getDefaultHighRefreshRate(), DEFAULT_PEAK_REFRESH_RATE);
         assertArrayEquals(mDisplayDeviceConfig.getLowDisplayBrightnessThresholds(),
                 LOW_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE);
         assertArrayEquals(mDisplayDeviceConfig.getLowAmbientBrightnessThresholds(),
@@ -416,6 +426,38 @@ public final class DisplayDeviceConfigTest {
                 +           "</brightnessThrottlingPoint>\n"
                 +       "</brightnessThrottlingMap>\n"
                 +   "</thermalThrottling>\n"
+                +   "<refreshRate>\n"
+                +       "<lowerBlockingZoneConfigs>\n"
+                +           "<defaultRefreshRate>75</defaultRefreshRate>\n"
+                +           "<blockingZoneThreshold>\n"
+                +               "<displayBrightnessPoint>\n"
+                +                   "<lux>50</lux>\n"
+                // This number will be rounded to integer when read by the system
+                +                   "<nits>45.3</nits>\n"
+                +               "</displayBrightnessPoint>\n"
+                +               "<displayBrightnessPoint>\n"
+                +                   "<lux>60</lux>\n"
+                // This number will be rounded to integer when read by the system
+                +                   "<nits>55.2</nits>\n"
+                +               "</displayBrightnessPoint>\n"
+                +           "</blockingZoneThreshold>\n"
+                +       "</lowerBlockingZoneConfigs>\n"
+                +       "<higherBlockingZoneConfigs>\n"
+                +           "<defaultRefreshRate>90</defaultRefreshRate>\n"
+                +           "<blockingZoneThreshold>\n"
+                +               "<displayBrightnessPoint>\n"
+                +                   "<lux>70</lux>\n"
+                // This number will be rounded to integer when read by the system
+                +                   "<nits>65.6</nits>\n"
+                +               "</displayBrightnessPoint>\n"
+                +               "<displayBrightnessPoint>\n"
+                +                   "<lux>80</lux>\n"
+                // This number will be rounded to integer when read by the system
+                +                   "<nits>75</nits>\n"
+                +               "</displayBrightnessPoint>\n"
+                +           "</blockingZoneThreshold>\n"
+                +       "</higherBlockingZoneConfigs>\n"
+                +   "</refreshRate>\n"
                 + "</displayConfiguration>\n";
     }
 

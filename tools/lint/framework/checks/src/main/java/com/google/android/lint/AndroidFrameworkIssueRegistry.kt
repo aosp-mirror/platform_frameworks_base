@@ -19,9 +19,6 @@ package com.google.android.lint
 import com.android.tools.lint.client.api.IssueRegistry
 import com.android.tools.lint.client.api.Vendor
 import com.android.tools.lint.detector.api.CURRENT_API
-import com.google.android.lint.aidl.EnforcePermissionDetector
-import com.google.android.lint.aidl.EnforcePermissionHelperDetector
-import com.google.android.lint.aidl.SimpleManualPermissionEnforcementDetector
 import com.google.android.lint.parcel.SaferParcelChecker
 import com.google.auto.service.AutoService
 
@@ -37,10 +34,6 @@ class AndroidFrameworkIssueRegistry : IssueRegistry() {
         CallingIdentityTokenDetector.ISSUE_CLEAR_IDENTITY_CALL_NOT_FOLLOWED_BY_TRY_FINALLY,
         CallingIdentityTokenDetector.ISSUE_RESULT_OF_CLEAR_IDENTITY_CALL_NOT_STORED_IN_VARIABLE,
         CallingSettingsNonUserGetterMethodsDetector.ISSUE_NON_USER_GETTER_CALLED,
-        EnforcePermissionDetector.ISSUE_MISSING_ENFORCE_PERMISSION,
-        EnforcePermissionDetector.ISSUE_MISMATCHING_ENFORCE_PERMISSION,
-        EnforcePermissionHelperDetector.ISSUE_ENFORCE_PERMISSION_HELPER,
-        SimpleManualPermissionEnforcementDetector.ISSUE_SIMPLE_MANUAL_PERMISSION_ENFORCEMENT,
         SaferParcelChecker.ISSUE_UNSAFE_API_USAGE,
         PackageVisibilityDetector.ISSUE_PACKAGE_NAME_NO_PACKAGE_VISIBILITY_FILTERS,
         RegisterReceiverFlagDetector.ISSUE_RECEIVER_EXPORTED_FLAG,

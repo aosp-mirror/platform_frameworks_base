@@ -16,8 +16,8 @@
 
 package com.android.credentialmanager.jetpack.provider
 
+import android.app.PendingIntent
 import android.app.slice.Slice
-import android.credentials.ui.Entry
 import android.graphics.drawable.Icon
 
 /**
@@ -35,38 +35,45 @@ class SaveEntryUi(
   val lastUsedTimeMillis: Long?,
 ) {
   companion object {
+    const val SLICE_HINT_ACCOUNT_NAME =
+            "androidx.credentials.provider.createEntry.SLICE_HINT_USER_PROVIDER_ACCOUNT_NAME"
+    const val SLICE_HINT_ICON =
+            "androidx.credentials.provider.createEntry.SLICE_HINT_PROFILE_ICON"
+    const val SLICE_HINT_CREDENTIAL_COUNT_INFORMATION =
+            "androidx.credentials.provider.createEntry.SLICE_HINT_CREDENTIAL_COUNT_INFORMATION"
+    const val SLICE_HINT_LAST_USED_TIME_MILLIS =
+            "androidx.credentials.provider.createEntry.SLICE_HINT_LAST_USED_TIME_MILLIS"
+    const val SLICE_HINT_PENDING_INTENT =
+            "androidx.credentials.provider.createEntry.SLICE_HINT_PENDING_INTENT"
+
+    /**
+     * Returns an instance of [SaveEntryUi] derived from a [Slice] object.
+     *
+     * @param slice the [Slice] object constructed through the jetpack library
+     */
+    @JvmStatic
     fun fromSlice(slice: Slice): SaveEntryUi {
-      var userProviderAccountName: CharSequence? = null
-      var credentialTypeIcon: Icon? = null
-      var profileIcon: Icon? = null
-      var passwordCount: Int? = null
-      var passkeyCount: Int? = null
-      var totalCredentialCount: Int? = null
-      var lastUsedTimeMillis: Long? = null
+      var accountName: CharSequence? = null
+      var icon: Icon? = null
+      var pendingIntent: PendingIntent? = null
+      var lastUsedTimeMillis: Long = 0
 
-
-      val items = slice.items
-      items.forEach {
-        if (it.hasHint(Entry.HINT_USER_PROVIDER_ACCOUNT_NAME)) {
-          userProviderAccountName = it.text
-        } else if (it.hasHint(Entry.HINT_CREDENTIAL_TYPE_ICON)) {
-          credentialTypeIcon = it.icon
-        } else if (it.hasHint(Entry.HINT_PROFILE_ICON)) {
-          profileIcon = it.icon
-        } else if (it.hasHint(Entry.HINT_PASSWORD_COUNT)) {
-          passwordCount = it.int
-        } else if (it.hasHint(Entry.HINT_PASSKEY_COUNT)) {
-          passkeyCount = it.int
-        } else if (it.hasHint(Entry.HINT_TOTAL_CREDENTIAL_COUNT)) {
-          totalCredentialCount = it.int
-        } else if (it.hasHint(Entry.HINT_LAST_USED_TIME_MILLIS)) {
+      slice.items.forEach {
+        if (it.hasHint(SLICE_HINT_ACCOUNT_NAME)) {
+          accountName = it.text
+        } else if (it.hasHint(SLICE_HINT_ICON)) {
+          icon = it.icon
+        } else if (it.hasHint(SLICE_HINT_PENDING_INTENT)) {
+          pendingIntent = it.action
+        } else if (it.hasHint(SLICE_HINT_LAST_USED_TIME_MILLIS)) {
           lastUsedTimeMillis = it.long
         }
       }
-      // TODO: fail NPE more elegantly.
+
       return SaveEntryUi(
-        userProviderAccountName!!, credentialTypeIcon, profileIcon,
-        passwordCount, passkeyCount, totalCredentialCount, lastUsedTimeMillis,
+              // TODO: Add count parsing
+              accountName!!, icon, icon,
+              0, 0, 0, lastUsedTimeMillis,
       )
     }
   }

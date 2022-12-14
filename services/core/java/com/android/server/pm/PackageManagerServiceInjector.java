@@ -139,6 +139,7 @@ public class PackageManagerServiceInjector {
     private final Singleton<BackgroundDexOptService> mBackgroundDexOptService;
     private final Singleton<IBackupManager> mIBackupManager;
     private final Singleton<SharedLibrariesImpl> mSharedLibrariesProducer;
+    private final Singleton<CrossProfileIntentFilterHelper> mCrossProfileIntentFilterHelperProducer;
 
     PackageManagerServiceInjector(Context context, PackageManagerTracedLock lock,
             Installer installer, Object installLock, PackageAbiHelper abiHelper,
@@ -176,7 +177,8 @@ public class PackageManagerServiceInjector {
             ServiceProducer getSystemServiceProducer,
             Producer<BackgroundDexOptService> backgroundDexOptService,
             Producer<IBackupManager> iBackupManager,
-            Producer<SharedLibrariesImpl> sharedLibrariesProducer) {
+            Producer<SharedLibrariesImpl> sharedLibrariesProducer,
+            Producer<CrossProfileIntentFilterHelper> crossProfileIntentFilterHelperProducer) {
         mContext = context;
         mLock = lock;
         mInstaller = installer;
@@ -228,6 +230,8 @@ public class PackageManagerServiceInjector {
         mBackgroundDexOptService = new Singleton<>(backgroundDexOptService);
         mIBackupManager = new Singleton<>(iBackupManager);
         mSharedLibrariesProducer = new Singleton<>(sharedLibrariesProducer);
+        mCrossProfileIntentFilterHelperProducer = new Singleton<>(
+                crossProfileIntentFilterHelperProducer);
     }
 
     /**
@@ -260,6 +264,14 @@ public class PackageManagerServiceInjector {
 
     public PackageManagerTracedLock getLock() {
         return mLock;
+    }
+
+    /**
+     * {@link CrossProfileIntentFilterHelper} which manages {@link CrossProfileIntentFilter}
+     * @return CrossProfileIntentFilterHelper
+     */
+    public CrossProfileIntentFilterHelper getCrossProfileIntentFilterHelper() {
+        return mCrossProfileIntentFilterHelperProducer.get(this, mPackageManager);
     }
 
     public Installer getInstaller() {
