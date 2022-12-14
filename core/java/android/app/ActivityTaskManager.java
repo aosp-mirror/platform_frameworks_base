@@ -62,6 +62,12 @@ public class ActivityTaskManager {
     public static final int INVALID_TASK_ID = -1;
 
     /**
+     * Invalid windowing mode.
+     * @hide
+     */
+    public static final int INVALID_WINDOWING_MODE = -1;
+
+    /**
      * Input parameter to {@link IActivityTaskManager#resizeTask} which indicates
      * that the resize doesn't need to preserve the window, and can be skipped if bounds
      * is unchanged. This mode is used by window manager in most cases.

@@ -17,7 +17,15 @@
 package com.android.server.wm;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.app.Activity.FULLSCREEN_MODE_REQUEST_ENTER;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.ActivityTaskManager.INVALID_WINDOWING_MODE;
+import static android.app.FullscreenRequestHandler.REMOTE_CALLBACK_RESULT_KEY;
+import static android.app.FullscreenRequestHandler.RESULT_APPROVED;
+import static android.app.FullscreenRequestHandler.RESULT_FAILED_NOT_DEFAULT_FREEFORM;
+import static android.app.FullscreenRequestHandler.RESULT_FAILED_NOT_IN_FREEFORM;
+import static android.app.FullscreenRequestHandler.RESULT_FAILED_NOT_IN_FULLSCREEN_WITH_HISTORY;
+import static android.app.FullscreenRequestHandler.RESULT_FAILED_NOT_TOP_FOCUSED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -27,6 +35,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_APPLICATION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
@@ -52,6 +61,7 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.app.FullscreenRequestHandler;
 import android.app.IActivityClientController;
 import android.app.ICompatCameraControlCallback;
 import android.app.IRequestFinishCallback;
@@ -71,6 +81,7 @@ import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
@@ -85,6 +96,7 @@ import android.window.TransitionInfo;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
@@ -1053,6 +1065,133 @@ class ActivityClientController extends IActivityClientController.Stub {
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private @FullscreenRequestHandler.RequestResult int validateMultiwindowFullscreenRequestLocked(
+            Task topFocusedRootTask, int fullscreenRequest, ActivityRecord requesterActivity) {
+        // If the mode is not by default freeform, the freeform will be a user-driven event.
+        if (topFocusedRootTask.getParent().getWindowingMode() != WINDOWING_MODE_FREEFORM) {
+            return RESULT_FAILED_NOT_DEFAULT_FREEFORM;
+        }
+        // If this is not coming from the currently top-most activity, reject the request.
+        if (requesterActivity != topFocusedRootTask.getTopMostActivity()) {
+            return RESULT_FAILED_NOT_TOP_FOCUSED;
+        }
+        if (fullscreenRequest == FULLSCREEN_MODE_REQUEST_ENTER) {
+            if (topFocusedRootTask.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
+                return RESULT_FAILED_NOT_IN_FREEFORM;
+            }
+        } else {
+            if (topFocusedRootTask.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
+                return RESULT_FAILED_NOT_IN_FULLSCREEN_WITH_HISTORY;
+            }
+            if (topFocusedRootTask.mMultiWindowRestoreWindowingMode == INVALID_WINDOWING_MODE) {
+                return RESULT_FAILED_NOT_IN_FULLSCREEN_WITH_HISTORY;
+            }
+        }
+        return RESULT_APPROVED;
+    }
+
+    @Override
+    public void requestMultiwindowFullscreen(IBinder callingActivity, int fullscreenRequest,
+            IRemoteCallback callback) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                requestMultiwindowFullscreenLocked(callingActivity, fullscreenRequest, callback);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void requestMultiwindowFullscreenLocked(IBinder callingActivity, int fullscreenRequest,
+            IRemoteCallback callback) {
+        final ActivityRecord r = ActivityRecord.forTokenLocked(callingActivity);
+        if (r == null) {
+            return;
+        }
+
+        // If the shell transition is not enabled, just execute and done.
+        final TransitionController controller = r.mTransitionController;
+        if (!controller.isShellTransitionsEnabled()) {
+            final @FullscreenRequestHandler.RequestResult int validateResult;
+            final Task topFocusedRootTask;
+            topFocusedRootTask = mService.getTopDisplayFocusedRootTask();
+            validateResult = validateMultiwindowFullscreenRequestLocked(topFocusedRootTask,
+                    fullscreenRequest, r);
+            reportMultiwindowFullscreenRequestValidatingResult(callback, validateResult);
+            if (validateResult == RESULT_APPROVED) {
+                executeMultiWindowFullscreenRequest(fullscreenRequest, topFocusedRootTask);
+            }
+            return;
+        }
+        // Initiate the transition.
+        final Transition transition = new Transition(TRANSIT_CHANGE, 0 /* flags */, controller,
+                mService.mWindowManager.mSyncEngine);
+        if (mService.mWindowManager.mSyncEngine.hasActiveSync()) {
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                    "Creating Pending Multiwindow Fullscreen Request: %s", transition);
+            mService.mWindowManager.mSyncEngine.queueSyncSet(
+                    () -> r.mTransitionController.moveToCollecting(transition),
+                    () -> {
+                        executeFullscreenRequestTransition(fullscreenRequest, callback, r,
+                                transition, true /* queued */);
+                    });
+        } else {
+            executeFullscreenRequestTransition(fullscreenRequest, callback, r, transition,
+                    false /* queued */);
+        }
+    }
+
+    private void executeFullscreenRequestTransition(int fullscreenRequest, IRemoteCallback callback,
+            ActivityRecord r, Transition transition, boolean queued) {
+        final @FullscreenRequestHandler.RequestResult int validateResult;
+        final Task topFocusedRootTask;
+        topFocusedRootTask = mService.getTopDisplayFocusedRootTask();
+        validateResult = validateMultiwindowFullscreenRequestLocked(topFocusedRootTask,
+                fullscreenRequest, r);
+        reportMultiwindowFullscreenRequestValidatingResult(callback, validateResult);
+        if (validateResult != RESULT_APPROVED) {
+            if (queued) {
+                transition.abort();
+            }
+            return;
+        }
+        r.mTransitionController.requestStartTransition(transition, topFocusedRootTask,
+                null /* remoteTransition */, null /* displayChange */);
+        executeMultiWindowFullscreenRequest(fullscreenRequest, topFocusedRootTask);
+        transition.setReady(topFocusedRootTask, true);
+    }
+
+    private static void reportMultiwindowFullscreenRequestValidatingResult(IRemoteCallback callback,
+            @FullscreenRequestHandler.RequestResult int result) {
+        if (callback == null) {
+            return;
+        }
+        Bundle res = new Bundle();
+        res.putInt(REMOTE_CALLBACK_RESULT_KEY, result);
+        try {
+            callback.sendResult(res);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "client throws an exception back to the server, ignore it");
+        }
+    }
+
+    private static void executeMultiWindowFullscreenRequest(int fullscreenRequest, Task requester) {
+        final int targetWindowingMode;
+        if (fullscreenRequest == FULLSCREEN_MODE_REQUEST_ENTER) {
+            requester.mMultiWindowRestoreWindowingMode =
+                    requester.getRequestedOverrideWindowingMode();
+            targetWindowingMode = WINDOWING_MODE_FULLSCREEN;
+        } else {
+            targetWindowingMode = requester.mMultiWindowRestoreWindowingMode;
+            requester.mMultiWindowRestoreWindowingMode = INVALID_WINDOWING_MODE;
+        }
+        requester.setWindowingMode(targetWindowingMode);
+        if (targetWindowingMode == WINDOWING_MODE_FULLSCREEN) {
+            requester.setBounds(null);
         }
     }
 

@@ -4292,6 +4292,7 @@ package android.app {
     method @Deprecated public final void removeDialog(int);
     method public void reportFullyDrawn();
     method public android.view.DragAndDropPermissions requestDragAndDropPermissions(android.view.DragEvent);
+    method public void requestFullscreenMode(@NonNull int, @Nullable android.os.OutcomeReceiver<java.lang.Void,java.lang.Throwable>);
     method public final void requestPermissions(@NonNull String[], int);
     method public final void requestShowKeyboardShortcuts();
     method @Deprecated public boolean requestVisibleBehind(boolean);
@@ -4378,6 +4379,8 @@ package android.app {
     field public static final int DEFAULT_KEYS_SEARCH_LOCAL = 3; // 0x3
     field public static final int DEFAULT_KEYS_SHORTCUT = 2; // 0x2
     field protected static final int[] FOCUSED_STATE_SET;
+    field public static final int FULLSCREEN_MODE_REQUEST_ENTER = 1; // 0x1
+    field public static final int FULLSCREEN_MODE_REQUEST_EXIT = 0; // 0x0
     field public static final int RESULT_CANCELED = 0; // 0x0
     field public static final int RESULT_FIRST_USER = 1; // 0x1
     field public static final int RESULT_OK = -1; // 0xffffffff

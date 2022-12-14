@@ -83,6 +83,7 @@ import android.os.GraphicsEnvironment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.OutcomeReceiver;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -986,6 +987,17 @@ public class Activity extends ContextThemeWrapper
     private boolean mIsInMultiWindowMode;
     /** @hide */
     boolean mIsInPictureInPictureMode;
+
+    /** @hide */
+    @IntDef(prefix = { "FULLSCREEN_REQUEST_" }, value = {
+            FULLSCREEN_MODE_REQUEST_EXIT,
+            FULLSCREEN_MODE_REQUEST_ENTER
+    })
+    public @interface FullscreenModeRequest {}
+
+    public static final int FULLSCREEN_MODE_REQUEST_EXIT = 0;
+
+    public static final int FULLSCREEN_MODE_REQUEST_ENTER = 1;
 
     private boolean mShouldDockBigOverlays;
 
@@ -2998,6 +3010,36 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean onPictureInPictureRequested() {
         return false;
+    }
+
+    /**
+     * Request to put the a freeform activity into fullscreen. This will only be allowed if the
+     * activity is on a freeform display, such as a desktop device. The requester has to be the
+     * top-most activity and the request should be a response to a user input. When getting
+     * fullscreen and receiving corresponding {@link #onConfigurationChanged(Configuration)} and
+     * {@link #onMultiWindowModeChanged(boolean, Configuration)}, the activity should relayout
+     * itself and the system bars' visibilities can be controlled as usual fullscreen apps.
+     *
+     * Calling it again with the exit request can restore the activity to the previous status.
+     * This will only happen when it got into fullscreen through this API.
+     *
+     * If an app wants to be in fullscreen always, it should claim as not being resizable
+     * by setting
+     * <a href="https://developer.android.com/guide/topics/large-screens/multi-window-support#resizeableActivity">
+     * {@code android:resizableActivity="false"}</a> instead of calling this API.
+     *
+     * @param request Can be {@link #FULLSCREEN_MODE_REQUEST_ENTER} or
+     *                {@link #FULLSCREEN_MODE_REQUEST_EXIT} to indicate this request is to get
+     *                fullscreen or get restored.
+     * @param approvalCallback Optional callback, use {@code null} when not necessary. When the
+     *                         request is approved or rejected, the callback will be triggered. This
+     *                         will happen before any configuration change. The callback will be
+     *                         dispatched on the main thread.
+     */
+    public void requestFullscreenMode(@NonNull @FullscreenModeRequest int request,
+            @Nullable OutcomeReceiver<Void, Throwable> approvalCallback) {
+        FullscreenRequestHandler.requestFullscreenMode(
+                request, approvalCallback, mCurrentConfig, getActivityToken());
     }
 
     /**

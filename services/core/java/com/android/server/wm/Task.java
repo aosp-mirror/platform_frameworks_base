@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.isStartResultSuccessful;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.ActivityTaskManager.INVALID_WINDOWING_MODE;
 import static android.app.ActivityTaskManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
@@ -442,6 +443,8 @@ class Task extends TaskFragment {
      */
     @Surface.Rotation
     private int mRotation;
+
+    int mMultiWindowRestoreWindowingMode = INVALID_WINDOWING_MODE;
 
     /**
      * Last requested orientation reported to DisplayContent. This is different from {@link
