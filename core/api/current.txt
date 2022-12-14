@@ -8160,6 +8160,7 @@ package android.app.admin {
     field @NonNull public static final android.app.admin.TargetUser GLOBAL;
     field @NonNull public static final android.app.admin.TargetUser LOCAL_USER;
     field @NonNull public static final android.app.admin.TargetUser PARENT_USER;
+    field @NonNull public static final android.app.admin.TargetUser UNKNOWN_USER;
   }
 
   public final class UnsafeStateException extends java.lang.IllegalStateException implements android.os.Parcelable {

@@ -3300,7 +3300,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         List<String> protectedPackages = (owner == null || owner.protectedPackages == null)
-                ? Collections.emptyList() : owner.protectedPackages;
+                ? null : owner.protectedPackages;
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.getPackageManagerInternal().setOwnerProtectedPackages(
                         targetUserId, protectedPackages));
@@ -12644,9 +12644,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         admin,
                         caller.getUserId());
             } else {
-                LockTaskPolicy currentPolicy = mDevicePolicyEngine.getLocalPolicy(
+                LockTaskPolicy currentPolicy = mDevicePolicyEngine.getLocalPolicySetByAdmin(
                         PolicyDefinition.LOCK_TASK,
-                        caller.getUserId()).getPoliciesSetByAdmins().get(admin);
+                        admin,
+                        caller.getUserId());
                 LockTaskPolicy policy;
                 if (currentPolicy == null) {
                     policy = new LockTaskPolicy(Set.of(packages));
@@ -12689,8 +12690,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         if (isCoexistenceEnabled(caller)) {
-            LockTaskPolicy policy = mDevicePolicyEngine.getLocalPolicy(
-                    PolicyDefinition.LOCK_TASK, userHandle).getCurrentResolvedPolicy();
+            LockTaskPolicy policy = mDevicePolicyEngine.getResolvedPolicy(
+                    PolicyDefinition.LOCK_TASK, userHandle);
             if (policy == null) {
                 return new String[0];
             } else {
@@ -12719,8 +12720,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // TODO(b/260560985): This is not the right check, as the flag could be enabled but there
         //  could be an admin that hasn't targeted U.
         if (isCoexistenceFlagEnabled()) {
-            LockTaskPolicy policy = mDevicePolicyEngine.getLocalPolicy(
-                    PolicyDefinition.LOCK_TASK, userId).getCurrentResolvedPolicy();
+            LockTaskPolicy policy = mDevicePolicyEngine.getResolvedPolicy(
+                    PolicyDefinition.LOCK_TASK, userId);
             if (policy == null) {
                 return false;
             }
@@ -12754,9 +12755,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         if (isCoexistenceEnabled(caller)) {
             EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(who, userHandle);
-            LockTaskPolicy currentPolicy = mDevicePolicyEngine.getLocalPolicy(
+            LockTaskPolicy currentPolicy = mDevicePolicyEngine.getLocalPolicySetByAdmin(
                     PolicyDefinition.LOCK_TASK,
-                    caller.getUserId()).getPoliciesSetByAdmins().get(admin);
+                    admin,
+                    caller.getUserId());
             if (currentPolicy == null) {
                 throw new IllegalArgumentException("Can't set a lock task flags without setting "
                         + "lock task packages first.");
@@ -12793,8 +12795,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         if (isCoexistenceEnabled(caller)) {
-            LockTaskPolicy policy = mDevicePolicyEngine.getLocalPolicy(
-                    PolicyDefinition.LOCK_TASK, userHandle).getCurrentResolvedPolicy();
+            LockTaskPolicy policy = mDevicePolicyEngine.getResolvedPolicy(
+                    PolicyDefinition.LOCK_TASK, userHandle);
             if (policy == null) {
                 // We default on the power button menu, in order to be consistent with pre-P
                 // behaviour.
@@ -17672,12 +17674,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         checkCanExecuteOrThrowUnsafe(
                 DevicePolicyManager.OPERATION_SET_USER_CONTROL_DISABLED_PACKAGES);
 
-        synchronized (getLockObject()) {
-            ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(caller.getUserId());
-            if (!Objects.equals(owner.protectedPackages, packages)) {
-                owner.protectedPackages = packages.isEmpty() ? null : packages;
-                saveSettingsLocked(caller.getUserId());
-                pushUserControlDisabledPackagesLocked(caller.getUserId());
+        if (isCoexistenceEnabled(caller)) {
+            if (packages.isEmpty()) {
+                removeUserControlDisabledPackages(caller);
+            } else {
+                addUserControlDisabledPackages(caller, new HashSet<>(packages));
+            }
+        } else {
+            synchronized (getLockObject()) {
+                ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(caller.getUserId());
+                if (!Objects.equals(owner.protectedPackages, packages)) {
+                    owner.protectedPackages = packages.isEmpty() ? null : packages;
+                    saveSettingsLocked(caller.getUserId());
+                    pushUserControlDisabledPackagesLocked(caller.getUserId());
+                }
             }
         }
 
@@ -17688,6 +17698,52 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .write();
     }
 
+    private void addUserControlDisabledPackages(CallerIdentity caller, Set<String> packages) {
+        if (isCallerDeviceOwner(caller)) {
+            mDevicePolicyEngine.setGlobalPolicy(
+                    PolicyDefinition.USER_CONTROLLED_DISABLED_PACKAGES,
+                    // TODO(b/260573124): add correct enforcing admin when permission changes are
+                    //  merged.
+                    EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                            caller.getComponentName(), caller.getUserId()),
+                    packages);
+        } else {
+            mDevicePolicyEngine.setLocalPolicy(
+                    PolicyDefinition.USER_CONTROLLED_DISABLED_PACKAGES,
+                    // TODO(b/260573124): add correct enforcing admin when permission changes are
+                    //  merged.
+                    EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                            caller.getComponentName(), caller.getUserId()),
+                    packages,
+                    caller.getUserId());
+        }
+    }
+
+    private void removeUserControlDisabledPackages(CallerIdentity caller) {
+        if (isCallerDeviceOwner(caller)) {
+            mDevicePolicyEngine.removeGlobalPolicy(
+                    PolicyDefinition.USER_CONTROLLED_DISABLED_PACKAGES,
+                    // TODO(b/260573124): add correct enforcing admin when permission changes are
+                    //  merged.
+                    EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                            caller.getComponentName(), caller.getUserId()));
+        } else {
+            mDevicePolicyEngine.removeLocalPolicy(
+                    PolicyDefinition.USER_CONTROLLED_DISABLED_PACKAGES,
+                    // TODO(b/260573124): add correct enforcing admin when permission changes are
+                    //  merged.
+                    EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                            caller.getComponentName(), caller.getUserId()),
+                    caller.getUserId());
+        }
+    }
+
+    private boolean isCallerDeviceOwner(CallerIdentity caller) {
+        synchronized (getLockObject()) {
+            return getDeviceOwnerUserIdUncheckedLocked() == caller.getUserId();
+        }
+    }
+
     @Override
     public List<String> getUserControlDisabledPackages(ComponentName who) {
         Objects.requireNonNull(who, "ComponentName is null");
@@ -17696,10 +17752,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller) || isProfileOwner(caller)
                 || isFinancedDeviceOwner(caller));
 
-        synchronized (getLockObject()) {
-            ActiveAdmin deviceOwner = getDeviceOrProfileOwnerAdminLocked(caller.getUserId());
-            return deviceOwner.protectedPackages != null
-                    ? deviceOwner.protectedPackages : Collections.emptyList();
+        if (isCoexistenceEnabled(caller)) {
+            // This retrieves the policy for the calling user only, DOs for example can't know
+            // what's enforced globally or on another user.
+            Set<String> packages = mDevicePolicyEngine.getResolvedPolicy(
+                    PolicyDefinition.USER_CONTROLLED_DISABLED_PACKAGES,
+                    caller.getUserId());
+            return packages == null ? Collections.emptyList() : packages.stream().toList();
+        } else {
+            synchronized (getLockObject()) {
+                ActiveAdmin deviceOwner = getDeviceOrProfileOwnerAdminLocked(caller.getUserId());
+                return deviceOwner.protectedPackages != null
+                        ? deviceOwner.protectedPackages : Collections.emptyList();
+            }
         }
     }
 

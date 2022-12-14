@@ -227,4 +227,11 @@ final class EnforcingAdmin {
             return new EnforcingAdmin(packageName, componentName, authorities, userId);
         }
     }
+
+    @Override
+    public String toString() {
+        return "EnforcingAdmin { mPackageName= " + mPackageName + ", mComponentName= "
+                + mComponentName + ", mAuthorities= " + mAuthorities + ", mUserId= "
+                + mUserId + ", mIsRoleAuthority= " + mIsRoleAuthority + " }";
+    }
 }
