@@ -18,10 +18,14 @@ package com.android.server.display;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.DEFAULT_DISPLAY_GROUP;
+import static android.view.Display.TYPE_INTERNAL;
+import static android.view.Display.TYPE_VIRTUAL;
 
+import static com.android.server.display.DeviceStateToLayoutMap.STATE_DEFAULT;
 import static com.android.server.display.DisplayAdapter.DISPLAY_DEVICE_EVENT_ADDED;
 import static com.android.server.display.DisplayAdapter.DISPLAY_DEVICE_EVENT_CHANGED;
 import static com.android.server.display.DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED;
+import static com.android.server.display.DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY;
 import static com.android.server.display.LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_ADDED;
 import static com.android.server.display.LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_REMOVED;
 
@@ -69,7 +73,6 @@ import org.mockito.Spy;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.Set;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -155,8 +158,8 @@ public class LogicalDisplayMapperTest {
 
     @Test
     public void testDisplayDeviceAddAndRemove_Internal() {
-        DisplayDevice device = createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        DisplayDevice device = createDisplayDevice(TYPE_INTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
 
         // add
         LogicalDisplay displayAdded = add(device);
@@ -177,7 +180,7 @@ public class LogicalDisplayMapperTest {
         testDisplayDeviceAddAndRemove_NonInternal(Display.TYPE_EXTERNAL);
         testDisplayDeviceAddAndRemove_NonInternal(Display.TYPE_WIFI);
         testDisplayDeviceAddAndRemove_NonInternal(Display.TYPE_OVERLAY);
-        testDisplayDeviceAddAndRemove_NonInternal(Display.TYPE_VIRTUAL);
+        testDisplayDeviceAddAndRemove_NonInternal(TYPE_VIRTUAL);
         testDisplayDeviceAddAndRemove_NonInternal(Display.TYPE_UNKNOWN);
 
         // Call the internal test again, just to verify that adding non-internal displays
@@ -187,9 +190,9 @@ public class LogicalDisplayMapperTest {
 
     @Test
     public void testDisplayDeviceAdd_TwoInternalOneDefault() {
-        DisplayDevice device1 = createDisplayDevice(Display.TYPE_INTERNAL, 600, 800, 0);
-        DisplayDevice device2 = createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        DisplayDevice device1 = createDisplayDevice(TYPE_INTERNAL, 600, 800, 0);
+        DisplayDevice device2 = createDisplayDevice(TYPE_INTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
 
         LogicalDisplay display1 = add(device1);
         assertEquals(info(display1).address, info(device1).address);
@@ -202,10 +205,10 @@ public class LogicalDisplayMapperTest {
 
     @Test
     public void testDisplayDeviceAdd_TwoInternalBothDefault() {
-        DisplayDevice device1 = createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
-        DisplayDevice device2 = createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        DisplayDevice device1 = createDisplayDevice(TYPE_INTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        DisplayDevice device2 = createDisplayDevice(TYPE_INTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
 
         LogicalDisplay display1 = add(device1);
         assertEquals(info(display1).address, info(device1).address);
@@ -220,7 +223,7 @@ public class LogicalDisplayMapperTest {
     @Test
     public void testDisplayDeviceAddAndRemove_OneExternalDefault() {
         DisplayDevice device = createDisplayDevice(Display.TYPE_EXTERNAL, 600, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
 
         // add
         LogicalDisplay displayAdded = add(device);
@@ -238,10 +241,10 @@ public class LogicalDisplayMapperTest {
 
     @Test
     public void testDisplayDeviceAddAndRemove_SwitchDefault() {
-        DisplayDevice device1 = createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
-        DisplayDevice device2 = createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        DisplayDevice device1 = createDisplayDevice(TYPE_INTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        DisplayDevice device2 = createDisplayDevice(TYPE_INTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
 
         LogicalDisplay display1 = add(device1);
         assertEquals(info(display1).address, info(device1).address);
@@ -267,10 +270,10 @@ public class LogicalDisplayMapperTest {
 
     @Test
     public void testGetDisplayIdsLocked() {
-        add(createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY));
+        add(createDisplayDevice(TYPE_INTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY));
         add(createDisplayDevice(Display.TYPE_EXTERNAL, 600, 800, 0));
-        add(createDisplayDevice(Display.TYPE_VIRTUAL, 600, 800, 0));
+        add(createDisplayDevice(TYPE_VIRTUAL, 600, 800, 0));
 
         int [] ids = mLogicalDisplayMapper.getDisplayIdsLocked(Process.SYSTEM_UID,
                 /* includeDisabled= */ true);
@@ -280,71 +283,98 @@ public class LogicalDisplayMapperTest {
     }
 
     @Test
-    public void testGetDisplayInfoForStateLocked_oneDisplayGroup_internalType() {
-        add(createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY));
-        add(createDisplayDevice(Display.TYPE_INTERNAL, 200, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY));
-        add(createDisplayDevice(Display.TYPE_INTERNAL, 700, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY));
+    public void testGetDisplayInfoForStateLocked_defaultLayout() {
+        final DisplayDevice device1 = createDisplayDevice(TYPE_INTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        final DisplayDevice device2 = createDisplayDevice(TYPE_INTERNAL, 200, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
 
-        Set<DisplayInfo> displayInfos = mLogicalDisplayMapper.getDisplayInfoForStateLocked(
-                DeviceStateToLayoutMap.STATE_DEFAULT, DEFAULT_DISPLAY, DEFAULT_DISPLAY_GROUP);
-        assertThat(displayInfos.size()).isEqualTo(1);
-        for (DisplayInfo displayInfo : displayInfos) {
-            assertThat(displayInfo.displayId).isEqualTo(DEFAULT_DISPLAY);
-            assertThat(displayInfo.displayGroupId).isEqualTo(DEFAULT_DISPLAY_GROUP);
-            assertThat(displayInfo.logicalWidth).isEqualTo(600);
-            assertThat(displayInfo.logicalHeight).isEqualTo(800);
-        }
+        add(device1);
+        add(device2);
+
+        Layout layout1 = new Layout();
+        layout1.createDisplayLocked(info(device1).address, /* isDefault= */ true,
+                /* isEnabled= */ true, mIdProducer);
+        layout1.createDisplayLocked(info(device2).address, /* isDefault= */ false,
+                /* isEnabled= */ true, mIdProducer);
+        when(mDeviceStateToLayoutMapSpy.get(STATE_DEFAULT)).thenReturn(layout1);
+        assertThat(layout1.size()).isEqualTo(2);
+        final int logicalId2 = layout1.getByAddress(info(device2).address).getLogicalDisplayId();
+
+        final DisplayInfo displayInfoDefault = mLogicalDisplayMapper.getDisplayInfoForStateLocked(
+                STATE_DEFAULT, DEFAULT_DISPLAY);
+        assertThat(displayInfoDefault.displayId).isEqualTo(DEFAULT_DISPLAY);
+        assertThat(displayInfoDefault.logicalWidth).isEqualTo(width(device1));
+        assertThat(displayInfoDefault.logicalHeight).isEqualTo(height(device1));
+
+        final DisplayInfo displayInfoOther = mLogicalDisplayMapper.getDisplayInfoForStateLocked(
+                STATE_DEFAULT, logicalId2);
+        assertThat(displayInfoOther).isNotNull();
+        assertThat(displayInfoOther.displayId).isEqualTo(logicalId2);
+        assertThat(displayInfoOther.logicalWidth).isEqualTo(width(device2));
+        assertThat(displayInfoOther.logicalHeight).isEqualTo(height(device2));
     }
 
     @Test
-    public void testGetDisplayInfoForStateLocked_oneDisplayGroup_differentTypes() {
-        add(createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY));
-        add(createDisplayDevice(Display.TYPE_INTERNAL, 200, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY));
-        add(createDisplayDevice(Display.TYPE_EXTERNAL, 700, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY));
+    public void testGetDisplayInfoForStateLocked_multipleLayouts() {
+        final DisplayDevice device1 = createDisplayDevice(TYPE_INTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        final DisplayDevice device2 = createDisplayDevice(TYPE_INTERNAL, 200, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        final DisplayDevice device3 = createDisplayDevice(TYPE_VIRTUAL, 700, 800,
+                DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP);
 
-        Set<DisplayInfo> displayInfos = mLogicalDisplayMapper.getDisplayInfoForStateLocked(
-                DeviceStateToLayoutMap.STATE_DEFAULT, DEFAULT_DISPLAY, DEFAULT_DISPLAY_GROUP);
-        assertThat(displayInfos.size()).isEqualTo(1);
-        for (DisplayInfo displayInfo : displayInfos) {
-            assertThat(displayInfo.displayId).isEqualTo(DEFAULT_DISPLAY);
-            assertThat(displayInfo.displayGroupId).isEqualTo(DEFAULT_DISPLAY_GROUP);
-            assertThat(displayInfo.logicalWidth).isEqualTo(600);
-            assertThat(displayInfo.logicalHeight).isEqualTo(800);
-        }
-    }
+        add(device1);
+        add(device2);
+        add(device3);
 
-    @Test
-    public void testGetDisplayInfoForStateLocked_multipleDisplayGroups_defaultGroup() {
-        add(createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY));
-        add(createDisplayDevice(Display.TYPE_INTERNAL, 200, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY));
-        add(createDisplayDevice(Display.TYPE_VIRTUAL, 700, 800,
-                DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP));
+        Layout layout1 = new Layout();
+        layout1.createDisplayLocked(info(device1).address,
+                /* isDefault= */ true, /* isEnabled= */ true, mIdProducer);
+        when(mDeviceStateToLayoutMapSpy.get(STATE_DEFAULT)).thenReturn(layout1);
 
-        Set<DisplayInfo> displayInfos = mLogicalDisplayMapper.getDisplayInfoForStateLocked(
-                DeviceStateToLayoutMap.STATE_DEFAULT, DEFAULT_DISPLAY, DEFAULT_DISPLAY_GROUP);
-        assertThat(displayInfos.size()).isEqualTo(1);
-        for (DisplayInfo displayInfo : displayInfos) {
-            assertThat(displayInfo.displayId).isEqualTo(DEFAULT_DISPLAY);
-            assertThat(displayInfo.displayGroupId).isEqualTo(DEFAULT_DISPLAY_GROUP);
-            assertThat(displayInfo.logicalWidth).isEqualTo(600);
-            assertThat(displayInfo.logicalHeight).isEqualTo(800);
-        }
+        final int layoutState2 = 2;
+        Layout layout2 = new Layout();
+        layout2.createDisplayLocked(info(device2).address,
+                /* isDefault= */ false, /* isEnabled= */ true, mIdProducer);
+        // Device3 is the default display.
+        layout2.createDisplayLocked(info(device3).address,
+                /* isDefault= */ true, /* isEnabled= */ true, mIdProducer);
+        when(mDeviceStateToLayoutMapSpy.get(layoutState2)).thenReturn(layout2);
+        assertThat(layout2.size()).isEqualTo(2);
+        final int logicalId2 = layout2.getByAddress(info(device2).address).getLogicalDisplayId();
+
+        // Default layout.
+        final DisplayInfo displayInfoLayout1Default =
+                mLogicalDisplayMapper.getDisplayInfoForStateLocked(
+                        STATE_DEFAULT, DEFAULT_DISPLAY);
+        assertThat(displayInfoLayout1Default.displayId).isEqualTo(DEFAULT_DISPLAY);
+        assertThat(displayInfoLayout1Default.logicalWidth).isEqualTo(width(device1));
+        assertThat(displayInfoLayout1Default.logicalHeight).isEqualTo(height(device1));
+
+        // Second layout, where device3 is the default display.
+        final DisplayInfo displayInfoLayout2Default =
+                mLogicalDisplayMapper.getDisplayInfoForStateLocked(
+                        layoutState2, DEFAULT_DISPLAY);
+        assertThat(displayInfoLayout2Default.displayId).isEqualTo(DEFAULT_DISPLAY);
+        assertThat(displayInfoLayout2Default.logicalWidth).isEqualTo(width(device3));
+        assertThat(displayInfoLayout2Default.logicalHeight).isEqualTo(height(device3));
+
+        final DisplayInfo displayInfoLayout2Other =
+                mLogicalDisplayMapper.getDisplayInfoForStateLocked(
+                        layoutState2, logicalId2);
+        assertThat(displayInfoLayout2Other).isNotNull();
+        assertThat(displayInfoLayout2Other.displayId).isEqualTo(logicalId2);
+        assertThat(displayInfoLayout2Other.logicalWidth).isEqualTo(width(device2));
+        assertThat(displayInfoLayout2Other.logicalHeight).isEqualTo(height(device2));
     }
 
     @Test
     public void testSingleDisplayGroup() {
-        LogicalDisplay display1 = add(createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY));
-        LogicalDisplay display2 = add(createDisplayDevice(Display.TYPE_INTERNAL, 600, 800, 0));
-        LogicalDisplay display3 = add(createDisplayDevice(Display.TYPE_VIRTUAL, 600, 800, 0));
+        LogicalDisplay display1 = add(createDisplayDevice(TYPE_INTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY));
+        LogicalDisplay display2 = add(createDisplayDevice(TYPE_INTERNAL, 600, 800, 0));
+        LogicalDisplay display3 = add(createDisplayDevice(TYPE_VIRTUAL, 600, 800, 0));
 
         assertEquals(DEFAULT_DISPLAY_GROUP,
                 mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(id(display1)));
@@ -356,12 +386,12 @@ public class LogicalDisplayMapperTest {
 
     @Test
     public void testMultipleDisplayGroups() {
-        LogicalDisplay display1 = add(createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY));
-        LogicalDisplay display2 = add(createDisplayDevice(Display.TYPE_INTERNAL, 600, 800, 0));
+        LogicalDisplay display1 = add(createDisplayDevice(TYPE_INTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY));
+        LogicalDisplay display2 = add(createDisplayDevice(TYPE_INTERNAL, 600, 800, 0));
 
 
-        TestDisplayDevice device3 = createDisplayDevice(Display.TYPE_VIRTUAL, 600, 800,
+        TestDisplayDevice device3 = createDisplayDevice(TYPE_VIRTUAL, 600, 800,
                 DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP);
         LogicalDisplay display3 = add(device3);
 
@@ -519,10 +549,10 @@ public class LogicalDisplayMapperTest {
 
     @Test
     public void testDeviceStateLocked() {
-        DisplayDevice device1 = createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
-        DisplayDevice device2 = createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        DisplayDevice device1 = createDisplayDevice(TYPE_INTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        DisplayDevice device2 = createDisplayDevice(TYPE_INTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
 
         Layout layout = new Layout();
         layout.createDisplayLocked(device1.getDisplayDeviceInfoLocked().address,
@@ -577,14 +607,11 @@ public class LogicalDisplayMapperTest {
         DisplayAddress displayAddressThree = new TestUtils.TestDisplayAddress();
 
         TestDisplayDevice device1 = createDisplayDevice(displayAddressOne, "one",
-                Display.TYPE_INTERNAL, 600, 800,
-                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+                TYPE_INTERNAL, 600, 800, DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
         TestDisplayDevice device2 = createDisplayDevice(displayAddressTwo, "two",
-                Display.TYPE_INTERNAL, 200, 800,
-                DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP);
+                TYPE_INTERNAL, 200, 800, DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP);
         TestDisplayDevice device3 = createDisplayDevice(displayAddressThree, "three",
-                Display.TYPE_INTERNAL, 600, 900,
-                DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP);
+                TYPE_INTERNAL, 600, 900, DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP);
 
         Layout threeDevicesEnabledLayout = new Layout();
         threeDevicesEnabledLayout.createDisplayLocked(
@@ -603,7 +630,7 @@ public class LogicalDisplayMapperTest {
                 /* isEnabled= */ true,
                 mIdProducer);
 
-        when(mDeviceStateToLayoutMapSpy.get(DeviceStateToLayoutMap.STATE_DEFAULT))
+        when(mDeviceStateToLayoutMapSpy.get(STATE_DEFAULT))
                 .thenReturn(threeDevicesEnabledLayout);
 
         LogicalDisplay display1 = add(device1);
@@ -733,6 +760,14 @@ public class LogicalDisplayMapperTest {
 
     private DisplayDeviceInfo info(DisplayDevice device) {
         return device.getDisplayDeviceInfoLocked();
+    }
+
+    private int width(DisplayDevice device) {
+        return info(device).width;
+    }
+
+    private int height(DisplayDevice device) {
+        return info(device).height;
     }
 
     private DisplayInfo info(LogicalDisplay display) {
