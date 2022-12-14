@@ -2325,7 +2325,7 @@ public final class NotificationPanelViewController implements Dumpable {
 
 
     private boolean handleQsTouch(MotionEvent event) {
-        if (mSplitShadeEnabled && touchXOutsideOfQs(event.getX())) {
+        if (isSplitShadeAndTouchXOutsideQs(event.getX())) {
             return false;
         }
         final int action = event.getActionMasked();
@@ -2382,12 +2382,14 @@ public final class NotificationPanelViewController implements Dumpable {
         return false;
     }
 
-    private boolean touchXOutsideOfQs(float touchX) {
-        return touchX < mQsFrame.getX() || touchX > mQsFrame.getX() + mQsFrame.getWidth();
+    /** Returns whether split shade is enabled and an x coordinate is outside of the QS frame. */
+    private boolean isSplitShadeAndTouchXOutsideQs(float touchX) {
+        return mSplitShadeEnabled && (touchX < mQsFrame.getX()
+                || touchX > mQsFrame.getX() + mQsFrame.getWidth());
     }
 
     private boolean isInQsArea(float x, float y) {
-        if (touchXOutsideOfQs(x)) {
+        if (isSplitShadeAndTouchXOutsideQs(x)) {
             return false;
         }
         // Let's reject anything at the very bottom around the home handle in gesture nav
@@ -5316,7 +5318,7 @@ public final class NotificationPanelViewController implements Dumpable {
         @Override
         public void flingTopOverscroll(float velocity, boolean open) {
             // in split shade mode we want to expand/collapse QS only when touch happens within QS
-            if (mSplitShadeEnabled && touchXOutsideOfQs(mInitialTouchX)) {
+            if (isSplitShadeAndTouchXOutsideQs(mInitialTouchX)) {
                 return;
             }
             mLastOverscroll = 0f;
