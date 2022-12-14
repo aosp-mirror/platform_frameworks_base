@@ -2683,6 +2683,8 @@ public class InputManagerService extends IInputManager.Stub
     @EnforcePermission(Manifest.permission.MONITOR_INPUT)
     @Override
     public void pilferPointers(IBinder inputChannelToken) {
+        super.pilferPointers_enforcePermission();
+
         Objects.requireNonNull(inputChannelToken);
         mNative.pilferPointers(inputChannelToken);
     }
