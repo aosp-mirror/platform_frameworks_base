@@ -27,6 +27,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
@@ -54,6 +55,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -147,6 +149,19 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     }
 
     @Test
+    public void complicationAvailability_serviceAvailable_noFavorites_panel_addComplication() {
+        final DreamHomeControlsComplication.Registrant registrant =
+                new DreamHomeControlsComplication.Registrant(mComplication,
+                        mDreamOverlayStateController, mControlsComponent);
+        registrant.start();
+
+        setHaveFavorites(false);
+        setServiceWithPanel();
+
+        verify(mDreamOverlayStateController).addComplication(mComplication);
+    }
+
+    @Test
     public void complicationAvailability_serviceNotAvailable_haveFavorites_doNotAddComplication() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
@@ -229,6 +244,15 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
         final List<ControlsServiceInfo> serviceInfos = mock(List.class);
         when(mControlsListingController.getCurrentServices()).thenReturn(serviceInfos);
         when(serviceInfos.isEmpty()).thenReturn(!value);
+        triggerControlsListingCallback(serviceInfos);
+    }
+
+    private void setServiceWithPanel() {
+        final List<ControlsServiceInfo> serviceInfos = new ArrayList<>();
+        ControlsServiceInfo csi = mock(ControlsServiceInfo.class);
+        serviceInfos.add(csi);
+        when(csi.getPanelActivity()).thenReturn(new ComponentName("a", "b"));
+        when(mControlsListingController.getCurrentServices()).thenReturn(serviceInfos);
         triggerControlsListingCallback(serviceInfos);
     }
 

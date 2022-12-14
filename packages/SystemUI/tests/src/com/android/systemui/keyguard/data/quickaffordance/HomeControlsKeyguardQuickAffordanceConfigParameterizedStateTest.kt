@@ -20,13 +20,14 @@ package com.android.systemui.keyguard.data.quickaffordance
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import java.util.*
+import java.util.Optional
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -50,20 +51,22 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
     companion object {
         @Parameters(
             name =
-                "feature enabled = {0}, has favorites = {1}, has service infos = {2}, can show" +
-                    " while locked = {3}, visibility is AVAILABLE {4} - expected visible = {5}"
+                "feature enabled = {0}, has favorites = {1}, has panels = {2}, " +
+                    "has service infos = {3}, can show while locked = {4}, " +
+                    "visibility is AVAILABLE {5} - expected visible = {6}"
         )
         @JvmStatic
         fun data() =
-            (0 until 32)
+            (0 until 64)
                 .map { combination ->
                     arrayOf(
-                        /* isFeatureEnabled= */ combination and 0b10000 != 0,
-                        /* hasFavorites= */ combination and 0b01000 != 0,
-                        /* hasServiceInfos= */ combination and 0b00100 != 0,
-                        /* canShowWhileLocked= */ combination and 0b00010 != 0,
-                        /* visibilityAvailable= */ combination and 0b00001 != 0,
-                        /* isVisible= */ combination == 0b11111,
+                        /* isFeatureEnabled= */ combination and 0b100000 != 0,
+                        /* hasFavorites = */ combination and 0b010000 != 0,
+                        /* hasPanels = */ combination and 0b001000 != 0,
+                        /* hasServiceInfos= */ combination and 0b000100 != 0,
+                        /* canShowWhileLocked= */ combination and 0b000010 != 0,
+                        /* visibilityAvailable= */ combination and 0b000001 != 0,
+                        /* isVisible= */ combination in setOf(0b111111, 0b110111, 0b101111),
                     )
                 }
                 .toList()
@@ -72,6 +75,7 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
     @Mock private lateinit var component: ControlsComponent
     @Mock private lateinit var controlsController: ControlsController
     @Mock private lateinit var controlsListingController: ControlsListingController
+    @Mock private lateinit var controlsServiceInfo: ControlsServiceInfo
     @Captor
     private lateinit var callbackCaptor:
         ArgumentCaptor<ControlsListingController.ControlsListingCallback>
@@ -80,10 +84,11 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
 
     @JvmField @Parameter(0) var isFeatureEnabled: Boolean = false
     @JvmField @Parameter(1) var hasFavorites: Boolean = false
-    @JvmField @Parameter(2) var hasServiceInfos: Boolean = false
-    @JvmField @Parameter(3) var canShowWhileLocked: Boolean = false
-    @JvmField @Parameter(4) var isVisibilityAvailable: Boolean = false
-    @JvmField @Parameter(5) var isVisibleExpected: Boolean = false
+    @JvmField @Parameter(2) var hasPanels: Boolean = false
+    @JvmField @Parameter(3) var hasServiceInfos: Boolean = false
+    @JvmField @Parameter(4) var canShowWhileLocked: Boolean = false
+    @JvmField @Parameter(5) var isVisibilityAvailable: Boolean = false
+    @JvmField @Parameter(6) var isVisibleExpected: Boolean = false
 
     @Before
     fun setUp() {
@@ -93,10 +98,13 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
         whenever(component.getControlsController()).thenReturn(Optional.of(controlsController))
         whenever(component.getControlsListingController())
             .thenReturn(Optional.of(controlsListingController))
+        if (hasPanels) {
+            whenever(controlsServiceInfo.panelActivity).thenReturn(mock())
+        }
         whenever(controlsListingController.getCurrentServices())
             .thenReturn(
                 if (hasServiceInfos) {
-                    listOf(mock(), mock())
+                    listOf(controlsServiceInfo, mock())
                 } else {
                     emptyList()
                 }
@@ -134,10 +142,15 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
         val job = underTest.lockScreenState.onEach(values::add).launchIn(this)
 
         if (canShowWhileLocked) {
+            val serviceInfoMock: ControlsServiceInfo = mock {
+                if (hasPanels) {
+                    whenever(panelActivity).thenReturn(mock())
+                }
+            }
             verify(controlsListingController).addCallback(callbackCaptor.capture())
             callbackCaptor.value.onServicesUpdated(
                 if (hasServiceInfos) {
-                    listOf(mock())
+                    listOf(serviceInfoMock)
                 } else {
                     emptyList()
                 }
