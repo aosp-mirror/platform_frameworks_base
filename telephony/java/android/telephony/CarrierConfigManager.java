@@ -9987,7 +9987,8 @@ public class CarrierConfigManager {
      * Gets the configuration values of the specified keys for a particular subscription.
      *
      * <p>If an invalid subId is used, the returned configuration will contain default values for
-     * the specified keys.
+     * the specified keys. If the value for the key can't be found, the returned configuration will
+     * filter the key out.
      *
      * <p>After using this method to get the configuration bundle,
      * {@link #isConfigForIdentifiedCarrier(PersistableBundle)} should be called to confirm whether
@@ -10005,8 +10006,8 @@ public class CarrierConfigManager {
      * @param subId The subscription ID on which the carrier config should be retrieved.
      * @param keys  The carrier config keys to retrieve values.
      * @return A {@link PersistableBundle} with key/value mapping for the specified configuration
-     * on success, or an empty (but never null) bundle on failure (for example, when no value for
-     * the specified key can be found).
+     * on success, or an empty (but never null) bundle on failure (for example, when the calling app
+     * has no permission).
      */
     @RequiresPermission(anyOf = {
             Manifest.permission.READ_PHONE_STATE,
@@ -10123,6 +10124,8 @@ public class CarrierConfigManager {
     /**
      * Gets the configuration values of the specified config keys applied for the default
      * subscription.
+     *
+     * <p>If the value for the key can't be found, the returned bundle will filter the key out.
      *
      * <p>After using this method to get the configuration bundle, {@link
      * #isConfigForIdentifiedCarrier(PersistableBundle)} should be called to confirm whether any
