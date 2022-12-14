@@ -3,6 +3,7 @@
         android:sharedUserId="android.uid.system">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.MANAGE_DYNAMIC_SYSTEM" />
     <uses-permission android:name="android.permission.REBOOT" />
@@ -19,6 +20,7 @@
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.INSTALL_DYNAMIC_SYSTEM"
+            android:foregroundServiceType="systemExempted"
             android:process=":dynsystem">
             <intent-filter>
                 <action android:name="android.os.image.action.NOTIFY_IF_IN_USE" />
