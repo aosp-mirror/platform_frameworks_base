@@ -83,6 +83,7 @@ import java.util.function.IntConsumer;
  * Run: adb shell am instrument -e class BatteryStatsNoteTest -w \
  *      com.android.frameworks.coretests/androidx.test.runner.AndroidJUnitRunner
  */
+@SuppressWarnings("GuardedBy")
 public class BatteryStatsNoteTest extends TestCase {
     private static final String TAG = BatteryStatsNoteTest.class.getSimpleName();
 
@@ -271,11 +272,11 @@ public class BatteryStatsNoteTest extends TestCase {
         clocks.realtime = clocks.uptime = 220;
         bi.noteLongPartialWakelockFinish(name, historyName, ISOLATED_UID);
 
-        final BatteryStatsHistoryIterator iterator =  bi.createBatteryStatsHistoryIterator();
+        final BatteryStatsHistoryIterator iterator =  bi.iterateBatteryStatsHistory();
 
-        BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
+        BatteryStats.HistoryItem item;
 
-        while (iterator.next(item)) {
+        while ((item = iterator.next()) != null) {
             if (item.eventCode == HistoryItem.EVENT_LONG_WAKE_LOCK_START) break;
         }
         assertThat(item.eventCode).isEqualTo(HistoryItem.EVENT_LONG_WAKE_LOCK_START);
@@ -283,7 +284,7 @@ public class BatteryStatsNoteTest extends TestCase {
         assertThat(item.eventTag.string).isEqualTo(historyName);
         assertThat(item.eventTag.uid).isEqualTo(UID);
 
-        while (iterator.next(item)) {
+        while ((item = iterator.next()) != null) {
             if (item.eventCode == HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH) break;
         }
         assertThat(item.eventCode).isEqualTo(HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH);
@@ -327,11 +328,11 @@ public class BatteryStatsNoteTest extends TestCase {
         clocks.realtime = clocks.uptime = 220;
         bi.noteLongPartialWakelockFinish(name, historyName, ISOLATED_UID);
 
-        final BatteryStatsHistoryIterator iterator = bi.createBatteryStatsHistoryIterator();
+        final BatteryStatsHistoryIterator iterator = bi.iterateBatteryStatsHistory();
 
-        BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
+        BatteryStats.HistoryItem item;
 
-        while (iterator.next(item)) {
+        while ((item = iterator.next()) != null) {
             if (item.eventCode == HistoryItem.EVENT_LONG_WAKE_LOCK_START) break;
         }
         assertThat(item.eventCode).isEqualTo(HistoryItem.EVENT_LONG_WAKE_LOCK_START);
@@ -339,7 +340,7 @@ public class BatteryStatsNoteTest extends TestCase {
         assertThat(item.eventTag.string).isEqualTo(historyName);
         assertThat(item.eventTag.uid).isEqualTo(UID);
 
-        while (iterator.next(item)) {
+        while ((item = iterator.next()) != null) {
             if (item.eventCode == HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH) break;
         }
         assertThat(item.eventCode).isEqualTo(HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH);
@@ -941,26 +942,27 @@ public class BatteryStatsNoteTest extends TestCase {
         clocks.realtime = clocks.uptime = 5000;
         bi.noteAlarmFinishLocked("foo", null, UID);
 
-        HistoryItem item = new HistoryItem();
-        assertTrue(bi.startIteratingHistoryLocked());
+        BatteryStatsHistoryIterator iterator = bi.iterateBatteryStatsHistory();
+        HistoryItem item;
 
-        assertTrue(bi.getNextHistoryLocked(item));
+        assertThat(item = iterator.next()).isNotNull();
         assertEquals(HistoryItem.EVENT_ALARM_START, item.eventCode);
         assertEquals("foo", item.eventTag.string);
         assertEquals(UID, item.eventTag.uid);
 
         // TODO(narayan): Figure out why this event is written to the history buffer. See
         // test below where it is being interspersed between multiple START events too.
-        assertTrue(bi.getNextHistoryLocked(item));
+        assertThat(item = iterator.next()).isNotNull();
         assertEquals(HistoryItem.EVENT_NONE, item.eventCode);
 
-        assertTrue(bi.getNextHistoryLocked(item));
+        assertThat(item = iterator.next()).isNotNull();
         assertEquals(HistoryItem.EVENT_ALARM_FINISH, item.eventCode);
         assertTrue(item.isDeltaData());
         assertEquals("foo", item.eventTag.string);
         assertEquals(UID, item.eventTag.uid);
 
-        assertFalse(bi.getNextHistoryLocked(item));
+        assertThat(iterator.hasNext()).isFalse();
+        assertThat(iterator.next()).isNull();
     }
 
     @SmallTest
@@ -980,28 +982,28 @@ public class BatteryStatsNoteTest extends TestCase {
         clocks.realtime = clocks.uptime = 5000;
         bi.noteAlarmFinishLocked("foo", ws, UID);
 
-        HistoryItem item = new HistoryItem();
-        assertTrue(bi.startIteratingHistoryLocked());
+        BatteryStatsHistoryIterator iterator = bi.iterateBatteryStatsHistory();
+        HistoryItem item;
 
-        assertTrue(bi.getNextHistoryLocked(item));
+        assertThat(item = iterator.next()).isNotNull();
         assertEquals(HistoryItem.EVENT_ALARM_START, item.eventCode);
         assertEquals("foo", item.eventTag.string);
         assertEquals(100, item.eventTag.uid);
 
-        assertTrue(bi.getNextHistoryLocked(item));
+        assertThat(item = iterator.next()).isNotNull();
         assertEquals(HistoryItem.EVENT_NONE, item.eventCode);
 
-        assertTrue(bi.getNextHistoryLocked(item));
+        assertThat(item = iterator.next()).isNotNull();
         assertEquals(HistoryItem.EVENT_ALARM_START, item.eventCode);
         assertEquals("foo", item.eventTag.string);
         assertEquals(500, item.eventTag.uid);
 
-        assertTrue(bi.getNextHistoryLocked(item));
+        assertThat(item = iterator.next()).isNotNull();
         assertEquals(HistoryItem.EVENT_ALARM_FINISH, item.eventCode);
         assertEquals("foo", item.eventTag.string);
         assertEquals(100, item.eventTag.uid);
 
-        assertTrue(bi.getNextHistoryLocked(item));
+        assertThat(item = iterator.next()).isNotNull();
         assertEquals(HistoryItem.EVENT_ALARM_FINISH, item.eventCode);
         assertEquals("foo", item.eventTag.string);
         assertEquals(500, item.eventTag.uid);
