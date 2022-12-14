@@ -4397,6 +4397,9 @@
   <!-- Set to true to make assistant show in front of the dream/screensaver. -->
   <java-symbol type="bool" name="config_assistantOnTopOfDream"/>
 
+  <!-- Set to true to enable letterboxing on translucent activities. -->
+  <java-symbol type="bool" name="config_letterboxIsEnabledForTranslucentActivities" />
+
   <java-symbol type="string" name="config_overrideComponentUiPackage" />
 
   <java-symbol type="string" name="notification_channel_network_status" />
