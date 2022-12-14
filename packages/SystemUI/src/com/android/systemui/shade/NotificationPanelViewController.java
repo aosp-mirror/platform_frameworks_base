@@ -4722,6 +4722,7 @@ public final class NotificationPanelViewController implements Dumpable {
             if (!openingWithTouch || !mHasVibratedOnOpen) {
                 mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
                 mHasVibratedOnOpen = true;
+                mShadeLog.v("Vibrating on opening, mHasVibratedOnOpen=true");
             }
         }
     }
@@ -6122,6 +6123,7 @@ public final class NotificationPanelViewController implements Dumpable {
                     if (isFullyCollapsed()) {
                         // If panel is fully collapsed, reset haptic effect before adding movement.
                         mHasVibratedOnOpen = false;
+                        mShadeLog.logHasVibrated(mHasVibratedOnOpen, mExpandedFraction);
                     }
                     addMovement(event);
                     if (!isFullyCollapsed()) {
