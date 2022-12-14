@@ -70,8 +70,12 @@ public class DesktopModeStatus {
      * @return {@code true} if active
      */
     public static boolean isActive(Context context) {
-        if (!IS_SUPPORTED) {
+        if (!isAnyEnabled()) {
             return false;
+        }
+        if (isProto2Enabled()) {
+            // Desktop mode is always active in prototype 2
+            return true;
         }
         try {
             int result = Settings.System.getIntForUser(context.getContentResolver(),
