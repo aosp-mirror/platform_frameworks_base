@@ -511,10 +511,26 @@ public class StatusBarManager {
     @SystemApi
     public static final int MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER = 1;
 
+    /**
+     * State indicating that media transfer to this receiver device is succeeded.
+     *
+     * @hide
+     */
+    public static final int MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED = 2;
+
+    /**
+     * State indicating that media transfer to this receiver device is failed.
+     *
+     * @hide
+     */
+    public static final int MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_FAILED = 3;
+
     /** @hide */
     @IntDef(prefix = {"MEDIA_TRANSFER_RECEIVER_STATE_"}, value = {
             MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
             MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
+            MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_FAILED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface MediaTransferReceiverState {}
