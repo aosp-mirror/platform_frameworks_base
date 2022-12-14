@@ -454,7 +454,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 new MagnificationScaleProvider(mContext));
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
         mCaptioningManagerImpl = new CaptioningManagerImpl(mContext);
-        mProxyManager = new ProxyManager(mLock);
+        mProxyManager = new ProxyManager(mLock, mA11yWindowManager);
         init();
     }
 

@@ -39,12 +39,14 @@ import android.os.RemoteException;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityDisplayProxy;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import androidx.annotation.Nullable;
 
 import com.android.server.wm.WindowManagerInternal;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -74,6 +76,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
                 mainHandler, lock, securityPolicy, systemSupport, trace, windowManagerInternal,
                 /* systemActionPerformer= */ null, awm, /* activityTaskManagerService= */ null);
         mDisplayId = displayId;
+        setDisplayTypes(DISPLAY_TYPE_PROXY);
     }
 
     /**
@@ -186,6 +189,17 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
         synchronized (mLock) {
             return mInstalledAndEnabledServices;
         }
+    }
+
+    @Override
+    public AccessibilityWindowInfo.WindowListSparseArray getWindows() {
+        final AccessibilityWindowInfo.WindowListSparseArray allWindows = super.getWindows();
+        AccessibilityWindowInfo.WindowListSparseArray displayWindows = new
+                AccessibilityWindowInfo.WindowListSparseArray();
+        // Filter here so A11yInteractionClient will not cache all the windows belonging to other
+        // proxy connections.
+        displayWindows.put(mDisplayId, allWindows.get(mDisplayId, Collections.emptyList()));
+        return displayWindows;
     }
 
     @Override

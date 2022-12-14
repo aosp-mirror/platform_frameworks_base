@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility;
 
+import static com.android.server.accessibility.AbstractAccessibilityServiceConnection.DISPLAY_TYPE_DEFAULT;
 import static com.android.server.accessibility.AccessibilityWindowManagerTest.DisplayIdMatcher.displayId;
 import static com.android.server.accessibility.AccessibilityWindowManagerTest.WindowChangesMatcher.a11yWindowChanges;
 import static com.android.server.accessibility.AccessibilityWindowManagerTest.WindowIdMatcher.a11yWindowId;
@@ -823,7 +824,8 @@ public class AccessibilityWindowManagerTest {
         // Starts tracking window of second display.
         startTrackingPerDisplay(SECONDARY_DISPLAY_ID);
 
-        final ArrayList<Integer> displayList = mA11yWindowManager.getDisplayListLocked();
+        final ArrayList<Integer> displayList = mA11yWindowManager.getDisplayListLocked(
+                DISPLAY_TYPE_DEFAULT);
         assertTrue(displayList.equals(mExpectedDisplayList));
     }
 
