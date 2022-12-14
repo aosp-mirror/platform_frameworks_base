@@ -1637,6 +1637,8 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityRecord target = new ActivityBuilder(mAtm).setAffinity(info.taskAffinity)
                 .build();
         final ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK, false);
+        spyOn(starter);
+        doReturn(START_SUCCESS).when(starter).isAllowedToStart(any(), anyBoolean(), any());
         startActivityInner(starter, target, null /* source */, null /* options */,
                 null /* inTask */, null /* inTaskFragment */);
 
@@ -1661,6 +1663,8 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityRecord target = new ActivityBuilder(mAtm).setRequiredDisplayCategory("auto")
                 .setAffinity(info.taskAffinity).build();
         final ActivityStarter starter = prepareStarter(0, false);
+        spyOn(starter);
+        doReturn(START_SUCCESS).when(starter).isAllowedToStart(any(), anyBoolean(), any());
         startActivityInner(starter, target,  task.getBottomMostActivity(), null /* options */,
                 null /* inTask */, null /* inTaskFragment */);
 
@@ -1685,7 +1689,10 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityRecord target = new ActivityBuilder(mAtm)
                 .setRequiredDisplayCategory(info.requiredDisplayCategory)
                 .setAffinity(info.taskAffinity).build();
+
         final ActivityStarter starter = prepareStarter(0, false);
+        spyOn(starter);
+        doReturn(START_SUCCESS).when(starter).isAllowedToStart(any(), anyBoolean(), any());
         startActivityInner(starter, target,  task.getBottomMostActivity(), null /* options */,
                 null /* inTask */, null /* inTaskFragment */);
 
@@ -1706,6 +1713,8 @@ public class ActivityStarterTests extends WindowTestsBase {
         inTask.inRecents = true;
 
         final ActivityStarter starter = prepareStarter(0, false);
+        spyOn(starter);
+        doReturn(START_SUCCESS).when(starter).isAllowedToStart(any(), anyBoolean(), any());
         final ActivityRecord target = new ActivityBuilder(mAtm).build();
         startActivityInner(starter, target, null /* source */, null /* options */, inTask,
                 null /* inTaskFragment */);
@@ -1724,6 +1733,8 @@ public class ActivityStarterTests extends WindowTestsBase {
         inTask.inRecents = true;
 
         final ActivityStarter starter = prepareStarter(0, false);
+        spyOn(starter);
+        doReturn(START_SUCCESS).when(starter).isAllowedToStart(any(), anyBoolean(), any());
         final ActivityRecord target = new ActivityBuilder(mAtm).setRequiredDisplayCategory("auto")
                 .build();
         startActivityInner(starter, target, null /* source */, null /* options */, inTask,

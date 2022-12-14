@@ -392,7 +392,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
         final DisplayContent displayContent =
                 mRootWindowContainer.getDisplayContentOrCreate(displayId);
-        if (displayContent != null && displayContent.mDwpcHelper.hasController()) {
+        if (displayContent != null) {
             final ArrayList<ActivityInfo> activities = new ArrayList<>();
             if (activityInfo != null) {
                 activities.add(activityInfo);
@@ -402,10 +402,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     activities.add(r.info);
                 });
             }
-            if (!displayContent.mDwpcHelper.canContainActivities(activities,
-                    displayContent.getWindowingMode())) {
-                return false;
-            }
+            return displayContent.mDwpcHelper.canContainActivities(activities,
+                        displayContent.getWindowingMode());
         }
 
         return true;
