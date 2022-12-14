@@ -2215,7 +2215,8 @@ public class SyncManager {
         pw.print("Storage low: "); pw.println(storageLowIntent != null);
         pw.print("Clock valid: "); pw.println(mSyncStorageEngine.isClockValid());
 
-        final AccountAndUser[] accounts = AccountManagerService.getSingleton().getAllAccounts();
+        final AccountAndUser[] accounts =
+                AccountManagerService.getSingleton().getAllAccountsForSystemProcess();
 
         pw.print("Accounts: ");
         if (accounts != INITIAL_ACCOUNTS_ARRAY) {
@@ -3274,7 +3275,8 @@ public class SyncManager {
         private void updateRunningAccountsH(EndPoint syncTargets) {
             synchronized (mAccountsLock) {
                 AccountAndUser[] oldAccounts = mRunningAccounts;
-                mRunningAccounts = AccountManagerService.getSingleton().getRunningAccounts();
+                mRunningAccounts =
+                        AccountManagerService.getSingleton().getRunningAccountsForSystem();
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Slog.v(TAG, "Accounts list: ");
                     for (AccountAndUser acc : mRunningAccounts) {
@@ -3316,7 +3318,8 @@ public class SyncManager {
             }
 
             // Cancel all jobs from non-existent accounts.
-            AccountAndUser[] allAccounts = AccountManagerService.getSingleton().getAllAccounts();
+            AccountAndUser[] allAccounts =
+                    AccountManagerService.getSingleton().getAllAccountsForSystemProcess();
             List<SyncOperation> ops = getAllPendingSyncs();
             for (int i = 0, opsSize = ops.size(); i < opsSize; i++) {
                 SyncOperation op = ops.get(i);
