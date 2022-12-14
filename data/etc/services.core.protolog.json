@@ -169,6 +169,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1944652783": {
+      "message": "Unable to tell MediaProjectionManagerService to stop the active projection: %s",
+      "level": "ERROR",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecorder.java"
+    },
     "-1941440781": {
       "message": "Creating Pending Move-to-back: %s",
       "level": "VERBOSE",
@@ -714,6 +720,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-1423223548": {
+      "message": "Unable to tell MediaProjectionManagerService about resizing the active projection: %s",
+      "level": "ERROR",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecorder.java"
     },
     "-1421296808": {
       "message": "Moving to RESUMED: %s (in existing)",

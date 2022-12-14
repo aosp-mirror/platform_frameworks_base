@@ -11420,6 +11420,11 @@ public class AudioService extends IAudioService.Stub
             public void onStop() {
                 unregisterAudioPolicyAsync(mPolicyCallback);
             }
+
+            @Override
+            public void onCapturedContentResize(int width, int height) {
+                // Ignore resize of the captured content.
+            }
         };
         UnregisterOnStopCallback mProjectionCallback;
 

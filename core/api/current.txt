@@ -25464,6 +25464,7 @@ package android.media.projection {
 
   public abstract static class MediaProjection.Callback {
     ctor public MediaProjection.Callback();
+    method public void onCapturedContentResize(int, int);
     method public void onStop();
   }
 

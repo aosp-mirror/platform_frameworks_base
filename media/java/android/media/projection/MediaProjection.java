@@ -234,7 +234,7 @@ public final class MediaProjection {
     /**
      * Callbacks for the projection session.
      */
-    public static abstract class Callback {
+    public abstract static class Callback {
         /**
          * Called when the MediaProjection session is no longer valid.
          * <p>
@@ -243,6 +243,46 @@ public final class MediaProjection {
          * </p>
          */
         public void onStop() { }
+
+        /**
+         * Indicates the width and height of the captured region in pixels. Called immediately after
+         * capture begins to provide the app with accurate sizing for the stream. Also called
+         * when the region captured in this MediaProjection session is resized.
+         * <p>
+         * The given width and height, in pixels, corresponds to the same width and height that
+         * would be returned from {@link android.view.WindowMetrics#getBounds()}
+         * </p>
+         * <p>
+         * Without the application resizing the {@link VirtualDisplay} (returned from
+         * {@code MediaProjection#createVirtualDisplay}) and output {@link Surface} (provided
+         * to {@code MediaProjection#createVirtualDisplay}), the captured stream will have
+         * letterboxing (black bars) around the recorded content to make up for the
+         * difference in aspect ratio.
+         * </p>
+         * <p>
+         * The application can prevent the letterboxing by overriding this method, and
+         * updating the size of both the {@link VirtualDisplay} and output {@link Surface}:
+         * </p>
+         *
+         * <pre>
+         * &#x40;Override
+         * public String onCapturedContentResize(int width, int height) {
+         *     // VirtualDisplay instance from MediaProjection#createVirtualDisplay
+         *     virtualDisplay.resize(width, height, dpi);
+         *
+         *     // Create a new Surface with the updated size (depending on the application's use
+         *     // case, this may be through different APIs - see Surface documentation for
+         *     // options).
+         *     int texName; // the OpenGL texture object name
+         *     SurfaceTexture surfaceTexture = new SurfaceTexture(texName);
+         *     surfaceTexture.setDefaultBufferSize(width, height);
+         *     Surface surface = new Surface(surfaceTexture);
+         *
+         *     // Ensure the VirtualDisplay has the updated Surface to send the capture to.
+         *     virtualDisplay.setSurface(surface);
+         * }</pre>
+         */
+        public void onCapturedContentResize(int width, int height) { }
     }
 
     private final class MediaProjectionCallback extends IMediaProjectionCallback.Stub {
@@ -250,6 +290,13 @@ public final class MediaProjection {
         public void onStop() {
             for (CallbackRecord cbr : mCallbacks.values()) {
                 cbr.onStop();
+            }
+        }
+
+        @Override
+        public void onCapturedContentResize(int width, int height) {
+            for (CallbackRecord cbr : mCallbacks.values()) {
+                cbr.onCapturedContentResize(width, height);
             }
         }
     }
@@ -270,6 +317,10 @@ public final class MediaProjection {
                     mCallback.onStop();
                 }
             });
+        }
+
+        public void onCapturedContentResize(int width, int height) {
+            mHandler.post(() -> mCallback.onCapturedContentResize(width, height));
         }
     }
 }
