@@ -52785,12 +52785,14 @@ package android.view.accessibility {
     method public void addAudioDescriptionRequestedChangeListener(@NonNull java.util.concurrent.Executor, @NonNull android.view.accessibility.AccessibilityManager.AudioDescriptionRequestedChangeListener);
     method public boolean addTouchExplorationStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener);
     method public void addTouchExplorationStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener, @Nullable android.os.Handler);
+    method public void addUiContrastChangeListener(@NonNull java.util.concurrent.Executor, @NonNull android.view.accessibility.AccessibilityManager.UiContrastChangeListener);
     method @ColorInt public int getAccessibilityFocusColor();
     method public int getAccessibilityFocusStrokeWidth();
     method @Deprecated public java.util.List<android.content.pm.ServiceInfo> getAccessibilityServiceList();
     method public java.util.List<android.accessibilityservice.AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int);
     method public java.util.List<android.accessibilityservice.AccessibilityServiceInfo> getInstalledAccessibilityServiceList();
     method public int getRecommendedTimeoutMillis(int, int);
+    method @FloatRange(from=-1.0F, to=1.0f) public float getUiContrast();
     method public void interrupt();
     method public static boolean isAccessibilityButtonSupported();
     method public boolean isAudioDescriptionRequested();
@@ -52802,6 +52804,7 @@ package android.view.accessibility {
     method public boolean removeAccessibilityStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener);
     method public boolean removeAudioDescriptionRequestedChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AudioDescriptionRequestedChangeListener);
     method public boolean removeTouchExplorationStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener);
+    method public void removeUiContrastChangeListener(@NonNull android.view.accessibility.AccessibilityManager.UiContrastChangeListener);
     method public void sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     field public static final int FLAG_CONTENT_CONTROLS = 4; // 0x4
     field public static final int FLAG_CONTENT_ICONS = 1; // 0x1
@@ -52822,6 +52825,10 @@ package android.view.accessibility {
 
   public static interface AccessibilityManager.TouchExplorationStateChangeListener {
     method public void onTouchExplorationStateChanged(boolean);
+  }
+
+  public static interface AccessibilityManager.UiContrastChangeListener {
+    method public void onUiContrastChanged(@FloatRange(from=-1.0F, to=1.0f) float);
   }
 
   public class AccessibilityNodeInfo implements android.os.Parcelable {

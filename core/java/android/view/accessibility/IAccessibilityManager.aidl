@@ -118,4 +118,6 @@ interface IAccessibilityManager {
 
     // Used by UiAutomation for tests on the InputFilter
     void injectInputEventToInputFilter(in InputEvent event);
+
+    float getUiContrast();
 }
