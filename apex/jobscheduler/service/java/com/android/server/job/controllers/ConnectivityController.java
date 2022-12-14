@@ -149,11 +149,13 @@ public final class ConnectivityController extends RestrictingController implemen
             //   2. Waiting connectivity jobs would be ready with connectivity
             //   3. An existing network satisfies a waiting connectivity job's requirements
             //   4. TOP proc state
-            //   5. Existence of treat-as-EJ EJs (not just requested EJs)
-            //   6. FGS proc state
-            //   7. EJ enqueue time
-            //   8. Any other important job priorities/proc states
-            //   9. Enqueue time
+            //   5. Existence of treat-as-UI UIJs (not just requested UIJs)
+            //   6. Existence of treat-as-EJ EJs (not just requested EJs)
+            //   7. FGS proc state
+            //   8. UIJ enqueue time
+            //   9. EJ enqueue time
+            //   10. Any other important job priorities/proc states
+            //   11. Enqueue time
             // TODO: maybe consider number of jobs
             // TODO: consider IMPORTANT_WHILE_FOREGROUND bit
             final int runningPriority = prioritizeExistenceOver(0,
@@ -181,8 +183,13 @@ public final class ConnectivityController extends RestrictingController implemen
             if (topPriority != 0) {
                 return topPriority;
             }
-            // They're either both TOP or both not TOP. Prioritize the app that has runnable EJs
+            // They're either both TOP or both not TOP. Prioritize the app that has runnable UIJs
             // pending.
+            final int uijPriority = prioritizeExistenceOver(0, us1.numUIJs, us2.numUIJs);
+            if (uijPriority != 0) {
+                return uijPriority;
+            }
+            // Still equivalent. Prioritize the app that has runnable EJs pending.
             final int ejPriority = prioritizeExistenceOver(0, us1.numEJs, us2.numEJs);
             if (ejPriority != 0) {
                 return ejPriority;
@@ -194,6 +201,12 @@ public final class ConnectivityController extends RestrictingController implemen
                     us1.baseBias, us2.baseBias);
             if (fgsPriority != 0) {
                 return fgsPriority;
+            }
+            // Order them by UIJ enqueue time to help provide low UIJ latency.
+            if (us1.earliestUIJEnqueueTime < us2.earliestUIJEnqueueTime) {
+                return -1;
+            } else if (us1.earliestUIJEnqueueTime > us2.earliestUIJEnqueueTime) {
+                return 1;
             }
             // Order them by EJ enqueue time to help provide low EJ latency.
             if (us1.earliestEJEnqueueTime < us2.earliestEJEnqueueTime) {
@@ -414,7 +427,7 @@ public final class ConnectivityController extends RestrictingController implemen
         final UidStats uidStats =
                 getUidStats(jobStatus.getSourceUid(), jobStatus.getSourcePackageName(), true);
 
-        if (jobStatus.shouldTreatAsExpeditedJob()) {
+        if (jobStatus.shouldTreatAsExpeditedJob() && jobStatus.shouldTreatAsUserInitiated()) {
             if (!jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY)) {
                 // Don't request a direct hole through any of the firewalls. Instead, mark the
                 // constraint as satisfied if the network is available, and the job will get
@@ -936,10 +949,12 @@ public final class ConnectivityController extends RestrictingController implemen
             if (us.lastUpdatedElapsed + MIN_STATS_UPDATE_INTERVAL_MS < nowElapsed) {
                 us.earliestEnqueueTime = Long.MAX_VALUE;
                 us.earliestEJEnqueueTime = Long.MAX_VALUE;
+                us.earliestUIJEnqueueTime = Long.MAX_VALUE;
                 us.numReadyWithConnectivity = 0;
                 us.numRequestedNetworkAvailable = 0;
                 us.numRegular = 0;
                 us.numEJs = 0;
+                us.numUIJs = 0;
 
                 for (int j = 0; j < jobs.size(); ++j) {
                     JobStatus job = jobs.valueAt(j);
@@ -956,10 +971,15 @@ public final class ConnectivityController extends RestrictingController implemen
                         if (job.shouldTreatAsExpeditedJob() || job.startedAsExpeditedJob) {
                             us.earliestEJEnqueueTime =
                                     Math.min(us.earliestEJEnqueueTime, job.enqueueTime);
+                        } else if (job.shouldTreatAsUserInitiated()) {
+                            us.earliestUIJEnqueueTime =
+                                    Math.min(us.earliestUIJEnqueueTime, job.enqueueTime);
                         }
                     }
                     if (job.shouldTreatAsExpeditedJob() || job.startedAsExpeditedJob) {
                         us.numEJs++;
+                    } else if (job.shouldTreatAsUserInitiated()) {
+                        us.numUIJs++;
                     } else {
                         us.numRegular++;
                     }
@@ -1466,8 +1486,10 @@ public final class ConnectivityController extends RestrictingController implemen
         public int numRequestedNetworkAvailable;
         public int numEJs;
         public int numRegular;
+        public int numUIJs;
         public long earliestEnqueueTime;
         public long earliestEJEnqueueTime;
+        public long earliestUIJEnqueueTime;
         public long lastUpdatedElapsed;
 
         private UidStats(int uid) {
@@ -1485,6 +1507,7 @@ public final class ConnectivityController extends RestrictingController implemen
             pw.print("#reg", numRegular);
             pw.print("earliestEnqueue", earliestEnqueueTime);
             pw.print("earliestEJEnqueue", earliestEJEnqueueTime);
+            pw.print("earliestUIJEnqueue", earliestUIJEnqueueTime);
             pw.print("updated=");
             TimeUtils.formatDuration(lastUpdatedElapsed - nowElapsed, pw);
             pw.println("}");
