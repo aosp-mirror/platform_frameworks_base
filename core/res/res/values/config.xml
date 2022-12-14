@@ -5247,6 +5247,10 @@
     <!-- Whether using split screen aspect ratio as a default aspect ratio for unresizable apps. -->
     <bool name="config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled">false</bool>
 
+    <!-- Whether the specific behaviour for translucent activities letterboxing is enabled.
+         TODO(b/255532890) Enable when ignoreOrientationRequest is set -->
+    <bool name="config_letterboxIsEnabledForTranslucentActivities">false</bool>
+
     <!-- Whether a camera compat controller is enabled to allow the user to apply or revert
          treatment for stretched issues in camera viewfinder. -->
     <bool name="config_isCameraCompatControlForStretchedIssuesEnabled">false</bool>

@@ -3938,27 +3938,54 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         unregisterConfigurationChangeListener(listener);
     }
 
+    static void overrideConfigurationPropagation(WindowContainer<?> receiver,
+            WindowContainer<?> supplier) {
+        overrideConfigurationPropagation(receiver, supplier, null /* configurationMerger */);
+    }
+
     /**
      * Forces the receiver container to always use the configuration of the supplier container as
      * its requested override configuration. It allows to propagate configuration without changing
      * the relationship between child and parent.
+     *
+     * @param receiver            The {@link WindowContainer<?>} which will receive the {@link
+     *                            Configuration} result of the merging operation.
+     * @param supplier            The {@link WindowContainer<?>} which provides the initial {@link
+     *                            Configuration}.
+     * @param configurationMerger A {@link ConfigurationMerger} which combines the {@link
+     *                            Configuration} of the receiver and the supplier.
      */
-    static void overrideConfigurationPropagation(WindowContainer<?> receiver,
-            WindowContainer<?> supplier) {
+    static WindowContainerListener overrideConfigurationPropagation(WindowContainer<?> receiver,
+            WindowContainer<?> supplier, @Nullable ConfigurationMerger configurationMerger) {
         final ConfigurationContainerListener listener = new ConfigurationContainerListener() {
             @Override
             public void onMergedOverrideConfigurationChanged(Configuration mergedOverrideConfig) {
-                receiver.onRequestedOverrideConfigurationChanged(supplier.getConfiguration());
+                final Configuration mergedConfiguration =
+                        configurationMerger != null
+                                ? configurationMerger.merge(mergedOverrideConfig,
+                                receiver.getConfiguration())
+                                : supplier.getConfiguration();
+                receiver.onRequestedOverrideConfigurationChanged(mergedConfiguration);
             }
         };
         supplier.registerConfigurationChangeListener(listener);
-        receiver.registerWindowContainerListener(new WindowContainerListener() {
+        final WindowContainerListener wcListener = new WindowContainerListener() {
             @Override
             public void onRemoved() {
                 receiver.unregisterWindowContainerListener(this);
                 supplier.unregisterConfigurationChangeListener(listener);
             }
-        });
+        };
+        receiver.registerWindowContainerListener(wcListener);
+        return wcListener;
+    }
+
+    /**
+     * Abstraction for functions merging two {@link Configuration} objects into one.
+     */
+    @FunctionalInterface
+    interface ConfigurationMerger {
+        Configuration merge(Configuration first, Configuration second);
     }
 
     /**
