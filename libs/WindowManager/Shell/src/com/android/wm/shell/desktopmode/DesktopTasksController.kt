@@ -16,7 +16,11 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.app.ActivityManager
+import android.app.WindowConfiguration
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
+import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
+import android.app.WindowConfiguration.WindowingMode
 import android.content.Context
 import android.view.WindowManager
 import android.window.WindowContainerTransaction
@@ -82,6 +86,59 @@ class DesktopTasksController(
                 shellTaskOrganizer.applyTransaction(wct)
             }
         }
+    }
+
+    /** Move a task with given `taskId` to desktop */
+    fun moveToDesktop(taskId: Int) {
+        shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { task -> moveToDesktop(task) }
+    }
+
+    /** Move a task to desktop */
+    fun moveToDesktop(task: ActivityManager.RunningTaskInfo) {
+        ProtoLog.v(WM_SHELL_DESKTOP_MODE, "moveToDesktop: %d", task.taskId)
+
+        val wct = WindowContainerTransaction()
+        // Bring other apps to front first
+        bringDesktopAppsToFront(wct)
+
+        wct.setWindowingMode(task.getToken(), WindowConfiguration.WINDOWING_MODE_FREEFORM)
+        wct.reorder(task.getToken(), true /* onTop */)
+
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            transitions.startTransition(WindowManager.TRANSIT_CHANGE, wct, null /* handler */)
+        } else {
+            shellTaskOrganizer.applyTransaction(wct)
+        }
+    }
+
+    /** Move a task with given `taskId` to fullscreen */
+    fun moveToFullscreen(taskId: Int) {
+        shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { task -> moveToFullscreen(task) }
+    }
+
+    /** Move a task to fullscreen */
+    fun moveToFullscreen(task: ActivityManager.RunningTaskInfo) {
+        ProtoLog.v(WM_SHELL_DESKTOP_MODE, "moveToFullscreen: %d", task.taskId)
+
+        val wct = WindowContainerTransaction()
+        wct.setWindowingMode(task.getToken(), WindowConfiguration.WINDOWING_MODE_FULLSCREEN)
+        wct.setBounds(task.getToken(), null)
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            transitions.startTransition(WindowManager.TRANSIT_CHANGE, wct, null /* handler */)
+        } else {
+            shellTaskOrganizer.applyTransaction(wct)
+        }
+    }
+
+    /**
+     * Get windowing move for a given `taskId`
+     *
+     * @return [WindowingMode] for the task or [WINDOWING_MODE_UNDEFINED] if task is not found
+     */
+    @WindowingMode
+    fun getTaskWindowingMode(taskId: Int): Int {
+        return shellTaskOrganizer.getRunningTaskInfo(taskId)?.windowingMode
+            ?: WINDOWING_MODE_UNDEFINED
     }
 
     private fun bringDesktopAppsToFront(wct: WindowContainerTransaction) {
