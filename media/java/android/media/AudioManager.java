@@ -6237,6 +6237,49 @@ public class AudioManager {
     }
 
     /**
+     * @hide
+     * Lower media volume to RS1
+     */
+    public void lowerVolumeToRs1() {
+        try {
+            getService().lowerVolumeToRs1(mApplicationContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Sound dose warning at every 100% of dose during integration window
+     */
+    public static final int CSD_WARNING_DOSE_REACHED_1X = 1;
+    /**
+     * @hide
+     * Sound dose warning when 500% of dose is reached during integration window
+     */
+    public static final int CSD_WARNING_DOSE_REPEATED_5X = 2;
+    /**
+     * @hide
+     * Sound dose warning after a momentary exposure event
+     */
+    public static final int CSD_WARNING_MOMENTARY_EXPOSURE = 3;
+    /**
+     * @hide
+     * Sound dose warning at every 100% of dose during integration window
+     */
+    public static final int CSD_WARNING_ACCUMULATION_START = 4;
+
+    /** @hide */
+    @IntDef(flag = false, value = {
+            CSD_WARNING_DOSE_REACHED_1X,
+            CSD_WARNING_DOSE_REPEATED_5X,
+            CSD_WARNING_MOMENTARY_EXPOSURE,
+            CSD_WARNING_ACCUMULATION_START }
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CsdWarning {}
+
+    /**
      * Only useful for volume controllers.
      * @hide
      */

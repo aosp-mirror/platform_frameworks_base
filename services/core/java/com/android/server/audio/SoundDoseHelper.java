@@ -26,6 +26,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.ISoundDose;
 import android.media.ISoundDoseCallback;
@@ -40,6 +41,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.MathUtils;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.audio.AudioService.AudioHandler;
 import com.android.server.audio.AudioService.ISafeHearingVolumeController;
@@ -96,10 +98,18 @@ public class SoundDoseHelper {
 
     private static final float CUSTOM_RS2_VALUE = 90;
 
+    // timeouts for the CSD warnings, -1 means no timeout (dialog must be ack'd by user)
+    private static final int CSD_WARNING_TIMEOUT_MS_DOSE_1X = 7000;
+    private static final int CSD_WARNING_TIMEOUT_MS_DOSE_5X = 5000;
+    private static final int CSD_WARNING_TIMEOUT_MS_ACCUMULATION_START = -1;
+    private static final int CSD_WARNING_TIMEOUT_MS_MOMENTARY_EXPOSURE = 5000;
+
     private final EventLogger mLogger = new EventLogger(AudioService.LOG_NB_EVENTS_SOUND_DOSE,
             "CSD updates");
 
     private int mMcc = 0;
+
+    private final boolean mEnableCsd;
 
     final Object mSafeMediaVolumeStateLock = new Object();
     private int mSafeMediaVolumeState;
@@ -144,6 +154,8 @@ public class SoundDoseHelper {
 
     private ISoundDose mSoundDose;
     private float mCurrentCsd = 0.f;
+    // dose at which the next dose reached warning occurs
+    private float mNextCsdWarning = 1.0f;
     private final List<SoundDoseRecord> mDoseRecords = new ArrayList<>();
 
     private final Context mContext;
@@ -153,10 +165,42 @@ public class SoundDoseHelper {
             Log.w(TAG, "DeviceId " + deviceId + " triggered momentary exposure with value: "
                     + currentMel);
             mLogger.enqueue(SoundDoseEvent.getMomentaryExposureEvent(currentMel));
+            if (mEnableCsd) {
+                mVolumeController.postDisplayCsdWarning(
+                        AudioManager.CSD_WARNING_MOMENTARY_EXPOSURE,
+                        getTimeoutMsForWarning(AudioManager.CSD_WARNING_MOMENTARY_EXPOSURE));
+            }
         }
 
         public void onNewCsdValue(float currentCsd, SoundDoseRecord[] records) {
             Log.i(TAG, "onNewCsdValue: " + currentCsd);
+            if (mCurrentCsd < currentCsd) {
+                // dose increase: going over next threshold?
+                if ((mCurrentCsd < mNextCsdWarning) && (currentCsd >= mNextCsdWarning)) {
+                    if (mEnableCsd) {
+                        if (mNextCsdWarning == 5.0f) {
+                            // 500% dose repeat
+                            mVolumeController.postDisplayCsdWarning(
+                                    AudioManager.CSD_WARNING_DOSE_REPEATED_5X,
+                                    getTimeoutMsForWarning(
+                                            AudioManager.CSD_WARNING_DOSE_REPEATED_5X));
+                            // on the 5x dose warning, the volume reduction happens right away
+                            mAudioService.postLowerVolumeToRs1();
+                        } else {
+                            mVolumeController.postDisplayCsdWarning(
+                                    AudioManager.CSD_WARNING_DOSE_REACHED_1X,
+                                    getTimeoutMsForWarning(
+                                            AudioManager.CSD_WARNING_DOSE_REACHED_1X));
+                        }
+                    }
+                    mNextCsdWarning += 1.0f;
+                }
+            } else {
+                // dose decrease: dropping below previous threshold of warning?
+                if ((currentCsd < mNextCsdWarning - 1.0f) && (mNextCsdWarning >= 2.0f)) {
+                    mNextCsdWarning -= 1.0f;
+                }
+            }
             mCurrentCsd = currentCsd;
             mDoseRecords.addAll(Arrays.asList(records));
             long totalDuration = 0;
@@ -184,10 +228,12 @@ public class SoundDoseHelper {
         mSafeMediaVolumeState = mSettings.getGlobalInt(audioService.getContentResolver(),
                 Settings.Global.AUDIO_SAFE_VOLUME_STATE, 0);
 
+        mEnableCsd = mContext.getResources().getBoolean(R.bool.config_audio_csd_enabled_default);
+
         // The default safe volume index read here will be replaced by the actual value when
         // the mcc is read by onConfigureSafeVolume()
         mSafeMediaVolumeIndex = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_safe_media_volume_index) * 10;
+                R.integer.config_safe_media_volume_index) * 10;
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(
                 Context.ALARM_SERVICE);
@@ -401,6 +447,7 @@ public class SoundDoseHelper {
     }
 
     /*package*/ void dump(PrintWriter pw) {
+        pw.print("  mEnableCsd="); pw.println(mEnableCsd);
         pw.print("  mSafeMediaVolumeState=");
         pw.println(safeMediaVolumeStateToString(mSafeMediaVolumeState));
         pw.print("  mSafeMediaVolumeIndex="); pw.println(mSafeMediaVolumeIndex);
@@ -489,6 +536,21 @@ public class SoundDoseHelper {
                                 /*obj=*/null), /*delay=*/0);
             }
         }
+    }
+
+    private int getTimeoutMsForWarning(@AudioManager.CsdWarning int csdWarning) {
+        switch (csdWarning) {
+            case AudioManager.CSD_WARNING_DOSE_REACHED_1X:
+                return CSD_WARNING_TIMEOUT_MS_DOSE_1X;
+            case AudioManager.CSD_WARNING_DOSE_REPEATED_5X:
+                return CSD_WARNING_TIMEOUT_MS_DOSE_5X;
+            case AudioManager.CSD_WARNING_MOMENTARY_EXPOSURE:
+                return CSD_WARNING_TIMEOUT_MS_MOMENTARY_EXPOSURE;
+            case AudioManager.CSD_WARNING_ACCUMULATION_START:
+                return CSD_WARNING_TIMEOUT_MS_ACCUMULATION_START;
+        }
+        Log.e(TAG, "Invalid CSD warning " + csdWarning, new Exception());
+        return -1;
     }
 
     @GuardedBy("mSafeMediaVolumeStateLock")

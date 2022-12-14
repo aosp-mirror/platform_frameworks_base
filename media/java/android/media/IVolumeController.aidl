@@ -39,4 +39,19 @@ oneway interface IVolumeController {
      *     {@link VolumePolicy#A11Y_MODE_INDEPENDENT_A11Y_VOLUME}
      */
     void setA11yMode(int mode);
+
+    /**
+     * Display a sound-dose related warning.
+     * This method will never be called if the CSD (Computed Sound Dose) feature is
+     * not enabled. See com.android.android.server.audio.SoundDoseHelper for the state of
+     * the feature.
+     * @param warning the type of warning to display, values are one of
+     *        {@link android.media.AudioManager#CSD_WARNING_DOSE_REACHED_1X},
+     *        {@link android.media.AudioManager#CSD_WARNING_DOSE_REPEATED_5X},
+     *        {@link android.media.AudioManager#CSD_WARNING_MOMENTARY_EXPOSURE},
+     *        {@link android.media.AudioManager#CSD_WARNING_ACCUMULATION_START}.
+     * @param displayDurationMs the time expressed in milliseconds after which the dialog will be
+     *        automatically dismissed, or -1 if there is no automatic timeout.
+     */
+    void displayCsdWarning(int warning, int displayDurationMs);
 }
