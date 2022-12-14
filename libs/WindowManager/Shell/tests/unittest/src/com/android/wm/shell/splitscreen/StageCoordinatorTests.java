@@ -320,4 +320,16 @@ public class StageCoordinatorTests extends ShellTestCase {
         assertTrue(options.getBoolean(
                 KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION));
     }
+
+    @Test
+    public void testExitSplitScreenAfterFolded() {
+        when(mMainStage.isActive()).thenReturn(true);
+        when(mMainStage.isFocused()).thenReturn(true);
+        when(mMainStage.getTopVisibleChildTaskId()).thenReturn(INVALID_TASK_ID);
+
+        mStageCoordinator.onFoldedStateChanged(true);
+
+        verify(mStageCoordinator).onSplitScreenExit();
+        verify(mMainStage).deactivate(any(WindowContainerTransaction.class), eq(false));
+    }
 }
