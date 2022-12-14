@@ -21,14 +21,18 @@ import android.content.ContentProvider
 import android.content.ContentValues
 import android.content.Context
 import android.content.UriMatcher
+import android.content.pm.PackageManager
 import android.content.pm.ProviderInfo
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
+import android.os.Binder
+import android.os.Bundle
 import android.util.Log
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SystemUIAppComponentFactoryBase.ContextAvailableCallback
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
+import com.android.systemui.keyguard.ui.preview.KeyguardRemotePreviewManager
 import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderContract as Contract
 import javax.inject.Inject
 import kotlinx.coroutines.runBlocking
@@ -37,6 +41,7 @@ class KeyguardQuickAffordanceProvider :
     ContentProvider(), SystemUIAppComponentFactoryBase.ContextInitializer {
 
     @Inject lateinit var interactor: KeyguardQuickAffordanceInteractor
+    @Inject lateinit var previewManager: KeyguardRemotePreviewManager
 
     private lateinit var contextAvailableCallback: ContextAvailableCallback
 
@@ -147,6 +152,21 @@ class KeyguardQuickAffordanceProvider :
         }
 
         return deleteSelection(uri, selectionArgs)
+    }
+
+    override fun call(method: String, arg: String?, extras: Bundle?): Bundle? {
+        return if (
+            requireContext()
+                .checkPermission(
+                    android.Manifest.permission.BIND_WALLPAPER,
+                    Binder.getCallingPid(),
+                    Binder.getCallingUid(),
+                ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            previewManager.preview(extras)
+        } else {
+            null
+        }
     }
 
     private fun insertSelection(values: ContentValues?): Uri? {
