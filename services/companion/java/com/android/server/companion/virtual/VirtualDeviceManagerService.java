@@ -41,6 +41,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcel;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArraySet;
@@ -62,6 +63,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -492,6 +494,35 @@ public class VirtualDeviceManagerService extends SystemService {
             synchronized (mVirtualDeviceManagerLock) {
                 return isValidVirtualDeviceLocked(virtualDevice);
             }
+        }
+
+        @Override
+        public int getDeviceOwnerUid(int deviceId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                int size = mVirtualDevices.size();
+                for (int i = 0; i < size; i++) {
+                    VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
+                    if (device.getDeviceId() == deviceId) {
+                        return device.getOwnerUid();
+                    }
+                }
+            }
+            return Process.INVALID_UID;
+        }
+
+        @Override
+        public @NonNull Set<Integer> getDeviceIdsForUid(int uid) {
+            ArraySet<Integer> result = new ArraySet<>();
+            synchronized (mVirtualDeviceManagerLock) {
+                int size = mVirtualDevices.size();
+                for (int i = 0; i < size; i++) {
+                    VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
+                    if (device.isAppRunningOnVirtualDevice(uid)) {
+                        result.add(device.getDeviceId());
+                    }
+                }
+            }
+            return result;
         }
 
         @Override
