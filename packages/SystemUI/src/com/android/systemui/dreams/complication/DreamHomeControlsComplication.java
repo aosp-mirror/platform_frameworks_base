@@ -136,8 +136,15 @@ public class DreamHomeControlsComplication implements Complication {
             final boolean hasFavorites = mControlsComponent.getControlsController()
                     .map(c -> !c.getFavorites().isEmpty())
                     .orElse(false);
+            boolean hasPanels = false;
+            for (int i = 0; i < controlsServices.size(); i++) {
+                if (controlsServices.get(i).getPanelActivity() != null) {
+                    hasPanels = true;
+                    break;
+                }
+            }
             final ControlsComponent.Visibility visibility = mControlsComponent.getVisibility();
-            return hasFavorites && visibility != UNAVAILABLE;
+            return (hasFavorites || hasPanels) && visibility != UNAVAILABLE;
         }
     }
 
