@@ -25,6 +25,7 @@ import com.android.systemui.R
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.TintedIcon
+import com.android.systemui.temporarydisplay.TemporaryViewInfo
 
 /** Utility methods for media tap-to-transfer. */
 class MediaTttUtils {
@@ -47,7 +48,7 @@ class MediaTttUtils {
         fun getIconInfoFromPackageName(
             context: Context,
             appPackageName: String?,
-            logger: MediaTttLogger
+            logger: MediaTttLogger<out TemporaryViewInfo>
         ): IconInfo {
             if (appPackageName != null) {
                 val packageManager = context.packageManager

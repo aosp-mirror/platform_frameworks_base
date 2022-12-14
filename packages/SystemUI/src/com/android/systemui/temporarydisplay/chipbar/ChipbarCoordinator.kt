@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.time.SystemClock
 import com.android.systemui.util.view.ViewUtil
 import com.android.systemui.util.wakelock.WakeLock
 import javax.inject.Inject
@@ -77,6 +78,7 @@ open class ChipbarCoordinator @Inject constructor(
         private val viewUtil: ViewUtil,
         private val vibratorHelper: VibratorHelper,
         wakeLockBuilder: WakeLock.Builder,
+        systemClock: SystemClock,
 ) : TemporaryViewDisplayController<ChipbarInfo, ChipbarLogger>(
         context,
         logger,
@@ -87,6 +89,7 @@ open class ChipbarCoordinator @Inject constructor(
         powerManager,
         R.layout.chipbar,
         wakeLockBuilder,
+        systemClock,
 ) {
 
     private lateinit var parent: ChipbarRootView
