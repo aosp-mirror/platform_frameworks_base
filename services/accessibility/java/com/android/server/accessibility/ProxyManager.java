@@ -235,4 +235,15 @@ public class ProxyManager {
             }
         }
     }
+
+    /**
+     * Clears all proxy caches.
+     */
+    public void clearCacheLocked() {
+        for (int i = 0; i < mProxyA11yServiceConnections.size(); i++) {
+            final ProxyAccessibilityServiceConnection proxy =
+                    mProxyA11yServiceConnections.valueAt(i);
+            proxy.notifyClearAccessibilityNodeInfoCache();
+        }
+    }
 }
