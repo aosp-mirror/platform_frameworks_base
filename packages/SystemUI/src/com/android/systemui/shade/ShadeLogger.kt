@@ -140,6 +140,15 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         })
     }
 
+    fun logHasVibrated(hasVibratedOnOpen: Boolean, fraction: Float) {
+        log(LogLevel.VERBOSE, {
+            bool1 = hasVibratedOnOpen
+            double1 = fraction.toDouble()
+        }, {
+            "hasVibratedOnOpen=$bool1, expansionFraction=$double1"
+        })
+    }
+
     fun logQsExpansionChanged(
             message: String,
             qsExpanded: Boolean,
