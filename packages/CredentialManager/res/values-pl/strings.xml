@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Zapisz w innym miejscu"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Użyj innego urządzenia"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Zapisz na innym urządzeniu"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Klucze zwiększają Twoje bezpieczeństwo"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Nie musisz wymyślać ani zapamiętywać skomplikowanych haseł"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Możesz utworzyć unikalny klucz, używając odcisku palca, rozpoznawania twarzy albo blokady ekranu"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Klucze są zapisane w menedżerze haseł, dzięki czemu możesz logować się na innych urządzeniach"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Wybierz, gdzie chcesz <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"tworzyć klucze"</string>
     <string name="save_your_password" msgid="6597736507991704307">"zapisać hasło"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"Inne menedżery haseł"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Zamknij arkusz"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Wróć do poprzedniej strony"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Użyć zapisanego klucza dla aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Użyć zapisanych danych logowania dla aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Wybierz zapisane dane logowania dla aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

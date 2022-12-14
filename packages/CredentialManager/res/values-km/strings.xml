@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"រក្សាទុកក្នុងកន្លែងផ្សេងទៀត"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"ប្រើ​ឧបករណ៍​ផ្សេងទៀត"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"រក្សាទុកទៅក្នុងឧបករណ៍ផ្សេង"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"កាន់តែមានសុវត្ថិភាពដោយប្រើកូដសម្ងាត់"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"មិនចាំបាច់បង្កើត ឬចងចាំពាក្យសម្ងាត់ស្មុគស្មាញទេ"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"ប្រើស្នាមម្រាមដៃ មុខ ឬការចាក់សោអេក្រង់របស់អ្នក ដើម្បីបង្កើតកូដសម្ងាត់តែមួយគត់"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"កូដសម្ងាត់ត្រូវបានរក្សាទុកទៅក្នុងកម្មវិធីគ្រប់គ្រងពាក្យសម្ងាត់ ដូច្នេះអ្នកអាចចូលនៅលើឧបករណ៍ផ្សេងទៀត"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"ជ្រើសរើសកន្លែងដែលត្រូវ <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"បង្កើត​កូដសម្ងាត់របស់អ្នក"</string>
     <string name="save_your_password" msgid="6597736507991704307">"រក្សាទុកពាក្យសម្ងាត់របស់អ្នក"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"កម្មវិធីគ្រប់គ្រងពាក្យសម្ងាត់ផ្សេងទៀត"</string>
     <string name="close_sheet" msgid="1393792015338908262">"បិទសន្លឹក"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"ត្រឡប់ទៅ​ទំព័រ​មុនវិញ"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"ប្រើកូដសម្ងាត់ដែលបានរក្សាទុករបស់អ្នកសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> ឬ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"ប្រើការចូល​គណនីដែលបានរក្សាទុករបស់អ្នកសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> ឬ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"ជ្រើសរើសការចូលគណនីដែលបានរក្សាទុកសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

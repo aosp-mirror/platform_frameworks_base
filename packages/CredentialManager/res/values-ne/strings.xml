@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"अर्को ठाउँमा सेभ गर्नुहोस्"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"अर्को डिभाइस प्रयोग गर्नुहोस्"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"अर्को डिभाइसमा सेभ गर्नुहोस्"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"पासकीका सहायताले सुरक्षित रहनुहोस्"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"जटिल पासवर्डहरू बनाउनु वा सम्झनु पर्दैन"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"अद्वितीय पासकी बनाउन आफ्नो फिंगरप्रिन्ट, फेस वा स्क्रिन लक प्रयोग गर्नुहोस्"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"तपाईं अन्य डिभाइसहरूमा साइन इन गर्न सक्नुहोस् भन्नाका लागि पासकीहरू पासवर्ड म्यानेजरमा सेभ गरिन्छन्"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> सेभ गर्ने ठाउँ छनौट गर्नुहोस्"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"आफ्ना पासकीहरू बाउनुहोस्"</string>
     <string name="save_your_password" msgid="6597736507991704307">"आफ्नो पासवर्ड सेभ गर्नुहोस्"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"अन्य पासवर्ड म्यानेजरहरू"</string>
     <string name="close_sheet" msgid="1393792015338908262">"पाना बन्द गर्नुहोस्"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"अघिल्लो पेजमा फर्कनुहोस्"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"आफूले सेभ गरेको पासकी प्रयोग गरी <xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्ने हो?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"आफूले सेभ गरेको साइन इनसम्बन्धी जानकारी प्रयोग गरी <xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्ने हो?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्नका लागि सेभ गरिएका साइन इनसम्बन्धी जानकारी छनौट गर्नुहोस्"</string>

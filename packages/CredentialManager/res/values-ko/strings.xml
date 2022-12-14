@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"다른 위치에 저장"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"다른 기기 사용"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"다른 기기에 저장"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"패스키로 더 안전하게"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"복잡한 비밀번호를 만들거나 기억하지 않아도 됩니다."</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"지문, 얼굴 인식 또는 화면 잠금을 사용하여 고유한 패스키를 생성하세요."</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"비밀번호가 비밀번호 관리자에 저장되므로 다른 기기에서 로그인할 수 있습니다."</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> 작업을 위한 위치 선택"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"패스키 만들기"</string>
     <string name="save_your_password" msgid="6597736507991704307">"비밀번호 저장"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"기타 비밀번호 관리자"</string>
     <string name="close_sheet" msgid="1393792015338908262">"시트 닫기"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"이전 페이지로 돌아가기"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱용 저장된 패스키를 사용하시겠습니까?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱용 저장된 로그인 정보를 사용하시겠습니까?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱용 저장된 로그인 정보 선택"</string>

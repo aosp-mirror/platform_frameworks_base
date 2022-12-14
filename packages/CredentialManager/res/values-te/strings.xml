@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"మరొక స్థలంలో సేవ్ చేయండి"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"మరొక పరికరాన్ని ఉపయోగించండి"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"మరొక పరికరంలో సేవ్ చేయండి"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"పాస్-కీలతో సురక్షితంగా చెల్లించవచ్చు"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"క్లిష్టమైన పాస్‌వర్డ్‌లను క్రియేట్ చేయడం లేదా గుర్తుంచుకోవడం అవసరం లేదు"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"ప్రత్యేకమైన పాస్-కీని క్రియేట్ చేయడానికి మీ వేలిముద్ర, ముఖం లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"పాస్-కీలు పాస్‌వర్డ్ మేనేజర్‌కు సేవ్ చేయబడతాయి, కాబట్టి మీరు ఇతర పరికరాలలో సైన్ ఇన్ చేయవచ్చు"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"ఎక్కడ <xliff:g id="CREATETYPES">%1$s</xliff:g> చేయాలో ఎంచుకోండి"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"మీ పాస్-కీలను క్రియేట్ చేయండి"</string>
     <string name="save_your_password" msgid="6597736507991704307">"మీ పాస్‌వర్డ్‌ను సేవ్ చేయండి"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"ఇతర పాస్‌వర్డ్ మేనేజర్‌లు"</string>
     <string name="close_sheet" msgid="1393792015338908262">"షీట్‌ను మూసివేయండి"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"మునుపటి పేజీకి తిరిగి వెళ్లండి"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం మీ సేవ్ చేసిన పాస్-కీ వివరాలను ఉపయోగించాలా?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం మీరు సేవ్ చేసిన సైన్ ఇన్ వివరాలను ఉపయోగించాలా?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం సేవ్ చేసిన సైన్ ఇన్ వివరాలను ఎంచుకోండి"</string>
