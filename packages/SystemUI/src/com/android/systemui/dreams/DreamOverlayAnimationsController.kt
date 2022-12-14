@@ -21,11 +21,12 @@ import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.view.View
 import android.view.animation.Interpolator
-import androidx.annotation.FloatRange
 import androidx.core.animation.doOnEnd
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dreams.complication.ComplicationHostViewController
 import com.android.systemui.dreams.complication.ComplicationLayoutParams
+import com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_BOTTOM
+import com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_TOP
 import com.android.systemui.dreams.complication.ComplicationLayoutParams.Position
 import com.android.systemui.dreams.dagger.DreamOverlayModule
 import com.android.systemui.statusbar.BlurUtils
@@ -41,16 +42,15 @@ constructor(
     private val mComplicationHostViewController: ComplicationHostViewController,
     private val mStatusBarViewController: DreamOverlayStatusBarViewController,
     private val mOverlayStateController: DreamOverlayStateController,
+    @Named(DreamOverlayModule.DREAM_BLUR_RADIUS) private val mDreamBlurRadius: Int,
     @Named(DreamOverlayModule.DREAM_IN_BLUR_ANIMATION_DURATION)
     private val mDreamInBlurAnimDurationMs: Long,
-    @Named(DreamOverlayModule.DREAM_IN_BLUR_ANIMATION_DELAY)
-    private val mDreamInBlurAnimDelayMs: Long,
     @Named(DreamOverlayModule.DREAM_IN_COMPLICATIONS_ANIMATION_DURATION)
     private val mDreamInComplicationsAnimDurationMs: Long,
-    @Named(DreamOverlayModule.DREAM_IN_TOP_COMPLICATIONS_ANIMATION_DELAY)
-    private val mDreamInTopComplicationsAnimDelayMs: Long,
-    @Named(DreamOverlayModule.DREAM_IN_BOTTOM_COMPLICATIONS_ANIMATION_DELAY)
-    private val mDreamInBottomComplicationsAnimDelayMs: Long,
+    @Named(DreamOverlayModule.DREAM_IN_TRANSLATION_Y_DISTANCE)
+    private val mDreamInTranslationYDistance: Int,
+    @Named(DreamOverlayModule.DREAM_IN_TRANSLATION_Y_DURATION)
+    private val mDreamInTranslationYDurationMs: Long,
     @Named(DreamOverlayModule.DREAM_OUT_TRANSLATION_Y_DISTANCE)
     private val mDreamOutTranslationYDistance: Int,
     @Named(DreamOverlayModule.DREAM_OUT_TRANSLATION_Y_DURATION)
@@ -74,7 +74,7 @@ constructor(
      */
     private var mCurrentAlphaAtPosition = mutableMapOf<Int, Float>()
 
-    @FloatRange(from = 0.0, to = 1.0) private var mBlurProgress: Float = 0f
+    private var mCurrentBlurRadius: Float = 0f
 
     /** Starts the dream content and dream overlay entry animations. */
     @JvmOverloads
@@ -86,25 +86,23 @@ constructor(
                 playTogether(
                     blurAnimator(
                         view = view,
-                        from = 1f,
-                        to = 0f,
+                        fromBlurRadius = mDreamBlurRadius.toFloat(),
+                        toBlurRadius = 0f,
                         durationMs = mDreamInBlurAnimDurationMs,
-                        delayMs = mDreamInBlurAnimDelayMs
+                        interpolator = Interpolators.EMPHASIZED_DECELERATE
                     ),
                     alphaAnimator(
                         from = 0f,
                         to = 1f,
                         durationMs = mDreamInComplicationsAnimDurationMs,
-                        delayMs = mDreamInTopComplicationsAnimDelayMs,
-                        position = ComplicationLayoutParams.POSITION_TOP
+                        interpolator = Interpolators.LINEAR
                     ),
-                    alphaAnimator(
-                        from = 0f,
-                        to = 1f,
-                        durationMs = mDreamInComplicationsAnimDurationMs,
-                        delayMs = mDreamInBottomComplicationsAnimDelayMs,
-                        position = ComplicationLayoutParams.POSITION_BOTTOM
-                    )
+                    translationYAnimator(
+                        from = mDreamInTranslationYDistance.toFloat(),
+                        to = 0f,
+                        durationMs = mDreamInTranslationYDurationMs,
+                        interpolator = Interpolators.EMPHASIZED_DECELERATE
+                    ),
                 )
                 doOnEnd {
                     mAnimator = null
@@ -130,47 +128,48 @@ constructor(
                         view = view,
                         // Start the blurring wherever the entry animation ended, in
                         // case it was cancelled early.
-                        from = mBlurProgress,
-                        to = 1f,
-                        durationMs = mDreamOutBlurDurationMs
+                        fromBlurRadius = mCurrentBlurRadius,
+                        toBlurRadius = mDreamBlurRadius.toFloat(),
+                        durationMs = mDreamOutBlurDurationMs,
+                        interpolator = Interpolators.EMPHASIZED_ACCELERATE
                     ),
                     translationYAnimator(
                         from = 0f,
                         to = mDreamOutTranslationYDistance.toFloat(),
                         durationMs = mDreamOutTranslationYDurationMs,
                         delayMs = mDreamOutTranslationYDelayBottomMs,
-                        position = ComplicationLayoutParams.POSITION_BOTTOM,
-                        animInterpolator = Interpolators.EMPHASIZED_ACCELERATE
+                        positions = POSITION_BOTTOM,
+                        interpolator = Interpolators.EMPHASIZED_ACCELERATE
                     ),
                     translationYAnimator(
                         from = 0f,
                         to = mDreamOutTranslationYDistance.toFloat(),
                         durationMs = mDreamOutTranslationYDurationMs,
                         delayMs = mDreamOutTranslationYDelayTopMs,
-                        position = ComplicationLayoutParams.POSITION_TOP,
-                        animInterpolator = Interpolators.EMPHASIZED_ACCELERATE
+                        positions = POSITION_TOP,
+                        interpolator = Interpolators.EMPHASIZED_ACCELERATE
                     ),
                     alphaAnimator(
                         from =
                             mCurrentAlphaAtPosition.getOrDefault(
-                                key = ComplicationLayoutParams.POSITION_BOTTOM,
+                                key = POSITION_BOTTOM,
                                 defaultValue = 1f
                             ),
                         to = 0f,
                         durationMs = mDreamOutAlphaDurationMs,
                         delayMs = mDreamOutAlphaDelayBottomMs,
-                        position = ComplicationLayoutParams.POSITION_BOTTOM
+                        positions = POSITION_BOTTOM
                     ),
                     alphaAnimator(
                         from =
                             mCurrentAlphaAtPosition.getOrDefault(
-                                key = ComplicationLayoutParams.POSITION_TOP,
+                                key = POSITION_TOP,
                                 defaultValue = 1f
                             ),
                         to = 0f,
                         durationMs = mDreamOutAlphaDurationMs,
                         delayMs = mDreamOutAlphaDelayTopMs,
-                        position = ComplicationLayoutParams.POSITION_TOP
+                        positions = POSITION_TOP
                     )
                 )
                 doOnEnd {
@@ -194,20 +193,21 @@ constructor(
 
     private fun blurAnimator(
         view: View,
-        from: Float,
-        to: Float,
+        fromBlurRadius: Float,
+        toBlurRadius: Float,
         durationMs: Long,
-        delayMs: Long = 0
+        delayMs: Long = 0,
+        interpolator: Interpolator = Interpolators.LINEAR
     ): Animator {
-        return ValueAnimator.ofFloat(from, to).apply {
+        return ValueAnimator.ofFloat(fromBlurRadius, toBlurRadius).apply {
             duration = durationMs
             startDelay = delayMs
-            interpolator = Interpolators.LINEAR
+            this.interpolator = interpolator
             addUpdateListener { animator: ValueAnimator ->
-                mBlurProgress = animator.animatedValue as Float
+                mCurrentBlurRadius = animator.animatedValue as Float
                 mBlurUtils.applyBlur(
                     viewRootImpl = view.viewRootImpl,
-                    radius = mBlurUtils.blurRadiusOfRatio(mBlurProgress).toInt(),
+                    radius = mCurrentBlurRadius.toInt(),
                     opaque = false
                 )
             }
@@ -218,18 +218,24 @@ constructor(
         from: Float,
         to: Float,
         durationMs: Long,
-        delayMs: Long,
-        @Position position: Int
+        delayMs: Long = 0,
+        @Position positions: Int = POSITION_TOP or POSITION_BOTTOM,
+        interpolator: Interpolator = Interpolators.LINEAR
     ): Animator {
         return ValueAnimator.ofFloat(from, to).apply {
             duration = durationMs
             startDelay = delayMs
-            interpolator = Interpolators.LINEAR
+            this.interpolator = interpolator
             addUpdateListener { va: ValueAnimator ->
-                setElementsAlphaAtPosition(
-                    alpha = va.animatedValue as Float,
-                    position = position,
-                    fadingOut = to < from
+                ComplicationLayoutParams.iteratePositions(
+                    { position: Int ->
+                        setElementsAlphaAtPosition(
+                            alpha = va.animatedValue as Float,
+                            position = position,
+                            fadingOut = to < from
+                        )
+                    },
+                    positions
                 )
             }
         }
@@ -239,16 +245,21 @@ constructor(
         from: Float,
         to: Float,
         durationMs: Long,
-        delayMs: Long,
-        @Position position: Int,
-        animInterpolator: Interpolator
+        delayMs: Long = 0,
+        @Position positions: Int = POSITION_TOP or POSITION_BOTTOM,
+        interpolator: Interpolator = Interpolators.LINEAR
     ): Animator {
         return ValueAnimator.ofFloat(from, to).apply {
             duration = durationMs
             startDelay = delayMs
-            interpolator = animInterpolator
+            this.interpolator = interpolator
             addUpdateListener { va: ValueAnimator ->
-                setElementsTranslationYAtPosition(va.animatedValue as Float, position)
+                ComplicationLayoutParams.iteratePositions(
+                    { position: Int ->
+                        setElementsTranslationYAtPosition(va.animatedValue as Float, position)
+                    },
+                    positions
+                )
             }
         }
     }
@@ -263,7 +274,7 @@ constructor(
                 CrossFadeHelper.fadeIn(view, alpha, /* remap= */ false)
             }
         }
-        if (position == ComplicationLayoutParams.POSITION_TOP) {
+        if (position == POSITION_TOP) {
             mStatusBarViewController.setFadeAmount(alpha, fadingOut)
         }
     }
@@ -273,7 +284,7 @@ constructor(
         mComplicationHostViewController.getViewsAtPosition(position).forEach { v ->
             v.translationY = translationY
         }
-        if (position == ComplicationLayoutParams.POSITION_TOP) {
+        if (position == POSITION_TOP) {
             mStatusBarViewController.setTranslationY(translationY)
         }
     }
