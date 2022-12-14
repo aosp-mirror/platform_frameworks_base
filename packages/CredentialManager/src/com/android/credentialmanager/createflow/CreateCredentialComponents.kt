@@ -108,7 +108,8 @@ fun CreateCredentialScreen(
                     )
                     CreateScreenState.MORE_OPTIONS_ROW_INTRO -> MoreOptionsRowIntroCard(
                         providerInfo = uiState.activeEntry?.activeProvider!!,
-                        onDefaultOrNotSelected = viewModel::onDefaultOrNotSelected
+                        onChangeDefaultSelected = viewModel::onChangeDefaultSelected,
+                        onUseOnceSelected = viewModel::onUseOnceSelected,
                     )
                     CreateScreenState.EXTERNAL_ONLY_SELECTION -> ExternalOnlySelectionCard(
                         requestDisplayInfo = uiState.requestDisplayInfo,
@@ -464,7 +465,8 @@ fun MoreOptionsSelectionCard(
 @Composable
 fun MoreOptionsRowIntroCard(
     providerInfo: EnabledProviderInfo,
-    onDefaultOrNotSelected: () -> Unit,
+    onChangeDefaultSelected: () -> Unit,
+    onUseOnceSelected: () -> Unit,
 ) {
     ContainerCard() {
         Column() {
@@ -496,11 +498,11 @@ fun MoreOptionsRowIntroCard(
             ) {
                 CancelButton(
                     stringResource(R.string.use_once),
-                    onClick = onDefaultOrNotSelected
+                    onClick = onUseOnceSelected
                 )
                 ConfirmButton(
                     stringResource(R.string.set_as_default),
-                    onClick = onDefaultOrNotSelected
+                    onClick = onChangeDefaultSelected
                 )
             }
             Divider(
