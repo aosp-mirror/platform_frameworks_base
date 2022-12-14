@@ -21,14 +21,15 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.VirtualDisplay;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -37,9 +38,9 @@ import android.view.Display;
 import android.view.InputChannel;
 import android.view.InputMonitor;
 import android.view.SurfaceControl;
+import android.view.SurfaceView;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.rule.GrantPermissionRule;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
@@ -55,37 +56,28 @@ import org.mockito.Mock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /** Tests of {@link CaptionWindowDecorViewModel} */
 @SmallTest
 public class CaptionWindowDecorViewModelTests extends ShellTestCase {
-    @Mock private CaptionWindowDecoration mCaptionWindowDecoration;
 
+    private static final String TAG = "CaptionWindowDecorViewModelTests";
+
+    @Mock private CaptionWindowDecoration mCaptionWindowDecoration;
     @Mock private CaptionWindowDecoration.Factory mCaptionWindowDecorFactory;
 
     @Mock private Handler mMainHandler;
-
     @Mock private Choreographer mMainChoreographer;
-
     @Mock private ShellTaskOrganizer mTaskOrganizer;
-
     @Mock private DisplayController mDisplayController;
-
     @Mock private SyncTransactionQueue mSyncQueue;
-
     @Mock private DesktopModeController mDesktopModeController;
-
     @Mock private InputMonitor mInputMonitor;
-
-    @Mock private InputChannel mInputChannel;
-
-    @Mock private CaptionWindowDecorViewModel.EventReceiverFactory mEventReceiverFactory;
-
-    @Mock private CaptionWindowDecorViewModel.EventReceiver mEventReceiver;
-
     @Mock private InputManager mInputManager;
 
+    @Mock private CaptionWindowDecorViewModel.InputMonitorFactory mMockInputMonitorFactory;
     private final List<InputManager> mMockInputManagers = new ArrayList<>();
 
     private CaptionWindowDecorViewModel mCaptionWindowDecorViewModel;
@@ -104,44 +96,46 @@ public class CaptionWindowDecorViewModelTests extends ShellTestCase {
                 mSyncQueue,
                 Optional.of(mDesktopModeController),
                 mCaptionWindowDecorFactory,
-                new MockObjectSupplier<>(mMockInputManagers, () -> mock(InputManager.class)));
-        mCaptionWindowDecorViewModel.setEventReceiverFactory(mEventReceiverFactory);
+                mMockInputMonitorFactory
+            );
 
         doReturn(mCaptionWindowDecoration)
             .when(mCaptionWindowDecorFactory)
             .create(any(), any(), any(), any(), any(), any(), any(), any());
 
-        when(mInputManager.monitorGestureInput(any(), anyInt())).thenReturn(mInputMonitor);
-        when(mEventReceiverFactory.create(any(), any(), any())).thenReturn(mEventReceiver);
-        when(mInputMonitor.getInputChannel()).thenReturn(mInputChannel);
+        when(mMockInputMonitorFactory.create(any(), any())).thenReturn(mInputMonitor);
+        // InputChannel cannot be mocked because it passes to InputEventReceiver.
+        final InputChannel[] inputChannels = InputChannel.openInputChannelPair(TAG);
+        inputChannels[0].dispose();
+        when(mInputMonitor.getInputChannel()).thenReturn(inputChannels[1]);
     }
 
     @Test
     public void testDeleteCaptionOnChangeTransitionWhenNecessary() throws Exception {
-        Looper.prepare();
         final int taskId = 1;
         final ActivityManager.RunningTaskInfo taskInfo =
-                createTaskInfo(taskId, WINDOWING_MODE_FREEFORM);
+                createTaskInfo(taskId, Display.DEFAULT_DISPLAY, WINDOWING_MODE_FREEFORM);
         SurfaceControl surfaceControl = mock(SurfaceControl.class);
-        final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
-        final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
-        GrantPermissionRule.grant(android.Manifest.permission.MONITOR_INPUT);
+        runOnMainThread(() -> {
+            final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+            final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
 
-        mCaptionWindowDecorViewModel.onTaskOpening(taskInfo, surfaceControl, startT, finishT);
+            mCaptionWindowDecorViewModel.onTaskOpening(taskInfo, surfaceControl, startT, finishT);
+
+            taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+            taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
+            mCaptionWindowDecorViewModel.onTaskChanging(taskInfo, surfaceControl, startT, finishT);
+        });
         verify(mCaptionWindowDecorFactory)
                 .create(
-                    mContext,
-                    mDisplayController,
-                    mTaskOrganizer,
-                    taskInfo,
-                    surfaceControl,
-                    mMainHandler,
-                    mMainChoreographer,
-                    mSyncQueue);
-
-        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_UNDEFINED);
-        taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
-        mCaptionWindowDecorViewModel.onTaskChanging(taskInfo, surfaceControl, startT, finishT);
+                        mContext,
+                        mDisplayController,
+                        mTaskOrganizer,
+                        taskInfo,
+                        surfaceControl,
+                        mMainHandler,
+                        mMainChoreographer,
+                        mSyncQueue);
         verify(mCaptionWindowDecoration).close();
     }
 
@@ -149,70 +143,105 @@ public class CaptionWindowDecorViewModelTests extends ShellTestCase {
     public void testCreateCaptionOnChangeTransitionWhenNecessary() throws Exception {
         final int taskId = 1;
         final ActivityManager.RunningTaskInfo taskInfo =
-                createTaskInfo(taskId, WINDOWING_MODE_UNDEFINED);
+                createTaskInfo(taskId, Display.DEFAULT_DISPLAY, WINDOWING_MODE_UNDEFINED);
         SurfaceControl surfaceControl = mock(SurfaceControl.class);
-        final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
-        final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
-        taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
+        runOnMainThread(() -> {
+            final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+            final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+            taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
 
-        mCaptionWindowDecorViewModel.onTaskChanging(taskInfo, surfaceControl, startT, finishT);
+            mCaptionWindowDecorViewModel.onTaskChanging(taskInfo, surfaceControl, startT, finishT);
 
-        verify(mCaptionWindowDecorFactory, never())
+            taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+            taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_STANDARD);
+
+            mCaptionWindowDecorViewModel.onTaskChanging(taskInfo, surfaceControl, startT, finishT);
+        });
+        verify(mCaptionWindowDecorFactory, times(1))
                 .create(
-                    mContext,
-                    mDisplayController,
-                    mTaskOrganizer,
-                    taskInfo,
-                    surfaceControl,
-                    mMainHandler,
-                    mMainChoreographer,
-                    mSyncQueue);
-
-        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_STANDARD);
-
-        mCaptionWindowDecorViewModel.onTaskChanging(taskInfo, surfaceControl, startT, finishT);
-
-        verify(mCaptionWindowDecorFactory)
-                .create(
-                    mContext,
-                    mDisplayController,
-                    mTaskOrganizer,
-                    taskInfo,
-                    surfaceControl,
-                    mMainHandler,
-                    mMainChoreographer,
-                    mSyncQueue);
+                        mContext,
+                        mDisplayController,
+                        mTaskOrganizer,
+                        taskInfo,
+                        surfaceControl,
+                        mMainHandler,
+                        mMainChoreographer,
+                        mSyncQueue);
     }
 
-    private static ActivityManager.RunningTaskInfo createTaskInfo(int taskId, int windowingMode) {
+    @Test
+    public void testCreateAndDisposeEventReceiver() throws Exception {
+        final int taskId = 1;
+        final ActivityManager.RunningTaskInfo taskInfo =
+                createTaskInfo(taskId, Display.DEFAULT_DISPLAY, WINDOWING_MODE_FREEFORM);
+        taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_STANDARD);
+        runOnMainThread(() -> {
+            SurfaceControl surfaceControl = mock(SurfaceControl.class);
+            final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+            final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+
+            mCaptionWindowDecorViewModel.onTaskOpening(taskInfo, surfaceControl, startT, finishT);
+
+            mCaptionWindowDecorViewModel.destroyWindowDecoration(taskInfo);
+        });
+        verify(mMockInputMonitorFactory).create(any(), any());
+        verify(mInputMonitor).dispose();
+    }
+
+    @Test
+    public void testEventReceiversOnMultipleDisplays() throws Exception {
+        runOnMainThread(() -> {
+            SurfaceView surfaceView = new SurfaceView(mContext);
+            final DisplayManager mDm = mContext.getSystemService(DisplayManager.class);
+            final VirtualDisplay secondaryDisplay = mDm.createVirtualDisplay(
+                    "testEventReceiversOnMultipleDisplays", /*width=*/ 400, /*height=*/ 400,
+                    /*densityDpi=*/ 320, surfaceView.getHolder().getSurface(),
+                    DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY);
+            int secondaryDisplayId = secondaryDisplay.getDisplay().getDisplayId();
+
+            final int taskId = 1;
+            final ActivityManager.RunningTaskInfo taskInfo =
+                    createTaskInfo(taskId, Display.DEFAULT_DISPLAY, WINDOWING_MODE_FREEFORM);
+            final ActivityManager.RunningTaskInfo secondTaskInfo =
+                    createTaskInfo(taskId + 1, secondaryDisplayId, WINDOWING_MODE_FREEFORM);
+            final ActivityManager.RunningTaskInfo thirdTaskInfo =
+                    createTaskInfo(taskId + 2, secondaryDisplayId, WINDOWING_MODE_FREEFORM);
+
+            SurfaceControl surfaceControl = mock(SurfaceControl.class);
+            final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+            final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+
+            mCaptionWindowDecorViewModel.onTaskOpening(taskInfo, surfaceControl, startT, finishT);
+            mCaptionWindowDecorViewModel.onTaskOpening(secondTaskInfo, surfaceControl,
+                    startT, finishT);
+            mCaptionWindowDecorViewModel.onTaskOpening(thirdTaskInfo, surfaceControl,
+                    startT, finishT);
+            mCaptionWindowDecorViewModel.destroyWindowDecoration(thirdTaskInfo);
+            mCaptionWindowDecorViewModel.destroyWindowDecoration(taskInfo);
+        });
+        verify(mMockInputMonitorFactory, times(2)).create(any(), any());
+        verify(mInputMonitor, times(1)).dispose();
+    }
+
+    private void runOnMainThread(Runnable r) throws Exception {
+        final Handler mainHandler = new Handler(Looper.getMainLooper());
+        final CountDownLatch latch = new CountDownLatch(1);
+        mainHandler.post(() -> {
+            r.run();
+            latch.countDown();
+        });
+        latch.await(20, TimeUnit.MILLISECONDS);
+    }
+
+    private static ActivityManager.RunningTaskInfo createTaskInfo(int taskId,
+            int displayId, int windowingMode) {
         ActivityManager.RunningTaskInfo taskInfo =
                  new TestRunningTaskInfoBuilder()
-                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setDisplayId(displayId)
                 .setVisible(true)
                 .build();
         taskInfo.taskId = taskId;
         taskInfo.configuration.windowConfiguration.setWindowingMode(windowingMode);
         return taskInfo;
-    }
-
-    private static class MockObjectSupplier<T> implements Supplier<T> {
-        private final List<T> mObjects;
-        private final Supplier<T> mDefaultSupplier;
-        private int mNumOfCalls = 0;
-
-        private MockObjectSupplier(List<T> objects, Supplier<T> defaultSupplier) {
-            mObjects = objects;
-            mDefaultSupplier = defaultSupplier;
-        }
-
-        @Override
-        public T get() {
-            final T mock =
-                    mNumOfCalls < mObjects.size() ? mObjects.get(mNumOfCalls)
-                        : mDefaultSupplier.get();
-            ++mNumOfCalls;
-            return mock;
-        }
     }
 }

@@ -46,6 +46,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -56,7 +57,6 @@ import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * View model for the window decoration with a caption and shadows. Works with
@@ -66,7 +66,6 @@ import java.util.function.Supplier;
 public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     private static final String TAG = "CaptionViewModel";
     private final CaptionWindowDecoration.Factory mCaptionWindowDecorFactory;
-    private final Supplier<InputManager> mInputManagerSupplier;
     private final ActivityTaskManager mActivityTaskManager;
     private final ShellTaskOrganizer mTaskOrganizer;
     private final Context mContext;
@@ -82,7 +81,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
 
     private final SparseArray<CaptionWindowDecoration> mWindowDecorByTaskId = new SparseArray<>();
     private final DragStartListenerImpl mDragStartListener = new DragStartListenerImpl();
-    private EventReceiverFactory mEventReceiverFactory = new EventReceiverFactory();
+    private InputMonitorFactory mInputMonitorFactory;
 
     public CaptionWindowDecorViewModel(
             Context context,
@@ -101,10 +100,11 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                 syncQueue,
                 desktopModeController,
                 new CaptionWindowDecoration.Factory(),
-                InputManager::getInstance);
+                new InputMonitorFactory());
     }
 
-    public CaptionWindowDecorViewModel(
+    @VisibleForTesting
+    CaptionWindowDecorViewModel(
             Context context,
             Handler mainHandler,
             Choreographer mainChoreographer,
@@ -113,8 +113,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             SyncTransactionQueue syncQueue,
             Optional<DesktopModeController> desktopModeController,
             CaptionWindowDecoration.Factory captionWindowDecorFactory,
-            Supplier<InputManager> inputManagerSupplier) {
-
+            InputMonitorFactory inputMonitorFactory) {
         mContext = context;
         mMainHandler = mainHandler;
         mMainChoreographer = mainChoreographer;
@@ -125,11 +124,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         mDesktopModeController = desktopModeController;
 
         mCaptionWindowDecorFactory = captionWindowDecorFactory;
-        mInputManagerSupplier = inputManagerSupplier;
-    }
-
-    void setEventReceiverFactory(EventReceiverFactory eventReceiverFactory) {
-        mEventReceiverFactory = eventReceiverFactory;
+        mInputMonitorFactory = inputMonitorFactory;
     }
 
     @Override
@@ -205,7 +200,6 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         decoration.close();
         int displayId = taskInfo.displayId;
         if (mEventReceiversByDisplay.contains(displayId)) {
-            EventReceiver eventReceiver = mEventReceiversByDisplay.get(displayId);
             removeTaskFromEventReceiver(displayId);
         }
     }
@@ -408,12 +402,6 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         }
     }
 
-    class EventReceiverFactory {
-        EventReceiver create(InputMonitor inputMonitor, InputChannel channel, Looper looper) {
-            return new EventReceiver(inputMonitor, channel, looper);
-        }
-    }
-
     /**
      * Handle MotionEvents relevant to focused task's caption that don't directly touch it
      *
@@ -500,11 +488,11 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     private void createInputChannel(int displayId) {
-        InputManager inputManager = mInputManagerSupplier.get();
+        InputManager inputManager = InputManager.getInstance();
         InputMonitor inputMonitor =
-                inputManager.monitorGestureInput("caption-touch", mContext.getDisplayId());
-        EventReceiver eventReceiver = mEventReceiverFactory.create(
-                inputMonitor, inputMonitor.getInputChannel(), Looper.myLooper());
+                mInputMonitorFactory.create(inputManager, mContext);
+        EventReceiver eventReceiver = new EventReceiver(inputMonitor,
+                inputMonitor.getInputChannel(), Looper.myLooper());
         mEventReceiversByDisplay.put(displayId, eventReceiver);
     }
 
@@ -562,4 +550,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             mWindowDecorByTaskId.get(taskId).closeHandleMenu();
         }
     }
+
+    static class InputMonitorFactory {
+        InputMonitor create(InputManager inputManager, Context context) {
+            return inputManager.monitorGestureInput("caption-touch", context.getDisplayId());
+        }
+    }
 }
+
+
