@@ -395,19 +395,6 @@ public final class Trace {
     }
 
     /**
-     * @deprecated use asyncTraceForTrackEnd without methodName argument
-     *
-     * @hide
-     */
-    @Deprecated
-    public static void asyncTraceForTrackEnd(long traceTag,
-            @NonNull String trackName, @NonNull String methodName, int cookie) {
-        if (isTagEnabled(traceTag)) {
-            nativeAsyncTraceForTrackEnd(traceTag, trackName, cookie);
-        }
-    }
-
-    /**
      * Writes a trace message to indicate that a given section of code was invoked.
      *
      * @param traceTag The trace tag.
