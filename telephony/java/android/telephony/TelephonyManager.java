@@ -17808,11 +17808,11 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
-    public void isNullCipherAndIntegrityPreferenceEnabled() {
+    public boolean isNullCipherAndIntegrityPreferenceEnabled() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.isNullCipherAndIntegrityPreferenceEnabled();
+                return telephony.isNullCipherAndIntegrityPreferenceEnabled();
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
@@ -17820,5 +17820,6 @@ public class TelephonyManager {
             Rlog.e(TAG, "isNullCipherAndIntegrityPreferenceEnabled RemoteException", ex);
             ex.rethrowFromSystemServer();
         }
+        return true;
     }
 }
