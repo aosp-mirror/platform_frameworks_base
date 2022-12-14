@@ -369,8 +369,6 @@ public final class Settings implements Watchable, Snappable {
 
     // Current settings file.
     private final File mSettingsFilename;
-    // Compressed current settings file.
-    private final File mCompressedSettingsFilename;
     // Previous settings file.
     // Removed when the current settings file successfully stored.
     private final File mPreviousSettingsFilename;
@@ -641,7 +639,6 @@ public final class Settings implements Watchable, Snappable {
         mRuntimePermissionsPersistence = null;
         mPermissionDataProvider = null;
         mSettingsFilename = null;
-        mCompressedSettingsFilename = null;
         mPreviousSettingsFilename = null;
         mPackageListFilename = null;
         mStoppedPackagesFilename = null;
@@ -713,7 +710,6 @@ public final class Settings implements Watchable, Snappable {
                 |FileUtils.S_IROTH|FileUtils.S_IXOTH,
                 -1, -1);
         mSettingsFilename = new File(mSystemDir, "packages.xml");
-        mCompressedSettingsFilename = new File(mSystemDir, "packages.compressed");
         mPreviousSettingsFilename = new File(mSystemDir, "packages-backup.xml");
         mPackageListFilename = new File(mSystemDir, "packages.list");
         FileUtils.setPermissions(mPackageListFilename, 0640, SYSTEM_UID, PACKAGE_INFO_GID);
@@ -755,7 +751,6 @@ public final class Settings implements Watchable, Snappable {
         mLock = null;
         mRuntimePermissionsPersistence = r.mRuntimePermissionsPersistence;
         mSettingsFilename = null;
-        mCompressedSettingsFilename = null;
         mPreviousSettingsFilename = null;
         mPackageListFilename = null;
         mStoppedPackagesFilename = null;
@@ -2597,8 +2592,6 @@ public final class Settings implements Watchable, Snappable {
                 Slog.w(PackageManagerService.TAG, "Preserving older settings backup");
             }
         }
-        // Compressed settings are not valid anymore.
-        mCompressedSettingsFilename.delete();
 
         mPastSignatures.clear();
 
@@ -2688,29 +2681,9 @@ public final class Settings implements Watchable, Snappable {
             mPreviousSettingsFilename.delete();
 
             FileUtils.setPermissions(mSettingsFilename.toString(),
-                    FileUtils.S_IRUSR | FileUtils.S_IWUSR | FileUtils.S_IRGRP | FileUtils.S_IWGRP,
+                    FileUtils.S_IRUSR|FileUtils.S_IWUSR
+                    |FileUtils.S_IRGRP|FileUtils.S_IWGRP,
                     -1, -1);
-
-            final FileInputStream fis = new FileInputStream(mSettingsFilename);
-            final AtomicFile compressed = new AtomicFile(mCompressedSettingsFilename);
-            final FileOutputStream fos = compressed.startWrite();
-
-            BackgroundThread.getHandler().post(() -> {
-                try {
-                    if (!nativeCompressLz4(fis.getFD().getInt$(), fos.getFD().getInt$())) {
-                        throw new IOException("Failed to compress");
-                    }
-                    compressed.finishWrite(fos);
-                    FileUtils.setPermissions(mCompressedSettingsFilename.toString(),
-                            FileUtils.S_IRUSR | FileUtils.S_IWUSR | FileUtils.S_IRGRP
-                                    | FileUtils.S_IWGRP, -1, -1);
-                } catch (IOException e) {
-                    Slog.e(PackageManagerService.TAG, "Failed to write compressed settings file: "
-                            + mCompressedSettingsFilename, e);
-                    compressed.delete();
-                }
-                IoUtils.closeQuietly(fis);
-            });
 
             writeKernelMappingLPr();
             writePackageListLPr();
@@ -2733,8 +2706,6 @@ public final class Settings implements Watchable, Snappable {
         }
         //Debug.stopMethodTracing();
     }
-
-    private native boolean nativeCompressLz4(int inputFd, int outputFd);
 
     private void writeKernelRemoveUserLPr(int userId) {
         if (mKernelMappingFilename == null) return;

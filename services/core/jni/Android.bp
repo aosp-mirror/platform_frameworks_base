@@ -71,7 +71,6 @@ cc_library_static {
         "com_android_server_PersistentDataBlockService.cpp",
         "com_android_server_am_LowMemDetector.cpp",
         "com_android_server_pm_PackageManagerShellCommandDataLoader.cpp",
-        "com_android_server_pm_Settings.cpp",
         "com_android_server_sensor_SensorService.cpp",
         "com_android_server_wm_TaskFpsCallbackController.cpp",
         "onload.cpp",
@@ -153,7 +152,6 @@ cc_defaults {
         "libpsi",
         "libdataloader",
         "libincfs",
-        "liblz4",
         "android.hardware.audio.common@2.0",
         "android.media.audio.common.types-V1-ndk",
         "android.hardware.broadcastradio@1.0",
@@ -232,28 +230,5 @@ filegroup {
     name: "lib_gameManagerService_native",
     srcs: [
         "com_android_server_app_GameManagerService.cpp",
-    ],
-}
-
-// Settings JNI library for unit tests.
-cc_library_shared {
-    name: "libservices.core.settings.testonly",
-    defaults: ["libservices.core-libs"],
-
-    cpp_std: "c++2a",
-    cflags: [
-        "-Wall",
-        "-Werror",
-        "-Wno-unused-parameter",
-        "-Wthread-safety",
-    ],
-
-    srcs: [
-        "com_android_server_pm_Settings.cpp",
-        "onload_settings.cpp",
-    ],
-
-    header_libs: [
-        "bionic_libc_platform_headers",
     ],
 }

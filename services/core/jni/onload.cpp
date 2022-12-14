@@ -56,7 +56,6 @@ int register_android_server_am_LowMemDetector(JNIEnv* env);
 int register_com_android_server_soundtrigger_middleware_AudioSessionProviderImpl(JNIEnv* env);
 int register_com_android_server_soundtrigger_middleware_ExternalCaptureStateTracker(JNIEnv* env);
 int register_android_server_com_android_server_pm_PackageManagerShellCommandDataLoader(JNIEnv* env);
-int register_android_server_com_android_server_pm_Settings(JNIEnv* env);
 int register_android_server_AdbDebuggingManager(JNIEnv* env);
 int register_android_server_FaceService(JNIEnv* env);
 int register_android_server_GpuService(JNIEnv* env);
@@ -115,7 +114,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_com_android_server_soundtrigger_middleware_AudioSessionProviderImpl(env);
     register_com_android_server_soundtrigger_middleware_ExternalCaptureStateTracker(env);
     register_android_server_com_android_server_pm_PackageManagerShellCommandDataLoader(env);
-    register_android_server_com_android_server_pm_Settings(env);
     register_android_server_AdbDebuggingManager(env);
     register_android_server_FaceService(env);
     register_android_server_GpuService(env);
