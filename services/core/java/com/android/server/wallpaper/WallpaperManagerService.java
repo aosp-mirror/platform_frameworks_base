@@ -603,6 +603,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
      * for display.
      */
     void generateCrop(WallpaperData wallpaper) {
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG);
+        t.traceBegin("WPMS.generateCrop");
+        generateCropInternal(wallpaper);
+        t.traceEnd();
+    }
+
+    private void generateCropInternal(WallpaperData wallpaper) {
         boolean success = false;
 
         // Only generate crop for default display.
