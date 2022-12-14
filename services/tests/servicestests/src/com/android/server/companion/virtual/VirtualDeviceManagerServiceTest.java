@@ -203,6 +203,7 @@ public class VirtualDeviceManagerServiceTest {
     private VirtualDeviceImpl mDeviceImpl;
     private InputController mInputController;
     private SensorController mSensorController;
+    private CameraAccessController mCameraAccessController;
     private AssociationInfo mAssociationInfo;
     private VirtualDeviceManagerService mVdms;
     private VirtualDeviceManagerInternal mLocalService;
@@ -236,6 +237,8 @@ public class VirtualDeviceManagerServiceTest {
     private IAudioRoutingCallback mRoutingCallback;
     @Mock
     private IAudioConfigChangedCallback mConfigChangedCallback;
+    @Mock
+    private CameraAccessController.CameraAccessBlockedCallback mCameraAccessBlockedCallback;
     @Mock
     private ApplicationInfo mApplicationInfoMock;
     @Mock
@@ -325,6 +328,8 @@ public class VirtualDeviceManagerServiceTest {
                 new Handler(TestableLooper.get(this).getLooper()),
                 mContext.getSystemService(WindowManager.class), threadVerifier);
         mSensorController = new SensorController(new Object(), VIRTUAL_DEVICE_ID_1);
+        mCameraAccessController =
+                new CameraAccessController(mContext, mLocalService, mCameraAccessBlockedCallback);
 
         mAssociationInfo = new AssociationInfo(/* associationId= */ 1, 0, null,
                 MacAddress.BROADCAST_ADDRESS, "", null, null, true, false, false, 0, 0);
@@ -394,12 +399,7 @@ public class VirtualDeviceManagerServiceTest {
                 .setBlockedActivities(getBlockedActivities())
                 .setDevicePolicy(POLICY_TYPE_SENSORS, DEVICE_POLICY_CUSTOM)
                 .build();
-        mDeviceImpl = new VirtualDeviceImpl(mContext,
-                mAssociationInfo, new Binder(), /* ownerUid */ 0, VIRTUAL_DEVICE_ID_1,
-                mInputController, mSensorController,
-                /* onDeviceCloseListener= */ (int deviceId) -> {},
-                mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback, params);
-        mVdms.addVirtualDevice(mDeviceImpl);
+        mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);
 
         assertThat(mVdm.getDevicePolicy(mDeviceImpl.getDeviceId(), POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_CUSTOM);
@@ -555,6 +555,21 @@ public class VirtualDeviceManagerServiceTest {
         LocaleList localeList = mLocalService.getPreferredLocaleListForUid(UID_1);
         assertThat(localeList).isEqualTo(
                 LocaleList.forLanguageTags(firstKeyboardConfig.getLanguageTag()));
+    }
+
+    @Test
+    public void cameraAccessController_observerCountUpdated() {
+        assertThat(mCameraAccessController.getObserverCount()).isEqualTo(1);
+
+        VirtualDeviceImpl secondDevice =
+                createVirtualDevice(VIRTUAL_DEVICE_ID_2, DEVICE_OWNER_UID_2);
+        assertThat(mCameraAccessController.getObserverCount()).isEqualTo(2);
+
+        mDeviceImpl.close();
+        assertThat(mCameraAccessController.getObserverCount()).isEqualTo(1);
+
+        secondDevice.close();
+        assertThat(mCameraAccessController.getObserverCount()).isEqualTo(0);
     }
 
     @Test
@@ -1543,14 +1558,18 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     private VirtualDeviceImpl createVirtualDevice(int virtualDeviceId, int ownerUid) {
-        VirtualDeviceParams params = new VirtualDeviceParams
-                .Builder()
+        VirtualDeviceParams params = new VirtualDeviceParams.Builder()
                 .setBlockedActivities(getBlockedActivities())
                 .build();
+        return createVirtualDevice(virtualDeviceId, ownerUid, params);
+    }
+
+    private VirtualDeviceImpl createVirtualDevice(int virtualDeviceId, int ownerUid,
+            VirtualDeviceParams params) {
         VirtualDeviceImpl virtualDeviceImpl = new VirtualDeviceImpl(mContext,
                 mAssociationInfo, new Binder(), ownerUid, virtualDeviceId,
-                mInputController, mSensorController,
-                /* onDeviceCloseListener= */ (int deviceId) -> {},
+                mInputController, mSensorController, mCameraAccessController,
+                /* onDeviceCloseListener= */ deviceId -> mVdms.removeVirtualDevice(deviceId),
                 mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback, params);
         mVdms.addVirtualDevice(virtualDeviceImpl);
         return virtualDeviceImpl;
