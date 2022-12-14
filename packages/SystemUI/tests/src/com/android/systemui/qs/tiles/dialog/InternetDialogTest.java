@@ -86,7 +86,8 @@ public class InternetDialogTest extends SysuiTestCase {
     private View mDialogView;
     private View mSubTitle;
     private LinearLayout mEthernet;
-    private LinearLayout mMobileDataToggle;
+    private LinearLayout mMobileDataLayout;
+    private Switch mMobileToggleSwitch;
     private LinearLayout mWifiToggle;
     private Switch mWifiToggleSwitch;
     private TextView mWifiToggleSummary;
@@ -135,7 +136,8 @@ public class InternetDialogTest extends SysuiTestCase {
         mDialogView = mInternetDialog.mDialogView;
         mSubTitle = mDialogView.requireViewById(R.id.internet_dialog_subtitle);
         mEthernet = mDialogView.requireViewById(R.id.ethernet_layout);
-        mMobileDataToggle = mDialogView.requireViewById(R.id.mobile_network_layout);
+        mMobileDataLayout = mDialogView.requireViewById(R.id.mobile_network_layout);
+        mMobileToggleSwitch = mDialogView.requireViewById(R.id.mobile_toggle);
         mWifiToggle = mDialogView.requireViewById(R.id.turn_on_wifi_layout);
         mWifiToggleSwitch = mDialogView.requireViewById(R.id.wifi_toggle);
         mWifiToggleSummary = mDialogView.requireViewById(R.id.wifi_toggle_summary);
@@ -236,7 +238,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
         mInternetDialog.updateDialog(true);
 
-        assertThat(mMobileDataToggle.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mMobileDataLayout.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
@@ -248,7 +250,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
         mInternetDialog.updateDialog(true);
 
-        assertThat(mMobileDataToggle.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mMobileDataLayout.getVisibility()).isEqualTo(View.GONE);
 
         // Carrier network should be visible if airplane mode ON and Wi-Fi is ON.
         when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(true);
@@ -257,7 +259,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
         mInternetDialog.updateDialog(true);
 
-        assertThat(mMobileDataToggle.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mMobileDataLayout.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
@@ -267,7 +269,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
         mInternetDialog.updateDialog(true);
 
-        assertThat(mMobileDataToggle.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mMobileDataLayout.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
@@ -279,7 +281,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
         mInternetDialog.updateDialog(true);
 
-        assertThat(mMobileDataToggle.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mMobileDataLayout.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mAirplaneModeSummaryText.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
@@ -313,6 +315,30 @@ public class InternetDialogTest extends SysuiTestCase {
         mInternetDialog.updateDialog(true);
 
         assertThat(mAirplaneModeSummaryText.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void updateDialog_mobileDataIsEnabled_checkMobileDataSwitch() {
+        doReturn(true).when(mInternetDialogController).hasActiveSubId();
+        when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(true);
+        when(mInternetDialogController.isMobileDataEnabled()).thenReturn(true);
+        mMobileToggleSwitch.setChecked(false);
+
+        mInternetDialog.updateDialog(true);
+
+        assertThat(mMobileToggleSwitch.isChecked()).isTrue();
+    }
+
+    @Test
+    public void updateDialog_mobileDataIsNotChanged_checkMobileDataSwitch() {
+        doReturn(true).when(mInternetDialogController).hasActiveSubId();
+        when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(true);
+        when(mInternetDialogController.isMobileDataEnabled()).thenReturn(false);
+        mMobileToggleSwitch.setChecked(false);
+
+        mInternetDialog.updateDialog(true);
+
+        assertThat(mMobileToggleSwitch.isChecked()).isFalse();
     }
 
     @Test
@@ -695,7 +721,7 @@ public class InternetDialogTest extends SysuiTestCase {
     private void setNetworkVisible(boolean ethernetVisible, boolean mobileDataVisible,
             boolean connectedWifiVisible) {
         mEthernet.setVisibility(ethernetVisible ? View.VISIBLE : View.GONE);
-        mMobileDataToggle.setVisibility(mobileDataVisible ? View.VISIBLE : View.GONE);
+        mMobileDataLayout.setVisibility(mobileDataVisible ? View.VISIBLE : View.GONE);
         mConnectedWifi.setVisibility(connectedWifiVisible ? View.VISIBLE : View.GONE);
     }
 }
