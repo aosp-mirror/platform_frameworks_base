@@ -34,7 +34,11 @@ enum class MediaTttReceiverUiEvents(val metricId: Int) : UiEventLogger.UiEventEn
     @UiEvent(doc = "See android.app.StatusBarManager.MEDIA_TRANSFER_RECEIVER_* docs")
     MEDIA_TTT_RECEIVER_CLOSE_TO_SENDER(982),
     @UiEvent(doc = "See android.app.StatusBarManager.MEDIA_TRANSFER_RECEIVER_* docs")
-    MEDIA_TTT_RECEIVER_FAR_FROM_SENDER(983);
+    MEDIA_TTT_RECEIVER_FAR_FROM_SENDER(983),
+    @UiEvent(doc = "See android.app.StatusBarManager.MEDIA_TRANSFER_RECEIVER_* docs")
+    MEDIA_TTT_RECEIVER_TRANSFER_TO_RECEIVER_SUCCEEDED(1263),
+    @UiEvent(doc = "See android.app.StatusBarManager.MEDIA_TRANSFER_RECEIVER_* docs")
+    MEDIA_TTT_RECEIVER_TRANSFER_TO_RECEIVER_FAILED(1264);
 
     override fun getId() = metricId
 }
