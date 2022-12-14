@@ -7438,10 +7438,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (shareDescription != null) {
             triggerShellBugreport.putExtra(EXTRA_DESCRIPTION, shareDescription);
         }
+        UserHandle callingUser = Binder.getCallingUserHandle();
         final long identity = Binder.clearCallingIdentity();
         try {
             // Send broadcast to shell to trigger bugreport using Bugreport API
-            mContext.sendBroadcastAsUser(triggerShellBugreport, UserHandle.SYSTEM);
+            mContext.sendBroadcastAsUser(triggerShellBugreport, callingUser);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
