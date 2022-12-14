@@ -109,17 +109,16 @@ public final class UpdatableFontDirTest {
 
         @Override
         public boolean isFromTrustedProvider(String path, byte[] signature) {
-            return mHasFsverityPaths.contains(path);
+            if (!mHasFsverityPaths.contains(path)) {
+                return false;
+            }
+            String fakeSignature = new String(signature, StandardCharsets.UTF_8);
+            return GOOD_SIGNATURE.equals(fakeSignature);
         }
 
         @Override
-        public void setUpFsverity(String path, byte[] pkcs7Signature) throws IOException {
-            String fakeSignature = new String(pkcs7Signature, StandardCharsets.UTF_8);
-            if (GOOD_SIGNATURE.equals(fakeSignature)) {
-                mHasFsverityPaths.add(path);
-            } else {
-                throw new IOException("Failed to set up fake fs-verity");
-            }
+        public void setUpFsverity(String path) throws IOException {
+            mHasFsverityPaths.add(path);
         }
 
         @Override
@@ -813,8 +812,8 @@ public final class UpdatableFontDirTest {
             }
 
             @Override
-            public void setUpFsverity(String path, byte[] pkcs7Signature) throws IOException {
-                mFakeFsverityUtil.setUpFsverity(path, pkcs7Signature);
+            public void setUpFsverity(String path) throws IOException {
+                mFakeFsverityUtil.setUpFsverity(path);
             }
 
             @Override
