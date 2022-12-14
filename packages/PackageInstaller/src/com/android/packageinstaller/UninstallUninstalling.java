@@ -33,8 +33,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -51,6 +53,7 @@ public class UninstallUninstalling extends Activity implements
 
     static final String EXTRA_APP_LABEL = "com.android.packageinstaller.extra.APP_LABEL";
     static final String EXTRA_KEEP_DATA = "com.android.packageinstaller.extra.KEEP_DATA";
+    public static final String EXTRA_IS_CLONE_USER = "isCloneUser";
 
     private int mUninstallId;
     private ApplicationInfo mAppInfo;
@@ -76,6 +79,18 @@ public class UninstallUninstalling extends Activity implements
                 boolean keepData = getIntent().getBooleanExtra(EXTRA_KEEP_DATA, false);
                 UserHandle user = getIntent().getParcelableExtra(Intent.EXTRA_USER);
 
+                boolean isCloneUser = false;
+                if (user == null) {
+                    user = Process.myUserHandle();
+                }
+
+                UserManager customUserManager = UninstallUninstalling.this
+                        .createContextAsUser(UserHandle.of(user.getIdentifier()), 0)
+                        .getSystemService(UserManager.class);
+                if (customUserManager.isUserOfType(UserManager.USER_TYPE_PROFILE_CLONE)) {
+                    isCloneUser = true;
+                }
+
                 // Show dialog, which is the whole UI
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
                 Fragment prev = getFragmentManager().findFragmentByTag("dialog");
@@ -83,6 +98,9 @@ public class UninstallUninstalling extends Activity implements
                     transaction.remove(prev);
                 }
                 DialogFragment dialog = new UninstallUninstallingFragment();
+                Bundle args = new Bundle();
+                args.putBoolean(EXTRA_IS_CLONE_USER, isCloneUser);
+                dialog.setArguments(args);
                 dialog.setCancelable(false);
                 dialog.show(transaction, "dialog");
 
@@ -176,9 +194,20 @@ public class UninstallUninstalling extends Activity implements
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
 
+            Bundle bundle = getArguments();
+            boolean isCloneUser = false;
+            if (bundle != null) {
+                isCloneUser = bundle.getBoolean(EXTRA_IS_CLONE_USER);
+            }
+
             dialogBuilder.setCancelable(false);
-            dialogBuilder.setMessage(getActivity().getString(R.string.uninstalling_app,
-                    ((UninstallUninstalling) getActivity()).mLabel));
+            if (isCloneUser) {
+                dialogBuilder.setMessage(getActivity().getString(R.string.uninstalling_cloned_app,
+                        ((UninstallUninstalling) getActivity()).mLabel));
+            } else {
+                dialogBuilder.setMessage(getActivity().getString(R.string.uninstalling_app,
+                        ((UninstallUninstalling) getActivity()).mLabel));
+            }
 
             Dialog dialog = dialogBuilder.create();
             dialog.setCanceledOnTouchOutside(false);
