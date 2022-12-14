@@ -18,6 +18,7 @@ package com.android.companiondevicemanager;
 
 import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_COMPUTER;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING;
 
 import static com.android.companiondevicemanager.Utils.getApplicationIcon;
 import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
@@ -132,6 +133,14 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
                 title = getHtmlFromResources(getContext(), R.string.helper_title_computer);
                 summary = getHtmlFromResources(
                         getContext(), R.string.helper_summary_computer, title, displayName);
+                break;
+
+            case DEVICE_PROFILE_NEARBY_DEVICE_STREAMING:
+                title = getHtmlFromResources(getContext(),
+                        R.string.helper_title_nearby_device_streaming);
+                summary = getHtmlFromResources(
+                        getContext(), R.string.helper_summary_nearby_device_streaming, title,
+                        displayName);
                 break;
 
             default:

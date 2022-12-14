@@ -1361,7 +1361,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
         if (next.attachedToProcess()) {
             if (DEBUG_SWITCH) {
-                Slog.v(TAG_SWITCH, "Resume running: " + next + " stopped=" + next.stopped
+                Slog.v(TAG_SWITCH, "Resume running: " + next + " stopped=" + next.mAppStopped
                         + " visibleRequested=" + next.isVisibleRequested());
             }
 
@@ -1376,7 +1376,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     || mLastPausedActivity != null && !mLastPausedActivity.occludesParent();
 
             // This activity is now becoming visible.
-            if (!next.isVisibleRequested() || next.stopped || lastActivityTranslucent) {
+            if (!next.isVisibleRequested() || next.mAppStopped || lastActivityTranslucent) {
                 next.app.addToPendingTop();
                 next.setVisibility(true);
             }
@@ -1427,7 +1427,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     // Do over!
                     mTaskSupervisor.scheduleResumeTopActivities();
                 }
-                if (!next.isVisibleRequested() || next.stopped) {
+                if (!next.isVisibleRequested() || next.mAppStopped) {
                     next.setVisibility(true);
                 }
                 next.completeResumeLocked();
@@ -1456,7 +1456,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
                 // Well the app will no longer be stopped.
                 // Clear app token stopped state in window manager if needed.
-                next.notifyAppResumed(next.stopped);
+                next.notifyAppResumed();
 
                 EventLogTags.writeWmResumeActivity(next.mUserId, System.identityHashCode(next),
                         next.getTask().mTaskId, next.shortComponentName);

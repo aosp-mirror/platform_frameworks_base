@@ -32,8 +32,10 @@ import java.util.Objects;
  * <p>{@code id} contains the system's time zone ID setting, e.g. "America/Los_Angeles". This
  * will usually agree with {@code TimeZone.getDefault().getID()} but it can be empty in rare cases.
  *
- * <p>{@code userShouldConfirmId} is {@code true} if the system has low confidence in the current
- * time zone.
+ * <p>{@code userShouldConfirmId} is {@code true} if the system automatic time zone detection logic
+ * suggests that the user be asked to confirm the {@code id} value is correct via {@link
+ * TimeManager#confirmTimeZone}. If it is not correct, the value can usually be changed via {@link
+ * TimeManager#setManualTimeZone}.
  *
  * @hide
  */

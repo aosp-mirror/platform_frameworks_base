@@ -154,6 +154,7 @@ import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.NativeTombstoneManagerService;
 import com.android.server.os.SchedulingPolicyService;
 import com.android.server.people.PeopleService;
+import com.android.server.permission.access.AccessCheckingService;
 import com.android.server.pm.ApexManager;
 import com.android.server.pm.ApexSystemServiceInfo;
 import com.android.server.pm.BackgroundInstallControlService;
@@ -1108,6 +1109,11 @@ public final class SystemServer implements Dumpable {
         // to Memtrack::getMemory() don't fail.
         t.traceBegin("MemtrackProxyService");
         startMemtrackProxyService();
+        t.traceEnd();
+
+        // Start AccessCheckingService which provides new implementation for permission and app op.
+        t.traceBegin("StartAccessCheckingService");
+        mSystemServiceManager.startService(AccessCheckingService.class);
         t.traceEnd();
 
         // Activity manager runs the show.

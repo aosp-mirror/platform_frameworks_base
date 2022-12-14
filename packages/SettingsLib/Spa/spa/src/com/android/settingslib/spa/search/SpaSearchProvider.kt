@@ -125,7 +125,7 @@ class SpaSearchProvider : ContentProvider() {
     }
 
     @VisibleForTesting
-    fun querySearchImmutableStatusData(): Cursor {
+    internal fun querySearchImmutableStatusData(): Cursor {
         val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.SEARCH_IMMUTABLE_STATUS_DATA_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
@@ -136,7 +136,7 @@ class SpaSearchProvider : ContentProvider() {
     }
 
     @VisibleForTesting
-    fun querySearchMutableStatusData(): Cursor {
+    internal fun querySearchMutableStatusData(): Cursor {
         val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.SEARCH_MUTABLE_STATUS_DATA_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
@@ -147,7 +147,7 @@ class SpaSearchProvider : ContentProvider() {
     }
 
     @VisibleForTesting
-    fun querySearchStaticData(): Cursor {
+    internal fun querySearchStaticData(): Cursor {
         val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.SEARCH_STATIC_DATA_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
@@ -158,7 +158,7 @@ class SpaSearchProvider : ContentProvider() {
     }
 
     @VisibleForTesting
-    fun querySearchDynamicData(): Cursor {
+    internal fun querySearchDynamicData(): Cursor {
         val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.SEARCH_DYNAMIC_DATA_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {

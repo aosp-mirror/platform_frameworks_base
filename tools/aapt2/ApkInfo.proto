@@ -40,7 +40,8 @@ message Badging {
   PackageInfo package = 1;
   Application application = 2;
   UsesSdk uses_sdk = 3;
-  UsesConfiguration uses_configuration = 4;
+  // Previously: UsesConfiguration uses_configuration = 4;
+  reserved 4;
   SupportsScreen supports_screen = 5;
   SupportsInput supports_input = 6;
   LaunchableActivity launchable_activity = 7;
@@ -57,6 +58,8 @@ message Badging {
   repeated string locales = 17;
   repeated int32 densities = 18;
 
+  repeated UsesPackage uses_packages = 51;
+  repeated UsesConfiguration uses_configurations = 52;
   repeated FeatureGroup feature_groups = 53;
   repeated UsesPermission uses_permissions = 54;
   repeated Permission permissions = 55;
@@ -64,7 +67,6 @@ message Badging {
   repeated UsesStaticLibrary uses_static_libraries = 57;
   repeated UsesSdkLibrary uses_sdk_libraries = 58;
   repeated UsesNativeLibrary uses_native_libraries = 59;
-  repeated UsesPackage uses_packages = 51;
 
   repeated Metadata metadata = 62;
   repeated Property properties = 63;

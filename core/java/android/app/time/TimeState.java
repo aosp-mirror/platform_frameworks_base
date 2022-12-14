@@ -29,11 +29,13 @@ import java.util.Objects;
 /**
  * A snapshot of the system time state.
  *
- * <p>{@code mUnixEpochTime} contains a snapshot of the system clock time and elapsed realtime clock
+ * <p>{@code unixEpochTime} contains a snapshot of the system clock time and elapsed realtime clock
  * time.
  *
- * <p>{@code mUserShouldConfirmTime} is {@code true} if the system has low confidence in the system
- * clock time.
+ * <p>{@code userShouldConfirmTime} is {@code true} if the system automatic time detection logic
+ * suggests that the user be asked to confirm the {@code unixEpochTime} value is correct via {@link
+ * TimeManager#confirmTime}. If it is not correct, the value can usually be changed via {@link
+ * TimeManager#setManualTime}.
  *
  * @hide
  */

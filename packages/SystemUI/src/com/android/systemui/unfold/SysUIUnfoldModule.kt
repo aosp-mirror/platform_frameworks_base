@@ -92,5 +92,7 @@ interface SysUIUnfoldComponent {
 
     fun getUnfoldTransitionWallpaperController(): UnfoldTransitionWallpaperController
 
+    fun getUnfoldHapticsPlayer(): UnfoldHapticsPlayer
+
     fun getUnfoldLightRevealOverlayAnimation(): UnfoldLightRevealOverlayAnimation
 }

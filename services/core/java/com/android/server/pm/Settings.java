@@ -819,6 +819,10 @@ public final class Settings implements Watchable, Snappable {
         return mPackages;
     }
 
+    WatchedArrayMap<String, PackageSetting> getDisabledSystemPackagesLocked() {
+        return mDisabledSysPackages;
+    }
+
     KeySetManagerService getKeySetManagerService() {
         return mKeySetManagerService;
     }

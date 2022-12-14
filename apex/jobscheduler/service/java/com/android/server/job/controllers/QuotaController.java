@@ -641,6 +641,9 @@ public final class QuotaController extends StateController {
             mTopStartedJobs.add(jobStatus);
             // Top jobs won't count towards quota so there's no need to involve the Timer.
             return;
+        } else if (jobStatus.shouldTreatAsUserInitiated()) {
+            // User-initiated jobs won't count towards quota.
+            return;
         }
 
         final int userId = jobStatus.getSourceUserId();
@@ -892,7 +895,8 @@ public final class QuotaController extends StateController {
         //   1. it was started while the app was in the TOP state
         //   2. the app is currently in the foreground
         //   3. the app overall is within its quota
-        return isTopStartedJobLocked(jobStatus)
+        return jobStatus.shouldTreatAsUserInitiated()
+                || isTopStartedJobLocked(jobStatus)
                 || isUidInForeground(jobStatus.getSourceUid())
                 || isWithinQuotaLocked(
                 jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(), standbyBucket);
@@ -2116,6 +2120,13 @@ public final class QuotaController extends StateController {
         }
 
         void startTrackingJobLocked(@NonNull JobStatus jobStatus) {
+            if (jobStatus.shouldTreatAsUserInitiated()) {
+                if (DEBUG) {
+                    Slog.v(TAG, "Timer ignoring " + jobStatus.toShortString()
+                            + " because it's user-initiated");
+                }
+                return;
+            }
             if (isTopStartedJobLocked(jobStatus)) {
                 // We intentionally don't pay attention to fg state changes after a TOP job has
                 // started.

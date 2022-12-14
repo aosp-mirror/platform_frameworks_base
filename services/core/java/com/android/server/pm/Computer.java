@@ -338,6 +338,9 @@ public interface Computer extends PackageDataSnapshot {
     @NonNull
     ArrayMap<String, ? extends PackageStateInternal> getPackageStates();
 
+    @NonNull
+    ArrayMap<String, ? extends PackageStateInternal> getDisabledSystemPackageStates();
+
     @Nullable
     String getRenamedPackage(@NonNull String packageName);
 

@@ -4937,7 +4937,7 @@
 
     <!-- Title of Color Correction feature, which is mostly used to help users who are colorblind,
      shown in the warning dialog about the accessibility shortcut. -->
-    <string name="color_correction_feature_name">Color Correction</string>
+    <string name="color_correction_feature_name">Color correction</string>
 
     <!-- Title of One Handed Mode feature, shown in the system gestures of the accessibility shortcut. [CHAR LIMIT=none] -->
     <string name="one_handed_mode_feature_name">One-Handed mode</string>

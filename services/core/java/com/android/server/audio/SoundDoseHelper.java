@@ -27,10 +27,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioSystem;
+import android.media.ISoundDose;
 import android.media.ISoundDoseCallback;
 import android.media.SoundDoseRecord;
 import android.os.Binder;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -43,8 +45,10 @@ import com.android.server.audio.AudioService.AudioHandler;
 import com.android.server.audio.AudioService.ISafeHearingVolumeController;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -87,6 +91,8 @@ public class SoundDoseHelper {
 
     private static final int MUSIC_ACTIVE_POLL_PERIOD_MS = 60000;  // 1 minute polling interval
     private static final int REQUEST_CODE_CHECK_MUSIC_ACTIVE = 1;
+
+    private static final float CUSTOM_RS2_VALUE = 90;
 
     private int mMcc = 0;
 
@@ -131,6 +137,10 @@ public class SoundDoseHelper {
     @NonNull private final AudioHandler mAudioHandler;
     @NonNull private final ISafeHearingVolumeController mVolumeController;
 
+    private ISoundDose mSoundDose;
+    private float mCurrentCsd = 0.f;
+    private final List<SoundDoseRecord> mDoseRecords = new ArrayList<>();
+
     private final Context mContext;
 
     private final ISoundDoseCallback.Stub mSoundDoseCallback = new ISoundDoseCallback.Stub() {
@@ -141,6 +151,8 @@ public class SoundDoseHelper {
 
         public void onNewCsdValue(float currentCsd, SoundDoseRecord[] records) {
             Log.i(TAG, "onNewCsdValue: " + currentCsd);
+            mCurrentCsd = currentCsd;
+            mDoseRecords.addAll(Arrays.asList(records));
             for (SoundDoseRecord record : records) {
                 Log.i(TAG, "  new record: csd=" + record.value
                         + " averageMel=" + record.averageMel + " timestamp=" + record.timestamp
@@ -162,10 +174,6 @@ public class SoundDoseHelper {
 
         mSafeMediaVolumeState = mSettings.getGlobalInt(audioService.getContentResolver(),
                 Settings.Global.AUDIO_SAFE_VOLUME_STATE, 0);
-        if (USE_CSD_FOR_SAFE_HEARING) {
-            AudioSystem.registerSoundDoseCallback(mSoundDoseCallback);
-            mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_DISABLED;
-        }
 
         // The default safe volume index read here will be replaced by the actual value when
         // the mcc is read by onConfigureSafeVolume()
@@ -174,6 +182,8 @@ public class SoundDoseHelper {
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(
                 Context.ALARM_SERVICE);
+
+        initCsd();
     }
 
     /*package*/ int safeMediaVolumeIndex(int device) {
@@ -390,6 +400,35 @@ public class SoundDoseHelper {
         pw.print("  mMusicActiveMs="); pw.println(mMusicActiveMs);
         pw.print("  mMcc="); pw.println(mMcc);
         pw.print("  mPendingVolumeCommand="); pw.println(mPendingVolumeCommand);
+    }
+
+    /*package*/void reset() {
+        Log.d(TAG, "Reset the sound dose helper");
+        initCsd();
+    }
+
+    private void initCsd() {
+        synchronized (mSafeMediaVolumeStateLock) {
+            if (USE_CSD_FOR_SAFE_HEARING) {
+                Log.v(TAG, "Initializing sound dose");
+
+                mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_DISABLED;
+                mSoundDose = AudioSystem.getSoundDoseInterface(mSoundDoseCallback);
+                try {
+                    if (mSoundDose != null && mSoundDose.asBinder().isBinderAlive()) {
+                        mSoundDose.setOutputRs2(CUSTOM_RS2_VALUE);
+                        if (mCurrentCsd != 0.f) {
+                            Log.d(TAG, "Resetting the saved sound dose value " + mCurrentCsd);
+                            SoundDoseRecord[] records = mDoseRecords.toArray(
+                                    new SoundDoseRecord[0]);
+                            mSoundDose.resetCsd(mCurrentCsd, records);
+                        }
+                    }
+                } catch (RemoteException e) {
+                    // noop
+                }
+            }
+        }
     }
 
     private void onConfigureSafeVolume(boolean force, String caller) {

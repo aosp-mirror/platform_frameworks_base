@@ -98,7 +98,9 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
         backgroundExecutor.execute {
             if (userChangeInProgress.get() > 0) return@execute
             if (featureFlags.isEnabled(Flags.USE_APP_PANELS)) {
-                newServices.forEach(ControlsServiceInfo::resolvePanelActivity)
+                val allowAllApps = featureFlags.isEnabled(Flags.APP_PANELS_ALL_APPS_ALLOWED)
+                newServices.forEach {
+                    it.resolvePanelActivity(allowAllApps) }
             }
 
             if (newServices != availableServices) {

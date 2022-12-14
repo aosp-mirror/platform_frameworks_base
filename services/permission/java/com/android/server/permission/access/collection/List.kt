@@ -49,18 +49,24 @@ inline fun <T> List<T>.noneIndexed(predicate: (Int, T) -> Boolean): Boolean {
     return true
 }
 
-inline fun <T> MutableList<T>.removeAllIndexed(predicate: (Int, T) -> Boolean) {
+inline fun <T> MutableList<T>.removeAllIndexed(predicate: (Int, T) -> Boolean): Boolean {
+    var isChanged = false
     for (index in lastIndex downTo 0) {
         if (predicate(index, this[index])) {
             removeAt(index)
+            isChanged = true
         }
     }
+    return isChanged
 }
 
-inline fun <T> MutableList<T>.retainAllIndexed(predicate: (Int, T) -> Boolean) {
+inline fun <T> MutableList<T>.retainAllIndexed(predicate: (Int, T) -> Boolean): Boolean {
+    var isChanged = false
     for (index in lastIndex downTo 0) {
         if (!predicate(index, this[index])) {
             removeAt(index)
+            isChanged = true
         }
     }
+    return isChanged
 }

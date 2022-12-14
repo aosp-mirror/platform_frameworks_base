@@ -69,12 +69,14 @@ class ControlsServiceInfo(
     private var resolved: Boolean = false
 
     @WorkerThread
-    fun resolvePanelActivity() {
+    fun resolvePanelActivity(
+            allowAllApps: Boolean = false
+    ) {
         if (resolved) return
         resolved = true
         val validPackages = context.resources
                 .getStringArray(R.array.config_controlsPreferredPackages)
-        if (componentName.packageName !in validPackages) return
+        if (componentName.packageName !in validPackages && !allowAllApps) return
         panelActivity = _panelActivity?.let {
             val resolveInfos = mPm.queryIntentActivitiesAsUser(
                     Intent().setComponent(it),

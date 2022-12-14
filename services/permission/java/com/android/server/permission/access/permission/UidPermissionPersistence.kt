@@ -22,7 +22,6 @@ import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.permission.access.SystemState
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
-import com.android.server.permission.access.data.Permission
 import com.android.server.permission.access.util.attribute
 import com.android.server.permission.access.util.attributeInt
 import com.android.server.permission.access.util.attributeIntHex

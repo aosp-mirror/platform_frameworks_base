@@ -96,7 +96,7 @@ public interface HotwordDetector {
      * <p>
      * Calling this again while recognition is active does nothing.
      *
-     * @return true if the request to start recognition succeeded
+     * @return {@code true} if the request to start recognition succeeded
      * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
      *         or above and attempts to start a recognition when the detector is not able based on
      *         the state. This can be thrown even if the state has been checked before calling this
@@ -109,7 +109,7 @@ public interface HotwordDetector {
     /**
      * Stops hotword recognition.
      *
-     * @return true if the request to stop recognition succeeded
+     * @return {@code true} if the request to stop recognition succeeded
      * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
      *         or above and attempts to stop a recognition when the detector is not able based on
      *         the state. This can be thrown even if the state has been checked before calling this
@@ -129,7 +129,7 @@ public interface HotwordDetector {
      *         source of the audio. This will be provided to the {@link HotwordDetectionService}.
      *         PersistableBundle does not allow any remotable objects or other contents that can be
      *         used to communicate with other processes.
-     * @return true if the request to start recognition succeeded
+     * @return {@code true} if the request to start recognition succeeded
      * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
      *         or above and attempts to start a recognition when the detector is not able based on
      *         the state. This can be thrown even if the state has been checked before calling this
@@ -164,7 +164,9 @@ public interface HotwordDetector {
 
     /**
      * Invalidates this hotword detector so that any future calls to this result
-     * in an {@link IllegalStateException}.
+     * in an {@link IllegalStateException} when a caller has a target SDK below API level 33
+     * or an {@link IllegalDetectorStateException} when a caller has a target SDK of API level 33
+     * or above.
      *
      * <p>If there are no other {@link HotwordDetector} instances linked to the
      * {@link HotwordDetectionService}, the service will be shutdown.
@@ -234,7 +236,7 @@ public interface HotwordDetector {
         void onRecognitionResumed();
 
         /**
-         * Called when the {@link HotwordDetectionService second stage detection} did not detect the
+         * Called when the {@link HotwordDetectionService} second stage detection did not detect the
          * keyphrase.
          *
          * @param result Info about the second stage detection result, provided by the
@@ -244,7 +246,7 @@ public interface HotwordDetector {
 
         /**
          * Called when the {@link HotwordDetectionService} is created by the system and given a
-         * short amount of time to report it's initialization state.
+         * short amount of time to report its initialization state.
          *
          * @param status Info about initialization state of {@link HotwordDetectionService}; the
          * allowed values are {@link HotwordDetectionService#INITIALIZATION_STATUS_SUCCESS},

@@ -2163,6 +2163,31 @@ public class QuotaControllerTest {
     }
 
     @Test
+    public void testIsWithinQuotaLocked_UserInitiated() {
+        // Put app in a state where regular jobs are out of quota.
+        setDischarging();
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        final int jobCount = mQcConstants.MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW;
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (HOUR_IN_MILLIS), 15 * MINUTE_IN_MILLIS, 25), false);
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (5 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, jobCount),
+                false);
+        JobStatus job = createJobStatus("testIsWithinQuotaLocked_UserInitiated", 1);
+        spyOn(job);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.incrementJobCountLocked(SOURCE_USER_ID, SOURCE_PACKAGE, jobCount);
+            assertFalse(mQuotaController
+                    .isWithinQuotaLocked(SOURCE_USER_ID, SOURCE_PACKAGE, WORKING_INDEX));
+            doReturn(false).when(job).shouldTreatAsUserInitiated();
+            assertFalse(mQuotaController.isWithinQuotaLocked(job));
+            // User-initiated job should still be allowed.
+            doReturn(true).when(job).shouldTreatAsUserInitiated();
+            assertTrue(mQuotaController.isWithinQuotaLocked(job));
+        }
+    }
+
+    @Test
     public void testIsWithinQuotaLocked_WithQuotaBump_Duration() {
         setDischarging();
         int standbyBucket = WORKING_INDEX;

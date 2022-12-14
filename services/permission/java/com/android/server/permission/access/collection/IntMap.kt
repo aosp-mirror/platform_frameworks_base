@@ -120,20 +120,26 @@ inline fun <T> IntMap<T>.putWithDefault(key: Int, value: T, defaultValue: T): T 
     }
 }
 
-inline fun <T> IntMap<T>.removeAllIndexed(predicate: (Int, Int, T) -> Boolean) {
+inline fun <T> IntMap<T>.removeAllIndexed(predicate: (Int, Int, T) -> Boolean): Boolean {
+    var isChanged = false
     for (index in lastIndex downTo 0) {
         if (predicate(index, keyAt(index), valueAt(index))) {
             removeAt(index)
+            isChanged = true
         }
     }
+    return isChanged
 }
 
-inline fun <T> IntMap<T>.retainAllIndexed(predicate: (Int, Int, T) -> Boolean) {
+inline fun <T> IntMap<T>.retainAllIndexed(predicate: (Int, Int, T) -> Boolean): Boolean {
+    var isChanged = false
     for (index in lastIndex downTo 0) {
         if (!predicate(index, keyAt(index), valueAt(index))) {
             removeAt(index)
+            isChanged = true
         }
     }
+    return isChanged
 }
 
 inline val <T> IntMap<T>.size: Int

@@ -68,6 +68,8 @@ import com.android.server.PowerAllowlistInternal;
 import com.android.server.SystemServiceManager;
 import com.android.server.job.controllers.ConnectivityController;
 import com.android.server.job.controllers.JobStatus;
+import com.android.server.job.controllers.QuotaController;
+import com.android.server.job.controllers.TareController;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
 
@@ -336,13 +338,28 @@ public class JobSchedulerServiceTest {
         when(jobUI.shouldTreatAsUserInitiated()).thenReturn(true);
         when(jobUIDT.shouldTreatAsUserInitiated()).thenReturn(true);
 
-        grantRunLongJobsPermission(true);
+        QuotaController quotaController = mService.getQuotaController();
+        spyOn(quotaController);
+        TareController tareController = mService.getTareController();
+        spyOn(tareController);
+        doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
+                .when(quotaController).getMaxJobExecutionTimeMsLocked(any());
+        doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
+                .when(quotaController).getMaxJobExecutionTimeMsLocked(any());
 
+        grantRunLongJobsPermission(true);
         assertEquals(mService.mConstants.RUNTIME_DATA_TRANSFER_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobDT));
         assertEquals(mService.mConstants.RUNTIME_USER_INITIATED_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUI));
         assertEquals(mService.mConstants.RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUIDT));
+        grantRunLongJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_DATA_TRANSFER_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobDT));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUI));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUIDT));
     }
 

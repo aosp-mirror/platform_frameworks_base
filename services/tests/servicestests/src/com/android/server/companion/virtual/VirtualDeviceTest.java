@@ -16,8 +16,8 @@
 
 package com.android.server.companion.virtual;
 
-import static android.companion.virtual.VirtualDeviceManager.DEFAULT_DEVICE_ID;
-import static android.companion.virtual.VirtualDeviceManager.INVALID_DEVICE_ID;
+import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_DEFAULT;
+import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_INVALID;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -41,14 +41,14 @@ public class VirtualDeviceTest {
     public void build_invalidId_shouldThrowIllegalArgumentException() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new VirtualDevice(INVALID_DEVICE_ID, VIRTUAL_DEVICE_NAME));
+                () -> new VirtualDevice(DEVICE_ID_INVALID, VIRTUAL_DEVICE_NAME));
     }
 
     @Test
     public void build_defaultId_shouldThrowIllegalArgumentException() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new VirtualDevice(DEFAULT_DEVICE_ID, VIRTUAL_DEVICE_NAME));
+                () -> new VirtualDevice(DEVICE_ID_DEFAULT, VIRTUAL_DEVICE_NAME));
     }
 
     @Test
