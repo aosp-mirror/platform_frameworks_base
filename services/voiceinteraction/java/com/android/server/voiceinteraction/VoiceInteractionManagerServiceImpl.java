@@ -880,5 +880,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     @Override
     public void onSessionHidden(VoiceInteractionSessionConnection connection) {
         mServiceStub.onSessionHidden();
+        // Notifies visibility change here can cause duplicate events, it is added to make sure
+        // client always get the callback even if session is unexpectedly closed.
+        mServiceStub.setSessionWindowVisible(connection.mToken, false);
     }
 }
