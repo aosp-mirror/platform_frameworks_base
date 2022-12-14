@@ -458,12 +458,6 @@ interface IWindowManager
     int getDockedStackSide();
 
     /**
-     * Sets the region the user can touch the divider. This region will be excluded from the region
-     * which is used to cause a focus switch when dispatching touch.
-     */
-    void setDockedTaskDividerTouchRegion(in Rect touchableRegion);
-
-    /**
      * Registers a listener that will be called when the pinned task state changes.
      */
     void registerPinnedTaskListener(int displayId, IPinnedTaskListener listener);
