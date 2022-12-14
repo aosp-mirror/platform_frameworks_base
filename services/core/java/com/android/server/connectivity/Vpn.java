@@ -646,7 +646,10 @@ public class Vpn {
                 .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED)
                 .setTransportInfo(new VpnTransportInfo(
-                        VpnManager.TYPE_VPN_NONE, null /* sessionId */, false /* bypassable */))
+                        VpnManager.TYPE_VPN_NONE,
+                        null /* sessionId */,
+                        false /* bypassable */,
+                        false /* longLivedTcpConnectionsExpensive */))
                 .build();
 
         loadAlwaysOnPackage();
@@ -711,7 +714,10 @@ public class Vpn {
         mNetworkCapabilities = new NetworkCapabilities.Builder(mNetworkCapabilities)
                 .setUids(null)
                 .setTransportInfo(new VpnTransportInfo(
-                        VpnManager.TYPE_VPN_NONE, null /* sessionId */, false /* bypassable */))
+                        VpnManager.TYPE_VPN_NONE,
+                        null /* sessionId */,
+                        false /* bypassable */,
+                        false /* longLivedTcpConnectionsExpensive */))
                 .build();
     }
 
@@ -1570,7 +1576,8 @@ public class Vpn {
                 mConfig.allowedApplications, mConfig.disallowedApplications));
 
         capsBuilder.setTransportInfo(
-                new VpnTransportInfo(getActiveVpnType(), mConfig.session, mConfig.allowBypass));
+                new VpnTransportInfo(getActiveVpnType(), mConfig.session, mConfig.allowBypass,
+                        false /* longLivedTcpConnectionsExpensive */));
 
         // Only apps targeting Q and above can explicitly declare themselves as metered.
         // These VPNs are assumed metered unless they state otherwise.
