@@ -9873,11 +9873,20 @@ public class DevicePolicyManager {
      * <p>
      * The calling device admin must be a profile owner. If it is not, a security exception will be
      * thrown.
+     * <p>
+     * Starting with {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, calling this function
+     * is similar to calling {@link #setManagedProfileCallerIdAccessPolicy(PackagePolicy)}
+     * with a {@link PackagePolicy#PACKAGE_POLICY_BLOCKLIST} policy type when {@code disabled} is
+     * false or a {@link PackagePolicy#PACKAGE_POLICY_ALLOWLIST} policy type when
+     * {@code disabled} is true.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param disabled If true caller-Id information in the managed profile is not displayed.
      * @throws SecurityException if {@code admin} is not a profile owner.
+     * @deprecated starting with {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, use
+     * {@link #setManagedProfileCallerIdAccessPolicy(PackagePolicy)} instead
      */
+    @Deprecated
     public void setCrossProfileCallerIdDisabled(@NonNull ComponentName admin, boolean disabled) {
         throwIfParentInstance("setCrossProfileCallerIdDisabled");
         if (mService != null) {
@@ -9895,10 +9904,19 @@ public class DevicePolicyManager {
      * <p>
      * The calling device admin must be a profile owner. If it is not, a security exception will be
      * thrown.
+     * <p>
+     * Starting with {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * this will return true when
+     * {@link #setManagedProfileCallerIdAccessPolicy(PackagePolicy)}
+     * has been set with a non-null policy whose policy type is NOT
+     * {@link PackagePolicy#PACKAGE_POLICY_BLOCKLIST}
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @throws SecurityException if {@code admin} is not a profile owner.
+     * @deprecated starting with {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, use
+     * {@link #getManagedProfileCallerIdAccessPolicy()} instead
      */
+    @Deprecated
     public boolean getCrossProfileCallerIdDisabled(@NonNull ComponentName admin) {
         throwIfParentInstance("getCrossProfileCallerIdDisabled");
         if (mService != null) {
@@ -9912,15 +9930,172 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Determine whether or not caller-Id information has been disabled.
+     * Called by the system to determine whether or not caller-Id information has been disabled.
+     * <p>
+     * Starting with {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * this will return true when
+     * {@link #setManagedProfileCallerIdAccessPolicy(PackagePolicy)}
+     * has been set with a non-null policy whose policy type is NOT
+     * {@link PackagePolicy#PACKAGE_POLICY_BLOCKLIST}
      *
      * @param userHandle The user for whom to check the caller-id permission
+     * @deprecated use {@link #hasManagedProfileCallerIdAccess(UserHandle, String)} and provide the
+     * package name requesting access
      * @hide
      */
+    @Deprecated
     public boolean getCrossProfileCallerIdDisabled(UserHandle userHandle) {
         if (mService != null) {
             try {
                 return mService.getCrossProfileCallerIdDisabledForUser(userHandle.getIdentifier());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Called by a profile owner of a managed profile to set the packages that are allowed to
+     * lookup contacts in the managed profile based on caller id information.
+     * <p>
+     * For example, the policy determines if a dialer app in the parent profile resolving
+     * an incoming call can search the caller id data, such as phone number,
+     * of managed contacts and return managed contacts that match.
+     * <p>
+     * The calling device admin must be a profile owner of a managed profile.
+     * If it is not, a {@link SecurityException} will be thrown.
+     * <p>
+     * A {@link PackagePolicy#PACKAGE_POLICY_ALLOWLIST_AND_SYSTEM} policy type
+     * allows access from the OEM default packages for the Sms, Dialer and Contact roles,
+     * in addition to the packages specified in {@link PackagePolicy#getPackageNames()}
+     *
+     * @param policy the policy to set, setting this value to {@code null} will allow
+     *               all packages
+     * @throws SecurityException if caller is not a profile owner of a managed profile
+     */
+    public void setManagedProfileCallerIdAccessPolicy(@Nullable PackagePolicy policy) {
+        throwIfParentInstance("setManagedProfileCallerIdAccessPolicy");
+        if (mService != null) {
+            try {
+                mService.setManagedProfileCallerIdAccessPolicy(policy);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Called by a profile owner of a managed profile to retrieve the caller id policy.
+     * <p>
+     * The calling device admin must be a profile owner of a managed profile.
+     * If it is not, a {@link SecurityException} will be thrown.
+     *
+     * @throws SecurityException if caller is not a profile owner of a managed profile.
+     * @return the current caller id policy
+     */
+    public @Nullable PackagePolicy getManagedProfileCallerIdAccessPolicy() {
+        throwIfParentInstance("getManagedProfileCallerIdAccessPolicy");
+        if (mService != null) {
+            try {
+                return mService.getManagedProfileCallerIdAccessPolicy();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Determine whether the given package is allowed to query the requested user to
+     * populate caller id information
+     *
+     * @param userHandle The user for whom to check the contacts search permission
+     * @param packageName the name of the package requesting access
+     * @return true if package should be granted access, false otherwise
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public boolean hasManagedProfileCallerIdAccess(@NonNull UserHandle userHandle,
+            @NonNull String packageName) {
+        if (mService == null) {
+            return true;
+        }
+        try {
+            return mService.hasManagedProfileCallerIdAccess(userHandle.getIdentifier(),
+                    packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by a profile owner of a managed profile to set the packages that are allowed
+     * access to the managed profile contacts from the parent user.
+     * <p>
+     * For example, the system will enforce the provided policy and determine
+     * if contacts in the managed profile are shown when queried by an application
+     * in the parent user.
+     * <p>
+     * The calling device admin must be a profile owner of a managed profile.
+     * If it is not, a {@link SecurityException} will be thrown.
+     * <p>
+     * A {@link PackagePolicy#PACKAGE_POLICY_ALLOWLIST_AND_SYSTEM} policy type
+     * allows access from the OEM default packages for the Sms, Dialer and Contact roles,
+     * in addition to the packages specified in {@link PackagePolicy#getPackageNames()}
+     *
+     * @param policy the policy to set, setting this value to {@code null} will allow
+     *               all packages
+     * @throws SecurityException if caller is not a profile owner of a managed profile
+     */
+    public void setManagedProfileContactsAccessPolicy(@Nullable PackagePolicy policy) {
+        throwIfParentInstance("setManagedProfileContactsAccessPolicy");
+        if (mService != null) {
+            try {
+                mService.setManagedProfileContactsAccessPolicy(policy);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Called by a profile owner of a managed profile to determine the current policy applied
+     * to managed profile contacts.
+     * <p>
+     * The calling device admin must be a profile owner of a managed profile.
+     * If it is not, a {@link SecurityException} will be thrown.
+     *
+     * @throws SecurityException if caller is not a profile owner of a managed profile.
+     * @return the current contacts search policy
+     */
+    public @Nullable PackagePolicy getManagedProfileContactsAccessPolicy() {
+        throwIfParentInstance("getManagedProfileContactsAccessPolicy");
+        if (mService == null) {
+            return null;
+        }
+        try {
+            return mService.getManagedProfileContactsAccessPolicy();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Determine whether requesting package has ability to access contacts of the requested user
+     *
+     * @param userHandle The user for whom to check the contacts search permission
+     * @param packageName packageName requesting access to contact search
+     * @return true when package is allowed access, false otherwise
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public boolean hasManagedProfileContactsAccess(@NonNull UserHandle userHandle,
+            @NonNull String packageName) {
+        if (mService != null) {
+            try {
+                return mService.hasManagedProfileContactsAccess(userHandle.getIdentifier(),
+                        packageName);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -9935,10 +10110,20 @@ public class DevicePolicyManager {
      * The calling device admin must be a profile owner. If it is not, a security exception will be
      * thrown.
      *
+     * Starting with {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, calling this function
+     * is similar to calling {@link #setManagedProfileContactsAccessPolicy(PackagePolicy)} with a
+     * {@link PackagePolicy#PACKAGE_POLICY_BLOCKLIST} policy type when {@code disabled} is false
+     * or a {@link PackagePolicy#PACKAGE_POLICY_ALLOWLIST} policy type when {@code disabled}
+     * is true.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param disabled If true contacts search in the managed profile is not displayed.
      * @throws SecurityException if {@code admin} is not a profile owner.
+     *
+     * @deprecated From {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} use
+     * {@link #setManagedProfileContactsAccessPolicy(PackagePolicy)}
      */
+    @Deprecated
     public void setCrossProfileContactsSearchDisabled(@NonNull ComponentName admin,
             boolean disabled) {
         throwIfParentInstance("setCrossProfileContactsSearchDisabled");
@@ -9957,10 +10142,19 @@ public class DevicePolicyManager {
      * <p>
      * The calling device admin must be a profile owner. If it is not, a security exception will be
      * thrown.
+     * <p>
+     * Starting with {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * this will return true when
+     * {@link #setManagedProfileContactsAccessPolicy(PackagePolicy)}
+     * has been set with a non-null policy whose policy type is NOT
+     * {@link PackagePolicy#PACKAGE_POLICY_BLOCKLIST}
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @throws SecurityException if {@code admin} is not a profile owner.
+     * @deprecated From {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} use
+     * {@link #getManagedProfileContactsAccessPolicy()}
      */
+    @Deprecated
     public boolean getCrossProfileContactsSearchDisabled(@NonNull ComponentName admin) {
         throwIfParentInstance("getCrossProfileContactsSearchDisabled");
         if (mService != null) {
@@ -9973,13 +10167,20 @@ public class DevicePolicyManager {
         return false;
     }
 
-
     /**
      * Determine whether or not contacts search has been disabled.
-     *
+     * <p>
+     * Starting with {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * this will return true when
+     * {@link #setManagedProfileContactsAccessPolicy(PackagePolicy)}
+     * has been set with a non-null policy whose policy type is NOT
+     * {@link PackagePolicy#PACKAGE_POLICY_BLOCKLIST}
      * @param userHandle The user for whom to check the contacts search permission
+     * @deprecated use {@link #hasManagedProfileContactsAccess(UserHandle, String)} and provide the
+     * package name requesting access
      * @hide
      */
+    @Deprecated
     public boolean getCrossProfileContactsSearchDisabled(@NonNull UserHandle userHandle) {
         if (mService != null) {
             try {

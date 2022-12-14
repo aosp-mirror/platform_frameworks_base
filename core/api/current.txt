@@ -7484,8 +7484,8 @@ package android.app.admin {
     method public boolean getCameraDisabled(@Nullable android.content.ComponentName);
     method @Deprecated @Nullable public String getCertInstallerPackage(@NonNull android.content.ComponentName) throws java.lang.SecurityException;
     method @Deprecated @Nullable public java.util.Set<java.lang.String> getCrossProfileCalendarPackages(@NonNull android.content.ComponentName);
-    method public boolean getCrossProfileCallerIdDisabled(@NonNull android.content.ComponentName);
-    method public boolean getCrossProfileContactsSearchDisabled(@NonNull android.content.ComponentName);
+    method @Deprecated public boolean getCrossProfileCallerIdDisabled(@NonNull android.content.ComponentName);
+    method @Deprecated public boolean getCrossProfileContactsSearchDisabled(@NonNull android.content.ComponentName);
     method @NonNull public java.util.Set<java.lang.String> getCrossProfilePackages(@NonNull android.content.ComponentName);
     method @NonNull public java.util.List<java.lang.String> getCrossProfileWidgetProviders(@NonNull android.content.ComponentName);
     method public int getCurrentFailedPasswordAttempts();
@@ -7505,6 +7505,8 @@ package android.app.admin {
     method public int getLockTaskFeatures(@NonNull android.content.ComponentName);
     method @NonNull public String[] getLockTaskPackages(@NonNull android.content.ComponentName);
     method @Nullable public CharSequence getLongSupportMessage(@NonNull android.content.ComponentName);
+    method @Nullable public android.app.admin.PackagePolicy getManagedProfileCallerIdAccessPolicy();
+    method @Nullable public android.app.admin.PackagePolicy getManagedProfileContactsAccessPolicy();
     method public long getManagedProfileMaximumTimeOff(@NonNull android.content.ComponentName);
     method public int getMaximumFailedPasswordsForWipe(@Nullable android.content.ComponentName);
     method public long getMaximumTimeToLock(@Nullable android.content.ComponentName);
@@ -7633,8 +7635,8 @@ package android.app.admin {
     method public void setCommonCriteriaModeEnabled(@NonNull android.content.ComponentName, boolean);
     method public void setConfiguredNetworksLockdownState(@NonNull android.content.ComponentName, boolean);
     method @Deprecated public void setCrossProfileCalendarPackages(@NonNull android.content.ComponentName, @Nullable java.util.Set<java.lang.String>);
-    method public void setCrossProfileCallerIdDisabled(@NonNull android.content.ComponentName, boolean);
-    method public void setCrossProfileContactsSearchDisabled(@NonNull android.content.ComponentName, boolean);
+    method @Deprecated public void setCrossProfileCallerIdDisabled(@NonNull android.content.ComponentName, boolean);
+    method @Deprecated public void setCrossProfileContactsSearchDisabled(@NonNull android.content.ComponentName, boolean);
     method public void setCrossProfilePackages(@NonNull android.content.ComponentName, @NonNull java.util.Set<java.lang.String>);
     method public void setDefaultSmsApplication(@NonNull android.content.ComponentName, @NonNull String);
     method public void setDelegatedScopes(@NonNull android.content.ComponentName, @NonNull String, @NonNull java.util.List<java.lang.String>);
@@ -7653,6 +7655,8 @@ package android.app.admin {
     method public void setLockTaskPackages(@NonNull android.content.ComponentName, @NonNull String[]) throws java.lang.SecurityException;
     method public void setLogoutEnabled(@NonNull android.content.ComponentName, boolean);
     method public void setLongSupportMessage(@NonNull android.content.ComponentName, @Nullable CharSequence);
+    method public void setManagedProfileCallerIdAccessPolicy(@Nullable android.app.admin.PackagePolicy);
+    method public void setManagedProfileContactsAccessPolicy(@Nullable android.app.admin.PackagePolicy);
     method public void setManagedProfileMaximumTimeOff(@NonNull android.content.ComponentName, long);
     method public void setMasterVolumeMuted(@NonNull android.content.ComponentName, boolean);
     method public void setMaximumFailedPasswordsForWipe(@NonNull android.content.ComponentName, int);
@@ -7962,6 +7966,19 @@ package android.app.admin {
     method public String getPackageName();
     method public long getTimestamp();
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.NetworkEvent> CREATOR;
+  }
+
+  public final class PackagePolicy implements android.os.Parcelable {
+    ctor public PackagePolicy(int);
+    ctor public PackagePolicy(int, @NonNull java.util.Set<java.lang.String>);
+    method public int describeContents();
+    method @NonNull public java.util.Set<java.lang.String> getPackageNames();
+    method public int getPolicyType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.PackagePolicy> CREATOR;
+    field public static final int PACKAGE_POLICY_ALLOWLIST = 3; // 0x3
+    field public static final int PACKAGE_POLICY_ALLOWLIST_AND_SYSTEM = 2; // 0x2
+    field public static final int PACKAGE_POLICY_BLOCKLIST = 1; // 0x1
   }
 
   public final class PreferentialNetworkServiceConfig implements android.os.Parcelable {
