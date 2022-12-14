@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Color;
+import android.provider.DeviceConfig;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -103,6 +104,10 @@ final class LetterboxConfiguration {
 
     final Context mContext;
 
+    // Responsible for the persistence of letterbox[Horizontal|Vertical]PositionMultiplier
+    @NonNull
+    private final LetterboxConfigurationPersister mLetterboxConfigurationPersister;
+
     // Aspect ratio of letterbox for fixed orientation, values <=
     // MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO will be ignored.
     private float mFixedOrientationLetterboxAspectRatio;
@@ -165,9 +170,12 @@ final class LetterboxConfiguration {
     // Whether using split screen aspect ratio as a default aspect ratio for unresizable apps.
     private boolean mIsSplitScreenAspectRatioForUnresizableAppsEnabled;
 
-    // Responsible for the persistence of letterbox[Horizontal|Vertical]PositionMultiplier
-    @NonNull
-    private final LetterboxConfigurationPersister mLetterboxConfigurationPersister;
+    // Whether letterboxing strategy is enabled for translucent activities. If {@value false}
+    // all the feature is disabled
+    private boolean mTranslucentLetterboxingEnabled;
+
+    // Allows to enable letterboxing strategy for translucent activities ignoring flags.
+    private boolean mTranslucentLetterboxingOverrideEnabled;
 
     LetterboxConfiguration(Context systemUiContext) {
         this(systemUiContext, new LetterboxConfigurationPersister(systemUiContext,
@@ -206,6 +214,8 @@ final class LetterboxConfiguration {
                 R.dimen.config_letterboxDefaultMinAspectRatioForUnresizableApps));
         mIsSplitScreenAspectRatioForUnresizableAppsEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled);
+        mTranslucentLetterboxingEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsEnabledForTranslucentActivities);
         mLetterboxConfigurationPersister = letterboxConfigurationPersister;
         mLetterboxConfigurationPersister.start();
     }
@@ -817,6 +827,32 @@ final class LetterboxConfiguration {
                 R.bool.config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled);
     }
 
+    boolean isTranslucentLetterboxingEnabled() {
+        return mTranslucentLetterboxingOverrideEnabled || (mTranslucentLetterboxingEnabled
+                && isTranslucentLetterboxingAllowed());
+    }
+
+    void setTranslucentLetterboxingEnabled(boolean translucentLetterboxingEnabled) {
+        mTranslucentLetterboxingEnabled = translucentLetterboxingEnabled;
+    }
+
+    void setTranslucentLetterboxingOverrideEnabled(
+            boolean translucentLetterboxingOverrideEnabled) {
+        mTranslucentLetterboxingOverrideEnabled = translucentLetterboxingOverrideEnabled;
+        setTranslucentLetterboxingEnabled(translucentLetterboxingOverrideEnabled);
+    }
+
+    /**
+     * Resets whether we use the constraints override strategy for letterboxing when dealing
+     * with translucent activities {@link R.bool.config_letterboxIsEnabledForTranslucentActivities}.
+     */
+    void resetTranslucentLetterboxingEnabled() {
+        final boolean newValue = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsEnabledForTranslucentActivities);
+        setTranslucentLetterboxingEnabled(newValue);
+        setTranslucentLetterboxingOverrideEnabled(false);
+    }
+
     /** Calculates a new letterboxPositionForHorizontalReachability value and updates the store */
     private void updatePositionForHorizontalReachability(
             Function<Integer, Integer> newHorizonalPositionFun) {
@@ -839,4 +875,9 @@ final class LetterboxConfiguration {
                 nextVerticalPosition);
     }
 
+    // TODO(b/262378106): Cache runtime flag and implement DeviceConfig.OnPropertiesChangedListener
+    static boolean isTranslucentLetterboxingAllowed() {
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                "enable_translucent_activity_letterbox", false);
+    }
 }
