@@ -19,8 +19,6 @@ package com.android.systemui.accessibility.floatingmenu;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.content.ComponentCallbacks;
-import android.content.res.Configuration;
 import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
@@ -34,7 +32,7 @@ import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
  * Controls the interaction between {@link MagnetizedObject} and
  * {@link MagnetizedObject.MagneticTarget}.
  */
-class DismissAnimationController implements ComponentCallbacks {
+class DismissAnimationController {
     private static final float COMPLETELY_OPAQUE = 1.0f;
     private static final float COMPLETELY_TRANSPARENT = 0.0f;
     private static final float CIRCLE_VIEW_DEFAULT_SCALE = 1.0f;
@@ -105,16 +103,6 @@ class DismissAnimationController implements ComponentCallbacks {
         mMagnetizedObject.addTarget(magneticTarget);
     }
 
-    @Override
-    public void onConfigurationChanged(@NonNull Configuration newConfig) {
-        updateResources();
-    }
-
-    @Override
-    public void onLowMemory() {
-        // Do nothing
-    }
-
     void showDismissView(boolean show) {
         if (show) {
             mDismissView.show();
@@ -165,7 +153,7 @@ class DismissAnimationController implements ComponentCallbacks {
         }
     }
 
-    private void updateResources() {
+    void updateResources() {
         final float maxDismissSize = mDismissView.getResources().getDimensionPixelSize(
                 R.dimen.dismiss_circle_size);
         mMinDismissSize = mDismissView.getResources().getDimensionPixelSize(

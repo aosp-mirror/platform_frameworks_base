@@ -20,6 +20,7 @@ import static android.util.TypedValue.COMPLEX_UNIT_PX;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.annotation.IntDef;
+import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -33,6 +34,8 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
@@ -44,7 +47,7 @@ import java.lang.annotation.RetentionPolicy;
  * the {@link MenuView}.
  */
 class MenuMessageView extends LinearLayout implements
-        ViewTreeObserver.OnComputeInternalInsetsListener {
+        ViewTreeObserver.OnComputeInternalInsetsListener, ComponentCallbacks {
     private final TextView mTextView;
     private final Button mUndoButton;
 
@@ -72,10 +75,13 @@ class MenuMessageView extends LinearLayout implements
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         updateResources();
+    }
+
+    @Override
+    public void onLowMemory() {
+        // Do nothing.
     }
 
     @Override
@@ -92,6 +98,7 @@ class MenuMessageView extends LinearLayout implements
 
         updateResources();
 
+        getContext().registerComponentCallbacks(this);
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
     }
 
@@ -99,6 +106,7 @@ class MenuMessageView extends LinearLayout implements
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
 
+        getContext().unregisterComponentCallbacks(this);
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
     }
 
