@@ -49,8 +49,8 @@ import android.os.SharedMemory;
 import android.provider.DeviceConfig;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetector;
-import android.service.voice.IHotwordDetectionService;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
+import android.service.voice.ISandboxedDetectionService;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
 import android.speech.IRecognitionServiceManager;
 import android.util.Slog;
@@ -455,7 +455,7 @@ final class HotwordDetectionConnection {
         ServiceConnection createLocked() {
             ServiceConnection connection =
                     new ServiceConnection(mContext, mIntent, mBindingFlags, mUser,
-                            IHotwordDetectionService.Stub::asInterface,
+                            ISandboxedDetectionService.Stub::asInterface,
                             mRestartCount++ % MAX_ISOLATED_PROCESS_NUMBER);
             connection.connect();
 
@@ -467,7 +467,7 @@ final class HotwordDetectionConnection {
         }
     }
 
-    class ServiceConnection extends ServiceConnector.Impl<IHotwordDetectionService> {
+    class ServiceConnection extends ServiceConnector.Impl<ISandboxedDetectionService> {
         private final Object mLock = new Object();
 
         private final Intent mIntent;
@@ -480,7 +480,7 @@ final class HotwordDetectionConnection {
 
         ServiceConnection(@NonNull Context context,
                 @NonNull Intent intent, int bindingFlags, int userId,
-                @Nullable Function<IBinder, IHotwordDetectionService> binderAsInterface,
+                @Nullable Function<IBinder, ISandboxedDetectionService> binderAsInterface,
                 int instanceNumber) {
             super(context, intent, bindingFlags, userId, binderAsInterface);
             this.mIntent = intent;
@@ -489,7 +489,7 @@ final class HotwordDetectionConnection {
         }
 
         @Override // from ServiceConnector.Impl
-        protected void onServiceConnectionStatusChanged(IHotwordDetectionService service,
+        protected void onServiceConnectionStatusChanged(ISandboxedDetectionService service,
                 boolean connected) {
             if (DEBUG) {
                 Slog.d(TAG, "onServiceConnectionStatusChanged connected = " + connected);

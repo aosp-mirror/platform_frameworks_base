@@ -293,7 +293,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     private final Handler mHandler;
     private final IBinder mBinder = new Binder();
     private final int mTargetSdkVersion;
-    private final boolean mSupportHotwordDetectionService;
+    private final boolean mSupportSandboxedDetectionService;
 
     @GuardedBy("mLock")
     private boolean mIsAvailabilityOverriddenByTestApi = false;
@@ -756,7 +756,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      * @param callback A non-null Callback for receiving the recognition events.
      * @param modelManagementService A service that allows management of sound models.
      * @param targetSdkVersion The target SDK version.
-     * @param supportHotwordDetectionService {@code true} if HotwordDetectionService should be
+     * @param SupportSandboxedDetectionService {@code true} if HotwordDetectionService should be
      * triggered, otherwise {@code false}.
      *
      * @hide
@@ -764,7 +764,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     public AlwaysOnHotwordDetector(String text, Locale locale, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
             IVoiceInteractionManagerService modelManagementService, int targetSdkVersion,
-            boolean supportHotwordDetectionService) {
+            boolean supportSandboxedDetectionService) {
         super(modelManagementService, callback);
 
         mHandler = new MyHandler();
@@ -775,12 +775,12 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         mInternalCallback = new SoundTriggerListener(mHandler);
         mModelManagementService = modelManagementService;
         mTargetSdkVersion = targetSdkVersion;
-        mSupportHotwordDetectionService = supportHotwordDetectionService;
+        mSupportSandboxedDetectionService = supportSandboxedDetectionService;
     }
 
     @Override
     void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {
-        if (mSupportHotwordDetectionService) {
+        if (mSupportSandboxedDetectionService) {
             initAndVerifyDetector(options, sharedMemory, mInternalCallback,
                     DETECTOR_TYPE_TRUSTED_HOTWORD_DSP);
         }
@@ -812,7 +812,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     public final void updateState(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) throws IllegalDetectorStateException {
         synchronized (mLock) {
-            if (!mSupportHotwordDetectionService) {
+            if (!mSupportSandboxedDetectionService) {
                 throw new IllegalStateException(
                         "updateState called, but it doesn't support hotword detection service");
             }
@@ -1408,8 +1408,8 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      * @hide
      */
     @Override
-    public boolean isUsingHotwordDetectionService() {
-        return mSupportHotwordDetectionService;
+    public boolean isUsingSandboxedDetectionService() {
+        return mSupportSandboxedDetectionService;
     }
 
     /**

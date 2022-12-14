@@ -36,8 +36,8 @@ import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetector;
 import android.service.voice.HotwordRejectedResult;
 import android.service.voice.IDspHotwordDetectionCallback;
-import android.service.voice.IHotwordDetectionService;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
+import android.service.voice.ISandboxedDetectionService;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -175,7 +175,7 @@ final class SoftwareTrustedHotwordDetectorSession extends HotwordDetectorSession
         }
         mPerformingSoftwareHotwordDetection = false;
 
-        mRemoteHotwordDetectionService.run(IHotwordDetectionService::stopDetection);
+        mRemoteHotwordDetectionService.run(ISandboxedDetectionService::stopDetection);
 
         closeExternalAudioStreamLocked("stopping requested");
     }

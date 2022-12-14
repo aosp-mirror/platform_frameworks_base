@@ -129,7 +129,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
      * @hide
      */
     @Override
-    public boolean isUsingHotwordDetectionService() {
+    public boolean isUsingSandboxedDetectionService() {
         return true;
     }
 
