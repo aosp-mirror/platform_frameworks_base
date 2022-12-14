@@ -20,7 +20,7 @@ import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.WATCH_FOREGROUND_CHANGES;
 import static android.app.AppOpsManager.opRestrictsRead;
 
-import static com.android.server.appop.AppOpsServiceImpl.ModeCallback.ALL_OPS;
+import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -85,8 +85,8 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
 
 
     AppOpsCheckingServiceImpl(PersistenceScheduler persistenceScheduler,
-                              @NonNull Object lock, Handler handler, Context context,
-                              SparseArray<int[]> switchedOps) {
+            @NonNull Object lock, Handler handler, Context context,
+            SparseArray<int[]> switchedOps) {
         this.mPersistenceScheduler = persistenceScheduler;
         this.mLock = lock;
         this.mHandler = handler;
@@ -218,7 +218,7 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
     }
 
     @Override
-    public boolean arePackageModesDefault(@NonNull String packageMode, @UserIdInt int userId) {
+    public boolean arePackageModesDefault(String packageMode, @UserIdInt int userId) {
         synchronized (mLock) {
             ArrayMap<String, SparseIntArray> packageModes = mUserPackageModes.get(userId, null);
             if (packageModes == null) {
@@ -490,16 +490,15 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
     }
 
     @Override
-    public SparseBooleanArray evalForegroundUidOps(int uid,
-            @Nullable SparseBooleanArray foregroundOps) {
+    public SparseBooleanArray evalForegroundUidOps(int uid, SparseBooleanArray foregroundOps) {
         synchronized (mLock) {
             return evalForegroundOps(mUidModes.get(uid), foregroundOps);
         }
     }
 
     @Override
-    public SparseBooleanArray evalForegroundPackageOps(@NonNull String packageName,
-            @Nullable SparseBooleanArray foregroundOps, @UserIdInt int userId) {
+    public SparseBooleanArray evalForegroundPackageOps(String packageName,
+            SparseBooleanArray foregroundOps, @UserIdInt int userId) {
         synchronized (mLock) {
             ArrayMap<String, SparseIntArray> packageModes = mUserPackageModes.get(userId, null);
             return evalForegroundOps(packageModes == null ? null : packageModes.get(packageName),
@@ -538,8 +537,8 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
     }
 
     @Override
-    public boolean dumpListeners(int dumpOp, int dumpUid, @Nullable String dumpPackage,
-            @NonNull PrintWriter printWriter) {
+    public boolean dumpListeners(int dumpOp, int dumpUid, String dumpPackage,
+            PrintWriter printWriter) {
         boolean needSep = false;
         if (mOpModeWatchers.size() > 0) {
             boolean printedHeader = false;

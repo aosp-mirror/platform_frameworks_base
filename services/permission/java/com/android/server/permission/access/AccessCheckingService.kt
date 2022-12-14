@@ -24,7 +24,7 @@ import com.android.server.SystemConfig
 import com.android.server.SystemService
 import com.android.server.appop.AppOpsCheckingServiceInterface
 import com.android.server.permission.access.appop.AppOpService
-import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.collection.IntSet
 import com.android.server.permission.access.permission.PermissionService
 import com.android.server.pm.PackageManagerLocal
 import com.android.server.pm.UserManagerService
