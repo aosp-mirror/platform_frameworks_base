@@ -49,11 +49,12 @@ import android.os.SharedMemory;
 import android.provider.DeviceConfig;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetector;
-import android.service.voice.IHotwordDetectionService;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
+import android.service.voice.ISandboxedDetectionService;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
 import android.speech.IRecognitionServiceManager;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.contentcapture.IContentCaptureManager;
 
 import com.android.internal.annotations.GuardedBy;
@@ -68,6 +69,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -113,18 +115,18 @@ final class HotwordDetectionConnection {
     @GuardedBy("mLock")
     private boolean mDebugHotwordLogging = false;
 
+    /**
+     * For multiple detectors feature, we only support one AlwaysOnHotwordDetector and one
+     * SoftwareHotwordDetector at the same time. We use SparseArray with detector type as the key
+     * to record the detectors.
+     */
     @GuardedBy("mLock")
-    private final HotwordDetectorSession mHotwordDetectorSession;
+    private final SparseArray<HotwordDetectorSession> mHotwordDetectorSessions =
+            new SparseArray<>();
 
     HotwordDetectionConnection(Object lock, Context context, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity, ComponentName serviceName, int userId,
-            boolean bindInstantServiceAllowed, @Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory,
-            @NonNull IHotwordRecognitionStatusCallback callback, int detectorType) {
-        if (callback == null) {
-            Slog.w(TAG, "Callback is null while creating connection");
-            throw new IllegalArgumentException("Callback is null while creating connection");
-        }
+            boolean bindInstantServiceAllowed, int detectorType) {
         mLock = lock;
         mContext = context;
         mVoiceInteractionServiceUid = voiceInteractionServiceUid;
@@ -141,19 +143,6 @@ final class HotwordDetectionConnection {
         mServiceConnectionFactory = new ServiceConnectionFactory(intent, bindInstantServiceAllowed);
         mRemoteHotwordDetectionService = mServiceConnectionFactory.createLocked();
         mLastRestartInstant = Instant.now();
-
-        if (detectorType == HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP) {
-            mHotwordDetectorSession = new DspTrustedHotwordDetectorSession(
-                    mRemoteHotwordDetectionService, mLock, mContext, callback,
-                    mVoiceInteractionServiceUid, mVoiceInteractorIdentity,
-                    mScheduledExecutorService, mDebugHotwordLogging);
-        } else {
-            mHotwordDetectorSession = new SoftwareTrustedHotwordDetectorSession(
-                    mRemoteHotwordDetectionService, mLock, mContext, callback,
-                    mVoiceInteractionServiceUid, mVoiceInteractorIdentity,
-                    mScheduledExecutorService, mDebugHotwordLogging);
-        }
-        mHotwordDetectorSession.initialize(options, sharedMemory);
 
         if (mReStartPeriodSeconds <= 0) {
             mCancellationTaskFuture = null;
@@ -210,7 +199,10 @@ final class HotwordDetectionConnection {
     void cancelLocked() {
         Slog.v(TAG, "cancelLocked");
         clearDebugHotwordLoggingTimeoutLocked();
-        mHotwordDetectorSession.destroyLocked();
+        runForEachHotwordDetectorSessionLocked((session) -> {
+            session.destroyLocked();
+        });
+        mHotwordDetectorSessions.clear();
         mDebugHotwordLogging = false;
         mRemoteHotwordDetectionService.unbind();
         LocalServices.getService(PermissionManagerServiceInternal.class)
@@ -220,7 +212,7 @@ final class HotwordDetectionConnection {
         }
         mIdentity = null;
         if (mCancellationTaskFuture != null) {
-            mCancellationTaskFuture.cancel(/* may interrupt */ true);
+            mCancellationTaskFuture.cancel(/* mayInterruptIfRunning= */ true);
         }
         if (mAudioFlinger != null) {
             mAudioFlinger.unlinkToDeath(mAudioServerDeathRecipient, /* flags= */ 0);
@@ -228,57 +220,65 @@ final class HotwordDetectionConnection {
     }
 
     @SuppressWarnings("GuardedBy")
-    void updateStateLocked(PersistableBundle options, SharedMemory sharedMemory) {
-        mHotwordDetectorSession.updateStateLocked(options, sharedMemory, mLastRestartInstant);
+    void updateStateLocked(PersistableBundle options, SharedMemory sharedMemory,
+            @NonNull IBinder token) {
+        final HotwordDetectorSession session = getDetectorSessionByTokenLocked(token);
+        if (session == null) {
+            Slog.v(TAG, "Not found the detector by token");
+            return;
+        }
+        session.updateStateLocked(options, sharedMemory, mLastRestartInstant);
     }
 
     /**
      * This method is only used by SoftwareHotwordDetector.
      */
-    void startListeningFromMic(
+    void startListeningFromMicLocked(
             AudioFormat audioFormat,
             IMicrophoneHotwordDetectionVoiceInteractionCallback callback) {
         if (DEBUG) {
-            Slog.d(TAG, "startListeningFromMic");
+            Slog.d(TAG, "startListeningFromMicLocked");
         }
-        synchronized (mLock) {
-            if (!(mHotwordDetectorSession instanceof SoftwareTrustedHotwordDetectorSession)) {
-                Slog.d(TAG, "It is not a software detector");
-                return;
-            }
-            ((SoftwareTrustedHotwordDetectorSession) mHotwordDetectorSession)
-                    .startListeningFromMicLocked(audioFormat, callback);
+        // We only support one Dsp trusted hotword detector and one software hotword detector at
+        // the same time, so we can reuse original single software trusted hotword mechanism.
+        final SoftwareTrustedHotwordDetectorSession session =
+                getSoftwareTrustedHotwordDetectorSessionLocked();
+        if (session == null) {
+            return;
         }
+        session.startListeningFromMicLocked(audioFormat, callback);
     }
 
-    public void startListeningFromExternalSource(
+    public void startListeningFromExternalSourceLocked(
             ParcelFileDescriptor audioStream,
             AudioFormat audioFormat,
             @Nullable PersistableBundle options,
+            @NonNull IBinder token,
             IMicrophoneHotwordDetectionVoiceInteractionCallback callback) {
         if (DEBUG) {
-            Slog.d(TAG, "startListeningFromExternalSource");
+            Slog.d(TAG, "startListeningFromExternalSourceLocked");
         }
-        synchronized (mLock) {
-            mHotwordDetectorSession.startListeningFromExternalSourceLocked(audioStream, audioFormat,
-                    options, callback);
+        final HotwordDetectorSession session = getDetectorSessionByTokenLocked(token);
+        if (session == null) {
+            Slog.v(TAG, "Not found the detector by token");
+            return;
         }
+        session.startListeningFromExternalSourceLocked(audioStream, audioFormat, options, callback);
     }
 
     /**
      * This method is only used by SoftwareHotwordDetector.
      */
-    void stopListening() {
+    void stopListeningFromMicLocked() {
         if (DEBUG) {
-            Slog.d(TAG, "stopListening");
+            Slog.d(TAG, "stopListeningFromMicLocked");
         }
-        synchronized (mLock) {
-            if (!(mHotwordDetectorSession instanceof SoftwareTrustedHotwordDetectorSession)) {
-                Slog.d(TAG, "It is not a software detector");
-                return;
-            }
-            ((SoftwareTrustedHotwordDetectorSession) mHotwordDetectorSession).stopListeningLocked();
+        final SoftwareTrustedHotwordDetectorSession session =
+                getSoftwareTrustedHotwordDetectorSessionLocked();
+        if (session == null) {
+            return;
         }
+        session.stopListeningFromMicLocked();
     }
 
     void triggerHardwareRecognitionEventForTestLocked(
@@ -295,13 +295,16 @@ final class HotwordDetectionConnection {
         if (DEBUG) {
             Slog.d(TAG, "detectFromDspSource");
         }
+        // We only support one Dsp trusted hotword detector and one software hotword detector at
+        // the same time, so we can reuse original single Dsp trusted hotword mechanism.
         synchronized (mLock) {
-            if (!(mHotwordDetectorSession instanceof DspTrustedHotwordDetectorSession)) {
-                Slog.d(TAG, "It is not a Dsp detector");
+            final DspTrustedHotwordDetectorSession session =
+                    getDspTrustedHotwordDetectorSessionLocked();
+            if (session == null || !session.isSameCallback(externalCallback)) {
+                Slog.v(TAG, "Not found the Dsp detector by callback");
                 return;
             }
-            ((DspTrustedHotwordDetectorSession) mHotwordDetectorSession).detectFromDspSourceLocked(
-                    recognitionEvent, externalCallback);
+            session.detectFromDspSourceLocked(recognitionEvent, externalCallback);
         }
     }
 
@@ -317,7 +320,9 @@ final class HotwordDetectionConnection {
         Slog.v(TAG, "setDebugHotwordLoggingLocked: " + logging);
         clearDebugHotwordLoggingTimeoutLocked();
         mDebugHotwordLogging = logging;
-        mHotwordDetectorSession.setDebugHotwordLoggingLocked(logging);
+        runForEachHotwordDetectorSessionLocked((session) -> {
+            session.setDebugHotwordLoggingLocked(logging);
+        });
 
         if (logging) {
             // Reset mDebugHotwordLogging to false after one hour
@@ -325,7 +330,9 @@ final class HotwordDetectionConnection {
                 Slog.v(TAG, "Timeout to reset mDebugHotwordLogging to false");
                 synchronized (mLock) {
                     mDebugHotwordLogging = false;
-                    mHotwordDetectorSession.setDebugHotwordLoggingLocked(false);
+                    runForEachHotwordDetectorSessionLocked((session) -> {
+                        session.setDebugHotwordLoggingLocked(false);
+                    });
                 }
             }, RESET_DEBUG_HOTWORD_LOGGING_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         }
@@ -333,7 +340,7 @@ final class HotwordDetectionConnection {
 
     private void clearDebugHotwordLoggingTimeoutLocked() {
         if (mDebugHotwordLoggingTimeoutFuture != null) {
-            mDebugHotwordLoggingTimeoutFuture.cancel(/* mayInterruptIfRunning= */true);
+            mDebugHotwordLoggingTimeoutFuture.cancel(/* mayInterruptIfRunning= */ true);
             mDebugHotwordLoggingTimeoutFuture = null;
         }
     }
@@ -350,12 +357,14 @@ final class HotwordDetectionConnection {
         mRemoteHotwordDetectionService = mServiceConnectionFactory.createLocked();
 
         Slog.v(TAG, "Started the new process, dispatching processRestarted to detector");
-        mHotwordDetectorSession.updateRemoteHotwordDetectionServiceLocked(
-                mRemoteHotwordDetectionService);
-        mHotwordDetectorSession.informRestartProcessLocked();
+        runForEachHotwordDetectorSessionLocked((session) -> {
+            session.updateRemoteHotwordDetectionServiceLocked(mRemoteHotwordDetectionService);
+            session.informRestartProcessLocked();
+        });
         if (DEBUG) {
             Slog.i(TAG, "processRestarted is dispatched done, unbinding from the old process");
         }
+
         oldConnection.ignoreConnectionStatusEvents();
         oldConnection.unbind();
         if (previousIdentity != null) {
@@ -431,8 +440,10 @@ final class HotwordDetectionConnection {
             pw.print(prefix); pw.print("mLastRestartInstant="); pw.println(mLastRestartInstant);
             pw.print(prefix); pw.print("mDetectorType=");
             pw.println(HotwordDetector.detectorTypeToString(mDetectorType));
-            pw.print(prefix); pw.println("HotwordDetectorSession");
-            mHotwordDetectorSession.dumpLocked(prefix, pw);
+            pw.print(prefix); pw.println("HotwordDetectorSession(s)");
+            runForEachHotwordDetectorSessionLocked((session) -> {
+                session.dumpLocked(prefix, pw);
+            });
         }
     }
 
@@ -450,7 +461,7 @@ final class HotwordDetectionConnection {
         ServiceConnection createLocked() {
             ServiceConnection connection =
                     new ServiceConnection(mContext, mIntent, mBindingFlags, mUser,
-                            IHotwordDetectionService.Stub::asInterface,
+                            ISandboxedDetectionService.Stub::asInterface,
                             mRestartCount++ % MAX_ISOLATED_PROCESS_NUMBER);
             connection.connect();
 
@@ -462,7 +473,7 @@ final class HotwordDetectionConnection {
         }
     }
 
-    class ServiceConnection extends ServiceConnector.Impl<IHotwordDetectionService> {
+    class ServiceConnection extends ServiceConnector.Impl<ISandboxedDetectionService> {
         private final Object mLock = new Object();
 
         private final Intent mIntent;
@@ -475,7 +486,7 @@ final class HotwordDetectionConnection {
 
         ServiceConnection(@NonNull Context context,
                 @NonNull Intent intent, int bindingFlags, int userId,
-                @Nullable Function<IBinder, IHotwordDetectionService> binderAsInterface,
+                @Nullable Function<IBinder, ISandboxedDetectionService> binderAsInterface,
                 int instanceNumber) {
             super(context, intent, bindingFlags, userId, binderAsInterface);
             this.mIntent = intent;
@@ -484,7 +495,7 @@ final class HotwordDetectionConnection {
         }
 
         @Override // from ServiceConnector.Impl
-        protected void onServiceConnectionStatusChanged(IHotwordDetectionService service,
+        protected void onServiceConnectionStatusChanged(ISandboxedDetectionService service,
                 boolean connected) {
             if (DEBUG) {
                 Slog.d(TAG, "onServiceConnectionStatusChanged connected = " + connected);
@@ -525,8 +536,10 @@ final class HotwordDetectionConnection {
                 }
             }
             synchronized (HotwordDetectionConnection.this.mLock) {
-                mHotwordDetectorSession.reportErrorLocked(
-                        HotwordDetectorSession.HOTWORD_DETECTION_SERVICE_DIED);
+                runForEachHotwordDetectorSessionLocked((session) -> {
+                    session.reportErrorLocked(
+                            HotwordDetectorSession.HOTWORD_DETECTION_SERVICE_DIED);
+                });
             }
         }
 
@@ -568,6 +581,93 @@ final class HotwordDetectionConnection {
             synchronized (mLock) {
                 mRespectServiceConnectionStatusChanged = false;
             }
+        }
+    }
+
+    @SuppressWarnings("GuardedBy")
+    void createDetectorLocked(
+            @Nullable PersistableBundle options,
+            @Nullable SharedMemory sharedMemory,
+            @NonNull IBinder token,
+            @NonNull IHotwordRecognitionStatusCallback callback,
+            int detectorType) {
+        // We only support one Dsp trusted hotword detector and one software hotword detector at
+        // the same time, remove existing one.
+        HotwordDetectorSession removeSession = mHotwordDetectorSessions.get(detectorType);
+        if (removeSession != null) {
+            removeSession.destroyLocked();
+            mHotwordDetectorSessions.remove(detectorType);
+        }
+        final HotwordDetectorSession session;
+        if (detectorType == HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP) {
+            session = new DspTrustedHotwordDetectorSession(mRemoteHotwordDetectionService,
+                    mLock, mContext, token, callback, mVoiceInteractionServiceUid,
+                    mVoiceInteractorIdentity, mScheduledExecutorService, mDebugHotwordLogging);
+        } else {
+            session = new SoftwareTrustedHotwordDetectorSession(
+                    mRemoteHotwordDetectionService, mLock, mContext, token, callback,
+                    mVoiceInteractionServiceUid, mVoiceInteractorIdentity,
+                    mScheduledExecutorService, mDebugHotwordLogging);
+        }
+        mHotwordDetectorSessions.put(detectorType, session);
+        session.initialize(options, sharedMemory);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    void destroyDetectorLocked(@NonNull IBinder token) {
+        final HotwordDetectorSession session = getDetectorSessionByTokenLocked(token);
+        if (session != null) {
+            session.destroyLocked();
+            final int index = mHotwordDetectorSessions.indexOfValue(session);
+            if (index < 0 || index > mHotwordDetectorSessions.size() - 1) {
+                return;
+            }
+            mHotwordDetectorSessions.removeAt(index);
+        }
+    }
+
+    @SuppressWarnings("GuardedBy")
+    private HotwordDetectorSession getDetectorSessionByTokenLocked(IBinder token) {
+        if (token == null) {
+            return null;
+        }
+        for (int i = 0; i < mHotwordDetectorSessions.size(); i++) {
+            final HotwordDetectorSession session = mHotwordDetectorSessions.valueAt(i);
+            if (!session.isDestroyed() && session.isSameToken(token)) {
+                return session;
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings("GuardedBy")
+    private DspTrustedHotwordDetectorSession getDspTrustedHotwordDetectorSessionLocked() {
+        final HotwordDetectorSession session = mHotwordDetectorSessions.get(
+                HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP);
+        if (session == null || session.isDestroyed()) {
+            Slog.v(TAG, "Not found the Dsp detector");
+            return null;
+        }
+        return (DspTrustedHotwordDetectorSession) session;
+    }
+
+    @SuppressWarnings("GuardedBy")
+    private SoftwareTrustedHotwordDetectorSession getSoftwareTrustedHotwordDetectorSessionLocked() {
+        final HotwordDetectorSession session = mHotwordDetectorSessions.get(
+                HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE);
+        if (session == null || session.isDestroyed()) {
+            Slog.v(TAG, "Not found the software detector");
+            return null;
+        }
+        return (SoftwareTrustedHotwordDetectorSession) session;
+    }
+
+    @SuppressWarnings("GuardedBy")
+    private void runForEachHotwordDetectorSessionLocked(
+            @NonNull Consumer<HotwordDetectorSession> action) {
+        for (int i = 0; i < mHotwordDetectorSessions.size(); i++) {
+            HotwordDetectorSession session = mHotwordDetectorSessions.valueAt(i);
+            action.accept(session);
         }
     }
 

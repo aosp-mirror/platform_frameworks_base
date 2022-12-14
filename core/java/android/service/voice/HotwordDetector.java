@@ -178,7 +178,7 @@ public interface HotwordDetector {
     /**
      * @hide
      */
-    default boolean isUsingHotwordDetectionService() {
+    default boolean isUsingSandboxedDetectionService() {
         throw new UnsupportedOperationException("Not implemented. Must override in a subclass.");
     }
 

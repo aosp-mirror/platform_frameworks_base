@@ -140,7 +140,7 @@ public abstract class HotwordDetectionService extends Service {
     @Nullable
     private IRecognitionServiceManager mIRecognitionServiceManager;
 
-    private final IHotwordDetectionService mInterface = new IHotwordDetectionService.Stub() {
+    private final ISandboxedDetectionService mInterface = new ISandboxedDetectionService.Stub() {
         @Override
         public void detectFromDspSource(
                 SoundTrigger.KeyphraseRecognitionEvent event,

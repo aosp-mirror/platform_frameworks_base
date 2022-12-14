@@ -430,7 +430,7 @@ public class VoiceInteractionService extends Service {
                 safelyShutdownAllHotwordDetectors();
             } else {
                 for (HotwordDetector detector : mActiveHotwordDetectors) {
-                    if (detector.isUsingHotwordDetectionService()
+                    if (detector.isUsingSandboxedDetectionService()
                             != supportHotwordDetectionService) {
                         throw new IllegalStateException(
                                 "It disallows to create trusted and non-trusted detectors "
@@ -513,7 +513,7 @@ public class VoiceInteractionService extends Service {
                 safelyShutdownAllHotwordDetectors();
             } else {
                 for (HotwordDetector detector : mActiveHotwordDetectors) {
-                    if (!detector.isUsingHotwordDetectionService()) {
+                    if (!detector.isUsingSandboxedDetectionService()) {
                         throw new IllegalStateException(
                                 "It disallows to create trusted and non-trusted detectors "
                                         + "at the same time.");
@@ -605,7 +605,7 @@ public class VoiceInteractionService extends Service {
 
     private void shutdownHotwordDetectionServiceIfRequiredLocked() {
         for (HotwordDetector detector : mActiveHotwordDetectors) {
-            if (detector.isUsingHotwordDetectionService()) {
+            if (detector.isUsingSandboxedDetectionService()) {
                 return;
             }
         }

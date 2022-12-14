@@ -57,6 +57,7 @@ import android.media.permission.Identity;
 import android.media.permission.PermissionUtil;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
@@ -182,16 +183,18 @@ abstract class HotwordDetectorSession {
     private boolean mDestroyed = false;
     @GuardedBy("mLock")
     boolean mPerformingExternalSourceHotwordDetection;
+    @NonNull final IBinder mToken;
 
     HotwordDetectorSession(
             @NonNull HotwordDetectionConnection.ServiceConnection remoteHotwordDetectionService,
-            @NonNull Object lock, @NonNull Context context,
+            @NonNull Object lock, @NonNull Context context, @NonNull IBinder token,
             @NonNull IHotwordRecognitionStatusCallback callback, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity,
             @NonNull ScheduledExecutorService scheduledExecutorService, boolean logging) {
         mRemoteHotwordDetectionService = remoteHotwordDetectionService;
         mLock = lock;
         mContext = context;
+        mToken = token;
         mCallback = callback;
         mVoiceInteractionServiceUid = voiceInteractionServiceUid;
         mVoiceInteractorIdentity = voiceInteractorIdentity;
@@ -474,8 +477,8 @@ abstract class HotwordDetectorSession {
                                             callback.onError();
                                             return;
                                         }
-                                        callback.onDetected(newResult, null /* audioFormat */,
-                                                null /* audioStream */);
+                                        callback.onDetected(newResult, /* audioFormat= */ null,
+                                                /* audioStream= */ null);
                                         Slog.i(TAG, "Egressed "
                                                 + HotwordDetectedResult.getUsageSize(newResult)
                                                 + " bits from hotword trusted process");
@@ -541,6 +544,30 @@ abstract class HotwordDetectorSession {
      * Called when the trusted process is restarted.
      */
     abstract void informRestartProcessLocked();
+
+    boolean isSameCallback(@Nullable IHotwordRecognitionStatusCallback callback) {
+        synchronized (mLock) {
+            if (callback == null) {
+                return false;
+            }
+            return mCallback.asBinder().equals(callback.asBinder());
+        }
+    }
+
+    boolean isSameToken(@NonNull IBinder token) {
+        synchronized (mLock) {
+            if (token == null) {
+                return false;
+            }
+            return mToken == token;
+        }
+    }
+
+    boolean isDestroyed() {
+        synchronized (mLock) {
+            return mDestroyed;
+        }
+    }
 
     private static Pair<ParcelFileDescriptor, ParcelFileDescriptor> createPipe() {
         ParcelFileDescriptor[] fileDescriptors;
