@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -112,5 +114,10 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
     public void onResume_requestsFocus() {
         mKeyguardPinViewController.onResume(KeyguardSecurityView.SCREEN_ON);
         verify(mPasswordEntry).requestFocus();
+    }
+
+    @Test
+    public void testGetInitialMessageResId() {
+        assertThat(mKeyguardPinViewController.getInitialMessageResId()).isNotEqualTo(0);
     }
 }
