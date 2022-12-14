@@ -23,7 +23,6 @@ import static com.android.server.voiceinteraction.HotwordDetectionConnection.DEB
 
 import android.annotation.NonNull;
 import android.app.AppOpsManager;
-import android.media.permission.Identity;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.service.voice.HotwordAudioStream;
@@ -52,13 +51,18 @@ final class HotwordAudioStreamManager {
     private static final int MAX_COPY_BUFFER_LENGTH_BYTES = 65_536;
 
     private final AppOpsManager mAppOpsManager;
-    private final Identity mVoiceInteractorIdentity;
+    private final int mVoiceInteractorUid;
+    private final String mVoiceInteractorPackageName;
+    private final String mVoiceInteractorAttributionTag;
     private final ExecutorService mExecutorService = Executors.newCachedThreadPool();
 
     HotwordAudioStreamManager(@NonNull AppOpsManager appOpsManager,
-            @NonNull Identity voiceInteractorIdentity) {
+            int voiceInteractorUid, @NonNull String voiceInteractorPackageName,
+            @NonNull String voiceInteractorAttributionTag) {
         mAppOpsManager = appOpsManager;
-        mVoiceInteractorIdentity = voiceInteractorIdentity;
+        mVoiceInteractorUid = voiceInteractorUid;
+        mVoiceInteractorPackageName = voiceInteractorPackageName;
+        mVoiceInteractorAttributionTag = voiceInteractorAttributionTag;
     }
 
     /**
@@ -152,8 +156,8 @@ final class HotwordAudioStreamManager {
             }
 
             if (mAppOpsManager.startOpNoThrow(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD,
-                    mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
-                    mVoiceInteractorIdentity.attributionTag, OP_MESSAGE) == MODE_ALLOWED) {
+                    mVoiceInteractorUid, mVoiceInteractorPackageName,
+                    mVoiceInteractorAttributionTag, OP_MESSAGE) == MODE_ALLOWED) {
                 try {
                     // TODO(b/244599891): Set timeout, close after inactivity
                     mExecutorService.invokeAll(tasks);
@@ -162,14 +166,15 @@ final class HotwordAudioStreamManager {
                     bestEffortPropagateError(e.getMessage());
                 } finally {
                     mAppOpsManager.finishOp(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD,
-                            mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
-                            mVoiceInteractorIdentity.attributionTag);
+                            mVoiceInteractorUid, mVoiceInteractorPackageName,
+                            mVoiceInteractorAttributionTag);
                 }
             } else {
                 bestEffortPropagateError(
-                        "Failed to obtain RECORD_AUDIO_HOTWORD permission for "
-                                + SoundTriggerSessionPermissionsDecorator.toString(
-                                mVoiceInteractorIdentity));
+                        "Failed to obtain RECORD_AUDIO_HOTWORD permission for voice interactor with"
+                                + " uid=" + mVoiceInteractorUid
+                                + " packageName=" + mVoiceInteractorPackageName
+                                + " attributionTag=" + mVoiceInteractorAttributionTag);
             }
         }
 
