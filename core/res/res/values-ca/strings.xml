@@ -1167,8 +1167,8 @@
     <string name="no" msgid="5122037903299899715">"Cancel·la"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Atenció"</string>
     <string name="loading" msgid="3138021523725055037">"S\'està carregant…"</string>
-    <string name="capital_on" msgid="2770685323900821829">"SÍ"</string>
-    <string name="capital_off" msgid="7443704171014626777">"NO"</string>
+    <string name="capital_on" msgid="2770685323900821829">"ACTIVAT"</string>
+    <string name="capital_off" msgid="7443704171014626777">"DESACTIVAT"</string>
     <string name="checked" msgid="9179896827054513119">"seleccionat"</string>
     <string name="not_checked" msgid="7972320087569023342">"no seleccionat"</string>
     <string name="selected" msgid="6614607926197755875">"seleccionat"</string>

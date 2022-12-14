@@ -180,10 +180,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Lidmašīnas režīms."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN ieslēgts"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Akumulators: <xliff:g id="NUMBER">%d</xliff:g> procenti"</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"Akumulatora uzlādes līmenis: <xliff:g id="PERCENTAGE">%1$d</xliff:g>%% procenti, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"Akumulatora uzlādes līmenis: <xliff:g id="PERCENTAGE">%1$d</xliff:g>%%, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Notiek akumulatora uzlāde, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
-    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"Akumulatora uzlādes līmenis: <xliff:g id="PERCENTAGE">%d</xliff:g>%% procenti, uzlāde ir apturēta, lai aizsargātu akumulatoru."</string>
-    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"Akumulatora uzlādes līmenis: <xliff:g id="PERCENTAGE">%1$d</xliff:g>%% procenti, <xliff:g id="TIME">%2$s</xliff:g>, uzlāde ir apturēta, lai aizsargātu akumulatoru."</string>
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"Akumulatora uzlādes līmenis: <xliff:g id="PERCENTAGE">%d</xliff:g>%%, uzlāde ir apturēta, lai aizsargātu akumulatoru."</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"Akumulatora uzlādes līmenis: <xliff:g id="PERCENTAGE">%1$d</xliff:g>%%, <xliff:g id="TIME">%2$s</xliff:g>, uzlāde ir apturēta, lai aizsargātu akumulatoru."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Skatīt visus paziņojumus"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Teletaips ir iespējots."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Zvana signāls — vibrācija."</string>
@@ -393,10 +393,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Paziņojumi pārtraukti, izmantojot iestatījumu “Netraucēt”"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Sākt tūlīt"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Nav paziņojumu"</string>
-    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
-    <skip />
-    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
-    <skip />
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"Nav jaunu paziņojumu"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Atbloķējiet vecāku paziņojumu skatīšanai"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Šo ierīci pārvalda viens no jūsu vecākiem."</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Šī ierīce pieder jūsu organizācijai, un jūsu organizācija var uzraudzīt tīkla datplūsmu."</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Šī ierīce pieder organizācijai<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, un šī organizācija var uzraudzīt tīkla datplūsmu."</string>
@@ -1013,4 +1011,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Vai apvērst uz priekšējo kameru labākai pašbildei?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Lai uzņemtu platāku fotoattēlu ar augstāku izšķirtspēju, izmantojiet aizmugurējo kameru."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Šis ekrāns tiks izslēgts."</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

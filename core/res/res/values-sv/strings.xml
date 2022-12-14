@@ -1486,7 +1486,7 @@
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Tillgänglighet"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Bakgrund"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Ändra bakgrund"</string>
-    <string name="notification_listener_binding_label" msgid="2702165274471499713">"Meddelandelyssnare"</string>
+    <string name="notification_listener_binding_label" msgid="2702165274471499713">"Aviseringslyssnare"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"Lyssnare för VR"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Leverantör"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"Rankningstjänst för aviseringar"</string>

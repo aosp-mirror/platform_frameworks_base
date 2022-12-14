@@ -393,10 +393,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Οι ειδοποιήσεις τέθηκαν σε παύση από τη λειτουργία \"Μην ενοχλείτε\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Έναρξη τώρα"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Δεν υπάρχουν ειδοποιήσεις"</string>
-    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
-    <skip />
-    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
-    <skip />
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"Δεν υπάρχουν νέες ειδοποιήσεις"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Ξεκλειδώστε για εμφάνιση παλαιότ. ειδοπ."</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Αυτή η συσκευή είναι διαχειριζόμενη από τον γονέα σου"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ο οργανισμός σας κατέχει αυτήν τη συσκευή και μπορεί να παρακολουθεί την επισκεψιμότητα δικτύου."</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Ο οργανισμός <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> κατέχει αυτήν τη συσκευή και μπορεί να παρακολουθεί την επισκεψιμότητα δικτύου."</string>
@@ -874,8 +872,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Διακοπή μετάδοσης"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Διαθέσιμες συσκευές για έξοδο ήχου."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Ένταση ήχου"</string>
-    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
-    <skip />
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Πώς λειτουργεί η μετάδοση"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Μετάδοση"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Οι άνθρωποι με συμβατές συσκευές Bluetooth που βρίσκονται κοντά σας μπορούν να ακούσουν το μέσο που μεταδίδετε."</string>
@@ -989,8 +986,7 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Η κάμερα και το μικρόφωνο έχουν απενεργοποιηθεί"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ειδοποίηση}other{# ειδοποιήσεις}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <!-- no translation found for note_task_button_label (8718616095800343136) -->
-    <skip />
+    <string name="note_task_button_label" msgid="8718616095800343136">"Δημιουργία σημειώσεων"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Μετάδοση"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Διακοπή μετάδοσης με την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>;"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Εάν κάνετε μετάδοση με την εφαρμογή <xliff:g id="SWITCHAPP">%1$s</xliff:g> ή αλλάξετε την έξοδο, η τρέχουσα μετάδοση θα σταματήσει"</string>
@@ -1013,4 +1009,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Αναστροφή στην μπροστ. οθόνη για καλύτερη selfie;"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Χρησιμοποιήστε την πίσω κάμερα για να βγάλετε μια φωτογραφία με μεγαλύτερο εύρος και υψηλότερη ανάλυση."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"* Αυτή η οθόνη θα απενεργοποιηθεί"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

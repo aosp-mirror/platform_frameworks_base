@@ -393,10 +393,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Aviseringar har pausats via Stör ej"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Starta nu"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Inga aviseringar"</string>
-    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
-    <skip />
-    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
-    <skip />
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"Det finns inga nya aviseringar"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Lås upp för att se äldre aviseringar"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Den här enheten hanteras av din förälder"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organisationen äger den här enheten och kan övervaka nätverkstrafiken"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> äger den här enheten och kan övervaka nätverkstrafiken"</string>
@@ -1013,4 +1011,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Vill du ta en bättre selfie med främre skärmen?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Använd den bakre kameran för att ta ett mer vidsträckt foto med högre upplösning."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Den här skärmen inaktiveras"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

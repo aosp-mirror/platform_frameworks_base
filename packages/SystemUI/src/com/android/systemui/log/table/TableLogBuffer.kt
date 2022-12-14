@@ -127,8 +127,18 @@ class TableLogBuffer(
         rowInitializer(row)
     }
 
+    /** Logs a String? change. */
+    fun logChange(prefix: String, columnName: String, value: String?) {
+        logChange(systemClock.currentTimeMillis(), prefix, columnName, value)
+    }
+
     /** Logs a boolean change. */
     fun logChange(prefix: String, columnName: String, value: Boolean) {
+        logChange(systemClock.currentTimeMillis(), prefix, columnName, value)
+    }
+
+    /** Logs a Int change. */
+    fun logChange(prefix: String, columnName: String, value: Int) {
         logChange(systemClock.currentTimeMillis(), prefix, columnName, value)
     }
 
