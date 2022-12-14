@@ -165,7 +165,8 @@ final class HotwordDetectionConnection {
                 synchronized (mLock) {
                     restartProcessLocked();
                     HotwordMetricsLogger.writeServiceRestartEvent(mDetectorType,
-                            HOTWORD_DETECTION_SERVICE_RESTARTED__REASON__SCHEDULE);
+                            HOTWORD_DETECTION_SERVICE_RESTARTED__REASON__SCHEDULE,
+                            mVoiceInteractionServiceUid);
                 }
             }, mReStartPeriodSeconds, mReStartPeriodSeconds, TimeUnit.SECONDS);
         }
@@ -200,7 +201,8 @@ final class HotwordDetectionConnection {
             // conditions with audio reading in the service.
             restartProcessLocked();
             HotwordMetricsLogger.writeServiceRestartEvent(mDetectorType,
-                    HOTWORD_DETECTION_SERVICE_RESTARTED__REASON__AUDIO_SERVICE_DIED);
+                    HOTWORD_DETECTION_SERVICE_RESTARTED__REASON__AUDIO_SERVICE_DIED,
+                    mVoiceInteractionServiceUid);
         }
     }
 
@@ -364,11 +366,13 @@ final class HotwordDetectionConnection {
     static final class SoundTriggerCallback extends IRecognitionStatusCallback.Stub {
         private final HotwordDetectionConnection mHotwordDetectionConnection;
         private final IHotwordRecognitionStatusCallback mExternalCallback;
+        private final int mVoiceInteractionServiceUid;
 
         SoundTriggerCallback(IHotwordRecognitionStatusCallback callback,
-                HotwordDetectionConnection connection) {
+                HotwordDetectionConnection connection, int uid) {
             mHotwordDetectionConnection = connection;
             mExternalCallback = callback;
+            mVoiceInteractionServiceUid = uid;
         }
 
         @Override
@@ -381,13 +385,15 @@ final class HotwordDetectionConnection {
             if (useHotwordDetectionService) {
                 HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                         HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__TRUSTED_DETECTOR_DSP,
-                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__KEYPHRASE_TRIGGER);
+                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__KEYPHRASE_TRIGGER,
+                        mVoiceInteractionServiceUid);
                 mHotwordDetectionConnection.detectFromDspSource(
                         recognitionEvent, mExternalCallback);
             } else {
                 HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                         HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__NORMAL_DETECTOR,
-                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__KEYPHRASE_TRIGGER);
+                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__KEYPHRASE_TRIGGER,
+                        mVoiceInteractionServiceUid);
                 mExternalCallback.onKeyphraseDetected(recognitionEvent, null);
             }
         }

@@ -238,7 +238,7 @@ abstract class HotwordDetectorSession {
                     try {
                         mCallback.onStatusReported(status);
                         HotwordMetricsLogger.writeServiceInitResultEvent(getDetectorType(),
-                                initResultMetricsResult);
+                                initResultMetricsResult, mVoiceInteractionServiceUid);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failed to report initialization status: " + e);
                         HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
@@ -269,7 +269,7 @@ abstract class HotwordDetectorSession {
                 try {
                     mCallback.onStatusReported(INITIALIZATION_STATUS_UNKNOWN);
                     HotwordMetricsLogger.writeServiceInitResultEvent(getDetectorType(),
-                            METRICS_INIT_UNKNOWN_TIMEOUT);
+                            METRICS_INIT_UNKNOWN_TIMEOUT, mVoiceInteractionServiceUid);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to report initialization status UNKNOWN", e);
                     HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),

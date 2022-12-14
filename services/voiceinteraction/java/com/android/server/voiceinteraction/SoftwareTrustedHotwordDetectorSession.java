@@ -101,12 +101,14 @@ final class SoftwareTrustedHotwordDetectorSession extends HotwordDetectorSession
                 synchronized (mLock) {
                     HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                             HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
-                            HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECTED);
+                            HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECTED,
+                            mVoiceInteractionServiceUid);
                     if (!mPerformingSoftwareHotwordDetection) {
                         Slog.i(TAG, "Hotword detection has already completed");
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                                 HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
-                                METRICS_KEYPHRASE_TRIGGERED_DETECT_UNEXPECTED_CALLBACK);
+                                METRICS_KEYPHRASE_TRIGGERED_DETECT_UNEXPECTED_CALLBACK,
+                                mVoiceInteractionServiceUid);
                         return;
                     }
                     mPerformingSoftwareHotwordDetection = false;
@@ -115,7 +117,8 @@ final class SoftwareTrustedHotwordDetectorSession extends HotwordDetectorSession
                     } catch (SecurityException e) {
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                                 HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
-                                METRICS_KEYPHRASE_TRIGGERED_DETECT_SECURITY_EXCEPTION);
+                                METRICS_KEYPHRASE_TRIGGERED_DETECT_SECURITY_EXCEPTION,
+                                mVoiceInteractionServiceUid);
                         mSoftwareCallback.onError();
                         return;
                     }
@@ -144,7 +147,8 @@ final class SoftwareTrustedHotwordDetectorSession extends HotwordDetectorSession
                 }
                 HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                         HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
-                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED);
+                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED,
+                        mVoiceInteractionServiceUid);
                 // onRejected isn't allowed here, and we are not expecting it.
             }
         };
