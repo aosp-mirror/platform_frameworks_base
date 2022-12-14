@@ -154,7 +154,7 @@ class AccessCheckingService(context: Context) : SystemService(context) {
     internal inline fun <T> getState(action: GetStateScope.() -> T): T =
         GetStateScope(state).action()
 
-    internal inline fun mutateState(action: MutateStateScope.() -> Unit) {
+    internal inline fun mutateState(crossinline action: MutateStateScope.() -> Unit) {
         synchronized(stateLock) {
             val oldState = state
             val newState = oldState.copy()
