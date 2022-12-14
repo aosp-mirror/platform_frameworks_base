@@ -49,6 +49,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.TimeUtils;
 
@@ -170,6 +171,11 @@ public final class JobServiceContext implements ServiceConnection {
     private long mMinExecutionGuaranteeMillis;
     /** The absolute maximum amount of time the job can run */
     private long mMaxExecutionTimeMillis;
+
+    private long mEstimatedDownloadBytes;
+    private long mEstimatedUploadBytes;
+    private long mTransferredDownloadBytes;
+    private long mTransferredUploadBytes;
 
     /**
      * The stop reason for a pending cancel. If there's not pending cancel, then the value should be
@@ -306,6 +312,9 @@ public final class JobServiceContext implements ServiceConnection {
             mMinExecutionGuaranteeMillis = mService.getMinJobExecutionGuaranteeMs(job);
             mMaxExecutionTimeMillis =
                     Math.max(mService.getMaxJobExecutionTimeMs(job), mMinExecutionGuaranteeMillis);
+            mEstimatedDownloadBytes = job.getEstimatedNetworkDownloadBytes();
+            mEstimatedUploadBytes = job.getEstimatedNetworkUploadBytes();
+            mTransferredDownloadBytes = mTransferredUploadBytes = 0;
 
             final long whenDeferred = job.getWhenStandbyDeferred();
             if (whenDeferred > 0) {
@@ -524,6 +533,16 @@ public final class JobServiceContext implements ServiceConnection {
         return false;
     }
 
+    @GuardedBy("mLock")
+    Pair<Long, Long> getEstimatedNetworkBytes() {
+        return Pair.create(mEstimatedDownloadBytes, mEstimatedUploadBytes);
+    }
+
+    @GuardedBy("mLock")
+    Pair<Long, Long> getTransferredNetworkBytes() {
+        return Pair.create(mTransferredDownloadBytes, mTransferredUploadBytes);
+    }
+
     void doJobFinished(JobCallback cb, int jobId, boolean reschedule) {
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -541,14 +560,26 @@ public final class JobServiceContext implements ServiceConnection {
         }
     }
 
-    private void doAcknowledgeGetTransferredDownloadBytesMessage(JobCallback jobCallback, int jobId,
+    private void doAcknowledgeGetTransferredDownloadBytesMessage(JobCallback cb, int jobId,
             int workId, @BytesLong long transferredBytes) {
         // TODO(255393346): Make sure apps call this appropriately and monitor for abuse
+        synchronized (mLock) {
+            if (!verifyCallerLocked(cb)) {
+                return;
+            }
+            mTransferredDownloadBytes = transferredBytes;
+        }
     }
 
-    private void doAcknowledgeGetTransferredUploadBytesMessage(JobCallback jobCallback, int jobId,
+    private void doAcknowledgeGetTransferredUploadBytesMessage(JobCallback cb, int jobId,
             int workId, @BytesLong long transferredBytes) {
         // TODO(255393346): Make sure apps call this appropriately and monitor for abuse
+        synchronized (mLock) {
+            if (!verifyCallerLocked(cb)) {
+                return;
+            }
+            mTransferredUploadBytes = transferredBytes;
+        }
     }
 
     void doAcknowledgeStopMessage(JobCallback cb, int jobId, boolean reschedule) {
@@ -603,6 +634,30 @@ public final class JobServiceContext implements ServiceConnection {
         }
     }
 
+    private void doUpdateEstimatedNetworkBytes(JobCallback cb, int jobId,
+            @Nullable JobWorkItem item, long downloadBytes, long uploadBytes) {
+        // TODO(255393346): Make sure apps call this appropriately and monitor for abuse
+        synchronized (mLock) {
+            if (!verifyCallerLocked(cb)) {
+                return;
+            }
+            mEstimatedDownloadBytes = downloadBytes;
+            mEstimatedUploadBytes = uploadBytes;
+        }
+    }
+
+    private void doUpdateTransferredNetworkBytes(JobCallback cb, int jobId,
+            @Nullable JobWorkItem item, long downloadBytes, long uploadBytes) {
+        // TODO(255393346): Make sure apps call this appropriately and monitor for abuse
+        synchronized (mLock) {
+            if (!verifyCallerLocked(cb)) {
+                return;
+            }
+            mTransferredDownloadBytes = downloadBytes;
+            mTransferredUploadBytes = uploadBytes;
+        }
+    }
+
     private void doSetNotification(JobCallback cb, int jodId, int notificationId,
             Notification notification, int jobEndNotificationPolicy) {
         final int callingPid = Binder.getCallingPid();
@@ -625,16 +680,6 @@ public final class JobServiceContext implements ServiceConnection {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-    }
-
-    private void doUpdateTransferredNetworkBytes(JobCallback jobCallback, int jobId,
-            @Nullable JobWorkItem item, long downloadBytes, long uploadBytes) {
-        // TODO(255393346): Make sure apps call this appropriately and monitor for abuse
-    }
-
-    private void doUpdateEstimatedNetworkBytes(JobCallback jobCallback, int jobId,
-            @Nullable JobWorkItem item, long downloadBytes, long uploadBytes) {
-        // TODO(255393346): Make sure apps call this appropriately and monitor for abuse
     }
 
     /**

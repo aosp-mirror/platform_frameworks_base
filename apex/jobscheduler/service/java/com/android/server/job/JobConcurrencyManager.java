@@ -1703,6 +1703,40 @@ class JobConcurrencyManager {
         return foundSome;
     }
 
+    /**
+     * Returns the estimated network bytes if the job is running. Returns {@code null} if the job
+     * isn't running.
+     */
+    @Nullable
+    @GuardedBy("mLock")
+    Pair<Long, Long> getEstimatedNetworkBytesLocked(String pkgName, int uid, int jobId) {
+        for (int i = 0; i < mActiveServices.size(); i++) {
+            final JobServiceContext jc = mActiveServices.get(i);
+            final JobStatus js = jc.getRunningJobLocked();
+            if (js != null && js.matches(uid, jobId) && js.getSourcePackageName().equals(pkgName)) {
+                return jc.getEstimatedNetworkBytes();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the transferred network bytes if the job is running. Returns {@code null} if the job
+     * isn't running.
+     */
+    @Nullable
+    @GuardedBy("mLock")
+    Pair<Long, Long> getTransferredNetworkBytesLocked(String pkgName, int uid, int jobId) {
+        for (int i = 0; i < mActiveServices.size(); i++) {
+            final JobServiceContext jc = mActiveServices.get(i);
+            final JobStatus js = jc.getRunningJobLocked();
+            if (js != null && js.matches(uid, jobId) && js.getSourcePackageName().equals(pkgName)) {
+                return jc.getTransferredNetworkBytes();
+            }
+        }
+        return null;
+    }
+
     @NonNull
     private JobServiceContext createNewJobServiceContext() {
         return mInjector.createJobServiceContext(mService, this, mNotificationCoordinator,
