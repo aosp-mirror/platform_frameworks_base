@@ -54,35 +54,6 @@ class KeyguardLogger @Inject constructor(@KeyguardLog private val buffer: LogBuf
         buffer.log(TAG, INFO, { str1 = arg.toString() }, { "$msg: $str1" })
     }
 
-    // TODO: remove after b/237743330 is fixed
-    fun logStatusBarCalculatedAlpha(alpha: Float) {
-        buffer.log(TAG, DEBUG, { double1 = alpha.toDouble() }, { "Calculated new alpha: $double1" })
-    }
-
-    // TODO: remove after b/237743330 is fixed
-    fun logStatusBarExplicitAlpha(alpha: Float) {
-        buffer.log(
-            TAG,
-            DEBUG,
-            { double1 = alpha.toDouble() },
-            { "new mExplicitAlpha value: $double1" }
-        )
-    }
-
-    // TODO: remove after b/237743330 is fixed
-    fun logStatusBarAlphaVisibility(visibility: Int, alpha: Float, state: String) {
-        buffer.log(
-            TAG,
-            DEBUG,
-            {
-                int1 = visibility
-                double1 = alpha.toDouble()
-                str1 = state
-            },
-            { "changing visibility to $int1 with alpha $double1 in state: $str1" }
-        )
-    }
-
     @JvmOverloads
     fun logBiometricMessage(
         @CompileTimeConstant context: String,

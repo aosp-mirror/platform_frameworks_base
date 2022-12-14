@@ -22,6 +22,7 @@ import android.util.ArraySet
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.NotificationRemoteInputManager
+import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
@@ -38,6 +39,7 @@ import com.android.systemui.statusbar.notification.collection.render.NodeControl
 import com.android.systemui.statusbar.notification.dagger.IncomingHeader
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision
 import com.android.systemui.statusbar.notification.logKey
 import com.android.systemui.statusbar.notification.stack.BUCKET_HEADS_UP
 import com.android.systemui.statusbar.policy.HeadsUpManager
@@ -70,11 +72,13 @@ class HeadsUpCoordinator @Inject constructor(
     private val mNotificationInterruptStateProvider: NotificationInterruptStateProvider,
     private val mRemoteInputManager: NotificationRemoteInputManager,
     private val mLaunchFullScreenIntentProvider: LaunchFullScreenIntentProvider,
+    private val mFlags: NotifPipelineFlags,
     @IncomingHeader private val mIncomingHeaderController: NodeController,
     @Main private val mExecutor: DelayableExecutor,
 ) : Coordinator {
     private val mEntriesBindingUntil = ArrayMap<String, Long>()
     private val mEntriesUpdateTimes = ArrayMap<String, Long>()
+    private val mFSIUpdateCandidates = ArrayMap<String, Long>()
     private var mEndLifetimeExtension: OnEndLifetimeExtensionCallback? = null
     private lateinit var mNotifPipeline: NotifPipeline
     private var mNow: Long = -1
@@ -278,7 +282,7 @@ class HeadsUpCoordinator @Inject constructor(
         mPostedEntries.clear()
 
         // Also take this opportunity to clean up any stale entry update times
-        cleanUpEntryUpdateTimes()
+        cleanUpEntryTimes()
     }
 
     /**
@@ -384,8 +388,15 @@ class HeadsUpCoordinator @Inject constructor(
         override fun onEntryAdded(entry: NotificationEntry) {
             // First check whether this notification should launch a full screen intent, and
             // launch it if needed.
-            if (mNotificationInterruptStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry)) {
+            val fsiDecision = mNotificationInterruptStateProvider.getFullScreenIntentDecision(entry)
+            if (fsiDecision != null && fsiDecision.shouldLaunch) {
+                mNotificationInterruptStateProvider.logFullScreenIntentDecision(entry, fsiDecision)
                 mLaunchFullScreenIntentProvider.launchFullScreenIntent(entry)
+            } else if (mFlags.fsiOnDNDUpdate() &&
+                fsiDecision.equals(FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)) {
+                // If DND was the only reason this entry was suppressed, note it for potential
+                // reconsideration on later ranking updates.
+                addForFSIReconsideration(entry, mSystemClock.currentTimeMillis())
             }
 
             // shouldHeadsUp includes check for whether this notification should be filtered
@@ -488,10 +499,31 @@ class HeadsUpCoordinator @Inject constructor(
                 if (!isNewEnoughForRankingUpdate(entry)) continue
 
                 // The only entries we consider alerting for here are entries that have never
-                // interrupted and that now say they should heads up; if they've alerted in the
-                // past, we don't want to incorrectly alert a second time if there wasn't an
+                // interrupted and that now say they should heads up or FSI; if they've alerted in
+                // the past, we don't want to incorrectly alert a second time if there wasn't an
                 // explicit notification update.
                 if (entry.hasInterrupted()) continue
+
+                // Before potentially allowing heads-up, check for any candidates for a FSI launch.
+                // Any entry that is a candidate meets two criteria:
+                //   - was suppressed from FSI launch only by a DND suppression
+                //   - is within the recency window for reconsideration
+                // If any of these entries are no longer suppressed, launch the FSI now.
+                if (mFlags.fsiOnDNDUpdate() && isCandidateForFSIReconsideration(entry)) {
+                    val decision =
+                        mNotificationInterruptStateProvider.getFullScreenIntentDecision(entry)
+                    if (decision.shouldLaunch) {
+                        // Log both the launch of the full screen and also that this was via a
+                        // ranking update.
+                        mLogger.logEntryUpdatedToFullScreen(entry.key)
+                        mNotificationInterruptStateProvider.logFullScreenIntentDecision(
+                            entry, decision)
+                        mLaunchFullScreenIntentProvider.launchFullScreenIntent(entry)
+
+                        // if we launch the FSI then this is no longer a candidate for HUN
+                        continue
+                    }
+                }
 
                 // The cases where we should consider this notification to be updated:
                 // - if this entry is not present in PostedEntries, and is now in a shouldHeadsUp
@@ -528,6 +560,15 @@ class HeadsUpCoordinator @Inject constructor(
     }
 
     /**
+     * Add the entry to the list of entries potentially considerable for FSI ranking update, where
+     * the provided time is the time the entry was added.
+     */
+    @VisibleForTesting
+    fun addForFSIReconsideration(entry: NotificationEntry, time: Long) {
+        mFSIUpdateCandidates[entry.key] = time
+    }
+
+    /**
      * Checks whether the entry is new enough to be updated via ranking update.
      * We want to avoid updating an entry too long after it was originally posted/updated when we're
      * only reacting to a ranking change, as relevant ranking updates are expected to come in
@@ -541,17 +582,38 @@ class HeadsUpCoordinator @Inject constructor(
         return (mSystemClock.currentTimeMillis() - updateTime) <= MAX_RANKING_UPDATE_DELAY_MS
     }
 
-    private fun cleanUpEntryUpdateTimes() {
+    /**
+     * Checks whether the entry is present new enough for reconsideration for full screen launch.
+     * The time window is the same as for ranking update, but this doesn't allow a potential update
+     * to an entry with full screen intent to count for timing purposes.
+     */
+    private fun isCandidateForFSIReconsideration(entry: NotificationEntry): Boolean {
+        val addedTime = mFSIUpdateCandidates[entry.key] ?: return false
+        return (mSystemClock.currentTimeMillis() - addedTime) <= MAX_RANKING_UPDATE_DELAY_MS
+    }
+
+    private fun cleanUpEntryTimes() {
         // Because we won't update entries that are older than this amount of time anyway, clean
-        // up any entries that are too old to notify.
+        // up any entries that are too old to notify from both the general and FSI specific lists.
+
+        // Anything newer than this time is still within the window.
+        val timeThreshold = mSystemClock.currentTimeMillis() - MAX_RANKING_UPDATE_DELAY_MS
+
         val toRemove = ArraySet<String>()
         for ((key, updateTime) in mEntriesUpdateTimes) {
-            if (updateTime == null ||
-                    (mSystemClock.currentTimeMillis() - updateTime) > MAX_RANKING_UPDATE_DELAY_MS) {
+            if (updateTime == null || timeThreshold > updateTime) {
                 toRemove.add(key)
             }
         }
         mEntriesUpdateTimes.removeAll(toRemove)
+
+        val toRemoveForFSI = ArraySet<String>()
+        for ((key, addedTime) in mFSIUpdateCandidates) {
+            if (addedTime == null || timeThreshold > addedTime) {
+                toRemoveForFSI.add(key)
+            }
+        }
+        mFSIUpdateCandidates.removeAll(toRemoveForFSI)
     }
 
     /** When an action is pressed on a notification, end HeadsUp lifetime extension. */

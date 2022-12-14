@@ -16,6 +16,8 @@
 
 package com.android.systemui.dreams;
 
+import static com.android.systemui.dreams.dagger.DreamModule.DREAM_OVERLAY_SERVICE_COMPONENT;
+
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -35,6 +37,7 @@ import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.qualifiers.Main;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * {@link DreamOverlayRegistrant} is responsible for telling system server that SystemUI should be
@@ -98,12 +101,13 @@ public class DreamOverlayRegistrant implements CoreStartable {
     }
 
     @Inject
-    public DreamOverlayRegistrant(Context context, @Main Resources resources) {
+    public DreamOverlayRegistrant(Context context, @Main Resources resources,
+            @Named(DREAM_OVERLAY_SERVICE_COMPONENT) ComponentName dreamOverlayServiceComponent) {
         mContext = context;
         mResources = resources;
         mDreamManager = IDreamManager.Stub.asInterface(
                 ServiceManager.getService(DreamService.DREAM_SERVICE));
-        mOverlayServiceComponent = new ComponentName(mContext, DreamOverlayService.class);
+        mOverlayServiceComponent = dreamOverlayServiceComponent;
     }
 
     @Override

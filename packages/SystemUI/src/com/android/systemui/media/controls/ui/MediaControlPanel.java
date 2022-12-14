@@ -224,6 +224,8 @@ public class MediaControlPanel {
     private TurbulenceNoiseController mTurbulenceNoiseController;
     private FeatureFlags mFeatureFlags;
     private TurbulenceNoiseAnimationConfig mTurbulenceNoiseAnimationConfig = null;
+    @VisibleForTesting
+    MultiRippleController.Companion.RipplesFinishedListener mRipplesFinishedListener = null;
 
     /**
      * Initialize a new control panel
@@ -404,15 +406,17 @@ public class MediaControlPanel {
         MultiRippleView multiRippleView = vh.getMultiRippleView();
         mMultiRippleController = new MultiRippleController(multiRippleView);
         mTurbulenceNoiseController = new TurbulenceNoiseController(vh.getTurbulenceNoiseView());
-        mMultiRippleController.addRipplesFinishedListener(
-                () -> {
-                    if (mTurbulenceNoiseAnimationConfig == null) {
-                        mTurbulenceNoiseAnimationConfig = createLingeringNoiseAnimation();
-                    }
-                    // Color will be correctly updated in ColorSchemeTransition.
-                    mTurbulenceNoiseController.play(mTurbulenceNoiseAnimationConfig);
+        if (mFeatureFlags.isEnabled(Flags.UMO_TURBULENCE_NOISE)) {
+            mRipplesFinishedListener = () -> {
+                if (mTurbulenceNoiseAnimationConfig == null) {
+                    mTurbulenceNoiseAnimationConfig = createLingeringNoiseAnimation();
                 }
-        );
+                // Color will be correctly updated in ColorSchemeTransition.
+                mTurbulenceNoiseController.play(mTurbulenceNoiseAnimationConfig);
+            };
+            mMultiRippleController.addRipplesFinishedListener(mRipplesFinishedListener);
+        }
+
         mColorSchemeTransition = new ColorSchemeTransition(
                 mContext, mMediaViewHolder, mMultiRippleController, mTurbulenceNoiseController);
         mMetadataAnimationHandler = new MetadataAnimationHandler(exit, enter);

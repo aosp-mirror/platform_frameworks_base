@@ -83,7 +83,7 @@ object Flags {
     val STABILITY_INDEX_FIX = releasedFlag(114, "stability_index_fix")
 
     // TODO(b/259559750): Tracking Bug
-    val SEMI_STABLE_SORT = unreleasedFlag(115, "semi_stable_sort", teamfood = true)
+    val SEMI_STABLE_SORT = releasedFlag(115, "semi_stable_sort")
 
     @JvmField
     val USE_ROUNDNESS_SOURCETYPES = unreleasedFlag(116, "use_roundness_sourcetype", teamfood = true)
@@ -254,10 +254,6 @@ object Flags {
     // TODO(b/254512848): Tracking Bug
     val REGION_SAMPLING = unreleasedFlag(801, "region_sampling", teamfood = true)
 
-    // 802 - wallpaper rendering
-    // TODO(b/254512923): Tracking Bug
-    @JvmField val USE_CANVAS_RENDERER = unreleasedFlag(802, "use_canvas_renderer")
-
     // 803 - screen contents translation
     // TODO(b/254513187): Tracking Bug
     val SCREEN_CONTENTS_TRANSLATION = unreleasedFlag(803, "screen_contents_translation")
@@ -289,7 +285,11 @@ object Flags {
     // TODO(b/254513168): Tracking Bug
     @JvmField val UMO_SURFACE_RIPPLE = unreleasedFlag(907, "umo_surface_ripple")
 
-    @JvmField val MEDIA_FALSING_PENALTY = unreleasedFlag(908, "media_falsing_media")
+    @JvmField
+    val MEDIA_FALSING_PENALTY = unreleasedFlag(908, "media_falsing_media", teamfood = true)
+
+    // TODO(b/261734857): Tracking Bug
+    @JvmField val UMO_TURBULENCE_NOISE = unreleasedFlag(909, "umo_turbulence_noise")
 
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
@@ -436,6 +436,8 @@ object Flags {
     // 2300 - stylus
     @JvmField val TRACK_STYLUS_EVER_USED = unreleasedFlag(2300, "track_stylus_ever_used")
     @JvmField val ENABLE_STYLUS_CHARGING_UI = unreleasedFlag(2301, "enable_stylus_charging_ui")
+    @JvmField
+    val ENABLE_USI_BATTERY_NOTIFICATIONS = unreleasedFlag(2302, "enable_usi_battery_notifications")
 
     // 2400 - performance tools and debugging info
     // TODO(b/238923086): Tracking Bug

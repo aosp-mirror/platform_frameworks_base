@@ -1417,11 +1417,7 @@ public final class ViewRootImpl implements ViewParent,
                 mFirstPostImeInputStage = earlyPostImeStage;
                 mPendingInputEventQueueLengthCounterName = "aq:pending:" + counterSuffix;
 
-                if (!mRemoved || !mAppVisible) {
-                    AnimationHandler.requestAnimatorsEnabled(mAppVisible, this);
-                } else if (LOCAL_LOGV) {
-                    Log.v(mTag, "setView() enabling visibility when removed");
-                }
+                AnimationHandler.requestAnimatorsEnabled(mAppVisible, this);
             }
         }
     }
@@ -1759,12 +1755,7 @@ public final class ViewRootImpl implements ViewParent,
             if (!mAppVisible) {
                 WindowManagerGlobal.trimForeground();
             }
-            // Only enable if the window is not already removed (via earlier call to doDie())
-            if (!mRemoved || !mAppVisible) {
-                AnimationHandler.requestAnimatorsEnabled(mAppVisible, this);
-            } else if (LOCAL_LOGV) {
-                Log.v(mTag, "handleAppVisibility() enabling visibility when removed");
-            }
+            AnimationHandler.requestAnimatorsEnabled(mAppVisible, this);
         }
     }
 

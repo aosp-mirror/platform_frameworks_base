@@ -23,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.statusbar.NotificationRemoteInputManager
+import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -38,6 +39,7 @@ import com.android.systemui.statusbar.notification.collection.provider.LaunchFul
 import com.android.systemui.statusbar.notification.collection.render.NodeController
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback
 import com.android.systemui.statusbar.phone.NotificationGroupTestHelper
 import com.android.systemui.statusbar.policy.HeadsUpManager
@@ -88,6 +90,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     private val mEndLifetimeExtension: OnEndLifetimeExtensionCallback = mock()
     private val mHeaderController: NodeController = mock()
     private val mLaunchFullScreenIntentProvider: LaunchFullScreenIntentProvider = mock()
+    private val mFlags: NotifPipelineFlags = mock()
 
     private lateinit var mEntry: NotificationEntry
     private lateinit var mGroupSummary: NotificationEntry
@@ -113,6 +116,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
             mNotificationInterruptStateProvider,
             mRemoteInputManager,
             mLaunchFullScreenIntentProvider,
+            mFlags,
             mHeaderController,
             mExecutor)
         mCoordinator.attach(mNotifPipeline)
@@ -246,14 +250,14 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testOnEntryAdded_shouldFullScreen() {
-        setShouldFullScreen(mEntry)
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.FSI_EXPECTED_NOT_TO_HUN)
         mCollectionListener.onEntryAdded(mEntry)
         verify(mLaunchFullScreenIntentProvider).launchFullScreenIntent(mEntry)
     }
 
     @Test
     fun testOnEntryAdded_shouldNotFullScreen() {
-        setShouldFullScreen(mEntry, should = false)
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.NO_FULL_SCREEN_INTENT)
         mCollectionListener.onEntryAdded(mEntry)
         verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
     }
@@ -805,15 +809,96 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(mHeadsUpManager, never()).showNotification(any())
     }
 
+    @Test
+    fun testOnRankingApplied_noFSIOnUpdateWhenFlagOff() {
+        // Ensure the feature flag is off
+        whenever(mFlags.fsiOnDNDUpdate()).thenReturn(false)
+
+        // GIVEN that mEntry was previously suppressed from full-screen only by DND
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
+        mCollectionListener.onEntryAdded(mEntry)
+
+        // and it is then updated to allow full screen
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
+        whenever(mNotifPipeline.allNotifs).thenReturn(listOf(mEntry))
+        mCollectionListener.onRankingApplied()
+
+        // THEN it should not full screen because the feature is off
+        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(mEntry)
+    }
+
+    @Test
+    fun testOnRankingApplied_updateToFullScreen() {
+        // Turn on the feature
+        whenever(mFlags.fsiOnDNDUpdate()).thenReturn(true)
+
+        // GIVEN that mEntry was previously suppressed from full-screen only by DND
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
+        mCollectionListener.onEntryAdded(mEntry)
+
+        // at this point, it should not have full screened
+        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(mEntry)
+
+        // and it is then updated to allow full screen AND HUN
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
+        setShouldHeadsUp(mEntry)
+        whenever(mNotifPipeline.allNotifs).thenReturn(listOf(mEntry))
+        mCollectionListener.onRankingApplied()
+        mBeforeTransformGroupsListener.onBeforeTransformGroups(listOf(mEntry))
+        mBeforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(mEntry))
+
+        // THEN it should full screen but it should NOT HUN
+        verify(mLaunchFullScreenIntentProvider).launchFullScreenIntent(mEntry)
+        verify(mHeadsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(mHeadsUpManager, never()).showNotification(any())
+    }
+
+    @Test
+    fun testOnRankingApplied_noFSIWhenAlsoSuppressedForOtherReasons() {
+        // Feature on
+        whenever(mFlags.fsiOnDNDUpdate()).thenReturn(true)
+
+        // GIVEN that mEntry is suppressed by DND (functionally), but not *only* DND
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_BY_DND)
+        mCollectionListener.onEntryAdded(mEntry)
+
+        // and it is updated to full screen later
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
+        mCollectionListener.onRankingApplied()
+
+        // THEN it should still not full screen because something else was blocking it before
+        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(mEntry)
+    }
+
+    @Test
+    fun testOnRankingApplied_noFSIWhenTooOld() {
+        // Feature on
+        whenever(mFlags.fsiOnDNDUpdate()).thenReturn(true)
+
+        // GIVEN that mEntry is suppressed only by DND
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
+        mCollectionListener.onEntryAdded(mEntry)
+
+        // but it's >10s old
+        mCoordinator.addForFSIReconsideration(mEntry, mSystemClock.currentTimeMillis() - 10000)
+
+        // and it is updated to full screen later
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.FSI_EXPECTED_NOT_TO_HUN)
+        mCollectionListener.onRankingApplied()
+
+        // THEN it should still not full screen because it's too old
+        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(mEntry)
+    }
+
     private fun setShouldHeadsUp(entry: NotificationEntry, should: Boolean = true) {
         whenever(mNotificationInterruptStateProvider.shouldHeadsUp(entry)).thenReturn(should)
         whenever(mNotificationInterruptStateProvider.checkHeadsUp(eq(entry), any()))
                 .thenReturn(should)
     }
 
-    private fun setShouldFullScreen(entry: NotificationEntry, should: Boolean = true) {
-        whenever(mNotificationInterruptStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
-            .thenReturn(should)
+    private fun setShouldFullScreen(entry: NotificationEntry, decision: FullScreenIntentDecision) {
+        whenever(mNotificationInterruptStateProvider.getFullScreenIntentDecision(entry))
+            .thenReturn(decision)
     }
 
     private fun finishBind(entry: NotificationEntry) {

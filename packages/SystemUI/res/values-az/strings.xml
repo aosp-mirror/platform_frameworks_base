@@ -393,10 +393,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Bildirişlər \"Narahat Etməyin\" rejimi tərəfindən dayandırıldı"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"İndi başlayın"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Heç bir bildiriş yoxdur"</string>
-    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
-    <skip />
-    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
-    <skip />
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"Yeni bildiriş yoxdur"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Köhnə bildirişləri görmək üçün kilidi açın"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Bu cihaz valideyniniz tərəfindən idarə olunur"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Təşkilatınız bu cihazın sahibidir və şəbəkə trafikinə nəzarət edə bilər"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> bu cihazın sahibidir və şəbəkə trafikinə nəzarət edə bilər"</string>
@@ -1013,4 +1011,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Daha yaxşı selfi üçün ön displeyə çevrilsin?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Daha yüksək ayırdetmə dəqiqliyi ilə daha geniş şəkil üçün arxaya baxan kameradan istifadə edin."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Bu ekran deaktiv ediləcək"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

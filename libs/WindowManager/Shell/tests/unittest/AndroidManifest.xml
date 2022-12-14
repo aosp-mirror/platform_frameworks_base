@@ -19,6 +19,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.android.wm.shell.tests">
 
+    <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
+
     <application android:debuggable="true" android:largeHeap="true">
         <uses-library android:name="android.test.mock" />
         <uses-library android:name="android.test.runner" />

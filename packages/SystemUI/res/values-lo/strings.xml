@@ -1011,4 +1011,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"ປີ້ນເປັນຈໍສະແດງຜົນດ້ານໜ້າເພື່ອການຖ່າຍເຊວຟີທີ່ດີຂຶ້ນບໍ?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ໃຊ້ກ້ອງຫຼັງເພື່ອການຖ່າຍຮູບທີ່ກວ້າງຂຶ້ນດ້ວຍຄວາມລະອຽດສູງຂຶ້ນ."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ໜ້າຈໍນີ້ຈະປິດ"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

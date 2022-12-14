@@ -15,7 +15,7 @@
  */
 
 
-package com.android.systemui.wallpapers.canvas;
+package com.android.systemui.wallpapers;
 
 import android.app.WallpaperColors;
 import android.graphics.Bitmap;
@@ -31,7 +31,6 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.util.Assert;
-import com.android.systemui.wallpapers.ImageWallpaper;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
