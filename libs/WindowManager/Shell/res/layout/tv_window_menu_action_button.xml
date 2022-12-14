@@ -21,6 +21,7 @@
     android:layout_width="@dimen/tv_window_menu_button_size"
     android:layout_height="@dimen/tv_window_menu_button_size"
     android:padding="@dimen/tv_window_menu_button_margin"
+    android:duplicateParentState="true"
     android:stateListAnimator="@animator/tv_window_menu_action_button_animator"
     android:focusable="true">
 

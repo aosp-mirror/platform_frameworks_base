@@ -44,67 +44,15 @@
             android:background="@color/tv_pip_menu_dim_layer"
             android:alpha="0"/>
 
-        <ScrollView
-            android:id="@+id/tv_pip_menu_scroll"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="none"
-            android:visibility="gone"/>
-
-        <HorizontalScrollView
-            android:id="@+id/tv_pip_menu_horizontal_scroll"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="none">
-
-            <LinearLayout
-                android:id="@+id/tv_pip_menu_action_buttons"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:alpha="0">
-
-                <Space
-                    android:layout_width="@dimen/pip_menu_button_wrapper_margin"
-                    android:layout_height="@dimen/pip_menu_button_wrapper_margin"/>
-
-                <com.android.wm.shell.common.TvWindowMenuActionButton
-                    android:id="@+id/tv_pip_menu_fullscreen_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/pip_ic_fullscreen_white"
-                    android:text="@string/pip_fullscreen" />
-
-                <com.android.wm.shell.common.TvWindowMenuActionButton
-                    android:id="@+id/tv_pip_menu_close_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/pip_ic_close_white"
-                    android:text="@string/pip_close" />
-
-                <!-- More TvWindowMenuActionButtons may be added here at runtime. -->
-
-                <com.android.wm.shell.common.TvWindowMenuActionButton
-                    android:id="@+id/tv_pip_menu_move_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/pip_ic_move_white"
-                    android:text="@string/pip_move" />
-
-                <com.android.wm.shell.common.TvWindowMenuActionButton
-                    android:id="@+id/tv_pip_menu_expand_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/pip_ic_collapse"
-                    android:visibility="gone"
-                    android:text="@string/pip_collapse" />
-
-                <Space
-                    android:layout_width="@dimen/pip_menu_button_wrapper_margin"
-                    android:layout_height="@dimen/pip_menu_button_wrapper_margin"/>
-
-            </LinearLayout>
-        </HorizontalScrollView>
+        <com.android.internal.widget.RecyclerView
+            android:id="@+id/tv_pip_menu_action_buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="@dimen/pip_menu_button_start_end_offset"
+            android:clipToPadding="false"
+            android:alpha="0"
+            android:contentDescription="@string/a11y_pip_menu_entered"/>
     </FrameLayout>
 
     <!-- Frame around the content, just overlapping the corners to make them round -->
