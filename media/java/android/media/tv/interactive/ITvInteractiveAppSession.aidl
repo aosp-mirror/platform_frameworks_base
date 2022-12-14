@@ -19,6 +19,7 @@ package android.media.tv.interactive;
 import android.graphics.Rect;
 import android.media.tv.BroadcastInfoResponse;
 import android.net.Uri;
+import android.media.tv.AdBuffer;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvTrackInfo;
@@ -59,6 +60,7 @@ oneway interface ITvInteractiveAppSession {
     void dispatchSurfaceChanged(int format, int width, int height);
     void notifyBroadcastInfoResponse(in BroadcastInfoResponse response);
     void notifyAdResponse(in AdResponse response);
+    void notifyAdBufferConsumed(in AdBuffer buffer);
 
     void createMediaView(in IBinder windowToken, in Rect frame);
     void relayoutMediaView(in Rect frame);

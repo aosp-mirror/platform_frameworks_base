@@ -29,6 +29,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.graphics.Rect;
+import android.media.tv.AdBuffer;
 import android.media.tv.AdRequest;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
@@ -1513,6 +1514,29 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
+        public void notifyAdBufferConsumed(
+                IBinder sessionToken, AdBuffer buffer, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,
+                    "notifyAdBufferConsumed");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).notifyAdBufferConsumed(buffer);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in notifyAdBufferConsumed", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void registerCallback(final ITvInteractiveAppManagerCallback callback, int userId) {
             int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
@@ -2374,6 +2398,23 @@ public class TvInteractiveAppManagerService extends SystemService {
                     mSessionState.mClient.onTeletextAppStateChanged(state, mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onTeletextAppStateChanged", e);
+                }
+            }
+        }
+
+        @Override
+        public void onAdBuffer(AdBuffer buffer) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onAdBuffer(buffer=" + buffer + ")");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onAdBuffer(buffer, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onAdBuffer", e);
                 }
             }
         }

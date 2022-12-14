@@ -965,6 +965,19 @@ public final class TvInputManager {
                 });
             }
         }
+
+        void postAdBufferConsumed(AdBuffer buffer) {
+            if (mSession.mIAppNotificationEnabled) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mSession.getInteractiveAppSession() != null) {
+                            mSession.getInteractiveAppSession().notifyAdBufferConsumed(buffer);
+                        }
+                    }
+                });
+            }
+        }
     }
 
     /**
@@ -1410,6 +1423,18 @@ public final class TvInputManager {
                         return;
                     }
                     record.postAdResponse(response);
+                }
+            }
+
+            @Override
+            public void onAdBufferConsumed(AdBuffer buffer, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postAdBufferConsumed(buffer);
                 }
             }
         };
@@ -3199,6 +3224,21 @@ public final class TvInputManager {
             }
             try {
                 mService.requestAd(mToken, request, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Notifies when the advertisement buffer is filled and ready to be read.
+         */
+        public void notifyAdBuffer(AdBuffer buffer) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyAdBuffer(mToken, buffer, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
