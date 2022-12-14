@@ -313,6 +313,9 @@ public class KeyguardPatternViewController
             case PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT:
                 mMessageAreaController.setMessage(R.string.kg_prompt_reason_timeout_pattern);
                 break;
+            case PROMPT_REASON_TRUSTAGENT_EXPIRED:
+                mMessageAreaController.setMessage(R.string.kg_prompt_reason_timeout_pattern);
+                break;
             case PROMPT_REASON_NONE:
                 break;
             default:
