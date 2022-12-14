@@ -371,6 +371,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
         if (!mKeyguardStateController.isShowing()) {
             final Intent cameraIntent = CameraIntents.getInsecureCameraIntent(mContext);
+            cameraIntent.putExtra(CameraIntents.EXTRA_LAUNCH_SOURCE, source);
             mCentralSurfaces.startActivityDismissingKeyguard(cameraIntent,
                     false /* onlyProvisioned */, true /* dismissShade */,
                     true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */, 0,
