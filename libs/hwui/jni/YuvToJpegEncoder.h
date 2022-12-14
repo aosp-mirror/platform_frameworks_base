@@ -1,6 +1,9 @@
 #ifndef _ANDROID_GRAPHICS_YUV_TO_JPEG_ENCODER_H_
 #define _ANDROID_GRAPHICS_YUV_TO_JPEG_ENCODER_H_
 
+#include <android/data_space.h>
+#include <jpegrecoverymap/recoverymap.h>
+
 extern "C" {
     #include "jpeglib.h"
     #include "jerror.h"
@@ -24,7 +27,7 @@ public:
      *
      *  @param stream The jpeg output stream.
      *  @param inYuv The input yuv data.
-     *  @param width Width of the the Yuv data in terms of pixels.
+     *  @param width Width of the Yuv data in terms of pixels.
      *  @param height Height of the Yuv data in terms of pixels.
      *  @param offsets The offsets in each image plane with respect to inYuv.
      *  @param jpegQuality Picture quality in [0, 100].
@@ -69,6 +72,48 @@ private:
     void compress(jpeg_compress_struct* cinfo, uint8_t* yuv, int* offsets);
     void deinterleave(uint8_t* yuv, uint8_t* yRows, uint8_t* uRows,
             uint8_t* vRows, int rowIndex, int width, int height);
+};
+
+class P010Yuv420ToJpegREncoder {
+public:
+    /** Encode YUV data to jpeg/r,  which is output to a stream.
+     *  This method will call RecoveryMap::EncodeJPEGR() method. If encoding failed,
+     *  Corresponding error code (defined in jpegrerrorcode.h) will be printed and this
+     *  method will be terminated and return false.
+     *
+     *  @param env JNI environment.
+     *  @param stream The jpeg output stream.
+     *  @param hdr The input yuv data (p010 format).
+     *  @param hdrColorSpaceId color space id for the input hdr.
+     *  @param sdr The input yuv data (yuv420p format).
+     *  @param sdrColorSpaceId color space id for the input sdr.
+     *  @param width Width of the Yuv data in terms of pixels.
+     *  @param height Height of the Yuv data in terms of pixels.
+     *  @param jpegQuality Picture quality in [0, 100].
+     *  @return true if successfully compressed the stream.
+     */
+    bool encode(JNIEnv* env,
+            SkWStream* stream, void* hdr, int hdrColorSpace, void* sdr, int sdrColorSpace,
+            int width, int height, int jpegQuality);
+
+    /** Map data space (defined in DataSpace.java and data_space.h) to the color gamut
+     *  used in JPEG/R
+     *
+     *  @param env JNI environment.
+     *  @param aDataSpace data space defined in data_space.h.
+     *  @return color gamut for JPEG/R.
+     */
+    static android::recoverymap::jpegr_color_gamut findColorGamut(JNIEnv* env, int aDataSpace);
+
+    /** Map data space (defined in DataSpace.java and data_space.h) to the transfer function
+     *  used in JPEG/R
+     *
+     *  @param env JNI environment.
+     *  @param aDataSpace data space defined in data_space.h.
+     *  @return color gamut for JPEG/R.
+     */
+    static android::recoverymap::jpegr_transfer_function findHdrTransferFunction(
+            JNIEnv* env, int aDataSpace);
 };
 
 #endif  // _ANDROID_GRAPHICS_YUV_TO_JPEG_ENCODER_H_
