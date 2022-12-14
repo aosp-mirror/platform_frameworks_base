@@ -36192,6 +36192,7 @@ package android.provider {
     field public static final String RADIO_CELL = "cell";
     field public static final String RADIO_NFC = "nfc";
     field public static final String RADIO_WIFI = "wifi";
+    field public static final String SECURE_FRP_MODE = "secure_frp_mode";
     field @Deprecated public static final String SHOW_PROCESSES = "show_processes";
     field public static final String STAY_ON_WHILE_PLUGGED_IN = "stay_on_while_plugged_in";
     field public static final String TRANSITION_ANIMATION_SCALE = "transition_animation_scale";
