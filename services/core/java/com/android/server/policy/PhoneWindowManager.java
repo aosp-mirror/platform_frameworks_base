@@ -2901,7 +2901,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_RECENT_APPS:
-                // TODO(b/261621522): Handle recents key presses
+                if (down && repeatCount == 0) {
+                    showRecentApps(false /* triggeredFromAltTab */);
+                }
                 return key_consumed;
             case KeyEvent.KEYCODE_APP_SWITCH:
                 if (!keyguardOn) {
