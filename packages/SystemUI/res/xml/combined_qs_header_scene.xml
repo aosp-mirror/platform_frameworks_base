@@ -124,6 +124,11 @@
         </KeyFrameSet>
     </Transition>
 
+    <Transition
+        android:id="@+id/large_screen_header_transition"
+        app:constraintSetStart="@id/large_screen_header_constraint"
+        app:constraintSetEnd="@id/large_screen_header_constraint"/>
+
     <Include app:constraintSet="@xml/large_screen_shade_header"/>
 
     <Include app:constraintSet="@xml/qs_header"/>
