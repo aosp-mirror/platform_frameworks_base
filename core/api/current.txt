@@ -39296,6 +39296,8 @@ package android.service.controls {
     method public final boolean onUnbind(@NonNull android.content.Intent);
     method public abstract void performControlAction(@NonNull String, @NonNull android.service.controls.actions.ControlAction, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method public static void requestAddControl(@NonNull android.content.Context, @NonNull android.content.ComponentName, @NonNull android.service.controls.Control);
+    field public static final String EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS = "android.service.controls.extra.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS";
+    field public static final String META_DATA_PANEL_ACTIVITY = "android.service.controls.META_DATA_PANEL_ACTIVITY";
     field public static final String SERVICE_CONTROLS = "android.service.controls.ControlsProviderService";
     field @NonNull public static final String TAG = "ControlsProviderService";
   }
