@@ -622,7 +622,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         public static final long DEFAULT_RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_MS =
                 Math.max(10 * MINUTE_IN_MILLIS, DEFAULT_RUNTIME_MIN_USER_INITIATED_GUARANTEE_MS);
         public static final long DEFAULT_RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS =
-                Math.max(Long.MAX_VALUE, DEFAULT_RUNTIME_USER_INITIATED_LIMIT_MS);
+                Math.min(Long.MAX_VALUE, DEFAULT_RUNTIME_USER_INITIATED_LIMIT_MS);
         static final boolean DEFAULT_PERSIST_IN_SPLIT_FILES = true;
         private static final boolean DEFAULT_USE_TARE_POLICY = false;
 
@@ -3174,10 +3174,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     /** Returns the minimum amount of time we should let this job run before timing out. */
     public long getMinJobExecutionGuaranteeMs(JobStatus job) {
         synchronized (mLock) {
-            final boolean shouldTreatAsDataTransfer = job.getJob().isDataTransfer()
-                    && checkRunLongJobsPermission(job.getSourceUid(), job.getSourcePackageName());
-            if (job.shouldTreatAsUserInitiatedJob()) {
-                if (shouldTreatAsDataTransfer) {
+            if (job.shouldTreatAsUserInitiatedJob()
+                    && checkRunLongJobsPermission(job.getSourceUid(), job.getSourcePackageName())) {
+                if (job.getJob().isDataTransfer()) {
                     final long estimatedTransferTimeMs =
                             mConnectivityController.getEstimatedTransferTimeMs(job);
                     if (estimatedTransferTimeMs == ConnectivityController.UNKNOWN_TIME) {
@@ -3194,7 +3193,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                             ));
                 }
                 return mConstants.RUNTIME_MIN_USER_INITIATED_GUARANTEE_MS;
-            } else if (shouldTreatAsDataTransfer) {
+            } else if (job.getJob().isDataTransfer()) {
                 // For now, don't increase a bg data transfer's minimum guarantee.
                 return mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS;
             } else if (job.shouldTreatAsExpeditedJob()) {
@@ -3213,23 +3212,18 @@ public class JobSchedulerService extends com.android.server.SystemService
     /** Returns the maximum amount of time this job could run for. */
     public long getMaxJobExecutionTimeMs(JobStatus job) {
         synchronized (mLock) {
-            final boolean allowLongerJob;
-            final boolean isDataTransfer = job.getJob().isDataTransfer();
-            if (isDataTransfer || job.shouldTreatAsUserInitiatedJob()) {
-                allowLongerJob =
-                        checkRunLongJobsPermission(job.getSourceUid(), job.getSourcePackageName());
-            } else {
-                allowLongerJob = false;
+            final boolean allowLongerJob = job.shouldTreatAsUserInitiatedJob()
+                    && checkRunLongJobsPermission(job.getSourceUid(), job.getSourcePackageName());
+            if (job.getJob().isDataTransfer() && allowLongerJob) { // UI+DT
+                return mConstants.RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS;
+            }
+            if (allowLongerJob) { // UI with LRJ permission
+                return mConstants.RUNTIME_USER_INITIATED_LIMIT_MS;
             }
             if (job.shouldTreatAsUserInitiatedJob()) {
-                if (isDataTransfer && allowLongerJob) {
-                    return mConstants.RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS;
-                }
-                if (allowLongerJob) {
-                    return mConstants.RUNTIME_USER_INITIATED_LIMIT_MS;
-                }
                 return mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
-            } else if (isDataTransfer && allowLongerJob) {
+            }
+            if (job.getJob().isDataTransfer()) {
                 return mConstants.RUNTIME_DATA_TRANSFER_LIMIT_MS;
             }
             return Math.min(mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
