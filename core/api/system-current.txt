@@ -12326,6 +12326,7 @@ package android.service.voice {
     method public int describeContents();
     method @NonNull public android.media.AudioFormat getAudioFormat();
     method @NonNull public android.os.ParcelFileDescriptor getAudioStreamParcelFileDescriptor();
+    method @NonNull public byte[] getInitialAudio();
     method @NonNull public android.os.PersistableBundle getMetadata();
     method @Nullable public android.media.AudioTimestamp getTimestamp();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -12338,6 +12339,7 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordAudioStream build();
     method @NonNull public android.service.voice.HotwordAudioStream.Builder setAudioFormat(@NonNull android.media.AudioFormat);
     method @NonNull public android.service.voice.HotwordAudioStream.Builder setAudioStreamParcelFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
+    method @NonNull public android.service.voice.HotwordAudioStream.Builder setInitialAudio(@NonNull byte[]);
     method @NonNull public android.service.voice.HotwordAudioStream.Builder setMetadata(@NonNull android.os.PersistableBundle);
     method @NonNull public android.service.voice.HotwordAudioStream.Builder setTimestamp(@NonNull android.media.AudioTimestamp);
   }
