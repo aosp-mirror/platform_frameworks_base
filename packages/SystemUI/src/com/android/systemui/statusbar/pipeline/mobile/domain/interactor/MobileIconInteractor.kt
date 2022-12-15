@@ -58,6 +58,9 @@ interface MobileIconInteractor {
     /** True if the RAT icon should always be displayed and false otherwise. */
     val alwaysShowDataRatIcon: StateFlow<Boolean>
 
+    /** True if the CDMA level should be preferred over the primary level. */
+    val alwaysUseCdmaLevel: StateFlow<Boolean>
+
     /** Observable for RAT type (network type) indicator */
     val networkTypeIconGroup: StateFlow<MobileIconGroup>
 
@@ -94,6 +97,7 @@ class MobileIconInteractorImpl(
     @Application scope: CoroutineScope,
     defaultSubscriptionHasDataEnabled: StateFlow<Boolean>,
     override val alwaysShowDataRatIcon: StateFlow<Boolean>,
+    override val alwaysUseCdmaLevel: StateFlow<Boolean>,
     defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>,
     defaultMobileIconGroup: StateFlow<MobileIconGroup>,
     override val isDefaultConnectionFailed: StateFlow<Boolean>,
@@ -154,13 +158,12 @@ class MobileIconInteractorImpl(
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val level: StateFlow<Int> =
-        connectionInfo
-            .mapLatest { connection ->
-                // TODO: incorporate [MobileMappings.Config.alwaysShowCdmaRssi]
-                if (connection.isGsm) {
-                    connection.primaryLevel
-                } else {
-                    connection.cdmaLevel
+        combine(connectionInfo, alwaysUseCdmaLevel) { connection, alwaysUseCdmaLevel ->
+                when {
+                    // GSM connections should never use the CDMA level
+                    connection.isGsm -> connection.primaryLevel
+                    alwaysUseCdmaLevel -> connection.cdmaLevel
+                    else -> connection.primaryLevel
                 }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), 0)

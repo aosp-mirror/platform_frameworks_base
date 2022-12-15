@@ -61,6 +61,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
                 scope,
                 mobileIconsInteractor.activeDataConnectionHasDataEnabled,
                 mobileIconsInteractor.alwaysShowDataRatIcon,
+                mobileIconsInteractor.alwaysUseCdmaLevel,
                 mobileIconsInteractor.defaultMobileIconMapping,
                 mobileIconsInteractor.defaultMobileIconGroup,
                 mobileIconsInteractor.isDefaultConnectionFailed,
@@ -103,7 +104,27 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun cdma_level_default_unknown() =
+    fun gsm_alwaysShowCdmaTrue_stillUsesGsmLevel() =
+        runBlocking(IMMEDIATE) {
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
+                    isGsm = true,
+                    primaryLevel = GSM_LEVEL,
+                    cdmaLevel = CDMA_LEVEL,
+                ),
+            )
+            mobileIconsInteractor.alwaysUseCdmaLevel.value = true
+
+            var latest: Int? = null
+            val job = underTest.level.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(GSM_LEVEL)
+
+            job.cancel()
+        }
+
+    @Test
+    fun notGsm_level_default_unknown() =
         runBlocking(IMMEDIATE) {
             connectionRepository.setConnectionInfo(
                 MobileConnectionModel(isGsm = false),
@@ -117,7 +138,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun cdma_usesCdmaLevel() =
+    fun notGsm_alwaysShowCdmaTrue_usesCdmaLevel() =
         runBlocking(IMMEDIATE) {
             connectionRepository.setConnectionInfo(
                 MobileConnectionModel(
@@ -126,11 +147,32 @@ class MobileIconInteractorTest : SysuiTestCase() {
                     cdmaLevel = CDMA_LEVEL
                 ),
             )
+            mobileIconsInteractor.alwaysUseCdmaLevel.value = true
 
             var latest: Int? = null
             val job = underTest.level.onEach { latest = it }.launchIn(this)
 
             assertThat(latest).isEqualTo(CDMA_LEVEL)
+
+            job.cancel()
+        }
+
+    @Test
+    fun notGsm_alwaysShowCdmaFalse_usesPrimaryLevel() =
+        runBlocking(IMMEDIATE) {
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
+                    isGsm = false,
+                    primaryLevel = GSM_LEVEL,
+                    cdmaLevel = CDMA_LEVEL,
+                ),
+            )
+            mobileIconsInteractor.alwaysUseCdmaLevel.value = false
+
+            var latest: Int? = null
+            val job = underTest.level.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(GSM_LEVEL)
 
             job.cancel()
         }
@@ -234,6 +276,21 @@ class MobileIconInteractorTest : SysuiTestCase() {
             assertThat(latest).isTrue()
 
             mobileIconsInteractor.alwaysShowDataRatIcon.value = false
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun alwaysUseCdmaLevel_matchesParent() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.alwaysUseCdmaLevel.onEach { latest = it }.launchIn(this)
+
+            mobileIconsInteractor.alwaysUseCdmaLevel.value = true
+            assertThat(latest).isTrue()
+
+            mobileIconsInteractor.alwaysUseCdmaLevel.value = false
             assertThat(latest).isFalse()
 
             job.cancel()
