@@ -5772,14 +5772,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 || mExpandingNotificationRow == null) {
             return;
         }
-        int left = Math.min(mLaunchAnimationParams.getLeft(), mRoundedRectClippingLeft);
-        int right = Math.max(mLaunchAnimationParams.getRight(), mRoundedRectClippingRight);
-        int bottom = Math.max(mLaunchAnimationParams.getBottom(), mRoundedRectClippingBottom);
+        int[] absoluteCoords = new int[2];
+        getLocationOnScreen(absoluteCoords);
+
+        int left = Math.min(mLaunchAnimationParams.getLeft() - absoluteCoords[0],
+                mRoundedRectClippingLeft);
+        int right = Math.max(mLaunchAnimationParams.getRight() - absoluteCoords[0],
+                mRoundedRectClippingRight);
+        int bottom = Math.max(mLaunchAnimationParams.getBottom() - absoluteCoords[1],
+                mRoundedRectClippingBottom);
         float expandProgress = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
                 mLaunchAnimationParams.getProgress(0,
                         NotificationLaunchAnimatorController.ANIMATION_DURATION_TOP_ROUNDING));
         int top = (int) Math.min(MathUtils.lerp(mRoundedRectClippingTop,
-                        mLaunchAnimationParams.getTop(), expandProgress),
+                        mLaunchAnimationParams.getTop() - absoluteCoords[1], expandProgress),
                 mRoundedRectClippingTop);
         float topRadius = mLaunchAnimationParams.getTopCornerRadius();
         float bottomRadius = mLaunchAnimationParams.getBottomCornerRadius();
