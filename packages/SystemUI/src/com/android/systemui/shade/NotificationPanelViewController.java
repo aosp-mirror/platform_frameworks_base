@@ -137,6 +137,7 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
@@ -352,6 +353,7 @@ public final class NotificationPanelViewController implements Dumpable {
     private final FragmentListener mQsFragmentListener = new QsFragmentListener();
     private final AccessibilityDelegate mAccessibilityDelegate = new ShadeAccessibilityDelegate();
     private final NotificationGutsManager mGutsManager;
+    private final AlternateBouncerInteractor mAlternateBouncerInteractor;
 
     private long mDownTime;
     private boolean mTouchSlopExceededBeforeDown;
@@ -758,6 +760,7 @@ public final class NotificationPanelViewController implements Dumpable {
             SystemClock systemClock,
             KeyguardBottomAreaViewModel keyguardBottomAreaViewModel,
             KeyguardBottomAreaInteractor keyguardBottomAreaInteractor,
+            AlternateBouncerInteractor alternateBouncerInteractor,
             DumpManager dumpManager) {
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
@@ -938,6 +941,7 @@ public final class NotificationPanelViewController implements Dumpable {
                         unlockAnimationStarted(playingCannedAnimation, isWakeAndUnlock, startDelay);
                     }
                 });
+        mAlternateBouncerInteractor = alternateBouncerInteractor;
         dumpManager.registerDumpable(this);
     }
 
@@ -4815,7 +4819,7 @@ public final class NotificationPanelViewController implements Dumpable {
                 mUpdateFlingVelocity = vel;
             }
         } else if (!mCentralSurfaces.isBouncerShowing()
-                && !mStatusBarKeyguardViewManager.isShowingAlternateBouncer()
+                && !mAlternateBouncerInteractor.isVisibleState()
                 && !mKeyguardStateController.isKeyguardGoingAway()) {
             onEmptySpaceClick();
             onTrackingStopped(true);
