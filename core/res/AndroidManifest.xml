@@ -5977,7 +5977,7 @@
     <permission android:name="android.permission.START_VIEW_PERMISSION_USAGE"
         android:label="@string/permlab_startViewPermissionUsage"
         android:description="@string/permdesc_startViewPermissionUsage"
-        android:protectionLevel="signature|installer" />
+        android:protectionLevel="signature|installer|module" />
 
     <!--
         @SystemApi
