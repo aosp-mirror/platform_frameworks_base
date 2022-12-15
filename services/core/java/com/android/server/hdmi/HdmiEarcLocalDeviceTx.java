@@ -78,9 +78,11 @@ public class HdmiEarcLocalDeviceTx extends HdmiEarcLocalDevice {
     }
 
     protected void handleEarcStateChange(@Constants.EarcStatus int status) {
+        int oldEarcStatus;
         synchronized (mLock) {
             HdmiLogger.debug(TAG, "eARC state change [old:%b new %b]", mEarcStatus,
                     status);
+            oldEarcStatus = mEarcStatus;
             mEarcStatus = status;
         }
 
@@ -91,7 +93,13 @@ public class HdmiEarcLocalDeviceTx extends HdmiEarcLocalDevice {
         } else if (status == HDMI_EARC_STATUS_ARC_PENDING) {
             notifyEarcStatusToAudioService(false, new ArrayList<>());
             mService.startArcAction(true, null);
+        } else if (status == HDMI_EARC_STATUS_EARC_PENDING
+                && oldEarcStatus == HDMI_EARC_STATUS_ARC_PENDING) {
+            mService.startArcAction(false, null);
         } else if (status == HDMI_EARC_STATUS_EARC_CONNECTED) {
+            if (oldEarcStatus == HDMI_EARC_STATUS_ARC_PENDING) {
+                mService.startArcAction(false, null);
+            }
             mReportCapsHandler.postDelayed(mReportCapsRunnable, REPORT_CAPS_MAX_DELAY_MS);
         }
     }

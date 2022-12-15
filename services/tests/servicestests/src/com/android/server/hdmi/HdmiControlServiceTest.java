@@ -1319,6 +1319,28 @@ public class HdmiControlServiceTest {
         verify(mHdmiControlServiceSpy, times(1)).startArcAction(eq(true), any());
     }
 
+    @Test
+    public void earcStateWasArcPending_becomesEarcPending_terminateArc() {
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_ARC_PENDING);
+        mTestLooper.dispatchAll();
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_EARC_PENDING);
+        verify(mHdmiControlServiceSpy, times(1)).startArcAction(eq(false), any());
+    }
+
+    @Test
+    public void earcStateWasArcPending_becomesEarcEnabled_terminateArc() {
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_ARC_PENDING);
+        mTestLooper.dispatchAll();
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_EARC_CONNECTED);
+        verify(mHdmiControlServiceSpy, times(1)).startArcAction(eq(false), any());
+    }
+
     protected static class MockPlaybackDevice extends HdmiCecLocalDevicePlayback {
 
         private boolean mCanGoToStandby;
