@@ -12,21 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.android.systemui.keyguard.shared.quickaffordance
+package com.android.systemui.keyguard.ui.preview
 
-import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
+import android.os.Bundle
+import dagger.assisted.AssistedFactory
 
-/** Enumerates all possible positions for quick affordances that can appear on the lock-screen. */
-enum class KeyguardQuickAffordancePosition {
-    BOTTOM_START,
-    BOTTOM_END;
-
-    fun toSlotId(): String {
-        return when (this) {
-            BOTTOM_START -> KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
-            BOTTOM_END -> KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END
-        }
-    }
+@AssistedFactory
+interface KeyguardPreviewRendererFactory {
+    fun create(bundle: Bundle): KeyguardPreviewRenderer
 }

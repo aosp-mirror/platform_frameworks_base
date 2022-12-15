@@ -139,4 +139,9 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
         super.startErrorAnimation();
         mView.startErrorAnimation();
     }
+
+    @Override
+    protected int getInitialMessageResId() {
+        return R.string.keyguard_enter_your_pin;
+    }
 }

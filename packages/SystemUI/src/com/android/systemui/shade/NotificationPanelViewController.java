@@ -40,6 +40,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_N
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
+import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
 import static com.android.systemui.statusbar.VibratorHelper.TOUCH_VIBRATION_ATTRIBUTES;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_FOLD_TO_AOD;
 import static com.android.systemui.util.DumpUtilsKt.asIndenting;
@@ -1327,7 +1328,9 @@ public final class NotificationPanelViewController implements Dumpable {
         mKeyguardBottomArea.init(
                 mKeyguardBottomAreaViewModel,
                 mFalsingManager,
-                mLockIconViewController
+                mLockIconViewController,
+                stringResourceId ->
+                        mKeyguardIndicationController.showTransientIndication(stringResourceId)
         );
     }
 
@@ -2325,7 +2328,7 @@ public final class NotificationPanelViewController implements Dumpable {
 
 
     private boolean handleQsTouch(MotionEvent event) {
-        if (mSplitShadeEnabled && touchXOutsideOfQs(event.getX())) {
+        if (isSplitShadeAndTouchXOutsideQs(event.getX())) {
             return false;
         }
         final int action = event.getActionMasked();
@@ -2382,12 +2385,14 @@ public final class NotificationPanelViewController implements Dumpable {
         return false;
     }
 
-    private boolean touchXOutsideOfQs(float touchX) {
-        return touchX < mQsFrame.getX() || touchX > mQsFrame.getX() + mQsFrame.getWidth();
+    /** Returns whether split shade is enabled and an x coordinate is outside of the QS frame. */
+    private boolean isSplitShadeAndTouchXOutsideQs(float touchX) {
+        return mSplitShadeEnabled && (touchX < mQsFrame.getX()
+                || touchX > mQsFrame.getX() + mQsFrame.getWidth());
     }
 
     private boolean isInQsArea(float x, float y) {
-        if (touchXOutsideOfQs(x)) {
+        if (isSplitShadeAndTouchXOutsideQs(x)) {
             return false;
         }
         // Let's reject anything at the very bottom around the home handle in gesture nav
@@ -4720,6 +4725,7 @@ public final class NotificationPanelViewController implements Dumpable {
             if (!openingWithTouch || !mHasVibratedOnOpen) {
                 mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
                 mHasVibratedOnOpen = true;
+                mShadeLog.v("Vibrating on opening, mHasVibratedOnOpen=true");
             }
         }
     }
@@ -5316,7 +5322,7 @@ public final class NotificationPanelViewController implements Dumpable {
         @Override
         public void flingTopOverscroll(float velocity, boolean open) {
             // in split shade mode we want to expand/collapse QS only when touch happens within QS
-            if (mSplitShadeEnabled && touchXOutsideOfQs(mInitialTouchX)) {
+            if (isSplitShadeAndTouchXOutsideQs(mInitialTouchX)) {
                 return;
             }
             mLastOverscroll = 0f;
@@ -5477,6 +5483,15 @@ public final class NotificationPanelViewController implements Dumpable {
             mBarState = statusBarState;
             mKeyguardShowing = keyguardShowing;
 
+            boolean fromShadeToKeyguard = statusBarState == KEYGUARD
+                    && (oldState == SHADE || oldState == SHADE_LOCKED);
+            if (mSplitShadeEnabled && fromShadeToKeyguard) {
+                // user can go to keyguard from different shade states and closing animation
+                // may not fully run - we always want to make sure we close QS when that happens
+                // as we never need QS open in fresh keyguard state
+                closeQs();
+            }
+
             if (oldState == KEYGUARD && (goingToFullShade
                     || statusBarState == StatusBarState.SHADE_LOCKED)) {
 
@@ -5496,27 +5511,12 @@ public final class NotificationPanelViewController implements Dumpable {
                 mKeyguardStatusBarViewController.animateKeyguardStatusBarIn();
 
                 mNotificationStackScrollLayoutController.resetScrollPosition();
-                // Only animate header if the header is visible. If not, it will partially
-                // animate out
-                // the top of QS
-                if (!mQsExpanded) {
-                    // TODO(b/185683835) Nicer clipping when using new spacial model
-                    if (mSplitShadeEnabled) {
-                        mQs.animateHeaderSlidingOut();
-                    }
-                }
             } else {
                 // this else branch means we are doing one of:
                 //  - from KEYGUARD to SHADE (but not fully expanded as when swiping from the top)
                 //  - from SHADE to KEYGUARD
                 //  - from SHADE_LOCKED to SHADE
                 //  - getting notified again about the current SHADE or KEYGUARD state
-                if (mSplitShadeEnabled && oldState == SHADE && statusBarState == KEYGUARD) {
-                    // user can go to keyguard from different shade states and closing animation
-                    // may not fully run - we always want to make sure we close QS when that happens
-                    // as we never need QS open in fresh keyguard state
-                    closeQs();
-                }
                 final boolean animatingUnlockedShadeToKeyguard = oldState == SHADE
                         && statusBarState == KEYGUARD
                         && mScreenOffAnimationController.isKeyguardShowDelayed();
@@ -6120,6 +6120,7 @@ public final class NotificationPanelViewController implements Dumpable {
                     if (isFullyCollapsed()) {
                         // If panel is fully collapsed, reset haptic effect before adding movement.
                         mHasVibratedOnOpen = false;
+                        mShadeLog.logHasVibrated(mHasVibratedOnOpen, mExpandedFraction);
                     }
                     addMovement(event);
                     if (!isFullyCollapsed()) {

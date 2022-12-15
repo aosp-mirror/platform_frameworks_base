@@ -2084,6 +2084,96 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isFalse();
     }
 
+    @Test
+    public void fingerprintFailure_requestActiveUnlock_dismissKeyguard()
+            throws RemoteException {
+        // GIVEN shouldTriggerActiveUnlock
+        bouncerFullyVisible();
+        when(mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())).thenReturn(true);
+
+        // GIVEN active unlock triggers on biometric failures
+        when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
+                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.BIOMETRIC_FAIL))
+                .thenReturn(true);
+
+        // WHEN fingerprint fails
+        mKeyguardUpdateMonitor.mFingerprintAuthenticationCallback.onAuthenticationFailed();
+
+        // ALWAYS request unlock with a keyguard dismissal
+        verify(mTrustManager).reportUserRequestedUnlock(eq(KeyguardUpdateMonitor.getCurrentUser()),
+                eq(true));
+    }
+
+    @Test
+    public void faceNonBypassFailure_requestActiveUnlock_doesNotDismissKeyguard()
+            throws RemoteException {
+        // GIVEN shouldTriggerActiveUnlock
+        when(mAuthController.isUdfpsFingerDown()).thenReturn(false);
+        keyguardIsVisible();
+        keyguardNotGoingAway();
+        statusBarShadeIsNotLocked();
+        when(mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())).thenReturn(true);
+
+        // GIVEN active unlock triggers on biometric failures
+        when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
+                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.BIOMETRIC_FAIL))
+                .thenReturn(true);
+
+        // WHEN face fails & bypass is not allowed
+        lockscreenBypassIsNotAllowed();
+        mKeyguardUpdateMonitor.mFaceAuthenticationCallback.onAuthenticationFailed();
+
+        // THEN request unlock with NO keyguard dismissal
+        verify(mTrustManager).reportUserRequestedUnlock(eq(KeyguardUpdateMonitor.getCurrentUser()),
+                eq(false));
+    }
+
+    @Test
+    public void faceBypassFailure_requestActiveUnlock_dismissKeyguard()
+            throws RemoteException {
+        // GIVEN shouldTriggerActiveUnlock
+        when(mAuthController.isUdfpsFingerDown()).thenReturn(false);
+        keyguardIsVisible();
+        keyguardNotGoingAway();
+        statusBarShadeIsNotLocked();
+        when(mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())).thenReturn(true);
+
+        // GIVEN active unlock triggers on biometric failures
+        when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
+                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.BIOMETRIC_FAIL))
+                .thenReturn(true);
+
+        // WHEN face fails & bypass is not allowed
+        lockscreenBypassIsAllowed();
+        mKeyguardUpdateMonitor.mFaceAuthenticationCallback.onAuthenticationFailed();
+
+        // THEN request unlock with a keyguard dismissal
+        verify(mTrustManager).reportUserRequestedUnlock(eq(KeyguardUpdateMonitor.getCurrentUser()),
+                eq(true));
+    }
+
+    @Test
+    public void faceNonBypassFailure_requestActiveUnlock_dismissKeyguard()
+            throws RemoteException {
+        // GIVEN shouldTriggerActiveUnlock
+        when(mAuthController.isUdfpsFingerDown()).thenReturn(false);
+        lockscreenBypassIsNotAllowed();
+        when(mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())).thenReturn(true);
+
+        // GIVEN active unlock triggers on biometric failures
+        when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
+                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.BIOMETRIC_FAIL))
+                .thenReturn(true);
+
+        // WHEN face fails & on the bouncer
+        bouncerFullyVisible();
+        mKeyguardUpdateMonitor.mFaceAuthenticationCallback.onAuthenticationFailed();
+
+        // THEN request unlock with a keyguard dismissal
+        verify(mTrustManager).reportUserRequestedUnlock(eq(KeyguardUpdateMonitor.getCurrentUser()),
+                eq(true));
+    }
+
     private void userDeviceLockDown() {
         when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(false);
         when(mStrongAuthTracker.getStrongAuthForUser(mCurrentUserId))
@@ -2101,6 +2191,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void mockCanBypassLockscreen(boolean canBypass) {
+        // force update the isFaceEnrolled cache:
+        mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(getCurrentUser());
+
         mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
         when(mKeyguardBypassController.canBypass()).thenReturn(canBypass);
     }

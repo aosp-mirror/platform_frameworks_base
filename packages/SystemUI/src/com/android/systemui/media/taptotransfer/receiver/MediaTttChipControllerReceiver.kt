@@ -45,8 +45,10 @@ import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.temporarydisplay.TemporaryViewInfo
+import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.util.animation.AnimationUtil.Companion.frames
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.time.SystemClock
 import com.android.systemui.util.view.ViewUtil
 import com.android.systemui.util.wakelock.WakeLock
 import javax.inject.Inject
@@ -62,7 +64,7 @@ import javax.inject.Inject
 open class MediaTttChipControllerReceiver @Inject constructor(
         private val commandQueue: CommandQueue,
         context: Context,
-        @MediaTttReceiverLogger logger: MediaTttLogger,
+        @MediaTttReceiverLogger logger: MediaTttLogger<ChipReceiverInfo>,
         windowManager: WindowManager,
         mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
@@ -73,7 +75,8 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         private val uiEventLogger: MediaTttReceiverUiEventLogger,
         private val viewUtil: ViewUtil,
         wakeLockBuilder: WakeLock.Builder,
-) : TemporaryViewDisplayController<ChipReceiverInfo, MediaTttLogger>(
+        systemClock: SystemClock,
+) : TemporaryViewDisplayController<ChipReceiverInfo, MediaTttLogger<ChipReceiverInfo>>(
         context,
         logger,
         windowManager,
@@ -83,6 +86,7 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         powerManager,
         R.layout.media_ttt_chip_receiver,
         wakeLockBuilder,
+        systemClock,
 ) {
     @SuppressLint("WrongConstant") // We're allowed to use LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
     override val windowLayoutParams = commonWindowLayoutParams.apply {
@@ -290,4 +294,5 @@ data class ChipReceiverInfo(
     override val windowTitle: String = MediaTttUtils.WINDOW_TITLE_RECEIVER,
     override val wakeReason: String = MediaTttUtils.WAKE_REASON_RECEIVER,
     override val id: String,
+    override val priority: ViewPriority = ViewPriority.NORMAL,
 ) : TemporaryViewInfo()

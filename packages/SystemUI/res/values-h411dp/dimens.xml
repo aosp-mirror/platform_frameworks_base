@@ -13,12 +13,7 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
--->
-<TextClock
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/date_view"
-    style="@style/clock_subtitle"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:format12Hour="@string/dream_date_complication_date_format"
-    android:format24Hour="@string/dream_date_complication_date_format"/>
+  -->
+<resources>
+    <dimen name="volume_row_slider_height">137dp</dimen>
+</resources>
