@@ -11950,9 +11950,7 @@ public final class Settings {
          * <p>
          * Type: int (0 for false, 1 for true)
          *
-         * @hide
          */
-        @SystemApi
         @Readable
         @SuppressLint("NoSettingsProvider")
         public static final String SECURE_FRP_MODE = "secure_frp_mode";
