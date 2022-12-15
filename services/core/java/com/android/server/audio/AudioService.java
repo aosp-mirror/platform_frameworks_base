@@ -106,6 +106,7 @@ import android.media.IAudioService;
 import android.media.ICapturePresetDevicesRoleDispatcher;
 import android.media.ICommunicationDeviceDispatcher;
 import android.media.IDeviceVolumeBehaviorDispatcher;
+import android.media.IDevicesForAttributesCallback;
 import android.media.IMuteAwaitConnectionCallback;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IPreferredMixerAttributesDispatcher;
@@ -3122,6 +3123,25 @@ public class AudioService extends IAudioService.Stub
             @NonNull AudioAttributes attributes, boolean forVolume) {
         Objects.requireNonNull(attributes);
         return mAudioSystem.getDevicesForAttributes(attributes, forVolume);
+    }
+
+    /**
+     * @see AudioManager#addOnDevicesForAttributesChangedListener(
+     *      AudioAttributes, Executor, OnDevicesForAttributesChangedListener)
+     */
+    public void addOnDevicesForAttributesChangedListener(AudioAttributes attributes,
+            IDevicesForAttributesCallback callback) {
+        mAudioSystem.addOnDevicesForAttributesChangedListener(
+                attributes, false /* forVolume */, callback);
+    }
+
+    /**
+     * @see AudioManager#removeOnDevicesForAttributesChangedListener(
+     *      OnDevicesForAttributesChangedListener)
+     */
+    public void removeOnDevicesForAttributesChangedListener(
+            IDevicesForAttributesCallback callback) {
+        mAudioSystem.removeOnDevicesForAttributesChangedListener(callback);
     }
 
     // pre-condition: event.getKeyCode() is one of KeyEvent.KEYCODE_VOLUME_UP,
