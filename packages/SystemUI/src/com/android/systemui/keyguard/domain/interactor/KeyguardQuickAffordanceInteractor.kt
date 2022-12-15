@@ -40,13 +40,13 @@ import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAff
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import javax.inject.Inject
 
 @SysUISingleton
 class KeyguardQuickAffordanceInteractor
@@ -294,10 +294,7 @@ constructor(
             SystemUIDialog.setShowForAllUsers(dialog, true)
             SystemUIDialog.registerDismissListener(dialog)
             SystemUIDialog.setDialogSize(dialog)
-            launchAnimator.show(
-                dialog,
-                controller
-            )
+            launchAnimator.show(dialog, controller)
         }
     }
 
@@ -354,6 +351,10 @@ constructor(
 
     fun getPickerFlags(): List<KeyguardPickerFlag> {
         return listOf(
+            KeyguardPickerFlag(
+                name = Contract.FlagsTable.FLAG_NAME_REVAMPED_WALLPAPER_UI,
+                value = featureFlags.isEnabled(Flags.REVAMPED_WALLPAPER_UI),
+            ),
             KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_CUSTOM_LOCK_SCREEN_QUICK_AFFORDANCES_ENABLED,
                 value = featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES),
