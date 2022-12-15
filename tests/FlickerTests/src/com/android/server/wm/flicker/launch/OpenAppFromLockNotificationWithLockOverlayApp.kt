@@ -109,6 +109,11 @@ class OpenAppFromLockNotificationWithLockOverlayApp(flicker: FlickerTest) :
     @Test
     override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 209599395)
+    @Test
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
+
     companion object {
         /**
          * Creates the test configurations.

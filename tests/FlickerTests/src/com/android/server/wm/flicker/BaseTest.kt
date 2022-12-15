@@ -18,12 +18,14 @@ package com.android.server.wm.flicker
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
+import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.junit.FlickerBuilderProvider
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume
+import org.junit.AssumptionViolatedException
 import org.junit.Test
 
 /**
@@ -47,6 +49,8 @@ constructor(
         )
         tapl.setExpectedRotationCheckEnabled(true)
     }
+
+    private val logTag = this::class.java.simpleName
 
     /** Specification of the test transition to execute */
     abstract val transition: FlickerBuilder.() -> Unit
@@ -100,7 +104,21 @@ constructor(
     @Test
     open fun navBarWindowIsAlwaysVisible() {
         Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(flicker.scenario.isLandscapeOrSeascapeAtStart)
         flicker.navBarWindowIsAlwaysVisible()
+    }
+
+    /**
+     * Checks that the [ComponentNameMatcher.NAV_BAR] window is visible at the start and end of
+     * the transition
+     *
+     * Note: Phones only
+     */
+    @Presubmit
+    @Test
+    open fun navBarWindowIsVisibleAtStartAndEnd() {
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.navBarWindowIsVisibleAtStartAndEnd()
     }
 
     /**
@@ -179,13 +197,18 @@ constructor(
         statusBarWindowIsAlwaysVisible()
         visibleLayersShownMoreThanOneConsecutiveEntry()
         visibleWindowsShownMoreThanOneConsecutiveEntry()
+        runAndIgnoreAssumptionViolation { taskBarLayerIsVisibleAtStartAndEnd() }
+        runAndIgnoreAssumptionViolation { taskBarWindowIsAlwaysVisible() }
+        runAndIgnoreAssumptionViolation { navBarLayerIsVisibleAtStartAndEnd() }
+        runAndIgnoreAssumptionViolation { navBarWindowIsAlwaysVisible() }
+        runAndIgnoreAssumptionViolation { navBarWindowIsVisibleAtStartAndEnd() }
+    }
 
-        if (flicker.scenario.isTablet) {
-            taskBarLayerIsVisibleAtStartAndEnd()
-            taskBarWindowIsAlwaysVisible()
-        } else {
-            navBarLayerIsVisibleAtStartAndEnd()
-            navBarWindowIsAlwaysVisible()
+    protected fun runAndIgnoreAssumptionViolation(predicate: () -> Unit) {
+        try {
+            predicate()
+        } catch (e: AssumptionViolatedException) {
+            Log.e(logTag, "Assumption violation on CUJ complete", e)
         }
     }
 }
