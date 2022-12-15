@@ -101,7 +101,7 @@ interface IUserManager {
     Bundle getDefaultGuestRestrictions();
     int removeUserWhenPossible(int userId, boolean overrideDevicePolicy);
     boolean markGuestForDeletion(int userId);
-    UserInfo findCurrentGuestUser();
+    List<UserInfo> getGuestUsers();
     boolean isQuietModeEnabled(int userId);
     UserHandle createUserWithAttributes(in String userName, in String userType, int flags,
             in Bitmap userIcon,
