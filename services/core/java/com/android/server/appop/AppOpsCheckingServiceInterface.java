@@ -103,7 +103,7 @@ public interface AppOpsCheckingServiceInterface {
      * @param packageName package name.
      * @param userId user id associated with the package.
      */
-    boolean arePackageModesDefault(@NonNull String packageName, @UserIdInt int userId);
+    boolean arePackageModesDefault(String packageName, @UserIdInt int userId);
 
     /**
      * Stop tracking app-op modes for all uid and packages.
@@ -184,7 +184,7 @@ public interface AppOpsCheckingServiceInterface {
      * @param foregroundOps boolean array where app-ops that have MODE_FOREGROUND are marked true.
      * @return  foregroundOps.
      */
-    SparseBooleanArray evalForegroundUidOps(int uid, @Nullable SparseBooleanArray foregroundOps);
+    SparseBooleanArray evalForegroundUidOps(int uid, SparseBooleanArray foregroundOps);
 
     /**
      * Go over the list of app-ops for the package name and mark app-ops with MODE_FOREGROUND in
@@ -194,8 +194,8 @@ public interface AppOpsCheckingServiceInterface {
      * @param userId user id associated with the package.
      * @return foregroundOps.
      */
-    SparseBooleanArray evalForegroundPackageOps(@NonNull String packageName,
-            @Nullable SparseBooleanArray foregroundOps, @UserIdInt int userId);
+    SparseBooleanArray evalForegroundPackageOps(String packageName,
+            SparseBooleanArray foregroundOps, @UserIdInt int userId);
 
     /**
      * Dump op mode and package mode listeners and their details.
@@ -205,6 +205,5 @@ public interface AppOpsCheckingServiceInterface {
      * @param dumpPackage if not null and if dumpOp is -1, dumps watchers for the package name.
      * @param printWriter writer to dump to.
      */
-    boolean dumpListeners(int dumpOp, int dumpUid, @Nullable String dumpPackage,
-            @NonNull PrintWriter printWriter);
+    boolean dumpListeners(int dumpOp, int dumpUid, String dumpPackage, PrintWriter printWriter);
 }

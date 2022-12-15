@@ -581,10 +581,6 @@ public final class PowerManagerService extends SystemService
     private boolean mIsFaceDown = false;
     private long mLastFlipTime = 0L;
 
-    // The screen brightness mode.
-    // One of the Settings.System.SCREEN_BRIGHTNESS_MODE_* constants.
-    private int mScreenBrightnessModeSetting;
-
     // The screen brightness setting override from the window manager
     // to allow the current foreground activity to override the brightness.
     private float mScreenBrightnessOverrideFromWindowManager =
@@ -1456,10 +1452,6 @@ public final class PowerManagerService extends SystemService
                 mSystemProperties.get(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, null))) {
             mSystemProperties.set(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, retailDemoValue);
         }
-
-        mScreenBrightnessModeSetting = Settings.System.getIntForUser(resolver,
-                Settings.System.SCREEN_BRIGHTNESS_MODE,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, UserHandle.USER_CURRENT);
 
         mDirty |= DIRTY_SETTINGS;
     }
@@ -3432,23 +3424,18 @@ public final class PowerManagerService extends SystemService
                 final PowerGroup powerGroup = mPowerGroups.valueAt(idx);
                 final int groupId = powerGroup.getGroupId();
 
-                // Determine appropriate screen brightness and auto-brightness adjustments.
-                final boolean autoBrightness;
+                // Determine appropriate screen brightness.
                 final float screenBrightnessOverride;
                 if (!mBootCompleted) {
                     // Keep the brightness steady during boot. This requires the
                     // bootloader brightness and the default brightness to be identical.
-                    autoBrightness = false;
                     screenBrightnessOverride = mScreenBrightnessDefault;
                 } else if (isValidBrightness(mScreenBrightnessOverrideFromWindowManager)) {
-                    autoBrightness = false;
                     screenBrightnessOverride = mScreenBrightnessOverrideFromWindowManager;
                 } else {
-                    autoBrightness = (mScreenBrightnessModeSetting
-                            == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
                     screenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
                 }
-                boolean ready = powerGroup.updateLocked(screenBrightnessOverride, autoBrightness,
+                boolean ready = powerGroup.updateLocked(screenBrightnessOverride,
                         shouldUseProximitySensorLocked(), shouldBoostScreenBrightness(),
                         mDozeScreenStateOverrideFromDreamManager,
                         mDozeScreenBrightnessOverrideFromDreamManagerFloat,
@@ -3469,7 +3456,6 @@ public final class PowerManagerService extends SystemService
                             powerGroup.getUserActivitySummaryLocked())
                             + ", mBootCompleted=" + mBootCompleted
                             + ", screenBrightnessOverride=" + screenBrightnessOverride
-                            + ", useAutoBrightness=" + autoBrightness
                             + ", mScreenBrightnessBoostInProgress="
                             + mScreenBrightnessBoostInProgress
                             + ", sQuiescent=" + sQuiescent);
@@ -4488,7 +4474,6 @@ public final class PowerManagerService extends SystemService
                     + mMaximumScreenOffTimeoutFromDeviceAdmin + " (enforced="
                     + isMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked() + ")");
             pw.println("  mStayOnWhilePluggedInSetting=" + mStayOnWhilePluggedInSetting);
-            pw.println("  mScreenBrightnessModeSetting=" + mScreenBrightnessModeSetting);
             pw.println("  mScreenBrightnessOverrideFromWindowManager="
                     + mScreenBrightnessOverrideFromWindowManager);
             pw.println("  mUserActivityTimeoutOverrideFromWindowManager="
@@ -4865,9 +4850,6 @@ public final class PowerManagerService extends SystemService
                             != 0));
             proto.end(stayOnWhilePluggedInToken);
 
-            proto.write(
-                    PowerServiceSettingsAndConfigurationDumpProto.SCREEN_BRIGHTNESS_MODE_SETTING,
-                    mScreenBrightnessModeSetting);
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto
                             .SCREEN_BRIGHTNESS_OVERRIDE_FROM_WINDOW_MANAGER,

@@ -14,26 +14,8 @@
  * limitations under the License.
  */
 
-#include "jni.h"
-#include "utils/Log.h"
+package com.android.internal.telephony;
 
-namespace android {
-int register_android_server_com_android_server_pm_Settings(JNIEnv* env);
-};
-
-using namespace android;
-
-extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */) {
-    JNIEnv* env = NULL;
-    jint result = -1;
-
-    if (vm->GetEnv((void**)&env, JNI_VERSION_1_4) != JNI_OK) {
-        ALOGE("GetEnv failed!");
-        return result;
-    }
-    ALOG_ASSERT(env, "Could not retrieve the env!");
-
-    register_android_server_com_android_server_pm_Settings(env);
-
-    return JNI_VERSION_1_4;
+oneway interface ICarrierConfigChangeListener {
+    void onCarrierConfigChanged(int slotIndex, int subId, int carrierId, int specificCarrierId);
 }

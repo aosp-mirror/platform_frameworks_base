@@ -6117,9 +6117,8 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_UID = "android.intent.extra.UID";
 
     /**
-     * @hide String array of package names.
+     * String array of package names.
      */
-    @SystemApi
     public static final String EXTRA_PACKAGES = "android.intent.extra.PACKAGES";
 
     /**

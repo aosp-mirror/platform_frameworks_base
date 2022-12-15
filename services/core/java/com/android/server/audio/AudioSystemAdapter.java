@@ -192,15 +192,7 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
             synchronized (mDevicesForAttrCache) {
                 res = mDevicesForAttrCache.get(key);
                 if (res == null) {
-                    // result from AudioSystem guaranteed non-null, but could be invalid
-                    // if there is a failure to talk to APM
                     res = AudioSystem.getDevicesForAttributes(attributes, forVolume);
-                    if (res.size() > 1 && res.get(0) != null
-                            && res.get(0).getInternalType() == AudioSystem.DEVICE_NONE) {
-                        Log.e(TAG, "unable to get devices for " + attributes);
-                        // return now, do not put invalid value in cache
-                        return res;
-                    }
                     mDevicesForAttrCache.put(key, res);
                     if (DEBUG_CACHE) {
                         Log.d(TAG, mMethodNames[METHOD_GETDEVICESFORATTRIBUTES]

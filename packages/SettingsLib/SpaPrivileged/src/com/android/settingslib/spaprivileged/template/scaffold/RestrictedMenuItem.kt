@@ -16,7 +16,6 @@
 
 package com.android.settingslib.spaprivileged.template.scaffold
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -24,7 +23,7 @@ import com.android.settingslib.spa.widget.scaffold.MoreOptionsScope
 import com.android.settingslib.spaprivileged.model.enterprise.BaseUserRestricted
 import com.android.settingslib.spaprivileged.model.enterprise.BlockedByAdmin
 import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
-import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProvider
+import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderFactory
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderImpl
 
 @Composable
@@ -41,7 +40,7 @@ internal fun MoreOptionsScope.RestrictedMenuItemImpl(
     text: String,
     restrictions: Restrictions,
     onClick: () -> Unit,
-    restrictionsProviderFactory: (Context, Restrictions) -> RestrictionsProvider,
+    restrictionsProviderFactory: RestrictionsProviderFactory,
 ) {
     val context = LocalContext.current
     val restrictionsProvider = remember(restrictions) {

@@ -106,8 +106,8 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
                 onVisible(PROFILE_USER_ID));
         startForegroundUser(PARENT_USER_ID);
 
-        int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID, BG,
-                DEFAULT_DISPLAY);
+        int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID,
+                BG_VISIBLE, DEFAULT_DISPLAY);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
 
         expectUserIsVisible(PROFILE_USER_ID);
@@ -126,7 +126,7 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
     public void testStartBgUser_onSecondaryDisplay() throws Exception {
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
-        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG,
+        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG_VISIBLE,
                 SECONDARY_DISPLAY_ID);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 

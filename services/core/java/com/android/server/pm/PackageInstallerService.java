@@ -45,6 +45,7 @@ import android.content.pm.IPackageInstallerSession;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.InstallConstraints;
+import android.content.pm.PackageInstaller.InstallConstraintsResult;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageItemInfo;
@@ -91,7 +92,6 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ImageUtils;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.IoThread;
@@ -123,6 +123,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.IntPredicate;
 import java.util.function.Supplier;
 
@@ -153,6 +154,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     private static final long MAX_HISTORICAL_SESSIONS = 1048576;
     /** Destroy sessions older than this on storage free request */
     private static final long MAX_SESSION_AGE_ON_LOW_STORAGE_MILLIS = 8 * DateUtils.HOUR_IN_MILLIS;
+    /** Maximum time to wait for install constraints to be satisfied */
+    private static final long MAX_INSTALL_CONSTRAINTS_TIMEOUT_MILLIS = DateUtils.WEEK_IN_MILLIS;
 
     /** Threshold of historical sessions size */
     private static final int HISTORICAL_SESSIONS_THRESHOLD = 500;
@@ -300,6 +303,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     public void systemReady() {
         mAppOps = mContext.getSystemService(AppOpsManager.class);
         mStagingManager.systemReady();
+        mGentleUpdateHelper.systemReady();
 
         synchronized (mSessions) {
             readSessionsLocked();
@@ -1248,12 +1252,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
     }
 
-    @Override
-    public void checkInstallConstraints(String installerPackageName, List<String> packageNames,
-            InstallConstraints constraints, RemoteCallback callback) {
-        Preconditions.checkArgument(packageNames != null);
-        Preconditions.checkArgument(constraints != null);
-        Preconditions.checkArgument(callback != null);
+    private CompletableFuture<InstallConstraintsResult> checkInstallConstraintsInternal(
+            String installerPackageName, List<String> packageNames,
+            InstallConstraints constraints, long timeoutMillis) {
+        Objects.requireNonNull(packageNames);
+        Objects.requireNonNull(constraints);
 
         final var snapshot = mPm.snapshotComputer();
         final int callingUid = Binder.getCallingUid();
@@ -1267,11 +1270,41 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
-        var future = mGentleUpdateHelper.checkInstallConstraints(packageNames, constraints);
+        return mGentleUpdateHelper.checkInstallConstraints(
+                packageNames, constraints, timeoutMillis);
+    }
+
+    @Override
+    public void checkInstallConstraints(String installerPackageName, List<String> packageNames,
+            InstallConstraints constraints, RemoteCallback callback) {
+        Objects.requireNonNull(callback);
+        var future = checkInstallConstraintsInternal(
+                installerPackageName, packageNames, constraints, /*timeoutMillis=*/0);
         future.thenAccept(result -> {
             var b = new Bundle();
             b.putParcelable("result", result);
             callback.sendResult(b);
+        });
+    }
+
+    @Override
+    public void waitForInstallConstraints(String installerPackageName, List<String> packageNames,
+            InstallConstraints constraints, IntentSender callback, long timeoutMillis) {
+        Objects.requireNonNull(callback);
+        if (timeoutMillis < 0 || timeoutMillis > MAX_INSTALL_CONSTRAINTS_TIMEOUT_MILLIS) {
+            throw new IllegalArgumentException("Invalid timeoutMillis=" + timeoutMillis);
+        }
+        var future = checkInstallConstraintsInternal(
+                installerPackageName, packageNames, constraints, timeoutMillis);
+        future.thenAccept(result -> {
+            final var intent = new Intent();
+            intent.putExtra(Intent.EXTRA_PACKAGES, packageNames.toArray(new String[0]));
+            intent.putExtra(PackageInstaller.EXTRA_INSTALL_CONSTRAINTS, constraints);
+            intent.putExtra(PackageInstaller.EXTRA_INSTALL_CONSTRAINTS_RESULT, result);
+            try {
+                callback.sendIntent(mContext, 0, intent, null, null);
+            } catch (SendIntentException ignore) {
+            }
         });
     }
 

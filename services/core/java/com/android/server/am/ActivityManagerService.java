@@ -13577,9 +13577,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             // updating their receivers to be exempt from this requirement until their receivers
             // are flagged.
             if (requireExplicitFlagForDynamicReceivers) {
-                if ("com.google.android.apps.messaging".equals(callerPackage)) {
-                    // Note, a versionCode check for this package is not performed because it could
-                    // cause breakage with a subsequent update outside the system image.
+                if ("com.shannon.imsservice".equals(callerPackage)) {
+                    // Note, a versionCode check for this package is not performed because this
+                    // package consumes the SecurityException, so it wouldn't be caught during
+                    // presubmit.
                     requireExplicitFlagForDynamicReceivers = false;
                 }
             }

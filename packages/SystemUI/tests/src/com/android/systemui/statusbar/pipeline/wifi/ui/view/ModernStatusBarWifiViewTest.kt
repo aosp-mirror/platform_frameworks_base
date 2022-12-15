@@ -16,11 +16,14 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.ui.view
 
+import android.content.res.ColorStateList
+import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.ViewUtils
 import android.view.View
+import android.widget.ImageView
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -44,6 +47,7 @@ import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiIntera
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -229,8 +233,41 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
         ViewUtils.detachView(view)
     }
 
+    @Test
+    fun onDarkChanged_iconHasNewColor() {
+        whenever(statusBarPipelineFlags.useWifiDebugColoring()).thenReturn(false)
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
+        ViewUtils.attachView(view)
+        testableLooper.processAllMessages()
+
+        val areas = ArrayList(listOf(Rect(0, 0, 1000, 1000)))
+        val color = 0x12345678
+        view.onDarkChanged(areas, 1.0f, color)
+        testableLooper.processAllMessages()
+
+        assertThat(view.getIconView().imageTintList).isEqualTo(ColorStateList.valueOf(color))
+    }
+
+    @Test
+    fun setStaticDrawableColor_iconHasNewColor() {
+        whenever(statusBarPipelineFlags.useWifiDebugColoring()).thenReturn(false)
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
+        ViewUtils.attachView(view)
+        testableLooper.processAllMessages()
+
+        val color = 0x23456789
+        view.setStaticDrawableColor(color)
+        testableLooper.processAllMessages()
+
+        assertThat(view.getIconView().imageTintList).isEqualTo(ColorStateList.valueOf(color))
+    }
+
     private fun View.getIconGroupView(): View {
         return this.requireViewById(R.id.wifi_group)
+    }
+
+    private fun View.getIconView(): ImageView {
+        return this.requireViewById(R.id.wifi_signal)
     }
 
     private fun View.getDotView(): View {

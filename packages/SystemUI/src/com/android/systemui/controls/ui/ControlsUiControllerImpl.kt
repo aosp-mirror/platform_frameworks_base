@@ -186,7 +186,7 @@ class ControlsUiControllerImpl @Inject constructor (
         val allStructures = controlsController.get().getFavorites()
         val selected = getPreferredSelectedItem(allStructures)
         val anyPanels = controlsListingController.get().getCurrentServices()
-                .none { it.panelActivity != null }
+                .any { it.panelActivity != null }
 
         return if (controlsController.get().addSeedingFavoritesCallback(onSeedingComplete)) {
             ControlsActivity::class.java

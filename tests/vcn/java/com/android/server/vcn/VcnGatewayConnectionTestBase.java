@@ -35,6 +35,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.net.ConnectivityDiagnosticsManager;
 import android.net.ConnectivityManager;
 import android.net.InetAddresses;
 import android.net.IpSecConfig;
@@ -157,6 +158,7 @@ public class VcnGatewayConnectionTestBase {
 
     @NonNull protected final IpSecService mIpSecSvc;
     @NonNull protected final ConnectivityManager mConnMgr;
+    @NonNull protected final ConnectivityDiagnosticsManager mConnDiagMgr;
 
     @NonNull protected final IkeSessionConnectionInfo mIkeConnectionInfo;
     @NonNull protected final IkeSessionConfiguration mIkeSessionConfiguration;
@@ -185,6 +187,13 @@ public class VcnGatewayConnectionTestBase {
         mConnMgr = mock(ConnectivityManager.class);
         VcnTestUtils.setupSystemService(
                 mContext, mConnMgr, Context.CONNECTIVITY_SERVICE, ConnectivityManager.class);
+
+        mConnDiagMgr = mock(ConnectivityDiagnosticsManager.class);
+        VcnTestUtils.setupSystemService(
+                mContext,
+                mConnDiagMgr,
+                Context.CONNECTIVITY_DIAGNOSTICS_SERVICE,
+                ConnectivityDiagnosticsManager.class);
 
         mIkeConnectionInfo =
                 new IkeSessionConnectionInfo(TEST_ADDR, TEST_ADDR_2, mock(Network.class));

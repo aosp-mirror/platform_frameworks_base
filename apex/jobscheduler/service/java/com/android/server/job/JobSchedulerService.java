@@ -86,6 +86,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -4166,6 +4167,100 @@ public class JobSchedulerService extends com.android.server.SystemService
             return mStorageController != null
                     ? mStorageController.getTracker().isStorageNotLow() : false;
         }
+    }
+
+    int getEstimatedNetworkBytes(PrintWriter pw, String pkgName, int userId, int jobId,
+            int byteOption) {
+        try {
+            final int uid = AppGlobals.getPackageManager().getPackageUid(pkgName, 0,
+                    userId != UserHandle.USER_ALL ? userId : UserHandle.USER_SYSTEM);
+            if (uid < 0) {
+                pw.print("unknown(");
+                pw.print(pkgName);
+                pw.println(")");
+                return JobSchedulerShellCommand.CMD_ERR_NO_PACKAGE;
+            }
+
+            synchronized (mLock) {
+                final JobStatus js = mJobs.getJobByUidAndJobId(uid, jobId);
+                if (DEBUG) {
+                    Slog.d(TAG, "get-estimated-network-bytes " + uid + "/" + jobId + ": " + js);
+                }
+                if (js == null) {
+                    pw.print("unknown("); UserHandle.formatUid(pw, uid);
+                    pw.print("/jid"); pw.print(jobId); pw.println(")");
+                    return JobSchedulerShellCommand.CMD_ERR_NO_JOB;
+                }
+
+                final long downloadBytes;
+                final long uploadBytes;
+                final Pair<Long, Long> bytes =
+                        mConcurrencyManager.getEstimatedNetworkBytesLocked(pkgName, uid, jobId);
+                if (bytes == null) {
+                    downloadBytes = js.getEstimatedNetworkDownloadBytes();
+                    uploadBytes = js.getEstimatedNetworkUploadBytes();
+                } else {
+                    downloadBytes = bytes.first;
+                    uploadBytes = bytes.second;
+                }
+                if (byteOption == JobSchedulerShellCommand.BYTE_OPTION_DOWNLOAD) {
+                    pw.println(downloadBytes);
+                } else {
+                    pw.println(uploadBytes);
+                }
+                pw.println();
+            }
+        } catch (RemoteException e) {
+            // can't happen
+        }
+        return 0;
+    }
+
+    int getTransferredNetworkBytes(PrintWriter pw, String pkgName, int userId, int jobId,
+            int byteOption) {
+        try {
+            final int uid = AppGlobals.getPackageManager().getPackageUid(pkgName, 0,
+                    userId != UserHandle.USER_ALL ? userId : UserHandle.USER_SYSTEM);
+            if (uid < 0) {
+                pw.print("unknown(");
+                pw.print(pkgName);
+                pw.println(")");
+                return JobSchedulerShellCommand.CMD_ERR_NO_PACKAGE;
+            }
+
+            synchronized (mLock) {
+                final JobStatus js = mJobs.getJobByUidAndJobId(uid, jobId);
+                if (DEBUG) {
+                    Slog.d(TAG, "get-transferred-network-bytes " + uid + "/" + jobId + ": " + js);
+                }
+                if (js == null) {
+                    pw.print("unknown("); UserHandle.formatUid(pw, uid);
+                    pw.print("/jid"); pw.print(jobId); pw.println(")");
+                    return JobSchedulerShellCommand.CMD_ERR_NO_JOB;
+                }
+
+                final long downloadBytes;
+                final long uploadBytes;
+                final Pair<Long, Long> bytes =
+                        mConcurrencyManager.getTransferredNetworkBytesLocked(pkgName, uid, jobId);
+                if (bytes == null) {
+                    downloadBytes = 0;
+                    uploadBytes = 0;
+                } else {
+                    downloadBytes = bytes.first;
+                    uploadBytes = bytes.second;
+                }
+                if (byteOption == JobSchedulerShellCommand.BYTE_OPTION_DOWNLOAD) {
+                    pw.println(downloadBytes);
+                } else {
+                    pw.println(uploadBytes);
+                }
+                pw.println();
+            }
+        } catch (RemoteException e) {
+            // can't happen
+        }
+        return 0;
     }
 
     private boolean checkRunLongJobsPermission(int packageUid, String packageName) {

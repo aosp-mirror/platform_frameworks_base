@@ -42,6 +42,7 @@ import com.android.settingslib.spaprivileged.model.app.AppListModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.android.settingslib.spaprivileged.model.app.userId
 import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
+import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderFactory
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderImpl
 import com.android.settingslib.spaprivileged.template.preference.RestrictedSwitchPreference
 import kotlinx.coroutines.flow.Flow
@@ -64,41 +65,18 @@ internal class TogglePermissionAppListPageProvider(
         val permissionType = parameter.getStringArg(PERMISSION, arguments)!!
         val appListPage = SettingsPage.create(name, parameter = parameter, arguments = arguments)
         val appInfoPage = TogglePermissionAppInfoPageProvider.buildPageData(permissionType)
-        val entryList = mutableListOf<SettingsEntry>()
         // TODO: add more categories, such as personal, work, cloned, etc.
-        for (category in listOf("personal")) {
-            entryList.add(
-                SettingsEntryBuilder.createLinkFrom("${ENTRY_NAME}_$category", appListPage)
-                    .setLink(toPage = appInfoPage)
-                    .build()
-            )
+        return listOf("personal").map { category ->
+            SettingsEntryBuilder.createLinkFrom("${ENTRY_NAME}_$category", appListPage)
+                .setLink(toPage = appInfoPage)
+                .build()
         }
-        return entryList
     }
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        TogglePermissionAppList(arguments?.getString(PERMISSION)!!)
-    }
-
-    @Composable
-    private fun TogglePermissionAppList(permissionType: String) {
-        val listModel = appListTemplate.rememberModel(permissionType)
-        val context = LocalContext.current
-        val internalListModel = remember {
-            TogglePermissionInternalAppListModel(context, listModel)
-        }
-        AppListPage(
-            title = stringResource(listModel.pageTitleResId),
-            listModel = internalListModel,
-        ) {
-            AppListItem(
-                onClick = TogglePermissionAppInfoPageProvider.navigator(
-                    permissionType = permissionType,
-                    app = record.app,
-                ),
-            )
-        }
+        val permissionType = arguments?.getString(PERMISSION)!!
+        appListTemplate.rememberModel(permissionType).TogglePermissionAppList(permissionType)
     }
 
     companion object {
@@ -132,9 +110,34 @@ internal class TogglePermissionAppListPageProvider(
     }
 }
 
+@Composable
+internal fun <T : AppRecord> TogglePermissionAppListModel<T>.TogglePermissionAppList(
+    permissionType: String,
+    restrictionsProviderFactory: RestrictionsProviderFactory = ::RestrictionsProviderImpl,
+    appList: @Composable AppListInput<T>.() -> Unit = { AppList() },
+) {
+    val context = LocalContext.current
+    val internalListModel = remember {
+        TogglePermissionInternalAppListModel(context, this, restrictionsProviderFactory)
+    }
+    AppListPage(
+        title = stringResource(pageTitleResId),
+        listModel = internalListModel,
+        appList = appList,
+    ) {
+        AppListItem(
+            onClick = TogglePermissionAppInfoPageProvider.navigator(
+                permissionType = permissionType,
+                app = record.app,
+            ),
+        )
+    }
+}
+
 internal class TogglePermissionInternalAppListModel<T : AppRecord>(
     private val context: Context,
     private val listModel: TogglePermissionAppListModel<T>,
+    private val restrictionsProviderFactory: RestrictionsProviderFactory,
 ) : AppListModel<T> {
     override fun transform(userIdFlow: Flow<Int>, appListFlow: Flow<List<ApplicationInfo>>) =
         listModel.transform(userIdFlow, appListFlow)
@@ -147,12 +150,12 @@ internal class TogglePermissionInternalAppListModel<T : AppRecord>(
 
     @Composable
     fun getSummary(record: T): State<String> {
-        val restrictionsProvider = remember {
+        val restrictionsProvider = remember(record.app.userId) {
             val restrictions = Restrictions(
                 userId = record.app.userId,
                 keys = listModel.switchRestrictionKeys,
             )
-            RestrictionsProviderImpl(context, restrictions)
+            restrictionsProviderFactory(context, restrictions)
         }
         val restrictedMode = restrictionsProvider.restrictedModeState()
         val allowed = listModel.isAllowed(record)

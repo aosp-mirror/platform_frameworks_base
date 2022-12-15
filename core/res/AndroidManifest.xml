@@ -4975,6 +4975,15 @@
     <permission android:name="android.permission.ROTATE_SURFACE_FLINGER"
         android:protectionLevel="signature|recents" />
 
+    <!-- @SystemApi Allows an application to provide hints to SurfaceFlinger that can influence
+         its wakes up time to compose the next frame. This is a subset of the capabilities granted
+         by {@link #ACCESS_SURFACE_FLINGER}.
+         <p>Not for use by third-party applications.
+         @hide
+    -->
+    <permission android:name="android.permission.WAKEUP_SURFACE_FLINGER"
+        android:protectionLevel="signature|recents" />
+
     <!-- Allows an application to take screen shots and more generally
          get access to the frame buffer data.
          <p>Not for use by third-party applications.

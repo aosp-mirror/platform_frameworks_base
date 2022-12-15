@@ -45,6 +45,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.listeners.ListenerExecutor;
+import com.android.internal.telephony.ICarrierConfigChangeListener;
 import com.android.internal.telephony.ICarrierPrivilegesCallback;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.ITelephonyRegistry;
@@ -54,8 +55,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
@@ -88,6 +91,14 @@ public class TelephonyRegistryManager {
     private final Map<SubscriptionManager.OnOpportunisticSubscriptionsChangedListener,
             IOnSubscriptionsChangedListener> mOpportunisticSubscriptionChangedListenerMap
             = new HashMap<>();
+
+    /**
+     * A mapping between {@link CarrierConfigManager.CarrierConfigChangeListener} and its callback
+     * ICarrierConfigChangeListener.
+     */
+    private final ConcurrentHashMap<CarrierConfigManager.CarrierConfigChangeListener,
+                ICarrierConfigChangeListener>
+            mCarrierConfigChangeListenerMap = new ConcurrentHashMap<>();
 
 
     /** @hide **/
@@ -1410,6 +1421,96 @@ public class TelephonyRegistryManager {
             sRegistry.notifyCarrierServiceChanged(logicalSlotIndex, packageName, uid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Register a {@link android.telephony.CarrierConfigManager.CarrierConfigChangeListener} to get
+     * notification when carrier configurations have changed.
+     *
+     * @param executor The executor on which the callback will be executed.
+     * @param listener The CarrierConfigChangeListener to be registered with.
+     */
+    public void addCarrierConfigChangedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull CarrierConfigManager.CarrierConfigChangeListener listener) {
+        Objects.requireNonNull(executor, "Executor should be non-null.");
+        Objects.requireNonNull(listener, "Listener should be non-null.");
+        if (mCarrierConfigChangeListenerMap.get(listener) != null) {
+            Log.e(TAG, "registerCarrierConfigChangeListener: listener already present");
+            return;
+        }
+
+        ICarrierConfigChangeListener callback = new ICarrierConfigChangeListener.Stub() {
+            @Override
+            public void onCarrierConfigChanged(int slotIndex, int subId, int carrierId,
+                    int specificCarrierId) {
+                Log.d(TAG, "onCarrierConfigChanged call in ICarrierConfigChangeListener callback");
+                final long identify = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> listener.onCarrierConfigChanged(slotIndex, subId,
+                            carrierId, specificCarrierId));
+                } finally {
+                    Binder.restoreCallingIdentity(identify);
+                }
+            }
+        };
+
+        try {
+            sRegistry.addCarrierConfigChangeListener(callback,
+                    mContext.getOpPackageName(), mContext.getAttributionTag());
+            mCarrierConfigChangeListenerMap.put(listener, callback);
+        } catch (RemoteException re) {
+            // system server crashes
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister to stop the notification when carrier configurations changed.
+     *
+     * @param listener The CarrierConfigChangeListener to be unregistered with.
+     */
+    public void removeCarrierConfigChangedListener(
+            @NonNull CarrierConfigManager.CarrierConfigChangeListener listener) {
+        Objects.requireNonNull(listener, "Listener should be non-null.");
+        if (mCarrierConfigChangeListenerMap.get(listener) == null) {
+            Log.e(TAG, "removeCarrierConfigChangedListener: listener was not present");
+            return;
+        }
+
+        try {
+            sRegistry.removeCarrierConfigChangeListener(
+                    mCarrierConfigChangeListenerMap.get(listener), mContext.getOpPackageName());
+            mCarrierConfigChangeListenerMap.remove(listener);
+        } catch (RemoteException re) {
+            // System sever crashes
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify the registrants the carrier configurations have changed.
+     *
+     * @param slotIndex         The SIM slot index on which to monitor and get notification.
+     * @param subId             The subscription on the SIM slot. May be
+     *                          {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
+     * @param carrierId         The optional carrier Id, may be
+     *                          {@link TelephonyManager#UNKNOWN_CARRIER_ID}.
+     * @param specificCarrierId The optional specific carrier Id, may be {@link
+     *                          TelephonyManager#UNKNOWN_CARRIER_ID}.
+     */
+    public void notifyCarrierConfigChanged(int slotIndex, int subId, int carrierId,
+            int specificCarrierId) {
+        // Only validate slotIndex, all others are optional and allowed to be invalid
+        if (!SubscriptionManager.isValidPhoneId(slotIndex)) {
+            Log.e(TAG, "notifyCarrierConfigChanged, ignored: invalid slotIndex " + slotIndex);
+            return;
+        }
+        try {
+            sRegistry.notifyCarrierConfigChanged(slotIndex, subId, carrierId, specificCarrierId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
     }
 }

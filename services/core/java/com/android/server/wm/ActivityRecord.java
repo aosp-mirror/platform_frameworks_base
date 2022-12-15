@@ -670,7 +670,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private boolean mCurrentLaunchCanTurnScreenOn = true;
 
     /** Whether our surface was set to be showing in the last call to {@link #prepareSurfaces} */
-    private boolean mLastSurfaceShowing = true;
+    private boolean mLastSurfaceShowing;
 
     /**
      * The activity is opaque and fills the entire space of this task.
@@ -873,6 +873,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean mEnteringAnimation;
     boolean mOverrideTaskTransition;
     boolean mDismissKeyguard;
+    boolean mShareIdentity;
 
     /** True if the activity has reported stopped; False if the activity becomes visible. */
     boolean mAppStopped;
@@ -1233,8 +1234,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.println(prefix + "supportsEnterPipOnTaskSwitch: "
                         + supportsEnterPipOnTaskSwitch);
             }
-            if (info.getMaxAspectRatio() != 0) {
-                pw.println(prefix + "maxAspectRatio=" + info.getMaxAspectRatio());
+            if (getMaxAspectRatio() != 0) {
+                pw.println(prefix + "maxAspectRatio=" + getMaxAspectRatio());
             }
             final float minAspectRatio = getMinAspectRatio();
             if (minAspectRatio != 0) {
@@ -1574,6 +1575,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 newParent.setResumedActivity(this, "onParentChanged");
                 mImeInsetsFrozenUntilStartInput = false;
             }
+            mLetterboxUiController.onActivityParentChanged(newParent);
         }
 
         if (rootTask != null && rootTask.topRunningActivity() == this) {
@@ -1997,6 +1999,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             mOverrideTaskTransition = options.getOverrideTaskTransition();
             mDismissKeyguard = options.getDismissKeyguard();
+            mShareIdentity = options.getShareIdentity();
         }
 
         ColorDisplayService.ColorDisplayServiceInternal cds = LocalServices.getService(
@@ -5470,7 +5473,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // no animation but there will still be a transition set.
         // We still need to delay hiding the surface such that it
         // can be synchronized with showing the next surface in the transition.
-        if (!isVisible() && !delayed && !displayContent.mAppTransition.isTransitionSet()) {
+        if (!usingShellTransitions && !isVisible() && !delayed
+                && !displayContent.mAppTransition.isTransitionSet()) {
             SurfaceControl.openTransaction();
             try {
                 forAllWindows(win -> {
@@ -7400,6 +7404,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
+    boolean showSurfaceOnCreation() {
+        return false;
+    }
+
+    @Override
     void prepareSurfaces() {
         final boolean show = isVisible() || isAnimating(PARENTS,
                 ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
@@ -7638,6 +7647,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Configuration.Orientation
     @Override
     int getRequestedConfigurationOrientation(boolean forDisplay) {
+        if (mLetterboxUiController.hasInheritedOrientation()) {
+            final RootDisplayArea root = getRootDisplayArea();
+            if (forDisplay && root != null && root.isOrientationDifferentFromDisplay()) {
+                return ActivityInfo.reverseOrientation(
+                        mLetterboxUiController.getInheritedOrientation());
+            } else {
+                return mLetterboxUiController.getInheritedOrientation();
+            }
+        }
         if (mOrientation == SCREEN_ORIENTATION_BEHIND && task != null) {
             // We use Task here because we want to be consistent with what happens in
             // multi-window mode where other tasks orientations are ignored.
@@ -7765,6 +7783,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Nullable
     CompatDisplayInsets getCompatDisplayInsets() {
+        if (mLetterboxUiController.hasInheritedLetterboxBehavior()) {
+            return mLetterboxUiController.getInheritedCompatDisplayInsets();
+        }
         return mCompatDisplayInsets;
     }
 
@@ -7847,6 +7868,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
     private void updateCompatDisplayInsets() {
+        if (mLetterboxUiController.hasInheritedLetterboxBehavior()) {
+            mCompatDisplayInsets =  mLetterboxUiController.getInheritedCompatDisplayInsets();
+            return;
+        }
         if (mCompatDisplayInsets != null || !shouldCreateCompatDisplayInsets()) {
             // The override configuration is set only once in size compatibility mode.
             return;
@@ -7908,6 +7933,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     float getCompatScale() {
+        if (mLetterboxUiController.hasInheritedLetterboxBehavior()) {
+            return mLetterboxUiController.getInheritedSizeCompatScale();
+        }
         return hasSizeCompatBounds() ? mSizeCompatScale : super.getCompatScale();
     }
 
@@ -8017,6 +8045,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
+     * @return The orientation to use to understand if reachability is enabled.
+     */
+    @ActivityInfo.ScreenOrientation
+    int getOrientationForReachability() {
+        return mLetterboxUiController.hasInheritedLetterboxBehavior()
+                ? mLetterboxUiController.getInheritedOrientation()
+                : getRequestedConfigurationOrientation();
+    }
+
+    /**
      * Returns whether activity bounds are letterboxed.
      *
      * <p>Note that letterbox UI may not be shown even when this returns {@code true}. See {@link
@@ -8055,6 +8093,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private int getAppCompatState(boolean ignoreVisibility) {
         if (!ignoreVisibility && !mVisibleRequested) {
             return APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
+        }
+        // TODO(b/256564921): Investigate if we need new metrics for translucent activities
+        if (mLetterboxUiController.hasInheritedLetterboxBehavior()) {
+            return mLetterboxUiController.getInheritedAppCompatState();
         }
         if (mInSizeCompatModeForBounds) {
             return APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
@@ -8526,6 +8568,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     private boolean isInSizeCompatModeForBounds(final Rect appBounds, final Rect containerBounds) {
+        if (mLetterboxUiController.hasInheritedLetterboxBehavior()) {
+            // To avoid wrong app behaviour, we decided to disable SCM when a translucent activity
+            // is letterboxed.
+            return false;
+        }
         final int appWidth = appBounds.width();
         final int appHeight = appBounds.height();
         final int containerAppWidth = containerBounds.width();
@@ -8546,10 +8593,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // The rest of the condition is that only one side is smaller than the container, but it
         // still needs to exclude the cases where the size is limited by the fixed aspect ratio.
-        if (info.getMaxAspectRatio() > 0) {
+        final float maxAspectRatio = getMaxAspectRatio();
+        if (maxAspectRatio > 0) {
             final float aspectRatio = (0.5f + Math.max(appWidth, appHeight))
                     / Math.min(appWidth, appHeight);
-            if (aspectRatio >= info.getMaxAspectRatio()) {
+            if (aspectRatio >= maxAspectRatio) {
                 // The current size has reached the max aspect ratio.
                 return false;
             }
@@ -8771,7 +8819,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
     private boolean applyAspectRatio(Rect outBounds, Rect containingAppBounds,
             Rect containingBounds, float desiredAspectRatio) {
-        final float maxAspectRatio = info.getMaxAspectRatio();
+        final float maxAspectRatio = getMaxAspectRatio();
         final Task rootTask = getRootTask();
         final float minAspectRatio = getMinAspectRatio();
         final TaskFragment organizedTf = getOrganizedTaskFragment();
@@ -8878,6 +8926,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Returns the min aspect ratio of this activity.
      */
     float getMinAspectRatio() {
+        if (mLetterboxUiController.hasInheritedLetterboxBehavior()) {
+            return mLetterboxUiController.getInheritedMinAspectRatio();
+        }
         if (info.applicationInfo == null) {
             return info.getMinAspectRatio();
         }
@@ -8922,11 +8973,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 && parent.getWindowConfiguration().getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
     }
 
+    float getMaxAspectRatio() {
+        if (mLetterboxUiController.hasInheritedLetterboxBehavior()) {
+            return mLetterboxUiController.getInheritedMaxAspectRatio();
+        }
+        return info.getMaxAspectRatio();
+    }
+
     /**
      * Returns true if the activity has maximum or minimum aspect ratio.
      */
     private boolean hasFixedAspectRatio() {
-        return info.getMaxAspectRatio() != 0 || getMinAspectRatio() != 0;
+        return getMaxAspectRatio() != 0 || getMinAspectRatio() != 0;
     }
 
     /**

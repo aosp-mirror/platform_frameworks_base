@@ -29,6 +29,7 @@ import android.util.Slog;
 import java.io.EOFException;
 import java.io.FileDescriptor;
 import java.io.InterruptedIOException;
+import java.net.ProtocolException;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -39,12 +40,16 @@ import java.util.function.Consumer;
 // write contents of the host system's clipboard.
 class EmulatorClipboardMonitor implements Consumer<ClipData> {
     private static final String TAG = "EmulatorClipboardMonitor";
+
     private static final String PIPE_NAME = "pipe:clipboard";
     private static final int HOST_PORT = 5000;
-    private final Thread mHostMonitorThread;
+
     private static final boolean LOG_CLIBOARD_ACCESS =
             SystemProperties.getBoolean("ro.boot.qemu.log_clipboard_access", false);
+    private static final int MAX_CLIPBOARD_BYTES = 128 << 20;
+
     private FileDescriptor mPipe = null;
+    private final Thread mHostMonitorThread;
 
     private static byte[] createOpenHandshake() {
         // String.getBytes doesn't include the null terminator,
@@ -97,14 +102,18 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         return fd;
     }
 
-    private static byte[] receiveMessage(final FileDescriptor fd) throws ErrnoException,
-            InterruptedIOException, EOFException {
+    private byte[] receiveMessage(final FileDescriptor fd) throws ErrnoException,
+            InterruptedIOException, EOFException, ProtocolException {
         final byte[] lengthBits = new byte[4];
         readFully(fd, lengthBits, 0, lengthBits.length);
 
         final ByteBuffer bb = ByteBuffer.wrap(lengthBits);
         bb.order(ByteOrder.LITTLE_ENDIAN);
         final int msgLen = bb.getInt();
+
+        if (msgLen <= 0 || msgLen > MAX_CLIPBOARD_BYTES) {
+            throw new ProtocolException("Clipboard message length: " + msgLen + " out of bounds.");
+        }
 
         final byte[] msg = new byte[msgLen];
         readFully(fd, msg, 0, msg.length);
@@ -150,7 +159,8 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
                     }
                     setAndroidClipboard.accept(clip);
                 } catch (ErrnoException | EOFException | InterruptedIOException
-                         | InterruptedException e) {
+                         | InterruptedException | ProtocolException | OutOfMemoryError e) {
+                    Slog.w(TAG, "Failure to read from host clipboard", e);
                     setPipeFD(null);
 
                     try {

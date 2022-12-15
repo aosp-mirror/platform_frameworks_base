@@ -6986,10 +6986,8 @@ public class UserManagerService extends IUserManager.Stub {
         @UserAssignmentResult
         public int assignUserToDisplayOnStart(@UserIdInt int userId,
                 @UserIdInt int profileGroupId, @UserStartMode int userStartMode, int displayId) {
-            // TODO(245939659): change UserVisibilityMediator to take @UserStartMode
-            boolean foreground = userStartMode == UserManagerInternal.USER_START_MODE_FOREGROUND;
             return mUserVisibilityMediator.assignUserToDisplayOnStart(userId, profileGroupId,
-                    foreground, displayId);
+                    userStartMode, displayId);
         }
 
         @Override

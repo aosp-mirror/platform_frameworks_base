@@ -171,8 +171,8 @@ class TunerSession extends ITuner.Stub {
     }
 
     @Override
-    public void scan(boolean directionDown, boolean skipSubChannel) throws RemoteException {
-        mEventLogger.logRadioEvent("Scan with direction %s, skipSubChannel? %s",
+    public void seek(boolean directionDown, boolean skipSubChannel) throws RemoteException {
+        mEventLogger.logRadioEvent("Seek with direction %s, skipSubChannel? %s",
                 directionDown ? "down" : "up", skipSubChannel ? "yes" : "no");
         if (!RadioServiceUserController.isCurrentOrSystemUser()) {
             Slogf.w(TAG, "Cannot scan on HAL 2.0 client from non-current user");
@@ -214,7 +214,7 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void cancelAnnouncement() {
-        Slog.i(TAG, "Announcements control doesn't involve cancelling at the HAL level in HAL 2.0");
+        Slog.w(TAG, "Announcements control doesn't involve cancelling at the HAL level in HAL 2.0");
     }
 
     @Override
@@ -225,7 +225,7 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public boolean startBackgroundScan() {
-        Slog.i(TAG, "Explicit background scan trigger is not supported with HAL 2.0");
+        Slog.w(TAG, "Explicit background scan trigger is not supported with HAL 2.0");
         if (!RadioServiceUserController.isCurrentOrSystemUser()) {
             Slogf.w(TAG,
                     "Cannot start background scan on HAL 2.0 client from non-current user");

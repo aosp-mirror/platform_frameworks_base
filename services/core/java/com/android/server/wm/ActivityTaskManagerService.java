@@ -3616,6 +3616,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
+    public void setSplitScreenResizing(boolean resizing) {
+        enforceTaskPermission("setSplitScreenResizing()");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mTaskSupervisor.setSplitScreenResizing(resizing);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public IWindowOrganizerController getWindowOrganizerController() {
         return mWindowOrganizerController;
     }

@@ -123,6 +123,7 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
                 messageBuilder.append(" ").append(appLabel).append(".\n\n");
             }
         }
+        boolean isClonedApp = false;
 
         final boolean isUpdate =
                 ((dialogInfo.appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
@@ -144,16 +145,36 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
                     messageBuilder.append(
                             getString(R.string.uninstall_application_text_current_user_work_profile,
                                     userInfo.name));
+                } else if (userInfo.isCloneProfile()
+                        && userInfo.profileGroupId == myUserHandle.getIdentifier()) {
+                    isClonedApp = true;
+                    messageBuilder.append(getString(
+                            R.string.uninstall_application_text_current_user_clone_profile));
                 } else {
                     messageBuilder.append(
                             getString(R.string.uninstall_application_text_user, userInfo.name));
                 }
+            } else if (isCloneProfile(myUserHandle)) {
+                isClonedApp = true;
+                messageBuilder.append(getString(
+                        R.string.uninstall_application_text_current_user_clone_profile));
             } else {
-                messageBuilder.append(getString(R.string.uninstall_application_text));
+                if (Process.myUserHandle().equals(UserHandle.SYSTEM)
+                        && hasClonedInstance(dialogInfo.appInfo.packageName)) {
+                    messageBuilder.append(getString(
+                            R.string.uninstall_application_text_with_clone_instance,
+                            appLabel));
+                } else {
+                    messageBuilder.append(getString(R.string.uninstall_application_text));
+                }
             }
         }
 
-        dialogBuilder.setTitle(appLabel);
+        if (isClonedApp) {
+            dialogBuilder.setTitle(getString(R.string.cloned_app_label, appLabel));
+        } else {
+            dialogBuilder.setTitle(appLabel);
+        }
         dialogBuilder.setPositiveButton(android.R.string.ok, this);
         dialogBuilder.setNegativeButton(android.R.string.cancel, this);
 
@@ -190,6 +211,42 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
         }
 
         return dialogBuilder.create();
+    }
+
+    private boolean isCloneProfile(UserHandle userHandle) {
+        UserManager customUserManager = getContext()
+                .createContextAsUser(UserHandle.of(userHandle.getIdentifier()), 0)
+                .getSystemService(UserManager.class);
+        if (customUserManager.isUserOfType(UserManager.USER_TYPE_PROFILE_CLONE)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean hasClonedInstance(String packageName) {
+        // Check if clone user is present on the device.
+        UserHandle cloneUser = null;
+        UserManager userManager = getContext().getSystemService(UserManager.class);
+        List<UserHandle> profiles = userManager.getUserProfiles();
+        for (UserHandle userHandle : profiles) {
+            if (!Process.myUserHandle().equals(UserHandle.SYSTEM) && isCloneProfile(userHandle)) {
+                cloneUser = userHandle;
+                break;
+            }
+        }
+
+        // Check if another instance of given package exists in clone user profile.
+        if (cloneUser != null) {
+            try {
+                if (getContext().getPackageManager()
+                        .getPackageUidAsUser(packageName, cloneUser.getIdentifier()) > 0) {
+                    return true;
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                return false;
+            }
+        }
+        return false;
     }
 
     @Override

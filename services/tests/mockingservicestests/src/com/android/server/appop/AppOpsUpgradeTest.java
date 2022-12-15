@@ -121,13 +121,13 @@ public class AppOpsUpgradeTest {
         }
     }
 
-    private void assertSameModes(SparseArray<AppOpsServiceImpl.UidState> uidStates,
+    private void assertSameModes(SparseArray<AppOpsService.UidState> uidStates,
             int op1, int op2) {
         int numberOfNonDefaultOps = 0;
         final int defaultModeOp1 = AppOpsManager.opToDefaultMode(op1);
         final int defaultModeOp2 = AppOpsManager.opToDefaultMode(op2);
         for (int i = 0; i < uidStates.size(); i++) {
-            final AppOpsServiceImpl.UidState uidState = uidStates.valueAt(i);
+            final AppOpsService.UidState uidState = uidStates.valueAt(i);
             SparseIntArray opModes = uidState.getNonDefaultUidModes();
             if (opModes != null) {
                 final int uidMode1 = opModes.get(op1, defaultModeOp1);
@@ -141,12 +141,12 @@ public class AppOpsUpgradeTest {
                 continue;
             }
             for (int j = 0; j < uidState.pkgOps.size(); j++) {
-                final AppOpsServiceImpl.Ops ops = uidState.pkgOps.valueAt(j);
+                final AppOpsService.Ops ops = uidState.pkgOps.valueAt(j);
                 if (ops == null) {
                     continue;
                 }
-                final AppOpsServiceImpl.Op _op1 = ops.get(op1);
-                final AppOpsServiceImpl.Op _op2 = ops.get(op2);
+                final AppOpsService.Op _op1 = ops.get(op1);
+                final AppOpsService.Op _op2 = ops.get(op2);
                 final int mode1 = (_op1 == null) ? defaultModeOp1 : _op1.getMode();
                 final int mode2 = (_op2 == null) ? defaultModeOp2 : _op2.getMode();
                 assertEquals(mode1, mode2);
@@ -199,7 +199,7 @@ public class AppOpsUpgradeTest {
     public void upgradeRunAnyInBackground() {
         extractAppOpsFile(APP_OPS_UNVERSIONED_ASSET_PATH);
 
-        AppOpsServiceImpl testService = new AppOpsServiceImpl(sAppOpsFile, mHandler, mTestContext);
+        AppOpsService testService = new AppOpsService(sAppOpsFile, mHandler, mTestContext);
 
         testService.upgradeRunAnyInBackgroundLocked();
         assertSameModes(testService.mUidStates, AppOpsManager.OP_RUN_IN_BACKGROUND,
@@ -244,7 +244,7 @@ public class AppOpsUpgradeTest {
             return UserHandle.getUid(userId, appIds[index]);
         }).when(mPackageManagerInternal).getPackageUid(anyString(), anyLong(), anyInt());
 
-        AppOpsServiceImpl testService = new AppOpsServiceImpl(sAppOpsFile, mHandler, mTestContext);
+        AppOpsService testService = new AppOpsService(sAppOpsFile, mHandler, mTestContext);
 
         testService.upgradeScheduleExactAlarmLocked();
 
@@ -259,7 +259,7 @@ public class AppOpsUpgradeTest {
                 } else {
                     expectedMode = previousMode;
                 }
-                final AppOpsServiceImpl.UidState uidState = testService.mUidStates.get(uid);
+                final AppOpsService.UidState uidState = testService.mUidStates.get(uid);
                 assertEquals(expectedMode, uidState.getUidMode(OP_SCHEDULE_EXACT_ALARM));
             }
         }
@@ -268,7 +268,7 @@ public class AppOpsUpgradeTest {
         int[] unrelatedUidsInFile = {10225, 10178};
 
         for (int uid : unrelatedUidsInFile) {
-            final AppOpsServiceImpl.UidState uidState = testService.mUidStates.get(uid);
+            final AppOpsService.UidState uidState = testService.mUidStates.get(uid);
             assertEquals(AppOpsManager.opToDefaultMode(OP_SCHEDULE_EXACT_ALARM),
                     uidState.getUidMode(OP_SCHEDULE_EXACT_ALARM));
         }
@@ -278,8 +278,8 @@ public class AppOpsUpgradeTest {
     public void upgradeFromNoFile() {
         assertFalse(sAppOpsFile.exists());
 
-        AppOpsServiceImpl testService = spy(
-                new AppOpsServiceImpl(sAppOpsFile, mHandler, mTestContext));
+        AppOpsService testService = spy(
+                new AppOpsService(sAppOpsFile, mHandler, mTestContext));
 
         doNothing().when(testService).upgradeRunAnyInBackgroundLocked();
         doNothing().when(testService).upgradeScheduleExactAlarmLocked();
@@ -296,7 +296,7 @@ public class AppOpsUpgradeTest {
 
         AppOpsDataParser parser = new AppOpsDataParser(sAppOpsFile);
         assertTrue(parser.parse());
-        assertEquals(AppOpsServiceImpl.CURRENT_VERSION, parser.mVersion);
+        assertEquals(AppOpsService.CURRENT_VERSION, parser.mVersion);
     }
 
     @Test
@@ -306,8 +306,8 @@ public class AppOpsUpgradeTest {
         assertTrue(parser.parse());
         assertEquals(AppOpsDataParser.NO_VERSION, parser.mVersion);
 
-        AppOpsServiceImpl testService = spy(
-                new AppOpsServiceImpl(sAppOpsFile, mHandler, mTestContext));
+        AppOpsService testService = spy(
+                new AppOpsService(sAppOpsFile, mHandler, mTestContext));
 
         doNothing().when(testService).upgradeRunAnyInBackgroundLocked();
         doNothing().when(testService).upgradeScheduleExactAlarmLocked();
@@ -320,7 +320,7 @@ public class AppOpsUpgradeTest {
 
         testService.writeState();
         assertTrue(parser.parse());
-        assertEquals(AppOpsServiceImpl.CURRENT_VERSION, parser.mVersion);
+        assertEquals(AppOpsService.CURRENT_VERSION, parser.mVersion);
     }
 
     @Test
@@ -330,8 +330,8 @@ public class AppOpsUpgradeTest {
         assertTrue(parser.parse());
         assertEquals(1, parser.mVersion);
 
-        AppOpsServiceImpl testService = spy(
-                new AppOpsServiceImpl(sAppOpsFile, mHandler, mTestContext));
+        AppOpsService testService = spy(
+                new AppOpsService(sAppOpsFile, mHandler, mTestContext));
 
         doNothing().when(testService).upgradeRunAnyInBackgroundLocked();
         doNothing().when(testService).upgradeScheduleExactAlarmLocked();
@@ -344,7 +344,7 @@ public class AppOpsUpgradeTest {
 
         testService.writeState();
         assertTrue(parser.parse());
-        assertEquals(AppOpsServiceImpl.CURRENT_VERSION, parser.mVersion);
+        assertEquals(AppOpsService.CURRENT_VERSION, parser.mVersion);
     }
 
     /**

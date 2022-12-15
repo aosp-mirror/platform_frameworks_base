@@ -22,12 +22,14 @@ import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.Slog;
 import android.window.DisplayWindowPolicyController;
 
 import java.io.PrintWriter;
 import java.util.List;
 
 class DisplayWindowPolicyControllerHelper {
+    private static final String TAG = "DisplayWindowPolicyControllerHelper";
 
     private final DisplayContent mDisplayContent;
 
@@ -69,6 +71,17 @@ class DisplayWindowPolicyControllerHelper {
     public boolean canContainActivities(@NonNull List<ActivityInfo> activities,
             @WindowConfiguration.WindowingMode int windowingMode) {
         if (mDisplayWindowPolicyController == null) {
+            for (int i = activities.size() - 1; i >= 0; i--) {
+                final ActivityInfo aInfo = activities.get(i);
+                if (aInfo.requiredDisplayCategory != null) {
+                    Slog.e(TAG,
+                            String.format("Activity with requiredDisplayCategory='%s' cannot be"
+                                            + " displayed on display %d because that display does"
+                                            + " not have a matching category",
+                                    aInfo.requiredDisplayCategory, mDisplayContent.mDisplayId));
+                    return false;
+                }
+            }
             return true;
         }
         return mDisplayWindowPolicyController.canContainActivities(activities, windowingMode);
@@ -81,6 +94,14 @@ class DisplayWindowPolicyControllerHelper {
             @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
             boolean isNewTask) {
         if (mDisplayWindowPolicyController == null) {
+            if (activityInfo.requiredDisplayCategory != null) {
+                Slog.e(TAG,
+                        String.format("Activity with requiredDisplayCategory='%s' cannot be"
+                                + " launched on display %d because that display does"
+                                + " not have a matching category",
+                                activityInfo.requiredDisplayCategory, mDisplayContent.mDisplayId));
+                return false;
+            }
             return true;
         }
         return mDisplayWindowPolicyController.canActivityBeLaunched(activityInfo, windowingMode,

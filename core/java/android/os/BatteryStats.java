@@ -44,6 +44,7 @@ import android.util.LongSparseArray;
 import android.util.MutableBoolean;
 import android.util.Pair;
 import android.util.Printer;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseDoubleArray;
 import android.util.SparseIntArray;
@@ -52,6 +53,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BatteryStatsHistoryIterator;
 
 import com.google.android.collect.Lists;
 
@@ -2398,9 +2400,6 @@ public abstract class BatteryStats {
 
     public abstract int getHistoryUsedSize();
 
-    @UnsupportedAppUsage
-    public abstract boolean startIteratingHistoryLocked();
-
     public abstract int getHistoryStringPoolSize();
 
     public abstract int getHistoryStringPoolBytes();
@@ -2409,10 +2408,11 @@ public abstract class BatteryStats {
 
     public abstract int getHistoryTagPoolUid(int index);
 
-    @UnsupportedAppUsage
-    public abstract boolean getNextHistoryLocked(HistoryItem out);
-
-    public abstract void finishIteratingHistoryLocked();
+    /**
+     * Returns a BatteryStatsHistoryIterator. Battery history will remain immutable until the
+     * {@link BatteryStatsHistoryIterator#close()} method is invoked.
+     */
+    public abstract BatteryStatsHistoryIterator iterateBatteryStatsHistory();
 
     /**
      * Returns the number of times the device has been started.
@@ -7451,80 +7451,88 @@ public abstract class BatteryStats {
 
     private void dumpHistoryLocked(PrintWriter pw, int flags, long histStart, boolean checkin) {
         final HistoryPrinter hprinter = new HistoryPrinter();
-        final HistoryItem rec = new HistoryItem();
         long lastTime = -1;
         long baseTime = -1;
         boolean printed = false;
         HistoryEventTracker tracker = null;
-        while (getNextHistoryLocked(rec)) {
-            lastTime = rec.time;
-            if (baseTime < 0) {
-                baseTime = lastTime;
-            }
-            if (rec.time >= histStart) {
-                if (histStart >= 0 && !printed) {
-                    if (rec.cmd == HistoryItem.CMD_CURRENT_TIME
-                            || rec.cmd == HistoryItem.CMD_RESET
-                            || rec.cmd == HistoryItem.CMD_START
-                            || rec.cmd == HistoryItem.CMD_SHUTDOWN) {
-                        printed = true;
-                        hprinter.printNextItem(pw, rec, baseTime, checkin,
-                                (flags&DUMP_VERBOSE) != 0);
-                        rec.cmd = HistoryItem.CMD_UPDATE;
-                    } else if (rec.currentTime != 0) {
-                        printed = true;
-                        byte cmd = rec.cmd;
-                        rec.cmd = HistoryItem.CMD_CURRENT_TIME;
-                        hprinter.printNextItem(pw, rec, baseTime, checkin,
-                                (flags&DUMP_VERBOSE) != 0);
-                        rec.cmd = cmd;
+        try (BatteryStatsHistoryIterator iterator = iterateBatteryStatsHistory()) {
+            HistoryItem rec;
+            while ((rec = iterator.next()) != null) {
+                try {
+                    lastTime = rec.time;
+                    if (baseTime < 0) {
+                        baseTime = lastTime;
                     }
-                    if (tracker != null) {
-                        if (rec.cmd != HistoryItem.CMD_UPDATE) {
-                            hprinter.printNextItem(pw, rec, baseTime, checkin,
-                                    (flags&DUMP_VERBOSE) != 0);
-                            rec.cmd = HistoryItem.CMD_UPDATE;
-                        }
-                        int oldEventCode = rec.eventCode;
-                        HistoryTag oldEventTag = rec.eventTag;
-                        rec.eventTag = new HistoryTag();
-                        for (int i=0; i<HistoryItem.EVENT_COUNT; i++) {
-                            HashMap<String, SparseIntArray> active
-                                    = tracker.getStateForEvent(i);
-                            if (active == null) {
-                                continue;
+                    if (rec.time >= histStart) {
+                        if (histStart >= 0 && !printed) {
+                            if (rec.cmd == HistoryItem.CMD_CURRENT_TIME
+                                    || rec.cmd == HistoryItem.CMD_RESET
+                                    || rec.cmd == HistoryItem.CMD_START
+                                    || rec.cmd == HistoryItem.CMD_SHUTDOWN) {
+                                printed = true;
+                                hprinter.printNextItem(pw, rec, baseTime, checkin,
+                                        (flags & DUMP_VERBOSE) != 0);
+                                rec.cmd = HistoryItem.CMD_UPDATE;
+                            } else if (rec.currentTime != 0) {
+                                printed = true;
+                                byte cmd = rec.cmd;
+                                rec.cmd = HistoryItem.CMD_CURRENT_TIME;
+                                hprinter.printNextItem(pw, rec, baseTime, checkin,
+                                        (flags & DUMP_VERBOSE) != 0);
+                                rec.cmd = cmd;
                             }
-                            for (HashMap.Entry<String, SparseIntArray> ent
-                                    : active.entrySet()) {
-                                SparseIntArray uids = ent.getValue();
-                                for (int j=0; j<uids.size(); j++) {
-                                    rec.eventCode = i;
-                                    rec.eventTag.string = ent.getKey();
-                                    rec.eventTag.uid = uids.keyAt(j);
-                                    rec.eventTag.poolIdx = uids.valueAt(j);
+                            if (tracker != null) {
+                                if (rec.cmd != HistoryItem.CMD_UPDATE) {
                                     hprinter.printNextItem(pw, rec, baseTime, checkin,
-                                            (flags&DUMP_VERBOSE) != 0);
-                                    rec.wakeReasonTag = null;
-                                    rec.wakelockTag = null;
+                                            (flags & DUMP_VERBOSE) != 0);
+                                    rec.cmd = HistoryItem.CMD_UPDATE;
                                 }
+                                int oldEventCode = rec.eventCode;
+                                HistoryTag oldEventTag = rec.eventTag;
+                                rec.eventTag = new HistoryTag();
+                                for (int i = 0; i < HistoryItem.EVENT_COUNT; i++) {
+                                    Map<String, SparseIntArray> active =
+                                            tracker.getStateForEvent(i);
+                                    if (active == null) {
+                                        continue;
+                                    }
+                                    for (Map.Entry<String, SparseIntArray> ent :
+                                            active.entrySet()) {
+                                        SparseIntArray uids = ent.getValue();
+                                        for (int j = 0; j < uids.size(); j++) {
+                                            rec.eventCode = i;
+                                            rec.eventTag.string = ent.getKey();
+                                            rec.eventTag.uid = uids.keyAt(j);
+                                            rec.eventTag.poolIdx = uids.valueAt(j);
+                                            hprinter.printNextItem(pw, rec, baseTime, checkin,
+                                                    (flags & DUMP_VERBOSE) != 0);
+                                            rec.wakeReasonTag = null;
+                                            rec.wakelockTag = null;
+                                        }
+                                    }
+                                }
+                                rec.eventCode = oldEventCode;
+                                rec.eventTag = oldEventTag;
+                                tracker = null;
                             }
                         }
-                        rec.eventCode = oldEventCode;
-                        rec.eventTag = oldEventTag;
-                        tracker = null;
+                        hprinter.printNextItem(pw, rec, baseTime, checkin,
+                                (flags & DUMP_VERBOSE) != 0);
+                    } else if (false/* && rec.eventCode != HistoryItem.EVENT_NONE */) {
+                        // This is an attempt to aggregate the previous state and generate
+                        // fake events to reflect that state at the point where we start
+                        // printing real events.  It doesn't really work right, so is turned off.
+                        if (tracker == null) {
+                            tracker = new HistoryEventTracker();
+                        }
+                        tracker.updateState(rec.eventCode, rec.eventTag.string,
+                                rec.eventTag.uid, rec.eventTag.poolIdx);
                     }
+                } catch (Throwable t) {
+                    t.printStackTrace(pw);
+                    Slog.wtf(TAG, "Corrupted battery history", t);
+                    break;
                 }
-                hprinter.printNextItem(pw, rec, baseTime, checkin,
-                        (flags&DUMP_VERBOSE) != 0);
-            } else if (false && rec.eventCode != HistoryItem.EVENT_NONE) {
-                // This is an attempt to aggregate the previous state and generate
-                // fake events to reflect that state at the point where we start
-                // printing real events.  It doesn't really work right, so is turned off.
-                if (tracker == null) {
-                    tracker = new HistoryEventTracker();
-                }
-                tracker.updateState(rec.eventCode, rec.eventTag.string,
-                        rec.eventTag.uid, rec.eventTag.poolIdx);
             }
         }
         if (histStart >= 0) {
@@ -7595,25 +7603,19 @@ public abstract class BatteryStats {
         if ((flags&DUMP_HISTORY_ONLY) != 0 || !filtering) {
             final long historyTotalSize = getHistoryTotalSize();
             final long historyUsedSize = getHistoryUsedSize();
-            if (startIteratingHistoryLocked()) {
-                try {
-                    pw.print("Battery History (");
-                    pw.print((100*historyUsedSize)/historyTotalSize);
-                    pw.print("% used, ");
-                    printSizeValue(pw, historyUsedSize);
-                    pw.print(" used of ");
-                    printSizeValue(pw, historyTotalSize);
-                    pw.print(", ");
-                    pw.print(getHistoryStringPoolSize());
-                    pw.print(" strings using ");
-                    printSizeValue(pw, getHistoryStringPoolBytes());
-                    pw.println("):");
-                    dumpHistoryLocked(pw, flags, histStart, false);
-                    pw.println();
-                } finally {
-                    finishIteratingHistoryLocked();
-                }
-            }
+            pw.print("Battery History (");
+            pw.print((100 * historyUsedSize) / historyTotalSize);
+            pw.print("% used, ");
+            printSizeValue(pw, historyUsedSize);
+            pw.print(" used of ");
+            printSizeValue(pw, historyTotalSize);
+            pw.print(", ");
+            pw.print(getHistoryStringPoolSize());
+            pw.print(" strings using ");
+            printSizeValue(pw, getHistoryStringPoolBytes());
+            pw.println("):");
+            dumpHistoryLocked(pw, flags, histStart, false);
+            pw.println();
         }
 
         if (filtering && (flags&(DUMP_CHARGED_ONLY|DUMP_DAILY_ONLY)) == 0) {
@@ -7770,28 +7772,24 @@ public abstract class BatteryStats {
                 getEndPlatformVersion());
 
         if ((flags & (DUMP_INCLUDE_HISTORY | DUMP_HISTORY_ONLY)) != 0) {
-            if (startIteratingHistoryLocked()) {
-                try {
-                    for (int i=0; i<getHistoryStringPoolSize(); i++) {
-                        pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
-                        pw.print(HISTORY_STRING_POOL); pw.print(',');
-                        pw.print(i);
-                        pw.print(",");
-                        pw.print(getHistoryTagPoolUid(i));
-                        pw.print(",\"");
-                        String str = getHistoryTagPoolString(i);
-                        if (str != null) {
-                            str = str.replace("\\", "\\\\");
-                            str = str.replace("\"", "\\\"");
-                            pw.print(str);
-                        }
-                        pw.print("\"");
-                        pw.println();
-                    }
-                    dumpHistoryLocked(pw, flags, histStart, true);
-                } finally {
-                    finishIteratingHistoryLocked();
+            for (int i = 0; i < getHistoryStringPoolSize(); i++) {
+                pw.print(BATTERY_STATS_CHECKIN_VERSION);
+                pw.print(',');
+                pw.print(HISTORY_STRING_POOL);
+                pw.print(',');
+                pw.print(i);
+                pw.print(",");
+                pw.print(getHistoryTagPoolUid(i));
+                pw.print(",\"");
+                String str = getHistoryTagPoolString(i);
+                if (str != null) {
+                    str = str.replace("\\", "\\\\");
+                    str = str.replace("\"", "\\\"");
+                    pw.print(str);
                 }
+                pw.print("\"");
+                pw.println();
+                dumpHistoryLocked(pw, flags, histStart, true);
             }
         }
 
@@ -8331,17 +8329,12 @@ public abstract class BatteryStats {
     }
 
     private void dumpProtoHistoryLocked(ProtoOutputStream proto, int flags, long histStart) {
-        if (!startIteratingHistoryLocked()) {
-            return;
-        }
-
         proto.write(BatteryStatsServiceDumpHistoryProto.REPORT_VERSION, CHECKIN_VERSION);
         proto.write(BatteryStatsServiceDumpHistoryProto.PARCEL_VERSION, getParcelVersion());
         proto.write(BatteryStatsServiceDumpHistoryProto.START_PLATFORM_VERSION,
                 getStartPlatformVersion());
         proto.write(BatteryStatsServiceDumpHistoryProto.END_PLATFORM_VERSION,
                 getEndPlatformVersion());
-        try {
             long token;
             // History string pool (HISTORY_STRING_POOL)
             for (int i = 0; i < getHistoryStringPoolSize(); ++i) {
@@ -8353,14 +8346,15 @@ public abstract class BatteryStats {
                 proto.end(token);
             }
 
-            // History data (HISTORY_DATA)
-            final HistoryPrinter hprinter = new HistoryPrinter();
-            final HistoryItem rec = new HistoryItem();
-            long lastTime = -1;
-            long baseTime = -1;
-            boolean printed = false;
-            HistoryEventTracker tracker = null;
-            while (getNextHistoryLocked(rec)) {
+        // History data (HISTORY_DATA)
+        final HistoryPrinter hprinter = new HistoryPrinter();
+        long lastTime = -1;
+        long baseTime = -1;
+        boolean printed = false;
+        HistoryEventTracker tracker = null;
+        try (BatteryStatsHistoryIterator iterator = iterateBatteryStatsHistory()) {
+            HistoryItem rec;
+            while ((rec = iterator.next()) != null) {
                 lastTime = rec.time;
                 if (baseTime < 0) {
                     baseTime = lastTime;
@@ -8427,8 +8421,6 @@ public abstract class BatteryStats {
                 proto.write(BatteryStatsServiceDumpHistoryProto.CSV_LINES,
                         "NEXT: " + (lastTime + 1));
             }
-        } finally {
-            finishIteratingHistoryLocked();
         }
     }
 

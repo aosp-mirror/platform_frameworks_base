@@ -37,6 +37,7 @@ import java.util.List;
  * proxy connection will belong to a separate user state.
  *
  * TODO(241117292): Remove or cut down during simultaneous user refactoring.
+ * TODO(262244375): Add unit tests.
  */
 public class ProxyManager {
     // Names used to populate ComponentName and ResolveInfo in connection.mA11yServiceInfo and in
@@ -84,7 +85,9 @@ public class ProxyManager {
                         windowManagerInternal,
                         awm, displayId);
 
-        mProxyA11yServiceConnections.put(displayId, connection);
+        synchronized (mLock) {
+            mProxyA11yServiceConnections.put(displayId, connection);
+        }
 
         // If the client dies, make sure to remove the connection.
         IBinder.DeathRecipient deathRecipient =
@@ -98,7 +101,9 @@ public class ProxyManager {
         client.asBinder().linkToDeath(deathRecipient, 0);
         // Notify apps that the service state has changed.
         // A11yManager#A11yServicesStateChangeListener
-        connection.mSystemSupport.onClientChangeLocked(true);
+        synchronized (mLock) {
+            connection.mSystemSupport.onClientChangeLocked(true);
+        }
 
         connection.initializeServiceInterface(client);
     }
@@ -111,9 +116,11 @@ public class ProxyManager {
     }
 
     private boolean clearConnection(int displayId) {
-        if (mProxyA11yServiceConnections.contains(displayId)) {
-            mProxyA11yServiceConnections.remove(displayId);
-            return true;
+        synchronized (mLock) {
+            if (mProxyA11yServiceConnections.contains(displayId)) {
+                mProxyA11yServiceConnections.remove(displayId);
+                return true;
+            }
         }
         return false;
     }
@@ -122,7 +129,9 @@ public class ProxyManager {
      * Checks if a display id is being proxy-ed.
      */
     public boolean isProxyed(int displayId) {
-        return mProxyA11yServiceConnections.contains(displayId);
+        synchronized (mLock) {
+            return mProxyA11yServiceConnections.contains(displayId);
+        }
     }
 
     /**
@@ -130,10 +139,10 @@ public class ProxyManager {
      * {@link android.view.accessibility.AccessibilityDisplayProxy} will filter based on display.
      * TODO(b/250929565): Filtering should happen in the system, not in the proxy.
      */
-    public void sendAccessibilityEvent(AccessibilityEvent event) {
-        for (int i = 0; i < mProxyA11yServiceConnections.size(); i++) {
-            ProxyAccessibilityServiceConnection proxy =
-                    mProxyA11yServiceConnections.valueAt(i);
+    public void sendAccessibilityEventLocked(AccessibilityEvent event) {
+        final ProxyAccessibilityServiceConnection proxy =
+                mProxyA11yServiceConnections.get(event.getDisplayId());
+        if (proxy != null) {
             proxy.notifyAccessibilityEvent(event);
         }
     }
@@ -187,7 +196,7 @@ public class ProxyManager {
      * Returns the relevant event types of every proxy.
      * TODO(254545943): When A11yManager is separated, return based on the A11yManager display.
      */
-    public int getRelevantEventTypes() {
+    public int getRelevantEventTypesLocked() {
         int relevantEventTypes = 0;
         for (int i = 0; i < mProxyA11yServiceConnections.size(); i++) {
             ProxyAccessibilityServiceConnection proxy =
@@ -201,7 +210,7 @@ public class ProxyManager {
      * Gets the number of current proxy connections.
      * @return
      */
-    public int getNumProxys() {
+    public int getNumProxysLocked() {
         return mProxyA11yServiceConnections.size();
     }
 
@@ -209,7 +218,7 @@ public class ProxyManager {
      * Adds the service interfaces to a list.
      * @param interfaces
      */
-    public void addServiceInterfaces(List<IAccessibilityServiceClient> interfaces) {
+    public void addServiceInterfacesLocked(List<IAccessibilityServiceClient> interfaces) {
         for (int i = 0; i < mProxyA11yServiceConnections.size(); i++) {
             final ProxyAccessibilityServiceConnection proxy =
                     mProxyA11yServiceConnections.valueAt(i);

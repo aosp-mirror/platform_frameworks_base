@@ -18,14 +18,16 @@ package android.hardware.radio.tests.unittests;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.hardware.radio.Announcement;
 import android.hardware.radio.IAnnouncementListener;
 import android.hardware.radio.ICloseHandle;
@@ -34,6 +36,7 @@ import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
 import android.hardware.radio.RadioTuner;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -52,6 +55,8 @@ import java.util.Set;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class RadioManagerTest {
+
+    private static final int TEST_TARGET_SDK_VERSION = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
     private static final int REGION = RadioManager.REGION_ITU_2;
     private static final int FM_LOWER_LIMIT = 87500;
@@ -126,6 +131,7 @@ public final class RadioManagerTest {
                     /* vendorInfo= */ new ArrayMap<>()));
 
     private RadioManager mRadioManager;
+    private final ApplicationInfo mApplicationInfo = new ApplicationInfo();
 
     @Mock
     private IRadioService mRadioServiceMock;
@@ -1008,7 +1014,8 @@ public final class RadioManagerTest {
         mRadioManager.openTuner(moduleId, FM_BAND_CONFIG, withAudio, mCallbackMock,
                 /* handler= */ null);
 
-        verify(mRadioServiceMock).openTuner(eq(moduleId), eq(FM_BAND_CONFIG), eq(withAudio), any());
+        verify(mRadioServiceMock).openTuner(eq(moduleId), eq(FM_BAND_CONFIG), eq(withAudio), any(),
+                anyInt());
     }
 
     @Test
@@ -1103,6 +1110,8 @@ public final class RadioManagerTest {
     }
 
     private void createRadioManager() throws RemoteException {
+        mApplicationInfo.targetSdkVersion = TEST_TARGET_SDK_VERSION;
+        when(mContextMock.getApplicationInfo()).thenReturn(mApplicationInfo);
         when(mRadioServiceMock.listModules()).thenReturn(Arrays.asList(AMFM_PROPERTIES));
         when(mRadioServiceMock.addAnnouncementListener(any(), any())).thenReturn(mCloseHandleMock);
 

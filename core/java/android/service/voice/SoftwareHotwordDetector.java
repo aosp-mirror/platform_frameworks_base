@@ -59,7 +59,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
             IVoiceInteractionManagerService managerService,
             AudioFormat audioFormat,
             HotwordDetector.Callback callback) {
-        super(managerService, callback, DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE);
+        super(managerService, callback);
 
         mManagerService = managerService;
         mAudioFormat = audioFormat;
@@ -129,7 +129,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
      * @hide
      */
     @Override
-    public boolean isUsingHotwordDetectionService() {
+    public boolean isUsingSandboxedDetectionService() {
         return true;
     }
 

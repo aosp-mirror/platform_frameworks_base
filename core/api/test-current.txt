@@ -2944,6 +2944,7 @@ package android.view {
   }
 
   public final class MotionEvent extends android.view.InputEvent implements android.os.Parcelable {
+    method public int getDisplayId();
     method public void setActionButton(int);
     method public void setButtonState(int);
     method public void setDisplayId(int);

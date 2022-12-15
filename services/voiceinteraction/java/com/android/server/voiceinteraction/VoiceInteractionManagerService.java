@@ -1245,14 +1245,15 @@ public class VoiceInteractionManagerService extends SystemService {
         @Override
         public void updateState(
                 @Nullable PersistableBundle options,
-                @Nullable SharedMemory sharedMemory) {
+                @Nullable SharedMemory sharedMemory,
+                @NonNull IBinder token) {
             super.updateState_enforcePermission();
 
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
 
                 Binder.withCleanCallingIdentity(
-                        () -> mImpl.updateStateLocked(options, sharedMemory));
+                        () -> mImpl.updateStateLocked(options, sharedMemory, token));
             }
         }
 
@@ -1262,6 +1263,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 @NonNull Identity voiceInteractorIdentity,
                 @Nullable PersistableBundle options,
                 @Nullable SharedMemory sharedMemory,
+                @NonNull IBinder token,
                 IHotwordRecognitionStatusCallback callback,
                 int detectorType) {
             super.initAndVerifyDetector_enforcePermission();
@@ -1274,7 +1276,20 @@ public class VoiceInteractionManagerService extends SystemService {
 
                 Binder.withCleanCallingIdentity(
                         () -> mImpl.initAndVerifyDetectorLocked(voiceInteractorIdentity, options,
-                                sharedMemory, callback, detectorType));
+                                sharedMemory, token, callback, detectorType));
+            }
+        }
+
+        @Override
+        public void destroyDetector(@NonNull IBinder token) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "destroyDetector without running voice interaction service");
+                    return;
+                }
+
+                Binder.withCleanCallingIdentity(
+                        () -> mImpl.destroyDetectorLocked(token));
             }
         }
 
@@ -1326,6 +1341,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 ParcelFileDescriptor audioStream,
                 AudioFormat audioFormat,
                 PersistableBundle options,
+                @NonNull IBinder token,
                 IMicrophoneHotwordDetectionVoiceInteractionCallback callback)
                 throws RemoteException {
             synchronized (this) {
@@ -1338,8 +1354,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.startListeningFromExternalSourceLocked(
-                            audioStream, audioFormat, options, callback);
+                    mImpl.startListeningFromExternalSourceLocked(audioStream, audioFormat, options,
+                            token, callback);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }

@@ -56,7 +56,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
 import android.os.UserHandle;
-import android.service.voice.HotwordDetector;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
@@ -113,7 +112,6 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     VoiceInteractionSessionConnection mActiveSession;
     int mDisabledShowContext;
-    int mDetectorType;
 
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -552,7 +550,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     public void updateStateLocked(
             @Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory) {
+            @Nullable SharedMemory sharedMemory,
+            @NonNull IBinder token) {
         Slog.v(TAG, "updateStateLocked");
 
         if (sharedMemory != null && !sharedMemory.setProtect(OsConstants.PROT_READ)) {
@@ -565,7 +564,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             throw new IllegalStateException("Hotword detection connection not found");
         }
         synchronized (mHotwordDetectionConnection.mLock) {
-            mHotwordDetectionConnection.updateStateLocked(options, sharedMemory);
+            mHotwordDetectionConnection.updateStateLocked(options, sharedMemory, token);
         }
     }
 
@@ -573,6 +572,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             @NonNull Identity voiceInteractorIdentity,
             @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
+            @NonNull IBinder token,
             IHotwordRecognitionStatusCallback callback,
             int detectorType) {
         Slog.v(TAG, "initAndVerifyDetectorLocked");
@@ -624,16 +624,26 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             throw new IllegalStateException("Can't set sharedMemory to be read-only");
         }
 
-        mDetectorType = detectorType;
-
         logDetectorCreateEventIfNeeded(callback, detectorType, true,
                 voiceInteractionServiceUid);
         if (mHotwordDetectionConnection == null) {
             mHotwordDetectionConnection = new HotwordDetectionConnection(mServiceStub, mContext,
                     mInfo.getServiceInfo().applicationInfo.uid, voiceInteractorIdentity,
                     mHotwordDetectionComponentName, mUser, /* bindInstantServiceAllowed= */ false,
-                    options, sharedMemory, callback, detectorType);
+                    detectorType);
         }
+        mHotwordDetectionConnection.createDetectorLocked(options, sharedMemory, token, callback,
+                detectorType);
+    }
+
+    public void destroyDetectorLocked(IBinder token) {
+        Slog.v(TAG, "destroyDetectorLocked");
+
+        if (mHotwordDetectionConnection == null) {
+            Slog.w(TAG, "destroy detector callback, but no hotword detection connection");
+            return;
+        }
+        mHotwordDetectionConnection.destroyDetectorLocked(token);
     }
 
     private void logDetectorCreateEventIfNeeded(IHotwordRecognitionStatusCallback callback,
@@ -642,19 +652,16 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             HotwordMetricsLogger.writeDetectorCreateEvent(detectorType, isCreated,
                     voiceInteractionServiceUid);
         }
-
     }
 
     public void shutdownHotwordDetectionServiceLocked() {
         if (DEBUG) {
             Slog.d(TAG, "shutdownHotwordDetectionServiceLocked");
         }
-
         if (mHotwordDetectionConnection == null) {
             Slog.w(TAG, "shutdown, but no hotword detection connection");
             return;
         }
-
         mHotwordDetectionConnection.cancelLocked();
         mHotwordDetectionConnection = null;
     }
@@ -663,7 +670,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             AudioFormat audioFormat,
             IMicrophoneHotwordDetectionVoiceInteractionCallback callback) {
         if (DEBUG) {
-            Slog.d(TAG, "startListeningFromMic");
+            Slog.d(TAG, "startListeningFromMicLocked");
         }
 
         if (mHotwordDetectionConnection == null) {
@@ -671,16 +678,17 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             return;
         }
 
-        mHotwordDetectionConnection.startListeningFromMic(audioFormat, callback);
+        mHotwordDetectionConnection.startListeningFromMicLocked(audioFormat, callback);
     }
 
     public void startListeningFromExternalSourceLocked(
             ParcelFileDescriptor audioStream,
             AudioFormat audioFormat,
             @Nullable PersistableBundle options,
+            @NonNull IBinder token,
             IMicrophoneHotwordDetectionVoiceInteractionCallback callback) {
         if (DEBUG) {
-            Slog.d(TAG, "startListeningFromExternalSource");
+            Slog.d(TAG, "startListeningFromExternalSourceLocked");
         }
 
         if (mHotwordDetectionConnection == null) {
@@ -693,21 +701,21 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             throw new IllegalStateException("External source is null for hotword detector");
         }
 
-        mHotwordDetectionConnection
-                .startListeningFromExternalSource(audioStream, audioFormat, options, callback);
+        mHotwordDetectionConnection.startListeningFromExternalSourceLocked(audioStream, audioFormat,
+                options, token, callback);
     }
 
     public void stopListeningFromMicLocked() {
         if (DEBUG) {
-            Slog.d(TAG, "stopListeningFromMic");
+            Slog.d(TAG, "stopListeningFromMicLocked");
         }
 
         if (mHotwordDetectionConnection == null) {
-            Slog.w(TAG, "stopListeningFromMic() called but connection isn't established");
+            Slog.w(TAG, "stopListeningFromMicLocked() called but connection isn't established");
             return;
         }
 
-        mHotwordDetectionConnection.stopListening();
+        mHotwordDetectionConnection.stopListeningFromMicLocked();
     }
 
     public void triggerHardwareRecognitionEventForTestLocked(
@@ -730,7 +738,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             Slog.d(TAG, "createSoundTriggerCallbackLocked");
         }
         return new HotwordDetectionConnection.SoundTriggerCallback(callback,
-                mHotwordDetectionConnection);
+                mHotwordDetectionConnection, mInfo.getServiceInfo().applicationInfo.uid);
     }
 
     private static ServiceInfo getServiceInfoLocked(@NonNull ComponentName componentName,
@@ -809,8 +817,6 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             pw.println(Integer.toHexString(mDisabledShowContext));
         }
         pw.print("  mBound="); pw.print(mBound);  pw.print(" mService="); pw.println(mService);
-        pw.print("  mDetectorType=");
-        pw.println(HotwordDetector.detectorTypeToString(mDetectorType));
         if (mHotwordDetectionConnection != null) {
             pw.println("  Hotword detection connection:");
             mHotwordDetectionConnection.dump("    ", pw);

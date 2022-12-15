@@ -26,7 +26,7 @@ import com.android.server.permission.access.permission.UidPermissionPolicy
 import com.android.server.permission.access.util.forEachTag
 import com.android.server.permission.access.util.tag
 import com.android.server.permission.access.util.tagName
-import com.android.server.pm.permission.PermissionManagerServiceInternal
+import com.android.server.pm.permission.PermissionAllowlist
 import com.android.server.pm.pkg.PackageState
 
 class AccessPolicy private constructor(
@@ -54,14 +54,22 @@ class AccessPolicy private constructor(
         with(getSchemePolicy(subject, `object`)) { setDecision(subject, `object`, decision) }
     }
 
-    fun initialize(state: AccessState, userIds: IntSet, packageStates: Map<String, PackageState>) {
+    fun initialize(
+        state: AccessState,
+        userIds: IntSet,
+        packageStates: Map<String, PackageState>,
+        disabledSystemPackageStates: Map<String, PackageState>,
+        permissionAllowlist: PermissionAllowlist
+    ) {
         state.systemState.apply {
             this.userIds += userIds
             this.packageStates = packageStates
+            this.disabledSystemPackageStates = disabledSystemPackageStates
             packageStates.forEach { (_, packageState) ->
                 appIds.getOrPut(packageState.appId) { IndexedListSet() }
                     .add(packageState.packageName)
             }
+            this.permissionAllowlist = permissionAllowlist
         }
     }
 
@@ -83,10 +91,14 @@ class AccessPolicy private constructor(
 
     fun MutateStateScope.onStorageVolumeMounted(
         packageStates: Map<String, PackageState>,
+        disabledSystemPackageStates: Map<String, PackageState>,
         volumeUuid: String?,
         isSystemUpdated: Boolean
     ) {
-        newState.systemState.packageStates = packageStates
+        newState.systemState.apply {
+            this.packageStates = packageStates
+            this.disabledSystemPackageStates = disabledSystemPackageStates
+        }
         forEachSchemePolicy {
             with(it) { onStorageVolumeMounted(volumeUuid, isSystemUpdated) }
         }
@@ -94,18 +106,24 @@ class AccessPolicy private constructor(
 
     fun MutateStateScope.onPackageAdded(
         packageStates: Map<String, PackageState>,
+        disabledSystemPackageStates: Map<String, PackageState>,
         packageName: String
     ) {
-        newState.systemState.packageStates = packageStates
-        var isAppIdAdded = false
         val packageState = packageStates[packageName]
-        // TODO(zhanghai): Remove check before submission.
-        checkNotNull(packageState)
+        // TODO(zhanghai): STOPSHIP: Remove check before feature enable.
+        checkNotNull(packageState) {
+            "Added package $packageName isn't found in packageStates in onPackageAdded()"
+        }
         val appId = packageState.appId
-        newState.systemState.appIds.getOrPut(appId) {
-            isAppIdAdded = true
-            IndexedListSet()
-        }.add(packageName)
+        var isAppIdAdded = false
+        newState.systemState.apply {
+            this.packageStates = packageStates
+            this.disabledSystemPackageStates = disabledSystemPackageStates
+            appIds.getOrPut(appId) {
+                isAppIdAdded = true
+                IndexedListSet()
+            }.add(packageName)
+        }
         if (isAppIdAdded) {
             forEachSchemePolicy {
                 with(it) { onAppIdAdded(appId) }
@@ -118,18 +136,22 @@ class AccessPolicy private constructor(
 
     fun MutateStateScope.onPackageRemoved(
         packageStates: Map<String, PackageState>,
+        disabledSystemPackageStates: Map<String, PackageState>,
         packageName: String,
         appId: Int
     ) {
-        newState.systemState.packageStates = packageStates
+        // TODO(zhanghai): STOPSHIP: Remove check before feature enable.
+        check(packageName !in packageStates) {
+            "Removed package $packageName is still in packageStates in onPackageRemoved()"
+        }
         var isAppIdRemoved = false
-        // TODO(zhanghai): Remove check before submission.
-        check(packageName !in packageStates)
-        newState.systemState.appIds.apply appIds@{
-            this[appId]?.apply {
+        newState.systemState.apply {
+            this.packageStates = packageStates
+            this.disabledSystemPackageStates = disabledSystemPackageStates
+            appIds[appId]?.apply {
                 this -= packageName
                 if (isEmpty()) {
-                    this@appIds -= appId
+                    appIds -= appId
                     isAppIdRemoved = true
                 }
             }
@@ -146,26 +168,35 @@ class AccessPolicy private constructor(
 
     fun MutateStateScope.onPackageInstalled(
         packageStates: Map<String, PackageState>,
+        disabledSystemPackageStates: Map<String, PackageState>,
         packageName: String,
-        params: PermissionManagerServiceInternal.PackageInstalledParams,
         userId: Int
     ) {
-        newState.systemState.packageStates = packageStates
+        newState.systemState.apply {
+            this.packageStates = packageStates
+            this.disabledSystemPackageStates = disabledSystemPackageStates
+        }
         val packageState = packageStates[packageName]
-        // TODO(zhanghai): Remove check before submission.
-        checkNotNull(packageState)
+        // TODO(zhanghai): STOPSHIP: Remove check before feature enable.
+        checkNotNull(packageState) {
+            "Installed package $packageName isn't found in packageStates in onPackageInstalled()"
+        }
         forEachSchemePolicy {
-            with(it) { onPackageInstalled(packageState, params, userId) }
+            with(it) { onPackageInstalled(packageState, userId) }
         }
     }
 
     fun MutateStateScope.onPackageUninstalled(
         packageStates: Map<String, PackageState>,
+        disabledSystemPackageStates: Map<String, PackageState>,
         packageName: String,
         appId: Int,
         userId: Int
     ) {
-        newState.systemState.packageStates = packageStates
+        newState.systemState.apply {
+            this.packageStates = packageStates
+            this.disabledSystemPackageStates = disabledSystemPackageStates
+        }
         forEachSchemePolicy {
             with(it) { onPackageUninstalled(packageName, appId, userId) }
         }
@@ -241,10 +272,6 @@ class AccessPolicy private constructor(
 }
 
 abstract class SchemePolicy {
-    @Volatile
-    private var onDecisionChangedListeners = IndexedListSet<OnDecisionChangedListener>()
-    private val onDecisionChangedListenersLock = Any()
-
     abstract val subjectScheme: String
 
     abstract val objectScheme: String
@@ -256,30 +283,6 @@ abstract class SchemePolicy {
         `object`: AccessUri,
         decision: Int
     )
-
-    fun addOnDecisionChangedListener(listener: OnDecisionChangedListener) {
-        synchronized(onDecisionChangedListenersLock) {
-            onDecisionChangedListeners = onDecisionChangedListeners + listener
-        }
-    }
-
-    fun removeOnDecisionChangedListener(listener: OnDecisionChangedListener) {
-        synchronized(onDecisionChangedListenersLock) {
-            onDecisionChangedListeners = onDecisionChangedListeners - listener
-        }
-    }
-
-    protected fun notifyOnDecisionChangedListeners(
-        subject: AccessUri,
-        `object`: AccessUri,
-        oldDecision: Int,
-        newDecision: Int
-    ) {
-        val listeners = onDecisionChangedListeners
-        listeners.forEachIndexed { _, it ->
-            it.onDecisionChanged(subject, `object`, oldDecision, newDecision)
-        }
-    }
 
     open fun MutateStateScope.onUserAdded(userId: Int) {}
 
@@ -298,11 +301,7 @@ abstract class SchemePolicy {
 
     open fun MutateStateScope.onPackageRemoved(packageName: String, appId: Int) {}
 
-    open fun MutateStateScope.onPackageInstalled(
-        packageState: PackageState,
-        params: PermissionManagerServiceInternal.PackageInstalledParams,
-        userId: Int
-    ) {}
+    open fun MutateStateScope.onPackageInstalled(packageState: PackageState, userId: Int) {}
 
     open fun MutateStateScope.onPackageUninstalled(packageName: String, appId: Int, userId: Int) {}
 
@@ -313,13 +312,4 @@ abstract class SchemePolicy {
     open fun BinaryXmlPullParser.parseUserState(userId: Int, userState: UserState) {}
 
     open fun BinaryXmlSerializer.serializeUserState(userId: Int, userState: UserState) {}
-
-    fun interface OnDecisionChangedListener {
-        fun onDecisionChanged(
-            subject: AccessUri,
-            `object`: AccessUri,
-            oldDecision: Int,
-            newDecision: Int
-        )
-    }
 }

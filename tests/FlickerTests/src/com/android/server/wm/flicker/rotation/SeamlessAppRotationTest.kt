@@ -213,6 +213,14 @@ open class SeamlessAppRotationTest(flicker: FlickerTest) : RotationTransition(fl
             // not yet tablet compatible
             appLayerRotates()
             appLayerAlwaysVisible()
+            // not tablet compatible
+            navBarLayerIsVisibleAtStartAndEnd()
+            navBarWindowIsAlwaysVisible()
+        }
+
+        if (flicker.scenario.isTablet) {
+            taskBarLayerIsVisibleAtStartAndEnd()
+            taskBarWindowIsAlwaysVisible()
         }
 
         appWindowFullScreen()
@@ -223,10 +231,6 @@ open class SeamlessAppRotationTest(flicker: FlickerTest) : RotationTransition(fl
         appLayerRotates_StartingPos()
         appLayerRotates_EndingPos()
         entireScreenCovered()
-        navBarLayerIsVisibleAtStartAndEnd()
-        navBarWindowIsAlwaysVisible()
-        taskBarLayerIsVisibleAtStartAndEnd()
-        taskBarWindowIsAlwaysVisible()
         visibleLayersShownMoreThanOneConsecutiveEntry()
         visibleWindowsShownMoreThanOneConsecutiveEntry()
     }

@@ -532,15 +532,13 @@ class BroadcastProcessQueue {
     }
 
     public void traceActiveBegin() {
-        final int cookie = mActive.receivers.get(mActiveIndex).hashCode();
         Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                runningTraceTrackName, mActive.toShortString() + " scheduled", cookie);
+                runningTraceTrackName, mActive.toShortString() + " scheduled", hashCode());
     }
 
     public void traceActiveEnd() {
-        final int cookie = mActive.receivers.get(mActiveIndex).hashCode();
         Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                runningTraceTrackName, cookie);
+                runningTraceTrackName, hashCode());
     }
 
     /**

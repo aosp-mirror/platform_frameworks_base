@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.IRemoteCallback;
 import android.os.PersistableBundle;
 import android.view.RemoteAnimationDefinition;
 import android.window.SizeConfigurationBuckets;
@@ -102,6 +103,8 @@ interface IActivityClientController {
     void setPictureInPictureParams(in IBinder token, in PictureInPictureParams params);
     oneway void setShouldDockBigOverlays(in IBinder token, in boolean shouldDockBigOverlays);
     void toggleFreeformWindowingMode(in IBinder token);
+    oneway void requestMultiwindowFullscreen(in IBinder token, in int request,
+            in IRemoteCallback callback);
 
     oneway void startLockTaskModeByToken(in IBinder token);
     oneway void stopLockTaskModeByToken(in IBinder token);

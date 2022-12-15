@@ -42,7 +42,7 @@ public class AppOpsRestrictionsImpl implements AppOpsRestrictions {
 
     private Context mContext;
     private Handler mHandler;
-    private AppOpsCheckingServiceInterface mAppOpsServiceInterface;
+    private AppOpsCheckingServiceInterface mAppOpsCheckingServiceInterface;
 
     // Map from (Object token) to (int code) to (boolean restricted)
     private final ArrayMap<Object, SparseBooleanArray> mGlobalRestrictions = new ArrayMap<>();
@@ -56,10 +56,10 @@ public class AppOpsRestrictionsImpl implements AppOpsRestrictions {
             mUserRestrictionExcludedPackageTags = new ArrayMap<>();
 
     public AppOpsRestrictionsImpl(Context context, Handler handler,
-            AppOpsCheckingServiceInterface appOpsServiceInterface) {
+            AppOpsCheckingServiceInterface appOpsCheckingServiceInterface) {
         mContext = context;
         mHandler = handler;
-        mAppOpsServiceInterface = appOpsServiceInterface;
+        mAppOpsCheckingServiceInterface = appOpsCheckingServiceInterface;
     }
 
     @Override
@@ -219,7 +219,7 @@ public class AppOpsRestrictionsImpl implements AppOpsRestrictions {
         int restrictedCodesSize = allUserRestrictedCodes.size();
         for (int j = 0; j < restrictedCodesSize; j++) {
             int code = allUserRestrictedCodes.keyAt(j);
-            mHandler.post(() -> mAppOpsServiceInterface.notifyWatchersOfChange(code, UID_ANY));
+            mHandler.post(() -> mAppOpsCheckingServiceInterface.notifyWatchersOfChange(code, UID_ANY));
         }
     }
 

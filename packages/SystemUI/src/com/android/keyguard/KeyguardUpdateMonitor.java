@@ -1644,7 +1644,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
                 @Override
                 public void onAuthenticationFailed() {
-                    requestActiveUnlock(
+                    requestActiveUnlockDismissKeyguard(
                             ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.BIOMETRIC_FAIL,
                             "fingerprintFailure");
                     handleFingerprintAuthFailed();
@@ -2573,6 +2573,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         || mUdfpsBouncerShowing
                         || mPrimaryBouncerFullyShown
                         || mAuthController.isUdfpsFingerDown());
+    }
+
+    /**
+     * Attempts to trigger active unlock from trust agent with a request to dismiss the keyguard.
+     */
+    public void requestActiveUnlockDismissKeyguard(
+            @NonNull ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN requestOrigin,
+            String extraReason
+    ) {
+        requestActiveUnlock(
+                requestOrigin,
+                extraReason + "-dismissKeyguard", true);
     }
 
     /**

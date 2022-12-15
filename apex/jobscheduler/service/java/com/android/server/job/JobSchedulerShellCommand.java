@@ -32,6 +32,9 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
     public static final int CMD_ERR_NO_JOB = -1001;
     public static final int CMD_ERR_CONSTRAINTS = -1002;
 
+    static final int BYTE_OPTION_DOWNLOAD = 0;
+    static final int BYTE_OPTION_UPLOAD = 1;
+
     JobSchedulerService mInternal;
     IPackageManager mPM;
 
@@ -59,10 +62,18 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                     return getBatteryCharging(pw);
                 case "get-battery-not-low":
                     return getBatteryNotLow(pw);
+                case "get-estimated-download-bytes":
+                    return getEstimatedNetworkBytes(pw, BYTE_OPTION_DOWNLOAD);
+                case "get-estimated-upload-bytes":
+                    return getEstimatedNetworkBytes(pw, BYTE_OPTION_UPLOAD);
                 case "get-storage-seq":
                     return getStorageSeq(pw);
                 case "get-storage-not-low":
                     return getStorageNotLow(pw);
+                case "get-transferred-download-bytes":
+                    return getTransferredNetworkBytes(pw, BYTE_OPTION_DOWNLOAD);
+                case "get-transferred-upload-bytes":
+                    return getTransferredNetworkBytes(pw, BYTE_OPTION_UPLOAD);
                 case "get-job-state":
                     return getJobState(pw);
                 case "heartbeat":
@@ -304,6 +315,43 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         return 0;
     }
 
+    private int getEstimatedNetworkBytes(PrintWriter pw, int byteOption) throws Exception {
+        checkPermission("get estimated bytes");
+
+        int userId = UserHandle.USER_SYSTEM;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "-u":
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+
+                default:
+                    pw.println("Error: unknown option '" + opt + "'");
+                    return -1;
+            }
+        }
+
+        if (userId == UserHandle.USER_CURRENT) {
+            userId = ActivityManager.getCurrentUser();
+        }
+
+        final String pkgName = getNextArgRequired();
+        final String jobIdStr = getNextArgRequired();
+        final int jobId = Integer.parseInt(jobIdStr);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            int ret = mInternal.getEstimatedNetworkBytes(pw, pkgName, userId, jobId, byteOption);
+            printError(ret, pkgName, userId, jobId);
+            return ret;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     private int getStorageSeq(PrintWriter pw) {
         int seq = mInternal.getStorageSeq();
         pw.println(seq);
@@ -316,8 +364,45 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         return 0;
     }
 
+    private int getTransferredNetworkBytes(PrintWriter pw, int byteOption) throws Exception {
+        checkPermission("get transferred bytes");
+
+        int userId = UserHandle.USER_SYSTEM;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "-u":
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+
+                default:
+                    pw.println("Error: unknown option '" + opt + "'");
+                    return -1;
+            }
+        }
+
+        if (userId == UserHandle.USER_CURRENT) {
+            userId = ActivityManager.getCurrentUser();
+        }
+
+        final String pkgName = getNextArgRequired();
+        final String jobIdStr = getNextArgRequired();
+        final int jobId = Integer.parseInt(jobIdStr);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            int ret = mInternal.getTransferredNetworkBytes(pw, pkgName, userId, jobId, byteOption);
+            printError(ret, pkgName, userId, jobId);
+            return ret;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     private int getJobState(PrintWriter pw) throws Exception {
-        checkPermission("force timeout jobs");
+        checkPermission("get job state");
 
         int userId = UserHandle.USER_SYSTEM;
 
@@ -473,10 +558,30 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         pw.println("    Return whether the battery is currently considered to be charging.");
         pw.println("  get-battery-not-low");
         pw.println("    Return whether the battery is currently considered to not be low.");
+        pw.println("  get-estimated-download-bytes [-u | --user USER_ID] PACKAGE JOB_ID");
+        pw.println("    Return the most recent estimated download bytes for the job.");
+        pw.println("    Options:");
+        pw.println("      -u or --user: specify which user's job is to be run; the default is");
+        pw.println("         the primary or system user");
+        pw.println("  get-estimated-upload-bytes [-u | --user USER_ID] PACKAGE JOB_ID");
+        pw.println("    Return the most recent estimated upload bytes for the job.");
+        pw.println("    Options:");
+        pw.println("      -u or --user: specify which user's job is to be run; the default is");
+        pw.println("         the primary or system user");
         pw.println("  get-storage-seq");
         pw.println("    Return the last storage update sequence number that was received.");
         pw.println("  get-storage-not-low");
         pw.println("    Return whether storage is currently considered to not be low.");
+        pw.println("  get-transferred-download-bytes [-u | --user USER_ID] PACKAGE JOB_ID");
+        pw.println("    Return the most recent transferred download bytes for the job.");
+        pw.println("    Options:");
+        pw.println("      -u or --user: specify which user's job is to be run; the default is");
+        pw.println("         the primary or system user");
+        pw.println("  get-transferred-upload-bytes [-u | --user USER_ID] PACKAGE JOB_ID");
+        pw.println("    Return the most recent transferred upload bytes for the job.");
+        pw.println("    Options:");
+        pw.println("      -u or --user: specify which user's job is to be run; the default is");
+        pw.println("         the primary or system user");
         pw.println("  get-job-state [-u | --user USER_ID] PACKAGE JOB_ID");
         pw.println("    Return the current state of a job, may be any combination of:");
         pw.println("      pending: currently on the pending list, waiting to be active");
@@ -493,5 +598,4 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         pw.println("    Trigger wireless charging dock state.  Active by default.");
         pw.println();
     }
-
 }

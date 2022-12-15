@@ -29,11 +29,11 @@ import android.view.contentcapture.IContentCaptureManager;
 import android.speech.IRecognitionServiceManager;
 
 /**
- * Provide the interface to communicate with hotword detection service.
+ * Provide the interface to communicate with sandboxed detection service.
  *
  * @hide
  */
-oneway interface IHotwordDetectionService {
+oneway interface ISandboxedDetectionService {
     void detectFromDspSource(
         in SoundTrigger.KeyphraseRecognitionEvent event,
         in AudioFormat audioFormat,

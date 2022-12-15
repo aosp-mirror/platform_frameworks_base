@@ -25,7 +25,9 @@ import android.app.ActivityThread;
 import android.app.compat.CompatChanges;
 import android.media.AudioFormat;
 import android.media.permission.Identity;
+import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
@@ -49,19 +51,20 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
     private final IVoiceInteractionManagerService mManagerService;
     private final Handler mHandler;
     private final HotwordDetector.Callback mCallback;
-    private final int mDetectorType;
     private Consumer<AbstractHotwordDetector> mOnDestroyListener;
     private final AtomicBoolean mIsDetectorActive;
+    /**
+     * A token which is used by voice interaction system service to identify different detectors.
+     */
+    private final IBinder mToken = new Binder();
 
     AbstractHotwordDetector(
             IVoiceInteractionManagerService managerService,
-            HotwordDetector.Callback callback,
-            int detectorType) {
+            HotwordDetector.Callback callback) {
         mManagerService = managerService;
         // TODO: this needs to be supplied from above
         mHandler = new Handler(Looper.getMainLooper());
         mCallback = callback;
-        mDetectorType = detectorType;
         mIsDetectorActive = new AtomicBoolean(true);
     }
 
@@ -94,6 +97,7 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
                     audioStream,
                     audioFormat,
                     options,
+                    mToken,
                     new BinderCallback(mHandler, mCallback));
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -111,7 +115,7 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
         }
         throwIfDetectorIsNoLongerActive();
         try {
-            mManagerService.updateState(options, sharedMemory);
+            mManagerService.updateState(options, sharedMemory, mToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -128,7 +132,7 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
         Identity identity = new Identity();
         identity.packageName = ActivityThread.currentOpPackageName();
         try {
-            mManagerService.initAndVerifyDetector(identity, options, sharedMemory, callback,
+            mManagerService.initAndVerifyDetector(identity, options, sharedMemory, mToken, callback,
                     detectorType);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -151,6 +155,11 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
             return;
         }
         mIsDetectorActive.set(false);
+        try {
+            mManagerService.destroyDetector(mToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
         synchronized (mLock) {
             mOnDestroyListener.accept(this);
         }

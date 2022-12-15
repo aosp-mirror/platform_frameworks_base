@@ -74,9 +74,4 @@ public class KeyguardPinViewController
         return mView.startDisappearAnimation(
                 mKeyguardUpdateMonitor.needsSlowUnlockTransition(), finishRunnable);
     }
-
-    @Override
-    protected int getInitialMessageResId() {
-        return R.string.keyguard_enter_your_pin;
-    }
 }

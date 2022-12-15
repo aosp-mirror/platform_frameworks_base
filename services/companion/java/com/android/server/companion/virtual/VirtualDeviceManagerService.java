@@ -41,6 +41,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcel;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArraySet;
@@ -62,6 +63,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -88,14 +90,20 @@ public class VirtualDeviceManagerService extends SystemService {
             new SparseArray<>();
 
     /**
-     * Mapping from CDM association IDs to virtual devices. Only one virtual device is allowed for
-     * each CDM associated device.
+     * Mapping from device IDs to CameraAccessControllers.
+     */
+    @GuardedBy("mVirtualDeviceManagerLock")
+    private final SparseArray<CameraAccessController> mCameraAccessControllersByDeviceId =
+            new SparseArray<>();
+
+    /**
+     * Mapping from device IDs to virtual devices.
      */
     @GuardedBy("mVirtualDeviceManagerLock")
     private final SparseArray<VirtualDeviceImpl> mVirtualDevices = new SparseArray<>();
 
     /**
-     * Mapping from CDM association IDs to app UIDs running on the corresponding virtual device.
+     * Mapping from device IDs to app UIDs running on the corresponding virtual device.
      */
     @GuardedBy("mVirtualDeviceManagerLock")
     private final SparseArray<ArraySet<Integer>> mAppsOnVirtualDevices = new SparseArray<>();
@@ -158,7 +166,7 @@ public class VirtualDeviceManagerService extends SystemService {
     @GuardedBy("mVirtualDeviceManagerLock")
     private boolean isValidVirtualDeviceLocked(IVirtualDevice virtualDevice) {
         try {
-            return mVirtualDevices.contains(virtualDevice.getAssociationId());
+            return mVirtualDevices.contains(virtualDevice.getDeviceId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -228,9 +236,9 @@ public class VirtualDeviceManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    void notifyRunningAppsChanged(int associationId, ArraySet<Integer> uids) {
+    void notifyRunningAppsChanged(int deviceId, ArraySet<Integer> uids) {
         synchronized (mVirtualDeviceManagerLock) {
-            mAppsOnVirtualDevices.put(associationId, uids);
+            mAppsOnVirtualDevices.put(deviceId, uids);
         }
         mLocalService.onAppsOnVirtualDeviceChanged();
     }
@@ -238,7 +246,7 @@ public class VirtualDeviceManagerService extends SystemService {
     @VisibleForTesting
     void addVirtualDevice(VirtualDeviceImpl virtualDevice) {
         synchronized (mVirtualDeviceManagerLock) {
-            mVirtualDevices.put(virtualDevice.getAssociationId(), virtualDevice);
+            mVirtualDevices.put(virtualDevice.getDeviceId(), virtualDevice);
         }
     }
 
@@ -266,60 +274,26 @@ public class VirtualDeviceManagerService extends SystemService {
                 throw new IllegalArgumentException("No association with ID " + associationId);
             }
             synchronized (mVirtualDeviceManagerLock) {
-                if (mVirtualDevices.contains(associationId)) {
-                    throw new IllegalStateException(
-                            "Virtual device for association ID " + associationId
-                                    + " already exists");
-                }
                 final int userId = UserHandle.getUserId(callingUid);
                 final CameraAccessController cameraAccessController =
                         mCameraAccessControllers.get(userId);
-                final int uniqueId = sNextUniqueIndex.getAndIncrement();
-
+                final int deviceId = sNextUniqueIndex.getAndIncrement();
                 VirtualDeviceImpl virtualDevice = new VirtualDeviceImpl(getContext(),
-                        associationInfo, token, callingUid, uniqueId,
-                        new VirtualDeviceImpl.OnDeviceCloseListener() {
-                            @Override
-                            public void onClose(int associationId) {
-                                synchronized (mVirtualDeviceManagerLock) {
-                                    VirtualDeviceImpl removedDevice =
-                                            mVirtualDevices.removeReturnOld(associationId);
-                                    if (removedDevice != null) {
-                                        Intent i = new Intent(
-                                                VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED);
-                                        i.putExtra(
-                                                VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID,
-                                                removedDevice.getDeviceId());
-                                        i.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                                        final long identity = Binder.clearCallingIdentity();
-                                        try {
-                                            getContext().sendBroadcastAsUser(i, UserHandle.ALL);
-                                        } finally {
-                                            Binder.restoreCallingIdentity(identity);
-                                        }
-                                    }
-                                    mAppsOnVirtualDevices.remove(associationId);
-                                    if (cameraAccessController != null) {
-                                        cameraAccessController.stopObservingIfNeeded();
-                                    } else {
-                                        Slog.w(TAG, "cameraAccessController not found for user "
-                                                + userId);
-                                    }
-                                }
-                            }
-                        },
+                        associationInfo, token, callingUid, deviceId,
+                        /* onDeviceCloseListener= */ this::onDeviceClosed,
                         this, activityListener,
                         runningUids -> {
                             cameraAccessController.blockCameraAccessIfNeeded(runningUids);
-                            notifyRunningAppsChanged(associationInfo.getId(), runningUids);
+                            notifyRunningAppsChanged(deviceId, runningUids);
                         },
                         params);
                 if (cameraAccessController != null) {
                     cameraAccessController.startObservingIfNeeded();
+                    mCameraAccessControllersByDeviceId.put(deviceId, cameraAccessController);
                 } else {
                     Slog.w(TAG, "cameraAccessController not found for user " + userId);
                 }
-                mVirtualDevices.put(associationInfo.getId(), virtualDevice);
+                mVirtualDevices.put(deviceId, virtualDevice);
                 return virtualDevice;
             }
         }
@@ -336,7 +310,7 @@ public class VirtualDeviceManagerService extends SystemService {
             }
             VirtualDeviceImpl virtualDeviceImpl;
             synchronized (mVirtualDeviceManagerLock) {
-                virtualDeviceImpl = mVirtualDevices.get(virtualDevice.getAssociationId());
+                virtualDeviceImpl = mVirtualDevices.get(virtualDevice.getDeviceId());
                 if (virtualDeviceImpl == null) {
                     throw new SecurityException("Invalid VirtualDevice");
                 }
@@ -417,8 +391,7 @@ public class VirtualDeviceManagerService extends SystemService {
         @Nullable
         private AssociationInfo getAssociationInfo(String packageName, int associationId) {
             final int callingUserId = getCallingUserHandle().getIdentifier();
-            final List<AssociationInfo> associations =
-                    mAllAssociations.get(callingUserId);
+            final List<AssociationInfo> associations = mAllAssociations.get(callingUserId);
             if (associations != null) {
                 final int associationSize = associations.size();
                 for (int i = 0; i < associationSize; i++) {
@@ -432,6 +405,29 @@ public class VirtualDeviceManagerService extends SystemService {
                 Slog.w(TAG, "No associations for user " + callingUserId);
             }
             return null;
+        }
+
+        private void onDeviceClosed(int deviceId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                mVirtualDevices.remove(deviceId);
+                Intent i = new Intent(VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED);
+                i.putExtra(VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID, deviceId);
+                i.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    getContext().sendBroadcastAsUser(i, UserHandle.ALL);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+                mAppsOnVirtualDevices.remove(deviceId);
+                final CameraAccessController cameraAccessController =
+                        mCameraAccessControllersByDeviceId.removeReturnOld(deviceId);
+                if (cameraAccessController != null) {
+                    cameraAccessController.stopObservingIfNeeded();
+                } else {
+                    Slog.w(TAG, "cameraAccessController not found for device Id " + deviceId);
+                }
+            }
         }
 
         @Override
@@ -492,6 +488,35 @@ public class VirtualDeviceManagerService extends SystemService {
             synchronized (mVirtualDeviceManagerLock) {
                 return isValidVirtualDeviceLocked(virtualDevice);
             }
+        }
+
+        @Override
+        public int getDeviceOwnerUid(int deviceId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                int size = mVirtualDevices.size();
+                for (int i = 0; i < size; i++) {
+                    VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
+                    if (device.getDeviceId() == deviceId) {
+                        return device.getOwnerUid();
+                    }
+                }
+            }
+            return Process.INVALID_UID;
+        }
+
+        @Override
+        public @NonNull Set<Integer> getDeviceIdsForUid(int uid) {
+            ArraySet<Integer> result = new ArraySet<>();
+            synchronized (mVirtualDeviceManagerLock) {
+                int size = mVirtualDevices.size();
+                for (int i = 0; i < size; i++) {
+                    VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
+                    if (device.isAppRunningOnVirtualDevice(uid)) {
+                        result.add(device.getDeviceId());
+                    }
+                }
+            }
+            return result;
         }
 
         @Override

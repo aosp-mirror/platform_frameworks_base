@@ -25,6 +25,7 @@ import android.hardware.broadcastradio.VendorKeyValue;
 import android.hardware.radio.Announcement;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
+import android.os.Build;
 
 import com.google.common.truth.Expect;
 
@@ -67,6 +68,18 @@ public final class ConversionUtilsTest {
 
     @Rule
     public final Expect expect = Expect.create();
+
+    @Test
+    public void isAtLeastU_withTSdkVersion_returnsFalse() {
+        expect.withMessage("Target SDK version of T")
+                .that(ConversionUtils.isAtLeastU(Build.VERSION_CODES.TIRAMISU)).isFalse();
+    }
+
+    @Test
+    public void isAtLeastU_withCurrentSdkVersion_returnsTrue() {
+        expect.withMessage("Target SDK version of U")
+                .that(ConversionUtils.isAtLeastU(Build.VERSION_CODES.CUR_DEVELOPMENT)).isTrue();
+    }
 
     @Test
     public void propertiesFromHalProperties_idsMatch() {

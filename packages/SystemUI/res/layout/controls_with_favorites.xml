@@ -90,7 +90,7 @@
       android:layout_weight="1"
       android:layout_marginLeft="@dimen/global_actions_side_margin"
       android:layout_marginRight="@dimen/global_actions_side_margin"
-      android:background="#ff0000"
+      android:background="@drawable/controls_panel_background"
       android:padding="@dimen/global_actions_side_margin"
       android:visibility="gone"
       />

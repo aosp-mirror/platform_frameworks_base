@@ -29,7 +29,7 @@ class ChipbarLogger
 @Inject
 constructor(
     @ChipbarLog buffer: LogBuffer,
-) : TemporaryViewLogger(buffer, "ChipbarLog") {
+) : TemporaryViewLogger<ChipbarInfo>(buffer, "ChipbarLog") {
     /**
      * Logs that the chipbar was updated to display in a window named [windowTitle], with [text] and
      * [endItemDesc].

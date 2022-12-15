@@ -19,15 +19,22 @@ package com.android.server.permission.access
 import android.content.pm.PermissionGroupInfo
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.permission.Permission
+import com.android.server.pm.permission.PermissionAllowlist
 import com.android.server.pm.pkg.PackageState
 
 class AccessState private constructor(
     val systemState: SystemState,
     val userStates: IntMap<UserState>
 ) {
-    constructor() : this(SystemState(), IntMap())
+    constructor() : this(
+        SystemState(),
+        IntMap()
+    )
 
-    fun copy(): AccessState = AccessState(systemState.copy(), userStates.copy { it.copy() })
+    fun copy(): AccessState = AccessState(
+        systemState.copy(),
+        userStates.copy { it.copy() }
+    )
 }
 
 class SystemState private constructor(
@@ -39,30 +46,26 @@ class SystemState private constructor(
     val knownPackages: IntMap<IndexedListSet<String>>,
     // A map of userId to packageName
     val deviceAndProfileOwners: IntMap<String>,
-    // A map of packageName to (A map of oem permission name to whether it's granted)
-    val oemPermissions: IndexedMap<String, IndexedMap<String, Boolean>>,
     val privilegedPermissionAllowlistSourcePackageNames: IndexedListSet<String>,
-    // A map of packageName to a set of vendor priv app permission names
-    val vendorPrivAppPermissions: Map<String, Set<String>>,
-    val productPrivAppPermissions: Map<String, Set<String>>,
-    val systemExtPrivAppPermissions: Map<String, Set<String>>,
-    val privAppPermissions: Map<String, Set<String>>,
-    val apexPrivAppPermissions: Map<String, Map<String, Set<String>>>,
-    val vendorPrivAppDenyPermissions: Map<String, Set<String>>,
-    val productPrivAppDenyPermissions: Map<String, Set<String>>,
-    val systemExtPrivAppDenyPermissions: Map<String, Set<String>>,
-    val apexPrivAppDenyPermissions: Map<String, Map<String, Set<String>>>,
-    val privAppDenyPermissions: Map<String, Set<String>>,
+    var permissionAllowlist: PermissionAllowlist,
     val implicitToSourcePermissions: Map<String, Set<String>>,
     val permissionGroups: IndexedMap<String, PermissionGroupInfo>,
     val permissionTrees: IndexedMap<String, Permission>,
     val permissions: IndexedMap<String, Permission>
 ) : WritableState() {
     constructor() : this(
-        IntSet(), emptyMap(), emptyMap(), IntMap(), IntMap(), IntMap(), IndexedMap(),
-        IndexedListSet(), IndexedMap(), IndexedMap(), IndexedMap(), IndexedMap(), IndexedMap(),
-        IndexedMap(), IndexedMap(), IndexedMap(), IndexedMap(), IndexedMap(), IndexedMap(),
-        IndexedMap(), IndexedMap(), IndexedMap()
+        IntSet(),
+        emptyMap(),
+        emptyMap(),
+        IntMap(),
+        IntMap(),
+        IntMap(),
+        IndexedListSet(),
+        PermissionAllowlist(),
+        IndexedMap(),
+        IndexedMap(),
+        IndexedMap(),
+        IndexedMap()
     )
 
     fun copy(): SystemState =
@@ -73,18 +76,8 @@ class SystemState private constructor(
             appIds.copy { it.copy() },
             knownPackages.copy { it.copy() },
             deviceAndProfileOwners.copy { it },
-            oemPermissions.copy { it.copy { it } },
             privilegedPermissionAllowlistSourcePackageNames.copy(),
-            vendorPrivAppPermissions,
-            productPrivAppPermissions,
-            systemExtPrivAppPermissions,
-            privAppPermissions,
-            apexPrivAppPermissions,
-            vendorPrivAppDenyPermissions,
-            productPrivAppDenyPermissions,
-            systemExtPrivAppDenyPermissions,
-            apexPrivAppDenyPermissions,
-            privAppDenyPermissions,
+            permissionAllowlist,
             implicitToSourcePermissions,
             permissionGroups.copy { it },
             permissionTrees.copy { it },
@@ -98,7 +91,11 @@ class UserState private constructor(
     val uidAppOpModes: IntMap<IndexedMap<String, Int>>,
     val packageAppOpModes: IndexedMap<String, IndexedMap<String, Int>>
 ) : WritableState() {
-    constructor() : this(IntMap(), IntMap(), IndexedMap())
+    constructor() : this(
+        IntMap(),
+        IntMap(),
+        IndexedMap()
+    )
 
     fun copy(): UserState = UserState(
         uidPermissionFlags.copy { it.copy { it } },

@@ -93,7 +93,7 @@ internal class TogglePermissionAppInfoPageProvider(
         ) {
             val context = LocalContext.current
             val internalListModel = remember {
-                TogglePermissionInternalAppListModel(context, listModel)
+                TogglePermissionInternalAppListModel(context, listModel, ::RestrictionsProviderImpl)
             }
             val record = remember { listModel.transformItem(app) }
             if (!remember { listModel.isChangeable(record) }) return

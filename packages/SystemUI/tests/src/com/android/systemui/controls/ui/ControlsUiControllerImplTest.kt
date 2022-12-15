@@ -38,6 +38,7 @@ import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.management.ControlsListingController
+import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.controls.settings.FakeControlsSettingsRepository
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
@@ -53,6 +54,7 @@ import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.wm.shell.TaskView
 import com.android.wm.shell.TaskViewFactory
@@ -320,6 +322,45 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
                 )
             )
             .isFalse()
+    }
+
+    @Test
+    fun testResolveActivityWhileSeeding_ControlsActivity() {
+        whenever(controlsController.addSeedingFavoritesCallback(any())).thenReturn(true)
+        assertThat(underTest.resolveActivity()).isEqualTo(ControlsActivity::class.java)
+    }
+
+    @Test
+    fun testResolveActivityNotSeedingNoFavoritesNoPanels_ControlsProviderSelectorActivity() {
+        whenever(controlsController.addSeedingFavoritesCallback(any())).thenReturn(false)
+        whenever(controlsController.getFavorites()).thenReturn(emptyList())
+
+        val selectedItems =
+            listOf(
+                SelectedItem.StructureItem(
+                    StructureInfo(ComponentName.unflattenFromString("pkg/.cls1"), "a", ArrayList())
+                ),
+            )
+        sharedPreferences
+            .edit()
+            .putString("controls_component", selectedItems[0].componentName.flattenToString())
+            .putString("controls_structure", selectedItems[0].name.toString())
+            .commit()
+
+        assertThat(underTest.resolveActivity())
+            .isEqualTo(ControlsProviderSelectorActivity::class.java)
+    }
+
+    @Test
+    fun testResolveActivityNotSeedingNoDefaultNoFavoritesPanel_ControlsActivity() {
+        val panel = SelectedItem.PanelItem("App name", ComponentName("pkg", "cls"))
+        val activity = ComponentName("pkg", "activity")
+        val csi = ControlsServiceInfo(panel.componentName, panel.appName, activity)
+        whenever(controlsController.addSeedingFavoritesCallback(any())).thenReturn(true)
+        whenever(controlsController.getFavorites()).thenReturn(emptyList())
+        whenever(controlsListingController.getCurrentServices()).thenReturn(listOf(csi))
+
+        assertThat(underTest.resolveActivity()).isEqualTo(ControlsActivity::class.java)
     }
 
     private fun setUpPanel(panel: SelectedItem.PanelItem): ControlsServiceInfo {

@@ -167,7 +167,10 @@ public final class ProgramSelector implements Parcelable {
     public static final int IDENTIFIER_TYPE_HD_STATION_NAME = 10004;
     /**
      * @see {@link IDENTIFIER_TYPE_DAB_SID_EXT}
+     *
+     * @deprecated use {@link #IDENTIFIER_TYPE_DAB_DMB_SID_EXT} instead
      */
+    @Deprecated
     public static final int IDENTIFIER_TYPE_DAB_SIDECC = 5;
     /**
      * 28bit compound primary identifier for Digital Audio Broadcasting.
@@ -183,7 +186,10 @@ public final class ProgramSelector implements Parcelable {
      *
      * The remaining bits should be set to zeros when writing on the chip side
      * and ignored when read.
+     *
+     * @deprecated use {@link #IDENTIFIER_TYPE_DAB_DMB_SID_EXT} instead
      */
+    @Deprecated
     public static final int IDENTIFIER_TYPE_DAB_SID_EXT = IDENTIFIER_TYPE_DAB_SIDECC;
     /** 16bit */
     public static final int IDENTIFIER_TYPE_DAB_ENSEMBLE = 6;
@@ -197,7 +203,7 @@ public final class ProgramSelector implements Parcelable {
     public static final int IDENTIFIER_TYPE_DRMO_FREQUENCY = 10;
     /**
      * 1: AM, 2:FM
-     * @deprecated use {@link IDENTIFIER_TYPE_DRMO_FREQUENCY} instead
+     * @deprecated use {@link #IDENTIFIER_TYPE_DRMO_FREQUENCY} instead
      */
     @Deprecated
     public static final int IDENTIFIER_TYPE_DRMO_MODULATION = 11;
@@ -205,6 +211,23 @@ public final class ProgramSelector implements Parcelable {
     public static final int IDENTIFIER_TYPE_SXM_SERVICE_ID = 12;
     /** 0-999 range */
     public static final int IDENTIFIER_TYPE_SXM_CHANNEL = 13;
+    /**
+     * 44bit compound primary identifier for Digital Audio Broadcasting and
+     * Digital Multimedia Broadcasting.
+     *
+     * <p>Consists of (from the LSB):
+     * - 32bit: SId;
+     * - 8bit: ECC code;
+     * - 4bit: SCIdS.
+     *
+     * <p>SCIdS (Service Component Identifier within the Service) value
+     * of 0 represents the main service, while 1 and above represents
+     * secondary services.
+     *
+     * The remaining bits should be set to zeros when writing on the chip side
+     * and ignored when read.
+     */
+    public static final int IDENTIFIER_TYPE_DAB_DMB_SID_EXT = 14;
     /**
      * Primary identifier for vendor-specific radio technology.
      * The value format is determined by a vendor.
@@ -219,12 +242,12 @@ public final class ProgramSelector implements Parcelable {
      */
     public static final int IDENTIFIER_TYPE_VENDOR_END = PROGRAM_TYPE_VENDOR_END;
     /**
-     * @deprecated use {@link IDENTIFIER_TYPE_VENDOR_START} instead
+     * @deprecated use {@link #IDENTIFIER_TYPE_VENDOR_START} instead
      */
     @Deprecated
     public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_START = IDENTIFIER_TYPE_VENDOR_START;
     /**
-     * @deprecated use {@link IDENTIFIER_TYPE_VENDOR_END} instead
+     * @deprecated use {@link #IDENTIFIER_TYPE_VENDOR_END} instead
      */
     @Deprecated
     public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_END = IDENTIFIER_TYPE_VENDOR_END;
@@ -245,6 +268,7 @@ public final class ProgramSelector implements Parcelable {
         IDENTIFIER_TYPE_DRMO_MODULATION,
         IDENTIFIER_TYPE_SXM_SERVICE_ID,
         IDENTIFIER_TYPE_SXM_CHANNEL,
+        IDENTIFIER_TYPE_DAB_DMB_SID_EXT,
     })
     @IntRange(from = IDENTIFIER_TYPE_VENDOR_START, to = IDENTIFIER_TYPE_VENDOR_END)
     @Retention(RetentionPolicy.SOURCE)
@@ -285,7 +309,7 @@ public final class ProgramSelector implements Parcelable {
      * Type of a radio technology.
      *
      * @return program type.
-     * @deprecated use {@link getPrimaryId} instead
+     * @deprecated use {@link #getPrimaryId} instead
      */
     @Deprecated
     public @ProgramType int getProgramType() {

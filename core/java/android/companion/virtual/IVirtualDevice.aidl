@@ -33,6 +33,7 @@ import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
 import android.hardware.input.VirtualTouchEvent;
 import android.hardware.input.VirtualTouchscreenConfig;
+import android.hardware.input.VirtualNavigationTouchpadConfig;
 import android.os.ResultReceiver;
 
 /**
@@ -83,6 +84,10 @@ interface IVirtualDevice {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
     void createVirtualTouchscreen(
             in VirtualTouchscreenConfig config,
+            IBinder token);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
+    void createVirtualNavigationTouchpad(
+            in VirtualNavigationTouchpadConfig config,
             IBinder token);
     void unregisterInputDevice(IBinder token);
     int getInputDeviceId(IBinder token);
