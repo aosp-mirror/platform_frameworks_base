@@ -55,6 +55,7 @@ cc_library {
     host_supported: true,
     srcs: [
         "ApkAssets.cpp",
+        "ApkParsing.cpp",
         "Asset.cpp",
         "AssetDir.cpp",
         "AssetManager.cpp",
@@ -160,6 +161,7 @@ cc_test {
 
         // Actual tests.
         "tests/ApkAssets_test.cpp",
+        "tests/ApkParsing_test.cpp",
         "tests/AppAsLib_test.cpp",
         "tests/Asset_test.cpp",
         "tests/AssetManager2_test.cpp",
