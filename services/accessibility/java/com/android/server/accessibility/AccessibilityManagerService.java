@@ -32,6 +32,7 @@ import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_MENU
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 import static android.view.accessibility.AccessibilityManager.CONTRAST_DEFAULT_VALUE;
 import static android.view.accessibility.AccessibilityManager.CONTRAST_NOT_SET;
+import static android.view.accessibility.AccessibilityManager.FlashNotificationReason;
 import static android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
@@ -314,6 +315,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     boolean mInputSessionRequested;
     private SparseArray<SurfaceControl> mA11yOverlayLayers = new SparseArray<>();
 
+    private final FlashNotificationsController mFlashNotificationsController;
+
     private AccessibilityUserState getCurrentUserStateLocked() {
         return getUserStateLocked(mCurrentUserId);
     }
@@ -440,6 +443,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mInputFilter = inputFilter;
             mHasInputFilter = true;
         }
+        mFlashNotificationsController = new FlashNotificationsController(mContext);
         init();
     }
 
@@ -470,6 +474,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
         mCaptioningManagerImpl = new CaptioningManagerImpl(mContext);
         mProxyManager = new ProxyManager(mLock, mA11yWindowManager);
+        mFlashNotificationsController = new FlashNotificationsController(mContext);
         init();
     }
 
@@ -3868,6 +3873,40 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (contrast != CONTRAST_NOT_SET) return contrast;
             readUiContrastLocked(userState);
             return userState.getUiContrastLocked();
+        }
+    }
+
+    @Override
+    public boolean startFlashNotificationSequence(String opPkg,
+            @FlashNotificationReason int reason, IBinder token) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mFlashNotificationsController.startFlashNotificationSequence(opPkg,
+                    reason, token);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public boolean stopFlashNotificationSequence(String opPkg) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mFlashNotificationsController.stopFlashNotificationSequence(opPkg);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public boolean startFlashNotificationEvent(String opPkg,
+            @FlashNotificationReason int reason, String reasonPkg) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mFlashNotificationsController.startFlashNotificationEvent(opPkg,
+                    reason, reasonPkg);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
