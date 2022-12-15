@@ -16,9 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.media.AudioAttributes.USAGE_VOICE_COMMUNICATION;
-import static android.media.AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING;
-
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManagerInternal;
@@ -26,6 +23,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -84,19 +82,12 @@ public class AppStateHelper {
     private boolean hasVoiceCall() {
         var am = mContext.getSystemService(AudioManager.class);
         try {
-            for (var apc : am.getActivePlaybackConfigurations()) {
-                if (!apc.isActive()) {
-                    continue;
-                }
-                var usage = apc.getAudioAttributes().getUsage();
-                if (usage == USAGE_VOICE_COMMUNICATION
-                        || usage == USAGE_VOICE_COMMUNICATION_SIGNALLING) {
-                    return true;
-                }
-            }
+            int audioMode = am.getMode();
+            return audioMode == AudioManager.MODE_IN_CALL
+                    || audioMode == AudioManager.MODE_IN_COMMUNICATION;
         } catch (Exception ignore) {
+            return false;
         }
-        return false;
     }
 
     /**
@@ -186,6 +177,11 @@ public class AppStateHelper {
      * True if there is an ongoing phone call.
      */
     public boolean isInCall() {
+        // Simulate in-call during test
+        if (SystemProperties.getBoolean(
+                "debug.pm.gentle_update_test.is_in_call", false)) {
+            return true;
+        }
         // TelecomManager doesn't handle the case where some apps don't implement ConnectionService.
         // We check apps using voice communication to detect if the device is in call.
         var tm = mContext.getSystemService(TelecomManager.class);
