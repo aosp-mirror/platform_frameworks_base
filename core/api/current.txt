@@ -4294,7 +4294,7 @@ package android.app {
     method @Deprecated public final void removeDialog(int);
     method public void reportFullyDrawn();
     method public android.view.DragAndDropPermissions requestDragAndDropPermissions(android.view.DragEvent);
-    method public void requestFullscreenMode(@NonNull int, @Nullable android.os.OutcomeReceiver<java.lang.Void,java.lang.Throwable>);
+    method public void requestFullscreenMode(int, @Nullable android.os.OutcomeReceiver<java.lang.Void,java.lang.Throwable>);
     method public final void requestPermissions(@NonNull String[], int);
     method public final void requestShowKeyboardShortcuts();
     method @Deprecated public boolean requestVisibleBehind(boolean);

@@ -995,8 +995,13 @@ public class Activity extends ContextThemeWrapper
     })
     public @interface FullscreenModeRequest {}
 
+    /** Request type of {@link #requestFullscreenMode(int, OutcomeReceiver)}, to request exiting the
+     *  requested fullscreen mode and restore to the previous multi-window mode.
+     */
     public static final int FULLSCREEN_MODE_REQUEST_EXIT = 0;
-
+    /** Request type of {@link #requestFullscreenMode(int, OutcomeReceiver)}, to request enter
+     *  fullscreen mode from multi-window mode.
+     */
     public static final int FULLSCREEN_MODE_REQUEST_ENTER = 1;
 
     private boolean mShouldDockBigOverlays;
@@ -3015,8 +3020,9 @@ public class Activity extends ContextThemeWrapper
     /**
      * Request to put the a freeform activity into fullscreen. This will only be allowed if the
      * activity is on a freeform display, such as a desktop device. The requester has to be the
-     * top-most activity and the request should be a response to a user input. When getting
-     * fullscreen and receiving corresponding {@link #onConfigurationChanged(Configuration)} and
+     * top-most activity of the focused display, and the request should be a response to a user
+     * input. When getting fullscreen and receiving corresponding
+     * {@link #onConfigurationChanged(Configuration)} and
      * {@link #onMultiWindowModeChanged(boolean, Configuration)}, the activity should relayout
      * itself and the system bars' visibilities can be controlled as usual fullscreen apps.
      *
@@ -3034,9 +3040,11 @@ public class Activity extends ContextThemeWrapper
      * @param approvalCallback Optional callback, use {@code null} when not necessary. When the
      *                         request is approved or rejected, the callback will be triggered. This
      *                         will happen before any configuration change. The callback will be
-     *                         dispatched on the main thread.
+     *                         dispatched on the main thread. If the request is rejected, the
+     *                         Throwable provided will be an {@link IllegalStateException} with a
+     *                         detailed message can be retrieved by {@link Throwable#getMessage()}.
      */
-    public void requestFullscreenMode(@NonNull @FullscreenModeRequest int request,
+    public void requestFullscreenMode(@FullscreenModeRequest int request,
             @Nullable OutcomeReceiver<Void, Throwable> approvalCallback) {
         FullscreenRequestHandler.requestFullscreenMode(
                 request, approvalCallback, mCurrentConfig, getActivityToken());
