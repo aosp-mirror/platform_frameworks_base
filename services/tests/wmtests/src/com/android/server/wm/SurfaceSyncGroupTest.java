@@ -336,6 +336,27 @@ public class SurfaceSyncGroupTest {
         verify(parentTransaction).merge(targetTransaction);
     }
 
+    @Test
+    public void testAddToSameParentNoCrash() {
+        final CountDownLatch finishedLatch = new CountDownLatch(1);
+        SurfaceSyncGroup syncGroup = new SurfaceSyncGroup();
+        syncGroup.addSyncCompleteCallback(mExecutor, finishedLatch::countDown);
+        SyncTarget syncTarget = new SyncTarget();
+        syncGroup.addToSync(syncTarget, false /* parentSyncGroupMerge */);
+        // Add the syncTarget to the same syncGroup and ensure it doesn't crash.
+        syncGroup.addToSync(syncTarget, false /* parentSyncGroupMerge */);
+        syncGroup.onTransactionReady(null);
+
+        syncTarget.onBufferReady();
+
+        try {
+            finishedLatch.await(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        assertEquals(0, finishedLatch.getCount());
+    }
+
     private static class SyncTarget extends SurfaceSyncGroup {
         void onBufferReady() {
             SurfaceControl.Transaction t = new StubTransaction();
