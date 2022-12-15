@@ -23123,6 +23123,7 @@ package android.media {
 
   public class MediaPlayer implements android.media.AudioRouting android.media.VolumeAutomation {
     ctor public MediaPlayer();
+    ctor public MediaPlayer(@NonNull android.content.Context);
     method public void addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler);
     method public void addTimedTextSource(String, String) throws java.io.IOException, java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void addTimedTextSource(android.content.Context, android.net.Uri, String) throws java.io.IOException, java.lang.IllegalArgumentException, java.lang.IllegalStateException;
