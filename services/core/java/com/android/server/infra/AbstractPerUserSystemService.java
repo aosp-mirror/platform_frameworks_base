@@ -154,7 +154,14 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
 
         if (mMaster.mServiceNameResolver != null
                 && mMaster.mServiceNameResolver.isConfiguredInMultipleMode()) {
-            updateServiceInfoListLocked();
+            // Update of multi configured mode should always happen in AbstractMasterSystemService
+            // as this class is not aware of the complete list of multiple backends. Since we
+            // should never end up in this state, it is safe to not do anything if we end up here
+            // through a different code path.
+            if (mMaster.debug) {
+                Slog.d(mTag, "Should not end up in updateLocked when "
+                        + "isConfiguredInMultipleMode is true");
+            }
         } else {
             updateServiceInfoLocked();
         }
@@ -166,29 +173,14 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
      */
     @GuardedBy("mLock")
     protected final ComponentName updateServiceInfoLocked() {
-        ComponentName[] componentNames = updateServiceInfoListLocked();
-        return componentNames == null || componentNames.length == 0 ? null : componentNames[0];
-    }
-
-    /**
-     * Updates the internal reference to the service info, and returns the service's component.
-     */
-    @GuardedBy("mLock")
-    protected final ComponentName[] updateServiceInfoListLocked() {
         if (mMaster.mServiceNameResolver == null) {
             return null;
         }
         if (!mMaster.mServiceNameResolver.isConfiguredInMultipleMode()) {
             final String componentName = getComponentNameLocked();
-            return new ComponentName[] { getServiceComponent(componentName) };
+            return getServiceComponent(componentName);
         }
-        final String[] componentNames = mMaster.mServiceNameResolver.getServiceNameList(
-                mUserId);
-        ComponentName[] serviceComponents = new ComponentName[componentNames.length];
-        for (int i = 0; i < componentNames.length; i++) {
-            serviceComponents[i] = getServiceComponent(componentNames[i]);
-        }
-        return serviceComponents;
+        return null;
     }
 
     private ComponentName getServiceComponent(String componentName) {
