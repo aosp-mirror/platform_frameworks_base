@@ -157,7 +157,7 @@ class FgsManagerControllerImpl @Inject constructor(
         private const val DEFAULT_TASK_MANAGER_ENABLED = true
         private const val DEFAULT_TASK_MANAGER_SHOW_FOOTER_DOT = false
         private const val DEFAULT_TASK_MANAGER_SHOW_STOP_BUTTON_FOR_USER_ALLOWLISTED_APPS = true
-        private const val DEFAULT_TASK_MANAGER_SHOW_USER_VISIBLE_JOBS = false
+        private const val DEFAULT_TASK_MANAGER_SHOW_USER_VISIBLE_JOBS = true
     }
 
     override var newChangesSinceDialogWasDismissed = false
