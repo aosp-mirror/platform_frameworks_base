@@ -21,24 +21,74 @@ import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Describes a keyboard layout.
  *
  * @hide
  */
-public final class KeyboardLayout implements Parcelable,
-        Comparable<KeyboardLayout> {
+public final class KeyboardLayout implements Parcelable, Comparable<KeyboardLayout> {
     private final String mDescriptor;
     private final String mLabel;
     private final String mCollection;
     private final int mPriority;
     @NonNull
     private final LocaleList mLocales;
+    private final LayoutType mLayoutType;
     private final int mVendorId;
     private final int mProductId;
 
-    public static final @android.annotation.NonNull Parcelable.Creator<KeyboardLayout> CREATOR =
-            new Parcelable.Creator<KeyboardLayout>() {
+    /** Currently supported Layout types in the KCM files */
+    private enum LayoutType {
+        UNDEFINED(0, "undefined"),
+        QWERTY(1, "qwerty"),
+        QWERTZ(2, "qwertz"),
+        AZERTY(3, "azerty"),
+        DVORAK(4, "dvorak"),
+        COLEMAK(5, "colemak"),
+        WORKMAN(6, "workman"),
+        TURKISH_F(7, "turkish_f"),
+        TURKISH_Q(8, "turkish_q"),
+        EXTENDED(9, "extended");
+
+        private final int mValue;
+        private final String mName;
+        private static final Map<Integer, LayoutType> VALUE_TO_ENUM_MAP = new HashMap<>();
+        static {
+            VALUE_TO_ENUM_MAP.put(UNDEFINED.mValue, UNDEFINED);
+            VALUE_TO_ENUM_MAP.put(QWERTY.mValue, QWERTY);
+            VALUE_TO_ENUM_MAP.put(QWERTZ.mValue, QWERTZ);
+            VALUE_TO_ENUM_MAP.put(AZERTY.mValue, AZERTY);
+            VALUE_TO_ENUM_MAP.put(DVORAK.mValue, DVORAK);
+            VALUE_TO_ENUM_MAP.put(COLEMAK.mValue, COLEMAK);
+            VALUE_TO_ENUM_MAP.put(WORKMAN.mValue, WORKMAN);
+            VALUE_TO_ENUM_MAP.put(TURKISH_F.mValue, TURKISH_F);
+            VALUE_TO_ENUM_MAP.put(TURKISH_Q.mValue, TURKISH_Q);
+            VALUE_TO_ENUM_MAP.put(EXTENDED.mValue, EXTENDED);
+        }
+
+        private static LayoutType of(int value) {
+            return VALUE_TO_ENUM_MAP.getOrDefault(value, UNDEFINED);
+        }
+
+        LayoutType(int value, String name) {
+            this.mValue = value;
+            this.mName = name;
+        }
+
+        private int getValue() {
+            return mValue;
+        }
+
+        private String getName() {
+            return mName;
+        }
+    }
+
+    @NonNull
+    public static final Parcelable.Creator<KeyboardLayout> CREATOR = new Parcelable.Creator<>() {
         public KeyboardLayout createFromParcel(Parcel source) {
             return new KeyboardLayout(source);
         }
@@ -48,12 +98,13 @@ public final class KeyboardLayout implements Parcelable,
     };
 
     public KeyboardLayout(String descriptor, String label, String collection, int priority,
-            LocaleList locales, int vid, int pid) {
+            LocaleList locales, int layoutValue, int vid, int pid) {
         mDescriptor = descriptor;
         mLabel = label;
         mCollection = collection;
         mPriority = priority;
         mLocales = locales;
+        mLayoutType = LayoutType.of(layoutValue);
         mVendorId = vid;
         mProductId = pid;
     }
@@ -64,6 +115,7 @@ public final class KeyboardLayout implements Parcelable,
         mCollection = source.readString();
         mPriority = source.readInt();
         mLocales = LocaleList.CREATOR.createFromParcel(source);
+        mLayoutType = LayoutType.of(source.readInt());
         mVendorId = source.readInt();
         mProductId = source.readInt();
     }
@@ -106,6 +158,15 @@ public final class KeyboardLayout implements Parcelable,
     }
 
     /**
+     * Gets the layout type that this keyboard layout is intended for.
+     * This may be "undefined" if a layoutType has not been assigned to this keyboard layout.
+     * @return The keyboard layout's intended layout type.
+     */
+    public String getLayoutType() {
+        return mLayoutType.getName();
+    }
+
+    /**
      * Gets the vendor ID of the hardware device this keyboard layout is intended for.
      * Returns -1 if this is not specific to any piece of hardware.
      * @return The hardware vendor ID of the keyboard layout's intended device.
@@ -135,6 +196,7 @@ public final class KeyboardLayout implements Parcelable,
         dest.writeString(mCollection);
         dest.writeInt(mPriority);
         mLocales.writeToParcel(dest, 0);
+        dest.writeInt(mLayoutType.getValue());
         dest.writeInt(mVendorId);
         dest.writeInt(mProductId);
     }
@@ -160,6 +222,7 @@ public final class KeyboardLayout implements Parcelable,
                 + ", descriptor: " + mDescriptor
                 + ", priority: " + mPriority
                 + ", locales: " + mLocales.toString()
+                + ", layout type: " + mLayoutType.getName()
                 + ", vendorId: " + mVendorId
                 + ", productId: " + mProductId;
     }

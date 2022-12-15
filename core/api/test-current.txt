@@ -1299,6 +1299,7 @@ package android.hardware.input {
     method @RequiresPermission(android.Manifest.permission.REMAP_MODIFIER_KEYS) public void clearAllModifierKeyRemappings();
     method @Nullable public String getCurrentKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier);
     method @NonNull public java.util.List<java.lang.String> getKeyboardLayoutDescriptorsForInputDevice(@NonNull android.view.InputDevice);
+    method @NonNull public String getKeyboardLayoutTypeForLayoutDescriptor(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.REMAP_MODIFIER_KEYS) public java.util.Map<java.lang.Integer,java.lang.Integer> getModifierKeyRemapping();
     method @RequiresPermission(android.Manifest.permission.REMAP_MODIFIER_KEYS) public void remapModifierKey(int, int);
     method @RequiresPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT) public void removeKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier, @NonNull String);

@@ -935,6 +935,8 @@ package android {
     field @Deprecated public static final int keyTextSize = 16843316; // 0x1010234
     field @Deprecated public static final int keyWidth = 16843325; // 0x101023d
     field public static final int keyboardLayout = 16843691; // 0x10103ab
+    field public static final int keyboardLayoutType;
+    field public static final int keyboardLocale;
     field @Deprecated public static final int keyboardMode = 16843341; // 0x101024d
     field public static final int keyboardNavigationCluster = 16844096; // 0x1010540
     field public static final int keycode = 16842949; // 0x10100c5
