@@ -164,6 +164,9 @@ interface IAudioService {
     @EnforcePermission("ACCESS_ULTRASOUND")
     boolean isUltrasoundSupported();
 
+    @EnforcePermission("CAPTURE_AUDIO_HOTWORD")
+    boolean isHotwordStreamSupported(boolean lookbackAudio);
+
     void setMicrophoneMute(boolean on, String callingPackage, int userId, in String attributionTag);
 
     oneway void setMicrophoneMuteFromSwitch(boolean on);

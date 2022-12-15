@@ -7440,6 +7440,27 @@ public class AudioManager {
 
     /**
      * @hide
+     * Indicates whether the platform supports capturing content from the hotword recognition
+     * pipeline. To capture content of this type, create an AudioRecord with
+     * {@link AudioRecord.Builder.setRequestHotwordStream(boolean, boolean)}.
+     * @param lookbackAudio Query if the hotword stream additionally supports providing buffered
+     * audio prior to stream open.
+     * @return True if the platform supports capturing hotword content, and if lookbackAudio
+     * is true, if it additionally supports capturing buffered hotword content prior to stream
+     * open. False otherwise.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_HOTWORD)
+    public boolean isHotwordStreamSupported(boolean lookbackAudio) {
+        try {
+            return getService().isHotwordStreamSupported(lookbackAudio);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * @hide
      * Introspection API to retrieve audio product strategies.
      * When implementing {Car|Oem}AudioManager, use this method  to retrieve the collection of
      * audio product strategies, which is indexed by a weakly typed index in order to be extended
