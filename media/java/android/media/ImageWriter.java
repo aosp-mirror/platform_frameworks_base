@@ -99,6 +99,8 @@ public class ImageWriter implements AutoCloseable {
     private final Object mListenerLock = new Object();
     private OnImageReleasedListener mListener;
     private ListenerHandler mListenerHandler;
+    private final Object mCloseLock = new Object();
+    private boolean mIsWriterValid = false;
     private long mNativeContext;
 
     private int mWidth;
@@ -282,6 +284,8 @@ public class ImageWriter implements AutoCloseable {
         mEstimatedNativeAllocBytes = ImageUtils.getEstimatedNativeAllocBytes(mWidth, mHeight,
                 imageFormat, /*buffer count*/ 1);
         VMRuntime.getRuntime().registerNativeAllocation(mEstimatedNativeAllocBytes);
+
+        mIsWriterValid = true;
     }
 
     private ImageWriter(Surface surface, int maxImages, boolean useSurfaceImageFormatInfo,
@@ -427,14 +431,17 @@ public class ImageWriter implements AutoCloseable {
      * @see Image#close
      */
     public Image dequeueInputImage() {
-        if (mDequeuedImages.size() >= mMaxImages) {
-            throw new IllegalStateException("Already dequeued max number of Images " + mMaxImages);
+        synchronized (mCloseLock) {
+            if (mDequeuedImages.size() >= mMaxImages) {
+                throw new IllegalStateException(
+                        "Already dequeued max number of Images " + mMaxImages);
+            }
+            WriterSurfaceImage newImage = new WriterSurfaceImage(this);
+            nativeDequeueInputImage(mNativeContext, newImage);
+            mDequeuedImages.add(newImage);
+            newImage.mIsImageValid = true;
+            return newImage;
         }
-        WriterSurfaceImage newImage = new WriterSurfaceImage(this);
-        nativeDequeueInputImage(mNativeContext, newImage);
-        mDequeuedImages.add(newImage);
-        newImage.mIsImageValid = true;
-        return newImage;
     }
 
     /**
@@ -492,49 +499,53 @@ public class ImageWriter implements AutoCloseable {
         if (image == null) {
             throw new IllegalArgumentException("image shouldn't be null");
         }
-        boolean ownedByMe = isImageOwnedByMe(image);
-        if (ownedByMe && !(((WriterSurfaceImage) image).mIsImageValid)) {
-            throw new IllegalStateException("Image from ImageWriter is invalid");
-        }
 
-        // For images from other components that have non-null owner, need to detach first,
-        // then attach. Images without owners must already be attachable.
-        if (!ownedByMe) {
-            if ((image.getOwner() instanceof ImageReader)) {
-                ImageReader prevOwner = (ImageReader) image.getOwner();
-
-                prevOwner.detachImage(image);
-            } else if (image.getOwner() != null) {
-                throw new IllegalArgumentException("Only images from ImageReader can be queued to"
-                        + " ImageWriter, other image source is not supported yet!");
+        synchronized (mCloseLock) {
+            boolean ownedByMe = isImageOwnedByMe(image);
+            if (ownedByMe && !(((WriterSurfaceImage) image).mIsImageValid)) {
+                throw new IllegalStateException("Image from ImageWriter is invalid");
             }
 
-            attachAndQueueInputImage(image);
-            // This clears the native reference held by the original owner.
-            // When this Image is detached later by this ImageWriter, the
-            // native memory won't be leaked.
-            image.close();
-            return;
-        }
+            // For images from other components that have non-null owner, need to detach first,
+            // then attach. Images without owners must already be attachable.
+            if (!ownedByMe) {
+                if ((image.getOwner() instanceof ImageReader)) {
+                    ImageReader prevOwner = (ImageReader) image.getOwner();
 
-        Rect crop = image.getCropRect();
-        nativeQueueInputImage(mNativeContext, image, image.getTimestamp(), image.getDataSpace(),
-                crop.left, crop.top, crop.right, crop.bottom, image.getTransform(),
-                image.getScalingMode());
+                    prevOwner.detachImage(image);
+                } else if (image.getOwner() != null) {
+                    throw new IllegalArgumentException(
+                            "Only images from ImageReader can be queued to"
+                                    + " ImageWriter, other image source is not supported yet!");
+                }
 
-        /**
-         * Only remove and cleanup the Images that are owned by this
-         * ImageWriter. Images detached from other owners are only temporarily
-         * owned by this ImageWriter and will be detached immediately after they
-         * are released by downstream consumers, so there is no need to keep
-         * track of them in mDequeuedImages.
-         */
-        if (ownedByMe) {
-            mDequeuedImages.remove(image);
-            // Do not call close here, as close is essentially cancel image.
-            WriterSurfaceImage wi = (WriterSurfaceImage) image;
-            wi.clearSurfacePlanes();
-            wi.mIsImageValid = false;
+                attachAndQueueInputImage(image);
+                // This clears the native reference held by the original owner.
+                // When this Image is detached later by this ImageWriter, the
+                // native memory won't be leaked.
+                image.close();
+                return;
+            }
+
+            Rect crop = image.getCropRect();
+            nativeQueueInputImage(mNativeContext, image, image.getTimestamp(), image.getDataSpace(),
+                    crop.left, crop.top, crop.right, crop.bottom, image.getTransform(),
+                    image.getScalingMode());
+
+            /**
+             * Only remove and cleanup the Images that are owned by this
+             * ImageWriter. Images detached from other owners are only temporarily
+             * owned by this ImageWriter and will be detached immediately after they
+             * are released by downstream consumers, so there is no need to keep
+             * track of them in mDequeuedImages.
+             */
+            if (ownedByMe) {
+                mDequeuedImages.remove(image);
+                // Do not call close here, as close is essentially cancel image.
+                WriterSurfaceImage wi = (WriterSurfaceImage) image;
+                wi.clearSurfacePlanes();
+                wi.mIsImageValid = false;
+            }
         }
     }
 
@@ -670,17 +681,23 @@ public class ImageWriter implements AutoCloseable {
      */
     @Override
     public void close() {
-        setOnImageReleasedListener(null, null);
-        for (Image image : mDequeuedImages) {
-            image.close();
-        }
-        mDequeuedImages.clear();
-        nativeClose(mNativeContext);
-        mNativeContext = 0;
+        synchronized (mCloseLock) {
+            if (!mIsWriterValid) {
+                return;
+            }
+            setOnImageReleasedListener(null, null);
+            for (Image image : mDequeuedImages) {
+                image.close();
+            }
+            mDequeuedImages.clear();
+            nativeClose(mNativeContext);
+            mNativeContext = 0;
 
-        if (mEstimatedNativeAllocBytes > 0) {
-            VMRuntime.getRuntime().registerNativeFree(mEstimatedNativeAllocBytes);
-            mEstimatedNativeAllocBytes = 0;
+            if (mEstimatedNativeAllocBytes > 0) {
+                VMRuntime.getRuntime().registerNativeFree(mEstimatedNativeAllocBytes);
+                mEstimatedNativeAllocBytes = 0;
+            }
+            mIsWriterValid = false;
         }
     }
 
@@ -771,10 +788,16 @@ public class ImageWriter implements AutoCloseable {
         @Override
         public void handleMessage(Message msg) {
             OnImageReleasedListener listener;
-            synchronized (mListenerLock) {
+            boolean isWriterValid;
+            synchronized (ImageWriter.this.mListenerLock) {
                 listener = mListener;
             }
-            if (listener != null) {
+            // Check to make sure we don't accidentally queue images after the writer is
+            // closed or closing
+            synchronized (ImageWriter.this.mCloseLock) {
+                isWriterValid = ImageWriter.this.mIsWriterValid;
+            }
+            if (listener != null && isWriterValid) {
                 listener.onImageReleased(ImageWriter.this);
             }
         }
@@ -794,10 +817,14 @@ public class ImageWriter implements AutoCloseable {
         }
 
         final Handler handler;
+        final boolean isWriterValid;
         synchronized (iw.mListenerLock) {
             handler = iw.mListenerHandler;
         }
-        if (handler != null) {
+        synchronized (iw.mCloseLock) {
+            isWriterValid = iw.mIsWriterValid;
+        }
+        if (handler != null && isWriterValid) {
             handler.sendEmptyMessage(0);
         }
     }
@@ -1031,6 +1058,9 @@ public class ImageWriter implements AutoCloseable {
         private int mTransform = 0; //Default no transform
         private int mScalingMode = 0; //Default frozen scaling mode
 
+        private final Object mCloseLock = new Object(); // lock to protect against multiple
+                                                        // simultaneous calls to close()
+
         public WriterSurfaceImage(ImageWriter writer) {
             mOwner = writer;
             mWidth = writer.mWidth;
@@ -1172,8 +1202,10 @@ public class ImageWriter implements AutoCloseable {
 
         @Override
         public void close() {
-            if (mIsImageValid) {
-                getOwner().abortImage(this);
+            synchronized (mCloseLock) {
+                if (mIsImageValid) {
+                    getOwner().abortImage(this);
+                }
             }
         }
 
