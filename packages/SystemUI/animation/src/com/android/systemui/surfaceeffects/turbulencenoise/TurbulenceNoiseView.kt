@@ -25,38 +25,29 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.core.graphics.ColorUtils
-import java.util.Random
-import kotlin.math.sin
 
-/** View that renders turbulence noise effect. */
+/**
+ * View that renders turbulence noise effect.
+ *
+ * <p>Use [TurbulenceNoiseController] to control the turbulence animation. If you want to make some
+ * other turbulence noise effects, either add functionality to [TurbulenceNoiseController] or create
+ * another controller instead of extend or modify the [TurbulenceNoiseView].
+ *
+ * <p>Please keep the [TurbulenceNoiseView] (or View in general) not aware of the state.
+ *
+ * <p>Please avoid inheriting the View if possible. Instead, reconsider adding a controller for a
+ * new case.
+ */
 class TurbulenceNoiseView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
     companion object {
         private const val MS_TO_SEC = 0.001f
-        private const val TWO_PI = Math.PI.toFloat() * 2f
     }
 
-    @VisibleForTesting val turbulenceNoiseShader = TurbulenceNoiseShader()
+    private val turbulenceNoiseShader = TurbulenceNoiseShader()
     private val paint = Paint().apply { this.shader = turbulenceNoiseShader }
-    private val random = Random()
-    private val animator: ValueAnimator = ValueAnimator.ofFloat(0f, 1f)
-    private var config: TurbulenceNoiseAnimationConfig? = null
-
-    val isPlaying: Boolean
-        get() = animator.isRunning
-
-    init {
-        // Only visible during the animation.
-        visibility = INVISIBLE
-    }
-
-    /** Updates the color during the animation. No-op if there's no animation playing. */
-    fun updateColor(color: Int) {
-        config?.let {
-            it.color = color
-            applyConfig(it)
-        }
-    }
+    @VisibleForTesting var noiseConfig: TurbulenceNoiseAnimationConfig? = null
+    @VisibleForTesting var currentAnimator: ValueAnimator? = null
 
     override fun onDraw(canvas: Canvas?) {
         if (canvas == null || !canvas.isHardwareAccelerated) {
@@ -68,32 +59,38 @@ class TurbulenceNoiseView(context: Context?, attrs: AttributeSet?) : View(contex
         canvas.drawPaint(paint)
     }
 
-    fun play(config: TurbulenceNoiseAnimationConfig) {
-        if (isPlaying) {
-            return // Ignore if the animation is playing.
+    /** Updates the color during the animation. No-op if there's no animation playing. */
+    internal fun updateColor(color: Int) {
+        noiseConfig?.let {
+            turbulenceNoiseShader.setColor(ColorUtils.setAlphaComponent(color, it.opacity))
         }
-        visibility = VISIBLE
-        applyConfig(config)
+    }
 
-        // Add random offset to avoid same patterned noise.
-        val offsetX = random.nextFloat()
-        val offsetY = random.nextFloat()
+    /** Plays the turbulence noise with no easing. */
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+    fun play(onAnimationEnd: Runnable? = null) {
+        if (noiseConfig == null) {
+            return
+        }
+        val config = noiseConfig!!
 
-        animator.duration = config.duration.toLong()
+        val animator = ValueAnimator.ofFloat(0f, 1f)
+        animator.duration = config.maxDuration.toLong()
+
+        // Animation should start from the initial position to avoid abrupt transition.
+        val initialX = turbulenceNoiseShader.noiseOffsetX
+        val initialY = turbulenceNoiseShader.noiseOffsetY
+        val initialZ = turbulenceNoiseShader.noiseOffsetZ
+
         animator.addUpdateListener { updateListener ->
             val timeInSec = updateListener.currentPlayTime * MS_TO_SEC
-            // Remap [0,1] to [0, 2*PI]
-            val progress = TWO_PI * updateListener.animatedValue as Float
-
             turbulenceNoiseShader.setNoiseMove(
-                offsetX + timeInSec * config.noiseMoveSpeedX,
-                offsetY + timeInSec * config.noiseMoveSpeedY,
-                timeInSec * config.noiseMoveSpeedZ
+                initialX + timeInSec * config.noiseMoveSpeedX,
+                initialY + timeInSec * config.noiseMoveSpeedY,
+                initialZ + timeInSec * config.noiseMoveSpeedZ
             )
 
-            // Fade in and out the noise as the animation progress.
-            // TODO: replace it with a better curve
-            turbulenceNoiseShader.setOpacity(sin(TWO_PI - progress) * config.luminosityMultiplier)
+            turbulenceNoiseShader.setOpacity(config.luminosityMultiplier)
 
             invalidate()
         }
@@ -101,16 +98,121 @@ class TurbulenceNoiseView(context: Context?, attrs: AttributeSet?) : View(contex
         animator.addListener(
             object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
-                    visibility = INVISIBLE
-                    config.onAnimationEnd?.run()
+                    currentAnimator = null
+                    onAnimationEnd?.run()
                 }
             }
         )
+
         animator.start()
+        currentAnimator = animator
     }
 
-    private fun applyConfig(config: TurbulenceNoiseAnimationConfig) {
-        this.config = config
+    /** Plays the turbulence noise with linear ease-in. */
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+    fun playEaseIn(offsetX: Float = 0f, offsetY: Float = 0f, onAnimationEnd: Runnable? = null) {
+        if (noiseConfig == null) {
+            return
+        }
+        val config = noiseConfig!!
+
+        val animator = ValueAnimator.ofFloat(0f, 1f)
+        animator.duration = config.easeInDuration.toLong()
+
+        // Animation should start from the initial position to avoid abrupt transition.
+        val initialX = turbulenceNoiseShader.noiseOffsetX
+        val initialY = turbulenceNoiseShader.noiseOffsetY
+        val initialZ = turbulenceNoiseShader.noiseOffsetZ
+
+        animator.addUpdateListener { updateListener ->
+            val timeInSec = updateListener.currentPlayTime * MS_TO_SEC
+            val progress = updateListener.animatedValue as Float
+
+            turbulenceNoiseShader.setNoiseMove(
+                offsetX + initialX + timeInSec * config.noiseMoveSpeedX,
+                offsetY + initialY + timeInSec * config.noiseMoveSpeedY,
+                initialZ + timeInSec * config.noiseMoveSpeedZ
+            )
+
+            // TODO: Replace it with a better curve.
+            turbulenceNoiseShader.setOpacity(progress * config.luminosityMultiplier)
+
+            invalidate()
+        }
+
+        animator.addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    currentAnimator = null
+                    onAnimationEnd?.run()
+                }
+            }
+        )
+
+        animator.start()
+        currentAnimator = animator
+    }
+
+    /** Plays the turbulence noise with linear ease-out. */
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+    fun playEaseOut(onAnimationEnd: Runnable? = null) {
+        if (noiseConfig == null) {
+            return
+        }
+        val config = noiseConfig!!
+
+        val animator = ValueAnimator.ofFloat(0f, 1f)
+        animator.duration = config.easeOutDuration.toLong()
+
+        // Animation should start from the initial position to avoid abrupt transition.
+        val initialX = turbulenceNoiseShader.noiseOffsetX
+        val initialY = turbulenceNoiseShader.noiseOffsetY
+        val initialZ = turbulenceNoiseShader.noiseOffsetZ
+
+        animator.addUpdateListener { updateListener ->
+            val timeInSec = updateListener.currentPlayTime * MS_TO_SEC
+            val progress = updateListener.animatedValue as Float
+
+            turbulenceNoiseShader.setNoiseMove(
+                initialX + timeInSec * config.noiseMoveSpeedX,
+                initialY + timeInSec * config.noiseMoveSpeedY,
+                initialZ + timeInSec * config.noiseMoveSpeedZ
+            )
+
+            // TODO: Replace it with a better curve.
+            turbulenceNoiseShader.setOpacity((1f - progress) * config.luminosityMultiplier)
+
+            invalidate()
+        }
+
+        animator.addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    currentAnimator = null
+                    onAnimationEnd?.run()
+                }
+            }
+        )
+
+        animator.start()
+        currentAnimator = animator
+    }
+
+    /** Finishes the current animation if playing and plays the next animation if given. */
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+    fun finish(nextAnimation: Runnable? = null) {
+        // Calling Animator#end sets the animation state back to the initial state. Using pause to
+        // avoid visual artifacts.
+        currentAnimator?.pause()
+        currentAnimator = null
+
+        nextAnimation?.run()
+    }
+
+    /** Applies shader uniforms. Must be called before playing animation. */
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+    fun applyConfig(config: TurbulenceNoiseAnimationConfig) {
+        noiseConfig = config
         with(turbulenceNoiseShader) {
             setGridCount(config.gridCount)
             setColor(ColorUtils.setAlphaComponent(config.color, config.opacity))
@@ -119,5 +221,9 @@ class TurbulenceNoiseView(context: Context?, attrs: AttributeSet?) : View(contex
             setPixelDensity(config.pixelDensity)
         }
         paint.blendMode = config.blendMode
+    }
+
+    internal fun clearConfig() {
+        noiseConfig = null
     }
 }

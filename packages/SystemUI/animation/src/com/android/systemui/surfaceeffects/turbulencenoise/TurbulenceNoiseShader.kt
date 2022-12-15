@@ -114,8 +114,19 @@ class TurbulenceNoiseShader : RuntimeShader(TURBULENCE_NOISE_SHADER) {
         setFloatUniform("in_aspectRatio", width / max(height, 0.001f))
     }
 
-    /** Sets noise move speed in x, y, and z direction. */
+    /** Current noise movements in x, y, and z axes. */
+    var noiseOffsetX: Float = 0f
+        private set
+    var noiseOffsetY: Float = 0f
+        private set
+    var noiseOffsetZ: Float = 0f
+        private set
+
+    /** Sets noise move offset in x, y, and z direction. */
     fun setNoiseMove(x: Float, y: Float, z: Float) {
-        setFloatUniform("in_noiseMove", x, y, z)
+        noiseOffsetX = x
+        noiseOffsetY = y
+        noiseOffsetZ = z
+        setFloatUniform("in_noiseMove", noiseOffsetX, noiseOffsetY, noiseOffsetZ)
     }
 }

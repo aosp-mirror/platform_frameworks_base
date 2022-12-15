@@ -1070,7 +1070,9 @@ public class MediaControlPanel {
                 TurbulenceNoiseAnimationConfig.DEFAULT_OPACITY,
                 /* width= */ mMediaViewHolder.getMultiRippleView().getWidth(),
                 /* height= */ mMediaViewHolder.getMultiRippleView().getHeight(),
-                TurbulenceNoiseAnimationConfig.DEFAULT_NOISE_DURATION_IN_MILLIS,
+                TurbulenceNoiseAnimationConfig.DEFAULT_MAX_DURATION_IN_MILLIS,
+                TurbulenceNoiseAnimationConfig.DEFAULT_EASING_DURATION_IN_MILLIS,
+                TurbulenceNoiseAnimationConfig.DEFAULT_EASING_DURATION_IN_MILLIS,
                 this.getContext().getResources().getDisplayMetrics().density,
                 BlendMode.PLUS,
                 /* onAnimationEnd= */ null
