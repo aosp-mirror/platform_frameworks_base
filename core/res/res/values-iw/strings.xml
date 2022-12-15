@@ -692,6 +692,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"מאפשרת לאפליקציה לקרוא קובצי וידאו מתוך האחסון המשותף."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"קריאה של קובצי תמונה מתוך האחסון המשותף"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"מאפשרת לאפליקציה לקרוא קובצי תמונה מתוך האחסון המשותף."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"קריאה של קובצי הווידאו והתמונה שנבחרו על ידי המשתמש מתוך נפח האחסון המשותף"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"ההרשאה מאפשרת לאפליקציה לקרוא קובצי וידאו ותמונה שבחרת מתוך נפח האחסון המשותף."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"שינוי או מחיקה של תוכן האחסון המשותף שלך"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"מאפשרת לאפליקציה לכתוב את התוכן של האחסון המשותף."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"‏ביצוע/קבלה של שיחות SIP"</string>
@@ -1478,7 +1480,7 @@
     <string name="accessibility_binding_label" msgid="1974602776545801715">"נגישות"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"טפט"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"שינוי טפט"</string>
-    <string name="notification_listener_binding_label" msgid="2702165274471499713">"מאזין להתראות"</string>
+    <string name="notification_listener_binding_label" msgid="2702165274471499713">"האזנה להתראות"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"‏VR ליסנר"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"ספק תנאי"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"שירות של דירוג התראות"</string>
