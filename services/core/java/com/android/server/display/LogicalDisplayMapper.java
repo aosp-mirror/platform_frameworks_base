@@ -19,6 +19,7 @@ package com.android.server.display;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateManager;
 import android.os.Handler;
@@ -28,7 +29,6 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.text.TextUtils;
-import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -43,7 +43,6 @@ import com.android.server.display.layout.Layout;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -304,58 +303,44 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     }
 
     /**
-     * Returns the set of {@link DisplayInfo} for this device state, only fetching the info that is
-     * part of the same display group as the provided display id. The DisplayInfo represent the
-     * logical display layouts possible for the given device state.
+     * Returns the {@link DisplayInfo} for this device state, indicated by the given display id. The
+     * DisplayInfo represents the attributes of the indicated display in the layout associated with
+     * this state. This is used to get display information for various displays in various states;
+     * e.g. to help apps preload resources for the possible display states.
      *
      * @param deviceState the state to query possible layouts for
-     * @param displayId   the display id to apply to all displays within the group
-     * @param groupId     the display group to filter display info for. Must be the same group as
-     *                    the display with the provided display id.
+     * @param displayId   the display id to retrieve
+     * @return {@code null} if no corresponding {@link DisplayInfo} could be found, or the
+     * {@link DisplayInfo} with a matching display id.
      */
-    public Set<DisplayInfo> getDisplayInfoForStateLocked(int deviceState, int displayId,
-            int groupId) {
-        Set<DisplayInfo> displayInfos = new ArraySet<>();
+    @Nullable
+    public DisplayInfo getDisplayInfoForStateLocked(int deviceState, int displayId) {
+        // Retrieve the layout for this particular state.
         final Layout layout = mDeviceStateToLayoutMap.get(deviceState);
-        final int layoutSize = layout.size();
-        for (int i = 0; i < layoutSize; i++) {
-            Layout.Display displayLayout = layout.getAt(i);
-            if (displayLayout == null) {
-                continue;
-            }
-
-            // If the underlying display-device we want to use for this display
-            // doesn't exist, then skip it. This can happen at startup as display-devices
-            // trickle in one at a time. When the new display finally shows up, the layout is
-            // recalculated so that the display is properly added to the current layout.
-            final DisplayAddress address = displayLayout.getAddress();
-            final DisplayDevice device = mDisplayDeviceRepo.getByAddressLocked(address);
-            if (device == null) {
-                Slog.w(TAG, "The display device (" + address + "), is not available"
-                        + " for the display state " + deviceState);
-                continue;
-            }
-
-            // Find or create the LogicalDisplay to map the DisplayDevice to.
-            final int logicalDisplayId = displayLayout.getLogicalDisplayId();
-            final LogicalDisplay logicalDisplay = getDisplayLocked(logicalDisplayId);
-            if (logicalDisplay == null) {
-                Slog.w(TAG, "The logical display (" + address + "), is not available"
-                        + " for the display state " + deviceState);
-                continue;
-            }
-            final DisplayInfo temp = logicalDisplay.getDisplayInfoLocked();
-            DisplayInfo displayInfo = new DisplayInfo(temp);
-            if (displayInfo.displayGroupId != groupId) {
-                // Ignore any displays not in the provided group.
-                continue;
-            }
-            // A display in the same group can be swapped out at any point, so set the display id
-            // for all results to the provided display id.
-            displayInfo.displayId = displayId;
-            displayInfos.add(displayInfo);
+        if (layout == null) {
+            return null;
         }
-        return displayInfos;
+        // Retrieve the details of the given display within this layout.
+        Layout.Display display = layout.getById(displayId);
+        if (display == null) {
+            return null;
+        }
+        // Retrieve the display info for the display that matches the display id.
+        final DisplayDevice device = mDisplayDeviceRepo.getByAddressLocked(display.getAddress());
+        if (device == null) {
+            Slog.w(TAG, "The display device (" + display.getAddress() + "), is not available"
+                    + " for the display state " + mDeviceState);
+            return null;
+        }
+        LogicalDisplay logicalDisplay = getDisplayLocked(device, /* includeDisabled= */ true);
+        if (logicalDisplay == null) {
+            Slog.w(TAG, "The logical display associated with address (" + display.getAddress()
+                    + "), is not available for the display state " + mDeviceState);
+            return null;
+        }
+        DisplayInfo displayInfo = new DisplayInfo(logicalDisplay.getDisplayInfoLocked());
+        displayInfo.displayId = displayId;
+        return displayInfo;
     }
 
     public void dumpLocked(PrintWriter pw) {
