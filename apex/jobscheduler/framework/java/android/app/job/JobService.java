@@ -400,9 +400,9 @@ public abstract class JobService extends Service {
 
     /**
      * Provide JobScheduler with a notification to post and tie to this job's lifecycle.
-     * This is required for all user-initiated jobs
-     * (scheduled via {link JobInfo.Builder#setUserInitiated(boolean)}) and optional for
-     * other jobs. If the app does not call this method for a required notification within
+     * This is only required for those user-initiated jobs which return {@code true} via
+     * {@link JobParameters#isUserInitiatedJob()}.
+     * If the app does not call this method for a required notification within
      * 10 seconds after {@link #onStartJob(JobParameters)} is called,
      * the system will trigger an ANR and stop this job.
      *

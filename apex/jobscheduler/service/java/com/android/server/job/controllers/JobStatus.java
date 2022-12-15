@@ -1351,8 +1351,9 @@ public final class JobStatus {
      * for any reason.
      */
     public boolean shouldTreatAsUserInitiated() {
-        // TODO(248386641): implement
-        return false;
+        // TODO(248386641): update implementation to handle loss of privilege
+        //  and also rename to `shouldTreatAsUserInitiatedJob` for consistency
+        return getJob().isUserInitiated();
     }
 
     /**
