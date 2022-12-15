@@ -27265,8 +27265,14 @@ package android.net.sip {
 package android.net.vcn {
 
   public final class VcnCellUnderlyingNetworkTemplate extends android.net.vcn.VcnUnderlyingNetworkTemplate {
+    method public int getCbs();
+    method public int getDun();
+    method public int getIms();
+    method public int getInternet();
+    method public int getMms();
     method @NonNull public java.util.Set<java.lang.String> getOperatorPlmnIds();
     method public int getOpportunistic();
+    method public int getRcs();
     method public int getRoaming();
     method @NonNull public java.util.Set<java.lang.Integer> getSimSpecificCarrierIds();
   }
@@ -27274,11 +27280,17 @@ package android.net.vcn {
   public static final class VcnCellUnderlyingNetworkTemplate.Builder {
     ctor public VcnCellUnderlyingNetworkTemplate.Builder();
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate build();
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setCbs(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setDun(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setIms(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setInternet(int);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMetered(int);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMinDownstreamBandwidthKbps(int, int);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMinUpstreamBandwidthKbps(int, int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMms(int);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setOperatorPlmnIds(@NonNull java.util.Set<java.lang.String>);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setOpportunistic(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setRcs(int);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setRoaming(int);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setSimSpecificCarrierIds(@NonNull java.util.Set<java.lang.Integer>);
   }
