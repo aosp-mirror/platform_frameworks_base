@@ -31,21 +31,18 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.Spy
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-import org.mockito.Mockito.`when` as whenever
 
 @RunWith(AndroidJUnit4::class)
 class AppOpsControllerTest {
-    @get:Rule
-    val mockito: MockitoRule = MockitoJUnit.rule()
+    @get:Rule val mockito: MockitoRule = MockitoJUnit.rule()
 
-    @Spy
-    private val context: Context = ApplicationProvider.getApplicationContext()
+    @Spy private val context: Context = ApplicationProvider.getApplicationContext()
 
-    @Mock
-    private lateinit var appOpsManager: AppOpsManager
+    @Mock private lateinit var appOpsManager: AppOpsManager
 
     @Before
     fun setUp() {
@@ -54,7 +51,13 @@ class AppOpsControllerTest {
 
     @Test
     fun setAllowed_setToTrue() {
-        val controller = AppOpsController(context = context, app = APP, op = OP)
+        val controller =
+            AppOpsController(
+                context = context,
+                app = APP,
+                op = OP,
+                modeForNotAllowed = MODE_ERRORED
+            )
 
         controller.setAllowed(true)
 
@@ -63,7 +66,13 @@ class AppOpsControllerTest {
 
     @Test
     fun setAllowed_setToFalse() {
-        val controller = AppOpsController(context = context, app = APP, op = OP)
+        val controller =
+            AppOpsController(
+                context = context,
+                app = APP,
+                op = OP,
+                modeForNotAllowed = MODE_ERRORED
+            )
 
         controller.setAllowed(false)
 
@@ -73,7 +82,13 @@ class AppOpsControllerTest {
     @Test
     fun setAllowed_setToTrueByUid() {
         val controller =
-            AppOpsController(context = context, app = APP, op = OP, setModeByUid = true)
+            AppOpsController(
+                context = context,
+                app = APP,
+                op = OP,
+                modeForNotAllowed = MODE_ERRORED,
+                setModeByUid = true
+            )
 
         controller.setAllowed(true)
 
@@ -83,7 +98,13 @@ class AppOpsControllerTest {
     @Test
     fun setAllowed_setToFalseByUid() {
         val controller =
-            AppOpsController(context = context, app = APP, op = OP, setModeByUid = true)
+            AppOpsController(
+                context = context,
+                app = APP,
+                op = OP,
+                modeForNotAllowed = MODE_ERRORED,
+                setModeByUid = true
+            )
 
         controller.setAllowed(false)
 
@@ -92,10 +113,15 @@ class AppOpsControllerTest {
 
     @Test
     fun getMode() {
-        whenever(
-            appOpsManager.checkOpNoThrow(OP, APP.uid, APP.packageName)
-        ).thenReturn(MODE_ALLOWED)
-        val controller = AppOpsController(context = context, app = APP, op = OP)
+        whenever(appOpsManager.checkOpNoThrow(OP, APP.uid, APP.packageName))
+            .thenReturn(MODE_ALLOWED)
+        val controller =
+            AppOpsController(
+                context = context,
+                app = APP,
+                op = OP,
+                modeForNotAllowed = MODE_ERRORED
+            )
 
         val mode = controller.getMode()
 
@@ -104,9 +130,10 @@ class AppOpsControllerTest {
 
     private companion object {
         const val OP = 1
-        val APP = ApplicationInfo().apply {
-            packageName = "package.name"
-            uid = 123
-        }
+        val APP =
+            ApplicationInfo().apply {
+                packageName = "package.name"
+                uid = 123
+            }
     }
 }
