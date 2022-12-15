@@ -140,13 +140,13 @@ public interface AttachedSurfaceControl {
     }
 
     /**
-     * Returns a SurfaceSyncGroup that can be used to sync {@link AttachedSurfaceControl} in a
+     * Returns a SyncTarget that can be used to sync {@link AttachedSurfaceControl} in a
      * {@link SurfaceSyncGroup}
      *
      * @hide
      */
     @Nullable
-    default SurfaceSyncGroup getOrCreateSurfaceSyncGroup() {
+    default SurfaceSyncGroup.SyncTarget getSyncTarget() {
         return null;
     }
 }
