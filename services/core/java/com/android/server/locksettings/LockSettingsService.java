@@ -375,7 +375,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      * @param profileUserId  profile user Id
      * @param profileUserPassword  profile original password (when it has separated lock).
      */
-    public void tieProfileLockIfNecessary(int profileUserId,
+    private void tieProfileLockIfNecessary(int profileUserId,
             LockscreenCredential profileUserPassword) {
         if (DEBUG) Slog.v(TAG, "Check child profile lock for user: " + profileUserId);
         // Only for profiles that shares credential with parent
@@ -713,7 +713,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             userHandle);
     }
 
-    public void onCleanupUser(int userId) {
+    @VisibleForTesting
+    void onCleanupUser(int userId) {
         hideEncryptionNotification(new UserHandle(userId));
         // User is stopped with its CE key evicted. Restore strong auth requirement to the default
         // flags after boot since stopping and restarting a user later is equivalent to rebooting
@@ -725,7 +726,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    public void onStartUser(final int userId) {
+    private void onStartUser(final int userId) {
         maybeShowEncryptionNotificationForUser(userId, "user started");
     }
 
@@ -779,7 +780,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    public void onUnlockUser(final int userId) {
+    private void onUnlockUser(final int userId) {
         // Perform tasks which require locks in LSS on a handler, as we are callbacks from
         // ActivityManager.unlockUser()
         mHandler.post(new Runnable() {
@@ -1222,7 +1223,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      * {@link #CREDENTIAL_TYPE_PATTERN}, {@link #CREDENTIAL_TYPE_PIN} and
      * {@link #CREDENTIAL_TYPE_PASSWORD}
      */
-    public int getCredentialTypeInternal(int userId) {
+    private int getCredentialTypeInternal(int userId) {
         if (userId == USER_FRP) {
             return getFrpCredentialType();
         }
@@ -1802,6 +1803,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
+    @VisibleForTesting /** Note: this method is overridden in unit tests */
     protected boolean isCredentialSharableWithParent(int userId) {
         return getUserManagerFromCache(userId).isCredentialSharableWithParent();
     }
@@ -2560,7 +2562,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    protected synchronized IGateKeeperService getGateKeeperService() {
+    private synchronized IGateKeeperService getGateKeeperService() {
         if (mGateKeeperService != null) {
             return mGateKeeperService;
         }
