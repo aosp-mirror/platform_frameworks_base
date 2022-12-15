@@ -4231,6 +4231,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (mContexts == null) {
             mContexts = new ArrayList<>(1);
         }
+        mContexts.add(new FillContext(requestId, new AssistStructure(), mCurrentViewId));
 
         if (inlineSuggestionsRequest != null && !inlineSuggestionsRequest.isClientSupported()) {
             inlineSuggestionsRequest = null;
