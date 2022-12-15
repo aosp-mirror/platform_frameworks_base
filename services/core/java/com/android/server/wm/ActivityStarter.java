@@ -1823,7 +1823,7 @@ class ActivityStarter {
         if (mPreferredTaskDisplayArea != null) {
             final DisplayContent displayContent = mRootWindowContainer.getDisplayContentOrCreate(
                     mPreferredTaskDisplayArea.getDisplayId());
-            if (displayContent != null && displayContent.mDwpcHelper.hasController()) {
+            if (displayContent != null) {
                 final int targetWindowingMode = (targetTask != null)
                         ? targetTask.getWindowingMode() : displayContent.getWindowingMode();
                 final int launchingFromDisplayId =

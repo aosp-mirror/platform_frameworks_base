@@ -219,36 +219,37 @@ public class BatteryUsageStatsProviderTest {
 
         final BatteryStatsHistoryIterator iterator =
                 unparceled.iterateBatteryStatsHistory();
-        BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
+        BatteryStats.HistoryItem item;
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
         assertHistoryItem(item,
                 BatteryStats.HistoryItem.CMD_RESET, BatteryStats.HistoryItem.EVENT_NONE,
                 null, 0, 3_600_000, 90, 1_000_000);
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
         assertHistoryItem(item,
                 BatteryStats.HistoryItem.CMD_UPDATE, BatteryStats.HistoryItem.EVENT_NONE,
                 null, 0, 3_600_000, 90, 1_000_000);
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
         assertHistoryItem(item,
                 BatteryStats.HistoryItem.CMD_UPDATE, BatteryStats.HistoryItem.EVENT_NONE,
                 null, 0, 3_600_000, 90, 2_000_000);
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
         assertHistoryItem(item,
                 BatteryStats.HistoryItem.CMD_UPDATE,
                 BatteryStats.HistoryItem.EVENT_ALARM | BatteryStats.HistoryItem.EVENT_FLAG_START,
                 "foo", APP_UID, 3_600_000, 90, 3_000_000);
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
         assertHistoryItem(item,
                 BatteryStats.HistoryItem.CMD_UPDATE,
                 BatteryStats.HistoryItem.EVENT_ALARM | BatteryStats.HistoryItem.EVENT_FLAG_FINISH,
                 "foo", APP_UID, 3_600_000, 90, 3_001_000);
 
-        assertThat(iterator.next(item)).isFalse();
+        assertThat(iterator.hasNext()).isFalse();
+        assertThat(iterator.next()).isNull();
     }
 
     @Test
@@ -304,16 +305,16 @@ public class BatteryUsageStatsProviderTest {
                 BatteryUsageStats.class);
 
         BatteryStatsHistoryIterator iterator = unparceled.iterateBatteryStatsHistory();
-        BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
+        BatteryStats.HistoryItem item;
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
         assertThat(item.cmd).isEqualTo((int) BatteryStats.HistoryItem.CMD_RESET);
 
         int expectedUid = 1;
-        while (iterator.next(item)) {
+        while ((item = iterator.next()) != null) {
             while (item.cmd != BatteryStats.HistoryItem.CMD_UPDATE
                     || item.eventCode == BatteryStats.HistoryItem.EVENT_NONE) {
-                assertThat(iterator.next(item)).isTrue();
+                assertThat(item = iterator.next()).isNotNull();
             }
             int uid = item.eventTag.uid;
             assertThat(uid).isEqualTo(expectedUid++);

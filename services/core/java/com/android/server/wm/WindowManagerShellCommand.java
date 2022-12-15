@@ -978,6 +978,29 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetTranslucentLetterboxingEnabled(PrintWriter pw) {
+        String arg = getNextArg();
+        final boolean enabled;
+        switch (arg) {
+            case "true":
+            case "1":
+                enabled = true;
+                break;
+            case "false":
+            case "0":
+                enabled = false;
+                break;
+            default:
+                getErrPrintWriter().println("Error: expected true, 1, false, 0, but got " + arg);
+                return -1;
+        }
+
+        synchronized (mInternal.mGlobalLock) {
+            mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(enabled);
+        }
+        return 0;
+    }
+
     private int runSetLetterboxStyle(PrintWriter pw) throws RemoteException {
         if (peekNextArg() == null) {
             getErrPrintWriter().println("Error: No arguments provided.");
@@ -1032,6 +1055,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                     break;
                 case "--isSplitScreenAspectRatioForUnresizableAppsEnabled":
                     runSetLetterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled(pw);
+                    break;
+                case "--isTranslucentLetterboxingEnabled":
+                    runSetTranslucentLetterboxingEnabled(pw);
                     break;
                 default:
                     getErrPrintWriter().println(
@@ -1095,6 +1121,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                     case "isSplitScreenAspectRatioForUnresizableAppsEnabled":
                         mLetterboxConfiguration
                                 .getIsSplitScreenAspectRatioForUnresizableAppsEnabled();
+                        break;
+                    case "isTranslucentLetterboxingEnabled":
+                        mLetterboxConfiguration.resetTranslucentLetterboxingEnabled();
                         break;
                     default:
                         getErrPrintWriter().println(
@@ -1196,6 +1225,7 @@ public class WindowManagerShellCommand extends ShellCommand {
             mLetterboxConfiguration.resetDefaultPositionForVerticalReachability();
             mLetterboxConfiguration.resetIsEducationEnabled();
             mLetterboxConfiguration.resetIsSplitScreenAspectRatioForUnresizableAppsEnabled();
+            mLetterboxConfiguration.resetTranslucentLetterboxingEnabled();
         }
     }
 
@@ -1232,7 +1262,6 @@ public class WindowManagerShellCommand extends ShellCommand {
             pw.println("Is using split screen aspect ratio as aspect ratio for unresizable apps: "
                     + mLetterboxConfiguration
                             .getIsSplitScreenAspectRatioForUnresizableAppsEnabled());
-
             pw.println("Background type: "
                     + LetterboxConfiguration.letterboxBackgroundTypeToString(
                             mLetterboxConfiguration.getLetterboxBackgroundType()));
@@ -1242,6 +1271,12 @@ public class WindowManagerShellCommand extends ShellCommand {
                     + mLetterboxConfiguration.getLetterboxBackgroundWallpaperBlurRadius());
             pw.println("    Wallpaper dark scrim alpha: "
                     + mLetterboxConfiguration.getLetterboxBackgroundWallpaperDarkScrimAlpha());
+
+            if (mLetterboxConfiguration.isTranslucentLetterboxingEnabled()) {
+                pw.println("Letterboxing for translucent activities: enabled");
+            } else {
+                pw.println("Letterboxing for translucent activities: disabled");
+            }
         }
         return 0;
     }
@@ -1434,12 +1469,16 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("      --isSplitScreenAspectRatioForUnresizableAppsEnabled [true|1|false|0]");
         pw.println("        Whether using split screen aspect ratio as a default aspect ratio for");
         pw.println("        unresizable apps.");
+        pw.println("      --isTranslucentLetterboxingEnabled [true|1|false|0]");
+        pw.println("        Whether letterboxing for translucent activities is enabled.");
+
         pw.println("  reset-letterbox-style [aspectRatio|cornerRadius|backgroundType");
         pw.println("      |backgroundColor|wallpaperBlurRadius|wallpaperDarkScrimAlpha");
         pw.println("      |horizontalPositionMultiplier|verticalPositionMultiplier");
         pw.println("      |isHorizontalReachabilityEnabled|isVerticalReachabilityEnabled");
-        pw.println("      isEducationEnabled||defaultPositionMultiplierForHorizontalReachability");
-        pw.println("      ||defaultPositionMultiplierForVerticalReachability]");
+        pw.println("      |isEducationEnabled||defaultPositionMultiplierForHorizontalReachability");
+        pw.println("      |isTranslucentLetterboxingEnabled");
+        pw.println("      |defaultPositionMultiplierForVerticalReachability]");
         pw.println("    Resets overrides to default values for specified properties separated");
         pw.println("    by space, e.g. 'reset-letterbox-style aspectRatio cornerRadius'.");
         pw.println("    If no arguments provided, all values will be reset.");

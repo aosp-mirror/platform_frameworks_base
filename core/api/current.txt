@@ -4150,6 +4150,8 @@ package android.app {
     method @Deprecated public android.app.FragmentManager getFragmentManager();
     method public android.content.Intent getIntent();
     method @Nullable public Object getLastNonConfigurationInstance();
+    method @Nullable public String getLaunchedFromPackage();
+    method public int getLaunchedFromUid();
     method @NonNull public android.view.LayoutInflater getLayoutInflater();
     method @Deprecated public android.app.LoaderManager getLoaderManager();
     method @NonNull public String getLocalClassName();
@@ -4292,6 +4294,7 @@ package android.app {
     method @Deprecated public final void removeDialog(int);
     method public void reportFullyDrawn();
     method public android.view.DragAndDropPermissions requestDragAndDropPermissions(android.view.DragEvent);
+    method public void requestFullscreenMode(@NonNull int, @Nullable android.os.OutcomeReceiver<java.lang.Void,java.lang.Throwable>);
     method public final void requestPermissions(@NonNull String[], int);
     method public final void requestShowKeyboardShortcuts();
     method @Deprecated public boolean requestVisibleBehind(boolean);
@@ -4378,6 +4381,8 @@ package android.app {
     field public static final int DEFAULT_KEYS_SEARCH_LOCAL = 3; // 0x3
     field public static final int DEFAULT_KEYS_SHORTCUT = 2; // 0x2
     field protected static final int[] FOCUSED_STATE_SET;
+    field public static final int FULLSCREEN_MODE_REQUEST_ENTER = 1; // 0x1
+    field public static final int FULLSCREEN_MODE_REQUEST_EXIT = 0; // 0x0
     field public static final int RESULT_CANCELED = 0; // 0x0
     field public static final int RESULT_FIRST_USER = 1; // 0x1
     field public static final int RESULT_OK = -1; // 0xffffffff
@@ -4619,6 +4624,7 @@ package android.app {
     method public android.app.ActivityOptions setLaunchDisplayId(int);
     method public android.app.ActivityOptions setLockTaskEnabled(boolean);
     method public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
+    method @NonNull public android.app.ActivityOptions setShareIdentityEnabled(boolean);
     method @NonNull public android.app.ActivityOptions setSplashScreenStyle(int);
     method public android.os.Bundle toBundle();
     method public void update(android.app.ActivityOptions);
@@ -10589,6 +10595,7 @@ package android.content {
     field public static final String EXTRA_MIME_TYPES = "android.intent.extra.MIME_TYPES";
     field public static final String EXTRA_NOT_UNKNOWN_SOURCE = "android.intent.extra.NOT_UNKNOWN_SOURCE";
     field public static final String EXTRA_ORIGINATING_URI = "android.intent.extra.ORIGINATING_URI";
+    field public static final String EXTRA_PACKAGES = "android.intent.extra.PACKAGES";
     field public static final String EXTRA_PACKAGE_NAME = "android.intent.extra.PACKAGE_NAME";
     field public static final String EXTRA_PERMISSION_GROUP_NAME = "android.intent.extra.PERMISSION_GROUP_NAME";
     field public static final String EXTRA_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
@@ -11718,9 +11725,12 @@ package android.content.pm {
     method public void unregisterSessionCallback(@NonNull android.content.pm.PackageInstaller.SessionCallback);
     method public void updateSessionAppIcon(int, @Nullable android.graphics.Bitmap);
     method public void updateSessionAppLabel(int, @Nullable CharSequence);
+    method public void waitForInstallConstraints(@NonNull java.util.List<java.lang.String>, @NonNull android.content.pm.PackageInstaller.InstallConstraints, @NonNull android.content.IntentSender, long);
     field public static final String ACTION_SESSION_COMMITTED = "android.content.pm.action.SESSION_COMMITTED";
     field public static final String ACTION_SESSION_DETAILS = "android.content.pm.action.SESSION_DETAILS";
     field public static final String ACTION_SESSION_UPDATED = "android.content.pm.action.SESSION_UPDATED";
+    field public static final String EXTRA_INSTALL_CONSTRAINTS = "android.content.pm.extra.INSTALL_CONSTRAINTS";
+    field public static final String EXTRA_INSTALL_CONSTRAINTS_RESULT = "android.content.pm.extra.INSTALL_CONSTRAINTS_RESULT";
     field public static final String EXTRA_OTHER_PACKAGE_NAME = "android.content.pm.extra.OTHER_PACKAGE_NAME";
     field public static final String EXTRA_PACKAGE_NAME = "android.content.pm.extra.PACKAGE_NAME";
     field public static final String EXTRA_PRE_APPROVAL = "android.content.pm.extra.PRE_APPROVAL";
@@ -20519,6 +20529,7 @@ package android.media {
     field public static final int ENCODING_DOLBY_MAT = 19; // 0x13
     field public static final int ENCODING_DOLBY_TRUEHD = 14; // 0xe
     field public static final int ENCODING_DRA = 28; // 0x1c
+    field public static final int ENCODING_DSD = 31; // 0x1f
     field public static final int ENCODING_DTS = 7; // 0x7
     field public static final int ENCODING_DTS_HD = 8; // 0x8
     field public static final int ENCODING_DTS_HD_MA = 29; // 0x1d
@@ -27874,13 +27885,17 @@ package android.net.vcn {
     method @IntRange(from=0x500) public int getMaxMtu();
     method @NonNull public long[] getRetryIntervalsMillis();
     method @NonNull public java.util.List<android.net.vcn.VcnUnderlyingNetworkTemplate> getVcnUnderlyingNetworkPriorities();
+    method public boolean hasGatewayOption(int);
+    field public static final int VCN_GATEWAY_OPTION_ENABLE_DATA_STALL_RECOVERY_WITH_MOBILITY = 0; // 0x0
   }
 
   public static final class VcnGatewayConnectionConfig.Builder {
     ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.ipsec.ike.IkeTunnelConnectionParams);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addGatewayOption(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeGatewayOption(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=0x500) int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryIntervalsMillis(@NonNull long[]);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setVcnUnderlyingNetworkPriorities(@NonNull java.util.List<android.net.vcn.VcnUnderlyingNetworkTemplate>);
@@ -36274,7 +36289,7 @@ package android.provider {
     field public static final String PARENTAL_CONTROL_LAST_UPDATE = "parental_control_last_update";
     field public static final String PARENTAL_CONTROL_REDIRECT_URL = "parental_control_redirect_url";
     field public static final String RTT_CALLING_MODE = "rtt_calling_mode";
-    field public static final String SECURE_FRP_MODE = "secure_frp_mode";
+    field @Deprecated public static final String SECURE_FRP_MODE = "secure_frp_mode";
     field public static final String SELECTED_INPUT_METHOD_SUBTYPE = "selected_input_method_subtype";
     field public static final String SETTINGS_CLASSNAME = "settings_classname";
     field public static final String SKIP_FIRST_USE_HINTS = "skip_first_use_hints";
@@ -38270,7 +38285,7 @@ package android.security.identity {
     ctor public AlreadyPersonalizedException(@NonNull String, @NonNull Throwable);
   }
 
-  public class AuthenticationKeyMetadata {
+  public final class AuthenticationKeyMetadata {
     method @NonNull public java.time.Instant getExpirationDate();
     method @IntRange(from=0) public int getUsageCount();
   }
@@ -42031,6 +42046,8 @@ package android.telephony {
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, "carrier privileges"}) public android.os.PersistableBundle getConfigForSubId(int, @NonNull java.lang.String...);
     method public static boolean isConfigForIdentifiedCarrier(android.os.PersistableBundle);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyConfigChangedForSubId(int);
+    method public void registerCarrierConfigChangeListener(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.CarrierConfigManager.CarrierConfigChangeListener);
+    method public void unregisterCarrierConfigChangeListener(@NonNull android.telephony.CarrierConfigManager.CarrierConfigChangeListener);
     field public static final String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
     field public static final int CARRIER_NR_AVAILABILITY_NSA = 1; // 0x1
     field public static final int CARRIER_NR_AVAILABILITY_SA = 2; // 0x2
@@ -42358,6 +42375,10 @@ package android.telephony {
     field public static final String KEY_BSF_SERVER_PORT_INT = "bsf.bsf_server_port_int";
     field public static final String KEY_BSF_TRANSPORT_TYPE_INT = "bsf.bsf_transport_type_int";
     field public static final String KEY_PREFIX = "bsf.";
+  }
+
+  public static interface CarrierConfigManager.CarrierConfigChangeListener {
+    method public void onCarrierConfigChanged(int, int, int, int);
   }
 
   public static final class CarrierConfigManager.Gps {
@@ -52772,12 +52793,14 @@ package android.view.accessibility {
     method public void addAudioDescriptionRequestedChangeListener(@NonNull java.util.concurrent.Executor, @NonNull android.view.accessibility.AccessibilityManager.AudioDescriptionRequestedChangeListener);
     method public boolean addTouchExplorationStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener);
     method public void addTouchExplorationStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener, @Nullable android.os.Handler);
+    method public void addUiContrastChangeListener(@NonNull java.util.concurrent.Executor, @NonNull android.view.accessibility.AccessibilityManager.UiContrastChangeListener);
     method @ColorInt public int getAccessibilityFocusColor();
     method public int getAccessibilityFocusStrokeWidth();
     method @Deprecated public java.util.List<android.content.pm.ServiceInfo> getAccessibilityServiceList();
     method public java.util.List<android.accessibilityservice.AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int);
     method public java.util.List<android.accessibilityservice.AccessibilityServiceInfo> getInstalledAccessibilityServiceList();
     method public int getRecommendedTimeoutMillis(int, int);
+    method @FloatRange(from=-1.0F, to=1.0f) public float getUiContrast();
     method public void interrupt();
     method public static boolean isAccessibilityButtonSupported();
     method public boolean isAudioDescriptionRequested();
@@ -52789,6 +52812,7 @@ package android.view.accessibility {
     method public boolean removeAccessibilityStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener);
     method public boolean removeAudioDescriptionRequestedChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AudioDescriptionRequestedChangeListener);
     method public boolean removeTouchExplorationStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener);
+    method public void removeUiContrastChangeListener(@NonNull android.view.accessibility.AccessibilityManager.UiContrastChangeListener);
     method public void sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     field public static final int FLAG_CONTENT_CONTROLS = 4; // 0x4
     field public static final int FLAG_CONTENT_ICONS = 1; // 0x1
@@ -52809,6 +52833,10 @@ package android.view.accessibility {
 
   public static interface AccessibilityManager.TouchExplorationStateChangeListener {
     method public void onTouchExplorationStateChanged(boolean);
+  }
+
+  public static interface AccessibilityManager.UiContrastChangeListener {
+    method public void onUiContrastChanged(@FloatRange(from=-1.0F, to=1.0f) float);
   }
 
   public class AccessibilityNodeInfo implements android.os.Parcelable {

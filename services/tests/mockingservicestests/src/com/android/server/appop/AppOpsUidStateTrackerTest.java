@@ -76,7 +76,7 @@ public class AppOpsUidStateTrackerTest {
     ActivityManagerInternal mAmi;
 
     @Mock
-    AppOpsServiceImpl.Constants mConstants;
+    AppOpsService.Constants mConstants;
 
     AppOpsUidStateTrackerTestExecutor mExecutor = new AppOpsUidStateTrackerTestExecutor();
 

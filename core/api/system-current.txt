@@ -352,6 +352,7 @@ package android {
     field public static final String USE_COLORIZED_NOTIFICATIONS = "android.permission.USE_COLORIZED_NOTIFICATIONS";
     field public static final String USE_RESERVED_DISK = "android.permission.USE_RESERVED_DISK";
     field public static final String UWB_PRIVILEGED = "android.permission.UWB_PRIVILEGED";
+    field public static final String WAKEUP_SURFACE_FLINGER = "android.permission.WAKEUP_SURFACE_FLINGER";
     field public static final String WHITELIST_AUTO_REVOKE_PERMISSIONS = "android.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS";
     field public static final String WHITELIST_RESTRICTED_PERMISSIONS = "android.permission.WHITELIST_RESTRICTED_PERMISSIONS";
     field public static final String WIFI_ACCESS_COEX_UNSAFE_CHANNELS = "android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS";
@@ -2999,6 +3000,7 @@ package android.companion.virtual {
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualKeyboard createVirtualKeyboard(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.input.VirtualMouseConfig);
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualNavigationTouchpad createVirtualNavigationTouchpad(@NonNull android.hardware.input.VirtualNavigationTouchpadConfig);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.input.VirtualTouchscreenConfig);
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
     method public int getDeviceId();
@@ -3319,7 +3321,6 @@ package android.content {
     field public static final String EXTRA_INSTANT_APP_TOKEN = "android.intent.extra.INSTANT_APP_TOKEN";
     field public static final String EXTRA_LONG_VERSION_CODE = "android.intent.extra.LONG_VERSION_CODE";
     field public static final String EXTRA_ORIGINATING_UID = "android.intent.extra.ORIGINATING_UID";
-    field public static final String EXTRA_PACKAGES = "android.intent.extra.PACKAGES";
     field public static final String EXTRA_PERMISSION_NAME = "android.intent.extra.PERMISSION_NAME";
     field public static final String EXTRA_REASON = "android.intent.extra.REASON";
     field public static final String EXTRA_REMOTE_CALLBACK = "android.intent.extra.REMOTE_CALLBACK";
@@ -4784,6 +4785,24 @@ package android.hardware.input {
     method @NonNull public android.hardware.input.VirtualMouseScrollEvent.Builder setYAxisMovement(@FloatRange(from=-1.0F, to=1.0f) float);
   }
 
+  public class VirtualNavigationTouchpad implements java.io.Closeable {
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendTouchEvent(@NonNull android.hardware.input.VirtualTouchEvent);
+  }
+
+  public final class VirtualNavigationTouchpadConfig extends android.hardware.input.VirtualInputDeviceConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getHeight();
+    method public int getWidth();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualNavigationTouchpadConfig> CREATOR;
+  }
+
+  public static final class VirtualNavigationTouchpadConfig.Builder extends android.hardware.input.VirtualInputDeviceConfig.Builder<android.hardware.input.VirtualNavigationTouchpadConfig.Builder> {
+    ctor public VirtualNavigationTouchpadConfig.Builder(@IntRange(from=1) int, @IntRange(from=1) int);
+    method @NonNull public android.hardware.input.VirtualNavigationTouchpadConfig build();
+  }
+
   public final class VirtualTouchEvent implements android.os.Parcelable {
     method public int describeContents();
     method public int getAction();
@@ -5275,11 +5294,12 @@ package android.hardware.radio {
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramSelector> CREATOR;
     field public static final int IDENTIFIER_TYPE_AMFM_FREQUENCY = 1; // 0x1
+    field public static final int IDENTIFIER_TYPE_DAB_DMB_SID_EXT = 14; // 0xe
     field public static final int IDENTIFIER_TYPE_DAB_ENSEMBLE = 6; // 0x6
     field public static final int IDENTIFIER_TYPE_DAB_FREQUENCY = 8; // 0x8
     field public static final int IDENTIFIER_TYPE_DAB_SCID = 7; // 0x7
-    field public static final int IDENTIFIER_TYPE_DAB_SIDECC = 5; // 0x5
-    field public static final int IDENTIFIER_TYPE_DAB_SID_EXT = 5; // 0x5
+    field @Deprecated public static final int IDENTIFIER_TYPE_DAB_SIDECC = 5; // 0x5
+    field @Deprecated public static final int IDENTIFIER_TYPE_DAB_SID_EXT = 5; // 0x5
     field public static final int IDENTIFIER_TYPE_DRMO_FREQUENCY = 10; // 0xa
     field @Deprecated public static final int IDENTIFIER_TYPE_DRMO_MODULATION = 11; // 0xb
     field public static final int IDENTIFIER_TYPE_DRMO_SERVICE_ID = 9; // 0x9
@@ -5316,7 +5336,7 @@ package android.hardware.radio {
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramSelector.Identifier> CREATOR;
   }
 
-  @IntDef(prefix={"IDENTIFIER_TYPE_"}, value={android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_INVALID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_RDS_PI, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_ID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_SUBCHANNEL, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_NAME, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SIDECC, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SCID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_SERVICE_ID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_MODULATION, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_SXM_SERVICE_ID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_SXM_CHANNEL}) @IntRange(from=android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_VENDOR_START, to=android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_VENDOR_END) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface ProgramSelector.IdentifierType {
+  @IntDef(prefix={"IDENTIFIER_TYPE_"}, value={android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_INVALID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_RDS_PI, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_ID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_SUBCHANNEL, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_NAME, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SIDECC, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SCID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_SERVICE_ID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_MODULATION, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_SXM_SERVICE_ID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_SXM_CHANNEL, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT}) @IntRange(from=android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_VENDOR_START, to=android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_VENDOR_END) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface ProgramSelector.IdentifierType {
   }
 
   @Deprecated @IntDef(prefix={"PROGRAM_TYPE_"}, value={android.hardware.radio.ProgramSelector.PROGRAM_TYPE_INVALID, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_AM, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_FM, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_AM_HD, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_FM_HD, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_DAB, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_DRMO, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_SXM}) @IntRange(from=android.hardware.radio.ProgramSelector.PROGRAM_TYPE_VENDOR_START, to=android.hardware.radio.ProgramSelector.PROGRAM_TYPE_VENDOR_END) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface ProgramSelector.ProgramType {
@@ -5531,30 +5551,31 @@ package android.hardware.radio {
 
   public abstract class RadioTuner {
     ctor public RadioTuner();
-    method public abstract int cancel();
-    method public abstract void cancelAnnouncement();
-    method public abstract void close();
-    method @Deprecated public abstract int getConfiguration(android.hardware.radio.RadioManager.BandConfig[]);
-    method @Nullable public android.hardware.radio.ProgramList getDynamicProgramList(@Nullable android.hardware.radio.ProgramList.Filter);
-    method public abstract boolean getMute();
-    method @NonNull public java.util.Map<java.lang.String,java.lang.String> getParameters(@NonNull java.util.List<java.lang.String>);
-    method @Deprecated public abstract int getProgramInformation(android.hardware.radio.RadioManager.ProgramInfo[]);
-    method @Deprecated @NonNull public abstract java.util.List<android.hardware.radio.RadioManager.ProgramInfo> getProgramList(@Nullable java.util.Map<java.lang.String,java.lang.String>);
-    method public abstract boolean hasControl();
-    method @Deprecated public abstract boolean isAnalogForced();
-    method @Deprecated public abstract boolean isAntennaConnected();
-    method public boolean isConfigFlagSet(int);
-    method public boolean isConfigFlagSupported(int);
-    method public abstract int scan(int, boolean);
-    method @Deprecated public abstract void setAnalogForced(boolean);
-    method public void setConfigFlag(int, boolean);
-    method @Deprecated public abstract int setConfiguration(android.hardware.radio.RadioManager.BandConfig);
-    method public abstract int setMute(boolean);
-    method @NonNull public java.util.Map<java.lang.String,java.lang.String> setParameters(@NonNull java.util.Map<java.lang.String,java.lang.String>);
-    method public abstract boolean startBackgroundScan();
-    method public abstract int step(int, boolean);
-    method @Deprecated public abstract int tune(int, int);
-    method public abstract void tune(@NonNull android.hardware.radio.ProgramSelector);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract int cancel();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract void cancelAnnouncement();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract void close();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract int getConfiguration(android.hardware.radio.RadioManager.BandConfig[]);
+    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public android.hardware.radio.ProgramList getDynamicProgramList(@Nullable android.hardware.radio.ProgramList.Filter);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract boolean getMute();
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public java.util.Map<java.lang.String,java.lang.String> getParameters(@NonNull java.util.List<java.lang.String>);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract int getProgramInformation(android.hardware.radio.RadioManager.ProgramInfo[]);
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract java.util.List<android.hardware.radio.RadioManager.ProgramInfo> getProgramList(@Nullable java.util.Map<java.lang.String,java.lang.String>);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract boolean hasControl();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract boolean isAnalogForced();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract boolean isAntennaConnected();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public boolean isConfigFlagSet(int);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public boolean isConfigFlagSupported(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract int scan(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public int seek(int, boolean);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract void setAnalogForced(boolean);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public void setConfigFlag(int, boolean);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract int setConfiguration(android.hardware.radio.RadioManager.BandConfig);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract int setMute(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public java.util.Map<java.lang.String,java.lang.String> setParameters(@NonNull java.util.Map<java.lang.String,java.lang.String>);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract boolean startBackgroundScan();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract int step(int, boolean);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract int tune(int, int);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract void tune(@NonNull android.hardware.radio.ProgramSelector);
     field public static final int DIRECTION_DOWN = 1; // 0x1
     field public static final int DIRECTION_UP = 0; // 0x0
     field @Deprecated public static final int ERROR_BACKGROUND_SCAN_FAILED = 6; // 0x6
@@ -5564,6 +5585,14 @@ package android.hardware.radio {
     field @Deprecated public static final int ERROR_HARDWARE_FAILURE = 0; // 0x0
     field @Deprecated public static final int ERROR_SCAN_TIMEOUT = 3; // 0x3
     field @Deprecated public static final int ERROR_SERVER_DIED = 1; // 0x1
+    field public static final int TUNER_RESULT_CANCELED = 6; // 0x6
+    field public static final int TUNER_RESULT_INTERNAL_ERROR = 1; // 0x1
+    field public static final int TUNER_RESULT_INVALID_ARGUMENTS = 2; // 0x2
+    field public static final int TUNER_RESULT_INVALID_STATE = 3; // 0x3
+    field public static final int TUNER_RESULT_NOT_SUPPORTED = 4; // 0x4
+    field public static final int TUNER_RESULT_OK = 0; // 0x0
+    field public static final int TUNER_RESULT_TIMEOUT = 5; // 0x5
+    field public static final int TUNER_RESULT_UNKNOWN_ERROR = 7; // 0x7
   }
 
   public abstract static class RadioTuner.Callback {
@@ -5571,6 +5600,7 @@ package android.hardware.radio {
     method public void onAntennaState(boolean);
     method public void onBackgroundScanAvailabilityChange(boolean);
     method public void onBackgroundScanComplete();
+    method public void onConfigFlagUpdated(int, boolean);
     method @Deprecated public void onConfigurationChanged(android.hardware.radio.RadioManager.BandConfig);
     method public void onControlChanged(boolean);
     method public void onEmergencyAnnouncement(boolean);
@@ -10883,6 +10913,7 @@ package android.provider {
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS = "install_carrier_app_notification_sleep_millis";
     field public static final String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";
     field public static final String REQUIRE_PASSWORD_TO_DECRYPT = "require_password_to_decrypt";
+    field public static final String SECURE_FRP_MODE = "secure_frp_mode";
     field public static final String TETHER_OFFLOAD_DISABLED = "tether_offload_disabled";
     field public static final String TETHER_SUPPORTED = "tether_supported";
     field public static final String THEATER_MODE_ON = "theater_mode_on";

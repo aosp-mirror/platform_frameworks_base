@@ -67,7 +67,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     @Mock
     private lateinit var applicationInfo: ApplicationInfo
     @Mock
-    private lateinit var logger: MediaTttLogger
+    private lateinit var logger: MediaTttLogger<ChipReceiverInfo>
     @Mock
     private lateinit var accessibilityManager: AccessibilityManager
     @Mock
@@ -128,6 +128,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             receiverUiEventLogger,
             viewUtil,
             fakeWakeLockBuilder,
+            fakeClock,
         )
         controllerReceiver.start()
 
@@ -155,6 +156,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             receiverUiEventLogger,
             viewUtil,
             fakeWakeLockBuilder,
+            fakeClock,
         )
         controllerReceiver.start()
 

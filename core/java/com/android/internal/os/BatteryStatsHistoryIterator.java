@@ -23,10 +23,13 @@ import android.os.Parcel;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import java.util.Iterator;
+
 /**
  * An iterator for {@link BatteryStats.HistoryItem}'s.
  */
-public class BatteryStatsHistoryIterator {
+public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.HistoryItem>,
+        AutoCloseable {
     private static final boolean DEBUG = false;
     private static final String TAG = "BatteryStatsHistoryItr";
     private final BatteryStatsHistory mBatteryStatsHistory;
@@ -38,29 +41,51 @@ public class BatteryStatsHistoryIterator {
     private final BatteryStatsHistory.VarintParceler mVarintParceler =
             new BatteryStatsHistory.VarintParceler();
 
+    private final BatteryStats.HistoryItem mHistoryItem = new BatteryStats.HistoryItem();
+
+    private static final int MAX_ENERGY_CONSUMER_COUNT = 100;
+    private static final int MAX_CPU_BRACKET_COUNT = 100;
+
     public BatteryStatsHistoryIterator(@NonNull BatteryStatsHistory history) {
         mBatteryStatsHistory = history;
+        mHistoryItem.clear();
+    }
+
+    @Override
+    public boolean hasNext() {
+        Parcel p = mBatteryStatsHistory.getNextParcel();
+        if (p == null) {
+            close();
+            return false;
+        }
+        return true;
     }
 
     /**
-     * Retrieves the next HistoryItem from battery history, if available. Returns false if there
+     * Retrieves the next HistoryItem from battery history, if available. Returns null if there
      * are no more items.
      */
-    public boolean next(BatteryStats.HistoryItem out) {
-        Parcel p = mBatteryStatsHistory.getNextParcel(out);
+    @Override
+    public BatteryStats.HistoryItem next() {
+        Parcel p = mBatteryStatsHistory.getNextParcel();
         if (p == null) {
-            mBatteryStatsHistory.finishIteratingHistory();
-            return false;
+            close();
+            return null;
         }
 
-        final long lastRealtimeMs = out.time;
-        final long lastWalltimeMs = out.currentTime;
-        readHistoryDelta(p, out);
-        if (out.cmd != BatteryStats.HistoryItem.CMD_CURRENT_TIME
-                && out.cmd != BatteryStats.HistoryItem.CMD_RESET && lastWalltimeMs != 0) {
-            out.currentTime = lastWalltimeMs + (out.time - lastRealtimeMs);
+        final long lastRealtimeMs = mHistoryItem.time;
+        final long lastWalltimeMs = mHistoryItem.currentTime;
+        try {
+            readHistoryDelta(p, mHistoryItem);
+        } catch (Throwable t) {
+            Slog.wtf(TAG, "Corrupted battery history", t);
+            return null;
         }
-        return true;
+        if (mHistoryItem.cmd != BatteryStats.HistoryItem.CMD_CURRENT_TIME
+                && mHistoryItem.cmd != BatteryStats.HistoryItem.CMD_RESET && lastWalltimeMs != 0) {
+            mHistoryItem.currentTime = lastWalltimeMs + (mHistoryItem.time - lastRealtimeMs);
+        }
+        return mHistoryItem;
     }
 
     private void readHistoryDelta(Parcel src, BatteryStats.HistoryItem cur) {
@@ -210,6 +235,12 @@ public class BatteryStatsHistoryIterator {
                 }
 
                 final int consumerCount = src.readInt();
+                if (consumerCount > MAX_ENERGY_CONSUMER_COUNT) {
+                    // Check to avoid a heap explosion in case the parcel is corrupted
+                    throw new IllegalStateException(
+                            "EnergyConsumer count too high: " + consumerCount
+                                    + ". Max = " + MAX_ENERGY_CONSUMER_COUNT);
+                }
                 mMeasuredEnergyDetails.consumers =
                         new BatteryStats.MeasuredEnergyDetails.EnergyConsumer[consumerCount];
                 mMeasuredEnergyDetails.chargeUC = new long[consumerCount];
@@ -236,7 +267,16 @@ public class BatteryStatsHistoryIterator {
 
             if ((extensionFlags & BatteryStatsHistory.EXTENSION_CPU_USAGE_HEADER_FLAG) != 0) {
                 mCpuUsageDetails = new BatteryStats.CpuUsageDetails();
-                mCpuUsageDetails.cpuBracketDescriptions = src.readStringArray();
+                final int cpuBracketCount = src.readInt();
+                if (cpuBracketCount > MAX_CPU_BRACKET_COUNT) {
+                    // Check to avoid a heap explosion in case the parcel is corrupted
+                    throw new IllegalStateException("Too many CPU brackets: " + cpuBracketCount
+                            + ". Max = " + MAX_CPU_BRACKET_COUNT);
+                }
+                mCpuUsageDetails.cpuBracketDescriptions = new String[cpuBracketCount];
+                for (int i = 0; i < cpuBracketCount; i++) {
+                    mCpuUsageDetails.cpuBracketDescriptions[i] = src.readString();
+                }
                 mCpuUsageDetails.cpuUsageMs =
                         new long[mCpuUsageDetails.cpuBracketDescriptions.length];
             } else if (mCpuUsageDetails != null) {
@@ -294,7 +334,8 @@ public class BatteryStatsHistoryIterator {
     /**
      * Should be called when iteration is complete.
      */
+    @Override
     public void close() {
-        mBatteryStatsHistory.finishIteratingHistory();
+        mBatteryStatsHistory.iteratorFinished();
     }
 }

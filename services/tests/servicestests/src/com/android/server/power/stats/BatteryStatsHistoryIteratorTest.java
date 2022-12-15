@@ -93,43 +93,44 @@ public class BatteryStatsHistoryIteratorTest {
         }
 
         final BatteryStatsHistoryIterator iterator =
-                mBatteryStats.createBatteryStatsHistoryIterator();
+                mBatteryStats.iterateBatteryStatsHistory();
 
-        BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
+        BatteryStats.HistoryItem item;
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
         assertHistoryItem(item,
                 BatteryStats.HistoryItem.CMD_RESET, BatteryStats.HistoryItem.EVENT_NONE,
                 null, 0, 3_600_000, 90, 1_000_000);
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
         assertHistoryItem(item,
                 BatteryStats.HistoryItem.CMD_UPDATE, BatteryStats.HistoryItem.EVENT_NONE,
                 null, 0, 3_600_000, 90, 1_000_000);
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
         assertHistoryItem(item,
                 BatteryStats.HistoryItem.CMD_UPDATE, BatteryStats.HistoryItem.EVENT_NONE,
                 null, 0, 2_400_000, 80, 2_000_000);
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
         assertHistoryItem(item,
                 BatteryStats.HistoryItem.CMD_UPDATE, BatteryStats.HistoryItem.EVENT_NONE,
                 null, 0, 2_400_000, 80, 2_000_000);
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
         assertHistoryItem(item,
                 BatteryStats.HistoryItem.CMD_UPDATE,
                 BatteryStats.HistoryItem.EVENT_ALARM | BatteryStats.HistoryItem.EVENT_FLAG_START,
                 "foo", APP_UID, 2_400_000, 80, 3_000_000);
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
         assertHistoryItem(item,
                 BatteryStats.HistoryItem.CMD_UPDATE,
                 BatteryStats.HistoryItem.EVENT_ALARM | BatteryStats.HistoryItem.EVENT_FLAG_FINISH,
                 "foo", APP_UID, 2_400_000, 80, 3_001_000);
 
-        assertThat(iterator.next(item)).isFalse();
+        assertThat(iterator.hasNext()).isFalse();
+        assertThat(iterator.next()).isNull();
     }
 
     // Test history that spans multiple buffers and uses more than 32k different strings.
@@ -163,21 +164,21 @@ public class BatteryStatsHistoryIteratorTest {
         }
 
         final BatteryStatsHistoryIterator iterator =
-                mBatteryStats.createBatteryStatsHistoryIterator();
+                mBatteryStats.iterateBatteryStatsHistory();
 
-        BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
-        assertThat(iterator.next(item)).isTrue();
+        BatteryStats.HistoryItem item;
+        assertThat(item = iterator.next()).isNotNull();
         assertThat(item.cmd).isEqualTo((int) BatteryStats.HistoryItem.CMD_RESET);
         assertThat(item.eventCode).isEqualTo(BatteryStats.HistoryItem.EVENT_NONE);
         assertThat(item.eventTag).isNull();
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
         assertThat(item.cmd).isEqualTo((int) BatteryStats.HistoryItem.CMD_UPDATE);
         assertThat(item.eventCode).isEqualTo(BatteryStats.HistoryItem.EVENT_NONE);
         assertThat(item.eventTag).isNull();
         assertThat(item.time).isEqualTo(1_000_000);
 
-        assertThat(iterator.next(item)).isTrue();
+        assertThat(item = iterator.next()).isNotNull();
         assertThat(item.cmd).isEqualTo((int) BatteryStats.HistoryItem.CMD_UPDATE);
         assertThat(item.eventCode).isEqualTo(BatteryStats.HistoryItem.EVENT_NONE);
         assertThat(item.eventTag).isNull();
@@ -186,7 +187,7 @@ public class BatteryStatsHistoryIteratorTest {
         for (int i = 0; i < eventCount; i++) {
             String name = "a" + (i % 10);
             do {
-                assertThat(iterator.next(item)).isTrue();
+                assertThat(item = iterator.next()).isNotNull();
                 // Skip a blank event inserted at the start of every buffer
             } while (item.cmd != BatteryStats.HistoryItem.CMD_UPDATE
                     || item.eventCode == BatteryStats.HistoryItem.EVENT_NONE);
@@ -196,7 +197,7 @@ public class BatteryStatsHistoryIteratorTest {
             assertThat(item.eventTag.string).isEqualTo(name);
 
             do {
-                assertThat(iterator.next(item)).isTrue();
+                assertThat(item = iterator.next()).isNotNull();
             } while (item.cmd != BatteryStats.HistoryItem.CMD_UPDATE
                     || item.eventCode == BatteryStats.HistoryItem.EVENT_NONE);
 
@@ -205,7 +206,8 @@ public class BatteryStatsHistoryIteratorTest {
             assertThat(item.eventTag.string).isEqualTo(name);
         }
 
-        assertThat(iterator.next(item)).isFalse();
+        assertThat(iterator.hasNext()).isFalse();
+        assertThat(iterator.next()).isNull();
     }
 
     private void assertHistoryItem(BatteryStats.HistoryItem item, int command, int eventCode,

@@ -399,9 +399,10 @@ object Flags {
     val CHOOSER_UNBUNDLED = unreleasedFlag(1500, "chooser_unbundled", teamfood = true)
 
     // 1600 - accessibility
+    // TODO(b/262224538): Tracking Bug
     @JvmField
     val A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS =
-        unreleasedFlag(1600, "a11y_floating_menu_fling_spring_animations", teamfood = true)
+        releasedFlag(1600, "a11y_floating_menu_fling_spring_animations")
 
     // 1700 - clipboard
     @JvmField val CLIPBOARD_OVERLAY_REFACTOR = releasedFlag(1700, "clipboard_overlay_refactor")

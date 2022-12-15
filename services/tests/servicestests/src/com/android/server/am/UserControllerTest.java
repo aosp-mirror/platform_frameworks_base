@@ -243,14 +243,6 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testStartUserOnSecondaryDisplay_defaultDisplay() {
-        assertThrows(IllegalArgumentException.class, () -> mUserController
-                .startUserOnSecondaryDisplay(TEST_USER_ID, Display.DEFAULT_DISPLAY));
-
-        verifyUserNeverAssignedToDisplay();
-    }
-
-    @Test
     public void testStartUserOnSecondaryDisplay() {
         boolean started = mUserController.startUserOnSecondaryDisplay(TEST_USER_ID, 42);
 

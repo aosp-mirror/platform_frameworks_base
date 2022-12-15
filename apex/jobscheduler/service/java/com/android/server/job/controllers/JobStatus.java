@@ -388,6 +388,8 @@ public final class JobStatus {
      */
     public boolean startedAsExpeditedJob = false;
 
+    public boolean startedWithImmediacyPrivilege = false;
+
     // If non-null, this is work that has been enqueued for the job.
     public ArrayList<JobWorkItem> pendingWork;
 

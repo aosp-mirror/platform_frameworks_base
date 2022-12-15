@@ -171,4 +171,19 @@ public abstract class InputManagerInternal {
      * {@see Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT}
      */
     public abstract void decrementKeyboardBacklight(int deviceId);
+
+    /**
+     * Add a runtime association between the input port and device type. Input ports are expected to
+     * be unique.
+     * @param inputPort The port of the input device.
+     * @param type The type of the device. E.g. "touchNavigation".
+     */
+    public abstract void setTypeAssociation(@NonNull String inputPort, @NonNull String type);
+
+    /**
+     * Removes a runtime association between the input device and type.
+     *
+     * @param inputPort The port of the input device.
+     */
+    public abstract void unsetTypeAssociation(@NonNull String inputPort);
 }

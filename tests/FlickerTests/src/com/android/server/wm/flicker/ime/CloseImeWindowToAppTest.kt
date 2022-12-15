@@ -106,7 +106,9 @@ class CloseImeWindowToAppTest(flicker: FlickerTest) : BaseTest(flicker) {
     @IwTest(focusArea = "ime")
     override fun cujCompleted() {
         super.cujCompleted()
-        navBarLayerPositionAtStartAndEnd()
+        if (!flicker.scenario.isTablet) {
+            navBarLayerPositionAtStartAndEnd()
+        }
         imeLayerBecomesInvisible()
         imeAppLayerIsAlwaysVisible()
         imeAppWindowIsAlwaysVisible()

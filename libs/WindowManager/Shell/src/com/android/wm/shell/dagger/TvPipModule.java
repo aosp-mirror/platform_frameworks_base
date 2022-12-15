@@ -81,6 +81,7 @@ public abstract class TvPipModule {
             PipParamsChangedForwarder pipParamsChangedForwarder,
             DisplayController displayController,
             WindowManagerShellWrapper windowManagerShellWrapper,
+            @ShellMainThread Handler mainHandler, // needed for registerReceiverForAllUsers()
             @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.of(
                 TvPipController.create(
@@ -100,6 +101,7 @@ public abstract class TvPipModule {
                         pipParamsChangedForwarder,
                         displayController,
                         windowManagerShellWrapper,
+                        mainHandler,
                         mainExecutor));
     }
 
@@ -157,22 +159,17 @@ public abstract class TvPipModule {
             Context context,
             TvPipBoundsState tvPipBoundsState,
             SystemWindows systemWindows,
-            PipMediaController pipMediaController,
             @ShellMainThread Handler mainHandler) {
-        return new TvPipMenuController(context, tvPipBoundsState, systemWindows, pipMediaController,
-                mainHandler);
+        return new TvPipMenuController(context, tvPipBoundsState, systemWindows, mainHandler);
     }
 
-    // Handler needed for registerReceiverForAllUsers()
     @WMSingleton
     @Provides
     static TvPipNotificationController provideTvPipNotificationController(Context context,
             PipMediaController pipMediaController,
-            PipParamsChangedForwarder pipParamsChangedForwarder,
-            TvPipBoundsState tvPipBoundsState,
-            @ShellMainThread Handler mainHandler) {
+            PipParamsChangedForwarder pipParamsChangedForwarder) {
         return new TvPipNotificationController(context, pipMediaController,
-                pipParamsChangedForwarder, tvPipBoundsState, mainHandler);
+                pipParamsChangedForwarder);
     }
 
     @WMSingleton

@@ -1571,12 +1571,6 @@ class UserController implements Handler.Callback {
         checkCallingHasOneOfThosePermissions("startUserOnSecondaryDisplay",
                 MANAGE_USERS, INTERACT_ACROSS_USERS);
 
-        // DEFAULT_DISPLAY is used for the current foreground user only
-        // TODO(b/245939659): might need to move this check to UserVisibilityMediator to support
-        // passenger-only screens
-        Preconditions.checkArgument(displayId != Display.DEFAULT_DISPLAY,
-                "Cannot use DEFAULT_DISPLAY");
-
         try {
             return startUserNoChecks(userId, displayId, USER_START_MODE_BACKGROUND_VISIBLE,
                     /* unlockListener= */ null);

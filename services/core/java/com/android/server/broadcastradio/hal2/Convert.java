@@ -36,6 +36,7 @@ import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
+import android.hardware.radio.RadioTuner;
 import android.os.ParcelableException;
 import android.util.Slog;
 
@@ -78,6 +79,27 @@ class Convert {
             default:
                 throw new ParcelableException(new RuntimeException(
                         action + ": unknown error (" + result + ")"));
+        }
+    }
+
+    @RadioTuner.TunerResultType
+    static int halResultToTunerResult(int result) {
+        switch (result) {
+            case Result.OK:
+                return RadioTuner.TUNER_RESULT_OK;
+            case Result.INTERNAL_ERROR:
+                return RadioTuner.TUNER_RESULT_INTERNAL_ERROR;
+            case Result.INVALID_ARGUMENTS:
+                return RadioTuner.TUNER_RESULT_INVALID_ARGUMENTS;
+            case Result.INVALID_STATE:
+                return RadioTuner.TUNER_RESULT_INVALID_STATE;
+            case Result.NOT_SUPPORTED:
+                return RadioTuner.TUNER_RESULT_NOT_SUPPORTED;
+            case Result.TIMEOUT:
+                return RadioTuner.TUNER_RESULT_TIMEOUT;
+            case Result.UNKNOWN_ERROR:
+            default:
+                return RadioTuner.TUNER_RESULT_UNKNOWN_ERROR;
         }
     }
 
@@ -130,6 +152,7 @@ class Convert {
             case ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE:
             case ProgramSelector.IDENTIFIER_TYPE_DAB_SCID:
             case ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY:
+            case ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT:
                 return ProgramSelector.PROGRAM_TYPE_DAB;
             case ProgramSelector.IDENTIFIER_TYPE_DRMO_SERVICE_ID:
             case ProgramSelector.IDENTIFIER_TYPE_DRMO_FREQUENCY:

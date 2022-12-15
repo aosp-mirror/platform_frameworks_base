@@ -21,8 +21,8 @@ import android.util.SparseArray
 typealias IntMap<T> = SparseArray<T>
 
 inline fun <T> IntMap<T>.allIndexed(predicate: (Int, Int, T) -> Boolean): Boolean {
-    for (index in 0 until size) {
-        if (!predicate(index, keyAt(index), valueAt(index))) {
+    forEachIndexed { index, key, value ->
+        if (!predicate(index, key, value)) {
             return false
         }
     }
@@ -30,8 +30,8 @@ inline fun <T> IntMap<T>.allIndexed(predicate: (Int, Int, T) -> Boolean): Boolea
 }
 
 inline fun <T> IntMap<T>.anyIndexed(predicate: (Int, Int, T) -> Boolean): Boolean {
-    for (index in 0 until size) {
-        if (predicate(index, keyAt(index), valueAt(index))) {
+    forEachIndexed { index, key, value ->
+        if (predicate(index, key, value)) {
             return true
         }
     }
@@ -46,8 +46,8 @@ inline fun <T> IntMap<T>.copy(copyValue: (T) -> T): IntMap<T> =
     }
 
 inline fun <T, R> IntMap<T>.firstNotNullOfOrNullIndexed(transform: (Int, Int, T) -> R): R? {
-    for (index in 0 until size) {
-        transform(index, keyAt(index), valueAt(index))?.let { return it }
+    forEachIndexed { index, key, value ->
+        transform(index, key, value)?.let { return it }
     }
     return null
 }
@@ -61,6 +61,12 @@ inline fun <T> IntMap<T>.forEachIndexed(action: (Int, Int, T) -> Unit) {
 inline fun <T> IntMap<T>.forEachKeyIndexed(action: (Int, Int) -> Unit) {
     for (index in 0 until size) {
         action(index, keyAt(index))
+    }
+}
+
+inline fun <T> IntMap<T>.forEachReversedIndexed(action: (Int, Int, T) -> Unit) {
+    for (index in lastIndex downTo 0) {
+        action(index, keyAt(index), valueAt(index))
     }
 }
 
@@ -91,8 +97,8 @@ inline operator fun <T> IntMap<T>.minusAssign(key: Int) {
 }
 
 inline fun <T> IntMap<T>.noneIndexed(predicate: (Int, Int, T) -> Boolean): Boolean {
-    for (index in 0 until size) {
-        if (predicate(index, keyAt(index), valueAt(index))) {
+    forEachIndexed { index, key, value ->
+        if (predicate(index, key, value)) {
             return false
         }
     }
@@ -120,10 +126,22 @@ inline fun <T> IntMap<T>.putWithDefault(key: Int, value: T, defaultValue: T): T 
     }
 }
 
+// SparseArray.removeReturnOld() is @hide, so a backup once we move to APIs.
+fun <T> IntMap<T>.removeReturnOld(key: Int): T? {
+    val index = indexOfKey(key)
+    return if (index >= 0) {
+        val oldValue = valueAt(index)
+        removeAt(index)
+        oldValue
+    } else {
+        null
+    }
+}
+
 inline fun <T> IntMap<T>.removeAllIndexed(predicate: (Int, Int, T) -> Boolean): Boolean {
     var isChanged = false
-    for (index in lastIndex downTo 0) {
-        if (predicate(index, keyAt(index), valueAt(index))) {
+    forEachReversedIndexed { index, key, value ->
+        if (predicate(index, key, value)) {
             removeAt(index)
             isChanged = true
         }
@@ -133,8 +151,8 @@ inline fun <T> IntMap<T>.removeAllIndexed(predicate: (Int, Int, T) -> Boolean): 
 
 inline fun <T> IntMap<T>.retainAllIndexed(predicate: (Int, Int, T) -> Boolean): Boolean {
     var isChanged = false
-    for (index in lastIndex downTo 0) {
-        if (!predicate(index, keyAt(index), valueAt(index))) {
+    forEachReversedIndexed { index, key, value ->
+        if (!predicate(index, key, value)) {
             removeAt(index)
             isChanged = true
         }

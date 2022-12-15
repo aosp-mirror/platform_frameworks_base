@@ -36,7 +36,6 @@ public abstract class VirtualDeviceManagerInternal {
         void onVirtualDisplayRemoved(int displayId);
     }
 
-
     /** Interface to listen to the changes on the list of app UIDs running on any virtual device. */
     public interface AppsOnVirtualDeviceListener {
         /** Notifies that running apps on any virtual device has changed */
@@ -70,6 +69,25 @@ public abstract class VirtualDeviceManagerInternal {
      * Validate the virtual device.
      */
     public abstract boolean isValidVirtualDevice(IVirtualDevice virtualDevice);
+
+    /**
+     * Gets the owner uid for a deviceId.
+     *
+     * @param deviceId which device we're asking about
+     * @return the uid of the app which created and owns the VirtualDevice with the given deviceId,
+     * or {@link android.os.Process#INVALID_UID} if no such device exists.
+     */
+    public abstract int getDeviceOwnerUid(int deviceId);
+
+    /**
+     * Finds VirtualDevices where an app is running.
+     *
+     * @param uid - the app's uid
+     * @return a set of id's of VirtualDevices where the app with the given uid is running.
+     * *Note* this only checks VirtualDevices, and does not include information about whether
+     * the app is running on the default device or not.
+     */
+    public abstract @NonNull Set<Integer> getDeviceIdsForUid(int uid);
 
     /**
      * Notifies that a virtual display is created.

@@ -49,6 +49,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -163,10 +164,6 @@ public class BatteryStatsHistory {
      */
     private int mCurrentParcelEnd;
     /**
-     * When iterating history files, the current record count.
-     */
-    private int mRecordCount = 0;
-    /**
      * Used when BatteryStatsImpl object is created from deserialization of a parcel,
      * such as Settings app or checkin file, to iterate over history parcels.
      */
@@ -199,10 +196,8 @@ public class BatteryStatsHistory {
     private boolean mMeasuredEnergyHeaderWritten = false;
     private boolean mCpuUsageHeaderWritten = false;
     private final VarintParceler mVarintParceler = new VarintParceler();
-
     private byte mLastHistoryStepLevel = 0;
-
-    private BatteryStatsHistoryIterator mBatteryStatsHistoryIterator;
+    private boolean mMutable = true;
 
     /**
      * A delegate responsible for computing additional details for a step in battery history.
@@ -493,25 +488,21 @@ public class BatteryStatsHistory {
      * @return always return true.
      */
     public BatteryStatsHistoryIterator iterate() {
-        mRecordCount = 0;
         mCurrentFileIndex = 0;
         mCurrentParcel = null;
         mCurrentParcelEnd = 0;
         mParcelIndex = 0;
-        mBatteryStatsHistoryIterator = new BatteryStatsHistoryIterator(this);
-        return mBatteryStatsHistoryIterator;
+        mMutable = false;
+        return new BatteryStatsHistoryIterator(this);
     }
 
     /**
      * Finish iterating history files and history buffer.
      */
-    void finishIteratingHistory() {
+    void iteratorFinished() {
         // setDataPosition so mHistoryBuffer Parcel can be written.
         mHistoryBuffer.setDataPosition(mHistoryBuffer.dataSize());
-        mBatteryStatsHistoryIterator = null;
-        if (DEBUG) {
-            Slog.d(TAG, "Battery history records iterated: " + mRecordCount);
-        }
+        mMutable = true;
     }
 
     /**
@@ -519,17 +510,11 @@ public class BatteryStatsHistory {
      * history file, when reached the mActiveFile (highest numbered history file), do not read from
      * mActiveFile, read from history buffer instead because the buffer has more updated data.
      *
-     * @param out a history item.
      * @return The parcel that has next record. null if finished all history files and history
      * buffer
      */
-    public Parcel getNextParcel(HistoryItem out) {
-        if (mRecordCount == 0) {
-            // reset out if it is the first record.
-            out.clear();
-        }
-        ++mRecordCount;
-
+    @Nullable
+    public Parcel getNextParcel() {
         // First iterate through all records in current parcel.
         if (mCurrentParcel != null) {
             if (mCurrentParcel.dataPosition() < mCurrentParcelEnd) {
@@ -1270,6 +1255,10 @@ public class BatteryStatsHistory {
             return;
         }
 
+        if (!mMutable) {
+            throw new ConcurrentModificationException("Battery history is not writable");
+        }
+
         final long timeDiffMs = (mHistoryBaseTimeMs + elapsedRealtimeMs) - mHistoryLastWritten.time;
         final int diffStates = mHistoryLastWritten.states ^ (cur.states & mActiveHistoryStates);
         final int diffStates2 = mHistoryLastWritten.states2 ^ (cur.states2 & mActiveHistoryStates2);
@@ -1390,8 +1379,8 @@ public class BatteryStatsHistory {
 
     private void writeHistoryItem(long elapsedRealtimeMs,
             @SuppressWarnings("UnusedVariable") long uptimeMs, HistoryItem cur, byte cmd) {
-        if (mBatteryStatsHistoryIterator != null) {
-            throw new IllegalStateException("Can't do this while iterating history!");
+        if (!mMutable) {
+            throw new ConcurrentModificationException("Battery history is not writable");
         }
         mHistoryBufferLastPos = mHistoryBuffer.dataPosition();
         mHistoryLastLastWritten.setTo(mHistoryLastWritten);
@@ -1687,7 +1676,10 @@ public class BatteryStatsHistory {
                     Slog.i(TAG, "WRITE DELTA: cpuUsageDetails=" + cur.cpuUsageDetails);
                 }
                 if (!mCpuUsageHeaderWritten) {
-                    dest.writeStringArray(cur.cpuUsageDetails.cpuBracketDescriptions);
+                    dest.writeInt(cur.cpuUsageDetails.cpuBracketDescriptions.length);
+                    for (String desc: cur.cpuUsageDetails.cpuBracketDescriptions) {
+                        dest.writeString(desc);
+                    }
                     mCpuUsageHeaderWritten = true;
                 }
                 dest.writeInt(cur.cpuUsageDetails.uid);

@@ -19,8 +19,8 @@ package com.android.server.permission.access.collection
 typealias IndexedList<T> = ArrayList<T>
 
 inline fun <T> IndexedList<T>.allIndexed(predicate: (Int, T) -> Boolean): Boolean {
-    for (index in 0 until size) {
-        if (!predicate(index, this[index])) {
+    forEachIndexed { index, element ->
+        if (!predicate(index, element)) {
             return false
         }
     }
@@ -28,8 +28,8 @@ inline fun <T> IndexedList<T>.allIndexed(predicate: (Int, T) -> Boolean): Boolea
 }
 
 inline fun <T> IndexedList<T>.anyIndexed(predicate: (Int, T) -> Boolean): Boolean {
-    for (index in 0 until size) {
-        if (predicate(index, this[index])) {
+    forEachIndexed { index, element ->
+        if (predicate(index, element)) {
             return true
         }
     }
@@ -45,6 +45,12 @@ inline fun <T> IndexedList<T>.forEachIndexed(action: (Int, T) -> Unit) {
     }
 }
 
+inline fun <T> IndexedList<T>.forEachReversedIndexed(action: (Int, T) -> Unit) {
+    for (index in lastIndex downTo 0) {
+        action(index, this[index])
+    }
+}
+
 @Suppress("NOTHING_TO_INLINE")
 inline operator fun <T> IndexedList<T>.minus(element: T): IndexedList<T> =
     copy().apply { this -= element }
@@ -55,8 +61,8 @@ inline operator fun <T> IndexedList<T>.minusAssign(element: T) {
 }
 
 inline fun <T> IndexedList<T>.noneIndexed(predicate: (Int, T) -> Boolean): Boolean {
-    for (index in 0 until size) {
-        if (predicate(index, this[index])) {
+    forEachIndexed { index, element ->
+        if (predicate(index, element)) {
             return false
         }
     }
@@ -74,8 +80,8 @@ inline operator fun <T> IndexedList<T>.plusAssign(element: T) {
 
 inline fun <T> IndexedList<T>.removeAllIndexed(predicate: (Int, T) -> Boolean): Boolean {
     var isChanged = false
-    for (index in lastIndex downTo 0) {
-        if (predicate(index, this[index])) {
+    forEachReversedIndexed { index, element ->
+        if (predicate(index, element)) {
             removeAt(index)
             isChanged = true
         }
@@ -85,8 +91,8 @@ inline fun <T> IndexedList<T>.removeAllIndexed(predicate: (Int, T) -> Boolean): 
 
 inline fun <T> IndexedList<T>.retainAllIndexed(predicate: (Int, T) -> Boolean): Boolean {
     var isChanged = false
-    for (index in lastIndex downTo 0) {
-        if (!predicate(index, this[index])) {
+    forEachReversedIndexed { index, element ->
+        if (!predicate(index, element)) {
             removeAt(index)
             isChanged = true
         }

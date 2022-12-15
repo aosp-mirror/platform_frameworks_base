@@ -154,10 +154,25 @@ final class TunerAdapter extends RadioTuner {
     @Override
     public int scan(int direction, boolean skipSubChannel) {
         try {
-            mTuner.scan(/* directionDown= */ direction == RadioTuner.DIRECTION_DOWN,
+            mTuner.seek(/* directionDown= */ direction == RadioTuner.DIRECTION_DOWN,
                     skipSubChannel);
         } catch (IllegalStateException e) {
             Log.e(TAG, "Can't scan", e);
+            return RadioManager.STATUS_INVALID_OPERATION;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Service died", e);
+            return RadioManager.STATUS_DEAD_OBJECT;
+        }
+        return RadioManager.STATUS_OK;
+    }
+
+    @Override
+    public int seek(int direction, boolean skipSubChannel) {
+        try {
+            mTuner.seek(/* directionDown= */ direction == RadioTuner.DIRECTION_DOWN,
+                    skipSubChannel);
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "Can't seek", e);
             return RadioManager.STATUS_INVALID_OPERATION;
         } catch (RemoteException e) {
             Log.e(TAG, "Service died", e);

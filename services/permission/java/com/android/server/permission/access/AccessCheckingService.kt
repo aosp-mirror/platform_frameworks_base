@@ -20,15 +20,15 @@ import android.content.Context
 import com.android.internal.annotations.Keep
 import com.android.server.LocalManagerRegistry
 import com.android.server.LocalServices
+import com.android.server.SystemConfig
 import com.android.server.SystemService
 import com.android.server.appop.AppOpsCheckingServiceInterface
 import com.android.server.permission.access.appop.AppOpService
-import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.collection.IntSet
 import com.android.server.permission.access.permission.PermissionService
 import com.android.server.pm.PackageManagerLocal
 import com.android.server.pm.UserManagerService
 import com.android.server.pm.permission.PermissionManagerServiceInterface
-import com.android.server.pm.permission.PermissionManagerServiceInternal
 import com.android.server.pm.pkg.PackageState
 
 @Keep
@@ -46,6 +46,7 @@ class AccessCheckingService(context: Context) : SystemService(context) {
 
     private lateinit var packageManagerLocal: PackageManagerLocal
     private lateinit var userManagerService: UserManagerService
+    private lateinit var systemConfig: SystemConfig
 
     override fun onStart() {
         appOpService = AppOpService(this)
@@ -59,12 +60,16 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         packageManagerLocal =
             LocalManagerRegistry.getManagerOrThrow(PackageManagerLocal::class.java)
         userManagerService = UserManagerService.getInstance()
+        systemConfig = SystemConfig.getInstance()
 
         val userIds = IntSet(userManagerService.userIdsIncludingPreCreated)
-        val packageStates = packageManagerLocal.packageStates
+        val (packageStates, disabledSystemPackageStates) = packageManagerLocal.allPackageStates
+        val permissionAllowlist = systemConfig.permissionAllowlist
 
         val state = AccessState()
-        policy.initialize(state, userIds, packageStates)
+        policy.initialize(
+            state, userIds, packageStates, disabledSystemPackageStates, permissionAllowlist
+        )
         persistence.read(state)
         this.state = state
 
@@ -96,51 +101,60 @@ class AccessCheckingService(context: Context) : SystemService(context) {
     }
 
     internal fun onStorageVolumeMounted(volumeUuid: String?, isSystemUpdated: Boolean) {
-        val packageStates = packageManagerLocal.packageStates
+        val (packageStates, disabledSystemPackageStates) = packageManagerLocal.allPackageStates
         mutateState {
-            with(policy) { onStorageVolumeMounted(packageStates, volumeUuid, isSystemUpdated) }
+            with(policy) {
+                onStorageVolumeMounted(
+                    packageStates, disabledSystemPackageStates, volumeUuid, isSystemUpdated
+                )
+            }
         }
     }
 
     internal fun onPackageAdded(packageName: String) {
-        val packageStates = packageManagerLocal.packageStates
+        val (packageStates, disabledSystemPackageStates) = packageManagerLocal.allPackageStates
         mutateState {
-            with(policy) { onPackageAdded(packageStates, packageName) }
+            with(policy) { onPackageAdded(packageStates, disabledSystemPackageStates, packageName) }
         }
     }
 
     internal fun onPackageRemoved(packageName: String, appId: Int) {
-        val packageStates = packageManagerLocal.packageStates
+        val (packageStates, disabledSystemPackageStates) = packageManagerLocal.allPackageStates
         mutateState {
-            with(policy) { onPackageRemoved(packageStates, packageName, appId) }
+            with(policy) {
+                onPackageRemoved(packageStates, disabledSystemPackageStates, packageName, appId)
+            }
         }
     }
 
-    internal fun onPackageInstalled(
-        packageName: String,
-        params: PermissionManagerServiceInternal.PackageInstalledParams,
-        userId: Int
-    ) {
-        val packageStates = packageManagerLocal.packageStates
+    internal fun onPackageInstalled(packageName: String, userId: Int) {
+        val (packageStates, disabledSystemPackageStates) = packageManagerLocal.allPackageStates
         mutateState {
-            with(policy) { onPackageInstalled(packageStates, packageName, params, userId) }
+            with(policy) {
+                onPackageInstalled(packageStates, disabledSystemPackageStates, packageName, userId)
+            }
         }
     }
 
     internal fun onPackageUninstalled(packageName: String, appId: Int, userId: Int) {
-        val packageStates = packageManagerLocal.packageStates
+        val (packageStates, disabledSystemPackageStates) = packageManagerLocal.allPackageStates
         mutateState {
-            with(policy) { onPackageUninstalled(packageStates, packageName, appId, userId) }
+            with(policy) {
+                onPackageUninstalled(
+                    packageStates, disabledSystemPackageStates, packageName, appId, userId
+                )
+            }
         }
     }
 
-    private val PackageManagerLocal.packageStates: Map<String, PackageState>
-        get() = withUnfilteredSnapshot().use { it.packageStates }
+    private val PackageManagerLocal.allPackageStates:
+        Pair<Map<String, PackageState>, Map<String, PackageState>>
+        get() = withUnfilteredSnapshot().use { it.packageStates to it.disabledSystemPackageStates }
 
     internal inline fun <T> getState(action: GetStateScope.() -> T): T =
         GetStateScope(state).action()
 
-    internal inline fun mutateState(action: MutateStateScope.() -> Unit) {
+    internal inline fun mutateState(crossinline action: MutateStateScope.() -> Unit) {
         synchronized(stateLock) {
             val oldState = state
             val newState = oldState.copy()

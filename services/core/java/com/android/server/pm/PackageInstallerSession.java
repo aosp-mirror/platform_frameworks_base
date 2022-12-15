@@ -125,7 +125,7 @@ import android.os.incremental.IncrementalManager;
 import android.os.incremental.PerUidReadTimeouts;
 import android.os.incremental.StorageHealthCheckParams;
 import android.os.storage.StorageManager;
-import android.provider.Settings.Secure;
+import android.provider.Settings.Global;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.system.ErrnoException;
 import android.system.Int64Ref;
@@ -1842,7 +1842,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertNoWriteFileTransfersOpenLocked();
 
             final boolean isSecureFrpEnabled =
-                    (Secure.getInt(mContext.getContentResolver(), Secure.SECURE_FRP_MODE, 0) == 1);
+                    Global.getInt(mContext.getContentResolver(), Global.SECURE_FRP_MODE, 0) == 1;
+
             if (isSecureFrpEnabled
                     && !isSecureFrpInstallAllowed(mContext, Binder.getCallingUid())) {
                 throw new SecurityException("Can't install packages while in secure FRP");
@@ -2785,6 +2786,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Default to require only if existing base apk has fs-verity signature.
         mVerityFoundForApks = PackageManagerServiceUtils.isApkVerityEnabled()
                 && params.mode == SessionParams.MODE_INHERIT_EXISTING
+                && VerityUtils.hasFsverity(pkgInfo.applicationInfo.getBaseCodePath())
                 && (new File(VerityUtils.getFsveritySignatureFilePath(
                         pkgInfo.applicationInfo.getBaseCodePath()))).exists();
 

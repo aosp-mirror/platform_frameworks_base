@@ -53,6 +53,7 @@ import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
+import android.hardware.input.VirtualNavigationTouchpadConfig;
 import android.hardware.input.VirtualTouchEvent;
 import android.hardware.input.VirtualTouchscreenConfig;
 import android.os.Binder;
@@ -108,7 +109,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private VirtualAudioController mVirtualAudioController;
     @VisibleForTesting
     final Set<Integer> mVirtualDisplayIds = new ArraySet<>();
-    private final OnDeviceCloseListener mListener;
+    private final OnDeviceCloseListener mOnDeviceCloseListener;
     private final IBinder mAppToken;
     private final VirtualDeviceParams mParams;
     private final Map<Integer, PowerManager.WakeLock> mPerDisplayWakelocks = new ArrayMap<>();
@@ -155,7 +156,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             IBinder token,
             int ownerUid,
             int deviceId,
-            OnDeviceCloseListener listener,
+            OnDeviceCloseListener onDeviceCloseListener,
             PendingTrampolineCallback pendingTrampolineCallback,
             IVirtualDeviceActivityListener activityListener,
             Consumer<ArraySet<Integer>> runningAppsChangedCallback,
@@ -168,7 +169,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 deviceId,
                 /* inputController= */ null,
                 /* sensorController= */ null,
-                listener,
+                onDeviceCloseListener,
                 pendingTrampolineCallback,
                 activityListener,
                 runningAppsChangedCallback,
@@ -184,7 +185,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             int deviceId,
             InputController inputController,
             SensorController sensorController,
-            OnDeviceCloseListener listener,
+            OnDeviceCloseListener onDeviceCloseListener,
             PendingTrampolineCallback pendingTrampolineCallback,
             IVirtualDeviceActivityListener activityListener,
             Consumer<ArraySet<Integer>> runningAppsChangedCallback,
@@ -212,7 +213,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         } else {
             mSensorController = sensorController;
         }
-        mListener = listener;
+        mOnDeviceCloseListener = onDeviceCloseListener;
         try {
             token.linkToDeath(this, 0);
         } catch (RemoteException e) {
@@ -330,7 +331,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 mVirtualAudioController = null;
             }
         }
-        mListener.onClose(mAssociationInfo.getId());
+        mOnDeviceCloseListener.onClose(mDeviceId);
         mAppToken.unlinkToDeath(this, 0);
 
         final long ident = Binder.clearCallingIdentity();
@@ -485,6 +486,38 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             mInputController.createTouchscreen(config.getInputDeviceName(), config.getVendorId(),
                     config.getProductId(), deviceToken, config.getAssociatedDisplayId(),
                     screenHeightPixels, screenWidthPixels);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    public void createVirtualNavigationTouchpad(VirtualNavigationTouchpadConfig config,
+            @NonNull IBinder deviceToken) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
+                "Permission required to create a virtual navigation touchpad");
+        synchronized (mVirtualDeviceLock) {
+            if (!mVirtualDisplayIds.contains(config.getAssociatedDisplayId())) {
+                throw new SecurityException(
+                        "Cannot create a virtual navigation touchpad for a display not associated "
+                                + "with this virtual device");
+            }
+        }
+        int touchpadHeight = config.getHeight();
+        int touchpadWidth = config.getWidth();
+        if (touchpadHeight <= 0 || touchpadWidth <= 0) {
+            throw new IllegalArgumentException(
+                "Cannot create a virtual navigation touchpad, touchpad dimensions must be positive."
+                    + " Got: (" + touchpadHeight + ", " + touchpadWidth + ")");
+        }
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInputController.createNavigationTouchpad(
+                    config.getInputDeviceName(), config.getVendorId(),
+                    config.getProductId(), deviceToken, config.getAssociatedDisplayId(),
+                    touchpadHeight, touchpadWidth);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -650,6 +683,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @Override
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
         fout.println("  VirtualDevice: ");
+        fout.println("    mDeviceId: " + mDeviceId);
         fout.println("    mAssociationId: " + mAssociationInfo.getId());
         fout.println("    mParams: " + mParams);
         fout.println("    mVirtualDisplayIds: ");
@@ -839,7 +873,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     interface OnDeviceCloseListener {
-        void onClose(int associationId);
+        void onClose(int deviceId);
     }
 
     interface PendingTrampolineCallback {

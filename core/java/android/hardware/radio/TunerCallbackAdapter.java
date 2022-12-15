@@ -246,6 +246,11 @@ final class TunerCallbackAdapter extends ITunerCallback.Stub {
     }
 
     @Override
+    public void onConfigFlagUpdated(@RadioManager.ConfigFlag int flag, boolean value) {
+        mHandler.post(() -> mCallback.onConfigFlagUpdated(flag, value));
+    }
+
+    @Override
     public void onParametersUpdated(Map<String, String> parameters) {
         mHandler.post(() -> mCallback.onParametersUpdated(parameters));
     }

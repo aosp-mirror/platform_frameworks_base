@@ -43,6 +43,7 @@ class CredentialSelectorActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     CredentialManagerRepo.setup(this, intent)
+    UserConfigRepo.setup(this)
     val requestInfo = CredentialManagerRepo.getInstance().requestInfo
     setContent {
       CredentialSelectorTheme {

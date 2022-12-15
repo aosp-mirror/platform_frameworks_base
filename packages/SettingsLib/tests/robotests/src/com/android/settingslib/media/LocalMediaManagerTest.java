@@ -206,8 +206,7 @@ public class LocalMediaManagerTest {
         when(device1.getId()).thenReturn(TEST_DEVICE_ID_1);
         when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);
 
-        final MediaDevice device = mLocalMediaManager
-                .getMediaDeviceById(mLocalMediaManager.mMediaDevices, TEST_DEVICE_ID_2);
+        MediaDevice device = mLocalMediaManager.getMediaDeviceById(TEST_DEVICE_ID_2);
 
         assertThat(device.getId()).isEqualTo(TEST_DEVICE_ID_2);
     }
@@ -222,8 +221,7 @@ public class LocalMediaManagerTest {
         when(device1.getId()).thenReturn(TEST_DEVICE_ID_1);
         when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);
 
-        final MediaDevice device = mLocalMediaManager
-                .getMediaDeviceById(mLocalMediaManager.mMediaDevices, TEST_CURRENT_DEVICE_ID);
+        MediaDevice device = mLocalMediaManager.getMediaDeviceById(TEST_CURRENT_DEVICE_ID);
 
         assertThat(device).isNull();
     }
@@ -238,12 +236,7 @@ public class LocalMediaManagerTest {
         when(device1.getId()).thenReturn(null);
         when(device2.getId()).thenReturn(null);
 
-        MediaDevice device = mLocalMediaManager
-                .getMediaDeviceById(mLocalMediaManager.mMediaDevices, TEST_CURRENT_DEVICE_ID);
-
-        assertThat(device).isNull();
-
-        device = mLocalMediaManager.getMediaDeviceById(TEST_CURRENT_DEVICE_ID);
+        MediaDevice device = mLocalMediaManager.getMediaDeviceById(TEST_CURRENT_DEVICE_ID);
 
         assertThat(device).isNull();
     }

@@ -193,6 +193,30 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         assertEquals(result, START_ABORTED);
     }
 
+    @Test
+    public void testCanActivityBeLaunched_requiredDisplayCategory() {
+        ActivityStarter starter = new ActivityStarter(mock(ActivityStartController.class), mAtm,
+                mSupervisor, mock(ActivityStartInterceptor.class));
+        final Task task = new TaskBuilder(mSupervisor).setDisplay(mSecondaryDisplay).build();
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).setTask(task).build();
+        final ActivityRecord disallowedRecord =
+                new ActivityBuilder(mAtm).setRequiredDisplayCategory("auto").build();
+
+        int result = starter.startActivityInner(
+                disallowedRecord,
+                sourceRecord,
+                /* voiceSession= */null,
+                /* voiceInteractor= */ null,
+                /* startFlags= */ 0,
+                /* options= */null,
+                /* inTask= */null,
+                /* inTaskFragment= */ null,
+                /* restrictedBgActivity= */false,
+                /* intentGrants= */null);
+
+        assertEquals(result, START_ABORTED);
+    }
+
     private class TestDisplayWindowPolicyController extends DisplayWindowPolicyController {
 
         public ComponentName DISALLOWED_ACTIVITY =

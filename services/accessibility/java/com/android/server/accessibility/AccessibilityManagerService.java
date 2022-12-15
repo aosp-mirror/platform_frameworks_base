@@ -26,8 +26,11 @@ import static android.accessibilityservice.AccessibilityTrace.FLAGS_USER_BROADCA
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MAGNIFICATION_CONNECTION;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
 import static android.provider.Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED;
+import static android.provider.Settings.Secure.CONTRAST_LEVEL;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
+import static android.view.accessibility.AccessibilityManager.CONTRAST_DEFAULT_VALUE;
+import static android.view.accessibility.AccessibilityManager.CONTRAST_NOT_SET;
 import static android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_COMPONENT_NAME;
@@ -1018,10 +1021,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private void dispatchAccessibilityEventLocked(AccessibilityEvent event) {
-        notifyAccessibilityServicesDelayedLocked(event, false);
-        notifyAccessibilityServicesDelayedLocked(event, true);
+        if (mProxyManager.isProxyed(event.getDisplayId())) {
+            mProxyManager.sendAccessibilityEventLocked(event);
+        } else {
+            notifyAccessibilityServicesDelayedLocked(event, false);
+            notifyAccessibilityServicesDelayedLocked(event, true);
+        }
         mUiAutomationManager.sendAccessibilityEventLocked(event);
-        mProxyManager.sendAccessibilityEvent(event);
     }
 
     private void sendAccessibilityEventToInputFilter(AccessibilityEvent event) {
@@ -1162,7 +1168,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
             List<AccessibilityServiceConnection> services =
                     getUserStateLocked(resolvedUserId).mBoundServices;
-            int numServices = services.size() + mProxyManager.getNumProxys();
+            int numServices = services.size() + mProxyManager.getNumProxysLocked();
             interfacesToInterrupt = new ArrayList<>(numServices);
             for (int i = 0; i < services.size(); i++) {
                 AccessibilityServiceConnection service = services.get(i);
@@ -1172,7 +1178,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     interfacesToInterrupt.add(a11yServiceInterface);
                 }
             }
-            mProxyManager.addServiceInterfaces(interfacesToInterrupt);
+            mProxyManager.addServiceInterfacesLocked(interfacesToInterrupt);
         }
         for (int i = 0, count = interfacesToInterrupt.size(); i < count; i++) {
             try {
@@ -1899,6 +1905,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return false;
     }
 
+    private boolean readUiContrastLocked(AccessibilityUserState userState) {
+        float contrast = Settings.Secure.getFloatForUser(mContext.getContentResolver(),
+                CONTRAST_LEVEL, CONTRAST_DEFAULT_VALUE, userState.mUserId);
+        if (Math.abs(userState.getUiContrastLocked() - contrast) >= 1e-10) {
+            userState.setUiContrastLocked(contrast);
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Performs {@link AccessibilityService}s delayed notification. The delay is configurable
      * and denotes the period after the last event before notifying the service.
@@ -1963,7 +1979,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mUiAutomationManager.getServiceInfo(), client)
                 ? mUiAutomationManager.getRelevantEventTypes()
                 : 0;
-        relevantEventTypes |= mProxyManager.getRelevantEventTypes();
+        relevantEventTypes |= mProxyManager.getRelevantEventTypesLocked();
         return relevantEventTypes;
     }
 
@@ -2565,6 +2581,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         somethingChanged |= readMagnificationModeForDefaultDisplayLocked(userState);
         somethingChanged |= readMagnificationCapabilitiesLocked(userState);
         somethingChanged |= readMagnificationFollowTypingLocked(userState);
+        somethingChanged |= readUiContrastLocked(userState);
         return somethingChanged;
     }
 
@@ -3706,6 +3723,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return mProxyManager.unregisterProxy(displayId);
     }
 
+    @Override public float getUiContrast() {
+        if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
+            mTraceManager.logTrace(LOG_TAG + ".getUiContrast", FLAGS_ACCESSIBILITY_MANAGER);
+        }
+        synchronized (mLock) {
+            AccessibilityUserState userState = getCurrentUserStateLocked();
+            float contrast = userState.getUiContrastLocked();
+            if (contrast != CONTRAST_NOT_SET) return contrast;
+            readUiContrastLocked(userState);
+            return userState.getUiContrastLocked();
+        }
+    }
+
     @Override
     public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
@@ -4153,6 +4183,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private final Uri mMagnificationFollowTypingUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED);
 
+        private final Uri mUiContrastUri = Settings.Secure.getUriFor(
+                CONTRAST_LEVEL);
+
         public AccessibilityContentObserver(Handler handler) {
             super(handler);
         }
@@ -4193,6 +4226,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     mMagnificationCapabilityUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mMagnificationFollowTypingUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mUiContrastUri, false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -4262,6 +4297,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 } else if (mMagnificationFollowTypingUri.equals(uri)) {
                     readMagnificationFollowTypingLocked(userState);
+                } else if (mUiContrastUri.equals(uri)) {
+                    if (readUiContrastLocked(userState)) {
+                        updateUiContrastLocked(userState);
+                    }
                 }
             }
         }
@@ -4551,7 +4590,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         userState.getFocusColorLocked());
             }));
         });
+    }
 
+    private void updateUiContrastLocked(AccessibilityUserState userState) {
+        if (userState.mUserId != mCurrentUserId) {
+            return;
+        }
+        if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_SERVICE_CLIENT)) {
+            mTraceManager.logTrace(LOG_TAG + ".updateUiContrastLocked",
+                    FLAGS_ACCESSIBILITY_SERVICE_CLIENT, "userState=" + userState);
+        }
+        float contrast = userState.getUiContrastLocked();
+        mMainHandler.post(() -> {
+            broadcastToClients(userState, ignoreRemoteException(client -> {
+                client.mCallback.setUiContrast(contrast);
+            }));
+        });
     }
 
     public AccessibilityTraceManager getTraceManager() {

@@ -1742,7 +1742,7 @@ public class LockPatternUtils {
     }
 
     public static boolean userOwnsFrpCredential(Context context, UserInfo info) {
-        return info != null && info.isPrimary() && info.isAdmin() && frpCredentialEnabled(context);
+        return info != null && info.isMain() && info.isAdmin() && frpCredentialEnabled(context);
     }
 
     public static boolean frpCredentialEnabled(Context context) {

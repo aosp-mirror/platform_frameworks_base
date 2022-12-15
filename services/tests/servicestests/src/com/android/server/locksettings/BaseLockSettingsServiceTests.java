@@ -85,7 +85,8 @@ public abstract class BaseLockSettingsServiceTests {
     protected static final int SECONDARY_USER_ID = 20;
 
     private static final UserInfo PRIMARY_USER_INFO = new UserInfo(PRIMARY_USER_ID, null, null,
-            UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY);
+            UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY
+                    | UserInfo.FLAG_MAIN);
     private static final UserInfo SECONDARY_USER_INFO = new UserInfo(SECONDARY_USER_ID, null, null,
             UserInfo.FLAG_INITIALIZED);
 

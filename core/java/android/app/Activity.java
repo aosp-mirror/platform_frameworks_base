@@ -83,6 +83,7 @@ import android.os.GraphicsEnvironment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.OutcomeReceiver;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -986,6 +987,17 @@ public class Activity extends ContextThemeWrapper
     private boolean mIsInMultiWindowMode;
     /** @hide */
     boolean mIsInPictureInPictureMode;
+
+    /** @hide */
+    @IntDef(prefix = { "FULLSCREEN_REQUEST_" }, value = {
+            FULLSCREEN_MODE_REQUEST_EXIT,
+            FULLSCREEN_MODE_REQUEST_ENTER
+    })
+    public @interface FullscreenModeRequest {}
+
+    public static final int FULLSCREEN_MODE_REQUEST_EXIT = 0;
+
+    public static final int FULLSCREEN_MODE_REQUEST_ENTER = 1;
 
     private boolean mShouldDockBigOverlays;
 
@@ -2998,6 +3010,36 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean onPictureInPictureRequested() {
         return false;
+    }
+
+    /**
+     * Request to put the a freeform activity into fullscreen. This will only be allowed if the
+     * activity is on a freeform display, such as a desktop device. The requester has to be the
+     * top-most activity and the request should be a response to a user input. When getting
+     * fullscreen and receiving corresponding {@link #onConfigurationChanged(Configuration)} and
+     * {@link #onMultiWindowModeChanged(boolean, Configuration)}, the activity should relayout
+     * itself and the system bars' visibilities can be controlled as usual fullscreen apps.
+     *
+     * Calling it again with the exit request can restore the activity to the previous status.
+     * This will only happen when it got into fullscreen through this API.
+     *
+     * If an app wants to be in fullscreen always, it should claim as not being resizable
+     * by setting
+     * <a href="https://developer.android.com/guide/topics/large-screens/multi-window-support#resizeableActivity">
+     * {@code android:resizableActivity="false"}</a> instead of calling this API.
+     *
+     * @param request Can be {@link #FULLSCREEN_MODE_REQUEST_ENTER} or
+     *                {@link #FULLSCREEN_MODE_REQUEST_EXIT} to indicate this request is to get
+     *                fullscreen or get restored.
+     * @param approvalCallback Optional callback, use {@code null} when not necessary. When the
+     *                         request is approved or rejected, the callback will be triggered. This
+     *                         will happen before any configuration change. The callback will be
+     *                         dispatched on the main thread.
+     */
+    public void requestFullscreenMode(@NonNull @FullscreenModeRequest int request,
+            @Nullable OutcomeReceiver<Void, Throwable> approvalCallback) {
+        FullscreenRequestHandler.requestFullscreenMode(
+                request, approvalCallback, mCurrentConfig, getActivityToken());
     }
 
     /**
@@ -6612,16 +6654,64 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Returns the uid who started this activity.
-     * @hide
+     * Returns the uid of the app that initially launched this activity.
+     *
+     * <p>In order to receive the launching app's uid, at least one of the following has to
+     * be met:
+     * <ul>
+     *     <li>The app must call {@link ActivityOptions#setShareIdentityEnabled(boolean)} with a
+     *     value of {@code true} and launch this activity with the resulting {@code
+     *     ActivityOptions}.
+     *     <li>The launched activity has the same uid as the launching app.
+     *     <li>The launched activity is running in a package that is signed with the same key
+     *     used to sign the platform (typically only system packages such as Settings will
+     *     meet this requirement).
+     * </ul>.
+     * These are the same requirements for {@link #getLaunchedFromPackage()}; if any of these are
+     * met, then these methods can be used to obtain the uid and package name of the launching
+     * app. If none are met, then {@link Process#INVALID_UID} is returned.
+     *
+     * <p>Note, even if the above conditions are not met, the launching app's identity may
+     * still be available from {@link #getCallingPackage()} if this activity was started with
+     * {@code Activity#startActivityForResult} to allow validation of the result's recipient.
+     *
+     * @return the uid of the launching app or {@link Process#INVALID_UID} if the current
+     * activity cannot access the identity of the launching app
+     *
+     * @see ActivityOptions#setShareIdentityEnabled(boolean)
+     * @see #getLaunchedFromPackage()
      */
     public int getLaunchedFromUid() {
         return ActivityClient.getInstance().getLaunchedFromUid(getActivityToken());
     }
 
     /**
-     * Returns the package who started this activity.
-     * @hide
+     * Returns the package name of the app that initially launched this activity.
+     *
+     * <p>In order to receive the launching app's package name, at least one of the following has
+     * to be met:
+     * <ul>
+     *     <li>The app must call {@link ActivityOptions#setShareIdentityEnabled(boolean)} with a
+     *     value of {@code true} and launch this activity with the resulting
+     *     {@code ActivityOptions}.
+     *     <li>The launched activity has the same uid as the launching app.
+     *     <li>The launched activity is running in a package that is signed with the same key
+     *     used to sign the platform (typically only system packages such as Settings will
+     *     meet this requirement).
+     * </ul>.
+     * These are the same requirements for {@link #getLaunchedFromUid()}; if any of these are
+     * met, then these methods can be used to obtain the uid and package name of the launching
+     * app. If none are met, then {@code null} is returned.
+     *
+     * <p>Note, even if the above conditions are not met, the launching app's identity may
+     * still be available from {@link #getCallingPackage()} if this activity was started with
+     * {@code Activity#startActivityForResult} to allow validation of the result's recipient.
+     *
+     * @return the package name of the launching app or null if the current activity
+     * cannot access the identity of the launching app
+     *
+     * @see ActivityOptions#setShareIdentityEnabled(boolean)
+     * @see #getLaunchedFromUid()
      */
     @Nullable
     public String getLaunchedFromPackage() {

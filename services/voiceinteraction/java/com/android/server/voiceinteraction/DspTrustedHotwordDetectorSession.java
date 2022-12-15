@@ -28,6 +28,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.media.permission.Identity;
+import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
@@ -74,12 +75,13 @@ final class DspTrustedHotwordDetectorSession extends HotwordDetectorSession {
 
     DspTrustedHotwordDetectorSession(
             @NonNull HotwordDetectionConnection.ServiceConnection remoteHotwordDetectionService,
-            @NonNull Object lock, @NonNull Context context,
+            @NonNull Object lock, @NonNull Context context, @NonNull IBinder token,
             @NonNull IHotwordRecognitionStatusCallback callback, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity,
             @NonNull ScheduledExecutorService scheduledExecutorService, boolean logging) {
-        super(remoteHotwordDetectionService, lock, context, callback, voiceInteractionServiceUid,
-                voiceInteractorIdentity, scheduledExecutorService, logging);
+        super(remoteHotwordDetectionService, lock, context, token, callback,
+                voiceInteractionServiceUid, voiceInteractorIdentity, scheduledExecutorService,
+                logging);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -106,12 +108,14 @@ final class DspTrustedHotwordDetectorSession extends HotwordDetectorSession {
                     }
                     HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                             HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP,
-                            HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECTED);
+                            HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECTED,
+                            mVoiceInteractionServiceUid);
                     if (!mValidatingDspTrigger) {
                         Slog.i(TAG, "Ignoring #onDetected due to a process restart");
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                                 HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP,
-                                METRICS_KEYPHRASE_TRIGGERED_DETECT_UNEXPECTED_CALLBACK);
+                                METRICS_KEYPHRASE_TRIGGERED_DETECT_UNEXPECTED_CALLBACK,
+                                mVoiceInteractionServiceUid);
                         return;
                     }
                     mValidatingDspTrigger = false;
@@ -122,7 +126,8 @@ final class DspTrustedHotwordDetectorSession extends HotwordDetectorSession {
                         Slog.i(TAG, "Ignoring #onDetected due to a SecurityException", e);
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                                 HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP,
-                                METRICS_KEYPHRASE_TRIGGERED_DETECT_SECURITY_EXCEPTION);
+                                METRICS_KEYPHRASE_TRIGGERED_DETECT_SECURITY_EXCEPTION,
+                                mVoiceInteractionServiceUid);
                         externalCallback.onError(CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION);
                         return;
                     }
@@ -157,12 +162,14 @@ final class DspTrustedHotwordDetectorSession extends HotwordDetectorSession {
                     }
                     HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                             HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP,
-                            HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED);
+                            HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED,
+                            mVoiceInteractionServiceUid);
                     if (!mValidatingDspTrigger) {
                         Slog.i(TAG, "Ignoring #onRejected due to a process restart");
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                                 HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP,
-                                METRICS_KEYPHRASE_TRIGGERED_REJECT_UNEXPECTED_CALLBACK);
+                                METRICS_KEYPHRASE_TRIGGERED_REJECT_UNEXPECTED_CALLBACK,
+                                mVoiceInteractionServiceUid);
                         return;
                     }
                     mValidatingDspTrigger = false;
@@ -187,7 +194,8 @@ final class DspTrustedHotwordDetectorSession extends HotwordDetectorSession {
                         Slog.w(TAG, "Timed out on #detectFromDspSource");
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                                 HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP,
-                                HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_TIMEOUT);
+                                HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_TIMEOUT,
+                                mVoiceInteractionServiceUid);
                         try {
                             externalCallback.onError(CALLBACK_DETECT_TIMEOUT);
                         } catch (RemoteException e) {
@@ -220,7 +228,8 @@ final class DspTrustedHotwordDetectorSession extends HotwordDetectorSession {
                 mCallback.onRejected(new HotwordRejectedResult.Builder().build());
                 HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                         HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP,
-                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED_FROM_RESTART);
+                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED_FROM_RESTART,
+                        mVoiceInteractionServiceUid);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to call #rejected");
                 HotwordMetricsLogger.writeDetectorEvent(

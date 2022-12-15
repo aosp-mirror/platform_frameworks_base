@@ -357,11 +357,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return mMainStage.isActive();
     }
 
-    boolean isSplitScreenRunningBackground() {
-        return !isSplitScreenVisible() && mMainStageListener.mHasChildren
-                && mSideStageListener.mHasChildren;
-    }
-
     @StageType
     int getStageOfTask(int taskId) {
         if (mMainStage.containsTask(taskId)) {
@@ -389,7 +384,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 targetStage = stagePosition == mSideStagePosition ? mSideStage : mMainStage;
                 sideStagePosition = mSideStagePosition;
             } else {
-                exitSplitIfBackground();
+                // Exit split if it running background.
+                exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RECREATE_SPLIT);
+
                 targetStage = mSideStage;
                 sideStagePosition = stagePosition;
             }
@@ -685,7 +682,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @Nullable PendingIntent mainPendingIntent, @Nullable Intent mainFillInIntent,
             @Nullable Bundle mainOptions, @SplitPosition int sidePosition, float splitRatio,
             RemoteAnimationAdapter adapter, InstanceId instanceId) {
-        exitSplitIfBackground();
+        if (!isSplitScreenVisible()) {
+            exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RECREATE_SPLIT);
+        }
+
         // Init divider first to make divider leash for remote animation target.
         mSplitLayout.init();
         mSplitLayout.setDivideRatio(splitRatio);
@@ -1070,7 +1070,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSideStage.removeAllTasks(wct, false /* toTop */);
             mMainStage.deactivate(wct, false /* toTop */);
             wct.reorder(mRootTaskInfo.token, false /* onTop */);
-            wct.setForceTranslucent(mRootTaskInfo.token, true);
             wct.setBounds(mSideStage.mRootTaskInfo.token, mTempRect1);
             onTransitionAnimationComplete();
         } else {
@@ -1102,7 +1101,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     mMainStage.deactivate(finishedWCT, childrenToTop == mMainStage /* toTop */);
                     mSideStage.removeAllTasks(finishedWCT, childrenToTop == mSideStage /* toTop */);
                     finishedWCT.reorder(mRootTaskInfo.token, false /* toTop */);
-                    finishedWCT.setForceTranslucent(mRootTaskInfo.token, true);
                     finishedWCT.setBounds(mSideStage.mRootTaskInfo.token, mTempRect1);
                     mSyncQueue.queue(finishedWCT);
                     mSyncQueue.runInSync(at -> {
@@ -1120,13 +1118,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         } else {
             logExit(exitReason);
         }
-    }
-
-    /** Exit split screen if it still running background */
-    public void exitSplitIfBackground() {
-        if (!isSplitScreenRunningBackground()) return;
-
-        exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RECREATE_SPLIT);
     }
 
     /**
@@ -1451,7 +1442,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     void onChildTaskAppeared(StageListenerImpl stageListener, int taskId) {
-        if (stageListener == mSideStageListener && isSplitScreenRunningBackground()) {
+        if (stageListener == mSideStageListener && !isSplitScreenVisible() && isSplitActive()
+                && !mIsSplitEntering) {
             // Handle entring split case here if split already running background.
             if (mIsDropEntering) {
                 mSplitLayout.resetDividerPosition();
@@ -1459,11 +1451,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSplitLayout.setDividerAtBorder(mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT);
             }
             final WindowContainerTransaction wct = new WindowContainerTransaction();
+            mMainStage.reparentTopTask(wct);
             mMainStage.evictAllChildren(wct);
             mSideStage.evictOtherChildren(wct, taskId);
-            mMainStage.reparentTopTask(wct);
             updateWindowBounds(mSplitLayout, wct);
             wct.reorder(mRootTaskInfo.token, true);
+            wct.setForceTranslucent(mRootTaskInfo.token, false);
 
             mSyncQueue.queue(wct);
             mSyncQueue.runInSync(t -> {
@@ -1471,6 +1464,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
                     mIsDropEntering = false;
                 } else {
+                    mShowDecorImmediately = true;
                     mSplitLayout.flingDividerToCenter();
                 }
             });
@@ -1499,6 +1493,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (!mainStageVisible) {
             wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
                     true /* setReparentLeafTaskIfRelaunch */);
+            wct.setForceTranslucent(mRootTaskInfo.token, true);
             // Both stages are not visible, check if it needs to dismiss split screen.
             if (mExitSplitScreenOnHide) {
                 exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RETURN_HOME);
@@ -1506,6 +1501,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         } else {
             wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
                     false /* setReparentLeafTaskIfRelaunch */);
+            wct.setForceTranslucent(mRootTaskInfo.token, false);
         }
         mSyncQueue.queue(wct);
         mSyncQueue.runInSync(t -> {
@@ -1617,8 +1613,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSplitLayout.flingDividerToDismiss(
                         mSideStagePosition != SPLIT_POSITION_BOTTOM_OR_RIGHT,
                         EXIT_REASON_APP_FINISHED);
-            } else if (isSplitScreenRunningBackground()) {
-                // Do not exit to any stage due to running background.
+            } else if (!isSplitScreenVisible()) {
                 exitSplitScreen(null /* childrenToTop */, EXIT_REASON_APP_FINISHED);
             }
         } else if (isSideStage && hasChildren && !mMainStage.isActive()) {
@@ -2355,9 +2350,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (!isSplitScreenVisible()) {
             mIsDropEntering = true;
         }
-        if (isSplitScreenRunningBackground()) {
-            // Split running background, log exit first and start new enter request.
-            logExit(EXIT_REASON_RECREATE_SPLIT);
+        if (!isSplitScreenVisible()) {
+            // If split running background, exit split first.
+            exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RECREATE_SPLIT);
         }
         mLogger.enterRequestedByDrag(position, dragSessionId);
     }
@@ -2366,9 +2361,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
      * Sets info to be logged when splitscreen is next entered.
      */
     public void onRequestToSplit(InstanceId sessionId, int enterReason) {
-        if (isSplitScreenRunningBackground()) {
-            // Split running background, log exit first and start new enter request.
-            logExit(EXIT_REASON_RECREATE_SPLIT);
+        if (!isSplitScreenVisible()) {
+            // If split running background, exit split first.
+            exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RECREATE_SPLIT);
         }
         mLogger.enterRequested(sessionId, enterReason);
     }

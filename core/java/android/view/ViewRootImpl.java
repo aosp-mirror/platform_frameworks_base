@@ -51,6 +51,8 @@ import static android.view.ViewRootImplProto.WIDTH;
 import static android.view.ViewRootImplProto.WINDOW_ATTRIBUTES;
 import static android.view.ViewRootImplProto.WIN_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
+import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
+import static android.view.WindowCallbacks.RESIZE_MODE_INVALID;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -513,6 +515,7 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mPendingDragResizing;
     private boolean mDragResizing;
     private boolean mInvalidateRootRequested;
+    private int mResizeMode = RESIZE_MODE_INVALID;
     private int mCanvasOffsetX;
     private int mCanvasOffsetY;
     private boolean mActivityRelaunched;
@@ -592,19 +595,21 @@ public final class ViewRootImpl implements ViewParent,
     String mLastPerformDrawSkippedReason;
     /** The reason the last call to performTraversals() returned without drawing */
     String mLastPerformTraversalsSkipDrawReason;
-    /** The state of the local sync, if one is in progress. Can be one of the states below. */
-    int mLocalSyncState;
+    /** The state of the WMS requested sync, if one is in progress. Can be one of the states
+     * below. */
+    int mWmsRequestSyncGroupState;
 
-    // The possible states of the local sync, see createSyncIfNeeded()
-    private final int LOCAL_SYNC_NONE = 0;
-    private final int LOCAL_SYNC_PENDING = 1;
-    private final int LOCAL_SYNC_RETURNED = 2;
-    private final int LOCAL_SYNC_MERGED = 3;
+    // The possible states of the WMS requested sync, see createSyncIfNeeded()
+    private static final int WMS_SYNC_NONE = 0;
+    private static final int WMS_SYNC_PENDING = 1;
+    private static final int WMS_SYNC_RETURNED = 2;
+    private static final int WMS_SYNC_MERGED = 3;
 
     /**
-     * Set whether the draw should send the buffer to system server. When set to true, VRI will
-     * create a sync transaction with BBQ and send the resulting buffer to system server. If false,
-     * VRI will not try to sync a buffer in BBQ, but still report when a draw occurred.
+     * Set whether the requested SurfaceSyncGroup should sync the buffer. When set to true, VRI will
+     * create a sync transaction with BBQ and send the resulting buffer back to the
+     * SurfaceSyncGroup. If false, VRI will not try to sync a buffer in BBQ, but still report when a
+     * draw occurred.
      */
     private boolean mSyncBuffer = false;
 
@@ -846,8 +851,19 @@ public final class ViewRootImpl implements ViewParent,
         return mHandwritingInitiator;
     }
 
-    private SurfaceSyncGroup mSyncGroup;
-    private SurfaceSyncGroup.TransactionReadyCallback mTransactionReadyCallback;
+    /**
+     * A SurfaceSyncGroup that is created when WMS requested to sync the buffer
+     */
+    private SurfaceSyncGroup mWmsRequestSyncGroup;
+
+    /**
+     * The SurfaceSyncGroup that represents the active VRI SurfaceSyncGroup. This is non null if
+     * anyone requested the SurfaceSyncGroup for this VRI to ensure that anyone trying to sync with
+     * this VRI are collected together. The SurfaceSyncGroup is cleared when the VRI draws since
+     * that is the stop point where all changes are have been applied. A new SurfaceSyncGroup is
+     * created after that point when something wants to sync VRI again.
+     */
+    private SurfaceSyncGroup mActiveSurfaceSyncGroup;
 
     private static final Object sSyncProgressLock = new Object();
     // The count needs to be static since it's used to enable or disable RT animations which is
@@ -1790,7 +1806,7 @@ public final class ViewRootImpl implements ViewParent,
         CompatibilityInfo.applyOverrideScaleIfNeeded(mergedConfiguration);
         final boolean forceNextWindowRelayout = args.argi1 != 0;
         final int displayId = args.argi3;
-        final boolean dragResizing = args.argi5 != 0;
+        final int resizeMode = args.argi5;
 
         final Rect frame = frames.frame;
         final Rect displayFrame = frames.displayFrame;
@@ -1806,14 +1822,16 @@ public final class ViewRootImpl implements ViewParent,
         final boolean attachedFrameChanged = LOCAL_LAYOUT
                 && !Objects.equals(mTmpFrames.attachedFrame, attachedFrame);
         final boolean displayChanged = mDisplay.getDisplayId() != displayId;
+        final boolean resizeModeChanged = mResizeMode != resizeMode;
         final boolean compatScaleChanged = mTmpFrames.compatScale != compatScale;
         if (msg == MSG_RESIZED && !frameChanged && !configChanged && !attachedFrameChanged
-                && !displayChanged && !forceNextWindowRelayout
+                && !displayChanged && !resizeModeChanged && !forceNextWindowRelayout
                 && !compatScaleChanged) {
             return;
         }
 
-        mPendingDragResizing = dragResizing;
+        mPendingDragResizing = resizeMode != RESIZE_MODE_INVALID;
+        mResizeMode = resizeMode;
         mTmpFrames.compatScale = compatScale;
         mInvCompatScale = 1f / compatScale;
 
@@ -3010,7 +3028,7 @@ public final class ViewRootImpl implements ViewParent,
                         frame.width() < desiredWindowWidth && frame.width() != mWidth)
                 || (lp.height == ViewGroup.LayoutParams.WRAP_CONTENT &&
                         frame.height() < desiredWindowHeight && frame.height() != mHeight));
-        windowShouldResize |= mDragResizing && mPendingDragResizing;
+        windowShouldResize |= mDragResizing && mResizeMode == RESIZE_MODE_FREEFORM;
 
         // If the activity was just relaunched, it might have unfrozen the task bounds (while
         // relaunching), so we need to force a call into window manager to pick up the latest
@@ -3257,7 +3275,7 @@ public final class ViewRootImpl implements ViewParent,
                                         && mWinFrame.height() == mPendingBackDropFrame.height();
                         // TODO: Need cutout?
                         startDragResizing(mPendingBackDropFrame, !backdropSizeMatchesFrame,
-                                mAttachInfo.mContentInsets, mAttachInfo.mStableInsets);
+                                mAttachInfo.mContentInsets, mAttachInfo.mStableInsets, mResizeMode);
                     } else {
                         // We shouldn't come here, but if we come we should end the resize.
                         endDragResizing();
@@ -3638,6 +3656,12 @@ public final class ViewRootImpl implements ViewParent,
         boolean cancelAndRedraw = cancelDueToPreDrawListener
                  || (cancelDraw && mDrewOnceForSync);
         if (!cancelAndRedraw) {
+            // A sync was already requested before the WMS requested sync. This means we need to
+            // sync the buffer, regardless if WMS wants to sync the buffer.
+            if (mActiveSurfaceSyncGroup != null) {
+                mSyncBuffer = true;
+            }
+
             createSyncIfNeeded();
             mDrewOnceForSync = true;
         }
@@ -3651,8 +3675,8 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingTransitions.clear();
             }
 
-            if (mTransactionReadyCallback != null) {
-                mTransactionReadyCallback.onTransactionReady(null);
+            if (mActiveSurfaceSyncGroup != null) {
+                mActiveSurfaceSyncGroup.onTransactionReady(null);
             }
         } else if (cancelAndRedraw) {
             mLastPerformTraversalsSkipDrawReason = cancelDueToPreDrawListener
@@ -3667,8 +3691,8 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 mPendingTransitions.clear();
             }
-            if (!performDraw() && mTransactionReadyCallback != null) {
-                mTransactionReadyCallback.onTransactionReady(null);
+            if (!performDraw() && mActiveSurfaceSyncGroup != null) {
+                mActiveSurfaceSyncGroup.onTransactionReady(null);
             }
         }
 
@@ -3682,39 +3706,40 @@ public final class ViewRootImpl implements ViewParent,
         if (!cancelAndRedraw) {
             mReportNextDraw = false;
             mLastReportNextDrawReason = null;
-            mTransactionReadyCallback = null;
+            mActiveSurfaceSyncGroup = null;
             mSyncBuffer = false;
-            if (isInLocalSync()) {
-                mSyncGroup.markSyncReady();
-                mSyncGroup = null;
-                mLocalSyncState = LOCAL_SYNC_NONE;
+            if (isInWMSRequestedSync()) {
+                mWmsRequestSyncGroup.onTransactionReady(null);
+                mWmsRequestSyncGroup = null;
+                mWmsRequestSyncGroupState = WMS_SYNC_NONE;
             }
         }
     }
 
     private void createSyncIfNeeded() {
-        // Started a sync already or there's nothing needing to sync
-        if (isInLocalSync() || !mReportNextDraw) {
+        // WMS requested sync already started or there's nothing needing to sync
+        if (isInWMSRequestedSync() || !mReportNextDraw) {
             return;
         }
 
         final int seqId = mSyncSeqId;
-        mLocalSyncState = LOCAL_SYNC_PENDING;
-        mSyncGroup = new SurfaceSyncGroup(transaction -> {
-            mLocalSyncState = LOCAL_SYNC_RETURNED;
+        mWmsRequestSyncGroupState = WMS_SYNC_PENDING;
+        mWmsRequestSyncGroup = new SurfaceSyncGroup(t -> {
+            mWmsRequestSyncGroupState = WMS_SYNC_RETURNED;
             // Callback will be invoked on executor thread so post to main thread.
             mHandler.postAtFrontOfQueue(() -> {
-                if (transaction != null) {
-                    mSurfaceChangedTransaction.merge(transaction);
+                if (t != null) {
+                    mSurfaceChangedTransaction.merge(t);
                 }
-                mLocalSyncState = LOCAL_SYNC_MERGED;
+                mWmsRequestSyncGroupState = WMS_SYNC_MERGED;
                 reportDrawFinished(seqId);
             });
         });
         if (DEBUG_BLAST) {
-            Log.d(mTag, "Setup new sync id=" + mSyncGroup);
+            Log.d(mTag, "Setup new sync id=" + mWmsRequestSyncGroup);
         }
-        mSyncGroup.addToSync(mSyncTarget);
+
+        mWmsRequestSyncGroup.addToSync(this);
         notifySurfaceSyncStarted();
     }
 
@@ -4365,19 +4390,11 @@ public final class ViewRootImpl implements ViewParent,
         return mAttachInfo.mThreadedRenderer != null && mAttachInfo.mThreadedRenderer.isEnabled();
     }
 
-    void addToSync(SurfaceSyncGroup.SyncTarget syncable) {
-        if (!isInLocalSync()) {
-            return;
-        }
-        mSyncGroup.addToSync(syncable);
-    }
-
     /**
-     * This VRI is currently in the middle of a sync request, but specifically one initiated from
-     * within VRI.
+     * This VRI is currently in the middle of a sync request that was initiated by WMS.
      */
-    public boolean isInLocalSync() {
-        return mSyncGroup != null;
+    public boolean isInWMSRequestedSync() {
+        return mWmsRequestSyncGroup != null;
     }
 
     private void addFrameCommitCallbackIfNeeded() {
@@ -4444,7 +4461,7 @@ public final class ViewRootImpl implements ViewParent,
             return false;
         }
 
-        final boolean fullRedrawNeeded = mFullRedrawNeeded || mTransactionReadyCallback != null;
+        final boolean fullRedrawNeeded = mFullRedrawNeeded || mActiveSurfaceSyncGroup != null;
         mFullRedrawNeeded = false;
 
         mIsDrawing = true;
@@ -4452,9 +4469,9 @@ public final class ViewRootImpl implements ViewParent,
 
         addFrameCommitCallbackIfNeeded();
 
-        boolean usingAsyncReport = isHardwareEnabled() && mTransactionReadyCallback != null;
+        boolean usingAsyncReport = isHardwareEnabled() && mActiveSurfaceSyncGroup != null;
         if (usingAsyncReport) {
-            registerCallbacksForSync(mSyncBuffer, mTransactionReadyCallback);
+            registerCallbacksForSync(mSyncBuffer, mActiveSurfaceSyncGroup);
         } else if (mHasPendingTransactions) {
             // These callbacks are only needed if there's no sync involved and there were calls to
             // applyTransactionOnDraw. These callbacks check if the draw failed for any reason and
@@ -4505,11 +4522,10 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             if (mSurfaceHolder != null && mSurface.isValid()) {
-                final SurfaceSyncGroup.TransactionReadyCallback transactionReadyCallback =
-                        mTransactionReadyCallback;
+                final SurfaceSyncGroup surfaceSyncGroup = mActiveSurfaceSyncGroup;
                 SurfaceCallbackHelper sch = new SurfaceCallbackHelper(() ->
-                        mHandler.post(() -> transactionReadyCallback.onTransactionReady(null)));
-                mTransactionReadyCallback = null;
+                        mHandler.post(() -> surfaceSyncGroup.onTransactionReady(null)));
+                mActiveSurfaceSyncGroup = null;
 
                 SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
 
@@ -4520,8 +4536,8 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
         }
-        if (mTransactionReadyCallback != null && !usingAsyncReport) {
-            mTransactionReadyCallback.onTransactionReady(null);
+        if (mActiveSurfaceSyncGroup != null && !usingAsyncReport) {
+            mActiveSurfaceSyncGroup.onTransactionReady(null);
         }
         if (mPerformContentCapture) {
             performContentCaptureInitialReport();
@@ -8611,8 +8627,8 @@ public final class ViewRootImpl implements ViewParent,
             writer.println(innerPrefix + "mLastPerformDrawFailedReason="
                 + mLastPerformDrawSkippedReason);
         }
-        if (mLocalSyncState != LOCAL_SYNC_NONE) {
-            writer.println(innerPrefix + "mLocalSyncState=" + mLocalSyncState);
+        if (mWmsRequestSyncGroupState != WMS_SYNC_NONE) {
+            writer.println(innerPrefix + "mWmsRequestSyncGroupState=" + mWmsRequestSyncGroupState);
         }
         writer.println(innerPrefix + "mLastReportedMergedConfiguration="
                 + mLastReportedMergedConfiguration);
@@ -8825,7 +8841,7 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void dispatchResized(ClientWindowFrames frames, boolean reportDraw,
             MergedConfiguration mergedConfiguration, InsetsState insetsState, boolean forceLayout,
-            boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, boolean dragResizing) {
+            boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, int resizeMode) {
         Message msg = mHandler.obtainMessage(reportDraw ? MSG_RESIZED_REPORT : MSG_RESIZED);
         SomeArgs args = SomeArgs.obtain();
         final boolean sameProcessCall = (Binder.getCallingPid() == android.os.Process.myPid());
@@ -8847,7 +8863,7 @@ public final class ViewRootImpl implements ViewParent,
         args.argi2 = alwaysConsumeSystemBars ? 1 : 0;
         args.argi3 = displayId;
         args.argi4 = syncSeqId;
-        args.argi5 = dragResizing ? 1 : 0;
+        args.argi5 = resizeMode;
 
         msg.obj = args;
         mHandler.sendMessage(msg);
@@ -10239,11 +10255,11 @@ public final class ViewRootImpl implements ViewParent,
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, InsetsState insetsState,
                 boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int syncSeqId,
-                boolean dragResizing) {
+                int resizeMode) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(frames, reportDraw, mergedConfiguration, insetsState,
-                        forceLayout, alwaysConsumeSystemBars, displayId, syncSeqId, dragResizing);
+                        forceLayout, alwaysConsumeSystemBars, displayId, syncSeqId, resizeMode);
             }
         }
 
@@ -10448,13 +10464,13 @@ public final class ViewRootImpl implements ViewParent,
      * Start a drag resizing which will inform all listeners that a window resize is taking place.
      */
     private void startDragResizing(Rect initialBounds, boolean fullscreen, Rect systemInsets,
-            Rect stableInsets) {
+            Rect stableInsets, int resizeMode) {
         if (!mDragResizing) {
             mDragResizing = true;
             if (mUseMTRenderer) {
                 for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
                     mWindowCallbacks.get(i).onWindowDragResizeStart(
-                            initialBounds, fullscreen, systemInsets, stableInsets);
+                            initialBounds, fullscreen, systemInsets, stableInsets, resizeMode);
                 }
             }
             mFullRedrawNeeded = true;
@@ -11200,7 +11216,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void registerCallbacksForSync(boolean syncBuffer,
-            final SurfaceSyncGroup.TransactionReadyCallback transactionReadyCallback) {
+            final SurfaceSyncGroup surfaceSyncGroup) {
         if (!isHardwareEnabled()) {
             return;
         }
@@ -11227,7 +11243,7 @@ public final class ViewRootImpl implements ViewParent,
                 // pendingDrawFinished.
                 if ((syncResult
                         & (SYNC_LOST_SURFACE_REWARD_IF_FOUND | SYNC_CONTEXT_IS_STOPPED)) != 0) {
-                    transactionReadyCallback.onTransactionReady(
+                    surfaceSyncGroup.onTransactionReady(
                             mBlastBufferQueue.gatherPendingTransactions(frame));
                     return null;
                 }
@@ -11238,7 +11254,7 @@ public final class ViewRootImpl implements ViewParent,
 
                 if (syncBuffer) {
                     mBlastBufferQueue.syncNextTransaction(
-                            transactionReadyCallback::onTransactionReady);
+                            surfaceSyncGroup::onTransactionReady);
                 }
 
                 return didProduceBuffer -> {
@@ -11258,7 +11274,7 @@ public final class ViewRootImpl implements ViewParent,
                         // since the frame didn't draw on this vsync. It's possible the frame will
                         // draw later, but it's better to not be sync than to block on a frame that
                         // may never come.
-                        transactionReadyCallback.onTransactionReady(
+                        surfaceSyncGroup.onTransactionReady(
                                 mBlastBufferQueue.gatherPendingTransactions(frame));
                         return;
                     }
@@ -11267,35 +11283,23 @@ public final class ViewRootImpl implements ViewParent,
                     // syncNextTransaction callback. Instead, just report back to the Syncer so it
                     // knows that this sync request is complete.
                     if (!syncBuffer) {
-                        transactionReadyCallback.onTransactionReady(null);
+                        surfaceSyncGroup.onTransactionReady(null);
                     }
                 };
             }
         });
     }
 
-    public final SurfaceSyncGroup.SyncTarget mSyncTarget = new SurfaceSyncGroup.SyncTarget() {
-        @Override
-        public void onAddedToSyncGroup(SurfaceSyncGroup parentSyncGroup,
-                SurfaceSyncGroup.TransactionReadyCallback transactionReadyCallback) {
-            updateSyncInProgressCount(parentSyncGroup);
-            if (!isInLocalSync()) {
-                // Always sync the buffer if the sync request did not come from VRI.
-                mSyncBuffer = true;
-            }
-
-            if (mTransactionReadyCallback != null) {
-                Log.d(mTag, "Already set sync for the next draw.");
-                mTransactionReadyCallback.onTransactionReady(null);
-            }
-            if (DEBUG_BLAST) {
-                Log.d(mTag, "Setting syncFrameCallback");
-            }
-            mTransactionReadyCallback = transactionReadyCallback;
+    @Override
+    public SurfaceSyncGroup getOrCreateSurfaceSyncGroup() {
+        if (mActiveSurfaceSyncGroup == null) {
+            mActiveSurfaceSyncGroup = new SurfaceSyncGroup();
+            updateSyncInProgressCount(mActiveSurfaceSyncGroup);
             if (!mIsInTraversal && !mTraversalScheduled) {
                 scheduleTraversals();
             }
         }
+        return mActiveSurfaceSyncGroup;
     };
 
     private final Executor mSimpleExecutor = Runnable::run;
@@ -11320,15 +11324,10 @@ public final class ViewRootImpl implements ViewParent,
         });
     }
 
-    @Override
-    public SurfaceSyncGroup.SyncTarget getSyncTarget() {
-        return mSyncTarget;
-    }
-
-    void mergeSync(SurfaceSyncGroup otherSyncGroup) {
-        if (!isInLocalSync()) {
+    void addToSync(SurfaceSyncGroup syncable) {
+        if (mActiveSurfaceSyncGroup == null) {
             return;
         }
-        mSyncGroup.merge(otherSyncGroup);
+        mActiveSurfaceSyncGroup.addToSync(syncable, false /* parentSyncGroupMerge */);
     }
 }

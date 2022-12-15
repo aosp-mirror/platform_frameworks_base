@@ -22,6 +22,7 @@ import androidx.annotation.AttrRes
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.temporarydisplay.TemporaryViewInfo
+import com.android.systemui.temporarydisplay.ViewPriority
 
 /**
  * A container for all the state needed to display a chipbar via [ChipbarCoordinator].
@@ -42,6 +43,7 @@ data class ChipbarInfo(
     override val wakeReason: String,
     override val timeoutMs: Int,
     override val id: String,
+    override val priority: ViewPriority,
 ) : TemporaryViewInfo() {
     companion object {
         @AttrRes const val DEFAULT_ICON_TINT_ATTR = android.R.attr.textColorPrimary

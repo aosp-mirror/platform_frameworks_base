@@ -16,6 +16,7 @@
 
 package com.android.server.input
 
+
 import android.content.Context
 import android.content.ContextWrapper
 import android.hardware.display.DisplayViewport
@@ -25,6 +26,7 @@ import android.platform.test.annotations.Presubmit
 import android.view.Display
 import android.view.PointerIcon
 import androidx.test.InstrumentationRegistry
+import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import org.junit.Assert.assertFalse
@@ -285,6 +287,28 @@ class InputManagerServiceTests {
 
         verify(native).setPointerIconType(eq(PointerIcon.TYPE_NULL))
         verify(native).setPointerAcceleration(eq(5f))
+    }
+
+    @Test
+    fun setDeviceTypeAssociation_setsDeviceTypeAssociation() {
+        val inputPort = "inputPort"
+        val type = "type"
+
+        localService.setTypeAssociation(inputPort, type)
+
+        assertThat(service.getDeviceTypeAssociations()).asList().containsExactly(inputPort, type)
+            .inOrder()
+    }
+
+    @Test
+    fun setAndUnsetDeviceTypeAssociation_deviceTypeAssociationIsMissing() {
+        val inputPort = "inputPort"
+        val type = "type"
+
+        localService.setTypeAssociation(inputPort, type)
+        localService.unsetTypeAssociation(inputPort)
+
+        assertTrue(service.getDeviceTypeAssociations().isEmpty())
     }
 
     private fun setVirtualMousePointerDisplayIdAndVerify(overrideDisplayId: Int) {

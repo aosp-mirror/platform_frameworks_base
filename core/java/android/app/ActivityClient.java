@@ -24,6 +24,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.util.Singleton;
@@ -367,6 +368,14 @@ public class ActivityClient {
     void toggleFreeformWindowingMode(IBinder token) {
         try {
             getActivityClientController().toggleFreeformWindowingMode(token);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    void requestMultiwindowFullscreen(IBinder token, int request, IRemoteCallback callback) {
+        try {
+            getActivityClientController().requestMultiwindowFullscreen(token, request, callback);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

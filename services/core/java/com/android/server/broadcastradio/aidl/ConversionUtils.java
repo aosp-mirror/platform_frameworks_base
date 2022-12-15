@@ -33,6 +33,8 @@ import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
+import android.hardware.radio.RadioTuner;
+import android.os.Build;
 import android.os.ParcelableException;
 import android.os.ServiceSpecificException;
 import android.util.ArrayMap;
@@ -62,6 +64,11 @@ final class ConversionUtils {
         throw new UnsupportedOperationException("ConversionUtils class is noninstantiable");
     }
 
+    static boolean isAtLeastU(int targetSdkVersion) {
+        // TODO(b/261770108): Use version code for U.
+        return targetSdkVersion >= Build.VERSION_CODES.CUR_DEVELOPMENT;
+    }
+
     static RuntimeException throwOnError(RuntimeException halException, String action) {
         if (!(halException instanceof ServiceSpecificException)) {
             return new ParcelableException(new RuntimeException(
@@ -86,6 +93,27 @@ final class ConversionUtils {
             default:
                 return new ParcelableException(new RuntimeException(
                         action + ": unknown error (" + result + ")"));
+        }
+    }
+
+    @RadioTuner.TunerResultType
+    static int halResultToTunerResult(int result) {
+        switch (result) {
+            case Result.OK:
+                return RadioTuner.TUNER_RESULT_OK;
+            case Result.INTERNAL_ERROR:
+                return RadioTuner.TUNER_RESULT_INTERNAL_ERROR;
+            case Result.INVALID_ARGUMENTS:
+                return RadioTuner.TUNER_RESULT_INVALID_ARGUMENTS;
+            case Result.INVALID_STATE:
+                return RadioTuner.TUNER_RESULT_INVALID_STATE;
+            case Result.NOT_SUPPORTED:
+                return RadioTuner.TUNER_RESULT_NOT_SUPPORTED;
+            case Result.TIMEOUT:
+                return RadioTuner.TUNER_RESULT_TIMEOUT;
+            case Result.UNKNOWN_ERROR:
+            default:
+                return RadioTuner.TUNER_RESULT_UNKNOWN_ERROR;
         }
     }
 
@@ -143,6 +171,7 @@ final class ConversionUtils {
             case ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE:
             case ProgramSelector.IDENTIFIER_TYPE_DAB_SCID:
             case ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY:
+            case ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT:
                 return ProgramSelector.PROGRAM_TYPE_DAB;
             case ProgramSelector.IDENTIFIER_TYPE_DRMO_SERVICE_ID:
             case ProgramSelector.IDENTIFIER_TYPE_DRMO_FREQUENCY:
@@ -469,6 +498,60 @@ final class ConversionUtils {
             }
         }
         return new ProgramList.Chunk(chunk.purge, chunk.complete, modified, removed);
+    }
+
+    private static boolean isNewIdentifierInU(ProgramSelector.Identifier id) {
+        return id.getType() == ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT;
+    }
+
+    static boolean programSelectorMeetsSdkVersionRequirement(ProgramSelector sel,
+            int targetSdkVersion) {
+        if (isAtLeastU(targetSdkVersion)) {
+            return true;
+        }
+        if (sel.getPrimaryId().getType() == ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT) {
+            return false;
+        }
+        ProgramSelector.Identifier[] secondaryIds = sel.getSecondaryIds();
+        for (int i = 0; i < secondaryIds.length; i++) {
+            if (isNewIdentifierInU(secondaryIds[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static boolean programInfoMeetsSdkVersionRequirement(RadioManager.ProgramInfo info,
+            int targetSdkVersion) {
+        if (isAtLeastU(targetSdkVersion)) {
+            return true;
+        }
+        if (!programSelectorMeetsSdkVersionRequirement(info.getSelector(), targetSdkVersion)) {
+            return false;
+        }
+        if (isNewIdentifierInU(info.getLogicallyTunedTo())
+                || isNewIdentifierInU(info.getPhysicallyTunedTo())) {
+            return false;
+        }
+        Iterator<ProgramSelector.Identifier> relatedContentIt = info.getRelatedContent().iterator();
+        while (relatedContentIt.hasNext()) {
+            if (isNewIdentifierInU(relatedContentIt.next())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static ProgramList.Chunk convertChunkToTargetSdkVersion(ProgramList.Chunk chunk,
+            int targetSdkVersion) {
+        if (isAtLeastU(targetSdkVersion)) {
+            return chunk;
+        }
+        Set<RadioManager.ProgramInfo> modified = chunk.getModified();
+        modified.removeIf(info -> !programInfoMeetsSdkVersionRequirement(info, targetSdkVersion));
+        Set<ProgramSelector.Identifier> removed = chunk.getRemoved();
+        removed.removeIf(id -> isNewIdentifierInU(id));
+        return new ProgramList.Chunk(chunk.isPurge(), chunk.isComplete(), modified, removed);
     }
 
     public static android.hardware.radio.Announcement announcementFromHalAnnouncement(

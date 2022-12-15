@@ -21,8 +21,8 @@ import android.util.ArrayMap
 typealias IndexedMap<K, V> = ArrayMap<K, V>
 
 inline fun <K, V> IndexedMap<K, V>.allIndexed(predicate: (Int, K, V) -> Boolean): Boolean {
-    for (index in 0 until size) {
-        if (!predicate(index, keyAt(index), valueAt(index))) {
+    forEachIndexed { index, key, value ->
+        if (!predicate(index, key, value)) {
             return false
         }
     }
@@ -30,8 +30,8 @@ inline fun <K, V> IndexedMap<K, V>.allIndexed(predicate: (Int, K, V) -> Boolean)
 }
 
 inline fun <K, V> IndexedMap<K, V>.anyIndexed(predicate: (Int, K, V) -> Boolean): Boolean {
-    for (index in 0 until size) {
-        if (predicate(index, keyAt(index), valueAt(index))) {
+    forEachIndexed { index, key, value ->
+        if (predicate(index, key, value)) {
             return true
         }
     }
@@ -46,8 +46,8 @@ inline fun <K, V> IndexedMap<K, V>.copy(copyValue: (V) -> V): IndexedMap<K, V> =
     }
 
 inline fun <K, V, R> IndexedMap<K, V>.firstNotNullOfOrNullIndexed(transform: (Int, K, V) -> R): R? {
-    for (index in 0 until size) {
-        transform(index, keyAt(index), valueAt(index))?.let { return it }
+    forEachIndexed { index, key, value ->
+        transform(index, key, value)?.let { return it }
     }
     return null
 }
@@ -61,6 +61,12 @@ inline fun <K, V> IndexedMap<K, V>.forEachIndexed(action: (Int, K, V) -> Unit) {
 inline fun <K, V> IndexedMap<K, V>.forEachKeyIndexed(action: (Int, K) -> Unit) {
     for (index in 0 until size) {
         action(index, keyAt(index))
+    }
+}
+
+inline fun <K, V> IndexedMap<K, V>.forEachReversedIndexed(action: (Int, K, V) -> Unit) {
+    for (index in lastIndex downTo 0) {
+        action(index, keyAt(index), valueAt(index))
     }
 }
 
@@ -90,6 +96,15 @@ inline operator fun <K, V> IndexedMap<K, V>.minusAssign(key: K) {
     remove(key)
 }
 
+inline fun <K, V> IndexedMap<K, V>.noneIndexed(predicate: (Int, K, V) -> Boolean): Boolean {
+    forEachIndexed { index, key, value ->
+        if (predicate(index, key, value)) {
+            return false
+        }
+    }
+    return true
+}
+
 @Suppress("NOTHING_TO_INLINE")
 inline fun <K, V> IndexedMap<K, V>.putWithDefault(key: K, value: V, defaultValue: V): V {
     val index = indexOfKey(key)
@@ -113,8 +128,8 @@ inline fun <K, V> IndexedMap<K, V>.putWithDefault(key: K, value: V, defaultValue
 
 inline fun <K, V> IndexedMap<K, V>.removeAllIndexed(predicate: (Int, K, V) -> Boolean): Boolean {
     var isChanged = false
-    for (index in lastIndex downTo 0) {
-        if (predicate(index, keyAt(index), valueAt(index))) {
+    forEachReversedIndexed { index, key, value ->
+        if (predicate(index, key, value)) {
             removeAt(index)
             isChanged = true
         }
@@ -124,8 +139,8 @@ inline fun <K, V> IndexedMap<K, V>.removeAllIndexed(predicate: (Int, K, V) -> Bo
 
 inline fun <K, V> IndexedMap<K, V>.retainAllIndexed(predicate: (Int, K, V) -> Boolean): Boolean {
     var isChanged = false
-    for (index in lastIndex downTo 0) {
-        if (!predicate(index, keyAt(index), valueAt(index))) {
+    forEachReversedIndexed { index, key, value ->
+        if (!predicate(index, key, value)) {
             removeAt(index)
             isChanged = true
         }

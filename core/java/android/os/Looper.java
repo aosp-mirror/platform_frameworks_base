@@ -177,12 +177,15 @@ public final class Looper {
         final long traceTag = me.mTraceTag;
         long slowDispatchThresholdMs = me.mSlowDispatchThresholdMs;
         long slowDeliveryThresholdMs = me.mSlowDeliveryThresholdMs;
-        if (thresholdOverride > 0) {
+
+        final boolean hasOverride = thresholdOverride >= 0;
+        if (hasOverride) {
             slowDispatchThresholdMs = thresholdOverride;
             slowDeliveryThresholdMs = thresholdOverride;
         }
-        final boolean logSlowDelivery = (slowDeliveryThresholdMs > 0) && (msg.when > 0);
-        final boolean logSlowDispatch = (slowDispatchThresholdMs > 0);
+        final boolean logSlowDelivery = (slowDeliveryThresholdMs > 0 || hasOverride)
+                && (msg.when > 0);
+        final boolean logSlowDispatch = (slowDispatchThresholdMs > 0 || hasOverride);
 
         final boolean needStartTime = logSlowDelivery || logSlowDispatch;
         final boolean needEndTime = logSlowDispatch;
@@ -283,7 +286,7 @@ public final class Looper {
                 SystemProperties.getInt("log.looper."
                         + Process.myUid() + "."
                         + Thread.currentThread().getName()
-                        + ".slow", 0);
+                        + ".slow", -1);
 
         me.mSlowDeliveryDetected = false;
 

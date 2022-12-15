@@ -186,6 +186,8 @@ interface NativeInputManagerService {
 
     void changeUniqueIdAssociation();
 
+    void changeTypeAssociation();
+
     void notifyPointerDisplayIdChanged();
 
     void setDisplayEligibilityForPointerCapture(int displayId, boolean enabled);
@@ -398,6 +400,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void changeUniqueIdAssociation();
+
+        @Override
+        public native void changeTypeAssociation();
 
         @Override
         public native void notifyPointerDisplayIdChanged();

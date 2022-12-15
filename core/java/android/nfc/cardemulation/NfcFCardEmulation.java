@@ -17,8 +17,10 @@
 package android.nfc.cardemulation;
 
 import android.app.Activity;
+import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.nfc.INfcFCardEmulation;
 import android.nfc.NfcAdapter;
@@ -68,13 +70,18 @@ public final class NfcFCardEmulation {
             throw new UnsupportedOperationException();
         }
         if (!sIsInitialized) {
-            PackageManager pm = context.getPackageManager();
+            IPackageManager pm = ActivityThread.getPackageManager();
             if (pm == null) {
                 Log.e(TAG, "Cannot get PackageManager");
                 throw new UnsupportedOperationException();
             }
-            if (!pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION_NFCF)) {
-                Log.e(TAG, "This device does not support NFC-F card emulation");
+            try {
+                if (!pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION_NFCF, 0)) {
+                    Log.e(TAG, "This device does not support NFC-F card emulation");
+                    throw new UnsupportedOperationException();
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "PackageManager query failed.");
                 throw new UnsupportedOperationException();
             }
             sIsInitialized = true;

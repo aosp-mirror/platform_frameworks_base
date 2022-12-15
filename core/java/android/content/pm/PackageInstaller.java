@@ -30,6 +30,7 @@ import static android.content.pm.Checksum.TYPE_WHOLE_SHA512;
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.DurationMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -247,6 +248,24 @@ public class PackageInstaller {
      * @see Intent#getStringExtra(String)
      */
     public static final String EXTRA_STORAGE_PATH = "android.content.pm.extra.STORAGE_PATH";
+
+    /**
+     * The {@link InstallConstraints} object.
+     *
+     * @see Intent#getParcelableExtra(String, Class)
+     * @see #waitForInstallConstraints(List, InstallConstraints, IntentSender, long)
+     */
+    public static final String EXTRA_INSTALL_CONSTRAINTS =
+            "android.content.pm.extra.INSTALL_CONSTRAINTS";
+
+    /**
+     * The {@link InstallConstraintsResult} object.
+     *
+     * @see Intent#getParcelableExtra(String, Class)
+     * @see #waitForInstallConstraints(List, InstallConstraints, IntentSender, long)
+     */
+    public static final String EXTRA_INSTALL_CONSTRAINTS_RESULT =
+            "android.content.pm.extra.INSTALL_CONSTRAINTS_RESULT";
 
     /** {@hide} */
     @Deprecated
@@ -879,6 +898,32 @@ public class PackageInstaller {
             });
             mInstaller.checkInstallConstraints(
                     mInstallerPackageName, packageNames, constraints, remoteCallback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Similar to {@link #checkInstallConstraints(List, InstallConstraints, Executor, Consumer)},
+     * but the callback is invoked only when the constraints are satisfied or after timeout.
+     *
+     * @param callback Called when the constraints are satisfied or after timeout.
+     *                 Intents sent to this callback contain:
+     *                 {@link Intent#EXTRA_PACKAGES} for the input package names,
+     *                 {@link #EXTRA_INSTALL_CONSTRAINTS} for the input constraints,
+     *                 {@link #EXTRA_INSTALL_CONSTRAINTS_RESULT} for the result.
+     * @param timeoutMillis The maximum time to wait, in milliseconds until the constraints are
+     *                      satisfied. Valid range is from 0 to one week. {@code 0} means the
+     *                      callback will be invoked immediately no matter constraints are
+     *                      satisfied or not.
+     */
+    public void waitForInstallConstraints(@NonNull List<String> packageNames,
+            @NonNull InstallConstraints constraints,
+            @NonNull IntentSender callback,
+            @DurationMillisLong long timeoutMillis) {
+        try {
+            mInstaller.waitForInstallConstraints(
+                    mInstallerPackageName, packageNames, constraints, callback, timeoutMillis);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3807,7 +3852,7 @@ public class PackageInstaller {
      * Note the constraints are applied transitively. If app Foo is used by app Bar (via shared
      * library or bounded service), the constraints will also be applied to Bar.
      */
-    @DataClass(genParcelable = true, genHiddenConstructor = true)
+    @DataClass(genParcelable = true, genHiddenConstructor = true, genEqualsHashCode=true)
     public static final class InstallConstraints implements Parcelable {
         /**
          * Preset constraints suitable for gentle update.
@@ -3968,6 +4013,41 @@ public class PackageInstaller {
 
         @Override
         @DataClass.Generated.Member
+        public boolean equals(@Nullable Object o) {
+            // You can override field equality logic by defining either of the methods like:
+            // boolean fieldNameEquals(InstallConstraints other) { ... }
+            // boolean fieldNameEquals(FieldType otherValue) { ... }
+
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            @SuppressWarnings("unchecked")
+            InstallConstraints that = (InstallConstraints) o;
+            //noinspection PointlessBooleanExpression
+            return true
+                    && mRequireDeviceIdle == that.mRequireDeviceIdle
+                    && mRequireAppNotForeground == that.mRequireAppNotForeground
+                    && mRequireAppNotInteracting == that.mRequireAppNotInteracting
+                    && mRequireAppNotTopVisible == that.mRequireAppNotTopVisible
+                    && mRequireNotInCall == that.mRequireNotInCall;
+        }
+
+        @Override
+        @DataClass.Generated.Member
+        public int hashCode() {
+            // You can override field hashCode logic by defining methods like:
+            // int fieldNameHashCode() { ... }
+
+            int _hash = 1;
+            _hash = 31 * _hash + Boolean.hashCode(mRequireDeviceIdle);
+            _hash = 31 * _hash + Boolean.hashCode(mRequireAppNotForeground);
+            _hash = 31 * _hash + Boolean.hashCode(mRequireAppNotInteracting);
+            _hash = 31 * _hash + Boolean.hashCode(mRequireAppNotTopVisible);
+            _hash = 31 * _hash + Boolean.hashCode(mRequireNotInCall);
+            return _hash;
+        }
+
+        @Override
+        @DataClass.Generated.Member
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             // You can override field parcelling by defining methods like:
             // void parcelFieldName(Parcel dest, int flags) { ... }
@@ -4023,10 +4103,10 @@ public class PackageInstaller {
         };
 
         @DataClass.Generated(
-                time = 1668650523752L,
+                time = 1670207178734L,
                 codegenVersion = "1.0.23",
                 sourceFile = "frameworks/base/core/java/android/content/pm/PackageInstaller.java",
-                inputSignatures = "public static final @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints GENTLE_UPDATE\nprivate final  boolean mRequireDeviceIdle\nprivate final  boolean mRequireAppNotForeground\nprivate final  boolean mRequireAppNotInteracting\nprivate final  boolean mRequireAppNotTopVisible\nprivate final  boolean mRequireNotInCall\nclass InstallConstraints extends java.lang.Object implements [android.os.Parcelable]\nprivate  boolean mRequireDeviceIdle\nprivate  boolean mRequireAppNotForeground\nprivate  boolean mRequireAppNotInteracting\nprivate  boolean mRequireAppNotTopVisible\nprivate  boolean mRequireNotInCall\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder requireDeviceIdle()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotForeground()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotInteracting()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotTopVisible()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder requireNotInCall()\npublic @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints build()\nclass Builder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genParcelable=true, genHiddenConstructor=true)")
+                inputSignatures = "public static final @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints GENTLE_UPDATE\nprivate final  boolean mRequireDeviceIdle\nprivate final  boolean mRequireAppNotForeground\nprivate final  boolean mRequireAppNotInteracting\nprivate final  boolean mRequireAppNotTopVisible\nprivate final  boolean mRequireNotInCall\nclass InstallConstraints extends java.lang.Object implements [android.os.Parcelable]\nprivate  boolean mRequireDeviceIdle\nprivate  boolean mRequireAppNotForeground\nprivate  boolean mRequireAppNotInteracting\nprivate  boolean mRequireAppNotTopVisible\nprivate  boolean mRequireNotInCall\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder requireDeviceIdle()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotForeground()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotInteracting()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotTopVisible()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder requireNotInCall()\npublic @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints build()\nclass Builder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genParcelable=true, genHiddenConstructor=true, genEqualsHashCode=true)")
         @Deprecated
         private void __metadata() {}
 

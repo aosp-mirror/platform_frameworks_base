@@ -32,6 +32,7 @@ import android.hardware.radio.ICloseHandle;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
+import android.os.Build;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,6 +50,7 @@ public final class IRadioServiceHidlImplTest {
 
     private static final int HAL1_MODULE_ID = 0;
     private static final int[] ENABLE_TYPES = new int[]{Announcement.TYPE_TRAFFIC};
+    private static final int TARGET_SDK_VERSION = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
     private IRadioServiceHidlImpl mHidlImpl;
 
@@ -103,7 +105,7 @@ public final class IRadioServiceHidlImplTest {
     @Test
     public void openTuner_withHal1ModuleId_forHidlImpl() throws Exception {
         ITuner tuner = mHidlImpl.openTuner(HAL1_MODULE_ID, mBandConfigMock,
-                /* withAudio= */ true, mTunerCallbackMock);
+                /* withAudio= */ true, mTunerCallbackMock, TARGET_SDK_VERSION);
 
         assertWithMessage("Tuner opened in HAL 1")
                 .that(tuner).isEqualTo(mHal1TunerMock);
@@ -112,7 +114,7 @@ public final class IRadioServiceHidlImplTest {
     @Test
     public void openTuner_withHal2ModuleId_forHidlImpl() throws Exception {
         ITuner tuner = mHidlImpl.openTuner(HAL1_MODULE_ID + 1, mBandConfigMock,
-                /* withAudio= */ true, mTunerCallbackMock);
+                /* withAudio= */ true, mTunerCallbackMock, TARGET_SDK_VERSION);
 
         assertWithMessage("Tuner opened in HAL 2")
                 .that(tuner).isEqualTo(mHal2TunerMock);

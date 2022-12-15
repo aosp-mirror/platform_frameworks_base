@@ -276,9 +276,12 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(imeWindow.canBeImeTarget());
 
         // Simulate the window is in split screen root task.
+        final DockedTaskDividerController controller =
+                mDisplayContent.getDockedDividerController();
         final Task rootTask = createTask(mDisplayContent,
                 WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         spyOn(appWindow);
+        spyOn(controller);
         spyOn(rootTask);
         rootTask.setFocusable(false);
         doReturn(rootTask).when(appWindow).getRootTask();
@@ -772,7 +775,7 @@ public class WindowStateTests extends WindowTestsBase {
                     anyBoolean() /* reportDraw */, any() /* mergedConfig */,
                     any() /* insetsState */, anyBoolean() /* forceLayout */,
                     anyBoolean() /* alwaysConsumeSystemBars */, anyInt() /* displayId */,
-                    anyInt() /* seqId */, anyBoolean() /* dragResizing */);
+                    anyInt() /* seqId */, anyInt() /* resizeMode */);
         } catch (RemoteException ignored) {
         }
         win.reportResized();

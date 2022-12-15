@@ -24,6 +24,10 @@ import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.RoundRectShape
+import com.android.systemui.R
 import com.android.systemui.util.boundsOnScreen
 import com.android.wm.shell.TaskView
 import java.util.concurrent.Executor
@@ -64,6 +68,16 @@ class PanelTaskViewController(
                 options.taskAlwaysOnTop = true
 
                 taskView.post {
+                    val roundedCorner =
+                        activityContext.resources.getDimensionPixelSize(
+                            R.dimen.notification_corner_radius
+                        )
+                    val radii = FloatArray(8) { roundedCorner.toFloat() }
+                    taskView.background =
+                        ShapeDrawable(RoundRectShape(radii, null, null)).apply {
+                            setTint(Color.TRANSPARENT)
+                        }
+                    taskView.clipToOutline = true
                     taskView.startActivity(
                         pendingIntent,
                         fillInIntent,
