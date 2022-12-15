@@ -17,4 +17,5 @@
 <resources>
     <!-- Margin above the ambient indication container -->
     <dimen name="ambient_indication_container_margin_top">15dp</dimen>
+    <dimen name="volume_row_slider_height">177dp</dimen>
 </resources>

@@ -20,20 +20,79 @@ import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel
 
 /** A logger for temporary view changes -- see [TemporaryViewDisplayController]. */
-open class TemporaryViewLogger(
+open class TemporaryViewLogger<T : TemporaryViewInfo>(
     internal val buffer: LogBuffer,
     internal val tag: String,
 ) {
-    /** Logs that we added the view with the given [id] in a window titled [windowTitle]. */
-    fun logViewAddition(id: String, windowTitle: String) {
+    fun logViewExpiration(info: T) {
         buffer.log(
             tag,
             LogLevel.DEBUG,
             {
-                str1 = windowTitle
-                str2 = id
+                str1 = info.id
+                str2 = info.windowTitle
+                str3 = info.priority.name
             },
-            { "View added. window=$str1 id=$str2" }
+            { "View timeout has already expired; removing. id=$str1 window=$str2 priority=$str3" }
+        )
+    }
+
+    fun logViewUpdate(info: T) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                str1 = info.id
+                str2 = info.windowTitle
+                str3 = info.priority.name
+            },
+            { "Existing view updated with new data. id=$str1 window=$str2 priority=$str3" }
+        )
+    }
+
+    fun logViewAdditionDelayed(info: T) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                str1 = info.id
+                str2 = info.windowTitle
+                str3 = info.priority.name
+            },
+            {
+                "New view can't be displayed because higher priority view is currently " +
+                    "displayed. New view id=$str1 window=$str2 priority=$str3"
+            }
+        )
+    }
+
+    /** Logs that we added the view with the given information. */
+    fun logViewAddition(info: T) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                str1 = info.id
+                str2 = info.windowTitle
+                str3 = info.priority.name
+            },
+            { "View added. id=$str1 window=$str2 priority=$str3" }
+        )
+    }
+
+    fun logViewHidden(info: T) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                str1 = info.id
+                str2 = info.windowTitle
+                str3 = info.priority.name
+            },
+            {
+                "View hidden in favor of newer view. " +
+                    "Hidden view id=$str1 window=$str2 priority=$str3"
+            }
         )
     }
 

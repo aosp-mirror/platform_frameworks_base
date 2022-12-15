@@ -12,21 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.android.systemui.keyguard.shared.quickaffordance
+package com.android.systemui.shared.quickaffordance.shared.model
 
-import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
-
-/** Enumerates all possible positions for quick affordances that can appear on the lock-screen. */
-enum class KeyguardQuickAffordancePosition {
-    BOTTOM_START,
-    BOTTOM_END;
-
-    fun toSlotId(): String {
-        return when (this) {
-            BOTTOM_START -> KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
-            BOTTOM_END -> KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END
-        }
-    }
+object KeyguardQuickAffordancePreviewConstants {
+    const val MESSAGE_ID_SLOT_SELECTED = 1337
+    const val KEY_SLOT_ID = "slot_id"
+    const val KEY_INITIALLY_SELECTED_SLOT_ID = "initially_selected_slot_id"
 }

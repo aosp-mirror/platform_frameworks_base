@@ -39,6 +39,7 @@ import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -105,6 +106,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
                 viewUtil,
                 vibratorHelper,
                 fakeWakeLockBuilder,
+                fakeClock,
             )
         underTest.start()
     }
@@ -408,6 +410,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
             wakeReason = WAKE_REASON,
             timeoutMs = TIMEOUT,
             id = DEVICE_ID,
+            priority = ViewPriority.NORMAL,
         )
     }
 

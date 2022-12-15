@@ -46,6 +46,7 @@ import kotlinx.coroutines.launch
  * view-model to be reused for multiple view/view-binder bindings.
  */
 @OptIn(InternalCoroutinesApi::class)
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 object WifiViewBinder {
 
     /**
@@ -59,6 +60,12 @@ object WifiViewBinder {
 
         /** Notifies that the visibility state has changed. */
         fun onVisibilityStateChanged(@StatusBarIconView.VisibleState state: Int)
+
+        /** Notifies that the icon tint has been updated. */
+        fun onIconTintChanged(newTint: Int)
+
+        /** Notifies that the decor tint has been updated (used only for the dot). */
+        fun onDecorTintChanged(newTint: Int)
     }
 
     /** Binds the view to the view-model, continuing to update the former based on the latter. */
@@ -82,6 +89,9 @@ object WifiViewBinder {
         @StatusBarIconView.VisibleState
         val visibilityState: MutableStateFlow<Int> = MutableStateFlow(STATE_HIDDEN)
 
+        val iconTint: MutableStateFlow<Int> = MutableStateFlow(viewModel.defaultColor)
+        val decorTint: MutableStateFlow<Int> = MutableStateFlow(viewModel.defaultColor)
+
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
@@ -101,7 +111,7 @@ object WifiViewBinder {
                 }
 
                 launch {
-                    viewModel.tint.collect { tint ->
+                    iconTint.collect { tint ->
                         val tintList = ColorStateList.valueOf(tint)
                         iconView.imageTintList = tintList
                         activityInView.imageTintList = tintList
@@ -109,6 +119,8 @@ object WifiViewBinder {
                         dotView.setDecorColor(tint)
                     }
                 }
+
+                launch { decorTint.collect { tint -> dotView.setDecorColor(tint) } }
 
                 launch {
                     viewModel.isActivityInViewVisible.distinctUntilChanged().collect { visible ->
@@ -143,6 +155,20 @@ object WifiViewBinder {
 
             override fun onVisibilityStateChanged(@StatusBarIconView.VisibleState state: Int) {
                 visibilityState.value = state
+            }
+
+            override fun onIconTintChanged(newTint: Int) {
+                if (viewModel.useDebugColoring) {
+                    return
+                }
+                iconTint.value = newTint
+            }
+
+            override fun onDecorTintChanged(newTint: Int) {
+                if (viewModel.useDebugColoring) {
+                    return
+                }
+                decorTint.value = newTint
             }
         }
     }

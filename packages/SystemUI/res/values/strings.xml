@@ -2688,9 +2688,6 @@
     <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, media app is unknown -->
     <string name="bt_le_audio_broadcast_dialog_unknown_name">Unknown</string>
 
-    <!-- Date format for the Dream Date Complication [CHAR LIMIT=NONE] -->
-    <string name="dream_date_complication_date_format">EEE, MMM d</string>
-
     <!-- Time format for the Dream Time Complication for 12-hour time format [CHAR LIMIT=NONE] -->
     <string name="dream_time_complication_12_hr_time_format">h:mm</string>
 
@@ -2742,6 +2739,12 @@
     shortcut button on the lock screen. [CHAR LIMIT=NONE].
     -->
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2">&#8226; At least one device is available</string>
+
+    <!--
+    Error message shown when a button should be pressed and held to activate it, usually shown when
+    the user attempted to tap the button or held it for too short a time. [CHAR LIMIT=32].
+    -->
+    <string name="keyguard_affordance_press_too_short">Press and hold to activate</string>
 
     <!-- Text for education page of cancel button to hide the page. [CHAR_LIMIT=NONE] -->
     <string name="rear_display_bottom_sheet_cancel">Cancel</string>

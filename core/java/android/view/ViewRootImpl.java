@@ -3799,44 +3799,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (mAdded) {
-            profileRendering(hasWindowFocus);
-            if (hasWindowFocus) {
-                if (mAttachInfo.mThreadedRenderer != null && mSurface.isValid()) {
-                    mFullRedrawNeeded = true;
-                    try {
-                        final Rect surfaceInsets = mWindowAttributes.surfaceInsets;
-                        mAttachInfo.mThreadedRenderer.initializeIfNeeded(
-                                mWidth, mHeight, mAttachInfo, mSurface, surfaceInsets);
-                    } catch (OutOfResourcesException e) {
-                        Log.e(mTag, "OutOfResourcesException locking surface", e);
-                        try {
-                            if (!mWindowSession.outOfMemory(mWindow)) {
-                                Slog.w(mTag, "No processes killed for memory;"
-                                        + " killing self");
-                                Process.killProcess(Process.myPid());
-                            }
-                        } catch (RemoteException ex) {
-                        }
-                        // Retry in a bit.
-                        mHandler.sendMessageDelayed(mHandler.obtainMessage(
-                                MSG_WINDOW_FOCUS_CHANGED), 500);
-                        return;
-                    }
-                }
-            }
-
-            mAttachInfo.mHasWindowFocus = hasWindowFocus;
-            mImeFocusController.updateImeFocusable(mWindowAttributes, true /* force */);
-            mImeFocusController.onPreWindowFocus(hasWindowFocus, mWindowAttributes);
-
-            if (mView != null) {
-                mAttachInfo.mKeyDispatchState.reset();
-                mView.dispatchWindowFocusChanged(hasWindowFocus);
-                mAttachInfo.mTreeObserver.dispatchOnWindowFocusChange(hasWindowFocus);
-                if (mAttachInfo.mTooltipHost != null) {
-                    mAttachInfo.mTooltipHost.hideTooltip();
-                }
-            }
+            dispatchFocusEvent(hasWindowFocus);
 
             // Note: must be done after the focus change callbacks,
             // so all of the view state is set up correctly.
@@ -3869,6 +3832,45 @@ public final class ViewRootImpl implements ViewParent,
         // text changes, but these should be flushed independently.
         if (hasWindowFocus) {
             handleContentCaptureFlush();
+        }
+    }
+
+    private void dispatchFocusEvent(boolean hasWindowFocus) {
+        profileRendering(hasWindowFocus);
+        if (hasWindowFocus && mAttachInfo.mThreadedRenderer != null && mSurface.isValid()) {
+            mFullRedrawNeeded = true;
+            try {
+                final Rect surfaceInsets = mWindowAttributes.surfaceInsets;
+                mAttachInfo.mThreadedRenderer.initializeIfNeeded(
+                        mWidth, mHeight, mAttachInfo, mSurface, surfaceInsets);
+            } catch (OutOfResourcesException e) {
+                Log.e(mTag, "OutOfResourcesException locking surface", e);
+                try {
+                    if (!mWindowSession.outOfMemory(mWindow)) {
+                        Slog.w(mTag, "No processes killed for memory;"
+                                + " killing self");
+                        Process.killProcess(Process.myPid());
+                    }
+                } catch (RemoteException ex) {
+                }
+                // Retry in a bit.
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(
+                        MSG_WINDOW_FOCUS_CHANGED), 500);
+                return;
+            }
+        }
+
+        mAttachInfo.mHasWindowFocus = hasWindowFocus;
+        mImeFocusController.updateImeFocusable(mWindowAttributes, true /* force */);
+        mImeFocusController.onPreWindowFocus(hasWindowFocus, mWindowAttributes);
+
+        if (mView != null) {
+            mAttachInfo.mKeyDispatchState.reset();
+            mView.dispatchWindowFocusChanged(hasWindowFocus);
+            mAttachInfo.mTreeObserver.dispatchOnWindowFocusChange(hasWindowFocus);
+            if (mAttachInfo.mTooltipHost != null) {
+                mAttachInfo.mTooltipHost.hideTooltip();
+            }
         }
     }
 
