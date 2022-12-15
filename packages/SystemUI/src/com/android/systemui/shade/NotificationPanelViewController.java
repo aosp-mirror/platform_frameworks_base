@@ -1328,7 +1328,9 @@ public final class NotificationPanelViewController implements Dumpable {
         mKeyguardBottomArea.init(
                 mKeyguardBottomAreaViewModel,
                 mFalsingManager,
-                mLockIconViewController
+                mLockIconViewController,
+                stringResourceId ->
+                        mKeyguardIndicationController.showTransientIndication(stringResourceId)
         );
     }
 
