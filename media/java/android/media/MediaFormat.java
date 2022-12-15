@@ -174,11 +174,20 @@ public final class MediaFormat {
     public static final String MIMETYPE_AUDIO_MPEGH_MHA1 = "audio/mha1";
     /** MIME type for MPEG-H Audio single stream, encapsulated in MHAS */
     public static final String MIMETYPE_AUDIO_MPEGH_MHM1 = "audio/mhm1";
-    /** MIME type for DTS (up to 5.1 channels) audio stream. */
+    /** MIME type for DTS Digital Surround (up to 5.1 channels) audio stream, aka DTS-CA. */
     public static final String MIMETYPE_AUDIO_DTS = "audio/vnd.dts";
-    /** MIME type for DTS HD (up to 7.1 channels) audio stream. */
+    /**
+     * MIME type for DTS HD (up to 7.1 channels) audio stream.
+     * With codec profile DTS_HDProfileHRA represents DTS HD High Resolution Audio.
+     * With codec profile DTS_HDProfileMA represents DTS HD Master Audio.
+     * With codec profile DTS_HDProfileLBR represents DTS Express.
+     */
     public static final String MIMETYPE_AUDIO_DTS_HD = "audio/vnd.dts.hd";
-    /** MIME type for DTS UHD (object-based) audio stream. */
+    /**
+     * MIME type for DTS UHD (object-based) audio stream, aka DTS:X.
+     * With codec profile DTS_UHDProfileP1 represents DTS-UHD P1.
+     * With codec profile DTS_UHDProfileP2 represents DTS-UHD P2.
+     */
     public static final String MIMETYPE_AUDIO_DTS_UHD = "audio/vnd.dts.uhd";
     /** MIME type for Dynamic Resolution Adaptation (DRA) audio stream. */
     public static final String MIMETYPE_AUDIO_DRA = "audio/vnd.dra";
