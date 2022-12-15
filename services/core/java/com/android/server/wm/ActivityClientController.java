@@ -67,9 +67,11 @@ import android.app.ICompatCameraControlCallback;
 import android.app.IRequestFinishCallback;
 import android.app.PictureInPictureParams;
 import android.app.PictureInPictureUiState;
+import android.app.compat.CompatChanges;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.EnterPipRequestedItem;
 import android.app.servertransaction.PipStateTransactionItem;
+import android.compat.annotation.ChangeId;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -121,6 +123,19 @@ class ActivityClientController extends IActivityClientController.Stub {
 
     /** Wrapper around VoiceInteractionServiceManager. */
     private AssistUtils mAssistUtils;
+
+    /**
+     * Grants access to the launching app's identity if the app opted-in to sharing its identity
+     * by launching this activity with an instance of {@link android.app.ActivityOptions} on which
+     * {@link android.app.ActivityOptions#setShareIdentityEnabled(boolean)} was invoked with a
+     * value of {@code true}, or if the launched activity's uid is the same as the launching
+     * app's. When this change is enabled and one of these requirements is met, the activity
+     * can access the launching app's uid and package name with {@link
+     * android.app.Activity#getLaunchedFromUid()} and {@link
+     * android.app.Activity#getLaunchedFromPackage()}, respectively.
+     */
+    @ChangeId
+    public static final long ACCESS_SHARED_IDENTITY = 259743961L;
 
     ActivityClientController(ActivityTaskManagerService service) {
         mService = service;
@@ -691,7 +706,7 @@ class ActivityClientController extends IActivityClientController.Stub {
         final boolean isInternalCaller = isInternalCallerGetLaunchedFrom(uid);
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            if (r != null && (isInternalCaller || r.mShareIdentity || r.launchedFromUid == uid)) {
+            if (r != null && (isInternalCaller || canGetLaunchedFromLocked(uid, r))) {
                 return r.launchedFromUid;
             }
         }
@@ -704,7 +719,7 @@ class ActivityClientController extends IActivityClientController.Stub {
         final boolean isInternalCaller = isInternalCallerGetLaunchedFrom(uid);
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            if (r != null && (isInternalCaller || r.mShareIdentity || r.launchedFromUid == uid)) {
+            if (r != null && (isInternalCaller || canGetLaunchedFromLocked(uid, r))) {
                 return r.launchedFromPackage;
             }
         }
@@ -727,6 +742,18 @@ class ActivityClientController extends IActivityClientController.Stub {
         final String[] installerNames = pm.getKnownPackageNames(
                 KnownPackages.PACKAGE_INSTALLER, UserHandle.getUserId(uid));
         return installerNames.length > 0 && callingPkg.getPackageName().equals(installerNames[0]);
+    }
+
+    /**
+     * Returns whether the specified {@code uid} can access the launching app's identity by
+     * verifying whether the provided {@code ActivityRecord r} has opted in to sharing its
+     * identity or if the uid of the activity matches that of the launching app.
+     */
+    private static boolean canGetLaunchedFromLocked(int uid, ActivityRecord r) {
+        if (CompatChanges.isChangeEnabled(ACCESS_SHARED_IDENTITY, uid)) {
+            return r.mShareIdentity || r.launchedFromUid == uid;
+        }
+        return false;
     }
 
     @Override
