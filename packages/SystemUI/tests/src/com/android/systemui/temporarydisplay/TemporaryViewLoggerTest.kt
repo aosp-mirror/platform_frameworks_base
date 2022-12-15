@@ -32,7 +32,7 @@ import org.mockito.Mockito
 @SmallTest
 class TemporaryViewLoggerTest : SysuiTestCase() {
     private lateinit var buffer: LogBuffer
-    private lateinit var logger: TemporaryViewLogger
+    private lateinit var logger: TemporaryViewLogger<TemporaryViewInfo>
 
     @Before
     fun setUp() {
@@ -44,13 +44,22 @@ class TemporaryViewLoggerTest : SysuiTestCase() {
 
     @Test
     fun logViewAddition_bufferHasLog() {
-        logger.logViewAddition("test id", "Test Window Title")
+        val info =
+            object : TemporaryViewInfo() {
+                override val id: String = "test id"
+                override val priority: ViewPriority = ViewPriority.CRITICAL
+                override val windowTitle: String = "Test Window Title"
+                override val wakeReason: String = "wake reason"
+            }
+
+        logger.logViewAddition(info)
 
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
         val actualString = stringWriter.toString()
 
         assertThat(actualString).contains(TAG)
+        assertThat(actualString).contains("test id")
         assertThat(actualString).contains("Test Window Title")
     }
 

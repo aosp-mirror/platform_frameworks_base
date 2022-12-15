@@ -70,7 +70,8 @@ class ControlsActivity @Inject constructor(
             ControlsAnimations.observerForAnimations(
                 requireViewById<ViewGroup>(R.id.control_detail_root),
                 window,
-                intent
+                intent,
+                !featureFlags.isEnabled(Flags.USE_APP_PANELS)
             )
         )
 

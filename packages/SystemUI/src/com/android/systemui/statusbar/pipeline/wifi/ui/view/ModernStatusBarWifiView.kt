@@ -22,6 +22,7 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.view.LayoutInflater
 import com.android.systemui.R
+import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.statusbar.BaseStatusBarFrameLayout
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
@@ -51,18 +52,20 @@ class ModernStatusBarWifiView(
             binding.onVisibilityStateChanged(value)
         }
 
-    override fun onDarkChanged(areas: ArrayList<Rect>?, darkIntensity: Float, tint: Int) {
-        // TODO(b/238425913)
-    }
-
     override fun getSlot() = slot
 
+    override fun onDarkChanged(areas: ArrayList<Rect>?, darkIntensity: Float, tint: Int) {
+        val newTint = DarkIconDispatcher.getTint(areas, this, tint)
+        binding.onIconTintChanged(newTint)
+        binding.onDecorTintChanged(newTint)
+    }
+
     override fun setStaticDrawableColor(color: Int) {
-        // TODO(b/238425913)
+        binding.onIconTintChanged(color)
     }
 
     override fun setDecorColor(color: Int) {
-        // TODO(b/238425913)
+        binding.onDecorTintChanged(color)
     }
 
     override fun setVisibleState(@StatusBarIconView.VisibleState state: Int, animate: Boolean) {

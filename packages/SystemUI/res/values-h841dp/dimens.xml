@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2022 The Android Open Source Project
   ~
@@ -13,8 +14,6 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/dream_overlay_aqi_unknown" />
-    <corners android:radius="@dimen/dream_aqi_badge_corner_radius" />
-</shape>
+<resources>
+    <dimen name="volume_row_slider_height">237dp</dimen>
+</resources>

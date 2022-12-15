@@ -25,6 +25,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -40,7 +41,7 @@ class MediaTttUtilsTest : SysuiTestCase() {
     private lateinit var appIconFromPackageName: Drawable
     @Mock private lateinit var packageManager: PackageManager
     @Mock private lateinit var applicationInfo: ApplicationInfo
-    @Mock private lateinit var logger: MediaTttLogger
+    @Mock private lateinit var logger: MediaTttLogger<TemporaryViewInfo>
 
     @Before
     fun setUp() {

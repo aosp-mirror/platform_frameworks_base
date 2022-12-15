@@ -13,10 +13,10 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
--->
-<TextView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/weather_view"
-    style="@style/clock_subtitle"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content" />
+  ~
+  -->
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#1F1F1F" />
+    <corners android:radius="@dimen/notification_corner_radius" />
+</shape>
