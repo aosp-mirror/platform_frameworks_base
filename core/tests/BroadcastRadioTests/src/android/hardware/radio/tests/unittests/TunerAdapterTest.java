@@ -18,10 +18,13 @@ package android.hardware.radio.tests.unittests;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,6 +40,7 @@ import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
 import android.hardware.radio.RadioTuner;
 import android.os.Build;
+import android.os.RemoteException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -46,7 +50,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -131,6 +134,24 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void setConfiguration_withInvalidParameters_fails() throws Exception {
+        doThrow(new IllegalArgumentException()).when(mTunerMock).setConfiguration(any());
+
+        assertWithMessage("Status for setting configuration with invalid parameters")
+                .that(mRadioTuner.setConfiguration(TEST_BAND_CONFIG))
+                .isEqualTo(RadioManager.STATUS_BAD_VALUE);
+    }
+
+    @Test
+    public void setConfiguration_whenServiceDied_fails() throws Exception {
+        doThrow(new RemoteException()).when(mTunerMock).setConfiguration(any());
+
+        assertWithMessage("Status for setting configuration when service is dead")
+                .that(mRadioTuner.setConfiguration(TEST_BAND_CONFIG))
+                .isEqualTo(RadioManager.STATUS_DEAD_OBJECT);
+    }
+
+    @Test
     public void getConfiguration_forTunerAdapter() throws Exception {
         when(mTunerMock.getConfiguration()).thenReturn(TEST_BAND_CONFIG);
         RadioManager.BandConfig[] bandConfigs = new RadioManager.BandConfig[1];
@@ -144,11 +165,49 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void getConfiguration_withInvalidParameters_fails() throws Exception {
+        RadioManager.BandConfig[] bandConfigs = new RadioManager.BandConfig[0];
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> mRadioTuner.getConfiguration(bandConfigs));
+
+        assertWithMessage("Exception for getting configuration with invalid parameters")
+                .that(thrown).hasMessageThat().contains("must be an array of length 1");
+    }
+
+    @Test
+    public void getConfiguration_whenServiceDied_fails() throws Exception {
+        doThrow(new RemoteException()).when(mTunerMock).getConfiguration();
+        RadioManager.BandConfig[] bandConfigs = new RadioManager.BandConfig[1];
+
+        assertWithMessage("Status for getting configuration when service is dead")
+                .that(mRadioTuner.getConfiguration(bandConfigs))
+                .isEqualTo(RadioManager.STATUS_DEAD_OBJECT);
+    }
+
+    @Test
     public void setMute_forTunerAdapter() {
-        int status = mRadioTuner.setMute(/* mute= */ true);
+        int status = mRadioTuner.setMute(true);
 
         assertWithMessage("Status for setting mute")
                 .that(status).isEqualTo(RadioManager.STATUS_OK);
+    }
+
+    @Test
+    public void setMute_whenIllegalState_fails() throws Exception {
+        doThrow(new IllegalStateException()).when(mTunerMock).setMuted(anyBoolean());
+
+        assertWithMessage("Status for setting muted when service is in illegal state")
+                .that(mRadioTuner.setMute(true)).isEqualTo(RadioManager.STATUS_ERROR);
+    }
+
+    @Test
+    public void setMute_whenServiceDied_fails() throws Exception {
+        doThrow(new RemoteException()).when(mTunerMock).setMuted(anyBoolean());
+
+        assertWithMessage("Status for setting muted when service is dead")
+                .that(mRadioTuner.setMute(true))
+                .isEqualTo(RadioManager.STATUS_DEAD_OBJECT);
     }
 
     @Test
@@ -158,6 +217,14 @@ public final class TunerAdapterTest {
         boolean muteStatus = mRadioTuner.getMute();
 
         assertWithMessage("Mute status").that(muteStatus).isTrue();
+    }
+
+    @Test
+    public void getMute_whenServiceDied_returnsTrue() throws Exception {
+        when(mTunerMock.isMuted()).thenThrow(new RemoteException());
+
+        assertWithMessage("Status for getting muted when service is dead")
+                .that(mRadioTuner.getMute()).isEqualTo(true);
     }
 
     @Test
@@ -176,6 +243,24 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void step_whenIllegalState_fails() throws Exception {
+        doThrow(new IllegalStateException()).when(mTunerMock).step(anyBoolean(), anyBoolean());
+
+        assertWithMessage("Status for stepping when service is in illegal state")
+                .that(mRadioTuner.step(RadioTuner.DIRECTION_UP, /* skipSubChannel= */ false))
+                .isEqualTo(RadioManager.STATUS_INVALID_OPERATION);
+    }
+
+    @Test
+    public void step_whenServiceDied_fails() throws Exception {
+        doThrow(new RemoteException()).when(mTunerMock).step(anyBoolean(), anyBoolean());
+
+        assertWithMessage("Status for stepping when service is dead")
+                .that(mRadioTuner.step(RadioTuner.DIRECTION_UP, /* skipSubChannel= */ false))
+                .isEqualTo(RadioManager.STATUS_DEAD_OBJECT);
+    }
+
+    @Test
     public void scan_forTunerAdapter_succeeds() throws Exception {
         doAnswer(invocation -> {
             mTunerCallback.onCurrentProgramInfoChanged(FM_PROGRAM_INFO);
@@ -191,13 +276,31 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void scan_whenIllegalState_fails() throws Exception {
+        doThrow(new IllegalStateException()).when(mTunerMock).seek(anyBoolean(), anyBoolean());
+
+        assertWithMessage("Status for scanning when service is in illegal state")
+                .that(mRadioTuner.scan(RadioTuner.DIRECTION_UP, /* skipSubChannel= */ false))
+                .isEqualTo(RadioManager.STATUS_INVALID_OPERATION);
+    }
+
+    @Test
+    public void scan_whenServiceDied_fails() throws Exception {
+        doThrow(new RemoteException()).when(mTunerMock).seek(anyBoolean(), anyBoolean());
+
+        assertWithMessage("Status for scan when service is dead")
+                .that(mRadioTuner.scan(RadioTuner.DIRECTION_UP, /* skipSubChannel= */ true))
+                .isEqualTo(RadioManager.STATUS_DEAD_OBJECT);
+    }
+
+    @Test
     public void seek_forTunerAdapter_succeeds() throws Exception {
         doAnswer(invocation -> {
             mTunerCallback.onCurrentProgramInfoChanged(FM_PROGRAM_INFO);
             return RadioManager.STATUS_OK;
         }).when(mTunerMock).seek(anyBoolean(), anyBoolean());
 
-        int scanStatus = mRadioTuner.scan(RadioTuner.DIRECTION_DOWN, /* skipSubChannel= */ false);
+        int scanStatus = mRadioTuner.seek(RadioTuner.DIRECTION_DOWN, /* skipSubChannel= */ false);
 
         verify(mTunerMock).seek(/* directionDown= */ true, /* skipSubChannel= */ false);
         assertWithMessage("Status for seeking")
@@ -212,10 +315,28 @@ public final class TunerAdapterTest {
             return RadioManager.STATUS_OK;
         }).when(mTunerMock).seek(anyBoolean(), anyBoolean());
 
-        mRadioTuner.scan(RadioTuner.DIRECTION_UP, /* skipSubChannel*/ true);
+        mRadioTuner.seek(RadioTuner.DIRECTION_UP, /* skipSubChannel= */ true);
 
         verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onTuneFailed(
                 RadioTuner.TUNER_RESULT_TIMEOUT, FM_SELECTOR);
+    }
+
+    @Test
+    public void seek_whenIllegalState_fails() throws Exception {
+        doThrow(new IllegalStateException()).when(mTunerMock).seek(anyBoolean(), anyBoolean());
+
+        assertWithMessage("Status for seeking when service is in illegal state")
+                .that(mRadioTuner.seek(RadioTuner.DIRECTION_UP, /* skipSubChannel= */ false))
+                .isEqualTo(RadioManager.STATUS_INVALID_OPERATION);
+    }
+
+    @Test
+    public void seek_whenServiceDied_fails() throws Exception {
+        doThrow(new RemoteException()).when(mTunerMock).seek(anyBoolean(), anyBoolean());
+
+        assertWithMessage("Status for seeking when service is dead")
+                .that(mRadioTuner.seek(RadioTuner.DIRECTION_UP, /* skipSubChannel= */ true))
+                .isEqualTo(RadioManager.STATUS_DEAD_OBJECT);
     }
 
     @Test
@@ -225,6 +346,33 @@ public final class TunerAdapterTest {
         assertWithMessage("Status for tuning with channel and sub-channel")
                 .that(status).isEqualTo(RadioManager.STATUS_OK);
         verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onProgramInfoChanged(FM_PROGRAM_INFO);
+    }
+
+    @Test
+    public void tune_withInvalidChannel_fails() throws Exception {
+        doThrow(new IllegalArgumentException()).when(mTunerMock).tune(any());
+
+        assertWithMessage("Status for tuning when service is in illegal state")
+                .that(mRadioTuner.tune(/* channel= */ 300, /* subChannel= */ 0))
+                .isEqualTo(RadioManager.STATUS_BAD_VALUE);
+    }
+
+    @Test
+    public void tune_withChannelsWhenIllegalState_fails() throws Exception {
+        doThrow(new IllegalStateException()).when(mTunerMock).tune(any());
+
+        assertWithMessage("Status for tuning when service is in illegal state")
+                .that(mRadioTuner.tune(/* channel= */ 92300, /* subChannel= */ 0))
+                .isEqualTo(RadioManager.STATUS_INVALID_OPERATION);
+    }
+
+    @Test
+    public void tune_withChannelsWhenServiceDied_fails() throws Exception {
+        doThrow(new RemoteException()).when(mTunerMock).tune(any());
+
+        assertWithMessage("Status for tuning when service is dead")
+                .that(mRadioTuner.tune(/* channel= */ 92300, /* subChannel= */ 0))
+                .isEqualTo(RadioManager.STATUS_DEAD_OBJECT);
     }
 
     @Test
@@ -250,6 +398,17 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void tune_withSelectorWhenServiceDied_fails() throws Exception {
+        doThrow(new RemoteException()).when(mTunerMock).tune(any());
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> mRadioTuner.tune(FM_SELECTOR));
+
+        assertWithMessage("Exception for tuning when service is dead")
+                .that(thrown).hasMessageThat().contains("Service died");
+    }
+
+    @Test
     public void cancel_forTunerAdapter() throws Exception {
         mRadioTuner.tune(FM_SELECTOR);
 
@@ -259,10 +418,37 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void cancel_whenIllegalState_fails() throws Exception {
+        doThrow(new IllegalStateException()).when(mTunerMock).cancel();
+
+        assertWithMessage("Status for canceling when service is in illegal state")
+                .that(mRadioTuner.cancel()).isEqualTo(RadioManager.STATUS_INVALID_OPERATION);
+    }
+
+    @Test
+    public void cancel_forTunerAdapterWhenServiceDied_fails() throws Exception {
+        doThrow(new RemoteException()).when(mTunerMock).cancel();
+
+        assertWithMessage("Status for canceling when service is dead")
+                .that(mRadioTuner.cancel()).isEqualTo(RadioManager.STATUS_DEAD_OBJECT);
+    }
+
+    @Test
     public void cancelAnnouncement_forTunerAdapter() throws Exception {
         mRadioTuner.cancelAnnouncement();
 
         verify(mTunerMock).cancelAnnouncement();
+    }
+
+    @Test
+    public void cancelAnnouncement_whenServiceDied_fails() throws Exception {
+        doThrow(new RemoteException()).when(mTunerMock).cancelAnnouncement();
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> mRadioTuner.cancelAnnouncement());
+
+        assertWithMessage("Exception for canceling announcement when service is dead")
+                .that(thrown).hasMessageThat().contains("Service died");
     }
 
     @Test
@@ -295,10 +481,21 @@ public final class TunerAdapterTest {
         when(mTunerMock.getImage(anyInt())).thenReturn(bitmapExpected);
         int imageId = 1;
 
-        Bitmap image = mRadioTuner.getMetadataImage(/* id= */ imageId);
+        Bitmap image = mRadioTuner.getMetadataImage(imageId);
 
         assertWithMessage("Image obtained from id %s", imageId)
                 .that(image).isEqualTo(bitmapExpected);
+    }
+
+    @Test
+    public void getMetadataImage_whenServiceDied_fails() throws Exception {
+        when(mTunerMock.getImage(anyInt())).thenThrow(new RemoteException());
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> mRadioTuner.getMetadataImage(/* id= */ 1));
+
+        assertWithMessage("Exception for getting metadata image when service is dead")
+                .that(thrown).hasMessageThat().contains("Service died");
     }
 
     @Test
@@ -312,6 +509,17 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void startBackgroundScan_whenServiceDied_fails() throws Exception {
+        when(mTunerMock.startBackgroundScan()).thenThrow(new RemoteException());
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> mRadioTuner.startBackgroundScan());
+
+        assertWithMessage("Exception for background scan when service is dead")
+                .that(thrown).hasMessageThat().contains("Service died");
+    }
+
+    @Test
     public void isAnalogForced_forTunerAdapter() throws Exception {
         when(mTunerMock.isConfigFlagSet(RadioManager.CONFIG_FORCE_ANALOG)).thenReturn(true);
 
@@ -322,12 +530,38 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void isAnalogForced_whenNotSupported_fails() throws Exception {
+        String errorMessage = "Analog forced switch is not supported";
+        when(mTunerMock.isConfigFlagSet(RadioManager.CONFIG_FORCE_ANALOG))
+                .thenThrow(new UnsupportedOperationException(errorMessage));
+
+        IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> mRadioTuner.isAnalogForced());
+
+        assertWithMessage("Exception for checking analog playback switch when not supported")
+                .that(thrown).hasMessageThat().contains(errorMessage);
+    }
+
+    @Test
     public void setAnalogForced_forTunerAdapter() throws Exception {
         boolean analogForced = true;
 
         mRadioTuner.setAnalogForced(analogForced);
 
         verify(mTunerMock).setConfigFlag(RadioManager.CONFIG_FORCE_ANALOG, analogForced);
+    }
+
+    @Test
+    public void setAnalogForced_whenNotSupported_fails() throws Exception {
+        String errorMessage = "Analog forced switch is not supported";
+        doThrow(new UnsupportedOperationException(errorMessage))
+                .when(mTunerMock).setConfigFlag(eq(RadioManager.CONFIG_FORCE_ANALOG), anyBoolean());
+
+        IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> mRadioTuner.setAnalogForced(/* isForced= */ false));
+
+        assertWithMessage("Exception for setting analog playback switch when not supported")
+                .that(thrown).hasMessageThat().contains(errorMessage);
     }
 
     @Test
@@ -343,6 +577,17 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void isConfigFlagSupported_whenServiceDied_fails() throws Exception {
+        when(mTunerMock.isConfigFlagSupported(anyInt())).thenThrow(new RemoteException());
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> mRadioTuner.isConfigFlagSupported(RadioManager.CONFIG_DAB_DAB_LINKING));
+
+        assertWithMessage("Exception for checking config flag support when service is dead")
+                .that(thrown).hasMessageThat().contains("Service died");
+    }
+
+    @Test
     public void isConfigFlagSet_forTunerAdapter() throws Exception {
         when(mTunerMock.isConfigFlagSet(RadioManager.CONFIG_DAB_FM_SOFT_LINKING))
                 .thenReturn(true);
@@ -355,6 +600,17 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void isConfigFlagSet_whenServiceDied_fails() throws Exception {
+        when(mTunerMock.isConfigFlagSet(anyInt())).thenThrow(new RemoteException());
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> mRadioTuner.isConfigFlagSet(RadioManager.CONFIG_DAB_DAB_LINKING));
+
+        assertWithMessage("Exception for getting config flag when service is dead")
+                .that(thrown).hasMessageThat().contains("Service died");
+    }
+
+    @Test
     public void setConfigFlag_forTunerAdapter() throws Exception {
         boolean dabFmLinking = true;
 
@@ -364,13 +620,37 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void setConfigFlag_whenServiceDied_fails() throws Exception {
+        doThrow(new RemoteException()).when(mTunerMock).setConfigFlag(anyInt(), anyBoolean());
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> mRadioTuner.setConfigFlag(RadioManager.CONFIG_DAB_DAB_LINKING,
+                        /* value= */ true));
+
+        assertWithMessage("Exception for setting config flag when service is dead")
+                .that(thrown).hasMessageThat().contains("Service died");
+    }
+
+    @Test
     public void getParameters_forTunerAdapter() throws Exception {
-        List<String> parameterKeys = Arrays.asList("ParameterKeyMock");
+        List<String> parameterKeys = List.of("ParameterKeyMock");
         Map<String, String> parameters = Map.of("ParameterKeyMock", "ParameterValueMock");
         when(mTunerMock.getParameters(parameterKeys)).thenReturn(parameters);
 
         assertWithMessage("Parameters obtained from radio tuner")
                 .that(mRadioTuner.getParameters(parameterKeys)).isEqualTo(parameters);
+    }
+
+    @Test
+    public void getParameters_whenServiceDied_fails() throws Exception {
+        List<String> parameterKeys = List.of("ParameterKeyMock");
+        when(mTunerMock.getParameters(parameterKeys)).thenThrow(new RemoteException());
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> mRadioTuner.getParameters(parameterKeys));
+
+        assertWithMessage("Exception for getting parameters when service is dead")
+                .that(thrown).hasMessageThat().contains("Service died");
     }
 
     @Test
@@ -383,6 +663,18 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void setParameters_whenServiceDied_fails() throws Exception {
+        Map<String, String> parameters = Map.of("ParameterKeyMock", "ParameterValueMock");
+        when(mTunerMock.setParameters(parameters)).thenThrow(new RemoteException());
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> mRadioTuner.setParameters(parameters));
+
+        assertWithMessage("Exception for setting parameters when service is dead")
+                .that(thrown).hasMessageThat().contains("Service died");
+    }
+
+    @Test
     public void isAntennaConnected_forTunerAdapter() throws Exception {
         mTunerCallback.onAntennaState(/* connected= */ false);
 
@@ -391,10 +683,27 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void onError_forTunerAdapter() throws Exception {
+        int errorStatus = RadioTuner.ERROR_HARDWARE_FAILURE;
+
+        mTunerCallback.onError(errorStatus);
+
+        verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onError(errorStatus);
+    }
+
+    @Test
     public void hasControl_forTunerAdapter() throws Exception {
         when(mTunerMock.isClosed()).thenReturn(true);
 
         assertWithMessage("Control on tuner").that(mRadioTuner.hasControl()).isFalse();
+    }
+
+    @Test
+    public void hasControl_whenServiceDied_returnsFalse() throws Exception {
+        when(mTunerMock.isClosed()).thenThrow(new RemoteException());
+
+        assertWithMessage("Control on tuner when service is dead")
+                .that(mRadioTuner.hasControl()).isFalse();
     }
 
     @Test

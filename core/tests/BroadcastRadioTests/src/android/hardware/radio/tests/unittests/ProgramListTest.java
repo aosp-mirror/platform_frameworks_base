@@ -276,6 +276,19 @@ public final class ProgramListTest {
     }
 
     @Test
+    public void getProgramList_forTunerAdapterWhenServiceDied_fails() throws Exception {
+        Map<String, String> parameters = Map.of("ParameterKeyMock", "ParameterValueMock");
+        createRadioTuner();
+        doThrow(new RemoteException()).when(mTunerMock).startProgramListUpdates(any());
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> mRadioTuner.getProgramList(parameters));
+
+        assertWithMessage("Exception for getting program list when service is dead")
+                .that(thrown).hasMessageThat().contains("Service died");
+    }
+
+    @Test
     public void getDynamicProgramList_forTunerAdapter() throws Exception {
         createRadioTuner();
 

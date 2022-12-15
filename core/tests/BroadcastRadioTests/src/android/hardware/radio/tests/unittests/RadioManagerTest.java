@@ -18,7 +18,9 @@ package android.hardware.radio.tests.unittests;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -1006,6 +1008,35 @@ public final class RadioManagerTest {
     }
 
     @Test
+    public void listModules_forRadioManagerWithNullListAsInput_fails() throws Exception {
+        createRadioManager();
+
+        assertWithMessage("Status when listing module with empty list input")
+                .that(mRadioManager.listModules(null)).isEqualTo(RadioManager.STATUS_BAD_VALUE);
+    }
+
+    @Test
+    public void listModules_withNullListFromService_fails() throws Exception {
+        createRadioManager();
+        when(mRadioServiceMock.listModules()).thenReturn(null);
+        List<RadioManager.ModuleProperties> modules = new ArrayList<>();
+
+        assertWithMessage("Status for listing module when getting null list from HAL client")
+                .that(mRadioManager.listModules(modules)).isEqualTo(RadioManager.STATUS_ERROR);
+    }
+
+    @Test
+    public void listModules_whenServiceDied_fails() throws Exception {
+        createRadioManager();
+        when(mRadioServiceMock.listModules()).thenThrow(new RemoteException());
+        List<RadioManager.ModuleProperties> modules = new ArrayList<>();
+
+        assertWithMessage("Status for listing module when HAL client service is dead")
+                .that(mRadioManager.listModules(modules))
+                .isEqualTo(RadioManager.STATUS_DEAD_OBJECT);
+    }
+
+    @Test
     public void openTuner_forRadioModule() throws Exception {
         createRadioManager();
         int moduleId = 0;
@@ -1016,6 +1047,18 @@ public final class RadioManagerTest {
 
         verify(mRadioServiceMock).openTuner(eq(moduleId), eq(FM_BAND_CONFIG), eq(withAudio), any(),
                 anyInt());
+    }
+
+    @Test
+    public void openTuner_whenServiceDied_returnsNull() throws Exception {
+        createRadioManager();
+        when(mRadioServiceMock.openTuner(anyInt(), any(), anyBoolean(), any(), anyInt()))
+                .thenThrow(new RemoteException());
+
+        RadioTuner nullTuner = mRadioManager.openTuner(/* moduleId= */ 0, FM_BAND_CONFIG,
+                /* withAudio= */ true, mCallbackMock, /* handler= */ null);
+
+        assertWithMessage("Radio tuner when service is dead").that(nullTuner).isNull();
     }
 
     @Test
@@ -1046,6 +1089,21 @@ public final class RadioManagerTest {
         mRadioManager.addAnnouncementListener(enableTypeSet, mEventListener);
 
         verify(mCloseHandleMock).close();
+    }
+
+    @Test
+    public void addAnnouncementListener_whenServiceDied_throwException() throws Exception {
+        createRadioManager();
+        String exceptionMessage = "service is dead";
+        when(mRadioServiceMock.addAnnouncementListener(any(), any()))
+                .thenThrow(new RemoteException(exceptionMessage));
+        Set<Integer> enableTypeSet = createAnnouncementTypeSet(EVENT_ANNOUNCEMENT_TYPE);
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> mRadioManager.addAnnouncementListener(enableTypeSet, mEventListener));
+
+        assertWithMessage("Exception for adding announcement listener with dead service")
+                .that(thrown).hasMessageThat().contains(exceptionMessage);
     }
 
     @Test
