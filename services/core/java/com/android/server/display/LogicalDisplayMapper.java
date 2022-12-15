@@ -444,7 +444,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 // Send the device to sleep when required.
                 mHandler.post(() -> {
                     mPowerManager.goToSleep(SystemClock.uptimeMillis(),
-                            PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD, 0);
+                            PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD,
+                            PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP);
                 });
             }
         }
