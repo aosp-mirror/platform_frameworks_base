@@ -72,6 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock বন্ধ করা হয়েছে"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"একটি ছবি পাঠানো হয়েছে"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"স্ক্রিনশট সেভ করা হচ্ছে..."</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"অফিস প্রোফাইলে স্ক্রিনশট সেভ করা হচ্ছে…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"স্ক্রিনশট সেভ করা হয়েছে"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"স্ক্রিনশট সেভ করা যায়নি"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"স্ক্রিনশট সেভ করার আগে ডিভাইসটি অবশ্যই আনলক করতে হবে"</string>
@@ -125,8 +126,7 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ভয়েস সহায়তা"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR কোড স্ক্যানার"</string>
-    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
-    <skip />
+    <string name="accessibility_unlock_button" msgid="3613812140816244310">"আনলক করা হয়েছে"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"ডিভাইস লক করা আছে"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"ফেস স্ক্যান করা হচ্ছে"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"পাঠান"</string>
@@ -169,8 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"ফেস শনাক্ত করা যায়নি"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"পরিবর্তে ফিঙ্গারপ্রিন্ট ব্যবহার করুন"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
-    <skip />
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"\'ফেস আনলক\' উপলভ্য নেই"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ব্লুটুথ সংযুক্ত হয়েছে৷"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ব্যাটারি কত শতাংশ আছে তা জানা যায়নি।"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>এ সংযুক্ত হয়ে আছে।"</string>
@@ -181,12 +180,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"বিমান মোড৷"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN চালু আছে।"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> শতাংশ ব্যাটারি রয়েছে৷"</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"ব্যাটারি <xliff:g id="PERCENTAGE">%1$d</xliff:g> শতাংশ, বর্তমান ব্যবহারের উপর ভিত্তি করে আর <xliff:g id="TIME">%2$s</xliff:g> চলবে"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"ব্যাটারির চার্জ <xliff:g id="PERCENTAGE">%1$d</xliff:g> শতাংশ আছে, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"ব্যাটারি চার্জ হচ্ছে, এখন <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> শতাংশ চার্জ আছে৷"</string>
-    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
-    <skip />
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"ব্যাটারির চার্জ <xliff:g id="PERCENTAGE">%d</xliff:g> শতাংশ আছে, ব্যাটারির সুরক্ষার জন্য চার্জ দেওয়া পজ করা হয়েছে।"</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"ব্যাটারির চার্জ <xliff:g id="PERCENTAGE">%1$d</xliff:g> শতাংশ আছে, <xliff:g id="TIME">%2$s</xliff:g>, ব্যাটারির সুরক্ষার জন্য চার্জ দেওয়া পজ করা হয়েছে।"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"সমস্ত বিজ্ঞপ্তি দেখুন"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"টেলি টাইপরাইটার সক্ষম করা আছে৷"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"রিং বাজার সাথে স্পন্দিত করুন৷"</string>
@@ -320,7 +317,8 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"সব অ্যাপ ও পরিষেবার জন্য ক্যামেরার অ্যাক্সেস চালু করা হয়েছে।"</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"সব অ্যাপ ও পরিষেবার জন্য ক্যামেরার অ্যাক্সেস বন্ধ করা হয়েছে।"</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"মাইক্রোফোনের বোতাম ব্যবহার করতে, সেটিংস থেকে মাইক্রোফোনের অ্যাক্সেস চালু করুন।"</string>
-    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"সেটিংস খুলুন।"</string>
+    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
+    <skip />
     <string name="media_seamless_other_device" msgid="4654849800789196737">"অন্য ডিভাইস"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"\'এক নজরে\' বৈশিষ্ট্যটি চালু বা বন্ধ করুন"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"অ্যালার্ম, রিমাইন্ডার, ইভেন্ট, এবং আপনার নির্দিষ্ট করে দেওয়া ব্যক্তিদের কল ছাড়া অন্য কোনও আওয়াজ বা ভাইব্রেশন হবে না। তবে সঙ্গীত, ভিডিও, এবং গেম সহ আপনি যা কিছু চালাবেন তার আওয়াজ শুনতে পাবেন।"</string>
@@ -407,6 +405,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'বিরক্ত করবে না\' দিয়ে বিজ্ঞপ্তি পজ করা হয়েছে"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"এখন শুরু করুন"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"কোনো বিজ্ঞপ্তি নেই"</string>
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"নতুন কোনও বিজ্ঞপ্তি নেই"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"পুরনো বিজ্ঞপ্তি দেখতে আনলক করুন"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"আপনার অভিভাবক এই ডিভাইস ম্যানেজ করেন"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"এই ডিভাইসটি আপনার প্রতিষ্ঠানের এবং এরা ডিভাইসের নেটওয়ার্ক ট্রাফিক মনিটর করতে পারে"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> এই ডিভাইসের মালিক এবং এটির নেটওয়ার্ক ট্রাফিক মনিটর করতে পারে"</string>
@@ -511,8 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ব্যবহার করতে আনলক করুন"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"আপনার কার্ড সংক্রান্ত তথ্য পেতে সমস্যা হয়েছে, পরে আবার চেষ্টা করুন"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"লক স্ক্রিন সেটিংস"</string>
-    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR কোড স্ক্যানার খুলুন"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"আপডেট করা হচ্ছে"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"কাজের প্রোফাইল"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"বিমান মোড"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"আপনি আপনার পরবর্তী <xliff:g id="WHEN">%1$s</xliff:g> অ্যালার্ম শুনতে পাবেন না"</string>
@@ -795,8 +795,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"সম্পূর্ণ স্ক্রিন বড় করে দেখা"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"স্ক্রিনের কিছুটা অংশ বড় করুন"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"বদল করুন"</string>
-    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
-    <skip />
+    <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"ছোট বড় করার জন্য কোণ টেনে আনুন"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"কোণাকুণি স্ক্রল করার অনুমতি দেওয়া"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"ছোট বড় করা"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"বড় করে দেখার ধরন পরিবর্তন করা"</string>
@@ -905,6 +904,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"কাস্ট করা বন্ধ করুন"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"অডিও আউটপুটের জন্য উপলভ্য ডিভাইস।"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ভলিউম"</string>
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ব্রডকাস্ট কীভাবে কাজ করে"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"সম্প্রচার করুন"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"আশপাশে লোকজন যাদের মানানসই ব্লুটুথ ডিভাইস আছে, তারা আপনার ব্রডকাস্ট করা মিডিয়া শুনতে পারবেন"</string>
@@ -1018,17 +1018,34 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ক্যামেরা ও মাইক্রোফোন বন্ধ আছে"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{#টি বিজ্ঞপ্তি}one{#টি বিজ্ঞপ্তি}other{#টি বিজ্ঞপ্তি}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="note_task_button_label" msgid="8718616095800343136">"Notetaking"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ব্রডকাস্ট করা হচ্ছে"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> সম্প্রচার বন্ধ করবেন?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"আপনি <xliff:g id="SWITCHAPP">%1$s</xliff:g> সম্প্রচার করলে বা আউটপুট পরিবর্তন করলে, আপনার বর্তমান সম্প্রচার বন্ধ হয়ে যাবে"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> সম্প্রচার করুন"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"আউটপুট পরিবর্তন করুন"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"অজানা"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>-কে ডিভাইসের সব লগ অ্যাক্সেসের অনুমতি দিতে চান?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"এককালীন অ্যাক্সেসের অনুমতি দিন"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"অনুমতি দেবেন না"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"ডিভাইস লগে আপনার ডিভাইসে করা অ্যাক্টিভিটি রেকর্ড করা হয়। অ্যাপ সমস্যা খুঁজে তা সমাধান করতে এইসব লগ ব্যবহার করতে পারে।\n\nকিছু লগে সংবেদনশীল তথ্য থাকতে পারে, তাই বিশ্বাস করেন শুধুমাত্র এমন অ্যাপকেই সব ডিভাইসের লগ অ্যাক্সেসের অনুমতি দিন। \n\nআপনি এই অ্যাপকে ডিভাইসের সব লগ অ্যাক্সেস করার অনুমতি না দিলেও, এটি নিজে লগ অ্যাক্সেস করতে পারবে। ডিভাইস প্রস্তুতকারকও আপনার ডিভাইসের কিছু লগ বা তথ্য হয়ত অ্যাক্সেস করতে পারবে।"</string>
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> খুলুন"</string>
+    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"শর্টকাট হিসেবে <xliff:g id="APPNAME">%1$s</xliff:g> অ্যাপ যোগ করতে, এই বিষয়গুলি নিশ্চিত করুন"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• অ্যাপ সেট-আপ করা হয়ে গেছে"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• অন্তত একটি কার্ড Wallet-এ যোগ করা হয়েছে"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ক্যামেরা অ্যাপ ইনস্টল করুন"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• অ্যাপ সেট-আপ করা হয়ে গেছে"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• অন্তত একটি ডিভাইস উপলভ্য"</string>
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"বাতিল করুন"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"এখনই উল্টান"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"আরও ভাল সেলফির জন্য ফোন আনফোল্ড করা"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"আরও ভাল সেলফির জন্য সামনের ক্যামেরায় পাল্টাতে চান?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"আরও ভাল রেজোলিউশন সহ আরও বেশি ওয়াইড ছবির জন্য ব্যাক-ক্যামেরা ব্যবহার করুন।"</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ এই স্ক্রিন বন্ধ হয়ে যাবে"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

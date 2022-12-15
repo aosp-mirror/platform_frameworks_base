@@ -72,6 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Tính năng Smart Lock đã tắt"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"đã gửi hình ảnh"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Đang lưu ảnh chụp màn hình..."</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Đang lưu ảnh chụp màn hình vào hồ sơ công việc…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Đã lưu ảnh chụp màn hình"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Không thể lưu ảnh chụp màn hình"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Bạn phải mở khóa thiết bị để chúng tôi có thể lưu ảnh chụp màn hình"</string>
@@ -125,8 +126,7 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Trợ lý thoại"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Ví"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Trình quét mã QR"</string>
-    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
-    <skip />
+    <string name="accessibility_unlock_button" msgid="3613812140816244310">"Đã mở khoá"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Đã khóa thiết bị"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Quét tìm khuôn mặt"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Gửi"</string>
@@ -169,8 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Không nhận ra khuôn mặt"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Hãy dùng vân tay"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
-    <skip />
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Không dùng được tính năng Mở khoá bằng khuôn mặt"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Đã kết nối bluetooth."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Tỷ lệ phần trăm pin không xác định."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Đã kết nối với <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
@@ -181,12 +180,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Chế độ trên máy bay."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN đang bật."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> phần trăm pin."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> phần trăm pin, còn khoảng <xliff:g id="TIME">%2$s</xliff:g> dựa trên mức sử dụng của bạn"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> phần trăm pin, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Đang sạc pin, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
-    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
-    <skip />
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"<xliff:g id="PERCENTAGE">%d</xliff:g> phần trăm pin, đã tạm dừng sạc để bảo vệ pin."</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> phần trăm pin, <xliff:g id="TIME">%2$s</xliff:g>, đã tạm dừng sạc để bảo vệ pin."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Xem tất cả thông báo"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Đã bật TeleTypewriter."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Chuông rung."</string>
@@ -320,7 +317,8 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Mọi ứng dụng và dịch vụ được phép sử dụng máy ảnh."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Mọi ứng dụng và dịch vụ không có quyền truy cập vào máy ảnh."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Để dùng nút micrô, hãy bật quyền truy cập vào micrô trong phần Cài đặt."</string>
-    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"Mở phần cài đặt."</string>
+    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
+    <skip />
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Thiết bị khác"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Bật/tắt chế độ xem Tổng quan"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Bạn sẽ không bị làm phiền bởi âm thanh và tiếng rung, ngoại trừ báo thức, lời nhắc, sự kiện và người gọi mà bạn chỉ định. Bạn sẽ vẫn nghe thấy mọi thứ bạn chọn phát, bao gồm nhạc, video và trò chơi."</string>
@@ -407,6 +405,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Chế độ Không làm phiền đã tạm dừng thông báo"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Bắt đầu ngay"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Không có thông báo nào"</string>
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"Không có thông báo mới"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Mở khoá để xem thông báo cũ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Thiết bị này do cha mẹ của bạn quản lý"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Tổ chức của bạn sở hữu thiết bị này và có thể giám sát lưu lượng truy cập mạng"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> sở hữu thiết bị này và có thể giám sát lưu lượng truy cập mạng"</string>
@@ -511,8 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Mở khóa để sử dụng"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Đã xảy ra sự cố khi tải thẻ của bạn. Vui lòng thử lại sau"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Cài đặt màn hình khóa"</string>
-    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Trình quét mã QR"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Đang cập nhật"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Hồ sơ công việc"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Chế độ máy bay"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Bạn sẽ không nghe thấy báo thức tiếp theo lúc <xliff:g id="WHEN">%1$s</xliff:g> của mình"</string>
@@ -795,8 +795,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Phóng to toàn màn hình"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Phóng to một phần màn hình"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Chuyển"</string>
-    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
-    <skip />
+    <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Kéo góc để thay đổi kích thước"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Cho phép cuộn chéo"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Đổi kích thước"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Thay đổi kiểu phóng to"</string>
@@ -905,6 +904,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Dừng truyền"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Các thiết bị có sẵn để xuất âm thanh."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Âm lượng"</string>
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cách tính năng truyền hoạt động"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Truyền"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Những người ở gần có thiết bị Bluetooth tương thích có thể nghe nội dung nghe nhìn bạn đang truyền"</string>
@@ -1018,17 +1018,34 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Máy ảnh và micrô đang tắt"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# thông báo}other{# thông báo}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="note_task_button_label" msgid="8718616095800343136">"Ghi chú"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Phát sóng"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Dừng phát <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Nếu bạn phát <xliff:g id="SWITCHAPP">%1$s</xliff:g> hoặc thay đổi đầu ra, phiên truyền phát hiện tại sẽ dừng"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Phát <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Thay đổi đầu ra"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Không xác định"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"Cho phép <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> truy cập vào mọi nhật ký thiết bị?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Cho phép truy cập một lần"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Không cho phép"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Nhật ký thiết bị ghi lại những hoạt động diễn ra trên thiết bị của bạn. Các ứng dụng có thể dùng nhật ký này để tìm và khắc phục vấn đề.\n\nMột số nhật ký có thể chứa thông tin nhạy cảm, vì vậy, bạn chỉ nên cấp quyền truy cập vào mọi nhật ký thiết bị cho những ứng dụng mà mình tin tưởng. \n\nNếu bạn không cho phép ứng dụng này truy cập vào mọi nhật ký thiết bị, thì ứng dụng này vẫn có thể truy cập vào nhật ký của chính nó. Nhà sản xuất thiết bị vẫn có thể truy cập vào một số nhật ký hoặc thông tin trên thiết bị của bạn."</string>
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Mở <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
+    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Để tạo lối tắt cho ứng dụng <xliff:g id="APPNAME">%1$s</xliff:g>, hãy đảm bảo"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Ứng dụng được thiết lập"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Thêm ít nhất một thẻ vào Wallet"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Cài đặt một ứng dụng máy ảnh"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Ứng dụng được thiết lập"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Có ít nhất một thiết bị đang hoạt động"</string>
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Huỷ"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Lật ngay"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Mở điện thoại ra để tự chụp ảnh chân dung đẹp hơn"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Lật sang màn hình ngoài để tự chụp ảnh chân dung đẹp hơn?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Sử dụng máy ảnh sau để chụp ảnh góc rộng hơn với độ phân giải cao hơn."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Màn hình này sẽ tắt"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

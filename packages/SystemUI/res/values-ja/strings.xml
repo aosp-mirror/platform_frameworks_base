@@ -72,6 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock は無効です"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"画像を送信しました"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"スクリーンショットを保存しています..."</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"スクリーンショットを仕事用プロファイルに保存中…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"スクリーンショットを保存しました"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"スクリーンショット保存エラー"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"スクリーンショットを保存するには、デバイスのロックを解除する必要があります"</string>
@@ -168,8 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"顔を認識できません"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"指紋認証をお使いください"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
-    <skip />
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"顔認証を利用できません"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetoothに接続済み。"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"バッテリー残量は不明です。"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>に接続しました。"</string>
@@ -180,10 +180,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"機内モード。"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN は ON です。"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"バッテリー残量: <xliff:g id="NUMBER">%d</xliff:g>パーセント"</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"バッテリー残量: <xliff:g id="PERCENTAGE">%1$d</xliff:g>、およそ <xliff:g id="TIME">%2$s</xliff:g> にバッテリー切れ（使用状況に基づく）"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"バッテリー残量 <xliff:g id="PERCENTAGE">%1$d</xliff:g>%%、<xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"電池充電中: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>パーセント"</string>
-    <string name="accessibility_battery_level_charging_paused" msgid="1716051308782906917">"バッテリー残量: <xliff:g id="PERCENTAGE">%d</xliff:g>%%。バッテリー保護のため、充電を一時停止しました。"</string>
-    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="4006089349465741762">"バッテリー残量: <xliff:g id="PERCENTAGE">%1$d</xliff:g>%%、およそ <xliff:g id="TIME">%2$s</xliff:g> にバッテリー切れ（使用状況に基づく）。バッテリー保護のため、充電を一時停止しました。"</string>
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"バッテリー残量 <xliff:g id="PERCENTAGE">%d</xliff:g>%%: バッテリー保護のため、充電を一時停止しました。"</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"バッテリー残量 <xliff:g id="PERCENTAGE">%1$d</xliff:g>%%、<xliff:g id="TIME">%2$s</xliff:g>: バッテリー保護のため、充電を一時停止しました。"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"通知をすべて表示"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"テレタイプライターが有効です。"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"バイブレーション着信。"</string>
@@ -317,7 +317,8 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"カメラはすべてのアプリとサービスで有効になっています。"</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"カメラへのアクセスは、すべてのアプリとサービスで無効になっています。"</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"マイクボタンを使用するには、[設定] でマイクへのアクセスを有効にしてください。"</string>
-    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"設定を開く"</string>
+    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
+    <skip />
     <string name="media_seamless_other_device" msgid="4654849800789196737">"その他のデバイス"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"概要を切り替え"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"アラーム、リマインダー、予定、指定した人からの着信以外の音やバイブレーションに煩わされることはありません。音楽、動画、ゲームなど再生対象として選択したコンテンツは引き続き再生されます。"</string>
@@ -404,6 +405,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"サイレント モードにより通知は一時停止中です"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"今すぐ開始"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"通知はありません"</string>
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"新しい通知はありません"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"ロック解除して以前の通知を表示"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"このデバイスは保護者によって管理されています"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"これは組織が所有するデバイスで、ネットワーク トラフィックが監視されることもあります"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"これは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> が所有するデバイスで、ネットワーク トラフィックが監視されることもあります"</string>
@@ -509,6 +512,7 @@
     <string name="wallet_error_generic" msgid="257704570182963611">"カードの取得中に問題が発生しました。しばらくしてからもう一度お試しください"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ロック画面の設定"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR コードスキャナ"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"更新しています"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"仕事用プロファイル"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"機内モード"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"次回のアラーム（<xliff:g id="WHEN">%1$s</xliff:g>）は鳴りません"</string>
@@ -791,8 +795,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"画面全体を拡大します"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"画面の一部を拡大します"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"スイッチ"</string>
-    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
-    <skip />
+    <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"サイズを変更するには角をドラッグ"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"斜めスクロールを許可"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"サイズ変更"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"拡大の種類を変更"</string>
@@ -901,6 +904,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"キャストを停止"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"音声出力ができるデバイスです。"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"音量"</string>
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ブロードキャストの仕組み"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ブロードキャスト"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Bluetooth 対応デバイスを持っている付近のユーザーは、あなたがブロードキャストしているメディアを聴けます"</string>
@@ -1014,17 +1018,34 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"カメラとマイクが OFF です"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# 件の通知}other{# 件の通知}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>、<xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="note_task_button_label" msgid="8718616095800343136">"メモ"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ブロードキャスト"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> のブロードキャストを停止しますか？"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> をブロードキャストしたり、出力を変更したりすると、現在のブロードキャストが停止します。"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> をブロードキャスト"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"出力を変更"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"不明"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> にすべてのデバイスログへのアクセスを許可しますか？"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"1 回限りのアクセスを許可"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"許可しない"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"デバイスのログに、このデバイスで発生したことが記録されます。アプリは問題を検出、修正するためにこれらのログを使用することができます。\n\nログによっては機密性の高い情報が含まれている可能性があるため、すべてのデバイスログへのアクセスは信頼できるアプリにのみ許可してください。\n\nすべてのデバイスログへのアクセスを許可しなかった場合も、このアプリはアプリ独自のログにアクセスできます。また、デバイスのメーカーもデバイスの一部のログや情報にアクセスできる可能性があります。"</string>
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> を開く"</string>
+    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"<xliff:g id="APPNAME">%1$s</xliff:g> アプリをショートカットとして追加するための手順"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• アプリが設定されている"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• ウォーレットに追加されているカードが 1 枚以上ある"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• カメラアプリをインストールする"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• アプリが設定されている"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• 利用できるデバイスが 1 台以上ある"</string>
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"キャンセル"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"切り替えましょう"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"高画質で撮るにはスマートフォンを開いてください"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"前面ディスプレイに切り替えて綺麗に撮りましょう"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"高解像度で広い範囲を撮影するには、背面カメラを使用してください。"</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱この画面は OFF になります"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>
