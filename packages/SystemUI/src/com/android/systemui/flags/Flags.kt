@@ -165,7 +165,9 @@ object Flags {
 
     /** Shows chipbar UI whenever the device is unlocked by ActiveUnlock (watch). */
     // TODO(b/256513609): Tracking Bug
-    @JvmField val ACTIVE_UNLOCK_CHIPBAR = releasedFlag(217, "active_unlock_chipbar")
+    @JvmField
+    val ACTIVE_UNLOCK_CHIPBAR =
+        resourceBooleanFlag(217, R.bool.flag_active_unlock_chipbar, "active_unlock_chipbar")
 
     /**
      * Migrates control of the LightRevealScrim's reveal effect and amount from legacy code to the
