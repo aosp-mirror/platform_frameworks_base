@@ -42,7 +42,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -134,7 +133,7 @@ public final class VcnGatewayConnectionConfig {
     /**
      * Perform mobility update to attempt recovery from suspected data stalls.
      *
-     * <p>If set, the gatway connection will monitor the data stall detection of the VCN network.
+     * <p>If set, the gateway connection will monitor the data stall detection of the VCN network.
      * When there is a suspected data stall, the gateway connection will attempt recovery by
      * performing a mobility update on the underlying IKE session.
      */
@@ -243,7 +242,7 @@ public final class VcnGatewayConnectionConfig {
         mExposedCapabilities = new TreeSet(exposedCapabilities);
         mRetryIntervalsMs = retryIntervalsMs;
         mMaxMtu = maxMtu;
-        mGatewayOptions = Collections.unmodifiableSet(new HashSet(gatewayOptions));
+        mGatewayOptions = Collections.unmodifiableSet(new ArraySet(gatewayOptions));
 
         mUnderlyingNetworkTemplates = new ArrayList<>(underlyingNetworkTemplates);
         if (mUnderlyingNetworkTemplates.isEmpty()) {
@@ -294,7 +293,7 @@ public final class VcnGatewayConnectionConfig {
             mGatewayOptions = Collections.emptySet();
         } else {
             mGatewayOptions =
-                    new HashSet<>(
+                    new ArraySet<>(
                             PersistableBundleUtils.toList(
                                     gatewayOptionsBundle,
                                     PersistableBundleUtils.INTEGER_DESERIALIZER));
