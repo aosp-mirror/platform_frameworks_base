@@ -35,4 +35,5 @@ interface IImsMmTelListener {
     void onRejectedCall(in ImsCallProfile callProfile, in ImsReasonInfo reason);
     oneway void onVoiceMessageCountUpdate(int count);
     oneway void onAudioModeIsVoipChanged(int imsAudioHandler);
+    oneway void onTriggerEpsFallback(int reason);
 }
