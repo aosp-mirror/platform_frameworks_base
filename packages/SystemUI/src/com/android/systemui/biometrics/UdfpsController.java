@@ -330,17 +330,19 @@ public class UdfpsController implements DozeReceiver, Dumpable {
          *
          * @param event MotionEvent to simulate in onTouch
          */
-        public void debugOnTouch(long requestId, MotionEvent event) {
-            UdfpsController.this.onTouch(requestId, event, false);
+        public void debugOnTouch(MotionEvent event) {
+            final long requestId = (mOverlay != null) ? mOverlay.getRequestId() : 0L;
+            UdfpsController.this.onTouch(requestId, event, true);
         }
 
         /**
          * Debug to run onUiReady
          */
-        public void debugOnUiReady(long requestId, int sensorId) {
+        public void debugOnUiReady(int sensorId) {
             if (UdfpsController.this.mAlternateTouchProvider != null) {
                 UdfpsController.this.mAlternateTouchProvider.onUiReady();
             } else {
+                final long requestId = (mOverlay != null) ? mOverlay.getRequestId() : 0L;
                 UdfpsController.this.mFingerprintManager.onUiReady(requestId, sensorId);
             }
         }
