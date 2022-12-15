@@ -35,6 +35,7 @@ import android.telephony.CallForwardingInfo;
 import android.telephony.CarrierRestrictionRules;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
+import android.telephony.CellBroadcastIdRange;
 import android.telephony.ClientRequestStats;
 import android.telephony.ThermalMitigationRequest;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
@@ -2658,4 +2659,15 @@ interface ITelephony {
     * @hide
     */
     boolean isNullCipherAndIntegrityPreferenceEnabled();
+
+    /**
+     * Get current broadcast ranges.
+     */
+    List<CellBroadcastIdRange> getCellBroadcastIdRanges(int subId);
+
+    /**
+     * Set reception of cell broadcast messages with the list of the given ranges
+     */
+    void setCellBroadcastIdRanges(int subId, in List<CellBroadcastIdRange> ranges,
+            IIntegerConsumer callback);
 }
