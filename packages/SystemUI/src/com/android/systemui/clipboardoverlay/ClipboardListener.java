@@ -16,15 +16,21 @@
 
 package com.android.systemui.clipboardoverlay;
 
+import static android.content.ClipDescription.CLASSIFICATION_COMPLETE;
+
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_ENABLED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ENTERED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_UPDATED;
+import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_TOAST_SHOWN;
+
+import static com.google.android.setupcompat.util.WizardManagerHelper.SETTINGS_SECURE_USER_SETUP_COMPLETE;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.SystemProperties;
 import android.provider.DeviceConfig;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -56,6 +62,7 @@ public class ClipboardListener implements
     private final DeviceConfigProxy mDeviceConfig;
     private final Provider<ClipboardOverlayController> mOverlayProvider;
     private final ClipboardOverlayControllerLegacyFactory mOverlayFactory;
+    private final ClipboardToast mClipboardToast;
     private final ClipboardManager mClipboardManager;
     private final UiEventLogger mUiEventLogger;
     private final FeatureFlags mFeatureFlags;
@@ -66,6 +73,7 @@ public class ClipboardListener implements
     public ClipboardListener(Context context, DeviceConfigProxy deviceConfigProxy,
             Provider<ClipboardOverlayController> clipboardOverlayControllerProvider,
             ClipboardOverlayControllerLegacyFactory overlayFactory,
+            ClipboardToast clipboardToast,
             ClipboardManager clipboardManager,
             UiEventLogger uiEventLogger,
             FeatureFlags featureFlags) {
@@ -73,6 +81,7 @@ public class ClipboardListener implements
         mDeviceConfig = deviceConfigProxy;
         mOverlayProvider = clipboardOverlayControllerProvider;
         mOverlayFactory = overlayFactory;
+        mClipboardToast = clipboardToast;
         mClipboardManager = clipboardManager;
         mUiEventLogger = uiEventLogger;
         mFeatureFlags = featureFlags;
@@ -99,6 +108,15 @@ public class ClipboardListener implements
 
         if (shouldSuppressOverlay(clipData, clipSource, isEmulator())) {
             Log.i(TAG, "Clipboard overlay suppressed.");
+            return;
+        }
+
+        if (!isUserSetupComplete()) {
+            // just show a toast, user should not access intents from this state
+            if (shouldShowToast(clipData)) {
+                mUiEventLogger.log(CLIPBOARD_TOAST_SHOWN, 0, clipSource);
+                mClipboardToast.showCopiedToast();
+            }
             return;
         }
 
@@ -136,8 +154,24 @@ public class ClipboardListener implements
         return clipData.getDescription().getExtras().getBoolean(EXTRA_SUPPRESS_OVERLAY, false);
     }
 
+    boolean shouldShowToast(ClipData clipData) {
+        if (clipData == null) {
+            return false;
+        } else if (clipData.getDescription().getClassificationStatus() == CLASSIFICATION_COMPLETE) {
+            // only show for classification complete if we aren't already showing a toast, to ignore
+            // the duplicate ClipData with classification
+            return !mClipboardToast.isShowing();
+        }
+        return true;
+    }
+
     private static boolean isEmulator() {
         return SystemProperties.getBoolean("ro.boot.qemu", false);
+    }
+
+    private boolean isUserSetupComplete() {
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
     }
 
     interface ClipboardOverlay {
