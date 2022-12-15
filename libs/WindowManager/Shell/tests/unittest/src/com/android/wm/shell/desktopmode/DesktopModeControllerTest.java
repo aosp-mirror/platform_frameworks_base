@@ -365,7 +365,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
     @Test
     public void testHandleTransitionRequest_taskToFront_returnsWct() {
         RunningTaskInfo trigger = new RunningTaskInfo();
-        trigger.token = new MockToken().mToken;
+        trigger.token = new MockToken().token();
         trigger.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
         WindowContainerTransaction wct = mController.handleRequest(
                 mock(IBinder.class),
