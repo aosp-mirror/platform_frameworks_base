@@ -148,7 +148,7 @@ class UdfpsShell @Inject constructor(
 
     @VisibleForTesting
     fun onUiReady() {
-        udfpsOverlayController?.debugOnUiReady(REQUEST_ID, SENSOR_ID)
+        udfpsOverlayController?.debugOnUiReady(SENSOR_ID)
     }
 
     @VisibleForTesting
@@ -157,11 +157,11 @@ class UdfpsShell @Inject constructor(
 
         val downEvent: MotionEvent? = obtainMotionEvent(ACTION_DOWN, sensorBounds.exactCenterX(),
                 sensorBounds.exactCenterY(), MINOR, MAJOR)
-        udfpsOverlayController?.debugOnTouch(REQUEST_ID, downEvent)
+        udfpsOverlayController?.debugOnTouch(downEvent)
 
         val moveEvent: MotionEvent? = obtainMotionEvent(ACTION_MOVE, sensorBounds.exactCenterX(),
                 sensorBounds.exactCenterY(), MINOR, MAJOR)
-        udfpsOverlayController?.debugOnTouch(REQUEST_ID, moveEvent)
+        udfpsOverlayController?.debugOnTouch(moveEvent)
 
         downEvent?.recycle()
         moveEvent?.recycle()
@@ -173,7 +173,7 @@ class UdfpsShell @Inject constructor(
 
         val upEvent: MotionEvent? = obtainMotionEvent(ACTION_UP, sensorBounds.exactCenterX(),
                 sensorBounds.exactCenterY(), MINOR, MAJOR)
-        udfpsOverlayController?.debugOnTouch(REQUEST_ID, upEvent)
+        udfpsOverlayController?.debugOnTouch(upEvent)
         upEvent?.recycle()
     }
 
