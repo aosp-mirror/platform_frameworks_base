@@ -16,8 +16,13 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator
 
+import android.database.ContentObserver
+import android.os.UserHandle
+import android.provider.Settings
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
@@ -30,11 +35,20 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.provider.SectionHeaderVisibilityProvider
 import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProviderImpl
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider
+import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.util.settings.SettingsProxy
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 /**
@@ -45,16 +59,19 @@ import kotlinx.coroutines.launch
 class KeyguardCoordinator
 @Inject
 constructor(
+    @Background private val bgDispatcher: CoroutineDispatcher,
     private val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider,
     private val keyguardRepository: KeyguardRepository,
     private val notifPipelineFlags: NotifPipelineFlags,
     @Application private val scope: CoroutineScope,
     private val sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider,
+    private val secureSettings: SecureSettings,
     private val seenNotifsProvider: SeenNotificationsProviderImpl,
     private val statusBarStateController: StatusBarStateController,
 ) : Coordinator {
 
     private val unseenNotifications = mutableSetOf<NotificationEntry>()
+    private var unseenFilterEnabled = false
 
     override fun attach(pipeline: NotifPipeline) {
         setupInvalidateNotifListCallbacks()
@@ -71,6 +88,7 @@ constructor(
         pipeline.addFinalizeFilter(unseenNotifFilter)
         pipeline.addCollectionListener(collectionListener)
         scope.launch { clearUnseenWhenKeyguardIsDismissed() }
+        scope.launch { invalidateWhenUnseenSettingChanges() }
     }
 
     private suspend fun clearUnseenWhenKeyguardIsDismissed() {
@@ -83,6 +101,36 @@ constructor(
                 unseenNotifications.clear()
             }
         }
+    }
+
+    private suspend fun invalidateWhenUnseenSettingChanges() {
+        secureSettings
+            // emit whenever the setting has changed
+            .settingChangesForUser(
+                Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
+                UserHandle.USER_ALL,
+            )
+            // perform a query immediately
+            .onStart { emit(Unit) }
+            // for each change, lookup the new value
+            .map {
+                secureSettings.getBoolForUser(
+                    Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
+                    UserHandle.USER_CURRENT,
+                )
+            }
+            // perform lookups on the bg thread pool
+            .flowOn(bgDispatcher)
+            // only track the most recent emission, if events are happening faster than they can be
+            // consumed
+            .conflate()
+            // update local field and invalidate if necessary
+            .collect { setting ->
+                if (setting != unseenFilterEnabled) {
+                    unseenFilterEnabled = setting
+                    unseenNotifFilter.invalidateList("unseen setting changed")
+                }
+            }
     }
 
     private val collectionListener =
@@ -112,6 +160,8 @@ constructor(
 
             override fun shouldFilterOut(entry: NotificationEntry, now: Long): Boolean =
                 when {
+                    // Don't apply filter if the setting is disabled
+                    !unseenFilterEnabled -> false
                     // Don't apply filter if the keyguard isn't currently showing
                     !keyguardRepository.isKeyguardShowing() -> false
                     // Don't apply the filter if the notification is unseen
@@ -165,3 +215,15 @@ constructor(
         private val SEEN_TIMEOUT = 5.seconds
     }
 }
+
+private fun SettingsProxy.settingChangesForUser(name: String, userHandle: Int): Flow<Unit> =
+    conflatedCallbackFlow {
+        val observer =
+            object : ContentObserver(null) {
+                override fun onChange(selfChange: Boolean) {
+                    trySend(Unit)
+                }
+            }
+        registerContentObserverForUser(name, observer, userHandle)
+        awaitClose { unregisterContentObserver(observer) }
+    }
