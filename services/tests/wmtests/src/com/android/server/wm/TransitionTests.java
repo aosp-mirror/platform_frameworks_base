@@ -463,6 +463,53 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     @Test
+    public void testCreateInfo_NoAnimation() {
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
+        ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        final Task newTask = createTask(mDisplayContent);
+        final Task oldTask = createTask(mDisplayContent);
+        final ActivityRecord closing = createActivityRecord(oldTask);
+        final ActivityRecord opening = createActivityRecord(newTask);
+        // Start states.
+        changes.put(newTask, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
+        changes.put(oldTask, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
+        changes.put(opening, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
+        changes.put(closing, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
+        transition.setNoAnimation(opening);
+        fillChangeMap(changes, newTask);
+        // End states.
+        closing.setVisibleRequested(false);
+        opening.setVisibleRequested(true);
+
+        final int transit = transition.mType;
+        int flags = 0;
+
+        // Check that no-animation flag is promoted
+        participants.add(oldTask);
+        participants.add(newTask);
+        participants.add(opening);
+        participants.add(closing);
+        ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes,
+                mMockT);
+        assertNotNull(info.getChange(newTask.mRemoteToken.toWindowContainerToken()));
+        assertTrue(info.getChange(newTask.mRemoteToken.toWindowContainerToken())
+                .hasFlags(TransitionInfo.FLAG_NO_ANIMATION));
+
+        // Check that no-animation flag is NOT promoted if at-least on child *is* animated
+        final ActivityRecord opening2 = createActivityRecord(newTask);
+        changes.put(opening2, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
+        participants.add(opening2);
+        targets = Transition.calculateTargets(participants, changes);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, changes, mMockT);
+        assertNotNull(info.getChange(newTask.mRemoteToken.toWindowContainerToken()));
+        assertFalse(info.getChange(newTask.mRemoteToken.toWindowContainerToken())
+                .hasFlags(TransitionInfo.FLAG_NO_ANIMATION));
+    }
+
+    @Test
     public void testTargets_noIntermediatesToWallpaper() {
         final Transition transition = createTestTransition(TRANSIT_OPEN);
 

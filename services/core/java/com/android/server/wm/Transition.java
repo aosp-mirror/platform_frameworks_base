@@ -47,6 +47,7 @@ import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_INPUT_METHOD;
 import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_OCCLUDES_KEYGUARD;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
@@ -916,6 +917,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return mRemoteTransition;
     }
 
+    void setNoAnimation(WindowContainer wc) {
+        final ChangeInfo change = mChanges.get(wc);
+        if (change == null) {
+            throw new IllegalStateException("Can't set no-animation property of non-participant");
+        }
+        change.mFlags |= ChangeInfo.FLAG_CHANGE_NO_ANIMATION;
+    }
+
     @Override
     public void onTransactionReady(int syncId, SurfaceControl.Transaction transaction) {
         if (syncId != mSyncId) {
@@ -1442,6 +1451,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 i++;
                 targets.add(parent);
             }
+            if ((changes.get(target).mFlags & ChangeInfo.FLAG_CHANGE_NO_ANIMATION) != 0) {
+                changes.get(parent).mFlags |= ChangeInfo.FLAG_CHANGE_NO_ANIMATION;
+            } else {
+                changes.get(parent).mFlags |= ChangeInfo.FLAG_CHANGE_YES_ANIMATION;
+            }
         }
     }
 
@@ -1880,11 +1894,21 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         private static final int FLAG_TRANSIENT_LAUNCH = 2;
         private static final int FLAG_ABOVE_TRANSIENT_LAUNCH = 4;
 
+        /** This container explicitly requested no-animation (usually Activity level). */
+        private static final int FLAG_CHANGE_NO_ANIMATION = 0x8;
+        /**
+         * This container has at-least one child which IS animating (not marked NO_ANIMATION).
+         * Used during promotion. This trumps `FLAG_NO_ANIMATION` (if both are set).
+         */
+        private static final int FLAG_CHANGE_YES_ANIMATION = 0x10;
+
         @IntDef(prefix = { "FLAG_" }, value = {
                 FLAG_NONE,
                 FLAG_SEAMLESS_ROTATION,
                 FLAG_TRANSIENT_LAUNCH,
-                FLAG_ABOVE_TRANSIENT_LAUNCH
+                FLAG_ABOVE_TRANSIENT_LAUNCH,
+                FLAG_CHANGE_NO_ANIMATION,
+                FLAG_CHANGE_YES_ANIMATION
         })
         @Retention(RetentionPolicy.SOURCE)
         @interface Flag {}
@@ -2054,6 +2078,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
             if (occludesKeyguard(wc)) {
                 flags |= FLAG_OCCLUDES_KEYGUARD;
+            }
+            if ((mFlags & FLAG_CHANGE_NO_ANIMATION) != 0
+                    && (mFlags & FLAG_CHANGE_YES_ANIMATION) == 0) {
+                flags |= FLAG_NO_ANIMATION;
             }
             return flags;
         }

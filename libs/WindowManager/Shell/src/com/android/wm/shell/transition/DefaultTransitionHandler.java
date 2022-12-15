@@ -301,6 +301,14 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             return true;
         }
 
+        // check if no-animation and skip animation if so.
+        if (Transitions.isAllNoAnimation(info)) {
+            startTransaction.apply();
+            finishTransaction.apply();
+            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+            return true;
+        }
+
         if (mAnimations.containsKey(transition)) {
             throw new IllegalStateException("Got a duplicate startAnimation call for "
                     + transition);
