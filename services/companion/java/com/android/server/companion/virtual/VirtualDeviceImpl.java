@@ -88,7 +88,6 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Consumer;
 
 
@@ -114,7 +113,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final CameraAccessController mCameraAccessController;
     private VirtualAudioController mVirtualAudioController;
     @VisibleForTesting
-    final Set<Integer> mVirtualDisplayIds = new ArraySet<>();
+    final ArraySet<Integer> mVirtualDisplayIds = new ArraySet<>();
     private final OnDeviceCloseListener mOnDeviceCloseListener;
     private final IBinder mAppToken;
     private final VirtualDeviceParams mParams;

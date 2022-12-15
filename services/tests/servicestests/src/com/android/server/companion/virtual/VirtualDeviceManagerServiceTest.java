@@ -1595,6 +1595,33 @@ public class VirtualDeviceManagerServiceTest {
         verify(mSoundEffectListener).onPlaySoundEffect(AudioManager.FX_KEY_CLICK);
     }
 
+    @Test
+    public void getDisplayIdsForDevice_invalidDeviceId_emptyResult() {
+        ArraySet<Integer> displayIds = mLocalService.getDisplayIdsForDevice(VIRTUAL_DEVICE_ID_2);
+        assertThat(displayIds).isEmpty();
+    }
+
+    @Test
+    public void getDisplayIdsForDevice_noDisplays_emptyResult() {
+        ArraySet<Integer> displayIds = mLocalService.getDisplayIdsForDevice(VIRTUAL_DEVICE_ID_1);
+        assertThat(displayIds).isEmpty();
+    }
+
+    @Test
+    public void getDisplayIdsForDevice_oneDisplay_resultContainsCorrectDisplayId() {
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID_1);
+        ArraySet<Integer> displayIds = mLocalService.getDisplayIdsForDevice(VIRTUAL_DEVICE_ID_1);
+        assertThat(displayIds).containsExactly(DISPLAY_ID_1);
+    }
+
+    @Test
+    public void getDisplayIdsForDevice_twoDisplays_resultContainsCorrectDisplayIds() {
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID_1);
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID_2);
+        ArraySet<Integer> displayIds = mLocalService.getDisplayIdsForDevice(VIRTUAL_DEVICE_ID_1);
+        assertThat(displayIds).containsExactly(DISPLAY_ID_1, DISPLAY_ID_2);
+    }
+
     private VirtualDeviceImpl createVirtualDevice(int virtualDeviceId, int ownerUid) {
         VirtualDeviceParams params = new VirtualDeviceParams.Builder()
                 .setBlockedActivities(getBlockedActivities())
