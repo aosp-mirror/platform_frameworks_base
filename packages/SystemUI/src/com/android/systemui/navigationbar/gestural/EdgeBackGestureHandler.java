@@ -654,8 +654,9 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     }
 
     private void updateMLModelState() {
-        boolean newState = mIsEnabled && DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.USE_BACK_GESTURE_ML_MODEL, false);
+        boolean newState =
+                mIsGesturalModeEnabled && DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
+                        SystemUiDeviceConfigFlags.USE_BACK_GESTURE_ML_MODEL, false);
 
         if (newState == mUseMLModel) {
             return;
@@ -785,7 +786,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             // ML model
             boolean withinMinRange = x < mMLEnableWidth + mLeftInset
                     || x >= (mDisplaySize.x - mMLEnableWidth - mRightInset);
-            if (!withinMinRange && mUseMLModel
+            if (!withinMinRange && mUseMLModel && !mMLModelIsLoading
                     && (results = getBackGesturePredictionsCategory(x, y, app)) != -1) {
                 withinRange = (results == 1);
             }
