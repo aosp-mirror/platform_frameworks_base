@@ -975,13 +975,17 @@ public class AppStandbyController
                                     + standbyBucketToString(newBucket));
                         }
                     } else {
-                        newBucket = getBucketForLocked(packageName, userId,
-                                elapsedRealtime);
-                        if (DEBUG) {
-                            Slog.d(TAG, "Evaluated AOSP newBucket = "
-                                    + standbyBucketToString(newBucket));
+                        // Don't update the standby state for apps that were restored
+                        if (!(oldMainReason == REASON_MAIN_DEFAULT
+                                && (app.bucketingReason & REASON_SUB_MASK)
+                                        == REASON_SUB_DEFAULT_APP_RESTORED)) {
+                            newBucket = getBucketForLocked(packageName, userId, elapsedRealtime);
+                            if (DEBUG) {
+                                Slog.d(TAG, "Evaluated AOSP newBucket = "
+                                        + standbyBucketToString(newBucket));
+                            }
+                            reason = REASON_MAIN_TIMEOUT;
                         }
-                        reason = REASON_MAIN_TIMEOUT;
                     }
                 }
 
