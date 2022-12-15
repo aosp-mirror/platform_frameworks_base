@@ -16,13 +16,24 @@
 
 package com.android.systemui.clipboardoverlay;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.when;
 
+import android.app.RemoteAction;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.os.PersistableBundle;
 import android.testing.TestableResources;
+import android.util.ArrayMap;
+import android.view.textclassifier.TextClassification;
+import android.view.textclassifier.TextClassificationManager;
+import android.view.textclassifier.TextClassifier;
+import android.view.textclassifier.TextLinks;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -30,19 +41,84 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
+import com.google.android.collect.Lists;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Map;
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ClipboardOverlayUtilsTest extends SysuiTestCase {
 
     private ClipboardOverlayUtils mClipboardUtils;
+    @Mock
+    private TextClassificationManager mTextClassificationManager;
+    @Mock
+    private TextClassifier mTextClassifier;
+
+    @Mock
+    private ClipData.Item mClipDataItem;
 
     @Before
     public void setUp() {
-        mClipboardUtils = new ClipboardOverlayUtils();
+        MockitoAnnotations.initMocks(this);
+
+        when(mTextClassificationManager.getTextClassifier()).thenReturn(mTextClassifier);
+        mClipboardUtils = new ClipboardOverlayUtils(mTextClassificationManager);
+    }
+
+    @Test
+    public void test_getAction_noLinks_returnsEmptyOptional() {
+        ClipData.Item item = new ClipData.Item("no text links");
+        item.setTextLinks(Mockito.mock(TextLinks.class));
+
+        Optional<RemoteAction> action = mClipboardUtils.getAction(item, "");
+
+        assertTrue(action.isEmpty());
+    }
+
+    @Test
+    public void test_getAction_returnsFirstLink() {
+        when(mClipDataItem.getTextLinks()).thenReturn(getFakeTextLinks());
+        when(mClipDataItem.getText()).thenReturn("");
+        RemoteAction actionA = constructRemoteAction("abc");
+        RemoteAction actionB = constructRemoteAction("def");
+        TextClassification classificationA = Mockito.mock(TextClassification.class);
+        when(classificationA.getActions()).thenReturn(Lists.newArrayList(actionA));
+        TextClassification classificationB = Mockito.mock(TextClassification.class);
+        when(classificationB.getActions()).thenReturn(Lists.newArrayList(actionB));
+        when(mTextClassifier.classifyText(anyString(), anyInt(), anyInt(), isNull())).thenReturn(
+                classificationA, classificationB);
+
+        RemoteAction result = mClipboardUtils.getAction(mClipDataItem, "def").orElse(null);
+
+        assertEquals(actionA, result);
+    }
+
+    @Test
+    public void test_getAction_skipsMatchingComponent() {
+        when(mClipDataItem.getTextLinks()).thenReturn(getFakeTextLinks());
+        when(mClipDataItem.getText()).thenReturn("");
+        RemoteAction actionA = constructRemoteAction("abc");
+        RemoteAction actionB = constructRemoteAction("def");
+        TextClassification classificationA = Mockito.mock(TextClassification.class);
+        when(classificationA.getActions()).thenReturn(Lists.newArrayList(actionA));
+        TextClassification classificationB = Mockito.mock(TextClassification.class);
+        when(classificationB.getActions()).thenReturn(Lists.newArrayList(actionB));
+        when(mTextClassifier.classifyText(anyString(), anyInt(), anyInt(), isNull())).thenReturn(
+                classificationA, classificationB);
+
+        RemoteAction result = mClipboardUtils.getAction(mClipDataItem, "abc").orElse(null);
+
+        assertEquals(actionB, result);
     }
 
     @Test
@@ -92,12 +168,28 @@ public class ClipboardOverlayUtilsTest extends SysuiTestCase {
         assertFalse(mClipboardUtils.isRemoteCopy(mContext, data, ""));
     }
 
-    static ClipData constructClipData(String[] mimeTypes, ClipData.Item item,
+    private static ClipData constructClipData(String[] mimeTypes, ClipData.Item item,
             PersistableBundle extras) {
         ClipDescription description = new ClipDescription("Test", mimeTypes);
         if (extras != null) {
             description.setExtras(extras);
         }
         return new ClipData(description, item);
+    }
+
+    private static RemoteAction constructRemoteAction(String packageName) {
+        RemoteAction action = Mockito.mock(RemoteAction.class, Answers.RETURNS_DEEP_STUBS);
+        when(action.getActionIntent().getIntent().getComponent().getPackageName())
+                .thenReturn(packageName);
+        return action;
+    }
+
+    private static TextLinks getFakeTextLinks() {
+        TextLinks.Builder textLinks = new TextLinks.Builder("test");
+        final Map<String, Float> scores = new ArrayMap<>();
+        scores.put(TextClassifier.TYPE_EMAIL, 1f);
+        textLinks.addLink(0, 0, scores);
+        textLinks.addLink(0, 0, scores);
+        return textLinks.build();
     }
 }

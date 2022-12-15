@@ -93,6 +93,7 @@ import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.CaptioningManager;
 import android.view.inputmethod.InputMethodManager;
+import android.view.textclassifier.TextClassificationManager;
 
 import androidx.core.app.NotificationManagerCompat;
 
@@ -637,5 +638,11 @@ public class FrameworkServicesModule {
     @Singleton
     static BluetoothAdapter provideBluetoothAdapter(BluetoothManager bluetoothManager) {
         return bluetoothManager.getAdapter();
+    }
+
+    @Provides
+    @Singleton
+    static TextClassificationManager provideTextClassificationManager(Context context) {
+        return context.getSystemService(TextClassificationManager.class);
     }
 }
