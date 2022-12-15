@@ -8987,6 +8987,10 @@
         <!-- The service that provides {@link android.service.voice.HotwordDetectionService}.
              @hide @SystemApi -->
         <attr name="hotwordDetectionService" format="string" />
+        <!-- The service that provides {@link android.service.voice.VisualQueryDetectionService}.
+             @hide @SystemApi -->
+        <attr name="visualQueryDetectionService" format="string" />
+
     </declare-styleable>
 
     <!-- Use <code>game-service</code> as the root tag of the XML resource that

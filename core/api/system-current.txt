@@ -389,6 +389,7 @@ package android {
     field public static final int sdkVersion = 16844304; // 0x1010610
     field public static final int supportsAmbientMode = 16844173; // 0x101058d
     field public static final int userRestriction = 16844164; // 0x1010584
+    field public static final int visualQueryDetectionService;
   }
 
   public static final class R.bool {
