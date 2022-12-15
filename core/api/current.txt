@@ -20923,6 +20923,7 @@ package android.media {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int AUDIO_ENCAPSULATION_TYPE_IEC61937 = 1; // 0x1
     field public static final int AUDIO_ENCAPSULATION_TYPE_NONE = 0; // 0x0
+    field public static final int AUDIO_ENCAPSULATION_TYPE_PCM = 2; // 0x2
     field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioProfile> CREATOR;
   }
 

@@ -25,6 +25,7 @@ namespace android {
 // keep these values in sync with AudioProfile.java
 #define ENCAPSULATION_TYPE_NONE 0
 #define ENCAPSULATION_TYPE_IEC61937 1
+#define ENCAPSULATION_TYPE_PCM 2
 
 static inline status_t audioEncapsulationTypeFromNative(
         audio_encapsulation_type_t nEncapsulationType, int* encapsulationType) {
@@ -35,6 +36,9 @@ static inline status_t audioEncapsulationTypeFromNative(
             break;
         case AUDIO_ENCAPSULATION_TYPE_IEC61937:
             *encapsulationType = ENCAPSULATION_TYPE_IEC61937;
+            break;
+        case AUDIO_ENCAPSULATION_TYPE_PCM:
+            *encapsulationType = ENCAPSULATION_TYPE_PCM;
             break;
         default:
             result = BAD_VALUE;
