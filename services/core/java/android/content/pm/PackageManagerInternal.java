@@ -375,10 +375,15 @@ public abstract class PackageManagerInternal {
             int deviceOwnerUserId, String deviceOwner, SparseArray<String> profileOwners);
 
     /**
-     * Marks packages as protected for a given user or all users in case of USER_ALL.
+     * Marks packages as protected for a given user or all users in case of USER_ALL. Setting
+     * {@code packageNames} to {@code null} means unset all existing protected packages for the
+     * given user.
+     *
+     * <p> Note that setting it if set for a specific user, it takes precedence over the packages
+     * set globally using USER_ALL.
      */
     public abstract void setOwnerProtectedPackages(
-            @UserIdInt int userId, @NonNull List<String> packageNames);
+            @UserIdInt int userId, @Nullable List<String> packageNames);
 
     /**
      * Returns {@code true} if a given package can't be wiped. Otherwise, returns {@code false}.
