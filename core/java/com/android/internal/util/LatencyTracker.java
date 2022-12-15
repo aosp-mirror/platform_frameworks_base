@@ -37,12 +37,17 @@ import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPOR
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_UDFPS_ILLUMINATE;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_USER_SWITCH;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__UNKNOWN_ACTION;
+import static com.android.internal.util.LatencyTracker.ActionProperties.ENABLE_SUFFIX;
+import static com.android.internal.util.LatencyTracker.ActionProperties.LEGACY_TRACE_THRESHOLD_SUFFIX;
+import static com.android.internal.util.LatencyTracker.ActionProperties.SAMPLE_INTERVAL_SUFFIX;
+import static com.android.internal.util.LatencyTracker.ActionProperties.TRACE_THRESHOLD_SUFFIX;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Build;
+import android.os.ConditionVariable;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.provider.DeviceConfig;
@@ -58,6 +63,7 @@ import com.android.internal.os.BackgroundThread;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -261,11 +267,11 @@ public class LatencyTracker {
     @GuardedBy("mLock")
     private final SparseArray<Session> mSessions = new SparseArray<>();
     @GuardedBy("mLock")
-    private final int[] mTraceThresholdPerAction = new int[ACTIONS_ALL.length];
-    @GuardedBy("mLock")
-    private int mSamplingInterval;
+    private final SparseArray<ActionProperties> mActionPropertiesMap = new SparseArray<>();
     @GuardedBy("mLock")
     private boolean mEnabled;
+    @VisibleForTesting
+    public final ConditionVariable mDeviceConfigPropertiesUpdated = new ConditionVariable();
 
     public static LatencyTracker getInstance(Context context) {
         if (sLatencyTracker == null) {
@@ -278,9 +284,9 @@ public class LatencyTracker {
         return sLatencyTracker;
     }
 
-    private LatencyTracker() {
+    @VisibleForTesting
+    public LatencyTracker() {
         mEnabled = DEFAULT_ENABLED;
-        mSamplingInterval = DEFAULT_SAMPLING_INTERVAL;
 
         // Post initialization to the background in case we're running on the main thread.
         BackgroundThread.getHandler().post(() -> this.updateProperties(
@@ -291,14 +297,24 @@ public class LatencyTracker {
 
     private void updateProperties(DeviceConfig.Properties properties) {
         synchronized (mLock) {
-            mSamplingInterval = properties.getInt(SETTINGS_SAMPLING_INTERVAL_KEY,
+            int samplingInterval = properties.getInt(SETTINGS_SAMPLING_INTERVAL_KEY,
                     DEFAULT_SAMPLING_INTERVAL);
             mEnabled = properties.getBoolean(SETTINGS_ENABLED_KEY, DEFAULT_ENABLED);
             for (int action : ACTIONS_ALL) {
-                mTraceThresholdPerAction[action] =
-                    properties.getInt(getNameOfAction(STATSD_ACTION[action]), -1);
+                String actionName = getNameOfAction(STATSD_ACTION[action]).toLowerCase(Locale.ROOT);
+                int legacyActionTraceThreshold = properties.getInt(
+                        actionName + LEGACY_TRACE_THRESHOLD_SUFFIX, -1);
+                mActionPropertiesMap.put(action, new ActionProperties(action,
+                        properties.getBoolean(actionName + ENABLE_SUFFIX, mEnabled),
+                        properties.getInt(actionName + SAMPLE_INTERVAL_SUFFIX, samplingInterval),
+                        properties.getInt(actionName + TRACE_THRESHOLD_SUFFIX,
+                                legacyActionTraceThreshold)));
+            }
+            if (DEBUG) {
+                Log.d(TAG, "updated action properties: " + mActionPropertiesMap);
             }
         }
+        mDeviceConfigPropertiesUpdated.open();
     }
 
     /**
@@ -369,13 +385,35 @@ public class LatencyTracker {
         return "com.android.telemetry.latency-tracker-" + getNameOfAction(STATSD_ACTION[action]);
     }
 
+    /**
+     * @deprecated Use {@link #isEnabled(Context, int)}
+     */
+    @Deprecated
     public static boolean isEnabled(Context ctx) {
         return getInstance(ctx).isEnabled();
     }
 
+    /**
+     * @deprecated Used {@link #isEnabled(int)}
+     */
+    @Deprecated
     public boolean isEnabled() {
         synchronized (mLock) {
             return mEnabled;
+        }
+    }
+
+    public static boolean isEnabled(Context ctx, int action) {
+        return getInstance(ctx).isEnabled(action);
+    }
+
+    public boolean isEnabled(int action) {
+        synchronized (mLock) {
+            ActionProperties actionProperties = mActionPropertiesMap.get(action);
+            if (actionProperties != null) {
+                return actionProperties.isEnabled();
+            }
+            return false;
         }
     }
 
@@ -468,8 +506,14 @@ public class LatencyTracker {
         boolean shouldSample;
         int traceThreshold;
         synchronized (mLock) {
-            shouldSample = ThreadLocalRandom.current().nextInt(mSamplingInterval) == 0;
-            traceThreshold = mTraceThresholdPerAction[action];
+            ActionProperties actionProperties = mActionPropertiesMap.get(action);
+            if (actionProperties == null) {
+                return;
+            }
+            int nextRandNum = ThreadLocalRandom.current().nextInt(
+                    actionProperties.getSamplingInterval());
+            shouldSample = nextRandNum == 0;
+            traceThreshold = actionProperties.getTraceThreshold();
         }
 
         if (traceThreshold > 0 && duration >= traceThreshold) {
@@ -547,6 +591,61 @@ public class LatencyTracker {
 
         int duration() {
             return (int) (mEndRtc - mStartRtc);
+        }
+    }
+
+    @VisibleForTesting
+    static class ActionProperties {
+        static final String ENABLE_SUFFIX = "_enable";
+        static final String SAMPLE_INTERVAL_SUFFIX = "_sample_interval";
+        // TODO: migrate all usages of the legacy trace theshold property
+        static final String LEGACY_TRACE_THRESHOLD_SUFFIX = "";
+        static final String TRACE_THRESHOLD_SUFFIX = "_trace_threshold";
+
+        @Action
+        private final int mAction;
+        private final boolean mEnabled;
+        private final int mSamplingInterval;
+        private final int mTraceThreshold;
+
+        ActionProperties(
+                @Action int action,
+                boolean enabled,
+                int samplingInterval,
+                int traceThreshold) {
+            this.mAction = action;
+            com.android.internal.util.AnnotationValidations.validate(
+                    Action.class, null, mAction);
+            this.mEnabled = enabled;
+            this.mSamplingInterval = samplingInterval;
+            this.mTraceThreshold = traceThreshold;
+        }
+
+        @Action
+        int getAction() {
+            return mAction;
+        }
+
+        boolean isEnabled() {
+            return mEnabled;
+        }
+
+        int getSamplingInterval() {
+            return mSamplingInterval;
+        }
+
+        int getTraceThreshold() {
+            return mTraceThreshold;
+        }
+
+        @Override
+        public String toString() {
+            return "ActionProperties{"
+                    + " mAction=" + mAction
+                    + ", mEnabled=" + mEnabled
+                    + ", mSamplingInterval=" + mSamplingInterval
+                    + ", mTraceThreshold=" + mTraceThreshold
+                    + "}";
         }
     }
 }
