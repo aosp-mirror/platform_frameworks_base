@@ -1499,11 +1499,13 @@ final class HdmiCecController {
     }
 
     final class HdmiCecCallback {
+        @VisibleForTesting
         public void onCecMessage(int initiator, int destination, byte[] body) {
             runOnServiceThread(
                     () -> handleIncomingCecCommand(initiator, destination, body));
         }
 
+        @VisibleForTesting
         public void onHotplugEvent(int portId, boolean connected) {
             runOnServiceThread(() -> handleHotplug(portId, connected));
         }
