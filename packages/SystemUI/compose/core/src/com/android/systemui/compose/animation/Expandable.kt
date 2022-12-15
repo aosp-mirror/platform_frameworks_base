@@ -53,8 +53,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Density
 import androidx.lifecycle.ViewTreeLifecycleOwner
 import androidx.lifecycle.ViewTreeViewModelStoreOwner
-import androidx.savedstate.findViewTreeSavedStateRegistryOwner
-import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.android.systemui.animation.LaunchAnimator
 import kotlin.math.min
 
@@ -298,8 +296,9 @@ private fun AnimatedContentInOverlay(
                 overlayViewGroup,
                 ViewTreeViewModelStoreOwner.get(composeViewRoot),
             )
-            overlayViewGroup.setViewTreeSavedStateRegistryOwner(
-                composeViewRoot.findViewTreeSavedStateRegistryOwner()
+            ViewTreeSavedStateRegistryOwner.set(
+                overlayViewGroup,
+                ViewTreeSavedStateRegistryOwner.get(composeViewRoot),
             )
 
             composeView.setParentCompositionContext(compositionContext)
