@@ -190,8 +190,7 @@ public class UninstallAppProgress extends Activity {
                         UserHandle otherBlockingUserHandle = null;
                         for (int i = 0; i < userHandles.size(); ++i) {
                             final UserHandle handle = userHandles.get(i);
-                            if (packageManager.getBlockUninstallForUser(packageName,
-                                    handle.getIdentifier())) {
+                            if (packageManager.canUserUninstall(packageName, handle)) {
                                 otherBlockingUserHandle = handle;
                                 break;
                             }

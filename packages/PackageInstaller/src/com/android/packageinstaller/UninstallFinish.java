@@ -135,8 +135,7 @@ public class UninstallFinish extends BroadcastReceiver {
                         UserHandle otherBlockingUserHandle = null;
                         for (int i = 0; i < userHandles.size(); ++i) {
                             final UserHandle handle = userHandles.get(i);
-                            if (packageManager.getBlockUninstallForUser(appInfo.packageName,
-                                    handle.getIdentifier())) {
+                            if (packageManager.canUserUninstall(appInfo.packageName, handle)) {
                                 otherBlockingUserHandle = handle;
                                 break;
                             }

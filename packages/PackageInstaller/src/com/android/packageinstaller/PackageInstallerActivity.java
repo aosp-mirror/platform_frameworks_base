@@ -332,21 +332,23 @@ public class PackageInstallerActivity extends AlertActivity {
             final int sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID,
                     -1 /* defaultValue */);
             final SessionInfo info = mInstaller.getSessionInfo(sessionId);
-            if (info == null || !info.sealed || info.resolvedBaseCodePath == null) {
+            final String resolvedBaseCodePath = intent.getStringExtra(
+                    PackageInstaller.EXTRA_RESOLVED_BASE_PATH);
+            if (info == null || !info.isSealed() || resolvedBaseCodePath == null) {
                 Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
                 finish();
                 return;
             }
 
             mSessionId = sessionId;
-            packageSource = Uri.fromFile(new File(info.resolvedBaseCodePath));
+            packageSource = Uri.fromFile(new File(resolvedBaseCodePath));
             mOriginatingURI = null;
             mReferrerURI = null;
         } else if (PackageInstaller.ACTION_CONFIRM_PRE_APPROVAL.equals(action)) {
             final int sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID,
                     -1 /* defaultValue */);
             final SessionInfo info = mInstaller.getSessionInfo(sessionId);
-            if (info == null || !info.isPreapprovalRequested) {
+            if (info == null || !info.getIsPreApprovalRequested()) {
                 Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
                 finish();
                 return;
