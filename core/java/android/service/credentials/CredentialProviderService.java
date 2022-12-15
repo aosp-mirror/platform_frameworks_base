@@ -24,6 +24,7 @@ import android.annotation.SdkConstant;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.credentials.ClearCredentialStateException;
 import android.credentials.CreateCredentialException;
 import android.credentials.GetCredentialException;
 import android.os.CancellationSignal;
@@ -224,6 +225,40 @@ public abstract class CredentialProviderService extends Service {
             ));
             return transport;
         }
+
+        @Override
+        public ICancellationSignal onClearCredentialState(ClearCredentialStateRequest request,
+                IClearCredentialStateCallback callback) {
+            Objects.requireNonNull(request);
+            Objects.requireNonNull(callback);
+
+            ICancellationSignal transport = CancellationSignal.createTransport();
+
+            mHandler.sendMessage(obtainMessage(
+                    CredentialProviderService::onClearCredentialState,
+                    CredentialProviderService.this, request,
+                    CancellationSignal.fromTransport(transport),
+                    new OutcomeReceiver<Void, ClearCredentialStateException>() {
+                        @Override
+                        public void onResult(Void result) {
+                            try {
+                                callback.onSuccess();
+                            } catch (RemoteException e) {
+                                e.rethrowFromSystemServer();
+                            }
+                        }
+                        @Override
+                        public void onError(ClearCredentialStateException e) {
+                            try {
+                                callback.onFailure(e.errorType, e.getMessage());
+                            } catch (RemoteException ex) {
+                                ex.rethrowFromSystemServer();
+                            }
+                        }
+                    }
+            ));
+            return transport;
+        }
     };
 
     /**
@@ -262,4 +297,26 @@ public abstract class CredentialProviderService extends Service {
             @NonNull CancellationSignal cancellationSignal,
             @NonNull OutcomeReceiver<BeginCreateCredentialResponse,
                     CreateCredentialException> callback);
+
+    /**
+     * Called by the android system to clear the credential state.
+     *
+     * This api isinvoked by developers after users sign out of an app, with an intention to
+     * clear any stored credential session that providers have retained.
+     *
+     * As a provider, you must clear any credential state, if maintained. For e.g. a provider may
+     * have stored an active credential session that is used to limit or rank sign-in options for
+     * future credential retrieval flows. When a user signs out of the app, such state should be
+     * cleared and an exhaustive list of credentials must be presented to the user on subsequent
+     * credential retrieval flows.
+     *
+     * @param request The clear credential request for the provider to handle.
+     * @param cancellationSignal Signal for providers to listen to any cancellation requests from
+     *                           the android system.
+     * @param callback Object used to relay the result of the request.
+     */
+    public abstract void onClearCredentialState(@NonNull ClearCredentialStateRequest request,
+            @NonNull CancellationSignal cancellationSignal,
+            @NonNull OutcomeReceiver<Void,
+                    ClearCredentialStateException> callback);
 }
