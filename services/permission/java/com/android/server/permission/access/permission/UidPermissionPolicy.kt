@@ -191,6 +191,61 @@ class UidPermissionPolicy : SchemePolicy() {
         check(packageName !in newState.systemState.disabledSystemPackageStates) {
             "Package $packageName reported as removed before disabled system package is enabled"
         }
+
+        val changedPermissionNames = IndexedSet<String>()
+        trimPermissions(packageName, changedPermissionNames)
+        trimPermissionStates(appId)
+        changedPermissionNames.forEachIndexed { _, permissionName ->
+            evaluatePermissionStateForAllPackages(permissionName, null)
+        }
+    }
+
+    override fun MutateStateScope.onPackageUninstalled(
+        packageName: String,
+        appId: Int,
+        userId: Int
+    ) {
+        resetRuntimePermissions(packageName, appId, userId)
+    }
+
+    fun MutateStateScope.resetRuntimePermissions(
+        packageName: String,
+        appId: Int,
+        userId: Int
+    ) {
+        val androidPackage = newState.systemState.packageStates[packageName]?.androidPackage
+            ?: return
+        androidPackage.requestedPermissions.forEachIndexed { _, permissionName ->
+            val permission = newState.systemState.permissions[permissionName]
+                ?: return@forEachIndexed
+            if (permission.isRemoved) {
+                return@forEachIndexed
+            }
+            val isRequestedByOtherPackages = anyPackageInAppId(appId) { packageState ->
+                packageState.packageName != packageName &&
+                    permissionName in packageState.androidPackage!!.requestedPermissions
+            }
+            if (isRequestedByOtherPackages) {
+                return@forEachIndexed
+            }
+            val oldFlags = getPermissionFlags(appId, userId, permissionName)
+            if (oldFlags.hasAnyBit(SYSTEM_OR_POLICY_FIXED_MASK)) {
+                return@forEachIndexed
+            }
+            var newFlags = oldFlags
+            newFlags = if (
+                newFlags.hasBits(PermissionFlags.ROLE) || newFlags.hasBits(PermissionFlags.PREGRANT)
+            ) {
+                newFlags or PermissionFlags.RUNTIME_GRANTED
+            } else {
+                newFlags andInv PermissionFlags.RUNTIME_GRANTED
+            }
+            newFlags = newFlags andInv USER_SETTABLE_MASK
+            if (newFlags.hasBits(PermissionFlags.LEGACY_GRANTED)) {
+                newFlags = newFlags or PermissionFlags.IMPLICIT
+            }
+            setPermissionFlags(appId, userId, permissionName, newFlags)
+        }
     }
 
     private fun MutateStateScope.adoptPermissions(
@@ -586,7 +641,9 @@ class UidPermissionPolicy : SchemePolicy() {
                 newFlags = newFlags or (oldFlags and PermissionFlags.RUNTIME_GRANTED)
             }
             if (permission.isRole) {
-                newFlags = newFlags or (oldFlags and PermissionFlags.ROLE)
+                newFlags = newFlags or (
+                    oldFlags and (PermissionFlags.ROLE or PermissionFlags.RUNTIME_GRANTED)
+                )
             }
             setPermissionFlags(appId, userId, permissionName, newFlags)
         } else if (permission.isRuntime) {
@@ -646,11 +703,7 @@ class UidPermissionPolicy : SchemePolicy() {
                             PermissionFlags.isAppOpGranted(accessBackgroundLocationFlags) &&
                                 !accessBackgroundLocationFlags.hasBits(PermissionFlags.IMPLICIT)
                     }
-                    // These are the permission flags that imply we shouldn't automatically
-                    // modify the permission grant state.
-                    val shouldRetainByMask = newFlags.hasAnyBit(
-                        PermissionFlags.SYSTEM_FIXED or PermissionFlags.POLICY_FIXED
-                    )
+                    val shouldRetainByMask = newFlags.hasAnyBit(SYSTEM_OR_POLICY_FIXED_MASK)
                     if (shouldRetainAsNearbyDevices || shouldRetainByMask) {
                         if (wasGrantedByImplicit) {
                             newFlags = newFlags or PermissionFlags.RUNTIME_GRANTED
@@ -1159,6 +1212,24 @@ class UidPermissionPolicy : SchemePolicy() {
         private val NOTIFICATIONS_PERMISSIONS = indexedSetOf(
             Manifest.permission.POST_NOTIFICATIONS
         )
+
+        /**
+         * Mask for all permission flags that can be set by the user
+         */
+        private const val USER_SETTABLE_MASK =
+            PermissionFlags.USER_SET or
+                PermissionFlags.USER_FIXED or
+                PermissionFlags.APP_OP_REVOKED or
+                PermissionFlags.ONE_TIME or
+                PermissionFlags.HIBERNATION or
+                PermissionFlags.USER_SELECTED
+
+        /**
+         * Mask for all permission flags that imply we shouldn't automatically modify the
+         * permission grant state.
+         */
+        private const val SYSTEM_OR_POLICY_FIXED_MASK =
+            PermissionFlags.SYSTEM_FIXED or PermissionFlags.POLICY_FIXED
     }
 
     /**
