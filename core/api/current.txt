@@ -24065,7 +24065,6 @@ package android.media {
   }
 
   public static final class RouteListingPreference.Item implements android.os.Parcelable {
-    ctor public RouteListingPreference.Item(@NonNull String, int, int);
     method public int describeContents();
     method public int getDisableReason();
     method public int getFlags();
@@ -24078,6 +24077,13 @@ package android.media {
     field public static final int DISABLE_REASON_SUBSCRIPTION_REQUIRED = 1; // 0x1
     field public static final int FLAG_ONGOING_SESSION = 1; // 0x1
     field public static final int FLAG_SUGGESTED_ROUTE = 2; // 0x2
+  }
+
+  public static final class RouteListingPreference.Item.Builder {
+    ctor public RouteListingPreference.Item.Builder(@NonNull String);
+    method @NonNull public android.media.RouteListingPreference.Item build();
+    method @NonNull public android.media.RouteListingPreference.Item.Builder setDisableReason(int);
+    method @NonNull public android.media.RouteListingPreference.Item.Builder setFlags(int);
   }
 
   public final class RoutingSessionInfo implements android.os.Parcelable {
