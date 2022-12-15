@@ -157,7 +157,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private KeyguardViewController mKeyguardViewController;
     private DozeScrimController mDozeScrimController;
     private KeyguardViewMediator mKeyguardViewMediator;
-    private ScrimController mScrimController;
     private PendingAuthenticated mPendingAuthenticated = null;
     private boolean mHasScreenTurnedOnSinceAuthenticating;
     private boolean mFadedAwayAfterWakeAndUnlock;
@@ -256,7 +255,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     @Inject
     public BiometricUnlockController(
             DozeScrimController dozeScrimController,
-            KeyguardViewMediator keyguardViewMediator, ScrimController scrimController,
+            KeyguardViewMediator keyguardViewMediator,
             NotificationShadeWindowController notificationShadeWindowController,
             KeyguardStateController keyguardStateController, Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -285,7 +284,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mNotificationShadeWindowController = notificationShadeWindowController;
         mDozeScrimController = dozeScrimController;
         mKeyguardViewMediator = keyguardViewMediator;
-        mScrimController = scrimController;
         mKeyguardStateController = keyguardStateController;
         mHandler = handler;
         mConsecutiveFpFailureThreshold = resources.getInteger(
@@ -366,12 +364,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         Trace.endSection();
     }
 
-    private boolean pulsingOrAod() {
-        final ScrimState scrimState = mScrimController.getState();
-        return scrimState == ScrimState.AOD
-                || scrimState == ScrimState.PULSING;
-    }
-
     @Override
     public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType,
             boolean isStrongBiometric) {
@@ -416,7 +408,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         boolean wasDeviceInteractive = mUpdateMonitor.isDeviceInteractive();
         mMode = mode;
         mHasScreenTurnedOnSinceAuthenticating = false;
-        if (mMode == MODE_WAKE_AND_UNLOCK_PULSING && pulsingOrAod()) {
+        if (mMode == MODE_WAKE_AND_UNLOCK_PULSING) {
             // If we are waking the device up while we are pulsing the clock and the
             // notifications would light up first, creating an unpleasant animation.
             // Defer changing the screen brightness by forcing doze brightness on our window
