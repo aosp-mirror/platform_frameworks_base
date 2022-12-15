@@ -424,11 +424,11 @@ object Flags {
     @JvmField val NOTE_TASKS = unreleasedFlag(1900, "keycode_flag")
 
     // 2000 - device controls
-    @Keep @JvmField val USE_APP_PANELS = unreleasedFlag(2000, "use_app_panels", teamfood = true)
+    @Keep @JvmField val USE_APP_PANELS = releasedFlag(2000, "use_app_panels", teamfood = true)
 
     @JvmField
     val APP_PANELS_ALL_APPS_ALLOWED =
-        unreleasedFlag(2001, "app_panels_all_apps_allowed", teamfood = true)
+        releasedFlag(2001, "app_panels_all_apps_allowed", teamfood = true)
 
     // 2100 - Falsing Manager
     @JvmField val FALSING_FOR_LONG_TAPS = releasedFlag(2100, "falsing_for_long_taps")
