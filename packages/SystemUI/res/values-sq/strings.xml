@@ -993,7 +993,6 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Transmeto <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Ndrysho daljen"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"I panjohur"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Hap \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>

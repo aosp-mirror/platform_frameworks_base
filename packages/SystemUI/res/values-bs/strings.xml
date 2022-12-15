@@ -986,14 +986,13 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera i mikrofon su isključeni"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# obavještenje}one{# obavještenje}few{# obavještenja}other{# obavještenja}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <string name="note_task_button_label" msgid="8718616095800343136">"Pisanje bilježaka"</string>
+    <string name="note_task_button_label" msgid="8718616095800343136">"Pisanje bilješki"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Emitiranje"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Zaustaviti emitiranje aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Ako emitirate aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g> ili promijenite izlaz, trenutno emitiranje će se zaustaviti"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Emitiraj aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Promijeni izlaz"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Nepoznato"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"DDD, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Otvori aplikaciju <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
@@ -1009,8 +1008,6 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Obrnuti na prednji ekran radi boljeg selfija?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Koristite stražnju kameru za širu fotografiju veće rezolucije."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Ekran će se isključiti"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Rasklopljen sklopivi uređaj"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Okretanje sklopivog uređaja sa svih strana"</string>
 </resources>
