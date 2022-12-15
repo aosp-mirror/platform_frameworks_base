@@ -50,6 +50,7 @@ import android.telephony.TelephonyManager.NETWORK_TYPE_LTE
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
@@ -90,6 +91,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var tableLogger: TableLogBuffer
 
     private val scope = CoroutineScope(IMMEDIATE)
     private val mobileMappings = FakeMobileMappingsProxy()
@@ -116,6 +118,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                 mobileMappings,
                 IMMEDIATE,
                 logger,
+                tableLogger,
                 scope,
             )
     }

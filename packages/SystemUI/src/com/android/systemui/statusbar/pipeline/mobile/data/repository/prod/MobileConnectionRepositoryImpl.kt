@@ -36,6 +36,9 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.TableLogBufferFactory
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
@@ -46,7 +49,6 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.toNetworkNameMo
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
@@ -59,6 +61,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
@@ -79,6 +82,7 @@ class MobileConnectionRepositoryImpl(
     mobileMappingsProxy: MobileMappingsProxy,
     bgDispatcher: CoroutineDispatcher,
     logger: ConnectivityPipelineLogger,
+    mobileLogger: TableLogBuffer,
     scope: CoroutineScope,
 ) : MobileConnectionRepository {
     init {
@@ -95,7 +99,6 @@ class MobileConnectionRepositoryImpl(
     override val connectionInfo: StateFlow<MobileConnectionModel> = run {
         var state = MobileConnectionModel()
         conflatedCallbackFlow {
-                // TODO (b/240569788): log all of these into the connectivity logger
                 val callback =
                     object :
                         TelephonyCallback(),
@@ -106,6 +109,7 @@ class MobileConnectionRepositoryImpl(
                         TelephonyCallback.CarrierNetworkListener,
                         TelephonyCallback.DisplayInfoListener {
                         override fun onServiceStateChanged(serviceState: ServiceState) {
+                            logger.logOnServiceStateChanged(serviceState, subId)
                             state =
                                 state.copy(
                                     isEmergencyOnly = serviceState.isEmergencyOnly,
@@ -116,6 +120,7 @@ class MobileConnectionRepositoryImpl(
                         }
 
                         override fun onSignalStrengthsChanged(signalStrength: SignalStrength) {
+                            logger.logOnSignalStrengthsChanged(signalStrength, subId)
                             val cdmaLevel =
                                 signalStrength
                                     .getCellSignalStrengths(CellSignalStrengthCdma::class.java)
@@ -142,12 +147,14 @@ class MobileConnectionRepositoryImpl(
                             dataState: Int,
                             networkType: Int
                         ) {
+                            logger.logOnDataConnectionStateChanged(dataState, networkType, subId)
                             state =
                                 state.copy(dataConnectionState = dataState.toDataConnectionType())
                             trySend(state)
                         }
 
                         override fun onDataActivity(direction: Int) {
+                            logger.logOnDataActivity(direction, subId)
                             state =
                                 state.copy(
                                     dataActivityDirection = direction.toMobileDataActivityModel()
@@ -156,6 +163,7 @@ class MobileConnectionRepositoryImpl(
                         }
 
                         override fun onCarrierNetworkChange(active: Boolean) {
+                            logger.logOnCarrierNetworkChange(active, subId)
                             state = state.copy(carrierNetworkChangeActive = active)
                             trySend(state)
                         }
@@ -163,6 +171,7 @@ class MobileConnectionRepositoryImpl(
                         override fun onDisplayInfoChanged(
                             telephonyDisplayInfo: TelephonyDisplayInfo
                         ) {
+                            logger.logOnDisplayInfoChanged(telephonyDisplayInfo, subId)
 
                             val networkType =
                                 if (telephonyDisplayInfo.networkType == NETWORK_TYPE_UNKNOWN) {
@@ -193,7 +202,11 @@ class MobileConnectionRepositoryImpl(
                 awaitClose { telephonyManager.unregisterTelephonyCallback(callback) }
             }
             .onEach { telephonyCallbackEvent.tryEmit(Unit) }
-            .logOutputChange(logger, "MobileSubscriptionModel")
+            .logDiffsForTable(
+                mobileLogger,
+                columnPrefix = "MobileConnection ($subId)",
+                initialValue = state,
+            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), state)
     }
 
@@ -243,19 +256,43 @@ class MobileConnectionRepositoryImpl(
                     intent.toNetworkNameModel(networkNameSeparator) ?: defaultNetworkName
                 }
             }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                mobileLogger,
+                columnPrefix = "",
+                initialValue = defaultNetworkName,
+            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), defaultNetworkName)
 
-    override val dataEnabled: StateFlow<Boolean> =
+    override val dataEnabled: StateFlow<Boolean> = run {
+        val initial = dataConnectionAllowed()
         telephonyPollingEvent
             .mapLatest { dataConnectionAllowed() }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), dataConnectionAllowed())
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                mobileLogger,
+                columnPrefix = "",
+                columnName = "dataEnabled",
+                initialValue = initial,
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
+    }
 
     private fun dataConnectionAllowed(): Boolean = telephonyManager.isDataConnectionAllowed
 
-    override val isDefaultDataSubscription: StateFlow<Boolean> =
+    override val isDefaultDataSubscription: StateFlow<Boolean> = run {
+        val initialValue = defaultDataSubId.value == subId
         defaultDataSubId
             .mapLatest { it == subId }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), defaultDataSubId.value == subId)
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                mobileLogger,
+                columnPrefix = "",
+                columnName = "isDefaultDataSub",
+                initialValue = initialValue,
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue)
+    }
 
     class Factory
     @Inject
@@ -266,6 +303,7 @@ class MobileConnectionRepositoryImpl(
         private val logger: ConnectivityPipelineLogger,
         private val globalSettings: GlobalSettings,
         private val mobileMappingsProxy: MobileMappingsProxy,
+        private val logFactory: TableLogBufferFactory,
         @Background private val bgDispatcher: CoroutineDispatcher,
         @Application private val scope: CoroutineScope,
     ) {
@@ -276,6 +314,8 @@ class MobileConnectionRepositoryImpl(
             defaultDataSubId: StateFlow<Int>,
             globalMobileDataSettingChangedEvent: Flow<Unit>,
         ): MobileConnectionRepository {
+            val mobileLogger = logFactory.create(tableBufferLogName(subId), 100)
+
             return MobileConnectionRepositoryImpl(
                 context,
                 subId,
@@ -289,8 +329,13 @@ class MobileConnectionRepositoryImpl(
                 mobileMappingsProxy,
                 bgDispatcher,
                 logger,
+                mobileLogger,
                 scope,
             )
         }
+    }
+
+    companion object {
+        fun tableBufferLogName(subId: Int): String = "MobileConnectionLog [$subId]"
     }
 }
