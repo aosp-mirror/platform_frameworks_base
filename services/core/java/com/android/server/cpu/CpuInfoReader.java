@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.system.Os;
 import android.system.OsConstants;
+import android.util.ArrayMap;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
@@ -46,8 +47,12 @@ public final class CpuInfoReader {
     private static final String CPUFREQ_DIR_PATH = "/sys/devices/system/cpu/cpufreq";
     private static final String POLICY_DIR_PREFIX = "policy";
     private static final String RELATED_CPUS_FILE = "related_cpus";
+    private static final String AFFECTED_CPUS_FILE = "affected_cpus";
+    private static final String CUR_CPUFREQ_FILE = "cpuinfo_cur_freq";
     private static final String MAX_CPUFREQ_FILE = "cpuinfo_max_freq";
+    private static final String CUR_SCALING_FREQ_FILE = "scaling_cur_freq";
     private static final String MAX_SCALING_FREQ_FILE = "scaling_max_freq";
+    private static final String TIME_IN_STATE_FILE = "stats/time_in_state";
     private static final String CPUSET_DIR_PATH = "/dev/cpuset";
     private static final String CPUSET_TOP_APP_DIR = "top-app";
     private static final String CPUSET_BACKGROUND_DIR = "background";
@@ -60,6 +65,8 @@ public final class CpuInfoReader {
                     + "(?<irqClockTicks>[0-9]+)\\s(?<softirqClockTicks>[0-9]+)\\s"
                     + "(?<stealClockTicks>[0-9]+)\\s(?<guestClockTicks>[0-9]+)\\s"
                     + "(?<guestNiceClockTicks>[0-9]+)");
+    private static final Pattern TIME_IN_STATE_PATTERN =
+            Pattern.compile("(?<freqKHz>[0-9]+)\\s(?<time>[0-9]+)");
     private static final long MILLIS_PER_JIFFY = 1000L / Os.sysconf(OsConstants._SC_CLK_TCK);
 
     @Retention(RetentionPolicy.SOURCE)
@@ -70,14 +77,16 @@ public final class CpuInfoReader {
     private @interface CpusetCategory{}
 
     private final File mCpusetDir;
-    private final File mCpuFreqDir;
-    private final File mProcStatFile;
     private final SparseIntArray mCpusetCategoriesByCpus = new SparseIntArray();
     private final SparseArray<Long> mMaxCpuFrequenciesByCpus = new SparseArray<>();
+    private final ArrayMap<String, ArrayMap<Long, Long>> mTimeInStateByPolicy = new ArrayMap<>();
 
+    private File mCpuFreqDir;
+    private File mProcStatFile;
     private File[] mCpuFreqPolicyDirs;
     private SparseArray<CpuUsageStats> mCumulativeCpuUsageStats = new SparseArray<>();
     private boolean mIsEnabled;
+    private boolean mHasTimeInStateFile;
 
     public CpuInfoReader() {
         this(new File(CPUSET_DIR_PATH), new File(CPUFREQ_DIR_PATH), new File(PROC_STAT_FILE_PATH));
@@ -115,6 +124,11 @@ public final class CpuInfoReader {
                     mCpuFreqDir.getAbsolutePath());
             return false;
         }
+
+        // The Kernel must be configured to generate the `time_in_state` file. If the Kernel is not
+        // configured to generate this file, this file won't be available for the entire system
+        // uptime. Thus, check for the presence of this file only during init.
+        mHasTimeInStateFile = new File(mCpuFreqPolicyDirs[0], TIME_IN_STATE_FILE).exists();
         mIsEnabled = true;
         return true;
     }
@@ -129,8 +143,44 @@ public final class CpuInfoReader {
             Slogf.e(TAG, "Failed to read latest CPU usage stats");
             return Collections.emptyList();
         }
-        // TODO(b/217422127): Read current CPU frequencies and populate the CpuInfo.
-        return Collections.emptyList();
+        SparseArray<Long> cpuFrequenciesByCpus = readCurrentCpuFrequencies();
+        List<CpuInfo> cpuInfos = new ArrayList<>();
+        for (int i = 0; i < cpuFrequenciesByCpus.size(); i++) {
+            int cpu = cpuFrequenciesByCpus.keyAt(i);
+            long curFrequency = cpuFrequenciesByCpus.valueAt(i);
+            if (!mMaxCpuFrequenciesByCpus.contains(cpu) || !latestCpuUsageStats.contains(cpu)) {
+                Slogf.w(TAG, "Missing max CPU frequency or CPU usage stats for CPU core %d", cpu);
+                continue;
+            }
+            int cpuCategories = mCpusetCategoriesByCpus.get(cpu, -1);
+            if (cpuCategories < 0) {
+                Slogf.w(TAG, "Missing cpuset information for CPU core %d", cpu);
+                continue;
+            }
+            cpuInfos.add(new CpuInfo(cpu, cpuCategories, curFrequency,
+                    mMaxCpuFrequenciesByCpus.get(cpu), latestCpuUsageStats.get(cpu)));
+        }
+        return cpuInfos;
+    }
+
+    @VisibleForTesting
+    void setCpuFreqDir(File cpuFreqDir) {
+        File[] cpuFreqPolicyDirs = cpuFreqDir.listFiles(
+                file -> file.isDirectory() && file.getName().startsWith(POLICY_DIR_PREFIX));
+        if (mCpuFreqPolicyDirs == null || mCpuFreqPolicyDirs.length == 0) {
+            Slogf.w(TAG, "Failed to set CPU frequency directory. Missing policy directories at %s",
+                    mCpuFreqDir.getAbsolutePath());
+            return;
+        }
+        mCpuFreqDir = cpuFreqDir;
+        mCpuFreqPolicyDirs = cpuFreqPolicyDirs;
+        Slogf.i(TAG, "Set CPU frequency directory to %s", cpuFreqDir.getAbsolutePath());
+    }
+
+    @VisibleForTesting
+    void setProcStatFile(File procStatFile) {
+        mProcStatFile = procStatFile;
+        Slogf.i(TAG, "Set proc stat file to %s", procStatFile.getAbsolutePath());
     }
 
     private void readCpusetCategories() {
@@ -192,6 +242,77 @@ public final class CpuInfoReader {
                 : readCpuFreqKHz(new File(policyDir, MAX_SCALING_FREQ_FILE));
     }
 
+    private SparseArray<Long> readCurrentCpuFrequencies() {
+        SparseArray<Long> curCpuFrequenciesByCpus = new SparseArray<>();
+        for (int i = 0; i < mCpuFreqPolicyDirs.length; i++) {
+            File policyDir = mCpuFreqPolicyDirs[i];
+            long curCpuFreqKHz = readCurrentCpuFrequency(policyDir);
+            if (curCpuFreqKHz == 0) {
+                Slogf.w(TAG, "Missing current frequency information at %s",
+                        policyDir.getAbsolutePath());
+                continue;
+            }
+            File cpuCoresFile = new File(policyDir, AFFECTED_CPUS_FILE);
+            List<Integer> cpuCores = readCpuCores(cpuCoresFile);
+            if (cpuCores.isEmpty()) {
+                Slogf.e(TAG, "Failed to read CPU cores from %s", cpuCoresFile.getAbsolutePath());
+                continue;
+            }
+            for (int j = 0; j < cpuCores.size(); j++) {
+                curCpuFrequenciesByCpus.append(cpuCores.get(j), curCpuFreqKHz);
+            }
+        }
+        return curCpuFrequenciesByCpus;
+    }
+
+    private long readCurrentCpuFrequency(File policyDir) {
+        ArrayMap<Long, Long> latestTimeInState = readTimeInState(policyDir);
+        if (latestTimeInState == null) {
+            long curCpuFreqKHz = readCpuFreqKHz(new File(policyDir, CUR_CPUFREQ_FILE));
+            return curCpuFreqKHz > 0 ? curCpuFreqKHz :
+                    readCpuFreqKHz(new File(policyDir, CUR_SCALING_FREQ_FILE));
+        }
+        String policyDirName = policyDir.getName();
+        if (mTimeInStateByPolicy.containsKey(policyDirName)) {
+            ArrayMap<Long, Long> prevTimeInState = mTimeInStateByPolicy.get(policyDirName);
+            ArrayMap<Long, Long> deltaTimeInState =
+                    calculateDeltaTimeInState(prevTimeInState, latestTimeInState);
+            mTimeInStateByPolicy.put(policyDirName, latestTimeInState);
+            return calculateAvgCpuFreq(deltaTimeInState);
+        }
+        mTimeInStateByPolicy.put(policyDirName, latestTimeInState);
+        return calculateAvgCpuFreq(latestTimeInState);
+    }
+
+    @Nullable
+    private ArrayMap<Long, Long> readTimeInState(File policyDir) {
+        if (!mHasTimeInStateFile) {
+            return null;
+        }
+        File timeInStateFile = new File(policyDir, TIME_IN_STATE_FILE);
+        try {
+            List<String> lines = Files.readAllLines(timeInStateFile.toPath());
+            if (lines.isEmpty()) {
+                Slogf.w(TAG, "Empty time in state file at %s", timeInStateFile.getAbsolutePath());
+                return null;
+            }
+            ArrayMap<Long, Long> cpuTimeByFrequencies = new ArrayMap<>();
+            for (int i = 0; i < lines.size(); i++) {
+                Matcher m = TIME_IN_STATE_PATTERN.matcher(lines.get(i).trim());
+                if (!m.find()) {
+                    continue;
+                }
+                cpuTimeByFrequencies.put(Long.parseLong(m.group("freqKHz")),
+                        jiffyStrToMillis(m.group("time")));
+            }
+            return cpuTimeByFrequencies;
+        } catch (Exception e) {
+            Slogf.e(TAG, e, "Failed to read CPU time in state from file: %s",
+                    timeInStateFile.getAbsolutePath());
+        }
+        return null;
+    }
+
     private static long readCpuFreqKHz(File file) {
         if (!file.exists()) {
             Slogf.e(TAG, "CPU frequency file %s doesn't exist", file.getAbsolutePath());
@@ -207,6 +328,37 @@ public final class CpuInfoReader {
             Slogf.e(TAG, e, "Failed to read integer content from file: %s", file.getAbsolutePath());
         }
         return 0;
+    }
+
+    private static ArrayMap<Long, Long> calculateDeltaTimeInState(
+            ArrayMap<Long, Long> prevTimeInState, ArrayMap<Long, Long> latestTimeInState) {
+        ArrayMap<Long, Long> deltaTimeInState = new ArrayMap();
+        for (int i = 0; i < latestTimeInState.size(); i++) {
+            long freq = latestTimeInState.keyAt(i);
+            long durationMillis = latestTimeInState.valueAt(i);
+            long deltaDurationMillis;
+            if (prevTimeInState.containsKey(freq)) {
+                long prevDurationMillis = prevTimeInState.get(freq);
+                deltaDurationMillis = durationMillis > prevDurationMillis
+                        ? (durationMillis - prevDurationMillis) : durationMillis;
+            } else {
+                deltaDurationMillis = durationMillis;
+            }
+            deltaTimeInState.put(freq, deltaDurationMillis);
+        }
+        return deltaTimeInState;
+    }
+
+    private static long calculateAvgCpuFreq(ArrayMap<Long, Long> timeInState) {
+        double totalTimeInState = 0;
+        for (int i = 0; i < timeInState.size(); i++) {
+            totalTimeInState += timeInState.valueAt(i);
+        }
+        double avgFreqKHz = 0;
+        for (int i = 0; i < timeInState.size(); i++) {
+            avgFreqKHz += (timeInState.keyAt(i) * timeInState.valueAt(i)) / totalTimeInState;
+        }
+        return (long) avgFreqKHz;
     }
 
     /**
@@ -282,7 +434,7 @@ public final class CpuInfoReader {
                 if (!m.find()) {
                     continue;
                 }
-                cpuUsageStats.append(Integer.parseInt(Objects.requireNonNull(m.group("core"))),
+                cpuUsageStats.append(Integer.parseInt(m.group("core")),
                         new CpuUsageStats(jiffyStrToMillis(m.group("userClockTicks")),
                                 jiffyStrToMillis(m.group("niceClockTicks")),
                                 jiffyStrToMillis(m.group("sysClockTicks")),
@@ -302,7 +454,7 @@ public final class CpuInfoReader {
     }
 
     private static long jiffyStrToMillis(String jiffyStr) {
-        return Long.parseLong(Objects.requireNonNull(jiffyStr)) * MILLIS_PER_JIFFY;
+        return Long.parseLong(jiffyStr) * MILLIS_PER_JIFFY;
     }
 
     /** Contains information for each CPU core on the system. */
