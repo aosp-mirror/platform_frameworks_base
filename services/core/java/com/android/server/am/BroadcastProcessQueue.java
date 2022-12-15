@@ -425,8 +425,9 @@ class BroadcastProcessQueue {
     /**
      * Get package name of the first application loaded into this process.
      */
+    @Nullable
     public String getPackageName() {
-        return app.getApplicationInfo().packageName;
+        return app == null ? null : app.getApplicationInfo().packageName;
     }
 
     /**
