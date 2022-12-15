@@ -976,10 +976,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /**
      * Updates states of all children.
      */
-    public void updateChildrenStates(AmbientState ambientState) {
+    public void updateChildrenStates() {
         if (mIsSummaryWithChildren) {
             ExpandableViewState parentState = getViewState();
-            mChildrenContainer.updateState(parentState, ambientState);
+            mChildrenContainer.updateState(parentState);
         }
     }
 
