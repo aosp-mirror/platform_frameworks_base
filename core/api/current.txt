@@ -24191,6 +24191,8 @@ package android.media {
     ctor public SoundPool.Builder();
     method public android.media.SoundPool build();
     method public android.media.SoundPool.Builder setAudioAttributes(android.media.AudioAttributes) throws java.lang.IllegalArgumentException;
+    method @NonNull public android.media.SoundPool.Builder setAudioSessionId(int);
+    method @NonNull public android.media.SoundPool.Builder setContext(@NonNull android.content.Context);
     method public android.media.SoundPool.Builder setMaxStreams(int) throws java.lang.IllegalArgumentException;
   }
 
