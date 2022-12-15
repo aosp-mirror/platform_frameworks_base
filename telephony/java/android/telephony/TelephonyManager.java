@@ -388,6 +388,9 @@ public class TelephonyManager {
     /** @hide */
     public static final int INVALID_PORT_INDEX = -1;
 
+    /** @hide */
+    public static final String PROPERTY_ENABLE_NULL_CIPHER_TOGGLE = "enable_null_cipher_toggle";
+
     private final Context mContext;
     private final int mSubId;
     @UnsupportedAppUsage
