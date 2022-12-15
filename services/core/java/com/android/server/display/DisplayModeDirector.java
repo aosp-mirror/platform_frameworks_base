@@ -1163,7 +1163,7 @@ public class DisplayModeDirector {
             mDefaultRefreshRate =
                     (displayDeviceConfig == null) ? (float) mContext.getResources().getInteger(
                         R.integer.config_defaultRefreshRate)
-                        : (float) displayDeviceConfig.getDefaultRefreshRate();
+                        : (float) displayDeviceConfig.getDefaultLowRefreshRate();
         }
 
         public void observe() {
@@ -1250,7 +1250,7 @@ public class DisplayModeDirector {
                 defaultPeakRefreshRate =
                         (displayDeviceConfig == null) ? (float) mContext.getResources().getInteger(
                                 R.integer.config_defaultPeakRefreshRate)
-                                : (float) displayDeviceConfig.getDefaultPeakRefreshRate();
+                                : (float) displayDeviceConfig.getDefaultHighRefreshRate();
             }
             mDefaultPeakRefreshRate = defaultPeakRefreshRate;
         }
