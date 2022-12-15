@@ -33,6 +33,7 @@ import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
+import android.window.TaskConstants;
 import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -195,7 +196,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                     .setParent(mTaskSurface)
                     .build();
 
-            startT.setTrustedOverlay(mDecorationContainerSurface, true);
+            startT.setTrustedOverlay(mDecorationContainerSurface, true)
+                    .setLayer(mDecorationContainerSurface,
+                            TaskConstants.TASK_CHILD_LAYER_WINDOW_DECORATIONS);
         }
 
         final Rect taskBounds = taskConfig.windowConfiguration.getBounds();
@@ -213,8 +216,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                         outResult.mDecorContainerOffsetX, outResult.mDecorContainerOffsetY)
                 .setWindowCrop(mDecorationContainerSurface,
                         outResult.mWidth, outResult.mHeight)
-                // TODO(b/244455401): Change the z-order when it's better organized
-                .setLayer(mDecorationContainerSurface, mTaskInfo.numActivities + 1)
                 .show(mDecorationContainerSurface);
 
         // TaskBackgroundSurface
@@ -225,6 +226,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                     .setEffectLayer()
                     .setParent(mTaskSurface)
                     .build();
+
+            startT.setLayer(mTaskBackgroundSurface, TaskConstants.TASK_CHILD_LAYER_TASK_BACKGROUND);
         }
 
         float shadowRadius = loadDimension(resources, params.mShadowRadiusId);
@@ -236,8 +239,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                         taskBounds.height())
                 .setShadowRadius(mTaskBackgroundSurface, shadowRadius)
                 .setColor(mTaskBackgroundSurface, mTmpColor)
-                // TODO(b/244455401): Change the z-order when it's better organized
-                .setLayer(mTaskBackgroundSurface, -1)
                 .show(mTaskBackgroundSurface);
 
         // CaptionContainerSurface, CaptionWindowManager
