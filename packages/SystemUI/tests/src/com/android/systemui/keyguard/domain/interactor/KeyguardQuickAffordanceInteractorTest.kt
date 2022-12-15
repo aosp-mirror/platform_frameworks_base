@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.os.UserHandle
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -290,6 +291,11 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     @Test
     fun select() =
         testScope.runTest {
+            overrideResource(
+                R.array.config_keyguardQuickAffordanceDefaults,
+                arrayOf<String>(),
+            )
+
             featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
             homeControls.setState(
                 KeyguardQuickAffordanceConfig.LockScreenState.Visible(icon = ICON)
