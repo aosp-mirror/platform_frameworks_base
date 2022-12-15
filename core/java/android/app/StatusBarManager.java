@@ -516,6 +516,7 @@ public class StatusBarManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED = 2;
 
     /**
@@ -523,6 +524,7 @@ public class StatusBarManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_FAILED = 3;
 
     /** @hide */

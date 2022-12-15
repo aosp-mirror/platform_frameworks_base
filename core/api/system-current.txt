@@ -1007,6 +1007,8 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void updateMediaTapToTransferSenderDisplay(int, @NonNull android.media.MediaRoute2Info, @Nullable java.util.concurrent.Executor, @Nullable Runnable);
     field public static final int MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER = 0; // 0x0
     field public static final int MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER = 1; // 0x1
+    field public static final int MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_FAILED = 3; // 0x3
+    field public static final int MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED = 2; // 0x2
     field public static final int MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST = 1; // 0x1
     field public static final int MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST = 0; // 0x0
     field public static final int MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER = 8; // 0x8
