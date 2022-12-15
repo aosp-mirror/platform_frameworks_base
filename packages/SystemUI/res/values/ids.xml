@@ -142,6 +142,9 @@
 
     <item type="id" name="row_tag_for_content_view" />
 
+    <!-- Chipbar -->
+    <item type="id" name="tag_chipbar_info"/>
+
     <!-- Optional cancel button on Keyguard -->
     <item type="id" name="cancel_button"/>
 
