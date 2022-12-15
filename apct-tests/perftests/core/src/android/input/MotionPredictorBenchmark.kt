@@ -14,11 +14,12 @@
  * the License.
  */
 
-package com.android.test.input
+package android.input
 
 import android.content.Context
 import android.content.res.Resources
 import android.os.SystemProperties
+import android.perftests.utils.PerfStatusReporter
 import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_DOWN
@@ -27,14 +28,14 @@ import android.view.MotionEvent.PointerCoords
 import android.view.MotionEvent.PointerProperties
 import android.view.MotionPredictor
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.filters.LargeTest
+import androidx.test.ext.junit.runners.AndroidJUnit4
 
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -80,10 +81,15 @@ private fun getPredictionContext(offset: Duration, enablePrediction: Boolean): C
 }
 
 @RunWith(AndroidJUnit4::class)
-@SmallTest
-class MotionPredictorTest {
+@LargeTest
+class MotionPredictorBenchmark {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
-    val initialPropertyValue = SystemProperties.get("persist.input.enable_motion_prediction")
+    @get:Rule
+    val perfStatusReporter = PerfStatusReporter()
+    private val initialPropertyValue =
+            SystemProperties.get("persist.input.enable_motion_prediction")
+
+    private var eventTime = Duration.ofMillis(1)
 
     @Before
     fun setUp() {
@@ -99,38 +105,41 @@ class MotionPredictorTest {
 
     /**
      * In a typical usage, app will send the event to the predictor and then call .predict to draw
-     * a prediction. Here, we send 2 events to the predictor and check the returned event.
-     * Input:
-     * t = 0 x = 0 y = 0
-     * t = 1 x = 1 y = 2
-     * Output (expected):
-     * t = 3 x = 3 y = 6
-     *
-     * Historical data is ignored for simplicity.
+     * a prediction. In a loop, we keep sending MOVE and then calling .predict to simulate this.
      */
     @Test
-    fun testPredictedCoordinatesAndTime() {
-        val context = getPredictionContext(
-            /*offset=*/Duration.ofMillis(1), /*enablePrediction=*/true)
-        val predictor = MotionPredictor(context)
-        var eventTime = Duration.ofMillis(0)
-        val downEvent = getStylusMotionEvent(eventTime, ACTION_DOWN, /*x=*/0f, /*y=*/0f)
+    fun timeRecordAndPredict() {
+        val offset = Duration.ofMillis(1)
+        val predictor = MotionPredictor(getPredictionContext(offset, /*enablePrediction=*/true))
         // ACTION_DOWN t=0 x=0 y=0
-        predictor.record(downEvent)
+        predictor.record(getStylusMotionEvent(eventTime, ACTION_DOWN, /*x=*/0f, /*y=*/0f))
 
-        eventTime += Duration.ofMillis(1)
-        val moveEvent = getStylusMotionEvent(eventTime, ACTION_MOVE, /*x=*/1f, /*y=*/2f)
-        // ACTION_MOVE t=1 x=1 y=2
-        predictor.record(moveEvent)
+        val state = perfStatusReporter.getBenchmarkState()
+        while (state.keepRunning()) {
+            eventTime += Duration.ofMillis(1)
 
-        val predicted = predictor.predict(Duration.ofMillis(2).toNanos())
-        assertEquals(1, predicted.size)
-        val event = predicted[0]
-        assertNotNull(event)
+            // Send MOVE event and then call .predict
+            val moveEvent = getStylusMotionEvent(eventTime, ACTION_MOVE, /*x=*/1f, /*y=*/2f)
+            predictor.record(moveEvent)
+            val predictionTime = eventTime + Duration.ofMillis(2)
+            val predicted = predictor.predict(predictionTime.toNanos())
+            assertEquals(1, predicted.size)
+            assertEquals((predictionTime + offset).toMillis(), predicted[0].eventTime)
+        }
+    }
 
-        // Prediction will happen for t=3 (2 + 1, since offset is 1 and present time is 2)
-        assertEquals(3, event.eventTime)
-        assertEquals(3f, event.x, /*delta=*/0.001f)
-        assertEquals(6f, event.y, /*delta=*/0.001f)
+    /**
+     * The creation of the predictor should happen infrequently. However, we still want to be
+     * mindful of the load times.
+     */
+    @Test
+    fun timeCreatePredictor() {
+        val context = getPredictionContext(
+                /*offset=*/Duration.ofMillis(1), /*enablePrediction=*/true)
+
+        val state = perfStatusReporter.getBenchmarkState()
+        while (state.keepRunning()) {
+            MotionPredictor(context)
+        }
     }
 }
