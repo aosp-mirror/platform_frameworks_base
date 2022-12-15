@@ -16190,7 +16190,6 @@ package android.telephony.ims.stub {
     method public void acknowledgeSms(int, @IntRange(from=0, to=65535) int, int, @NonNull byte[]);
     method public void acknowledgeSmsReport(int, @IntRange(from=0, to=65535) int, int);
     method public String getSmsFormat();
-    method public void onMemoryAvailable(int);
     method public void onReady();
     method @Deprecated public final void onSendSmsResult(int, @IntRange(from=0, to=65535) int, int, int) throws java.lang.RuntimeException;
     method public final void onSendSmsResultError(int, @IntRange(from=0, to=65535) int, int, int, int) throws java.lang.RuntimeException;
