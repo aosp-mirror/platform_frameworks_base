@@ -26,6 +26,7 @@ import android.annotation.SystemApi;
 import android.app.ActivityManager;
 import android.app.Service;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
@@ -57,10 +58,8 @@ import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
-
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -171,7 +170,7 @@ public abstract class TvInputService extends Service {
 
             @Override
             public void createSession(InputChannel channel, ITvInputSessionCallback cb,
-                    String inputId, String sessionId) {
+                    String inputId, String sessionId, AttributionSource tvAppAttributionSource) {
                 if (channel == null) {
                     Log.w(TAG, "Creating session without input channel");
                 }
@@ -183,6 +182,7 @@ public abstract class TvInputService extends Service {
                 args.arg2 = cb;
                 args.arg3 = inputId;
                 args.arg4 = sessionId;
+                args.arg5 = tvAppAttributionSource;
                 mServiceHandler.obtainMessage(ServiceHandler.DO_CREATE_SESSION,
                         args).sendToTarget();
             }
@@ -367,6 +367,24 @@ public abstract class TvInputService extends Service {
     @Nullable
     public Session onCreateSession(@NonNull String inputId, @NonNull String sessionId) {
         return onCreateSession(inputId);
+    }
+
+    /**
+     * Returns a concrete implementation of {@link Session}.
+     *
+     * <p>For any apps that needs sessionId to request tuner resources from TunerResourceManager and
+     * needs to specify custom AttributionSource to AudioTrack, it needs to override this method to
+     * get the sessionId and AttrubutionSource passed. When no overriding, this method calls {@link
+     * #onCreateSession(String, String)} defaultly.
+     *
+     * @param inputId The ID of the TV input associated with the session.
+     * @param sessionId the unique sessionId created by TIF when session is created.
+     * @param tvAppAttributionSource The Attribution Source of the TV App.
+     */
+    @Nullable
+    public Session onCreateSession(@NonNull String inputId, @NonNull String sessionId,
+            @NonNull AttributionSource tvAppAttributionSource) {
+        return onCreateSession(inputId, sessionId);
     }
 
     /**
@@ -1107,7 +1125,7 @@ public abstract class TvInputService extends Service {
         public abstract void onSetStreamVolume(@FloatRange(from = 0.0, to = 1.0) float volume);
 
         /**
-         * called when broadcast info is requested.
+         * Called when broadcast info is requested.
          *
          * @param request broadcast info request
          */
@@ -1115,7 +1133,7 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * called when broadcast info is removed.
+         * Called when broadcast info is removed.
          */
         public void onRemoveBroadcastInfo(int requestId) {
         }
@@ -2444,8 +2462,10 @@ public abstract class TvInputService extends Service {
                     ITvInputSessionCallback cb = (ITvInputSessionCallback) args.arg2;
                     String inputId = (String) args.arg3;
                     String sessionId = (String) args.arg4;
+                    AttributionSource tvAppAttributionSource = (AttributionSource) args.arg5;
                     args.recycle();
-                    Session sessionImpl = onCreateSession(inputId, sessionId);
+                    Session sessionImpl =
+                            onCreateSession(inputId, sessionId, tvAppAttributionSource);
                     if (sessionImpl == null) {
                         try {
                             // Failed to create a session.
@@ -2481,7 +2501,7 @@ public abstract class TvInputService extends Service {
                         proxySession.mServiceHandler = mServiceHandler;
                         TvInputManager manager = (TvInputManager) getSystemService(
                                 Context.TV_INPUT_SERVICE);
-                        manager.createSession(hardwareInputId,
+                        manager.createSession(hardwareInputId, tvAppAttributionSource,
                                 proxySession.mHardwareSessionCallback, mServiceHandler);
                     } else {
                         SomeArgs someArgs = SomeArgs.obtain();

@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.content.AttributionSource;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -90,7 +91,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.InputChannel;
 import android.view.Surface;
-
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
@@ -101,9 +101,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.android.server.SystemService;
-
 import dalvik.annotation.optimization.NeverCompile;
-
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
@@ -813,7 +811,7 @@ public final class TvInputManagerService extends SystemService {
 
     @GuardedBy("mLock")
     private boolean createSessionInternalLocked(ITvInputService service, IBinder sessionToken,
-            int userId) {
+            int userId, AttributionSource tvAppAttributionSource) {
         UserState userState = getOrCreateUserStateLocked(userId);
         SessionState sessionState = userState.sessionStateMap.get(sessionToken);
         if (DEBUG) {
@@ -832,8 +830,8 @@ public final class TvInputManagerService extends SystemService {
                 service.createRecordingSession(
                         callback, sessionState.inputId, sessionState.sessionId);
             } else {
-                service.createSession(
-                        channels[1], callback, sessionState.inputId, sessionState.sessionId);
+                service.createSession(channels[1], callback, sessionState.inputId,
+                        sessionState.sessionId, tvAppAttributionSource);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "error in createSession", e);
@@ -1485,7 +1483,8 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public void createSession(final ITvInputClient client, final String inputId,
-                boolean isRecordingSession, int seq, int userId) {
+                AttributionSource tvAppAttributionSource, boolean isRecordingSession, int seq,
+                int userId) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
@@ -1556,7 +1555,7 @@ public final class TvInputManagerService extends SystemService {
 
                     if (serviceState.service != null) {
                         if (!createSessionInternalLocked(serviceState.service, sessionToken,
-                                resolvedUserId)) {
+                                    resolvedUserId, tvAppAttributionSource)) {
                             removeSessionStateLocked(sessionToken, resolvedUserId);
                         }
                     } else {
@@ -3113,7 +3112,8 @@ public final class TvInputManagerService extends SystemService {
 
                 // And create sessions, if any.
                 for (IBinder sessionToken : serviceState.sessionTokens) {
-                    if (!createSessionInternalLocked(serviceState.service, sessionToken, mUserId)) {
+                    if (!createSessionInternalLocked(
+                                serviceState.service, sessionToken, mUserId, null)) {
                         tokensToBeRemoved.add(sessionToken);
                     }
                 }

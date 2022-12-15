@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -51,7 +52,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
-
 import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.List;
@@ -111,6 +111,7 @@ public class TvView extends ViewGroup {
     private int mSurfaceViewTop;
     private int mSurfaceViewBottom;
     private TimeShiftPositionCallback mTimeShiftPositionCallback;
+    private AttributionSource mTvAppAttributionSource;
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
@@ -185,6 +186,7 @@ public class TvView extends ViewGroup {
         mDefStyleAttr = defStyleAttr;
         resetSurfaceView();
         mTvInputManager = (TvInputManager) getContext().getSystemService(Context.TV_INPUT_SERVICE);
+        mTvAppAttributionSource = getContext().getAttributionSource();
     }
 
     /**
@@ -304,6 +306,22 @@ public class TvView extends ViewGroup {
     }
 
     /**
+     * Override default attribution source of TV App.
+     *
+     * <p>An attribution source of TV App is used to attribute work to TV Input Service.
+     * The default attribution source is created by {@link Context#getAttributionSource()}.
+     * Call this method before calling {@link #tune(String, Uri, Bundle)} or {@link
+     * #timeShiftPlay(String, Uri)} to override the default attribution source.
+     *
+     * @param tvAppAttributionSource The attribution source of the TV App.
+     */
+    public void overrideTvAppAttributionSource(@NonNull AttributionSource tvAppAttributionSource) {
+        if (tvAppAttributionSource != null) {
+            mTvAppAttributionSource = tvAppAttributionSource;
+        }
+    }
+
+    /**
      * Tunes to a given channel.
      *
      * @param inputId The ID of the TV input for the given channel.
@@ -355,7 +373,8 @@ public class TvView extends ViewGroup {
             // is obsolete and should ignore it.
             mSessionCallback = new MySessionCallback(inputId, channelUri, params);
             if (mTvInputManager != null) {
-                mTvInputManager.createSession(inputId, mSessionCallback, mHandler);
+                mTvInputManager.createSession(
+                        inputId, mTvAppAttributionSource, mSessionCallback, mHandler);
             }
         }
     }
@@ -526,7 +545,8 @@ public class TvView extends ViewGroup {
             resetInternal();
             mSessionCallback = new MySessionCallback(inputId, recordedProgramUri);
             if (mTvInputManager != null) {
-                mTvInputManager.createSession(inputId, mSessionCallback, mHandler);
+                mTvInputManager.createSession(
+                        inputId, mTvAppAttributionSource, mSessionCallback, mHandler);
             }
         }
     }
