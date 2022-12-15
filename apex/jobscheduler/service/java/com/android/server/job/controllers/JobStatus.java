@@ -607,7 +607,7 @@ public final class JobStatus {
 
         // The first time a job is rescheduled it will not be subject to flexible constraints.
         // Otherwise, every consecutive reschedule increases a jobs' flexibility deadline.
-        if (!isRequestedExpeditedJob()
+        if (!isRequestedExpeditedJob() && !job.isUserInitiated()
                 && satisfiesMinWindowException
                 && (numFailures + numSystemStops) != 1
                 && lacksSomeFlexibleConstraints) {

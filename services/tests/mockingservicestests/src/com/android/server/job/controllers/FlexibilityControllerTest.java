@@ -617,6 +617,14 @@ public class FlexibilityControllerTest {
     }
 
     @Test
+    public void testExceptions_UserInitiated() {
+        JobInfo.Builder jb = createJob(0);
+        jb.setUserInitiated(true);
+        JobStatus js = createJobStatus("testExceptions_UserInitiated", jb);
+        assertFalse(js.hasFlexibilityConstraint());
+    }
+
+    @Test
     public void testExceptions_ShortWindow() {
         JobInfo.Builder jb = createJob(0);
         jb.setMinimumLatency(1);
