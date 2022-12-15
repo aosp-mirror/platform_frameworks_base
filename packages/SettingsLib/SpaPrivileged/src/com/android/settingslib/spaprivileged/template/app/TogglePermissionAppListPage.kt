@@ -117,25 +117,23 @@ internal fun <T : AppRecord> TogglePermissionAppListModel<T>.TogglePermissionApp
     appList: @Composable AppListInput<T>.() -> Unit = { AppList() },
 ) {
     val context = LocalContext.current
-    val internalListModel = remember {
-        TogglePermissionInternalAppListModel(context, this, restrictionsProviderFactory)
-    }
     AppListPage(
         title = stringResource(pageTitleResId),
-        listModel = internalListModel,
-        appList = appList,
-    ) {
-        AppListItem(
-            onClick = TogglePermissionAppInfoPageProvider.navigator(
+        listModel = remember {
+            TogglePermissionInternalAppListModel(
+                context = context,
                 permissionType = permissionType,
-                app = record.app,
-            ),
-        )
-    }
+                listModel = this,
+                restrictionsProviderFactory = restrictionsProviderFactory,
+            )
+        },
+        appList = appList,
+    )
 }
 
 internal class TogglePermissionInternalAppListModel<T : AppRecord>(
     private val context: Context,
+    private val permissionType: String,
     private val listModel: TogglePermissionAppListModel<T>,
     private val restrictionsProviderFactory: RestrictionsProviderFactory,
 ) : AppListModel<T> {
@@ -177,5 +175,15 @@ internal class TogglePermissionInternalAppListModel<T : AppRecord>(
             false -> context.getString(R.string.app_permission_summary_not_allowed)
             null -> context.getString(R.string.summary_placeholder)
         }
+    }
+
+    @Composable
+    override fun AppListItemModel<T>.AppItem() {
+        AppListItem(
+            onClick = TogglePermissionAppInfoPageProvider.navigator(
+                permissionType = permissionType,
+                app = record.app,
+            ),
+        )
     }
 }
