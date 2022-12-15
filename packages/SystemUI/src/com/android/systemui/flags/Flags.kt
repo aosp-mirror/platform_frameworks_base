@@ -183,6 +183,10 @@ object Flags {
     // TODO(b/260619425): Tracking Bug
     @JvmField val MODERN_ALTERNATE_BOUNCER = unreleasedFlag(219, "modern_alternate_bouncer")
 
+    // TODO(b/262780002): Tracking Bug
+    @JvmField
+    val REVAMPED_WALLPAPER_UI = unreleasedFlag(222, "revamped_wallpaper_ui", teamfood = false)
+
     /** Flag to control the migration of face auth to modern architecture. */
     // TODO(b/262838215): Tracking bug
     @JvmField val FACE_AUTH_REFACTOR = unreleasedFlag(220, "face_auth_refactor")
