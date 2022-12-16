@@ -229,9 +229,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     private TaskFragment mCompanionTaskFragment;
 
     /**
-     * Prevents duplicate calls to onTaskAppeared.
+     * Prevents duplicate calls to onTaskFragmentAppeared.
      */
     boolean mTaskFragmentAppearedSent;
+
+    /**
+     * Prevents unnecessary callbacks after onTaskFragmentVanished.
+     */
+    boolean mTaskFragmentVanishedSent;
 
     /**
      * The last running activity of the TaskFragment was finished due to clear task while launching
