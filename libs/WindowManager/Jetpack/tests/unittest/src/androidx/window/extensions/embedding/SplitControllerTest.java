@@ -90,6 +90,7 @@ import android.window.WindowContainerTransaction;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 import androidx.window.extensions.layout.WindowLayoutInfo;
 
@@ -142,7 +143,9 @@ public class SplitControllerTest {
         MockitoAnnotations.initMocks(this);
         doReturn(new WindowLayoutInfo(new ArrayList<>())).when(mWindowLayoutComponent)
                 .getCurrentWindowLayoutInfo(anyInt(), any());
-        mSplitController = new SplitController(mWindowLayoutComponent);
+        DeviceStateManagerFoldingFeatureProducer producer =
+                mock(DeviceStateManagerFoldingFeatureProducer.class);
+        mSplitController = new SplitController(mWindowLayoutComponent, producer);
         mSplitPresenter = mSplitController.mPresenter;
         mSplitInfos = new ArrayList<>();
         mEmbeddingCallback = splitInfos -> {
