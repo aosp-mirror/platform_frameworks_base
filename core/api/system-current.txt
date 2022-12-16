@@ -15770,7 +15770,8 @@ package android.telephony.ims.feature {
     method @NonNull public android.telephony.ims.stub.ImsSmsImplBase getSmsImplementation();
     method @NonNull public android.telephony.ims.stub.ImsUtImplBase getUt();
     method public final void notifyCapabilitiesStatusChanged(@NonNull android.telephony.ims.feature.MmTelFeature.MmTelCapabilities);
-    method public final void notifyIncomingCall(@NonNull android.telephony.ims.stub.ImsCallSessionImplBase, @NonNull android.os.Bundle);
+    method @Deprecated public final void notifyIncomingCall(@NonNull android.telephony.ims.stub.ImsCallSessionImplBase, @NonNull android.os.Bundle);
+    method @Nullable public final android.telephony.ims.ImsCallSessionListener notifyIncomingCall(@NonNull android.telephony.ims.stub.ImsCallSessionImplBase, @NonNull String, @NonNull android.os.Bundle);
     method public final void notifyRejectedCall(@NonNull android.telephony.ims.ImsCallProfile, @NonNull android.telephony.ims.ImsReasonInfo);
     method public void notifySrvccCanceled();
     method public void notifySrvccCompleted();
@@ -15880,7 +15881,7 @@ package android.telephony.ims.stub {
     method public void sendRttModifyRequest(android.telephony.ims.ImsCallProfile);
     method public void sendRttModifyResponse(boolean);
     method public void sendUssd(String);
-    method public void setListener(android.telephony.ims.ImsCallSessionListener);
+    method @Deprecated public void setListener(android.telephony.ims.ImsCallSessionListener);
     method public void setMute(boolean);
     method public void start(String, android.telephony.ims.ImsCallProfile);
     method public void startConference(String[], android.telephony.ims.ImsCallProfile);
