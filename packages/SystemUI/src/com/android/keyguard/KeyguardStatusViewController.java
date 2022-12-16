@@ -20,6 +20,8 @@ import android.graphics.Rect;
 import android.util.Slog;
 
 import com.android.keyguard.KeyguardClockSwitch.ClockSize;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -59,6 +61,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             ConfigurationController configurationController,
             DozeParameters dozeParameters,
+            FeatureFlags featureFlags,
             ScreenOffAnimationController screenOffAnimationController) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
@@ -67,6 +70,8 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mConfigurationController = configurationController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, keyguardStateController,
                 dozeParameters, screenOffAnimationController, /* animateYPos= */ true);
+        mKeyguardVisibilityHelper.setOcclusionTransitionFlagEnabled(
+                featureFlags.isEnabled(Flags.UNOCCLUSION_TRANSITION));
     }
 
     @Override
@@ -115,8 +120,8 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     /**
      * Sets a translationY on the views on the keyguard, except on the media view.
      */
-    public void setTranslationYExcludingMedia(float translationY) {
-        mView.setChildrenTranslationYExcludingMediaView(translationY);
+    public void setTranslationY(float translationY, boolean excludeMedia) {
+        mView.setChildrenTranslationY(translationY, excludeMedia);
     }
 
     /**
