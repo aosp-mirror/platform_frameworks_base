@@ -35,7 +35,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.ArrayMap;
-import android.window.WindowProvider;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -129,9 +128,10 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         });
         mWindowLayoutChangeListeners.put(context, consumer);
 
-        // TODO(b/258065175) Further extend this to ContextWrappers.
-        if (context instanceof WindowProvider) {
-            final IBinder windowContextToken = context.getWindowContextToken();
+        final IBinder windowContextToken = context.getWindowContextToken();
+        if (windowContextToken != null) {
+            // We register component callbacks for window contexts. For activity contexts, they will
+            // receive callbacks from NotifyOnConfigurationChanged instead.
             final ConfigurationChangeListener listener =
                     new ConfigurationChangeListener(windowContextToken);
             context.registerComponentCallbacks(listener);
@@ -150,8 +150,8 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             if (!mWindowLayoutChangeListeners.get(context).equals(consumer)) {
                 continue;
             }
-            if (context instanceof WindowProvider) {
-                final IBinder token = context.getWindowContextToken();
+            final IBinder token = context.getWindowContextToken();
+            if (token != null) {
                 context.unregisterComponentCallbacks(mConfigurationChangeListeners.get(token));
                 mConfigurationChangeListeners.remove(token);
             }
@@ -308,9 +308,10 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             return false;
         }
         final int windowingMode;
-        if (context instanceof Activity) {
+        IBinder activityToken = context.getActivityToken();
+        if (activityToken != null) {
             final Configuration taskConfig = ActivityClient.getInstance().getTaskConfiguration(
-                    context.getActivityToken());
+                    activityToken);
             if (taskConfig == null) {
                 // If we cannot determine the task configuration for any reason, it is likely that
                 // we won't be able to determine its position correctly as well. DisplayFeatures'
