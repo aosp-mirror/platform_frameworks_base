@@ -55,6 +55,7 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -220,7 +221,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mock(NotificationPanelViewController.class),
                         mActivityLaunchAnimator,
                         notificationAnimationProvider,
-                        mock(LaunchFullScreenIntentProvider.class)
+                        mock(LaunchFullScreenIntentProvider.class),
+                        mock(FeatureFlags.class)
                 );
 
         // set up dismissKeyguardThenExecute to synchronously invoke the OnDismissAction arg
