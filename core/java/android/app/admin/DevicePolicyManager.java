@@ -3925,6 +3925,8 @@ public class DevicePolicyManager {
      * <p>The MTE policy can only be set to {@link #MTE_DISABLED} if called by a device owner.
      * Otherwise a {@link SecurityException} will be thrown.
      *
+     * <p>The device needs to be rebooted to apply changes to the MTE policy.
+     *
      * @throws SecurityException if caller is not device owner or profile owner of org-owned device
      *     or if called on a parent instance
      * @param policy the MTE policy to be set
