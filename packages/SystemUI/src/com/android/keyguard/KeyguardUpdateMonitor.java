@@ -145,6 +145,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.dump.DumpsysTableLogger;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserTracker;
@@ -445,13 +446,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final SparseBooleanArray mBiometricEnabledForUser = new SparseBooleanArray();
     private final Map<Integer, Intent> mSecondaryLockscreenRequirement = new HashMap<>();
 
+    private final KeyguardFingerprintListenModel.Buffer mFingerprintListenBuffer =
+            new KeyguardFingerprintListenModel.Buffer();
+    private final KeyguardFaceListenModel.Buffer mFaceListenBuffer =
+            new KeyguardFaceListenModel.Buffer();
+    private final KeyguardActiveUnlockModel.Buffer mActiveUnlockTriggerBuffer =
+            new KeyguardActiveUnlockModel.Buffer();
+
     @VisibleForTesting
     SparseArray<BiometricAuthenticated> mUserFingerprintAuthenticated = new SparseArray<>();
     @VisibleForTesting
     SparseArray<BiometricAuthenticated> mUserFaceAuthenticated = new SparseArray<>();
-
-    // Keep track of recent calls to shouldListenFor*() for debugging.
-    private final KeyguardListenQueue mListenModels = new KeyguardListenQueue();
 
     private static int sCurrentUser;
 
@@ -2642,7 +2647,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         && !mSecureCameraLaunched;
 
         // Aggregate relevant fields for debug logging.
-        maybeLogListenerModelData(
+        logListenerModelData(
                 new KeyguardActiveUnlockModel(
                         System.currentTimeMillis(),
                         user,
@@ -2723,7 +2728,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         boolean shouldListen = shouldListenKeyguardState && shouldListenUserState
                 && shouldListenBouncerState && shouldListenUdfpsState
                 && shouldListenSideFpsState;
-        maybeLogListenerModelData(
+        logListenerModelData(
                 new KeyguardFingerprintListenModel(
                     System.currentTimeMillis(),
                     user,
@@ -2808,7 +2813,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 && !mGoingToSleep;
 
         // Aggregate relevant fields for debug logging.
-        maybeLogListenerModelData(
+        logListenerModelData(
                 new KeyguardFaceListenModel(
                     System.currentTimeMillis(),
                     user,
@@ -2836,28 +2841,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         return shouldListen;
     }
 
-    private void maybeLogListenerModelData(@NonNull KeyguardListenModel model) {
+    private void logListenerModelData(@NonNull KeyguardListenModel model) {
         mLogger.logKeyguardListenerModel(model);
-
-        if (model instanceof KeyguardActiveUnlockModel) {
-            mListenModels.add(model);
-            return;
-        }
-
-        // Add model data to the historical buffer.
-        final boolean notYetRunning =
-                (model instanceof KeyguardFaceListenModel
-                        && mFaceRunningState != BIOMETRIC_STATE_RUNNING)
-                || (model instanceof KeyguardFingerprintListenModel
-                        && mFingerprintRunningState != BIOMETRIC_STATE_RUNNING);
-        final boolean running =
-                (model instanceof KeyguardFaceListenModel
-                        && mFaceRunningState == BIOMETRIC_STATE_RUNNING)
-                        || (model instanceof KeyguardFingerprintListenModel
-                        && mFingerprintRunningState == BIOMETRIC_STATE_RUNNING);
-        if (notYetRunning && model.getListening()
-                || running && !model.getListening()) {
-            mListenModels.add(model);
+        if (model instanceof KeyguardFingerprintListenModel) {
+            mFingerprintListenBuffer.insert((KeyguardFingerprintListenModel) model);
+        } else if (model instanceof KeyguardActiveUnlockModel) {
+            mActiveUnlockTriggerBuffer.insert((KeyguardActiveUnlockModel) model);
+        } else if (model instanceof KeyguardFaceListenModel) {
+            mFaceListenBuffer.insert((KeyguardFaceListenModel) model);
         }
     }
 
@@ -3932,6 +3923,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         + mSfpsRequireScreenOnToAuthPrefEnabled);
                 }
             }
+            new DumpsysTableLogger(
+                    "KeyguardFingerprintListen",
+                    KeyguardFingerprintListenModel.TABLE_HEADERS,
+                    mFingerprintListenBuffer.toList()
+            ).printTableData(pw);
         }
         if (mFaceManager != null && mFaceManager.isHardwareDetected()) {
             final int userId = mUserTracker.getUserId();
@@ -3957,8 +3953,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             pw.println("    mSecureCameraLaunched=" + mSecureCameraLaunched);
             pw.println("    mPrimaryBouncerFullyShown=" + mPrimaryBouncerFullyShown);
             pw.println("    mNeedsSlowUnlockTransition=" + mNeedsSlowUnlockTransition);
+            new DumpsysTableLogger(
+                    "KeyguardFaceListen",
+                    KeyguardFaceListenModel.TABLE_HEADERS,
+                    mFaceListenBuffer.toList()
+            ).printTableData(pw);
         }
-        mListenModels.print(pw);
+
+        new DumpsysTableLogger(
+                "KeyguardActiveUnlockTriggers",
+                KeyguardActiveUnlockModel.TABLE_HEADERS,
+                mActiveUnlockTriggerBuffer.toList()
+        ).printTableData(pw);
     }
 
     /**
