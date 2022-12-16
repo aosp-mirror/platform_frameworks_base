@@ -402,7 +402,7 @@ public class ChooseTypeAndAccountActivity extends Activity
                 mExistingAccounts = AccountManager.get(this).getAccountsForPackage(mCallingPackage,
                         mCallingUid);
                 intent.setFlags(intent.getFlags() & ~Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivityForResult(intent, REQUEST_ADD_ACCOUNT);
+                startActivityForResult(new Intent(intent), REQUEST_ADD_ACCOUNT);
                 return;
             }
         } catch (OperationCanceledException e) {

@@ -92,7 +92,7 @@
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Оповещения"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Переадресация вызовов"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Режим экстренных обратных вызовов"</string>
-    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Состояние мобильного Интернета"</string>
+    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Состояние мобильного интернета"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Голосовые сообщения"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"Звонки по Wi-Fi"</string>
@@ -693,6 +693,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Приложение сможет считывать видеофайлы из общего хранилища."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"считывание изображений из общего хранилища"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Приложение сможет считывать изображения из общего хранилища."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"считывание указанных пользователем изображений и видеофайлов из общего хранилища"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Приложение сможет считывать указанные вами изображения и видеофайлы из общего хранилища."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"Изменение или удаление данных на общем накопителе"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Приложение сможет записывать данные на общий накопитель."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"Входящие и исходящие вызовы SIP"</string>
