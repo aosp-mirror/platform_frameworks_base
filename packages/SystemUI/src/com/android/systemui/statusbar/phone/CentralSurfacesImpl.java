@@ -35,6 +35,7 @@ import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
+import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
@@ -1147,10 +1148,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private void onFoldedStateChangedInternal(boolean isFolded, boolean willGoToSleep) {
         // Folded state changes are followed by a screen off event.
         // By default turning off the screen also closes the shade.
-        // We want to make sure that the shade status is kept after
-        // folding/unfolding.
-        boolean isShadeOpen = mShadeController.isShadeOpen();
-        boolean leaveOpen = isShadeOpen && !willGoToSleep;
+        // We want to make sure that the shade status is kept after folding/unfolding.
+        boolean isShadeOpen = mShadeController.isShadeFullyOpen();
+        boolean leaveOpen = isShadeOpen && !willGoToSleep && mState == SHADE;
         if (DEBUG) {
             Log.d(TAG, String.format(
                     "#onFoldedStateChanged(): "
@@ -1161,18 +1161,17 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     isFolded, willGoToSleep, isShadeOpen, leaveOpen));
         }
         if (leaveOpen) {
-            if (mKeyguardStateController.isShowing()) {
-                // When device state changes on keyguard we don't want to keep the state of
-                // the shade and instead we open clean state of keyguard with shade closed.
-                // Normally some parts of QS state (like expanded/collapsed) are persisted and
-                // that causes incorrect UI rendering, especially when changing state with QS
-                // expanded. To prevent that we can close QS which resets QS and some parts of
-                // the shade to its default state. Read more in b/201537421
-                mCloseQsBeforeScreenOff = true;
-            } else {
-                // below makes shade stay open when going from folded to unfolded
-                mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
-            }
+            // below makes shade stay open when going from folded to unfolded
+            mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
+        }
+        if (mState != SHADE && isShadeOpen) {
+            // When device state changes on KEYGUARD/SHADE_LOCKED we don't want to keep the state of
+            // the shade and instead we open clean state of keyguard with shade closed.
+            // Normally some parts of QS state (like expanded/collapsed) are persisted and
+            // that causes incorrect UI rendering, especially when changing state with QS
+            // expanded. To prevent that we can close QS which resets QS and some parts of
+            // the shade to its default state. Read more in b/201537421
+            mCloseQsBeforeScreenOff = true;
         }
     }
 
