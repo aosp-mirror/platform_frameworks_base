@@ -592,13 +592,13 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             setupPermissionList();
         } else if (deviceProfile.equals(DEVICE_PROFILE_GLASSES)) {
             profileName = getString(R.string.profile_name_glasses);
-            title = getHtmlFromResources(this, R.string.confirmation_title, appLabel, profileName);
+            title = getHtmlFromResources(this, R.string.confirmation_title, appLabel, deviceName);
             summary = getHtmlFromResources(
                     this, R.string.summary_glasses_single_device, profileName, appLabel);
             profileIcon = getIcon(this, R.drawable.ic_glasses);
 
             mPermissionTypes.addAll(Arrays.asList(
-                    PERMISSION_PHONE, PERMISSION_SMS, PERMISSION_CONTACTS,
+                    PERMISSION_NOTIFICATION, PERMISSION_PHONE, PERMISSION_SMS, PERMISSION_CONTACTS,
                     PERMISSION_MICROPHONE, PERMISSION_NEARBY_DEVICES));
 
             setupPermissionList();

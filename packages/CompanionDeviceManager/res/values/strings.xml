@@ -43,7 +43,7 @@
     <string name="profile_name_glasses">glasses</string>
 
     <!-- Description of the privileges the application will get if associated with the companion device of GLASSES profile (type) [CHAR LIMIT=NONE] -->
-    <string name="summary_glasses">This app is needed to manage your <xliff:g id="device_name" example="My Glasses">%1$s</xliff:g>. <xliff:g id="app_name" example="Glasses">%2$s</xliff:g> will be allowed to access your Phone, SMS, Contacts, Microphone and Nearby devices permissions.</string>
+    <string name="summary_glasses">This app is needed to manage your <xliff:g id="device_name" example="My Glasses">%1$s</xliff:g>. <xliff:g id="app_name" example="Glasses">%2$s</xliff:g> will be allowed to interact with your notifications and access your Phone, SMS, Contacts, Microphone and Nearby devices permissions.</string>
 
     <!-- Description of the privileges the application will get if associated with the companion device of GLASSES profile for singleDevice(type) [CHAR LIMIT=NONE] -->
     <string name="summary_glasses_single_device">The app is needed to manage your <xliff:g id="device_name" example="My Glasses">%1$s</xliff:g>. <xliff:g id="app_name" example="Glasses">%2$s</xliff:g> will be allowed to interact with these permissions:</string>
