@@ -3045,6 +3045,14 @@ public abstract class Context {
      * Prior to that, it would be ignored and delivered to all matching registered
      * receivers.  Be careful if using this for security.</p>
      *
+     * <p>For apps targeting {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * either {@link #RECEIVER_EXPORTED} or {@link #RECEIVER_NOT_EXPORTED} must be
+     * specified if the receiver is not being registered for <a
+     * href="{@docRoot}guide/components/broadcasts#system-broadcasts">system broadcasts</a>
+     * or a {@link SecurityException} will be thrown. See {@link
+     * #registerReceiver(BroadcastReceiver, IntentFilter, int)} to register a receiver with
+     * flags.
+     *
      * <p class="note">Note: this method <em>cannot be called from a
      * {@link BroadcastReceiver} component;</em> that is, from a BroadcastReceiver
      * that is declared in an application's manifest.  It is okay, however, to call
@@ -3084,16 +3092,16 @@ public abstract class Context {
      *
      * @param receiver The BroadcastReceiver to handle the broadcast.
      * @param filter Selects the Intent broadcasts to be received.
-     * @param flags Additional options for the receiver. In a future release, either
-     * {@link #RECEIVER_EXPORTED} or {@link #RECEIVER_NOT_EXPORTED} must be specified if the
-     *             receiver isn't being registered for <a href="{@docRoot}guide/components
-     *              /broadcasts#system-broadcasts">system broadcasts</a> or an exception will be
-     *              thrown. If {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
-     *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
-     *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
-     *              Android SDK. If both {@link #RECEIVER_EXPORTED} and
-     *              {@link #RECEIVER_NOT_EXPORTED} are specified, an exception will be thrown as
-     *              well.
+     * @param flags Additional options for the receiver. For apps targeting {@link
+     *      android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} either {@link #RECEIVER_EXPORTED} or
+     *      {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
+     *      for <a href="{@docRoot}guide/components/broadcasts#system-broadcasts">system
+     *      broadcasts</a> or a {@link SecurityException} will be thrown. If {@link
+     *      #RECEIVER_EXPORTED} is specified, a receiver may additionally specify {@link
+     *      #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of system broadcast actions,
+     *      see the BROADCAST_ACTIONS.TXT file in the Android SDK. If both {@link
+     *      #RECEIVER_EXPORTED} and {@link #RECEIVER_NOT_EXPORTED} are specified, an {@link
+     *      IllegalArgumentException} will be thrown.
      *
      * @return The first sticky intent found that matches <var>filter</var>,
      *         or null if there are none.
@@ -3122,6 +3130,14 @@ public abstract class Context {
      * {@link Intent#setPackage(String)} specified for an Intent being broadcast.
      * Prior to that, it would be ignored and delivered to all matching registered
      * receivers.  Be careful if using this for security.</p>
+     *
+     * <p>For apps targeting {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * either {@link #RECEIVER_EXPORTED} or {@link #RECEIVER_NOT_EXPORTED} must be
+     * specified if the receiver is not being registered for <a
+     * href="{@docRoot}guide/components/broadcasts#system-broadcasts">system broadcasts</a>
+     * or a {@link SecurityException} will be thrown. See {@link
+     * #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler, int)} to register a
+     * receiver with flags.
      *
      * @param receiver The BroadcastReceiver to handle the broadcast.
      * @param filter Selects the Intent broadcasts to be received.
@@ -3165,17 +3181,16 @@ public abstract class Context {
      *      no permission is required.
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent.  If null, the main thread of the process will be used.
-     * @param flags Additional options for the receiver. In a future release, either
-     * {@link #RECEIVER_EXPORTED} or {@link #RECEIVER_NOT_EXPORTED} must be specified if the
-     *             receiver isn't being registered for <a href="{@docRoot}guide/components
-     *              /broadcasts#system-broadcasts">system broadcasts</a> or an exception will be
-     *              thrown. If {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
-     *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
-     *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
-     *              Android SDK. If both {@link #RECEIVER_EXPORTED} and
-     *              {@link #RECEIVER_NOT_EXPORTED} are specified, an exception will be thrown as
-     *              well.
-     *
+     * @param flags Additional options for the receiver. For apps targeting {@link
+     *      android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} either {@link #RECEIVER_EXPORTED} or
+     *      {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
+     *      for <a href="{@docRoot}guide/components/broadcasts#system-broadcasts">system
+     *      broadcasts</a> or a {@link SecurityException} will be thrown. If {@link
+     *      #RECEIVER_EXPORTED} is specified, a receiver may additionally specify {@link
+     *      #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of system broadcast actions,
+     *      see the BROADCAST_ACTIONS.TXT file in the Android SDK. If both {@link
+     *      #RECEIVER_EXPORTED} and {@link #RECEIVER_NOT_EXPORTED} are specified, an {@link
+     *      IllegalArgumentException} will be thrown.
      * @return The first sticky intent found that matches <var>filter</var>,
      *         or null if there are none.
      *
@@ -3233,16 +3248,16 @@ public abstract class Context {
      *      no permission is required.
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent. If {@code null}, the main thread of the process will be used.
-     * @param flags Additional options for the receiver. In a future release, either
-     * {@link #RECEIVER_EXPORTED} or {@link #RECEIVER_NOT_EXPORTED} must be specified if the
-     *             receiver isn't being registered for <a href="{@docRoot}guide/components
-     *              /broadcasts#system-broadcasts">system broadcasts</a> or an exception will be
-     *              thrown. If {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
-     *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
-     *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
-     *              Android SDK. If both {@link #RECEIVER_EXPORTED} and
-     *              {@link #RECEIVER_NOT_EXPORTED} are specified, an exception will be thrown as
-     *              well.
+     * @param flags Additional options for the receiver. For apps targeting {@link
+     *      android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} either {@link #RECEIVER_EXPORTED} or
+     *      {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
+     *      for <a href="{@docRoot}guide/components/broadcasts#system-broadcasts">system
+     *      broadcasts</a> or a {@link SecurityException} will be thrown. If {@link
+     *      #RECEIVER_EXPORTED} is specified, a receiver may additionally specify {@link
+     *      #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of system broadcast actions,
+     *      see the BROADCAST_ACTIONS.TXT file in the Android SDK. If both {@link
+     *      #RECEIVER_EXPORTED} and {@link #RECEIVER_NOT_EXPORTED} are specified, an {@link
+     *      IllegalArgumentException} will be thrown.
      *
      * @return The first sticky intent found that matches <var>filter</var>,
      *         or {@code null} if there are none.
@@ -3306,16 +3321,16 @@ public abstract class Context {
      *      no permission is required.
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent.  If null, the main thread of the process will be used.
-     * @param flags Additional options for the receiver. In a future release, either
-     * {@link #RECEIVER_EXPORTED} or {@link #RECEIVER_NOT_EXPORTED} must be specified if the
-     *             receiver isn't being registered for <a href="{@docRoot}guide/components
-     *              /broadcasts#system-broadcasts">system broadcasts</a> or an exception will be
-     *              thrown. If {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
-     *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
-     *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
-     *              Android SDK. If both {@link #RECEIVER_EXPORTED} and
-     *              {@link #RECEIVER_NOT_EXPORTED} are specified, an exception will be thrown as
-     *              well.
+     * @param flags Additional options for the receiver. For apps targeting {@link
+     *      android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} either {@link #RECEIVER_EXPORTED} or
+     *      {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
+     *      for <a href="{@docRoot}guide/components/broadcasts#system-broadcasts">system
+     *      broadcasts</a> or a {@link SecurityException} will be thrown. If {@link
+     *      #RECEIVER_EXPORTED} is specified, a receiver may additionally specify {@link
+     *      #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of system broadcast actions,
+     *      see the BROADCAST_ACTIONS.TXT file in the Android SDK. If both {@link
+     *      #RECEIVER_EXPORTED} and {@link #RECEIVER_NOT_EXPORTED} are specified, an {@link
+     *      IllegalArgumentException} will be thrown.
      *
      * @return The first sticky intent found that matches <var>filter</var>,
      *         or null if there are none.
