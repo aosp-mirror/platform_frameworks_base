@@ -1254,6 +1254,68 @@ public class SplitControllerTest {
         verify(mEmbeddingCallback).accept(any());
     }
 
+    @Test
+    public void testLaunchPlaceholderIfNecessary_nonEmbeddedActivity() {
+        // Launch placeholder for non embedded activity.
+        setupPlaceholderRule(mActivity);
+        mTransactionManager.startNewTransaction();
+        mSplitController.launchPlaceholderIfNecessary(mTransaction, mActivity,
+                true /* isOnCreated */);
+
+        verify(mTransaction).startActivityInTaskFragment(any(), any(), eq(PLACEHOLDER_INTENT),
+                any());
+    }
+
+    @Test
+    public void testLaunchPlaceholderIfNecessary_embeddedInTopTaskFragment() {
+        // Launch placeholder for activity in top TaskFragment.
+        setupPlaceholderRule(mActivity);
+        mTransactionManager.startNewTransaction();
+        final TaskFragmentContainer container = mSplitController.newContainer(mActivity, TASK_ID);
+        mSplitController.launchPlaceholderIfNecessary(mTransaction, mActivity,
+                true /* isOnCreated */);
+
+        assertTrue(container.hasActivity(mActivity.getActivityToken()));
+        verify(mTransaction).startActivityInTaskFragment(any(), any(), eq(PLACEHOLDER_INTENT),
+                any());
+    }
+
+    @Test
+    public void testLaunchPlaceholderIfNecessary_embeddedBelowTaskFragment() {
+        // Do not launch placeholder for invisible activity below the top TaskFragment.
+        setupPlaceholderRule(mActivity);
+        mTransactionManager.startNewTransaction();
+        final TaskFragmentContainer bottomTf = mSplitController.newContainer(mActivity, TASK_ID);
+        final TaskFragmentContainer topTf = mSplitController.newContainer(new Intent(), mActivity,
+                TASK_ID);
+        bottomTf.setInfo(mTransaction, createMockTaskFragmentInfo(bottomTf, mActivity,
+                false /* isVisible */));
+        topTf.setInfo(mTransaction, createMockTaskFragmentInfo(topTf, createMockActivity()));
+        assertFalse(bottomTf.isVisible());
+        mSplitController.launchPlaceholderIfNecessary(mTransaction, mActivity,
+                true /* isOnCreated */);
+
+        verify(mTransaction, never()).startActivityInTaskFragment(any(), any(), any(), any());
+    }
+
+    @Test
+    public void testLaunchPlaceholderIfNecessary_embeddedBelowTransparentTaskFragment() {
+        // Launch placeholder for visible activity below the top TaskFragment.
+        setupPlaceholderRule(mActivity);
+        mTransactionManager.startNewTransaction();
+        final TaskFragmentContainer bottomTf = mSplitController.newContainer(mActivity, TASK_ID);
+        final TaskFragmentContainer topTf = mSplitController.newContainer(new Intent(), mActivity,
+                TASK_ID);
+        bottomTf.setInfo(mTransaction, createMockTaskFragmentInfo(bottomTf, mActivity,
+                true /* isVisible */));
+        topTf.setInfo(mTransaction, createMockTaskFragmentInfo(topTf, createMockActivity()));
+        assertTrue(bottomTf.isVisible());
+        mSplitController.launchPlaceholderIfNecessary(mTransaction, mActivity,
+                true /* isOnCreated */);
+
+        verify(mTransaction).startActivityInTaskFragment(any(), any(), any(), any());
+    }
+
     /** Creates a mock activity in the organizer process. */
     private Activity createMockActivity() {
         return createMockActivity(TASK_ID);

@@ -976,10 +976,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /**
      * Updates states of all children.
      */
-    public void updateChildrenStates(AmbientState ambientState) {
+    public void updateChildrenStates() {
         if (mIsSummaryWithChildren) {
             ExpandableViewState parentState = getViewState();
-            mChildrenContainer.updateState(parentState, ambientState);
+            mChildrenContainer.updateState(parentState);
         }
     }
 
@@ -2223,6 +2223,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             if (mNotificationParent != null) {
                 mNotificationParent.setClipTopAmount(0);
             }
+            setTranslationX(0);
             return;
         }
 
@@ -2241,6 +2242,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         setTranslationZ(translationZ);
         float extraWidthForClipping = params.getWidth() - getWidth();
         setExtraWidthForClipping(extraWidthForClipping);
+
         int top;
         if (params.getStartRoundedTopClipping() > 0) {
             // If we were clipping initially, let's interpolate from the start position to the
@@ -2248,20 +2250,22 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             float expandProgress = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
                     params.getProgress(0,
                             NotificationLaunchAnimatorController.ANIMATION_DURATION_TOP_ROUNDING));
-            float startTop = params.getStartNotificationTop();
-            top = (int) Math.min(MathUtils.lerp(startTop,
-                            params.getTop(), expandProgress),
+            int startTop = params.getStartNotificationTop();
+            top = (int) Math.min(MathUtils.lerp(startTop, params.getTop(), expandProgress),
                     startTop);
         } else {
             top = params.getTop();
         }
         int actualHeight = params.getBottom() - top;
         setActualHeight(actualHeight);
+
+        int notificationStackTop = params.getNotificationParentTop();
+        top -= notificationStackTop;
         int startClipTopAmount = params.getStartClipTopAmount();
         int clipTopAmount = (int) MathUtils.lerp(startClipTopAmount, 0, params.getProgress());
         if (mNotificationParent != null) {
-            float parentY = mNotificationParent.getTranslationY();
-            top -= parentY;
+            float parentTranslationY = mNotificationParent.getTranslationY();
+            top -= parentTranslationY;
             mNotificationParent.setTranslationZ(translationZ);
 
             // When the expanding notification is below its parent, the parent must be clipped
@@ -2270,21 +2274,23 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             // pixels to show the expanding notification, while still taking the decreasing
             // notification clipTopAmount into consideration, so 'top + clipTopAmount'.
             int parentStartClipTopAmount = params.getParentStartClipTopAmount();
-            int parentClipTopAmount = Math.min(parentStartClipTopAmount,
-                    top + clipTopAmount);
+            int parentClipTopAmount = Math.min(parentStartClipTopAmount, top + clipTopAmount);
             mNotificationParent.setClipTopAmount(parentClipTopAmount);
 
             mNotificationParent.setExtraWidthForClipping(extraWidthForClipping);
-            float clipBottom = Math.max(params.getBottom(),
-                    parentY + mNotificationParent.getActualHeight()
+            float clipBottom = Math.max(params.getBottom() - notificationStackTop,
+                    parentTranslationY + mNotificationParent.getActualHeight()
                             - mNotificationParent.getClipBottomAmount());
-            float clipTop = Math.min(params.getTop(), parentY);
+            float clipTop = Math.min(params.getTop() - notificationStackTop, parentTranslationY);
             int minimumHeightForClipping = (int) (clipBottom - clipTop);
             mNotificationParent.setMinimumHeightForClipping(minimumHeightForClipping);
         } else if (startClipTopAmount != 0) {
             setClipTopAmount(clipTopAmount);
         }
         setTranslationY(top);
+
+        float absoluteCenterX = getLocationOnScreen()[0] + getWidth() / 2f - getTranslationX();
+        setTranslationX(params.getCenterX() - absoluteCenterX);
 
         final float maxRadius = getMaxRadius();
         mTopRoundnessDuringLaunchAnimation = params.getTopCornerRadius() / maxRadius;

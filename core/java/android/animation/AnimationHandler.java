@@ -19,10 +19,10 @@ package android.animation;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Log;
 import android.view.Choreographer;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -40,7 +40,7 @@ import java.util.ArrayList;
 public class AnimationHandler {
 
     private static final String TAG = "AnimationHandler";
-    private static final boolean LOCAL_LOGV = true;
+    private static final boolean LOCAL_LOGV = false;
 
     /**
      * Internal per-thread collections used to avoid set collisions as animations start and end
@@ -78,7 +78,7 @@ public class AnimationHandler {
      * store visible (foreground) requestors; if the set size reaches zero, there are no
      * objects in the foreground and it is time to pause animators.
      */
-    private final ArraySet<Object> mAnimatorRequestors = new ArraySet<>();
+    private final ArrayList<WeakReference<Object>> mAnimatorRequestors = new ArrayList<>();
 
     private final Choreographer.FrameCallback mFrameCallback = new Choreographer.FrameCallback() {
         @Override
@@ -141,24 +141,9 @@ public class AnimationHandler {
      * tracking obsolete+enabled requestors.
      */
     public static void removeRequestor(Object requestor) {
-        getInstance().removeRequestorImpl(requestor);
-    }
-
-    private void removeRequestorImpl(Object requestor) {
-        // Also request disablement, in case that requestor was the sole object keeping
-        // animators un-paused
-        long startTime = System.nanoTime();
-        requestAnimatorsEnabled(false, requestor);
-        Log.d(TAG, "removeRequestorImpl called requestAnimatorsEnabled after " + 
-              (System.nanoTime() - startTime));
-        mAnimatorRequestors.remove(requestor);
-        Log.d(TAG, "removeRequestorImpl removed requestor after " + 
-              (System.nanoTime() - startTime));
+        getInstance().requestAnimatorsEnabledImpl(false, requestor);
         if (LOCAL_LOGV) {
-            Log.v(TAG, "removeRequestorImpl for " + requestor);
-            for (int i = 0; i < mAnimatorRequestors.size(); ++i) {
-                Log.v(TAG, "animatorRequesters " + i + " = " + mAnimatorRequestors.valueAt(i));
-            }
+            Log.v(TAG, "removeRequestor for " + requestor);
         }
     }
 
@@ -176,25 +161,44 @@ public class AnimationHandler {
     }
 
     private void requestAnimatorsEnabledImpl(boolean enable, Object requestor) {
-        long startTime = System.nanoTime();
         boolean wasEmpty = mAnimatorRequestors.isEmpty();
         setAnimatorPausingEnabled(isPauseBgAnimationsEnabledInSystemProperties());
-        Log.d(TAG, "requestAnimatorsEnabledImpl called setAnimatorPausingEnabled after " + 
-              (System.nanoTime() - startTime));
-        if (enable) {
-            mAnimatorRequestors.add(requestor);
-        } else {
-            mAnimatorRequestors.remove(requestor);
+        synchronized (mAnimatorRequestors) {
+            // Only store WeakRef objects to avoid leaks
+            if (enable) {
+                // First, check whether such a reference is already on the list
+                WeakReference<Object> weakRef = null;
+                for (int i = mAnimatorRequestors.size() - 1; i >= 0; --i) {
+                    WeakReference<Object> ref = mAnimatorRequestors.get(i);
+                    Object referent = ref.get();
+                    if (referent == requestor) {
+                        weakRef = ref;
+                    } else if (referent == null) {
+                        // Remove any reference that has been cleared
+                        mAnimatorRequestors.remove(i);
+                    }
+                }
+                if (weakRef == null) {
+                    weakRef = new WeakReference<>(requestor);
+                    mAnimatorRequestors.add(weakRef);
+                }
+            } else {
+                for (int i = mAnimatorRequestors.size() - 1; i >= 0; --i) {
+                    WeakReference<Object> ref = mAnimatorRequestors.get(i);
+                    Object referent = ref.get();
+                    if (referent == requestor || referent == null) {
+                        // remove requested item or item that has been cleared
+                        mAnimatorRequestors.remove(i);
+                    }
+                }
+                // If a reference to the requestor wasn't in the list, nothing to remove
+            }
         }
-        Log.d(TAG, "requestAnimatorsEnabledImpl added/removed after " + 
-              (System.nanoTime() - startTime));
         if (!sAnimatorPausingEnabled) {
             // Resume any animators that have been paused in the meantime, otherwise noop
             // Leave logic above so that if pausing gets re-enabled, the state of the requestors
             // list is valid
             resumeAnimators();
-            Log.d(TAG, "requestAnimatorsEnabledImpl resumed, returning after " + 
-                  (System.nanoTime() - startTime));
             return;
         }
         boolean isEmpty = mAnimatorRequestors.isEmpty();
@@ -209,12 +213,13 @@ public class AnimationHandler {
                         Animator.getBackgroundPauseDelay());
             }
         }
-        Log.d(TAG, "requestAnimatorsEnabledImpl post was/is check after " + 
-              (System.nanoTime() - startTime));
         if (LOCAL_LOGV) {
-            Log.v(TAG, enable ? "enable" : "disable" + " animators for " + requestor);
+            Log.v(TAG, (enable ? "enable" : "disable") + " animators for " + requestor
+                    + " with pauseDelay of " + Animator.getBackgroundPauseDelay());
             for (int i = 0; i < mAnimatorRequestors.size(); ++i) {
-                Log.v(TAG, "animatorRequesters " + i + " = " + mAnimatorRequestors.valueAt(i));
+                Log.v(TAG, "animatorRequestors " + i + " = "
+                        + mAnimatorRequestors.get(i) + " with referent "
+                        + mAnimatorRequestors.get(i).get());
             }
         }
     }

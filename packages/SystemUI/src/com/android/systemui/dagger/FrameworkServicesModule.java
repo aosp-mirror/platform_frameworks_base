@@ -92,6 +92,9 @@ import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.CaptioningManager;
 import android.view.inputmethod.InputMethodManager;
+import android.view.textclassifier.TextClassificationManager;
+
+import androidx.core.app.NotificationManagerCompat;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.appwidget.IAppWidgetService;
@@ -389,6 +392,12 @@ public class FrameworkServicesModule {
         return context.getSystemService(NotificationManager.class);
     }
 
+    @Provides
+    @Singleton
+    static NotificationManagerCompat provideNotificationManagerCompat(Context context) {
+        return NotificationManagerCompat.from(context);
+    }
+
     /** */
     @Provides
     @Singleton
@@ -622,5 +631,11 @@ public class FrameworkServicesModule {
     @Singleton
     static BluetoothAdapter provideBluetoothAdapter(BluetoothManager bluetoothManager) {
         return bluetoothManager.getAdapter();
+    }
+
+    @Provides
+    @Singleton
+    static TextClassificationManager provideTextClassificationManager(Context context) {
+        return context.getSystemService(TextClassificationManager.class);
     }
 }

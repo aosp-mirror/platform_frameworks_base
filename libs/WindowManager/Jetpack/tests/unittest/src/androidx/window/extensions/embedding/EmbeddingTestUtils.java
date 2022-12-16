@@ -163,11 +163,17 @@ public class EmbeddingTestUtils {
     /** Creates a mock TaskFragmentInfo for the given TaskFragment. */
     static TaskFragmentInfo createMockTaskFragmentInfo(@NonNull TaskFragmentContainer container,
             @NonNull Activity activity) {
+        return createMockTaskFragmentInfo(container, activity, true /* isVisible */);
+    }
+
+    /** Creates a mock TaskFragmentInfo for the given TaskFragment. */
+    static TaskFragmentInfo createMockTaskFragmentInfo(@NonNull TaskFragmentContainer container,
+            @NonNull Activity activity, boolean isVisible) {
         return new TaskFragmentInfo(container.getTaskFragmentToken(),
                 mock(WindowContainerToken.class),
                 new Configuration(),
                 1,
-                true /* isVisible */,
+                isVisible,
                 Collections.singletonList(activity.getActivityToken()),
                 new Point(),
                 false /* isTaskClearedForReuse */,

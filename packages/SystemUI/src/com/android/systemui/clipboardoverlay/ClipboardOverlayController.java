@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_SHOW_ACTIONS;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_SHOW_EDIT_BUTTON;
+import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ACTION_SHOWN;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ACTION_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_DISMISSED_OTHER;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_DISMISS_TAPPED;
@@ -41,7 +42,6 @@ import android.app.RemoteAction;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipDescription;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -51,7 +51,6 @@ import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
 import android.hardware.input.InputManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Looper;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
@@ -62,10 +61,6 @@ import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InputMonitor;
 import android.view.MotionEvent;
-import android.view.textclassifier.TextClassification;
-import android.view.textclassifier.TextClassificationManager;
-import android.view.textclassifier.TextClassifier;
-import android.view.textclassifier.TextLinks;
 
 import androidx.annotation.NonNull;
 
@@ -74,12 +69,13 @@ import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule.OverlayWindowContext;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.screenshot.TimeoutHandler;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -102,9 +98,9 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
     private final DisplayManager mDisplayManager;
     private final ClipboardOverlayWindow mWindow;
     private final TimeoutHandler mTimeoutHandler;
-    private final TextClassifier mTextClassifier;
     private final ClipboardOverlayUtils mClipboardUtils;
     private final FeatureFlags mFeatureFlags;
+    private final Executor mBgExecutor;
 
     private final ClipboardOverlayView mView;
 
@@ -189,6 +185,7 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
             TimeoutHandler timeoutHandler,
             FeatureFlags featureFlags,
             ClipboardOverlayUtils clipboardUtils,
+            @Background Executor bgExecutor,
             UiEventLogger uiEventLogger) {
         mBroadcastDispatcher = broadcastDispatcher;
         mDisplayManager = requireNonNull(context.getSystemService(DisplayManager.class));
@@ -204,14 +201,12 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
             hideImmediate();
         });
 
-        mTextClassifier = requireNonNull(context.getSystemService(TextClassificationManager.class))
-                .getTextClassifier();
-
         mTimeoutHandler = timeoutHandler;
         mTimeoutHandler.setDefaultTimeoutMillis(CLIPBOARD_DEFAULT_TIMEOUT_MILLIS);
 
         mFeatureFlags = featureFlags;
         mClipboardUtils = clipboardUtils;
+        mBgExecutor = bgExecutor;
 
         mView.setCallbacks(mClipboardCallbacks);
 
@@ -281,7 +276,7 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
             if (isRemote || DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
                     CLIPBOARD_OVERLAY_SHOW_ACTIONS, false)) {
                 if (item.getTextLinks() != null) {
-                    AsyncTask.execute(() -> classifyText(clipData.getItemAt(0), clipSource));
+                    classifyText(clipData.getItemAt(0), clipSource);
                 }
             }
             if (isSensitive) {
@@ -338,22 +333,18 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
     }
 
     private void classifyText(ClipData.Item item, String source) {
-        ArrayList<RemoteAction> actions = new ArrayList<>();
-        for (TextLinks.TextLink link : item.getTextLinks().getLinks()) {
-            TextClassification classification = mTextClassifier.classifyText(
-                    item.getText(), link.getStart(), link.getEnd(), null);
-            actions.addAll(classification.getActions());
-        }
-        mView.post(() -> {
-            Optional<RemoteAction> action = actions.stream().filter(remoteAction -> {
-                ComponentName component = remoteAction.getActionIntent().getIntent().getComponent();
-                return component != null && !TextUtils.equals(source, component.getPackageName());
-            }).findFirst();
-            mView.resetActionChips();
-            action.ifPresent(remoteAction -> mView.setActionChip(remoteAction, () -> {
-                mClipboardLogger.logSessionComplete(CLIPBOARD_OVERLAY_ACTION_TAPPED);
-                animateOut();
-            }));
+        mBgExecutor.execute(() -> {
+            Optional<RemoteAction> action = mClipboardUtils.getAction(item, source);
+            mView.post(() -> {
+                mView.resetActionChips();
+                action.ifPresent(remoteAction -> {
+                    mView.setActionChip(remoteAction, () -> {
+                        mClipboardLogger.logSessionComplete(CLIPBOARD_OVERLAY_ACTION_TAPPED);
+                        animateOut();
+                    });
+                    mClipboardLogger.logUnguarded(CLIPBOARD_OVERLAY_ACTION_SHOWN);
+                });
+            });
         });
     }
 
@@ -537,6 +528,10 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
 
         void setClipSource(String clipSource) {
             mClipSource = clipSource;
+        }
+
+        void logUnguarded(@NonNull UiEventLogger.UiEventEnum event) {
+            mUiEventLogger.log(event, 0, mClipSource);
         }
 
         void logSessionComplete(@NonNull UiEventLogger.UiEventEnum event) {

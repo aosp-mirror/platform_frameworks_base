@@ -773,15 +773,15 @@
     <integer name="complicationFadeOutDelayMs">200</integer>
 
     <!-- Duration in milliseconds of the dream in un-blur animation. -->
-    <integer name="config_dreamOverlayInBlurDurationMs">249</integer>
-    <!-- Delay in milliseconds of the dream in un-blur animation. -->
-    <integer name="config_dreamOverlayInBlurDelayMs">133</integer>
+    <integer name="config_dreamOverlayInBlurDurationMs">250</integer>
     <!-- Duration in milliseconds of the dream in complications fade-in animation. -->
-    <integer name="config_dreamOverlayInComplicationsDurationMs">282</integer>
-    <!-- Delay in milliseconds of the dream in top complications fade-in animation. -->
-    <integer name="config_dreamOverlayInTopComplicationsDelayMs">216</integer>
-    <!-- Delay in milliseconds of the dream in bottom complications fade-in animation. -->
-    <integer name="config_dreamOverlayInBottomComplicationsDelayMs">299</integer>
+    <integer name="config_dreamOverlayInComplicationsDurationMs">250</integer>
+    <!-- Duration in milliseconds of the y-translation animation when entering a dream -->
+    <integer name="config_dreamOverlayInTranslationYDurationMs">917</integer>
+
+    <!-- Delay in milliseconds before switching to the dock user and dreaming if a secondary user is
+    active when the device is locked and docked. 0 indicates disabled. Default is 1 minute. -->
+    <integer name="config_defaultDockUserTimeoutMs">60000</integer>
 
     <!-- Icons that don't show in a collapsed non-keyguard statusbar -->
     <string-array name="config_collapsed_statusbar_icon_blocklist" translatable="false">
@@ -824,6 +824,8 @@
     slot. If the user did make a choice, even if the choice is the "None" option, the default is
     ignored. -->
     <string-array name="config_keyguardQuickAffordanceDefaults" translatable="false">
+        <item>bottom_start:home</item>
+        <item>bottom_end:wallet</item>
     </string-array>
 
 </resources>
