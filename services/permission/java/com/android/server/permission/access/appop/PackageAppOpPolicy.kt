@@ -48,6 +48,10 @@ class PackageAppOpPolicy : BaseAppOpPolicy(PackageAppOpPersistence()) {
         setAppOpMode(subject.packageName, subject.userId, `object`.appOpName, decision)
     }
 
+    override fun GetStateScope.onStateMutated() {
+        onAppOpModeChangedListeners.forEachIndexed { _, it -> it.onStateMutated() }
+    }
+
     override fun MutateStateScope.onPackageRemoved(packageName: String, appId: Int) {
         newState.userStates.forEachIndexed { _, _, userState ->
             userState.packageAppOpModes -= packageName
@@ -113,13 +117,30 @@ class PackageAppOpPolicy : BaseAppOpPolicy(PackageAppOpPersistence()) {
         }
     }
 
-    fun interface OnAppOpModeChangedListener {
-        fun onAppOpModeChanged(
+    /**
+     * Listener for app op mode changes.
+     */
+    abstract class OnAppOpModeChangedListener {
+        /**
+         * Called when an app op mode change has been made to the upcoming new state.
+         *
+         * Implementations should keep this method fast to avoid stalling the locked state mutation,
+         * and only call external code after [onStateMutated] when the new state has actually become
+         * the current state visible to external code.
+         */
+        abstract fun onAppOpModeChanged(
             packageName: String,
             userId: Int,
             appOpName: String,
             oldMode: Int,
             newMode: Int
         )
+
+        /**
+         * Called when the upcoming new state has become the current state.
+         *
+         * Implementations should keep this method fast to avoid stalling the locked state mutation.
+         */
+        abstract fun onStateMutated()
     }
 }

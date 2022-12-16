@@ -74,6 +74,10 @@ class UidPermissionPolicy : SchemePolicy() {
         setPermissionFlags(subject.appId, subject.userId, `object`.permissionName, decision)
     }
 
+    override fun GetStateScope.onStateMutated() {
+        onPermissionFlagsChangedListeners.forEachIndexed { _, it -> it.onStateMutated() }
+    }
+
     override fun MutateStateScope.onUserAdded(userId: Int) {
         newState.systemState.packageStates.forEach { (_, packageState) ->
             evaluateAllPermissionStatesForPackageAndUser(packageState, userId, null)
@@ -563,7 +567,7 @@ class UidPermissionPolicy : SchemePolicy() {
                 newFlags = newFlags andInv PermissionFlags.LEGACY_GRANTED
                 val wasGrantedByImplicit = newFlags.hasBits(PermissionFlags.IMPLICIT_GRANTED)
                 val isLeanBackNotificationsPermission = newState.systemState.isLeanback &&
-                    permissionName in NOTIFICATION_PERMISSIONS
+                    permissionName in NOTIFICATIONS_PERMISSIONS
                 val isImplicitPermission = anyPackageInAppId(appId) {
                     permissionName in it.androidPackage!!.implicitPermissions
                 }
@@ -1108,18 +1112,35 @@ class UidPermissionPolicy : SchemePolicy() {
             Manifest.permission.BLUETOOTH_SCAN
         )
 
-        private val NOTIFICATION_PERMISSIONS = indexedSetOf(
+        private val NOTIFICATIONS_PERMISSIONS = indexedSetOf(
             Manifest.permission.POST_NOTIFICATIONS
         )
     }
 
-    fun interface OnPermissionFlagsChangedListener {
-        fun onPermissionFlagsChanged(
+    /**
+     * Listener for permission flags changes.
+     */
+    abstract class OnPermissionFlagsChangedListener {
+        /**
+         * Called when a permission flags change has been made to the upcoming new state.
+         *
+         * Implementations should keep this method fast to avoid stalling the locked state mutation,
+         * and only call external code after [onStateMutated] when the new state has actually become
+         * the current state visible to external code.
+         */
+        abstract fun onPermissionFlagsChanged(
             appId: Int,
             userId: Int,
             permissionName: String,
             oldFlags: Int,
             newFlags: Int
         )
+
+        /**
+         * Called when the upcoming new state has become the current state.
+         *
+         * Implementations should keep this method fast to avoid stalling the locked state mutation.
+         */
+        abstract fun onStateMutated()
     }
 }

@@ -161,6 +161,7 @@ class AccessCheckingService(context: Context) : SystemService(context) {
             MutateStateScope(oldState, newState).action()
             persistence.write(newState)
             state = newState
+            with(policy) { GetStateScope(newState).onStateMutated() }
         }
     }
 
