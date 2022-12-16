@@ -494,7 +494,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 }
             }
 
-            mLogger.logTrustGrantedWithFlags(flags, userId, message);
+            mLogger.logTrustGrantedWithFlags(flags, newlyUnlocked, userId, message);
             if (userId == getCurrentUser()) {
                 final TrustGrantFlags trustGrantFlags = new TrustGrantFlags(flags);
                 for (int i = 0; i < mCallbacks.size(); i++) {
@@ -502,7 +502,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     if (cb != null) {
                         cb.onTrustGrantedForCurrentUser(
                                 shouldDismissKeyguardOnTrustGrantedWithCurrentUser(trustGrantFlags),
-                                trustGrantFlags, message);
+                                newlyUnlocked,
+                                trustGrantFlags,
+                                message
+                        );
                     }
                 }
             }
