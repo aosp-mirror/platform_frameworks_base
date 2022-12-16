@@ -1002,14 +1002,16 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ক্যামেরা অ্যাপ ইনস্টল করুন"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• অ্যাপ সেট-আপ করা হয়ে গেছে"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• অন্তত একটি ডিভাইস উপলভ্য"</string>
+    <!-- no translation found for keyguard_affordance_press_too_short (2687995216454987952) -->
+    <skip />
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"বাতিল করুন"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"এখনই উল্টান"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"আরও ভাল সেলফির জন্য ফোন আনফোল্ড করা"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"আরও ভাল সেলফির জন্য সামনের ক্যামেরায় পাল্টাতে চান?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"আরও ভাল রেজোলিউশন সহ আরও বেশি ওয়াইড ছবির জন্য ব্যাক-ক্যামেরা ব্যবহার করুন।"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ এই স্ক্রিন বন্ধ হয়ে যাবে"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ফোল্ড করা যায় এমন ডিভাইস খোলা হচ্ছে"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ফোল্ড করা যায় এমন ডিভাইস উল্টানো হচ্ছে"</string>
+    <!-- no translation found for stylus_battery_low (7134370101603167096) -->
     <skip />
 </resources>
