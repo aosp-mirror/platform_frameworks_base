@@ -60,10 +60,10 @@ final class HotwordAudioStreamCopier {
     private static final String OP_MESSAGE = "Streaming hotword audio to VoiceInteractionService";
     private static final String TASK_ID_PREFIX = "HotwordDetectedResult@";
     private static final String THREAD_NAME_PREFIX = "Copy-";
-    private static final int DEFAULT_COPY_BUFFER_LENGTH_BYTES = 2_560;
 
     // Corresponds to the OS pipe capacity in bytes
     private static final int MAX_COPY_BUFFER_LENGTH_BYTES = 65_536;
+    private static final int DEFAULT_COPY_BUFFER_LENGTH_BYTES = 32_768;
 
     private final AppOpsManager mAppOpsManager;
     private final int mDetectorType;
