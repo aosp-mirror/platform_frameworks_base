@@ -43,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"PIN-ovi koje ste unijeli međusobno se ne podudaraju."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Unesite PIN koji ima od 4 do 8 brojeva."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Upišite PUK koji se sastoji od barem 8 brojeva."</string>
-    <string name="needPuk" msgid="7321876090152422918">"Vaša je SIM kartica zaključana PUK-om. Unesite PUK kôd da biste je otključali."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"Unesite PUK2 da biste odblokirali SIM karticu."</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"Neuspješno; omogući zaključavanje SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaj prije zaključavanja SIM kartice.</item>
@@ -391,6 +393,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Aplikacija se može izvoditi u pozadini. To može brže trošiti bateriju."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"upotrebljavati podatke u pozadini"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Aplikacija može upotrebljavati podatke u pozadini. To može povećati potrošnju podataka."</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"Zakaži precizno tempirane radnje"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Ova aplikacija može zakazati izvršavanje zadatka u željeno vrijeme u budućnosti. To znači da se može izvršavati i kad ne koristite uređaj aktivno."</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"Zakaži alarme ili podsjetnike na događaje"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Ova aplikacija može zakazati radnje kao što su alarmi i podsjetnici kako biste dobili obavijest u željeno vrijeme u budućnosti."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"trajni rad aplikacije"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Aplikaciji omogućuje trajnu prisutnost nekih njenih dijelova u memoriji. To može ograničiti dostupnost memorije drugim aplikacijama i usporiti tabletno računalo."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Aplikaciji omogućuje trajnu prisutnost nekih njenih dijelova u memoriji. To može ograničiti dostupnost memorije drugim aplikacijama i usporiti Android TV uređaj."</string>
@@ -419,6 +425,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Omogućuje aplikaciji da iskoristi usluge u prednjem planu s vrstom \"udaljena razmjena poruka\""</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"pokretanje usluge u prednjem planu s vrstom \"sustav je izuzeo\""</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Omogućuje aplikaciji da iskoristi usluge u prednjem planu s vrstom \"izuzeo sustav\""</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"pokreni uslugu u prednjem planu s vrstom fileManagement"</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Aplikaciji omogućuje da iskoristi usluge u prednjem planu s vrstom fileManagement"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"pokretanje usluge u prednjem planu s vrstom \"posebna upotreba\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Omogućuje aplikaciji da iskoristi usluge u prednjem planu s vrstom \"posebna upotreba\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"mjerenje prostora za pohranu aplikacije"</string>
@@ -956,14 +964,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Pokušajte ponovo"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Otključajte za sve značajke i podatke"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Premašen je maksimalni broj pokušaja otključavanja licem"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Nema SIM kartice"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"U tabletnom uređaju nema SIM kartice."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Na Android TV uređaju nema SIM kartice."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"U telefonu nema SIM kartice."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Umetnite SIM karticu."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM kartica nedostaje ili nije čitljiva. Umetnite SIM karticu."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Neupotrebljiva SIM kartica."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Vaša SIM kartica trajno je onemogućena.\n Obratite se svom pružatelju bežičnih usluga da biste dobili drugu SIM karticu."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Prethodna pjesma"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Sljedeća pjesma"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pauziraj"</string>
@@ -973,10 +989,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Brzo unaprijed"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Samo hitni pozivi"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Mreža je zaključana"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM kartica je zaključana PUK-om."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Pogledajte korisnički priručnik ili kontaktirajte korisničku službu."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM kartica je zaključana."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Otključavanje SIM kartice…"</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Netočno ste napisali zaporku <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Netočno ste napisali PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
@@ -1360,10 +1379,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Kasnije to možete promijeniti u odjeljku Postavke &gt; Aplikacije"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Dopusti uvijek"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Ne dopuštaj nikada"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"SIM kartica uklonjena"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"Mobilna mreža bit će nedostupna do ponovnog pokretanja s umetnutom važećom SIM karticom."</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"Gotovo"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"SIM kartica dodana"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"Za pristup mobilnoj mreži ponovo pokrenite uređaj."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Ponovno pokreni"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Aktivirajte mobilnu uslugu"</string>
@@ -1675,7 +1697,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM je sad onemogućen. Unesite PUK kôd da biste nastavili. Kontaktirajte operatera za pojedinosti."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Upišite željeni PIN kôd"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Potvrdite željeni PIN kôd"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Otključavanje SIM kartice…"</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Netočan PIN kôd."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Unesite PIN koji ima od 4 do 8 brojeva."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK kôd mora se sastojati od 8 brojeva."</string>
@@ -1732,7 +1755,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Isključi prečac"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Upotrijebi prečac"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverzija boja"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Korekcija boja"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Način rada jednom rukom"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Još tamnije"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Držali ste tipke za glasnoću. Uključila se usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
@@ -2321,4 +2345,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"Slika u slici ne može se prikazivati tijekom streaminga"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Zadane postavke sustava"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KARTICA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Dopuštenje profila popratne aplikacije sata za upravljanje satovima"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"Popratnoj aplikaciji omogućuje upravljanje satovima."</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"Prati prisutnost popratnih uređaja"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"Popratnoj aplikaciji omogućuje praćenje prisutnosti popratnih uređaja kad su uređaji u blizini ili daleko."</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"Dostavi popratne poruke"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"Popratnoj aplikaciji omogućuje isporuku popratnih poruka drugim uređajima."</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"Pokreni usluge u prednjem planu iz pozadine"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Popratnoj aplikaciji omogućuje da iz pozadine pokrene usluge u prednjem planu."</string>
 </resources>

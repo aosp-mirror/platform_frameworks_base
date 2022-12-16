@@ -43,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Hindi nagtutugma ang na-type mong mga PIN."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Mag-type ng PIN na 4 hanggang 8 numero."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Mag-type ng PUK na may 8 numbero o mas mahaba."</string>
-    <string name="needPuk" msgid="7321876090152422918">"Na-PUK-lock ang iyong SIM card. I-type ang PUK code upang i-unlock ito."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"I-type ang PUK2 upang i-unblock ang SIM card."</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"Hindi matagumpay, i-enable ang SIM/RUIM Lock."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Mayroon kang <xliff:g id="NUMBER_1">%d</xliff:g> natitirang pagsubok bago ma-lock ang SIM.</item>
@@ -390,6 +392,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Maaaring tumakbo sa background ang app na ito. Maaaring mas mabilis nitong maubos ang baterya."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"gumamit ng data sa background"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Maaaring gumamit ng data sa background ang app na ito. Maaaring mas maraming data ang magamit nito."</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"Mag-iskedyul ng mga tumpak na nakatakdang pagkilos"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Puwedeng iiskedyul ng app na ito na gawin ang gawain sa napiling takdang panahon sa hinaharap. Ibig sabihin din nito, puwedeng tumakbo ang app kapag hindi mo aktibong ginagamit ang device."</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"Mag-iskedyul ng mga alarm o paalala para sa event"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Puwedeng mag-iskedyul ang app na ito ng mga pagkilos gaya ng mga alarm at paalala para abisuhan ka sa napiling takdang panahon sa hinaharap."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"palaging patakbuhin ang app"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Pinapayagan ang app na panatilihin ang ilang bahagi nito sa memory. Maaari nitong limitahan ang memory na available sa iba pang apps na nagpapabagal sa tablet."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Nagbibigay-daan sa app na gawing persistent sa memory ang ilang partikular na bahagi nito. Puwede nitong limitahan ang memory na available sa iba pang app na nagpapabagal sa iyong Android TV device."</string>
@@ -418,6 +424,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Nagbibigay-daan sa app na gamitin ang mga serbisyo sa foreground na may uring \"remoteMessaging\""</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"magpagana ng serbisyo sa foreground na may uring \"systemExempted\""</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Nagbibigay-daan sa app na gamitin ang mga serbisyo sa foreground na may uring \"systemExempted\""</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"Magpatakbo ng serbisyo sa foreground na may uring \"fileManagement\""</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Nagbibigay-daan sa app na gamitin ang mga serbisyo sa foreground na may uring \"fileManagement\""</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"magpagana ng serbisyo sa foreground na may uring \"specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Nagbibigay-daan sa app na gamitin ang mga serbisyo sa foreground na may uring \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"sukatin ang espasyo ng storage ng app"</string>
@@ -955,14 +963,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Subukang muli"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"I-unlock para sa lahat ng feature at data"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Nalagpasan na ang maximum na mga pagtatangka sa Pag-unlock Gamit ang Mukha"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Walang SIM card"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Walang SIM card sa tablet."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Walang SIM card sa iyong Android TV device."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Walang SIM card sa telepono."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Maglagay ng isang SIM card."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"Nawawala o hindi nababasa ang SIM card. Maglagay ng isang SIM card."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Hindi nagagamit na SIM card."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Ang iyong SIM card ay permanenteng naka-disable.\n Makipag-ugnay sa iyong wireless service provider para sa isa pang SIM card."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Nakaraang track"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Susunod na track"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"I-pause"</string>
@@ -972,10 +988,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"I-fast forward"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Mga pang-emergency na tawag lang"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Naka-lock ang network"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"Naka-PUK-lock ang SIM card."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Tingnan ang Gabay ng User o makipag-ugnay sa Pangangalaga sa Customer."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"Naka-lock ang SIM card."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Ina-unlock ang SIM card…"</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Mali mong naguhit ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%2$d</xliff:g> (na) segundo."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Na-type mo nang mali ang iyong password nang <xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%2$d</xliff:g> (na) segundo."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Na-type mo nang mali ang iyong PIN nang <xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%2$d</xliff:g> (na) segundo."</string>
@@ -1359,10 +1378,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Mapapalitan mo ito sa ibang pagkakataon sa Mga Setting &gt; Apps"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Palaging Payagan"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Huwag kailanman Payagan"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"Naalis ang SIM card"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"Hindi magiging available ang mobile network hanggang mag-restart ka gamit ang isang may-bisang SIM card"</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"Tapos na"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"Idinagdag ang SIM card"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"I-restart ang iyong device upang ma-access ang mobile network."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"I-restart"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"I-activate ang serbisyo sa mobile"</string>
@@ -1674,7 +1696,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"Hindi na pinagana ang SIM ngayon. Maglagay ng PUK code upang magpatuloy. Makipag-ugnay sa carrier para sa mga detalye."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Ilagay ang ninanais na PIN code"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Kumpirmahin ang ninanais na PIN code"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Ina-unlock ang SIM card…"</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Hindi tamang PIN code."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Mag-type ng PIN na 4 hanggang 8 numero."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"8 numero dapat ang PUK code."</string>
@@ -1731,7 +1754,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"I-off ang Shortcut"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gamitin ang Shortcut"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Pag-invert ng Kulay"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Pagwawasto ng Kulay"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"One-Hand mode"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extra dim"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Pinindot nang matagal ang volume keys. Na-on ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
@@ -2320,4 +2344,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"Hindi matingnan nang picture-in-picture habang nagsi-stream"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Default ng system"</string>
     <string name="default_card_name" msgid="9198284935962911468">"CARD <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Pahintulot sa profile ng Relo ng kasamang app na pamahalaan ang mga relo"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"Nagbibigay-daan sa kasamang app na pamahalaan ang mga relo."</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"Obserbahan ang presensya ng kasamang device"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"Nagbibigay-daan sa kasamang app na obserbahan ang presensya ng kasamang device kapag malapit o malayo ang mga device."</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"Maghatid ng mga mensahe ng kasamang app"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"Nagbibigay-daan sa kasamang app na maghatid ng mga mensahe ng kasamang app sa iba pang device."</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"Magsimula ng mga serbisyo sa foreground mula sa background"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Nagbibigay-daan sa kasamang app na magsimula ng mga serbisyo sa foreground mula sa background."</string>
 </resources>

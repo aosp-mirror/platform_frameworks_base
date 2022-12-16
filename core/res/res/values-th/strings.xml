@@ -43,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"PIN ที่คุณพิมพ์ไม่ตรงกัน"</string>
     <string name="invalidPin" msgid="7542498253319440408">"พิมพ์ PIN ซึ่งเป็นเลข 4-8 หลัก"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"พิมพ์รหัส PUK ซึ่งต้องเป็นตัวเลขอย่างน้อย 8 หลัก"</string>
-    <string name="needPuk" msgid="7321876090152422918">"ซิมการ์ดของคุณถูกล็อกด้วย PUK พิมพ์รหัส PUK เพื่อปลดล็อก"</string>
-    <string name="needPuk2" msgid="7032612093451537186">"พิมพ์ PUK2 เพื่อยกเลิกการปิดกั้นซิมการ์ด"</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"ไม่สำเร็จ เปิดใช้การล็อกซิม/RUIM"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">คุณพยายามได้อีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้งก่อนที่ซิมจะล็อก</item>
@@ -390,6 +392,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"แอปนี้สามารถทำงานในพื้นหลัง ซึ่งอาจทำให้แบตเตอรี่หมดเร็วขึ้น"</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"ใช้เน็ตในพื้นหลัง"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"แอปนี้สามารถใช้เน็ตในพื้นหลัง ซึ่งอาจเพิ่มปริมาณการใช้อินเทอร์เน็ต"</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"กำหนดเวลาการดำเนินการที่มีเวลาแน่นอน"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"แอปนี้จะกำหนดเวลางานให้เกิดขึ้นตามเวลาที่ต้องการในอนาคตได้ ซึ่งหมายความว่าแอปจะสามารถทำงานเมื่อคุณไม่ได้ใช้อุปกรณ์อยู่ด้วยเช่นกัน"</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"กำหนดเวลาการปลุกหรือการช่วยเตือนกิจกรรม"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"แอปนี้สามารถกำหนดเวลาการดำเนินการต่างๆ เช่น การปลุกและการช่วยเตือนเพื่อแจ้งให้คุณทราบตามเวลาที่ต้องการในอนาคต"</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"ทำให้แอปพลิเคชันทำงานเสมอ"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"อนุญาตให้แอปพลิเคชันทำให้ส่วนหนึ่งของตัวเองคงอยู่ถาวรในหน่วยความจำ ซึ่งจะจำกัดพื้นที่หน่วยความจำที่ใช้งานได้ของแอปพลิเคชันอื่นๆ และทำให้แท็บเล็ตทำงานช้าลง"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"อนุญาตให้แอปทำให้ส่วนต่างๆ ของแอปคงอยู่ถาวรในหน่วยความจำ ซึ่งจะจำกัดพื้นที่หน่วยความจำที่จะให้แอปอื่นๆ ใช้งานและทำให้อุปกรณ์ Android TV ทำงานช้าลง"</string>
@@ -418,6 +424,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"อนุญาตให้แอปใช้ประโยชน์จากบริการที่ทำงานอยู่เบื้องหน้าโดยมีประเภทเป็น \"การรับส่งข้อความระยะไกล\""</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"เรียกใช้บริการที่ทำงานอยู่เบื้องหน้าโดยมีประเภทเป็น \"ได้รับการยกเว้นจากระบบ\""</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"อนุญาตให้แอปใช้ประโยชน์จากบริการที่ทำงานอยู่เบื้องหน้าโดยมีประเภทเป็น \"ได้รับการยกเว้นจากระบบ\""</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"เรียกใช้บริการที่ทำงานอยู่เบื้องหน้าโดยมีประเภทเป็น \"การจัดการไฟล์\""</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"อนุญาตให้แอปใช้ประโยชน์จากบริการที่ทำงานอยู่เบื้องหน้าโดยมีประเภทเป็น \"การจัดการไฟล์\""</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"เรียกใช้บริการที่ทำงานอยู่เบื้องหน้าโดยมีประเภทเป็น \"การใช้งานพิเศษ\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"อนุญาตให้แอปใช้ประโยชน์จากบริการที่ทำงานอยู่เบื้องหน้าโดยมีประเภทเป็น \"การใช้งานพิเศษ\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"วัดพื้นที่เก็บข้อมูลของแอปพลิเคชัน"</string>
@@ -955,14 +963,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"ลองอีกครั้ง"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"ปลดล็อกฟีเจอร์และข้อมูลทั้งหมด"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"ลองใช้การปลดล็อกด้วยใบหน้าเกินจำนวนครั้งที่กำหนดแล้ว"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"ไม่มีซิมการ์ด"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ไม่มีซิมการ์ดในแท็บเล็ต"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"ไม่มีซิมการ์ดในอุปกรณ์ Android TV"</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"ไม่มีซิมการ์ดในโทรศัพท์"</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"ใส่ซิมการ์ด"</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"ไม่มีซิมการ์ดหรือไม่สามารถอ่านได้ โปรดใส่ซิมการ์ด"</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"ซิมการ์ดใช้ไม่ได้"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"ซิมการ์ดของคุณถูกปิดใช้งานอย่างถาวร\nติดต่อผู้ให้บริการไร้สายของคุณเพื่อรับซิมการ์ดอีกอันหนึ่ง"</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"แทร็กก่อนหน้า"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"แทร็กถัดไป"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"หยุดชั่วคราว"</string>
@@ -972,10 +988,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"กรอไปข้างหน้า"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"โทรฉุกเฉินเท่านั้น"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"ล็อกเครือข่ายไว้"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"ซิมการ์ดถูกล็อกด้วย PUK"</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"ดูคู่มือผู้ใช้หรือติดต่อศูนย์บริการลูกค้า"</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"ซิมการ์ดถูกล็อก"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"กำลังปลดล็อกซิมการ์ด…"</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้องไป <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว\n\nโปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> วินาที"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"คุณพิมพ์รหัสผ่านไม่ถูกต้องไป <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว\n\nลองอีกครั้งใน <xliff:g id="NUMBER_1">%2$d</xliff:g> วินาที"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"คุณพิมพ์ PIN ไม่ถูกต้องไป <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว\n\nลองอีกครั้งใน <xliff:g id="NUMBER_1">%2$d</xliff:g> วินาที"</string>
@@ -1359,10 +1378,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"คุณสามารถเปลี่ยนค่านี้ภายหลังในการตั้งค่า &gt; แอปพลิเคชัน"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"อนุญาตทุกครั้ง"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"ไม่อนุญาตเลย"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"นำซิมการ์ดออกแล้ว"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"เครือข่ายมือถือจะไม่สามารถใช้งานได้จนกว่าคุณจะรีสตาร์ทโดยใส่ซิมการ์ดที่ถูกต้องแล้ว"</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"เสร็จสิ้น"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"เพิ่มซิมการ์ดแล้ว"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"รีสตาร์ทอุปกรณ์ของคุณเพื่อเข้าถึงเครือข่ายมือถือ"</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"รีสตาร์ท"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"เปิดใช้งานบริการมือถือ"</string>
@@ -1674,7 +1696,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"ซิมการ์ดถูกปิดใช้งานแล้วในตอนนี้ ป้อนรหัส PUK เพื่อดำเนินการต่อ โปรดติดต่อผู้ให้บริการสำหรับรายละเอียด"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"ป้อนรหัส PIN ที่ต้องการ"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"ยืนยันรหัส PIN ที่ต้องการ"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"กำลังปลดล็อกซิมการ์ด…"</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"รหัส PIN ไม่ถูกต้อง"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"พิมพ์ PIN ซึ่งเป็นเลข 4 ถึง 8 หลัก"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"รหัส PUK ต้องเป็นตัวเลข 8 หลัก"</string>
@@ -1731,7 +1754,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ปิดทางลัด"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ใช้ทางลัด"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"การกลับสี"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"การแก้สี"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"โหมดมือเดียว"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"หรี่แสงเพิ่มเติม"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว เปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
@@ -2320,4 +2344,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"ดูการแสดงภาพซ้อนภาพขณะสตรีมไม่ได้"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ค่าเริ่มต้นของระบบ"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ซิมการ์ด <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"สิทธิ์สำหรับโปรไฟล์ในนาฬิกาที่ใช้ร่วมกันเพื่อจัดการนาฬิกา"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"อนุญาตให้แอปที่ใช้ร่วมกันจัดการนาฬิกา"</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"สังเกตการปรากฏของอุปกรณ์ที่ใช้ร่วมกัน"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"อนุญาตให้แอปที่ใช้ร่วมกันเห็นอุปกรณ์ที่ใช้ร่วมกันซึ่งแสดงขึ้นมาเมื่ออุปกรณ์อยู่ใกล้เคียงหรือไกลออกไป"</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"ส่งข้อความที่ใช้ร่วมกัน"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"อนุญาตให้แอปที่ใช้ร่วมกันส่งข้อความที่ใช้ร่วมกันไปยังอุปกรณ์อื่นๆ"</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"เริ่มการทำงานของบริการที่ทำงานอยู่เบื้องหน้าโดยให้อนุญาตจากเบื้องหลัง"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"อนุญาตจากเบื้องหลังให้แอปที่ใช้ร่วมกันเริ่มการทำงานของบริการที่ทำงานอยู่เบื้องหน้า"</string>
 </resources>

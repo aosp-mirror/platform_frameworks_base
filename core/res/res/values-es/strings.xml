@@ -43,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Los códigos PIN introducidos no coinciden."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Introduce un código PIN con una longitud comprendida entre cuatro y ocho dígitos."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Escribe un código PUK de ocho caracteres o más."</string>
-    <string name="needPuk" msgid="7321876090152422918">"La tarjeta SIM está bloqueada con el código PUK. Introduce el código PUK para desbloquearla."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"Introduce el código PUK2 para desbloquear la tarjeta SIM."</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"Error, habilitar bloqueo de SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
@@ -391,6 +393,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Esta aplicación puede ejecutarse en segundo plano, pero es posible que la batería se agote más rápido."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"utilizar datos en segundo plano"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Esta aplicación puede utilizar datos en segundo plano, pero es posible que aumente el uso de datos."</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"Programar acciones con horarios concretos"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Esta aplicación puede programar tareas para que se realicen en un momento posterior determinado. Esto también implica que la aplicación puede ejecutarse cuando no estés usando el dispositivo de manera activa."</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"Programar alarmas o recordatorios de eventos"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Esta aplicación puede programar acciones como alarmas y recordatorios para que te notifiquen en un momento posterior determinado."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"hacer que la aplicación se ejecute siempre"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Permite que la aplicación haga que algunas de sus partes se mantengan en la memoria. Esto puede limitar la cantidad de memoria disponible para otras aplicaciones y ralentizar el tablet."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Permite que algunas partes de la aplicación se queden en la memoria, lo que puede reducir la cantidad de memoria disponible para otras aplicaciones y ralentizar tu dispositivo Android TV."</string>
@@ -419,6 +425,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Permite que la aplicación use servicios en primer plano con el tipo \"remoteMessaging\""</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"ejecutar un servicio en primer plano con el tipo \"systemExempted\""</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Permite que la aplicación use servicios en primer plano con el tipo \"systemExempted\""</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"ejecutar un servicio en primer plano con el tipo \"fileManagement\""</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Permite que la aplicación use servicios en primer plano con el tipo \"fileManagement\""</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"ejecutar un servicio en primer plano con el tipo \"specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Permite que la aplicación use servicios en primer plano con el tipo \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"medir el espacio de almacenamiento de la aplicación"</string>
@@ -956,14 +964,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Vuelve a intentarlo"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desbloquear para todos los datos y funciones"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Se ha superado el número máximo de intentos de Desbloqueo facial."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Falta la tarjeta SIM."</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"No se ha insertado ninguna tarjeta SIM en el tablet."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"No hay ninguna tarjeta SIM en tu dispositivo Android TV."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"No se ha insertado ninguna tarjeta SIM en el teléfono."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Inserta una tarjeta SIM."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"Falta la tarjeta SIM o no se puede leer. Introduce una tarjeta SIM."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Tarjeta SIM inutilizable"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Tu tarjeta SIM se ha inhabilitado permanentemente.\n Para obtener otra tarjeta SIM, ponte en contacto con tu proveedor de servicios de telefonía."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Canción anterior"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Siguiente canción"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pausar"</string>
@@ -973,10 +989,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Avance rápido"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Solo llamadas de emergencia"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Bloqueada para la red"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"La tarjeta SIM está bloqueada con el código PUK."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Consulta la guía del usuario o ponte en contacto con el servicio de atención al cliente."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"Introduce el código PIN."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Desbloqueando tarjeta SIM..."</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Has realizado <xliff:g id="NUMBER_0">%1$d</xliff:g> intentos fallidos de creación de un patrón de desbloqueo. \n\nInténtalo de nuevo dentro de <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Has introducido una contraseña incorrecta <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. \n\nInténtalo de nuevo dentro de <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Has introducido un código PIN incorrecto <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. \n\nInténtalo de nuevo dentro de <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
@@ -1360,10 +1379,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Puedes cambiar esta opción más tarde en Ajustes &gt; Aplicaciones."</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Permitir siempre"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"No permitir nunca"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"Tarjeta SIM retirada"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"La red móvil no estará disponible hasta que reinicies el dispositivo con una tarjeta SIM válida."</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"Hecho"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"Tarjeta SIM añadida"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"Reinicia el dispositivo para acceder a la red móvil."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Reiniciar"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Activar servicio móvil"</string>
@@ -1675,7 +1697,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"La tarjeta SIM está inhabilitada. Para continuar, introduce el código PUK. Si quieres obtener más información, ponte en contacto con el operador"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Introduce el código PIN deseado"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Confirma el código PIN"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Desbloqueando tarjeta SIM…"</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Código PIN incorrecto"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Introduce un código PIN con una longitud comprendida entre cuatro y ocho dígitos."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"El código PUK debe tener 8 números."</string>
@@ -1732,7 +1755,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactivar acceso directo"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizar acceso directo"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversión de color"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Corrección de color"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo Una mano"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Atenuación extra"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Al mantener pulsadas las teclas de volumen, se ha activado <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
@@ -2321,4 +2345,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"No se puede usar imagen en imagen mientras se emite contenido"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Predeterminado del sistema"</string>
     <string name="default_card_name" msgid="9198284935962911468">"TARJETA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Permiso del perfil del reloj complementario para gestionar relojes"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"Permite que una aplicación complementaria gestione relojes."</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"Observar la presencia de dispositivos complementarios"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"Permite que una aplicación complementaria observe la presencia de dispositivos complementarios cuando estos están cerca o lejos."</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"Enviar mensajes complementarios"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"Permite que una aplicación complementaria envíe mensajes complementarios a otros dispositivos."</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"Iniciar servicios en primer plano desde el segundo plano"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permite que una aplicación complementaria inicie servicios en primer plano desde el segundo plano."</string>
 </resources>
