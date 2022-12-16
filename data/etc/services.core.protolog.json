@@ -3907,12 +3907,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
     },
-    "1648338379": {
-      "message": "Display id=%d is ignoring all orientation requests, return %d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
     "1653025361": {
       "message": "Register task fragment organizer=%s uid=%d pid=%d",
       "level": "VERBOSE",
@@ -4140,6 +4134,12 @@
       "level": "WARN",
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/DisplayAreaPolicyBuilder.java"
+    },
+    "1877863087": {
+      "message": "Display id=%d is ignoring orientation request for %d, return %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "1878927091": {
       "message": "prepareSurface: No changes in animation for %s",

@@ -1460,9 +1460,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @return {@code true} if it handles or will handle orientation change in the future; {@code
      *         false} if it won't handle the change at anytime.
      */
-    boolean handlesOrientationChangeFromDescendant() {
+    boolean handlesOrientationChangeFromDescendant(int orientation) {
         final WindowContainer parent = getParent();
-        return parent != null && parent.handlesOrientationChangeFromDescendant();
+        return parent != null && parent.handlesOrientationChangeFromDescendant(orientation);
     }
 
     /**
@@ -1554,7 +1554,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     // portrait but the task is still in landscape. While updating from display,
                     // the task can be updated to portrait first so the configuration can be
                     // computed in a consistent environment.
-                    && (inMultiWindowMode() || !handlesOrientationChangeFromDescendant())) {
+                    && (inMultiWindowMode()
+                        || !handlesOrientationChangeFromDescendant(orientation))) {
                 // Resolve the requested orientation.
                 onConfigurationChanged(parent.getConfiguration());
             }
