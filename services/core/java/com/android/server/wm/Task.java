@@ -4920,6 +4920,11 @@ class Task extends TaskFragment {
                     }
                     if (child.getVisibility(null /* starting */)
                             != TASK_FRAGMENT_VISIBILITY_VISIBLE) {
+                        if (child.topRunningActivity() == null) {
+                            // Skip the task if no running activity and continue resuming next task.
+                            continue;
+                        }
+                        // Otherwise, assuming everything behind this task should also be invisible.
                         break;
                     }
 
