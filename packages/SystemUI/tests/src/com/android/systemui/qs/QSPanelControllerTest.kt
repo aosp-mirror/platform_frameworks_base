@@ -135,10 +135,10 @@ class QSPanelControllerTest : SysuiTestCase() {
     fun configurationChange_onlySplitShadeConfigChanges_tileAreRedistributed() {
         testableResources.addOverride(R.bool.config_use_split_notification_shade, false)
         controller.mOnConfigurationChangedListener.onConfigurationChange(configuration)
-        verify(pagedTileLayout, never()).forceTilesRedistribution()
+        verify(pagedTileLayout, never()).forceTilesRedistribution(any())
 
         testableResources.addOverride(R.bool.config_use_split_notification_shade, true)
         controller.mOnConfigurationChangedListener.onConfigurationChange(configuration)
-        verify(pagedTileLayout).forceTilesRedistribution()
+        verify(pagedTileLayout).forceTilesRedistribution("Split shade state changed")
     }
 }
