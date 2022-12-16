@@ -49,8 +49,8 @@ import org.junit.Test
 class MobileIconInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconInteractor
     private val mobileMappingsProxy = FakeMobileMappingsProxy()
-    private val mobileIconsInteractor = FakeMobileIconsInteractor(mobileMappingsProxy)
-    private val connectionRepository = FakeMobileConnectionRepository(SUB_1_ID)
+    private val mobileIconsInteractor = FakeMobileIconsInteractor(mobileMappingsProxy, mock())
+    private val connectionRepository = FakeMobileConnectionRepository(SUB_1_ID, mock())
 
     private val scope = CoroutineScope(IMMEDIATE)
 

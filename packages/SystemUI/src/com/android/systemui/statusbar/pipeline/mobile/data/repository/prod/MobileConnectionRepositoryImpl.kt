@@ -96,6 +96,8 @@ class MobileConnectionRepositoryImpl(
 
     private val telephonyCallbackEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
+    override val tableLogBuffer: TableLogBuffer = mobileLogger
+
     override val connectionInfo: StateFlow<MobileConnectionModel> = run {
         var state = MobileConnectionModel()
         conflatedCallbackFlow {

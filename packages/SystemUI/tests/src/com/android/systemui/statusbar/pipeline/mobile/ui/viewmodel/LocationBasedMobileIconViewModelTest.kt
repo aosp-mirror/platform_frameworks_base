@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconViewModelTest.Companion.defaultSignal
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
@@ -43,9 +44,10 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
     private lateinit var homeIcon: HomeMobileIconViewModel
     private lateinit var qsIcon: QsMobileIconViewModel
     private lateinit var keyguardIcon: KeyguardMobileIconViewModel
-    private val interactor = FakeMobileIconInteractor()
+    private lateinit var interactor: FakeMobileIconInteractor
     @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var constants: ConnectivityConstants
+    @Mock private lateinit var tableLogBuffer: TableLogBuffer
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -53,6 +55,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        interactor = FakeMobileIconInteractor(tableLogBuffer)
         interactor.apply {
             setLevel(1)
             setIsDefaultDataEnabled(true)
@@ -62,11 +65,12 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
             setNumberOfLevels(4)
             isDataConnected.value = true
         }
-        commonImpl = MobileIconViewModel(SUB_1_ID, interactor, logger, constants)
+        commonImpl =
+            MobileIconViewModel(SUB_1_ID, interactor, logger, constants, testScope.backgroundScope)
 
-        homeIcon = HomeMobileIconViewModel(commonImpl)
-        qsIcon = QsMobileIconViewModel(commonImpl)
-        keyguardIcon = KeyguardMobileIconViewModel(commonImpl)
+        homeIcon = HomeMobileIconViewModel(commonImpl, logger)
+        qsIcon = QsMobileIconViewModel(commonImpl, logger)
+        keyguardIcon = KeyguardMobileIconViewModel(commonImpl, logger)
     }
 
     @Test

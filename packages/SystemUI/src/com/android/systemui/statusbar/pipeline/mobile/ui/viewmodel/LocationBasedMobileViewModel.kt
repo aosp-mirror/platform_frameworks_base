@@ -18,7 +18,10 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
 import android.graphics.Color
 import com.android.systemui.statusbar.phone.StatusBarLocation
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 
 /**
@@ -30,34 +33,50 @@ import kotlinx.coroutines.flow.flowOf
  */
 abstract class LocationBasedMobileViewModel(
     val commonImpl: MobileIconViewModelCommon,
+    val logger: ConnectivityPipelineLogger,
 ) : MobileIconViewModelCommon by commonImpl {
     abstract val tint: Flow<Int>
 
     companion object {
         fun viewModelForLocation(
             commonImpl: MobileIconViewModelCommon,
+            logger: ConnectivityPipelineLogger,
             loc: StatusBarLocation,
         ): LocationBasedMobileViewModel =
             when (loc) {
-                StatusBarLocation.HOME -> HomeMobileIconViewModel(commonImpl)
-                StatusBarLocation.KEYGUARD -> KeyguardMobileIconViewModel(commonImpl)
-                StatusBarLocation.QS -> QsMobileIconViewModel(commonImpl)
+                StatusBarLocation.HOME -> HomeMobileIconViewModel(commonImpl, logger)
+                StatusBarLocation.KEYGUARD -> KeyguardMobileIconViewModel(commonImpl, logger)
+                StatusBarLocation.QS -> QsMobileIconViewModel(commonImpl, logger)
             }
     }
 }
 
 class HomeMobileIconViewModel(
     commonImpl: MobileIconViewModelCommon,
-) : MobileIconViewModelCommon, LocationBasedMobileViewModel(commonImpl) {
-    override val tint: Flow<Int> = flowOf(Color.CYAN)
+    logger: ConnectivityPipelineLogger,
+) : MobileIconViewModelCommon, LocationBasedMobileViewModel(commonImpl, logger) {
+    override val tint: Flow<Int> =
+        flowOf(Color.CYAN)
+            .distinctUntilChanged()
+            .logOutputChange(logger, "HOME tint(${commonImpl.subscriptionId})")
 }
 
-class QsMobileIconViewModel(commonImpl: MobileIconViewModelCommon) :
-    MobileIconViewModelCommon, LocationBasedMobileViewModel(commonImpl) {
-    override val tint: Flow<Int> = flowOf(Color.GREEN)
+class QsMobileIconViewModel(
+    commonImpl: MobileIconViewModelCommon,
+    logger: ConnectivityPipelineLogger,
+) : MobileIconViewModelCommon, LocationBasedMobileViewModel(commonImpl, logger) {
+    override val tint: Flow<Int> =
+        flowOf(Color.GREEN)
+            .distinctUntilChanged()
+            .logOutputChange(logger, "QS tint(${commonImpl.subscriptionId})")
 }
 
-class KeyguardMobileIconViewModel(commonImpl: MobileIconViewModelCommon) :
-    MobileIconViewModelCommon, LocationBasedMobileViewModel(commonImpl) {
-    override val tint: Flow<Int> = flowOf(Color.MAGENTA)
+class KeyguardMobileIconViewModel(
+    commonImpl: MobileIconViewModelCommon,
+    logger: ConnectivityPipelineLogger,
+) : MobileIconViewModelCommon, LocationBasedMobileViewModel(commonImpl, logger) {
+    override val tint: Flow<Int> =
+        flowOf(Color.MAGENTA)
+            .distinctUntilChanged()
+            .logOutputChange(logger, "KEYGUARD tint(${commonImpl.subscriptionId})")
 }

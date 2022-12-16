@@ -387,7 +387,7 @@ public interface StatusBarIconController {
             if (statusBarPipelineFlags.runNewMobileIconsBackend()) {
                 // This starts the flow for the new pipeline, and will notify us of changes if
                 // {@link StatusBarPipelineFlags#useNewMobileIcons} is also true.
-                mMobileIconsViewModel = mobileUiAdapter.createMobileIconsViewModel();
+                mMobileIconsViewModel = mobileUiAdapter.getMobileIconsViewModel();
                 MobileIconsBinder.bind(mGroup, mMobileIconsViewModel);
             } else {
                 mMobileIconsViewModel = null;

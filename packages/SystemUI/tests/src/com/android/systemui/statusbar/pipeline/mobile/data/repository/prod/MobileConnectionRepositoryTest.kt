@@ -88,6 +88,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class MobileConnectionRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: MobileConnectionRepositoryImpl
+    private lateinit var connectionsRepo: FakeMobileConnectionsRepository
 
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: ConnectivityPipelineLogger
@@ -96,13 +97,14 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     private val scope = CoroutineScope(IMMEDIATE)
     private val mobileMappings = FakeMobileMappingsProxy()
     private val globalSettings = FakeSettings()
-    private val connectionsRepo = FakeMobileConnectionsRepository(mobileMappings)
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         globalSettings.userId = UserHandle.USER_ALL
         whenever(telephonyManager.subscriptionId).thenReturn(SUB_1_ID)
+
+        connectionsRepo = FakeMobileConnectionsRepository(mobileMappings, tableLogger)
 
         underTest =
             MobileConnectionRepositoryImpl(
