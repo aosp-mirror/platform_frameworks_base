@@ -113,6 +113,10 @@ public final class StepSegment extends VibrationEffectSegment {
         VibrationEffectSegment.checkDurationArgument(mDuration, "duration");
         if (Float.compare(mAmplitude, VibrationEffect.DEFAULT_AMPLITUDE) != 0) {
             Preconditions.checkArgumentInRange(mAmplitude, 0f, 1f, "amplitude");
+            VibrationEffectSegment.checkFrequencyArgument(mFrequencyHz, "frequencyHz");
+        } else if (Float.compare(mFrequencyHz, 0) != 0) {
+            throw new IllegalArgumentException(
+                    "frequency must be default when amplitude is set to default");
         }
     }
 

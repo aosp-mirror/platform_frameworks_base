@@ -28,7 +28,6 @@ import android.content.Context;
 import android.hardware.vibrator.V1_0.EffectStrength;
 import android.hardware.vibrator.V1_3.Effect;
 import android.net.Uri;
-import android.os.Vibrator;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
@@ -336,7 +335,7 @@ public abstract class VibrationEffect implements Parcelable {
      */
     @TestApi
     public static VibrationEffect get(int effectId) {
-        return get(effectId, true);
+        return get(effectId, PrebakedSegment.DEFAULT_SHOULD_FALLBACK);
     }
 
     /**
@@ -364,7 +363,7 @@ public abstract class VibrationEffect implements Parcelable {
     @TestApi
     public static VibrationEffect get(int effectId, boolean fallback) {
         VibrationEffect effect = new Composed(
-                new PrebakedSegment(effectId, fallback, EffectStrength.MEDIUM));
+                new PrebakedSegment(effectId, fallback, PrebakedSegment.DEFAULT_STRENGTH));
         effect.validate();
         return effect;
     }
@@ -1176,7 +1175,7 @@ public abstract class VibrationEffect implements Parcelable {
          */
         @NonNull
         public Composition addPrimitive(@PrimitiveType int primitiveId) {
-            return addPrimitive(primitiveId, /*scale*/ 1.0f, /*delay*/ 0);
+            return addPrimitive(primitiveId, PrimitiveSegment.DEFAULT_SCALE);
         }
 
         /**
@@ -1191,7 +1190,7 @@ public abstract class VibrationEffect implements Parcelable {
         @NonNull
         public Composition addPrimitive(@PrimitiveType int primitiveId,
                 @FloatRange(from = 0f, to = 1f) float scale) {
-            return addPrimitive(primitiveId, scale, /*delay*/ 0);
+            return addPrimitive(primitiveId, scale, PrimitiveSegment.DEFAULT_DELAY_MILLIS);
         }
 
         /**
@@ -1206,8 +1205,7 @@ public abstract class VibrationEffect implements Parcelable {
         @NonNull
         public Composition addPrimitive(@PrimitiveType int primitiveId,
                 @FloatRange(from = 0f, to = 1f) float scale, @IntRange(from = 0) int delay) {
-            PrimitiveSegment primitive = new PrimitiveSegment(primitiveId, scale,
-                    delay);
+            PrimitiveSegment primitive = new PrimitiveSegment(primitiveId, scale, delay);
             primitive.validate();
             return addSegment(primitive);
         }

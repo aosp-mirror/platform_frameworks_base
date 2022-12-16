@@ -2629,6 +2629,21 @@ package android.os.vibrator {
 
 }
 
+package android.os.vibrator.persistence {
+
+  public final class VibrationXmlParser {
+    method @Nullable public static android.os.VibrationEffect parse(@NonNull java.io.Reader) throws java.io.IOException;
+  }
+
+  public final class VibrationXmlSerializer {
+    method public static void serialize(@NonNull android.os.VibrationEffect, @NonNull java.io.Writer) throws java.io.IOException, android.os.vibrator.persistence.VibrationXmlSerializer.SerializationFailedException;
+  }
+
+  public static final class VibrationXmlSerializer.SerializationFailedException extends java.lang.IllegalStateException {
+  }
+
+}
+
 package android.permission {
 
   public final class PermissionControllerManager {
