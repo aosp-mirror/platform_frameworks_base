@@ -100,12 +100,18 @@ public class VcnGatewayConnectionConfigTest {
                 EXPOSED_CAPS);
     }
 
-    // Public for use in VcnGatewayConnectionTest
-    public static VcnGatewayConnectionConfig buildTestConfig() {
+    // Public for use in UnderlyingNetworkControllerTest
+    public static VcnGatewayConnectionConfig buildTestConfig(
+            List<VcnUnderlyingNetworkTemplate> nwTemplates) {
         final VcnGatewayConnectionConfig.Builder builder =
-                newBuilder().setVcnUnderlyingNetworkPriorities(UNDERLYING_NETWORK_TEMPLATES);
+                newBuilder().setVcnUnderlyingNetworkPriorities(nwTemplates);
 
         return buildTestConfigWithExposedCaps(builder, EXPOSED_CAPS);
+    }
+
+    // Public for use in VcnGatewayConnectionTest
+    public static VcnGatewayConnectionConfig buildTestConfig() {
+        return buildTestConfig(UNDERLYING_NETWORK_TEMPLATES);
     }
 
     private static VcnGatewayConnectionConfig.Builder newBuilder() {

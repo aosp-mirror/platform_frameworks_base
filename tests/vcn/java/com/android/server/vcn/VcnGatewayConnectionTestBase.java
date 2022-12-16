@@ -109,9 +109,23 @@ public class VcnGatewayConnectionTestBase {
     protected static final long ELAPSED_REAL_TIME = 123456789L;
     protected static final String TEST_IPSEC_TUNNEL_IFACE = "IPSEC_IFACE";
 
+    protected static UnderlyingNetworkRecord getTestNetworkRecord(
+            Network network,
+            NetworkCapabilities networkCapabilities,
+            LinkProperties linkProperties,
+            boolean isBlocked) {
+        return new UnderlyingNetworkRecord(
+                network,
+                networkCapabilities,
+                linkProperties,
+                isBlocked,
+                false /* isSelected */,
+                0 /* priorityClass */);
+    }
+
     protected static final String TEST_TCP_BUFFER_SIZES_1 = "1,2,3,4";
     protected static final UnderlyingNetworkRecord TEST_UNDERLYING_NETWORK_RECORD_1 =
-            new UnderlyingNetworkRecord(
+            getTestNetworkRecord(
                     mock(Network.class, CALLS_REAL_METHODS),
                     new NetworkCapabilities(),
                     new LinkProperties(),
@@ -124,7 +138,7 @@ public class VcnGatewayConnectionTestBase {
 
     protected static final String TEST_TCP_BUFFER_SIZES_2 = "2,3,4,5";
     protected static final UnderlyingNetworkRecord TEST_UNDERLYING_NETWORK_RECORD_2 =
-            new UnderlyingNetworkRecord(
+            getTestNetworkRecord(
                     mock(Network.class, CALLS_REAL_METHODS),
                     new NetworkCapabilities(),
                     new LinkProperties(),
