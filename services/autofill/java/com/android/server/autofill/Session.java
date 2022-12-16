@@ -324,6 +324,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private final long mStartTime;
 
     /**
+     * Starting timestamp of latency logger.
+     * This is set when Session created or when the view is reset.
+     */
+    @GuardedBy("mLock")
+    private long mLatencyBaseTime;
+
+    /**
      * When the UI was shown for the first time (using elapsed time since boot).
      */
     @GuardedBy("mLock")
@@ -1041,6 +1048,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
+        final long fillRequestSentRelativeTimestamp =
+                SystemClock.elapsedRealtime() - mLatencyBaseTime;
+        mPresentationStatsEventLogger.maybeSetFillRequestSentTimestampMs(
+                (int) (fillRequestSentRelativeTimestamp));
+
         // Now request the assist structure data.
         requestAssistStructureLocked(requestId, flags);
     }
@@ -1085,6 +1097,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         this.taskId = taskId;
         this.uid = uid;
         mStartTime = SystemClock.elapsedRealtime();
+        mLatencyBaseTime = mStartTime;
         mService = service;
         mLock = lock;
         mUi = ui;
@@ -1116,6 +1129,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     @Override
                     public void notifyInlineUiShown(AutofillId autofillId) {
                         notifyFillUiShown(autofillId);
+
+                        synchronized (mLock) {
+                            // TODO(b/262448552): Log when chip inflates instead of here
+                            final long inlineUiShownRelativeTimestamp =
+                                    SystemClock.elapsedRealtime() - mLatencyBaseTime;
+                            mPresentationStatsEventLogger.maybeSetSuggestionPresentedTimestampMs(
+                                    (int) (inlineUiShownRelativeTimestamp));
+                        }
                     }
 
                     @Override
@@ -1208,6 +1229,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + id + " destroyed");
                 return;
             }
+
+            // Time passed since session was created
+            final long fillRequestReceivedRelativeTimestamp =
+                    SystemClock.elapsedRealtime() - mLatencyBaseTime;
+            mPresentationStatsEventLogger.maybeSetFillResponseReceivedTimestampMs(
+                    (int) (fillRequestReceivedRelativeTimestamp));
 
             requestLog = mRequestLogs.get(requestId);
             if (requestLog != null) {
@@ -3128,6 +3155,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
                 break;
             case ACTION_VIEW_ENTERED:
+                mLatencyBaseTime = SystemClock.elapsedRealtime();
                 boolean wasPreviouslyFillDialog = mPreviouslyFillDialogPotentiallyStarted;
                 mPreviouslyFillDialogPotentiallyStarted = false;
                 if (sVerbose && virtualBounds != null) {
@@ -3181,7 +3209,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         return;
                     }
                 }
-
+                // If previous request was FillDialog request, a logger event was already started
                 if (!wasPreviouslyFillDialog) {
                     mPresentationStatsEventLogger.startNewEvent();
                     mPresentationStatsEventLogger.maybeSetAutofillServiceUid(
@@ -3405,6 +3433,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
+        synchronized (mLock) {
+            // Time passed since Session was created
+            long suggestionSentRelativeTimestamp =
+                    SystemClock.elapsedRealtime() - mLatencyBaseTime;
+            mPresentationStatsEventLogger.maybeSetSuggestionSentTimestampMs(
+                    (int) (suggestionSentRelativeTimestamp));
+        }
+
         final AutofillId[] ids = response.getFillDialogTriggerIds();
         if (ids != null && ArrayUtils.contains(ids, filledId)) {
             if (requestShowFillDialog(response, filledId, filterText, flags)) {
@@ -3421,6 +3457,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // Note: Cannot disable before requestShowFillDialog() because the method
                 //       need to check whether fill dialog enabled.
                 setFillDialogDisabled();
+                synchronized (mLock) {
+                    // Logs when fill dialog ui is shown; time since Session was created
+                    final long fillDialogUiShownRelativeTimestamp =
+                            SystemClock.elapsedRealtime() - mLatencyBaseTime;
+                    mPresentationStatsEventLogger.maybeSetSuggestionPresentedTimestampMs(
+                            (int) (fillDialogUiShownRelativeTimestamp));
+                }
                 return;
             } else {
                 setFillDialogDisabled();
@@ -3431,6 +3474,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (response.supportsInlineSuggestions()) {
             synchronized (mLock) {
                 if (requestShowInlineSuggestionsLocked(response, filterText)) {
+                    // Cannot tell for sure that InlineSuggestions are shown yet, IME needs to send
+                    // back a response via callback.
                     final ViewState currentView = mViewStates.get(mCurrentViewId);
                     currentView.setState(ViewState.STATE_INLINE_SHOWN);
                     // TODO(b/248378401): Fix it to log showed only when IME asks for inflation,
@@ -3464,6 +3509,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // Log first time UI is shown.
                 mUiShownTime = SystemClock.elapsedRealtime();
                 final long duration = mUiShownTime - mStartTime;
+                // This logs when dropdown ui was shown. Timestamp is relative to
+                // when the session was created
+                mPresentationStatsEventLogger.maybeSetSuggestionPresentedTimestampMs(
+                        (int) (mUiShownTime - mLatencyBaseTime));
+
                 if (sDebug) {
                     final StringBuilder msg = new StringBuilder("1st UI for ")
                             .append(mActivityToken)
