@@ -12,21 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.android.systemui.shade;
+package com.android.systemui.shade.data.repository
 
-import com.android.systemui.shade.data.repository.ShadeRepository;
-import com.android.systemui.shade.data.repository.ShadeRepositoryImpl;
+import com.android.systemui.shade.domain.model.ShadeModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
-import dagger.Binds;
-import dagger.Module;
+/** Fake implementation of [KeyguardRepository] */
+class FakeShadeRepository : ShadeRepository {
 
-/** Provides Shade-related events and information. */
-@Module
-public abstract class ShadeEventsModule {
-    @Binds
-    abstract ShadeStateEvents bindShadeEvents(ShadeExpansionStateManager impl);
+    private val _shadeModel = MutableStateFlow(ShadeModel())
+    override val shadeModel: Flow<ShadeModel> = _shadeModel
 
-    @Binds abstract ShadeRepository shadeRepository(ShadeRepositoryImpl impl);
+    fun setShadeModel(model: ShadeModel) {
+        _shadeModel.value = model
+    }
 }

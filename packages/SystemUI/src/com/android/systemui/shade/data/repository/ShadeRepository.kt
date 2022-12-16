@@ -27,11 +27,17 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
+interface ShadeRepository {
+    /** ShadeModel information regarding shade expansion events */
+    val shadeModel: Flow<ShadeModel>
+}
+
 /** Business logic for shade interactions */
 @SysUISingleton
-class ShadeRepository @Inject constructor(shadeExpansionStateManager: ShadeExpansionStateManager) {
-
-    val shadeModel: Flow<ShadeModel> =
+class ShadeRepositoryImpl
+@Inject
+constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepository {
+    override val shadeModel: Flow<ShadeModel> =
         conflatedCallbackFlow {
                 val callback =
                     object : ShadeExpansionListener {

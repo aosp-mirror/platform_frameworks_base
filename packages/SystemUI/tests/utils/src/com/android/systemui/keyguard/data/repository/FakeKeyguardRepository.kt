@@ -120,6 +120,14 @@ class FakeKeyguardRepository : KeyguardRepository {
         _dozeAmount.value = dozeAmount
     }
 
+    fun setWakefulnessModel(model: WakefulnessModel) {
+        _wakefulnessModel.value = model
+    }
+
+    fun setBouncerShowing(isShowing: Boolean) {
+        _isBouncerShowing.value = isShowing
+    }
+
     fun setBiometricUnlockState(state: BiometricUnlockModel) {
         _biometricUnlockState.tryEmit(state)
     }
