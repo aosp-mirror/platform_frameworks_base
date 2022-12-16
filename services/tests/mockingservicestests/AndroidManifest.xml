@@ -43,6 +43,9 @@
     <!-- needed by TrustManagerServiceTest to access LockSettings' secure storage -->
     <uses-permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE" />
 
+    <!-- needed by GameManagerServiceTest because GameManager creates a UidObserver -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+
     <application android:testOnly="true"
                  android:debuggable="true">
         <uses-library android:name="android.test.runner" />
