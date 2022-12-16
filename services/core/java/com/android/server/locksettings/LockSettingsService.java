@@ -2424,16 +2424,20 @@ public class LockSettingsService extends ILockSettings.Stub {
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
             String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
         enforceShell();
-        final int origPid = Binder.getCallingPid();
-        final int origUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
 
-        Slog.e(TAG, "Caller pid " + origPid + " Caller uid " + origUid);
+        // Don't log arguments other than the first one (the command name), since they might contain
+        // secrets that must not be written to the log.
+        Slogf.i(TAG, "Executing shell command '%s'; callingPid=%d, callingUid=%d",
+                ArrayUtils.isEmpty(args) ? "" : args[0], callingPid, callingUid);
+
         // The original identity is an opaque integer.
         final long origId = Binder.clearCallingIdentity();
         try {
             final LockSettingsShellCommand command =
-                    new LockSettingsShellCommand(new LockPatternUtils(mContext), mContext, origPid,
-                            origUid);
+                    new LockSettingsShellCommand(new LockPatternUtils(mContext), mContext,
+                            callingPid, callingUid);
             command.exec(this, in, out, err, args, callback, resultReceiver);
         } finally {
             Binder.restoreCallingIdentity(origId);
