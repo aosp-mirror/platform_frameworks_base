@@ -32,7 +32,8 @@ public class VcnCellUnderlyingNetworkTemplateTest extends VcnUnderlyingNetworkTe
     private static final Set<String> ALLOWED_PLMN_IDS = new HashSet<>();
     private static final Set<Integer> ALLOWED_CARRIER_IDS = new HashSet<>();
 
-    private static VcnCellUnderlyingNetworkTemplate.Builder getTestNetworkTemplateBuilder() {
+    // Public for use in UnderlyingNetworkControllerTest
+    public static VcnCellUnderlyingNetworkTemplate.Builder getTestNetworkTemplateBuilder() {
         return new VcnCellUnderlyingNetworkTemplate.Builder()
                 .setMetered(MATCH_FORBIDDEN)
                 .setMinUpstreamBandwidthKbps(
