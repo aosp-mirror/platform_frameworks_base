@@ -52,8 +52,6 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
     private lateinit var foldAodAnimationController: FoldAodAnimationController
     @Mock
     private lateinit var unfoldAnimation: UnfoldLightRevealOverlayAnimation
-    @Mock
-    private lateinit var screenLifecycle: ScreenLifecycle
     @Captor
     private lateinit var readyCaptor: ArgumentCaptor<Runnable>
 
@@ -69,13 +67,8 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
                 .thenReturn(foldAodAnimationController)
 
         screenOnCoordinator = ScreenOnCoordinator(
-            screenLifecycle,
             Optional.of(unfoldComponent),
-            FakeExecution()
         )
-
-        // Make sure screen events are registered to observe
-        verify(screenLifecycle).addObserver(screenOnCoordinator)
     }
 
     @Test
@@ -93,9 +86,7 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
     fun testUnfoldTransitionDisabledDrawnTasksReady_onScreenTurningOn_callsDrawnCallback() {
         // Recreate with empty unfoldComponent
         screenOnCoordinator = ScreenOnCoordinator(
-            screenLifecycle,
             Optional.empty(),
-            FakeExecution()
         )
         screenOnCoordinator.onScreenTurningOn(runnable)
 
@@ -105,11 +96,11 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
 
     private fun onUnfoldOverlayReady() {
         verify(unfoldAnimation).onScreenTurningOn(capture(readyCaptor))
-        readyCaptor.getValue().run()
+        readyCaptor.value.run()
     }
 
     private fun onFoldAodReady() {
         verify(foldAodAnimationController).onScreenTurningOn(capture(readyCaptor))
-        readyCaptor.getValue().run()
+        readyCaptor.value.run()
     }
 }
