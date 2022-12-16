@@ -3614,6 +3614,7 @@ package android.content.pm {
     method public abstract boolean arePermissionsIndividuallyControlled();
     method @NonNull public boolean[] canPackageQuery(@NonNull String, @NonNull String[]) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public abstract java.util.List<android.content.IntentFilter> getAllIntentFilters(@NonNull String);
+    method @NonNull @RequiresPermission("android.permission.GET_APP_METADATA") public android.os.PersistableBundle getAppMetadata(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.pm.ApplicationInfo getApplicationInfoAsUser(@NonNull String, int, @NonNull android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.pm.ApplicationInfo getApplicationInfoAsUser(@NonNull String, @NonNull android.content.pm.PackageManager.ApplicationInfoFlags, @NonNull android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public android.content.pm.dex.ArtManager getArtManager();

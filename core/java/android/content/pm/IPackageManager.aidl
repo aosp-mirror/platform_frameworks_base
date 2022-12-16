@@ -159,6 +159,8 @@ interface IPackageManager {
      */
     ParceledListSlice getInstalledPackages(long flags, in int userId);
 
+    String getAppMetadataPath(String packageName, int userId);
+
     /**
      * This implements getPackagesHoldingPermissions via a "last returned row"
      * mechanism that is not exposed in the API. This is to get around the IPC
