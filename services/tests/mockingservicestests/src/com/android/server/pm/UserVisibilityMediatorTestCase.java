@@ -165,12 +165,16 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         expectNoDisplayAssignedToUser(USER_ID);
         expectInitialCurrentUserAssignedToDisplay(DEFAULT_DISPLAY);
 
+        assertInvisibleUserCannotBeAssignedExtraDisplay(USER_ID, SECONDARY_DISPLAY_ID);
+
         listener.verify();
     }
 
     @Test
     public final void testStartVisibleBgUser_onDefaultDisplay() throws Exception {
         visibleBgUserCannotBeStartedOnDefaultDisplayTest();
+
+        assertInvisibleUserCannotBeAssignedExtraDisplay(USER_ID, SECONDARY_DISPLAY_ID);
     }
 
     protected final void visibleBgUserCannotBeStartedOnDefaultDisplayTest() throws Exception {
@@ -180,8 +184,8 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
                 DEFAULT_DISPLAY);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
-        expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
-        expectNoDisplayAssignedToUser(PROFILE_USER_ID);
+        expectUserIsNotVisibleAtAll(USER_ID);
+        expectNoDisplayAssignedToUser(USER_ID);
 
         listener.verify();
     }
@@ -194,8 +198,11 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
                 SECONDARY_DISPLAY_ID);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
-        expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
-        expectNoDisplayAssignedToUser(PROFILE_USER_ID);
+        expectUserIsNotVisibleAtAll(USER_ID);
+        expectNoDisplayAssignedToUser(USER_ID);
+
+        assertInvisibleUserCannotBeAssignedExtraDisplay(USER_ID, SECONDARY_DISPLAY_ID);
+        assertInvisibleUserCannotBeAssignedExtraDisplay(USER_ID, OTHER_SECONDARY_DISPLAY_ID);
 
         listener.verify();
     }
@@ -216,6 +223,9 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
 
         expectNoDisplayAssignedToUser(USER_SYSTEM);
         expectUserAssignedToDisplay(SECONDARY_DISPLAY_ID, USER_ID);
+
+        assertUserCannotBeAssignedExtraDisplay(USER_SYSTEM, SECONDARY_DISPLAY_ID);
+        assertUserCannotBeAssignedExtraDisplay(USER_SYSTEM, OTHER_SECONDARY_DISPLAY_ID);
 
         listener.verify();
     }
@@ -256,6 +266,8 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         expectNoDisplayAssignedToUser(PROFILE_USER_ID);
         expectUserAssignedToDisplay(DEFAULT_DISPLAY, OTHER_USER_ID);
 
+        assertUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+
         listener.verify();
     }
 
@@ -289,6 +301,8 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         expectNoDisplayAssignedToUser(PROFILE_USER_ID);
         expectInitialCurrentUserAssignedToDisplay(DEFAULT_DISPLAY);
 
+        assertUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+
         listener.verify();
     }
 
@@ -305,6 +319,10 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         expectNoDisplayAssignedToUser(PROFILE_USER_ID);
         expectInitialCurrentUserAssignedToDisplay(SECONDARY_DISPLAY_ID);
 
+        assertInvisibleUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+        assertInvisibleUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID,
+                OTHER_SECONDARY_DISPLAY_ID);
+
         listener.verify();
     }
 
@@ -319,6 +337,10 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
         expectNoDisplayAssignedToUser(PROFILE_USER_ID);
         expectInitialCurrentUserAssignedToDisplay(SECONDARY_DISPLAY_ID);
+
+        assertInvisibleUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+        assertInvisibleUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID,
+                OTHER_SECONDARY_DISPLAY_ID);
 
         listener.verify();
     }
@@ -336,6 +358,9 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         expectNoDisplayAssignedToUser(PROFILE_USER_ID);
         expectInitialCurrentUserAssignedToDisplay(DEFAULT_DISPLAY);
 
+        assertInvisibleUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID, DEFAULT_DISPLAY);
+        assertInvisibleUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+
         listener.verify();
     }
 
@@ -350,6 +375,10 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
         expectNoDisplayAssignedToUser(PROFILE_USER_ID);
         expectInitialCurrentUserAssignedToDisplay(SECONDARY_DISPLAY_ID);
+
+        assertInvisibleUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+        assertInvisibleUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID,
+                OTHER_SECONDARY_DISPLAY_ID);
 
         listener.verify();
     }
@@ -481,6 +510,63 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
                         .that(actualResult).isEqualTo(expectedResult);
     }
 
+    protected void assertBgUserBecomesInvisibleOnStop(@UserIdInt int userId) {
+        Log.d(TAG, "Stopping user " + userId);
+        mMediator.unassignUserFromDisplayOnStop(userId);
+        expectUserIsNotVisibleAtAll(userId);
+    }
+
+    /**
+     * Assigns and unassigns the user to / from an extra display, asserting the visibility state in
+     * between.
+     *
+     * <p>It assumes the user was not visible in the display beforehand.
+     */
+    protected void assertUserCanBeAssignedExtraDisplay(@UserIdInt int userId, int displayId) {
+        assertUserCanBeAssignedExtraDisplay(userId, displayId, /* unassign= */ true);
+    }
+
+    protected void assertUserCanBeAssignedExtraDisplay(@UserIdInt int userId, int displayId,
+            boolean unassign) {
+
+        expectUserIsNotVisibleOnDisplay(userId, displayId);
+
+        Log.d(TAG, "Calling assignUserToExtraDisplay(" + userId + ", " + displayId + ")");
+        assertWithMessage("assignUserToExtraDisplay(%s, %s)", userId, displayId)
+                .that(mMediator.assignUserToExtraDisplay(userId, displayId))
+                .isTrue();
+        expectUserIsVisibleOnDisplay(userId, displayId);
+
+        if (unassign) {
+            Log.d(TAG, "Calling unassignUserFromExtraDisplay(" + userId + ", " + displayId + ")");
+            assertWithMessage("unassignUserFromExtraDisplay(%s, %s)", userId, displayId)
+                    .that(mMediator.unassignUserFromExtraDisplay(userId, displayId))
+                    .isTrue();
+            expectUserIsNotVisibleOnDisplay(userId, displayId);
+        }
+    }
+
+    /**
+     * Asserts that a user (already visible or not) cannot be assigned to an extra display (and
+     * hence won't be visible on that display).
+     */
+    protected void assertUserCannotBeAssignedExtraDisplay(@UserIdInt int userId, int displayId) {
+        expectWithMessage("assignUserToExtraDisplay(%s, %s)", userId, displayId)
+                .that(mMediator.assignUserToExtraDisplay(userId, displayId))
+                .isFalse();
+        expectUserIsNotVisibleOnDisplay(userId, displayId);
+    }
+
+    /**
+     * Asserts that an invisible user cannot be assigned to an extra display.
+     */
+    protected void assertInvisibleUserCannotBeAssignedExtraDisplay(@UserIdInt int userId,
+            int displayId) {
+        assertUserCannotBeAssignedExtraDisplay(userId, displayId);
+        expectNoDisplayAssignedToUser(userId);
+        expectInitialCurrentUserAssignedToDisplay(displayId);
+    }
+
     protected void expectUserIsVisible(@UserIdInt int userId) {
         expectWithMessage("isUserVisible(%s)", userId)
                 .that(mMediator.isUserVisible(userId))
@@ -532,6 +618,11 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
     protected void expectNoDisplayAssignedToUser(@UserIdInt int userId) {
         expectWithMessage("getDisplayAssignedToUser(%s)", userId)
                 .that(mMediator.getDisplayAssignedToUser(userId)).isEqualTo(INVALID_DISPLAY);
+    }
+
+    protected void expectUserCannotBeUnassignedFromDisplay(@UserIdInt int userId, int displayId) {
+        expectWithMessage("unassignUserFromExtraDisplay(%s, %s)", userId, displayId)
+                .that(mMediator.unassignUserFromExtraDisplay(userId, displayId)).isFalse();
     }
 
     protected void expectUserAssignedToDisplay(int displayId, @UserIdInt int userId) {

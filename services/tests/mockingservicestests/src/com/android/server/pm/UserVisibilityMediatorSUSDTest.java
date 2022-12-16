@@ -49,6 +49,7 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
         int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, FG,
                 DEFAULT_DISPLAY);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
+        expectUserCannotBeUnassignedFromDisplay(USER_ID, DEFAULT_DISPLAY);
 
         expectUserIsVisible(USER_ID);
         expectUserIsNotVisibleOnDisplay(USER_ID, INVALID_DISPLAY);
@@ -80,6 +81,7 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
         int result = mMediator.assignUserToDisplayOnStart(currentUserId, currentUserId, FG,
                 DEFAULT_DISPLAY);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
+        expectUserCannotBeUnassignedFromDisplay(currentUserId, DEFAULT_DISPLAY);
 
         expectUserIsVisible(currentUserId);
         expectUserIsNotVisibleOnDisplay(currentUserId, INVALID_DISPLAY);
@@ -110,6 +112,7 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID,
                 BG_VISIBLE, DEFAULT_DISPLAY);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
+        expectUserCannotBeUnassignedFromDisplay(PROFILE_USER_ID, DEFAULT_DISPLAY);
 
         expectUserIsVisible(PROFILE_USER_ID);
         expectUserIsNotVisibleOnDisplay(PROFILE_USER_ID, INVALID_DISPLAY);
