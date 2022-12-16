@@ -57,6 +57,7 @@ import android.hardware.input.VirtualNavigationTouchpad;
 import android.hardware.input.VirtualNavigationTouchpadConfig;
 import android.hardware.input.VirtualTouchscreen;
 import android.hardware.input.VirtualTouchscreenConfig;
+import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -300,6 +301,22 @@ public final class VirtualDeviceManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Requests sound effect to be played on virtual device.
+     *
+     * @see android.media.AudioManager#playSoundEffect(int)
+     *
+     * @param deviceId - id of the virtual audio device
+     * @param effectType the type of sound effect
+     * @hide
+     */
+    public void playSoundEffect(int deviceId, @AudioManager.SystemSoundEffect int effectType) {
+        //TODO - handle requests to play sound effects by custom callbacks or SoundPool asociated
+        // with device session id.
+        // For now, this is intentionally left empty and effectively disables sound effects for
+        // virtual devices with custom device audio policy.
     }
 
     /**
