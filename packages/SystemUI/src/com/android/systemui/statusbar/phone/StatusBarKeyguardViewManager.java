@@ -135,7 +135,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final PrimaryBouncerCallbackInteractor mPrimaryBouncerCallbackInteractor;
     private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     private final BouncerView mPrimaryBouncerView;
-    private final Lazy<com.android.systemui.shade.ShadeController> mShadeController;
+    private final Lazy<ShadeController> mShadeController;
 
     // Local cache of expansion events, to avoid duplicates
     private float mFraction = -1f;
@@ -252,6 +252,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private float mQsExpansion;
     final Set<KeyguardViewManagerCallback> mCallbacks = new HashSet<>();
     private boolean mIsModernBouncerEnabled;
+    private boolean mIsUnoccludeTransitionFlagEnabled;
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private Runnable mKeyguardGoneCancelAction;
@@ -329,6 +330,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mFoldAodAnimationController = sysUIUnfoldComponent
                 .map(SysUIUnfoldComponent::getFoldAodAnimationController).orElse(null);
         mIsModernBouncerEnabled = featureFlags.isEnabled(Flags.MODERN_BOUNCER);
+        mIsUnoccludeTransitionFlagEnabled = featureFlags.isEnabled(Flags.UNOCCLUSION_TRANSITION);
     }
 
     @Override
@@ -867,8 +869,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             // by a FLAG_DISMISS_KEYGUARD_ACTIVITY.
             reset(isOccluding /* hideBouncerWhenShowing*/);
         }
-        if (animate && !isOccluded && isShowing && !primaryBouncerIsShowing()) {
-            mCentralSurfaces.animateKeyguardUnoccluding();
+        if (!mIsUnoccludeTransitionFlagEnabled) {
+            if (animate && !isOccluded && isShowing && !primaryBouncerIsShowing()) {
+                mCentralSurfaces.animateKeyguardUnoccluding();
+            }
         }
     }
 

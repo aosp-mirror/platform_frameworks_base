@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.animation.Interpolators.EMPHASIZED_ACCELERATE
+import com.android.systemui.animation.Interpolators.EMPHASIZED_DECELERATE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.DreamingTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -46,12 +47,11 @@ constructor(
     /** Dream overlay views alpha - fade out */
     val dreamOverlayAlpha: Flow<Float> = flowForAnimation(DREAM_OVERLAY_ALPHA).map { 1f - it }
 
-    /** Dream background alpha - fade out */
-    val dreamBackgroundAlpha: Flow<Float> = flowForAnimation(DREAM_BACKGROUND_ALPHA).map { 1f - it }
-
     /** Lockscreen views y-translation */
     fun lockscreenTranslationY(translatePx: Int): Flow<Float> {
-        return flowForAnimation(LOCKSCREEN_TRANSLATION_Y).map { it * translatePx }
+        return flowForAnimation(LOCKSCREEN_TRANSLATION_Y).map { value ->
+            -translatePx + (EMPHASIZED_DECELERATE.getInterpolation(value) * translatePx)
+        }
     }
 
     /** Lockscreen views alpha */
@@ -68,10 +68,12 @@ constructor(
     companion object {
         /* Length of time before ending the dream activity, in order to start unoccluding */
         val DREAM_ANIMATION_DURATION = 250.milliseconds
+        @JvmField
+        val LOCKSCREEN_ANIMATION_DURATION_MS =
+            (TO_LOCKSCREEN_DURATION - DREAM_ANIMATION_DURATION).inWholeMilliseconds
 
-        val DREAM_OVERLAY_TRANSLATION_Y = AnimationParams(duration = 500.milliseconds)
+        val DREAM_OVERLAY_TRANSLATION_Y = AnimationParams(duration = 600.milliseconds)
         val DREAM_OVERLAY_ALPHA = AnimationParams(duration = 250.milliseconds)
-        val DREAM_BACKGROUND_ALPHA = AnimationParams(duration = 250.milliseconds)
         val LOCKSCREEN_TRANSLATION_Y = AnimationParams(duration = TO_LOCKSCREEN_DURATION)
         val LOCKSCREEN_ALPHA =
             AnimationParams(startTime = 233.milliseconds, duration = 250.milliseconds)
