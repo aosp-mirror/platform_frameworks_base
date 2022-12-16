@@ -33,7 +33,6 @@ import com.android.server.permission.access.GetStateScope
 import com.android.server.permission.access.MutateStateScope
 import com.android.server.permission.access.PermissionUri
 import com.android.server.permission.access.SchemePolicy
-import com.android.server.permission.access.SystemState
 import com.android.server.permission.access.UidUri
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.andInv
@@ -821,12 +820,20 @@ class UidPermissionPolicy : SchemePolicy() {
         }
     }
 
-    override fun BinaryXmlPullParser.parseSystemState(systemState: SystemState) {
-        with(persistence) { this@parseSystemState.parseSystemState(systemState) }
+    override fun BinaryXmlPullParser.parseSystemState(state: AccessState) {
+        with(persistence) { this@parseSystemState.parseSystemState(state) }
     }
 
-    override fun BinaryXmlSerializer.serializeSystemState(systemState: SystemState) {
-        with(persistence) { this@serializeSystemState.serializeSystemState(systemState) }
+    override fun BinaryXmlSerializer.serializeSystemState(state: AccessState) {
+        with(persistence) { this@serializeSystemState.serializeSystemState(state) }
+    }
+
+    override fun BinaryXmlPullParser.parseUserState(state: AccessState, userId: Int) {
+        with(persistence) { this@parseUserState.parseUserState(state, userId) }
+    }
+
+    override fun BinaryXmlSerializer.serializeUserState(state: AccessState, userId: Int) {
+        with(persistence) { this@serializeUserState.serializeUserState(state, userId) }
     }
 
     fun GetStateScope.getPermissionGroup(permissionGroupName: String): PermissionGroupInfo? =

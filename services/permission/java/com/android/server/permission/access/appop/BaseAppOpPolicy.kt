@@ -18,9 +18,9 @@ package com.android.server.permission.access.appop
 
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
+import com.android.server.permission.access.AccessState
 import com.android.server.permission.access.AppOpUri
 import com.android.server.permission.access.SchemePolicy
-import com.android.server.permission.access.UserState
 
 abstract class BaseAppOpPolicy(
     private val persistence: BaseAppOpPersistence
@@ -28,11 +28,11 @@ abstract class BaseAppOpPolicy(
     override val objectScheme: String
         get() = AppOpUri.SCHEME
 
-    override fun BinaryXmlPullParser.parseUserState(userId: Int, userState: UserState) {
-        with(persistence) { this@parseUserState.parseUserState(userId, userState) }
+    override fun BinaryXmlPullParser.parseUserState(state: AccessState, userId: Int) {
+        with(persistence) { this@parseUserState.parseUserState(state, userId) }
     }
 
-    override fun BinaryXmlSerializer.serializeUserState(userId: Int, userState: UserState) {
-        with(persistence) { this@serializeUserState.serializeUserState(userId, userState) }
+    override fun BinaryXmlSerializer.serializeUserState(state: AccessState, userId: Int) {
+        with(persistence) { this@serializeUserState.serializeUserState(state, userId) }
     }
 }

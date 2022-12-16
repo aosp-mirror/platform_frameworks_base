@@ -33,24 +33,23 @@ class AccessPersistence(
     private val policy: AccessPolicy
 ) {
     fun read(state: AccessState) {
-        readSystemState(state.systemState)
-        val userStates = state.userStates
+        readSystemState(state)
         state.systemState.userIds.forEachIndexed { _, userId ->
-            readUserState(userId, userStates[userId])
+            readUserState(state, userId)
         }
     }
 
-    private fun readSystemState(systemState: SystemState) {
+    private fun readSystemState(state: AccessState) {
         systemFile.parse {
             // This is the canonical way to call an extension function in a different class.
             // TODO(b/259469752): Use context receiver for this when it becomes stable.
-            with(policy) { parseSystemState(systemState) }
+            with(policy) { parseSystemState(state) }
         }
     }
 
-    private fun readUserState(userId: Int, userState: UserState) {
+    private fun readUserState(state: AccessState, userId: Int) {
         getUserFile(userId).parse {
-            with(policy) { parseUserState(userId, userState) }
+            with(policy) { parseUserState(state, userId) }
         }
     }
 
@@ -65,30 +64,30 @@ class AccessPersistence(
     }
 
     fun write(state: AccessState) {
-        writeState(state.systemState, ::writeSystemState)
+        writeState(state.systemState) { writeSystemState(state) }
         state.userStates.forEachIndexed { _, userId, userState ->
-            writeState(userState) { writeUserState(userId, it) }
+            writeState(userState) { writeUserState(state, userId) }
         }
     }
 
-    private inline fun <T : WritableState> writeState(state: T, write: (T) -> Unit) {
+    private inline fun <T : WritableState> writeState(state: T, write: () -> Unit) {
         when (val writeMode = state.writeMode) {
             WriteMode.NONE -> {}
-            WriteMode.SYNC -> write(state)
+            WriteMode.SYNC -> write()
             WriteMode.ASYNC -> TODO()
             else -> error(writeMode)
         }
     }
 
-    private fun writeSystemState(systemState: SystemState) {
+    private fun writeSystemState(state: AccessState) {
         systemFile.serialize {
-            with(policy) { serializeSystemState(systemState) }
+            with(policy) { serializeSystemState(state) }
         }
     }
 
-    private fun writeUserState(userId: Int, userState: UserState) {
+    private fun writeUserState(state: AccessState, userId: Int) {
         getUserFile(userId).serialize {
-            with(policy) { serializeUserState(userId, userState) }
+            with(policy) { serializeUserState(state, userId) }
         }
     }
 
