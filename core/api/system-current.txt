@@ -4902,17 +4902,15 @@ package android.hardware.input {
 
   public final class VirtualTouchscreenConfig extends android.hardware.input.VirtualInputDeviceConfig implements android.os.Parcelable {
     method public int describeContents();
-    method public int getHeightInPixels();
-    method public int getWidthInPixels();
+    method public int getHeight();
+    method public int getWidth();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualTouchscreenConfig> CREATOR;
   }
 
   public static final class VirtualTouchscreenConfig.Builder extends android.hardware.input.VirtualInputDeviceConfig.Builder<android.hardware.input.VirtualTouchscreenConfig.Builder> {
-    ctor public VirtualTouchscreenConfig.Builder();
+    ctor public VirtualTouchscreenConfig.Builder(@IntRange(from=1) int, @IntRange(from=1) int);
     method @NonNull public android.hardware.input.VirtualTouchscreenConfig build();
-    method @NonNull public android.hardware.input.VirtualTouchscreenConfig.Builder setHeightInPixels(int);
-    method @NonNull public android.hardware.input.VirtualTouchscreenConfig.Builder setWidthInPixels(int);
   }
 
 }

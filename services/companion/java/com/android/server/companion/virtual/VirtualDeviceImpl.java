@@ -497,19 +497,19 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                                 + "this virtual device");
             }
         }
-        int screenHeightPixels = config.getHeightInPixels();
-        int screenWidthPixels = config.getWidthInPixels();
-        if (screenHeightPixels <= 0 || screenWidthPixels <= 0) {
+        int screenHeight = config.getHeight();
+        int screenWidth = config.getWidth();
+        if (screenHeight <= 0 || screenWidth <= 0) {
             throw new IllegalArgumentException(
                     "Cannot create a virtual touchscreen, screen dimensions must be positive. Got: "
-                            + "(" + screenWidthPixels + ", " + screenHeightPixels + ")");
+                            + "(" + screenWidth + ", " + screenHeight + ")");
         }
 
         final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.createTouchscreen(config.getInputDeviceName(), config.getVendorId(),
                     config.getProductId(), deviceToken, config.getAssociatedDisplayId(),
-                    screenHeightPixels, screenWidthPixels);
+                    screenHeight, screenWidth);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

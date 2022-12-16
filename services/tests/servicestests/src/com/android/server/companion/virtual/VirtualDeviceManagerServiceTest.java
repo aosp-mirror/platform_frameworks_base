@@ -178,17 +178,14 @@ public class VirtualDeviceManagerServiceTest {
                     .setAssociatedDisplayId(DISPLAY_ID_1)
                     .build();
     private static final VirtualTouchscreenConfig TOUCHSCREEN_CONFIG =
-            new VirtualTouchscreenConfig.Builder()
+            new VirtualTouchscreenConfig.Builder(WIDTH, HEIGHT)
                     .setVendorId(VENDOR_ID)
                     .setProductId(PRODUCT_ID)
                     .setInputDeviceName(DEVICE_NAME)
                     .setAssociatedDisplayId(DISPLAY_ID_1)
-                    .setWidthInPixels(WIDTH)
-                    .setHeightInPixels(HEIGHT)
                     .build();
     private static final VirtualNavigationTouchpadConfig NAVIGATION_TOUCHPAD_CONFIG =
-            new VirtualNavigationTouchpadConfig.Builder(
-                    /* touchpadHeight= */ HEIGHT, /* touchpadWidth= */ WIDTH)
+            new VirtualNavigationTouchpadConfig.Builder(WIDTH, HEIGHT)
                     .setVendorId(VENDOR_ID)
                     .setProductId(PRODUCT_ID)
                     .setInputDeviceName(DEVICE_NAME)
@@ -731,48 +728,28 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void createVirtualTouchscreen_zeroDisplayDimension_failsIllegalArgumentException() {
-        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID_1);
-        final VirtualTouchscreenConfig zeroConfig =
-                new VirtualTouchscreenConfig.Builder()
-                        .setVendorId(VENDOR_ID)
-                        .setProductId(PRODUCT_ID)
-                        .setInputDeviceName(DEVICE_NAME)
-                        .setAssociatedDisplayId(DISPLAY_ID_1)
-                        .setWidthInPixels(0)
-                        .setHeightInPixels(0)
-                        .build();
         assertThrows(IllegalArgumentException.class,
-                () -> mDeviceImpl.createVirtualTouchscreen(zeroConfig, BINDER));
+                () -> new VirtualTouchscreenConfig.Builder(
+                        /* touchscrenWidth= */ 0, /* touchscreenHeight= */ 0));
     }
 
     @Test
     public void createVirtualTouchscreen_negativeDisplayDimension_failsIllegalArgumentException() {
-        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID_1);
-        final VirtualTouchscreenConfig negativeConfig =
-                new VirtualTouchscreenConfig.Builder()
-                        .setVendorId(VENDOR_ID)
-                        .setProductId(PRODUCT_ID)
-                        .setInputDeviceName(DEVICE_NAME)
-                        .setAssociatedDisplayId(DISPLAY_ID_1)
-                        .setWidthInPixels(-100)
-                        .setHeightInPixels(-100)
-                        .build();
         assertThrows(IllegalArgumentException.class,
-                () -> mDeviceImpl.createVirtualTouchscreen(negativeConfig, BINDER));
-
+                () -> new VirtualTouchscreenConfig.Builder(
+                        /* touchscrenWidth= */ -100, /* touchscreenHeight= */ -100));
     }
 
     @Test
     public void createVirtualTouchscreen_positiveDisplayDimension_successful() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID_1);
         VirtualTouchscreenConfig positiveConfig =
-                new VirtualTouchscreenConfig.Builder()
+                new VirtualTouchscreenConfig.Builder(
+                        /* touchscrenWidth= */ 600, /* touchscreenHeight= */ 800)
                         .setVendorId(VENDOR_ID)
                         .setProductId(PRODUCT_ID)
                         .setInputDeviceName(DEVICE_NAME)
                         .setAssociatedDisplayId(DISPLAY_ID_1)
-                        .setWidthInPixels(600)
-                        .setHeightInPixels(800)
                         .build();
         mDeviceImpl.createVirtualTouchscreen(positiveConfig, BINDER);
         assertWithMessage(
@@ -789,36 +766,16 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void createVirtualNavigationTouchpad_zeroDisplayDimension_failsWithException() {
-        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID_1);
         assertThrows(IllegalArgumentException.class,
-                () -> {
-                    final VirtualNavigationTouchpadConfig zeroConfig =
-                            new VirtualNavigationTouchpadConfig.Builder(
-                                    /* touchpadHeight= */ 0, /* touchpadWidth= */ 0)
-                                    .setVendorId(VENDOR_ID)
-                                    .setProductId(PRODUCT_ID)
-                                    .setInputDeviceName(DEVICE_NAME)
-                                    .setAssociatedDisplayId(DISPLAY_ID_1)
-                                    .build();
-                    mDeviceImpl.createVirtualNavigationTouchpad(zeroConfig, BINDER);
-                });
+                () -> new VirtualNavigationTouchpadConfig.Builder(
+                        /* touchpadHeight= */ 0, /* touchpadWidth= */ 0));
     }
 
     @Test
     public void createVirtualNavigationTouchpad_negativeDisplayDimension_failsWithException() {
-        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID_1);
         assertThrows(IllegalArgumentException.class,
-                () -> {
-                    final VirtualNavigationTouchpadConfig negativeConfig =
-                            new VirtualNavigationTouchpadConfig.Builder(
-                                    /* touchpadHeight= */ -50, /* touchpadWidth= */ 50)
-                                    .setVendorId(VENDOR_ID)
-                                    .setProductId(PRODUCT_ID)
-                                    .setInputDeviceName(DEVICE_NAME)
-                                    .setAssociatedDisplayId(DISPLAY_ID_1)
-                                    .build();
-                    mDeviceImpl.createVirtualNavigationTouchpad(negativeConfig, BINDER);
-                });
+                () -> new VirtualNavigationTouchpadConfig.Builder(
+                        /* touchpadHeight= */ -50, /* touchpadWidth= */ 50));
     }
 
     @Test
