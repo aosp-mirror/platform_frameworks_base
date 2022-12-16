@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Mentés másik helyre"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Másik eszköz használata"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Mentés másik eszközre"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Fokozott biztonság – azonosítókulccsal"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Nincs szükség összetett jelszavak létrehozására vagy megjegyzésére"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Ujjlenyomatát, arcát vagy képernyőzárát egyedi azonosítókulcs létrehozására használhatja"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Az azonosítókulcsokat a rendszer jelszókezelőbe menti, így más eszközökbe is be tud jelentkezni"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Válassza ki a(z) <xliff:g id="CREATETYPES">%1$s</xliff:g> helyét"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"azonosítókulcsok létrehozása"</string>
     <string name="save_your_password" msgid="6597736507991704307">"jelszó mentése"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"Egyéb jelszókezelők"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Munkalap bezárása"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Vissza az előző oldalra"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Szeretné a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazáshoz mentett azonosítókulcsot használni?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Szeretné a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazáshoz mentett bejelentkezési adatait használni?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Mentett bejelentkezési adatok választása a következő számára: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

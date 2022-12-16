@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Зачувајте на друго место"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Употребете друг уред"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Зачувајте на друг уред"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Побезбедно со криптографски клучеви"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Нема потреба да создавате или помните сложени лозинки"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Користете го отпечатокот, ликот или заклучувањето екран за да создадете единствен криптографски клуч."</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Криптографските клучеви се зачувуваат во управник со лозинки за да може да се најавувате на други уреди"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Изберете каде да <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"создајте криптографски клучеви"</string>
     <string name="save_your_password" msgid="6597736507991704307">"се зачува лозинката"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"Други управници со лозинки"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Затворете го листот"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Врати се на претходната страница"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Да се користи вашиот зачуван криптографски клуч за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Да се користи вашето зачувано најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Изберете зачувано најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

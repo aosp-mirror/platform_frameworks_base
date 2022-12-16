@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Desa en un altre lloc"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Utilitza un altre dispositiu"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Desa en un altre dispositiu"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Més seguretat amb les claus d\'accés"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"No cal que creïs ni recordis contrasenyes difícils"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Utilitza l\'empremta digital, la cara o el bloqueig de pantalla per crear una clau d\'accés única"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Les claus d\'accés es desen a un gestor de contrasenyes perquè puguis iniciar la sessió en altres dispositius"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Tria on vols <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"crea les teves claus d\'accés"</string>
     <string name="save_your_password" msgid="6597736507991704307">"desar la contrasenya"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"Altres gestors de contrasenyes"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Tanca el full"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Torna a la pàgina anterior"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Vols utilitzar la clau d\'accés desada per a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Vols utilitzar l\'inici de sessió desat per a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Tria un inici de sessió desat per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

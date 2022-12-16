@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"অন্য জায়গায় সেভ করুন"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"অন্য ডিভাইস ব্যবহার করুন"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"অন্য ডিভাইসে সেভ করুন"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"\'পাসকী\'-এর সাথে সুরক্ষিত"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"জটিল পাসওয়ার্ড তৈরি বা মনে রাখার কোনও প্রয়োজন নেই"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"একটি অনন্য \'পাসকী\' তৈরি করতে, আপনার ফিঙ্গারপ্রিন্ট, ফেস বা স্ক্রিন লক ব্যবহার করুন"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"আপনি যাতে অন্যান্য ডিভাইসে সাইন-ইন করতে পারেন তার জন্য Password Manager-এ \'পাসকী\' সেভ করা হয়"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> কোথায় সেভ করবেন তা বেছে নিন"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"আপনার পাসকী তৈরি করা"</string>
     <string name="save_your_password" msgid="6597736507991704307">"আপনার পাসওয়ার্ড সেভ করুন"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"অন্যান্য Password Manager"</string>
     <string name="close_sheet" msgid="1393792015338908262">"শিট বন্ধ করুন"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"আগের পৃষ্ঠায় ফিরে যান"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g>-এর জন্য আপনার সেভ করা পাসকী ব্যবহার করবেন?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g>-এর জন্য আপনার সেভ করা সাইন-ইন সম্পর্কিত ক্রেডেনশিয়াল ব্যবহার করবেন?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g>-এর জন্য সাইন-ইন করা সম্পর্কিত ক্রেডেনশিয়াল বেছে নিন"</string>

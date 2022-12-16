@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Ruaj në një vend tjetër"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Përdor një pajisje tjetër"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Ruaj në një pajisje tjetër"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Më e sigurt me çelësat e kalimit"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Nuk ka nevojë të krijosh ose të mbash mend fjalëkalime të ndërlikuara"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Përdor gjurmën e gishtit, fytyrën, ose kyçjen e ekranit për të krijuar një çelës unik kalimi"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Çelësat e kalimit janë të ruajtur te një menaxher i fjalëkalimeve, kështu që mund të identifikohesh në pajisje të tjera"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Zgjidh se ku të <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"do t\'i krijosh çelësat e tu të kalimit"</string>
     <string name="save_your_password" msgid="6597736507991704307">"ruaj fjalëkalimin"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"Menaxherët e tjerë të fjalëkalimeve"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Mbyll fletën"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Kthehu te faqja e mëparshme"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Të përdoret fjalëkalimi yt i ruajtur për <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Të përdoret identifikimi yt i ruajtur për <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Zgjidh një identifikim të ruajtur për <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

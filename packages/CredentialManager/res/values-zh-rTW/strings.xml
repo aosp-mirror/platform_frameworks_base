@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"儲存至其他位置"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"改用其他裝置"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"儲存至其他裝置"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"使用密碼金鑰確保帳戶安全"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"不必建立或記住複雜的密碼"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"你可以使用指紋、人臉或螢幕鎖定功能建立不重複的密碼金鑰"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"系統會將密碼金鑰儲存到密碼管理工具，方便你在任何裝置上登入"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"選擇「<xliff:g id="CREATETYPES">%1$s</xliff:g>」的位置"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"建立金鑰密碼"</string>
     <string name="save_your_password" msgid="6597736507991704307">"儲存密碼"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"其他密碼管理工具"</string>
     <string name="close_sheet" msgid="1393792015338908262">"關閉功能表"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"返回上一頁"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"要使用已儲存的「<xliff:g id="APP_NAME">%1$s</xliff:g>」密碼金鑰嗎？"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"要使用已儲存的「<xliff:g id="APP_NAME">%1$s</xliff:g>」登入資訊嗎？"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"選擇已儲存的「<xliff:g id="APP_NAME">%1$s</xliff:g>」登入資訊"</string>

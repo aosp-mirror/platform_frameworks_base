@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"કોઈ અન્ય સ્થાન પર સાચવો"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"કોઈ અન્ય ડિવાઇસનો ઉપયોગ કરો"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"અન્ય ડિવાઇસ પર સાચવો"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"પાસકી સાથે વધુ સલામત"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"જટિલ પાસવર્ડ બનાવવાની અથવા યાદ રાખવાની કોઈ જરૂર નથી"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"વિશિષ્ટ પાસકી બનાવવા માટે તમારી ફિંગરપ્રિન્ટ, ચહેરો અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"પાસકીને પાસવર્ડ મેનેજરમાં સાચવવામાં આવે છે, જેથી તમે અન્ય ડિવાઇસમાં સાઇન ઇન ન કરી શકો"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> ક્યાં સાચવવી છે, તે પસંદ કરો"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"તમારી પાસકી બનાવો"</string>
     <string name="save_your_password" msgid="6597736507991704307">"તમારો પાસવર્ડ સાચવો"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"અન્ય પાસવર્ડ મેનેજર"</string>
     <string name="close_sheet" msgid="1393792015338908262">"શીટ બંધ કરો"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"પાછલા પેજ પર પરત જાઓ"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે શું તમારી સાચવેલી પાસકીનો ઉપયોગ કરીએ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે શું તમારા સાચવેલા સાઇન-ઇનનો ઉપયોગ કરીએ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે કોઈ સાચવેલું સાઇન-ઇન પસંદ કરો"</string>

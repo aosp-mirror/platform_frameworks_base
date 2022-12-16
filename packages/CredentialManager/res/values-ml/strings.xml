@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"മറ്റൊരു സ്ഥലത്തേക്ക് സംരക്ഷിക്കുക"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"മറ്റൊരു ഉപകരണം ഉപയോഗിക്കുക"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"മറ്റൊരു ഉപകരണത്തിലേക്ക് സംരക്ഷിക്കുക"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"പാസ്‌കീകൾ ഉപയോഗിച്ച് സുരക്ഷിതരാകൂ"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"സങ്കീർണ്ണമായ പാസ്‌വേഡുകൾ സൃഷ്ടിക്കുകയോ ഓർമ്മിക്കുകയോ ചെയ്യേണ്ടതില്ല"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"തനത് പാസ്‌കീ സൃഷ്ടിക്കാൻ നിങ്ങളുടെ ഫിംഗർപ്രിന്റോ മുഖമോ സ്ക്രീൻ ലോക്കോ ഉപയോഗിക്കുക"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"പാസ്‌കീകൾ, പാസ്‌വേഡ് മാനേജറിൽ സംരക്ഷിക്കുന്നതിനാൽ നിങ്ങൾക്ക് മറ്റ് ഉപകരണങ്ങളിൽ സൈൻ ഇൻ ചെയ്യാം"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"എവിടെ <xliff:g id="CREATETYPES">%1$s</xliff:g> എന്ന് തിരഞ്ഞെടുക്കുക"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"നിങ്ങളുടെ പാസ്‌കീകൾ സൃഷ്‌ടിക്കുക"</string>
     <string name="save_your_password" msgid="6597736507991704307">"നിങ്ങളുടെ പാസ്‌വേഡ് സംരക്ഷിക്കുക"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"മറ്റ് പാസ്‌വേഡ് മാനേജർമാർ"</string>
     <string name="close_sheet" msgid="1393792015338908262">"ഷീറ്റ് അടയ്ക്കുക"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"മുമ്പത്തെ പേജിലേക്ക് മടങ്ങുക"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിനായി നിങ്ങൾ സംരക്ഷിച്ച പാസ്‌കീ ഉപയോഗിക്കണോ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിനായി നിങ്ങൾ സംരക്ഷിച്ച സൈൻ ഇൻ ഉപയോഗിക്കണോ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിനായി ഒരു സംരക്ഷിച്ച സൈൻ ഇൻ തിരഞ്ഞെടുക്കുക"</string>
