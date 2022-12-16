@@ -391,7 +391,7 @@ class SharedLibrariesImplTest {
             libraries?.forEach { pkg.addLibraryName(it) }
             staticLibrary?.let {
                 pkg.setStaticSharedLibraryName(it)
-                pkg.setStaticSharedLibVersion(staticLibraryVersion)
+                pkg.setStaticSharedLibraryVersion(staticLibraryVersion)
                 pkg.setStaticSharedLibrary(true)
             }
             usesLibraries?.forEach { pkg.addUsesLibrary(it) }
@@ -435,7 +435,7 @@ class SharedLibrariesImplTest {
             libraries?.forEach { addLibraryName(it) }
             staticLibrary?.let {
                 setStaticSharedLibraryName(it)
-                setStaticSharedLibVersion(staticLibraryVersion)
+                setStaticSharedLibraryVersion(staticLibraryVersion)
                 setStaticSharedLibrary(true)
             }
             usesLibraries?.forEach { addUsesLibrary(it) }

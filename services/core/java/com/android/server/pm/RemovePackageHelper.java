@@ -234,7 +234,7 @@ final class RemovePackageHelper {
         }
         if (pkg.getStaticSharedLibraryName() != null) {
             if (mSharedLibraries.removeSharedLibrary(pkg.getStaticSharedLibraryName(),
-                    pkg.getStaticSharedLibVersion())) {
+                    pkg.getStaticSharedLibraryVersion())) {
                 if (DEBUG_REMOVE && chatty) {
                     if (r == null) {
                         r = new StringBuilder(256);

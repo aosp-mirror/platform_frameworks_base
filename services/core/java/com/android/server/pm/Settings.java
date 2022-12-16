@@ -1455,7 +1455,7 @@ public final class Settings implements Watchable, Snappable {
     void checkAndConvertSharedUserSettingsLPw(SharedUserSetting sharedUser) {
         if (!sharedUser.isSingleUser()) return;
         final AndroidPackage pkg = sharedUser.getPackageSettings().valueAt(0).getPkg();
-        if (pkg != null && pkg.isLeavingSharedUid()
+        if (pkg != null && pkg.isLeavingSharedUser()
                 && SharedUidMigration.applyStrategy(BEST_EFFORT)) {
             convertSharedUserSettingsLPw(sharedUser);
         }
@@ -4857,7 +4857,7 @@ public final class Settings implements Watchable, Snappable {
                 pw.print(prefix); pw.println("  static library:");
                 pw.print(prefix); pw.print("    ");
                 pw.print("name:"); pw.print(pkg.getStaticSharedLibraryName());
-                pw.print(" version:"); pw.println(pkg.getStaticSharedLibVersion());
+                pw.print(" version:"); pw.println(pkg.getStaticSharedLibraryVersion());
             }
 
             if (pkg.getSdkLibraryName() != null) {

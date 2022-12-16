@@ -1044,9 +1044,9 @@ public class ParsingPackageUtils {
         }
 
         return input.success(pkg
-                .setLeavingSharedUid(leaving)
+                .setLeavingSharedUser(leaving)
                 .setSharedUserId(str.intern())
-                .setSharedUserLabel(resId(R.styleable.AndroidManifest_sharedUserLabel, sa)));
+                .setSharedUserLabelRes(resId(R.styleable.AndroidManifest_sharedUserLabel, sa)));
     }
 
     private static ParseResult<ParsingPackage> parseKeySets(ParseInput input,
@@ -1869,7 +1869,7 @@ public class ParsingPackageUtils {
                     return input.error("Empty class name in package " + packageName);
                 }
 
-                pkg.setClassName(outInfoName);
+                pkg.setApplicationClassName(outInfoName);
             }
 
             TypedValue labelValue = sa.peekValue(R.styleable.AndroidManifestApplication_label);
@@ -1939,7 +1939,7 @@ public class ParsingPackageUtils {
                         fullBackupContent = v.data == 0 ? -1 : 0;
                     }
 
-                    pkg.setFullBackupContent(fullBackupContent);
+                    pkg.setFullBackupContentRes(fullBackupContent);
                 }
                 if (DEBUG_BACKUP) {
                     Slog.v(TAG, "fullBackupContent=" + fullBackupContent + " for " + pkgName);
@@ -2247,7 +2247,7 @@ public class ParsingPackageUtils {
                 .setOnBackInvokedCallbackEnabled(bool(false, R.styleable.AndroidManifestApplication_enableOnBackInvokedCallback, sa))
                 // targetSdkVersion gated
                 .setAllowAudioPlaybackCapture(bool(targetSdk >= Build.VERSION_CODES.Q, R.styleable.AndroidManifestApplication_allowAudioPlaybackCapture, sa))
-                .setBaseHardwareAccelerated(bool(targetSdk >= Build.VERSION_CODES.ICE_CREAM_SANDWICH, R.styleable.AndroidManifestApplication_hardwareAccelerated, sa))
+                .setHardwareAccelerated(bool(targetSdk >= Build.VERSION_CODES.ICE_CREAM_SANDWICH, R.styleable.AndroidManifestApplication_hardwareAccelerated, sa))
                 .setRequestLegacyExternalStorage(bool(targetSdk < Build.VERSION_CODES.Q, R.styleable.AndroidManifestApplication_requestLegacyExternalStorage, sa))
                 .setUsesCleartextTraffic(bool(targetSdk < Build.VERSION_CODES.P, R.styleable.AndroidManifestApplication_usesCleartextTraffic, sa))
                 // Ints Default 0
@@ -2258,14 +2258,14 @@ public class ParsingPackageUtils {
                 .setMaxAspectRatio(aFloat(R.styleable.AndroidManifestApplication_maxAspectRatio, sa))
                 .setMinAspectRatio(aFloat(R.styleable.AndroidManifestApplication_minAspectRatio, sa))
                 // Resource ID
-                .setBanner(resId(R.styleable.AndroidManifestApplication_banner, sa))
+                .setBannerRes(resId(R.styleable.AndroidManifestApplication_banner, sa))
                 .setDescriptionRes(resId(R.styleable.AndroidManifestApplication_description, sa))
                 .setIconRes(resId(R.styleable.AndroidManifestApplication_icon, sa))
-                .setLogo(resId(R.styleable.AndroidManifestApplication_logo, sa))
+                .setLogoRes(resId(R.styleable.AndroidManifestApplication_logo, sa))
                 .setNetworkSecurityConfigRes(resId(R.styleable.AndroidManifestApplication_networkSecurityConfig, sa))
                 .setRoundIconRes(resId(R.styleable.AndroidManifestApplication_roundIcon, sa))
-                .setTheme(resId(R.styleable.AndroidManifestApplication_theme, sa))
-                .setDataExtractionRules(
+                .setThemeRes(resId(R.styleable.AndroidManifestApplication_theme, sa))
+                .setDataExtractionRulesRes(
                         resId(R.styleable.AndroidManifestApplication_dataExtractionRules, sa))
                 .setLocaleConfigRes(resId(R.styleable.AndroidManifestApplication_localeConfig, sa))
                 // Strings
@@ -2399,7 +2399,7 @@ public class ParsingPackageUtils {
             }
 
             return input.success(pkg.setStaticSharedLibraryName(lname.intern())
-                    .setStaticSharedLibVersion(
+                    .setStaticSharedLibraryVersion(
                             PackageInfo.composeLongVersionCode(versionMajor, version))
                     .setStaticSharedLibrary(true));
         } finally {
@@ -2694,7 +2694,7 @@ public class ParsingPackageUtils {
         // Build custom App Details activity info instead of parsing it from xml
         return input.success(ParsedActivity.makeAppDetailsActivity(packageName,
                 pkg.getProcessName(), pkg.getUiOptions(), taskAffinity,
-                pkg.isBaseHardwareAccelerated()));
+                pkg.isHardwareAccelerated()));
     }
 
     /**

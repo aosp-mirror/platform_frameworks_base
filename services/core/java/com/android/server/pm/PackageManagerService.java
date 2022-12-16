@@ -2878,7 +2878,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static void renameStaticSharedLibraryPackage(ParsedPackage parsedPackage) {
         // Derive the new package synthetic package name
         parsedPackage.setPackageName(toStaticSharedLibraryPackageName(
-                parsedPackage.getPackageName(), parsedPackage.getStaticSharedLibVersion()));
+                parsedPackage.getPackageName(), parsedPackage.getStaticSharedLibraryVersion()));
     }
 
     private static String toStaticSharedLibraryPackageName(
