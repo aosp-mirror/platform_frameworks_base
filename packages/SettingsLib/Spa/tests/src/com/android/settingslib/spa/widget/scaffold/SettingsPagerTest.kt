@@ -41,7 +41,7 @@ class SettingsPagerTest {
         composeTestRule.onNodeWithText("Personal").assertIsSelected()
         composeTestRule.onNodeWithText("Page 0").assertIsDisplayed()
         composeTestRule.onNodeWithText("Work").assertIsNotSelected()
-        composeTestRule.onNodeWithText("Page 1").assertIsNotDisplayed()
+        composeTestRule.onNodeWithText("Page 1").assertDoesNotExist()
     }
 
     @Test

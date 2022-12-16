@@ -19,7 +19,7 @@ buildscript {
         BUILD_TOOLS_VERSION = "30.0.3"
         MIN_SDK = 21
         TARGET_SDK = 33
-        jetpack_compose_version = '1.4.0-alpha01'
+        jetpack_compose_version = '1.4.0-alpha03'
         jetpack_compose_compiler_version = '1.3.2'
     }
 }
