@@ -78,7 +78,7 @@ public abstract class ControlsProviderService extends Service {
      * @hide
      */
     public static final String EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS =
-            "android.service.controls.EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS";
+            "android.service.controls.extra.EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS";
 
     /**
      * @hide

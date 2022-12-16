@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.StatusBarManager.DISABLE_HOME;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowVisibleState;
@@ -70,6 +71,7 @@ import android.graphics.Point;
 import android.hardware.devicestate.DeviceStateManager;
 import android.metrics.LogMaker;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -1047,8 +1049,21 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // set the initial view visibility
         int disabledFlags1 = result.mDisabledFlags1;
         int disabledFlags2 = result.mDisabledFlags2;
-        mInitController.addPostInitTask(
-                () -> setUpDisableFlags(disabledFlags1, disabledFlags2));
+        mInitController.addPostInitTask(() -> {
+            setUpDisableFlags(disabledFlags1, disabledFlags2);
+            try {
+                // NOTE(b/262059863): Force-update the disable flags after applying the flags
+                // returned from registerStatusBar(). The result's disabled flags may be stale
+                // if StatusBarManager's disabled flags are updated between registering the bar and
+                // this handling this post-init task. We force an update in this case, and use a new
+                // token to not conflict with any other disabled flags already requested by SysUI
+                Binder token = new Binder();
+                mBarService.disable(DISABLE_HOME, token, mContext.getPackageName());
+                mBarService.disable(0, token, mContext.getPackageName());
+            } catch (RemoteException ex) {
+                ex.rethrowFromSystemServer();
+            }
+        });
 
         mFalsingManager.addFalsingBeliefListener(mFalsingBeliefListener);
 

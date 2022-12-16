@@ -40,10 +40,13 @@ public class LottieColorUtils {
         HashMap<String, Integer> map = new HashMap<>();
         map.put(
                 ".grey600",
-                R.color.settingslib_color_grey300);
+                R.color.settingslib_color_grey400);
+        map.put(
+                ".grey700",
+                R.color.settingslib_color_grey500);
         map.put(
                 ".grey800",
-                R.color.settingslib_color_grey200);
+                R.color.settingslib_color_grey300);
         map.put(
                 ".grey900",
                 R.color.settingslib_color_grey50);

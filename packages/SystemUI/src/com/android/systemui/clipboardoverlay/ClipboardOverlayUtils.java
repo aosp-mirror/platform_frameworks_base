@@ -16,22 +16,34 @@
 
 package com.android.systemui.clipboardoverlay;
 
+import android.app.RemoteAction;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
 import android.provider.DeviceConfig;
+import android.text.TextUtils;
+import android.view.textclassifier.TextClassification;
+import android.view.textclassifier.TextClassificationManager;
+import android.view.textclassifier.TextClassifier;
+import android.view.textclassifier.TextLinks;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.R;
+
+import java.util.ArrayList;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
 class ClipboardOverlayUtils {
 
+    private final TextClassifier mTextClassifier;
+
     @Inject
-    ClipboardOverlayUtils() {
+    ClipboardOverlayUtils(TextClassificationManager textClassificationManager) {
+        mTextClassifier = textClassificationManager.getTextClassifier();
     }
 
     boolean isRemoteCopy(Context context, ClipData clipData, String clipSource) {
@@ -51,5 +63,22 @@ class ClipboardOverlayUtils {
             }
         }
         return false;
+    }
+
+    public Optional<RemoteAction> getAction(ClipData.Item item, String source) {
+        return getActions(item).stream().filter(remoteAction -> {
+            ComponentName component = remoteAction.getActionIntent().getIntent().getComponent();
+            return component != null && !TextUtils.equals(source, component.getPackageName());
+        }).findFirst();
+    }
+
+    private ArrayList<RemoteAction> getActions(ClipData.Item item) {
+        ArrayList<RemoteAction> actions = new ArrayList<>();
+        for (TextLinks.TextLink link : item.getTextLinks().getLinks()) {
+            TextClassification classification = mTextClassifier.classifyText(
+                    item.getText(), link.getStart(), link.getEnd(), null);
+            actions.addAll(classification.getActions());
+        }
+        return actions;
     }
 }

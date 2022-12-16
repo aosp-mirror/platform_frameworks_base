@@ -251,9 +251,17 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
      * position specified for this {@link ComplicationLayoutParams}.
      */
     public void iteratePositions(Consumer<Integer> consumer) {
+        iteratePositions(consumer, mPosition);
+    }
+
+    /**
+     * Iterates over the defined positions and invokes the specified {@link Consumer} for each
+     * position specified by the given {@code position}.
+     */
+    public static void iteratePositions(Consumer<Integer> consumer, @Position int position) {
         for (int currentPosition = FIRST_POSITION; currentPosition <= LAST_POSITION;
                 currentPosition <<= 1) {
-            if ((mPosition & currentPosition) == currentPosition) {
+            if ((position & currentPosition) == currentPosition) {
                 consumer.accept(currentPosition);
             }
         }
