@@ -20,13 +20,18 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.settingslib.spa.testutils.FakeNavControllerWrapper
+import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.model.app.IPackageManagers
 import com.android.settingslib.spaprivileged.model.enterprise.NoRestricted
 import com.android.settingslib.spaprivileged.tests.testutils.FakeRestrictionsProvider
@@ -55,6 +60,8 @@ class TogglePermissionAppInfoPageTest {
     @Mock
     private lateinit var packageManagers: IPackageManagers
 
+    private val fakeNavControllerWrapper = FakeNavControllerWrapper()
+
     private val fakeRestrictionsProvider = FakeRestrictionsProvider()
 
     private val appListTemplate =
@@ -78,7 +85,58 @@ class TogglePermissionAppInfoPageTest {
     }
 
     @Test
-    fun title_isDisplayed() {
+    fun entryItem_whenNotChangeable_notDisplayed() {
+        val listModel = TestTogglePermissionAppListModel(isChangeable = false)
+
+        setEntryItem(listModel)
+
+        composeTestRule.onRoot().assertIsNotDisplayed()
+    }
+
+    @Test
+    fun entryItem_whenChangeable_titleDisplayed() {
+        val listModel = TestTogglePermissionAppListModel(isChangeable = true)
+
+        setEntryItem(listModel)
+
+        composeTestRule.onNodeWithText(context.getString(listModel.pageTitleResId))
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun entryItem_whenAllowed_summaryIsAllowed() {
+        val listModel = TestTogglePermissionAppListModel(isAllowed = true, isChangeable = true)
+
+        setEntryItem(listModel)
+
+        composeTestRule.onNodeWithText(context.getString(R.string.app_permission_summary_allowed))
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun entryItem_whenNotAllowed_summaryIsNotAllowed() {
+        val listModel = TestTogglePermissionAppListModel(isAllowed = false, isChangeable = true)
+
+        setEntryItem(listModel)
+
+        composeTestRule.onNodeWithText(
+            context.getString(R.string.app_permission_summary_not_allowed)
+        ).assertIsDisplayed()
+    }
+
+    @Test
+    fun entryItem_onClick() {
+        val listModel = TestTogglePermissionAppListModel(isChangeable = true)
+
+        setEntryItem(listModel)
+        composeTestRule.onRoot().performClick()
+
+        assertThat(fakeNavControllerWrapper.navigateCalledWith)
+            .isEqualTo("TogglePermissionAppInfoPage/test.PERMISSION/package.name/0")
+    }
+
+    @Test
+    fun infoPage_title_isDisplayed() {
         val listModel = TestTogglePermissionAppListModel()
 
         setTogglePermissionAppInfoPage(listModel)
@@ -88,7 +146,7 @@ class TogglePermissionAppInfoPageTest {
     }
 
     @Test
-    fun whenAllowed_switchIsOn() {
+    fun infoPage_whenAllowed_switchIsOn() {
         val listModel = TestTogglePermissionAppListModel(isAllowed = true)
 
         setTogglePermissionAppInfoPage(listModel)
@@ -98,7 +156,7 @@ class TogglePermissionAppInfoPageTest {
     }
 
     @Test
-    fun whenNotAllowed_switchIsOff() {
+    fun infoPage_whenNotAllowed_switchIsOff() {
         val listModel = TestTogglePermissionAppListModel(isAllowed = false)
 
         setTogglePermissionAppInfoPage(listModel)
@@ -108,7 +166,31 @@ class TogglePermissionAppInfoPageTest {
     }
 
     @Test
-    fun whenNotChangeable_switchNotEnabled() {
+    fun infoPage_whenChangeableAndClick() {
+        val listModel = TestTogglePermissionAppListModel(isAllowed = false, isChangeable = true)
+
+        setTogglePermissionAppInfoPage(listModel)
+        composeTestRule.onNodeWithText(context.getString(listModel.switchTitleResId))
+            .performClick()
+
+        composeTestRule.onNodeWithText(context.getString(listModel.switchTitleResId))
+            .assertIsOn()
+    }
+
+    @Test
+    fun infoPage_whenNotChangeableAndClick() {
+        val listModel = TestTogglePermissionAppListModel(isAllowed = false, isChangeable = false)
+
+        setTogglePermissionAppInfoPage(listModel)
+        composeTestRule.onNodeWithText(context.getString(listModel.switchTitleResId))
+            .performClick()
+
+        composeTestRule.onNodeWithText(context.getString(listModel.switchTitleResId))
+            .assertIsOff()
+    }
+
+    @Test
+    fun infoPage_whenNotChangeable_switchNotEnabled() {
         val listModel = TestTogglePermissionAppListModel(isAllowed = false, isChangeable = false)
 
         setTogglePermissionAppInfoPage(listModel)
@@ -119,13 +201,24 @@ class TogglePermissionAppInfoPageTest {
     }
 
     @Test
-    fun footer_isDisplayed() {
+    fun infoPage_footer_isDisplayed() {
         val listModel = TestTogglePermissionAppListModel()
 
         setTogglePermissionAppInfoPage(listModel)
 
         composeTestRule.onNodeWithText(context.getString(listModel.footerResId))
             .assertIsDisplayed()
+    }
+
+    private fun setEntryItem(listModel: TestTogglePermissionAppListModel) {
+        composeTestRule.setContent {
+            fakeNavControllerWrapper.Wrapper {
+                listModel.TogglePermissionAppInfoPageEntryItem(
+                    permissionType = PERMISSION_TYPE,
+                    app = APP,
+                )
+            }
+        }
     }
 
     private fun setTogglePermissionAppInfoPage(listModel: TestTogglePermissionAppListModel) {
@@ -140,6 +233,7 @@ class TogglePermissionAppInfoPageTest {
     }
 
     private companion object {
+        const val PERMISSION_TYPE = "test.PERMISSION"
         const val USER_ID = 0
         const val PACKAGE_NAME = "package.name"
         val APP = ApplicationInfo().apply {

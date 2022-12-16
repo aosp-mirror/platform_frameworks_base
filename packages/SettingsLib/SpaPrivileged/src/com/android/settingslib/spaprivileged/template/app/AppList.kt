@@ -60,7 +60,6 @@ data class AppListInput<T : AppRecord>(
     val listModel: AppListModel<T>,
     val state: AppListState,
     val header: @Composable () -> Unit,
-    val appItem: @Composable AppListItemModel<T>.() -> Unit,
     val bottomPadding: Dp,
 )
 
@@ -80,15 +79,13 @@ internal fun <T : AppRecord> AppListInput<T>.AppListImpl(
 ) {
     LogCompositions(TAG, config.userId.toString())
     val appListData = appListDataSupplier()
-    AppListWidget(appListData, listModel, header, appItem, bottomPadding)
+    listModel.AppListWidget(appListData, header, bottomPadding)
 }
 
 @Composable
-private fun <T : AppRecord> AppListWidget(
+private fun <T : AppRecord> AppListModel<T>.AppListWidget(
     appListData: State<AppListData<T>?>,
-    listModel: AppListModel<T>,
     header: @Composable () -> Unit,
-    appItem: @Composable (itemState: AppListItemModel<T>) -> Unit,
     bottomPadding: Dp,
 ) {
     val timeMeasurer = rememberTimeMeasurer(TAG)
@@ -108,14 +105,14 @@ private fun <T : AppRecord> AppListWidget(
             }
 
             items(count = list.size, key = { option to list[it].record.app.packageName }) {
-                remember(list) { listModel.getGroupTitleIfFirst(option, list, it) }
+                remember(list) { getGroupTitleIfFirst(option, list, it) }
                     ?.let { group -> CategoryTitle(title = group) }
 
                 val appEntry = list[it]
-                val summary = listModel.getSummary(option, appEntry.record) ?: "".toState()
-                appItem(remember(appEntry) {
+                val summary = getSummary(option, appEntry.record) ?: "".toState()
+                remember(appEntry) {
                     AppListItemModel(appEntry.record, appEntry.label, summary)
-                })
+                }.AppItem()
             }
         }
     }

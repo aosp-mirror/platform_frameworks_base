@@ -99,7 +99,6 @@ class AppListTest {
                     searchQuery = "".toState(),
                 ),
                 header = header,
-                appItem = { AppListItem {} },
                 bottomPadding = 0.dp,
             )
             appListInput.AppListImpl { stateOf(AppListData(appEntries, option = 0)) }
