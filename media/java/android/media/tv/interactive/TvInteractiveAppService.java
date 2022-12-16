@@ -459,10 +459,19 @@ public abstract class TvInteractiveAppService extends Service {
         /**
          * Receives requested recording info.
          *
-         * @param recordingInfo The requested recordingh info. Null if recording not found.
+         * @param recordingInfo The requested recording info. Null if recording not found.
          * @hide
          */
-        public void onRecordingInfo(@Nullable TvRecordingInfo recordingInfo) {
+        public void onTvRecordingInfo(@Nullable TvRecordingInfo recordingInfo) {
+        }
+
+        /**
+         * Receives requested recording info.
+         *
+         * @param recordingInfoList The requested recording info list. Null if recording not found.
+         * @hide
+         */
+        public void onTvRecordingInfoList(@Nullable List<TvRecordingInfo> recordingInfoList) {
         }
 
         /**
@@ -1041,6 +1050,28 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Gets the recording info list for the specified recording type
+         *
+         * @hide
+         */
+        @CallSuper
+        public void requestTvRecordingInfoList(@NonNull @TvRecordingInfo.TvRecordingListType
+                int type) {
+            executeOrPostRunnableOnMainThread(() -> {
+                try {
+                    if (DEBUG) {
+                        Log.d(TAG, "requestTvRecordingInfoList");
+                    }
+                    if (mSessionCallback != null) {
+                        mSessionCallback.onRequestTvRecordingInfoList(type);
+                    }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "error in requestTvRecordingInfoList", e);
+                }
+            });
+        }
+
+        /**
          * Requests signing of the given data.
          *
          * <p>This is used when the corresponding server of the broadcast-independent interactive
@@ -1151,7 +1182,11 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         void sendTvRecordingInfo(@Nullable TvRecordingInfo recordingInfo) {
-            onRecordingInfo(recordingInfo);
+            onTvRecordingInfo(recordingInfo);
+        }
+
+        void sendTvRecordingInfoList(@Nullable List<TvRecordingInfo> recordingInfoList) {
+            onTvRecordingInfoList(recordingInfoList);
         }
 
         void sendSigningResult(String signingId, byte[] result) {

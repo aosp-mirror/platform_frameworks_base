@@ -46,6 +46,7 @@ oneway interface ITvInteractiveAppSession {
     void sendCurrentTvInputId(in String inputId);
     void sendSigningResult(in String signingId, in byte[] result);
     void sendTvRecordingInfo(in TvRecordingInfo recordingInfo);
+    void sendTvRecordingInfoList(in List<TvRecordingInfo> recordingInfoList);
     void notifyError(in String errMsg, in Bundle params);
     void release();
     void notifyTuned(in Uri channelUri);

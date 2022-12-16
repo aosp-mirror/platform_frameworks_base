@@ -538,6 +538,18 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
+            public void onRequestTvRecordingInfoList(int type, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestTvRecordingInfoList(type);
+                }
+            }
+
+            @Override
             public void onRequestSigning(
                     String id, String algorithm, String alias, byte[] data, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
@@ -1105,6 +1117,18 @@ public final class TvInteractiveAppManager {
             }
             try {
                 mService.sendTvRecordingInfo(mToken, recordingInfo, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendTvRecordingInfoList(@Nullable List<TvRecordingInfo> recordingInfoList) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendTvRecordingInfoList(mToken, recordingInfoList, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1846,6 +1870,15 @@ public final class TvInteractiveAppManager {
             });
         }
 
+        void postRequestTvRecordingInfoList(int type) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestTvRecordingInfoList(mSession, type);
+                }
+            });
+        }
+
         void postSetTvRecordingInfo(String recordingId, TvRecordingInfo recordingInfo) {
             mHandler.post(new Runnable() {
                 @Override
@@ -2048,6 +2081,17 @@ public final class TvInteractiveAppManager {
          * @param recordingId The recordingId of the recording to be stopped.
          */
         public void onRequestTvRecordingInfo(Session session, String recordingId) {
+        }
+
+        /**
+         * This is called when {@link TvInteractiveAppService.Session#requestTvRecordingInfoList} is
+         * called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         * @param type The type of recordings to return
+         */
+        public void onRequestTvRecordingInfoList(Session session,
+                @TvRecordingInfo.TvRecordingListType int type) {
         }
 
         /**

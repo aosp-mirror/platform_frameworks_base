@@ -87,6 +87,7 @@ public class ITvInteractiveAppSessionWrapper
     private static final int DO_NOTIFY_RECORDING_STOPPED = 31;
     private static final int DO_NOTIFY_AD_BUFFER_CONSUMED = 32;
     private static final int DO_SEND_RECORDING_INFO = 33;
+    private static final int DO_SEND_RECORDING_INFO_LIST = 34;
 
     private final HandlerCaller mCaller;
     private Session mSessionImpl;
@@ -172,6 +173,10 @@ public class ITvInteractiveAppSessionWrapper
             }
             case DO_SEND_RECORDING_INFO: {
                 mSessionImpl.sendTvRecordingInfo((TvRecordingInfo) msg.obj);
+                break;
+            }
+            case DO_SEND_RECORDING_INFO_LIST: {
+                mSessionImpl.sendTvRecordingInfoList((List<TvRecordingInfo>) msg.obj);
                 break;
             }
             case DO_NOTIFY_RECORDING_STARTED: {
@@ -347,6 +352,12 @@ public class ITvInteractiveAppSessionWrapper
     public void sendTvRecordingInfo(@Nullable TvRecordingInfo recordingInfo) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageO(DO_SEND_RECORDING_INFO, recordingInfo));
+    }
+
+    @Override
+    public void sendTvRecordingInfoList(@Nullable List<TvRecordingInfo> recordingInfoList) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageO(DO_SEND_RECORDING_INFO_LIST, recordingInfoList));
     }
 
     @Override

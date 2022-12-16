@@ -54,6 +54,8 @@ interface ITvInteractiveAppManager {
     void sendSigningResult(in IBinder sessionToken, in String signingId, in byte[] result,
             int userId);
     void sendTvRecordingInfo(in IBinder sessionToken, in TvRecordingInfo recordingInfo, int userId);
+    void sendTvRecordingInfoList(in IBinder sessionToken,
+            in List<TvRecordingInfo> recordingInfoList, int userId);
     void notifyError(in IBinder sessionToken, in String errMsg, in Bundle params, int userId);
     void createSession(in ITvInteractiveAppClient client, in String iAppServiceId, int type,
             int seq, int userId);

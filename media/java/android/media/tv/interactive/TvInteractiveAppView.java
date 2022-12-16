@@ -597,6 +597,21 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
+     * Sends the requested {@link android.media.tv.TvRecordingInfo}.
+     *
+     * @param recordingInfoList The list of recording info requested.
+     * @hide
+     */
+    public void sendTvRecordingInfoList(@Nullable List<TvRecordingInfo> recordingInfoList) {
+        if (DEBUG) {
+            Log.d(TAG, "sendTvRecordingInfoList");
+        }
+        if (mSession != null) {
+            mSession.sendTvRecordingInfoList(recordingInfoList);
+        }
+    }
+
+    /**
      * Alerts the TV interactive app that a recording has been started.
      *
      * @param recordingId The ID of the recording started. This ID is created and maintained by the
