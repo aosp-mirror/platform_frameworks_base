@@ -39,7 +39,6 @@ import com.android.internal.util.ScreenshotHelper
 import com.android.internal.util.ScreenshotHelper.ScreenshotRequest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags.SCREENSHOT_REQUEST_PROCESSOR
 import com.android.systemui.flags.Flags.SCREENSHOT_WORK_PROFILE_POLICY
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_REQUESTED_KEY_CHORD
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_REQUESTED_OVERVIEW
@@ -101,7 +100,6 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
         }.`when`(requestProcessor).processAsync(/* request= */ any(), /* callback= */ any())
 
         // Flipped in selected test cases
-        flags.set(SCREENSHOT_REQUEST_PROCESSOR, false)
         flags.set(SCREENSHOT_WORK_PROFILE_POLICY, false)
 
         service.attach(
@@ -127,31 +125,6 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
 
     @Test
     fun takeScreenshotFullscreen() {
-        val request = ScreenshotRequest(
-            TAKE_SCREENSHOT_FULLSCREEN,
-            SCREENSHOT_KEY_CHORD,
-            topComponent)
-
-        service.handleRequest(request, { /* onSaved */ }, callback)
-
-        verify(controller, times(1)).takeScreenshotFullscreen(
-            eq(topComponent),
-            /* onSavedListener = */ any(),
-            /* requestCallback = */ any())
-
-        assertEquals("Expected one UiEvent", eventLogger.numLogs(), 1)
-        val logEvent = eventLogger.get(0)
-
-        assertEquals("Expected SCREENSHOT_REQUESTED UiEvent",
-            logEvent.eventId, SCREENSHOT_REQUESTED_KEY_CHORD.id)
-        assertEquals("Expected supplied package name",
-            topComponent.packageName, eventLogger.get(0).packageName)
-    }
-
-    @Test
-    fun takeScreenshot_requestProcessorEnabled() {
-        flags.set(SCREENSHOT_REQUEST_PROCESSOR, true)
-
         val request = ScreenshotRequest(
             TAKE_SCREENSHOT_FULLSCREEN,
             SCREENSHOT_KEY_CHORD,

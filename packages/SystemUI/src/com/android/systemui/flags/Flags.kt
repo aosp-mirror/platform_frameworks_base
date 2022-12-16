@@ -384,9 +384,6 @@ object Flags {
         unreleasedFlag(1204, "persist.wm.debug.predictive_back_sysui_enable", teamfood = true)
 
     // 1300 - screenshots
-    // TODO(b/254512719): Tracking Bug
-    @JvmField val SCREENSHOT_REQUEST_PROCESSOR = releasedFlag(1300, "screenshot_request_processor")
-
     // TODO(b/254513155): Tracking Bug
     @JvmField
     val SCREENSHOT_WORK_PROFILE_POLICY =
