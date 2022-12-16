@@ -198,10 +198,10 @@ public class ThermalStatusRestrictionTest {
         when(ejRetried.shouldTreatAsExpeditedJob()).thenReturn(true);
         when(ejRunning.shouldTreatAsExpeditedJob()).thenReturn(true);
         when(ejRunningLong.shouldTreatAsExpeditedJob()).thenReturn(true);
-        when(ui.shouldTreatAsUserInitiated()).thenReturn(true);
-        when(uiRetried.shouldTreatAsUserInitiated()).thenReturn(true);
-        when(uiRunning.shouldTreatAsUserInitiated()).thenReturn(true);
-        when(uiRunningLong.shouldTreatAsUserInitiated()).thenReturn(true);
+        when(ui.shouldTreatAsUserInitiatedJob()).thenReturn(true);
+        when(uiRetried.shouldTreatAsUserInitiatedJob()).thenReturn(true);
+        when(uiRunning.shouldTreatAsUserInitiatedJob()).thenReturn(true);
+        when(uiRunningLong.shouldTreatAsUserInitiatedJob()).thenReturn(true);
         when(ejRetried.getNumPreviousAttempts()).thenReturn(1);
         when(uiRetried.getNumPreviousAttempts()).thenReturn(2);
         when(mJobSchedulerService.isCurrentlyRunningLocked(jobLowPriorityRunning)).thenReturn(true);

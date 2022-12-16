@@ -427,7 +427,7 @@ public final class ConnectivityController extends RestrictingController implemen
         final UidStats uidStats =
                 getUidStats(jobStatus.getSourceUid(), jobStatus.getSourcePackageName(), true);
 
-        if (jobStatus.shouldTreatAsExpeditedJob() && jobStatus.shouldTreatAsUserInitiated()) {
+        if (jobStatus.shouldTreatAsExpeditedJob() && jobStatus.shouldTreatAsUserInitiatedJob()) {
             if (!jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY)) {
                 // Don't request a direct hole through any of the firewalls. Instead, mark the
                 // constraint as satisfied if the network is available, and the job will get
@@ -971,14 +971,14 @@ public final class ConnectivityController extends RestrictingController implemen
                         if (job.shouldTreatAsExpeditedJob() || job.startedAsExpeditedJob) {
                             us.earliestEJEnqueueTime =
                                     Math.min(us.earliestEJEnqueueTime, job.enqueueTime);
-                        } else if (job.shouldTreatAsUserInitiated()) {
+                        } else if (job.shouldTreatAsUserInitiatedJob()) {
                             us.earliestUIJEnqueueTime =
                                     Math.min(us.earliestUIJEnqueueTime, job.enqueueTime);
                         }
                     }
                     if (job.shouldTreatAsExpeditedJob() || job.startedAsExpeditedJob) {
                         us.numEJs++;
-                    } else if (job.shouldTreatAsUserInitiated()) {
+                    } else if (job.shouldTreatAsUserInitiatedJob()) {
                         us.numUIJs++;
                     } else {
                         us.numRegular++;
