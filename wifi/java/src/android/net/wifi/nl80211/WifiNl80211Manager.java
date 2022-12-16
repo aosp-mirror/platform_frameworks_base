@@ -234,7 +234,11 @@ public class WifiNl80211Manager {
 
     /**
      * Result of a signal poll requested using {@link #signalPoll(String)}.
+     *
+     * @deprecated The usage is replaced by
+     * {@code com.android.server.wifi.WifiSignalPollResults}.
      */
+    @Deprecated
     public static class SignalPollResult {
         /** @hide */
         public SignalPollResult(int currentRssiDbm, int txBitrateMbps, int rxBitrateMbps,
@@ -876,7 +880,11 @@ public class WifiNl80211Manager {
      *
      * @return A {@link SignalPollResult} object containing interface statistics, or a null on
      * error (e.g. the interface hasn't been set up yet).
+     *
+     * @deprecated replaced by
+     * {@link com.android.server.wifi.SupplicantStaIfaceHal#getSignalPollResults}
      */
+    @Deprecated
     @Nullable public SignalPollResult signalPoll(@NonNull String ifaceName) {
         IClientInterface iface = getClientInterface(ifaceName);
         if (iface == null) {
