@@ -304,6 +304,20 @@ import java.util.List;
  * </ul>
  * </p>
  * <p>
+ * <b>View scrolled to</b> - represents the event of a target node brought on screen by
+ * ACTION_SCROLL_IN_DIRECTION.
+ * <em>Type:</em> {@link #TYPE_VIEW_TARGETED_BY_SCROLL}</br>
+ * <em>Properties:</em></br>
+ * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
+ *   <li>{@link #getSource()} - The source info (for registered clients). This represents the node
+ *   that is brought on screen as a result of the scroll.</li>
+ *   <li>{@link #getClassName()} - The class name of the source.</li>
+ *   <li>{@link #getPackageName()} - The package name of the source.</li>
+ *   <li>{@link #getEventTime()}  - The event time.</li>
+ * </ul>
+ * </p>
+ * <p>
  * <b>Touch interaction start</b> - represents the event of starting a touch
  * interaction, which is the user starts touching the screen.</br>
  * <em>Type:</em> {@link #TYPE_TOUCH_INTERACTION_START}</br>
@@ -594,6 +608,11 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @see #setSpeechStateChangeTypes
      */
     public static final int TYPE_SPEECH_STATE_CHANGE = 0x02000000;
+
+    /**
+     * Represents the event of a scroll having completed and brought the target node on screen.
+     */
+    public static final int TYPE_VIEW_TARGETED_BY_SCROLL = 0x04000000;
 
     /**
      * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event: The type of change is not
@@ -899,7 +918,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 TYPE_WINDOWS_CHANGED,
                 TYPE_VIEW_CONTEXT_CLICKED,
                 TYPE_ASSIST_READING_CONTEXT,
-                TYPE_SPEECH_STATE_CHANGE
+                TYPE_SPEECH_STATE_CHANGE,
+                TYPE_VIEW_TARGETED_BY_SCROLL
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType {}
@@ -929,6 +949,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @see #TYPE_TOUCH_INTERACTION_END
      * @see #TYPE_WINDOWS_CHANGED
      * @see #TYPE_VIEW_CONTEXT_CLICKED
+     * @see #TYPE_VIEW_TARGETED_BY_SCROLL
      */
     public static final int TYPES_ALL_MASK = 0xFFFFFFFF;
 
@@ -1729,6 +1750,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
             case TYPE_VIEW_CONTEXT_CLICKED: return "TYPE_VIEW_CONTEXT_CLICKED";
             case TYPE_ASSIST_READING_CONTEXT: return "TYPE_ASSIST_READING_CONTEXT";
             case TYPE_SPEECH_STATE_CHANGE: return "TYPE_SPEECH_STATE_CHANGE";
+            case TYPE_VIEW_TARGETED_BY_SCROLL: return "TYPE_VIEW_TARGETED_BY_SCROLL";
             default: return Integer.toHexString(eventType);
         }
     }

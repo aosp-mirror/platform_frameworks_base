@@ -2115,6 +2115,7 @@ package android {
     field public static final int accessibilityActionPageUp = 16908358; // 0x1020046
     field public static final int accessibilityActionPressAndHold = 16908362; // 0x102004a
     field public static final int accessibilityActionScrollDown = 16908346; // 0x102003a
+    field public static final int accessibilityActionScrollInDirection;
     field public static final int accessibilityActionScrollLeft = 16908345; // 0x1020039
     field public static final int accessibilityActionScrollRight = 16908347; // 0x102003b
     field public static final int accessibilityActionScrollToPosition = 16908343; // 0x1020037
@@ -52763,6 +52764,7 @@ package android.view.accessibility {
     field public static final int TYPE_VIEW_LONG_CLICKED = 2; // 0x2
     field public static final int TYPE_VIEW_SCROLLED = 4096; // 0x1000
     field public static final int TYPE_VIEW_SELECTED = 4; // 0x4
+    field public static final int TYPE_VIEW_TARGETED_BY_SCROLL = 67108864; // 0x4000000
     field public static final int TYPE_VIEW_TEXT_CHANGED = 16; // 0x10
     field public static final int TYPE_VIEW_TEXT_SELECTION_CHANGED = 8192; // 0x2000
     field public static final int TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY = 131072; // 0x20000
@@ -53003,6 +53005,7 @@ package android.view.accessibility {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACTION_ACCESSIBILITY_FOCUS = 64; // 0x40
     field public static final String ACTION_ARGUMENT_COLUMN_INT = "android.view.accessibility.action.ARGUMENT_COLUMN_INT";
+    field public static final String ACTION_ARGUMENT_DIRECTION_INT = "android.view.accessibility.action.ARGUMENT_DIRECTION_INT";
     field public static final String ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN = "ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN";
     field public static final String ACTION_ARGUMENT_HTML_ELEMENT_STRING = "ACTION_ARGUMENT_HTML_ELEMENT_STRING";
     field public static final String ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT = "ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT";
@@ -53095,6 +53098,7 @@ package android.view.accessibility {
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_BACKWARD;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_DOWN;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_FORWARD;
+    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_IN_DIRECTION;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_LEFT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_RIGHT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_TO_POSITION;
