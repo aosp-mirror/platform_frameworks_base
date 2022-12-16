@@ -16,11 +16,8 @@
 
 package android.view;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.window.WindowProviderService.isWindowProviderService;
 
 import android.annotation.CallbackExecutor;
@@ -28,12 +25,9 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
-import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -42,6 +36,7 @@ import android.os.StrictMode;
 import android.window.ITaskFpsCallback;
 import android.window.TaskFpsCallback;
 import android.window.WindowContext;
+import android.window.WindowMetricsController;
 import android.window.WindowProvider;
 
 import com.android.internal.annotations.GuardedBy;
@@ -49,7 +44,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -107,6 +101,10 @@ public final class WindowManagerImpl implements WindowManager {
     private final ArrayList<OnFpsCallbackListenerProxy> mOnFpsCallbackListenerProxies =
             new ArrayList<>();
 
+    /** A controller to handle {@link WindowMetrics} related APIs */
+    @NonNull
+    private final WindowMetricsController mWindowMetricsController;
+
     public WindowManagerImpl(Context context) {
         this(context, null /* parentWindow */, null /* clientToken */);
     }
@@ -116,6 +114,7 @@ public final class WindowManagerImpl implements WindowManager {
         mContext = context;
         mParentWindow = parentWindow;
         mWindowContextToken = windowContextToken;
+        mWindowMetricsController = new WindowMetricsController(mContext);
     }
 
     public WindowManagerImpl createLocalWindowManager(Window parentWindow) {
@@ -293,112 +292,18 @@ public final class WindowManagerImpl implements WindowManager {
 
     @Override
     public WindowMetrics getCurrentWindowMetrics() {
-        final Context context = mParentWindow != null ? mParentWindow.getContext() : mContext;
-        final Rect bounds = getCurrentBounds(context);
-
-        return new WindowMetrics(bounds, computeWindowInsets(bounds));
-    }
-
-    private static Rect getCurrentBounds(Context context) {
-        synchronized (ResourcesManager.getInstance()) {
-            return context.getResources().getConfiguration().windowConfiguration.getBounds();
-        }
+        return mWindowMetricsController.getCurrentWindowMetrics();
     }
 
     @Override
     public WindowMetrics getMaximumWindowMetrics() {
-        final Context context = mParentWindow != null ? mParentWindow.getContext() : mContext;
-        final Rect maxBounds = getMaximumBounds(context);
-
-        return new WindowMetrics(maxBounds, computeWindowInsets(maxBounds));
-    }
-
-    private static Rect getMaximumBounds(Context context) {
-        synchronized (ResourcesManager.getInstance()) {
-            return context.getResources().getConfiguration().windowConfiguration.getMaxBounds();
-        }
-    }
-
-    private WindowInsets computeWindowInsets(Rect bounds) {
-        // Initialize params which used for obtaining all system insets.
-        final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-        final Context context = (mParentWindow != null) ? mParentWindow.getContext() : mContext;
-        params.token = Context.getToken(context);
-        return getWindowInsetsFromServerForCurrentDisplay(params, bounds);
-    }
-
-    private WindowInsets getWindowInsetsFromServerForCurrentDisplay(
-            WindowManager.LayoutParams attrs, Rect bounds) {
-        final Configuration config = mContext.getResources().getConfiguration();
-        return getWindowInsetsFromServerForDisplay(mContext.getDisplayId(), attrs, bounds,
-                config.isScreenRound(), config.windowConfiguration.getWindowingMode());
-    }
-
-    /**
-     * Retrieves WindowInsets for the given context and display, given the window bounds.
-     *
-     * @param displayId the ID of the logical display to calculate insets for
-     * @param attrs the LayoutParams for the calling app
-     * @param bounds the window bounds to calculate insets for
-     * @param isScreenRound if the display identified by displayId is round
-     * @param windowingMode the windowing mode of the window to calculate insets for
-     * @return WindowInsets calculated for the given window bounds, on the given display
-     */
-    private static WindowInsets getWindowInsetsFromServerForDisplay(int displayId,
-            WindowManager.LayoutParams attrs, Rect bounds, boolean isScreenRound,
-            int windowingMode) {
-        try {
-            final InsetsState insetsState = new InsetsState();
-            final boolean alwaysConsumeSystemBars = WindowManagerGlobal.getWindowManagerService()
-                    .getWindowInsets(attrs, displayId, insetsState);
-            return insetsState.calculateInsets(bounds, null /* ignoringVisibilityState*/,
-                    isScreenRound, alwaysConsumeSystemBars, SOFT_INPUT_ADJUST_NOTHING, attrs.flags,
-                    SYSTEM_UI_FLAG_VISIBLE, attrs.type, windowingMode,
-                    null /* typeSideMap */);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return mWindowMetricsController.getMaximumWindowMetrics();
     }
 
     @Override
     @NonNull
     public Set<WindowMetrics> getPossibleMaximumWindowMetrics(int displayId) {
-        List<DisplayInfo> possibleDisplayInfos;
-        try {
-            possibleDisplayInfos = WindowManagerGlobal.getWindowManagerService()
-                    .getPossibleDisplayInfo(displayId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-
-        Set<WindowMetrics> maxMetrics = new HashSet<>();
-        WindowInsets windowInsets;
-        DisplayInfo currentDisplayInfo;
-        final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-        for (int i = 0; i < possibleDisplayInfos.size(); i++) {
-            currentDisplayInfo = possibleDisplayInfos.get(i);
-
-            // Calculate max bounds for this rotation and state.
-            Rect maxBounds = new Rect(0, 0, currentDisplayInfo.logicalWidth,
-                    currentDisplayInfo.logicalHeight);
-
-            // Calculate insets for the rotated max bounds.
-            final boolean isScreenRound = (currentDisplayInfo.flags & Display.FLAG_ROUND) != 0;
-            // Initialize insets based upon display rotation. Note any window-provided insets
-            // will not be set.
-            windowInsets = getWindowInsetsFromServerForDisplay(
-                    currentDisplayInfo.displayId, params,
-                    new Rect(0, 0, currentDisplayInfo.getNaturalWidth(),
-                            currentDisplayInfo.getNaturalHeight()), isScreenRound,
-                    WINDOWING_MODE_FULLSCREEN);
-            // Set the hardware-provided insets.
-            windowInsets = new WindowInsets.Builder(windowInsets).setRoundedCorners(
-                    currentDisplayInfo.roundedCorners)
-                    .setDisplayCutout(currentDisplayInfo.displayCutout).build();
-
-            maxMetrics.add(new WindowMetrics(maxBounds, windowInsets));
-        }
-        return maxMetrics;
+        return mWindowMetricsController.getPossibleMaximumWindowMetrics(displayId);
     }
 
     @Override
