@@ -89,6 +89,11 @@ open class OpenAppFromLockNotificationCold(flicker: FlickerTest) :
     override fun statusBarLayerIsVisibleAtStartAndEnd() =
         super.statusBarLayerIsVisibleAtStartAndEnd()
 
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarWindowIsVisibleAtStartAndEnd() = super.navBarWindowIsVisibleAtStartAndEnd()
+
     /**
      * Checks the position of the [ComponentNameMatcher.STATUS_BAR] at the start and end of the
      * transition

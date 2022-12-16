@@ -18,6 +18,7 @@ package android.os.vibrator;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.os.VibratorInfo;
 
 import com.android.internal.util.Preconditions;
@@ -38,7 +39,9 @@ import com.android.internal.util.Preconditions;
  * frequency increment between each pair of amplitude values.
  *
  * <p>Vibrators without independent frequency control do not have a frequency profile.
+ * @hide
  */
+@TestApi
 public final class VibratorFrequencyProfile {
 
     private final VibratorInfo.FrequencyProfile mFrequencyProfile;
@@ -62,7 +65,9 @@ public final class VibratorFrequencyProfile {
      * {@link #getMinFrequency()} to {@link #getMaxFrequency()}, inclusive.
      *
      * @return Array of maximum relative amplitude measurements.
+     * @hide
      */
+    @TestApi
     @NonNull
     @FloatRange(from = 0, to = 1)
     public float[] getMaxAmplitudeMeasurements() {
@@ -74,7 +79,9 @@ public final class VibratorFrequencyProfile {
      * Gets the frequency interval used to measure the maximum relative amplitudes.
      *
      * @return the frequency interval used for the measurement, in hertz.
+     * @hide
      */
+    @TestApi
     public float getMaxAmplitudeMeasurementInterval() {
         return mFrequencyProfile.getFrequencyResolutionHz();
     }
@@ -83,7 +90,9 @@ public final class VibratorFrequencyProfile {
      * Gets the minimum frequency supported by the vibrator.
      *
      * @return the minimum frequency supported by the vibrator, in hertz.
+     * @hide
      */
+    @TestApi
     public float getMinFrequency() {
         return mFrequencyProfile.getFrequencyRangeHz().getLower();
     }
@@ -92,7 +101,9 @@ public final class VibratorFrequencyProfile {
      * Gets the maximum frequency supported by the vibrator.
      *
      * @return the maximum frequency supported by the vibrator, in hertz.
+     * @hide
      */
+    @TestApi
     public float getMaxFrequency() {
         return mFrequencyProfile.getFrequencyRangeHz().getUpper();
     }

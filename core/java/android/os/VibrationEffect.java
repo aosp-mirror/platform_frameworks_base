@@ -438,7 +438,9 @@ public abstract class VibrationEffect implements Parcelable {
      * {@link #startWaveform(VibrationEffect.VibrationParameter)}.
      *
      * @see VibrationEffect.WaveformBuilder
+     * @hide
      */
+    @TestApi
     @NonNull
     public static WaveformBuilder startWaveform() {
         return new WaveformBuilder();
@@ -456,7 +458,9 @@ public abstract class VibrationEffect implements Parcelable {
      * @return The {@link VibrationEffect.WaveformBuilder} started with the initial parameters.
      *
      * @see VibrationEffect.WaveformBuilder
+     * @hide
      */
+    @TestApi
     @NonNull
     public static WaveformBuilder startWaveform(@NonNull VibrationParameter initialParameter) {
         WaveformBuilder builder = startWaveform();
@@ -479,7 +483,9 @@ public abstract class VibrationEffect implements Parcelable {
      * @return The {@link VibrationEffect.WaveformBuilder} started with the initial parameters.
      *
      * @see VibrationEffect.WaveformBuilder
+     * @hide
      */
+    @TestApi
     @NonNull
     public static WaveformBuilder startWaveform(@NonNull VibrationParameter initialParameter1,
             @NonNull VibrationParameter initialParameter2) {
@@ -919,29 +925,8 @@ public abstract class VibrationEffect implements Parcelable {
      *     .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1.0f, 100)
      *     .compose();}</pre>
      *
-     * <p>Composition elements can also be {@link VibrationEffect} instances, including other
-     * compositions, and off durations, which are periods of time when the vibrator will be
-     * turned off. Here is an example of a composition that "warms up" with a light tap,
-     * a stronger double tap, then repeats a vibration pattern indefinitely:
-     *
-     * <pre>
-     * {@code VibrationEffect repeatingEffect = VibrationEffect.startComposition()
-     *     .addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK)
-     *     .addOffDuration(Duration.ofMillis(10))
-     *     .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK))
-     *     .addOffDuration(Duration.ofMillis(50))
-     *     .addEffect(VibrationEffect.createWaveform(pattern, repeatIndex))
-     *     .compose();}</pre>
-     *
      * <p>When choosing to play a composed effect, you should check that individual components are
-     * supported by the device by using the appropriate vibrator method:
-     *
-     * <ul>
-     *     <li>Primitive support can be checked using {@link Vibrator#arePrimitivesSupported}.
-     *     <li>Effect support can be checked using {@link Vibrator#areEffectsSupported}.
-     *     <li>Amplitude control for one-shot and waveforms with amplitude values can be checked
-     *         using {@link Vibrator#hasAmplitudeControl}.
-     * </ul>
+     * supported by the device by using {@link Vibrator#arePrimitivesSupported}.
      *
      * @see VibrationEffect#startComposition()
      */
@@ -964,7 +949,9 @@ public abstract class VibrationEffect implements Parcelable {
         /**
          * Exception thrown when adding an element to a {@link Composition} that already ends in an
          * indefinitely repeating effect.
+         * @hide
          */
+        @TestApi
         public static final class UnreachableAfterRepeatingIndefinitelyException
                 extends IllegalStateException {
             UnreachableAfterRepeatingIndefinitelyException() {
@@ -1033,7 +1020,9 @@ public abstract class VibrationEffect implements Parcelable {
          *
          * @throws UnreachableAfterRepeatingIndefinitelyException if the composition is currently
          * ending with a repeating effect.
+         * @hide
          */
+        @TestApi
         @NonNull
         public Composition addOffDuration(@NonNull Duration duration) {
             int durationMs = (int) duration.toMillis();
@@ -1060,7 +1049,9 @@ public abstract class VibrationEffect implements Parcelable {
          *
          * @throws UnreachableAfterRepeatingIndefinitelyException if the composition is currently
          * ending with a repeating effect.
+         * @hide
          */
+        @TestApi
         @NonNull
         public Composition addEffect(@NonNull VibrationEffect effect) {
             return addSegments(effect);
@@ -1082,7 +1073,9 @@ public abstract class VibrationEffect implements Parcelable {
          * @throws IllegalArgumentException if the given effect is already repeating indefinitely.
          * @throws UnreachableAfterRepeatingIndefinitelyException if the composition is currently
          * ending with a repeating effect.
+         * @hide
          */
+        @TestApi
         @NonNull
         public Composition repeatEffectIndefinitely(@NonNull VibrationEffect effect) {
             Preconditions.checkArgument(effect.getDuration() < Long.MAX_VALUE,
@@ -1102,9 +1095,6 @@ public abstract class VibrationEffect implements Parcelable {
          *
          * @param primitiveId The primitive to add
          * @return This {@link Composition} object to enable adding multiple elements in one chain.
-         *
-         * @throws UnreachableAfterRepeatingIndefinitelyException if the composition is currently
-         * ending with a repeating effect.
          */
         @NonNull
         public Composition addPrimitive(@PrimitiveType int primitiveId) {
@@ -1119,9 +1109,6 @@ public abstract class VibrationEffect implements Parcelable {
          * @param primitiveId The primitive to add
          * @param scale The scale to apply to the intensity of the primitive.
          * @return This {@link Composition} object to enable adding multiple elements in one chain.
-         *
-         * @throws UnreachableAfterRepeatingIndefinitelyException if the composition is currently
-         * ending with a repeating effect.
          */
         @NonNull
         public Composition addPrimitive(@PrimitiveType int primitiveId,
@@ -1137,9 +1124,6 @@ public abstract class VibrationEffect implements Parcelable {
          * @param delay The amount of time in milliseconds to wait before playing this primitive,
          *              starting at the time the previous element in this composition is finished.
          * @return This {@link Composition} object to enable adding multiple elements in one chain.
-         *
-         * @throws UnreachableAfterRepeatingIndefinitelyException if the composition is currently
-         * ending with a repeating effect.
          */
         @NonNull
         public Composition addPrimitive(@PrimitiveType int primitiveId,
@@ -1172,13 +1156,13 @@ public abstract class VibrationEffect implements Parcelable {
         }
 
         /**
-         * Compose all of the added elements together into a single {@link VibrationEffect}.
+         * Compose all of the added primitives together into a single {@link VibrationEffect}.
          *
          * <p>The {@link Composition} object is still valid after this call, so you can continue
-         * adding more elements to it and generating more {@link VibrationEffect}s by calling this
+         * adding more primitives to it and generating more {@link VibrationEffect}s by calling this
          * method again.
          *
-         * @return The {@link VibrationEffect} resulting from the composition of the elements.
+         * @return The {@link VibrationEffect} resulting from the composition of the primitives.
          */
         @NonNull
         public VibrationEffect compose() {
@@ -1297,7 +1281,9 @@ public abstract class VibrationEffect implements Parcelable {
      *     .build();}</pre>
      *
      * @see VibrationEffect#startWaveform
+     * @hide
      */
+    @TestApi
     public static final class WaveformBuilder {
         // Epsilon used for float comparison of amplitude and frequency values on transitions.
         private static final float EPSILON = 1e-5f;
@@ -1324,7 +1310,9 @@ public abstract class VibrationEffect implements Parcelable {
          *                        after the given duration.
          * @return This {@link WaveformBuilder} object to enable adding multiple transitions in
          * chain.
+         * @hide
          */
+        @TestApi
         @SuppressWarnings("MissingGetterMatchingBuilder") // No getters to segments once created.
         @NonNull
         public WaveformBuilder addTransition(@NonNull Duration duration,
@@ -1356,7 +1344,9 @@ public abstract class VibrationEffect implements Parcelable {
          *                         than the one specified by the first argument.
          * @return This {@link WaveformBuilder} object to enable adding multiple transitions in
          * chain.
+         * @hide
          */
+        @TestApi
         @SuppressWarnings("MissingGetterMatchingBuilder") // No getters to segments once created.
         @NonNull
         public WaveformBuilder addTransition(@NonNull Duration duration,
@@ -1384,7 +1374,9 @@ public abstract class VibrationEffect implements Parcelable {
          *                   Value must be >= 1ms.
          * @return This {@link WaveformBuilder} object to enable adding multiple transitions in
          * chain.
+         * @hide
          */
+        @TestApi
         @SuppressWarnings("MissingGetterMatchingBuilder") // No getters to segments once created.
         @NonNull
         public WaveformBuilder addSustain(@NonNull Duration duration) {
@@ -1402,7 +1394,9 @@ public abstract class VibrationEffect implements Parcelable {
          * calling this method again.
          *
          * @return The {@link VibrationEffect} resulting from the list of transitions.
+         * @hide
          */
+        @TestApi
         @NonNull
         public VibrationEffect build() {
             if (mSegments.isEmpty()) {
@@ -1478,7 +1472,9 @@ public abstract class VibrationEffect implements Parcelable {
      * <p>Examples of concrete parameters are the vibration amplitude or frequency.
      *
      * @see VibrationEffect.WaveformBuilder
+     * @hide
      */
+    @TestApi
     @SuppressWarnings("UserHandleName") // This is not a regular set of parameters, no *Params.
     public static class VibrationParameter {
         VibrationParameter() {
@@ -1491,7 +1487,9 @@ public abstract class VibrationEffect implements Parcelable {
          *                  vibrator turned off and 1 represents the maximum amplitude the vibrator
          *                  can reach across all supported frequencies.
          * @return The {@link VibrationParameter} instance that represents given amplitude.
+         * @hide
          */
+        @TestApi
         @NonNull
         public static VibrationParameter targetAmplitude(
                 @FloatRange(from = 0, to = 1) float amplitude) {
@@ -1503,7 +1501,9 @@ public abstract class VibrationEffect implements Parcelable {
          *
          * @param frequencyHz The frequency value, in hertz.
          * @return The {@link VibrationParameter} instance that represents given frequency.
+         * @hide
          */
+        @TestApi
         @NonNull
         public static VibrationParameter targetFrequency(@FloatRange(from = 1) float frequencyHz) {
             return new FrequencyVibrationParameter(frequencyHz);

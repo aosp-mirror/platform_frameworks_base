@@ -17,13 +17,10 @@
 package com.android.server.wm.flicker.quickswitch
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.navBarWindowIsVisibleAtStartAndEnd
-import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -60,17 +57,6 @@ open class QuickSwitchBetweenTwoAppsBackTest_ShellTransit(flicker: FlickerTest) 
     @Ignore("Nav bar window becomes invisible during quick switch")
     @Test
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
-
-    /**
-     * Checks that [ComponentNameMatcher.NAV_BAR] window is visible and above the app windows at the
-     * start and end of the WM trace
-     */
-    @Presubmit
-    @Test
-    fun navBarWindowIsVisibleAtStartAndEnd() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
-        flicker.navBarWindowIsVisibleAtStartAndEnd()
-    }
 
     /** {@inheritDoc} */
     @FlakyTest(bugId = 250520840)

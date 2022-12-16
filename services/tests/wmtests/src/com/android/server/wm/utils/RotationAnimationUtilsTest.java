@@ -23,15 +23,11 @@ import static org.junit.Assert.assertEquals;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.ColorSpace;
-import android.graphics.Matrix;
-import android.graphics.PointF;
 import android.hardware.HardwareBuffer;
 import android.platform.test.annotations.Presubmit;
-import android.view.Surface;
 
 import com.android.internal.policy.TransitionAnimation;
 
-import org.junit.Before;
 import org.junit.Test;
 
 @Presubmit
@@ -39,16 +35,8 @@ public class RotationAnimationUtilsTest {
 
     private static final int BITMAP_HEIGHT = 100;
     private static final int BITMAP_WIDTH = 100;
-    private static final int POINT_WIDTH = 1000;
-    private static final int POINT_HEIGHT = 2000;
 
     private ColorSpace mColorSpace = ColorSpace.get(ColorSpace.Named.DISPLAY_P3);
-    private Matrix mMatrix;
-
-    @Before
-    public void setup() {
-        mMatrix = new Matrix();
-    }
 
     @Test
     public void blackLuma() {
@@ -91,48 +79,6 @@ public class RotationAnimationUtilsTest {
         HardwareBuffer hb = swBitmapToHardwareBuffer(swBitmap);
         float borderLuma = TransitionAnimation.getBorderLuma(hb, mColorSpace);
         assertEquals(1, borderLuma, 0);
-    }
-
-    @Test
-    public void rotate_0_bottomRight() {
-        RotationAnimationUtils.createRotationMatrix(Surface.ROTATION_0,
-                POINT_WIDTH, POINT_HEIGHT, mMatrix);
-        PointF newPoints = checkMappedPoints(POINT_WIDTH, POINT_HEIGHT);
-        assertEquals(POINT_WIDTH, newPoints.x, 0);
-        assertEquals(POINT_HEIGHT, newPoints.y, 0);
-    }
-
-    @Test
-    public void rotate_90_bottomRight() {
-        RotationAnimationUtils.createRotationMatrix(Surface.ROTATION_90,
-                POINT_WIDTH, POINT_HEIGHT, mMatrix);
-        PointF newPoints = checkMappedPoints(POINT_WIDTH, POINT_HEIGHT);
-        assertEquals(0, newPoints.x, 0);
-        assertEquals(POINT_WIDTH, newPoints.y, 0);
-    }
-
-    @Test
-    public void rotate_180_bottomRight() {
-        RotationAnimationUtils.createRotationMatrix(Surface.ROTATION_180,
-                POINT_WIDTH, POINT_HEIGHT, mMatrix);
-        PointF newPoints = checkMappedPoints(POINT_WIDTH, POINT_HEIGHT);
-        assertEquals(0, newPoints.x, 0);
-        assertEquals(0, newPoints.y, 0);
-    }
-
-    @Test
-    public void rotate_270_bottomRight() {
-        RotationAnimationUtils.createRotationMatrix(Surface.ROTATION_270,
-                POINT_WIDTH, POINT_HEIGHT, mMatrix);
-        PointF newPoints = checkMappedPoints(POINT_WIDTH, POINT_HEIGHT);
-        assertEquals(POINT_HEIGHT, newPoints.x, 0);
-        assertEquals(0, newPoints.y, 0);
-    }
-
-    private PointF checkMappedPoints(int x, int y) {
-        final float[] fs = new float[] {x, y};
-        mMatrix.mapPoints(fs);
-        return new PointF(fs[0], fs[1]);
     }
 
     private Bitmap createBitmap(float luma) {

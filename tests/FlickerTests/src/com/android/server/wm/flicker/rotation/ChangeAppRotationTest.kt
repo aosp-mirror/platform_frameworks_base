@@ -127,7 +127,7 @@ class ChangeAppRotationTest(flicker: FlickerTest) : RotationTransition(flicker) 
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     @Test
-    @IwTest(focusArea = "ime")
+    @IwTest(focusArea = "framework")
     override fun cujCompleted() {
         super.cujCompleted()
         focusChanges()

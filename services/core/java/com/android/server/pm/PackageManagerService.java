@@ -193,6 +193,7 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
+import com.android.server.art.DexUseManagerLocal;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.Installer.InstallerException;
@@ -212,6 +213,7 @@ import com.android.server.pm.permission.LegacyPermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
@@ -5330,18 +5332,70 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 return;
             }
 
-            // TODO(b/254043366): Call `ArtManagerLocal.notifyDexLoad`.
+            UserHandle user = Binder.getCallingUserHandle();
+            int userId = user.getIdentifier();
 
-            int userId = UserHandle.getCallingUserId();
-            ApplicationInfo ai =
-                    snapshot.getApplicationInfo(loadingPackageName, /*flags*/ 0, userId);
-            if (ai == null) {
-                Slog.w(PackageManagerService.TAG, "Loading a package that does not exist for the calling user. package="
-                        + loadingPackageName + ", user=" + userId);
-                return;
+            // Proxy the call to either ART Service or the legacy implementation. If the
+            // implementation is switched with the system property, the dex usage info will be
+            // incomplete, with these effects:
+            //
+            // -  Shared dex files may temporarily get compiled for private use.
+            // -  Secondary dex files may not get compiled at all.
+            // -  Stale compiled artifacts for secondary dex files may not get cleaned up.
+            //
+            // This recovers in the first background dexopt after the depending apps have been
+            // loaded for the first time.
+
+            DexUseManagerLocal dexUseManager = DexOptHelper.getDexUseManagerLocal();
+            if (dexUseManager != null) {
+                // TODO(chiuwinson): Retrieve filtered snapshot from Computer instance instead.
+                try (PackageManagerLocal.FilteredSnapshot filteredSnapshot =
+                                LocalManagerRegistry.getManager(PackageManagerLocal.class)
+                                        .withFilteredSnapshot(callingUid, user)) {
+                    if (loaderIsa != null) {
+                        // Check that loaderIsa agrees with the ISA that dexUseManager will
+                        // determine.
+                        PackageState loadingPkgState =
+                                filteredSnapshot.getPackageState(loadingPackageName);
+                        // If we don't find the loading package just pass it through and let
+                        // dexUseManager throw on it.
+                        if (loadingPkgState != null) {
+                            String loadingPkgAbi = loadingPkgState.getPrimaryCpuAbi();
+                            if (loadingPkgAbi == null) {
+                                loadingPkgAbi = Build.SUPPORTED_ABIS[0];
+                            }
+                            String loadingPkgDexCodeIsa = InstructionSets.getDexCodeInstructionSet(
+                                    VMRuntime.getInstructionSet(loadingPkgAbi));
+                            if (!loaderIsa.equals(loadingPkgDexCodeIsa)) {
+                                // TODO(b/251903639): Make this crash to surface this problem
+                                // better.
+                                Slog.w(PackageManagerService.TAG,
+                                        "Invalid loaderIsa in notifyDexLoad call from "
+                                                + loadingPackageName + ", uid " + callingUid
+                                                + ": expected " + loadingPkgDexCodeIsa + ", got "
+                                                + loaderIsa);
+                                return;
+                            }
+                        }
+                    }
+
+                    // This is called from binder, so exceptions thrown here are caught and handled
+                    // by it.
+                    dexUseManager.notifyDexContainersLoaded(
+                            filteredSnapshot, loadingPackageName, classLoaderContextMap);
+                }
+            } else {
+                ApplicationInfo ai =
+                        snapshot.getApplicationInfo(loadingPackageName, /*flags*/ 0, userId);
+                if (ai == null) {
+                    Slog.w(PackageManagerService.TAG,
+                            "Loading a package that does not exist for the calling user. package="
+                                    + loadingPackageName + ", user=" + userId);
+                    return;
+                }
+                mDexManager.notifyDexLoad(ai, classLoaderContextMap, loaderIsa, userId,
+                        Process.isIsolated(callingUid));
             }
-            mDexManager.notifyDexLoad(ai, classLoaderContextMap, loaderIsa, userId,
-                    Process.isIsolated(callingUid));
         }
 
         @Override

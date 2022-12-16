@@ -9,6 +9,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
@@ -42,6 +43,21 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     public static final int LARGE = 0;
     public static final int SMALL = 1;
+
+    /** Returns a region for the large clock to position itself, based on the given parent. */
+    public static Rect getLargeClockRegion(ViewGroup parent) {
+        int largeClockTopMargin = parent.getResources()
+                .getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin);
+        int targetHeight = parent.getResources()
+                .getDimensionPixelSize(R.dimen.large_clock_text_size) * 2;
+        int top = parent.getHeight() / 2 - targetHeight / 2
+                + largeClockTopMargin / 2;
+        return new Rect(
+                parent.getLeft(),
+                top,
+                parent.getRight(),
+                top + targetHeight);
+    }
 
     /**
      * Frame for small/large clocks
@@ -129,17 +145,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
             }
 
             if (mLargeClockFrame.isLaidOut()) {
-                int largeClockTopMargin = getResources()
-                        .getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin);
-                int targetHeight = getResources()
-                        .getDimensionPixelSize(R.dimen.large_clock_text_size) * 2;
-                int top = mLargeClockFrame.getHeight() / 2 - targetHeight / 2
-                        + largeClockTopMargin / 2;
-                mClock.getLargeClock().getEvents().onTargetRegionChanged(new Rect(
-                        mLargeClockFrame.getLeft(),
-                        top,
-                        mLargeClockFrame.getRight(),
-                        top + targetHeight));
+                mClock.getLargeClock().getEvents().onTargetRegionChanged(
+                        getLargeClockRegion(mLargeClockFrame));
             }
         }
     }

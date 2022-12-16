@@ -50,14 +50,14 @@ public abstract class DreamOverlayModule {
     public static final String BURN_IN_PROTECTION_UPDATE_INTERVAL =
             "burn_in_protection_update_interval";
     public static final String MILLIS_UNTIL_FULL_JITTER = "millis_until_full_jitter";
+    public static final String DREAM_BLUR_RADIUS = "DREAM_BLUR_RADIUS";
     public static final String DREAM_IN_BLUR_ANIMATION_DURATION = "dream_in_blur_anim_duration";
-    public static final String DREAM_IN_BLUR_ANIMATION_DELAY = "dream_in_blur_anim_delay";
     public static final String DREAM_IN_COMPLICATIONS_ANIMATION_DURATION =
             "dream_in_complications_anim_duration";
-    public static final String DREAM_IN_TOP_COMPLICATIONS_ANIMATION_DELAY =
-            "dream_in_top_complications_anim_delay";
-    public static final String DREAM_IN_BOTTOM_COMPLICATIONS_ANIMATION_DELAY =
-            "dream_in_bottom_complications_anim_delay";
+    public static final String DREAM_IN_TRANSLATION_Y_DISTANCE =
+            "dream_in_complications_translation_y";
+    public static final String DREAM_IN_TRANSLATION_Y_DURATION =
+            "dream_in_complications_translation_y_duration";
     public static final String DREAM_OUT_TRANSLATION_Y_DISTANCE =
             "dream_out_complications_translation_y";
     public static final String DREAM_OUT_TRANSLATION_Y_DURATION =
@@ -134,21 +134,21 @@ public abstract class DreamOverlayModule {
     }
 
     /**
+     * The blur radius applied to the dream overlay at dream entry and exit.
+     */
+    @Provides
+    @Named(DREAM_BLUR_RADIUS)
+    static int providesDreamBlurRadius(@Main Resources resources) {
+        return resources.getDimensionPixelSize(R.dimen.dream_overlay_anim_blur_radius);
+    }
+
+    /**
      * Duration in milliseconds of the dream in un-blur animation.
      */
     @Provides
     @Named(DREAM_IN_BLUR_ANIMATION_DURATION)
     static long providesDreamInBlurAnimationDuration(@Main Resources resources) {
         return (long) resources.getInteger(R.integer.config_dreamOverlayInBlurDurationMs);
-    }
-
-    /**
-     * Delay in milliseconds of the dream in un-blur animation.
-     */
-    @Provides
-    @Named(DREAM_IN_BLUR_ANIMATION_DELAY)
-    static long providesDreamInBlurAnimationDelay(@Main Resources resources) {
-        return (long) resources.getInteger(R.integer.config_dreamOverlayInBlurDelayMs);
     }
 
     /**
@@ -161,22 +161,23 @@ public abstract class DreamOverlayModule {
     }
 
     /**
-     * Delay in milliseconds of the dream in top complications fade-in animation.
+     * Provides the number of pixels to translate complications when entering a dream.
      */
     @Provides
-    @Named(DREAM_IN_TOP_COMPLICATIONS_ANIMATION_DELAY)
-    static long providesDreamInTopComplicationsAnimationDelay(@Main Resources resources) {
-        return (long) resources.getInteger(R.integer.config_dreamOverlayInTopComplicationsDelayMs);
+    @Named(DREAM_IN_TRANSLATION_Y_DISTANCE)
+    @DreamOverlayComponent.DreamOverlayScope
+    static int providesDreamInComplicationsTranslationY(@Main Resources resources) {
+        return resources.getDimensionPixelSize(R.dimen.dream_overlay_entry_y_offset);
     }
 
     /**
-     * Delay in milliseconds of the dream in bottom complications fade-in animation.
+     * Provides the duration in ms of the y-translation when dream enters.
      */
     @Provides
-    @Named(DREAM_IN_BOTTOM_COMPLICATIONS_ANIMATION_DELAY)
-    static long providesDreamInBottomComplicationsAnimationDelay(@Main Resources resources) {
-        return (long) resources.getInteger(
-                R.integer.config_dreamOverlayInBottomComplicationsDelayMs);
+    @Named(DREAM_IN_TRANSLATION_Y_DURATION)
+    @DreamOverlayComponent.DreamOverlayScope
+    static long providesDreamInComplicationsTranslationYDuration(@Main Resources resources) {
+        return (long) resources.getInteger(R.integer.config_dreamOverlayInTranslationYDurationMs);
     }
 
     /**

@@ -38,6 +38,13 @@ import java.util.Map;
 @SystemService(Context.MEDIA_PROJECTION_SERVICE)
 public final class MediaProjectionManager {
     private static final String TAG = "MediaProjectionManager";
+
+    /**
+     * Intent extra to customize the permission dialog based on the host app's preferences.
+     * @hide
+     */
+    public static final String EXTRA_MEDIA_PROJECTION_CONFIG =
+            "android.media.projection.extra.EXTRA_MEDIA_PROJECTION_CONFIG";
     /** @hide */
     public static final String EXTRA_APP_TOKEN = "android.media.projection.extra.EXTRA_APP_TOKEN";
     /** @hide */
@@ -64,11 +71,13 @@ public final class MediaProjectionManager {
     }
 
     /**
-     * Returns an Intent that <b>must</b> be passed to startActivityForResult()
-     * in order to start screen capture. The activity will prompt
-     * the user whether to allow screen capture.  The result of this
-     * activity should be passed to getMediaProjection.
+     * Returns an {@link Intent} that <b>must</b> be passed to
+     * {@link Activity#startActivityForResult(Intent, int)} (or similar) in order to start screen
+     * capture. The activity will prompt the user whether to allow screen capture.  The result of
+     * this activity (received by overriding {@link Activity#onActivityResult(int, int, Intent)})
+     * should be passed to {@link #getMediaProjection(int, Intent)}.
      */
+    @NonNull
     public Intent createScreenCaptureIntent() {
         Intent i = new Intent();
         final ComponentName mediaProjectionPermissionDialogComponent =
@@ -76,6 +85,49 @@ public final class MediaProjectionManager {
                         com.android.internal.R.string
                         .config_mediaProjectionPermissionDialogComponent));
         i.setComponent(mediaProjectionPermissionDialogComponent);
+        return i;
+    }
+
+    /**
+     * Returns an {@link Intent} that <b>must</b> be passed to
+     * {@link Activity#startActivityForResult(Intent, int)} (or similar) in order to start screen
+     * capture. Customizes the activity and resulting {@link MediaProjection} session based up
+     * the provided {@code config}. The activity will prompt the user whether to allow screen
+     * capture. The result of this activity (received by overriding
+     * {@link Activity#onActivityResult(int, int, Intent)}) should be passed to
+     * {@link #getMediaProjection(int, Intent)}.
+     *
+     * <p>
+     * If {@link MediaProjectionConfig} was created from:
+     * <li>
+     *     <ul>
+     *         {@link MediaProjectionConfig#createConfigForDisplay(int)}, then creates an
+     *         {@link Intent} for capturing this particular display. The activity limits the user's
+     *         choice to just the display specified.
+     *     </ul>
+     *     <ul>
+     *         {@link MediaProjectionConfig#createConfigForUserChoice()}, then creates an
+     *         {@link Intent} for deferring which region to capture to the user. This gives the
+     *         user the same behaviour as calling {@link #createScreenCaptureIntent()}. The
+     *         activity gives the user the choice between
+     *         {@link android.view.Display#DEFAULT_DISPLAY}, or a different region.
+     *     </ul>
+     * </li>
+     *
+     * @param config Customization for the {@link MediaProjection} that this {@link Intent} requests
+     *               the user's consent for.
+     * @return An {@link Intent} requesting the user's consent, specialized based upon the given
+     * configuration.
+     */
+    @NonNull
+    public Intent createScreenCaptureIntent(@NonNull MediaProjectionConfig config) {
+        Intent i = new Intent();
+        final ComponentName mediaProjectionPermissionDialogComponent =
+                ComponentName.unflattenFromString(mContext.getResources()
+                        .getString(com.android.internal.R.string
+                                .config_mediaProjectionPermissionDialogComponent));
+        i.setComponent(mediaProjectionPermissionDialogComponent);
+        i.putExtra(EXTRA_MEDIA_PROJECTION_CONFIG, config);
         return i;
     }
 

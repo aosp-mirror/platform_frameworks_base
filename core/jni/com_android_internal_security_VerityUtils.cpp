@@ -23,7 +23,6 @@
 #include <linux/fsverity.h>
 #include <linux/stat.h>
 #include <nativehelper/JNIHelp.h>
-#include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -39,7 +38,7 @@ namespace android {
 
 namespace {
 
-int enableFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath, jbyteArray signature) {
+int enableFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath) {
     ScopedUtfChars path(env, filePath);
     if (path.c_str() == nullptr) {
         return EINVAL;
@@ -55,18 +54,6 @@ int enableFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath, jbyteArra
     arg.block_size = 4096;
     arg.salt_size = 0;
     arg.salt_ptr = reinterpret_cast<uintptr_t>(nullptr);
-
-    if (signature != nullptr) {
-        ScopedByteArrayRO signature_bytes(env, signature);
-        if (signature_bytes.get() == nullptr) {
-            return EINVAL;
-        }
-        arg.sig_size = signature_bytes.size();
-        arg.sig_ptr = reinterpret_cast<uintptr_t>(signature_bytes.get());
-    } else {
-        arg.sig_size = 0;
-        arg.sig_ptr = reinterpret_cast<uintptr_t>(nullptr);
-    }
 
     if (ioctl(rfd.get(), FS_IOC_ENABLE_VERITY, &arg) < 0) {
         return errno;
@@ -138,7 +125,7 @@ int measureFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath, jbyteArr
     return 0;
 }
 const JNINativeMethod sMethods[] = {
-        {"enableFsverityNative", "(Ljava/lang/String;[B)I", (void *)enableFsverity},
+        {"enableFsverityNative", "(Ljava/lang/String;)I", (void *)enableFsverity},
         {"statxForFsverityNative", "(Ljava/lang/String;)I", (void *)statxForFsverity},
         {"measureFsverityNative", "(Ljava/lang/String;[B)I", (void *)measureFsverity},
 };

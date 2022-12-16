@@ -43,6 +43,8 @@ import android.util.MathUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.audio.AudioService.AudioHandler;
 import com.android.server.audio.AudioService.ISafeHearingVolumeController;
+import com.android.server.audio.AudioServiceEvents.SoundDoseEvent;
+import com.android.server.utils.EventLogger;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -93,6 +95,9 @@ public class SoundDoseHelper {
     private static final int REQUEST_CODE_CHECK_MUSIC_ACTIVE = 1;
 
     private static final float CUSTOM_RS2_VALUE = 90;
+
+    private final EventLogger mLogger = new EventLogger(AudioService.LOG_NB_EVENTS_SOUND_DOSE,
+            "CSD updates");
 
     private int mMcc = 0;
 
@@ -147,17 +152,21 @@ public class SoundDoseHelper {
         public void onMomentaryExposure(float currentMel, int deviceId) {
             Log.w(TAG, "DeviceId " + deviceId + " triggered momentary exposure with value: "
                     + currentMel);
+            mLogger.enqueue(SoundDoseEvent.getMomentaryExposureEvent(currentMel));
         }
 
         public void onNewCsdValue(float currentCsd, SoundDoseRecord[] records) {
             Log.i(TAG, "onNewCsdValue: " + currentCsd);
             mCurrentCsd = currentCsd;
             mDoseRecords.addAll(Arrays.asList(records));
+            long totalDuration = 0;
             for (SoundDoseRecord record : records) {
                 Log.i(TAG, "  new record: csd=" + record.value
                         + " averageMel=" + record.averageMel + " timestamp=" + record.timestamp
                         + " duration=" + record.duration);
+                totalDuration += record.duration;
             }
+            mLogger.enqueue(SoundDoseEvent.getDoseUpdateEvent(currentCsd, totalDuration));
         }
     };
 
@@ -400,6 +409,9 @@ public class SoundDoseHelper {
         pw.print("  mMusicActiveMs="); pw.println(mMusicActiveMs);
         pw.print("  mMcc="); pw.println(mMcc);
         pw.print("  mPendingVolumeCommand="); pw.println(mPendingVolumeCommand);
+        pw.println();
+        mLogger.dump(pw);
+        pw.println();
     }
 
     /*package*/void reset() {

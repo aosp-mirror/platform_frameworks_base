@@ -17,7 +17,6 @@
 package com.android.internal.security;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.system.Os;
@@ -41,9 +40,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -57,9 +53,6 @@ public abstract class VerityUtils {
      * foo.apk.
      */
     public static final String FSVERITY_SIGNATURE_FILE_EXTENSION = ".fsv_sig";
-
-    /** The maximum size of signature file.  This is just to avoid potential abuse. */
-    private static final int MAX_SIGNATURE_FILE_SIZE_BYTES = 8192;
 
     /** SHA256 hash size. */
     private static final int HASH_SIZE_BYTES = 32;
@@ -79,26 +72,9 @@ public abstract class VerityUtils {
         return filePath + FSVERITY_SIGNATURE_FILE_EXTENSION;
     }
 
-    /** Enables fs-verity for the file with an optional PKCS#7 detached signature file. */
-    public static void setUpFsverity(@NonNull String filePath, @Nullable String signaturePath)
-            throws IOException {
-        byte[] rawSignature = null;
-        if (signaturePath != null) {
-            Path path = Paths.get(signaturePath);
-            if (Files.size(path) > MAX_SIGNATURE_FILE_SIZE_BYTES) {
-                throw new SecurityException("Signature file is unexpectedly large: "
-                        + signaturePath);
-            }
-            rawSignature = Files.readAllBytes(path);
-        }
-        setUpFsverity(filePath, rawSignature);
-    }
-
-    /** Enables fs-verity for the file with an optional PKCS#7 detached signature bytes. */
-    public static void setUpFsverity(@NonNull String filePath, @Nullable byte[] pkcs7Signature)
-            throws IOException {
-        // This will fail if the public key is not already in .fs-verity kernel keyring.
-        int errno = enableFsverityNative(filePath, pkcs7Signature);
+    /** Enables fs-verity for the file without signature. */
+    public static void setUpFsverity(@NonNull String filePath) throws IOException {
+        int errno = enableFsverityNative(filePath);
         if (errno != 0) {
             throw new IOException("Failed to enable fs-verity on " + filePath + ": "
                     + Os.strerror(errno));
@@ -234,8 +210,7 @@ public abstract class VerityUtils {
         return buffer.array();
     }
 
-    private static native int enableFsverityNative(@NonNull String filePath,
-            @Nullable byte[] pkcs7Signature);
+    private static native int enableFsverityNative(@NonNull String filePath);
     private static native int measureFsverityNative(@NonNull String filePath,
             @NonNull byte[] digest);
     private static native int statxForFsverityNative(@NonNull String filePath);

@@ -76,6 +76,17 @@ public final class GeoidHeightMap {
         }
     }
 
+    /**
+     * Same as {@link #getParams(Context)} except that null is returned if the singleton parameter
+     * instance is not yet initialized.
+     */
+    @Nullable
+    public static MapParamsProto getParams() {
+        synchronized (sLock) {
+            return sParams;
+        }
+    }
+
     private static long getCacheKey(@NonNull MapParamsProto params, long s2CellId) {
         return S2CellIdUtils.getParent(s2CellId, params.cacheTileS2Level);
     }
@@ -99,7 +110,8 @@ public final class GeoidHeightMap {
         S2TileProto[] tiles = new S2TileProto[len];
         for (int i = 0; i < len; i++) {
             if (s2CellIds[i] != 0) {
-                tiles[i] = tileFunction.getTile(s2CellIds[i]);
+                long cacheKey = getCacheKey(params, s2CellIds[i]);
+                tiles[i] = tileFunction.getTile(cacheKey);
             }
             values[i] = Double.NaN;
         }
@@ -208,6 +220,18 @@ public final class GeoidHeightMap {
     }
 
     /**
+     * Throws an {@link IllegalArgumentException} if the {@code s2CellIds} has an invalid length or
+     * ID.
+     */
+    private static void validate(@NonNull MapParamsProto params, @NonNull long[] s2CellIds) {
+        Preconditions.checkArgument(s2CellIds.length == 4);
+        for (long s2CellId : s2CellIds) {
+            Preconditions.checkArgument(
+                    s2CellId == 0 || S2CellIdUtils.getLevel(s2CellId) == params.mapS2Level);
+        }
+    }
+
+    /**
      * Returns the geoid heights in meters associated with the map cells identified by
      * {@code s2CellIds}. Throws an {@link IOException} if a geoid height cannot be calculated for a
      * non-zero ID.
@@ -215,12 +239,7 @@ public final class GeoidHeightMap {
     @NonNull
     public double[] readGeoidHeights(@NonNull MapParamsProto params, @NonNull Context context,
             @NonNull long[] s2CellIds) throws IOException {
-        Preconditions.checkArgument(s2CellIds.length == 4);
-        for (long s2CellId : s2CellIds) {
-            Preconditions.checkArgument(
-                    s2CellId == 0 || S2CellIdUtils.getLevel(s2CellId) == params.mapS2Level);
-        }
-
+        validate(params, s2CellIds);
         double[] heightsMeters = new double[s2CellIds.length];
         if (getGeoidHeights(params, mCacheTiles::get, s2CellIds, heightsMeters)) {
             return heightsMeters;
@@ -231,6 +250,21 @@ public final class GeoidHeightMap {
             return heightsMeters;
         }
         throw new IOException("Unable to calculate geoid heights from raw assets.");
+    }
+
+    /**
+     * Same as {@link #readGeoidHeights(MapParamsProto, Context, long[])} except that data will not
+     * be loaded from raw assets. Returns the heights if present for all non-zero IDs; otherwise,
+     * returns null.
+     */
+    @Nullable
+    public double[] readGeoidHeights(@NonNull MapParamsProto params, @NonNull long[] s2CellIds) {
+        validate(params, s2CellIds);
+        double[] heightsMeters = new double[s2CellIds.length];
+        if (getGeoidHeights(params, mCacheTiles::get, s2CellIds, heightsMeters)) {
+            return heightsMeters;
+        }
+        return null;
     }
 
     /**
@@ -297,11 +331,7 @@ public final class GeoidHeightMap {
             mergeFromDiskTile(params, tile, cacheKeys, diskTokens, i, loadedTiles);
         }
 
-        return s2CellId -> {
-            if (s2CellId == 0) {
-                return null;
-            }
-            long cacheKey = getCacheKey(params, s2CellId);
+        return cacheKey -> {
             for (int i = 0; i < cacheKeys.length; i++) {
                 if (cacheKeys[i] == cacheKey) {
                     return loadedTiles[i];
@@ -321,8 +351,8 @@ public final class GeoidHeightMap {
         long[] s2CellIds = new long[numMapCellsPerCacheTile];
         double[] values = new double[numMapCellsPerCacheTile];
 
-        // Each cache key identifies a different sub-tile of the disk tile.
-        TileFunction diskTileFunction = s2CellId -> diskTile;
+        // Each cache key identifies a different sub-tile of the same disk tile.
+        TileFunction diskTileFunction = cacheKey -> diskTile;
         for (int i = diskTokenIndex; i < len; i++) {
             if (!Objects.equals(diskTokens[i], diskTokens[diskTokenIndex])
                     || loadedTiles[i] != null) {
@@ -358,10 +388,10 @@ public final class GeoidHeightMap {
         }
     }
 
-    /** Defines a function-like object to retrieve tiles for map cells. */
+    /** Defines a function-like object to retrieve tiles for cache keys. */
     private interface TileFunction {
 
         @Nullable
-        S2TileProto getTile(long s2CellId);
+        S2TileProto getTile(long cacheKey);
     }
 }

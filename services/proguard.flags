@@ -78,6 +78,13 @@
 -keep,allowoptimization,allowaccessmodification class com.android.server.wm.** implements com.android.server.wm.DisplayAreaPolicy$Provider
 
 # JNI keep rules
+# The global keep rule for native methods allows stripping of such methods if they're unreferenced
+# in Java. However, because system_server explicitly registers these methods from native code,
+# stripping them in Java can cause runtime issues. As such, conservatively keep all such methods in
+# system_server subpackages as long as the containing class is also kept or referenced.
+-keepclassmembers class com.android.server.** {
+  native <methods>;
+}
 # TODO(b/210510433): Revisit and fix with @Keep, or consider auto-generating from
 # frameworks/base/services/core/jni/onload.cpp.
 -keep,allowoptimization,allowaccessmodification class com.android.server.broadcastradio.hal1.BroadcastRadioService { *; }

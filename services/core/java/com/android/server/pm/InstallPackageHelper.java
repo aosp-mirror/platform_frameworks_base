@@ -1872,7 +1872,7 @@ final class InstallPackageHelper {
                 if (new File(signaturePath).exists()) {
                     // If signature is provided, enable fs-verity first so that the file can be
                     // measured for signature check below.
-                    VerityUtils.setUpFsverity(filePath, (byte[]) null);
+                    VerityUtils.setUpFsverity(filePath);
 
                     if (!fis.verifyPkcs7DetachedSignature(signaturePath, filePath)) {
                         throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
@@ -2385,7 +2385,7 @@ final class InstallPackageHelper {
             for (String path : apkPaths) {
                 if (!VerityUtils.hasFsverity(path)) {
                     try {
-                        VerityUtils.setUpFsverity(path, (byte[]) null);
+                        VerityUtils.setUpFsverity(path);
                     } catch (IOException e) {
                         // There's nothing we can do if the setup failed. Since fs-verity is
                         // optional, just ignore the error for now.

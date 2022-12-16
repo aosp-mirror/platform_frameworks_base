@@ -16,8 +16,17 @@
 
 package com.android.systemui.keyguard.shared.quickaffordance
 
+import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
+
 /** Enumerates all possible positions for quick affordances that can appear on the lock-screen. */
 enum class KeyguardQuickAffordancePosition {
     BOTTOM_START,
-    BOTTOM_END,
+    BOTTOM_END;
+
+    fun toSlotId(): String {
+        return when (this) {
+            BOTTOM_START -> KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
+            BOTTOM_END -> KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END
+        }
+    }
 }

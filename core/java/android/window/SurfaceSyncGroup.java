@@ -18,6 +18,7 @@ package android.window;
 
 import android.annotation.Nullable;
 import android.annotation.UiThread;
+import android.os.Debug;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
@@ -141,7 +142,7 @@ public class SurfaceSyncGroup {
         };
 
         if (DEBUG) {
-            Log.d(TAG, "setupSync");
+            Log.d(TAG, "setupSync " + this + " " + Debug.getCallers(2));
         }
     }
 
@@ -313,9 +314,17 @@ public class SurfaceSyncGroup {
                 // Additionally, the old parent will not get the final transaction object and
                 // instead will send it to the new parent, ensuring that any other SurfaceSyncGroups
                 // from the original parent are also combined with the new parent SurfaceSyncGroup.
-                if (mParentSyncGroup != null) {
-                    Log.d(TAG, "Already part of sync group " + mParentSyncGroup + " " + this);
+                if (mParentSyncGroup != null && mParentSyncGroup != parentSyncGroup) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Already part of sync group " + mParentSyncGroup + " " + this);
+                    }
                     parentSyncGroup.addToSync(mParentSyncGroup, true /* parentSyncGroupMerge */);
+                }
+
+                if (mParentSyncGroup == parentSyncGroup) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Added to parent that was already the parent");
+                    }
                 }
                 mParentSyncGroup = parentSyncGroup;
                 final TransactionReadyCallback lastCallback = mTransactionReadyCallback;

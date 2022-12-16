@@ -207,22 +207,8 @@ open class SeamlessAppRotationTest(flicker: FlickerTest) : RotationTransition(fl
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     @Test
-    @IwTest(focusArea = "ime")
+    @IwTest(focusArea = "framework")
     override fun cujCompleted() {
-        if (!flicker.scenario.isTablet) {
-            // not yet tablet compatible
-            appLayerRotates()
-            appLayerAlwaysVisible()
-            // not tablet compatible
-            navBarLayerIsVisibleAtStartAndEnd()
-            navBarWindowIsAlwaysVisible()
-        }
-
-        if (flicker.scenario.isTablet) {
-            taskBarLayerIsVisibleAtStartAndEnd()
-            taskBarWindowIsAlwaysVisible()
-        }
-
         appWindowFullScreen()
         appWindowSeamlessRotation()
         focusDoesNotChange()
@@ -233,6 +219,13 @@ open class SeamlessAppRotationTest(flicker: FlickerTest) : RotationTransition(fl
         entireScreenCovered()
         visibleLayersShownMoreThanOneConsecutiveEntry()
         visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+        runAndIgnoreAssumptionViolation { appLayerRotates() }
+        runAndIgnoreAssumptionViolation { appLayerAlwaysVisible() }
+        runAndIgnoreAssumptionViolation { navBarLayerIsVisibleAtStartAndEnd() }
+        runAndIgnoreAssumptionViolation { navBarWindowIsAlwaysVisible() }
+        runAndIgnoreAssumptionViolation { taskBarLayerIsVisibleAtStartAndEnd() }
+        runAndIgnoreAssumptionViolation { taskBarWindowIsAlwaysVisible() }
     }
 
     companion object {

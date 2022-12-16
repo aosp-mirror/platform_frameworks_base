@@ -690,7 +690,7 @@ public class TrustManagerService extends SystemService {
      */
     public void lockUser(int userId) {
         mLockPatternUtils.requireStrongAuth(
-                StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST, userId);
+                StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED, userId);
         try {
             WindowManagerGlobal.getWindowManagerService().lockNow(null);
         } catch (RemoteException e) {
@@ -2088,7 +2088,7 @@ public class TrustManagerService extends SystemService {
             if (mStrongAuthTracker.isTrustAllowedForUser(mUserId)) {
                 if (DEBUG) Slog.d(TAG, "Revoking all trust because of trust timeout");
                 mLockPatternUtils.requireStrongAuth(
-                        mStrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST, mUserId);
+                        mStrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED, mUserId);
             }
             maybeLockScreen(mUserId);
         }

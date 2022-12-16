@@ -3682,15 +3682,36 @@ public class UserManager {
         }
     }
 
+    // TODO(b/256690588): Remove this after removing its callsites.
     /**
      * Gets the existing guest user if it exists.  This does not include guest users that are dying.
      * @return The existing guest user if it exists. Null otherwise.
      * @hide
+     *
+     * @deprecated Use {@link #getGuestUsers()}
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public UserInfo findCurrentGuestUser() {
         try {
-            return mService.findCurrentGuestUser();
+            final List<UserInfo> guestUsers = mService.getGuestUsers();
+            if (guestUsers.size() == 0) {
+                return null;
+            }
+            return guestUsers.get(0);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the existing guest users.  This does not include guest users that are dying.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public @NonNull List<UserInfo> getGuestUsers() {
+        try {
+            return mService.getGuestUsers();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
