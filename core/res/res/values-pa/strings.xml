@@ -2352,4 +2352,8 @@
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"ਹੋਰ ਡੀਵਾਈਸਾਂ \'ਤੇ ਸੰਬੰਧੀ ਸੁਨੇਹੇ ਡਿਲੀਵਰ ਕਰਨ ਲਈ ਸੰਬੰਧੀ ਐਪ ਨੂੰ ਆਗਿਆ ਮਿਲਦੀ ਹੈ।"</string>
     <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"ਬੈਕਗ੍ਰਾਊਂਡ ਤੋਂ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਚਾਲੂ ਕਰੋ"</string>
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"ਸੰਬੰਧੀ ਐਪ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਤੋਂ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਸ਼ੁਰੂ ਕਰਨ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ।"</string>
+    <!-- no translation found for mic_access_on_toast (2666925317663845156) -->
+    <skip />
+    <!-- no translation found for mic_access_off_toast (8111040892954242437) -->
+    <skip />
 </resources>

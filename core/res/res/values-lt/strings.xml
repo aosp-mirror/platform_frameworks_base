@@ -2354,4 +2354,8 @@
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"Leidžiama papildomai programai teikti papildomos programos pranešimus į kitus įrenginius."</string>
     <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"Priekinio plano paslaugų paleidimas fone"</string>
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Leidžiama papildomai programai paleisti priekinio plano paslaugas fone."</string>
+    <!-- no translation found for mic_access_on_toast (2666925317663845156) -->
+    <skip />
+    <!-- no translation found for mic_access_off_toast (8111040892954242437) -->
+    <skip />
 </resources>

@@ -2352,4 +2352,8 @@
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"മറ്റ് ഉപകരണങ്ങളിലേക്ക് സഹകാരി സന്ദേശങ്ങൾ ഡെലിവർ ചെയ്യാൻ സഹകാരി ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"പശ്ചാത്തലത്തിൽ നിന്ന് ഫോർഗ്രൗണ്ട് സേവനങ്ങൾ ആരംഭിക്കുക"</string>
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"പശ്ചാത്തലത്തിൽ നിന്ന് ഫോർഗ്രൗണ്ട് സേവനങ്ങൾ ആരംഭിക്കാൻ സഹകാരി ആപ്പിനെ അനുവദിക്കുന്നു."</string>
+    <!-- no translation found for mic_access_on_toast (2666925317663845156) -->
+    <skip />
+    <!-- no translation found for mic_access_off_toast (8111040892954242437) -->
+    <skip />
 </resources>

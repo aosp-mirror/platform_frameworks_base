@@ -2352,4 +2352,8 @@
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"อนุญาตให้แอปที่ใช้ร่วมกันส่งข้อความที่ใช้ร่วมกันไปยังอุปกรณ์อื่นๆ"</string>
     <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"เริ่มการทำงานของบริการที่ทำงานอยู่เบื้องหน้าโดยให้อนุญาตจากเบื้องหลัง"</string>
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"อนุญาตจากเบื้องหลังให้แอปที่ใช้ร่วมกันเริ่มการทำงานของบริการที่ทำงานอยู่เบื้องหน้า"</string>
+    <!-- no translation found for mic_access_on_toast (2666925317663845156) -->
+    <skip />
+    <!-- no translation found for mic_access_off_toast (8111040892954242437) -->
+    <skip />
 </resources>

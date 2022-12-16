@@ -2352,4 +2352,8 @@
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"ଅନ୍ୟ ଡିଭାଇସଗୁଡ଼ିକରେ ସହଯୋଗୀ ମେସେଜଗୁଡ଼ିକ ଡେଲିଭର କରିବା ପାଇଁ ଏକ ସହଯୋଗୀ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
     <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"ପୃଷ୍ଠପଟରୁ ଫୋରଗ୍ରାଉଣ୍ଡ ସେବାଗୁଡ଼ିକ ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"ପୃଷ୍ଠପଟରୁ ଫୋରଗ୍ରାଉଣ୍ଡ ସେବାଗୁଡ଼ିକ ଆରମ୍ଭ କରିବାକୁ ଏକ ସହଯୋଗୀ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
+    <!-- no translation found for mic_access_on_toast (2666925317663845156) -->
+    <skip />
+    <!-- no translation found for mic_access_off_toast (8111040892954242437) -->
+    <skip />
 </resources>

@@ -2366,4 +2366,8 @@
     <skip />
     <!-- no translation found for permdesc_startForegroundServicesFromBackground (4071826571656001537) -->
     <skip />
+    <!-- no translation found for mic_access_on_toast (2666925317663845156) -->
+    <skip />
+    <!-- no translation found for mic_access_off_toast (8111040892954242437) -->
+    <skip />
 </resources>
