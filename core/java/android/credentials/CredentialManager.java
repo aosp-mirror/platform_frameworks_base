@@ -208,11 +208,7 @@ public final class CredentialManager {
      * @param callback the callback invoked when the request succeeds or fails
      * @hide
      */
-    @RequiresPermission(
-            allOf = {
-                android.Manifest.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS,
-                android.Manifest.permission.QUERY_ALL_PACKAGES
-            })
+    @RequiresPermission(android.Manifest.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS)
     public void listEnabledProviders(
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
