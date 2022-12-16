@@ -72,6 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock је онемогућен"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"је послао/ла слику"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Чување снимка екрана..."</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Снимак екрана се чува на пословном профилу…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Снимак екрана је сачуван"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Чување снимка екрана није успело"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Уређај мора да буде откључан да би снимак екрана могао да се сачува"</string>
@@ -125,8 +126,7 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Гласовна помоћ"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Новчаник"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Скенер QR кода"</string>
-    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
-    <skip />
+    <string name="accessibility_unlock_button" msgid="3613812140816244310">"Откључано"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Уређај је закључан"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Скенирање лица"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Пошаљи"</string>
@@ -169,8 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Лице није препознато"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Користите отисак прста"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
-    <skip />
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Откључавање лицем није доступно"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth је прикључен."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Проценат напуњености батерије није познат."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Повезани сте са <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
@@ -181,12 +180,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Режим рада у авиону."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN је укључен."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Батерија је на <xliff:g id="NUMBER">%d</xliff:g> посто."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Батерија је на <xliff:g id="PERCENTAGE">%1$d</xliff:g> посто, преостало време на основу коришћења је <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"Батерија је на <xliff:g id="PERCENTAGE">%1$d</xliff:g> посто, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Батерија се пуни, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> посто."</string>
-    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
-    <skip />
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"Батерија је на <xliff:g id="PERCENTAGE">%d</xliff:g> посто, пуњење је паузирано да би се заштитила батерија."</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"Батерија је на <xliff:g id="PERCENTAGE">%1$d</xliff:g> посто, <xliff:g id="TIME">%2$s</xliff:g>, пуњење је паузирано да би се заштитила батерија."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Погледајте сва обавештења"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter је омогућен."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Вибрација звона."</string>
@@ -320,7 +317,8 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Камера је омогућена за све апликације и услуге."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Приступ камери је онемогућен за све апликације и услуге."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Да бисте користили дугме микрофона, омогућите приступ микрофону у Подешавањима."</string>
-    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"Отвори Подешавања."</string>
+    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
+    <skip />
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Други уређај"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Укључи/искључи преглед"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Неће вас узнемиравати звукови и вибрације осим за аларме, подсетнике, догађаје и позиваоце које наведете. И даље ћете чути све што одаберете да пустите, укључујући музику, видео снимке и игре."</string>
@@ -407,6 +405,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Обавештења су паузирана режимом Не узнемиравај"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Започни"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Нема обавештења"</string>
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"Нема нових обавештења"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Откључајте да видите старија обавештења"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Овим уређајем управља родитељ"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Организација је власник уређаја и може да надгледа мрежни саобраћај"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> је власник овог уређаја и може да надгледа мрежни саобраћај"</string>
@@ -511,8 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Откључај ради коришћења"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Дошло је до проблема при преузимању картица. Пробајте поново касније"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Подешавања закључаног екрана"</string>
-    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Скенер QR кода"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Ажурира се"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Пословни профил"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Режим рада у авиону"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Нећете чути следећи аларм у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -795,8 +795,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Увећајте цео екран"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Увећајте део екрана"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Пређи"</string>
-    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
-    <skip />
+    <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Превуците угао да бисте променили величину"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Дозволи дијагонално скроловање"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Промени величину"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Промени тип увећања"</string>
@@ -905,6 +904,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Заустави пребацивање"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Доступни уређаји за аудио излаз."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Звук"</string>
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Како функционише емитовање"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Емитовање"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Људи у близини са компатибилним Bluetooth уређајима могу да слушају медијски садржај који емитујете"</string>
@@ -1018,17 +1018,34 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Камера и микрофон су искључени"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# обавештење}one{# обавештење}few{# обавештења}other{# обавештења}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="note_task_button_label" msgid="8718616095800343136">"Прављење бележака"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Емитовање"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Желите да зауставите емитовање апликације <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Ако емитујете апликацију <xliff:g id="SWITCHAPP">%1$s</xliff:g> или промените излаз, актуелно емитовање ће се зауставити"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Емитујте апликацију <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Промените излаз"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Непознато"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"ДДД, д. МММ"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"с:мин"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"ч:мин"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"Желите да дозволите да <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> приступа свим евиденцијама уређаја?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Дозволи једнократан приступ"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Не дозволи"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Евиденције уређаја региструју шта се дешава на уређају. Апликације могу да користе те евиденције да би пронашле и решиле проблеме.\n\nНеке евиденције могу да садрже осетљиве информације, па приступ свим евиденцијама уређаја треба да дозвољавате само апликацијама у које имате поверења. \n\nАко не дозволите овој апликацији да приступа свим евиденцијама уређаја, она и даље може да приступа сопственим евиденцијама. Произвођач уређаја ће можда и даље моћи да приступа неким евиденцијама или информацијама на уређају."</string>
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Отворите: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
+    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Да бисте додали апликацију <xliff:g id="APPNAME">%1$s</xliff:g> као пречицу, уверите се:"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• да је апликација подешена"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• да је у Новчаник додата барем једна картица"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• да сте инсталирали апликацију за камеру"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• да је апликација подешена"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• да је доступан барем један уређај"</string>
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Откажи"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Обрните"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Отворите телефон за бољи селфи"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Желите да обрнете на предњи екран за бољи селфи?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Користите задњу камеру да бисте снимили ширу слику са вишом резолуцијом."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Овај екран ће се искључити"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>
