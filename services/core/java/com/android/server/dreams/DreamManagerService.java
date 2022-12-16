@@ -55,6 +55,7 @@ import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.service.dreams.DreamService;
@@ -113,6 +114,7 @@ public final class DreamManagerService extends SystemService {
     private final PowerManagerInternal mPowerManagerInternal;
     private final PowerManager.WakeLock mDozeWakeLock;
     private final ActivityTaskManagerInternal mAtmInternal;
+    private final UserManager mUserManager;
     private final UiEventLogger mUiEventLogger;
     private final DreamUiEventLogger mDreamUiEventLogger;
     private final ComponentName mAmbientDisplayComponent;
@@ -212,6 +214,7 @@ public final class DreamManagerService extends SystemService {
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mPowerManagerInternal = getLocalService(PowerManagerInternal.class);
         mAtmInternal = getLocalService(ActivityTaskManagerInternal.class);
+        mUserManager = context.getSystemService(UserManager.class);
         mDozeWakeLock = mPowerManager.newWakeLock(PowerManager.DOZE_WAKE_LOCK, DOZE_WAKE_LOCK_TAG);
         mDozeConfig = new AmbientDisplayConfiguration(mContext);
         mUiEventLogger = new UiEventLoggerImpl();
@@ -379,6 +382,10 @@ public final class DreamManagerService extends SystemService {
             }
 
             if (!dreamsEnabledForUser(ActivityManager.getCurrentUser())) {
+                return false;
+            }
+
+            if (!mUserManager.isUserUnlocked()) {
                 return false;
             }
 
