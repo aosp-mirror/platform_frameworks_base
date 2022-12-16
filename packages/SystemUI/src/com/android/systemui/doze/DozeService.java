@@ -116,8 +116,8 @@ public class DozeService extends DreamService
 
     @Override
     public void requestWakeUp(@DozeLog.Reason int reason) {
-        PowerManager pm = getSystemService(PowerManager.class);
-        pm.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
+        final PowerManager pm = getSystemService(PowerManager.class);
+        pm.wakeUp(SystemClock.uptimeMillis(), DozeLog.getPowerManagerWakeReason(reason),
                 "com.android.systemui:NODOZE " + DozeLog.reasonToString(reason));
     }
 

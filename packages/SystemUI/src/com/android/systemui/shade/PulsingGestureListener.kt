@@ -17,6 +17,7 @@
 package com.android.systemui.shade
 
 import android.hardware.display.AmbientDisplayConfiguration
+import android.os.PowerManager
 import android.os.SystemClock
 import android.os.UserHandle
 import android.provider.Settings
@@ -89,7 +90,8 @@ class PulsingGestureListener @Inject constructor(
                 centralSurfaces.wakeUpIfDozing(
                     SystemClock.uptimeMillis(),
                     notificationShadeWindowView,
-                    "PULSING_SINGLE_TAP"
+                    "PULSING_SINGLE_TAP",
+                    PowerManager.WAKE_REASON_TAP
                 )
             }
             return true
@@ -114,7 +116,9 @@ class PulsingGestureListener @Inject constructor(
             centralSurfaces.wakeUpIfDozing(
                     SystemClock.uptimeMillis(),
                     notificationShadeWindowView,
-                    "PULSING_DOUBLE_TAP")
+                    "PULSING_DOUBLE_TAP",
+                    PowerManager.WAKE_REASON_TAP
+            )
             return true
         }
         return false
