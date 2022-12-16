@@ -17,6 +17,9 @@
 
 package com.android.systemui.compose
 
+import androidx.activity.ComponentActivity
+import com.android.systemui.people.ui.viewmodel.PeopleViewModel
+
 /**
  * A facade to interact with Compose, when it is available.
  *
@@ -31,4 +34,11 @@ interface BaseComposeFacade {
      * This value will never change at runtime.
      */
     fun isComposeAvailable(): Boolean
+
+    /** Bind the content of [activity] to [viewModel]. */
+    fun setPeopleSpaceActivityContent(
+        activity: ComponentActivity,
+        viewModel: PeopleViewModel,
+        onResult: (PeopleViewModel.Result) -> Unit,
+    )
 }

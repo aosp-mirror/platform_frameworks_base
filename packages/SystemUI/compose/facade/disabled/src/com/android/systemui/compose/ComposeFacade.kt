@@ -17,9 +17,20 @@
 
 package com.android.systemui.compose
 
+import androidx.activity.ComponentActivity
+import com.android.systemui.people.ui.viewmodel.PeopleViewModel
+
 /** The Compose facade, when Compose is *not* available. */
 object ComposeFacade : BaseComposeFacade {
     override fun isComposeAvailable(): Boolean = false
+
+    override fun setPeopleSpaceActivityContent(
+        activity: ComponentActivity,
+        viewModel: PeopleViewModel,
+        onResult: (PeopleViewModel.Result) -> Unit,
+    ) {
+        throwComposeUnavailableError()
+    }
 
     private fun throwComposeUnavailableError() {
         error(

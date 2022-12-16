@@ -16,7 +16,21 @@
 
 package com.android.systemui.compose
 
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import com.android.systemui.compose.theme.SystemUITheme
+import com.android.systemui.people.ui.compose.PeopleScreen
+import com.android.systemui.people.ui.viewmodel.PeopleViewModel
+
 /** The Compose facade, when Compose is available. */
 object ComposeFacade : BaseComposeFacade {
     override fun isComposeAvailable(): Boolean = true
+
+    override fun setPeopleSpaceActivityContent(
+        activity: ComponentActivity,
+        viewModel: PeopleViewModel,
+        onResult: (PeopleViewModel.Result) -> Unit,
+    ) {
+        activity.setContent { SystemUITheme { PeopleScreen(viewModel, onResult) } }
+    }
 }

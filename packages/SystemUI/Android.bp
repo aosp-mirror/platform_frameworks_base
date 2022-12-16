@@ -64,6 +64,7 @@ systemui_compose_java_defaults {
 
                 "androidx.compose.runtime_runtime",
                 "androidx.compose.material3_material3",
+                "androidx.activity_activity-compose",
             ],
 
             // By default, Compose is disabled and we compile the ComposeFacade
