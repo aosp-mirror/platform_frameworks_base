@@ -22,8 +22,6 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IBackgroundInstallControlService;
-import android.content.pm.IPackageManager;
-import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -32,8 +30,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArraySet;
@@ -54,6 +50,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -75,7 +72,7 @@ public class BackgroundInstallControlService extends SystemService {
 
     private final Context mContext;
     private final BinderService mBinderService;
-    private final IPackageManager mIPackageManager;
+    private final PackageManager mPackageManager;
     private final PackageManagerInternal mPackageManagerInternal;
     private final UsageStatsManagerInternal mUsageStatsManagerInternal;
     private final PermissionManagerServiceInternal mPermissionManager;
@@ -98,7 +95,7 @@ public class BackgroundInstallControlService extends SystemService {
     BackgroundInstallControlService(@NonNull Injector injector) {
         super(injector.getContext());
         mContext = injector.getContext();
-        mIPackageManager = injector.getIPackageManager();
+        mPackageManager = injector.getPackageManager();
         mPackageManagerInternal = injector.getPackageManagerInternal();
         mPermissionManager = injector.getPermissionManager();
         mHandler = new EventHandler(injector.getLooper(), this);
@@ -131,16 +128,12 @@ public class BackgroundInstallControlService extends SystemService {
     @VisibleForTesting
     ParceledListSlice<PackageInfo> getBackgroundInstalledPackages(
             @PackageManager.PackageInfoFlagsBits long flags, int userId) {
-        ParceledListSlice<PackageInfo> packages;
-        try {
-            packages = mIPackageManager.getInstalledPackages(flags, userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        List<PackageInfo> packages = mPackageManager.getInstalledPackagesAsUser(
+                    PackageManager.PackageInfoFlags.of(flags), userId);
 
         initBackgroundInstalledPackages();
 
-        ListIterator<PackageInfo> iter = packages.getList().listIterator();
+        ListIterator<PackageInfo> iter = packages.listIterator();
         while (iter.hasNext()) {
             String packageName = iter.next().packageName;
             if (!mBackgroundInstalledPackages.contains(userId, packageName)) {
@@ -148,7 +141,7 @@ public class BackgroundInstallControlService extends SystemService {
             }
         }
 
-        return packages;
+        return new ParceledListSlice<>(packages);
     }
 
     private static class EventHandler extends Handler {
@@ -181,31 +174,21 @@ public class BackgroundInstallControlService extends SystemService {
     }
 
     void handlePackageAdd(String packageName, int userId) {
-        InstallSourceInfo installSourceInfo = null;
+        ApplicationInfo appInfo = null;
         try {
-            installSourceInfo = mIPackageManager.getInstallSourceInfo(packageName);
-        } catch (RemoteException e) {
-            // Failed to talk to PackageManagerService Should never happen!
-            throw e.rethrowFromSystemServer();
-        }
-        String installerPackageName =
-                installSourceInfo == null ? null : installSourceInfo.getInstallingPackageName();
-        if (installerPackageName == null) {
-            Slog.w(TAG, "fails to get installerPackageName for " + packageName);
+            appInfo = mPackageManager.getApplicationInfoAsUser(packageName,
+                    PackageManager.ApplicationInfoFlags.of(0), userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.w(TAG, "Package's appInfo not found " + packageName);
             return;
         }
 
-        ApplicationInfo appInfo = null;
+        String installerPackageName = null;
         try {
-            appInfo = mIPackageManager.getApplicationInfo(packageName,
-                    0, userId);
-        } catch (RemoteException e) {
-            // Failed to talk to PackageManagerService Should never happen!
-            throw e.rethrowFromSystemServer();
-        }
-
-        if (appInfo == null) {
-            Slog.w(TAG, "fails to get appInfo for " + packageName);
+            installerPackageName = mPackageManager
+                    .getInstallSourceInfo(packageName).getInstallingPackageName();
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.w(TAG, "Package's installer not found " + packageName);
             return;
         }
 
@@ -486,7 +469,7 @@ public class BackgroundInstallControlService extends SystemService {
     interface Injector {
         Context getContext();
 
-        IPackageManager getIPackageManager();
+        PackageManager getPackageManager();
 
         PackageManagerInternal getPackageManagerInternal();
 
@@ -512,8 +495,8 @@ public class BackgroundInstallControlService extends SystemService {
         }
 
         @Override
-        public IPackageManager getIPackageManager() {
-            return IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
+        public PackageManager getPackageManager() {
+            return mContext.getPackageManager();
         }
 
         @Override

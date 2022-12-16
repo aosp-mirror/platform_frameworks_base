@@ -22,8 +22,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -37,12 +37,10 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.UsageEventListener;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.ParceledListSlice;
 import android.os.FileUtils;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -103,7 +101,7 @@ public final class BackgroundInstallControlServiceTest {
     @Mock
     private Context mContext;
     @Mock
-    private IPackageManager mIPackageManager;
+    private PackageManager mPackageManager;
     @Mock
     private PackageManagerInternal mPackageManagerInternal;
     @Mock
@@ -538,19 +536,19 @@ public final class BackgroundInstallControlServiceTest {
 
     @Test
     public void testHandleUsageEvent_packageAddedNoUsageEvent() throws
-            RemoteException, NoSuchFieldException {
+            NoSuchFieldException, PackageManager.NameNotFoundException {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
         InstallSourceInfo installSourceInfo = new InstallSourceInfo(
                 /* initiatingPackageName = */ null, /* initiatingPackageSigningInfo = */ null,
                 /* originatingPackageName = */ null,
                 /* installingPackageName = */ INSTALLER_NAME_1);
         assertEquals(installSourceInfo.getInstallingPackageName(), INSTALLER_NAME_1);
-        when(mIPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
+        when(mPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
         ApplicationInfo appInfo = mock(ApplicationInfo.class);
 
-        when(mIPackageManager.getApplicationInfo(
+        when(mPackageManager.getApplicationInfoAsUser(
                 eq(PACKAGE_NAME_1),
-                eq(0L),
+                any(),
                 anyInt())
         ).thenReturn(appInfo);
 
@@ -574,19 +572,19 @@ public final class BackgroundInstallControlServiceTest {
 
     @Test
     public void testHandleUsageEvent_packageAddedInsideTimeFrame() throws
-            RemoteException, NoSuchFieldException {
+            NoSuchFieldException, PackageManager.NameNotFoundException {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
         InstallSourceInfo installSourceInfo = new InstallSourceInfo(
                 /* initiatingPackageName = */ null, /* initiatingPackageSigningInfo = */ null,
                 /* originatingPackageName = */ null,
                 /* installingPackageName = */ INSTALLER_NAME_1);
         assertEquals(installSourceInfo.getInstallingPackageName(), INSTALLER_NAME_1);
-        when(mIPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
+        when(mPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
         ApplicationInfo appInfo = mock(ApplicationInfo.class);
 
-        when(mIPackageManager.getApplicationInfo(
+        when(mPackageManager.getApplicationInfoAsUser(
                 eq(PACKAGE_NAME_1),
-                eq(0L),
+                any(),
                 anyInt())
         ).thenReturn(appInfo);
 
@@ -618,19 +616,19 @@ public final class BackgroundInstallControlServiceTest {
 
     @Test
     public void testHandleUsageEvent_packageAddedOutsideTimeFrame1() throws
-            RemoteException, NoSuchFieldException {
+            NoSuchFieldException, PackageManager.NameNotFoundException {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
         InstallSourceInfo installSourceInfo = new InstallSourceInfo(
                 /* initiatingPackageName = */ null, /* initiatingPackageSigningInfo = */ null,
                 /* originatingPackageName = */ null,
                 /* installingPackageName = */ INSTALLER_NAME_1);
         assertEquals(installSourceInfo.getInstallingPackageName(), INSTALLER_NAME_1);
-        when(mIPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
+        when(mPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
         ApplicationInfo appInfo = mock(ApplicationInfo.class);
 
-        when(mIPackageManager.getApplicationInfo(
+        when(mPackageManager.getApplicationInfoAsUser(
                 eq(PACKAGE_NAME_1),
-                eq(0L),
+                any(),
                 anyInt())
         ).thenReturn(appInfo);
 
@@ -666,19 +664,19 @@ public final class BackgroundInstallControlServiceTest {
     }
     @Test
     public void testHandleUsageEvent_packageAddedOutsideTimeFrame2() throws
-            RemoteException, NoSuchFieldException {
+            NoSuchFieldException, PackageManager.NameNotFoundException {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
         InstallSourceInfo installSourceInfo = new InstallSourceInfo(
                 /* initiatingPackageName = */ null, /* initiatingPackageSigningInfo = */ null,
                 /* originatingPackageName = */ null,
                 /* installingPackageName = */ INSTALLER_NAME_1);
         assertEquals(installSourceInfo.getInstallingPackageName(), INSTALLER_NAME_1);
-        when(mIPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
+        when(mPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
         ApplicationInfo appInfo = mock(ApplicationInfo.class);
 
-        when(mIPackageManager.getApplicationInfo(
+        when(mPackageManager.getApplicationInfoAsUser(
                 eq(PACKAGE_NAME_1),
-                eq(0L),
+                any(),
                 anyInt())
         ).thenReturn(appInfo);
 
@@ -760,8 +758,8 @@ public final class BackgroundInstallControlServiceTest {
         packages.add(packageInfo2);
         var packageInfo3 = makePackageInfo(PACKAGE_NAME_3);
         packages.add(packageInfo3);
-        doReturn(new ParceledListSlice<>(packages)).when(mIPackageManager).getInstalledPackages(
-                anyLong(), anyInt());
+        doReturn(packages).when(mPackageManager).getInstalledPackagesAsUser(
+                any(), anyInt());
 
         var resultPackages =
                 mBackgroundInstallControlService.getBackgroundInstalledPackages(0L, USER_ID_1);
@@ -808,8 +806,8 @@ public final class BackgroundInstallControlServiceTest {
         }
 
         @Override
-        public IPackageManager getIPackageManager() {
-            return mIPackageManager;
+        public PackageManager getPackageManager() {
+            return mPackageManager;
         }
 
         @Override
