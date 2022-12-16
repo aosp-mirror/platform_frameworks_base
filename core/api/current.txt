@@ -363,6 +363,7 @@ package android {
     field public static final int allowGameFpsOverride = 16844378; // 0x101065a
     field public static final int allowNativeHeapPointerTagging = 16844306; // 0x1010612
     field public static final int allowParallelSyncs = 16843570; // 0x1010332
+    field public static final int allowSharedIsolatedProcess;
     field public static final int allowSingleTap = 16843353; // 0x1010259
     field public static final int allowTaskReparenting = 16843268; // 0x1010204
     field public static final int allowUndo = 16843999; // 0x10104df
@@ -12521,6 +12522,7 @@ package android.content.pm {
     method public void dump(android.util.Printer, String);
     method public int getForegroundServiceType();
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.ServiceInfo> CREATOR;
+    field public static final int FLAG_ALLOW_SHARED_ISOLATED_PROCESS = 16; // 0x10
     field public static final int FLAG_EXTERNAL_SERVICE = 4; // 0x4
     field public static final int FLAG_ISOLATED_PROCESS = 2; // 0x2
     field public static final int FLAG_SINGLE_USER = 1073741824; // 0x40000000

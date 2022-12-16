@@ -100,6 +100,8 @@ public class ParsedServiceUtils {
                             R.styleable.AndroidManifestService_externalService, sa)
                             | flag(ServiceInfo.FLAG_USE_APP_ZYGOTE,
                             R.styleable.AndroidManifestService_useAppZygote, sa)
+                            | flag(ServiceInfo.FLAG_ALLOW_SHARED_ISOLATED_PROCESS,
+                            R.styleable.AndroidManifestService_allowSharedIsolatedProcess, sa)
                             | flag(ServiceInfo.FLAG_SINGLE_USER,
                             R.styleable.AndroidManifestService_singleUser, sa)));
 

@@ -3935,6 +3935,11 @@ public final class ActiveServices {
                         throw new SecurityException("BIND_SHARED_ISOLATED_PROCESS failed, "
                                 + className + " is not an isolatedProcess");
                     }
+                    if ((sInfo.flags & ServiceInfo.FLAG_ALLOW_SHARED_ISOLATED_PROCESS) == 0) {
+                        throw new SecurityException("BIND_SHARED_ISOLATED_PROCESS failed, "
+                                + className + " has not set the allowSharedIsolatedProcess "
+                                + " attribute.");
+                    }
                     if (instanceName == null) {
                         throw new IllegalArgumentException("instanceName must be provided for "
                                 + "binding a service into a shared isolated process.");
