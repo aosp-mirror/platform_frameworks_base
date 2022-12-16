@@ -18,6 +18,8 @@
 
     <application>
         <uses-library android:name="android.test.runner" />
+        <activity android:name="android.perftests.utils.PerfTestActivity"
+                android:exported="true" />
         <activity android:name="android.view.contentcapture.CustomTestActivity"
                 android:exported="true">
         </activity>

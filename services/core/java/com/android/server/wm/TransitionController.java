@@ -561,6 +561,11 @@ class TransitionController {
         mCollectingTransition.setOverrideAnimation(options, startCallback, finishCallback);
     }
 
+    void setNoAnimation(WindowContainer wc) {
+        if (mCollectingTransition == null) return;
+        mCollectingTransition.setNoAnimation(wc);
+    }
+
     /** @see Transition#setReady */
     void setReady(WindowContainer wc, boolean ready) {
         if (mCollectingTransition == null) return;

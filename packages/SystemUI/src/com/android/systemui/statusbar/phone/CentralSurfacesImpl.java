@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.StatusBarManager.DISABLE_HOME;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowVisibleState;
@@ -69,6 +70,7 @@ import android.graphics.Point;
 import android.hardware.devicestate.DeviceStateManager;
 import android.metrics.LogMaker;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -157,6 +159,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.ui.binder.LightRevealScrimViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
 import com.android.systemui.navigationbar.NavigationBarController;
@@ -465,6 +468,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final ShadeController mShadeController;
     private final InitController mInitController;
     private final Lazy<CameraLauncher> mCameraLauncherLazy;
+    private final AlternateBouncerInteractor mAlternateBouncerInteractor;
 
     private final PluginDependencyProvider mPluginDependencyProvider;
     private final KeyguardDismissUtil mKeyguardDismissUtil;
@@ -743,7 +747,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             WiredChargingRippleController wiredChargingRippleController,
             IDreamManager dreamManager,
             Lazy<CameraLauncher> cameraLauncherLazy,
-            Lazy<LightRevealScrimViewModel> lightRevealScrimViewModelLazy) {
+            Lazy<LightRevealScrimViewModel> lightRevealScrimViewModelLazy,
+            AlternateBouncerInteractor alternateBouncerInteractor
+    ) {
         mContext = context;
         mNotificationsController = notificationsController;
         mFragmentService = fragmentService;
@@ -821,6 +827,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mWallpaperManager = wallpaperManager;
         mJankMonitor = jankMonitor;
         mCameraLauncherLazy = cameraLauncherLazy;
+        mAlternateBouncerInteractor = alternateBouncerInteractor;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -1030,8 +1037,21 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // set the initial view visibility
         int disabledFlags1 = result.mDisabledFlags1;
         int disabledFlags2 = result.mDisabledFlags2;
-        mInitController.addPostInitTask(
-                () -> setUpDisableFlags(disabledFlags1, disabledFlags2));
+        mInitController.addPostInitTask(() -> {
+            setUpDisableFlags(disabledFlags1, disabledFlags2);
+            try {
+                // NOTE(b/262059863): Force-update the disable flags after applying the flags
+                // returned from registerStatusBar(). The result's disabled flags may be stale
+                // if StatusBarManager's disabled flags are updated between registering the bar and
+                // this handling this post-init task. We force an update in this case, and use a new
+                // token to not conflict with any other disabled flags already requested by SysUI
+                Binder token = new Binder();
+                mBarService.disable(DISABLE_HOME, token, mContext.getPackageName());
+                mBarService.disable(0, token, mContext.getPackageName());
+            } catch (RemoteException ex) {
+                ex.rethrowFromSystemServer();
+            }
+        });
 
         mFalsingManager.addFalsingBeliefListener(mFalsingBeliefListener);
 
@@ -3222,8 +3242,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private void showBouncerOrLockScreenIfKeyguard() {
         // If the keyguard is animating away, we aren't really the keyguard anymore and should not
         // show the bouncer/lockscreen.
-        if (!mKeyguardViewMediator.isHiding()
-                && !mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()) {
+        if (!mKeyguardViewMediator.isHiding() && !mKeyguardUpdateMonitor.isKeyguardGoingAway()) {
             if (mState == StatusBarState.SHADE_LOCKED) {
                 // shade is showing while locked on the keyguard, so go back to showing the
                 // lock screen where users can use the UDFPS affordance to enter the device
@@ -3702,7 +3721,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         boolean launchingAffordanceWithPreview = mLaunchingAffordance;
         mScrimController.setLaunchingAffordanceWithPreview(launchingAffordanceWithPreview);
 
-        if (mStatusBarKeyguardViewManager.isShowingAlternateBouncer()) {
+        if (mAlternateBouncerInteractor.isVisibleState()) {
             if (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
                     || mTransitionToFullShadeProgress > 0f) {
                 mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED_SHADE);

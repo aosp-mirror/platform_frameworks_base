@@ -431,12 +431,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (container != null) {
             // Cleanup if the TaskFragment vanished is not requested by the organizer.
             removeContainer(container);
-            // Make sure the top container is updated.
-            final TaskFragmentContainer newTopContainer = getTopActiveContainer(
-                    container.getTaskId());
-            if (newTopContainer != null) {
-                updateContainer(wct, newTopContainer);
-            }
+            // Make sure the containers in the Task are up-to-date.
+            updateContainersInTaskIfVisible(wct, container.getTaskId());
         }
         cleanupTaskFragment(taskFragmentInfo.getFragmentToken());
     }
@@ -474,6 +470,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return;
         }
         updateContainersInTask(wct, taskContainer);
+    }
+
+    void updateContainersInTaskIfVisible(@NonNull WindowContainerTransaction wct, int taskId) {
+        final TaskContainer taskContainer = getTaskContainer(taskId);
+        if (taskContainer != null && taskContainer.isVisible()) {
+            updateContainersInTask(wct, taskContainer);
+        }
     }
 
     private void updateContainersInTask(@NonNull WindowContainerTransaction wct,
@@ -1328,9 +1331,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     void removeContainer(@NonNull TaskFragmentContainer container) {
         // Remove all split containers that included this one
         final TaskContainer taskContainer = container.getTaskContainer();
-        if (taskContainer == null) {
-            return;
-        }
         taskContainer.mContainers.remove(container);
         // Marked as a pending removal which will be removed after it is actually removed on the
         // server side (#onTaskFragmentVanished).
@@ -1523,14 +1523,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
 
         final TaskFragmentContainer container = getContainerWithActivity(activity);
-        // Don't launch placeholder if the container is occluded.
-        if (container != null && container != getTopActiveContainer(container.getTaskId())) {
-            return false;
-        }
-
-        final SplitContainer splitContainer = getActiveSplitForContainer(container);
-        if (splitContainer != null && container.equals(splitContainer.getPrimaryContainer())) {
-            // Don't launch placeholder in primary split container
+        if (container != null && !allowLaunchPlaceholder(container)) {
+            // We don't allow activity in this TaskFragment to launch placeholder.
             return false;
         }
 
@@ -1555,6 +1549,32 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         startActivityToSide(wct, activity, placeholderRule.getPlaceholderIntent(), options,
                 placeholderRule, splitAttributes, null /* failureCallback */,
                 true /* isPlaceholder */);
+        return true;
+    }
+
+    /** Whether or not to allow activity in this container to launch placeholder. */
+    @GuardedBy("mLock")
+    private boolean allowLaunchPlaceholder(@NonNull TaskFragmentContainer container) {
+        final TaskFragmentContainer topContainer = getTopActiveContainer(container.getTaskId());
+        if (container != topContainer) {
+            // The container is not the top most.
+            if (!container.isVisible()) {
+                // In case the container is visible (the one on top may be transparent), we may
+                // still want to launch placeholder even if it is not the top most.
+                return false;
+            }
+            if (topContainer.isWaitingActivityAppear()) {
+                // When the top container appeared info is not sent by the server yet, the visible
+                // check above may not be reliable.
+                return false;
+            }
+        }
+
+        final SplitContainer splitContainer = getActiveSplitForContainer(container);
+        if (splitContainer != null && container.equals(splitContainer.getPrimaryContainer())) {
+            // Don't launch placeholder for primary split container.
+            return false;
+        }
         return true;
     }
 

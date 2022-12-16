@@ -37,7 +37,6 @@ import com.android.server.permission.access.SystemState
 import com.android.server.permission.access.UidUri
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.andInv
-import com.android.server.permission.access.util.hasAnyBit
 import com.android.server.permission.access.util.hasBits
 import com.android.server.pm.KnownPackages
 import com.android.server.pm.parsing.PackageInfoUtils
@@ -474,10 +473,10 @@ class UidPermissionPolicy : SchemePolicy() {
             // should only affect the other static flags, but not dynamic flags like development or
             // role. This may be useful in the case of an updated system app.
             if (permission.isDevelopment) {
-                newFlags = newFlags or (oldFlags and PermissionFlags.OTHER_GRANTED)
+                newFlags = newFlags or (oldFlags and PermissionFlags.RUNTIME_GRANTED)
             }
             if (permission.isRole) {
-                newFlags = newFlags or (oldFlags and PermissionFlags.ROLE_GRANTED)
+                newFlags = newFlags or (oldFlags and PermissionFlags.ROLE)
             }
             setPermissionFlags(appId, userId, permissionName, newFlags)
         } else if (permission.isRuntime) {
@@ -519,8 +518,8 @@ class UidPermissionPolicy : SchemePolicy() {
                     "Unknown source permission $sourcePermissionName in split permissions"
                 }
                 val sourceFlags = getPermissionFlags(appId, userId, sourcePermissionName)
-                val isSourceGranted = sourceFlags.hasAnyBit(PermissionFlags.MASK_GRANTED)
-                val isNewGranted = newFlags.hasAnyBit(PermissionFlags.MASK_GRANTED)
+                val isSourceGranted = PermissionFlags.isPermissionGranted(sourceFlags)
+                val isNewGranted = PermissionFlags.isPermissionGranted(newFlags)
                 val isGrantingNewFromRevoke = isSourceGranted && !isNewGranted
                 if (isSourceGranted == isNewGranted || isGrantingNewFromRevoke) {
                     if (isGrantingNewFromRevoke) {
@@ -528,7 +527,7 @@ class UidPermissionPolicy : SchemePolicy() {
                     }
                     newFlags = newFlags or (sourceFlags and PermissionFlags.MASK_RUNTIME)
                     if (!sourcePermission.isRuntime && isSourceGranted) {
-                        newFlags = newFlags or PermissionFlags.OTHER_GRANTED
+                        newFlags = newFlags or PermissionFlags.IMPLICIT_GRANTED
                     }
                 }
             }
@@ -836,6 +835,9 @@ class UidPermissionPolicy : SchemePolicy() {
     fun GetStateScope.getPermission(permissionName: String): Permission? =
         state.systemState.permissions[permissionName]
 
+    fun GetStateScope.getUidPermissionFlags(appId: Int, userId: Int): IndexedMap<String, Int>? =
+        state.userStates[userId]?.uidPermissionFlags?.get(appId)
+
     fun GetStateScope.getPermissionFlags(
         appId: Int,
         userId: Int,
@@ -854,7 +856,8 @@ class UidPermissionPolicy : SchemePolicy() {
         appId: Int,
         userId: Int,
         permissionName: String
-    ): Int = state.userStates[userId].uidPermissionFlags[appId].getWithDefault(permissionName, 0)
+    ): Int =
+        state.userStates[userId]?.uidPermissionFlags?.get(appId).getWithDefault(permissionName, 0)
 
     fun MutateStateScope.setPermissionFlags(
         appId: Int,
@@ -875,7 +878,7 @@ class UidPermissionPolicy : SchemePolicy() {
         val uidPermissionFlags = userState.uidPermissionFlags
         var permissionFlags = uidPermissionFlags[appId]
         val oldFlags = permissionFlags.getWithDefault(permissionName, 0)
-        val newFlags = (oldFlags andInv flagMask) or flagValues
+        val newFlags = (oldFlags andInv flagMask) or (flagValues and flagMask)
         if (oldFlags == newFlags) {
             return false
         }

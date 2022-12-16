@@ -112,6 +112,11 @@ class OpenAppFromLockNotificationWarm(flicker: FlickerTest) : OpenAppFromNotific
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarWindowIsVisibleAtStartAndEnd() = super.navBarWindowIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
     override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */

@@ -307,7 +307,8 @@ public final class JobServiceContext implements ServiceConnection {
             mParams = new JobParameters(mRunningCallback, job.getJobId(), ji.getExtras(),
                     ji.getTransientExtras(), ji.getClipData(), ji.getClipGrantFlags(),
                     isDeadlineExpired, job.shouldTreatAsExpeditedJob(),
-                    triggeredUris, triggeredAuthorities, job.network);
+                    job.shouldTreatAsUserInitiated(), triggeredUris, triggeredAuthorities,
+                    job.network);
             mExecutionStartTimeElapsed = sElapsedRealtimeClock.millis();
             mMinExecutionGuaranteeMillis = mService.getMinJobExecutionGuaranteeMs(job);
             mMaxExecutionTimeMillis =

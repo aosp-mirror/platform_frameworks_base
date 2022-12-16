@@ -154,12 +154,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     void cleanupContainer(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer container, boolean shouldFinishDependent) {
         container.finish(shouldFinishDependent, this, wct, mController);
-
-        final TaskFragmentContainer newTopContainer = mController.getTopActiveContainer(
-                container.getTaskId());
-        if (newTopContainer != null) {
-            mController.updateContainer(wct, newTopContainer);
-        }
+        // Make sure the containers in the Task is up-to-date.
+        mController.updateContainersInTaskIfVisible(wct, container.getTaskId());
     }
 
     /**

@@ -188,7 +188,7 @@ public final class FontManagerService extends IFontManager.Stub {
 
         @Override
         public void setUpFsverity(String filePath) throws IOException {
-            VerityUtils.setUpFsverity(filePath, /* signature */ (byte[]) null);
+            VerityUtils.setUpFsverity(filePath);
         }
 
         @Override

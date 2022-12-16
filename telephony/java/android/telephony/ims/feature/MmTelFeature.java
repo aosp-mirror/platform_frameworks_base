@@ -590,6 +590,17 @@ public class MmTelFeature extends ImsFeature {
         public void onAudioModeIsVoipChanged(int imsAudioHandler) {
 
         }
+
+        /**
+         * Called when the IMS triggers EPS fallback procedure.
+         *
+         * @param reason specifies the reason that causes EPS fallback.
+         * @hide
+         */
+        @Override
+        public void onTriggerEpsFallback(@EpsFallbackReason int reason) {
+
+        }
     }
 
     /**
@@ -661,6 +672,48 @@ public class MmTelFeature extends ImsFeature {
     */
     @SystemApi
     public static final int AUDIO_HANDLER_BASEBAND = 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+        prefix = "EPS_FALLBACK_REASON_",
+        value = {
+            EPS_FALLBACK_REASON_INVALID,
+            EPS_FALLBACK_REASON_NO_NETWORK_TRIGGER,
+            EPS_FALLBACK_REASON_NO_NETWORK_RESPONSE,
+        })
+    public @interface EpsFallbackReason {}
+
+    /**
+     * Default value. Internal use only.
+     * This value should not be used to trigger EPS fallback.
+     * @hide
+     */
+    public static final int EPS_FALLBACK_REASON_INVALID = -1;
+
+    /**
+     * If the network only supports the EPS fallback in 5G NR SA for voice calling and the EPS
+     * Fallback procedure by the network during the call setup is not triggered, UE initiated
+     * fallback will be triggered with this reason. The modem shall locally release the 5G NR
+     * SA RRC connection and acquire the LTE network and perform a tracking area update
+     * procedure. After the EPS fallback procedure is completed, the call setup for voice will
+     * be established if there is no problem.
+     *
+     * @hide
+     */
+    public static final int EPS_FALLBACK_REASON_NO_NETWORK_TRIGGER = 1;
+
+    /**
+     * If the UE doesn't receive any response for SIP INVITE within a certain timeout in 5G NR
+     * SA for MO voice calling, the device determines that voice call is not available in 5G and
+     * terminates all active SIP dialogs and SIP requests and enters IMS non-registered state.
+     * In that case, UE initiated fallback will be triggered with this reason. The modem shall
+     * reset modem's data buffer of IMS PDU to prevent the ghost call. After the EPS fallback
+     * procedure is completed, VoLTE call could be tried if there is no problem.
+     *
+     * @hide
+     */
+    public static final int EPS_FALLBACK_REASON_NO_NETWORK_RESPONSE = 2;
 
     private IImsMmTelListener mListener;
 
@@ -824,6 +877,24 @@ public class MmTelFeature extends ImsFeature {
         }
         try {
             listener.onAudioModeIsVoipChanged(imsAudioHandler);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Triggers the EPS fallback procedure.
+     *
+     * @param reason specifies the reason that causes EPS fallback.
+     * @hide
+     */
+    public final void triggerEpsFallback(@EpsFallbackReason int reason) {
+        IImsMmTelListener listener = getListener();
+        if (listener == null) {
+            throw new IllegalStateException("Session is not available.");
+        }
+        try {
+            listener.onTriggerEpsFallback(reason);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }

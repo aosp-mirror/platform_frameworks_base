@@ -12185,6 +12185,7 @@ package android.content.pm {
     field public static final String FEATURE_RAM_NORMAL = "android.hardware.ram.normal";
     field public static final String FEATURE_SCREEN_LANDSCAPE = "android.hardware.screen.landscape";
     field public static final String FEATURE_SCREEN_PORTRAIT = "android.hardware.screen.portrait";
+    field public static final String FEATURE_SEAMLESS_REFRESH_RATE_SWITCHING = "android.software.seamless_refresh_rate_switching";
     field public static final String FEATURE_SECURELY_REMOVES_USERS = "android.software.securely_removes_users";
     field public static final String FEATURE_SECURE_LOCK_SCREEN = "android.software.secure_lock_screen";
     field public static final String FEATURE_SECURITY_MODEL_COMPATIBLE = "android.hardware.security.model.compatible";
@@ -20923,6 +20924,7 @@ package android.media {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int AUDIO_ENCAPSULATION_TYPE_IEC61937 = 1; // 0x1
     field public static final int AUDIO_ENCAPSULATION_TYPE_NONE = 0; // 0x0
+    field public static final int AUDIO_ENCAPSULATION_TYPE_PCM = 2; // 0x2
     field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioProfile> CREATOR;
   }
 
@@ -24063,7 +24065,6 @@ package android.media {
   }
 
   public static final class RouteListingPreference.Item implements android.os.Parcelable {
-    ctor public RouteListingPreference.Item(@NonNull String, int, int);
     method public int describeContents();
     method public int getDisableReason();
     method public int getFlags();
@@ -24076,6 +24077,13 @@ package android.media {
     field public static final int DISABLE_REASON_SUBSCRIPTION_REQUIRED = 1; // 0x1
     field public static final int FLAG_ONGOING_SESSION = 1; // 0x1
     field public static final int FLAG_SUGGESTED_ROUTE = 2; // 0x2
+  }
+
+  public static final class RouteListingPreference.Item.Builder {
+    ctor public RouteListingPreference.Item.Builder(@NonNull String);
+    method @NonNull public android.media.RouteListingPreference.Item build();
+    method @NonNull public android.media.RouteListingPreference.Item.Builder setDisableReason(int);
+    method @NonNull public android.media.RouteListingPreference.Item.Builder setFlags(int);
   }
 
   public final class RoutingSessionInfo implements android.os.Parcelable {
@@ -25464,11 +25472,21 @@ package android.media.projection {
 
   public abstract static class MediaProjection.Callback {
     ctor public MediaProjection.Callback();
+    method public void onCapturedContentResize(int, int);
     method public void onStop();
   }
 
+  public final class MediaProjectionConfig implements android.os.Parcelable {
+    method @NonNull public static android.media.projection.MediaProjectionConfig createConfigForDisplay(@IntRange(from=android.view.Display.DEFAULT_DISPLAY, to=android.view.Display.DEFAULT_DISPLAY) int);
+    method @NonNull public static android.media.projection.MediaProjectionConfig createConfigForUserChoice();
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.projection.MediaProjectionConfig> CREATOR;
+  }
+
   public final class MediaProjectionManager {
-    method public android.content.Intent createScreenCaptureIntent();
+    method @NonNull public android.content.Intent createScreenCaptureIntent();
+    method @NonNull public android.content.Intent createScreenCaptureIntent(@NonNull android.media.projection.MediaProjectionConfig);
     method public android.media.projection.MediaProjection getMediaProjection(int, @NonNull android.content.Intent);
   }
 
@@ -32974,9 +32992,6 @@ package android.os {
     method public static android.os.VibrationEffect createWaveform(long[], int[], int);
     method public int describeContents();
     method @NonNull public static android.os.VibrationEffect.Composition startComposition();
-    method @NonNull public static android.os.VibrationEffect.WaveformBuilder startWaveform();
-    method @NonNull public static android.os.VibrationEffect.WaveformBuilder startWaveform(@NonNull android.os.VibrationEffect.VibrationParameter);
-    method @NonNull public static android.os.VibrationEffect.WaveformBuilder startWaveform(@NonNull android.os.VibrationEffect.VibrationParameter, @NonNull android.os.VibrationEffect.VibrationParameter);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect> CREATOR;
     field public static final int DEFAULT_AMPLITUDE = -1; // 0xffffffff
     field public static final int EFFECT_CLICK = 0; // 0x0
@@ -32986,13 +33001,10 @@ package android.os {
   }
 
   public static final class VibrationEffect.Composition {
-    method @NonNull public android.os.VibrationEffect.Composition addEffect(@NonNull android.os.VibrationEffect);
-    method @NonNull public android.os.VibrationEffect.Composition addOffDuration(@NonNull java.time.Duration);
     method @NonNull public android.os.VibrationEffect.Composition addPrimitive(int);
     method @NonNull public android.os.VibrationEffect.Composition addPrimitive(int, @FloatRange(from=0.0f, to=1.0f) float);
     method @NonNull public android.os.VibrationEffect.Composition addPrimitive(int, @FloatRange(from=0.0f, to=1.0f) float, @IntRange(from=0) int);
     method @NonNull public android.os.VibrationEffect compose();
-    method @NonNull public android.os.VibrationEffect.Composition repeatEffectIndefinitely(@NonNull android.os.VibrationEffect);
     field public static final int PRIMITIVE_CLICK = 1; // 0x1
     field public static final int PRIMITIVE_LOW_TICK = 8; // 0x8
     field public static final int PRIMITIVE_QUICK_FALL = 6; // 0x6
@@ -33003,34 +33015,17 @@ package android.os {
     field public static final int PRIMITIVE_TICK = 7; // 0x7
   }
 
-  public static final class VibrationEffect.Composition.UnreachableAfterRepeatingIndefinitelyException extends java.lang.IllegalStateException {
-  }
-
-  public static class VibrationEffect.VibrationParameter {
-    method @NonNull public static android.os.VibrationEffect.VibrationParameter targetAmplitude(@FloatRange(from=0, to=1) float);
-    method @NonNull public static android.os.VibrationEffect.VibrationParameter targetFrequency(@FloatRange(from=1) float);
-  }
-
-  public static final class VibrationEffect.WaveformBuilder {
-    method @NonNull public android.os.VibrationEffect.WaveformBuilder addSustain(@NonNull java.time.Duration);
-    method @NonNull public android.os.VibrationEffect.WaveformBuilder addTransition(@NonNull java.time.Duration, @NonNull android.os.VibrationEffect.VibrationParameter);
-    method @NonNull public android.os.VibrationEffect.WaveformBuilder addTransition(@NonNull java.time.Duration, @NonNull android.os.VibrationEffect.VibrationParameter, @NonNull android.os.VibrationEffect.VibrationParameter);
-    method @NonNull public android.os.VibrationEffect build();
-  }
-
   public abstract class Vibrator {
     method public final int areAllEffectsSupported(@NonNull int...);
     method public final boolean areAllPrimitivesSupported(@NonNull int...);
     method @NonNull public int[] areEffectsSupported(@NonNull int...);
     method @NonNull public boolean[] arePrimitivesSupported(@NonNull int...);
     method @RequiresPermission(android.Manifest.permission.VIBRATE) public abstract void cancel();
-    method @Nullable public android.os.vibrator.VibratorFrequencyProfile getFrequencyProfile();
     method public int getId();
     method @NonNull public int[] getPrimitiveDurations(@NonNull int...);
     method public float getQFactor();
     method public float getResonantFrequency();
     method public abstract boolean hasAmplitudeControl();
-    method public boolean hasFrequencyControl();
     method public abstract boolean hasVibrator();
     method @Deprecated @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(long);
     method @Deprecated @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(long, android.media.AudioAttributes);
@@ -33357,17 +33352,6 @@ package android.os.strictmode {
   }
 
   public final class WebViewMethodCalledOnWrongThreadViolation extends android.os.strictmode.Violation {
-  }
-
-}
-
-package android.os.vibrator {
-
-  public final class VibratorFrequencyProfile {
-    method public float getMaxAmplitudeMeasurementInterval();
-    method @FloatRange(from=0, to=1) @NonNull public float[] getMaxAmplitudeMeasurements();
-    method public float getMaxFrequency();
-    method public float getMinFrequency();
   }
 
 }
@@ -35136,6 +35120,7 @@ package android.provider {
     field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/phone_v2";
     field public static final android.net.Uri CONTENT_URI;
     field public static final android.net.Uri ENTERPRISE_CONTENT_FILTER_URI;
+    field @NonNull public static final android.net.Uri ENTERPRISE_CONTENT_URI;
     field public static final String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
     field public static final String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
     field public static final String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
@@ -35316,6 +35301,7 @@ package android.provider {
     field public static final String CONTENT_VCARD_TYPE = "text/x-vcard";
     field public static final android.net.Uri CONTENT_VCARD_URI;
     field public static final android.net.Uri ENTERPRISE_CONTENT_FILTER_URI;
+    field @NonNull public static final android.net.Uri ENTERPRISE_CONTENT_URI;
     field public static final String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
     field public static final String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
     field public static final String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";

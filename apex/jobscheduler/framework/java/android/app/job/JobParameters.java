@@ -285,6 +285,7 @@ public class JobParameters implements Parcelable {
     private final IBinder callback;
     private final boolean overrideDeadlineExpired;
     private final boolean mIsExpedited;
+    private final boolean mIsUserInitiated;
     private final Uri[] mTriggeredContentUris;
     private final String[] mTriggeredContentAuthorities;
     private final Network network;
@@ -296,7 +297,8 @@ public class JobParameters implements Parcelable {
     /** @hide */
     public JobParameters(IBinder callback, int jobId, PersistableBundle extras,
             Bundle transientExtras, ClipData clipData, int clipGrantFlags,
-            boolean overrideDeadlineExpired, boolean isExpedited, Uri[] triggeredContentUris,
+            boolean overrideDeadlineExpired, boolean isExpedited,
+            boolean isUserInitiated, Uri[] triggeredContentUris,
             String[] triggeredContentAuthorities, Network network) {
         this.jobId = jobId;
         this.extras = extras;
@@ -306,6 +308,7 @@ public class JobParameters implements Parcelable {
         this.callback = callback;
         this.overrideDeadlineExpired = overrideDeadlineExpired;
         this.mIsExpedited = isExpedited;
+        this.mIsUserInitiated = isUserInitiated;
         this.mTriggeredContentUris = triggeredContentUris;
         this.mTriggeredContentAuthorities = triggeredContentAuthorities;
         this.network = network;
@@ -389,6 +392,21 @@ public class JobParameters implements Parcelable {
      */
     public boolean isExpeditedJob() {
         return mIsExpedited;
+    }
+
+    /**
+     * @return Whether this job is running as a user-initiated job or not. A job is guaranteed to
+     * have all user-initiated job guarantees for the duration of the job execution if this returns
+     * {@code true}. This will return {@code false} if the job wasn't requested to run as a
+     * user-initiated job, or if it was requested to run as a user-initiated job but the app didn't
+     * meet any of the requirements at the time of execution, such as having the
+     * {@link android.Manifest.permission#RUN_LONG_JOBS} permission.
+     *
+     * @see JobInfo.Builder#setUserInitiated(boolean)
+     * @hide
+     */
+    public boolean isUserInitiatedJob() {
+        return mIsUserInitiated;
     }
 
     /**
@@ -535,6 +553,7 @@ public class JobParameters implements Parcelable {
         callback = in.readStrongBinder();
         overrideDeadlineExpired = in.readInt() == 1;
         mIsExpedited = in.readBoolean();
+        mIsUserInitiated = in.readBoolean();
         mTriggeredContentUris = in.createTypedArray(Uri.CREATOR);
         mTriggeredContentAuthorities = in.createStringArray();
         if (in.readInt() != 0) {
@@ -575,6 +594,7 @@ public class JobParameters implements Parcelable {
         dest.writeStrongBinder(callback);
         dest.writeInt(overrideDeadlineExpired ? 1 : 0);
         dest.writeBoolean(mIsExpedited);
+        dest.writeBoolean(mIsUserInitiated);
         dest.writeTypedArray(mTriggeredContentUris, flags);
         dest.writeStringArray(mTriggeredContentAuthorities);
         if (network != null) {

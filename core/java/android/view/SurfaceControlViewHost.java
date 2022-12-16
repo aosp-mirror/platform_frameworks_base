@@ -404,14 +404,6 @@ public class SurfaceControlViewHost {
     }
 
     /**
-     * @hide
-     */
-    @TestApi
-    public void relayout(WindowManager.LayoutParams attrs) {
-        relayout(attrs, SurfaceControl.Transaction::apply);
-    }
-
-    /**
      * Forces relayout and draw and allows to set a custom callback when it is finished
      * @hide
      */
@@ -420,6 +412,14 @@ public class SurfaceControlViewHost {
         mViewRoot.setLayoutParams(attrs, false);
         mViewRoot.setReportNextDraw(true /* syncBuffer */, "scvh_relayout");
         mWm.setCompletionCallback(mViewRoot.mWindow.asBinder(), callback);
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public void relayout(WindowManager.LayoutParams attrs) {
+        mViewRoot.setLayoutParams(attrs, false);
     }
 
     /**

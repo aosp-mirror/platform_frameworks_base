@@ -776,15 +776,11 @@
     <integer name="complicationFadeOutDelayMs">200</integer>
 
     <!-- Duration in milliseconds of the dream in un-blur animation. -->
-    <integer name="config_dreamOverlayInBlurDurationMs">249</integer>
-    <!-- Delay in milliseconds of the dream in un-blur animation. -->
-    <integer name="config_dreamOverlayInBlurDelayMs">133</integer>
+    <integer name="config_dreamOverlayInBlurDurationMs">250</integer>
     <!-- Duration in milliseconds of the dream in complications fade-in animation. -->
-    <integer name="config_dreamOverlayInComplicationsDurationMs">282</integer>
-    <!-- Delay in milliseconds of the dream in top complications fade-in animation. -->
-    <integer name="config_dreamOverlayInTopComplicationsDelayMs">216</integer>
-    <!-- Delay in milliseconds of the dream in bottom complications fade-in animation. -->
-    <integer name="config_dreamOverlayInBottomComplicationsDelayMs">299</integer>
+    <integer name="config_dreamOverlayInComplicationsDurationMs">250</integer>
+    <!-- Duration in milliseconds of the y-translation animation when entering a dream -->
+    <integer name="config_dreamOverlayInTranslationYDurationMs">917</integer>
 
     <!-- Icons that don't show in a collapsed non-keyguard statusbar -->
     <string-array name="config_collapsed_statusbar_icon_blocklist" translatable="false">

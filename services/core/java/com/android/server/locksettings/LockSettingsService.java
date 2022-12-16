@@ -240,8 +240,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     protected final UserManager mUserManager;
     private final IStorageManager mStorageManager;
     private final IActivityManager mActivityManager;
-    @VisibleForTesting
-    protected final SyntheticPasswordManager mSpManager;
+    private final SyntheticPasswordManager mSpManager;
 
     private final java.security.KeyStore mJavaKeyStore;
     private final RecoverableKeyStoreManager mRecoverableKeyStoreManager;
@@ -946,7 +945,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                     if (!isSyntheticPasswordBasedCredentialLocked(userId)) {
                         Slogf.i(TAG, "Creating locksettings state for user %d now that boot "
                                 + "is complete", userId);
-                        initializeSyntheticPasswordLocked(userId);
+                        initializeSyntheticPassword(userId);
                     }
                 }
             }
@@ -985,7 +984,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         long protectorId = getCurrentLskfBasedProtectorId(userId);
         if (protectorId == SyntheticPasswordManager.NULL_PROTECTOR_ID) {
             Slogf.i(TAG, "Migrating unsecured user %d to SP-based credential", userId);
-            initializeSyntheticPasswordLocked(userId);
+            initializeSyntheticPassword(userId);
         } else {
             Slogf.i(TAG, "Existing unsecured user %d has a synthetic password; re-encrypting CE " +
                     "key with it", userId);
@@ -1652,13 +1651,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         Objects.requireNonNull(savedCredential);
         if (DEBUG) Slog.d(TAG, "setLockCredentialInternal: user=" + userId);
         synchronized (mSpManager) {
-            if (!isSyntheticPasswordBasedCredentialLocked(userId)) {
-                if (!savedCredential.isNone()) {
-                    throw new IllegalStateException("Saved credential given, but user has no SP");
-                }
-                // TODO(b/232452368): this case is only needed by unit tests now; remove it.
-                initializeSyntheticPasswordLocked(userId);
-            } else if (savedCredential.isNone() && isProfileWithUnifiedLock(userId)) {
+            if (savedCredential.isNone() && isProfileWithUnifiedLock(userId)) {
                 // get credential from keystore when profile has unified lock
                 try {
                     //TODO: remove as part of b/80170828
@@ -2322,9 +2315,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 return;
             }
             removeStateForReusedUserIdIfNecessary(userId, userSerialNumber);
-            synchronized (mSpManager) {
-                initializeSyntheticPasswordLocked(userId);
-            }
+            initializeSyntheticPassword(userId);
         }
     }
 
@@ -2650,21 +2641,22 @@ public class LockSettingsService extends ILockSettings.Stub {
      * until the time when Weaver is guaranteed to be available), or when upgrading from Android 13
      * or earlier where users with no LSKF didn't necessarily have an SP.
      */
-    @GuardedBy("mSpManager")
     @VisibleForTesting
-    SyntheticPassword initializeSyntheticPasswordLocked(int userId) {
-        Slog.i(TAG, "Initialize SyntheticPassword for user: " + userId);
-        Preconditions.checkState(getCurrentLskfBasedProtectorId(userId) ==
-                SyntheticPasswordManager.NULL_PROTECTOR_ID,
-                "Cannot reinitialize SP");
+    SyntheticPassword initializeSyntheticPassword(int userId) {
+        synchronized (mSpManager) {
+            Slog.i(TAG, "Initialize SyntheticPassword for user: " + userId);
+            Preconditions.checkState(getCurrentLskfBasedProtectorId(userId) ==
+                    SyntheticPasswordManager.NULL_PROTECTOR_ID,
+                    "Cannot reinitialize SP");
 
-        final SyntheticPassword sp = mSpManager.newSyntheticPassword(userId);
-        final long protectorId = mSpManager.createLskfBasedProtector(getGateKeeperService(),
-                LockscreenCredential.createNone(), sp, userId);
-        setCurrentLskfBasedProtectorId(protectorId, userId);
-        setUserKeyProtection(userId, sp.deriveFileBasedEncryptionKey());
-        onSyntheticPasswordKnown(userId, sp);
-        return sp;
+            final SyntheticPassword sp = mSpManager.newSyntheticPassword(userId);
+            final long protectorId = mSpManager.createLskfBasedProtector(getGateKeeperService(),
+                    LockscreenCredential.createNone(), sp, userId);
+            setCurrentLskfBasedProtectorId(protectorId, userId);
+            setUserKeyProtection(userId, sp.deriveFileBasedEncryptionKey());
+            onSyntheticPasswordKnown(userId, sp);
+            return sp;
+        }
     }
 
     @VisibleForTesting
@@ -2678,13 +2670,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         setLong(CURRENT_LSKF_BASED_PROTECTOR_ID_KEY, newProtectorId, userId);
         setLong(PREV_LSKF_BASED_PROTECTOR_ID_KEY, oldProtectorId, userId);
         setLong(LSKF_LAST_CHANGED_TIME_KEY, System.currentTimeMillis(), userId);
-    }
-
-    @VisibleForTesting
-    boolean isSyntheticPasswordBasedCredential(int userId) {
-        synchronized (mSpManager) {
-            return isSyntheticPasswordBasedCredentialLocked(userId);
-        }
     }
 
     private boolean isSyntheticPasswordBasedCredentialLocked(int userId) {
@@ -2925,19 +2910,14 @@ public class LockSettingsService extends ILockSettings.Stub {
             @NonNull EscrowTokenStateChangeCallback callback) {
         if (DEBUG) Slog.d(TAG, "addEscrowToken: user=" + userId + ", type=" + type);
         synchronized (mSpManager) {
-            // If the user has no LSKF, then the token can be activated immediately, after creating
-            // the user's SP if it doesn't already exist.  Otherwise, the token can't be activated
-            // until the SP is unlocked by another protector (normally the LSKF-based one).
+            // If the user has no LSKF, then the token can be activated immediately.  Otherwise, the
+            // token can't be activated until the SP is unlocked by another protector (normally the
+            // LSKF-based one).
             SyntheticPassword sp = null;
             if (!isUserSecure(userId)) {
                 long protectorId = getCurrentLskfBasedProtectorId(userId);
-                if (protectorId == SyntheticPasswordManager.NULL_PROTECTOR_ID) {
-                    // TODO(b/232452368): this case is only needed by unit tests now; remove it.
-                    sp = initializeSyntheticPasswordLocked(userId);
-                } else {
-                    sp = mSpManager.unlockLskfBasedProtector(getGateKeeperService(), protectorId,
-                            LockscreenCredential.createNone(), userId, null).syntheticPassword;
-                }
+                sp = mSpManager.unlockLskfBasedProtector(getGateKeeperService(), protectorId,
+                        LockscreenCredential.createNone(), userId, null).syntheticPassword;
             }
             disableEscrowTokenOnNonManagedDevicesIfNeeded(userId);
             if (!mSpManager.hasEscrowData(userId)) {

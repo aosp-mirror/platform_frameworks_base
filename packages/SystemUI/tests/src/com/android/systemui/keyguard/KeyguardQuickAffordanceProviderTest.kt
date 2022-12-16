@@ -20,7 +20,13 @@ package com.android.systemui.keyguard
 import android.content.ContentValues
 import android.content.pm.PackageManager
 import android.content.pm.ProviderInfo
+import android.os.Bundle
+import android.os.Handler
+import android.os.IBinder
 import android.os.UserHandle
+import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
+import android.view.SurfaceControlViewHost
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SystemUIAppComponentFactoryBase
@@ -36,6 +42,9 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
+import com.android.systemui.keyguard.ui.preview.KeyguardPreviewRenderer
+import com.android.systemui.keyguard.ui.preview.KeyguardPreviewRendererFactory
+import com.android.systemui.keyguard.ui.preview.KeyguardRemotePreviewManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
@@ -43,40 +52,53 @@ import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordance
 import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderContract as Contract
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.FakeSharedPreferences
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidTestingRunner::class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
 
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var previewRendererFactory: KeyguardPreviewRendererFactory
+    @Mock private lateinit var previewRenderer: KeyguardPreviewRenderer
+    @Mock private lateinit var backgroundHandler: Handler
+    @Mock private lateinit var previewSurfacePackage: SurfaceControlViewHost.SurfacePackage
 
     private lateinit var underTest: KeyguardQuickAffordanceProvider
+
+    private lateinit var testScope: TestScope
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(previewRenderer.surfacePackage).thenReturn(previewSurfacePackage)
+        whenever(previewRendererFactory.create(any())).thenReturn(previewRenderer)
+        whenever(backgroundHandler.looper).thenReturn(TestableLooper.get(this).looper)
 
         underTest = KeyguardQuickAffordanceProvider()
-        val scope = CoroutineScope(IMMEDIATE)
+        val testDispatcher = StandardTestDispatcher()
+        testScope = TestScope(testDispatcher)
         val localUserSelectionManager =
             KeyguardQuickAffordanceLocalUserSelectionManager(
                 context = context,
@@ -96,7 +118,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
             )
         val remoteUserSelectionManager =
             KeyguardQuickAffordanceRemoteUserSelectionManager(
-                scope = scope,
+                scope = testScope.backgroundScope,
                 userTracker = userTracker,
                 clientFactory = FakeKeyguardQuickAffordanceProviderClientFactory(userTracker),
                 userHandle = UserHandle.SYSTEM,
@@ -104,7 +126,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
         val quickAffordanceRepository =
             KeyguardQuickAffordanceRepository(
                 appContext = context,
-                scope = scope,
+                scope = testScope.backgroundScope,
                 localUserSelectionManager = localUserSelectionManager,
                 remoteUserSelectionManager = remoteUserSelectionManager,
                 userTracker = userTracker,
@@ -123,8 +145,8 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                     ),
                 legacySettingSyncer =
                     KeyguardQuickAffordanceLegacySettingSyncer(
-                        scope = scope,
-                        backgroundDispatcher = IMMEDIATE,
+                        scope = testScope.backgroundScope,
+                        backgroundDispatcher = testDispatcher,
                         secureSettings = FakeSettings(),
                         selectionsManager = localUserSelectionManager,
                     ),
@@ -147,6 +169,12 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                         set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
                     },
                 repository = { quickAffordanceRepository },
+            )
+        underTest.previewManager =
+            KeyguardRemotePreviewManager(
+                previewRendererFactory = previewRendererFactory,
+                mainDispatcher = testDispatcher,
+                backgroundHandler = backgroundHandler,
             )
 
         underTest.attachInfoForTesting(
@@ -190,7 +218,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
 
     @Test
     fun `insert and query selection`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
             val affordanceId = AFFORDANCE_2
             val affordanceName = AFFORDANCE_2_NAME
@@ -214,7 +242,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
 
     @Test
     fun `query slots`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             assertThat(querySlots())
                 .isEqualTo(
                     listOf(
@@ -232,7 +260,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
 
     @Test
     fun `query affordances`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             assertThat(queryAffordances())
                 .isEqualTo(
                     listOf(
@@ -252,7 +280,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
 
     @Test
     fun `delete and query selection`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             insertSelection(
                 slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
                 affordanceId = AFFORDANCE_1,
@@ -286,7 +314,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
 
     @Test
     fun `delete all selections in a slot`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             insertSelection(
                 slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
                 affordanceId = AFFORDANCE_1,
@@ -314,6 +342,23 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                         )
                     )
                 )
+        }
+
+    @Test
+    fun preview() =
+        testScope.runTest {
+            val hostToken: IBinder = mock()
+            whenever(previewRenderer.hostToken).thenReturn(hostToken)
+            val extras = Bundle()
+
+            val result = underTest.call("whatever", "anything", extras)
+
+            verify(previewRenderer).render()
+            verify(hostToken).linkToDeath(any(), anyInt())
+            assertThat(result!!).isNotNull()
+            assertThat(result.get(KeyguardRemotePreviewManager.KEY_PREVIEW_SURFACE_PACKAGE))
+                .isEqualTo(previewSurfacePackage)
+            assertThat(result.containsKey(KeyguardRemotePreviewManager.KEY_PREVIEW_CALLBACK))
         }
 
     private fun insertSelection(
@@ -451,7 +496,6 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
     )
 
     companion object {
-        private val IMMEDIATE = Dispatchers.Main.immediate
         private const val AFFORDANCE_1 = "affordance_1"
         private const val AFFORDANCE_2 = "affordance_2"
         private const val AFFORDANCE_1_NAME = "affordance_1_name"

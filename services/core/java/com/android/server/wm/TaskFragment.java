@@ -2540,7 +2540,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 mRemoteToken.toWindowContainerToken(),
                 getConfiguration(),
                 getNonFinishingActivityCount(),
-                isVisibleRequested(),
+                shouldBeVisible(null /* starting */),
                 childActivities,
                 positionInParent,
                 mClearedTaskForReuse,
@@ -2828,6 +2828,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // in fullscreen windowing mode even it doesn't match parent bounds because there will be
         // letterbox around its real content.
         return getWindowingMode() == WINDOWING_MODE_FULLSCREEN || matchParentBounds();
+    }
+
+    @Override
+    protected boolean onChildVisibleRequestedChanged(@Nullable WindowContainer child) {
+        if (!super.onChildVisibleRequestedChanged(child)) return false;
+        // Send the info changed to update the TaskFragment visibility.
+        sendTaskFragmentInfoChanged();
+        return true;
     }
 
     @Nullable

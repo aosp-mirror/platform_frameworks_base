@@ -30,4 +30,6 @@ interface KeyguardRepositoryModule {
 
     @Binds
     fun lightRevealScrimRepository(impl: LightRevealScrimRepositoryImpl): LightRevealScrimRepository
+
+    @Binds fun biometricRepository(impl: BiometricRepositoryImpl): BiometricRepository
 }

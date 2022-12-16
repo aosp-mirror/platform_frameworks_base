@@ -68,7 +68,7 @@ class UdfpsShellTest : SysuiTestCase() {
     fun testSimFingerDown() {
         udfpsShell.simFingerDown()
 
-        verify(udfpsOverlayController, times(2)).debugOnTouch(any(), motionEvent.capture())
+        verify(udfpsOverlayController, times(2)).debugOnTouch(motionEvent.capture())
 
         assertEquals(motionEvent.allValues[0].action, MotionEvent.ACTION_DOWN) // ACTION_MOVE
         assertEquals(motionEvent.allValues[1].action, MotionEvent.ACTION_MOVE) // ACTION_MOVE
@@ -78,7 +78,7 @@ class UdfpsShellTest : SysuiTestCase() {
     fun testSimFingerUp() {
         udfpsShell.simFingerUp()
 
-        verify(udfpsOverlayController).debugOnTouch(any(), motionEvent.capture())
+        verify(udfpsOverlayController).debugOnTouch(motionEvent.capture())
 
         assertEquals(motionEvent.value.action, MotionEvent.ACTION_UP)
     }
@@ -87,6 +87,6 @@ class UdfpsShellTest : SysuiTestCase() {
     fun testOnUiReady() {
         udfpsShell.onUiReady()
 
-        verify(udfpsOverlayController).debugOnUiReady(any(), any())
+        verify(udfpsOverlayController).debugOnUiReady(any())
     }
 }

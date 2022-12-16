@@ -10003,6 +10003,7 @@ public class AudioService extends IAudioService.Stub
     static final int LOG_NB_EVENTS_VOLUME = 40;
     static final int LOG_NB_EVENTS_DYN_POLICY = 10;
     static final int LOG_NB_EVENTS_SPATIAL = 30;
+    static final int LOG_NB_EVENTS_SOUND_DOSE = 30;
 
     static final EventLogger
             sLifecycleLogger = new EventLogger(LOG_NB_EVENTS_LIFECYCLE,
@@ -11418,6 +11419,11 @@ public class AudioService extends IAudioService.Stub
         private final class UnregisterOnStopCallback extends IMediaProjectionCallback.Stub {
             public void onStop() {
                 unregisterAudioPolicyAsync(mPolicyCallback);
+            }
+
+            @Override
+            public void onCapturedContentResize(int width, int height) {
+                // Ignore resize of the captured content.
             }
         };
         UnregisterOnStopCallback mProjectionCallback;
