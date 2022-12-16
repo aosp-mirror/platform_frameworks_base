@@ -627,10 +627,22 @@ final class ConversionUtils {
         if (isAtLeastU(targetSdkVersion)) {
             return chunk;
         }
-        Set<RadioManager.ProgramInfo> modified = chunk.getModified();
-        modified.removeIf(info -> !programInfoMeetsSdkVersionRequirement(info, targetSdkVersion));
-        Set<ProgramSelector.Identifier> removed = chunk.getRemoved();
-        removed.removeIf(id -> isNewIdentifierInU(id));
+        Set<RadioManager.ProgramInfo> modified = new ArraySet<>();
+        Iterator<RadioManager.ProgramInfo> modifiedIterator = chunk.getModified().iterator();
+        while (modifiedIterator.hasNext()) {
+            RadioManager.ProgramInfo info = modifiedIterator.next();
+            if (programInfoMeetsSdkVersionRequirement(info, targetSdkVersion)) {
+                modified.add(info);
+            }
+        }
+        Set<ProgramSelector.Identifier> removed = new ArraySet<>();
+        Iterator<ProgramSelector.Identifier> removedIterator = chunk.getRemoved().iterator();
+        while (removedIterator.hasNext()) {
+            ProgramSelector.Identifier id = removedIterator.next();
+            if (!isNewIdentifierInU(id)) {
+                removed.add(id);
+            }
+        }
         return new ProgramList.Chunk(chunk.isPurge(), chunk.isComplete(), modified, removed);
     }
 

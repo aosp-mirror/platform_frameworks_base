@@ -19,6 +19,7 @@ import android.hardware.broadcastradio.IdentifierType;
 import android.hardware.broadcastradio.Metadata;
 import android.hardware.broadcastradio.ProgramIdentifier;
 import android.hardware.broadcastradio.ProgramInfo;
+import android.hardware.broadcastradio.ProgramListChunk;
 import android.hardware.broadcastradio.VendorKeyValue;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
@@ -41,17 +42,18 @@ final class AidlTestUtils {
                 /* dabFrequencyTable= */ null, /* vendorInfo= */ null);
     }
 
-    static RadioManager.ProgramInfo makeProgramInfo(ProgramSelector selector, int signalQuality) {
+    static RadioManager.ProgramInfo makeProgramInfo(ProgramSelector selector,
+            ProgramSelector.Identifier logicallyTunedTo,
+            ProgramSelector.Identifier physicallyTunedTo, int signalQuality) {
         return new RadioManager.ProgramInfo(selector,
-                selector.getPrimaryId(), selector.getPrimaryId(), /* relatedContents= */ null,
+                logicallyTunedTo, physicallyTunedTo, /* relatedContents= */ null,
                 /* infoFlags= */ 0, signalQuality,
                 new RadioMetadata.Builder().build(), new ArrayMap<>());
     }
 
-    static RadioManager.ProgramInfo makeProgramInfo(int programType,
-            ProgramSelector.Identifier identifier, int signalQuality) {
-        ProgramSelector selector = makeProgramSelector(programType, identifier);
-        return makeProgramInfo(selector, signalQuality);
+    static RadioManager.ProgramInfo makeProgramInfo(ProgramSelector selector, int signalQuality) {
+        return makeProgramInfo(selector, selector.getPrimaryId(), selector.getPrimaryId(),
+                signalQuality);
     }
 
     static ProgramIdentifier makeHalIdentifier(@IdentifierType int type, long value) {
@@ -87,21 +89,6 @@ final class AidlTestUtils {
         return hwSelector;
     }
 
-    static ProgramInfo programInfoToHalProgramInfo(RadioManager.ProgramInfo info) {
-        // Note that because ConversionUtils does not by design provide functions for all
-        // conversions, this function only copies fields that are set by makeProgramInfo().
-        ProgramInfo hwInfo = new ProgramInfo();
-        hwInfo.selector = ConversionUtils.programSelectorToHalProgramSelector(info.getSelector());
-        hwInfo.logicallyTunedTo =
-                ConversionUtils.identifierToHalProgramIdentifier(info.getLogicallyTunedTo());
-        hwInfo.physicallyTunedTo =
-                ConversionUtils.identifierToHalProgramIdentifier(info.getPhysicallyTunedTo());
-        hwInfo.signalQuality = info.getSignalStrength();
-        hwInfo.relatedContent = new ProgramIdentifier[]{};
-        hwInfo.metadata = new Metadata[]{};
-        return hwInfo;
-    }
-
     static ProgramInfo makeHalProgramInfo(
             android.hardware.broadcastradio.ProgramSelector hwSel, int hwSignalQuality) {
         return makeHalProgramInfo(hwSel, hwSel.primaryId, hwSel.primaryId, hwSignalQuality);
@@ -119,6 +106,16 @@ final class AidlTestUtils {
         hwInfo.relatedContent = new ProgramIdentifier[]{};
         hwInfo.metadata = new Metadata[]{};
         return hwInfo;
+    }
+
+    static ProgramListChunk makeProgramListChunk(boolean purge, boolean complete,
+            ProgramInfo[] modified, ProgramIdentifier[] removed) {
+        ProgramListChunk halChunk = new ProgramListChunk();
+        halChunk.purge = purge;
+        halChunk.complete = complete;
+        halChunk.modified = modified;
+        halChunk.removed = removed;
+        return halChunk;
     }
 
     static VendorKeyValue makeVendorKeyValue(String vendorKey, String vendorValue) {
