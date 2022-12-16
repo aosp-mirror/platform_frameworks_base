@@ -3707,7 +3707,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
          * of DisplayArea into relative coordinates for all windows, we need to correct the
          * QS Head bounds here.
          */
-        final int xOffset = Math.round(ev.getRawX() - ev.getX());
+        final int xOffset = Math.round(ev.getRawX() - ev.getX() + mQsHeader.getLeft());
         final int yOffset = Math.round(ev.getRawY() - ev.getY());
         mQsHeaderBound.offsetTo(xOffset, yOffset);
         return mQsHeaderBound.contains((int) ev.getRawX(), (int) ev.getRawY());
