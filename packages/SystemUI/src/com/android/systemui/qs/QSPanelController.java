@@ -122,9 +122,8 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         }
         switchTileLayout(true);
         mBrightnessMirrorHandler.onQsPanelAttached();
-
-        ((PagedTileLayout) mView.getOrCreateTileLayout())
-                .setOnTouchListener(mTileLayoutTouchListener);
+        PagedTileLayout pagedTileLayout= ((PagedTileLayout) mView.getOrCreateTileLayout());
+        pagedTileLayout.setOnTouchListener(mTileLayoutTouchListener);
     }
 
     @Override
@@ -150,7 +149,8 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     @Override
     protected void onSplitShadeChanged() {
-        ((PagedTileLayout) mView.getOrCreateTileLayout()).forceTilesRedistribution();
+        ((PagedTileLayout) mView.getOrCreateTileLayout())
+                .forceTilesRedistribution("Split shade state changed");
     }
 
     /** */
