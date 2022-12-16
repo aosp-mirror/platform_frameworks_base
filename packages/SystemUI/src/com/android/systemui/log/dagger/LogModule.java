@@ -62,6 +62,15 @@ public class LogModule {
         return factory.create("NotifLog", maxSize, false /* systrace */);
     }
 
+    /** Provides a logging buffer for all logs related to notifications on the lockscreen. */
+    @Provides
+    @SysUISingleton
+    @NotificationLockscreenLog
+    public static LogBuffer provideNotificationLockScreenLogBuffer(
+            LogBufferFactory factory) {
+        return factory.create("NotifLockscreenLog", 50, false /* systrace */);
+    }
+
     /** Provides a logging buffer for logs related to heads up presentation of notifications. */
     @Provides
     @SysUISingleton
