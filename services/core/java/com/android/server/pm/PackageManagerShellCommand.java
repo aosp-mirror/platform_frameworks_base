@@ -1772,7 +1772,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runCompile() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
-        boolean checkProfiles = SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false);
+        boolean checkProfiles = true;
         boolean forceCompilation = false;
         boolean allPackages = false;
         boolean clearProfileData = false;
