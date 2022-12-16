@@ -31,6 +31,7 @@ import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.util.IntArray;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -43,6 +44,7 @@ import java.util.List;
  * @hide
  */
 public class TransactionExecutorHelper {
+    private static final String TAG = TransactionExecutorHelper.class.getSimpleName();
     // A penalty applied to path with destruction when looking for the shortest one.
     private static final int DESTRUCTION_PENALTY = 10;
 
@@ -160,6 +162,11 @@ public class TransactionExecutorHelper {
     @VisibleForTesting
     public int getClosestOfStates(ActivityClientRecord r, int[] finalStates) {
         if (finalStates == null || finalStates.length == 0) {
+            return UNDEFINED;
+        }
+        if (r == null) {
+            // Early return because the ActivityClientRecord hasn't been created or cannot be found.
+            Log.w(TAG, "ActivityClientRecord was null");
             return UNDEFINED;
         }
 
