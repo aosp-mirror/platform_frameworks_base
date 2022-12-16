@@ -58,7 +58,9 @@ class FakeKeyguardQuickAffordanceProviderClient(
     flags: List<KeyguardQuickAffordanceProviderClient.Flag> =
         listOf(
             KeyguardQuickAffordanceProviderClient.Flag(
-                name = KeyguardQuickAffordanceProviderContract.FlagsTable.FLAG_NAME_FEATURE_ENABLED,
+                name =
+                    KeyguardQuickAffordanceProviderContract.FlagsTable
+                        .FLAG_NAME_CUSTOM_LOCK_SCREEN_QUICK_AFFORDANCES_ENABLED,
                 value = true,
             )
         ),
