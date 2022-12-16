@@ -3063,6 +3063,9 @@ public final class ActiveServices {
                 Slog.e(TAG_SERVICE, message);
             }
             mAm.appNotResponding(sr.app, tr);
+
+            // TODO(short-service): Make sure, if the FGS stops after this, the ANR dialog
+            // disappears.
         }
     }
 
