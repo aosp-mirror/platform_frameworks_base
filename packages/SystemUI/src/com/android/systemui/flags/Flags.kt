@@ -398,6 +398,10 @@ object Flags {
     // TODO(b/254512756): Tracking Bug
     val QUICK_TAP_IN_PCC = releasedFlag(1400, "quick_tap_in_pcc")
 
+    // TODO(b/261979569): Tracking Bug
+    val QUICK_TAP_FLOW_FRAMEWORK =
+            unreleasedFlag(1401, "quick_tap_flow_framework", teamfood = false)
+
     // 1500 - chooser
     // TODO(b/254512507): Tracking Bug
     val CHOOSER_UNBUNDLED = unreleasedFlag(1500, "chooser_unbundled", teamfood = true)
