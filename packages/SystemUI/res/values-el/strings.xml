@@ -993,7 +993,6 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Μετάδοση με την εφαρμογή <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Αλλαγή εξόδου"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Άγνωστο"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"ΗΗΗ, ΜΜΜ η"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"ώ:λλ"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:λλ"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Άνοιγμα <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
@@ -1009,8 +1008,6 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Αναστροφή στην μπροστ. οθόνη για καλύτερη selfie;"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Χρησιμοποιήστε την πίσω κάμερα για να βγάλετε μια φωτογραφία με μεγαλύτερο εύρος και υψηλότερη ανάλυση."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"* Αυτή η οθόνη θα απενεργοποιηθεί"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Αναδιπλούμενη συσκευή που ξεδιπλώνει"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Αναδιπλούμενη συσκευή που διπλώνει"</string>
 </resources>

@@ -17,6 +17,10 @@ package com.android.systemui.dreams.complication;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -29,6 +33,7 @@ import org.junit.runner.RunWith;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.function.Consumer;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -196,5 +201,20 @@ public class ComplicationLayoutParamsTest extends SysuiTestCase {
                 constraint);
         assertThat(paramsWithConstraint.constraintSpecified()).isTrue();
         assertThat(paramsWithConstraint.getConstraint()).isEqualTo(constraint);
+    }
+
+    @Test
+    public void testIteratePositions() {
+        final int positions = ComplicationLayoutParams.POSITION_TOP
+                | ComplicationLayoutParams.POSITION_START
+                | ComplicationLayoutParams.POSITION_END;
+        final Consumer<Integer> consumer = mock(Consumer.class);
+
+        ComplicationLayoutParams.iteratePositions(consumer, positions);
+
+        verify(consumer).accept(ComplicationLayoutParams.POSITION_TOP);
+        verify(consumer).accept(ComplicationLayoutParams.POSITION_START);
+        verify(consumer).accept(ComplicationLayoutParams.POSITION_END);
+        verify(consumer, never()).accept(ComplicationLayoutParams.POSITION_BOTTOM);
     }
 }

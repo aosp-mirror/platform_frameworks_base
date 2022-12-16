@@ -500,6 +500,29 @@ public class TaskFragmentContainerTest {
         assertEquals(2, taskContainer.indexOf(tf1));
     }
 
+    @Test
+    public void testIsVisible() {
+        final TaskContainer taskContainer = createTestTaskContainer();
+        final TaskFragmentContainer container = new TaskFragmentContainer(
+                null /* pendingAppearedActivity */, new Intent(), taskContainer, mController,
+                null /* pairedPrimaryTaskFragment */);
+
+        // Not visible when there is not appeared.
+        assertFalse(container.isVisible());
+
+        // Respect info.isVisible.
+        TaskFragmentInfo info = createMockTaskFragmentInfo(container, mActivity,
+                true /* isVisible */);
+        container.setInfo(mTransaction, info);
+
+        assertTrue(container.isVisible());
+
+        info = createMockTaskFragmentInfo(container, mActivity, false /* isVisible */);
+        container.setInfo(mTransaction, info);
+
+        assertFalse(container.isVisible());
+    }
+
     /** Creates a mock activity in the organizer process. */
     private Activity createMockActivity() {
         final Activity activity = mock(Activity.class);

@@ -711,7 +711,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             Slog.d(TAG, "createSoundTriggerCallbackLocked");
         }
         return new HotwordDetectionConnection.SoundTriggerCallback(callback,
-                mHotwordDetectionConnection);
+                mHotwordDetectionConnection, mInfo.getServiceInfo().applicationInfo.uid);
     }
 
     private static ServiceInfo getServiceInfoLocked(@NonNull ComponentName componentName,

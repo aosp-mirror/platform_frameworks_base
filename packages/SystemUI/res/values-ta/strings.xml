@@ -872,8 +872,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"அலைபரப்புவதை நிறுத்து"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ஆடியோ அவுட்புட்டுக்குக் கிடைக்கும் சாதனங்கள்."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ஒலியளவு"</string>
-    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
-    <skip />
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"பிராட்காஸ்ட் எவ்வாறு செயல்படுகிறது?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"பிராட்காஸ்ட்"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"நீங்கள் பிராட்காஸ்ட் செய்யும் மீடியாவை அருகிலுள்ளவர்கள் இணக்கமான புளூடூத் சாதனங்கள் மூலம் கேட்கலாம்"</string>
@@ -987,15 +986,13 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"கேமராவும் மைக்கும் ஆஃப் செய்யப்பட்டுள்ளன"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# அறிவிப்பு}other{# அறிவிப்புகள்}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <!-- no translation found for note_task_button_label (8718616095800343136) -->
-    <skip />
+    <string name="note_task_button_label" msgid="8718616095800343136">"குறிப்பெடுத்தல்"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ஒலிபரப்புதல்"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் ஒலிபரப்பப்படுவதை நிறுத்தவா?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"நீங்கள் <xliff:g id="SWITCHAPP">%1$s</xliff:g> ஆப்ஸை ஒலிபரப்பினாலோ அவுட்புட்டை மாற்றினாலோ உங்களின் தற்போதைய ஒலிபரப்பு நிறுத்தப்படும்"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ஆப்ஸை ஒலிபரப்பு"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"அவுட்புட்டை மாற்று"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"தெரியவில்லை"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸைத் திற"</string>

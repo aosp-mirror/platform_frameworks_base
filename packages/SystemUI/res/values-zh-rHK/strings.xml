@@ -872,8 +872,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"停止投放"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"可用作音訊輸出的裝置"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"音量"</string>
-    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
-    <skip />
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"廣播運作方式"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"廣播"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"附近有兼容藍牙裝置的人可收聽您正在廣播的媒體內容"</string>
@@ -987,15 +986,13 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"相機和麥克風已關閉"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# 則通知}other{# 則通知}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>，<xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <!-- no translation found for note_task_button_label (8718616095800343136) -->
-    <skip />
+    <string name="note_task_button_label" msgid="8718616095800343136">"做筆記"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"廣播"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"要停止廣播「<xliff:g id="APP_NAME">%1$s</xliff:g>」的內容嗎？"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"如要廣播「<xliff:g id="SWITCHAPP">%1$s</xliff:g>」的內容或變更輸出來源，系統就會停止廣播目前的內容"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"廣播「<xliff:g id="SWITCHAPP">%1$s</xliff:g>」的內容"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"變更輸出來源"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"不明"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"MMM d EEE"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"開啟「<xliff:g id="APPNAME">%1$s</xliff:g>」"</string>

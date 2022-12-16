@@ -993,7 +993,7 @@
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Výber používateľa"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Stav"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Fotoaparát"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Ovládacie prvky médií"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Ovládanie médií"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Zmena usporiadania miniaplikácií sa začala."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Zmena usporiadania miniaplikácií sa skončila."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"Miniaplikácia <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> bola odstránená."</string>

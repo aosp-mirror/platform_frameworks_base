@@ -66,7 +66,7 @@
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB పోర్ట్‌ నిలిపివేయబడింది"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"మీ పరికరంలోకి నీరు లేదా చెత్తాచెదారం చేరిపోకుండా కాపాడటానికి, USB పోర్ట్ నిలిపివేయబడుతుంది, అలాగే యాక్సెసరీలు వేటిని గుర్తించదు.\n\nUSB పోర్ట్‌ను ఉపయోగించడం సురక్షితమేనని నిర్ధారించుకున్న తర్వాత, మళ్లీ మీకో నోటిఫికేషన్‌ రూపంలో తెలియజేయబడుతుంది."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"ఛార్జర్‌లు, యాక్సెసరీలను గుర్తించే విధంగా USB పోర్ట్ ప్రారంభించబడింది"</string>
-    <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USBని ప్రారంభించు"</string>
+    <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USBని ప్రారంభించండి"</string>
     <string name="learn_more" msgid="4690632085667273811">"మరింత తెలుసుకోండి"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"స్క్రీన్‌షాట్"</string>
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock డిజేబుల్ చేయబడింది"</string>
@@ -105,7 +105,7 @@
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"మీ పరికరం నుండి వచ్చే మ్యూజిక్, కాల్స్‌, రింగ్‌టోన్‌ల వంటి ధ్వనులు"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"మైక్రోఫోన్"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"పరికరం ఆడియో, మైక్రోఫోన్"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"ప్రారంభించు"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"ప్రారంభించండి"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"స్క్రీన్ రికార్డింగ్ చేయబడుతోంది"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"స్క్రీన్, ఆడియో రికార్డింగ్ చేయబడుతున్నాయి"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"స్క్రీన్‌పై తాకే స్థానాలను చూపు"</string>
@@ -289,7 +289,7 @@
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC నిలిపివేయబడింది"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ప్రారంభించబడింది"</string>
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"స్క్రీన్ రికార్డ్"</string>
-    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ప్రారంభించు"</string>
+    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ప్రారంభించండి"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ఆపు"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"వన్-హ్యాండెడ్ మోడ్"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"పరికరం మైక్రోఫోన్‌ను అన్‌బ్లాక్ చేయమంటారా?"</string>
@@ -356,7 +356,7 @@
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ఈ సెషన్‌లోని అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"గెస్ట్‌కు తిరిగి స్వాగతం!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"మీరు మీ సెషన్‌ని కొనసాగించాలనుకుంటున్నారా?"</string>
-    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"మొదటి నుండి ప్రారంభించు"</string>
+    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"మొదటి నుండి ప్రారంభించండి"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"అవును, కొనసాగించు"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"గెస్ట్ మోడ్"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"మీరు గెస్ట్ మోడ్‌లో ఉన్నారు"</string>
@@ -391,7 +391,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"సంభాషణలు"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"అన్ని నిశ్శబ్ద నోటిఫికేషన్‌లను క్లియర్ చేస్తుంది"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"అంతరాయం కలిగించవద్దు ద్వారా నోటిఫికేషన్‌లు పాజ్ చేయబడ్డాయి"</string>
-    <string name="media_projection_action_text" msgid="3634906766918186440">"ఇప్పుడే ప్రారంభించు"</string>
+    <string name="media_projection_action_text" msgid="3634906766918186440">"ఇప్పుడే ప్రారంభించండి"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"నోటిఫికేషన్‌లు లేవు"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"కొత్త నోటిఫికేషన్‌లు ఏవీ లేవు"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"పాత నోటిఫికేషన్‌ల కోసం అన్‌లాక్ చేయండి"</string>
@@ -442,7 +442,7 @@
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"మీడియాకు ఆటోమేటిక్ క్యాప్షన్‌లు"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"క్యాప్షన్‌ల చిట్కాను మూసివేయండి"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"క్యాప్షన్‌లు ఓవర్‌లే"</string>
-    <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ప్రారంభించు"</string>
+    <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ప్రారంభించండి"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"నిలిపివేయండి"</string>
     <string name="sound_settings" msgid="8874581353127418308">"సౌండ్ &amp; వైబ్రేషన్"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"సెట్టింగ్‌లు"</string>
@@ -872,8 +872,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ప్రసారాన్ని ఆపివేయండి"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ఆడియో అవుట్‌పుట్ కోసం అందుబాటులో ఉన్న పరికరాలు."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"వాల్యూమ్"</string>
-    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
-    <skip />
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ప్రసారం కావడం అనేది ఎలా పని చేస్తుంది"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ప్రసారం"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"మీకు సమీపంలో ఉన్న వ్యక్తులు అనుకూలత ఉన్న బ్లూటూత్ పరికరాలతో మీరు ప్రసారం చేస్తున్న మీడియాను వినగలరు"</string>
@@ -987,15 +986,13 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"కెమెరా, మైక్ ఆఫ్‌లో ఉన్నాయి"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# నోటిఫికేషన్}other{# నోటిఫికేషన్‌లు}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <!-- no translation found for note_task_button_label (8718616095800343136) -->
-    <skip />
+    <string name="note_task_button_label" msgid="8718616095800343136">"నోట్‌టేకింగ్"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ప్రసారం చేస్తోంది"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> ప్రసారం చేయడాన్ని ఆపివేయాలా?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"మీరు <xliff:g id="SWITCHAPP">%1$s</xliff:g> ప్రసారం చేస్తే లేదా అవుట్‌పుట్‌ను మార్చినట్లయితే, మీ ప్రస్తుత ప్రసారం ఆగిపోతుంది"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ప్రసారం చేయండి"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"అవుట్‌పుట్‌ను మార్చండి"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"తెలియదు"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g>‌ను తెరవండి"</string>
