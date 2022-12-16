@@ -15563,10 +15563,6 @@ package android.telephony.ims {
     field public static final int SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT = 2; // 0x2
   }
 
-  public static class RegistrationManager.RegistrationCallback {
-    method public void onUnregistered(@NonNull android.telephony.ims.ImsReasonInfo, int);
-  }
-
   public final class RtpHeaderExtension implements android.os.Parcelable {
     ctor public RtpHeaderExtension(@IntRange(from=1, to=14) int, @NonNull byte[]);
     method public int describeContents();
@@ -15966,7 +15962,7 @@ package android.telephony.ims.stub {
     ctor public ImsRegistrationImplBase();
     ctor public ImsRegistrationImplBase(@NonNull java.util.concurrent.Executor);
     method public final void onDeregistered(android.telephony.ims.ImsReasonInfo);
-    method public final void onDeregistered(@Nullable android.telephony.ims.ImsReasonInfo, int);
+    method public final void onDeregistered(@Nullable android.telephony.ims.ImsReasonInfo, int, int);
     method public final void onRegistered(int);
     method public final void onRegistered(@NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public final void onRegistering(int);
