@@ -4998,8 +4998,35 @@ public final class NotificationPanelViewController implements Dumpable {
         return mExpandedFraction;
     }
 
+    /**
+     * This method should not be used anymore, you should probably use {@link #isShadeFullyOpen()}
+     * instead. It was overused as indicating if shade is open or we're on keyguard/AOD.
+     * Moving forward we should be explicit about the what state we're checking.
+     * @return if panel is covering the screen, which means we're in expanded shade or keyguard/AOD
+     *
+     * @deprecated depends on the state you check, use {@link #isShadeFullyOpen()},
+     * {@link #isOnAod()}, {@link #isOnKeyguard()} instead.
+     */
+    @Deprecated
     public boolean isFullyExpanded() {
         return mExpandedHeight >= getMaxPanelTransitionDistance();
+    }
+
+    /**
+     * Returns true if shade is fully opened, that is we're actually in the notification shade
+     * with QQS or QS. It's different from {@link #isFullyExpanded()} that it will not report
+     * shade as always expanded if we're on keyguard/AOD. It will return true only when user goes
+     * from keyguard to shade.
+     */
+    public boolean isShadeFullyOpen() {
+        if (mBarState == SHADE) {
+            return isFullyExpanded();
+        } else if (mBarState == SHADE_LOCKED) {
+            return true;
+        } else {
+            // case of two finger swipe from the top of keyguard
+            return computeQsExpansionFraction() == 1;
+        }
     }
 
     public boolean isFullyCollapsed() {

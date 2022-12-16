@@ -19,6 +19,9 @@ package com.android.systemui.statusbar.phone;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 
+import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
+import static com.android.systemui.statusbar.StatusBarState.SHADE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertFalse;
@@ -835,7 +838,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
         when(mNotificationsController.getActiveNotificationsCount()).thenReturn(5);
         when(mNotificationPresenter.isPresenterFullyCollapsed()).thenReturn(true);
-        mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
+        mCentralSurfaces.setBarStateForTest(SHADE);
 
         try {
             mCentralSurfaces.handleVisibleToUserChanged(true);
@@ -854,7 +857,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mNotificationsController.getActiveNotificationsCount()).thenReturn(5);
 
         when(mNotificationPresenter.isPresenterFullyCollapsed()).thenReturn(false);
-        mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
+        mCentralSurfaces.setBarStateForTest(SHADE);
 
         try {
             mCentralSurfaces.handleVisibleToUserChanged(true);
@@ -995,7 +998,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void testShowKeyguardImplementation_setsState() {
         when(mLockscreenUserManager.getCurrentProfiles()).thenReturn(new SparseArray<>());
 
-        mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
+        mCentralSurfaces.setBarStateForTest(SHADE);
 
         // By default, showKeyguardImpl sets state to KEYGUARD.
         mCentralSurfaces.showKeyguardImpl();
@@ -1052,7 +1055,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void collapseShade_callsanimateCollapseShade_whenExpanded() {
         // GIVEN the shade is expanded
         mCentralSurfaces.onShadeExpansionFullyChanged(true);
-        mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
+        mCentralSurfaces.setBarStateForTest(SHADE);
 
         // WHEN collapseShade is called
         mCentralSurfaces.collapseShade();
@@ -1065,7 +1068,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void collapseShade_doesNotCallanimateCollapseShade_whenCollapsed() {
         // GIVEN the shade is collapsed
         mCentralSurfaces.onShadeExpansionFullyChanged(false);
-        mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
+        mCentralSurfaces.setBarStateForTest(SHADE);
 
         // WHEN collapseShade is called
         mCentralSurfaces.collapseShade();
@@ -1078,7 +1081,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void collapseShadeForBugReport_callsanimateCollapseShade_whenFlagDisabled() {
         // GIVEN the shade is expanded & flag enabled
         mCentralSurfaces.onShadeExpansionFullyChanged(true);
-        mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
+        mCentralSurfaces.setBarStateForTest(SHADE);
         mFeatureFlags.set(Flags.LEAVE_SHADE_OPEN_FOR_BUGREPORT, false);
 
         // WHEN collapseShadeForBugreport is called
@@ -1092,7 +1095,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void collapseShadeForBugReport_doesNotCallanimateCollapseShade_whenFlagEnabled() {
         // GIVEN the shade is expanded & flag enabled
         mCentralSurfaces.onShadeExpansionFullyChanged(true);
-        mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
+        mCentralSurfaces.setBarStateForTest(SHADE);
         mFeatureFlags.set(Flags.LEAVE_SHADE_OPEN_FOR_BUGREPORT, true);
 
         // WHEN collapseShadeForBugreport is called
@@ -1104,10 +1107,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     public void deviceStateChange_unfolded_shadeOpen_setsLeaveOpenOnKeyguardHide() {
-        when(mKeyguardStateController.isShowing()).thenReturn(false);
         setFoldedStates(FOLD_STATE_FOLDED);
         setGoToSleepStates(FOLD_STATE_FOLDED);
-        when(mNotificationPanelViewController.isFullyExpanded()).thenReturn(true);
+        mCentralSurfaces.setBarStateForTest(SHADE);
+        when(mNotificationPanelViewController.isShadeFullyOpen()).thenReturn(true);
 
         setDeviceState(FOLD_STATE_UNFOLDED);
 
@@ -1116,10 +1119,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     public void deviceStateChange_unfolded_shadeOpen_onKeyguard_doesNotSetLeaveOpenOnKeyguardHide() {
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
         setFoldedStates(FOLD_STATE_FOLDED);
         setGoToSleepStates(FOLD_STATE_FOLDED);
-        when(mNotificationPanelViewController.isFullyExpanded()).thenReturn(true);
+        mCentralSurfaces.setBarStateForTest(KEYGUARD);
+        when(mNotificationPanelViewController.isShadeFullyOpen()).thenReturn(true);
 
         setDeviceState(FOLD_STATE_UNFOLDED);
 
@@ -1131,7 +1134,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void deviceStateChange_unfolded_shadeClose_doesNotSetLeaveOpenOnKeyguardHide() {
         setFoldedStates(FOLD_STATE_FOLDED);
         setGoToSleepStates(FOLD_STATE_FOLDED);
-        when(mNotificationPanelViewController.isFullyExpanded()).thenReturn(false);
+        mCentralSurfaces.setBarStateForTest(SHADE);
+        when(mNotificationPanelViewController.isShadeFullyOpen()).thenReturn(false);
 
         setDeviceState(FOLD_STATE_UNFOLDED);
 
@@ -1165,12 +1169,12 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // it to remain visible.
         when(mKeyguardViewMediator.isOccludeAnimationPlaying()).thenReturn(true);
         setKeyguardShowingAndOccluded(false /* showing */, true /* occluded */);
-        verify(mStatusBarStateController, never()).setState(StatusBarState.SHADE);
+        verify(mStatusBarStateController, never()).setState(SHADE);
 
         // Once the animation ends, verify that the keyguard is actually hidden.
         when(mKeyguardViewMediator.isOccludeAnimationPlaying()).thenReturn(false);
         setKeyguardShowingAndOccluded(false /* showing */, true /* occluded */);
-        verify(mStatusBarStateController).setState(StatusBarState.SHADE);
+        verify(mStatusBarStateController).setState(SHADE);
     }
 
     @Test
@@ -1183,7 +1187,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // immediately hide the keyguard.
         when(mKeyguardViewMediator.isOccludeAnimationPlaying()).thenReturn(false);
         setKeyguardShowingAndOccluded(false /* showing */, true /* occluded */);
-        verify(mStatusBarStateController).setState(StatusBarState.SHADE);
+        verify(mStatusBarStateController).setState(SHADE);
     }
 
     /**

@@ -154,9 +154,8 @@ public final class ShadeControllerImpl implements ShadeController {
     }
 
     @Override
-    public boolean isShadeOpen() {
-        return mNotificationPanelViewController.isExpanding()
-                || mNotificationPanelViewController.isFullyExpanded();
+    public boolean isShadeFullyOpen() {
+        return mNotificationPanelViewController.isShadeFullyOpen();
     }
 
     @Override
