@@ -202,7 +202,7 @@ class StylusManagerTest : SysuiTestCase() {
         stylusManager.onInputDeviceAdded(STYLUS_DEVICE_ID)
         stylusManager.registerCallback(otherStylusCallback)
 
-        stylusManager.onInputDeviceAdded(STYLUS_DEVICE_ID)
+        stylusManager.onInputDeviceRemoved(STYLUS_DEVICE_ID)
 
         verify(stylusCallback, times(1)).onStylusRemoved(STYLUS_DEVICE_ID)
         verify(otherStylusCallback, times(1)).onStylusRemoved(STYLUS_DEVICE_ID)
