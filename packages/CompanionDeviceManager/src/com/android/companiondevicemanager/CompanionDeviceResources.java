@@ -25,6 +25,7 @@ import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
 
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_APP_STREAMING;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CALENDAR;
+import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CALL_LOGS;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CONTACTS;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_MICROPHONE;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_NEARBY_DEVICES;
@@ -73,7 +74,7 @@ final class CompanionDeviceResources {
         map.put(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING,
                 Arrays.asList(PERMISSION_NEARBY_DEVICE_STREAMING));
         map.put(DEVICE_PROFILE_WATCH, Arrays.asList(PERMISSION_NOTIFICATION, PERMISSION_PHONE,
-                PERMISSION_SMS, PERMISSION_CONTACTS, PERMISSION_CALENDAR,
+                PERMISSION_CALL_LOGS, PERMISSION_SMS, PERMISSION_CONTACTS, PERMISSION_CALENDAR,
                 PERMISSION_NEARBY_DEVICES));
         map.put(DEVICE_PROFILE_GLASSES, Arrays.asList(PERMISSION_NOTIFICATION, PERMISSION_PHONE,
                 PERMISSION_SMS, PERMISSION_CONTACTS, PERMISSION_MICROPHONE,
@@ -103,7 +104,6 @@ final class CompanionDeviceResources {
     }
 
     static final Map<String, Integer> PROFILES_NAME;
-
     static {
         final Map<String, Integer> map = new ArrayMap<>();
         map.put(DEVICE_PROFILE_WATCH, R.string.profile_name_watch);
