@@ -553,6 +553,9 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
     void onTaskFragmentAppeared(@NonNull ITaskFragmentOrganizer organizer,
             @NonNull TaskFragment taskFragment) {
+        if (taskFragment.mTaskFragmentVanishedSent) {
+            return;
+        }
         if (taskFragment.getTask() == null) {
             Slog.w(TAG, "onTaskFragmentAppeared failed because it is not attached tf="
                     + taskFragment);
@@ -574,6 +577,9 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
     void onTaskFragmentInfoChanged(@NonNull ITaskFragmentOrganizer organizer,
             @NonNull TaskFragment taskFragment) {
+        if (taskFragment.mTaskFragmentVanishedSent) {
+            return;
+        }
         validateAndGetState(organizer);
         if (!taskFragment.mTaskFragmentAppearedSent) {
             // Skip if TaskFragment still not appeared.
@@ -586,10 +592,6 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                     .setTaskFragment(taskFragment)
                     .build();
         } else {
-            if (pendingEvent.mEventType == PendingTaskFragmentEvent.EVENT_VANISHED) {
-                // Skipped the info changed event if vanished event is pending.
-                return;
-            }
             // Remove and add for re-ordering.
             removePendingEvent(pendingEvent);
             // Reset the defer time when TaskFragment is changed, so that it can check again if
@@ -602,6 +604,10 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
     void onTaskFragmentVanished(@NonNull ITaskFragmentOrganizer organizer,
             @NonNull TaskFragment taskFragment) {
+        if (taskFragment.mTaskFragmentVanishedSent) {
+            return;
+        }
+        taskFragment.mTaskFragmentVanishedSent = true;
         final TaskFragmentOrganizerState state = validateAndGetState(organizer);
         final List<PendingTaskFragmentEvent> pendingEvents = mPendingTaskFragmentEvents
                 .get(organizer.asBinder());
@@ -617,20 +623,18 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 .setTaskFragment(taskFragment)
                 .build());
         state.removeTaskFragment(taskFragment);
+        // Make sure the vanished event will be dispatched if there are no other changes.
+        mAtmService.mWindowManager.mWindowPlacerLocked.requestTraversal();
     }
 
     void onTaskFragmentError(@NonNull ITaskFragmentOrganizer organizer,
             @Nullable IBinder errorCallbackToken, @Nullable TaskFragment taskFragment,
             int opType, @NonNull Throwable exception) {
-        validateAndGetState(organizer);
-        Slog.w(TAG, "onTaskFragmentError ", exception);
-        final PendingTaskFragmentEvent vanishedEvent = taskFragment != null
-                ? getPendingTaskFragmentEvent(taskFragment, PendingTaskFragmentEvent.EVENT_VANISHED)
-                : null;
-        if (vanishedEvent != null) {
-            // No need to notify if the TaskFragment has been removed.
+        if (taskFragment != null && taskFragment.mTaskFragmentVanishedSent) {
             return;
         }
+        validateAndGetState(organizer);
+        Slog.w(TAG, "onTaskFragmentError ", exception);
         addPendingEvent(new PendingTaskFragmentEvent.Builder(
                 PendingTaskFragmentEvent.EVENT_ERROR, organizer)
                 .setErrorCallbackToken(errorCallbackToken)
