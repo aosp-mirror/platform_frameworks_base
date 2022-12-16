@@ -360,7 +360,12 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     @Nullable
     private AutomaticBrightnessController mAutomaticBrightnessController;
 
+    // The controller for the sensor used to estimate ambient lux while the display is off.
+    @Nullable
+    private ScreenOffBrightnessSensorController mScreenOffBrightnessSensorController;
+
     private Sensor mLightSensor;
+    private Sensor mScreenOffBrightnessSensor;
 
     // The mappers between ambient lux, display backlight values, and display brightness.
     // We will switch between the idle mapper and active mapper in AutomaticBrightnessController.
@@ -994,6 +999,19 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
             mBrightnessEventRingBuffer =
                     new RingBuffer<>(BrightnessEvent.class, RINGBUFFER_MAX);
+
+            loadScreenOffBrightnessSensor();
+            int[] sensorValueToLux = mDisplayDeviceConfig.getScreenOffBrightnessSensorValueToLux();
+            if (mScreenOffBrightnessSensor != null && sensorValueToLux != null) {
+                mScreenOffBrightnessSensorController = new ScreenOffBrightnessSensorController(
+                        mSensorManager,
+                        mScreenOffBrightnessSensor,
+                        mHandler,
+                        SystemClock::uptimeMillis,
+                        sensorValueToLux,
+                        mInteractiveModeBrightnessMapper
+                );
+            }
         } else {
             mUseSoftwareAutoBrightnessConfig = false;
         }
@@ -1135,6 +1153,13 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         int state = mDisplayStateController
                 .updateDisplayState(mPowerRequest, mIsEnabled, mIsInTransition);
+
+        if (mScreenOffBrightnessSensorController != null) {
+            mScreenOffBrightnessSensorController.setLightSensorEnabled(mUseAutoBrightness
+                    && (state == Display.STATE_OFF || (state == Display.STATE_DOZE
+                    && !mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig())));
+        }
+
         // Initialize things the first time the power state is changed.
         if (mustInitialize) {
             initialize(state);
@@ -1224,6 +1249,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 updateScreenBrightnessSetting = mCurrentScreenBrightnessSetting != brightnessState;
                 mAppliedAutoBrightness = true;
                 mBrightnessReasonTemp.setReason(BrightnessReason.REASON_AUTOMATIC);
+                if (mScreenOffBrightnessSensorController != null) {
+                    mScreenOffBrightnessSensorController.setLightSensorEnabled(false);
+                }
             } else {
                 mAppliedAutoBrightness = false;
             }
@@ -1249,6 +1277,19 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 && Display.isDozeState(state)) {
             brightnessState = clampScreenBrightness(mScreenBrightnessDozeConfig);
             mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_DEFAULT);
+        }
+
+        // The ALS is not available yet - use the screen off sensor to determine the initial
+        // brightness
+        if (Float.isNaN(brightnessState) && autoBrightnessEnabled
+                && mScreenOffBrightnessSensorController != null) {
+            brightnessState = mScreenOffBrightnessSensorController.getAutomaticScreenBrightness();
+            if (isValidBrightnessValue(brightnessState)) {
+                brightnessState = clampScreenBrightness(brightnessState);
+                updateScreenBrightnessSetting = mCurrentScreenBrightnessSetting != brightnessState;
+                mBrightnessReasonTemp.setReason(
+                        BrightnessReason.REASON_SCREEN_OFF_BRIGHTNESS_SENSOR);
+            }
         }
 
         // Apply manual brightness.
@@ -1817,6 +1858,14 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 ? Sensor.TYPE_LIGHT : SensorUtils.NO_FALLBACK;
         mLightSensor = SensorUtils.findSensor(mSensorManager, lightSensor.type, lightSensor.name,
                 fallbackType);
+    }
+
+    private void loadScreenOffBrightnessSensor() {
+        DisplayDeviceConfig.SensorData screenOffBrightnessSensor =
+                mDisplayDeviceConfig.getScreenOffBrightnessSensor();
+        mScreenOffBrightnessSensor = SensorUtils.findSensor(mSensorManager,
+                screenOffBrightnessSensor.type, screenOffBrightnessSensor.name,
+                SensorUtils.NO_FALLBACK);
     }
 
     private float clampScreenBrightness(float value) {
