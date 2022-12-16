@@ -3575,7 +3575,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
         @Override
-        public void onScreenTurningOn(Runnable onDrawn) {
+        public void onScreenTurningOn() {
             mFalsingCollector.onScreenTurningOn();
             mNotificationPanelViewController.onScreenTurningOn();
         }
