@@ -129,11 +129,11 @@ abstract class WritableState {
     }
 }
 
-class GetStateScope(
+open class GetStateScope(
     val state: AccessState
 )
 
 class MutateStateScope(
     val oldState: AccessState,
     val newState: AccessState
-)
+) : GetStateScope(newState)
