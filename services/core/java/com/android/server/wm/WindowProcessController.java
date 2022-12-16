@@ -63,6 +63,7 @@ import android.os.LocaleList;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
@@ -261,7 +262,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
         boolean isSysUiPackage = info.packageName.equals(
                 mAtm.getSysUiServiceComponentLocked().getPackageName());
-        if (isSysUiPackage || mUid == Process.SYSTEM_UID) {
+        if (isSysUiPackage || UserHandle.getAppId(mUid) == Process.SYSTEM_UID) {
             // This is a system owned process and should not use an activity config.
             // TODO(b/151161907): Remove after support for display-independent (raw) SysUi configs.
             mIsActivityConfigOverrideAllowed = false;
