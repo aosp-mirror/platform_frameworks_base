@@ -50,7 +50,6 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         h: Float,
         touchSlop: Float,
         qsExpanded: Boolean,
-        collapsedOnDown: Boolean,
         keyguardShowing: Boolean,
         qsExpansionEnabled: Boolean
     ) {
@@ -63,13 +62,12 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
                 long1 = h.toLong()
                 double1 = touchSlop.toDouble()
                 bool1 = qsExpanded
-                bool2 = collapsedOnDown
-                bool3 = keyguardShowing
-                bool4 = qsExpansionEnabled
+                bool2 = keyguardShowing
+                bool3 = qsExpansionEnabled
             },
             {
                 "QsTrackingNotStarted: initTouchY=$int1,y=$int2,h=$long1,slop=$double1,qsExpanded" +
-                    "=$bool1,collapsedDown=$bool2,keyguardShowing=$bool3,qsExpansion=$bool4"
+                    "=$bool1,keyguardShowing=$bool2,qsExpansion=$bool3"
             }
         )
     }
@@ -158,7 +156,6 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
             qsMinExpansionHeight: Int,
             qsMaxExpansionHeight: Int,
             stackScrollerOverscrolling: Boolean,
-            dozing: Boolean,
             qsAnimatorExpand: Boolean,
             animatingQs: Boolean
     ) {
@@ -171,14 +168,13 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
                 int1 = qsMinExpansionHeight
                 int2 = qsMaxExpansionHeight
                 bool2 = stackScrollerOverscrolling
-                bool3 = dozing
-                bool4 = qsAnimatorExpand
+                bool3 = qsAnimatorExpand
                 // 0 = false, 1 = true
                 long1 = animatingQs.compareTo(false).toLong()
             },
             {
                 "$str1 qsExpanded=$bool1,qsMinExpansionHeight=$int1,qsMaxExpansionHeight=$int2," +
-                    "stackScrollerOverscrolling=$bool2,dozing=$bool3,qsAnimatorExpand=$bool4," +
+                    "stackScrollerOverscrolling=$bool2,qsAnimatorExpand=$bool3," +
                     "animatingQs=$long1"
             }
         )
