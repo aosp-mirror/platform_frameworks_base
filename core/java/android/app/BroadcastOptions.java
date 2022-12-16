@@ -725,8 +725,10 @@ public class BroadcastOptions extends ComponentOptions {
      * @hide
      */
     @SystemApi
-    public void setDeliveryGroupPolicy(@DeliveryGroupPolicy int policy) {
+    @NonNull
+    public BroadcastOptions setDeliveryGroupPolicy(@DeliveryGroupPolicy int policy) {
         mDeliveryGroupPolicy = policy;
+        return this;
     }
 
     /**
@@ -766,12 +768,15 @@ public class BroadcastOptions extends ComponentOptions {
      * @hide
      */
     @SystemApi
-    public void setDeliveryGroupMatchingKey(@NonNull String namespace, @NonNull String key) {
+    @NonNull
+    public BroadcastOptions setDeliveryGroupMatchingKey(@NonNull String namespace,
+            @NonNull String key) {
         Preconditions.checkArgument(!namespace.contains(":"),
                 "namespace should not contain ':'");
         Preconditions.checkArgument(!key.contains(":"),
                 "key should not contain ':'");
         mDeliveryGroupMatchingKey = namespace + ":" + key;
+        return this;
     }
 
     /**
@@ -813,8 +818,10 @@ public class BroadcastOptions extends ComponentOptions {
      * @hide
      */
     @SystemApi
-    public void setDeliveryGroupMatchingFilter(@NonNull IntentFilter matchingFilter) {
+    @NonNull
+    public BroadcastOptions setDeliveryGroupMatchingFilter(@NonNull IntentFilter matchingFilter) {
         mDeliveryGroupMatchingFilter = Objects.requireNonNull(matchingFilter);
+        return this;
     }
 
     /**
@@ -851,8 +858,10 @@ public class BroadcastOptions extends ComponentOptions {
      *
      * @hide
      */
-    public void setDeliveryGroupExtrasMerger(@NonNull BundleMerger extrasMerger) {
+    @NonNull
+    public BroadcastOptions setDeliveryGroupExtrasMerger(@NonNull BundleMerger extrasMerger) {
         mDeliveryGroupExtrasMerger = Objects.requireNonNull(extrasMerger);
+        return this;
     }
 
     /**
