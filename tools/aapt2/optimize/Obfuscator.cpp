@@ -83,13 +83,18 @@ struct PathComparator {
 };
 
 static bool HandleShortenFilePaths(ResourceTable* table,
-                                   std::map<std::string, std::string>& shortened_path_map) {
+                                   std::map<std::string, std::string>& shortened_path_map,
+                                   const std::set<ResourceName>& path_shorten_exemptions) {
   // used to detect collisions
   std::unordered_set<std::string> shortened_paths;
   std::set<FileReference*, PathComparator> file_refs;
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {
+        ResourceName resource_name({}, type->named_type, entry->name);
+        if (path_shorten_exemptions.find(resource_name) != path_shorten_exemptions.end()) {
+          continue;
+        }
         for (auto& config_value : entry->values) {
           FileReference* file_ref = ValueCast<FileReference>(config_value->value.get());
           if (file_ref) {
@@ -188,7 +193,8 @@ bool Obfuscator::Consume(IAaptContext* context, ResourceTable* table) {
   HandleCollapseKeyStringPool(table, options_.collapse_key_stringpool,
                               options_.name_collapse_exemptions, options_.id_resource_map);
   if (shorten_resource_paths_) {
-    return HandleShortenFilePaths(table, options_.shortened_path_map);
+    return HandleShortenFilePaths(table, options_.shortened_path_map,
+                                  options_.path_shorten_exemptions);
   }
   return true;
 }

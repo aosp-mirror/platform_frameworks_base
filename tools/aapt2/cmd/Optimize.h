@@ -122,7 +122,8 @@ class OptimizeCommand : public Command {
             "--resources-config-path.",
         &options_.table_flattener_options.collapse_key_stringpool);
     AddOptionalSwitch("--shorten-resource-paths",
-        "Shortens the paths of resources inside the APK.",
+        "Shortens the paths of resources inside the APK. Resources can be exempted using the \n"
+        "\"no_path_shorten\" directive in a file specified by --resources-config-path.",
         &options_.shorten_resource_paths);
     // TODO(b/246489170): keep the old option and format until transform to the new one
     AddOptionalFlag("--resource-path-shortening-map",

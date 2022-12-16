@@ -416,19 +416,27 @@ TEST(UtilTest, ParseConfigWithDirectives) {
   const std::string& content = R"(
 bool/remove_me#remove
 bool/keep_name#no_collapse
+layout/keep_path#no_path_shorten
 string/foo#no_obfuscate
 dimen/bar#no_obfuscate
+layout/keep_name_and_path#no_collapse,no_path_shorten
 )";
   aapt::test::Context context;
   std::unordered_set<ResourceName> resource_exclusion;
   std::set<ResourceName> name_collapse_exemptions;
+  std::set<ResourceName> path_shorten_exemptions;
 
-  EXPECT_TRUE(ParseResourceConfig(content, &context, resource_exclusion, name_collapse_exemptions));
+  EXPECT_TRUE(ParseResourceConfig(content, &context, resource_exclusion, name_collapse_exemptions,
+                                  path_shorten_exemptions));
 
   EXPECT_THAT(name_collapse_exemptions,
               UnorderedElementsAre(ResourceName({}, ResourceType::kString, "foo"),
                                    ResourceName({}, ResourceType::kDimen, "bar"),
-                                   ResourceName({}, ResourceType::kBool, "keep_name")));
+                                   ResourceName({}, ResourceType::kBool, "keep_name"),
+                                   ResourceName({}, ResourceType::kLayout, "keep_name_and_path")));
+  EXPECT_THAT(path_shorten_exemptions,
+              UnorderedElementsAre(ResourceName({}, ResourceType::kLayout, "keep_path"),
+                                   ResourceName({}, ResourceType::kLayout, "keep_name_and_path")));
   EXPECT_THAT(resource_exclusion,
               UnorderedElementsAre(ResourceName({}, ResourceType::kBool, "remove_me")));
 }
@@ -440,9 +448,10 @@ package:bool/remove_me#remove
   aapt::test::Context context;
   std::unordered_set<ResourceName> resource_exclusion;
   std::set<ResourceName> name_collapse_exemptions;
+  std::set<ResourceName> path_shorten_exemptions;
 
-  EXPECT_FALSE(
-      ParseResourceConfig(content, &context, resource_exclusion, name_collapse_exemptions));
+  EXPECT_FALSE(ParseResourceConfig(content, &context, resource_exclusion, name_collapse_exemptions,
+                                   path_shorten_exemptions));
 }
 
 TEST(UtilTest, ParseConfigInvalidName) {
@@ -452,9 +461,10 @@ package:bool/1231#remove
   aapt::test::Context context;
   std::unordered_set<ResourceName> resource_exclusion;
   std::set<ResourceName> name_collapse_exemptions;
+  std::set<ResourceName> path_shorten_exemptions;
 
-  EXPECT_FALSE(
-      ParseResourceConfig(content, &context, resource_exclusion, name_collapse_exemptions));
+  EXPECT_FALSE(ParseResourceConfig(content, &context, resource_exclusion, name_collapse_exemptions,
+                                   path_shorten_exemptions));
 }
 
 TEST(UtilTest, ParseConfigNoHash) {
@@ -464,9 +474,10 @@ package:bool/my_bool
   aapt::test::Context context;
   std::unordered_set<ResourceName> resource_exclusion;
   std::set<ResourceName> name_collapse_exemptions;
+  std::set<ResourceName> path_shorten_exemptions;
 
-  EXPECT_FALSE(
-      ParseResourceConfig(content, &context, resource_exclusion, name_collapse_exemptions));
+  EXPECT_FALSE(ParseResourceConfig(content, &context, resource_exclusion, name_collapse_exemptions,
+                                   path_shorten_exemptions));
 }
 
 }  // namespace aapt
