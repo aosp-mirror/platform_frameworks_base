@@ -17,11 +17,13 @@
 package android.companion.virtual;
 
 import android.app.PendingIntent;
+import android.companion.virtual.IVirtualDeviceIntentInterceptor;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
 import android.companion.virtual.sensor.IVirtualSensorStateChangeCallback;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.companion.virtual.sensor.VirtualSensorEvent;
+import android.content.IntentFilter;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.hardware.input.VirtualDpadConfig;
@@ -125,4 +127,15 @@ interface IVirtualDevice {
 
     /** Sets whether to show or hide the cursor while this virtual device is active. */
     void setShowPointerIcon(boolean showPointerIcon);
+
+    /**
+     * Registers an intent interceptor that will intercept an intent attempting to launch
+     * when matching the provided IntentFilter and calls the callback with the intercepted
+     * intent.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
+    void registerIntentInterceptor(
+            in IVirtualDeviceIntentInterceptor intentInterceptor, in IntentFilter filter);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
+    void unregisterIntentInterceptor(in IVirtualDeviceIntentInterceptor intentInterceptor);
 }

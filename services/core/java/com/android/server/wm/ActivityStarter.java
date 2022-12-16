@@ -1829,8 +1829,8 @@ class ActivityStarter {
                 final int launchingFromDisplayId =
                         mSourceRecord != null ? mSourceRecord.getDisplayId() : DEFAULT_DISPLAY;
                 if (!displayContent.mDwpcHelper
-                        .canActivityBeLaunched(r.info, targetWindowingMode, launchingFromDisplayId,
-                          newTask)) {
+                        .canActivityBeLaunched(r.info, r.intent, targetWindowingMode,
+                          launchingFromDisplayId, newTask)) {
                     Slog.w(TAG, "Abort to launch " + r.info.getComponentName()
                             + " on display area " + mPreferredTaskDisplayArea);
                     return START_ABORTED;

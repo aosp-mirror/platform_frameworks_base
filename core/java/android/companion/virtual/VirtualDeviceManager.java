@@ -35,6 +35,8 @@ import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Point;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.display.DisplayManager;
@@ -268,6 +270,9 @@ public final class VirtualDeviceManager {
         private final IVirtualDeviceManager mService;
         private final IVirtualDevice mVirtualDevice;
         private final ArrayMap<ActivityListener, ActivityListenerDelegate> mActivityListeners =
+                new ArrayMap<>();
+        private final ArrayMap<IntentInterceptorCallback,
+                     VirtualIntentInterceptorDelegate> mIntentInterceptorListeners =
                 new ArrayMap<>();
         private final IVirtualDeviceActivityListener mActivityListenerBinder =
                 new IVirtualDeviceActivityListener.Stub() {
@@ -857,6 +862,53 @@ public final class VirtualDeviceManager {
         public void removeActivityListener(@NonNull ActivityListener listener) {
             mActivityListeners.remove(listener);
         }
+
+        /**
+         * Registers an intent interceptor that will intercept an intent attempting to launch
+         * when matching the provided IntentFilter and calls the callback with the intercepted
+         * intent.
+         *
+         * @param executor The executor where the interceptor is executed on.
+         * @param interceptorFilter The filter to match intents intended for interception.
+         * @param interceptorCallback The callback called when an intent matching interceptorFilter
+         * is intercepted.
+         * @see #unregisterIntentInterceptor(IntentInterceptorCallback)
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void registerIntentInterceptor(
+                @CallbackExecutor @NonNull Executor executor,
+                @NonNull IntentFilter interceptorFilter,
+                @NonNull IntentInterceptorCallback interceptorCallback) {
+            Objects.requireNonNull(executor);
+            Objects.requireNonNull(interceptorFilter);
+            Objects.requireNonNull(interceptorCallback);
+            final VirtualIntentInterceptorDelegate delegate =
+                    new VirtualIntentInterceptorDelegate(executor, interceptorCallback);
+            try {
+                mVirtualDevice.registerIntentInterceptor(delegate, interceptorFilter);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            mIntentInterceptorListeners.put(interceptorCallback, delegate);
+        }
+
+        /**
+         * Unregisters the intent interceptorCallback previously registered with
+         * {@link #registerIntentInterceptor}.
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void unregisterIntentInterceptor(
+                    @NonNull IntentInterceptorCallback interceptorCallback) {
+            Objects.requireNonNull(interceptorCallback);
+            final VirtualIntentInterceptorDelegate delegate =
+                    mIntentInterceptorListeners.get(interceptorCallback);
+            try {
+                mVirtualDevice.unregisterIntentInterceptor(delegate);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            mIntentInterceptorListeners.remove(interceptorCallback);
+        }
     }
 
     /**
@@ -906,6 +958,53 @@ public final class VirtualDeviceManager {
 
         public void onDisplayEmpty(int displayId) {
             mExecutor.execute(() -> mActivityListener.onDisplayEmpty(displayId));
+        }
+    }
+
+    /**
+     * Interceptor interface to be called when an intent matches the IntentFilter passed into {@link
+     * VirtualDevice#registerIntentInterceptor}. When the interceptor is called after matching the
+     * IntentFilter, the intended activity launch will be aborted and alternatively replaced by
+     * the interceptor's receiver.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface IntentInterceptorCallback {
+
+        /**
+         * Called when an intent that matches the IntentFilter registered in {@link
+         * VirtualDevice#registerIntentInterceptor} is intercepted for the virtual device to
+         * handle.
+         *
+         * @param intent The intent that has been intercepted by the interceptor.
+         */
+        void onIntentIntercepted(@NonNull Intent intent);
+    }
+
+    /**
+     * A wrapper for {@link IntentInterceptorCallback} that executes callbacks on the
+     * the given executor.
+     */
+    private static class VirtualIntentInterceptorDelegate
+            extends IVirtualDeviceIntentInterceptor.Stub {
+        @NonNull private final IntentInterceptorCallback mIntentInterceptorCallback;
+        @NonNull private final Executor mExecutor;
+
+        private VirtualIntentInterceptorDelegate(Executor executor,
+                IntentInterceptorCallback interceptorCallback) {
+            mExecutor = executor;
+            mIntentInterceptorCallback = interceptorCallback;
+        }
+
+        @Override
+        public void onIntentIntercepted(Intent intent) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mIntentInterceptorCallback.onIntentIntercepted(intent));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
     }
 }

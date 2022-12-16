@@ -21,6 +21,7 @@ import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_INVALID;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_SENSORS;
+import static android.content.Intent.ACTION_VIEW;
 import static android.content.pm.ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -37,6 +38,7 @@ import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -49,6 +51,7 @@ import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;
 import android.companion.virtual.IVirtualDeviceActivityListener;
+import android.companion.virtual.IVirtualDeviceIntentInterceptor;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
@@ -57,6 +60,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.hardware.Sensor;
@@ -73,6 +77,7 @@ import android.hardware.input.VirtualNavigationTouchpadConfig;
 import android.hardware.input.VirtualTouchEvent;
 import android.hardware.input.VirtualTouchscreenConfig;
 import android.net.MacAddress;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -184,6 +189,7 @@ public class VirtualDeviceManagerServiceTest {
                     .setInputDeviceName(DEVICE_NAME)
                     .setAssociatedDisplayId(DISPLAY_ID)
                     .build();
+    private static final String TEST_SITE = "http://test";
 
     private Context mContext;
     private InputManagerMockHelper mInputManagerMockHelper;
@@ -1337,6 +1343,99 @@ public class VirtualDeviceManagerServiceTest {
         gwpc.onRunningAppsChanged(uids);
 
         assertThat(gwpc.getRunningAppsChangedListenersSizeForTesting()).isEqualTo(0);
+    }
+
+    @Test
+    public void canActivityBeLaunched_activityCanLaunch() {
+        Intent intent = new Intent(ACTION_VIEW, Uri.parse(TEST_SITE));
+        mDeviceImpl.onVirtualDisplayCreatedLocked(
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
+        GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
+                            DISPLAY_ID);
+        ArrayList<ActivityInfo> activityInfos = getActivityInfoList(
+                NONBLOCKED_APP_PACKAGE_NAME,
+                NONBLOCKED_APP_PACKAGE_NAME,
+            /* displayOnRemoveDevices */ true,
+            /* targetDisplayCategory */ null);
+        assertThat(gwpc.canActivityBeLaunched(activityInfos.get(0), intent,
+            WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID, /*isNewTask=*/false))
+            .isTrue();
+    }
+
+    @Test
+    public void canActivityBeLaunched_intentInterceptedWhenRegistered_activityNoLaunch()
+            throws RemoteException {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(TEST_SITE));
+
+        IVirtualDeviceIntentInterceptor.Stub interceptor =
+                mock(IVirtualDeviceIntentInterceptor.Stub.class);
+        doNothing().when(interceptor).onIntentIntercepted(any());
+        doReturn(interceptor).when(interceptor).asBinder();
+        doReturn(interceptor).when(interceptor).queryLocalInterface(anyString());
+
+        mDeviceImpl.onVirtualDisplayCreatedLocked(
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
+        GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
+                            DISPLAY_ID);
+        ArrayList<ActivityInfo> activityInfos = getActivityInfoList(
+                NONBLOCKED_APP_PACKAGE_NAME,
+                NONBLOCKED_APP_PACKAGE_NAME,
+            /* displayOnRemoveDevices */ true,
+            /* targetDisplayCategory */ null);
+
+        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_VIEW);
+        intentFilter.addDataScheme(IntentFilter.SCHEME_HTTP);
+        intentFilter.addDataScheme(IntentFilter.SCHEME_HTTPS);
+
+        // register interceptor and intercept intent
+        mDeviceImpl.registerIntentInterceptor(interceptor, intentFilter);
+        assertThat(gwpc.canActivityBeLaunched(activityInfos.get(0), intent,
+            WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID, /*isNewTask=*/false))
+            .isFalse();
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(interceptor).onIntentIntercepted(intentCaptor.capture());
+        Intent cIntent = intentCaptor.getValue();
+        assertThat(cIntent).isNotNull();
+        assertThat(cIntent.getAction()).isEqualTo(Intent.ACTION_VIEW);
+        assertThat(cIntent.getData().toString()).isEqualTo(TEST_SITE);
+
+        // unregister interceptor and launch activity
+        mDeviceImpl.unregisterIntentInterceptor(interceptor);
+        assertThat(gwpc.canActivityBeLaunched(activityInfos.get(0), intent,
+            WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID, /*isNewTask=*/false))
+            .isTrue();
+    }
+
+    @Test
+    public void canActivityBeLaunched_noMatchIntentFilter_activityLaunches()
+            throws RemoteException {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("testing"));
+
+        IVirtualDeviceIntentInterceptor.Stub interceptor =
+                mock(IVirtualDeviceIntentInterceptor.Stub.class);
+        doNothing().when(interceptor).onIntentIntercepted(any());
+        doReturn(interceptor).when(interceptor).asBinder();
+        doReturn(interceptor).when(interceptor).queryLocalInterface(anyString());
+
+        mDeviceImpl.onVirtualDisplayCreatedLocked(
+                mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
+        GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
+                            DISPLAY_ID);
+        ArrayList<ActivityInfo> activityInfos = getActivityInfoList(
+                NONBLOCKED_APP_PACKAGE_NAME,
+                NONBLOCKED_APP_PACKAGE_NAME,
+            /* displayOnRemoveDevices */ true,
+            /* targetDisplayCategory */ null);
+
+        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_VIEW);
+        intentFilter.addDataScheme("mailto");
+
+        // register interceptor with different filter
+        mDeviceImpl.registerIntentInterceptor(interceptor, intentFilter);
+
+        assertThat(gwpc.canActivityBeLaunched(activityInfos.get(0), intent,
+            WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID, /*isNewTask=*/false))
+            .isTrue();
     }
 
     @Test
