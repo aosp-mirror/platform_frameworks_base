@@ -6452,6 +6452,10 @@ public class DevicePolicyManager {
      * <p>The caller must hold the
      * {@link android.Manifest.permission#TRIGGER_LOST_MODE} permission.
      *
+     * <p>Register a broadcast receiver to receive lost mode location updates. This receiver should
+     * subscribe to the {@link #ACTION_LOST_MODE_LOCATION_UPDATE} action and receive the location
+     * from an intent extra {@link #EXTRA_LOST_MODE_LOCATION}.
+     *
      * <p> Not for use by third-party applications.
      *
      * @param executor The executor through which the callback should be invoked.
