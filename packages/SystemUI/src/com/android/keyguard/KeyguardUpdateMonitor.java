@@ -464,7 +464,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     @Override
-    public void onTrustChanged(boolean enabled, int userId, int flags,
+    public void onTrustChanged(boolean enabled, boolean newlyUnlocked, int userId, int flags,
             List<String> trustGrantedMessages) {
         Assert.isMainThread();
         boolean wasTrusted = mUserHasTrust.get(userId, false);
