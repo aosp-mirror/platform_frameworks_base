@@ -57,6 +57,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
@@ -392,12 +393,16 @@ public class TaskTests extends WindowTestsBase {
         leafTask1.getWindowConfiguration().setActivityType(ACTIVITY_TYPE_HOME);
         leafTask2.getWindowConfiguration().setActivityType(ACTIVITY_TYPE_STANDARD);
 
+        // We need to use an orientation that is not an exception for the
+        // ignoreOrientationRequest flag.
+        final int orientation = SCREEN_ORIENTATION_PORTRAIT;
+
         assertEquals(leafTask2, rootTask.getTopChild());
-        assertTrue(rootTask.handlesOrientationChangeFromDescendant());
+        assertTrue(rootTask.handlesOrientationChangeFromDescendant(orientation));
         // Treat orientation request from home as handled.
-        assertTrue(leafTask1.handlesOrientationChangeFromDescendant());
+        assertTrue(leafTask1.handlesOrientationChangeFromDescendant(orientation));
         // Orientation request from standard activity in multi window will not be handled.
-        assertFalse(leafTask2.handlesOrientationChangeFromDescendant());
+        assertFalse(leafTask2.handlesOrientationChangeFromDescendant(orientation));
     }
 
     @Test
@@ -636,7 +641,8 @@ public class TaskTests extends WindowTestsBase {
         doReturn(parentWindowContainer).when(task).getParent();
         doReturn(display.getDefaultTaskDisplayArea()).when(task).getDisplayArea();
         doReturn(rootTask).when(task).getRootTask();
-        doReturn(true).when(parentWindowContainer).handlesOrientationChangeFromDescendant();
+        doReturn(true).when(parentWindowContainer)
+                .handlesOrientationChangeFromDescendant(anyInt());
 
         // Setting app to fixed portrait fits within parent, but Task shouldn't adjust the
         // bounds because its parent says it will handle it at a later time.
