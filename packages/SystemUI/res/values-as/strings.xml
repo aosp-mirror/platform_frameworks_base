@@ -72,6 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock অক্ষম কৰা হৈছে"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"এখন প্ৰতিচ্ছবি পঠিয়াইছে"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"স্ক্ৰীণশ্বট ছেভ কৰি থকা হৈছে…"</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"কৰ্মস্থানৰ প্ৰ’ফাইলত স্ক্ৰীনশ্বট ছেভ কৰি থকা হৈছে…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"স্ক্ৰীণশ্বট ছেভ কৰা হ’ল"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"স্ক্ৰীণশ্বট ছেভ কৰিব পৰা নগ\'ল"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"স্ক্ৰীনশ্বট ছেভ কৰিবলৈ ডিভাইচটো আনলক কৰিবই লাগিব"</string>
@@ -125,8 +126,7 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"কণ্ঠধ্বনিৰে সহায়"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"ৱালেট"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"কিউআৰ ক’ড স্কেনাৰ"</string>
-    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
-    <skip />
+    <string name="accessibility_unlock_button" msgid="3613812140816244310">"আনলক কৰা আছে"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"ডিভাইচটো লক হৈ আছে"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"চেহেৰা স্কেন কৰি থকা হৈছে"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"পঠিয়াওক"</string>
@@ -169,8 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"মুখাৱয়ব চিনিব নোৱাৰি"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"ইয়াৰ সলনি ফিংগাৰপ্ৰিণ্ট ব্যৱহাৰ কৰক"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
-    <skip />
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"ফেচ আনলক সুবিধা উপলব্ধ নহয়"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ব্লুটুথ সংযোগ হ’ল।"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"বেটাৰীৰ চাৰ্জৰ শতাংশ অজ্ঞাত।"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>ৰ লগত সংযোগ কৰা হ’ল।"</string>
@@ -181,12 +180,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"এয়াৰপ্লে’ন ম’ড।"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"ভিপিএন অন অৱস্থাত আছে।"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> শতাংশ বেটাৰী।"</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"আপোনাৰ ব্যৱহাৰৰ ওপৰত ভিত্তি কৰি বেটাৰী <xliff:g id="PERCENTAGE">%1$d</xliff:g> শতাংশ, প্ৰায় <xliff:g id="TIME">%2$s</xliff:g> বাকী আছে"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> শতাংশ বেটাৰী, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"বেটাৰী চাৰ্জ হৈ আছে, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> শতাংশ।"</string>
-    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
-    <skip />
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"বেটাৰী <xliff:g id="PERCENTAGE">%d</xliff:g> শতাংশ, বেটাৰীৰ সুৰক্ষাৰ বাবে চাৰ্জিং পজ কৰা হৈছে।"</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"বেটাৰী <xliff:g id="PERCENTAGE">%1$d</xliff:g> শতাংশ, <xliff:g id="TIME">%2$s</xliff:g>, বেটাৰীৰ সুৰক্ষাৰ বাবে চাৰ্জিং পজ কৰা হৈছে।"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"আটাইবোৰ জাননী চাওক"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter সক্ষম কৰা হ\'ল৷"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"ৰিংগাৰ কম্পন অৱস্থাত আছে৷"</string>
@@ -320,7 +317,8 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"আটাইবোৰ এপ্ আৰু সেৱাৰ বাবে কেমেৰা সক্ষম কৰা হৈছে।"</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"আটাইবোৰ এপ্ আৰু সেৱাৰ বাবে কেমেৰাৰ এক্সেছ অক্ষম কৰা হৈছে।"</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"মাইক্ৰ’ফ’নৰ বুটামটো ব্যৱহাৰ কৰিবলৈ, ছেটিঙত মাইক্ৰ’ফ’নৰ এক্সেছ সক্ষম কৰক।"</string>
-    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"ছেটিং খোলক।"</string>
+    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
+    <skip />
     <string name="media_seamless_other_device" msgid="4654849800789196737">"অন্য ডিভাইচ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"অৱলোকন ট’গল কৰক"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"আপুনি নিৰ্দিষ্ট কৰা এলাৰ্ম, ৰিমাইণ্ডাৰ, ইভেন্ট আৰু কল কৰোঁতাৰ বাহিৰে আন কোনো শব্দৰ পৰা আপুনি অসুবিধা নাপাব। কিন্তু, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি আপুনি প্লে কৰিব খোজা যিকোনো বস্তু তথাপি শুনিব পাৰিব।"</string>
@@ -407,6 +405,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"অসুবিধা নিদিব-ই জাননী পজ কৰিছে"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"এতিয়াই আৰম্ভ কৰক"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"কোনো জাননী নাই"</string>
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"কোনো নতুন জাননী নাই"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"পুৰণি জাননী চবলৈ আনলক কৰক"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"এই ডিভাইচটো আপোনাৰ অভিভাৱকে পৰিচালনা কৰে"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"এই ডিভাইচটোৰ গৰাকী আপোনাৰ প্ৰতিষ্ঠান আৰু ই নেটৱৰ্কৰ ট্ৰেফিক নিৰীক্ষণ কৰিব পাৰে"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"এই ডিভাইচটোৰ গৰাকী <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> আৰু এইটোৱে নেটৱৰ্কৰ ট্ৰেফিক নিৰীক্ষণ কৰিব পাৰে"</string>
@@ -511,8 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ব্যৱহাৰ কৰিবলৈ আনলক কৰক"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"আপোনাৰ কাৰ্ড লাভ কৰোঁতে এটা সমস্যা হৈছে, অনুগ্ৰহ কৰি পাছত পুনৰ চেষ্টা কৰক"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"লক স্ক্ৰীনৰ ছেটিং"</string>
-    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"কিউআৰ ক’ড স্কেনাৰ"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"আপডে’ট কৰি থকা হৈছে"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"কৰ্মস্থানৰ প্ৰ\'ফাইল"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"এয়াৰপ্লে’ন ম’ড"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"আপুনি আপোনাৰ পিছৰটো এলাৰ্ম <xliff:g id="WHEN">%1$s</xliff:g> বজাত শুনা নাপাব"</string>
@@ -795,8 +795,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"পূৰ্ণ স্ক্ৰীন বিবৰ্ধন কৰক"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"স্ক্ৰীনৰ কিছু অংশ বিবৰ্ধন কৰক"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ছুইচ"</string>
-    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
-    <skip />
+    <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"আকাৰ সলনি কৰিবলৈ চুককেইটা টানি আনি এৰক"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"কৰ্ণডালৰ দিশত স্ক্ৰ’ল কৰাৰ সুবিধা"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"আকাৰ সলনি কৰক"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"বিবৰ্ধনৰ প্ৰকাৰ সলনি কৰক"</string>
@@ -905,6 +904,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"কাষ্ট বন্ধ কৰক"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"অডিঅ\' আউটপুটৰ বাবে উপলব্ধ ডিভাইচ।"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ভলিউম"</string>
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"সম্প্ৰচাৰ কৰাটোৱে কেনেকৈ কাম কৰে"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"সম্প্ৰচাৰ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"সমিল ব্লুটুথ ডিভাইচৰ সৈতে আপোনাৰ নিকটৱৰ্তী স্থানত থকা লোকসকলে আপুনি সম্প্ৰচাৰ কৰা মিডিয়াটো শুনিব পাৰে"</string>
@@ -1018,17 +1018,34 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"কেমেৰা আৰু মাইক অফ হৈ আছে"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# টা জাননী}one{# টা জাননী}other{# টা জাননী}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="note_task_button_label" msgid="8718616095800343136">"টোকাগ্ৰহণ"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"সম্প্ৰচাৰণ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ সম্প্ৰচাৰ কৰা বন্ধ কৰিবনে?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"যদি আপুনি <xliff:g id="SWITCHAPP">%1$s</xliff:g>ৰ সম্প্ৰচাৰ কৰে অথবা আউটপুট সলনি কৰে, তেন্তে, আপোনাৰ বৰ্তমানৰ সম্প্ৰচাৰ বন্ধ হৈ যাব"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> সম্প্ৰচাৰ কৰক"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"আউটপুট সলনি কৰক"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"অজ্ঞাত"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>ক আটাইবোৰ ডিভাইচৰ লগ এক্সেছ কৰাৰ অনুমতি প্ৰদান কৰিবনে?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"কেৱল এবাৰ এক্সেছ কৰাৰ অনুমতি দিয়ক"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"অনুমতি নিদিব"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"আপোনাৰ ডিভাইচত কি কি ঘটে সেয়া ডিভাইচ লগে ৰেকৰ্ড কৰে। এপ্‌সমূহে সমস্যা বিচাৰিবলৈ আৰু সমাধান কৰিবলৈ এই লগসমূহ ব্যৱহাৰ কৰিব পাৰে।\n\nকিছুমান লগত সংবেদনশীল তথ্য থাকিব পাৰে, গতিকে কেৱল আপুনি বিশ্বাস কৰা এপকহে আটাইবোৰ ডিভাইচ লগ এক্সেছ কৰাৰ অনুমতি দিয়ক। \n\nআপুনি যদি এই এপ্‌টোক আটাইবোৰ ডিভাইচ লগ এক্সেছ কৰাৰ অনুমতি নিদিয়ে, তথাপিও ই নিজৰ লগসমূহ এক্সেছ কৰিব পাৰিব। আপোনাৰ ডিভাইচৰ নিৰ্মাতাই তথাপিও হয়তো আপোনাৰ ডিভাইচটোত থকা কিছু লগ অথবা তথ্য এক্সেছ কৰিব পাৰিব।"</string>
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> খোলক"</string>
+    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"<xliff:g id="APPNAME">%1$s</xliff:g> এপ্‌টোক এটা শ্বৰ্টকাট হিচাপে যোগ দিবলৈ, এইকেইটা কথা নিশ্চিত কৰক"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• এপ্‌টো ছেট আপ কৰা হৈছে"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Walletত অতি কমেও এখন কাৰ্ড যোগ দিয়া হৈছে"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• এটা কেমেৰা এপ্ ইনষ্টল কৰক"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• এপ্‌টো ছেট আপ কৰা হৈছে"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• অতি কমেও এটা ডিভাইচ উপলব্ধ"</string>
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"বাতিল কৰক"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"এতিয়াই লুটিয়াই দিয়ক"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"উন্নত ছেল্ফিৰ বাবে ফ’নটো আনফ’ল্ড কৰক"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"উন্নত ছেল্ফিৰ বাবে সন্মুখৰ ডিছপ্লে’ লুটিয়াই দিবনে?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"অধিক ৰিজ’লিউশ্বনৰ বহল ফট’ৰ বাবে পিছফালে থকা কেমেৰাটো ব্যৱহাৰ কৰক।"</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ই স্ক্ৰীনখন অফ হ’ব"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

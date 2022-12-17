@@ -2115,6 +2115,7 @@ package android {
     field public static final int accessibilityActionPageUp = 16908358; // 0x1020046
     field public static final int accessibilityActionPressAndHold = 16908362; // 0x102004a
     field public static final int accessibilityActionScrollDown = 16908346; // 0x102003a
+    field public static final int accessibilityActionScrollInDirection;
     field public static final int accessibilityActionScrollLeft = 16908345; // 0x1020039
     field public static final int accessibilityActionScrollRight = 16908347; // 0x102003b
     field public static final int accessibilityActionScrollToPosition = 16908343; // 0x1020037
@@ -11809,6 +11810,7 @@ package android.content.pm {
     method public void close();
     method public void commit(@NonNull android.content.IntentSender);
     method public void fsync(@NonNull java.io.OutputStream) throws java.io.IOException;
+    method @NonNull public android.os.PersistableBundle getAppMetadata();
     method @NonNull public int[] getChildSessionIds();
     method @NonNull public String[] getNames() throws java.io.IOException;
     method public int getParentSessionId();
@@ -11821,6 +11823,7 @@ package android.content.pm {
     method public void removeSplit(@NonNull String) throws java.io.IOException;
     method public void requestChecksums(@NonNull String, int, @NonNull java.util.List<java.security.cert.Certificate>, @NonNull java.util.concurrent.Executor, @NonNull android.content.pm.PackageManager.OnChecksumsReadyListener) throws java.security.cert.CertificateEncodingException, java.io.FileNotFoundException;
     method public void requestUserPreapproval(@NonNull android.content.pm.PackageInstaller.PreapprovalDetails, @NonNull android.content.IntentSender);
+    method public void setAppMetadata(@Nullable android.os.PersistableBundle) throws java.io.IOException;
     method @Deprecated public void setChecksums(@NonNull String, @NonNull java.util.List<android.content.pm.Checksum>, @Nullable byte[]) throws java.io.IOException;
     method public void setStagingProgress(float);
     method public void transfer(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -27864,8 +27867,14 @@ package android.net.sip {
 package android.net.vcn {
 
   public final class VcnCellUnderlyingNetworkTemplate extends android.net.vcn.VcnUnderlyingNetworkTemplate {
+    method public int getCbs();
+    method public int getDun();
+    method public int getIms();
+    method public int getInternet();
+    method public int getMms();
     method @NonNull public java.util.Set<java.lang.String> getOperatorPlmnIds();
     method public int getOpportunistic();
+    method public int getRcs();
     method public int getRoaming();
     method @NonNull public java.util.Set<java.lang.Integer> getSimSpecificCarrierIds();
   }
@@ -27873,11 +27882,17 @@ package android.net.vcn {
   public static final class VcnCellUnderlyingNetworkTemplate.Builder {
     ctor public VcnCellUnderlyingNetworkTemplate.Builder();
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate build();
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setCbs(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setDun(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setIms(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setInternet(int);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMetered(int);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMinDownstreamBandwidthKbps(int, int);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMinUpstreamBandwidthKbps(int, int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMms(int);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setOperatorPlmnIds(@NonNull java.util.Set<java.lang.String>);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setOpportunistic(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setRcs(int);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setRoaming(int);
     method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setSimSpecificCarrierIds(@NonNull java.util.Set<java.lang.Integer>);
   }
@@ -32469,12 +32484,7 @@ package android.os {
   public static class PerformanceHintManager.Session implements java.io.Closeable {
     method public void close();
     method public void reportActualWorkDuration(long);
-    method public void sendHint(int);
     method public void updateTargetWorkDuration(long);
-    field public static final int CPU_LOAD_DOWN = 1; // 0x1
-    field public static final int CPU_LOAD_RESET = 2; // 0x2
-    field public static final int CPU_LOAD_RESUME = 3; // 0x3
-    field public static final int CPU_LOAD_UP = 0; // 0x0
   }
 
   public final class PersistableBundle extends android.os.BaseBundle implements java.lang.Cloneable android.os.Parcelable {
@@ -36189,6 +36199,7 @@ package android.provider {
     field public static final String RADIO_CELL = "cell";
     field public static final String RADIO_NFC = "nfc";
     field public static final String RADIO_WIFI = "wifi";
+    field public static final String SECURE_FRP_MODE = "secure_frp_mode";
     field @Deprecated public static final String SHOW_PROCESSES = "show_processes";
     field public static final String STAY_ON_WHILE_PLUGGED_IN = "stay_on_while_plugged_in";
     field public static final String TRANSITION_ANIMATION_SCALE = "transition_animation_scale";
@@ -48537,6 +48548,7 @@ package android.util {
     method public static int complexToDimensionPixelSize(int, android.util.DisplayMetrics);
     method public static float complexToFloat(int);
     method public static float complexToFraction(int, float, float);
+    method public static float deriveDimension(int, float, @NonNull android.util.DisplayMetrics);
     method public int getComplexUnit();
     method public float getDimension(android.util.DisplayMetrics);
     method public final float getFloat();
@@ -52491,6 +52503,7 @@ package android.view {
     method public default void removeCrossWindowBlurEnabledListener(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void removeViewImmediate(android.view.View);
     field public static final String PROPERTY_ACTIVITY_EMBEDDING_ALLOW_SYSTEM_OVERRIDE = "android.window.PROPERTY_ACTIVITY_EMBEDDING_ALLOW_SYSTEM_OVERRIDE";
+    field public static final String PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED = "android.window.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED";
   }
 
   public static class WindowManager.BadTokenException extends java.lang.RuntimeException {
@@ -52746,6 +52759,7 @@ package android.view.accessibility {
     field public static final int TYPE_VIEW_LONG_CLICKED = 2; // 0x2
     field public static final int TYPE_VIEW_SCROLLED = 4096; // 0x1000
     field public static final int TYPE_VIEW_SELECTED = 4; // 0x4
+    field public static final int TYPE_VIEW_TARGETED_BY_SCROLL = 67108864; // 0x4000000
     field public static final int TYPE_VIEW_TEXT_CHANGED = 16; // 0x10
     field public static final int TYPE_VIEW_TEXT_SELECTION_CHANGED = 8192; // 0x2000
     field public static final int TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY = 131072; // 0x20000
@@ -52986,6 +53000,7 @@ package android.view.accessibility {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACTION_ACCESSIBILITY_FOCUS = 64; // 0x40
     field public static final String ACTION_ARGUMENT_COLUMN_INT = "android.view.accessibility.action.ARGUMENT_COLUMN_INT";
+    field public static final String ACTION_ARGUMENT_DIRECTION_INT = "android.view.accessibility.action.ARGUMENT_DIRECTION_INT";
     field public static final String ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN = "ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN";
     field public static final String ACTION_ARGUMENT_HTML_ELEMENT_STRING = "ACTION_ARGUMENT_HTML_ELEMENT_STRING";
     field public static final String ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT = "ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT";
@@ -53078,6 +53093,7 @@ package android.view.accessibility {
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_BACKWARD;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_DOWN;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_FORWARD;
+    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_IN_DIRECTION;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_LEFT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_RIGHT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_TO_POSITION;

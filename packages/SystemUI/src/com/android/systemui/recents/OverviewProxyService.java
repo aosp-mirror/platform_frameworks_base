@@ -889,7 +889,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
          * Notifies the Launcher that screen is starting to turn on.
          */
         @Override
-        public void onScreenTurningOn(@NonNull Runnable ignored) {
+        public void onScreenTurningOn() {
             try {
                 if (mOverviewProxy != null) {
                     mOverviewProxy.onScreenTurningOn();

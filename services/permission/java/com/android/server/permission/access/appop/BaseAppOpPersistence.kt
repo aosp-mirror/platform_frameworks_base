@@ -19,7 +19,7 @@ package com.android.server.permission.access.appop
 import android.util.Log
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
-import com.android.server.permission.access.UserState
+import com.android.server.permission.access.AccessState
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.attributeInt
 import com.android.server.permission.access.util.attributeInterned
@@ -30,9 +30,9 @@ import com.android.server.permission.access.util.tag
 import com.android.server.permission.access.util.tagName
 
 abstract class BaseAppOpPersistence {
-    abstract fun BinaryXmlPullParser.parseUserState(userId: Int, userState: UserState)
+    abstract fun BinaryXmlPullParser.parseUserState(state: AccessState, userId: Int)
 
-    abstract fun BinaryXmlSerializer.serializeUserState(userId: Int, userState: UserState)
+    abstract fun BinaryXmlSerializer.serializeUserState(state: AccessState, userId: Int)
 
     protected fun BinaryXmlPullParser.parseAppOps(appOpModes: IndexedMap<String, Int>) {
         forEachTag {
@@ -67,7 +67,7 @@ abstract class BaseAppOpPersistence {
 
         private const val TAG_APP_OP = "app-op"
 
-        private const val ATTR_NAME = "name"
         private const val ATTR_MODE = "mode"
+        private const val ATTR_NAME = "name"
     }
 }

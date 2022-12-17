@@ -19,6 +19,7 @@ package com.android.server.biometrics;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_DEFAULT;
+import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTHENTICATED_PENDING_SYSUI;
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_CALLED;
@@ -65,12 +66,16 @@ import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.AmbientDisplayConfiguration;
+import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.security.KeyStore;
+import android.view.Display;
+import android.view.DisplayInfo;
+import android.view.WindowManager;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -134,6 +139,8 @@ public class BiometricServiceTest {
     @Mock
     DevicePolicyManager mDevicePolicyManager;
     @Mock
+    private WindowManager mWindowManager;
+    @Mock
     private IStatusBarService mStatusBarService;
     @Mock
     private ISessionListener mSessionListener;
@@ -174,9 +181,13 @@ public class BiometricServiceTest {
         when(mResources.getString(R.string.biometric_error_user_canceled))
                 .thenReturn(ERROR_USER_CANCELED);
 
+        when(mWindowManager.getDefaultDisplay()).thenReturn(
+                new Display(DisplayManagerGlobal.getInstance(), Display.DEFAULT_DISPLAY,
+                        new DisplayInfo(), DEFAULT_DISPLAY_ADJUSTMENTS));
         when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
-        mBiometricContextProvider = new BiometricContextProvider(mAmbientDisplayConfiguration,
-                mStatusBarService, null /* handler */, mAuthSessionCoordinator);
+        mBiometricContextProvider = new BiometricContextProvider(mContext, mWindowManager,
+                mAmbientDisplayConfiguration, mStatusBarService, null /* handler */,
+                mAuthSessionCoordinator);
         when(mInjector.getBiometricContext(any())).thenReturn(mBiometricContextProvider);
 
         final String[] config = {

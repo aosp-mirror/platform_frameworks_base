@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Сачувај на другом месту"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Користи други уређај"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Сачувај на други уређај"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Безбедније уз приступне кодове"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Нема потребе да правите или памтите сложене лозинке"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Користите отисак прста, лице или закључавање екрана да бисте направили јединствени приступни кôд"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Приступни кодови се чувају у менаџеру лозинки да бисте могли да се пријављујете на другим уређајима"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Одаберите локацију за: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"направите приступне кодове"</string>
     <string name="save_your_password" msgid="6597736507991704307">"сачувајте лозинку"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"Други менаџери лозинки"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Затворите табелу"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Вратите се на претходну страницу"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Желите да користите сачувани приступни кôд за: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Желите да користите сачуване податке за пријављивање за: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Одаберите сачувано пријављивање за: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

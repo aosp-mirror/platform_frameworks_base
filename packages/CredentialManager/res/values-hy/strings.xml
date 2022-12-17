@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Պահել այլ տեղում"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Օգտագործել այլ սարք"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Պահել մեկ այլ սարքում"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Անցաբառերի հետ ավելի ապահով է"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Բարդ գաղտնաբառեր ստեղծելու կամ հիշելու կարիք չկա"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Օգտագործեք ձեր մատնահետքը, դեմքը կամ էկրանի կողպումը՝ եզակի անցաբառ ստեղծելու համար"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Դուք կարող եք մուտք գործել այլ սարքերում, քանի որ անցաբառերը պահվում են գաղտնաբառերի կառավարչում"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Ընտրեք, թե որտեղ <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"ստեղծել ձեր անցաբառերը"</string>
     <string name="save_your_password" msgid="6597736507991704307">"պահել գաղտնաբառը"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"Գաղտնաբառերի այլ կառավարիչներ"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Փակել թերթը"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Անցնել նախորդ էջ"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Օգտագործե՞լ պահված անցաբառը <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի համար"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Օգտագործե՞լ մուտքի պահված տվյալները <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի համար"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Ընտրեք մուտքի պահված տվյալներ <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի համար"</string>

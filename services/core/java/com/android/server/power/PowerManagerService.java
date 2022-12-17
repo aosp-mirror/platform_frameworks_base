@@ -5710,6 +5710,11 @@ public final class PowerManagerService extends SystemService
             try {
                 synchronized (mLock) {
                     PowerGroup defaultPowerGroup = mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP);
+                    if ((flags & PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP) != 0) {
+                        if (defaultPowerGroup.hasWakeLockKeepingScreenOnLocked()) {
+                            return;
+                        }
+                    }
                     if ((flags & PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE) != 0) {
                         sleepPowerGroupLocked(defaultPowerGroup, eventTime, reason, uid);
                     } else {

@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"บันทึกลงในตำแหน่งอื่น"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"ใช้อุปกรณ์อื่น"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"ย้ายไปยังอุปกรณ์อื่น"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ปลอดภัยขึ้นด้วยพาสคีย์"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"ไม่จำเป็นต้องสร้างหรือจำรหัสผ่านที่ซับซ้อน"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"ใช้ลายนิ้วมือ ใบหน้า หรือล็อกหน้าจอเพื่อสร้างพาสคีย์ที่ไม่ซ้ำ"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"พาสคีย์จะบันทึกอยู่ในเครื่องมือจัดการรหัสผ่านเพื่อให้คุณลงชื่อเข้าใช้ในอุปกรณ์อื่นๆ ได้"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"เลือกตำแหน่งที่จะ <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"สร้างพาสคีย์"</string>
     <string name="save_your_password" msgid="6597736507991704307">"บันทึกรหัสผ่าน"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"เครื่องมือจัดการรหัสผ่านอื่นๆ"</string>
     <string name="close_sheet" msgid="1393792015338908262">"ปิดชีต"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"กลับไปยังหน้าก่อนหน้า"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"ใช้พาสคีย์ที่บันทึกไว้สำหรับ \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" ใช่ไหม"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"ใช้การลงชื่อเข้าใช้ที่บันทึกไว้สำหรับ \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" ใช่ไหม"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"เลือกการลงชื่อเข้าใช้ที่บันทึกไว้สำหรับ \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>

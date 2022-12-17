@@ -2170,9 +2170,9 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private @CrossProfileIntentFilter.AccessControlLevel int
                 getCrossProfileIntentFilterAccessControl(@UserIdInt int userId) {
-        final UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
-        return userTypeDetails != null ? userTypeDetails.getCrossProfileIntentFilterAccessControl()
-                : CrossProfileIntentFilter.ACCESS_LEVEL_ALL;
+        final UserProperties userProperties = getUserPropertiesInternal(userId);
+        return userProperties != null ? userProperties.getCrossProfileIntentFilterAccessControl() :
+                CrossProfileIntentFilter.ACCESS_LEVEL_ALL;
     }
 
     /**

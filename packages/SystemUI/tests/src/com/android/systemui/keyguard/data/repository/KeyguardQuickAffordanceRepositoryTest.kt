@@ -114,6 +114,11 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                 userHandle = UserHandle.SYSTEM,
             )
 
+        overrideResource(
+            R.array.config_keyguardQuickAffordanceDefaults,
+            arrayOf<String>(),
+        )
+
         underTest =
             KeyguardQuickAffordanceRepository(
                 appContext = context,

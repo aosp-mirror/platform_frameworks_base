@@ -43,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Οι αριθμοί PIN που πληκτρολογήσατε δεν ταιριάζουν."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Πληκτρολογήστε έναν αριθμό PIN μεγέθους 4 έως 8 αριθμών."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Πληκτρολογήστε έναν κωδικό PUK με 8 αριθμούς ή περισσότερους."</string>
-    <string name="needPuk" msgid="7321876090152422918">"Η κάρτα SIM έχει κλειδωθεί με κωδικό PUK. Πληκτρολογήστε τον κωδικό PUK για να την ξεκλειδώσετε."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"Πληκτρολογήστε τον κωδικό PUK2 για την κατάργηση αποκλεισμού της κάρτας SIM."</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"Ανεπιτυχής προσπάθεια. Ενεργοποιήστε το Κλείδωμα SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">Απομένουν άλλες <xliff:g id="NUMBER_1">%d</xliff:g> προσπάθειες προτού κλειδωθεί η κάρτα SIM.</item>
@@ -390,6 +392,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Αυτή η εφαρμογή μπορεί να εκτελείται στο παρασκήνιο. Αυτό μπορεί να εξαντλήσει πιο γρήγορα την μπαταρία."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"χρήση δεδομένων στο παρασκήνιο"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Αυτή η εφαρμογή μπορεί να χρησιμοποιεί δεδομένα στο παρασκήνιο. Αυτό μπορεί να αυξήσει τη χρήση δεδομένων."</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"Προγραμματισμός ενεργειών με ακριβή χρονομέτρηση"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Αυτή η εφαρμογή μπορεί να προγραμματίσει εργασίες έτσι ώστε να πραγματοποιηθούν σε μια επιθυμητή στιγμή στο μέλλον. Αυτό σημαίνει επίσης ότι η εφαρμογή μπορεί να εκτελείται όταν δεν χρησιμοποιείτε ενεργά τη συσκευή."</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"Προγραμματισμός ειδοποιήσεων ή υπενθυμίσεων συμβάντων"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Αυτή η εφαρμογή μπορεί να προγραμματίσει ενέργειες όπως ειδοποιήσεις και υπενθυμίσεις για να ειδοποιείστε σε μια επιθυμητή στιγμή στο μέλλον."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"επιτρέπει στην εφαρμογή να εκτελείται συνεχώς"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Επιτρέπει στην εφαρμογή να δημιουργεί μόνιμα τμήματα του εαυτού της στη μνήμη. Αυτό μπορεί να περιορίζει τη μνήμη που διατίθεται σε άλλες εφαρμογές, καθυστερώντας τη λειτουργία του tablet."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Επιτρέπει στην εφαρμογή να αποθηκεύει μόνιμα ορισμένα τμήματά της στη μνήμη. Αυτό μπορεί να περιορίσει τη διαθέσιμη μνήμη για άλλες εφαρμογές, μειώνοντας έτσι την ταχύτητα της συσκευής Android TV."</string>
@@ -418,6 +424,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Επιτρέπει στην εφαρμογή να χρησιμοποιεί τις υπηρεσίες στο προσκήνιο με τον τύπο \"remoteMessaging\""</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"εκτέλεση υπηρεσίας στο προσκήνιο με τον τύπο \"systemExempted\""</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Επιτρέπει στην εφαρμογή να χρησιμοποιεί τις υπηρεσίες στο προσκήνιο με τον τύπο \"systemExempted\""</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"εκτέλεση υπηρεσίας στο προσκήνιο με τον τύπο fileManagement"</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Επιτρέπει στην εφαρμογή να χρησιμοποιεί τις υπηρεσίες στο προσκήνιο με τον τύπο fileManagement."</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"εκτέλεση υπηρεσίας στο προσκήνιο με τον τύπο \"specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Επιτρέπει στην εφαρμογή να χρησιμοποιεί τις υπηρεσίες στο προσκήνιο με τον τύπο \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"υπολογίζει τον αποθηκευτικό χώρο εφαρμογής"</string>
@@ -955,14 +963,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Προσπαθήστε ξανά"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Ξεκλείδωμα για όλες τις λειτουργίες και δεδομένα"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Έγινε υπέρβαση του μέγιστου αριθμού προσπαθειών για Ξεκλείδωμα με το πρόσωπο"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Δεν υπάρχει κάρτα SIM"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Δεν υπάρχει κάρτα SIM στο tablet."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Δεν υπάρχει κάρτα SIM στη συσκευή σας Android TV."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Δεν υπάρχει κάρτα SIM στο τηλέφωνο."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Τοποθετήστε μια κάρτα SIM."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"Η κάρτα SIM δεν υπάρχει ή δεν είναι δυνατή η ανάγνωσή της. Τοποθετήστε μια κάρτα SIM."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Η κάρτα SIM δεν μπορεί να χρησιμοποιηθεί."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Η κάρτα SIM έχει απενεργοποιηθεί οριστικά.\n Επικοινωνήστε με τον πάροχο υπηρεσιών ασύρματου δικτύου για να λάβετε μια νέα κάρτα SIM."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Προηγούμενο κομμάτι"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Επόμενο κομμάτι"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Παύση"</string>
@@ -972,10 +988,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Γρήγορη προώθηση"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Μόνο κλήσεις έκτακτης ανάγκης"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Το δίκτυο κλειδώθηκε"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"Η κάρτα SIM είναι κλειδωμένη με κωδικό PUK."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Ανατρέξτε στον Οδηγό χρήσης ή επικοινωνήστε με την Εξυπηρέτηση πελατών."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"Η κάρτα SIM είναι κλειδωμένη."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Ξεκλείδωμα κάρτας SIM..."</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Σχεδιάσατε εσφαλμένα το μοτίβο ξεκλειδώματος<xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%2$d</xliff:g> δευτερόλεπτα."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Έχετε πληκτρολογήσει τον κωδικό πρόσβασης εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%2$d</xliff:g> δευτερόλεπτα."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Έχετε πληκτρολογήσει τον αριθμό σας PIN εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%2$d</xliff:g> δευτερόλεπτα."</string>
@@ -1359,10 +1378,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Μπορ.να το αλλάξ.αργ.στις Ρυθ. &gt; Εφ."</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Να επιτρέπεται πάντα"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Να μην επιτρέπεται ποτέ"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"Η κάρτα SIM αφαιρέθηκε"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"Το δίκτυο κινητής τηλεφωνίας δεν θα είναι διαθέσιμο μέχρι να κάνετε επανεκκίνηση αφού τοποθετήσετε μια έγκυρη κάρτα SIM."</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"Τέλος"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"Προστέθηκε κάρτα SIM"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"Επανεκκινήστε τη συσκευή σας για να αποκτήσετε πρόσβαση στο δίκτυο κινητής τηλεφωνίας."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Επανεκκίνηση"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Ενεργοποίηση υπηρεσίας κινητής τηλεφωνίας"</string>
@@ -1674,7 +1696,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"Η κάρτα SIM είναι απενεργοποιημένη αυτή τη στιγμή. Εισαγάγετε τον κωδικό PUK για να συνεχίσετε. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας σας για λεπτομέρειες."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Εισαγάγετε τον απαιτούμενο κωδικό PIN"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Επιβεβαιώστε τον απαιτούμενο κωδικό PIN"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Ξεκλείδωμα κάρτας SIM..."</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Λανθασμένος κωδικός PIN."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Πληκτρολογήστε έναν αριθμό PIN που να αποτελείται από 4 έως 8 αριθμούς."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"Ο κωδικός PUK θα πρέπει να αποτελείται από 8 αριθμούς."</string>
@@ -1731,7 +1754,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Απενεργοποίηση συντόμευσης"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Χρήση συντόμευσης"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Αντιστροφή χρωμάτων"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Διόρθωση χρωμάτων"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Λειτουργία ενός χεριού"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Επιπλέον μείωση φωτεινότητας"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Τα πλήκτρα έντασης είναι πατημένα. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ενεργοποιήθηκε."</string>
@@ -2320,4 +2344,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"Δεν είναι δυνατή η προβολή picture-in-picture κατά τη ροή"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Προεπιλογή συστήματος"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ΚΑΡΤΑ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Άδεια προφίλ συνοδευτικής εφαρμογής ρολογιού για τη διαχείριση ρολογιών"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"Επιτρέπει σε μια συνοδευτική εφαρμογή να διαχειρίζεται ρολόγια."</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"Παρατήρηση παρουσίας συνοδευτικών συσκευών"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"Επιτρέπει σε μια συνοδευτική εφαρμογή να παρατηρεί την παρουσία συνοδευτικών συσκευών όταν οι συσκευές βρίσκονται σε κοντινή απόσταση ή μακριά."</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"Παράδοση μηνυμάτων συνοδευτικής εφαρμογής"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"Επιτρέπει σε μια συνοδευτική εφαρμογή να παρέχει μηνύματα σε άλλες συσκευές."</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"Εκκίνηση υπηρεσιών στο προσκήνιο από το παρασκήνιο"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Επιτρέπει σε μια συνοδευτική εφαρμογή να εκκινεί υπηρεσίες στο προσκήνιο από το παρασκήνιο."</string>
 </resources>

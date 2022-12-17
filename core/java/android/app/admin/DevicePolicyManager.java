@@ -3925,6 +3925,8 @@ public class DevicePolicyManager {
      * <p>The MTE policy can only be set to {@link #MTE_DISABLED} if called by a device owner.
      * Otherwise a {@link SecurityException} will be thrown.
      *
+     * <p>The device needs to be rebooted to apply changes to the MTE policy.
+     *
      * @throws SecurityException if caller is not device owner or profile owner of org-owned device
      *     or if called on a parent instance
      * @param policy the MTE policy to be set
@@ -6311,13 +6313,12 @@ public class DevicePolicyManager {
      * personal use, removing the managed profile and all policies set by the profile owner.
      * </p>
      *
-     * <p>
-     * Calling this method from the primary user will only work if the calling app is targeting
-     * Android 13 or below, in which case it will cause the device to reboot, erasing all device
-     * data - including all the secondary users and their data - while booting up. If an app
-     * targeting Android 13+ is calling this method from the primary user or last full user,
-     * {@link IllegalStateException} will be thrown.
-     * </p>
+     * <p> Calling this method from the primary user will only work if the calling app is
+     * targeting SDK level {@link Build.VERSION_CODES#TIRAMISU} or below, in which case it will
+     * cause the device to reboot, erasing all device data - including all the secondary users
+     * and their data - while booting up. If an app targeting SDK level
+     * {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above is calling this method from the
+     * primary user or last full user, {@link IllegalStateException} will be thrown. </p>
      *
      * If an app wants to wipe the entire device irrespective of which user they are from, they
      * should use {@link #wipeDevice} instead.
@@ -6452,6 +6453,10 @@ public class DevicePolicyManager {
      *
      * <p>The caller must hold the
      * {@link android.Manifest.permission#TRIGGER_LOST_MODE} permission.
+     *
+     * <p>Register a broadcast receiver to receive lost mode location updates. This receiver should
+     * subscribe to the {@link #ACTION_LOST_MODE_LOCATION_UPDATE} action and receive the location
+     * from an intent extra {@link #EXTRA_LOST_MODE_LOCATION}.
      *
      * <p> Not for use by third-party applications.
      *

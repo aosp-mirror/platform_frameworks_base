@@ -165,7 +165,9 @@ object Flags {
 
     /** Shows chipbar UI whenever the device is unlocked by ActiveUnlock (watch). */
     // TODO(b/256513609): Tracking Bug
-    @JvmField val ACTIVE_UNLOCK_CHIPBAR = releasedFlag(217, "active_unlock_chipbar")
+    @JvmField
+    val ACTIVE_UNLOCK_CHIPBAR =
+        resourceBooleanFlag(217, R.bool.flag_active_unlock_chipbar, "active_unlock_chipbar")
 
     /**
      * Migrates control of the LightRevealScrim's reveal effect and amount from legacy code to the
@@ -401,6 +403,10 @@ object Flags {
     // TODO(b/254512756): Tracking Bug
     val QUICK_TAP_IN_PCC = releasedFlag(1400, "quick_tap_in_pcc")
 
+    // TODO(b/261979569): Tracking Bug
+    val QUICK_TAP_FLOW_FRAMEWORK =
+            unreleasedFlag(1401, "quick_tap_flow_framework", teamfood = false)
+
     // 1500 - chooser
     // TODO(b/254512507): Tracking Bug
     val CHOOSER_UNBUNDLED = unreleasedFlag(1500, "chooser_unbundled", teamfood = true)
@@ -455,6 +461,11 @@ object Flags {
     // TODO(b/261538825): Tracking Bug
     @JvmField
     val OUTPUT_SWITCHER_ADVANCED_LAYOUT = unreleasedFlag(2500, "output_switcher_advanced_layout")
+    @JvmField
+    val OUTPUT_SWITCHER_ROUTES_PROCESSING =
+        unreleasedFlag(2501, "output_switcher_routes_processing")
+    @JvmField
+    val OUTPUT_SWITCHER_DEVICE_STATUS = unreleasedFlag(2502, "output_switcher_device_status")
 
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag(2, "exp_flag_release")

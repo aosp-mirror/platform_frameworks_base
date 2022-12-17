@@ -19,6 +19,7 @@ package com.android.server.permission.access.appop
 import android.util.Log
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
+import com.android.server.permission.access.AccessState
 import com.android.server.permission.access.UserState
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.attributeInterned
@@ -28,19 +29,27 @@ import com.android.server.permission.access.util.tag
 import com.android.server.permission.access.util.tagName
 
 class PackageAppOpPersistence : BaseAppOpPersistence() {
-    override fun BinaryXmlPullParser.parseUserState(userId: Int, userState: UserState) {
+    override fun BinaryXmlPullParser.parseUserState(state: AccessState, userId: Int) {
         when (tagName) {
-            TAG_PACKAGE_APP_OPS -> parsePackageAppOps(userState)
+            TAG_PACKAGE_APP_OPS -> parsePackageAppOps(state, userId)
             else -> {}
         }
     }
 
-    private fun BinaryXmlPullParser.parsePackageAppOps(userState: UserState) {
+    private fun BinaryXmlPullParser.parsePackageAppOps(state: AccessState, userId: Int) {
+        val userState = state.userStates[userId]
         forEachTag {
             when (tagName) {
                 TAG_PACKAGE -> parsePackage(userState)
                 else -> Log.w(LOG_TAG, "Ignoring unknown tag $name when parsing app-op state")
             }
+        }
+        userState.packageAppOpModes.retainAllIndexed { _, packageName, _ ->
+            val hasPackage = packageName in state.systemState.packageStates
+            if (!hasPackage) {
+                Log.w(LOG_TAG, "Dropping unknown package $packageName when parsing app-op state")
+            }
+            hasPackage
         }
     }
 
@@ -51,8 +60,8 @@ class PackageAppOpPersistence : BaseAppOpPersistence() {
         parseAppOps(appOpModes)
     }
 
-    override fun BinaryXmlSerializer.serializeUserState(userId: Int, userState: UserState) {
-        serializePackageAppOps(userState)
+    override fun BinaryXmlSerializer.serializeUserState(state: AccessState, userId: Int) {
+        serializePackageAppOps(state.userStates[userId])
     }
 
     private fun BinaryXmlSerializer.serializePackageAppOps(userState: UserState) {
@@ -76,8 +85,8 @@ class PackageAppOpPersistence : BaseAppOpPersistence() {
     companion object {
         private val LOG_TAG = PackageAppOpPersistence::class.java.simpleName
 
-        private const val TAG_PACKAGE_APP_OPS = "package-app-ops"
         private const val TAG_PACKAGE = "package"
+        private const val TAG_PACKAGE_APP_OPS = "package-app-ops"
 
         private const val ATTR_NAME = "name"
     }

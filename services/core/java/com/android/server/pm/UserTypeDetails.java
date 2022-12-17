@@ -165,14 +165,6 @@ public final class UserTypeDetails {
     private final boolean mIsCredentialSharableWithParent;
 
     /**
-     * Denotes the default access control for {@link CrossProfileIntentFilter} of user profile.
-     *
-     * <p> Default value is {@link CrossProfileIntentFilter#ACCESS_LEVEL_ALL}
-     */
-    private final @CrossProfileIntentFilter.AccessControlLevel int
-            mCrossProfileIntentFilterAccessControl;
-
-    /**
      * The default {@link UserProperties} for the user type.
      * <p> The uninitialized value of each property is implied by {@link UserProperties.Builder}.
      */
@@ -190,7 +182,6 @@ public final class UserTypeDetails {
             @Nullable List<DefaultCrossProfileIntentFilter> defaultCrossProfileIntentFilters,
             boolean isMediaSharedWithParent,
             boolean isCredentialSharableWithParent,
-            @CrossProfileIntentFilter.AccessControlLevel int accessControlLevel,
             @NonNull UserProperties defaultUserProperties) {
         this.mName = name;
         this.mEnabled = enabled;
@@ -212,7 +203,6 @@ public final class UserTypeDetails {
         this.mDarkThemeBadgeColors = darkThemeBadgeColors;
         this.mIsMediaSharedWithParent = isMediaSharedWithParent;
         this.mIsCredentialSharableWithParent = isCredentialSharableWithParent;
-        this.mCrossProfileIntentFilterAccessControl = accessControlLevel;
         this.mDefaultUserProperties = defaultUserProperties;
     }
 
@@ -334,15 +324,6 @@ public final class UserTypeDetails {
         return mIsCredentialSharableWithParent;
     }
 
-    /**
-     * Returning user's {@link CrossProfileIntentFilter.AccessControlLevel}. If not explicitly
-     * configured, default value is {@link CrossProfileIntentFilter#ACCESS_LEVEL_ALL}
-     * @return user's {@link CrossProfileIntentFilter.AccessControlLevel}
-     */
-    public @CrossProfileIntentFilter.AccessControlLevel int
-            getCrossProfileIntentFilterAccessControl() {
-        return mCrossProfileIntentFilterAccessControl;
-    }
 
     /**
      * Returns the reference to the default {@link UserProperties} for this type of user.
@@ -458,8 +439,6 @@ public final class UserTypeDetails {
         private @DrawableRes int mBadgeNoBackground = Resources.ID_NULL;
         private boolean mIsMediaSharedWithParent = false;
         private boolean mIsCredentialSharableWithParent = false;
-        private @CrossProfileIntentFilter.AccessControlLevel int
-                mCrossProfileIntentFilterAccessControl = CrossProfileIntentFilter.ACCESS_LEVEL_ALL;
         // Default UserProperties cannot be null but for efficiency we don't initialize it now.
         // If it isn't set explicitly, {@link UserProperties.Builder#build()} will be used.
         private @Nullable UserProperties mDefaultUserProperties = null;
@@ -563,16 +542,6 @@ public final class UserTypeDetails {
         }
 
         /**
-         * Sets {@link CrossProfileIntentFilter.AccessControlLevel} for the user.
-         * @param accessControlLevel default access control for user
-         */
-        public Builder setCrossProfileIntentFilterAccessControl(
-                @CrossProfileIntentFilter.AccessControlLevel int accessControlLevel) {
-            mCrossProfileIntentFilterAccessControl = accessControlLevel;
-            return this;
-        }
-
-        /**
          * Sets shared media property for the user.
          * @param isCredentialSharableWithParent  the value to be set, true or false
          */
@@ -642,7 +611,6 @@ public final class UserTypeDetails {
                     mDefaultCrossProfileIntentFilters,
                     mIsMediaSharedWithParent,
                     mIsCredentialSharableWithParent,
-                    mCrossProfileIntentFilterAccessControl,
                     getDefaultUserProperties());
         }
 

@@ -285,12 +285,12 @@ int APerformanceHint_reportActualWorkDuration(APerformanceHintSession* session,
     return session->reportActualWorkDuration(actualDurationNanos);
 }
 
-int APerformanceHint_sendHint(APerformanceHintSession* session, int32_t hint) {
-    return session->sendHint(hint);
-}
-
 void APerformanceHint_closeSession(APerformanceHintSession* session) {
     delete session;
+}
+
+int APerformanceHint_sendHint(void* session, int32_t hint) {
+    return reinterpret_cast<APerformanceHintSession*>(session)->sendHint(hint);
 }
 
 void APerformanceHint_setIHintManagerForTesting(void* iManager) {

@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"ಮತ್ತೊಂದು ಸ್ಥಳದಲ್ಲಿ ಉಳಿಸಿ"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"ಬೇರೊಂದು ಸಾಧನವನ್ನು ಬಳಸಿ"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"ಬೇರೊಂದು ಸಾಧನದಲ್ಲಿ ಉಳಿಸಿ"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ಪಾಸ್‌ಕೀಗಳೊಂದಿಗೆ ಸುರಕ್ಷಿತವಾಗಿರುತ್ತವೆ"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"ಕ್ಲಿಷ್ಟ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ರಚಿಸುವ ಅಥವಾ ನೆನಪಿಟ್ಟುಕೊಳ್ಳುವ ಅಗತ್ಯವಿಲ್ಲ"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"ಅನನ್ಯ ಪಾಸ್‌ಕೀ ಅನ್ನು ರಚಿಸಲು ನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್, ಮುಖ ಅಥವಾ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"ಪಾಸ್‌ಕೀಗಳನ್ನು ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕದಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ, ಹಾಗಾಗಿ ನೀವು ಇತರ ಸಾಧನಗಳಲ್ಲಿ ಸೈನ್ ಇನ್ ಮಾಡಬಹುದು"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> ಅನ್ನು ಎಲ್ಲಿ ಉಳಿಸಬೇಕು ಎಂದು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"ನಿಮ್ಮ ಪಾಸ್‌ಕೀಗಳನ್ನು ರಚಿಸಿ"</string>
     <string name="save_your_password" msgid="6597736507991704307">"ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್‌ ಉಳಿಸಿ"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"ಇತರ ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕರು"</string>
     <string name="close_sheet" msgid="1393792015338908262">"ಶೀಟ್ ಮುಚ್ಚಿರಿ"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"ಹಿಂದಿನ ಪುಟಕ್ಕೆ ಹಿಂದಿರುಗಿ"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಉಳಿಸಲಾದ ನಿಮ್ಮ ಪಾಸ್‌ಕೀ ಅನ್ನು ಬಳಸಬೇಕೆ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಉಳಿಸಲಾದ ನಿಮ್ಮ ಸೈನ್-ಇನ್ ಅನ್ನು ಬಳಸಬೇಕೆ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಉಳಿಸಲಾದ ಸೈನ್-ಇನ್ ಮಾಹಿತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>

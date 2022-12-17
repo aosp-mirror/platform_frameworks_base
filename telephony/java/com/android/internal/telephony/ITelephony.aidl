@@ -2670,4 +2670,11 @@ interface ITelephony {
      */
     void setCellBroadcastIdRanges(int subId, in List<CellBroadcastIdRange> ranges,
             IIntegerConsumer callback);
+
+    /**
+     * Returns whether the domain selection service is supported.
+     *
+     * @return {@code true} if the domain selection service is supported.
+     */
+    boolean isDomainSelectionSupported();
 }

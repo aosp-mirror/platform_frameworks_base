@@ -75,7 +75,7 @@ dependencies {
     api "androidx.slice:slice-builders:1.1.0-alpha02"
     api "androidx.slice:slice-core:1.1.0-alpha02"
     api "androidx.slice:slice-view:1.1.0-alpha02"
-    api "androidx.compose.material3:material3:1.1.0-alpha01"
+    api "androidx.compose.material3:material3:1.1.0-alpha03"
     api "androidx.compose.material:material-icons-extended:$jetpack_compose_version"
     api "androidx.compose.runtime:runtime-livedata:$jetpack_compose_version"
     api "androidx.compose.ui:ui-tooling-preview:$jetpack_compose_version"

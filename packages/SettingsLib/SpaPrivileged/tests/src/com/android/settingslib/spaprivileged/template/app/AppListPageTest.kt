@@ -122,7 +122,6 @@ class AppListPageTest {
                 title = TITLE,
                 listModel = TestAppListModel(options),
                 header = header,
-                appItem = { AppListItem {} },
                 appList = { appListState.value = this },
             )
         }

@@ -92,11 +92,12 @@ class NotificationLaunchAnimatorController(
         )
 
         params.startTranslationZ = notification.translationZ
-        params.startNotificationTop = notification.translationY
+        params.startNotificationTop = location[1]
+        params.notificationParentTop = notificationListContainer
+                .getViewParentForNotification(notificationEntry).locationOnScreen[1]
         params.startRoundedTopClipping = roundedTopClipping
         params.startClipTopAmount = notification.clipTopAmount
         if (notification.isChildInGroup) {
-            params.startNotificationTop += notification.notificationParent.translationY
             val locationOnScreen = notification.notificationParent.locationOnScreen[1]
             val parentRoundedClip = (clipStartLocation - locationOnScreen).coerceAtLeast(0)
             params.parentStartRoundedTopClipping = parentRoundedClip

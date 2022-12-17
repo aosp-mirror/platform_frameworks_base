@@ -17,9 +17,10 @@
 package com.android.server.biometrics.log;
 
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.common.OperationContext;
+import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.common.OperationReason;
 import android.util.Slog;
+import android.view.Surface;
 
 import com.android.internal.util.FrameworkStatsLog;
 
@@ -41,32 +42,38 @@ public class BiometricFrameworkStatsLogger {
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_ACQUIRED}. */
-    public void acquired(OperationContext operationContext,
+    public void acquired(OperationContextExt operationContext,
             int statsModality, int statsAction, int statsClient, boolean isDebug,
             int acquiredInfo, int vendorCode, int targetUserId) {
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ACQUIRED,
                 statsModality,
                 targetUserId,
-                operationContext.isCrypto,
+                operationContext.isCrypto(),
                 statsAction,
                 statsClient,
                 acquiredInfo,
                 vendorCode,
                 isDebug,
                 -1 /* sensorId */,
-                operationContext.id,
-                sessionType(operationContext.reason),
-                operationContext.isAod);
+                operationContext.getId(),
+                sessionType(operationContext.getReason()),
+                operationContext.isAod(),
+                operationContext.isDisplayOn(),
+                operationContext.getDockState(),
+                orientationType(operationContext.getOrientation()),
+                foldType(operationContext.getFoldState()),
+                operationContext.getOrderAndIncrement(),
+                BiometricsProtoEnums.WAKE_REASON_UNKNOWN);
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_AUTHENTICATED}. */
-    public void authenticate(OperationContext operationContext,
+    public void authenticate(OperationContextExt operationContext,
             int statsModality, int statsAction, int statsClient, boolean isDebug, long latency,
             int authState, boolean requireConfirmation, int targetUserId, float ambientLightLux) {
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_AUTHENTICATED,
                 statsModality,
                 targetUserId,
-                operationContext.isCrypto,
+                operationContext.isCrypto(),
                 statsClient,
                 requireConfirmation,
                 authState,
@@ -74,13 +81,19 @@ public class BiometricFrameworkStatsLogger {
                 isDebug,
                 -1 /* sensorId */,
                 ambientLightLux,
-                operationContext.id,
-                sessionType(operationContext.reason),
-                operationContext.isAod);
+                operationContext.getId(),
+                sessionType(operationContext.getReason()),
+                operationContext.isAod(),
+                operationContext.isDisplayOn(),
+                operationContext.getDockState(),
+                orientationType(operationContext.getOrientation()),
+                foldType(operationContext.getFoldState()),
+                operationContext.getOrderAndIncrement(),
+                BiometricsProtoEnums.WAKE_REASON_UNKNOWN);
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_AUTHENTICATED}. */
-    public void authenticate(OperationContext operationContext,
+    public void authenticate(OperationContextExt operationContext,
             int statsModality, int statsAction, int statsClient, boolean isDebug, long latency,
             int authState, boolean requireConfirmation, int targetUserId, ALSProbe alsProbe) {
         alsProbe.awaitNextLux((ambientLightLux) -> {
@@ -102,13 +115,13 @@ public class BiometricFrameworkStatsLogger {
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED}. */
-    public void error(OperationContext operationContext,
+    public void error(OperationContextExt operationContext,
             int statsModality, int statsAction, int statsClient, boolean isDebug, long latency,
             int error, int vendorCode, int targetUserId) {
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED,
                 statsModality,
                 targetUserId,
-                operationContext.isCrypto,
+                operationContext.isCrypto(),
                 statsAction,
                 statsClient,
                 error,
@@ -116,9 +129,15 @@ public class BiometricFrameworkStatsLogger {
                 isDebug,
                 sanitizeLatency(latency),
                 -1 /* sensorId */,
-                operationContext.id,
-                sessionType(operationContext.reason),
-                operationContext.isAod);
+                operationContext.getId(),
+                sessionType(operationContext.getReason()),
+                operationContext.isAod(),
+                operationContext.isDisplayOn(),
+                operationContext.getDockState(),
+                orientationType(operationContext.getOrientation()),
+                foldType(operationContext.getFoldState()),
+                operationContext.getOrderAndIncrement(),
+                BiometricsProtoEnums.WAKE_REASON_UNKNOWN);
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED}. */
@@ -153,5 +172,31 @@ public class BiometricFrameworkStatsLogger {
             return BiometricsProtoEnums.SESSION_TYPE_KEYGUARD_ENTRY;
         }
         return BiometricsProtoEnums.SESSION_TYPE_UNKNOWN;
+    }
+
+    private static int orientationType(@Surface.Rotation int rotation) {
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                return BiometricsProtoEnums.ORIENTATION_0;
+            case Surface.ROTATION_90:
+                return BiometricsProtoEnums.ORIENTATION_90;
+            case Surface.ROTATION_180:
+                return BiometricsProtoEnums.ORIENTATION_180;
+            case Surface.ROTATION_270:
+                return BiometricsProtoEnums.ORIENTATION_270;
+        }
+        return BiometricsProtoEnums.ORIENTATION_UNKNOWN;
+    }
+
+    private static int foldType(int foldType) {
+        switch (foldType) {
+            case IBiometricContextListener.FoldState.FULLY_CLOSED:
+                return BiometricsProtoEnums.FOLD_CLOSED;
+            case IBiometricContextListener.FoldState.FULLY_OPENED:
+                return BiometricsProtoEnums.FOLD_OPEN;
+            case IBiometricContextListener.FoldState.HALF_OPENED:
+                return BiometricsProtoEnums.FOLD_HALF_OPEN;
+        }
+        return BiometricsProtoEnums.FOLD_UNKNOWN;
     }
 }

@@ -72,6 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"ປິດການນຳໃຊ້ Smart Lock ແລ້ວ"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ສົ່ງຮູບແລ້ວ"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ກຳລັງບັນທຶກພາບໜ້າຈໍ..."</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ກຳລັງບັນທຶກຮູບໜ້າຈໍໃສ່ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກ…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ບັນທຶກຮູບໜ້າຈໍໄວ້ແລ້ວ"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"ບໍ່ສາມາດບັນທຶກຮູບໜ້າຈໍໄດ້"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ຈະຕ້ອງປົດລັອກອຸປະກອນກ່ອນບັນທຶກຮູບໜ້າຈໍ"</string>
@@ -125,8 +126,7 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ຊ່ວຍ​ເຫຼືອ​ທາງ​ສຽງ"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"ຕົວສະແກນລະຫັດ QR"</string>
-    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
-    <skip />
+    <string name="accessibility_unlock_button" msgid="3613812140816244310">"ປົດລັອກແລ້ວ"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"ອຸປະກອນຖືກລັອກໄວ້"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"ການສະແກນໜ້າ"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"ສົ່ງ"</string>
@@ -169,8 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"ບໍ່ສາມາດຈຳແນກໃບໜ້າໄດ້"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"ກະລຸນາໃຊ້ລາຍນິ້ວມືແທນ"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
-    <skip />
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"ໃຊ້ການປົດລັອກດ້ວຍໜ້າບໍ່ໄດ້"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ເຊື່ອມຕໍ່ Bluetooth ແລ້ວ."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ບໍ່ຮູ້ເປີເຊັນແບັດເຕີຣີ."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"ເຊື່ອມ​ຕໍ່​ຫາ <xliff:g id="BLUETOOTH">%s</xliff:g> ແລ້ວ."</string>
@@ -181,12 +180,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"ໂໝດໃນຍົນ."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN ເປີດ."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"ແບັດເຕີຣີ <xliff:g id="NUMBER">%d</xliff:g> ເປີເຊັນ."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"ແບັດເຕີຣີ <xliff:g id="PERCENTAGE">%1$d</xliff:g> ເປີເຊັນ, ເຫຼືອປະມານ <xliff:g id="TIME">%2$s</xliff:g> ອ້າງອີງຈາກການນຳໃຊ້ຂອງທ່ານ"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"ແບັດເຕີຣີ <xliff:g id="PERCENTAGE">%1$d</xliff:g> ເປີເຊັນ, ໃຊ້ໄດ້ຈົນເຖິງ <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"ກຳລັງສາກແບັດເຕີຣີ, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ເປີເຊັນ."</string>
-    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
-    <skip />
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"ແບັດເຕີຣີ <xliff:g id="PERCENTAGE">%d</xliff:g> ເປີເຊັນ, ການສາກຢຸດໄວ້ຊົ່ວຄາວເພື່ອການຮັກສາແບັດເຕີຣີ."</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"ແບັດເຕີຣີ <xliff:g id="PERCENTAGE">%1$d</xliff:g> ເປີເຊັນ, ໃຊ້ໄດ້ຈົນເຖິງ <xliff:g id="TIME">%2$s</xliff:g>, ການສາກຢຸດໄວ້ຊົ່ວຄາວເພື່ອການຮັກສາແບັດເຕີຣີ."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"ເບິ່ງການແຈ້ງເຕືອນທັງໝົດ"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter ຖືກເປີດຢູ່."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"ສັ່ນເຕືອນພ້ອມສຽງເອີ້ນເຂົ້າ."</string>
@@ -320,7 +317,8 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"ເປີດການນຳໃຊ້ກ້ອງຖ່າຍຮູບສຳລັບແອັບ ແລະ ບໍລິການທັງໝົດແລ້ວ."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"ສິດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຖືກປິດການນຳໃຊ້ສຳລັບແອັບ ແລະ ບໍລິການທັງໝົດແລ້ວ."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"ເພື່ອໃຊ້ປຸ່ມໄມໂຄຣໂຟນ, ໃຫ້ເປີດການນຳໃຊ້ສິດເຂົ້າເຖິງໄມໂຄຣໂຟນໃນການຕັ້ງຄ່າກ່ອນ."</string>
-    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"ເປີດການຕັ້ງຄ່າ."</string>
+    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
+    <skip />
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ອຸປະກອນອື່ນໆ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ສະຫຼັບພາບຮວມ"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"ທ່ານຈະບໍ່ໄດ້ຮັບການລົບກວນຈາກສຽງ ແລະ ການສັ່ນເຕືອນ, ຍົກເວັ້ນໃນເວລາໂມງປຸກດັງ, ມີການແຈ້ງເຕືອນ ຫຼື ມີສາຍໂທເຂົ້າຈາກຜູ້ໂທທີ່ທ່ານລະບຸໄວ້. ທ່ານອາດຍັງຄົງໄດ້ຍິນຫາກທ່ານເລືອກຫຼິ້ນເພງ, ວິດີໂອ ແລະ ເກມ."</string>
@@ -407,6 +405,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ຢຸດການແຈ້ງເຕືອນໂດຍໂໝດຫ້າມລົບກວນແລ້ວ"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ເລີ່ມດຽວນີ້"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ບໍ່ມີການແຈ້ງເຕືອນ"</string>
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"ບໍ່ມີການແຈ້ງເຕືອນໃໝ່"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"ປົດລັອກເພື່ອເບິ່ງການແຈ້ງເຕືອນເກົ່າ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ອຸປະກອນນີ້ແມ່ນຈັດການໂດຍພໍ່ແມ່ຂອງທ່ານ"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ອົງການຂອງທ່ານເປັນເຈົ້າຂອງອຸປະກອນນີ້ ແລະ ສາມາດຕິດຕາມທຣາບຟິກເຄືອຂ່າຍໄດ້"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ເປັນເຈົ້າຂອງອຸປະກອນນີ້ ແລະ ສາມາດຕິດຕາມທຣາບຟິກເຄືອຂ່າຍໄດ້"</string>
@@ -511,8 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ປົດລັອກເພື່ອໃຊ້"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ເກີດບັນຫາໃນການໂຫຼດບັດຂອງທ່ານ, ກະລຸນາລອງໃໝ່ໃນພາຍຫຼັງ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ການຕັ້ງຄ່າໜ້າຈໍລັອກ"</string>
-    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"ຕົວສະແກນລະຫັດ QR"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"ກຳລັງອັບເດດ"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ໂໝດເຮືອ​ບິນ"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"ທ່ານ​ຈະ​ບໍ່​ໄດ້​ຍິນ​ສຽງ​ໂມງ​ປ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -795,8 +795,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ຂະຫຍາຍເຕັມຈໍ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ຂະຫຍາຍບາງສ່ວນຂອງໜ້າຈໍ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ສະຫຼັບ"</string>
-    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
-    <skip />
+    <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"ລາກຢູ່ມຸມເພື່ອປັບຂະໜາດ"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"ອະນຸຍາດໃຫ້ເລື່ອນທາງຂວາງ"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"ປ່ຽນຂະໜາດ"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"ປ່ຽນຮູບແບບການຂະຫຍາຍ"</string>
@@ -905,6 +904,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ຢຸດການສົ່ງສັນຍານ"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ອຸປະກອນທີ່ສາມາດໃຊ້ໄດ້ສຳລັບເອົ້າພຸດສຽງ."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ລະດັບສຽງ"</string>
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ການອອກອາກາດເຮັດວຽກແນວໃດ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ອອກອາກາດ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ຄົນທີ່ຢູ່ໃກ້ທ່ານທີ່ມີອຸປະກອນ Bluetooth ທີ່ເຂົ້າກັນໄດ້ຈະສາມາດຟັງມີເດຍທີ່ທ່ານກຳລັງອອກອາກາດຢູ່ໄດ້"</string>
@@ -1018,17 +1018,34 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ປິດກ້ອງຖ່າຍຮູບ ແລະ ໄມແລ້ວ"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ການແຈ້ງເຕືອນ}other{# ການແຈ້ງເຕືອນ}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="note_task_button_label" msgid="8718616095800343136">"ການຈົດບັນທຶກ"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ກຳລັງອອກອາກາດ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"ຢຸດການອອກອາກາດ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"ຫາກທ່ານອອກອາກາດ <xliff:g id="SWITCHAPP">%1$s</xliff:g> ຫຼື ປ່ຽນເອົ້າພຸດ, ການອອກອາກາດປັດຈຸບັນຂອງທ່ານຈະຢຸດ"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"ອອກອາກາດ <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"ປ່ຽນເອົ້າພຸດ"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"ບໍ່ຮູ້ຈັກ"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"ຊມ:ນທ"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"ຊມ:ນທ"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"ອະນຸຍາດໃຫ້ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ເຂົ້າເຖິງບັນທຶກທັງໝົດຂອງອຸປະກອນບໍ?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"ອະນຸຍາດສິດເຂົ້າເຖິງແບບເທື່ອດຽວ"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"ບໍ່ອະນຸຍາດ"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"ບັນທຶກຂອງອຸປະກອນຈະບັນທຶກສິ່ງທີ່ເກີດຂຶ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ແອັບສາມາດໃຊ້ບັນທຶກເຫຼົ່ານີ້ເພື່ອຊອກຫາ ແລະ ແກ້ໄຂບັນຫາໄດ້.\n\nບັນທຶກບາງຢ່າງອາດມີຂໍ້ມູນທີ່ລະອຽດອ່ອນ, ດັ່ງນັ້ນໃຫ້ອະນຸຍາດສະເພາະແອັບທີ່ທ່ານເຊື່ອຖືໄດ້ໃຫ້ເຂົ້າເຖິງບັນທຶກທັງໝົດຂອງອຸປະກອນເທົ່ານັ້ນ. \n\nຫາກທ່ານບໍ່ອະນຸຍາດໃຫ້ແອັບນີ້ເຂົ້າເຖິງບັນທຶກທັງໝົດຂອງອຸປະກອນ, ມັນຈະຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກຂອງຕົວມັນເອງໄດ້ຢູ່. ຜູ້ຜະລິດອຸປະກອນຂອງທ່ານອາດຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກ ຫຼື ຂໍ້ມູນບາງຢ່າງຢູ່ອຸປະກອນຂອງທ່ານໄດ້."</string>
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"ເປີດ <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
+    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"ເພື່ອເພີ່ມແອັບ <xliff:g id="APPNAME">%1$s</xliff:g> ເປັນທາງລັດ, ກະລຸນາກວດສອບໃຫ້ແນ່ໃຈວ່າ"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• ແອັບໄດ້ຮັບການຕັ້ງຄ່າແລ້ວ"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• ມີການເພີ່ມຢ່າງໜ້ອຍ 1 ບັດໃສ່ໃນ Wallet"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ຕິດຕັ້ງແອັບກ້ອງຖ່າຍຮູບ"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ແອັບໄດ້ຮັບການຕັ້ງຄ່າແລ້ວ"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ມີຢ່າງໜ້ອຍ 1 ອຸປະກອນພ້ອມໃຫ້ນຳໃຊ້"</string>
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ຍົກເລີກ"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ປີ້ນດຽວນີ້"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"ກາງໂທລະສັບອອກເພື່ອການຖ່າຍເຊວຟີທີ່ດີຂຶ້ນ"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"ປີ້ນເປັນຈໍສະແດງຜົນດ້ານໜ້າເພື່ອການຖ່າຍເຊວຟີທີ່ດີຂຶ້ນບໍ?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ໃຊ້ກ້ອງຫຼັງເພື່ອການຖ່າຍຮູບທີ່ກວ້າງຂຶ້ນດ້ວຍຄວາມລະອຽດສູງຂຶ້ນ."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ໜ້າຈໍນີ້ຈະປິດ"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

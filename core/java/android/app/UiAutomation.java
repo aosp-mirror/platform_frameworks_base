@@ -76,7 +76,6 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
@@ -484,7 +483,7 @@ public final class UiAutomation {
             // Calling out without a lock held.
             mUiAutomationConnection.adoptShellPermissionIdentity(Process.myUid(), null);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error executing adopting shell permission identity!", re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -509,7 +508,7 @@ public final class UiAutomation {
             // Calling out without a lock held.
             mUiAutomationConnection.adoptShellPermissionIdentity(Process.myUid(), permissions);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error executing adopting shell permission identity!", re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -525,7 +524,7 @@ public final class UiAutomation {
             // Calling out without a lock held.
             mUiAutomationConnection.dropShellPermissionIdentity();
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error executing dropping shell permission identity!", re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -543,8 +542,7 @@ public final class UiAutomation {
             final List<String> permissions = mUiAutomationConnection.getAdoptedShellPermissions();
             return permissions == null ? ALL_PERMISSIONS : new ArraySet<>(permissions);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting adopted shell permissions", re);
-            return Collections.emptySet();
+            throw re.rethrowFromSystemServer();
         }
     }
 

@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
@@ -170,6 +172,30 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
     }
 
     @Test
+    public void testIgnoreOrientationRequest_displayReceiveOrientationChangeForNoSensor() {
+        mFirstRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mSecondRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
+
+        prepareUnresizable(mFirstActivity, SCREEN_ORIENTATION_NOSENSOR);
+
+        verify(mFirstRoot).onDescendantOrientationChanged(any());
+        verify(mDisplay).onDescendantOrientationChanged(any());
+    }
+
+    @Test
+    public void testIgnoreOrientationRequest_displayReceiveOrientationChangeForLocked() {
+        mFirstRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mSecondRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
+
+        prepareUnresizable(mFirstActivity, SCREEN_ORIENTATION_LOCKED);
+
+        verify(mFirstRoot).onDescendantOrientationChanged(any());
+        verify(mDisplay).onDescendantOrientationChanged(any());
+    }
+
+    @Test
     public void testLaunchPortraitApp_fillsDisplayAreaGroup() {
         mFirstRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         mSecondRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
@@ -222,6 +248,21 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
     }
 
     @Test
+    public void testLaunchNoSensorApp_noSizeCompatAfterRotation() {
+        mFirstRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mSecondRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
+
+        prepareUnresizable(mFirstActivity, SCREEN_ORIENTATION_NOSENSOR);
+        assertThat(mFirstActivity.isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
+        assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
+
+        rotateDisplay(mDisplay, ROTATION_90);
+        assertThat(mFirstActivity.isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
+        assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
+    }
+
+    @Test
     public void testLaunchLandscapeApp_activityIsLetterboxForFixedOrientationInDisplayAreaGroup() {
         mFirstRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         mSecondRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
@@ -240,6 +281,26 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         assertThat(activityBounds.width()).isEqualTo(dagBounds.width());
         assertThat(activityBounds.height())
                 .isEqualTo(dagBounds.width() * dagBounds.width() / dagBounds.height());
+    }
+
+    @Test
+    public void testLaunchNoSensorApp_activityIsNotLetterboxForFixedOrientationDisplayAreaGroup() {
+        mFirstRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mSecondRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
+
+        prepareUnresizable(mFirstActivity, SCREEN_ORIENTATION_NOSENSOR);
+        assertThat(mFirstActivity.isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
+    }
+
+    @Test
+    public void testLaunchLockedApp_activityIsNotLetterboxForFixedOrientationInDisplayAreaGroup() {
+        mFirstRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mSecondRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
+
+        prepareUnresizable(mFirstActivity, SCREEN_ORIENTATION_LOCKED);
+        assertThat(mFirstActivity.isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
     }
 
     @Test
@@ -269,6 +330,20 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         assertThat(mFirstActivity.hasSizeCompatBounds()).isFalse();
         assertThat(newActivityBounds.width()).isEqualTo(activityBounds.width());
         assertThat(newActivityBounds.height()).isEqualTo(activityBounds.height());
+    }
+
+    @Test
+    public void testLaunchNoSensorApp_fixedOrientationLetterboxBecomesSizeCompatAfterRotation() {
+        mFirstRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mSecondRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
+
+        prepareUnresizable(mFirstActivity, SCREEN_ORIENTATION_NOSENSOR);
+
+        rotateDisplay(mDisplay, ROTATION_90);
+
+        assertThat(mFirstActivity.isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
+        assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
     }
 
     @Test

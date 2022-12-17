@@ -229,9 +229,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     private TaskFragment mCompanionTaskFragment;
 
     /**
-     * Prevents duplicate calls to onTaskAppeared.
+     * Prevents duplicate calls to onTaskFragmentAppeared.
      */
     boolean mTaskFragmentAppearedSent;
+
+    /**
+     * Prevents unnecessary callbacks after onTaskFragmentVanished.
+     */
+    boolean mTaskFragmentVanishedSent;
 
     /**
      * The last running activity of the TaskFragment was finished due to clear task while launching
@@ -2221,7 +2226,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     // task, because they should not be affected by insets.
                     inOutConfig.smallestScreenWidthDp = (int) (0.5f
                             + Math.min(mTmpFullBounds.width(), mTmpFullBounds.height()) / density);
-                } else if (isEmbedded()) {
+                } else if (windowingMode == WINDOWING_MODE_MULTI_WINDOW
+                        && isEmbeddedWithBoundsOverride()) {
                     // For embedded TFs, the smallest width should be updated. Otherwise, inherit
                     // from the parent task would result in applications loaded wrong resource.
                     inOutConfig.smallestScreenWidthDp =

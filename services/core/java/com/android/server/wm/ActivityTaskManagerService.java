@@ -37,6 +37,7 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_ACTIVITY;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
@@ -1260,6 +1261,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         assertPackageMatchesCallingUid(callingPackage);
         enforceNotIsolatedCaller("startActivityAsUser");
+
+        boolean isSandboxedActivity = (intent != null && intent.getAction() != null
+                && intent.getAction().equals(ACTION_START_SANDBOXED_ACTIVITY));
+        if (isSandboxedActivity) {
+            SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
+                    SdkSandboxManagerLocal.class);
+            sdkSandboxManagerLocal.enforceAllowedToHostSandboxedActivity(
+                    intent, Binder.getCallingUid(), callingPackage
+            );
+        }
+
         if (Process.isSdkSandboxUid(Binder.getCallingUid())) {
             SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
                     SdkSandboxManagerLocal.class);

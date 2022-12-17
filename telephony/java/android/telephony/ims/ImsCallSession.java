@@ -18,10 +18,12 @@ package android.telephony.ims;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.CallQuality;
 import android.telephony.ims.aidl.IImsCallSessionListener;
+import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -99,7 +101,6 @@ public class ImsCallSession {
      * Listener for events relating to an IMS session, such as when a session is being
      * recieved ("on ringing") or a call is outgoing ("on calling").
      * <p>Many of these events are also received by {@link ImsCall.Listener}.</p>
-     * @hide
      */
     public static class Listener {
         /**
@@ -523,16 +524,18 @@ public class ImsCallSession {
 
     private final IImsCallSession miSession;
     private boolean mClosed = false;
+    private String mCallId = null;
     private Listener mListener;
     private Executor mListenerExecutor = Runnable::run;
+    private IImsCallSessionListenerProxy mIImsCallSessionListenerProxy = null;
 
-    /** @hide */
     public ImsCallSession(IImsCallSession iSession) {
         miSession = iSession;
+        mIImsCallSessionListenerProxy = new IImsCallSessionListenerProxy();
 
         if (iSession != null) {
             try {
-                iSession.setListener(new IImsCallSessionListenerProxy());
+                iSession.setListener(mIImsCallSessionListenerProxy);
             } catch (RemoteException e) {
             }
         } else {
@@ -540,10 +543,16 @@ public class ImsCallSession {
         }
     }
 
-    /** @hide */
     public ImsCallSession(IImsCallSession iSession, Listener listener, Executor executor) {
         this(iSession);
         setListener(listener, executor);
+    }
+
+    /**
+     * returns the IImsCallSessionListenerProxy for the ImsCallSession
+     */
+    public final IImsCallSessionListenerProxy getIImsCallSessionListenerProxy() {
+        return mIImsCallSessionListenerProxy;
     }
 
     /**
@@ -573,10 +582,27 @@ public class ImsCallSession {
             return null;
         }
 
-        try {
-            return miSession.getCallId();
-        } catch (RemoteException e) {
-            return null;
+        if (mCallId != null) {
+            return mCallId;
+        } else {
+            try {
+                return mCallId = miSession.getCallId();
+            } catch (RemoteException e) {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Sets the call ID of the session.
+     *
+     * @param callId Call ID of the session, which is transferred from
+     * {@link android.telephony.ims.feature.MmTelFeature#notifyIncomingCall(
+     * ImsCallSessionImplBase, String, Bundle)}
+     */
+    public void setCallId(String callId) {
+        if (callId != null) {
+            mCallId = callId;
         }
     }
 
@@ -635,7 +661,6 @@ public class ImsCallSession {
      * Gets the video call provider for the session.
      *
      * @return The video call provider.
-     * @hide
      */
     public IImsVideoCallProvider getVideoCallProvider() {
         if (mClosed) {
@@ -712,7 +737,6 @@ public class ImsCallSession {
 
     /**
      * Gets the native IMS call session.
-     * @hide
      */
     public IImsCallSession getSession() {
         return miSession;
@@ -742,7 +766,6 @@ public class ImsCallSession {
      *
      * @param listener to listen to the session events of this object
      * @param executor an Executor that will execute callbacks
-     * @hide
      */
     public void setListener(Listener listener, Executor executor) {
         mListener = listener;
@@ -1706,8 +1729,6 @@ public class ImsCallSession {
         StringBuilder sb = new StringBuilder();
         sb.append("[ImsCallSession objId:");
         sb.append(System.identityHashCode(this));
-        sb.append(" state:");
-        sb.append(State.toString(getState()));
         sb.append(" callId:");
         sb.append(getCallId());
         sb.append("]");

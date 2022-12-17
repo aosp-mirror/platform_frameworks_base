@@ -24,7 +24,6 @@ import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
@@ -37,6 +36,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 
@@ -77,7 +77,7 @@ public class FingerprintDetectClientTest {
     @Mock
     private Sensor.HalSessionCallback mHalSessionCallback;
     @Captor
-    private ArgumentCaptor<OperationContext> mOperationContextCaptor;
+    private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -107,7 +107,8 @@ public class FingerprintDetectClientTest {
         InOrder order = inOrder(mHal, mBiometricContext);
         order.verify(mBiometricContext).updateContext(
                 mOperationContextCaptor.capture(), anyBoolean());
-        order.verify(mHal).detectInteractionWithContext(same(mOperationContextCaptor.getValue()));
+        order.verify(mHal).detectInteractionWithContext(
+                same(mOperationContextCaptor.getValue().toAidlContext()));
         verify(mHal, never()).detectInteraction();
     }
 

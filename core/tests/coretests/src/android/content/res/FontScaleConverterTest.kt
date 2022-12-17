@@ -17,7 +17,7 @@
 package android.content.res
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -27,60 +27,60 @@ class FontScaleConverterTest {
     @Test
     fun straightInterpolation() {
         val table = createTable(8f to 8f, 10f to 10f, 20f to 20f)
-        assertThat(table.convertSpToDp(1F)).isWithin(CONVERSION_TOLERANCE).of(1f)
-        assertThat(table.convertSpToDp(8F)).isWithin(CONVERSION_TOLERANCE).of(8f)
-        assertThat(table.convertSpToDp(10F)).isWithin(CONVERSION_TOLERANCE).of(10f)
-        assertThat(table.convertSpToDp(30F)).isWithin(CONVERSION_TOLERANCE).of(30f)
-        assertThat(table.convertSpToDp(20F)).isWithin(CONVERSION_TOLERANCE).of(20f)
-        assertThat(table.convertSpToDp(5F)).isWithin(CONVERSION_TOLERANCE).of(5f)
-        assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
+        verifyConversionBothWays(table, 1f, 1F)
+        verifyConversionBothWays(table, 8f, 8F)
+        verifyConversionBothWays(table, 10f, 10F)
+        verifyConversionBothWays(table, 30f, 30F)
+        verifyConversionBothWays(table, 20f, 20F)
+        verifyConversionBothWays(table, 5f, 5F)
+        verifyConversionBothWays(table, 0f, 0F)
     }
 
     @Test
     fun interpolate200Percent() {
         val table = createTable(8f to 16f, 10f to 20f, 30f to 60f)
-        assertThat(table.convertSpToDp(1F)).isWithin(CONVERSION_TOLERANCE).of(2f)
-        assertThat(table.convertSpToDp(8F)).isWithin(CONVERSION_TOLERANCE).of(16f)
-        assertThat(table.convertSpToDp(10F)).isWithin(CONVERSION_TOLERANCE).of(20f)
-        assertThat(table.convertSpToDp(30F)).isWithin(CONVERSION_TOLERANCE).of(60f)
-        assertThat(table.convertSpToDp(20F)).isWithin(CONVERSION_TOLERANCE).of(40f)
-        assertThat(table.convertSpToDp(5F)).isWithin(CONVERSION_TOLERANCE).of(10f)
-        assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
+        verifyConversionBothWays(table, 2f, 1F)
+        verifyConversionBothWays(table, 16f, 8F)
+        verifyConversionBothWays(table, 20f, 10F)
+        verifyConversionBothWays(table, 60f, 30F)
+        verifyConversionBothWays(table, 40f, 20F)
+        verifyConversionBothWays(table, 10f, 5F)
+        verifyConversionBothWays(table, 0f, 0F)
     }
 
     @Test
     fun interpolate150Percent() {
         val table = createTable(2f to 3f, 10f to 15f, 20f to 30f, 100f to 150f)
-        assertThat(table.convertSpToDp(2F)).isWithin(CONVERSION_TOLERANCE).of(3f)
-        assertThat(table.convertSpToDp(1F)).isWithin(CONVERSION_TOLERANCE).of(1.5f)
-        assertThat(table.convertSpToDp(8F)).isWithin(CONVERSION_TOLERANCE).of(12f)
-        assertThat(table.convertSpToDp(10F)).isWithin(CONVERSION_TOLERANCE).of(15f)
-        assertThat(table.convertSpToDp(20F)).isWithin(CONVERSION_TOLERANCE).of(30f)
-        assertThat(table.convertSpToDp(50F)).isWithin(CONVERSION_TOLERANCE).of(75f)
-        assertThat(table.convertSpToDp(5F)).isWithin(CONVERSION_TOLERANCE).of(7.5f)
-        assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
+        verifyConversionBothWays(table, 3f, 2F)
+        verifyConversionBothWays(table, 1.5f, 1F)
+        verifyConversionBothWays(table, 12f, 8F)
+        verifyConversionBothWays(table, 15f, 10F)
+        verifyConversionBothWays(table, 30f, 20F)
+        verifyConversionBothWays(table, 75f, 50F)
+        verifyConversionBothWays(table, 7.5f, 5F)
+        verifyConversionBothWays(table, 0f, 0F)
     }
 
     @Test
     fun pastEndsUsesLastScalingFactor() {
         val table = createTable(8f to 16f, 10f to 20f, 30f to 60f)
-        assertThat(table.convertSpToDp(100F)).isWithin(CONVERSION_TOLERANCE).of(200f)
-        assertThat(table.convertSpToDp(31F)).isWithin(CONVERSION_TOLERANCE).of(62f)
-        assertThat(table.convertSpToDp(1000F)).isWithin(CONVERSION_TOLERANCE).of(2000f)
-        assertThat(table.convertSpToDp(2000F)).isWithin(CONVERSION_TOLERANCE).of(4000f)
-        assertThat(table.convertSpToDp(10000F)).isWithin(CONVERSION_TOLERANCE).of(20000f)
+        verifyConversionBothWays(table, 200f, 100F)
+        verifyConversionBothWays(table, 62f, 31F)
+        verifyConversionBothWays(table, 2000f, 1000F)
+        verifyConversionBothWays(table, 4000f, 2000F)
+        verifyConversionBothWays(table, 20000f, 10000F)
     }
 
     @Test
     fun negativeSpIsNegativeDp() {
         val table = createTable(8f to 16f, 10f to 20f, 30f to 60f)
-        assertThat(table.convertSpToDp(-1F)).isWithin(CONVERSION_TOLERANCE).of(-2f)
-        assertThat(table.convertSpToDp(-8F)).isWithin(CONVERSION_TOLERANCE).of(-16f)
-        assertThat(table.convertSpToDp(-10F)).isWithin(CONVERSION_TOLERANCE).of(-20f)
-        assertThat(table.convertSpToDp(-30F)).isWithin(CONVERSION_TOLERANCE).of(-60f)
-        assertThat(table.convertSpToDp(-20F)).isWithin(CONVERSION_TOLERANCE).of(-40f)
-        assertThat(table.convertSpToDp(-5F)).isWithin(CONVERSION_TOLERANCE).of(-10f)
-        assertThat(table.convertSpToDp(-0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
+        verifyConversionBothWays(table, -2f, -1F)
+        verifyConversionBothWays(table, -16f, -8F)
+        verifyConversionBothWays(table, -20f, -10F)
+        verifyConversionBothWays(table, -60f, -30F)
+        verifyConversionBothWays(table, -40f, -20F)
+        verifyConversionBothWays(table, -10f, -5F)
+        verifyConversionBothWays(table, 0f, -0F)
     }
 
     private fun createTable(vararg pairs: Pair<Float, Float>) =
@@ -88,6 +88,22 @@ class FontScaleConverterTest {
             pairs.map { it.first }.toFloatArray(),
             pairs.map { it.second }.toFloatArray()
         )
+
+    private fun verifyConversionBothWays(
+        table: FontScaleConverter,
+        expectedDp: Float,
+        spToConvert: Float
+    ) {
+        assertWithMessage("convertSpToDp")
+            .that(table.convertSpToDp(spToConvert))
+            .isWithin(CONVERSION_TOLERANCE)
+            .of(expectedDp)
+
+        assertWithMessage("inverse: convertDpToSp")
+            .that(table.convertDpToSp(expectedDp))
+            .isWithin(CONVERSION_TOLERANCE)
+            .of(spToConvert)
+    }
 
     companion object {
         private const val CONVERSION_TOLERANCE = 0.05f

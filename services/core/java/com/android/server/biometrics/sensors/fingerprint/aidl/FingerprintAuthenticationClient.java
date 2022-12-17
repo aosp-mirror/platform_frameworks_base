@@ -29,7 +29,6 @@ import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants.FingerprintAcquired;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.common.ICancellationSignal;
-import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
@@ -47,6 +46,7 @@ import com.android.internal.R;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.CallbackWithProbe;
+import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.log.Probe;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationClient;
@@ -333,7 +333,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
     private ICancellationSignal doAuthenticate() throws RemoteException {
         final AidlSession session = getFreshDaemon();
 
-        final OperationContext opContext = getOperationContext();
+        final OperationContextExt opContext = getOperationContext();
         getBiometricContext().subscribe(opContext, ctx -> {
             if (session.hasContextMethods()) {
                 try {
@@ -356,7 +356,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
         }
 
         if (session.hasContextMethods()) {
-            return session.getSession().authenticateWithContext(mOperationId, opContext);
+            return session.getSession().authenticateWithContext(
+                    mOperationId, opContext.toAidlContext());
         } else {
             return session.getSession().authenticate(mOperationId);
         }

@@ -1332,10 +1332,10 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleController.updateBubble(mBubbleEntry);
         verify(mContext).registerReceiver(mBroadcastReceiverArgumentCaptor.capture(),
                 mFilterArgumentCaptor.capture(), eq(Context.RECEIVER_EXPORTED));
-        assertThat(mFilterArgumentCaptor.getValue().getAction(0)).isEqualTo(
-                Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        assertThat(mFilterArgumentCaptor.getValue().getAction(1)).isEqualTo(
-                Intent.ACTION_SCREEN_OFF);
+        assertThat(mFilterArgumentCaptor.getValue()
+                .hasAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)).isTrue();
+        assertThat(mFilterArgumentCaptor.getValue()
+                .hasAction(Intent.ACTION_SCREEN_OFF)).isTrue();
 
         mBubbleData.dismissBubbleWithKey(mBubbleEntry.getKey(), REASON_APP_CANCEL);
         // TODO: not certain why this isn't called normally when tests are run, perhaps because

@@ -66,20 +66,37 @@ public class FontScaleConverter {
     }
 
     /**
+     * Convert a dimension in "dp" back to "sp" using the lookup table.
+     *
+     * @hide
+     */
+    public float convertDpToSp(float dp) {
+        return lookupAndInterpolate(dp, mToDpValues, mFromSpValues);
+    }
+
+    /**
      * Convert a dimension in "sp" to "dp" using the lookup table.
      *
      * @hide
      */
     public float convertSpToDp(float sp) {
-        final float spPositive = Math.abs(sp);
+        return lookupAndInterpolate(sp, mFromSpValues, mToDpValues);
+    }
+
+    private static float lookupAndInterpolate(
+            float sourceValue,
+            float[] sourceValues,
+            float[] targetValues
+    ) {
+        final float sourceValuePositive = Math.abs(sourceValue);
         // TODO(b/247861374): find a match at a higher index?
-        final float sign = Math.signum(sp);
+        final float sign = Math.signum(sourceValue);
         // We search for exact matches only, even if it's just a little off. The interpolation will
         // handle any non-exact matches.
-        final int index = Arrays.binarySearch(mFromSpValues, spPositive);
+        final int index = Arrays.binarySearch(sourceValues, sourceValuePositive);
         if (index >= 0) {
             // exact match, return the matching dp
-            return sign * mToDpValues[index];
+            return sign * targetValues[index];
         } else {
             // must be a value in between index and index + 1: interpolate.
             final int lowerIndex = -(index + 1) - 1;
@@ -89,29 +106,30 @@ public class FontScaleConverter {
             final float startDp;
             final float endDp;
 
-            if (lowerIndex >= mFromSpValues.length - 1) {
+            if (lowerIndex >= sourceValues.length - 1) {
                 // It's past our lookup table. Determine the last elements' scaling factor and use.
-                startSp = mFromSpValues[mFromSpValues.length - 1];
-                startDp = mToDpValues[mFromSpValues.length - 1];
+                startSp = sourceValues[sourceValues.length - 1];
+                startDp = targetValues[sourceValues.length - 1];
 
                 if (startSp == 0) return 0;
 
                 final float scalingFactor = startDp / startSp;
-                return sp * scalingFactor;
+                return sourceValue * scalingFactor;
             } else if (lowerIndex == -1) {
                 // It's smaller than the smallest value in our table. Interpolate from 0.
                 startSp = 0;
                 startDp = 0;
-                endSp = mFromSpValues[0];
-                endDp = mToDpValues[0];
+                endSp = sourceValues[0];
+                endDp = targetValues[0];
             } else {
-                startSp = mFromSpValues[lowerIndex];
-                endSp = mFromSpValues[lowerIndex + 1];
-                startDp = mToDpValues[lowerIndex];
-                endDp = mToDpValues[lowerIndex + 1];
+                startSp = sourceValues[lowerIndex];
+                endSp = sourceValues[lowerIndex + 1];
+                startDp = targetValues[lowerIndex];
+                endDp = targetValues[lowerIndex + 1];
             }
 
-            return sign * MathUtils.constrainedMap(startDp, endDp, startSp, endSp, spPositive);
+            return sign
+                    * MathUtils.constrainedMap(startDp, endDp, startSp, endSp, sourceValuePositive);
         }
     }
 

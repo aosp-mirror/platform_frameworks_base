@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Spremi na drugom mjestu"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Upotrijebite neki drugi uređaj"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Spremi na drugi uređaj"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Sigurniji s pristupnim ključevima"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Ne trebate izrađivati niti pamtiti složene zaporke"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Jedinstveni pristupni ključ možete izraditi pomoću otiska prsta, lica ili zaključavanja zaslona"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Pristupni ključevi spremaju se u upravitelj zaporki, kako biste se mogli prijaviti na drugim uređajima"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Odaberite mjesto za sljedeće: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"izradite pristupne ključeve"</string>
     <string name="save_your_password" msgid="6597736507991704307">"spremi zaporku"</string>
@@ -44,6 +40,7 @@
     <string name="other_password_manager" msgid="565790221427004141">"Drugi upravitelji zaporki"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Zatvaranje lista"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Vratite se na prethodnu stranicu"</string>
+    <string name="accessibility_close_button" msgid="2953807735590034688">"Zatvorite prijedlog radnje upravitelja vjerodajnicama koji se pojavljuje na dnu zaslona"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Želite li upotrijebiti spremljeni pristupni ključ za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Želite li upotrijebiti spremljene podatke za prijavu za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Odaberite spremljene podatke za prijavu za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

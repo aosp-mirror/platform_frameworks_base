@@ -5753,6 +5753,24 @@ public abstract class PackageManager {
     }
 
     /**
+     * Returns the app metadata for a package.
+     *
+     * @param packageName
+     * @return A PersistableBundle containing the app metadata that was provided by the installer.
+     *         In the case where a package does not have any metadata, an empty PersistableBundle is
+     *         returned.
+     * @throws NameNotFoundException if no such package is available to the caller.
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    @RequiresPermission(Manifest.permission.GET_APP_METADATA)
+    public PersistableBundle getAppMetadata(@NonNull String packageName)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException("getAppMetadata not implemented in subclass");
+    }
+
+    /**
      * Return a List of all installed packages that are currently holding any of
      * the given permissions.
      *

@@ -202,13 +202,13 @@ class AccessPolicy private constructor(
         }
     }
 
-    fun BinaryXmlPullParser.parseSystemState(systemState: SystemState) {
+    fun BinaryXmlPullParser.parseSystemState(state: AccessState) {
         forEachTag {
             when (tagName) {
                 TAG_ACCESS -> {
                     forEachTag {
                         forEachSchemePolicy {
-                            with(it) { parseSystemState(systemState) }
+                            with(it) { parseSystemState(state) }
                         }
                     }
                 }
@@ -217,21 +217,21 @@ class AccessPolicy private constructor(
         }
     }
 
-    fun BinaryXmlSerializer.serializeSystemState(systemState: SystemState) {
+    fun BinaryXmlSerializer.serializeSystemState(state: AccessState) {
         tag(TAG_ACCESS) {
             forEachSchemePolicy {
-                with(it) { serializeSystemState(systemState) }
+                with(it) { serializeSystemState(state) }
             }
         }
     }
 
-    fun BinaryXmlPullParser.parseUserState(userId: Int, userState: UserState) {
+    fun BinaryXmlPullParser.parseUserState(state: AccessState, userId: Int) {
         forEachTag {
             when (tagName) {
                 TAG_ACCESS -> {
                     forEachTag {
                         forEachSchemePolicy {
-                            with(it) { parseUserState(userId, userState) }
+                            with(it) { parseUserState(state, userId) }
                         }
                     }
                 }
@@ -245,10 +245,10 @@ class AccessPolicy private constructor(
         }
     }
 
-    fun BinaryXmlSerializer.serializeUserState(userId: Int, userState: UserState) {
+    fun BinaryXmlSerializer.serializeUserState(state: AccessState, userId: Int) {
         tag(TAG_ACCESS) {
             forEachSchemePolicy {
-                with(it) { serializeUserState(userId, userState) }
+                with(it) { serializeUserState(state, userId) }
             }
         }
     }
@@ -305,11 +305,11 @@ abstract class SchemePolicy {
 
     open fun MutateStateScope.onPackageUninstalled(packageName: String, appId: Int, userId: Int) {}
 
-    open fun BinaryXmlPullParser.parseSystemState(systemState: SystemState) {}
+    open fun BinaryXmlPullParser.parseSystemState(state: AccessState) {}
 
-    open fun BinaryXmlSerializer.serializeSystemState(systemState: SystemState) {}
+    open fun BinaryXmlSerializer.serializeSystemState(state: AccessState) {}
 
-    open fun BinaryXmlPullParser.parseUserState(userId: Int, userState: UserState) {}
+    open fun BinaryXmlPullParser.parseUserState(state: AccessState, userId: Int) {}
 
-    open fun BinaryXmlSerializer.serializeUserState(userId: Int, userState: UserState) {}
+    open fun BinaryXmlSerializer.serializeUserState(state: AccessState, userId: Int) {}
 }

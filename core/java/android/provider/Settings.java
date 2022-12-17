@@ -9646,6 +9646,16 @@ public final class Settings {
                 "lock_screen_show_silent_notifications";
 
         /**
+         * Indicates whether "seen" notifications should be suppressed from the lockscreen.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS =
+                "lock_screen_show_only_unseen_notifications";
+
+        /**
          * Indicates whether snooze options should be shown on notifications
          * <p>
          * Type: int (0 for false, 1 for true)
@@ -11950,9 +11960,7 @@ public final class Settings {
          * <p>
          * Type: int (0 for false, 1 for true)
          *
-         * @hide
          */
-        @SystemApi
         @Readable
         @SuppressLint("NoSettingsProvider")
         public static final String SECURE_FRP_MODE = "secure_frp_mode";

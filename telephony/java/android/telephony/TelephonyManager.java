@@ -388,6 +388,9 @@ public class TelephonyManager {
     /** @hide */
     public static final int INVALID_PORT_INDEX = -1;
 
+    /** @hide */
+    public static final String PROPERTY_ENABLE_NULL_CIPHER_TOGGLE = "enable_null_cipher_toggle";
+
     private final Context mContext;
     private final int mSubId;
     @UnsupportedAppUsage
@@ -17932,5 +17935,29 @@ public class TelephonyManager {
         } catch (RemoteException ex) {
             ex.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns whether the domain selection service is supported.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}.
+     *
+     * @return {@code true} if the domain selection service is supported.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
+    public boolean isDomainSelectionSupported() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isDomainSelectionSupported();
+            }
+        } catch (RemoteException ex) {
+            Rlog.w(TAG, "RemoteException", ex);
+        }
+        return false;
     }
 }

@@ -91,6 +91,8 @@ interface IImsCallSession {
      * override the previous listener.
      *
      * @param listener to listen to the session events of this object
+     *
+     * @deprecated This is depreacated.
      */
     void setListener(in IImsCallSessionListener listener);
 

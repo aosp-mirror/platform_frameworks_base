@@ -1114,7 +1114,7 @@ class JobConcurrencyManager {
         // reasonably concurrency behavior.
         return job.lastEvaluatedBias == JobInfo.BIAS_TOP_APP
                 // TODO(): include BAL state for user-initiated jobs
-                && (job.shouldTreatAsExpeditedJob() || job.shouldTreatAsUserInitiated());
+                && (job.shouldTreatAsExpeditedJob() || job.shouldTreatAsUserInitiatedJob());
     }
 
     @GuardedBy("mLock")

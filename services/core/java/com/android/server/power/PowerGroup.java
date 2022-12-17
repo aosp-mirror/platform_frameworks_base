@@ -28,6 +28,8 @@ import static com.android.server.power.PowerManagerService.USER_ACTIVITY_SCREEN_
 import static com.android.server.power.PowerManagerService.WAKE_LOCK_DOZE;
 import static com.android.server.power.PowerManagerService.WAKE_LOCK_DRAW;
 import static com.android.server.power.PowerManagerService.WAKE_LOCK_SCREEN_BRIGHT;
+import static com.android.server.power.PowerManagerService.WAKE_LOCK_SCREEN_DIM;
+import static com.android.server.power.PowerManagerService.WAKE_LOCK_STAY_AWAKE;
 
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
@@ -334,6 +336,22 @@ public class PowerGroup {
 
     public int getWakeLockSummaryLocked() {
         return mWakeLockSummary;
+    }
+
+    /**
+     * Query whether a wake lock is at least partially responsible for keeping the device awake.
+     *
+     * This does not necessarily mean the wake lock is the sole reason the device is awake; there
+     * could also be user activity keeping the device awake, for example. It just means a wake lock
+     * is being held that would keep the device awake even if nothing else was.
+     *
+     * @return whether the PowerGroup is being kept awake at least in part because a wake lock is
+     *         being held.
+     */
+    public boolean hasWakeLockKeepingScreenOnLocked() {
+        final int screenOnWakeLockMask =
+                WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM | WAKE_LOCK_STAY_AWAKE;
+        return (mWakeLockSummary & (screenOnWakeLockMask)) != 0;
     }
 
     public void setWakeLockSummaryLocked(int summary) {

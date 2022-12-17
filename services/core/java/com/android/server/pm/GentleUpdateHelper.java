@@ -35,6 +35,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.text.format.DateUtils;
 import android.util.Slog;
 
@@ -167,6 +168,14 @@ public class GentleUpdateHelper {
 
     @WorkerThread
     private void scheduleIdleJob() {
+        // Simulate idle jobs during test. Otherwise we need to wait for
+        // more than 30 mins for JS to trigger the job.
+        boolean isIdle = SystemProperties.getBoolean("debug.pm.gentle_update_test.is_idle", false);
+        if (isIdle) {
+            mHandler.post(this::runIdleJob);
+            return;
+        }
+
         if (mHasPendingIdleJob) {
             // No need to schedule the job again
             return;

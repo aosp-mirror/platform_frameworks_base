@@ -20,7 +20,7 @@ import android.os.Bundle;
 
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsReasonInfo;
-
+import android.telephony.ims.aidl.IImsCallSessionListener;
 import com.android.ims.internal.IImsCallSession;
 
 /**
@@ -31,7 +31,7 @@ import com.android.ims.internal.IImsCallSession;
  // processed by telephony before the control flow returns to the ImsService to perform
  // operations on the IImsCallSession.
 interface IImsMmTelListener {
-    void onIncomingCall(IImsCallSession c, in Bundle extras);
+    IImsCallSessionListener onIncomingCall(in IImsCallSession c, in String callId, in Bundle extras);
     void onRejectedCall(in ImsCallProfile callProfile, in ImsReasonInfo reason);
     oneway void onVoiceMessageCountUpdate(int count);
     oneway void onAudioModeIsVoipChanged(int imsAudioHandler);

@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Enregistrer ailleurs"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Utiliser un autre appareil"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Enregistrer sur un autre appareil"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Sécurité renforcée grâce aux clés d\'accès"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Pas besoin de créer ni de mémoriser des mots de passe complexes"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Utilisez votre empreinte digitale, votre visage ou le verrouillage de l\'écran pour créer une clé d\'accès unique"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Les clés d\'accès sont enregistrées dans un gestionnaire de mots de passe pour que vous puissiez vous connecter sur d\'autres appareils"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Choisir où <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"créer vos clés d\'accès"</string>
     <string name="save_your_password" msgid="6597736507991704307">"enregistrer votre mot de passe"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"Autres gestionnaires de mots de passe"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Fermer la feuille"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Revenir à la page précédente"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Utiliser votre clé d\'accès enregistrée pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Utiliser vos informations de connexion enregistrées pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Choisir des informations de connexion enregistrées pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

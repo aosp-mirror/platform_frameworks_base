@@ -16,12 +16,14 @@
 
 package com.android.systemui.clipboardoverlay;
 
+import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ACTION_SHOWN;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_DISMISS_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SHARE_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SWIPE_DISMISSED;
 import static com.android.systemui.flags.Flags.CLIPBOARD_REMOTE_BEHAVIOR;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,10 +31,13 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
+import android.app.RemoteAction;
 import android.content.ClipData;
 import android.content.ClipDescription;
+import android.content.Context;
 import android.net.Uri;
 import android.os.PersistableBundle;
+import android.view.textclassifier.TextLinks;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -42,6 +47,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.screenshot.TimeoutHandler;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.After;
 import org.junit.Before;
@@ -50,7 +57,12 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -80,6 +92,8 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     private ArgumentCaptor<ClipboardOverlayView.ClipboardOverlayCallbacks> mOverlayCallbacksCaptor;
     private ClipboardOverlayView.ClipboardOverlayCallbacks mCallbacks;
 
+    private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -101,6 +115,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
                 mTimeoutHandler,
                 mFeatureFlags,
                 mClipboardUtils,
+                mExecutor,
                 mUiEventLogger);
         verify(mClipboardOverlayView).setCallbacks(mOverlayCallbacksCaptor.capture());
         mCallbacks = mOverlayCallbacksCaptor.getValue();
@@ -235,6 +250,31 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
         verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_DISMISS_TAPPED, 0, "first.package");
         verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_DISMISS_TAPPED, 0, "second.package");
+        verifyNoMoreInteractions(mUiEventLogger);
+    }
+
+    @Test
+    public void test_logOnClipboardActionsShown() {
+        ClipData.Item item = mSampleClipData.getItemAt(0);
+        item.setTextLinks(Mockito.mock(TextLinks.class));
+        mFeatureFlags.set(CLIPBOARD_REMOTE_BEHAVIOR, true);
+        when(mClipboardUtils.isRemoteCopy(any(Context.class), any(ClipData.class), anyString()))
+                .thenReturn(true);
+        when(mClipboardUtils.getAction(any(ClipData.Item.class), anyString()))
+                .thenReturn(Optional.of(Mockito.mock(RemoteAction.class)));
+        when(mClipboardOverlayView.post(any(Runnable.class))).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                ((Runnable) invocation.getArgument(0)).run();
+                return null;
+            }
+        });
+
+        mOverlayController.setClipData(
+                new ClipData(mSampleClipData.getDescription(), item), "actionShownSource");
+        mExecutor.runAllReady();
+
+        verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_ACTION_SHOWN, 0, "actionShownSource");
         verifyNoMoreInteractions(mUiEventLogger);
     }
 }

@@ -98,7 +98,7 @@ public class ThermalStatusRestriction extends JobRestriction {
             // Only let high priority jobs run if:
             //   They are already running and aren't yet in overtime
             // Don't let any other job run.
-            if (job.shouldTreatAsExpeditedJob() || job.shouldTreatAsUserInitiated()) {
+            if (job.shouldTreatAsExpeditedJob() || job.shouldTreatAsUserInitiatedJob()) {
                 return job.getNumPreviousAttempts() > 0
                         || (mService.isCurrentlyRunningLocked(job)
                                 && mService.isJobInOvertimeLocked(job));

@@ -48,6 +48,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.CallbackWithProbe;
+import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.log.Probe;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -107,7 +108,7 @@ public class FingerprintEnrollClientTest {
     @Mock
     private Probe mLuxProbe;
     @Captor
-    private ArgumentCaptor<OperationContext> mOperationContextCaptor;
+    private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
     @Captor
     private ArgumentCaptor<PointerContext> mPointerContextCaptor;
     @Captor
@@ -143,7 +144,8 @@ public class FingerprintEnrollClientTest {
         InOrder order = inOrder(mHal, mBiometricContext);
         order.verify(mBiometricContext).updateContext(
                 mOperationContextCaptor.capture(), anyBoolean());
-        order.verify(mHal).enrollWithContext(any(), same(mOperationContextCaptor.getValue()));
+        order.verify(mHal).enrollWithContext(any(),
+                same(mOperationContextCaptor.getValue().toAidlContext()));
         verify(mHal, never()).enroll(any());
     }
 
@@ -234,16 +236,20 @@ public class FingerprintEnrollClientTest {
         final FingerprintEnrollClient client = createClient();
         client.start(mCallback);
 
-        verify(mHal).enrollWithContext(any(), mOperationContextCaptor.capture());
-        OperationContext opContext = mOperationContextCaptor.getValue();
+        final ArgumentCaptor<OperationContext> captor =
+                ArgumentCaptor.forClass(OperationContext.class);
+        verify(mHal).enrollWithContext(any(), captor.capture());
+        OperationContext opContext = captor.getValue();
 
         // fake an update to the context
-        verify(mBiometricContext).subscribe(eq(opContext), mContextInjector.capture());
-        mContextInjector.getValue().accept(opContext);
+        verify(mBiometricContext).subscribe(
+                mOperationContextCaptor.capture(), mContextInjector.capture());
+        mContextInjector.getValue().accept(
+                mOperationContextCaptor.getValue().toAidlContext());
         verify(mHal).onContextChanged(eq(opContext));
 
         client.stopHalOperation();
-        verify(mBiometricContext).unsubscribe(same(opContext));
+        verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));
     }
 
     @Test

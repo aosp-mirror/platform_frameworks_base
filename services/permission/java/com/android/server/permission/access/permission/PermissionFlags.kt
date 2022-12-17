@@ -313,6 +313,11 @@ object PermissionFlags {
         APP_OP_REVOKED or ONE_TIME or HIBERNATION or USER_SELECTED
 
     /**
+     * Mask for all permission flags about permission exemption.
+     */
+    const val MASK_EXEMPT = INSTALLER_EXEMPT or SYSTEM_EXEMPT or UPGRADE_EXEMPT
+
+    /**
      * Mask for all API permission flags about permission restriction.
      */
     private const val API_MASK_RESTRICTION =

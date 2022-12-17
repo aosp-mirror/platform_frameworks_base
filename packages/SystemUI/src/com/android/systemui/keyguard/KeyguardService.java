@@ -77,6 +77,7 @@ import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
+import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.SystemUIApplication;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
@@ -91,6 +92,7 @@ public class KeyguardService extends Service {
 
     private final KeyguardViewMediator mKeyguardViewMediator;
     private final KeyguardLifecyclesDispatcher mKeyguardLifecyclesDispatcher;
+    private final ScreenOnCoordinator mScreenOnCoordinator;
     private final ShellTransitions mShellTransitions;
 
     private static int newModeToLegacyMode(int newMode) {
@@ -254,10 +256,12 @@ public class KeyguardService extends Service {
     @Inject
     public KeyguardService(KeyguardViewMediator keyguardViewMediator,
                            KeyguardLifecyclesDispatcher keyguardLifecyclesDispatcher,
+                           ScreenOnCoordinator screenOnCoordinator,
                            ShellTransitions shellTransitions) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
+        mScreenOnCoordinator = screenOnCoordinator;
         mShellTransitions = shellTransitions;
     }
 
@@ -547,6 +551,31 @@ public class KeyguardService extends Service {
             checkPermission();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNING_ON,
                     callback);
+
+            final String onDrawWaitingTraceTag = "Waiting for KeyguardDrawnCallback#onDrawn";
+            final int traceCookie = System.identityHashCode(callback);
+            Trace.beginAsyncSection(onDrawWaitingTraceTag, traceCookie);
+
+            // Ensure the drawn callback is only ever called once
+            mScreenOnCoordinator.onScreenTurningOn(new Runnable() {
+                boolean mInvoked;
+                @Override
+                public void run() {
+                    if (callback == null) return;
+                    if (!mInvoked) {
+                        mInvoked = true;
+                        try {
+                            Trace.endAsyncSection(onDrawWaitingTraceTag, traceCookie);
+                            callback.onDrawn();
+                        } catch (RemoteException e) {
+                            Log.w(TAG, "Exception calling onDrawn():", e);
+                        }
+                    } else {
+                        Log.w(TAG, "KeyguardDrawnCallback#onDrawn() invoked > 1 times");
+                    }
+                }
+            });
+
             Trace.endSection();
         }
 
@@ -555,6 +584,7 @@ public class KeyguardService extends Service {
             Trace.beginSection("KeyguardService.mBinder#onScreenTurnedOn");
             checkPermission();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNED_ON);
+            mScreenOnCoordinator.onScreenTurnedOn();
             Trace.endSection();
         }
 
