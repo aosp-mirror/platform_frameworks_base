@@ -70,7 +70,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     protected final MediaHost mMediaHost;
     protected final MetricsLogger mMetricsLogger;
     private final UiEventLogger mUiEventLogger;
-    private final QSLogger mQSLogger;
+    protected final QSLogger mQSLogger;
     private final DumpManager mDumpManager;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
     protected boolean mShouldUseSplitNotificationShade;
@@ -152,7 +152,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     @Override
     protected void onInit() {
-        mView.initialize();
+        mView.initialize(mQSLogger);
         mQSLogger.logAllTilesChangeListening(mView.isListening(), mView.getDumpableTag(), "");
     }
 
@@ -430,6 +430,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             pw.println("  horizontal layout: " + mUsingHorizontalLayout);
             pw.println("  last orientation: " + mLastOrientation);
         }
+        pw.println("  mShouldUseSplitNotificationShade: " + mShouldUseSplitNotificationShade);
     }
 
     public QSPanel.QSTileLayout getTileLayout() {

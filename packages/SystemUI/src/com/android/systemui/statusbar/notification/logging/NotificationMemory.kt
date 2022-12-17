@@ -17,10 +17,14 @@
 
 package com.android.systemui.statusbar.notification.logging
 
+import android.app.Notification
+
 /** Describes usage of a notification. */
 data class NotificationMemoryUsage(
     val packageName: String,
+    val uid: Int,
     val notificationKey: String,
+    val notification: Notification,
     val objectUsage: NotificationObjectUsage,
     val viewUsage: List<NotificationViewUsage>
 )
@@ -34,7 +38,8 @@ data class NotificationObjectUsage(
     val smallIcon: Int,
     val largeIcon: Int,
     val extras: Int,
-    val style: String?,
+    /** Style type, integer from [android.stats.sysui.NotificationEnums] */
+    val style: Int,
     val styleIcon: Int,
     val bigPicture: Int,
     val extender: Int,
