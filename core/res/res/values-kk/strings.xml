@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Қолданбаға ортақ жадтың бейнефайлдарын оқуға мүмкіндік береді."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"ортақ жадтың кескін файлдарын оқу"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Қолданбаға ортақ жадтың кескін файлдарын оқуға мүмкіндік береді."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"Пайдаланушының ортақ жадтағы сурет файлдарын және бейнефайлдарын оқу"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Қолданбаға ортақ жадтың сурет файлдарын және бейнефайлдарын оқуға мүмкіндік береді."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ортақ жадтың мазмұнын өзгерту немесе жою"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Қолданбаға ортақ жадтың мазмұнын жазуға мүмкіндік береді."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP қоңырауларын шалу/қабылдау"</string>

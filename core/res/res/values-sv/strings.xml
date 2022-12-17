@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Tillåter att appen läser videofiler från delad lagring."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"läsa bildfiler från delad lagring"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Tillåter att appen läser bildfiler från delad lagring."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"läsa bild- och videofiler som användaren valt från delat lagringsutrymme"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Tillåter att appen läser bild- och videofiler som du väljer från ditt delade lagringsutrymme."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ändra eller ta bort innehåll på delat lagringsutrymme"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Tillåter att appen skriver innehåll på ditt delade lagringsutrymme."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"gör/ta emot SIP-anrop"</string>
@@ -1477,7 +1479,7 @@
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Tillgänglighet"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Bakgrund"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Ändra bakgrund"</string>
-    <string name="notification_listener_binding_label" msgid="2702165274471499713">"Meddelandelyssnare"</string>
+    <string name="notification_listener_binding_label" msgid="2702165274471499713">"Aviseringslyssnare"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"Lyssnare för VR"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Leverantör"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"Rankningstjänst för aviseringar"</string>

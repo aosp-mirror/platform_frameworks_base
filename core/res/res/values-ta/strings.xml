@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"உங்கள் பகிர்ந்த சேமிப்பகத்திலுள்ள வீடியோ ஃபைல்களைப் படிக்க ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"பகிர்ந்த சேமிப்பகத்திலுள்ள பட ஃபைல்களைப் படித்தல்"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"உங்கள் பகிர்ந்த சேமிப்பகத்திலுள்ள பட ஃபைல்களைப் படிக்க ஆப்ஸை அனுமதிக்கும்."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"பகிர்ந்த சேமிப்பகத்தில் இருந்து பயனர் தேர்ந்தெடுக்கும் பட/வீடியோ ஃபைல்களைப் படித்தல்"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"உங்கள் பகிர்ந்த சேமிப்பகத்தில் இருந்து நீங்கள் தேர்ந்தெடுக்கும் பட/வீடியோ ஃபைல்களைப் படிக்க ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"பகிர்ந்த சேமிப்பகத்தின் உள்ளடக்கங்களை மாற்றும் அல்லது நீக்கும்"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"பகிர்ந்த சேமிப்பகத்தின் உள்ளடக்கத்தில் மாற்றங்களைச் செய்ய அனுமதிக்கும்."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP அழைப்புகளைச் செய்தல்/பெறுதல்"</string>
