@@ -1002,6 +1002,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• कैमरा ऐप्लिकेशन इंस्टॉल किया गया है"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ऐप्लिकेशन को सेट अप किया गया है"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• कम से कम एक डिवाइस उपलब्ध है"</string>
+    <!-- no translation found for keyguard_affordance_press_too_short (2687995216454987952) -->
+    <skip />
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"रद्द करें"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"कैमरा अभी स्विच करें"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"बेहतर सेल्फ़ी के लिए फ़ोन को अनफ़ोल्ड करें"</string>
@@ -1011,5 +1013,7 @@
     <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
     <skip />
     <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low (7134370101603167096) -->
     <skip />
 </resources>

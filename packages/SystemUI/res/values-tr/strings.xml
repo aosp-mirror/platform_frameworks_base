@@ -1002,14 +1002,16 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kamera uygulaması yüklenmelidir"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Uygulama kurulmuş olmalıdır"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• En az bir cihaz mevcut olmalıdır"</string>
+    <!-- no translation found for keyguard_affordance_press_too_short (2687995216454987952) -->
+    <skip />
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"İptal"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Şimdi çevirin"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Daha iyi selfie çekmek için telefonu açın"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Daha iyi bir selfie için ön ekrana geçilsin mi?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Daha yüksek çözünürlüğe sahip daha büyük bir fotoğraf için arka yüz kamerasını kullanın."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ * Bu ekran kapatılacak"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Katlanabilir cihaz açılıyor"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Katlanabilir cihaz döndürülüyor"</string>
+    <!-- no translation found for stylus_battery_low (7134370101603167096) -->
     <skip />
 </resources>

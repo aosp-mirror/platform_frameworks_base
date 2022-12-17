@@ -357,7 +357,7 @@
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"గెస్ట్‌కు తిరిగి స్వాగతం!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"మీరు మీ సెషన్‌ని కొనసాగించాలనుకుంటున్నారా?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"మొదటి నుండి ప్రారంభించండి"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"అవును, కొనసాగించు"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"అవును, కొనసాగించండి"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"గెస్ట్ మోడ్"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"మీరు గెస్ట్ మోడ్‌లో ఉన్నారు"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"కొత్త యూజర్‌ను జోడించడం వలన గెస్ట్ మోడ్ నుండి వైదొలుగుతుంది. అలాగే ప్రస్తుత గెస్ట్ సెషన్ నుండి అన్ని యాప్‌లతో పాటు మొత్తం డేటా తొలగించబడుతుంది."</string>
@@ -1002,14 +1002,16 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• కెమెరా యాప్ ఇన్‌స్టాల్ చేసి ఉందని"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• యాప్ సెటప్ చేయబడి ఉందని"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• కనీసం ఒక పరికరమైనా అందుబాటులో ఉందని"</string>
+    <!-- no translation found for keyguard_affordance_press_too_short (2687995216454987952) -->
+    <skip />
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"రద్దు చేయండి"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ఇప్పుడే తిప్పండి"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"మెరుగైన సెల్ఫీ కోసం ఫోన్‌ను అన్‌ఫోల్డ్ చేయండి"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"మంచి సెల్ఫీ కోసం ముందు వైపు డిస్‌ప్లేకు తిప్పాలా?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"అధిక రిజల్యూషన్‌తో పెద్ద ఫోటో కోసం వెనుక వైపున ఉన్న కెమెరాను ఉపయోగించండి."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ఈ స్క్రీన్ ఆఫ్ అవుతుంది"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"మడవగల పరికరం విప్పబడుతోంది"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"మడవగల పరికరం చుట్టూ తిప్పబడుతోంది"</string>
+    <!-- no translation found for stylus_battery_low (7134370101603167096) -->
     <skip />
 </resources>
