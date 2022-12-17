@@ -22,7 +22,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
 
-import com.android.internal.util.AnnotationValidations;
 import com.android.internal.util.Preconditions;
 
 import java.util.Objects;

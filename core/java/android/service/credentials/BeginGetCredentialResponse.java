@@ -27,7 +27,7 @@ import java.util.Objects;
  * Response from a credential provider, containing credential entries and other associated
  * data to be shown on the account selector UI.
  */
-public final class BeginGetCredentialsResponse implements Parcelable {
+public final class BeginGetCredentialResponse implements Parcelable {
     /** Content to be used for the UI. */
     private final @Nullable CredentialsResponseContent mCredentialsResponseContent;
 
@@ -38,7 +38,7 @@ public final class BeginGetCredentialsResponse implements Parcelable {
     private final @Nullable Action mAuthenticationAction;
 
     /**
-     * Creates a {@link BeginGetCredentialsResponse} instance with an authentication
+     * Creates a {@link BeginGetCredentialResponse} instance with an authentication
      * {@link Action} set. Providers must use this method when no content can be shown
      * before authentication.
      *
@@ -55,49 +55,49 @@ public final class BeginGetCredentialsResponse implements Parcelable {
      *
      * @throws NullPointerException If {@code authenticationAction} is null.
      */
-    public static @NonNull BeginGetCredentialsResponse createWithAuthentication(
+    public static @NonNull BeginGetCredentialResponse createWithAuthentication(
             @NonNull Action authenticationAction) {
         Objects.requireNonNull(authenticationAction,
                 "authenticationAction must not be null");
-        return new BeginGetCredentialsResponse(null, authenticationAction);
+        return new BeginGetCredentialResponse(null, authenticationAction);
     }
 
     /**
-     * Creates a {@link BeginGetCredentialsRequest} instance with content to be shown on the UI.
+     * Creates a {@link BeginGetCredentialRequest} instance with content to be shown on the UI.
      * Providers must use this method when there is content to be shown without top level
      * authentication required, including credential entries, action entries or a remote entry,
      *
      * @throws NullPointerException If {@code credentialsResponseContent} is null.
      */
-    public static @NonNull BeginGetCredentialsResponse createWithResponseContent(
+    public static @NonNull BeginGetCredentialResponse createWithResponseContent(
             @NonNull CredentialsResponseContent credentialsResponseContent) {
         Objects.requireNonNull(credentialsResponseContent,
                 "credentialsResponseContent must not be null");
-        return new BeginGetCredentialsResponse(credentialsResponseContent, null);
+        return new BeginGetCredentialResponse(credentialsResponseContent, null);
     }
 
-    private BeginGetCredentialsResponse(@Nullable CredentialsResponseContent
+    private BeginGetCredentialResponse(@Nullable CredentialsResponseContent
             credentialsResponseContent,
             @Nullable Action authenticationAction) {
         mCredentialsResponseContent = credentialsResponseContent;
         mAuthenticationAction = authenticationAction;
     }
 
-    private BeginGetCredentialsResponse(@NonNull Parcel in) {
+    private BeginGetCredentialResponse(@NonNull Parcel in) {
         mCredentialsResponseContent = in.readTypedObject(CredentialsResponseContent.CREATOR);
         mAuthenticationAction = in.readTypedObject(Action.CREATOR);
     }
 
-    public static final @NonNull Creator<BeginGetCredentialsResponse> CREATOR =
-            new Creator<BeginGetCredentialsResponse>() {
+    public static final @NonNull Creator<BeginGetCredentialResponse> CREATOR =
+            new Creator<BeginGetCredentialResponse>() {
                 @Override
-                public BeginGetCredentialsResponse createFromParcel(Parcel in) {
-                    return new BeginGetCredentialsResponse(in);
+                public BeginGetCredentialResponse createFromParcel(Parcel in) {
+                    return new BeginGetCredentialResponse(in);
                 }
 
                 @Override
-                public BeginGetCredentialsResponse[] newArray(int size) {
-                    return new BeginGetCredentialsResponse[size];
+                public BeginGetCredentialResponse[] newArray(int size) {
+                    return new BeginGetCredentialResponse[size];
                 }
             };
 

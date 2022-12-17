@@ -33,7 +33,7 @@ import java.util.Objects;
  */
 public final class GetCredentialRequest implements Parcelable {
     /** Calling package of the app requesting for credentials. */
-    private final @NonNull String mCallingPackage;
+    private final @NonNull CallingAppInfo mCallingAppInfo;
 
     /**
      * List of credential options. Each {@link GetCredentialOption} object holds parameters to
@@ -41,14 +41,14 @@ public final class GetCredentialRequest implements Parcelable {
      */
     private final @NonNull List<GetCredentialOption> mGetCredentialOptions;
 
-    private GetCredentialRequest(@NonNull String callingPackage,
+    private GetCredentialRequest(@NonNull CallingAppInfo callingAppInfo,
             @NonNull List<GetCredentialOption> getCredentialOptions) {
-        this.mCallingPackage = callingPackage;
+        this.mCallingAppInfo = callingAppInfo;
         this.mGetCredentialOptions = getCredentialOptions;
     }
 
     private GetCredentialRequest(@NonNull Parcel in) {
-        mCallingPackage = in.readString8();
+        mCallingAppInfo = in.readTypedObject(CallingAppInfo.CREATOR);
         List<GetCredentialOption> getCredentialOptions = new ArrayList<>();
         in.readTypedList(getCredentialOptions, GetCredentialOption.CREATOR);
         mGetCredentialOptions = getCredentialOptions;
@@ -75,15 +75,15 @@ public final class GetCredentialRequest implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString8(mCallingPackage);
+        dest.writeTypedObject(mCallingAppInfo, flags);
         dest.writeTypedList(mGetCredentialOptions);
     }
 
     /**
-     * Returns the calling package of the app requesting credentials.
+     * Returns info pertaining to the app requesting credentials.
      */
-    public @NonNull String getCallingPackage() {
-        return mCallingPackage;
+    public @NonNull CallingAppInfo getCallingAppInfo() {
+        return mCallingAppInfo;
     }
 
     /**
@@ -97,17 +97,17 @@ public final class GetCredentialRequest implements Parcelable {
      * Builder for {@link GetCredentialRequest}.
      */
     public static final class Builder {
-        private String mCallingPackage;
+        private CallingAppInfo mCallingAppInfo;
         private List<GetCredentialOption> mGetCredentialOptions = new ArrayList<>();
 
         /**
          * Creates a new builder.
-         * @param callingPackage the calling package of the app requesting credentials
+         * @param callingAppInfo info pertaining to the app requesting credentials
          *
          * @throws IllegalArgumentException If {@code callingPackag}e is null or empty.
          */
-        public Builder(@NonNull String callingPackage) {
-            mCallingPackage = Preconditions.checkStringNotEmpty(callingPackage);
+        public Builder(@NonNull CallingAppInfo callingAppInfo) {
+            mCallingAppInfo = Objects.requireNonNull(callingAppInfo);
         }
 
         /**
@@ -145,14 +145,14 @@ public final class GetCredentialRequest implements Parcelable {
          *
          * @throws NullPointerException If {@code getCredentialOptions} is null.
          * @throws IllegalArgumentException If {@code getCredentialOptions} is empty, or if
-         * {@code callingPackage} is null or empty.
+         * {@code callingAppInfo} is null or empty.
          */
         public @NonNull GetCredentialRequest build() {
-            Preconditions.checkStringNotEmpty(mCallingPackage,
-                    "Must set the calling package");
+            Objects.requireNonNull(mCallingAppInfo,
+                    "mCallingAppInfo");
             Preconditions.checkCollectionNotEmpty(mGetCredentialOptions,
                     "getCredentialOptions");
-            return new GetCredentialRequest(mCallingPackage, mGetCredentialOptions);
+            return new GetCredentialRequest(mCallingAppInfo, mGetCredentialOptions);
         }
     }
 }

@@ -39530,9 +39530,9 @@ package android.service.credentials {
   }
 
   public final class BeginCreateCredentialRequest implements android.os.Parcelable {
-    ctor public BeginCreateCredentialRequest(@NonNull String, @NonNull String, @NonNull android.os.Bundle);
+    ctor public BeginCreateCredentialRequest(@NonNull android.service.credentials.CallingAppInfo, @NonNull String, @NonNull android.os.Bundle);
     method public int describeContents();
-    method @NonNull public String getCallingPackage();
+    method @NonNull public android.service.credentials.CallingAppInfo getCallingAppInfo();
     method @NonNull public android.os.Bundle getData();
     method @NonNull public String getType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -39564,29 +39564,29 @@ package android.service.credentials {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.BeginGetCredentialOption> CREATOR;
   }
 
-  public final class BeginGetCredentialsRequest implements android.os.Parcelable {
+  public final class BeginGetCredentialRequest implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public java.util.List<android.service.credentials.BeginGetCredentialOption> getBeginGetCredentialOptions();
-    method @NonNull public String getCallingPackage();
+    method @NonNull public android.service.credentials.CallingAppInfo getCallingAppInfo();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.BeginGetCredentialsRequest> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.BeginGetCredentialRequest> CREATOR;
   }
 
-  public static final class BeginGetCredentialsRequest.Builder {
-    ctor public BeginGetCredentialsRequest.Builder(@NonNull String);
-    method @NonNull public android.service.credentials.BeginGetCredentialsRequest.Builder addBeginGetCredentialOption(@NonNull android.service.credentials.BeginGetCredentialOption);
-    method @NonNull public android.service.credentials.BeginGetCredentialsRequest build();
-    method @NonNull public android.service.credentials.BeginGetCredentialsRequest.Builder setBeginGetCredentialOptions(@NonNull java.util.List<android.service.credentials.BeginGetCredentialOption>);
+  public static final class BeginGetCredentialRequest.Builder {
+    ctor public BeginGetCredentialRequest.Builder(@NonNull android.service.credentials.CallingAppInfo);
+    method @NonNull public android.service.credentials.BeginGetCredentialRequest.Builder addBeginGetCredentialOption(@NonNull android.service.credentials.BeginGetCredentialOption);
+    method @NonNull public android.service.credentials.BeginGetCredentialRequest build();
+    method @NonNull public android.service.credentials.BeginGetCredentialRequest.Builder setBeginGetCredentialOptions(@NonNull java.util.List<android.service.credentials.BeginGetCredentialOption>);
   }
 
-  public final class BeginGetCredentialsResponse implements android.os.Parcelable {
-    method @NonNull public static android.service.credentials.BeginGetCredentialsResponse createWithAuthentication(@NonNull android.service.credentials.Action);
-    method @NonNull public static android.service.credentials.BeginGetCredentialsResponse createWithResponseContent(@NonNull android.service.credentials.CredentialsResponseContent);
+  public final class BeginGetCredentialResponse implements android.os.Parcelable {
+    method @NonNull public static android.service.credentials.BeginGetCredentialResponse createWithAuthentication(@NonNull android.service.credentials.Action);
+    method @NonNull public static android.service.credentials.BeginGetCredentialResponse createWithResponseContent(@NonNull android.service.credentials.CredentialsResponseContent);
     method public int describeContents();
     method @Nullable public android.service.credentials.Action getAuthenticationAction();
     method @Nullable public android.service.credentials.CredentialsResponseContent getCredentialsResponseContent();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.BeginGetCredentialsResponse> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.BeginGetCredentialResponse> CREATOR;
   }
 
   public final class CallingAppInfo implements android.os.Parcelable {
@@ -39599,9 +39599,9 @@ package android.service.credentials {
   }
 
   public final class CreateCredentialRequest implements android.os.Parcelable {
-    ctor public CreateCredentialRequest(@NonNull String, @NonNull String, @NonNull android.os.Bundle);
+    ctor public CreateCredentialRequest(@NonNull android.service.credentials.CallingAppInfo, @NonNull String, @NonNull android.os.Bundle);
     method public int describeContents();
-    method @NonNull public String getCallingPackage();
+    method @NonNull public android.service.credentials.CallingAppInfo getCallingAppInfo();
     method @NonNull public android.os.Bundle getData();
     method @NonNull public String getType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -39633,19 +39633,10 @@ package android.service.credentials {
     method @NonNull public android.service.credentials.CredentialEntry.Builder setAutoSelectAllowed(@NonNull boolean);
   }
 
-  public class CredentialProviderException extends java.lang.Exception {
-    ctor public CredentialProviderException(int, @NonNull String, @NonNull Throwable);
-    ctor public CredentialProviderException(int, @NonNull String);
-    ctor public CredentialProviderException(int, @NonNull Throwable);
-    ctor public CredentialProviderException(int);
-    method public int getErrorCode();
-    field public static final int ERROR_UNKNOWN = 0; // 0x0
-  }
-
   public abstract class CredentialProviderService extends android.app.Service {
     ctor public CredentialProviderService();
-    method public abstract void onBeginCreateCredential(@NonNull android.service.credentials.BeginCreateCredentialRequest, @NonNull android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<android.service.credentials.BeginCreateCredentialResponse,android.service.credentials.CredentialProviderException>);
-    method public abstract void onBeginGetCredentials(@NonNull android.service.credentials.BeginGetCredentialsRequest, @NonNull android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<android.service.credentials.BeginGetCredentialsResponse,android.service.credentials.CredentialProviderException>);
+    method public abstract void onBeginCreateCredential(@NonNull android.service.credentials.BeginCreateCredentialRequest, @NonNull android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<android.service.credentials.BeginCreateCredentialResponse,android.credentials.CreateCredentialException>);
+    method public abstract void onBeginGetCredential(@NonNull android.service.credentials.BeginGetCredentialRequest, @NonNull android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<android.service.credentials.BeginGetCredentialResponse,android.credentials.GetCredentialException>);
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
     field public static final String CAPABILITY_META_DATA_KEY = "android.credentials.capabilities";
     field public static final String EXTRA_CREATE_CREDENTIAL_EXCEPTION = "android.service.credentials.extra.CREATE_CREDENTIAL_EXCEPTION";
@@ -39679,14 +39670,14 @@ package android.service.credentials {
 
   public final class GetCredentialRequest implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public String getCallingPackage();
+    method @NonNull public android.service.credentials.CallingAppInfo getCallingAppInfo();
     method @NonNull public java.util.List<android.credentials.GetCredentialOption> getGetCredentialOptions();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.GetCredentialRequest> CREATOR;
   }
 
   public static final class GetCredentialRequest.Builder {
-    ctor public GetCredentialRequest.Builder(@NonNull String);
+    ctor public GetCredentialRequest.Builder(@NonNull android.service.credentials.CallingAppInfo);
     method @NonNull public android.service.credentials.GetCredentialRequest.Builder addGetCredentialOption(@NonNull android.credentials.GetCredentialOption);
     method @NonNull public android.service.credentials.GetCredentialRequest build();
     method @NonNull public android.service.credentials.GetCredentialRequest.Builder setGetCredentialOptions(@NonNull java.util.List<android.credentials.GetCredentialOption>);

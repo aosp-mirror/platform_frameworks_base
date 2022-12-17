@@ -21,18 +21,19 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.credentials.CreateCredentialException;
+import android.credentials.GetCredentialException;
 import android.os.Handler;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.BeginCreateCredentialRequest;
 import android.service.credentials.BeginCreateCredentialResponse;
-import android.service.credentials.BeginGetCredentialsRequest;
-import android.service.credentials.BeginGetCredentialsResponse;
+import android.service.credentials.BeginGetCredentialRequest;
+import android.service.credentials.BeginGetCredentialResponse;
 import android.service.credentials.CredentialProviderException;
-import android.service.credentials.CredentialProviderException.CredentialProviderError;
 import android.service.credentials.CredentialProviderService;
 import android.service.credentials.IBeginCreateCredentialCallback;
-import android.service.credentials.IBeginGetCredentialsCallback;
+import android.service.credentials.IBeginGetCredentialCallback;
 import android.service.credentials.ICredentialProviderService;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -71,7 +72,8 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
         /** Called when a successful response is received from the remote provider. */
         void onProviderResponseSuccess(@Nullable T response);
         /** Called when a failure response is received from the remote provider. */
-        void onProviderResponseFailure(int errorCode, @Nullable CharSequence message);
+        void onProviderResponseFailure(int errorCode, @Nullable String errorType,
+                @Nullable CharSequence message);
         /** Called when the remote provider service dies. */
         void onProviderServiceDied(RemoteCredentialService service);
     }
@@ -106,35 +108,34 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
      * @param callback the callback to be used to send back the provider response to the
      *                 {@link ProviderGetSession} class that maintains provider state
      */
-    public void onBeginGetCredentials(@NonNull BeginGetCredentialsRequest request,
-            ProviderCallbacks<BeginGetCredentialsResponse> callback) {
+    public void onBeginGetCredential(@NonNull BeginGetCredentialRequest request,
+            ProviderCallbacks<BeginGetCredentialResponse> callback) {
         Log.i(TAG, "In onGetCredentials in RemoteCredentialService");
         AtomicReference<ICancellationSignal> cancellationSink = new AtomicReference<>();
-        AtomicReference<CompletableFuture<BeginGetCredentialsResponse>> futureRef =
+        AtomicReference<CompletableFuture<BeginGetCredentialResponse>> futureRef =
                 new AtomicReference<>();
 
-        CompletableFuture<BeginGetCredentialsResponse> connectThenExecute = postAsync(service -> {
-            CompletableFuture<BeginGetCredentialsResponse> getCredentials =
+        CompletableFuture<BeginGetCredentialResponse> connectThenExecute = postAsync(service -> {
+            CompletableFuture<BeginGetCredentialResponse> getCredentials =
                     new CompletableFuture<>();
             ICancellationSignal cancellationSignal =
-                    service.onBeginGetCredentials(request,
-                            new IBeginGetCredentialsCallback.Stub() {
+                    service.onBeginGetCredential(request,
+                            new IBeginGetCredentialCallback.Stub() {
                         @Override
-                        public void onSuccess(BeginGetCredentialsResponse response) {
+                        public void onSuccess(BeginGetCredentialResponse response) {
                             Log.i(TAG, "In onSuccess in RemoteCredentialService");
                             getCredentials.complete(response);
                         }
 
                         @Override
-                        public void onFailure(@CredentialProviderError int errorCode,
-                                CharSequence message) {
+                        public void onFailure(String errorType, CharSequence message) {
                             Log.i(TAG, "In onFailure in RemoteCredentialService");
                             String errorMsg = message == null ? "" : String.valueOf(message);
-                            getCredentials.completeExceptionally(new CredentialProviderException(
-                                    errorCode, errorMsg));
+                                getCredentials.completeExceptionally(
+                                        new GetCredentialException(errorType, errorMsg));
                         }
                     });
-            CompletableFuture<BeginGetCredentialsResponse> future = futureRef.get();
+            CompletableFuture<BeginGetCredentialResponse> future = futureRef.get();
             if (future != null && future.isCancelled()) {
                 dispatchCancellationSignal(cancellationSignal);
             } else {
@@ -175,12 +176,11 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
                         }
 
                         @Override
-                        public void onFailure(@CredentialProviderError int errorCode,
-                                CharSequence message) {
+                        public void onFailure(String errorType, CharSequence message) {
                             Log.i(TAG, "In onFailure in RemoteCredentialService");
                             String errorMsg = message == null ? "" : String.valueOf(message);
                             createCredentialFuture.completeExceptionally(
-                                    new CredentialProviderException(errorCode, errorMsg));
+                                    new CreateCredentialException(errorType, errorMsg));
                         }});
             CompletableFuture<BeginCreateCredentialResponse> future = futureRef.get();
             if (future != null && future.isCancelled()) {
@@ -209,22 +209,34 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
                 dispatchCancellationSignal(cancellationSink.get());
                 callback.onProviderResponseFailure(
                         CredentialProviderException.ERROR_TIMEOUT,
+                        null,
                         error.getMessage());
             } else if (error instanceof CancellationException) {
                 Log.i(TAG, "In RemoteCredentialService execute error is cancellation");
                 dispatchCancellationSignal(cancellationSink.get());
                 callback.onProviderResponseFailure(
                         CredentialProviderException.ERROR_TASK_CANCELED,
+                        null,
                         error.getMessage());
-            } else if (error instanceof CredentialProviderException) {
-                Log.i(TAG, "In RemoteCredentialService execute error is provider error");
-                callback.onProviderResponseFailure(((CredentialProviderException) error)
-                                .getErrorCode(),
+            } else if (error instanceof GetCredentialException) {
+                Log.i(TAG, "In RemoteCredentialService execute error is provider get"
+                        + "error");
+                callback.onProviderResponseFailure(
+                        CredentialProviderException.ERROR_PROVIDER_FAILURE,
+                        ((GetCredentialException) error).errorType,
+                        error.getMessage());
+            } else if (error instanceof CreateCredentialException) {
+                Log.i(TAG, "In RemoteCredentialService execute error is provider create "
+                        + "error");
+                callback.onProviderResponseFailure(
+                        CredentialProviderException.ERROR_PROVIDER_FAILURE,
+                        ((CreateCredentialException) error).errorType,
                         error.getMessage());
             } else {
                 Log.i(TAG, "In RemoteCredentialService execute error is unknown");
                 callback.onProviderResponseFailure(
                         CredentialProviderException.ERROR_UNKNOWN,
+                        null,
                         error.getMessage());
             }
         }
