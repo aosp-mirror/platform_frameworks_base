@@ -8389,6 +8389,7 @@ package android.app.job {
     method public long getTriggerContentMaxDelay();
     method public long getTriggerContentUpdateDelay();
     method @Nullable public android.app.job.JobInfo.TriggerContentUri[] getTriggerContentUris();
+    method public boolean isDataTransfer();
     method public boolean isExpedited();
     method public boolean isImportantWhileForeground();
     method public boolean isPeriodic();
@@ -8398,6 +8399,7 @@ package android.app.job {
     method public boolean isRequireCharging();
     method public boolean isRequireDeviceIdle();
     method public boolean isRequireStorageNotLow();
+    method public boolean isUserInitiated();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int BACKOFF_POLICY_EXPONENTIAL = 1; // 0x1
     field public static final int BACKOFF_POLICY_LINEAR = 0; // 0x0
@@ -8424,6 +8426,7 @@ package android.app.job {
     method public android.app.job.JobInfo build();
     method public android.app.job.JobInfo.Builder setBackoffCriteria(long, int);
     method public android.app.job.JobInfo.Builder setClipData(@Nullable android.content.ClipData, int);
+    method @NonNull public android.app.job.JobInfo.Builder setDataTransfer(boolean);
     method public android.app.job.JobInfo.Builder setEstimatedNetworkBytes(long, long);
     method @NonNull public android.app.job.JobInfo.Builder setExpedited(boolean);
     method public android.app.job.JobInfo.Builder setExtras(@NonNull android.os.PersistableBundle);
@@ -8445,6 +8448,7 @@ package android.app.job {
     method public android.app.job.JobInfo.Builder setTransientExtras(@NonNull android.os.Bundle);
     method public android.app.job.JobInfo.Builder setTriggerContentMaxDelay(long);
     method public android.app.job.JobInfo.Builder setTriggerContentUpdateDelay(long);
+    method @NonNull @RequiresPermission(android.Manifest.permission.RUN_LONG_JOBS) public android.app.job.JobInfo.Builder setUserInitiated(boolean);
   }
 
   public static final class JobInfo.TriggerContentUri implements android.os.Parcelable {
@@ -8472,6 +8476,7 @@ package android.app.job {
     method @Nullable public android.net.Uri[] getTriggeredContentUris();
     method public boolean isExpeditedJob();
     method public boolean isOverrideDeadlineExpired();
+    method public boolean isUserInitiatedJob();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.job.JobParameters> CREATOR;
     field public static final int STOP_REASON_APP_STANDBY = 12; // 0xc
@@ -8530,6 +8535,11 @@ package android.app.job {
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract boolean onStartJob(android.app.job.JobParameters);
     method public abstract boolean onStopJob(android.app.job.JobParameters);
+    method public final void setNotification(@NonNull android.app.job.JobParameters, int, @NonNull android.app.Notification, int);
+    method public final void updateEstimatedNetworkBytes(@NonNull android.app.job.JobParameters, long, long);
+    method public final void updateEstimatedNetworkBytes(@NonNull android.app.job.JobParameters, @NonNull android.app.job.JobWorkItem, long, long);
+    method public final void updateTransferredNetworkBytes(@NonNull android.app.job.JobParameters, long, long);
+    method public final void updateTransferredNetworkBytes(@NonNull android.app.job.JobParameters, @NonNull android.app.job.JobWorkItem, long, long);
     field public static final String PERMISSION_BIND = "android.permission.BIND_JOB_SERVICE";
   }
 
