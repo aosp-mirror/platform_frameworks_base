@@ -18,9 +18,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="8898068901680117589">"Sim App Dialog"</string>
-    <string name="install_carrier_app_title" msgid="334729104862562585">"Aktivirajte mobilnu uslugu"</string>
-    <string name="install_carrier_app_description" msgid="4014303558674923797">"Da bi nova SIM kartica ispravno radila, treba da instalirate aplikaciju <xliff:g id="ID_1">%1$s</xliff:g>"</string>
-    <string name="install_carrier_app_description_default" msgid="7356830245205847840">"Da bi nova SIM kartica ispravno radila, treba da instalirate aplikaciju mobilnog operatera"</string>
-    <string name="install_carrier_app_defer_action" msgid="2558576736886876209">"Ne sada"</string>
-    <string name="install_carrier_app_download_action" msgid="7859229305958538064">"Preuzmi aplikaciju"</string>
+    <string name="install_carrier_app_title" msgid="334729104862562585">"Активирајте мобилну услугу"</string>
+    <string name="install_carrier_app_description" msgid="4014303558674923797">"Да би нова SIM картица исправно радила, треба да инсталирате апликацију <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="install_carrier_app_description_default" msgid="7356830245205847840">"Да би нова SIM картица исправно радила, треба да инсталирате апликацију мобилног оператера"</string>
+    <string name="install_carrier_app_defer_action" msgid="2558576736886876209">"Не сада"</string>
+    <string name="install_carrier_app_download_action" msgid="7859229305958538064">"Преузми апликацију"</string>
 </resources>
