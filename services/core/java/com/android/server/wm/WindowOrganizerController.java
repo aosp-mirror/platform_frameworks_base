@@ -1062,7 +1062,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (activity == null || activity.finishing) {
                     break;
                 }
-                if (activity.isVisible()) {
+                if (activity.isVisible() || activity.isVisibleRequested()) {
                     // Prevent the transition from being executed too early if the activity is
                     // visible.
                     activity.finishIfPossible("finish-activity-op", false /* oomAdj */);
