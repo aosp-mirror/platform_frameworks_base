@@ -22,6 +22,12 @@
     <string name="chooser_title" msgid="2262294130493605839">"Sélectionnez le/la <xliff:g id="PROFILE_NAME">%1$s</xliff:g> qui sera géré(e) par &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="summary_watch" msgid="4085794790142204006">"Cette appli est nécessaire pour gérer votre <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> aura l\'autorisation d\'interagir avec vos notifications et d\'accéder au téléphone, aux SMS, aux contacts, à l\'agenda, aux journaux d\'appels et aux appareils à proximité."</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"Cette appli est nécessaire pour gérer votre <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> pourra interagir avec ces autorisations :"</string>
+    <!-- no translation found for profile_name_glasses (8488394059007275998) -->
+    <skip />
+    <!-- no translation found for summary_glasses (3195267006147355861) -->
+    <skip />
+    <!-- no translation found for summary_glasses_single_device (5725890636605211803) -->
+    <skip />
     <string name="title_app_streaming" msgid="2270331024626446950">"Autoriser &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; à accéder à ces informations depuis votre téléphone"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Services inter-appareils"</string>
     <string name="helper_summary_app_streaming" msgid="5977509499890099">"<xliff:g id="APP_NAME">%1$s</xliff:g> demande l\'autorisation au nom de votre <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> pour caster des applis d\'un appareil à l\'autre"</string>
@@ -31,6 +37,12 @@
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Services Google Play"</string>
     <string name="helper_summary_computer" msgid="9050724687678157852">"<xliff:g id="APP_NAME">%1$s</xliff:g> demande l\'autorisation au nom de votre <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> pour accéder aux photos, contenus multimédias et notifications de votre téléphone"</string>
+    <!-- no translation found for title_nearby_device_streaming (179278282547719200) -->
+    <skip />
+    <!-- no translation found for helper_title_nearby_device_streaming (6124438217620593669) -->
+    <skip />
+    <!-- no translation found for helper_summary_nearby_device_streaming (5538329403511524333) -->
+    <skip />
     <string name="profile_name_generic" msgid="6851028682723034988">"appareil"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"Autoriser"</string>
@@ -44,16 +56,24 @@
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"Contacts"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Agenda"</string>
+    <!-- no translation found for permission_microphone (2152206421428732949) -->
+    <skip />
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Appareils à proximité"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Photos et contenus multimédias"</string>
     <string name="permission_notification" msgid="693762568127741203">"Notifications"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Applis"</string>
+    <!-- no translation found for permission_nearby_device_streaming (5868108148065023161) -->
+    <skip />
     <string name="permission_phone_summary" msgid="6154198036705702389">"Peut accéder à votre numéro de téléphone et aux informations réseau. Nécessaire pour passer des appels et pour VoIP, la messagerie vocale, la redirection d\'appels et la modification des journaux d\'appels."</string>
     <string name="permission_sms_summary" msgid="5107174184224165570"></string>
     <string name="permission_contacts_summary" msgid="7850901746005070792">"Peut lire, créer ou modifier votre liste de contacts, et accéder à la liste de tous les comptes utilisés sur votre appareil"</string>
     <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
+    <!-- no translation found for permission_microphone_summary (4241354865859396558) -->
+    <skip />
     <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
     <string name="permission_notification_summary" msgid="884075314530071011">"Peut lire toutes les notifications, y compris des informations comme les contacts, messages et photos"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Diffuser en streaming les applis de votre téléphone"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
+    <!-- no translation found for permission_nearby_device_streaming_summary (5776807830582725074) -->
+    <skip />
 </resources>

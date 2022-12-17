@@ -72,6 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock er slått av"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"har sendt et bilde"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Lagrer skjermdumpen …"</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Lagrer skjermdumpen i jobbprofilen …"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Skjermdumpen er lagret"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Kunne ikke lagre skjermdump"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Enheten må være låst opp før skjermdumpen kan lagres"</string>
@@ -125,8 +126,7 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Talehjelp"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR-kodeskanner"</string>
-    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
-    <skip />
+    <string name="accessibility_unlock_button" msgid="3613812140816244310">"Ulåst"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Enheten er låst"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Skanning av ansikt"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Send"</string>
@@ -169,8 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Ansiktet gjenkjennes ikke"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Bruk fingeravtrykk"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
-    <skip />
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Ansiktslås er utilgjengelig"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth er tilkoblet."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batteriprosenten er ukjent."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Koblet til <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
@@ -181,12 +180,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Flymodus."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN på."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Batteri – <xliff:g id="NUMBER">%d</xliff:g> prosent."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Batterinivået er <xliff:g id="PERCENTAGE">%1$d</xliff:g> prosent – omtrent <xliff:g id="TIME">%2$s</xliff:g> gjenstår basert på bruken din"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"Batterinivået er <xliff:g id="PERCENTAGE">%1$d</xliff:g> prosent, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Batteriet lades – <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> prosent."</string>
-    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
-    <skip />
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"Batterinivået er <xliff:g id="PERCENTAGE">%d</xliff:g> prosent. Lading er satt på pause for å beskytte batteriet."</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"Batterinivået er <xliff:g id="PERCENTAGE">%1$d</xliff:g> prosent, <xliff:g id="TIME">%2$s</xliff:g>. Lading er satt på pause for å beskytte batteriet."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Se alle varslene"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter er aktivert."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Vibreringsmodus."</string>
@@ -320,7 +317,8 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Kameraet er slått på for alle apper og tjenester."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Kameratilgang er slått av for alle apper og tjenester."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"For å bruke mikrofonknappen, gi mikrofontilgang i innstillingene."</string>
-    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"Åpne innstillingene."</string>
+    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
+    <skip />
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Annen enhet"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Slå oversikten av eller på"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Du blir ikke forstyrret av lyder og vibrasjoner, med unntak av alarmer, påminnelser, aktiviteter og oppringere du angir. Du kan fremdeles høre alt du velger å spille av, for eksempel musikk, videoer og spill."</string>
@@ -407,6 +405,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Varsler er satt på pause av «Ikke forstyrr»"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Start nå"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Ingen varsler"</string>
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"Ingen nye varsler"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Lås opp for å se eldre varsler"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Denne enheten administreres av forelderen din"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organisasjonen din eier denne enheten og kan overvåke nettverkstrafikken"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> eier denne enheten og kan overvåke nettverkstrafikken"</string>
@@ -511,8 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lås opp for å bruke"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Det oppsto et problem med henting av kortene. Prøv på nytt senere"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Innstillinger for låseskjermen"</string>
-    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR-kodeskanner"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Oppdaterer"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Work-profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flymodus"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Du hører ikke neste innstilte alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -795,8 +795,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Forstørr hele skjermen"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Forstørr en del av skjermen"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Bytt"</string>
-    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
-    <skip />
+    <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Dra hjørnet for å endre størrelse"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Tillat diagonal rulling"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Endre størrelse"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Endre forstørringstype"</string>
@@ -905,6 +904,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Stopp castingen"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Tilgjengelige enheter for lydutgang."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volum"</string>
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Slik fungerer kringkasting"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Kringkasting"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Folk i nærheten med kompatible Bluetooth-enheter kan lytte til mediene du kringkaster"</string>
@@ -1018,17 +1018,34 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera og mikrofon er av"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# varsel}other{# varsler}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="note_task_button_label" msgid="8718616095800343136">"Notatskriving"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Kringkaster"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Vil du stoppe kringkastingen av <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Hvis du kringkaster <xliff:g id="SWITCHAPP">%1$s</xliff:g> eller endrer utgangen, stopper den nåværende kringkastingen din"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Kringkast <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Endre utgang"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Ukjent"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE d. MMM"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"Vil du gi <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> tilgang til alle enhetslogger?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Gi éngangstilgang"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Ikke tillat"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Enhetslogger registrerer det som skjer på enheten din. Apper kan bruke disse loggene til å finne og løse problemer.\n\nNoen logger kan inneholde sensitiv informasjon, så du bør bare gi tilgang til alle enhetslogger til apper du stoler på. \n\nHvis du ikke gir denne appen tilgang til alle enhetslogger, har den fortsatt tilgang til sine egne logger. Enhetsprodusenten kan fortsatt ha tilgang til visse logger eller noe informasjon på enheten din."</string>
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Åpne <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
+    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"For å legge til <xliff:g id="APPNAME">%1$s</xliff:g>-appen som en snarvei må du sørge for at"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• appen er konfigurert"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• minst ett kort er lagt til i Wallet"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• en kameraapp er installert"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• appen er konfigurert"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• minst én enhet er tilgjengelig"</string>
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Avbryt"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Vend nå"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Brett ut telefonen for å ta bedre selfier"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Vil du bytte til frontskjermen for bedre selfier?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Bruk det bakovervendte kameraet for å ta bredere bilder med høyere oppløsning."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Denne skjermen slås av"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

@@ -41,8 +41,10 @@ import com.android.systemui.reardisplay.RearDisplayDialogController
 import com.android.systemui.recents.Recents
 import com.android.systemui.settings.dagger.MultiUserUtilsModule
 import com.android.systemui.shortcut.ShortcutKeyDispatcher
+import com.android.systemui.statusbar.notification.fsi.FsiChromeRepo
 import com.android.systemui.statusbar.notification.InstantAppNotifier
 import com.android.systemui.statusbar.phone.KeyguardLiftController
+import com.android.systemui.stylus.StylusUsiPowerStartable
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.theme.ThemeOverlayController
 import com.android.systemui.toast.ToastUI
@@ -78,6 +80,12 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(ClipboardListener::class)
     abstract fun bindClipboardListener(sysui: ClipboardListener): CoreStartable
+
+    /** Inject into FsiChromeRepo.  */
+    @Binds
+    @IntoMap
+    @ClassKey(FsiChromeRepo::class)
+    abstract fun bindFSIChromeRepo(sysui: FsiChromeRepo): CoreStartable
 
     /** Inject into GarbageMonitor.Service.  */
     @Binds
@@ -258,4 +266,10 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(RearDisplayDialogController::class)
     abstract fun bindRearDisplayDialogController(sysui: RearDisplayDialogController): CoreStartable
+
+    /** Inject into StylusUsiPowerStartable) */
+    @Binds
+    @IntoMap
+    @ClassKey(StylusUsiPowerStartable::class)
+    abstract fun bindStylusUsiPowerStartable(sysui: StylusUsiPowerStartable): CoreStartable
 }

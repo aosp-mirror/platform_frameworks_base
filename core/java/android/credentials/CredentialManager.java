@@ -31,6 +31,7 @@ import android.os.CancellationSignal;
 import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
 import android.os.RemoteException;
+import android.provider.DeviceConfig;
 import android.util.Log;
 
 import java.util.List;
@@ -49,6 +50,8 @@ import java.util.concurrent.Executor;
 @SystemService(Context.CREDENTIAL_SERVICE)
 public final class CredentialManager {
     private static final String TAG = "CredentialManager";
+    private static final String DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER =
+            "enable_credential_manager";
 
     private final Context mContext;
     private final ICredentialManager mService;
@@ -266,6 +269,16 @@ public final class CredentialManager {
         }
     }
 
+    /**
+     * Returns whether the service is enabled.
+     *
+     * @hide
+     */
+    public static boolean isServiceEnabled() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER, true);
+    }
+
     private static class GetCredentialTransport extends IGetCredentialCallback.Stub {
         // TODO: listen for cancellation to release callback.
 
@@ -397,7 +410,7 @@ public final class CredentialManager {
         public void onError(String errorType, String message) {
             mExecutor.execute(
                     () -> mCallback.onError(new ListEnabledProvidersException(errorType, message)));
-          }
+        }
     }
 
     private static class SetEnabledProvidersTransport extends ISetEnabledProvidersCallback.Stub {

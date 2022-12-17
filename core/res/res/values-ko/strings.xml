@@ -43,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"입력한 PIN이 일치하지 않습니다."</string>
     <string name="invalidPin" msgid="7542498253319440408">"4~ 8자리 숫자로 된 PIN을 입력하세요."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"8자리 이상의 숫자 PUK를 입력합니다."</string>
-    <string name="needPuk" msgid="7321876090152422918">"SIM 카드의 PUK가 잠겨 있습니다. 잠금해제하려면 PUK 코드를 입력하세요."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"SIM 카드 잠금을 해제하려면 PUK2를 입력하세요."</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"실패했습니다. SIM/RUIM 잠금을 사용 설정하세요."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g>번 더 실패하면 SIM이 잠깁니다.</item>
@@ -390,6 +392,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"이 앱은 백그라운드에서 실행될 수 있으며 이로 인해 배터리가 더 빨리 소모될 수도 있습니다."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"백그라운드에서 데이터 사용"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"이 앱은 백그라운드에서 데이터를 사용할 수 있으며 이로 인해 데이터 사용량이 증가할 수도 있습니다."</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"정확한 시간이 지정된 작업 예약"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"이 앱은 나중에 원하는 시간에 작업이 실행되도록 예약할 수 있습니다. 따라서 기기를 사용 중이 아닐 때에도 앱이 실행될 수 있습니다."</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"알람 또는 이벤트 리마인더 예약"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"이 앱은 알림, 리마인더와 같은 작업을 예약하여 미래의 원하는 시간에 알릴 수 있습니다."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"앱이 항상 실행되도록 설정"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"앱이 그 일부분을 영구적인 메모리로 만들 수 있도록 허용합니다. 이렇게 하면 다른 앱이 사용할 수 있는 메모리를 제한하여 태블릿의 속도를 저하시킬 수 있습니다."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"앱이 일부 구성요소를 메모리에 영구적으로 보관하도록 허용합니다. 이렇게 하면 Android TV 기기의 속도를 저하시키는 다른 앱에서 사용 가능한 메모리를 제한할 수 있습니다."</string>
@@ -418,6 +424,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"앱에서 \'remoteMessaging\' 유형의 포그라운드 서비스를 사용하도록 허용합니다."</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"\'systemExempted\' 유형의 포그라운드 서비스 실행"</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"앱에서 \'systemExempted\' 유형의 포그라운드 서비스를 사용하도록 허용합니다."</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"\'fileManagement\' 유형의 포그라운드 서비스 실행"</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"앱에서 \'fileManagement\' 유형의 포그라운드 서비스를 사용하도록 허용합니다."</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\'specialUse\' 유형의 포그라운드 서비스 실행"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"앱에서 \'specialUse\' 유형의 포그라운드 서비스를 사용하도록 허용합니다."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"앱 저장공간 계산"</string>
@@ -955,14 +963,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"다시 시도"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"모든 기능 및 데이터 잠금 해제"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"얼굴 인식 잠금 해제 최대 시도 횟수를 초과했습니다."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM 카드가 없습니다."</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"태블릿에 SIM 카드가 없습니다."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Android TV 기기에 SIM 카드가 없습니다."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"휴대전화에 SIM 카드가 없습니다."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"SIM 카드를 삽입하세요."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM 카드가 없거나 읽을 수 없습니다. SIM 카드를 삽입하세요."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"사용할 수 없는 SIM 카드입니다."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM 카드 사용이 영구적으로 사용중지되었습니다.\n다른 SIM 카드를 사용하려면 무선 서비스 제공업체에 문의하시기 바랍니다."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"이전 트랙"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"다음 트랙"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"일시중지"</string>
@@ -972,10 +988,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"빨리 감기"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"긴급 통화만 허용"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"네트워크 잠김"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM 카드가 PUK 잠김 상태입니다."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"사용자 가이드를 참조하거나 고객지원팀에 문의하세요."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM 카드가 잠겨 있습니다."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM 카드 잠금해제 중..."</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 그렸습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도하세요."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"비밀번호를 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도하세요."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"PIN을 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도하세요."</string>
@@ -1359,10 +1378,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"나중에 설정 &gt; 애플리케이션에서 변경할 수 있습니다."</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"항상 허용"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"허용 안함"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"SIM 카드 제거됨"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"유효한 SIM 카드를 삽입하여 다시 시작할 때까지 모바일 네트워크를 사용할 수 없습니다."</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"완료"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"SIM 카드 추가됨"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"모바일 네트워크에 액세스하려면 기기를 다시 시작하세요."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"다시 시작"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"모바일 서비스 활성화"</string>
@@ -1674,7 +1696,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"이제 SIM을 사용할 수 없습니다. 계속하려면 PUK 코드를 입력합니다. 자세한 내용은 이동통신사에 문의하세요."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"원하는 PIN 코드 입력"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"원하는 PIN 코드 확인"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM 카드 잠금해제 중..."</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"PIN 코드가 잘못되었습니다."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"4~8자리 숫자로 된 PIN을 입력하세요."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK 코드는 8자리 숫자여야 합니다."</string>
@@ -1731,7 +1754,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"단축키 사용 중지"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"단축키 사용"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"색상 반전"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"색상 보정"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"한 손 모드"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"더 어둡게"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"볼륨 키를 길게 눌렀습니다. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 설정되었습니다."</string>
@@ -2320,4 +2344,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"스트리밍 중에는 PIP 모드를 볼 수 없습니다."</string>
     <string name="system_locale_title" msgid="711882686834677268">"시스템 기본값"</string>
     <string name="default_card_name" msgid="9198284935962911468">"<xliff:g id="CARDNUMBER">%d</xliff:g> 카드"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"시계 관리를 위한 호환 시계 프로필 권한"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"호환 앱에서 시계를 관리하도록 허용합니다."</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"호환 기기 감지"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"호환 앱에서 기기가 근처에 있거나 멀리 있을 때 호환 기기를 감지할 수 있도록 허용합니다."</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"호환 메시지 전송"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"호환 앱에서 호환 메시지를 다른 기기로 전달하도록 허용합니다."</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"백그라운드에서 포그라운드 서비스 시작"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"호환 앱이 백그라운드에서 포그라운드 서비스를 시작할 수 있게 허용합니다."</string>
 </resources>

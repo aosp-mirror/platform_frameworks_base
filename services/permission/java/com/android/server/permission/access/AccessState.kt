@@ -46,6 +46,8 @@ class SystemState private constructor(
     val knownPackages: IntMap<IndexedListSet<String>>,
     // A map of userId to packageName
     val deviceAndProfileOwners: IntMap<String>,
+    // Whether the device supports leanback UI
+    var isLeanback: Boolean,
     val privilegedPermissionAllowlistSourcePackageNames: IndexedListSet<String>,
     var permissionAllowlist: PermissionAllowlist,
     val implicitToSourcePermissions: Map<String, Set<String>>,
@@ -60,6 +62,7 @@ class SystemState private constructor(
         IntMap(),
         IntMap(),
         IntMap(),
+        false,
         IndexedListSet(),
         PermissionAllowlist(),
         IndexedMap(),
@@ -76,6 +79,7 @@ class SystemState private constructor(
             appIds.copy { it.copy() },
             knownPackages.copy { it.copy() },
             deviceAndProfileOwners.copy { it },
+            isLeanback,
             privilegedPermissionAllowlistSourcePackageNames.copy(),
             permissionAllowlist,
             implicitToSourcePermissions,

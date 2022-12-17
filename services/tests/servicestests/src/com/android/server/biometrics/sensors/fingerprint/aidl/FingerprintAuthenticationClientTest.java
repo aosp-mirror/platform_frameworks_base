@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyFloat;
@@ -57,6 +59,7 @@ import com.android.internal.R;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.CallbackWithProbe;
+import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.log.Probe;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -131,7 +134,7 @@ public class FingerprintAuthenticationClientTest {
     @Mock
     private Clock mClock;
     @Captor
-    private ArgumentCaptor<OperationContext> mOperationContextCaptor;
+    private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
     @Captor
     private ArgumentCaptor<Consumer<OperationContext>> mContextInjector;
     private final TestLooper mLooper = new TestLooper();
@@ -164,7 +167,7 @@ public class FingerprintAuthenticationClientTest {
         order.verify(mBiometricContext).updateContext(
                 mOperationContextCaptor.capture(), anyBoolean());
         order.verify(mHal).authenticateWithContext(
-                eq(OP_ID), same(mOperationContextCaptor.getValue()));
+                eq(OP_ID), same(mOperationContextCaptor.getValue().toAidlContext()));
         verify(mHal, never()).authenticate(anyLong());
     }
 
@@ -236,9 +239,14 @@ public class FingerprintAuthenticationClientTest {
         final FingerprintAuthenticationClient client = createClient();
         client.start(mCallback);
 
-        verify(mHal).authenticateWithContext(eq(OP_ID), mOperationContextCaptor.capture());
-        OperationContext opContext = mOperationContextCaptor.getValue();
-        verify(mBiometricContext).subscribe(eq(opContext), mContextInjector.capture());
+        final ArgumentCaptor<OperationContext> captor =
+                ArgumentCaptor.forClass(OperationContext.class);
+        verify(mHal).authenticateWithContext(eq(OP_ID), captor.capture());
+        OperationContext opContext = captor.getValue();
+        verify(mBiometricContext).subscribe(
+                mOperationContextCaptor.capture(), mContextInjector.capture());
+        assertThat(mOperationContextCaptor.getValue().toAidlContext())
+                .isSameInstanceAs(opContext);
 
         mContextInjector.getValue().accept(opContext);
         verify(mLuxProbe, never()).enable();
@@ -282,9 +290,14 @@ public class FingerprintAuthenticationClientTest {
         final FingerprintAuthenticationClient client = createClient();
         client.start(mCallback);
 
-        verify(mHal).authenticateWithContext(eq(OP_ID), mOperationContextCaptor.capture());
-        OperationContext opContext = mOperationContextCaptor.getValue();
-        verify(mBiometricContext).subscribe(eq(opContext), mContextInjector.capture());
+        final ArgumentCaptor<OperationContext> captor =
+                ArgumentCaptor.forClass(OperationContext.class);
+        verify(mHal).authenticateWithContext(eq(OP_ID), captor.capture());
+        OperationContext opContext = captor.getValue();
+        verify(mBiometricContext).subscribe(
+                mOperationContextCaptor.capture(), mContextInjector.capture());
+        assertThat(opContext).isSameInstanceAs(
+                mOperationContextCaptor.getValue().toAidlContext());
 
         mContextInjector.getValue().accept(opContext);
         verify(mLuxProbe, never()).enable();
@@ -310,16 +323,21 @@ public class FingerprintAuthenticationClientTest {
         final FingerprintAuthenticationClient client = createClient();
         client.start(mCallback);
 
-        verify(mHal).authenticateWithContext(eq(OP_ID), mOperationContextCaptor.capture());
-        OperationContext opContext = mOperationContextCaptor.getValue();
+        final ArgumentCaptor<OperationContext> captor =
+                ArgumentCaptor.forClass(OperationContext.class);
+        verify(mHal).authenticateWithContext(eq(OP_ID), captor.capture());
+        OperationContext opContext = captor.getValue();
 
         // fake an update to the context
-        verify(mBiometricContext).subscribe(eq(opContext), mContextInjector.capture());
+        verify(mBiometricContext).subscribe(
+                mOperationContextCaptor.capture(), mContextInjector.capture());
+        assertThat(opContext).isSameInstanceAs(
+                mOperationContextCaptor.getValue().toAidlContext());
         mContextInjector.getValue().accept(opContext);
         verify(mHal).onContextChanged(eq(opContext));
 
         client.stopHalOperation();
-        verify(mBiometricContext).unsubscribe(same(opContext));
+        verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));
     }
 
     @Test

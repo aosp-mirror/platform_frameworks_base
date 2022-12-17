@@ -17,6 +17,7 @@
 #include "HintSessionWrapper.h"
 
 #include <dlfcn.h>
+#include <private/performance_hint_private.h>
 #include <utils/Log.h>
 
 #include <vector>

@@ -18,18 +18,20 @@ package com.android.settingslib.spaprivileged.tests.testutils
 
 import android.content.pm.ApplicationInfo
 import androidx.compose.runtime.Composable
-import com.android.settingslib.spa.framework.compose.stateOf
-import com.android.settingslib.spaprivileged.test.R
+import androidx.compose.runtime.mutableStateOf
 import com.android.settingslib.spaprivileged.template.app.TogglePermissionAppListModel
+import com.android.settingslib.spaprivileged.test.R
 import kotlinx.coroutines.flow.Flow
 
 class TestTogglePermissionAppListModel(
-    private val isAllowed: Boolean? = null,
+    isAllowed: Boolean? = null,
     private val isChangeable: Boolean = false,
 ) : TogglePermissionAppListModel<TestAppRecord> {
     override val pageTitleResId = R.string.test_permission_title
     override val switchTitleResId = R.string.test_permission_switch_title
     override val footerResId = R.string.test_permission_footer
+
+    private val isAllowedState = mutableStateOf(isAllowed)
 
     override fun transformItem(app: ApplicationInfo) = TestAppRecord(app = app)
 
@@ -37,9 +39,11 @@ class TestTogglePermissionAppListModel(
         recordListFlow
 
     @Composable
-    override fun isAllowed(record: TestAppRecord) = stateOf(isAllowed)
+    override fun isAllowed(record: TestAppRecord) = isAllowedState
 
     override fun isChangeable(record: TestAppRecord) = isChangeable
 
-    override fun setAllowed(record: TestAppRecord, newAllowed: Boolean) {}
+    override fun setAllowed(record: TestAppRecord, newAllowed: Boolean) {
+        isAllowedState.value = newAllowed
+    }
 }

@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.UserHandle;
 import android.util.ArraySet;
@@ -91,8 +92,8 @@ class DisplayWindowPolicyControllerHelper {
      * @see DisplayWindowPolicyController#canActivityBeLaunched(ActivityInfo, int, int, boolean)
      */
     public boolean canActivityBeLaunched(ActivityInfo activityInfo,
-            @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
-            boolean isNewTask) {
+            Intent intent, @WindowConfiguration.WindowingMode int windowingMode,
+            int launchingFromDisplayId, boolean isNewTask) {
         if (mDisplayWindowPolicyController == null) {
             if (activityInfo.requiredDisplayCategory != null) {
                 Slog.e(TAG,
@@ -104,8 +105,8 @@ class DisplayWindowPolicyControllerHelper {
             }
             return true;
         }
-        return mDisplayWindowPolicyController.canActivityBeLaunched(activityInfo, windowingMode,
-            launchingFromDisplayId, isNewTask);
+        return mDisplayWindowPolicyController.canActivityBeLaunched(activityInfo, intent,
+            windowingMode, launchingFromDisplayId, isNewTask);
     }
 
     /**

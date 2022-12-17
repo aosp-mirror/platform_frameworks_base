@@ -22,6 +22,12 @@
     <string name="chooser_title" msgid="2262294130493605839">"Vyberte profil <xliff:g id="PROFILE_NAME">%1$s</xliff:g>, ktorý bude spravovať aplikácia &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="summary_watch" msgid="4085794790142204006">"Aplikácia sa vyžaduje na správu zariadenia <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> bude môcť interagovať s vašimi upozorneniami a získa prístup k povoleniam telefónu, SMS, kontaktov, kalendára, zoznamu hovorov a zariadení v okolí."</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"Aplikácia sa vyžaduje na správu zariadenia <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> bude môcť interagovať s týmito povoleniami:"</string>
+    <!-- no translation found for profile_name_glasses (8488394059007275998) -->
+    <skip />
+    <!-- no translation found for summary_glasses (3195267006147355861) -->
+    <skip />
+    <!-- no translation found for summary_glasses_single_device (5725890636605211803) -->
+    <skip />
     <string name="title_app_streaming" msgid="2270331024626446950">"Povoľte aplikácii &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; prístup k týmto informáciám z vášho telefónu"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Služby pre viacero zariadení"</string>
     <string name="helper_summary_app_streaming" msgid="5977509499890099">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> vyžaduje povolenie na streamovanie aplikácií medzi vašimi zariadeniami v mene tohto zariadenia (<xliff:g id="DEVICE_TYPE">%2$s</xliff:g>)"</string>
@@ -31,6 +37,12 @@
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Služby Google Play"</string>
     <string name="helper_summary_computer" msgid="9050724687678157852">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> vyžaduje povolenie na prístup k fotkám, médiám a upozorneniam vášho telefónu v mene tohto zariadenia (<xliff:g id="DEVICE_TYPE">%2$s</xliff:g>)"</string>
+    <!-- no translation found for title_nearby_device_streaming (179278282547719200) -->
+    <skip />
+    <!-- no translation found for helper_title_nearby_device_streaming (6124438217620593669) -->
+    <skip />
+    <!-- no translation found for helper_summary_nearby_device_streaming (5538329403511524333) -->
+    <skip />
     <string name="profile_name_generic" msgid="6851028682723034988">"zariadenie"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"Povoliť"</string>
@@ -44,16 +56,24 @@
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"Kontakty"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Kalendár"</string>
+    <!-- no translation found for permission_microphone (2152206421428732949) -->
+    <skip />
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Zariadenia v okolí"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotky a médiá"</string>
     <string name="permission_notification" msgid="693762568127741203">"Upozornenia"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Aplikácie"</string>
+    <!-- no translation found for permission_nearby_device_streaming (5868108148065023161) -->
+    <skip />
     <string name="permission_phone_summary" msgid="6154198036705702389">"Má prístup k vášmu telefónnemu číslu a informáciám o sieti. Vyžaduje sa na volanie a VoIP, fungovanie hlasovej schránky, presmerovanie hovorov a upravovanie zoznamu hovorov"</string>
     <string name="permission_sms_summary" msgid="5107174184224165570"></string>
     <string name="permission_contacts_summary" msgid="7850901746005070792">"Môže čítať, vytvárať alebo upravovať náš zoznam kontaktov, ako aj získavať prístup k zoznamu všetkých účtov používaných vo vašom zariadení"</string>
     <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
+    <!-- no translation found for permission_microphone_summary (4241354865859396558) -->
+    <skip />
     <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
     <string name="permission_notification_summary" msgid="884075314530071011">"Môže čítať všetky upozornenia vrátane informácií, ako sú kontakty, správy a fotky"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Streamovať aplikácie telefónu"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
+    <!-- no translation found for permission_nearby_device_streaming_summary (5776807830582725074) -->
+    <skip />
 </resources>

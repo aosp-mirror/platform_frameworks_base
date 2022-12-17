@@ -18,6 +18,7 @@ package android.telephony.ims.stub;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.os.Bundle;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.ims.ImsCallProfile;
@@ -366,7 +367,11 @@ public class ImsCallSessionImplBase implements AutoCloseable {
      *
      * @param listener {@link ImsCallSessionListener} used to notify the framework of updates
      * to the ImsCallSession
+
+     * @deprecated use {@link android.telephony.ims.feature.MmTelFeature#notifyIncomingCall(
+     * ImsCallSessionImplBase, String, Bundle)} to get the listener instead
      */
+    @Deprecated
     public void setListener(ImsCallSessionListener listener) {
     }
 

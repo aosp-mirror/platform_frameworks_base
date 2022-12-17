@@ -128,7 +128,7 @@ public class StackScrollAlgorithm {
         updateSpeedBumpState(algorithmState, speedBumpIndex);
         updateShelfState(algorithmState, ambientState);
         updateAlphaState(algorithmState, ambientState);
-        getNotificationChildrenStates(algorithmState, ambientState);
+        getNotificationChildrenStates(algorithmState);
     }
 
     private void updateAlphaState(StackScrollAlgorithmState algorithmState,
@@ -231,14 +231,13 @@ public class StackScrollAlgorithm {
         }
     }
 
-    private void getNotificationChildrenStates(StackScrollAlgorithmState algorithmState,
-                                               AmbientState ambientState) {
+    private void getNotificationChildrenStates(StackScrollAlgorithmState algorithmState) {
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
             ExpandableView v = algorithmState.visibleChildren.get(i);
             if (v instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-                row.updateChildrenStates(ambientState);
+                row.updateChildrenStates();
             }
         }
     }

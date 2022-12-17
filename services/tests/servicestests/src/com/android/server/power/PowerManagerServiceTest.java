@@ -473,6 +473,111 @@ public class PowerManagerServiceTest {
     }
 
     @Test
+    public void testWakefulnessSleep_SoftSleepFlag_NoWakelocks() {
+        createService();
+        // Start with AWAKE state
+        startSystem();
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        // Take a nap and verify we go to sleep.
+        mService.getBinderServiceInstance().goToSleep(mClock.now(),
+                PowerManager.GO_TO_SLEEP_REASON_APPLICATION,
+                PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
+    }
+
+    @Test
+    public void testWakefulnessSleep_SoftSleepFlag_WithPartialWakelock() {
+        createService();
+        // Start with AWAKE state
+        startSystem();
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        // Grab a wakelock
+        final String tag = "wakelock1";
+        final String packageName = "pkg.name";
+        final IBinder token = new Binder();
+        final int flags = PowerManager.PARTIAL_WAKE_LOCK;
+        mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
+                null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
+                null /* callback */);
+
+        // Take a nap and verify we stay awake.
+        mService.getBinderServiceInstance().goToSleep(mClock.now(),
+                PowerManager.GO_TO_SLEEP_REASON_APPLICATION,
+                PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
+    }
+
+    @Test
+    public void testWakefulnessSleep_SoftSleepFlag_WithFullWakelock() {
+        createService();
+        // Start with AWAKE state
+        startSystem();
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        // Grab a wakelock
+        final String tag = "wakelock1";
+        final String packageName = "pkg.name";
+        final IBinder token = new Binder();
+        final int flags = PowerManager.FULL_WAKE_LOCK;
+        mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
+                null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
+                null /* callback */);
+
+        // Take a nap and verify we stay awake.
+        mService.getBinderServiceInstance().goToSleep(mClock.now(),
+                PowerManager.GO_TO_SLEEP_REASON_APPLICATION,
+                PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+    }
+
+    @Test
+    public void testWakefulnessSleep_SoftSleepFlag_WithScreenBrightWakelock() {
+        createService();
+        // Start with AWAKE state
+        startSystem();
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        // Grab a wakelock
+        final String tag = "wakelock1";
+        final String packageName = "pkg.name";
+        final IBinder token = new Binder();
+        final int flags = PowerManager.SCREEN_BRIGHT_WAKE_LOCK;
+        mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
+                null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
+                null /* callback */);
+
+        // Take a nap and verify we stay awake.
+        mService.getBinderServiceInstance().goToSleep(mClock.now(),
+                PowerManager.GO_TO_SLEEP_REASON_APPLICATION,
+                PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+    }
+    @Test
+    public void testWakefulnessSleep_SoftSleepFlag_WithScreenDimWakelock() {
+        createService();
+        // Start with AWAKE state
+        startSystem();
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        // Grab a wakelock
+        final String tag = "wakelock1";
+        final String packageName = "pkg.name";
+        final IBinder token = new Binder();
+        final int flags = PowerManager.SCREEN_DIM_WAKE_LOCK;
+        mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
+                null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
+                null /* callback */);
+
+        // Take a nap and verify we stay awake.
+        mService.getBinderServiceInstance().goToSleep(mClock.now(),
+                PowerManager.GO_TO_SLEEP_REASON_APPLICATION,
+                PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+    }
+
+    @Test
     public void testWakefulnessAwake_AcquireCausesWakeup_turnScreenOnAllowed() {
         createService();
         startSystem();

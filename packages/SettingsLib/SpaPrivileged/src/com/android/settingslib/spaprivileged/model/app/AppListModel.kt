@@ -4,6 +4,8 @@ import android.content.pm.ApplicationInfo
 import android.icu.text.CollationKey
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import com.android.settingslib.spaprivileged.template.app.AppListItem
+import com.android.settingslib.spaprivileged.template.app.AppListItemModel
 import kotlinx.coroutines.flow.Flow
 
 data class AppEntry<T : AppRecord>(
@@ -69,4 +71,9 @@ interface AppListModel<T : AppRecord> {
      */
     @Composable
     fun getSummary(option: Int, record: T): State<String>? = null
+
+    @Composable
+    fun AppListItemModel<T>.AppItem() {
+        AppListItem {}
+    }
 }

@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.common.OperationContext;
+import android.view.Surface;
 
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 
@@ -38,14 +39,14 @@ public interface BiometricContext {
     }
 
     /** Update the given context with the most recent values and return it. */
-    OperationContext updateContext(@NonNull OperationContext operationContext,
+    OperationContextExt updateContext(@NonNull OperationContextExt operationContext,
             boolean isCryptoOperation);
 
     /** The session id for keyguard entry, if active, or null. */
-    @Nullable Integer getKeyguardEntrySessionId();
+    @Nullable BiometricContextSessionInfo getKeyguardEntrySessionInfo();
 
     /** The session id for biometric prompt usage, if active, or null. */
-    @Nullable Integer getBiometricPromptSessionId();
+    @Nullable BiometricContextSessionInfo getBiometricPromptSessionInfo();
 
     /** If the display is in AOD. */
     boolean isAod();
@@ -53,16 +54,35 @@ public interface BiometricContext {
     /** If the device is awake or is becoming awake. */
     boolean isAwake();
 
+    /** If the display is on. */
+    boolean isDisplayOn();
+
+    /** Current dock state from {@link android.content.Intent#EXTRA_DOCK_STATE}. */
+    int getDockedState();
+
+    /**
+     * Current fold state from
+     * {@link android.hardware.biometrics.IBiometricContextListener.FoldState}.
+     */
+    int getFoldState();
+
+    /** Current device display rotation. */
+    @Surface.Rotation
+    int getCurrentRotation();
+
     /**
      * Subscribe to context changes.
+     *
+     * Note that this method only notifies for properties that are visible to the HAL.
      *
      * @param context context that will be modified when changed
      * @param consumer callback when the context is modified
      */
-    void subscribe(@NonNull OperationContext context, @NonNull Consumer<OperationContext> consumer);
+    void subscribe(@NonNull OperationContextExt context,
+            @NonNull Consumer<OperationContext> consumer);
 
     /** Unsubscribe from context changes. */
-    void unsubscribe(@NonNull OperationContext context);
+    void unsubscribe(@NonNull OperationContextExt context);
 
     /** Obtains an AuthSessionCoordinator. */
     AuthSessionCoordinator getAuthSessionCoordinator();

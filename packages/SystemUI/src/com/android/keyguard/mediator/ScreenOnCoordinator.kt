@@ -16,31 +16,25 @@
 
 package com.android.keyguard.mediator
 
+import android.annotation.BinderThread
 import android.os.Trace
-
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.ScreenLifecycle
-import com.android.systemui.util.concurrency.Execution
-import com.android.systemui.util.concurrency.PendingTasksContainer
 import com.android.systemui.unfold.SysUIUnfoldComponent
+import com.android.systemui.util.concurrency.PendingTasksContainer
 import com.android.systemui.util.kotlin.getOrNull
-
 import java.util.Optional
-
 import javax.inject.Inject
 
 /**
  * Coordinates screen on/turning on animations for the KeyguardViewMediator. Specifically for
  * screen on events, this will invoke the onDrawn Runnable after all tasks have completed. This
- * should route back to the KeyguardService, which informs the system_server that keyguard has
- * drawn.
+ * should route back to the [com.android.systemui.keyguard.KeyguardService], which informs
+ * the system_server that keyguard has drawn.
  */
 @SysUISingleton
 class ScreenOnCoordinator @Inject constructor(
-    screenLifecycle: ScreenLifecycle,
-    unfoldComponent: Optional<SysUIUnfoldComponent>,
-    private val execution: Execution
-) : ScreenLifecycle.Observer {
+    unfoldComponent: Optional<SysUIUnfoldComponent>
+) {
 
     private val unfoldLightRevealAnimation = unfoldComponent.map(
         SysUIUnfoldComponent::getUnfoldLightRevealOverlayAnimation).getOrNull()
@@ -48,15 +42,12 @@ class ScreenOnCoordinator @Inject constructor(
         SysUIUnfoldComponent::getFoldAodAnimationController).getOrNull()
     private val pendingTasks = PendingTasksContainer()
 
-    init {
-        screenLifecycle.addObserver(this)
-    }
-
     /**
      * When turning on, registers tasks that may need to run before invoking [onDrawn].
+     * This is called on a binder thread from [com.android.systemui.keyguard.KeyguardService].
      */
-    override fun onScreenTurningOn(onDrawn: Runnable) {
-        execution.assertIsMainThread()
+    @BinderThread
+    fun onScreenTurningOn(onDrawn: Runnable) {
         Trace.beginSection("ScreenOnCoordinator#onScreenTurningOn")
 
         pendingTasks.reset()
@@ -68,11 +59,13 @@ class ScreenOnCoordinator @Inject constructor(
         Trace.endSection()
     }
 
-    override fun onScreenTurnedOn() {
-        execution.assertIsMainThread()
-
+    /**
+     * Called when screen is fully turned on and screen on blocker is removed.
+     * This is called on a binder thread from [com.android.systemui.keyguard.KeyguardService].
+     */
+    @BinderThread
+    fun onScreenTurnedOn() {
         foldAodAnimationController?.onScreenTurnedOn()
-
         pendingTasks.reset()
     }
 }

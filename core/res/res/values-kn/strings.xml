@@ -43,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"ನೀವು ಟೈಪ್‌ ಮಾಡಿದ ಪಿನ್‌ ಗಳು ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ."</string>
     <string name="invalidPin" msgid="7542498253319440408">"4 ರಿಂದ 8 ಸಂಖ್ಯೆಗಳಿರುವ ಪಿನ್‌ ಟೈಪ್ ಮಾಡಿ."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"8 ಅಥವಾ ಅದಕ್ಕಿಂತ ಹೆಚ್ಚು ಸಂಖ್ಯೆಗಳಿರುವ PUK ಟೈಪ್ ಮಾಡಿ."</string>
-    <string name="needPuk" msgid="7321876090152422918">"ನಿಮ್ಮ ಸಿಮ್‌ ಕಾರ್ಡ್ PUK-ಲಾಕ್ ಆಗಿದೆ. ಅದನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲು PUK ಕೋಡ್ ಟೈಪ್ ಮಾಡಿ."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"ಸಿಮ್‌ ಕಾರ್ಡ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು PUK2 ಟೈಪ್ ಮಾಡಿ."</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"ಯಶಸ್ವಿಯಾಗಿಲ್ಲ, ಸಿಮ್‌/RUIM ಲಾಕ್ ಸಕ್ರಿಯಗೊಳಿಸಿ."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one"> ಸಿಮ್‌ ಲಾಕ್‌ ಆಗುವುದಕ್ಕಿಂತ ಮೊದಲು ನಿಮ್ಮಲ್ಲಿ <xliff:g id="NUMBER_1">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ.</item>
@@ -390,6 +392,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಹಿನ್ನಲೆಯಲ್ಲಿ ರನ್ ಆಗಬಹುದು. ಇದು ಬ್ಯಾಟರಿಯನ್ನು ವೇಗವಾಗಿ ಬರಿದಾಗಿಸಬಹುದು."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"ಹಿನ್ನಲೆಯಲ್ಲಿ ಡೇಟಾ ಬಳಕೆ ಮಾಡಿ"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಹಿನ್ನಲೆಯಲ್ಲಿ ಡೇಟಾವನ್ನು ಬಳಸಬಹುದು. ಇದರಿಂದ ಡೇಟಾ ಬಳಕೆ ಹೆಚ್ಚಾಗಬಹುದು."</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"ನಿಖರವಾದ ಸಮಯೋಚಿತ ಕ್ರಿಯೆಗಳನ್ನು ನಿಗದಿಪಡಿಸಿ"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"ಈ ಆ್ಯಪ್, ಭವಿಷ್ಯದಲ್ಲಿ ಕಾರ್ಯವು ಅಪೇಕ್ಷಿತ ಸಮಯಕ್ಕೆ ನಡೆಯುವಂತೆ ಕಾರ್ಯವನ್ನು ನಿಗದಿಪಡಿಸಬಹುದು. ಇದರರ್ಥ ನೀವು ಸಾಧನವನ್ನು ಸಕ್ರಿಯವಾಗಿ ಬಳಸದೇ ಇರುವಾಗ ಆ್ಯಪ್ ರನ್ ಆಗಬಹುದು."</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"ಅಲಾರಾಂಗಳು ಅಥವಾ ಈವೆಂಟ್ ರಿಮೈಂಡರ್‌ಗಳನ್ನು ನಿಗದಿಪಡಿಸಿ"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"ಈ ಆ್ಯಪ್ ಭವಿಷ್ಯದಲ್ಲಿ ಅಪೇಕ್ಷಿತ ಸಮಯದಲ್ಲಿ ನಿಮಗೆ ತಿಳಿಸುವುದಕ್ಕಾಗಿ ಅಲಾರಾಂಗಳು ಮತ್ತು ರಿಮೈಂಡರ್‌ಗಳಂತಹ ಕ್ರಿಯೆಗಳನ್ನು ನಿಗದಿಪಡಿಸಬಹುದು."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"ಅಪ್ಲಿಕೇಶನ್‌‌ ಅನ್ನು ಯಾವಾಗಲೂ ರನ್‌ ಆಗುವಂತೆ ಮಾಡಿ"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"ಸ್ಮರಣೆಯಲ್ಲಿ ನಿರಂತರವಾಗಿ ತನ್ನದೇ ಭಾಗಗಳನ್ನು ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಇದು ಟ್ಯಾಬ್ಲೆಟ್ ಕಾರ್ಯವನ್ನು ನಿಧಾನಗೊಳಿಸುವುದರ ಮೂಲಕ ಇತರ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳಿಗೆ ಲಭ್ಯವಿರುವ ಸ್ಮರಣೆಯನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"ಮೆಮೊರಿಯಲ್ಲಿ ತನ್ನ ಭಾಗಗಳನ್ನು ನಿರಂತರವಾಗಿರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಇದು ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಲಭ್ಯವಿರುವ ಮೆಮೊರಿಯನ್ನು ಮಿತಿಗೊಳಿಸಿ Android TV ಸಾಧನವನ್ನು ಇದು ನಿಧಾನಗೊಳಿಸಬಹುದು."</string>
@@ -418,6 +424,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"\"remoteMessaging\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"\"systemExempted\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಯನ್ನು ರನ್ ಮಾಡಿ"</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"\"systemExempted\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"\"fileManagement\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಯನ್ನು ರನ್ ಮಾಡಿ"</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"\"fileManagement\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"specialUse\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಯನ್ನು ರನ್ ಮಾಡಿ"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"\"specialUse\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"ಅಪ್ಲಿಕೇಶನ್‌ ಸಂಗ್ರಹ ಸ್ಥಳವನ್ನು ಅಳೆಯಿರಿ"</string>
@@ -955,14 +963,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"ಎಲ್ಲ ವೈಶಿಷ್ಟ್ಯಗಳು ಮತ್ತು ಡೇಟಾಗೆ ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"ಗರಿಷ್ಠ ಫೇಸ್ ಅನ್‍ಲಾಕ್ ಪ್ರಯತ್ನಗಳು ಮೀರಿವೆ"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"ಸಿಮ್‌ ಕಾರ್ಡ್ ಇಲ್ಲ"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಸಿಮ್‌ ಕಾರ್ಡ್ ಇಲ್ಲ."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"ನಿಮ್ಮ Android TV ಸಾಧನದಲ್ಲಿ ಯಾವುದೇ ಸಿಮ್ ಕಾರ್ಡ್ ಇಲ್ಲ."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"ಫೋನ್‌ನಲ್ಲಿ ಸಿಮ್‌ ಕಾರ್ಡ್ ಇಲ್ಲ."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"ಸಿಮ್‌ ಕಾರ್ಡ್ ಸೇರಿಸಿ."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"ಸಿಮ್‌ ಕಾರ್ಡ್ ಕಾಣೆಯಾಗಿದೆ ಅಥವಾ ಓದಲು ಸಾಧ್ಯವಿಲ್ಲ. ಒಂದು ಸಿಮ್‌ ಕಾರ್ಡ್ ಸೇರಿಸಿ."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"ನಿಷ್ಪ್ರಯೋಜಕ ಸಿಮ್‌ ಕಾರ್ಡ್."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"ನಿಮ್ಮ ಸಿಮ್‌ ಕಾರ್ಡ್ ಅನ್ನು ಶಾಶ್ವತವಾಗಿ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ.\n ಮತ್ತೊಂದು ಸಿಮ್‌ ಕಾರ್ಡ್‌ಗಾಗಿ ನಿಮ್ಮ ವಯರ್‌ಲೆಸ್ ಸೇವೆಯ ಪೂರೈಕೆದಾರರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"ಹಿಂದಿನ ಟ್ರ್ಯಾಕ್"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"ಮುಂದಿನ ಟ್ರ್ಯಾಕ್"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"ವಿರಾಮಗೊಳಿಸು"</string>
@@ -972,10 +988,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"ವೇಗವಾಗಿ ಮುಂದಕ್ಕೆ"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"ತುರ್ತು ಕರೆಗಳು ಮಾತ್ರ"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"ನೆಟ್‌ವರ್ಕ್ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"ಸಿಮ್‌ ಕಾರ್ಡ್ PUK-ಲಾಕ್ ಆಗಿದೆ."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"ಬಳಕೆದಾರರ ಮಾರ್ಗಸೂಚಿಯನ್ನು ನೋಡಿ ಅಥವಾ ಗ್ರಾಹಕರ ಸಹಾಯ ಕೇಂದ್ರಕ್ಕೆ ಸಂಪರ್ಕಿಸಿ."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"ಸಿಮ್‌ ಕಾರ್ಡ್ ಲಾಕ್ ಆಗಿದೆ."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"ಸಿಮ್‌ ಕಾರ್ಡ್ ಅನ್‌ಲಾಕ್  ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"ನಿಮ್ಮ ಅನ್‍‍ಲಾಕ್ ನಮೂನೆಯನ್ನುನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಚಿತ್ರಿಸಿರುವಿರಿ. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"ನಿಮ್ಮ ಪಾಸ್‍‍ವರ್ಡ್ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಟೈಪ್ ಮಾಡಿರುವಿರಿ. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"ನಿಮ್ಮ ಪಿನ್‌ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಟೈಪ್ ಮಾಡಿರುವಿರಿ. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
@@ -1359,10 +1378,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"ನೀವು ಇದನ್ನು ನಂತರದಲ್ಲಿ ಸೆಟ್ಟಿಂಗ್‍‍ಗಳು &gt; ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳಲ್ಲಿ ಬದಲಾಯಿಸಬಹುದು"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"ಯಾವಾಗಲೂ ಅನುಮತಿಸಿ"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"ಎಂದಿಗೂ ಅನುಮತಿಸದಿರು"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"ಸಿಮ್‌ ಕಾರ್ಡ್ ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"ನೀವು ಮಾನ್ಯವಾದ ಸಿಮ್‌ ಕಾರ್ಡ್ ಮರುಪ್ರಾರಂಭಿಸುವವರೆಗೆ ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್ ಲಭ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"ಮುಗಿದಿದೆ"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"ಸಿಮ್‌ ಕಾರ್ಡ್ ಸೇರಿಸಲಾಗಿದೆ"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"ಮೊಬೈಲ್ ನೆಟ್‍ವರ್ಕ್ ಪ್ರವೇಶಿಸಲು ನಿಮ್ಮ ಸಾಧನವನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿ."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"ಮರುಪ್ರಾರಂಭಿಸು"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"ಮೊಬೈಲ್ ಸೇವೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
@@ -1392,7 +1414,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"ಅನ್‌ಲಾಗ್ ಆಡಿಯೋ ಪರಿಕರ ಪತ್ತೆಯಾಗಿದೆ"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ಲಗತ್ತಿಸಲಾದ ಸಾಧನವು ಈ ಫೋನಿನೊಂದಿಗೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ. ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆ ಕನೆಕ್ಟ್‌ ಆಗಿದೆ"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆ ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ಡೀಬಗಿಂಗ್ ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಆಯ್ಕೆ ಮಾಡಿ."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
@@ -1674,7 +1696,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"ಇದೀಗ ಸಿಮ್‌ ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ. ಮುಂದುವರೆಯಲು PUK ಕೋಡ್ ನಮೂದಿಸಿ. ವಿವರಗಳಿಗಾಗಿ ವಾಹಕವನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"ಅಗತ್ಯವಿರುವ ಪಿನ್‌ ಕೋಡ್ ನಮೂದಿಸಿ"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"ಬಯಸಿರುವ ಪಿನ್‌ ಕೋಡ್ ದೃಢೀಕರಿಸಿ"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"ಸಿಮ್‌ ಕಾರ್ಡ್ ಅನ್‍ಲಾಕ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"ತಪ್ಪಾದ ಪಿನ್‌ ಕೋಡ್."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"4 ರಿಂದ 8 ಸಂಖ್ಯೆಗಳಿರುವ ಪಿನ್‌ ಟೈಪ್ ಮಾಡಿ."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK ಕೋಡ್ 8 ಸಂಖ್ಯೆಗಳನ್ನು ಹೊಂದಿರಬೇಕು."</string>
@@ -1731,7 +1754,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ಶಾರ್ಟ್‌ಕಟ್‌ ಆಫ್ ಮಾಡಿ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ಶಾರ್ಟ್‌ಕಟ್ ಬಳಸಿ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ಬಣ್ಣ ವಿಲೋಮ"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"ಬಣ್ಣ ತಿದ್ದುಪಡಿ"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ಒಂದು ಕೈ ಮೋಡ್‌"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ಇನ್ನಷ್ಟು ಮಬ್ಬು"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ವಾಲ್ಯೂಮ್ ಕೀಗಳನ್ನು ಹಿಡಿದುಕೊಳ್ಳಿ. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ಅನ್ನು ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
@@ -2320,4 +2344,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"ಸ್ಟ್ರೀಮ್ ಮಾಡುವಾಗ ಚಿತ್ರದಲ್ಲಿ ಚಿತ್ರವನ್ನು ವೀಕ್ಷಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ಸಿಸ್ಟಂ ಡೀಫಾಲ್ಟ್"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ಕಾರ್ಡ್ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"ವಾಚ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸುವುದಕ್ಕಾಗಿ ಕಂಪ್ಯಾನಿಯನ್ ವಾಚ್ ಪ್ರೊಫೈಲ್ ಅನುಮತಿ"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"ವಾಚ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಕಂಪ್ಯಾನಿಯನ್ ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"ಕಂಪ್ಯಾನಿಯನ್ ಸಾಧನದ ಉಪಸ್ಥಿತಿಯನ್ನು ಗಮನಿಸಿ"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"ಸಾಧನಗಳು ಸಮೀಪದಲ್ಲಿದ್ದಾಗ ಅಥವಾ ದೂರವಿದ್ದಾಗ ಕಂಪ್ಯಾನಿಯನ್ ಸಾಧನದ ಉಪಸ್ಥಿತಿಯನ್ನು ಗಮನಿಸಲು ಕಂಪ್ಯಾನಿಯನ್ ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"ಕಂಪ್ಯಾನಿಯನ್ ಸಂದೇಶಗಳನ್ನು ತಲುಪಿಸಿ"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"ಇತರ ಸಾಧನಗಳಿಗೆ ಕಂಪ್ಯಾನಿಯನ್ ಸಂದೇಶಗಳನ್ನು ತಲುಪಿಸಲು ಕಂಪ್ಯಾನಿಯನ್ ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಹಿನ್ನೆಲೆಯಿಂದ ಪ್ರಾರಂಭಿಸಿ"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಹಿನ್ನೆಲೆಯಿಂದ ಪ್ರಾರಂಭಿಸಲು ಕಂಪ್ಯಾನಿಯನ್ ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
 </resources>

@@ -59,6 +59,7 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.ParcelableException;
+import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -1756,6 +1757,65 @@ public class PackageInstaller {
                 mSession.removeChildSessionId(sessionId);
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * @return A PersistableBundle containing the app metadata set with
+         * {@link Session#setAppMetadata(PersistableBundle)}. In the case where this data does not
+         * exist, an empty PersistableBundle is returned.
+         */
+        @NonNull
+        public PersistableBundle getAppMetadata() {
+            PersistableBundle data = null;
+            try {
+                ParcelFileDescriptor pfd = mSession.getAppMetadataFd();
+                if (pfd != null) {
+                    try (InputStream inputStream =
+                            new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
+                        data = PersistableBundle.readFromStream(inputStream);
+                    }
+                }
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return data != null ? data : new PersistableBundle();
+        }
+
+        private OutputStream openWriteAppMetadata() throws IOException {
+            try {
+                if (ENABLE_REVOCABLE_FD) {
+                    return new ParcelFileDescriptor.AutoCloseOutputStream(
+                            mSession.openWriteAppMetadata());
+                } else {
+                    final ParcelFileDescriptor clientSocket = mSession.openWriteAppMetadata();
+                    return new FileBridge.FileBridgeOutputStream(clientSocket);
+                }
+            } catch (RuntimeException e) {
+                ExceptionUtils.maybeUnwrapIOException(e);
+                throw e;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Optionally set the app metadata. The size of this data cannot exceed the maximum allowed.
+         * If no data is provided, then any existing app metadata from the previous install will be
+         * removed for the package.
+         *
+         * @param data a PersistableBundle containing the app metadata. If this is set to null then
+         *     any existing app metadata will be removed.
+         * @throws IOException if writing the data fails.
+         */
+        public void setAppMetadata(@Nullable PersistableBundle data) throws IOException {
+            if (data == null) {
+                return;
+            }
+            try (OutputStream outputStream = openWriteAppMetadata()) {
+                data.writeToStream(outputStream);
             }
         }
 

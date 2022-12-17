@@ -67,8 +67,12 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
-                public void onTrustGrantedForCurrentUser(boolean dismissKeyguard,
-                        TrustGrantFlags flags, String message) {
+                public void onTrustGrantedForCurrentUser(
+                        boolean dismissKeyguard,
+                        boolean newlyUnlocked,
+                        TrustGrantFlags flags,
+                        String message
+                ) {
                     if (dismissKeyguard) {
                         if (!mView.isVisibleToUser()) {
                             // The trust agent dismissed the keyguard without the user proving

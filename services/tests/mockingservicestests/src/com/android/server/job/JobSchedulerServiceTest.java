@@ -249,8 +249,8 @@ public class JobSchedulerServiceTest {
         when(ejHighDowngraded.shouldTreatAsExpeditedJob()).thenReturn(false);
         when(jobHigh.shouldTreatAsExpeditedJob()).thenReturn(false);
         when(jobDef.shouldTreatAsExpeditedJob()).thenReturn(false);
-        when(jobUI.shouldTreatAsUserInitiated()).thenReturn(true);
-        when(jobUIDT.shouldTreatAsUserInitiated()).thenReturn(true);
+        when(jobUI.shouldTreatAsUserInitiatedJob()).thenReturn(true);
+        when(jobUIDT.shouldTreatAsUserInitiatedJob()).thenReturn(true);
 
         ConnectivityController connectivityController = mService.getConnectivityController();
         spyOn(connectivityController);
@@ -335,8 +335,8 @@ public class JobSchedulerServiceTest {
         spyOn(jobUI);
         spyOn(jobUIDT);
 
-        when(jobUI.shouldTreatAsUserInitiated()).thenReturn(true);
-        when(jobUIDT.shouldTreatAsUserInitiated()).thenReturn(true);
+        when(jobUI.shouldTreatAsUserInitiatedJob()).thenReturn(true);
+        when(jobUIDT.shouldTreatAsUserInitiatedJob()).thenReturn(true);
 
         QuotaController quotaController = mService.getQuotaController();
         spyOn(quotaController);

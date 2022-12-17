@@ -48,7 +48,6 @@ fun <T : AppRecord> AppListPage(
     moreOptions: @Composable MoreOptionsScope.() -> Unit = {},
     header: @Composable () -> Unit = {},
     appList: @Composable AppListInput<T>.() -> Unit = { AppList() },
-    appItem: @Composable AppListItemModel<T>.() -> Unit,
 ) {
     val showSystem = rememberSaveable { mutableStateOf(false) }
     SearchScaffold(
@@ -77,7 +76,6 @@ fun <T : AppRecord> AppListPage(
                         searchQuery = searchQuery,
                     ),
                     header = header,
-                    appItem = appItem,
                     bottomPadding = bottomPadding,
                 )
                 appList(appListInput)

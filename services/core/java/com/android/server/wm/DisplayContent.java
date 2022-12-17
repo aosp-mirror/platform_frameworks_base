@@ -1601,13 +1601,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     @Override
-    boolean onDescendantOrientationChanged(WindowContainer requestingContainer) {
+    boolean onDescendantOrientationChanged(@Nullable WindowContainer requestingContainer) {
         final Configuration config = updateOrientation(
                 requestingContainer, false /* forceUpdate */);
         // If display rotation class tells us that it doesn't consider app requested orientation,
         // this display won't rotate just because of an app changes its requested orientation. Thus
         // it indicates that this display chooses not to handle this request.
-        final boolean handled = handlesOrientationChangeFromDescendant();
+        final int orientation = requestingContainer != null ? requestingContainer.mOrientation
+                : SCREEN_ORIENTATION_UNSET;
+        final boolean handled = handlesOrientationChangeFromDescendant(orientation);
         if (config == null) {
             return handled;
         }
@@ -1630,8 +1632,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     @Override
-    boolean handlesOrientationChangeFromDescendant() {
-        return !getIgnoreOrientationRequest()
+    boolean handlesOrientationChangeFromDescendant(@ScreenOrientation int orientation) {
+        return !getIgnoreOrientationRequest(orientation)
                 && !getDisplayRotation().isFixedToUserRotation();
     }
 
@@ -1732,7 +1734,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return ROTATION_UNDEFINED;
         }
         if (!WindowManagerService.ENABLE_FIXED_ROTATION_TRANSFORM
-                || getIgnoreOrientationRequest()) {
+                || getIgnoreOrientationRequest(r.mOrientation)) {
             return ROTATION_UNDEFINED;
         }
         if (r.mOrientation == ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
@@ -2740,15 +2742,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @ScreenOrientation
     @Override
     int getOrientation() {
-        mLastOrientationSource = null;
-        if (!handlesOrientationChangeFromDescendant()) {
-            // Return SCREEN_ORIENTATION_UNSPECIFIED so that Display respect sensor rotation
-            ProtoLog.v(WM_DEBUG_ORIENTATION,
-                    "Display id=%d is ignoring all orientation requests, return %d",
-                    mDisplayId, SCREEN_ORIENTATION_UNSPECIFIED);
-            return SCREEN_ORIENTATION_UNSPECIFIED;
-        }
-
         if (mWmService.mDisplayFrozen) {
             if (mWmService.mPolicy.isKeyguardLocked()) {
                 // Use the last orientation the while the display is frozen with the keyguard
@@ -2764,6 +2757,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         final int orientation = super.getOrientation();
+
+        if (!handlesOrientationChangeFromDescendant(orientation)) {
+            mLastOrientationSource = null;
+            // Return SCREEN_ORIENTATION_UNSPECIFIED so that Display respect sensor rotation
+            ProtoLog.v(WM_DEBUG_ORIENTATION,
+                    "Display id=%d is ignoring orientation request for %d, return %d",
+                    mDisplayId, orientation, SCREEN_ORIENTATION_UNSPECIFIED);
+            return SCREEN_ORIENTATION_UNSPECIFIED;
+        }
+
         if (orientation == SCREEN_ORIENTATION_UNSET) {
             // Return SCREEN_ORIENTATION_UNSPECIFIED so that Display respect sensor rotation
             ProtoLog.v(WM_DEBUG_ORIENTATION,
@@ -3890,18 +3893,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** Called when the focused {@link TaskDisplayArea} on this display may have changed. */
     void onLastFocusedTaskDisplayAreaChanged(@Nullable TaskDisplayArea taskDisplayArea) {
-        // Only record the TaskDisplayArea that handles orientation request.
-        if (taskDisplayArea != null && taskDisplayArea.handlesOrientationChangeFromDescendant()) {
-            mOrientationRequestingTaskDisplayArea = taskDisplayArea;
-            return;
-        }
-
-        // If the previous TDA no longer handles orientation request, clear it.
-        if (mOrientationRequestingTaskDisplayArea != null
-                && !mOrientationRequestingTaskDisplayArea
-                .handlesOrientationChangeFromDescendant()) {
-            mOrientationRequestingTaskDisplayArea = null;
-        }
+        mOrientationRequestingTaskDisplayArea = taskDisplayArea;
     }
 
     /**
@@ -5104,13 +5096,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         @Override
-        int getOrientation(int candidate) {
-            if (getIgnoreOrientationRequest()) {
-                return SCREEN_ORIENTATION_UNSET;
-            }
-
+        @ScreenOrientation
+        int getOrientation(@ScreenOrientation int candidate) {
             // IME does not participate in orientation.
-            return candidate;
+            return getIgnoreOrientationRequest(candidate) ? SCREEN_ORIENTATION_UNSET : candidate;
         }
 
         @Override

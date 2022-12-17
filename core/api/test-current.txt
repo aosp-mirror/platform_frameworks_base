@@ -1860,6 +1860,14 @@ package android.os {
     method public static java.io.File getFile(java.io.FileDescriptor) throws java.io.IOException;
   }
 
+  public static class PerformanceHintManager.Session implements java.io.Closeable {
+    method public void sendHint(int);
+    field public static final int CPU_LOAD_DOWN = 1; // 0x1
+    field public static final int CPU_LOAD_RESET = 2; // 0x2
+    field public static final int CPU_LOAD_RESUME = 3; // 0x3
+    field public static final int CPU_LOAD_UP = 0; // 0x0
+  }
+
   public final class PowerManager {
     method public boolean areAutoPowerSaveModesEnabled();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER}) public void forceLowPowerStandbyActive(boolean);
@@ -2684,6 +2692,7 @@ package android.telephony {
     method @NonNull public android.util.Pair<java.lang.Integer,java.lang.Integer> getHalVersion(int);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getLine1AlphaTag();
     method @Deprecated public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDomainSelectionSupported();
     method public boolean modifyDevicePolicyOverrideApn(@NonNull android.content.Context, int, @NonNull android.telephony.data.ApnSetting);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
     method @Deprecated public void setCarrierTestOverride(String, String, String, String, String, String, String);

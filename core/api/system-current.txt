@@ -804,9 +804,9 @@ package android.app {
     method public static android.app.BroadcastOptions makeBasic();
     method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS) public void recordResponseEventWhileInBackground(@IntRange(from=0) long);
     method @RequiresPermission(android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND) public void setBackgroundActivityStartsAllowed(boolean);
-    method public void setDeliveryGroupMatchingFilter(@NonNull android.content.IntentFilter);
-    method public void setDeliveryGroupMatchingKey(@NonNull String, @NonNull String);
-    method public void setDeliveryGroupPolicy(int);
+    method @NonNull public android.app.BroadcastOptions setDeliveryGroupMatchingFilter(@NonNull android.content.IntentFilter);
+    method @NonNull public android.app.BroadcastOptions setDeliveryGroupMatchingKey(@NonNull String, @NonNull String);
+    method @NonNull public android.app.BroadcastOptions setDeliveryGroupPolicy(int);
     method public void setDontSendToRestrictedApps(boolean);
     method public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
     method public void setRequireAllOfPermissions(@Nullable String[]);
@@ -1007,6 +1007,8 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void updateMediaTapToTransferSenderDisplay(int, @NonNull android.media.MediaRoute2Info, @Nullable java.util.concurrent.Executor, @Nullable Runnable);
     field public static final int MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER = 0; // 0x0
     field public static final int MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER = 1; // 0x1
+    field public static final int MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_FAILED = 3; // 0x3
+    field public static final int MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED = 2; // 0x2
     field public static final int MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST = 1; // 0x1
     field public static final int MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST = 0; // 0x0
     field public static final int MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER = 8; // 0x8
@@ -2989,6 +2991,10 @@ package android.companion.virtual {
     method public void onTopActivityChanged(int, @NonNull android.content.ComponentName);
   }
 
+  public static interface VirtualDeviceManager.IntentInterceptorCallback {
+    method public void onIntentIntercepted(@NonNull android.content.Intent);
+  }
+
   public static class VirtualDeviceManager.VirtualDevice implements java.lang.AutoCloseable {
     method public void addActivityListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
@@ -3007,8 +3013,10 @@ package android.companion.virtual {
     method public int getDeviceId();
     method @Nullable public android.companion.virtual.sensor.VirtualSensor getVirtualSensor(int, @NonNull String);
     method public void launchPendingIntent(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.IntConsumer);
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void registerIntentInterceptor(@NonNull java.util.concurrent.Executor, @NonNull android.content.IntentFilter, @NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
     method public void removeActivityListener(@NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setShowPointerIcon(boolean);
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void unregisterIntentInterceptor(@NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
   }
 
   public final class VirtualDeviceParams implements android.os.Parcelable {
@@ -3612,6 +3620,7 @@ package android.content.pm {
     method public abstract boolean arePermissionsIndividuallyControlled();
     method @NonNull public boolean[] canPackageQuery(@NonNull String, @NonNull String[]) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public abstract java.util.List<android.content.IntentFilter> getAllIntentFilters(@NonNull String);
+    method @NonNull @RequiresPermission("android.permission.GET_APP_METADATA") public android.os.PersistableBundle getAppMetadata(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.pm.ApplicationInfo getApplicationInfoAsUser(@NonNull String, int, @NonNull android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.pm.ApplicationInfo getApplicationInfoAsUser(@NonNull String, @NonNull android.content.pm.PackageManager.ApplicationInfoFlags, @NonNull android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public android.content.pm.dex.ArtManager getArtManager();
@@ -10911,7 +10920,6 @@ package android.provider {
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS = "install_carrier_app_notification_sleep_millis";
     field public static final String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";
     field public static final String REQUIRE_PASSWORD_TO_DECRYPT = "require_password_to_decrypt";
-    field public static final String SECURE_FRP_MODE = "secure_frp_mode";
     field public static final String TETHER_OFFLOAD_DISABLED = "tether_offload_disabled";
     field public static final String TETHER_SUPPORTED = "tether_supported";
     field public static final String THEATER_MODE_ON = "theater_mode_on";
@@ -15562,10 +15570,6 @@ package android.telephony.ims {
     field public static final int SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT = 2; // 0x2
   }
 
-  public static class RegistrationManager.RegistrationCallback {
-    method public void onUnregistered(@NonNull android.telephony.ims.ImsReasonInfo, int);
-  }
-
   public final class RtpHeaderExtension implements android.os.Parcelable {
     ctor public RtpHeaderExtension(@IntRange(from=1, to=14) int, @NonNull byte[]);
     method public int describeContents();
@@ -15773,7 +15777,8 @@ package android.telephony.ims.feature {
     method @NonNull public android.telephony.ims.stub.ImsSmsImplBase getSmsImplementation();
     method @NonNull public android.telephony.ims.stub.ImsUtImplBase getUt();
     method public final void notifyCapabilitiesStatusChanged(@NonNull android.telephony.ims.feature.MmTelFeature.MmTelCapabilities);
-    method public final void notifyIncomingCall(@NonNull android.telephony.ims.stub.ImsCallSessionImplBase, @NonNull android.os.Bundle);
+    method @Deprecated public final void notifyIncomingCall(@NonNull android.telephony.ims.stub.ImsCallSessionImplBase, @NonNull android.os.Bundle);
+    method @Nullable public final android.telephony.ims.ImsCallSessionListener notifyIncomingCall(@NonNull android.telephony.ims.stub.ImsCallSessionImplBase, @NonNull String, @NonNull android.os.Bundle);
     method public final void notifyRejectedCall(@NonNull android.telephony.ims.ImsCallProfile, @NonNull android.telephony.ims.ImsReasonInfo);
     method public void notifySrvccCanceled();
     method public void notifySrvccCompleted();
@@ -15883,7 +15888,7 @@ package android.telephony.ims.stub {
     method public void sendRttModifyRequest(android.telephony.ims.ImsCallProfile);
     method public void sendRttModifyResponse(boolean);
     method public void sendUssd(String);
-    method public void setListener(android.telephony.ims.ImsCallSessionListener);
+    method @Deprecated public void setListener(android.telephony.ims.ImsCallSessionListener);
     method public void setMute(boolean);
     method public void start(String, android.telephony.ims.ImsCallProfile);
     method public void startConference(String[], android.telephony.ims.ImsCallProfile);
@@ -15965,7 +15970,7 @@ package android.telephony.ims.stub {
     ctor public ImsRegistrationImplBase();
     ctor public ImsRegistrationImplBase(@NonNull java.util.concurrent.Executor);
     method public final void onDeregistered(android.telephony.ims.ImsReasonInfo);
-    method public final void onDeregistered(@Nullable android.telephony.ims.ImsReasonInfo, int);
+    method public final void onDeregistered(@Nullable android.telephony.ims.ImsReasonInfo, int, int);
     method public final void onRegistered(int);
     method public final void onRegistered(@NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public final void onRegistering(int);

@@ -30,6 +30,9 @@
 
     <bool name="flag_charging_ripple">false</bool>
 
+    <!-- Whether to show chipbar UI whenever the device is unlocked by ActiveUnlock. -->
+    <bool name="flag_active_unlock_chipbar">true</bool>
+
     <bool name="flag_smartspace">false</bool>
 
     <!--  Whether the user switcher chip shows in the status bar. When true, the multi user

@@ -72,6 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"ปิดใช้ Smart Lock แล้ว"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ส่งรูปภาพ"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"กำลังบันทึกภาพหน้าจอ..."</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"กำลังบันทึกภาพหน้าจอไปยังโปรไฟล์งาน…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"บันทึกภาพหน้าจอแล้ว"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"บันทึกภาพหน้าจอไม่ได้"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ต้องปลดล็อกอุปกรณ์ก่อนจึงจะบันทึกภาพหน้าจอได้"</string>
@@ -168,8 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"ไม่รู้จักใบหน้า"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"ใช้ลายนิ้วมือแทน"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
-    <skip />
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"การปลดล็อกด้วยใบหน้าไม่พร้อมใช้งาน"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"เชื่อมต่อบลูทูธแล้ว"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ไม่ทราบเปอร์เซ็นต์แบตเตอรี่"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"เชื่อมต่อกับ <xliff:g id="BLUETOOTH">%s</xliff:g> แล้ว"</string>
@@ -180,10 +180,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"โหมดบนเครื่องบิน"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN เปิดอยู่"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"แบตเตอรี่ <xliff:g id="NUMBER">%d</xliff:g> เปอร์เซ็นต์"</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"แบตเตอรี่ <xliff:g id="PERCENTAGE">%1$d</xliff:g> เปอร์เซ็นต์ ใช้ได้อีกประมาณ <xliff:g id="TIME">%2$s</xliff:g> ทั้งนี้ขึ้นอยู่กับการใช้งานของคุณ"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"แบตเตอรี่ <xliff:g id="PERCENTAGE">%1$d</xliff:g> เปอร์เซ็นต์ (<xliff:g id="TIME">%2$s</xliff:g>)"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"กำลังชาร์จแบตเตอรี่ <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> เปอร์เซ็นต์"</string>
-    <string name="accessibility_battery_level_charging_paused" msgid="1716051308782906917">"แบตเตอรี่ <xliff:g id="PERCENTAGE">%d</xliff:g> เปอร์เซ็นต์ หยุดชาร์จชั่วคราวเพื่อยืดอายุแบตเตอรี่"</string>
-    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="4006089349465741762">"แบตเตอรี่ <xliff:g id="PERCENTAGE">%1$d</xliff:g> เปอร์เซ็นต์ ใช้ได้<xliff:g id="TIME">%2$s</xliff:g> ทั้งนี้ขึ้นอยู่กับการใช้งานของคุณ หยุดชาร์จชั่วคราวเพื่อยืดอายุแบตเตอรี่"</string>
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"แบตเตอรี่ <xliff:g id="PERCENTAGE">%d</xliff:g> เปอร์เซ็นต์ หยุดชาร์จชั่วคราวเพื่อยืดอายุแบตเตอรี่"</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"แบตเตอรี่ <xliff:g id="PERCENTAGE">%1$d</xliff:g> เปอร์เซ็นต์ (<xliff:g id="TIME">%2$s</xliff:g>) หยุดชาร์จชั่วคราวเพื่อยืดอายุแบตเตอรี่"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"ดูการแจ้งเตือนทั้งหมด"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"เปิดใช้งาน TeleTypewriter อยู่"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"เสียงเรียกเข้าแบบสั่น"</string>
@@ -317,7 +317,8 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"เปิดการเข้าถึงกล้องสำหรับแอปและบริการทั้งหมดแล้ว"</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"ปิดการเข้าถึงกล้องสำหรับแอปและบริการทั้งหมดแล้ว"</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"หากต้องการใช้ปุ่มไมโครโฟน ให้เปิดการเข้าถึงไมโครโฟนในการตั้งค่า"</string>
-    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"เปิดการตั้งค่า"</string>
+    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
+    <skip />
     <string name="media_seamless_other_device" msgid="4654849800789196737">"อุปกรณ์อื่น"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"สลับภาพรวม"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"คุณจะไม่ถูกรบกวนจากเสียงและการสั่น ยกเว้นเสียงนาฬิกาปลุก การช่วยเตือน กิจกรรม และผู้โทรที่ระบุไว้ คุณจะยังคงได้ยินสิ่งที่คุณเลือกเล่น เช่น เพลง วิดีโอ และเกม"</string>
@@ -404,6 +405,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"หยุดการแจ้งเตือนชั่วคราวโดย \"ห้ามรบกวน\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"เริ่มเลย"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ไม่มีการแจ้งเตือน"</string>
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"ไม่มีการแจ้งเตือนใหม่"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"ปลดล็อกเพื่อดูการแจ้งเตือนเก่า"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"อุปกรณ์นี้จัดการโดยผู้ปกครอง"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"องค์กรของคุณเป็นเจ้าของอุปกรณ์นี้และอาจตรวจสอบการจราจรของข้อมูลในเครือข่าย"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> เป็นเจ้าของอุปกรณ์นี้และอาจตรวจสอบการจราจรของข้อมูลในเครือข่าย"</string>
@@ -509,6 +512,7 @@
     <string name="wallet_error_generic" msgid="257704570182963611">"เกิดปัญหาในการดึงข้อมูลบัตรของคุณ โปรดลองอีกครั้งในภายหลัง"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"การตั้งค่าหน้าจอล็อก"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"เครื่องมือสแกนคิวอาร์โค้ด"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"กำลังอัปเดต"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"โปรไฟล์งาน"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"โหมดบนเครื่องบิน"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"คุณจะไม่ได้ยินเสียงปลุกครั้งถัดไปในเวลา <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -791,8 +795,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ขยายเป็นเต็มหน้าจอ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ขยายบางส่วนของหน้าจอ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"เปลี่ยน"</string>
-    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
-    <skip />
+    <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"ลากที่มุมเพื่อปรับขนาด"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"อนุญาตการเลื่อนแบบทแยงมุม"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"ปรับขนาด"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"เปลี่ยนประเภทการขยาย"</string>
@@ -901,6 +904,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"หยุดแคสต์"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"อุปกรณ์ที่พร้อมใช้งานสำหรับเอาต์พุตเสียง"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ระดับเสียง"</string>
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"วิธีการทำงานของการออกอากาศ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ประกาศ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ผู้ที่อยู่ใกล้คุณและมีอุปกรณ์บลูทูธที่รองรับสามารถรับฟังสื่อที่คุณกำลังออกอากาศได้"</string>
@@ -1014,17 +1018,34 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"กล้องและไมค์ปิดอยู่"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{การแจ้งเตือน # รายการ}other{การแจ้งเตือน # รายการ}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="note_task_button_label" msgid="8718616095800343136">"การจดบันทึก"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"กำลังออกอากาศ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"หยุดการออกอากาศ <xliff:g id="APP_NAME">%1$s</xliff:g> ไหม"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"หากคุณออกอากาศ <xliff:g id="SWITCHAPP">%1$s</xliff:g> หรือเปลี่ยนแปลงเอาต์พุต การออกอากาศในปัจจุบันจะหยุดลง"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"ออกอากาศ <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"เปลี่ยนเอาต์พุต"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"ไม่ทราบ"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE d MMM"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"HH:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"อนุญาตให้ \"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>\" เข้าถึงบันทึกทั้งหมดของอุปกรณ์ไหม"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"อนุญาตสิทธิ์เข้าถึงแบบครั้งเดียว"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"ไม่อนุญาต"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"บันทึกของอุปกรณ์เก็บข้อมูลสิ่งที่เกิดขึ้นในอุปกรณ์ แอปสามารถใช้บันทึกเหล่านี้เพื่อค้นหาและแก้ไขปัญหา\n\nบันทึกบางรายการอาจมีข้อมูลที่ละเอียดอ่อน คุณจึงควรอนุญาตเฉพาะแอปที่เชื่อถือได้ให้เข้าถึงบันทึกทั้งหมดของอุปกรณ์ \n\nหากคุณไม่อนุญาตให้แอปนี้เข้าถึงบันทึกทั้งหมดของอุปกรณ์ แอปจะยังเข้าถึงบันทึกของตัวเองได้อยู่ ผู้ผลิตอุปกรณ์อาจยังเข้าถึงบันทึกหรือข้อมูลบางรายการในอุปกรณ์ของคุณได้"</string>
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"เปิด <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
+    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"หากต้องการเพิ่มแอป <xliff:g id="APPNAME">%1$s</xliff:g> เป็นทางลัด โปรดตรวจสอบดังต่อไปนี้"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• แอปได้รับการตั้งค่าแล้ว"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• มีการเพิ่มบัตรลงใน Wallet อย่างน้อย 1 รายการ"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ติดตั้งแอปกล้อง"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• แอปได้รับการตั้งค่าแล้ว"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• มีอุปกรณ์พร้อมใช้งานอย่างน้อย 1 รายการ"</string>
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ยกเลิก"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"พลิกเลย"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"กางโทรศัพท์เพื่อเซลฟีที่ดียิ่งขึ้น"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"พลิกเป็นหน้าจอด้านหน้าเพื่อภาพเซลฟีที่ดีขึ้นไหม"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ใช้กล้องหลังเพื่อถ่ายภาพกว้างขึ้นด้วยความละเอียดสูงขึ้น"</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ หน้าจอนี้จะปิดไป"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

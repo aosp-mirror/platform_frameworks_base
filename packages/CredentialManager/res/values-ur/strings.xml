@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"دوسرے مقام میں محفوظ کریں"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"کوئی دوسرا آلہ استعمال کریں"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"دوسرے آلے میں محفوظ کریں"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"پاس کیز کے ساتھ زیادہ محفوظ"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"پیچیدہ پاس ورڈز بنانے یا انہیں یاد رکھنے کی ضرورت نہیں ہے"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"ایک منفرد پاس کی بنانے کے لیے اپنے فنگر پرنٹ، چہرے یا اسکرین لاک کا استعمال کریں"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"پاس کیز کو پاس ورڈ مینیجر میں محفوظ کیا جاتا ہے تاکہ آپ دوسرے آلات پر سائن ان کر سکیں"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> کی جگہ منتخب کریں"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"اپنی پاس کیز تخلیق کریں"</string>
     <string name="save_your_password" msgid="6597736507991704307">"اپنا پاس ورڈ محفوظ کریں"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"دیگر پاس ورڈ مینیجرز"</string>
     <string name="close_sheet" msgid="1393792015338908262">"شیٹ بند کریں"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"گزشتہ صفحے پر واپس جائیں"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے اپنی محفوظ کردہ پاس کی استعمال کریں؟"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے اپنے محفوظ کردہ سائن ان کو استعمال کریں؟"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے محفوظ کردہ سائن انز منتخب کریں"</string>

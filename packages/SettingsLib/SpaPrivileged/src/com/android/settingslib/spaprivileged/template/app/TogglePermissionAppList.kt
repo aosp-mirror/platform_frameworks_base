@@ -96,7 +96,7 @@ interface TogglePermissionAppListProvider {
     @Composable
     fun InfoPageEntryItem(app: ApplicationInfo) {
         val listModel = rememberContext(::createModel)
-        TogglePermissionAppInfoPageProvider.EntryItem(permissionType, app, listModel)
+        listModel.TogglePermissionAppInfoPageEntryItem(permissionType, app)
     }
 }
 

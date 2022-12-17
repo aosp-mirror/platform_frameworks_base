@@ -517,7 +517,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Mimic the behavior that display doesn't handle app's requested orientation.
         final DisplayContent dc = activity.getTask().getDisplayContent();
         doReturn(false).when(dc).onDescendantOrientationChanged(any());
-        doReturn(false).when(dc).handlesOrientationChangeFromDescendant();
+        doReturn(false).when(dc).handlesOrientationChangeFromDescendant(anyInt());
 
         final int requestedOrientation;
         switch (newConfig.orientation) {
@@ -2533,6 +2533,10 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Can specify orientation if app doesn't occludes parent.
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, activity.getOrientation());
 
+        doReturn(true).when(activity).shouldIgnoreOrientationRequests();
+        assertEquals(SCREEN_ORIENTATION_UNSET, activity.getOrientation());
+
+        doReturn(false).when(activity).shouldIgnoreOrientationRequests();
         activity.setOccludesParent(true);
         activity.setVisible(false);
         activity.setVisibleRequested(false);

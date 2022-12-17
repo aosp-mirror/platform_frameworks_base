@@ -178,11 +178,17 @@ public class KeyguardUpdateMonitorCallback {
      * Called after trust was granted.
      * @param dismissKeyguard whether the keyguard should be dismissed as a result of the
      *                        trustGranted
+     * @param newlyUnlocked whether the grantedTrust is believed to be the cause of a newly
+     *                      unlocked device (after being locked).
      * @param message optional message the trust agent has provided to show that should indicate
      *                why trust was granted.
      */
-    public void onTrustGrantedForCurrentUser(boolean dismissKeyguard,
-            @NonNull TrustGrantFlags flags, @Nullable String message) { }
+    public void onTrustGrantedForCurrentUser(
+            boolean dismissKeyguard,
+            boolean newlyUnlocked,
+            @NonNull TrustGrantFlags flags,
+            @Nullable String message
+    ) { }
 
     /**
      * Called when a biometric has been acquired.

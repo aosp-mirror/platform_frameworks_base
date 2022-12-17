@@ -62,12 +62,14 @@ public class UserManagerServiceUserPropertiesTest {
                 .setShowInSettings(45)
                 .setInheritDevicePolicy(67)
                 .setUseParentsContacts(false)
+                .setCrossProfileIntentFilterAccessControl(10)
                 .build();
         final UserProperties actualProps = new UserProperties(defaultProps);
         actualProps.setShowInLauncher(14);
         actualProps.setShowInSettings(32);
         actualProps.setInheritDevicePolicy(51);
         actualProps.setUseParentsContacts(true);
+        actualProps.setCrossProfileIntentFilterAccessControl(20);
 
         // Write the properties to xml.
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -150,6 +152,8 @@ public class UserManagerServiceUserPropertiesTest {
         assertEqualGetterOrThrows(orig::getStartWithParent, copy::getStartWithParent, exposeAll);
         assertEqualGetterOrThrows(orig::getInheritDevicePolicy,
                 copy::getInheritDevicePolicy, exposeAll);
+        assertEqualGetterOrThrows(orig::getCrossProfileIntentFilterAccessControl,
+                copy::getCrossProfileIntentFilterAccessControl, exposeAll);
 
         // Items requiring hasManagePermission - put them here using hasManagePermission.
         assertEqualGetterOrThrows(orig::getShowInSettings, copy::getShowInSettings,
@@ -203,5 +207,7 @@ public class UserManagerServiceUserPropertiesTest {
         assertThat(expected.getShowInSettings()).isEqualTo(actual.getShowInSettings());
         assertThat(expected.getInheritDevicePolicy()).isEqualTo(actual.getInheritDevicePolicy());
         assertThat(expected.getUseParentsContacts()).isEqualTo(actual.getUseParentsContacts());
+        assertThat(expected.getCrossProfileIntentFilterAccessControl())
+                .isEqualTo(actual.getCrossProfileIntentFilterAccessControl());
     }
 }

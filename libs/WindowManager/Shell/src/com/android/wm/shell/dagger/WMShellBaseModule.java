@@ -62,6 +62,7 @@ import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelperController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
@@ -687,7 +688,11 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static Optional<DesktopMode> provideDesktopMode(
-            Optional<DesktopModeController> desktopModeController) {
+            Optional<DesktopModeController> desktopModeController,
+            Optional<DesktopTasksController> desktopTasksController) {
+        if (DesktopModeStatus.isProto2Enabled()) {
+            return desktopTasksController.map(DesktopTasksController::asDesktopMode);
+        }
         return desktopModeController.map(DesktopModeController::asDesktopMode);
     }
 
@@ -704,6 +709,23 @@ public abstract class WMShellBaseModule {
         // when it will not be returned due to the condition below.
         if (DesktopModeStatus.isProto1Enabled()) {
             return desktopModeController.map(Lazy::get);
+        }
+        return Optional.empty();
+    }
+
+    @BindsOptionalOf
+    @DynamicOverride
+    abstract DesktopTasksController optionalDesktopTasksController();
+
+    @WMSingleton
+    @Provides
+    static Optional<DesktopTasksController> providesDesktopTasksController(
+            @DynamicOverride Optional<Lazy<DesktopTasksController>> desktopTasksController) {
+        // Use optional-of-lazy for the dependency that this provider relies on.
+        // Lazy ensures that this provider will not be the cause the dependency is created
+        // when it will not be returned due to the condition below.
+        if (DesktopModeStatus.isProto2Enabled()) {
+            return desktopTasksController.map(Lazy::get);
         }
         return Optional.empty();
     }

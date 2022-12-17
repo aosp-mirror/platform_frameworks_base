@@ -31,7 +31,6 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.hardware.biometrics.common.ICancellationSignal;
-import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
 import android.os.IBinder;
@@ -44,6 +43,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -96,7 +96,7 @@ public class FaceAuthenticationClientTest {
     @Mock
     private AuthSessionCoordinator mAuthSessionCoordinator;
     @Captor
-    private ArgumentCaptor<OperationContext> mOperationContextCaptor;
+    private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -126,7 +126,7 @@ public class FaceAuthenticationClientTest {
         order.verify(mBiometricContext).updateContext(
                 mOperationContextCaptor.capture(), anyBoolean());
         order.verify(mHal).authenticateWithContext(
-                eq(OP_ID), same(mOperationContextCaptor.getValue()));
+                eq(OP_ID), same(mOperationContextCaptor.getValue().toAidlContext()));
         verify(mHal, never()).authenticate(anyLong());
     }
 

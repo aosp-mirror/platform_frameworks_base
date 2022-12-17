@@ -164,7 +164,7 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
 
         if (session.hasContextMethods()) {
             return session.getSession().authenticateWithContext(
-                    mOperationId, getOperationContext());
+                    mOperationId, getOperationContext().toAidlContext());
         } else {
             return session.getSession().authenticate(mOperationId);
         }

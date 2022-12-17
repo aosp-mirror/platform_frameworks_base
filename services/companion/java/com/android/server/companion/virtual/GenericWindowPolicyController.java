@@ -32,6 +32,7 @@ import android.companion.virtual.VirtualDeviceParams.RecentsPolicy;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Handler;
@@ -93,6 +94,12 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         void onEnteringPipBlocked(int uid);
     }
 
+    /** Interface to listen for interception of intents. */
+    public interface IntentListenerCallback {
+        /** Returns true when an intent should be intercepted */
+        boolean shouldInterceptIntent(Intent intent);
+    }
+
     /**
      * If required, allow the secure activity to display on remote device since
      * {@link android.os.Build.VERSION_CODES#TIRAMISU}.
@@ -121,6 +128,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     final ArraySet<Integer> mRunningUids = new ArraySet<>();
     @Nullable private final ActivityListener mActivityListener;
     @Nullable private final PipBlockedCallback mPipBlockedCallback;
+    @Nullable private final IntentListenerCallback mIntentListenerCallback;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     @NonNull
     @GuardedBy("mGenericWindowPolicyControllerLock")
@@ -155,6 +163,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
      *   launching.
      * @param secureWindowCallback Callback that is called when a secure window shows on the
      *   virtual display.
+     * @param intentListenerCallback Callback that is called to intercept intents when matching
+     *   passed in filters.
      * @param defaultRecentsPolicy a policy to indicate how to handle activities in recents.
      */
     public GenericWindowPolicyController(int windowFlags, int systemWindowFlags,
@@ -168,6 +178,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @NonNull PipBlockedCallback pipBlockedCallback,
             @NonNull ActivityBlockedCallback activityBlockedCallback,
             @NonNull SecureWindowCallback secureWindowCallback,
+            @NonNull IntentListenerCallback intentListenerCallback,
             @NonNull List<String> displayCategories,
             @RecentsPolicy int defaultRecentsPolicy) {
         super();
@@ -182,6 +193,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         mActivityListener = activityListener;
         mPipBlockedCallback = pipBlockedCallback;
         mSecureWindowCallback = secureWindowCallback;
+        mIntentListenerCallback = intentListenerCallback;
         mDisplayCategories = displayCategories;
         mDefaultRecentsPolicy = defaultRecentsPolicy;
     }
@@ -227,8 +239,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
 
     @Override
     public boolean canActivityBeLaunched(ActivityInfo activityInfo,
-            @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
-            boolean isNewTask) {
+            Intent intent, @WindowConfiguration.WindowingMode int windowingMode,
+            int launchingFromDisplayId, boolean isNewTask) {
         if (!isWindowingModeSupported(windowingMode)) {
             return false;
         }
@@ -258,6 +270,12 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             Slog.d(TAG, "Virtual device not allowing cross task navigation of "
                     + activityComponent);
             mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
+            return false;
+        }
+
+        if (mIntentListenerCallback != null && intent != null
+                && mIntentListenerCallback.shouldInterceptIntent(intent)) {
+            Slog.d(TAG, "Virtual device has intercepted intent");
             return false;
         }
 

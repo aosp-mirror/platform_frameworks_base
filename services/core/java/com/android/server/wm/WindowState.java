@@ -61,6 +61,7 @@ import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NOT_MAGNIFIABLE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
@@ -1152,12 +1153,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mInputWindowHandle.setName(getName());
         mInputWindowHandle.setPackageName(mAttrs.packageName);
         mInputWindowHandle.setLayoutParamsType(mAttrs.type);
-        // Check private trusted overlay flag and window type to set trustedOverlay variable of
-        // input window handle.
-        mInputWindowHandle.setTrustedOverlay(
-                ((mAttrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0
-                        && mOwnerCanAddInternalSystemWindow)
-                        || InputMonitor.isTrustedOverlay(mAttrs.type));
+        mInputWindowHandle.setTrustedOverlay(shouldWindowHandleBeTrusted(s));
         if (DEBUG) {
             Slog.v(TAG, "Window " + this + " client=" + c.asBinder()
                             + " token=" + token + " (" + mAttrs.token + ")" + " params=" + a);
@@ -1236,6 +1232,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWpcForDisplayAreaConfigChanges = (s.mPid == MY_PID || s.mPid < 0)
                 ? null
                 : service.mAtmService.getProcessController(s.mPid, s.mUid);
+    }
+
+    boolean shouldWindowHandleBeTrusted(Session s) {
+        return InputMonitor.isTrustedOverlay(mAttrs.type)
+                || ((mAttrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0
+                        && s.mCanAddInternalSystemWindow)
+                || ((mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY) != 0
+                        && s.mCanCreateSystemApplicationOverlay);
     }
 
     int getTouchOcclusionMode() {

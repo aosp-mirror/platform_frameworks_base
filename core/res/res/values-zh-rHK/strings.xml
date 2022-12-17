@@ -43,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"您輸入的 PIN 碼不符。"</string>
     <string name="invalidPin" msgid="7542498253319440408">"請輸入一個 4 至 8 位數的 PIN。"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"輸入 8 位數以上的 PUK。"</string>
-    <string name="needPuk" msgid="7321876090152422918">"您的 SIM 卡已鎖定 PUK，請輸入 PUK 碼以解除鎖定。"</string>
-    <string name="needPuk2" msgid="7032612093451537186">"輸入 PUK2 為 SIM 卡解除封鎖。"</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"操作失敗，請啟用「SIM/RUIM 鎖定」。"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">您還有 <xliff:g id="NUMBER_1">%d</xliff:g> 次機會輸入。如果仍然輸入錯誤，SIM 卡將會被鎖定。</item>
@@ -390,6 +392,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"此應用程式可在背景中執行，這可能會加速耗電。"</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"在背景中使用數據"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"此應用程式可在背景中使用數據，這可能會增加數據用量。"</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"排定精準時間的動作"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"此應用程式可以預先安排系統在指定的未來時間執行工作。這也表示，即使您沒有積極使用裝置，應用程式仍可運作。"</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"預先安排鬧鐘或活動提醒"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"此應用程式可以預先安排鬧鐘和提醒等動作，讓系統在指定的未來時間發出通知。"</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"一律執行應用程式"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"允許應用程式設定本身的某些部分持續佔用記憶體。這樣可能會限制其他應用程式可用的記憶體，並拖慢平板電腦的運作速度。"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"允許應用程式的部分功能持續佔用記憶體。這樣可能會限制其他應用程式的可用記憶體，並拖慢 Android TV 裝置的運行速度。"</string>
@@ -418,6 +424,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"允許應用程式配搭「remoteMessaging」類型使用前景服務"</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"配搭「systemExempted」類型執行前景服務"</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"允許應用程式配搭「systemExempted」類型使用前景服務"</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"配搭「fileManagement」類型執行前景服務"</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"允許應用程式配搭「fileManagement」類型使用前景服務"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"配搭「specialUse」類型執行前景服務"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"允許應用程式配搭「specialUse」類型使用前景服務"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"測量應用程式儲存空間"</string>
@@ -676,9 +684,9 @@
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"請重新註冊面孔。"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"無法辨識面孔，請再試一次。"</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"請稍為轉換頭部的位置"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"請正面望向手機"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"請正面望向手機"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"請正面望向手機"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"正面望向手機"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"正面望向手機"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"正面望向手機"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"移開遮住面孔的任何物件。"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"請清理螢幕頂部，包括黑色列"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
@@ -955,14 +963,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"再試一次"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"解鎖即可使用所有功能和資料"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"已超過面孔解鎖嘗試次數上限"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"找不到 SIM 卡"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"平板電腦中沒有 SIM 卡。"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Android TV 裝置中沒有 SIM 卡。"</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"手機中沒有 SIM 卡。"</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"請插入 SIM 卡。"</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"找不到 SIM 卡或無法讀取 SIM 卡，請插入 SIM 卡。"</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"SIM 卡無法使用。"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"您的 SIM 卡已被永久停用。\n請與您的無線服務供應商聯絡，以取得另一張 SIM 卡。"</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"上一首曲目"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"下一首曲目"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"暫停"</string>
@@ -972,10 +988,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"向前快轉"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"只可撥打緊急電話"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"網絡已鎖定"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM 卡處於 PUK 鎖定狀態。"</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"請參閱使用者指南或與客戶服務中心聯絡。"</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM 卡處於鎖定狀態。"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"正在解除 SIM 卡鎖定..."</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"您已輸入錯誤的密碼 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"您已輸入錯誤的 PIN 碼 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
@@ -1359,10 +1378,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"您日後可以在 [設定] &gt; [應用程式] 中更改這項設定"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"一律允許"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"絕不允許"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"SIM 卡已移除"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"您必須先以插入有效的 SIM 卡來重新啟動手機，才能使用流動網絡。"</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"完成"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"SIM 卡已新增"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"重新啟動裝置，才能使用流動網絡。"</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"重新啟動"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"啟動流動服務"</string>
@@ -1674,7 +1696,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM 卡現已停用，請輸入 PUK 碼以繼續。詳情請與流動網絡供應商聯絡。"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"輸入所需的 PIN 碼"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"確認所需的 PIN 碼"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"正在解開上鎖的 SIM 卡..."</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"PIN 碼不正確。"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"請輸入一個 4 至 8 位數的 PIN 碼。"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK 碼應由 8 位數字組成。"</string>
@@ -1731,7 +1754,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"關閉快速鍵"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"使用快速鍵"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"色彩反轉"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"色彩校正"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"單手模式"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"超暗"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"已按住音量鍵。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> 已開啟。"</string>
@@ -2320,4 +2344,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"串流期間無法查看畫中畫"</string>
     <string name="system_locale_title" msgid="711882686834677268">"系統預設"</string>
     <string name="default_card_name" msgid="9198284935962911468">"SIM 卡 <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"用於管理手錶的隨附手錶設定檔權限"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"允許隨附應用程式管理手錶。"</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"觀測隨附裝置是否存在"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"允許隨附應用程式觀察附近或遠處是否有隨附裝置出現。"</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"傳送隨附訊息"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"允許隨附應用程式傳送隨附訊息至其他裝置。"</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"從背景啟動前景服務"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"允許隨附應用程式從背景啟動前景服務。"</string>
 </resources>

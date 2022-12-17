@@ -38,6 +38,7 @@ import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -98,12 +99,25 @@ public class TaskFragmentTest extends WindowTestsBase {
     }
 
     @Test
-    public void testOnConfigurationChanged_updateSurface() {
-        final Rect bounds = new Rect(100, 100, 1100, 1100);
+    public void testOnConfigurationChanged() {
+        final Configuration parentConfig = mTaskFragment.getParent().getConfiguration();
+        final Rect parentBounds = parentConfig.windowConfiguration.getBounds();
+        parentConfig.smallestScreenWidthDp += 10;
+        final int parentSw = parentConfig.smallestScreenWidthDp;
+        final Rect bounds = new Rect(parentBounds);
+        bounds.inset(100, 100);
         mTaskFragment.setBounds(bounds);
+        mTaskFragment.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        // Calculate its own sw with smaller bounds in multi-window mode.
+        assertNotEquals(parentSw, mTaskFragment.getConfiguration().smallestScreenWidthDp);
 
-        verify(mTransaction).setPosition(mLeash, 100, 100);
-        verify(mTransaction).setWindowCrop(mLeash, 1000, 1000);
+        verify(mTransaction).setPosition(mLeash, bounds.left, bounds.top);
+        verify(mTransaction).setWindowCrop(mLeash, bounds.width(), bounds.height());
+
+        mTaskFragment.setBounds(parentBounds);
+        mTaskFragment.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        // Inherit parent's sw in fullscreen mode.
+        assertEquals(parentSw, mTaskFragment.getConfiguration().smallestScreenWidthDp);
     }
 
     @Test

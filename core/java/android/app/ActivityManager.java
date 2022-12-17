@@ -5310,6 +5310,9 @@ public class ActivityManager {
      * <p> When {@code delayedDurationMs} is {@code 0}, it will clears any previously
      * set forced delays.
      *
+     * <p><b>Note: This method is only intended for testing and it only
+     * works for packages that are already running.
+     *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.DUMP)

@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"दूसरी जगह पर सेव करें"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"दूसरे डिवाइस का इस्तेमाल करें"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"दूसरे डिवाइस पर सेव करें"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"पासकी के साथ सुरक्षित रहें"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"जटिल पासवर्ड बनाने या याद रखने की कोई ज़रूरत नहीं है"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"यूनीक पासकी बनाने के लिए, अपने फ़िंगरप्रिंट, चेहरे या स्क्रीन लॉक का इस्तेमाल करें"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"पासकी, पासवर्ड मैनेजर में सेव की जाती हैं, ताकि आप अन्य डिवाइसों में साइन इन कर सकें"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"चुनें कि <xliff:g id="CREATETYPES">%1$s</xliff:g> कहां पर सेव करना है"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"अपनी पासकी बनाएं"</string>
     <string name="save_your_password" msgid="6597736507991704307">"अपना पासवर्ड सेव करें"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"दूसरे पासवर्ड मैनेजर"</string>
     <string name="close_sheet" msgid="1393792015338908262">"शीट बंद करें"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"पिछले पेज पर वापस जाएं"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"क्या आपको <xliff:g id="APP_NAME">%1$s</xliff:g> पर साइन इन करने के लिए, सेव की गई पासकी का इस्तेमाल करना है?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"क्या आपको <xliff:g id="APP_NAME">%1$s</xliff:g> पर साइन इन करने के लिए, सेव की गई जानकारी का इस्तेमाल करना है?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर साइन इन करने के लिए, सेव की गई जानकारी में से चुनें"</string>

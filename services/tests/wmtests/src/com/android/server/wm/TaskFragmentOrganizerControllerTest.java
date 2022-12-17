@@ -254,6 +254,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onTaskFragmentVanished(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
+        assertTrue(mTaskFragment.mTaskFragmentVanishedSent);
         assertTaskFragmentVanishedTransaction();
     }
 
@@ -266,10 +267,12 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onTaskFragmentVanished(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
+        assertTrue(mTaskFragment.mTaskFragmentVanishedSent);
         assertTaskFragmentVanishedTransaction();
 
         // Not trigger onTaskFragmentInfoChanged.
         // Call onTaskFragmentAppeared before calling onTaskFragmentInfoChanged.
+        mTaskFragment.mTaskFragmentVanishedSent = false;
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
         clearInvocations(mOrganizer);

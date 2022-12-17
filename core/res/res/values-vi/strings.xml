@@ -43,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Mã PIN bạn đã nhập không khớp."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Nhập mã PIN có từ 4 đến 8 số."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Nhập PUK có từ 8 số trở lên."</string>
-    <string name="needPuk" msgid="7321876090152422918">"Thẻ SIM của bạn đã bị khóa PUK. Nhập mã PUK để mở khóa thẻ SIM đó."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"Nhập mã PUK2 để bỏ chặn thẻ SIM."</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"Không thành công, kích hoạt tính năng khóa SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">Bạn còn <xliff:g id="NUMBER_1">%d</xliff:g> lần thử trước khi SIM bị khóa.</item>
@@ -390,6 +392,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Ứng dụng này có thể chạy trong nền. Việc này có thể tiêu hao pin nhanh hơn."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"sử dụng dữ liệu trong nền"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Ứng dụng này có thể sử dụng dữ liệu trong nền. Việc này có thể tăng mức sử dụng dữ liệu."</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"Lên lịch cho các hành động được xác định thời gian chính xác"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Ứng dụng này có thể lên lịch thực hiện công việc vào một thời điểm mong muốn trong tương lai. Điều này cũng đồng nghĩa với việc ứng dụng có thể chạy khi bạn không chủ động sử dụng thiết bị."</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"Lên lịch cho chuông báo hoặc lời nhắc sự kiện"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Ứng dụng này có thể lên lịch cho các hành động như thông báo cho bạn bằng chuông báo và lời nhắc vào một thời điểm mong muốn trong tương lai."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"đặt ứng dụng luôn chạy"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Cho phép ứng dụng tạo sự đồng nhất cho các phần của mình trong bộ nhớ. Việc này có thể hạn chế bộ nhớ đối với các ứng dụng khác đang làm chậm máy tính bảng."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Cho phép ứng dụng tạo sự ổn định cho các phần của chính ứng dụng trong bộ nhớ. Quyền này có thể giới hạn bộ nhớ còn trống ở các ứng dụng khác đang làm chậm thiết bị Android TV."</string>
@@ -418,6 +424,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Cho phép ứng dụng dùng các dịch vụ trên nền trước thuộc loại \"remoteMessaging\""</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"chạy dịch vụ trên nền trước thuộc loại \"systemExempted\""</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Cho phép ứng dụng dùng các dịch vụ trên nền trước thuộc loại \"systemExempted\""</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"chạy dịch vụ trên nền trước thuộc loại \"fileManagement\""</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Cho phép ứng dụng dùng các dịch vụ trên nền trước thuộc loại \"fileManagement\""</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"chạy dịch vụ trên nền trước thuộc loại \"specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Cho phép ứng dụng dùng các dịch vụ trên nền trước thuộc loại \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"đo dung lượng lưu trữ ứng dụng"</string>
@@ -955,14 +963,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Thử lại"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Mở khóa đối với tất cả các tính năng và dữ liệu"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Đã vượt quá số lần Mở khóa bằng khuôn mặt tối đa"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Không có thẻ SIM nào"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Không có thẻ SIM nào trong máy tính bảng."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Thiết bị Android TV không có thẻ SIM."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Không có thẻ SIM nào trong điện thoại."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Hãy lắp thẻ SIM."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"Thẻ SIM bị thiếu hoặc không thể đọc được. Vui lòng lắp thẻ SIM."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Thẻ SIM không sử dụng được."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Thẻ SIM của bạn đã bị vô hiệu hóa vĩnh viễn .\n Hãy liên hệ với nhà cung cấp dịch vụ không dây của bạn để lấy thẻ SIM khác."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Bản nhạc trước"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Bản nhạc tiếp theo"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Tạm dừng"</string>
@@ -972,10 +988,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Tua đi"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Chỉ cuộc gọi khẩn cấp"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Mạng đã khóa"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"Thẻ SIM đã bị khóa PUK."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Vui lòng xem Hướng dẫn người dùng hoặc liên hệ với Bộ phận chăm sóc khách hàng."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"Thẻ SIM đã bị khóa."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Đang mở khóa thẻ SIM…"</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Bạn đã <xliff:g id="NUMBER_0">%1$d</xliff:g> lần vẽ không chính xác hình mở khóa. \n\nVui lòng thử lại sau <xliff:g id="NUMBER_1">%2$d</xliff:g> giây."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Bạn đã <xliff:g id="NUMBER_0">%1$d</xliff:g> lần nhập sai mật khẩu. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%2$d</xliff:g> giây."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Bạn đã nhập sai mã PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> lần. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%2$d</xliff:g> giây."</string>
@@ -1359,10 +1378,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Bạn có thể thay đổi cài đặt này sau trong Cài đặt &gt; Ứng dụng"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Luôn cho phép"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Không bao giờ cho phép"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"Đã xóa thẻ SIM"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"Mạng di động sẽ không khả dụng cho đến khi bạn khởi động lại với thẻ SIM hợp lệ được lắp."</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"Xong"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"Đã thêm thẻ SIM"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"Khởi động lại thiết bị của bạn để truy cập mạng di động."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Khởi động lại"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Kích hoạt dịch vụ di động"</string>
@@ -1674,7 +1696,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM hiện bị vô hiệu hóa. Nhập mã PUK để tiếp tục. Liên hệ với nhà cung cấp dịch vụ để biết chi tiết."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Nhập mã PIN mong muốn"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Xác nhận mã PIN mong muốn"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Đang mở khóa thẻ SIM…"</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Mã PIN không chính xác."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Nhập mã PIN có từ 4 đến 8 số."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"Mã PUK phải có 8 số."</string>
@@ -1731,7 +1754,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Tắt phím tắt"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Sử dụng phím tắt"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Đảo màu"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Chỉnh màu"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Chế độ một tay"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Siêu tối"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã bật."</string>
@@ -2320,4 +2344,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"Không thể xem video ở chế độ hình trong hình khi đang truyền trực tuyến"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Theo chế độ mặc định của hệ thống"</string>
     <string name="default_card_name" msgid="9198284935962911468">"THẺ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Quyền sử dụng hồ sơ Đồng hồ của ứng dụng đồng hành để quản lý các đồng hồ"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"Cho phép một ứng dụng đồng hành quản lý các đồng hồ."</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"Phát hiện thiết bị đồng hành"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"Cho phép một ứng dụng đồng hành phát hiện thiết bị đồng hành khi các thiết bị ở gần hoặc ở xa."</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"Gửi thông báo đồng hành"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"Cho phép một ứng dụng đồng hành gửi thông báo đồng hành đến các thiết bị khác."</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"Bắt đầu các dịch vụ trên nền trước từ nền"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Cho phép một ứng dụng đồng hành bắt đầu các dịch vụ trên nền trước từ nền."</string>
 </resources>

@@ -2179,10 +2179,10 @@ public class QuotaControllerTest {
             mQuotaController.incrementJobCountLocked(SOURCE_USER_ID, SOURCE_PACKAGE, jobCount);
             assertFalse(mQuotaController
                     .isWithinQuotaLocked(SOURCE_USER_ID, SOURCE_PACKAGE, WORKING_INDEX));
-            doReturn(false).when(job).shouldTreatAsUserInitiated();
+            doReturn(false).when(job).shouldTreatAsUserInitiatedJob();
             assertFalse(mQuotaController.isWithinQuotaLocked(job));
             // User-initiated job should still be allowed.
-            doReturn(true).when(job).shouldTreatAsUserInitiated();
+            doReturn(true).when(job).shouldTreatAsUserInitiatedJob();
             assertTrue(mQuotaController.isWithinQuotaLocked(job));
         }
     }

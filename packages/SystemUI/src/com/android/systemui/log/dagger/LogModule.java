@@ -123,7 +123,7 @@ public class LogModule {
     @SysUISingleton
     @QSLog
     public static LogBuffer provideQuickSettingsLogBuffer(LogBufferFactory factory) {
-        return factory.create("QSLog", 500 /* maxSize */, false /* systrace */);
+        return factory.create("QSLog", 700 /* maxSize */, false /* systrace */);
     }
 
     /** Provides a logging buffer for {@link com.android.systemui.broadcast.BroadcastDispatcher} */

@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"மற்றொரு இடத்தில் சேமிக்கவும்"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"மற்றொரு சாதனத்தைப் பயன்படுத்தவும்"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"வேறொரு சாதனத்தில் சேமியுங்கள்"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"கடவுச்சாவிகள் மூலம் பாதுகாப்பாக வைத்திருங்கள்"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"கடினமான கடவுச்சொற்களை உருவாக்கவோ நினைவில்கொள்ளவோ தேவையில்லை"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"தனித்துவமான கடவுச்சாவியை உருவாக்க உங்கள் கைரேகை, முகம் அல்லது திரைப் பூட்டைப் பயன்படுத்தவும்"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Password Managerரில் கடவுச்சாவிகள் சேமிக்கப்பட்டுள்ளன, எனவே மற்றொரு சாதனத்தில் உள்நுழையவும்"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> எங்கே காட்டப்பட வேண்டும் என்பதைத் தேர்வுசெய்தல்"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"உங்கள் கடவுச்சாவிகளை உருவாக்குங்கள்"</string>
     <string name="save_your_password" msgid="6597736507991704307">"உங்கள் கடவுச்சொல்லைச் சேமிக்கவும்"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"பிற கடவுச்சொல் நிர்வாகிகள்"</string>
     <string name="close_sheet" msgid="1393792015338908262">"ஷீட்டை மூடும்"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"முந்தைய பக்கத்திற்குச் செல்லும்"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கு ஏற்கெனவே சேமிக்கப்பட்ட கடவுக்குறியீட்டைப் பயன்படுத்தவா?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கு ஏற்கெனவே சேமிக்கப்பட்ட உள்நுழைவுத் தகவலைப் பயன்படுத்தவா?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கு ஏற்கெனவே சேமிக்கப்பட்ட உள்நுழைவுத் தகவலைத் தேர்வுசெய்யவும்"</string>

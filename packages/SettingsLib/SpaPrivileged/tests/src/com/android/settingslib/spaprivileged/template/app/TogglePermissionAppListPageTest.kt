@@ -51,50 +51,49 @@ class TogglePermissionAppListPageTest {
     private val fakeRestrictionsProvider = FakeRestrictionsProvider()
 
     @Test
-    fun internalAppListModel_whenAllowed() {
+    fun pageTitle() {
+        val listModel = TestTogglePermissionAppListModel()
+
+        composeTestRule.setContent {
+            listModel.TogglePermissionAppList(
+                permissionType = PERMISSION_TYPE,
+                restrictionsProviderFactory = { _, _ -> fakeRestrictionsProvider },
+                appList = {},
+            )
+        }
+
+        composeTestRule.onNodeWithText(context.getString(listModel.pageTitleResId))
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun summary_whenAllowed() {
         fakeRestrictionsProvider.restrictedMode = NoRestricted
         val listModel = TestTogglePermissionAppListModel(isAllowed = true)
-        val internalAppListModel = TogglePermissionInternalAppListModel(
-            context = context,
-            listModel = listModel,
-            restrictionsProviderFactory = { _, _ -> fakeRestrictionsProvider },
-        )
 
-        val summaryState = getSummary(internalAppListModel)
+        val summaryState = getSummary(listModel)
 
-        assertThat(summaryState.value).isEqualTo(
-            context.getString(R.string.app_permission_summary_allowed)
-        )
+        assertThat(summaryState.value)
+            .isEqualTo(context.getString(R.string.app_permission_summary_allowed))
     }
 
     @Test
-    fun internalAppListModel_whenNotAllowed() {
+    fun summary_whenNotAllowed() {
         fakeRestrictionsProvider.restrictedMode = NoRestricted
         val listModel = TestTogglePermissionAppListModel(isAllowed = false)
-        val internalAppListModel = TogglePermissionInternalAppListModel(
-            context = context,
-            listModel = listModel,
-            restrictionsProviderFactory = { _, _ -> fakeRestrictionsProvider },
-        )
 
-        val summaryState = getSummary(internalAppListModel)
+        val summaryState = getSummary(listModel)
 
-        assertThat(summaryState.value).isEqualTo(
-            context.getString(R.string.app_permission_summary_not_allowed)
-        )
+        assertThat(summaryState.value)
+            .isEqualTo(context.getString(R.string.app_permission_summary_not_allowed))
     }
 
     @Test
-    fun internalAppListModel_whenComputingAllowed() {
+    fun summary_whenComputingAllowed() {
         fakeRestrictionsProvider.restrictedMode = NoRestricted
         val listModel = TestTogglePermissionAppListModel(isAllowed = null)
-        val internalAppListModel = TogglePermissionInternalAppListModel(
-            context = context,
-            listModel = listModel,
-            restrictionsProviderFactory = { _, _ -> fakeRestrictionsProvider },
-        )
 
-        val summaryState = getSummary(internalAppListModel)
+        val summaryState = getSummary(listModel)
 
         assertThat(summaryState.value).isEqualTo(
             context.getString(R.string.summary_placeholder)
@@ -105,16 +104,13 @@ class TogglePermissionAppListPageTest {
     fun appListItem_onClick_navigate() {
         val listModel = TestTogglePermissionAppListModel()
         composeTestRule.setContent {
-            listModel.TogglePermissionAppList(
-                permissionType = PERMISSION_TYPE,
-                restrictionsProviderFactory = { _, _ -> fakeRestrictionsProvider },
-            ) {
-                fakeNavControllerWrapper.Wrapper {
+            fakeNavControllerWrapper.Wrapper {
+                with(createInternalAppListModel(listModel)) {
                     AppListItemModel(
                         record = listModel.transformItem(APP),
                         label = LABEL,
                         summary = stateOf(SUMMARY),
-                    ).appItem()
+                    ).AppItem()
                 }
             }
         }
@@ -149,12 +145,18 @@ class TogglePermissionAppListPageTest {
             .assertIsDisplayed()
     }
 
-    private fun getSummary(
-        internalAppListModel: TogglePermissionInternalAppListModel<TestAppRecord>,
-    ): State<String> {
+    private fun createInternalAppListModel(listModel: TestTogglePermissionAppListModel) =
+        TogglePermissionInternalAppListModel(
+            context = context,
+            permissionType = PERMISSION_TYPE,
+            listModel = listModel,
+            restrictionsProviderFactory = { _, _ -> fakeRestrictionsProvider },
+        )
+
+    private fun getSummary(listModel: TestTogglePermissionAppListModel): State<String> {
         lateinit var summary: State<String>
         composeTestRule.setContent {
-            summary = internalAppListModel.getSummary(record = TestAppRecord(APP))
+            summary = createInternalAppListModel(listModel).getSummary(record = TestAppRecord(APP))
         }
         return summary
     }

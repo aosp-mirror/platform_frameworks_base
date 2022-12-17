@@ -861,6 +861,28 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_ACTIVITY_EMBEDDING_ALLOW_SYSTEM_OVERRIDE";
 
     /**
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} that an app can specify to inform the system that the app is ActivityEmbedding
+     * split feature enabled.
+     *
+     * <p>With this property, the system could provide custom behaviors for the apps that are
+     * ActivityEmbedding split feature enabled. For example, the fixed-portrait orientation
+     * requests of the activities could be ignored by the system in order to provide seamless
+     * ActivityEmbedding split experiences while holding the large-screen devices in landscape mode.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED"
+     *     android:value="true|false"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     */
+    String PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED =
+            "android.window.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED";
+
+    /**
      * Request for keyboard shortcuts to be retrieved asynchronously.
      *
      * @param receiver The callback to be triggered when the result is ready.

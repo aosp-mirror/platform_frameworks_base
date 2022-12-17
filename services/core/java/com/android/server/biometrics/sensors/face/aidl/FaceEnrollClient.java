@@ -199,7 +199,8 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
 
         if (session.hasContextMethods()) {
             return session.getSession().enrollWithContext(
-                    hat, EnrollmentType.DEFAULT, features, mHwPreviewHandle, getOperationContext());
+                    hat, EnrollmentType.DEFAULT, features, mHwPreviewHandle,
+                    getOperationContext().toAidlContext());
         } else {
             return session.getSession().enroll(hat, EnrollmentType.DEFAULT, features,
                     mHwPreviewHandle);

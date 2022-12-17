@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"অন্য ঠাইত ছেভ কৰক"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"অন্য ডিভাইচ ব্যৱহাৰ কৰক"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"অন্য এটা ডিভাইচত ছেভ কৰক"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"পাছকীৰ জৰিয়তে অধিক সুৰক্ষিত"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"জটিল পাছৱৰ্ডসমূহ সৃষ্টি কৰিব অথবা মনত ৰাখিব নালাগে"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"এটা ব্যতিক্ৰমী পাছকী সৃষ্টি কৰিবলৈ আপোনাৰ ফিংগাৰপ্ৰিণ্ট, মুখাৱয়ব অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰক।"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"পাছকীসমূহ এটা পাছৱৰ্ড পৰিচালকত ছেভ কৰা হয়. যাতে আপুনি অন্য ডিভাইচসমূহত ছাইন ইন কৰিব পাৰে।"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"ক’ত <xliff:g id="CREATETYPES">%1$s</xliff:g> সেয়া বাছনি কৰক"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"আপোনাৰ পাছকী সৃষ্টি কৰক"</string>
     <string name="save_your_password" msgid="6597736507991704307">"আপোনাৰ পাছৱৰ্ড ছেভ কৰক"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"অন্য পাছৱৰ্ড পৰিচালক"</string>
     <string name="close_sheet" msgid="1393792015338908262">"শ্বীট বন্ধ কৰক"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"পূৰ্বৱৰ্তী পৃষ্ঠালৈ ঘূৰি যাওক"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে আপোনাৰ ছেভ হৈ থকা পাছকী ব্যৱহাৰ কৰিবনে?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে আপোনাৰ ছেভ হৈ থকা ছাইন ইন তথ্য ব্যৱহাৰ কৰিবনে?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছেভ হৈ থকা এটা ছাইন ইন বাছনি কৰক"</string>

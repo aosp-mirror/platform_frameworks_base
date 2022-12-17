@@ -72,6 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock की सुविधा बंद कर दी गई है"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"एक इमेज भेजी गई"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"स्क्रीनशॉट, वर्क प्रोफ़ाइल में सेव किया जा रहा है…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"स्क्रीनशॉट सेव किया गया"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"स्क्रीनशॉट सेव नहीं किया जा सका"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"स्क्रीनशॉट सेव करने के लिए डिवाइस का अनलॉक होना ज़रूरी है"</string>
@@ -125,8 +126,7 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"आवाज़ से डिवाइस का इस्तेमाल"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"क्यूआर कोड स्कैनर"</string>
-    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
-    <skip />
+    <string name="accessibility_unlock_button" msgid="3613812140816244310">"अनलॉक है"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"डिवाइस लॉक है"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"डिवाइस अनलॉक करने के लिए चेहरा स्कैन किया जाता है"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"भेजें"</string>
@@ -169,8 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"चेहरे की पहचान नहीं हुई"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"फ़िंगरप्रिंट इस्तेमाल करें"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
-    <skip />
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"फ़ेस अनलॉक की सुविधा उपलब्ध नहीं है"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ब्लूटूथ कनेक्ट किया गया."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"इस बारे में जानकारी नहीं है कि अभी बैटरी कितने प्रतिशत चार्ज है."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> से कनेक्ट किया गया."</string>
@@ -181,12 +180,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"हवाई जहाज़ मोड."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN चालू."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> प्रति‍शत बैटरी."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> प्रतिशत बैटरी बची है और आपके इस्तेमाल के हिसाब से यह <xliff:g id="TIME">%2$s</xliff:g> में खत्म हो जाएगी"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"बैटरी <xliff:g id="PERCENTAGE">%1$d</xliff:g> प्रतिशत चार्ज है, जो कि <xliff:g id="TIME">%2$s</xliff:g> चल जाएगी"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"बैटरी चार्ज हो रही है, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> प्रतिशत."</string>
-    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
-    <skip />
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"बैटरी <xliff:g id="PERCENTAGE">%d</xliff:g> प्रतिशत चार्ज हुई. बैटरी खराब होने से बचाने के लिए, चार्जिंग रोक दी गई है."</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"बैटरी <xliff:g id="PERCENTAGE">%1$d</xliff:g> प्रतिशत चार्ज हुई, जो कि <xliff:g id="TIME">%2$s</xliff:g> चल जाएगी. बैटरी खराब होने से बचाने के लिए, चार्जिंग रोक दी गई है."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"पूरी सूचनाएं देखें"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"टेलीटाइपराइटर सक्षम."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"रिंगर कंपन (वाइब्रेशन)."</string>
@@ -320,7 +317,8 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"कैमरे का ऐक्सेस, सभी ऐप्लिकेशन और सेवाओं के लिए चालू किया गया."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"सभी ऐप्लिकेशन और सेवाओं के लिए कैमरे का ऐक्सेस बंद किया गया."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"माइक्रोफ़ोन बटन का इस्तेमाल करने के लिए, सेटिंग में जाकर माइक्रोफ़ोन का ऐक्सेस चालू करें."</string>
-    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"सेटिंग खोलें."</string>
+    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
+    <skip />
     <string name="media_seamless_other_device" msgid="4654849800789196737">"अन्य डिवाइस"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"खास जानकारी टॉगल करें"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"आपको अलार्म, रिमाइंडर, इवेंट और चुनिंदा कॉल करने वालों के अलावा किसी और तरह से (आवाज़ करके और थरथरा कर ) परेशान नहीं किया जाएगा. आप फिर भी संगीत, वीडियो और गेम सहित अपना चुना हुआ सब कुछ सुन सकते हैं."</string>
@@ -407,6 +405,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'परेशान न करें\' सुविधा के ज़रिए कुछ समय के लिए सूचनाएं दिखाना रोक दिया गया है"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"अभी शुरू करें"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"कोई सूचना नहीं है"</string>
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"कोई नई सूचना नहीं है"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"पुरानी सूचाएं देखने के लिए अनलॉक करें"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"इस डिवाइस का प्रबंधन आपके अभिभावक करते हैं"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है. आपका संगठन, नेटवर्क के ट्रैफ़िक की निगरानी कर सकता है"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"इस डिवाइस का मालिकाना हक <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> के पास है. आपका संगठन, नेटवर्क के ट्रैफ़िक की निगरानी कर सकता है"</string>
@@ -511,8 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"इस्तेमाल करने के लिए, डिवाइस अनलॉक करें"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"आपके कार्ड की जानकारी पाने में कोई समस्या हुई है. कृपया बाद में कोशिश करें"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"लॉक स्क्रीन की सेटिंग"</string>
-    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"क्यूआर कोड स्कैनर"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"अपडेट हो रहा है"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"वर्क प्रोफ़ाइल"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"हवाई जहाज़ मोड"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"आपको <xliff:g id="WHEN">%1$s</xliff:g> पर अपना अगला अलार्म नहीं सुनाई देगा"</string>
@@ -795,8 +795,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"फ़ुल स्क्रीन को ज़ूम करें"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रीन के किसी हिस्से को ज़ूम करें"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"स्विच"</string>
-    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
-    <skip />
+    <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"साइज़ बदलने के लिए, कोने को खींचें और छोड़ें"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"तिरछी दिशा में स्क्रोल करने की अनुमति दें"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"साइज़ बदलें"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"ज़ूम करने की सुविधा का टाइप बदलें"</string>
@@ -905,6 +904,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"कास्टिंग करना रोकें"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ऑडियो आउटपुट के लिए उपलब्ध डिवाइस."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"वॉल्यूम"</string>
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ब्रॉडकास्ट करने की सुविधा कैसे काम करती है"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ब्रॉडकास्ट करें"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"आपके आस-पास मौजूद लोग, ब्रॉडकास्ट किए जा रहे मीडिया को सुन सकते हैं. हालांकि, इसके लिए उनके पास ऐसे ब्लूटूथ डिवाइस होने चाहिए जिन पर मीडिया चलाया जा सके"</string>
@@ -1018,17 +1018,34 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"कैमरा और माइक बंद हैं"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# सूचना}one{# सूचना}other{# सूचनाएं}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="note_task_button_label" msgid="8718616095800343136">"नोट बनाएं"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ब्रॉडकास्ट ऐप्लिकेशन"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर ब्रॉडकास्ट करना रोकें?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> पर ब्रॉडकास्ट शुरू करने पर या आउटपुट बदलने पर, आपका मौजूदा ब्रॉडकास्ट बंद हो जाएगा"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> पर ब्रॉडकास्ट करें"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"आउटपुट बदलें"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"कोई जानकारी नहीं"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"क्या <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> को डिवाइस लॉग का ऐक्सेस देना है?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"एक बार ऐक्सेस करने की अनुमति दें"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"अनुमति न दें"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"डिवाइस लॉग में आपके डिवाइस पर की गई कार्रवाइयां रिकॉर्ड होती हैं. ऐप्लिकेशन, इन लॉग का इस्तेमाल गड़बड़ियां ढूंढने और उन्हें सही करने के लिए करता है.\n\nकुछ लॉग में संवेदनशील जानकारी हो सकती है. इसलिए, सिर्फ़ भरोसेमंद ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस दें. \n\nअगर इस ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस नहीं दिया जाता है, तब भी यह डिवाइस पर मौजूद अपने लॉग ऐक्सेस कर सकता है. डिवाइस को बनाने वाली कंपनी अब भी डिवाइस के कुछ लॉग या जानकारी को ऐक्सेस कर सकती है."</string>
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> खोलें"</string>
+    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"<xliff:g id="APPNAME">%1$s</xliff:g> ऐप्लिकेशन को शॉर्टकट के तौर पर जोड़ने के लिए, पक्का करें कि"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• ऐप्लिकेशन को सेट अप किया गया है"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet में कम से कम एक कार्ड जोड़ा गया है"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• कैमरा ऐप्लिकेशन इंस्टॉल किया गया है"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ऐप्लिकेशन को सेट अप किया गया है"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• कम से कम एक डिवाइस उपलब्ध है"</string>
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"रद्द करें"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"कैमरा अभी स्विच करें"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"बेहतर सेल्फ़ी के लिए फ़ोन को अनफ़ोल्ड करें"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"बेहतर सेल्फ़ी के लिए फ़्रंट डिसप्ले पर स्विच करें?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"वाइड ऐंगल में हाई रिज़ॉल्यूशन वाली फ़ोटो लेने के लिए, पीछे का कैमरा इस्तेमाल करें."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ यह स्क्रीन बंद हो जाएगी"</b></string>
+    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
+    <skip />
+    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <skip />
 </resources>

@@ -8,14 +8,10 @@
     <string name="string_save_to_another_place" msgid="7590325934591079193">"ບັນທຶກໃສ່ບ່ອນອື່ນ"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"ໃຊ້ອຸປະກອນອື່ນ"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"ບັນທຶກໃສ່ອຸປະກອນອື່ນ"</string>
-    <!-- no translation found for passkey_creation_intro_title (4251037543787718844) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_password (312712407571126228) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (691816235541508203) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (477121861162321129) -->
-    <skip />
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ປອດໄພຂຶ້ນດ້ວຍກະແຈຜ່ານ"</string>
+    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"ບໍ່ຈຳເປັນຕ້ອງສ້າງ ຫຼື ຈື່ລະຫັດຜ່ານທີ່ຊັບຊ້ອນ"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"ໃຊ້ລາຍນິ້ວມື, ໃບໜ້າ ຫຼື ລັອກໜ້າຈໍຂອງທ່ານເພື່ອສ້າງກະແຈຜ່ານທີ່ບໍ່ຊ້ຳກັນ"</string>
+    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"ກະແຈຜ່ານຖືກບັນທຶກໄວ້ຢູ່ໃນຕົວຈັດການລະຫັດຜ່ານ, ດັ່ງນັ້ນທ່ານສາມາດເຂົ້າສູ່ລະບົບຢູ່ອຸປະກອນອື່ນໆໄດ້."</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"ເລືອກບ່ອນທີ່ຈະ <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"ສ້າງກະແຈຜ່ານຂອງທ່ານ"</string>
     <string name="save_your_password" msgid="6597736507991704307">"ບັນທຶກລະຫັດຜ່ານຂອງທ່ານ"</string>
@@ -44,6 +40,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"ຕົວຈັດການລະຫັດຜ່ານອື່ນໆ"</string>
     <string name="close_sheet" msgid="1393792015338908262">"ປິດຊີດ"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"ກັບຄືນໄປຫາໜ້າກ່ອນໜ້ານີ້"</string>
+    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"ໃຊ້ກະແຈຜ່ານທີ່ບັນທຶກໄວ້ຂອງທ່ານສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"ໃຊ້ການເຂົ້າສູ່ລະບົບທີ່ບັນທຶກໄວ້ຂອງທ່ານສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"ເລືອກການເຂົ້າສູ່ລະບົບທີ່ບັນທຶກໄວ້ສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

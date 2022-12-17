@@ -148,7 +148,11 @@ object KeyguardQuickAffordanceProviderContract {
         /**
          * Flag denoting whether the customizable lock screen quick affordances feature is enabled.
          */
-        const val FLAG_NAME_FEATURE_ENABLED = "is_feature_enabled"
+        const val FLAG_NAME_CUSTOM_LOCK_SCREEN_QUICK_AFFORDANCES_ENABLED =
+            "is_custom_lock_screen_quick_affordances_feature_enabled"
+
+        /** Flag denoting whether the customizable clocks feature is enabled. */
+        const val FLAG_NAME_CUSTOM_CLOCKS_ENABLED = "is_custom_clocks_feature_enabled"
 
         object Columns {
             /** String. Unique ID for the flag. */

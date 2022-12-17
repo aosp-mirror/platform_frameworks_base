@@ -117,6 +117,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_OLD_UNSET;
@@ -930,6 +931,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // task and directly above this ActivityRecord. This field is updated whenever a new activity
     // is launched from this ActivityRecord. Touches are always allowed within the same uid.
     int mAllowedTouchUid;
+
+    // Whether the ActivityEmbedding is enabled on the app.
+    private final boolean mAppActivityEmbeddingSplitsEnabled;
 
     private final Runnable mPauseTimeoutRunnable = new Runnable() {
         @Override
@@ -2116,6 +2120,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mActivityRecordInputSink = new ActivityRecordInputSink(this, sourceRecord);
 
         updateEnterpriseThumbnailDrawable(mAtmService.getUiContext());
+
+        boolean appActivityEmbeddingEnabled = false;
+        try {
+            appActivityEmbeddingEnabled = WindowManagerService.sWindowExtensionsEnabled
+                    && mAtmService.mContext.getPackageManager()
+                            .getProperty(PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED, packageName)
+                            .getBoolean();
+        } catch (PackageManager.NameNotFoundException e) {
+            // No such property name.
+        }
+        mAppActivityEmbeddingSplitsEnabled = appActivityEmbeddingEnabled;
     }
 
     /**
@@ -7720,10 +7735,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // configuration. This is important to cases where activities with incompatible
         // orientations launch, or user goes back from an activity of bi-orientation to an
         // activity with specified orientation.
-        if (getRequestedOrientation() == SCREEN_ORIENTATION_UNSET) {
-            return;
-        }
-
         if (onDescendantOrientationChanged(this)) {
             // WM Shell can show additional UI elements, e.g. a restart button for size compat mode
             // so ensure that WM Shell is called when an activity becomes visible.
@@ -7732,11 +7743,32 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
+     * Ignores the activity orientation request if the App is fixed-orientation portrait and has
+     * ActivityEmbedding enabled and is currently running on large screen display. Or the display
+     * could be rotated to portrait and not having large enough width for app to split.
+     */
+    @VisibleForTesting
+    boolean shouldIgnoreOrientationRequests() {
+        if (!mAppActivityEmbeddingSplitsEnabled
+                || !ActivityInfo.isFixedOrientationPortrait(mOrientation)
+                || task.inMultiWindowMode()) {
+            return false;
+        }
+
+        return getTask().getConfiguration().smallestScreenWidthDp
+                >= mAtmService.mLargeScreenSmallestScreenWidthDp;
+    }
+
+    /**
      * We override because this class doesn't want its children affecting its reported orientation
      * in anyway.
      */
     @Override
     int getOrientation(int candidate) {
+        if (shouldIgnoreOrientationRequests()) {
+            return SCREEN_ORIENTATION_UNSET;
+        }
+
         if (candidate == SCREEN_ORIENTATION_BEHIND) {
             // Allow app to specify orientation regardless of its visibility state if the current
             // candidate want us to use orientation behind. I.e. the visible app on-top of this one
@@ -8274,6 +8306,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return orientationRespectedWithInsets;
     }
 
+    @Override
+    boolean handlesOrientationChangeFromDescendant(int orientation) {
+        if (shouldIgnoreOrientationRequests()) {
+            return false;
+        }
+        return super.handlesOrientationChangeFromDescendant(orientation);
+    }
+
     /**
      * Computes bounds (letterbox or pillarbox) when either:
      * 1. The parent doesn't handle the orientation change and the requested orientation is
@@ -8293,7 +8333,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If orientation is respected when insets are applied, then stableBounds will be empty.
         boolean orientationRespectedWithInsets =
                 orientationRespectedWithInsets(parentBounds, stableBounds);
-        if (handlesOrientationChangeFromDescendant() && orientationRespectedWithInsets) {
+        if (orientationRespectedWithInsets
+                && handlesOrientationChangeFromDescendant(mOrientation)) {
             // No need to letterbox because of fixed orientation. Display will handle
             // fixed-orientation requests and a display rotation is enough to respect requested
             // orientation with insets applied.

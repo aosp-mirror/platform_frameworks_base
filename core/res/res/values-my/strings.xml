@@ -43,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"သင် ရိုက်ထည့်ခဲ့သည့် PIN များ မတိုက်ဆိုင်ပါ။"</string>
     <string name="invalidPin" msgid="7542498253319440408">"နံပါတ်(၄)ခုမှ(၈)ခုအထိပါရှိသော ပင်နံပါတ်အားထည့်ပါ"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"နံပါတ်(၈)ခုသို့မဟုတ် ထိုထက်ရှည်သောသော PUKအားထည့်သွင်းပါ"</string>
-    <string name="needPuk" msgid="7321876090152422918">"ဆင်းမ်ကတ် ရဲ့ ပင်နံပါတ် ပြန်ဖွင့်သည့် ကုဒ် သော့ကျနေပါသည်။ ဖွင့်ရန် ကုဒ်အားထည့်သွင်းပါ။"</string>
-    <string name="needPuk2" msgid="7032612093451537186">"ဆင်းမ်ကတ်အားမပိတ်ရန် PUK2 အားထည့်သွင်းပါ"</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"မအောင်မြင်ပါ, SIM/RUIM သော့ကို အရင် သုံးခွင့်ပြုရန်"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">ဆင်းမ်ကတ် သော့မချခင် သင့်တွင် <xliff:g id="NUMBER_1">%d</xliff:g> ခါ ကြိုးစားခွင့်များကျန်ပါသေးသည်။</item>
@@ -390,6 +392,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"ဤအက်ပ်သည် နောက်ခံတွင် ပွင့်နေနိုင်သောကြောင့် ဘက်ထရီအကုန် မြန်စေနိုင်ပါသည်။"</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"နောက်ခံတွင် ဒေတာအသုံးပြုရန်"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"ဤအက်ပ်သည် နောက်ခံတွင် ဒေတာအသုံးပြုနေနိုင်သောကြောင့် ဒေတာအသုံးပြုမှု များစေနိုင်ပါသည်။"</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"အချိန်အတိအကျ ပြုလုပ်ထားသော လုပ်ဆောင်ချက်များ စီစဉ်ခြင်း"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"လာမည့် နှစ်သက်ရာအချိန်တွင် အလုပ်လုပ်ဆောင်ရန် ဤအက်ပ်က စီစဉ်နိုင်သည်။ စက်ကို လက်ရှိအသုံးပြုသည်ဖြစ်စေ၊ မပြုသည်ဖြစ်စေ အက်ပ်က စီမံဆောင်ရွက်နိုင်သည်ဟုလည်း ဆိုလိုသည်။"</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"နှိုးစက် (သို့) အစီအစဉ်သတိပေးချက်များ စီစဉ်ခြင်း"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"လာမည့် နှစ်သက်ရာအချိန်တွင် သင့်အားသတိပေးရန် နှိုးစက်နှင့် သတိပေးချက်များကဲ့သို့ လုပ်ဆောင်ချက်များကို ဤအက်ပ်က စီစဉ်နိုင်သည်။"</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"အက်ပ်ကို အမြဲတမ်း အလုပ်လုပ်စေခြင်း"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"အပလီကေးရှင်းအား မှတ်ဉာဏ်ထဲတွင် ရေရှည်သိမ်းဆည်ထားရန် ခွင့်ပြုပါ။ ဒီခွင့်ပြုချက်ကြောင့် တခြားအပလီကေးရှင်းအများအတွက် မှတ်ဉာဏ်ရရှိမှု နည်းသွားနိုင်ပြီး တက်ဘလက်လည်း နှေးသွားနိုင်ပါသည်။"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"အက်ပ်၏ တစ်စိတ်တစ်ပိုင်းကို မှတ်ဉာဏ်တွင် အမြဲရှိနေခွင့် ပြုသည်။ ၎င်းသည် အခြားအက်ပ်များအတွက် မှတ်ဉာဏ်ရနိုင်မှုကို ကန့်သတ်ထားနိုင်ပြီး သင့် Android TV ကို နှေးကွေးစေနိုင်သည်။"</string>
@@ -418,6 +424,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"\"remoteMessaging\" အမျိုးအစား မျက်နှာစာဝန်ဆောင်မှုများအား အကျိုးရှိရှိ အသုံးပြုနိုင်ရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"\"systemExempted\" အမျိုးအစား မျက်နှာစာဝန်ဆောင်မှု လုပ်ဆောင်ခြင်း"</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"\"systemExempted\" အမျိုးအစား မျက်နှာစာဝန်ဆောင်မှုများအား အကျိုးရှိရှိ အသုံးပြုနိုင်ရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"“fileManagement” အမျိုးအစား မျက်နှာစာဝန်ဆောင်မှု လုပ်ဆောင်ခြင်း"</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"“\"fileManagement” အမျိုးအစား မျက်နှာစာဝန်ဆောင်မှုများအား အကျိုးရှိရှိ အသုံးပြုနိုင်ရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"specialUse\" အမျိုးအစား မျက်နှာစာဝန်ဆောင်မှု လုပ်ဆောင်ခြင်း"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"\"specialUse\" အမျိုးအစား မျက်နှာစာဝန်ဆောင်မှုများအား အကျိုးရှိရှိ အသုံးပြုနိုင်ရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"အက်ပ်သိုလ​ှောင်မှု နေရာကို တိုင်းထွာခြင်း"</string>
@@ -955,14 +963,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"ထပ် စမ်းပါ"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"ဝန်ဆောင်မှုနှင့် ဒေတာအားလုံးအတွက် လော့ခ်ဖွင့်ပါ"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"မျက်မှာပြ လော့ခ်ဖွင့်ခြင်း ခွင့်ပြုသော အကြိမ်ရေထက် ကျော်လွန်သွားပါပြီ"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"ဆင်းမ်ကတ် မရှိပါ"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"တက်ဘလက်ထဲတွင်း ဆင်းမ်ကတ်မရှိပါ"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"သင့် Android TV စက်ပစ္စည်းပေါ်တွင် ဆင်းမ်ကတ်မရှိပါ။"</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"ဖုန်းထဲတွင် ဆင်းကတ်မရှိပါ"</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"ဆင်းမ်ကတ် ထည့်ပါ"</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"ဆင်းမ်ကတ် မရှိဘူး သို့မဟုတ် ဖတ်မရပါ။ ဆင်းမ်ကတ် တစ်ခုကို ထည့်ပါ။"</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"သုံး၍ မရတော့သော ဆင်းမ်ကတ်"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"သင့် ဆင်းမ်ကတ်ကို ထာဝရ ပိတ်လိုက်ပါပြီ။\n နောက် ဆင်းမ်ကတ် တစ်ခု အတွက် သင်၏ ကြိုးမဲ့ ဝန်ဆောင်မှု စီမံပေးသူကို ဆက်သွယ်ပါ"</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"ယခင် တစ်ပုဒ်"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"နောက် တစ်ပုဒ်"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"ခဏရပ်ရန်"</string>
@@ -972,10 +988,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"ရှေ့သို့ သွားရန်"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"အရေးပေါ်ခေါ်ဆိုမှုသာ"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"ကွန်ရက် သော့ကျနေခြင်း"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"ဆင်းမ်ကတ် ရဲ့ ပင်နံပါတ် ပြန်ဖွင့်သည့် ကုဒ် သော့ကျနေပါသည်"</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"သုံးစွဲသူ လမ်းညွှန်ကို ကြည့်ပါ သို့မဟုတ် ဖောက်သည်များ စောင့်ရှောက်ရေး ဌာနကို ဆက်သွယ်ပါ။"</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"ဆင်းမ်ကတ် သော့ကျနေပါသည်"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"ဆင်းမ်ကတ် ကို သော့ဖွင့်နေပါသည်"</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"သင်သည် သော့ဖွင့် ပုံစံကို<xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မမှန်မကန် ရေးဆွဲခဲ့သည်။ \n\nထပ်ပြီးတော့ <xliff:g id="NUMBER_1">%2$d</xliff:g>စက္ကန့် အကြာမှာ စမ်းကြည့်ပါ။"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"သင်သည် စကားဝှက်ကို  <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မမှန်မကန် ရိုက်ခဲ့ပြီ။ \n\n ထပ်ပြီးတော့ <xliff:g id="NUMBER_1">%2$d</xliff:g> စက္ကန့်အကြာ စမ်းကြည့်ပါ။"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"သင်သည် သင်၏ PIN <xliff:g id="NUMBER_0">%1$d</xliff:g>ကို ကြိမ် မမှန်မကန် ရိုက်ခဲ့ပြီ။ \n\n ထပ်ပြီးတော့ <xliff:g id="NUMBER_1">%2$d</xliff:g> စက္ကန့်အကြာ စမ်းကြည့်ပါ။"</string>
@@ -1359,10 +1378,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"နောင်တွင် ဆက်တင် &gt; အပလီကေးရှင်းများ မှပြောင်းနိုင်သည်"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"အမြဲခွင့်ပြုရန်"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"ဘယ်တော့မှခွင့်မပြုပါ"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"SIM ကတ်ဖယ်ရှားခြင်း"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"သတ်မှတ်ထားသောဆင်းမ်ကတ်ဖြင့် ပြန်လည်ဖွင့်သည့်အထိ မိုဘိုင်းကွန်ရက်ရရှိမည်မဟုတ်ပါ"</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"ပြီးပါပြီ"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"ဆင်းမ်ကတ် ထည့်ပါသည်"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"မိုးဘိုင်းကွန်ရက်ကို ဆက်သွယ်ရန် စက်ကို ပြန် စ ပါ"</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"ပြန်စရန်"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"မိုဘိုင်းဝန်ဆောင်မှု စတင်ဖွင့်လှစ်ရန်"</string>
@@ -1674,7 +1696,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"ဆင်းမ်ကဒ်သည် ယခု ပိတ်သွားပါပြီ ဆက်လက် လုပ်ဆောင်ရန် ပင်နံပါတ် ပြန်ဖွင့်သည့် ကုဒ်ကို ရိုက်ထည့်ပါ။ ပိုမိုသိချင်လျင် ဖုန်းဝန်ဆောင်မှု ပေးသောဌာန အားဆက်သွယ်နိုင်ပါသည်။"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"လိုချင်သော ပင်နံပါတ်ကို ရိုက်ထည့်ပါ"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"လိုချင်သော ပင်နံပါတ်ကို အတည်ပြုရန်"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"ဆင်းမ်ကတ် ကို သော့ဖွင့်နေပါသည်"</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"ပင်နံပါတ် အမှား"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"ဂဏန်း၄ လုံးမှ ၈ လုံးအထိ ရှိသော ပင်နံပါတ် ရိုက်ထည့်ပါ"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"ပင်နံပါတ် ပြန်ဖွင့်သည့် ကုဒ် က နံပါတ် ၈ လုံး ဖြစ်ရပါမည်"</string>
@@ -1731,7 +1754,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ဖြတ်လမ်းလင့်ခ်ကို ပိတ်ရန်"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ဖြတ်လမ်းလင့်ခ်ကို သုံးရန်"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"အရောင် ပြောင်းပြန်လှန်ခြင်း"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"အရောင်ပြင်ဆင်ခြင်း"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"လက်တစ်ဖက်သုံးမုဒ်"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ပိုမှိန်ခြင်း"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"အသံခလုတ်များကို ဖိထားသည်။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ဖွင့်လိုက်သည်။"</string>
@@ -2320,4 +2344,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"တိုက်ရိုက်လွှင့်စဉ် နှစ်ခုထပ်၍ မကြည့်နိုင်ပါ"</string>
     <string name="system_locale_title" msgid="711882686834677268">"စနစ်မူရင်း"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ကတ် <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"လက်ပတ်နာရီများစီမံရန် ‘တွဲဖက်နာရီ’ ပရိုဖိုင်ခွင့်ပြုချက်"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"လက်ပတ်နာရီများစီမံရန် တွဲဖက် အက်ပ်ကို ခွင့်ပြုသည်။"</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"တွဲဖက်သုံးနိုင်သော စက်ရှိ၊ မရှိ စောင့်ကြည့်ခြင်း"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"စက်များအနီးတွင် (သို့) အဝေးတွင်ရှိသည့်အခါ တွဲဖက်သုံးနိုင်သော စက်ရှိ၊ မရှိ စောင့်ကြည့်ရန် တွဲဖက် အက်ပ်ကို ခွင့်ပြုသည်။"</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"တွဲဖက်မက်ဆေ့ဂျ်များ ပို့ရန်"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"အခြားစက်များသို့ တွဲသုံးနိုင်သော မက်ဆေ့ဂျ်များပို့ရန် တွဲဖက် အက်ပ်ကို ခွင့်ပြုသည်။"</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"နောက်ခံမှနေ၍ မျက်နှာစာဝန်ဆောင်မှုများ စတင်ခြင်း"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"နောက်ခံမှနေ၍ မျက်နှာစာဝန်ဆောင်မှုများ စတင်ရန် တွဲဖက် အက်ပ်ကို ခွင့်ပြုသည်။"</string>
 </resources>

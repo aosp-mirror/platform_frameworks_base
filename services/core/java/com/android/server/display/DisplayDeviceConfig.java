@@ -46,6 +46,7 @@ import com.android.server.display.config.DisplayConfiguration;
 import com.android.server.display.config.DisplayQuirks;
 import com.android.server.display.config.HbmTiming;
 import com.android.server.display.config.HighBrightnessMode;
+import com.android.server.display.config.IntegerArray;
 import com.android.server.display.config.NitsMap;
 import com.android.server.display.config.Point;
 import com.android.server.display.config.RefreshRateConfigs;
@@ -213,6 +214,10 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *        <type>android.sensor.light</type>
  *        <name>1234 Ambient Light Sensor</name>
  *      </lightSensor>
+ *      <screenOffBrightnessSensor>
+ *        <type>com.google.sensor.binned_brightness</type>
+ *        <name>Binned Brightness 0 (wake-up)</name>
+ *      </screenOffBrightnessSensor>
  *      <proxSensor>
  *        <type>android.sensor.proximity</type>
  *        <name>1234 Proximity Sensor</name>
@@ -368,6 +373,13 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *             </brightnessThresholdPoints>
  *         </darkeningThresholds>
  *     </displayBrightnessChangeThresholdsIdle>
+ *     <screenOffBrightnessSensorValueToLux>
+ *         <item>-1</item>
+ *         <item>0</item>
+ *         <item>5</item>
+ *         <item>80</item>
+ *         <item>1500</item>
+ *     </screenOffBrightnessSensorValueToLux>
  *    </displayConfiguration>
  *  }
  *  </pre>
@@ -427,6 +439,9 @@ public class DisplayDeviceConfig {
 
     // The details of the ambient light sensor associated with this display.
     private final SensorData mAmbientLightSensor = new SensorData();
+
+    // The details of the doze brightness sensor associated with this display.
+    private final SensorData mScreenOffBrightnessSensor = new SensorData();
 
     // The details of the proximity sensor associated with this display.
     private final SensorData mProximitySensor = new SensorData();
@@ -522,6 +537,9 @@ public class DisplayDeviceConfig {
     private float[] mAmbientBrighteningPercentagesIdle = DEFAULT_AMBIENT_BRIGHTENING_THRESHOLDS;
     private float[] mAmbientDarkeningLevelsIdle = DEFAULT_AMBIENT_THRESHOLD_LEVELS;
     private float[] mAmbientDarkeningPercentagesIdle = DEFAULT_AMBIENT_DARKENING_THRESHOLDS;
+
+    // A mapping between screen off sensor values and lux values
+    private int[] mScreenOffBrightnessSensorValueToLux;
 
     private Spline mBrightnessToBacklightSpline;
     private Spline mBacklightToBrightnessSpline;
@@ -1197,6 +1215,10 @@ public class DisplayDeviceConfig {
         return mAmbientLightSensor;
     }
 
+    SensorData getScreenOffBrightnessSensor() {
+        return mScreenOffBrightnessSensor;
+    }
+
     SensorData getProximitySensor() {
         return mProximitySensor;
     }
@@ -1320,6 +1342,14 @@ public class DisplayDeviceConfig {
         return mHighAmbientBrightnessThresholds;
     }
 
+    /**
+     * @return A mapping from screen off brightness sensor readings to lux values. This estimates
+     * the ambient lux when the screen is off to determine the initial brightness
+     */
+    public int[] getScreenOffBrightnessSensorValueToLux() {
+        return mScreenOffBrightnessSensorValueToLux;
+    }
+
     @Override
     public String toString() {
         return "DisplayDeviceConfig{"
@@ -1398,6 +1428,7 @@ public class DisplayDeviceConfig {
                 mScreenDarkeningPercentagesIdle)
                 + "\n"
                 + ", mAmbientLightSensor=" + mAmbientLightSensor
+                + ", mScreenOffBrightnessSensor=" + mScreenOffBrightnessSensor
                 + ", mProximitySensor=" + mProximitySensor
                 + ", mRefreshRateLimitations= " + Arrays.toString(mRefreshRateLimitations.toArray())
                 + ", mDensityMapping= " + mDensityMapping
@@ -1420,6 +1451,9 @@ public class DisplayDeviceConfig {
                 + Arrays.toString(mHighDisplayBrightnessThresholds)
                 + ", mHighAmbientBrightnessThresholds= "
                 + Arrays.toString(mHighAmbientBrightnessThresholds)
+                + "\n"
+                + ", mScreenOffBrightnessSensorValueToLux=" + Arrays.toString(
+                mScreenOffBrightnessSensorValueToLux)
                 + "}";
     }
 
@@ -1473,11 +1507,13 @@ public class DisplayDeviceConfig {
                 loadQuirks(config);
                 loadBrightnessRamps(config);
                 loadAmbientLightSensorFromDdc(config);
+                loadScreenOffBrightnessSensorFromDdc(config);
                 loadProxSensorFromDdc(config);
                 loadAmbientHorizonFromDdc(config);
                 loadBrightnessChangeThresholds(config);
                 loadAutoBrightnessConfigValues(config);
                 loadRefreshRateSetting(config);
+                loadScreenOffBrightnessSensorValueToLuxFromDdc(config);
             } else {
                 Slog.w(TAG, "DisplayDeviceConfig file is null");
             }
@@ -2169,6 +2205,14 @@ public class DisplayDeviceConfig {
         mProximitySensor.type = null;
     }
 
+    private void loadScreenOffBrightnessSensorFromDdc(DisplayConfiguration config) {
+        final SensorDetails sensorDetails = config.getScreenOffBrightnessSensor();
+        if (sensorDetails != null) {
+            mScreenOffBrightnessSensor.type = sensorDetails.getType();
+            mScreenOffBrightnessSensor.name = sensorDetails.getName();
+        }
+    }
+
     private void loadProxSensorFromDdc(DisplayConfiguration config) {
         SensorDetails sensorDetails = config.getProxSensor();
         if (sensorDetails != null) {
@@ -2571,6 +2615,19 @@ public class DisplayDeviceConfig {
         mAutoBrightnessAvailable = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available)
                 && mDdcAutoBrightnessAvailable;
+    }
+
+    private void loadScreenOffBrightnessSensorValueToLuxFromDdc(DisplayConfiguration config) {
+        IntegerArray sensorValueToLux = config.getScreenOffBrightnessSensorValueToLux();
+        if (sensorValueToLux == null) {
+            return;
+        }
+
+        List<BigInteger> items = sensorValueToLux.getItem();
+        mScreenOffBrightnessSensorValueToLux = new int[items.size()];
+        for (int i = 0; i < items.size(); i++) {
+            mScreenOffBrightnessSensorValueToLux[i] = items.get(i).intValue();
+        }
     }
 
     static class SensorData {

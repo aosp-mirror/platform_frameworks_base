@@ -43,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"PIN yang Anda ketik tidak cocok."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Ketikkan PIN berupa 4 sampai 8 angka."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Ketik PUK yang terdiri dari 8 angka atau lebih."</string>
-    <string name="needPuk" msgid="7321876090152422918">"Kartu SIM Anda dikunci PUK. Ketikkan kode PUK untuk membukanya."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"Ketikkan PUK2 untuk membuka kartu SIM"</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"Gagal, aktifkan Kunci SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">Sisa <xliff:g id="NUMBER_1">%d</xliff:g> percobaan sebelum SIM terkunci.</item>
@@ -390,6 +392,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Aplikasi ini dapat berjalan di latar belakang. Dapat menghabiskan baterai lebih cepat."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"gunakan data di latar belakang"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Aplikasi ini dapat menggunakan data di latar belakang. Dapat meningkatkan penggunaan data."</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"Menjadwalkan tindakan tepat waktu"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Aplikasi ini dapat menjadwalkan tugas agar terjadi pada waktu yang diinginkan di masa mendatang. Hal ini juga berarti bahwa aplikasi dapat berjalan saat Anda tidak sedang menggunakan perangkat secara aktif."</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"Menjadwalkan alarm atau pengingat acara"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Aplikasi ini dapat menjadwalkan tindakan seperti alarm dan pengingat untuk memberi tahu Anda pada waktu yang diinginkan di masa mendatang."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"membuat apl selalu berjalan"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Memungkinkan aplikasi membuat bagian dari dirinya sendiri terus-menerus berada dalam memori. Izin ini dapat membatasi memori yang tersedia untuk aplikasi lain sehingga menjadikan tablet lambat."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Mengizinkan aplikasi membuat bagian dirinya tetap ada di memori. Hal ini dapat membatasi memori yang tersedia untuk aplikasi lain sehingga perangkat Android TV menjadi lambat."</string>
@@ -418,6 +424,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Mengizinkan aplikasi menggunakan layanan latar depan dengan jenis \"remoteMessaging\""</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"menjalankan layanan latar depan dengan jenis \"systemExempted\""</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Mengizinkan aplikasi menggunakan layanan latar depan dengan jenis \"systemExempted\""</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"menjalankan layanan latar depan dengan jenis \"fileManagement\""</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Mengizinkan aplikasi menggunakan layanan latar depan dengan jenis \"fileManagement\""</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"menjalankan layanan latar depan dengan jenis \"specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Mengizinkan aplikasi menggunakan layanan latar depan dengan jenis \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"mengukur ruang penyimpanan aplikasi"</string>
@@ -650,15 +658,15 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Terjadi error. Coba lagi."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikon sidik jari"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Face Unlock"</string>
-    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Masalah pada Face Unlock"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Buka dengan Wajah"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Masalah pada Buka dengan Wajah"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Ketuk untuk menghapus model wajah, lalu tambahkan wajah Anda lagi"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Siapkan Face Unlock"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Siapkan Buka dengan Wajah"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Buka kunci ponsel dengan melihat ke ponsel"</string>
-    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Untuk menggunakan Face Unlock, aktifkan "<b>"Akses kamera"</b>" di Setelan &gt; Privasi"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Untuk menggunakan Buka dengan Wajah, aktifkan "<b>"Akses kamera"</b>" di Setelan &gt; Privasi"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Siapkan lebih banyak cara untuk membuka kunci"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ketuk untuk menambahkan sidik jari"</string>
-    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingerprint Unlock"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Buka dengan Sidik Jari"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Tidak dapat menggunakan sensor sidik jari"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Kunjungi penyedia reparasi."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Tidak dapat membuat model wajah Anda. Coba lagi."</string>
@@ -691,19 +699,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Tidak dapat memverifikasi wajah. Hardware tidak tersedia."</string>
-    <string name="face_error_timeout" msgid="2598544068593889762">"Coba Face Unlock lagi"</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Coba Buka dengan Wajah lagi"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Tidak dapat menyimpan data wajah. Hapus dahulu data lama."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Pemrosesan wajah dibatalkan."</string>
-    <string name="face_error_user_canceled" msgid="5766472033202928373">"Face Unlock dibatalkan oleh pengguna"</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Buka dengan Wajah dibatalkan oleh pengguna"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Terlalu banyak percobaan. Coba lagi nanti."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Terlalu banyak upaya gagal. Face Unlock dinonaktifkan."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Terlalu banyak upaya gagal. Buka dengan Wajah dinonaktifkan."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Terlalu banyak upaya gagal. Masukkan kunci layar."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Tidak dapat memverifikasi wajah. Coba lagi."</string>
-    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Anda belum menyiapkan Face Unlock"</string>
-    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Face Unlock tidak didukung di perangkat ini"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Anda belum menyiapkan Buka dengan Wajah"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Buka dengan Wajah tidak didukung di perangkat ini"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensor dinonaktifkan untuk sementara."</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> wajah"</string>
-    <string name="face_app_setting_name" msgid="5854024256907828015">"Gunakan Face Unlock"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Gunakan Buka dengan Wajah"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Gunakan face lock atau kunci layar"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Gunakan wajah untuk melanjutkan"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gunakan face lock atau kunci layar untuk melanjutkan"</string>
@@ -954,15 +962,23 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Coba lagi"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Coba lagi"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Membuka kunci untuk semua fitur dan data"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Percobaan Face Unlock melebihi batas maksimum"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Tidak ada kartu SIM"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Tidak ada kartu SIM dalam tablet."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Tidak ada kartu SIM di perangkat Android TV."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Tidak ada Kartu SIM di dalam ponsel."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Masukkan kartu SIM."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"Kartu SIM tidak ada atau tidak dapat dibaca. Masukkan kartu SIM."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Kartu SIM tidak dapat digunakan."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Kartu SIM Anda telah dinonaktifkan secara permanen.\n Hubungi penyedia layanan nirkabel Anda untuk kartu SIM lain."</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Percobaan Buka dengan Wajah melebihi batas maksimum"</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Lagu sebelumnya"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Lagu berikutnya"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Jeda"</string>
@@ -972,10 +988,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Maju cepat"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Panggilan darurat saja"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Jaringan terkunci"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"Kartu SIM terkunci PUK."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Lihatlah Panduan Pengguna atau hubungi Layanan Pelanggan."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"Kartu SIM terkunci."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Membuka kartu SIM…"</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah menggambar pola pembuka kunci. \n\nCoba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> detik."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah mengetik sandi. \n\nCoba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> detik."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah mengetik PIN. \n\nCoba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> detik."</string>
@@ -1024,7 +1043,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Luaskan area buka kunci."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Buka kunci dengan menggeser."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Buka kunci dengan pola."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Face Unlock."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Buka dengan Wajah."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Buka kunci dengan PIN."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"PIN SIM terbuka."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"PUK SIM terbuka."</string>
@@ -1359,10 +1378,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Anda dapat mengubah ini nanti di Setelan &gt; Aplikasi"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Selalu Izinkan"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Jangan Pernah Izinkan"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"Kartu SIM dihapus"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"Jaringan seluler tidak akan tersedia sampai Anda memulai lagi dengan memasukkan kartu SIM yang valid."</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"Selesai"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"Kartu SIM ditambahkan"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"Mulai ulang perangkat Anda untuk mengakses jaringan selular."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Mulai Ulang"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Aktifkan layanan seluler"</string>
@@ -1674,7 +1696,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM telah dinonaktifkan. Masukkan kode PUK untuk melanjutkan. Hubungi operator untuk keterangan selengkapnya."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Masukkan kode PIN yang diinginkan"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Konfirmasi kode PIN yang diinginkan"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Membuka kunci kartu SIM…"</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Kode PIN salah."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Ketik PIN yang terdiri dari 4 sampai 8 angka."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"Kode PUK seharusnya terdiri dari 8 angka."</string>
@@ -1731,7 +1754,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Nonaktifkan Pintasan"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gunakan Pintasan"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversi Warna"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Koreksi Warna"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Mode satu tangan"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Ekstra redup"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tombol volume ditahan. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> diaktifkan."</string>
@@ -2320,4 +2344,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"Tidak dapat menampilkan picture-in-picture saat streaming"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Default sistem"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KARTU <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Izin profil Smartwatch Pendamping untuk mengelola smartwatch"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"Mengizinkan aplikasi pendamping mengelola smartwatch."</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"Mengamati kehadiran perangkat pendamping"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"Mengizinkan aplikasi pendamping mengamati kehadiran perangkat pendamping saat perangkat terkait berada di sekitar atau jauh."</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"Mengirimkan pesan pendamping"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"Mengizinkan aplikasi pendamping mengirimkan pesan pendamping ke perangkat lain."</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"Memulai layanan latar depan dari latar belakang"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Mengizinkan aplikasi pendamping memulai layanan latar depan dari latar belakang."</string>
 </resources>

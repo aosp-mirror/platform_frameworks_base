@@ -43,8 +43,10 @@
     <string name="mismatchPin" msgid="2929611853228707473">"तपाईंले टाइप गर्नुभएको PIN मेल खाँदैन।"</string>
     <string name="invalidPin" msgid="7542498253319440408">"४ देखि ८ वटा नम्बर भएको एउटा PIN टाइप गर्नुहोस्।"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"८ वटा नम्बरहरू वा सो भन्दा लामो एउटा PUK टाइप गर्नुहोस्।"</string>
-    <string name="needPuk" msgid="7321876090152422918">"तपाईंको SIM कार्ड PUK-लक छ। यसलाई अनलक गर्न PUK कोड टाइप गर्नुहोस्।"</string>
-    <string name="needPuk2" msgid="7032612093451537186">"SIM कार्ड अनलक गर्न PUK2 टाइप गर्नुहोस्।"</string>
+    <!-- no translation found for needPuk (3503414069503752211) -->
+    <skip />
+    <!-- no translation found for needPuk2 (3910763547447344963) -->
+    <skip />
     <string name="enablePin" msgid="2543771964137091212">"असफल, SIM/RUIM बन्द छ।"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">तपाईंसँग SIM बन्द हुनु अघि <xliff:g id="NUMBER_1">%d</xliff:g> बाँकी प्रयासहरू छन्।</item>
@@ -390,6 +392,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"यो एप ब्याकग्राउन्डमा चल्न सक्छ। यसले गर्दा छिट्टै ब्याट्रीको खपत हुनसक्छ।"</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"पृष्ठभूमिमा डेटा प्रयोग गर्नुहोस्"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"यो एपले ब्याकग्राउन्डमा डेटा प्रयोग गर्नसक्छ। यसले गर्दा धेरै डेटा प्रयोग हुनसक्छ।"</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"सटीक समयमा कार्यहरू पूरा गर्ने समयतालिका तोक्ने अनुमति"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"यो एपले भविष्यमा तपाईंले चाहेकै समयमा काम गर्ने समयतालिका तोक्न सक्छ। यसको अर्थ तपाईंले यो डिभाइस नचलाइरहेका बेलामा पनि यो एप चल्न सक्छ।"</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"अलार्म वा कार्यक्रमसम्बन्धी रिमाइन्डरको समयतालिका तोक्ने अनुमति"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"यो एपले तपाईंलाई भविष्यमा तपाईंले चाहेकै समयमा सूचित गराउने प्रयोजनका लागि अलार्म र रिमाइन्डर जस्ता कार्यहरूको समयतालिका तोक्न सक्छ।"</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"एपहरू जहिले पनि चल्ने बनाउनुहोस्"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"यसको आफ्नै मेमोरीमा दृढ भएकोको अंश बनाउनको लागि एपलाई अनुमति दिन्छ। ट्याब्लेटलाई ढिलो गराउँदै गरेका अन्य एपहरूलाई सीमित मात्रामा यसले मेमोरी उपलब्ध गराउन सक्छ।"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"एपलाई आफ्ना केही अंशहरू मेमोरीमा स्थायी रूपमा राख्ने अनुमति दिन्छ। यसले गर्दा अन्य एपका लागि मेमोरीको अभाव हुन सक्ने भएकाले तपाईंको Android टिभी यन्त्र सुस्त हुन सक्छ।"</string>
@@ -418,6 +424,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"यसले एपलाई \"remoteMessaging\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"\"systemExempted\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिनुहोस्"</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"यसले एपलाई \"systemExempted\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"यस प्रकारको \"fileManagement\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू चलाउने अनुमति"</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"यसले यो एपलाई यस प्रकारको \"fileManagement\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"specialUse\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिनुहोस्"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"यसले एपलाई \"specialUse\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"एप भण्डारण ठाउँको मापन गर्नुहोस्"</string>
@@ -955,14 +963,22 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"फेरि प्रयास गर्नुहोस्"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"सबै सुविधाहरू र डेटाका लागि अनलक गर्नुहोस्"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"फेस अनलक प्रयोग गरी अनलक गर्ने प्रयास अत्याधिक धेरै भयो"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM कार्ड छैन"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ट्याब्लेटमा SIM कार्ड छैन।"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"तपाईंको Android टिभी डिभाइसमा SIM कार्ड छैन।"</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"फोनमा SIM कार्ड छैन।"</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"SIM कार्ड घुसाउनुहोस्"</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM कार्ड छैन वा पढ्न मिल्दैन। SIM कार्ड हाल्नुहोस्।"</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"प्रयोग गर्न अयोग्य SIM कार्ड"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"तपाईंको SIM कार्ड स्थायी रूपमा अक्षम भयो।\n अर्को SIM कार्डको लागि आफनो ताररहित सेवा प्रदायकसँग सम्पर्क गर्नुहोस्।"</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
+    <skip />
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"अघिल्लो ट्रयाक"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"अर्को ट्रयाक"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"रोक्नुहोस्"</string>
@@ -972,10 +988,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"फास्ट फर्वार्ड"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"आपत्‌कालीन कलहरू मात्र"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"नेटवर्क लक छ"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM कार्ड PUK-लक गरिएको छ।"</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
+    <skip />
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"प्रयोगकर्ता निर्देशक वा ग्राहक सेवा सम्पर्क हर्नुहोस्।"</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM कार्ड लक गरिएको छ।"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM कार्ड अनलक गरिँदै..."</string>
+    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
+    <skip />
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"तपाईँले तपाईँको अनलक प्याटर्न गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक खिच्नु भएको छ। \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि कोसिस गर्नुहोस्।"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"तपाईंले गलत तरिकाले आफ्नो पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक टाइप गर्नुभयो। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"तपाईँले गलत तरिकाले तपाईँको PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक टाइप गर्नु भएको छ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
@@ -1359,10 +1378,13 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"तपाईं यसलाई पछि सेटिङहरूमा बदल्न सक्नु हुन्छ &gt; एपहरू"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"सधैँ अनुमति दिनुहोस्"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"कहिल्यै अनुमति नदिनुहोस्"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"SIM कार्ड हटाइयो"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"एउटा मान्य SIM कार्ड राखेर पुनःस्टार्ट नगरेसम्म मोबाइल नेटवर्क उपलब्ध हुने छैन।"</string>
+    <!-- no translation found for sim_removed_title (1349026474932481037) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (8469588437451533845) -->
+    <skip />
     <string name="sim_done_button" msgid="6464250841528410598">"भयो"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"SIM कार्ड थप गरियो"</string>
+    <!-- no translation found for sim_added_title (2976783426741012468) -->
+    <skip />
     <string name="sim_added_message" msgid="6602906609509958680">"मोबाइल नेटवर्क पहुँच गर्न तपाईँको उपकरण पुनःस्टार्ट गर्नुहोस्।"</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"पुनः सुरु गर्नुहोस्"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"मोबाइल सेवा अन गर्नुहोस्"</string>
@@ -1674,7 +1696,8 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM कार्ड अहिले असक्षम छ। सुचारु गर्नको लागि PUK कोड प्रविष्टि गर्नुहोस्।  विवरणको लागि वाहकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"इच्छित PIN कोड प्रविष्टि गर्नुहोस्"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"मनपर्दो PIN कोड निश्चित गर्नुहोस्"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM कार्ड अनलक गर्दै…"</string>
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
+    <skip />
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"गलत PIN कोड।"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"४ देखि ८ वाट नम्बर भएको एउटा PIN टाइप गर्नुहोस्।"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK कोड ८ संख्याको हुनु पर्दछ।"</string>
@@ -1731,7 +1754,8 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"सर्टकटलाई निष्क्रिय पार्नुहोस्"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"सर्टकट प्रयोग गर्नुहोस्"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"कलर इन्भर्सन"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"कलर करेक्सन"</string>
+    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
+    <skip />
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"एक हाते मोड"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"अझै मधुरो"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"तपाईंले भोल्युम बटनहरू थिचिराख्नुभयो। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> अन भयो।"</string>
@@ -2320,4 +2344,12 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"स्ट्रिम गरिरहेका बेला picture-in-picture मोड प्रयोग गर्न मिल्दैन"</string>
     <string name="system_locale_title" msgid="711882686834677268">"सिस्टम डिफल्ट"</string>
     <string name="default_card_name" msgid="9198284935962911468">"कार्ड <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"स्मार्टवाचहरू व्यवस्थापन गर्ने सहयोगी वाच प्रोफाइलसम्बन्धी अनुमति"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"यसले सहयोगी एपलाई स्मार्टवाचहरू व्यवस्थापन गर्ने अनुमति दिन्छ।"</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"सहयोगी डिभाइसको उपस्थिति अवलोकन गर्ने अनुमति"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"यसले सहयोगी एपलाई सहयोगी डिभाइस नजिकै वा टाढा हुँदा उक्त डिभाइसको उपस्थिति अवलोकन गर्ने अनुमति दिन्छ।"</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"सहयोगी म्यासेजहरू डेलिभर गर्ने अनुमति"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"यसले सहयोगी एपलाई अन्य डिभाइसमा सहयोगी म्यासेजहरू डेलिभर गर्ने अनुमति दिन्छ।"</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"ब्याकग्राउन्डमा फोरग्राउन्ड सेवाहरू चलाउने अनुमति"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"यसले सहयोगी एपलाई ब्याकग्राउन्डमा फोरग्राउन्ड सेवाहरू चलाउने अनुमति दिन्छ।"</string>
 </resources>
