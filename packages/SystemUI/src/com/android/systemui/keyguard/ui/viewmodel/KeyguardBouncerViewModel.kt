@@ -22,10 +22,8 @@ import com.android.systemui.keyguard.data.BouncerViewDelegate
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
-import com.android.systemui.statusbar.phone.KeyguardBouncer.EXPANSION_VISIBLE
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 
 /** Models UI state for the lock screen bouncer; handles user input. */
@@ -43,10 +41,6 @@ constructor(
 
     /** Observe whether bouncer is showing. */
     val show: Flow<KeyguardBouncerModel> = interactor.show
-
-    /** Observe visible expansion when bouncer is showing. */
-    val showWithFullExpansion: Flow<KeyguardBouncerModel> =
-        interactor.show.filter { it.expansionAmount == EXPANSION_VISIBLE }
 
     /** Observe whether bouncer is hiding. */
     val hide: Flow<Unit> = interactor.hide
