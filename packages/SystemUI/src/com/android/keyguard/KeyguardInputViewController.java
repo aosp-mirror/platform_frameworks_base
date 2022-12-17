@@ -121,6 +121,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
 
     @Override
     public void reset() {
+        mMessageAreaController.setMessage("", false);
     }
 
     @Override
