@@ -18,8 +18,11 @@ package android.hardware.input;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.icu.util.ULocale;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.Objects;
 
 
 /**
@@ -29,6 +32,18 @@ import android.os.Parcelable;
  */
 @SystemApi
 public final class VirtualKeyboardConfig extends VirtualInputDeviceConfig implements Parcelable {
+    /**
+     * Default language tag when creating virtual keyboard. Used when the language tag is not set.
+     */
+    public static final String DEFAULT_LANGUAGE_TAG = "en-Latn-US";
+    /** Default layout type when creating virtual keyboard. Used when the layout type is not set. */
+    public static final String DEFAULT_LAYOUT_TYPE = "qwerty";
+
+    @NonNull
+    private final String mLanguageTag;
+
+    @NonNull
+    private final String mLayoutType;
 
     @NonNull
     public static final Creator<VirtualKeyboardConfig> CREATOR =
@@ -46,10 +61,30 @@ public final class VirtualKeyboardConfig extends VirtualInputDeviceConfig implem
 
     private VirtualKeyboardConfig(@NonNull Builder builder) {
         super(builder);
+        mLanguageTag = builder.mLanguageTag;
+        mLayoutType = builder.mLayoutType;
     }
 
     private VirtualKeyboardConfig(@NonNull Parcel in) {
         super(in);
+        mLanguageTag = in.readString8();
+        mLayoutType = in.readString8();
+    }
+
+    /**
+     * @see Builder#setLanguageTag().
+     */
+    @NonNull
+    public String getLanguageTag() {
+        return mLanguageTag;
+    }
+
+    /**
+     * @see Builder#setLayoutType().
+     */
+    @NonNull
+    public String getLayoutType() {
+        return mLayoutType;
     }
 
     @Override
@@ -60,12 +95,66 @@ public final class VirtualKeyboardConfig extends VirtualInputDeviceConfig implem
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
+        dest.writeString8(mLanguageTag);
+        dest.writeString8(mLayoutType);
     }
 
     /**
      * Builder for creating a {@link VirtualKeyboardConfig}.
      */
     public static final class Builder extends VirtualInputDeviceConfig.Builder<Builder> {
+        @NonNull
+        private String mLanguageTag = DEFAULT_LANGUAGE_TAG;
+        @NonNull
+        private String mLayoutType = DEFAULT_LAYOUT_TYPE;
+
+        /**
+         * Sets the preferred input language of the virtual keyboard using an IETF
+         * <a href="https://tools.ietf.org/html/bcp47">BCP-47</a>
+         * conformant tag. See {@code keyboardLocale} attribute in
+         * frameworks/base/packages/InputDevices/res/xml/keyboard_layouts.xml for a list of
+         * supported language tags.
+         *
+         * The passed in {@code languageTag} will be canonized using {@link
+         * ULocale} and used by the system as a hint to configure the keyboard layout.
+         *
+         * If {@code languageTag} is not specified, the virtual keyboard will be created with {@link
+         * #DEFAULT_LANGUAGE_TAG}.
+         *
+         * Note that the preferred layout is not guaranteed. If the specified language is
+         * well-formed but not supported, the keyboard will be using English US QWERTY layout.
+         *
+         *  @throws IllegalArgumentException if either of the language or country is not present in
+         *  the language tag.
+         */
+        @NonNull
+        public Builder setLanguageTag(@NonNull String languageTag) {
+            Objects.requireNonNull(languageTag, "languageTag cannot be null");
+            ULocale locale = ULocale.forLanguageTag(languageTag);
+            if (locale.getLanguage().isEmpty() || locale.getCountry().isEmpty()) {
+                throw new IllegalArgumentException("The language tag is not valid.");
+            }
+            mLanguageTag = ULocale.createCanonical(locale).toLanguageTag();
+            return this;
+        }
+
+        /**
+         * Sets the preferred layout type of the virtual keyboard. See {@code keyboardLayoutType}
+         * attribute in frameworks/base/packages/InputDevices/res/xml/keyboard_layouts.xml for a
+         * list of supported layout types.
+         *
+         * Note that the preferred layout is not guaranteed. If the specified layout type is
+         * well-formed but not supported, the keyboard will be using English US QWERTY layout.
+         *
+         * If not specified, the virtual keyboard will be created with {@link #DEFAULT_LAYOUT_TYPE}.
+         */
+        @NonNull
+        public Builder setLayoutType(@NonNull String layoutType) {
+            Objects.requireNonNull(layoutType, "layoutType cannot be null");
+            mLayoutType = layoutType;
+            return this;
+        }
+
         /**
          * Builds the {@link VirtualKeyboardConfig} instance.
          */

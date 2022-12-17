@@ -142,17 +142,18 @@ class InputController {
         }
     }
 
-    void createKeyboard(@NonNull String deviceName,
-            int vendorId,
-            int productId,
-            @NonNull IBinder deviceToken,
-            int displayId) {
+    void createKeyboard(@NonNull String deviceName, int vendorId, int productId,
+            @NonNull IBinder deviceToken, int displayId, @NonNull String languageTag,
+            @NonNull String layoutType) {
         final String phys = createPhys(PHYS_TYPE_KEYBOARD);
+        mInputManagerInternal.addKeyboardLayoutAssociation(phys, languageTag,
+                layoutType);
         try {
             createDeviceInternal(InputDeviceDescriptor.TYPE_KEYBOARD, deviceName, vendorId,
                     productId, deviceToken, displayId, phys,
                     () -> mNativeWrapper.openUinputKeyboard(deviceName, vendorId, productId, phys));
         } catch (DeviceCreationException e) {
+            mInputManagerInternal.removeKeyboardLayoutAssociation(phys);
             throw new RuntimeException(
                     "Failed to create virtual keyboard device '" + deviceName + "'.", e);
         }
@@ -233,12 +234,16 @@ class InputController {
             InputDeviceDescriptor inputDeviceDescriptor) {
         token.unlinkToDeath(inputDeviceDescriptor.getDeathRecipient(), /* flags= */ 0);
         mNativeWrapper.closeUinput(inputDeviceDescriptor.getFileDescriptor());
-
-        InputManager.getInstance().removeUniqueIdAssociation(inputDeviceDescriptor.getPhys());
+        String phys = inputDeviceDescriptor.getPhys();
+        InputManager.getInstance().removeUniqueIdAssociation(phys);
         // Type associations are added in the case of navigation touchpads. Those should be removed
         // once the input device gets closed.
         if (inputDeviceDescriptor.getType() == InputDeviceDescriptor.TYPE_NAVIGATION_TOUCHPAD) {
-            mInputManagerInternal.unsetTypeAssociation(inputDeviceDescriptor.getPhys());
+            mInputManagerInternal.unsetTypeAssociation(phys);
+        }
+
+        if (inputDeviceDescriptor.getType() == InputDeviceDescriptor.TYPE_KEYBOARD) {
+            mInputManagerInternal.removeKeyboardLayoutAssociation(phys);
         }
 
         // Reset values to the default if all virtual mice are unregistered, or set display

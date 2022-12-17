@@ -4716,13 +4716,19 @@ package android.hardware.input {
 
   public final class VirtualKeyboardConfig extends android.hardware.input.VirtualInputDeviceConfig implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public String getLanguageTag();
+    method @NonNull public String getLayoutType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualKeyboardConfig> CREATOR;
+    field public static final String DEFAULT_LANGUAGE_TAG = "en-Latn-US";
+    field public static final String DEFAULT_LAYOUT_TYPE = "qwerty";
   }
 
   public static final class VirtualKeyboardConfig.Builder extends android.hardware.input.VirtualInputDeviceConfig.Builder<android.hardware.input.VirtualKeyboardConfig.Builder> {
     ctor public VirtualKeyboardConfig.Builder();
     method @NonNull public android.hardware.input.VirtualKeyboardConfig build();
+    method @NonNull public android.hardware.input.VirtualKeyboardConfig.Builder setLanguageTag(@NonNull String);
+    method @NonNull public android.hardware.input.VirtualKeyboardConfig.Builder setLayoutType(@NonNull String);
   }
 
   public class VirtualMouse implements java.io.Closeable {

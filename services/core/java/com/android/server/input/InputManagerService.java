@@ -247,6 +247,11 @@ public class InputManagerService extends IInputManager.Stub
     private final Map<String, Integer> mRuntimeAssociations = new ArrayMap<>();
     @GuardedBy("mAssociationsLock")
     private final Map<String, String> mUniqueIdAssociations = new ArrayMap<>();
+    // The map from input port (String) to the keyboard layout identifiers (comma separated string
+    // containing language tag and layout type) associated with the corresponding keyboard device.
+    // Currently only accessed by InputReader.
+    @GuardedBy("mAssociationsLock")
+    private final Map<String, String> mKeyboardLayoutAssociations = new ArrayMap<>();
 
     // Stores input ports associated with device types. For example, adding an association
     // {"123", "touchNavigation"} here would mean that a touch device appearing at port "123" would
@@ -1901,8 +1906,7 @@ public class InputManagerService extends IInputManager.Stub
         if (!checkCallingPermission(
                 android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY,
                 "removeUniqueIdAssociation()")) {
-            throw new SecurityException(
-                    "Requires ASSOCIATE_INPUT_DEVICE_TO_DISPLAY permission");
+            throw new SecurityException("Requires ASSOCIATE_INPUT_DEVICE_TO_DISPLAY permission");
         }
 
         Objects.requireNonNull(inputPort);
@@ -1927,6 +1931,27 @@ public class InputManagerService extends IInputManager.Stub
             mDeviceTypeAssociations.remove(inputPort);
         }
         mNative.changeTypeAssociation();
+    }
+
+    private void addKeyboardLayoutAssociation(@NonNull String inputPort,
+            @NonNull String languageTag, @NonNull String layoutType) {
+        Objects.requireNonNull(inputPort);
+        Objects.requireNonNull(languageTag);
+        Objects.requireNonNull(layoutType);
+
+        synchronized (mAssociationsLock) {
+            mKeyboardLayoutAssociations.put(inputPort,
+                    TextUtils.formatSimple("%s,%s", languageTag, layoutType));
+        }
+        mNative.changeKeyboardLayoutAssociation();
+    }
+
+    private void removeKeyboardLayoutAssociation(@NonNull String inputPort) {
+        Objects.requireNonNull(inputPort);
+        synchronized (mAssociationsLock) {
+            mKeyboardLayoutAssociations.remove(inputPort);
+        }
+        mNative.changeKeyboardLayoutAssociation();
     }
 
     @Override // Binder call
@@ -2673,6 +2698,17 @@ public class InputManagerService extends IInputManager.Stub
         return flatten(associations);
     }
 
+    // Native callback
+    @SuppressWarnings("unused")
+    @VisibleForTesting
+    private String[] getKeyboardLayoutAssociations() {
+        final Map<String, String> configs = new ArrayMap<>();
+        synchronized (mAssociationsLock) {
+            configs.putAll(mKeyboardLayoutAssociations);
+        }
+        return flatten(configs);
+    }
+
     /**
      * Gets if an input device could dispatch to the given display".
      * @param deviceId The input device id.
@@ -3315,6 +3351,18 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public void unsetTypeAssociation(@NonNull String inputPort) {
             unsetTypeAssociationInternal(inputPort);
+        }
+
+        @Override
+        public void addKeyboardLayoutAssociation(@NonNull String inputPort,
+                @NonNull String languageTag, @NonNull String layoutType) {
+            InputManagerService.this.addKeyboardLayoutAssociation(inputPort,
+                    languageTag, layoutType);
+        }
+
+        @Override
+        public void removeKeyboardLayoutAssociation(@NonNull String inputPort) {
+            InputManagerService.this.removeKeyboardLayoutAssociation(inputPort);
         }
     }
 
