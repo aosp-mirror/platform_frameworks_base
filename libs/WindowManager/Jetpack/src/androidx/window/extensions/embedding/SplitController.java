@@ -108,6 +108,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     // Currently applied split configuration.
     @GuardedBy("mLock")
     private final List<EmbeddingRule> mSplitRules = new ArrayList<>();
+
     /**
      * A developer-defined {@link SplitAttributes} calculator to compute the current
      * {@link SplitAttributes} with the current device and window states.
@@ -125,6 +126,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     @Nullable
     private SplitAttributesCalculator mSplitAttributesCalculator;
+
     /**
      * Map from Task id to {@link TaskContainer} which contains all TaskFragment and split pair info
      * below it.
@@ -230,6 +232,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     @NonNull
+    @GuardedBy("mLock")
+    @VisibleForTesting
     List<EmbeddingRule> getSplitRules() {
         return mSplitRules;
     }
@@ -246,7 +250,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /**
-     * Clears the listener set in {@link SplitController#setSplitInfoListener}.
+     * Clears the listener set in {@link SplitController#setSplitInfoCallback(Consumer)}.
      */
     @Override
     public void clearSplitInfoCallback() {
@@ -466,6 +470,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         updateContainersInTask(wct, taskContainer);
     }
 
+    @GuardedBy("mLock")
     void updateContainersInTaskIfVisible(@NonNull WindowContainerTransaction wct, int taskId) {
         final TaskContainer taskContainer = getTaskContainer(taskId);
         if (taskContainer != null && taskContainer.isVisible()) {
@@ -473,6 +478,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
     }
 
+    @GuardedBy("mLock")
     private void updateContainersInTask(@NonNull WindowContainerTransaction wct,
             @NonNull TaskContainer taskContainer) {
         // Update all TaskFragments in the Task. Make a copy of the list since some may be
@@ -756,6 +762,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     /**
      * Places the given activity to the top most TaskFragment in the task if there is any.
      */
+    @GuardedBy("mLock")
     @VisibleForTesting
     void placeActivityInTopContainer(@NonNull WindowContainerTransaction wct,
             @NonNull Activity activity) {
@@ -879,6 +886,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     /** Finds the activity below the given activity. */
     @VisibleForTesting
     @Nullable
+    @GuardedBy("mLock")
     Activity findActivityBelow(@NonNull Activity activity) {
         Activity activityBelow = null;
         final TaskFragmentContainer container = getContainerWithActivity(activity);
@@ -1213,6 +1221,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return null;
     }
 
+    @GuardedBy("mLock")
     TaskFragmentContainer newContainer(@NonNull Activity pendingAppearedActivity, int taskId) {
         return newContainer(pendingAppearedActivity, pendingAppearedActivity, taskId);
     }
@@ -1350,7 +1359,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Removes a secondary container for the given primary container if an existing split is
      * already registered.
      */
-    void removeExistingSecondaryContainers(@NonNull WindowContainerTransaction wct,
+    // Suppress GuardedBy warning because lint asks to mark this method as
+    // @GuardedBy(existingSplitContainer.getSecondaryContainer().mController.mLock), which is mLock
+    // itself
+    @SuppressWarnings("GuardedBy")
+    @GuardedBy("mLock")
+    private void removeExistingSecondaryContainers(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer primaryContainer) {
         // If the primary container was already in a split - remove the secondary container that
         // is now covered by the new one that replaced it.
@@ -1368,6 +1382,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     /**
      * Returns the topmost not finished container in Task of given task id.
      */
+    @GuardedBy("mLock")
     @Nullable
     TaskFragmentContainer getTopActiveContainer(int taskId) {
         final TaskContainer taskContainer = mTaskContainers.get(taskId);
@@ -1737,6 +1752,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     @Nullable
+    @GuardedBy("mLock")
     TaskFragmentContainer getContainer(@NonNull IBinder fragmentToken) {
         for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
             final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i).mContainers;
@@ -1750,6 +1766,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     @Nullable
+    @GuardedBy("mLock")
     TaskContainer getTaskContainer(int taskId) {
         return mTaskContainers.get(taskId);
     }
@@ -1758,6 +1775,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return mHandler;
     }
 
+    @GuardedBy("mLock")
     int getTaskId(@NonNull Activity activity) {
         // Prefer to get the taskId from TaskFragmentContainer because Activity.getTaskId() is an
         // IPC call.
@@ -1850,6 +1868,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     /**
      * @see #shouldRetainAssociatedContainer(TaskFragmentContainer, TaskFragmentContainer)
      */
+    @GuardedBy("mLock")
     boolean shouldRetainAssociatedActivity(@NonNull TaskFragmentContainer finishingContainer,
             @NonNull Activity associatedActivity) {
         final TaskFragmentContainer associatedContainer = getContainerWithActivity(
@@ -1970,6 +1989,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @VisibleForTesting
     class ActivityStartMonitor extends Instrumentation.ActivityMonitor {
         @VisibleForTesting
+        @GuardedBy("mLock")
         Intent mCurrentIntent;
 
         @Override
@@ -2034,18 +2054,21 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         @Override
         public void onStartActivityResult(int result, @NonNull Bundle bOptions) {
             super.onStartActivityResult(result, bOptions);
-            if (mCurrentIntent != null && result != START_SUCCESS) {
-                // Clear the pending appeared intent if the activity was not started successfully.
-                final IBinder token = bOptions.getBinder(
-                        ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN);
-                if (token != null) {
-                    final TaskFragmentContainer container = getContainer(token);
-                    if (container != null) {
-                        container.clearPendingAppearedIntentIfNeeded(mCurrentIntent);
+            synchronized (mLock) {
+                if (mCurrentIntent != null && result != START_SUCCESS) {
+                    // Clear the pending appeared intent if the activity was not started
+                    // successfully.
+                    final IBinder token = bOptions.getBinder(
+                            ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN);
+                    if (token != null) {
+                        final TaskFragmentContainer container = getContainer(token);
+                        if (container != null) {
+                            container.clearPendingAppearedIntentIfNeeded(mCurrentIntent);
+                        }
                     }
                 }
+                mCurrentIntent = null;
             }
-            mCurrentIntent = null;
         }
     }
 
