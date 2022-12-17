@@ -62,4 +62,19 @@ data class NormalizedTouchData(
             nativeSensorBounds.top <= y &&
             nativeSensorBounds.bottom >= y
     }
+
+    @JvmOverloads
+    fun toPrettyString(tag: String = ""): String =
+        """
+        |NormalizedTouchData [$tag] {
+        |     pointerId: $pointerId
+        |             x: $x
+        |             y: $y
+        |         minor: $minor
+        |         major: $major
+        |   orientation: $orientation
+        |          time: $time
+        |  gestureStart: $gestureStart
+        |}
+        """.trimMargin()
 }
