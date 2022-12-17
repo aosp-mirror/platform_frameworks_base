@@ -177,8 +177,6 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
 
     @Override
     public void startAppearAnimation() {
-        setAlpha(1f);
-        setTranslationY(0);
         if (mAppearAnimator.isRunning()) {
             mAppearAnimator.cancel();
         }
@@ -215,6 +213,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
 
     /** Animate subviews according to expansion or time. */
     private void animate(float progress) {
+        setAlpha(progress);
         Interpolator standardDecelerate = Interpolators.STANDARD_DECELERATE;
         Interpolator legacyDecelerate = Interpolators.LEGACY_DECELERATE;
 

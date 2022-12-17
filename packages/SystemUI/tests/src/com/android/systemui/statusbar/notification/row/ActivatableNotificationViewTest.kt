@@ -26,6 +26,7 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.FakeShadowView
 import com.android.systemui.statusbar.notification.NotificationUtils
+import com.android.systemui.statusbar.notification.SourceType
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -82,5 +83,18 @@ class ActivatableNotificationViewTest : SysuiTestCase() {
         // Updating the background colors resets tints, as those won't match the latest theme
         mView.updateBackgroundColors()
         assertThat(mView.currentBackgroundTint).isEqualTo(mNormalColor)
+    }
+
+    @Test
+    fun roundnessShouldBeTheSame_after_onDensityOrFontScaleChanged() {
+        val roundableState = mView.roundableState
+        assertThat(mView.topRoundness).isEqualTo(0f)
+        mView.requestTopRoundness(1f, SourceType.from(""))
+        assertThat(mView.topRoundness).isEqualTo(1f)
+
+        mView.onDensityOrFontScaleChanged()
+
+        assertThat(mView.topRoundness).isEqualTo(1f)
+        assertThat(mView.roundableState.hashCode()).isEqualTo(roundableState.hashCode())
     }
 }

@@ -16,14 +16,17 @@
 
 package com.android.systemui.shade;
 
-import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.shade.data.repository.ShadeRepository;
+import com.android.systemui.shade.data.repository.ShadeRepositoryImpl;
 
 import dagger.Binds;
 import dagger.Module;
 
-/** Provides a {@link ShadeStateEvents} in {@link SysUISingleton} scope. */
+/** Provides Shade-related events and information. */
 @Module
 public abstract class ShadeEventsModule {
     @Binds
     abstract ShadeStateEvents bindShadeEvents(ShadeExpansionStateManager impl);
+
+    @Binds abstract ShadeRepository shadeRepository(ShadeRepositoryImpl impl);
 }

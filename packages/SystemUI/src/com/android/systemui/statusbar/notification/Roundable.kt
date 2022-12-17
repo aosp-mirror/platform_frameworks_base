@@ -306,9 +306,12 @@ interface Roundable {
  */
 class RoundableState(
     internal val targetView: View,
-    roundable: Roundable,
-    internal val maxRadius: Float,
+    private val roundable: Roundable,
+    maxRadius: Float,
 ) {
+    internal var maxRadius = maxRadius
+        private set
+
     /** Animatable for top roundness */
     private val topAnimatable = topAnimatable(roundable)
 
@@ -354,6 +357,13 @@ class RoundableState(
         animated: Boolean,
     ) {
         PropertyAnimator.setProperty(targetView, bottomAnimatable, value, DURATION, animated)
+    }
+
+    fun setMaxRadius(radius: Float) {
+        if (maxRadius != radius) {
+            maxRadius = radius
+            roundable.applyRoundnessAndInvalidate()
+        }
     }
 
     fun debugString() = buildString {

@@ -1193,8 +1193,12 @@ public class KeyguardIndicationController {
         }
 
         @Override
-        public void onTrustGrantedForCurrentUser(boolean dismissKeyguard,
-                @NonNull TrustGrantFlags flags, @Nullable String message) {
+        public void onTrustGrantedForCurrentUser(
+                boolean dismissKeyguard,
+                boolean newlyUnlocked,
+                @NonNull TrustGrantFlags flags,
+                @Nullable String message
+        ) {
             showTrustGrantedMessage(dismissKeyguard, message);
         }
 

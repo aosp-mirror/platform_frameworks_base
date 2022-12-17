@@ -143,6 +143,7 @@ import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -2686,8 +2687,8 @@ class Task extends TaskFragment {
     }
 
     @Override
-    boolean handlesOrientationChangeFromDescendant() {
-        if (!super.handlesOrientationChangeFromDescendant()) {
+    boolean handlesOrientationChangeFromDescendant(@ScreenOrientation int orientation) {
+        if (!super.handlesOrientationChangeFromDescendant(orientation)) {
             return false;
         }
 
@@ -2702,7 +2703,7 @@ class Task extends TaskFragment {
         // Check for leaf Task.
         // Display won't rotate for the orientation request if the Task/TaskDisplayArea
         // can't specify orientation.
-        return canSpecifyOrientation() && getDisplayArea().canSpecifyOrientation();
+        return canSpecifyOrientation() && getDisplayArea().canSpecifyOrientation(orientation);
     }
 
     void resize(boolean relayout, boolean forced) {
@@ -2772,6 +2773,13 @@ class Task extends TaskFragment {
     @Override
     void getAnimationFrames(Rect outFrame, Rect outInsets, Rect outStableInsets,
             Rect outSurfaceInsets) {
+        // If this task has its adjacent task, it means they should animate together. Use display
+        // bounds for them could move same as full screen task.
+        if (getAdjacentTaskFragment() != null && getAdjacentTaskFragment().asTask() != null) {
+            super.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
+            return;
+        }
+
         final WindowState windowState = getTopVisibleAppMainWindow();
         if (windowState != null) {
             windowState.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
@@ -4920,6 +4928,11 @@ class Task extends TaskFragment {
                     }
                     if (child.getVisibility(null /* starting */)
                             != TASK_FRAGMENT_VISIBILITY_VISIBLE) {
+                        if (child.topRunningActivity() == null) {
+                            // Skip the task if no running activity and continue resuming next task.
+                            continue;
+                        }
+                        // Otherwise, assuming everything behind this task should also be invisible.
                         break;
                     }
 

@@ -517,7 +517,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Mimic the behavior that display doesn't handle app's requested orientation.
         final DisplayContent dc = activity.getTask().getDisplayContent();
         doReturn(false).when(dc).onDescendantOrientationChanged(any());
-        doReturn(false).when(dc).handlesOrientationChangeFromDescendant();
+        doReturn(false).when(dc).handlesOrientationChangeFromDescendant(anyInt());
 
         final int requestedOrientation;
         switch (newConfig.orientation) {

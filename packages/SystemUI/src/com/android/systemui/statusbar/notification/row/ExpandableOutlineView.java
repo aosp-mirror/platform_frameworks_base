@@ -214,7 +214,11 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         } else {
             maxRadius = res.getDimensionPixelSize(R.dimen.notification_corner_radius);
         }
-        mRoundableState = new RoundableState(this, this, maxRadius);
+        if (mRoundableState == null) {
+            mRoundableState = new RoundableState(this, this, maxRadius);
+        } else {
+            mRoundableState.setMaxRadius(maxRadius);
+        }
         setClipToOutline(mAlwaysRoundBothCorners);
     }
 

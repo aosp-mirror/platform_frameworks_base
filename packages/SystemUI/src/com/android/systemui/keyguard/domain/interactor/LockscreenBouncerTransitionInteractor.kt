@@ -22,7 +22,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE_LOCKED
+import com.android.systemui.keyguard.shared.model.StatusBarState.KEYGUARD
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.WakefulnessState
@@ -50,27 +50,22 @@ constructor(
 
     override fun start() {
         listenForDraggingUpToBouncer()
-        listenForBouncerHiding()
+        listenForBouncer()
     }
 
-    private fun listenForBouncerHiding() {
+    private fun listenForBouncer() {
         scope.launch {
             keyguardInteractor.isBouncerShowing
                 .sample(
                     combine(
                         keyguardInteractor.wakefulnessModel,
                         keyguardTransitionInteractor.startedKeyguardTransitionStep,
-                    ) { wakefulnessModel, transitionStep ->
-                        Pair(wakefulnessModel, transitionStep)
-                    }
-                ) { bouncerShowing, wakefulnessAndTransition ->
-                    Triple(
-                        bouncerShowing,
-                        wakefulnessAndTransition.first,
-                        wakefulnessAndTransition.second
-                    )
-                }
-                .collect { (isBouncerShowing, wakefulnessState, lastStartedTransitionStep) ->
+                        ::Pair
+                    ),
+                    ::toTriple
+                )
+                .collect { triple ->
+                    val (isBouncerShowing, wakefulnessState, lastStartedTransitionStep) = triple
                     if (
                         !isBouncerShowing && lastStartedTransitionStep.to == KeyguardState.BOUNCER
                     ) {
@@ -91,7 +86,19 @@ constructor(
                                 animator = getAnimator(),
                             )
                         )
+                    } else if (
+                        isBouncerShowing && lastStartedTransitionStep.to == KeyguardState.LOCKSCREEN
+                    ) {
+                        keyguardTransitionRepository.startTransition(
+                            TransitionInfo(
+                                ownerName = name,
+                                from = KeyguardState.LOCKSCREEN,
+                                to = KeyguardState.BOUNCER,
+                                animator = getAnimator(),
+                            )
+                        )
                     }
+                    Unit
                 }
         }
     }
@@ -104,24 +111,20 @@ constructor(
                     combine(
                         keyguardTransitionInteractor.finishedKeyguardState,
                         keyguardInteractor.statusBarState,
-                    ) { finishedKeyguardState, statusBarState ->
-                        Pair(finishedKeyguardState, statusBarState)
-                    }
-                ) { shadeModel, keyguardStateAndStatusBarState ->
-                    Triple(
-                        shadeModel,
-                        keyguardStateAndStatusBarState.first,
-                        keyguardStateAndStatusBarState.second
-                    )
-                }
-                .collect { (shadeModel, keyguardState, statusBarState) ->
+                        ::Pair
+                    ),
+                    ::toTriple
+                )
+                .collect { triple ->
+                    val (shadeModel, keyguardState, statusBarState) = triple
+
                     val id = transitionId
                     if (id != null) {
                         // An existing `id` means a transition is started, and calls to
                         // `updateTransition` will control it until FINISHED
                         keyguardTransitionRepository.updateTransition(
                             id,
-                            shadeModel.expansionAmount,
+                            1f - shadeModel.expansionAmount,
                             if (
                                 shadeModel.expansionAmount == 0f || shadeModel.expansionAmount == 1f
                             ) {
@@ -137,7 +140,7 @@ constructor(
                         if (
                             keyguardState == KeyguardState.LOCKSCREEN &&
                                 shadeModel.isUserDragging &&
-                                statusBarState != SHADE_LOCKED
+                                statusBarState == KEYGUARD
                         ) {
                             transitionId =
                                 keyguardTransitionRepository.startTransition(

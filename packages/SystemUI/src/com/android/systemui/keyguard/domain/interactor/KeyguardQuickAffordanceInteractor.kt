@@ -34,7 +34,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentati
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderContract
+import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderContract as Contract
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
 import javax.inject.Inject
@@ -333,9 +333,13 @@ constructor(
     fun getPickerFlags(): List<KeyguardPickerFlag> {
         return listOf(
             KeyguardPickerFlag(
-                name = KeyguardQuickAffordanceProviderContract.FlagsTable.FLAG_NAME_FEATURE_ENABLED,
+                name = Contract.FlagsTable.FLAG_NAME_CUSTOM_LOCK_SCREEN_QUICK_AFFORDANCES_ENABLED,
                 value = featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES),
-            )
+            ),
+            KeyguardPickerFlag(
+                name = Contract.FlagsTable.FLAG_NAME_CUSTOM_CLOCKS_ENABLED,
+                value = featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS),
+            ),
         )
     }
 
