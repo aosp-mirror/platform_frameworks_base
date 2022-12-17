@@ -4841,6 +4841,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // If there is no resumed activity, it will choose the pausing or focused activity.
                 : mRootWindowContainer.getTopResumedActivity();
         mTopApp = top != null ? top.app : null;
+        if (mTopApp == mPreviousProcess) mPreviousProcess = null;
     }
 
     /**
