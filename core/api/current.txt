@@ -39579,6 +39579,15 @@ package android.service.credentials {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.BeginGetCredentialsResponse> CREATOR;
   }
 
+  public final class CallingAppInfo implements android.os.Parcelable {
+    ctor public CallingAppInfo(@NonNull String, @NonNull java.util.Set<android.content.pm.Signature>);
+    method public int describeContents();
+    method @NonNull public String getPackageName();
+    method @NonNull public java.util.Set<android.content.pm.Signature> getSignatures();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.CallingAppInfo> CREATOR;
+  }
+
   public final class CreateCredentialRequest implements android.os.Parcelable {
     ctor public CreateCredentialRequest(@NonNull String, @NonNull String, @NonNull android.os.Bundle);
     method public int describeContents();
