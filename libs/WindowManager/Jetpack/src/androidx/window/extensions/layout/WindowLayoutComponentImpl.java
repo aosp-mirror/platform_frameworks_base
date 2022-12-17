@@ -36,6 +36,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.ArrayMap;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiContext;
@@ -63,13 +64,19 @@ import java.util.function.Consumer;
 public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private static final String TAG = "SampleExtension";
 
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
     private final Map<Context, Consumer<WindowLayoutInfo>> mWindowLayoutChangeListeners =
             new ArrayMap<>();
 
+    @GuardedBy("mLock")
     private final DataProducer<List<CommonFoldingFeature>> mFoldingFeatureProducer;
 
+    @GuardedBy("mLock")
     private final List<CommonFoldingFeature> mLastReportedFoldingFeatures = new ArrayList<>();
 
+    @GuardedBy("mLock")
     private final Map<IBinder, ConfigurationChangeListener> mConfigurationChangeListeners =
             new ArrayMap<>();
 
@@ -84,7 +91,9 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
     /** Registers to listen to {@link CommonFoldingFeature} changes */
     public void addFoldingStateChangedCallback(Consumer<List<CommonFoldingFeature>> consumer) {
-        mFoldingFeatureProducer.addDataChangedCallback(consumer);
+        synchronized (mLock) {
+            mFoldingFeatureProducer.addDataChangedCallback(consumer);
+        }
     }
 
     /**
@@ -113,29 +122,32 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     @Override
     public void addWindowLayoutInfoListener(@NonNull @UiContext Context context,
             @NonNull Consumer<WindowLayoutInfo> consumer) {
-        if (mWindowLayoutChangeListeners.containsKey(context)
-                // In theory this method can be called on the same consumer with different context.
-                || mWindowLayoutChangeListeners.containsValue(consumer)) {
-            return;
-        }
-        if (!context.isUiContext()) {
-            throw new IllegalArgumentException("Context must be a UI Context, which should be"
-                    + " an Activity, WindowContext or InputMethodService");
-        }
-        mFoldingFeatureProducer.getData((features) -> {
-            WindowLayoutInfo newWindowLayout = getWindowLayoutInfo(context, features);
-            consumer.accept(newWindowLayout);
-        });
-        mWindowLayoutChangeListeners.put(context, consumer);
+        synchronized (mLock) {
+            if (mWindowLayoutChangeListeners.containsKey(context)
+                    // In theory this method can be called on the same consumer with different
+                    // context.
+                    || mWindowLayoutChangeListeners.containsValue(consumer)) {
+                return;
+            }
+            if (!context.isUiContext()) {
+                throw new IllegalArgumentException("Context must be a UI Context, which should be"
+                        + " an Activity, WindowContext or InputMethodService");
+            }
+            mFoldingFeatureProducer.getData((features) -> {
+                WindowLayoutInfo newWindowLayout = getWindowLayoutInfo(context, features);
+                consumer.accept(newWindowLayout);
+            });
+            mWindowLayoutChangeListeners.put(context, consumer);
 
-        final IBinder windowContextToken = context.getWindowContextToken();
-        if (windowContextToken != null) {
-            // We register component callbacks for window contexts. For activity contexts, they will
-            // receive callbacks from NotifyOnConfigurationChanged instead.
-            final ConfigurationChangeListener listener =
-                    new ConfigurationChangeListener(windowContextToken);
-            context.registerComponentCallbacks(listener);
-            mConfigurationChangeListeners.put(windowContextToken, listener);
+            final IBinder windowContextToken = context.getWindowContextToken();
+            if (windowContextToken != null) {
+                // We register component callbacks for window contexts. For activity contexts, they
+                // will receive callbacks from NotifyOnConfigurationChanged instead.
+                final ConfigurationChangeListener listener =
+                        new ConfigurationChangeListener(windowContextToken);
+                context.registerComponentCallbacks(listener);
+                mConfigurationChangeListeners.put(windowContextToken, listener);
+            }
         }
     }
 
@@ -146,25 +158,29 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      */
     @Override
     public void removeWindowLayoutInfoListener(@NonNull Consumer<WindowLayoutInfo> consumer) {
-        for (Context context : mWindowLayoutChangeListeners.keySet()) {
-            if (!mWindowLayoutChangeListeners.get(context).equals(consumer)) {
-                continue;
+        synchronized (mLock) {
+            for (Context context : mWindowLayoutChangeListeners.keySet()) {
+                if (!mWindowLayoutChangeListeners.get(context).equals(consumer)) {
+                    continue;
+                }
+                final IBinder token = context.getWindowContextToken();
+                if (token != null) {
+                    context.unregisterComponentCallbacks(mConfigurationChangeListeners.get(token));
+                    mConfigurationChangeListeners.remove(token);
+                }
+                break;
             }
-            final IBinder token = context.getWindowContextToken();
-            if (token != null) {
-                context.unregisterComponentCallbacks(mConfigurationChangeListeners.get(token));
-                mConfigurationChangeListeners.remove(token);
-            }
-            break;
+            mWindowLayoutChangeListeners.values().remove(consumer);
         }
-        mWindowLayoutChangeListeners.values().remove(consumer);
     }
 
+    @GuardedBy("mLock")
     @NonNull
-    Set<Context> getContextsListeningForLayoutChanges() {
+    private Set<Context> getContextsListeningForLayoutChanges() {
         return mWindowLayoutChangeListeners.keySet();
     }
 
+    @GuardedBy("mLock")
     private boolean isListeningForLayoutChanges(IBinder token) {
         for (Context context: getContextsListeningForLayoutChanges()) {
             if (token.equals(Context.getToken(context))) {
@@ -172,10 +188,6 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             }
         }
         return false;
-    }
-
-    protected boolean hasListeners() {
-        return !mWindowLayoutChangeListeners.isEmpty();
     }
 
     /**
@@ -201,13 +213,17 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     }
 
     private void onDisplayFeaturesChanged(List<CommonFoldingFeature> storedFeatures) {
-        mLastReportedFoldingFeatures.clear();
-        mLastReportedFoldingFeatures.addAll(storedFeatures);
-        for (Context context : getContextsListeningForLayoutChanges()) {
-            // Get the WindowLayoutInfo from the activity and pass the value to the layoutConsumer.
-            Consumer<WindowLayoutInfo> layoutConsumer = mWindowLayoutChangeListeners.get(context);
-            WindowLayoutInfo newWindowLayout = getWindowLayoutInfo(context, storedFeatures);
-            layoutConsumer.accept(newWindowLayout);
+        synchronized (mLock) {
+            mLastReportedFoldingFeatures.clear();
+            mLastReportedFoldingFeatures.addAll(storedFeatures);
+            for (Context context : getContextsListeningForLayoutChanges()) {
+                // Get the WindowLayoutInfo from the activity and pass the value to the
+                // layoutConsumer.
+                Consumer<WindowLayoutInfo> layoutConsumer = mWindowLayoutChangeListeners.get(
+                        context);
+                WindowLayoutInfo newWindowLayout = getWindowLayoutInfo(context, storedFeatures);
+                layoutConsumer.accept(newWindowLayout);
+            }
         }
     }
 
@@ -232,7 +248,10 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     @NonNull
     public WindowLayoutInfo getCurrentWindowLayoutInfo(int displayId,
             @NonNull WindowConfiguration windowConfiguration) {
-        return getWindowLayoutInfo(displayId, windowConfiguration, mLastReportedFoldingFeatures);
+        synchronized (mLock) {
+            return getWindowLayoutInfo(displayId, windowConfiguration,
+                    mLastReportedFoldingFeatures);
+        }
     }
 
     /** @see #getWindowLayoutInfo(Context, List)  */
@@ -330,6 +349,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         return !WindowConfiguration.inMultiWindowMode(windowingMode);
     }
 
+    @GuardedBy("mLock")
     private void onDisplayFeaturesChangedIfListening(@NonNull IBinder token) {
         if (isListeningForLayoutChanges(token)) {
             mFoldingFeatureProducer.getData(
@@ -341,13 +361,17 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         @Override
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
             super.onActivityCreated(activity, savedInstanceState);
-            onDisplayFeaturesChangedIfListening(activity.getActivityToken());
+            synchronized (mLock) {
+                onDisplayFeaturesChangedIfListening(activity.getActivityToken());
+            }
         }
 
         @Override
         public void onActivityConfigurationChanged(Activity activity) {
             super.onActivityConfigurationChanged(activity);
-            onDisplayFeaturesChangedIfListening(activity.getActivityToken());
+            synchronized (mLock) {
+                onDisplayFeaturesChangedIfListening(activity.getActivityToken());
+            }
         }
     }
 
@@ -360,7 +384,9 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
         @Override
         public void onConfigurationChanged(@NonNull Configuration newConfig) {
-            onDisplayFeaturesChangedIfListening(mToken);
+            synchronized (mLock) {
+                onDisplayFeaturesChangedIfListening(mToken);
+            }
         }
 
         @Override

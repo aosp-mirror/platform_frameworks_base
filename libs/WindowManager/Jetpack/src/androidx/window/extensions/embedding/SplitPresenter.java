@@ -39,7 +39,6 @@ import android.view.WindowMetrics;
 import android.window.TaskFragmentCreationParams;
 import android.window.WindowContainerTransaction;
 
-import androidx.annotation.GuardedBy;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -63,7 +62,10 @@ import java.util.concurrent.Executor;
 /**
  * Controls the visual presentation of the splits according to the containers formed by
  * {@link SplitController}.
+ *
+ * Note that all calls into this class must hold the {@link SplitController} internal lock.
  */
+@SuppressWarnings("GuardedBy")
 class SplitPresenter extends JetpackTaskFragmentOrganizer {
     @VisibleForTesting
     static final int POSITION_START = 0;
@@ -163,7 +165,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      * @return The newly created secondary container.
      */
     @NonNull
-    @GuardedBy("mController.mLock")
     TaskFragmentContainer createNewSplitWithEmptySideContainer(
             @NonNull WindowContainerTransaction wct, @NonNull Activity primaryActivity,
             @NonNull Intent secondaryIntent, @NonNull SplitPairRule rule) {
@@ -210,7 +211,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      *                          created and the activity will be re-parented to it.
      * @param rule The split rule to be applied to the container.
      */
-    @GuardedBy("mController.mLock")
     void createNewSplitContainer(@NonNull WindowContainerTransaction wct,
             @NonNull Activity primaryActivity, @NonNull Activity secondaryActivity,
             @NonNull SplitPairRule rule) {
@@ -285,7 +285,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      * @param rule              The split rule to be applied to the container.
      * @param isPlaceholder     Whether the launch is a placeholder.
      */
-    @GuardedBy("mController.mLock")
     void startActivityToSide(@NonNull WindowContainerTransaction wct,
             @NonNull Activity launchingActivity, @NonNull Intent activityIntent,
             @Nullable Bundle activityOptions, @NonNull SplitRule rule,
@@ -328,7 +327,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      * @param updatedContainer The task fragment that was updated and caused this split update.
      * @param wct WindowContainerTransaction that this update should be performed with.
      */
-    @GuardedBy("mController.mLock")
     void updateSplitContainer(@NonNull SplitContainer splitContainer,
             @NonNull TaskFragmentContainer updatedContainer,
             @NonNull WindowContainerTransaction wct) {
@@ -369,7 +367,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         updateTaskFragmentWindowingModeIfRegistered(wct, secondaryContainer, windowingMode);
     }
 
-    @GuardedBy("mController.mLock")
     private void setAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer primaryContainer,
             @NonNull TaskFragmentContainer secondaryContainer, @NonNull SplitRule splitRule,
@@ -393,7 +390,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      * creation has not been reported from the server yet.
      */
     // TODO(b/190433398): Handle resize if the fragment hasn't appeared yet.
-    void resizeTaskFragmentIfRegistered(@NonNull WindowContainerTransaction wct,
+    private void resizeTaskFragmentIfRegistered(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer container,
             @Nullable Rect bounds) {
         if (container.getInfo() == null) {
@@ -520,7 +517,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         return !(splitAttributes.getSplitType() instanceof ExpandContainersSplitType);
     }
 
-    @GuardedBy("mController.mLock")
     @NonNull
     SplitAttributes computeSplitAttributes(@NonNull TaskProperties taskProperties,
             @NonNull SplitRule rule, @Nullable Pair<Size, Size> minDimensionsPair) {
@@ -572,8 +568,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     @NonNull
-    static Pair<Size, Size> getActivitiesMinDimensionsPair(@NonNull Activity primaryActivity,
-            @NonNull Activity secondaryActivity) {
+    private static Pair<Size, Size> getActivitiesMinDimensionsPair(
+            @NonNull Activity primaryActivity, @NonNull Activity secondaryActivity) {
         return new Pair<>(getMinDimensions(primaryActivity), getMinDimensions(secondaryActivity));
     }
 
@@ -619,7 +615,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         return new Size(windowLayout.minWidth, windowLayout.minHeight);
     }
 
-    static boolean boundsSmallerThanMinDimensions(@NonNull Rect bounds,
+    private static boolean boundsSmallerThanMinDimensions(@NonNull Rect bounds,
             @Nullable Size minDimensions) {
         if (minDimensions == null) {
             return false;
