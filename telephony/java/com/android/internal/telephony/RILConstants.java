@@ -500,7 +500,7 @@ public interface RILConstants {
     int RIL_REQUEST_GET_SIM_PHONEBOOK_CAPACITY = 149;
     int RIL_REQUEST_GET_SIM_PHONEBOOK_RECORDS = 150;
     int RIL_REQUEST_UPDATE_SIM_PHONEBOOK_RECORD = 151;
-
+    int RIL_REQUEST_DEVICE_IMEI = 152;
     /* The following requests are not defined in RIL.h */
     int RIL_REQUEST_HAL_NON_RIL_BASE = 200;
     int RIL_REQUEST_GET_SLOT_STATUS = 200;
