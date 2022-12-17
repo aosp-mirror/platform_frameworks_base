@@ -823,7 +823,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
         lockscreenBypassIsAllowed();
-        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
+        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */, true /* newlyUnlocked */,
                 KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */,
                 new ArrayList<>());
         keyguardIsVisible();
@@ -834,7 +834,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void testIgnoresAuth_whenTrustAgentOnKeyguard_withoutBypass() {
         mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
-        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
+        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */, true /* newlyUnlocked */,
                 KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */, new ArrayList<>());
         keyguardIsVisible();
         verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
@@ -1049,8 +1049,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testGetUserCanSkipBouncer_whenTrust() {
         int user = KeyguardUpdateMonitor.getCurrentUser();
-        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */, user, 0 /* flags */,
-                new ArrayList<>());
+        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */, true /* newlyUnlocked */,
+                user, 0 /* flags */, new ArrayList<>());
         assertThat(mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)).isTrue();
     }
 
@@ -1314,7 +1314,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
 
         // WHEN trust is enabled (ie: via smartlock)
-        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
+        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */, true /* newlyUnlocked */,
                 KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */, new ArrayList<>());
 
         // THEN we shouldn't listen for udfps
@@ -1418,13 +1418,14 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testShowTrustGrantedMessage_onTrustGranted() {
         // WHEN trust is enabled (ie: via some trust agent) with a trustGranted string
-        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
+        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */, true /* newlyUnlocked */,
                 KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */,
                 Arrays.asList("Unlocked by wearable"));
 
         // THEN the showTrustGrantedMessage should be called with the first message
         verify(mTestCallback).onTrustGrantedForCurrentUser(
-                anyBoolean(),
+                anyBoolean() /* dismissKeyguard */,
+                eq(true) /* newlyUnlocked */,
                 eq(new TrustGrantFlags(0)),
                 eq("Unlocked by wearable"));
     }
@@ -1870,6 +1871,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // WHEN onTrustChanged with TRUST_DISMISS_KEYGUARD flag
         mKeyguardUpdateMonitor.onTrustChanged(
                 true /* enabled */,
+                true /* newlyUnlocked */,
                 getCurrentUser() /* userId */,
                 TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD /* flags */,
                 null /* trustGrantedMessages */);
@@ -1877,6 +1879,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // THEN onTrustGrantedForCurrentUser callback called
         verify(callback).onTrustGrantedForCurrentUser(
                 eq(true) /* dismissKeyguard */,
+                eq(true) /* newlyUnlocked */,
                 eq(new TrustGrantFlags(TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD)),
                 eq(null) /* message */
         );
@@ -1893,6 +1896,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // WHEN onTrustChanged with TRUST_DISMISS_KEYGUARD flag
         mKeyguardUpdateMonitor.onTrustChanged(
                 true /* enabled */,
+                true /* newlyUnlocked */,
                 getCurrentUser() /* userId */,
                 TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD /* flags */,
                 null /* trustGrantedMessages */);
@@ -1900,6 +1904,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // THEN onTrustGrantedForCurrentUser callback called
         verify(callback).onTrustGrantedForCurrentUser(
                 eq(false) /* dismissKeyguard */,
+                eq(true) /* newlyUnlocked */,
                 eq(new TrustGrantFlags(TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD)),
                 eq(null) /* message */
         );
@@ -1917,6 +1922,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // WHEN onTrustChanged for a different user
         mKeyguardUpdateMonitor.onTrustChanged(
                 true /* enabled */,
+                true /* newlyUnlocked */,
                 546 /* userId, not the current userId */,
                 0 /* flags */,
                 null /* trustGrantedMessages */);
@@ -1924,6 +1930,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // THEN onTrustGrantedForCurrentUser callback called
         verify(callback, never()).onTrustGrantedForCurrentUser(
                 anyBoolean() /* dismissKeyguard */,
+                eq(true) /* newlyUnlocked */,
                 anyObject() /* flags */,
                 anyString() /* message */
         );
@@ -1941,6 +1948,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // flags (temporary & rewable is active unlock)
         mKeyguardUpdateMonitor.onTrustChanged(
                 true /* enabled */,
+                true /* newlyUnlocked */,
                 getCurrentUser() /* userId */,
                 TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD
                         | TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE /* flags */,
@@ -1949,6 +1957,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // THEN onTrustGrantedForCurrentUser callback called
         verify(callback).onTrustGrantedForCurrentUser(
                 eq(true) /* dismissKeyguard */,
+                eq(true) /* newlyUnlocked */,
                 eq(new TrustGrantFlags(TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD
                         | TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)),
                 eq(null) /* message */
@@ -1968,6 +1977,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // WHEN onTrustChanged with INITIATED_BY_USER flag
         mKeyguardUpdateMonitor.onTrustChanged(
                 true /* enabled */,
+                true /* newlyUnlocked */,
                 getCurrentUser() /* userId, not the current userId */,
                 TrustAgentService.FLAG_GRANT_TRUST_INITIATED_BY_USER /* flags */,
                 null /* trustGrantedMessages */);
@@ -1975,6 +1985,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // THEN onTrustGrantedForCurrentUser callback called
         verify(callback, never()).onTrustGrantedForCurrentUser(
                 eq(true) /* dismissKeyguard */,
+                eq(true) /* newlyUnlocked */,
                 eq(new TrustGrantFlags(TrustAgentService.FLAG_GRANT_TRUST_INITIATED_BY_USER)),
                 anyString() /* message */
         );
@@ -1992,6 +2003,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // WHEN onTrustChanged with INITIATED_BY_USER flag
         mKeyguardUpdateMonitor.onTrustChanged(
                 true /* enabled */,
+                true /* newlyUnlocked */,
                 getCurrentUser() /* userId, not the current userId */,
                 TrustAgentService.FLAG_GRANT_TRUST_INITIATED_BY_USER
                         | TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE /* flags */,
@@ -2000,6 +2012,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // THEN onTrustGrantedForCurrentUser callback called
         verify(callback, never()).onTrustGrantedForCurrentUser(
                 eq(true) /* dismissKeyguard */,
+                eq(true) /* newlyUnlocked */,
                 eq(new TrustGrantFlags(TrustAgentService.FLAG_GRANT_TRUST_INITIATED_BY_USER
                         | TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)),
                 anyString() /* message */
@@ -2309,6 +2322,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     private void currentUserDoesNotHaveTrust() {
         mKeyguardUpdateMonitor.onTrustChanged(
+                false,
                 false,
                 KeyguardUpdateMonitor.getCurrentUser(),
                 -1,

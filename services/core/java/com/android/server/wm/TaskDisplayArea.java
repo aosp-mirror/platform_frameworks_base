@@ -41,6 +41,7 @@ import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.UserHandle;
@@ -633,22 +634,20 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     }
 
     @Override
-    int getOrientation(int candidate) {
-        mLastOrientationSource = null;
-        if (getIgnoreOrientationRequest()) {
-            return SCREEN_ORIENTATION_UNSET;
-        }
-        if (!canSpecifyOrientation()) {
+    @ScreenOrientation
+    int getOrientation(@ScreenOrientation int candidate) {
+        final int orientation = super.getOrientation(candidate);
+        if (!canSpecifyOrientation(orientation)) {
+            mLastOrientationSource = null;
             // We only respect orientation of the focused TDA, which can be a child of this TDA.
-            return reduceOnAllTaskDisplayAreas((taskDisplayArea, orientation) -> {
-                if (taskDisplayArea == this || orientation != SCREEN_ORIENTATION_UNSET) {
-                    return orientation;
+            return reduceOnAllTaskDisplayAreas((taskDisplayArea, taskOrientation) -> {
+                if (taskDisplayArea == this || taskOrientation != SCREEN_ORIENTATION_UNSET) {
+                    return taskOrientation;
                 }
                 return taskDisplayArea.getOrientation(candidate);
             }, SCREEN_ORIENTATION_UNSET);
         }
 
-        final int orientation = super.getOrientation(candidate);
         if (orientation != SCREEN_ORIENTATION_UNSET
                 && orientation != SCREEN_ORIENTATION_BEHIND) {
             ProtoLog.v(WM_DEBUG_ORIENTATION,
@@ -1870,12 +1869,11 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     }
 
     /** Whether this task display area can request orientation. */
-    boolean canSpecifyOrientation() {
-        // Only allow to specify orientation if this TDA is not set to ignore orientation request,
-        // and it is the last focused one on this logical display that can request orientation
-        // request.
-        return !getIgnoreOrientationRequest()
-                && mDisplayContent.getOrientationRequestingTaskDisplayArea() == this;
+    boolean canSpecifyOrientation(@ScreenOrientation int orientation) {
+        // Only allow to specify orientation if this TDA is the last focused one on this logical
+        // display that can request orientation request.
+        return mDisplayContent.getOrientationRequestingTaskDisplayArea() == this
+                && !getIgnoreOrientationRequest(orientation);
     }
 
     void clearPreferredTopFocusableRootTask() {

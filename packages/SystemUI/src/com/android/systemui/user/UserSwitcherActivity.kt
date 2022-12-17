@@ -39,9 +39,9 @@ constructor(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.user_switcher_fullscreen)
-        window.decorView.getWindowInsetsController().apply {
-            setSystemBarsBehavior(BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE)
-            hide(Type.systemBars())
+        window.decorView.windowInsetsController?.let { controller ->
+            controller.systemBarsBehavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            controller.hide(Type.systemBars())
         }
         val viewModel =
             ViewModelProvider(this, viewModelFactory.get())[UserSwitcherViewModel::class.java]

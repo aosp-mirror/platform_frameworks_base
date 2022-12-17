@@ -16,13 +16,10 @@
 
 package com.android.systemui.keyguard.data.repository
 
-import android.animation.AnimationHandler.AnimationFrameCallbackProvider
 import android.animation.ValueAnimator
 import android.util.Log
 import android.util.Log.TerribleFailure
 import android.util.Log.TerribleFailureHandler
-import android.view.Choreographer.FrameCallback
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Interpolators
@@ -32,22 +29,17 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.util.KeyguardTransitionRunner
 import com.google.common.truth.Truth.assertThat
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.UUID
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.yield
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.After
-import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -60,12 +52,14 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: KeyguardTransitionRepository
     private lateinit var oldWtfHandler: TerribleFailureHandler
     private lateinit var wtfHandler: WtfHandler
+    private lateinit var runner: KeyguardTransitionRunner
 
     @Before
     fun setUp() {
         underTest = KeyguardTransitionRepositoryImpl()
         wtfHandler = WtfHandler()
         oldWtfHandler = Log.setWtfHandler(wtfHandler)
+        runner = KeyguardTransitionRunner(underTest)
     }
 
     @After
@@ -75,56 +69,37 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun `startTransition runs animator to completion`() =
-        runBlocking(IMMEDIATE) {
-            val (animator, provider) = setupAnimator(this)
-
+        TestScope().runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
 
-            underTest.startTransition(TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, animator))
-
-            val startTime = System.currentTimeMillis()
-            while (animator.isRunning()) {
-                yield()
-                if (System.currentTimeMillis() - startTime > MAX_TEST_DURATION) {
-                    fail("Failed test due to excessive runtime of: $MAX_TEST_DURATION")
-                }
-            }
+            runner.startTransition(
+                this,
+                TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, getAnimator()),
+                maxFrames = 100
+            )
 
             assertSteps(steps, listWithStep(BigDecimal(.1)), AOD, LOCKSCREEN)
-
             job.cancel()
-            provider.stop()
         }
 
     @Test
-    @FlakyTest(bugId = 260213291)
-    fun `starting second transition will cancel the first transition`() {
-        runBlocking(IMMEDIATE) {
-            val (animator, provider) = setupAnimator(this)
-
+    fun `starting second transition will cancel the first transition`() =
+        TestScope().runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
-
-            underTest.startTransition(TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, animator))
-            // 3 yields(), alternating with the animator, results in a value 0.1, which can be
-            // canceled and tested against
-            yield()
-            yield()
-            yield()
+            runner.startTransition(
+                this,
+                TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, getAnimator()),
+                maxFrames = 3,
+            )
 
             // Now start 2nd transition, which will interrupt the first
             val job2 = underTest.transition(LOCKSCREEN, AOD).onEach { steps.add(it) }.launchIn(this)
-            val (animator2, provider2) = setupAnimator(this)
-            underTest.startTransition(TransitionInfo(OWNER_NAME, LOCKSCREEN, AOD, animator2))
-
-            val startTime = System.currentTimeMillis()
-            while (animator2.isRunning()) {
-                yield()
-                if (System.currentTimeMillis() - startTime > MAX_TEST_DURATION) {
-                    fail("Failed test due to excessive runtime of: $MAX_TEST_DURATION")
-                }
-            }
+            runner.startTransition(
+                this,
+                TransitionInfo(OWNER_NAME, LOCKSCREEN, AOD, getAnimator()),
+            )
 
             val firstTransitionSteps = listWithStep(step = BigDecimal(.1), stop = BigDecimal(.1))
             assertSteps(steps.subList(0, 4), firstTransitionSteps, AOD, LOCKSCREEN)
@@ -134,31 +109,25 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
             job.cancel()
             job2.cancel()
-            provider.stop()
-            provider2.stop()
         }
-    }
 
     @Test
     fun `Null animator enables manual control with updateTransition`() =
-        runBlocking(IMMEDIATE) {
+        TestScope().runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
 
             val uuid =
                 underTest.startTransition(
-                    TransitionInfo(
-                        ownerName = OWNER_NAME,
-                        from = AOD,
-                        to = LOCKSCREEN,
-                        animator = null,
-                    )
+                    TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, animator = null)
                 )
+            runCurrent()
 
             checkNotNull(uuid).let {
                 underTest.updateTransition(it, 0.5f, TransitionState.RUNNING)
                 underTest.updateTransition(it, 1f, TransitionState.FINISHED)
             }
+            runCurrent()
 
             assertThat(steps.size).isEqualTo(3)
             assertThat(steps[0])
@@ -256,57 +225,11 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
         assertThat(wtfHandler.failed).isFalse()
     }
 
-    private fun setupAnimator(
-        scope: CoroutineScope
-    ): Pair<ValueAnimator, TestFrameCallbackProvider> {
-        val animator =
-            ValueAnimator().apply {
-                setInterpolator(Interpolators.LINEAR)
-                setDuration(ANIMATION_DURATION)
-            }
-
-        val provider = TestFrameCallbackProvider(animator, scope)
-        provider.start()
-
-        return Pair(animator, provider)
-    }
-
-    /** Gives direct control over ValueAnimator. See [AnimationHandler] */
-    private class TestFrameCallbackProvider(
-        private val animator: ValueAnimator,
-        private val scope: CoroutineScope,
-    ) : AnimationFrameCallbackProvider {
-
-        private var frameCount = 1L
-        private var frames = MutableStateFlow(Pair<Long, FrameCallback?>(0L, null))
-        private var job: Job? = null
-
-        fun start() {
-            animator.getAnimationHandler().setProvider(this)
-
-            job =
-                scope.launch {
-                    frames.collect {
-                        // Delay is required for AnimationHandler to properly register a callback
-                        yield()
-                        val (frameNumber, callback) = it
-                        callback?.doFrame(frameNumber)
-                    }
-                }
+    private fun getAnimator(): ValueAnimator {
+        return ValueAnimator().apply {
+            setInterpolator(Interpolators.LINEAR)
+            setDuration(10)
         }
-
-        fun stop() {
-            job?.cancel()
-            animator.getAnimationHandler().setProvider(null)
-        }
-
-        override fun postFrameCallback(cb: FrameCallback) {
-            frames.value = Pair(frameCount++, cb)
-        }
-        override fun postCommitCallback(runnable: Runnable) {}
-        override fun getFrameTime() = frameCount
-        override fun getFrameDelay() = 1L
-        override fun setFrameDelay(delay: Long) {}
     }
 
     private class WtfHandler : TerribleFailureHandler {
@@ -317,9 +240,6 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
     }
 
     companion object {
-        private const val MAX_TEST_DURATION = 100L
-        private const val ANIMATION_DURATION = 10L
-        private const val OWNER_NAME = "Test"
-        private val IMMEDIATE = Dispatchers.Main.immediate
+        private const val OWNER_NAME = "KeyguardTransitionRunner"
     }
 }

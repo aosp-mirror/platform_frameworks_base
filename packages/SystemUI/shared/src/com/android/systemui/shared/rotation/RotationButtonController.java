@@ -71,7 +71,7 @@ import java.util.function.Supplier;
  */
 public class RotationButtonController {
 
-    private static final String TAG = "StatusBar/RotationButtonController";
+    private static final String TAG = "RotationButtonController";
     private static final int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
     private static final int NAVBAR_HIDDEN_PENDING_ICON_TIMEOUT_MS = 20000;
     private static final Interpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
@@ -377,6 +377,7 @@ public class RotationButtonController {
         }
 
         // Prepare to show the navbar icon by updating the icon style to change anim params
+        Log.i(TAG, "onRotationProposal(rotation=" + rotation + ")");
         mLastRotationSuggestion = rotation; // Remember rotation for click
         final boolean rotationCCW = Utilities.isRotationAnimationCCW(windowRotation, rotation);
         if (windowRotation == Surface.ROTATION_0 || windowRotation == Surface.ROTATION_180) {
@@ -499,6 +500,7 @@ public class RotationButtonController {
         mUiEventLogger.log(RotationButtonEvent.ROTATION_SUGGESTION_ACCEPTED);
         incrementNumAcceptedRotationSuggestionsIfNeeded();
         setRotationLockedAtAngle(mLastRotationSuggestion);
+        Log.i(TAG, "onRotateSuggestionClick() mLastRotationSuggestion=" + mLastRotationSuggestion);
         v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
     }
 

@@ -50,7 +50,11 @@ internal object NotificationMemoryViewWalker {
 
     /**
      * Returns memory usage of public and private views contained in passed
-     * [ExpandableNotificationRow]
+     * [ExpandableNotificationRow]. Each entry will correspond to one of the [ViewType] values with
+     * [ViewType.TOTAL] totalling all memory use. If a type of view is missing, the corresponding
+     * entry will not appear in resulting list.
+     *
+     * This will return an empty list if the ExpandableNotificationRow has no views inflated.
      */
     fun getViewUsage(row: ExpandableNotificationRow?): List<NotificationViewUsage> {
         if (row == null) {
@@ -58,42 +62,72 @@ internal object NotificationMemoryViewWalker {
         }
 
         // The ordering here is significant since it determines deduplication of seen drawables.
-        return listOf(
-            getViewUsage(ViewType.PRIVATE_EXPANDED_VIEW, row.privateLayout?.expandedChild),
-            getViewUsage(ViewType.PRIVATE_CONTRACTED_VIEW, row.privateLayout?.contractedChild),
-            getViewUsage(ViewType.PRIVATE_HEADS_UP_VIEW, row.privateLayout?.headsUpChild),
-            getViewUsage(ViewType.PUBLIC_VIEW, row.publicLayout),
-            getTotalUsage(row)
-        )
+        val perViewUsages =
+            listOf(
+                    getViewUsage(ViewType.PRIVATE_EXPANDED_VIEW, row.privateLayout?.expandedChild),
+                    getViewUsage(
+                        ViewType.PRIVATE_CONTRACTED_VIEW,
+                        row.privateLayout?.contractedChild
+                    ),
+                    getViewUsage(ViewType.PRIVATE_HEADS_UP_VIEW, row.privateLayout?.headsUpChild),
+                    getViewUsage(
+                        ViewType.PUBLIC_VIEW,
+                        row.publicLayout?.expandedChild,
+                        row.publicLayout?.contractedChild,
+                        row.publicLayout?.headsUpChild
+                    ),
+                )
+                .filterNotNull()
+
+        return if (perViewUsages.isNotEmpty()) {
+            // Attach summed totals field only if there was any view actually measured.
+            // This reduces bug report noise and makes checks for collapsed views easier.
+            val totals = getTotalUsage(row)
+            if (totals == null) {
+                perViewUsages
+            } else {
+                perViewUsages + totals
+            }
+        } else {
+            listOf()
+        }
     }
 
     /**
      * Calculate total usage of all views - we need to do a separate traversal to make sure we don't
      * double count fields.
      */
-    private fun getTotalUsage(row: ExpandableNotificationRow): NotificationViewUsage {
-        val totalUsage = UsageBuilder()
+    private fun getTotalUsage(row: ExpandableNotificationRow): NotificationViewUsage? {
         val seenObjects = hashSetOf<Int>()
-
-        row.publicLayout?.let { computeViewHierarchyUse(it, totalUsage, seenObjects) }
-        row.privateLayout?.let { child ->
-            for (view in listOf(child.expandedChild, child.contractedChild, child.headsUpChild)) {
-                (view as? ViewGroup)?.let { v ->
-                    computeViewHierarchyUse(v, totalUsage, seenObjects)
-                }
-            }
-        }
-        return totalUsage.build(ViewType.TOTAL)
+        return getViewUsage(
+            ViewType.TOTAL,
+            row.privateLayout?.expandedChild,
+            row.privateLayout?.contractedChild,
+            row.privateLayout?.headsUpChild,
+            row.publicLayout?.expandedChild,
+            row.publicLayout?.contractedChild,
+            row.publicLayout?.headsUpChild,
+            seenObjects = seenObjects
+        )
     }
 
     private fun getViewUsage(
         type: ViewType,
-        rootView: View?,
+        vararg rootViews: View?,
         seenObjects: HashSet<Int> = hashSetOf()
-    ): NotificationViewUsage {
-        val usageBuilder = UsageBuilder()
-        (rootView as? ViewGroup)?.let { computeViewHierarchyUse(it, usageBuilder, seenObjects) }
-        return usageBuilder.build(type)
+    ): NotificationViewUsage? {
+        val usageBuilder = lazy { UsageBuilder() }
+        rootViews.forEach { rootView ->
+            (rootView as? ViewGroup)?.let { rootViewGroup ->
+                computeViewHierarchyUse(rootViewGroup, usageBuilder.value, seenObjects)
+            }
+        }
+
+        return if (usageBuilder.isInitialized()) {
+            usageBuilder.value.build(type)
+        } else {
+            null
+        }
     }
 
     private fun computeViewHierarchyUse(

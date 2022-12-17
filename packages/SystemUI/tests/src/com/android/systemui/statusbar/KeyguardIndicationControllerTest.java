@@ -1042,7 +1042,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         // GIVEN a trust granted message but trust isn't granted
         final String trustGrantedMsg = "testing trust granted message";
         mController.getKeyguardCallback().onTrustGrantedForCurrentUser(
-                false, new TrustGrantFlags(0), trustGrantedMsg);
+                false, false, new TrustGrantFlags(0), trustGrantedMsg);
 
         verifyHideIndication(INDICATION_TYPE_TRUST);
 
@@ -1067,7 +1067,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         // WHEN the showTrustGranted method is called
         final String trustGrantedMsg = "testing trust granted message";
         mController.getKeyguardCallback().onTrustGrantedForCurrentUser(
-                false, new TrustGrantFlags(0), trustGrantedMsg);
+                false, false, new TrustGrantFlags(0), trustGrantedMsg);
 
         // THEN verify the trust granted message shows
         verifyIndicationMessage(
@@ -1085,7 +1085,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // WHEN the showTrustGranted method is called with a null message
         mController.getKeyguardCallback().onTrustGrantedForCurrentUser(
-                false, new TrustGrantFlags(0), null);
+                false, false, new TrustGrantFlags(0), null);
 
         // THEN verify the default trust granted message shows
         verifyIndicationMessage(
@@ -1103,7 +1103,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // WHEN the showTrustGranted method is called with an EMPTY string
         mController.getKeyguardCallback().onTrustGrantedForCurrentUser(
-                false, new TrustGrantFlags(0), "");
+                false, false, new TrustGrantFlags(0), "");
 
         // THEN verify NO trust message is shown
         verifyNoMessage(INDICATION_TYPE_TRUST);

@@ -50,6 +50,8 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeController;
@@ -106,6 +108,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
     private final LockPatternUtils mLockPatternUtils;
     private final StatusBarRemoteInputCallback mStatusBarRemoteInputCallback;
     private final ActivityIntentHelper mActivityIntentHelper;
+    private final FeatureFlags mFeatureFlags;
 
     private final MetricsLogger mMetricsLogger;
     private final StatusBarNotificationActivityStarterLogger mLogger;
@@ -149,7 +152,8 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             NotificationPanelViewController panel,
             ActivityLaunchAnimator activityLaunchAnimator,
             NotificationLaunchAnimatorControllerProvider notificationAnimationProvider,
-            LaunchFullScreenIntentProvider launchFullScreenIntentProvider) {
+            LaunchFullScreenIntentProvider launchFullScreenIntentProvider,
+            FeatureFlags featureFlags) {
         mContext = context;
         mMainThreadHandler = mainThreadHandler;
         mUiBgExecutor = uiBgExecutor;
@@ -170,6 +174,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
         mLockPatternUtils = lockPatternUtils;
         mStatusBarRemoteInputCallback = remoteInputCallback;
         mActivityIntentHelper = activityIntentHelper;
+        mFeatureFlags = featureFlags;
         mMetricsLogger = metricsLogger;
         mLogger = logger;
         mOnUserInteractionCallback = onUserInteractionCallback;
@@ -548,7 +553,10 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             mLogger.logFullScreenIntentSuppressedByVR(entry);
             return;
         }
-
+        if (mFeatureFlags.isEnabled(Flags.FSI_CHROME)) {
+            // FsiChromeRepo runs its own implementation of launchFullScreenIntent
+            return;
+        }
         // Stop screensaver if the notification has a fullscreen intent.
         // (like an incoming phone call)
         mUiBgExecutor.execute(() -> {
