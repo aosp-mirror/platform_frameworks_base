@@ -1002,14 +1002,16 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Menginstal aplikasi kamera"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplikasi disiapkan"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Tersedia minimal satu perangkat"</string>
+    <!-- no translation found for keyguard_affordance_press_too_short (2687995216454987952) -->
+    <skip />
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Batal"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Balik sekarang"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Bentangkan ponsel untuk selfie yang lebih baik"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Gunakan layar depan untuk selfie yang lebih baik?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Gunakan kamera belakang untuk foto dengan resolusi lebih tinggi dan lebih lebar."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Layar ini akan dinonaktifkan"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Perangkat foldable sedang dibentangkan"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Perangkat foldable sedang dibalik"</string>
+    <!-- no translation found for stylus_battery_low (7134370101603167096) -->
     <skip />
 </resources>

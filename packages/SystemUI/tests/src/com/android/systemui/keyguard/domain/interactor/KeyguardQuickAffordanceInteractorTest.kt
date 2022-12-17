@@ -22,6 +22,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
@@ -73,6 +74,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var launchAnimator: DialogLaunchAnimator
 
     private lateinit var underTest: KeyguardQuickAffordanceInteractor
 
@@ -171,6 +173,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 activityStarter = activityStarter,
                 featureFlags = featureFlags,
                 repository = { quickAffordanceRepository },
+                launchAnimator = launchAnimator,
             )
     }
 

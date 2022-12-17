@@ -109,6 +109,7 @@ final class HotwordAudioStreamCopier {
         List<HotwordAudioStream> newAudioStreams = new ArrayList<>(audioStreams.size());
         List<CopyTaskInfo> copyTaskInfos = new ArrayList<>(audioStreams.size());
         int totalMetadataBundleSizeBytes = 0;
+        int totalInitialAudioSizeBytes = 0;
         for (HotwordAudioStream audioStream : audioStreams) {
             ParcelFileDescriptor[] clientPipe = ParcelFileDescriptor.createReliablePipe();
             ParcelFileDescriptor clientAudioSource = clientPipe[0];
@@ -137,6 +138,10 @@ final class HotwordAudioStreamCopier {
                 }
             }
 
+            // We are including the non-streamed initial audio
+            // (HotwordAudioStream.getInitialAudio()) bytes in the "stream" size metrics.
+            totalInitialAudioSizeBytes += audioStream.getInitialAudio().length;
+
             ParcelFileDescriptor serviceAudioSource =
                     audioStream.getAudioStreamParcelFileDescriptor();
             copyTaskInfos.add(new CopyTaskInfo(serviceAudioSource, clientAudioSink,
@@ -146,7 +151,7 @@ final class HotwordAudioStreamCopier {
         String resultTaskId = TASK_ID_PREFIX + System.identityHashCode(result);
         mExecutorService.execute(
                 new HotwordDetectedResultCopyTask(resultTaskId, copyTaskInfos,
-                        totalMetadataBundleSizeBytes));
+                        totalMetadataBundleSizeBytes, totalInitialAudioSizeBytes));
 
         return result.buildUpon().setAudioStreams(newAudioStreams).build();
     }
@@ -167,13 +172,15 @@ final class HotwordAudioStreamCopier {
         private final String mResultTaskId;
         private final List<CopyTaskInfo> mCopyTaskInfos;
         private final int mTotalMetadataSizeBytes;
+        private final int mTotalInitialAudioSizeBytes;
         private final ExecutorService mExecutorService = Executors.newCachedThreadPool();
 
         HotwordDetectedResultCopyTask(String resultTaskId, List<CopyTaskInfo> copyTaskInfos,
-                int totalMetadataSizeBytes) {
+                int totalMetadataSizeBytes, int totalInitialAudioSizeBytes) {
             mResultTaskId = resultTaskId;
             mCopyTaskInfos = copyTaskInfos;
             mTotalMetadataSizeBytes = totalMetadataSizeBytes;
+            mTotalInitialAudioSizeBytes = totalInitialAudioSizeBytes;
         }
 
         @Override
@@ -195,25 +202,30 @@ final class HotwordAudioStreamCopier {
                 try {
                     HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
                             HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__STARTED,
-                            mVoiceInteractorUid, /* streamSizeBytes= */ 0, mTotalMetadataSizeBytes,
-                            size);
+                            mVoiceInteractorUid, mTotalInitialAudioSizeBytes,
+                            mTotalMetadataSizeBytes, size);
                     // TODO(b/244599891): Set timeout, close after inactivity
                     mExecutorService.invokeAll(tasks);
 
-                    int totalStreamSizeBytes = 0;
+                    // We are including the non-streamed initial audio
+                    // (HotwordAudioStream.getInitialAudio()) bytes in the "stream" size metrics.
+                    int totalStreamSizeBytes = mTotalInitialAudioSizeBytes;
                     for (SingleAudioStreamCopyTask task : tasks) {
                         totalStreamSizeBytes += task.mTotalCopiedBytes;
                     }
 
-                    Slog.i(TAG, mResultTaskId + ": Task was completed. Total bytes streamed: "
-                            + totalStreamSizeBytes + ", total metadata bundle size bytes: "
+                    Slog.i(TAG, mResultTaskId + ": Task was completed. Total bytes egressed: "
+                            + totalStreamSizeBytes + " (including " + mTotalInitialAudioSizeBytes
+                            + " bytes NOT streamed), total metadata bundle size bytes: "
                             + mTotalMetadataSizeBytes);
                     HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
                             HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__ENDED,
                             mVoiceInteractorUid, totalStreamSizeBytes, mTotalMetadataSizeBytes,
                             size);
                 } catch (InterruptedException e) {
-                    int totalStreamSizeBytes = 0;
+                    // We are including the non-streamed initial audio
+                    // (HotwordAudioStream.getInitialAudio()) bytes in the "stream" size metrics.
+                    int totalStreamSizeBytes = mTotalInitialAudioSizeBytes;
                     for (SingleAudioStreamCopyTask task : tasks) {
                         totalStreamSizeBytes += task.mTotalCopiedBytes;
                     }
@@ -222,8 +234,9 @@ final class HotwordAudioStreamCopier {
                             HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__INTERRUPTED_EXCEPTION,
                             mVoiceInteractorUid, totalStreamSizeBytes, mTotalMetadataSizeBytes,
                             size);
-                    Slog.e(TAG, mResultTaskId + ": Task was interrupted. Total bytes streamed: "
-                            + totalStreamSizeBytes + ", total metadata bundle size bytes: "
+                    Slog.i(TAG, mResultTaskId + ": Task was interrupted. Total bytes egressed: "
+                            + totalStreamSizeBytes + " (including " + mTotalInitialAudioSizeBytes
+                            + " bytes NOT streamed), total metadata bundle size bytes: "
                             + mTotalMetadataSizeBytes);
                     bestEffortPropagateError(e.getMessage());
                 } finally {

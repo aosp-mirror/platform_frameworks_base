@@ -17,9 +17,11 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.util.Log
 import com.android.internal.widget.LockPatternUtils
+import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
@@ -35,15 +37,16 @@ import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAfforda
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderContract as Contract
+import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import javax.inject.Inject
 
 @SysUISingleton
 class KeyguardQuickAffordanceInteractor
@@ -57,6 +60,7 @@ constructor(
     private val activityStarter: ActivityStarter,
     private val featureFlags: FeatureFlags,
     private val repository: Lazy<KeyguardQuickAffordanceRepository>,
+    private val launchAnimator: DialogLaunchAnimator,
 ) {
     private val isUsingRepository: Boolean
         get() = featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES)
@@ -131,6 +135,11 @@ constructor(
                     expandable = expandable,
                 )
             is KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled -> Unit
+            is KeyguardQuickAffordanceConfig.OnTriggeredResult.ShowDialog ->
+                showDialog(
+                    result.dialog,
+                    result.expandable,
+                )
         }
     }
 
@@ -276,6 +285,19 @@ constructor(
             } else {
                 KeyguardQuickAffordanceModel.Hidden
             }
+        }
+    }
+
+    private fun showDialog(dialog: AlertDialog, expandable: Expandable?) {
+        expandable?.dialogLaunchController()?.let { controller ->
+            SystemUIDialog.applyFlags(dialog)
+            SystemUIDialog.setShowForAllUsers(dialog, true)
+            SystemUIDialog.registerDismissListener(dialog)
+            SystemUIDialog.setDialogSize(dialog)
+            launchAnimator.show(
+                dialog,
+                controller
+            )
         }
     }
 

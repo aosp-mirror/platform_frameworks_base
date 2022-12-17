@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.data.quickaffordance
 
+import android.app.AlertDialog
 import android.content.Intent
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
@@ -140,6 +141,16 @@ interface KeyguardQuickAffordanceConfig {
         data class StartActivity(
             val intent: Intent,
             val canShowWhileLocked: Boolean,
+        ) : OnTriggeredResult()
+
+        /**
+         * Returning this as a result from the [onTriggered] method means that the implementation
+         * has _not_ taken care of the action and the system should show a Dialog using the
+         * given [AlertDialog] and [Expandable].
+         */
+        data class ShowDialog(
+            val dialog: AlertDialog,
+            val expandable: Expandable?,
         ) : OnTriggeredResult()
     }
 
