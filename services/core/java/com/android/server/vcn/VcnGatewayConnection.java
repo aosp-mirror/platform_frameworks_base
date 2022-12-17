@@ -33,6 +33,7 @@ import static android.net.vcn.VcnManager.VCN_ERROR_CODE_NETWORK_ERROR;
 
 import static com.android.server.VcnManagementService.LOCAL_LOG;
 import static com.android.server.VcnManagementService.VDBG;
+import static com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -59,6 +60,7 @@ import android.net.RouteInfo;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.Uri;
 import android.net.annotations.PolicyDirection;
+import android.net.ipsec.ike.ChildSaProposal;
 import android.net.ipsec.ike.ChildSessionCallback;
 import android.net.ipsec.ike.ChildSessionConfiguration;
 import android.net.ipsec.ike.ChildSessionParams;
@@ -67,11 +69,14 @@ import android.net.ipsec.ike.IkeSessionCallback;
 import android.net.ipsec.ike.IkeSessionConfiguration;
 import android.net.ipsec.ike.IkeSessionConnectionInfo;
 import android.net.ipsec.ike.IkeSessionParams;
+import android.net.ipsec.ike.IkeTrafficSelector;
 import android.net.ipsec.ike.IkeTunnelConnectionParams;
+import android.net.ipsec.ike.TunnelModeChildSessionParams;
 import android.net.ipsec.ike.exceptions.IkeException;
 import android.net.ipsec.ike.exceptions.IkeInternalException;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
 import android.net.vcn.VcnGatewayConnectionConfig;
+import android.net.vcn.VcnManager;
 import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
 import android.os.Handler;
@@ -168,6 +173,9 @@ import java.util.function.Consumer;
  */
 public class VcnGatewayConnection extends StateMachine {
     private static final String TAG = VcnGatewayConnection.class.getSimpleName();
+
+    /** Default number of parallel SAs requested */
+    static final int TUNNEL_AGGREGATION_SA_COUNT_MAX_DEFAULT = 1;
 
     // Matches DataConnection.NETWORK_TYPE private constant, and magic string from
     // ConnectivityManager#getNetworkTypeName()
@@ -1980,6 +1988,22 @@ public class VcnGatewayConnection extends StateMachine {
                             mChildConfig,
                             oldChildConfig,
                             mIkeConnectionInfo);
+
+                    // Create opportunistic child SAs; this allows SA aggregation in the downlink,
+                    // reducing lock/atomic contention in high throughput scenarios. All SAs will
+                    // share the same UDP encap socket (and keepalives) as necessary, and are
+                    // effectively free.
+                    final int parallelTunnelCount =
+                            mDeps.getParallelTunnelCount(mLastSnapshot, mSubscriptionGroup);
+                    logInfo("Parallel tunnel count: " + parallelTunnelCount);
+
+                    for (int i = 0; i < parallelTunnelCount - 1; i++) {
+                        mIkeSession.openChildSession(
+                                buildOpportunisticChildParams(),
+                                new VcnChildSessionCallback(
+                                        mCurrentToken, true /* isOpportunistic */));
+                    }
+
                     break;
                 case EVENT_DISCONNECT_REQUESTED:
                     handleDisconnectRequested((EventDisconnectRequestedInfo) msg.obj);
@@ -2350,15 +2374,44 @@ public class VcnGatewayConnection extends StateMachine {
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public class VcnChildSessionCallback implements ChildSessionCallback {
         private final int mToken;
+        private final boolean mIsOpportunistic;
+
+        private boolean mIsChildOpened = false;
 
         VcnChildSessionCallback(int token) {
+            this(token, false /* isOpportunistic */);
+        }
+
+        /**
+         * Creates a ChildSessionCallback
+         *
+         * <p>If configured as opportunistic, transforms will not report initial startup, or
+         * associated startup failures. This serves the dual purposes of ensuring that if the server
+         * does not support connection multiplexing, new child SA negotiations will be ignored, and
+         * at the same time, will notify the VCN session if a successfully negotiated opportunistic
+         * child SA is subsequently torn down, which could impact uplink traffic if the SA in use
+         * for outbound/uplink traffic is this opportunistic SA.
+         *
+         * <p>While inbound SAs can be used in parallel, the IPsec stack explicitly selects the last
+         * applied outbound transform for outbound traffic. This means that unlike inbound traffic,
+         * outbound does not benefit from these parallel SAs in the same manner.
+         */
+        VcnChildSessionCallback(int token, boolean isOpportunistic) {
             mToken = token;
+            mIsOpportunistic = isOpportunistic;
         }
 
         /** Internal proxy method for injecting of mocked ChildSessionConfiguration */
         @VisibleForTesting(visibility = Visibility.PRIVATE)
         void onOpened(@NonNull VcnChildSessionConfiguration childConfig) {
             logDbg("ChildOpened for token " + mToken);
+
+            if (mIsOpportunistic) {
+                logDbg("ChildOpened for opportunistic child; suppressing event message");
+                mIsChildOpened = true;
+                return;
+            }
+
             childOpened(mToken, childConfig);
         }
 
@@ -2370,12 +2423,24 @@ public class VcnGatewayConnection extends StateMachine {
         @Override
         public void onClosed() {
             logDbg("ChildClosed for token " + mToken);
+
+            if (mIsOpportunistic && !mIsChildOpened) {
+                logDbg("ChildClosed for unopened opportunistic child; ignoring");
+                return;
+            }
+
             sessionLost(mToken, null);
         }
 
         @Override
         public void onClosedExceptionally(@NonNull IkeException exception) {
             logInfo("ChildClosedExceptionally for token " + mToken, exception);
+
+            if (mIsOpportunistic && !mIsChildOpened) {
+                logInfo("ChildClosedExceptionally for unopened opportunistic child; ignoring");
+                return;
+            }
+
             sessionLost(mToken, exception);
         }
 
@@ -2580,6 +2645,30 @@ public class VcnGatewayConnection extends StateMachine {
         return mConnectionConfig.getTunnelConnectionParams().getTunnelModeChildSessionParams();
     }
 
+    private ChildSessionParams buildOpportunisticChildParams() {
+        final ChildSessionParams baseParams =
+                mConnectionConfig.getTunnelConnectionParams().getTunnelModeChildSessionParams();
+
+        final TunnelModeChildSessionParams.Builder builder =
+                new TunnelModeChildSessionParams.Builder();
+        for (ChildSaProposal proposal : baseParams.getChildSaProposals()) {
+            builder.addChildSaProposal(proposal);
+        }
+
+        for (IkeTrafficSelector inboundSelector : baseParams.getInboundTrafficSelectors()) {
+            builder.addInboundTrafficSelectors(inboundSelector);
+        }
+
+        for (IkeTrafficSelector outboundSelector : baseParams.getOutboundTrafficSelectors()) {
+            builder.addOutboundTrafficSelectors(outboundSelector);
+        }
+
+        builder.setLifetimeSeconds(
+                baseParams.getHardLifetimeSeconds(), baseParams.getSoftLifetimeSeconds());
+
+        return builder.build();
+    }
+
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     VcnIkeSession buildIkeSession(@NonNull Network network) {
         final int token = ++mCurrentToken;
@@ -2679,6 +2768,23 @@ public class VcnGatewayConnection extends StateMachine {
                 Slog.d(TAG, "Could not get MTU of underlying network", e);
                 return 0;
             }
+        }
+
+        /** Gets the max number of parallel tunnels allowed for tunnel aggregation. */
+        public int getParallelTunnelCount(
+                TelephonySubscriptionSnapshot snapshot, ParcelUuid subGrp) {
+            PersistableBundleWrapper carrierConfig = snapshot.getCarrierConfigForSubGrp(subGrp);
+            int result = TUNNEL_AGGREGATION_SA_COUNT_MAX_DEFAULT;
+
+            if (carrierConfig != null) {
+                result =
+                        carrierConfig.getInt(
+                                VcnManager.VCN_TUNNEL_AGGREGATION_SA_COUNT_MAX_KEY,
+                                TUNNEL_AGGREGATION_SA_COUNT_MAX_DEFAULT);
+            }
+
+            // Guard against tunnel count < 1
+            return Math.max(1, result);
         }
     }
 
