@@ -31,6 +31,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
@@ -84,6 +85,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
     @Mock private lateinit var previewRenderer: KeyguardPreviewRenderer
     @Mock private lateinit var backgroundHandler: Handler
     @Mock private lateinit var previewSurfacePackage: SurfaceControlViewHost.SurfacePackage
+    @Mock private lateinit var launchAnimator: DialogLaunchAnimator
 
     private lateinit var underTest: KeyguardQuickAffordanceProvider
 
@@ -170,6 +172,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                         set(Flags.LOCKSCREEN_CUSTOM_CLOCKS, true)
                     },
                 repository = { quickAffordanceRepository },
+                launchAnimator = launchAnimator,
             )
         underTest.previewManager =
             KeyguardRemotePreviewManager(
