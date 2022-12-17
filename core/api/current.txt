@@ -45826,6 +45826,10 @@ package android.text {
     method public android.text.Editable newEditable(CharSequence);
   }
 
+  public final class EmojiConsistency {
+    method @NonNull public static java.util.Set<int[]> getEmojiConsistencySet();
+  }
+
   public interface GetChars extends java.lang.CharSequence {
     method public void getChars(int, int, char[], int);
   }
