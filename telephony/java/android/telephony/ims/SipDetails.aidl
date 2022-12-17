@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (c) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,6 @@
  * limitations under the License.
  */
 
-package android.telephony.ims.aidl;
+package android.telephony.ims;
 
-import java.util.List;
-import android.telephony.ims.SipDetails;
-
-/**
- * Interface used by the framework to receive the response of the publish
- * request through {@link RcsCapabilityExchangeImplBase#publishCapabilities}
- * {@hide}
- */
-oneway interface IPublishResponseCallback {
-    void onCommandError(int code);
-    void onNetworkResponse(in SipDetails details);
-}
+parcelable SipDetails;
