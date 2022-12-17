@@ -29,6 +29,7 @@ import android.os.PersistableBundle;
 
 import com.android.internal.util.DataClass;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -68,8 +69,17 @@ public final class HotwordAudioStream implements Parcelable {
     private final AudioFormat mAudioFormat;
 
     /**
-     * This stream starts with the audio bytes used for hotword detection, but continues streaming
-     * the audio until the stream is shutdown by the {@link HotwordDetectionService}.
+     * This stream typically starts with the audio bytes used for hotword detection, but continues
+     * streaming the audio (e.g., with the query) until the stream is shutdown by the
+     * {@link HotwordDetectionService}. The data format is expected to match
+     * {@link #getAudioFormat()}.
+     *
+     * <p>
+     * Alternatively, the {@link HotwordDetectionService} may use {@link #getInitialAudio()}
+     * to pass the start of the audio instead of streaming it here. This may prevent added latency
+     * caused by the streaming buffer (see {@link #KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES}) not
+     * being large enough to handle this initial chunk of audio.
+     * </p>
      */
     @NonNull
     private final ParcelFileDescriptor mAudioStreamParcelFileDescriptor;
@@ -108,13 +118,62 @@ public final class HotwordAudioStream implements Parcelable {
     }
 
     /**
+     * The start of the audio used for hotword detection. The data format is expected to match
+     * {@link #getAudioFormat()}.
+     *
+     * <p>
+     * The {@link HotwordDetectionService} may use this instead of using
+     * {@link #getAudioStreamParcelFileDescriptor()} to stream these initial bytes of audio. This
+     * may prevent added latency caused by the streaming buffer (see
+     * {@link #KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES}) not being large enough to handle this
+     * initial chunk of audio.
+     * </p>
+     */
+    @NonNull
+    private final byte[] mInitialAudio;
+    private static final byte[] DEFAULT_INITIAL_EMPTY_AUDIO = {};
+    private static byte[] defaultInitialAudio() {
+        return DEFAULT_INITIAL_EMPTY_AUDIO;
+    }
+
+    private String initialAudioToString() {
+        return "length=" + mInitialAudio.length;
+    }
+
+    /**
      * Provides an instance of {@link Builder} with state corresponding to this instance.
      * @hide
      */
     public Builder buildUpon() {
         return new Builder(mAudioFormat, mAudioStreamParcelFileDescriptor)
             .setTimestamp(mTimestamp)
-            .setMetadata(mMetadata);
+            .setMetadata(mMetadata)
+            .setInitialAudio(mInitialAudio);
+    }
+
+    @DataClass.Suppress("setInitialAudio")
+    abstract static class BaseBuilder {
+
+        /**
+         * The start of the audio used for hotword detection. The data format is expected to match
+         * {@link #getAudioFormat()}.
+         *
+         * <p>
+         * The {@link HotwordDetectionService} may use this instead of using
+         * {@link #getAudioStreamParcelFileDescriptor()} to stream these initial bytes of audio.
+         * This may prevent added latency caused by the streaming buffer (see
+         * {@link #KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES}) not being large enough to handle this
+         * initial chunk of audio.
+         * </p>
+         */
+        public @NonNull Builder setInitialAudio(@NonNull byte[] value) {
+            Objects.requireNonNull(value, "value should not be null");
+            final Builder builder = (Builder) this;
+            // If the code gen flag in build() is changed, we must update the flag e.g. 0x10 here.
+            builder.mBuilderFieldsSet |= 0x10;
+            builder.mInitialAudio = value;
+            return builder;
+        }
     }
 
 
@@ -137,7 +196,8 @@ public final class HotwordAudioStream implements Parcelable {
             @NonNull AudioFormat audioFormat,
             @NonNull ParcelFileDescriptor audioStreamParcelFileDescriptor,
             @Nullable AudioTimestamp timestamp,
-            @NonNull PersistableBundle metadata) {
+            @NonNull PersistableBundle metadata,
+            @NonNull byte[] initialAudio) {
         this.mAudioFormat = audioFormat;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mAudioFormat);
@@ -148,6 +208,9 @@ public final class HotwordAudioStream implements Parcelable {
         this.mMetadata = metadata;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mMetadata);
+        this.mInitialAudio = initialAudio;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mInitialAudio);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -161,8 +224,17 @@ public final class HotwordAudioStream implements Parcelable {
     }
 
     /**
-     * This stream starts with the audio bytes used for hotword detection, but continues streaming
-     * the audio until the stream is shutdown by the {@link HotwordDetectionService}.
+     * This stream typically starts with the audio bytes used for hotword detection, but continues
+     * streaming the audio (e.g., with the query) until the stream is shutdown by the
+     * {@link HotwordDetectionService}. The data format is expected to match
+     * {@link #getAudioFormat()}.
+     *
+     * <p>
+     * Alternatively, the {@link HotwordDetectionService} may use {@link #getInitialAudio()}
+     * to pass the start of the audio instead of streaming it here. This may prevent added latency
+     * caused by the streaming buffer (see {@link #KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES}) not
+     * being large enough to handle this initial chunk of audio.
+     * </p>
      */
     @DataClass.Generated.Member
     public @NonNull ParcelFileDescriptor getAudioStreamParcelFileDescriptor() {
@@ -200,6 +272,23 @@ public final class HotwordAudioStream implements Parcelable {
         return mMetadata;
     }
 
+    /**
+     * The start of the audio used for hotword detection. The data format is expected to match
+     * {@link #getAudioFormat()}.
+     *
+     * <p>
+     * The {@link HotwordDetectionService} may use this instead of using
+     * {@link #getAudioStreamParcelFileDescriptor()} to stream these initial bytes of audio. This
+     * may prevent added latency caused by the streaming buffer (see
+     * {@link #KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES}) not being large enough to handle this
+     * initial chunk of audio.
+     * </p>
+     */
+    @DataClass.Generated.Member
+    public @NonNull byte[] getInitialAudio() {
+        return mInitialAudio;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -210,7 +299,8 @@ public final class HotwordAudioStream implements Parcelable {
                 "audioFormat = " + mAudioFormat + ", " +
                 "audioStreamParcelFileDescriptor = " + mAudioStreamParcelFileDescriptor + ", " +
                 "timestamp = " + mTimestamp + ", " +
-                "metadata = " + mMetadata +
+                "metadata = " + mMetadata + ", " +
+                "initialAudio = " + initialAudioToString() +
         " }";
     }
 
@@ -230,7 +320,8 @@ public final class HotwordAudioStream implements Parcelable {
                 && Objects.equals(mAudioFormat, that.mAudioFormat)
                 && Objects.equals(mAudioStreamParcelFileDescriptor, that.mAudioStreamParcelFileDescriptor)
                 && Objects.equals(mTimestamp, that.mTimestamp)
-                && Objects.equals(mMetadata, that.mMetadata);
+                && Objects.equals(mMetadata, that.mMetadata)
+                && Arrays.equals(mInitialAudio, that.mInitialAudio);
     }
 
     @Override
@@ -244,6 +335,7 @@ public final class HotwordAudioStream implements Parcelable {
         _hash = 31 * _hash + Objects.hashCode(mAudioStreamParcelFileDescriptor);
         _hash = 31 * _hash + Objects.hashCode(mTimestamp);
         _hash = 31 * _hash + Objects.hashCode(mMetadata);
+        _hash = 31 * _hash + Arrays.hashCode(mInitialAudio);
         return _hash;
     }
 
@@ -260,6 +352,7 @@ public final class HotwordAudioStream implements Parcelable {
         dest.writeTypedObject(mAudioStreamParcelFileDescriptor, flags);
         if (mTimestamp != null) dest.writeTypedObject(mTimestamp, flags);
         dest.writeTypedObject(mMetadata, flags);
+        dest.writeByteArray(mInitialAudio);
     }
 
     @Override
@@ -278,6 +371,7 @@ public final class HotwordAudioStream implements Parcelable {
         ParcelFileDescriptor audioStreamParcelFileDescriptor = (ParcelFileDescriptor) in.readTypedObject(ParcelFileDescriptor.CREATOR);
         AudioTimestamp timestamp = (flg & 0x4) == 0 ? null : (AudioTimestamp) in.readTypedObject(AudioTimestamp.CREATOR);
         PersistableBundle metadata = (PersistableBundle) in.readTypedObject(PersistableBundle.CREATOR);
+        byte[] initialAudio = in.createByteArray();
 
         this.mAudioFormat = audioFormat;
         com.android.internal.util.AnnotationValidations.validate(
@@ -289,6 +383,9 @@ public final class HotwordAudioStream implements Parcelable {
         this.mMetadata = metadata;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mMetadata);
+        this.mInitialAudio = initialAudio;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mInitialAudio);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -312,12 +409,13 @@ public final class HotwordAudioStream implements Parcelable {
      */
     @SuppressWarnings("WeakerAccess")
     @DataClass.Generated.Member
-    public static final class Builder {
+    public static final class Builder extends BaseBuilder {
 
         private @NonNull AudioFormat mAudioFormat;
         private @NonNull ParcelFileDescriptor mAudioStreamParcelFileDescriptor;
         private @Nullable AudioTimestamp mTimestamp;
         private @NonNull PersistableBundle mMetadata;
+        private @NonNull byte[] mInitialAudio;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -327,8 +425,17 @@ public final class HotwordAudioStream implements Parcelable {
          * @param audioFormat
          *   The {@link AudioFormat} of the audio stream.
          * @param audioStreamParcelFileDescriptor
-         *   This stream starts with the audio bytes used for hotword detection, but continues streaming
-         *   the audio until the stream is shutdown by the {@link HotwordDetectionService}.
+         *   This stream typically starts with the audio bytes used for hotword detection, but continues
+         *   streaming the audio (e.g., with the query) until the stream is shutdown by the
+         *   {@link HotwordDetectionService}. The data format is expected to match
+         *   {@link #getAudioFormat()}.
+         *
+         *   <p>
+         *   Alternatively, the {@link HotwordDetectionService} may use {@link #getInitialAudio()}
+         *   to pass the start of the audio instead of streaming it here. This may prevent added latency
+         *   caused by the streaming buffer (see {@link #KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES}) not
+         *   being large enough to handle this initial chunk of audio.
+         *   </p>
          */
         public Builder(
                 @NonNull AudioFormat audioFormat,
@@ -353,8 +460,17 @@ public final class HotwordAudioStream implements Parcelable {
         }
 
         /**
-         * This stream starts with the audio bytes used for hotword detection, but continues streaming
-         * the audio until the stream is shutdown by the {@link HotwordDetectionService}.
+         * This stream typically starts with the audio bytes used for hotword detection, but continues
+         * streaming the audio (e.g., with the query) until the stream is shutdown by the
+         * {@link HotwordDetectionService}. The data format is expected to match
+         * {@link #getAudioFormat()}.
+         *
+         * <p>
+         * Alternatively, the {@link HotwordDetectionService} may use {@link #getInitialAudio()}
+         * to pass the start of the audio instead of streaming it here. This may prevent added latency
+         * caused by the streaming buffer (see {@link #KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES}) not
+         * being large enough to handle this initial chunk of audio.
+         * </p>
          */
         @DataClass.Generated.Member
         public @NonNull Builder setAudioStreamParcelFileDescriptor(@NonNull ParcelFileDescriptor value) {
@@ -404,7 +520,7 @@ public final class HotwordAudioStream implements Parcelable {
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull HotwordAudioStream build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x10; // Mark builder used
+            mBuilderFieldsSet |= 0x20; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x4) == 0) {
                 mTimestamp = defaultTimestamp();
@@ -412,16 +528,20 @@ public final class HotwordAudioStream implements Parcelable {
             if ((mBuilderFieldsSet & 0x8) == 0) {
                 mMetadata = defaultMetadata();
             }
+            if ((mBuilderFieldsSet & 0x10) == 0) {
+                mInitialAudio = defaultInitialAudio();
+            }
             HotwordAudioStream o = new HotwordAudioStream(
                     mAudioFormat,
                     mAudioStreamParcelFileDescriptor,
                     mTimestamp,
-                    mMetadata);
+                    mMetadata,
+                    mInitialAudio);
             return o;
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x10) != 0) {
+            if ((mBuilderFieldsSet & 0x20) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }
@@ -429,10 +549,10 @@ public final class HotwordAudioStream implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1669916341034L,
+            time = 1671232056270L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/HotwordAudioStream.java",
-            inputSignatures = "public static final  java.lang.String KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES\nprivate final @android.annotation.NonNull android.media.AudioFormat mAudioFormat\nprivate final @android.annotation.NonNull android.os.ParcelFileDescriptor mAudioStreamParcelFileDescriptor\nprivate final @android.annotation.Nullable android.media.AudioTimestamp mTimestamp\nprivate final @android.annotation.NonNull android.os.PersistableBundle mMetadata\nprivate static  android.media.AudioTimestamp defaultTimestamp()\nprivate static  android.os.PersistableBundle defaultMetadata()\npublic  android.service.voice.HotwordAudioStream.Builder buildUpon()\nclass HotwordAudioStream extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genParcelable=true, genToString=true)")
+            inputSignatures = "public static final  java.lang.String KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES\nprivate final @android.annotation.NonNull android.media.AudioFormat mAudioFormat\nprivate final @android.annotation.NonNull android.os.ParcelFileDescriptor mAudioStreamParcelFileDescriptor\nprivate final @android.annotation.Nullable android.media.AudioTimestamp mTimestamp\nprivate final @android.annotation.NonNull android.os.PersistableBundle mMetadata\nprivate final @android.annotation.NonNull byte[] mInitialAudio\nprivate static final  byte[] DEFAULT_INITIAL_EMPTY_AUDIO\nprivate static  android.media.AudioTimestamp defaultTimestamp()\nprivate static  android.os.PersistableBundle defaultMetadata()\nprivate static  byte[] defaultInitialAudio()\nprivate  java.lang.String initialAudioToString()\npublic  android.service.voice.HotwordAudioStream.Builder buildUpon()\nclass HotwordAudioStream extends java.lang.Object implements [android.os.Parcelable]\npublic @android.annotation.NonNull android.service.voice.HotwordAudioStream.Builder setInitialAudio(byte[])\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genParcelable=true, genToString=true)\npublic @android.annotation.NonNull android.service.voice.HotwordAudioStream.Builder setInitialAudio(byte[])\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 
