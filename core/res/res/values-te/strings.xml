@@ -1145,7 +1145,7 @@
     <string name="delete" msgid="1514113991712129054">"తొలగించండి"</string>
     <string name="copyUrl" msgid="6229645005987260230">"URLని కాపీ చేయి"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"వచనాన్ని ఎంచుకోండి"</string>
-    <string name="undo" msgid="3175318090002654673">"చర్య రద్దు చేయి"</string>
+    <string name="undo" msgid="3175318090002654673">"చర్య రద్దు చేయండి"</string>
     <string name="redo" msgid="7231448494008532233">"చర్యను రిపీట్‌ చేయి"</string>
     <string name="autofill" msgid="511224882647795296">"ఆటోఫిల్"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"వచన ఎంపిక"</string>
@@ -1699,7 +1699,7 @@
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"యాక్సెసిబిలిటీ బటన్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"వాల్యూమ్ కీ షార్ట్‌కట్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ఆఫ్ చేయబడింది"</string>
-    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"షార్ట్‌కట్‌లను ఎడిట్ చేయి"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"షార్ట్‌కట్‌లను ఎడిట్ చేయండి"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"పూర్తయింది"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"షార్ట్‌కట్‌ను ఆఫ్ చేయి"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"షార్ట్‌కట్‌ను ఉపయోగించు"</string>
