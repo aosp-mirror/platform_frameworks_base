@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"अपने डिवाइस के शेयर किए गए स्टोरेज से, ऐप्लिकेशन को वीडियो फ़ाइलें पढ़ने की अनुमति दें."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"डिवाइस के शेयर किए गए स्टोरेज से, इमेज फ़ाइलें देखने की अनुमति"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"अपने डिवाइस के शेयर किए गए स्टोरेज से, ऐप्लिकेशन को इमेज फ़ाइलें देखने की अनुमति दें."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"डिवाइस के शेयर किए गए स्टोरेज से चुनी गई इमेज और वीडियो फ़ाइलों को देखने की अनुमति दें"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"इससे ऐप्लिकेशन को, डिवाइस के शेयर किए गए स्टोरेज से चुनी गई इमेज और वीडियो फ़ाइलों को देखने की अनुमति मिलती है."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"आपकी शेयर की गई मेमोरी की सामग्री में बदलाव करना या उसे मिटाना"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"ऐप्लिकेशन को आपकी शेयर की गई मेमोरी की सामग्री लिखने देती है."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP कॉल करें/पाएं"</string>
