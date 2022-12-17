@@ -50,11 +50,17 @@ import java.util.concurrent.Executor;
 @SystemService(Context.CREDENTIAL_SERVICE)
 public final class CredentialManager {
     private static final String TAG = "CredentialManager";
-    private static final String DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER =
-            "enable_credential_manager";
 
     private final Context mContext;
     private final ICredentialManager mService;
+
+    /**
+     * Flag to enable and disable Credential Manager.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER =
+            "enable_credential_manager";
 
     /**
      * @hide instantiated by ContextImpl.
