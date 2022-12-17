@@ -41,6 +41,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -108,8 +109,8 @@ public class UserLifecycleStressTest {
             switchUser(USER_SYSTEM);
         }
 
-        final UserInfo foundGuest = mUserManager.findCurrentGuestUser();
-        int nextGuestId = foundGuest == null ? USER_NULL : foundGuest.id;
+        final List<UserInfo> guestUsers = mUserManager.getGuestUsers();
+        int nextGuestId = guestUsers.isEmpty() ? USER_NULL : guestUsers.get(0).id;
 
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             final int currentGuestId = nextGuestId;
