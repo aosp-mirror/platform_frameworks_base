@@ -21813,6 +21813,7 @@ package android.media {
     method public void subscribeToVendorParameters(@NonNull java.util.List<java.lang.String>);
     method public void unsubscribeFromVendorParameters(@NonNull java.util.List<java.lang.String>);
     field public static final int BUFFER_FLAG_CODEC_CONFIG = 2; // 0x2
+    field public static final int BUFFER_FLAG_DECODE_ONLY = 32; // 0x20
     field public static final int BUFFER_FLAG_END_OF_STREAM = 4; // 0x4
     field public static final int BUFFER_FLAG_KEY_FRAME = 1; // 0x1
     field public static final int BUFFER_FLAG_PARTIAL_FRAME = 8; // 0x8
@@ -21898,6 +21899,9 @@ package android.media {
   }
 
   public class MediaCodec.IncompatibleWithBlockModelException extends java.lang.RuntimeException {
+  }
+
+  public class MediaCodec.InvalidBufferFlagsException extends java.lang.RuntimeException {
   }
 
   public static final class MediaCodec.LinearBlock {
