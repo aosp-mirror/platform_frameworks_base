@@ -253,6 +253,7 @@ class TaskFragmentContainer {
         mPendingAppearedActivities.remove(activityToken);
     }
 
+    @GuardedBy("mController.mLock")
     void clearPendingAppearedActivities() {
         final List<IBinder> cleanupActivities = new ArrayList<>(mPendingAppearedActivities);
         // Clear mPendingAppearedActivities so that #getContainerWithActivity won't return the
@@ -452,6 +453,7 @@ class TaskFragmentContainer {
      * Removes all activities that belong to this process and finishes other containers/activities
      * configured to finish together.
      */
+    @GuardedBy("mController.mLock")
     void finish(boolean shouldFinishDependent, @NonNull SplitPresenter presenter,
             @NonNull WindowContainerTransaction wct, @NonNull SplitController controller) {
         if (!mIsFinished) {
@@ -476,6 +478,7 @@ class TaskFragmentContainer {
         mInfo = null;
     }
 
+    @GuardedBy("mController.mLock")
     private void finishActivities(boolean shouldFinishDependent, @NonNull SplitPresenter presenter,
             @NonNull WindowContainerTransaction wct, @NonNull SplitController controller) {
         // Finish own activities

@@ -393,10 +393,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"အကြောင်းကြားချက်များကို \'မနှောင့်ယှက်ရ\' က ခေတ္တရပ်ထားသည်"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ယခု စတင်ပါ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"အကြောင်းကြားချက်များ မရှိ"</string>
-    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
-    <skip />
-    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
-    <skip />
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"အကြောင်းကြားချက်သစ် မရှိပါ"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"အကြောင်းကြားချက်ဟောင်းကြည့်ရန် လော့ခ်ဖွင့်ပါ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ဤစက်ပစ္စည်းကို သင့်မိဘက စီမံခန့်ခွဲသည်"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ဤစက်ကို သင့်အဖွဲ့အစည်းကပိုင်ဆိုင်ပြီး ကွန်ရက်ဒေတာ စီးဆင်းမှုကို စောင့်ကြည့်နိုင်ပါသည်"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"ဤစက်ကို <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> က ပိုင်ဆိုင်ပြီး ကွန်ရက်ဒေတာ စီးဆင်းမှုကို စောင့်ကြည့်နိုင်ပါသည်"</string>
@@ -1004,14 +1002,16 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ကင်မရာအက်ပ် ထည့်သွင်းထားရမည်"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• အက်ပ်ကို စနစ်ထည့်သွင်းထားရမည်"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• အနည်းဆုံး စက်တစ်ခုသုံးနိုင်ရမည်"</string>
+    <!-- no translation found for keyguard_affordance_press_too_short (2687995216454987952) -->
+    <skip />
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"မလုပ်တော့"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ယခုလှည့်လိုက်ပါ"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"ပိုကောင်းသော ဆယ်လ်ဖီအတွက် ဖုန်းကိုဖြန့်လိုက်ပါ"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"ပိုကောင်းသော ဆယ်လ်ဖီအတွက် ဖန်သားပြင်ကိုလှည့်မလား။"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ပုံရိပ်ပြတ်သားကိန်း ပိုမြင့်ပြီး မြင်ကွင်းပိုကျယ်သည့် ဓာတ်ပုံအတွက် နောက်ဘက်ကင်မရာကို အသုံးပြုပါ။"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ဤဖန်သားပြင်ကို ပိတ်လိုက်မည်"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ခေါက်နိုင်သောစက်ကို ဖြန့်လိုက်သည်"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ခေါက်နိုင်သောစက်ကို တစ်ဘက်သို့ လှန်လိုက်သည်"</string>
+    <!-- no translation found for stylus_battery_low (7134370101603167096) -->
     <skip />
 </resources>

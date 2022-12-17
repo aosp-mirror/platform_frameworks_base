@@ -1002,14 +1002,16 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Installer en kameraapp"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Appen er konfigureret"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Mindst én enhed er tilgængelig"</string>
+    <!-- no translation found for keyguard_affordance_press_too_short (2687995216454987952) -->
+    <skip />
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Annuller"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Vend nu"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Fold telefonen ud for at tage en bedre selfie"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Vil du bruge frontkameraet for at få bedre selfie?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Brug bagsidekameraet for at få et bredere billede med højere opløsning."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ *Denne skærm slukkes"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Foldbar enhed foldes ud"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Foldbar enhed vendes om"</string>
+    <!-- no translation found for stylus_battery_low (7134370101603167096) -->
     <skip />
 </resources>
