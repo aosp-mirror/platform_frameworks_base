@@ -22143,6 +22143,7 @@ package android.media {
     field @Deprecated public static final int BUFFER_FLAG_SYNC_FRAME = 1; // 0x1
     field public static final int CONFIGURE_FLAG_ENCODE = 1; // 0x1
     field public static final int CONFIGURE_FLAG_USE_BLOCK_MODEL = 2; // 0x2
+    field public static final int CONFIGURE_FLAG_USE_CRYPTO_ASYNC = 4; // 0x4
     field public static final int CRYPTO_MODE_AES_CBC = 2; // 0x2
     field public static final int CRYPTO_MODE_AES_CTR = 1; // 0x1
     field public static final int CRYPTO_MODE_UNENCRYPTED = 0; // 0x0
@@ -22172,6 +22173,7 @@ package android.media {
 
   public abstract static class MediaCodec.Callback {
     ctor public MediaCodec.Callback();
+    method public void onCryptoError(@NonNull android.media.MediaCodec, @NonNull android.media.MediaCodec.CryptoException);
     method public abstract void onError(@NonNull android.media.MediaCodec, @NonNull android.media.MediaCodec.CodecException);
     method public abstract void onInputBufferAvailable(@NonNull android.media.MediaCodec, int);
     method public abstract void onOutputBufferAvailable(@NonNull android.media.MediaCodec, int, @NonNull android.media.MediaCodec.BufferInfo);
@@ -22189,6 +22191,7 @@ package android.media {
 
   public static final class MediaCodec.CryptoException extends java.lang.RuntimeException implements android.media.MediaDrmThrowable {
     ctor public MediaCodec.CryptoException(int, @Nullable String);
+    method @Nullable public android.media.MediaCodec.CryptoInfo getCryptoInfo();
     method public int getErrorCode();
     field @Deprecated public static final int ERROR_FRAME_TOO_LARGE = 8; // 0x8
     field @Deprecated public static final int ERROR_INSUFFICIENT_OUTPUT_PROTECTION = 4; // 0x4
