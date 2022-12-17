@@ -59,6 +59,7 @@ import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
 import android.net.ipsec.ike.ChildSaProposal;
 import android.net.ipsec.ike.IkeSessionConnectionInfo;
+import android.net.ipsec.ike.TunnelModeChildSessionParams;
 import android.net.ipsec.ike.exceptions.IkeException;
 import android.net.ipsec.ike.exceptions.IkeInternalException;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
@@ -70,6 +71,7 @@ import android.os.PersistableBundle;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.vcn.VcnGatewayConnection.VcnChildSessionCallback;
 import com.android.server.vcn.routeselection.UnderlyingNetworkRecord;
 import com.android.server.vcn.util.MtuUtils;
 
@@ -90,6 +92,8 @@ import java.util.function.Consumer;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnectionTestBase {
+    private static final int PARALLEL_SA_COUNT = 4;
+
     private VcnIkeSession mIkeSession;
     private VcnNetworkAgent mNetworkAgent;
     private Network mVcnNetwork;
@@ -227,16 +231,29 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     private void verifyVcnTransformsApplied(
             VcnGatewayConnection vcnGatewayConnection, boolean expectForwardTransform)
             throws Exception {
+        verifyVcnTransformsApplied(
+                vcnGatewayConnection,
+                expectForwardTransform,
+                Collections.singletonList(getChildSessionCallback()));
+    }
+
+    private void verifyVcnTransformsApplied(
+            VcnGatewayConnection vcnGatewayConnection,
+            boolean expectForwardTransform,
+            List<VcnChildSessionCallback> callbacks)
+            throws Exception {
         for (int direction : new int[] {DIRECTION_IN, DIRECTION_OUT}) {
-            getChildSessionCallback().onIpSecTransformCreated(makeDummyIpSecTransform(), direction);
+            for (VcnChildSessionCallback cb : callbacks) {
+                cb.onIpSecTransformCreated(makeDummyIpSecTransform(), direction);
+            }
             mTestLooper.dispatchAll();
 
-            verify(mIpSecSvc)
+            verify(mIpSecSvc, times(callbacks.size()))
                     .applyTunnelModeTransform(
                             eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), eq(direction), anyInt(), any());
         }
 
-        verify(mIpSecSvc, expectForwardTransform ? times(1) : never())
+        verify(mIpSecSvc, expectForwardTransform ? times(callbacks.size()) : never())
                 .applyTunnelModeTransform(
                         eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), eq(DIRECTION_FWD), anyInt(), any());
 
@@ -414,6 +431,89 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         verify(mSafeModeTimeoutAlarm).cancel();
         assertFalse(mGatewayConnection.isInSafeMode());
         verifySafeModeStateAndCallbackFired(1 /* invocationCount */, false /* isInSafeMode */);
+    }
+
+    private List<VcnChildSessionCallback> openChildAndVerifyParallelSasRequested()
+            throws Exception {
+        doReturn(PARALLEL_SA_COUNT)
+                .when(mDeps)
+                .getParallelTunnelCount(eq(TEST_SUBSCRIPTION_SNAPSHOT), eq(TEST_SUB_GRP));
+
+        // Verify scheduled but not canceled when entering ConnectedState
+        verifySafeModeTimeoutAlarmAndGetCallback(false /* expectCanceled */);
+        triggerChildOpened();
+        mTestLooper.dispatchAll();
+
+        // Verify new child sessions requested
+        final ArgumentCaptor<VcnChildSessionCallback> captor =
+                ArgumentCaptor.forClass(VcnChildSessionCallback.class);
+        verify(mIkeSession, times(PARALLEL_SA_COUNT - 1))
+                .openChildSession(any(TunnelModeChildSessionParams.class), captor.capture());
+
+        return captor.getAllValues();
+    }
+
+    private List<VcnChildSessionCallback> verifyChildOpenedRequestsAndAppliesParallelSas()
+            throws Exception {
+        List<VcnChildSessionCallback> callbacks = openChildAndVerifyParallelSasRequested();
+
+        verifyVcnTransformsApplied(mGatewayConnection, false, callbacks);
+
+        // Mock IKE calling of onOpened()
+        for (VcnChildSessionCallback cb : callbacks) {
+            cb.onOpened(mock(VcnChildSessionConfiguration.class));
+        }
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
+        return callbacks;
+    }
+
+    @Test
+    public void testChildOpenedWithParallelSas() throws Exception {
+        verifyChildOpenedRequestsAndAppliesParallelSas();
+    }
+
+    @Test
+    public void testOpportunisticSa_ignoresPreOpenFailures() throws Exception {
+        List<VcnChildSessionCallback> callbacks = openChildAndVerifyParallelSasRequested();
+
+        for (VcnChildSessionCallback cb : callbacks) {
+            cb.onClosed();
+            cb.onClosedExceptionally(mock(IkeException.class));
+        }
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
+        assertEquals(mIkeConnectionInfo, mGatewayConnection.getIkeConnectionInfo());
+    }
+
+    private void verifyPostOpenFailuresCloseSession(boolean shouldCloseWithException)
+            throws Exception {
+        List<VcnChildSessionCallback> callbacks = verifyChildOpenedRequestsAndAppliesParallelSas();
+
+        for (VcnChildSessionCallback cb : callbacks) {
+            if (shouldCloseWithException) {
+                cb.onClosed();
+            } else {
+                cb.onClosedExceptionally(mock(IkeException.class));
+            }
+        }
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
+        verify(mIkeSession).close();
+    }
+
+    @Test
+    public void testOpportunisticSa_handlesPostOpenFailures_onClosed() throws Exception {
+        verifyPostOpenFailuresCloseSession(false /* shouldCloseWithException */);
+    }
+
+    @Test
+    public void testOpportunisticSa_handlesPostOpenFailures_onClosedExceptionally()
+            throws Exception {
+        verifyPostOpenFailuresCloseSession(true /* shouldCloseWithException */);
     }
 
     @Test
