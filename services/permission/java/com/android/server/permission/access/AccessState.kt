@@ -92,7 +92,9 @@ class SystemState private constructor(
 class UserState private constructor(
     // A map of (appId to a map of (permissionName to permissionFlags))
     val uidPermissionFlags: IntMap<IndexedMap<String, Int>>,
+    // appId -> opName -> opCode
     val uidAppOpModes: IntMap<IndexedMap<String, Int>>,
+    // packageName -> opName -> opCode
     val packageAppOpModes: IndexedMap<String, IndexedMap<String, Int>>
 ) : WritableState() {
     constructor() : this(
@@ -129,11 +131,11 @@ abstract class WritableState {
     }
 }
 
-class GetStateScope(
+open class GetStateScope(
     val state: AccessState
 )
 
 class MutateStateScope(
     val oldState: AccessState,
     val newState: AccessState
-)
+) : GetStateScope(newState)

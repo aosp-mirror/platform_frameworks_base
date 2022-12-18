@@ -739,7 +739,6 @@ public class JobInfo implements Parcelable {
 
     /**
      * @see JobInfo.Builder#setDataTransfer(boolean)
-     * @hide
      */
     public boolean isDataTransfer() {
         return (flags & FLAG_DATA_TRANSFER) != 0;
@@ -747,7 +746,6 @@ public class JobInfo implements Parcelable {
 
     /**
      * @see JobInfo.Builder#setUserInitiated(boolean)
-     * @hide
      */
     public boolean isUserInitiated() {
         return (flags & FLAG_USER_INITIATED) != 0;
@@ -1445,6 +1443,7 @@ public class JobInfo implements Parcelable {
          * reasonable estimates should use the sentinel value
          * {@link JobInfo#NETWORK_BYTES_UNKNOWN}.
          * </ul>
+         * TODO(255371817): update documentation to reflect how this data will be used
          * Note that the system may choose to delay jobs with large network
          * usage estimates when the device has a poor network connection, in
          * order to save battery and possible network costs.
@@ -1852,11 +1851,6 @@ public class JobInfo implements Parcelable {
          * being transferred is potentially very large and can take a long time to complete.
          *
          * <p>
-         * The app must hold the {@link android.Manifest.permission#RUN_LONG_JOBS} permission to
-         * use this API. JobScheduler will throw a {@link SecurityException} if an app without the
-         * permission granted attempts to schedule a data transfer job.
-         *
-         * <p>
          * You must provide an estimate of the payload size via
          * {@link #setEstimatedNetworkBytes(long, long)} when scheduling the job or use
          * {@link JobService#updateEstimatedNetworkBytes(JobParameters, long, long)} or
@@ -1873,7 +1867,6 @@ public class JobInfo implements Parcelable {
          * {@link JobWorkItem JobWorkItems} along with {@link #setDataTransfer(boolean)}.
          *
          * @see JobInfo#isDataTransfer()
-         * @hide
          */
         @NonNull
         public Builder setDataTransfer(boolean dataTransfer) {
@@ -1903,12 +1896,17 @@ public class JobInfo implements Parcelable {
          * shown in the Task Manager when running.
          *
          * <p>
+         * If the app doesn't hold the {@link android.Manifest.permission#RUN_LONG_JOBS} permission
+         * when scheduling a user-initiated job, JobScheduler will throw a
+         * {@link SecurityException}.
+         *
+         * <p>
          * These jobs will not be subject to quotas and will be started immediately once scheduled
          * if all constraints are met and the device system health allows for additional tasks.
          *
          * @see JobInfo#isUserInitiated()
-         * @hide
          */
+        @RequiresPermission(android.Manifest.permission.RUN_LONG_JOBS)
         @NonNull
         public Builder setUserInitiated(boolean userInitiated) {
             if (userInitiated) {

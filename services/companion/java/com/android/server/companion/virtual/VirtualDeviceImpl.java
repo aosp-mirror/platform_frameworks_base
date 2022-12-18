@@ -439,7 +439,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.createKeyboard(config.getInputDeviceName(), config.getVendorId(),
-                    config.getProductId(), deviceToken, config.getAssociatedDisplayId());
+                    config.getProductId(), deviceToken, config.getAssociatedDisplayId(),
+                    config.getLanguageTag(), config.getLayoutType());
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

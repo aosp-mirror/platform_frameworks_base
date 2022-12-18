@@ -571,11 +571,7 @@
   <java-symbol type="string" name="prepend_shortcut_label" />
   <java-symbol type="string" name="private_dns_broken_detailed" />
   <java-symbol type="string" name="paste_as_plain_text" />
-  <java-symbol type="string" name="pasted_from_app" />
   <java-symbol type="string" name="pasted_from_clipboard" />
-  <java-symbol type="string" name="pasted_text" />
-  <java-symbol type="string" name="pasted_image" />
-  <java-symbol type="string" name="pasted_content" />
   <java-symbol type="string" name="replace" />
   <java-symbol type="string" name="undo" />
   <java-symbol type="string" name="redo" />
@@ -624,65 +620,7 @@
   <java-symbol type="string" name="activitychooserview_choose_application_error" />
   <java-symbol type="string" name="alternate_eri_file" />
   <java-symbol type="string" name="alwaysUse" />
-  <java-symbol type="string" name="autofill_address_line_1_label_re" />
-  <java-symbol type="string" name="autofill_address_line_1_re" />
-  <java-symbol type="string" name="autofill_address_line_2_re" />
-  <java-symbol type="string" name="autofill_address_line_3_re" />
-  <java-symbol type="string" name="autofill_address_name_separator" />
-  <java-symbol type="string" name="autofill_address_summary_format" />
-  <java-symbol type="string" name="autofill_address_summary_name_format" />
-  <java-symbol type="string" name="autofill_address_summary_separator" />
-  <java-symbol type="string" name="autofill_address_type_same_as_re" />
-  <java-symbol type="string" name="autofill_address_type_use_my_re" />
-  <java-symbol type="string" name="autofill_area" />
-  <java-symbol type="string" name="autofill_area_code_notext_re" />
-  <java-symbol type="string" name="autofill_area_code_re" />
-  <java-symbol type="string" name="autofill_attention_ignored_re" />
-  <java-symbol type="string" name="autofill_billing_designator_re" />
-  <java-symbol type="string" name="autofill_card_cvc_re" />
-  <java-symbol type="string" name="autofill_card_ignored_re" />
-  <java-symbol type="string" name="autofill_card_number_re" />
-  <java-symbol type="string" name="autofill_city_re" />
-  <java-symbol type="string" name="autofill_company_re" />
-  <java-symbol type="string" name="autofill_country_code_re" />
-  <java-symbol type="string" name="autofill_country_re" />
-  <java-symbol type="string" name="autofill_county" />
-  <java-symbol type="string" name="autofill_department" />
-  <java-symbol type="string" name="autofill_district" />
-  <java-symbol type="string" name="autofill_email_re" />
-  <java-symbol type="string" name="autofill_emirate" />
-  <java-symbol type="string" name="autofill_expiration_date_re" />
-  <java-symbol type="string" name="autofill_expiration_month_re" />
-  <java-symbol type="string" name="autofill_fax_re" />
-  <java-symbol type="string" name="autofill_first_name_re" />
-  <java-symbol type="string" name="autofill_island" />
-  <java-symbol type="string" name="autofill_last_name_re" />
-  <java-symbol type="string" name="autofill_middle_initial_re" />
-  <java-symbol type="string" name="autofill_middle_name_re" />
-  <java-symbol type="string" name="autofill_name_on_card_contextual_re" />
-  <java-symbol type="string" name="autofill_name_on_card_re" />
-  <java-symbol type="string" name="autofill_name_re" />
-  <java-symbol type="string" name="autofill_name_specific_re" />
-  <java-symbol type="string" name="autofill_parish" />
-  <java-symbol type="string" name="autofill_phone_extension_re" />
-  <java-symbol type="string" name="autofill_phone_prefix_re" />
-  <java-symbol type="string" name="autofill_phone_prefix_separator_re" />
-  <java-symbol type="string" name="autofill_phone_re" />
-  <java-symbol type="string" name="autofill_phone_suffix_re" />
-  <java-symbol type="string" name="autofill_phone_suffix_separator_re" />
-  <java-symbol type="string" name="autofill_postal_code" />
-  <java-symbol type="string" name="autofill_prefecture" />
-  <java-symbol type="string" name="autofill_province" />
-  <java-symbol type="string" name="autofill_region_ignored_re" />
-  <java-symbol type="string" name="autofill_shipping_designator_re" />
-  <java-symbol type="string" name="autofill_state" />
-  <java-symbol type="string" name="autofill_state_re" />
-  <java-symbol type="string" name="autofill_this_form" />
-  <java-symbol type="string" name="autofill_username_re" />
   <java-symbol type="string" name="autofill_window_title" />
-  <java-symbol type="string" name="autofill_zip_4_re" />
-  <java-symbol type="string" name="autofill_zip_code" />
-  <java-symbol type="string" name="autofill_zip_code_re" />
   <java-symbol type="string" name="badPin" />
   <java-symbol type="string" name="badPuk" />
   <java-symbol type="string" name="byteShort" />
@@ -742,7 +680,6 @@
   <java-symbol type="string" name="display_manager_overlay_display_name" />
   <java-symbol type="string" name="display_manager_overlay_display_secure_suffix" />
   <java-symbol type="string" name="display_manager_overlay_display_title" />
-  <java-symbol type="string" name="double_tap_toast" />
   <java-symbol type="string" name="elapsed_time_short_format_h_mm_ss" />
   <java-symbol type="string" name="elapsed_time_short_format_mm_ss" />
   <java-symbol type="string" name="emailTypeCustom" />
@@ -861,7 +798,6 @@
   <java-symbol type="string" name="number_picker_increment_scroll_mode" />
   <java-symbol type="string" name="old_app_action" />
   <java-symbol type="string" name="older" />
-  <java-symbol type="string" name="open_permission_deny" />
   <java-symbol type="string" name="orgTypeCustom" />
   <java-symbol type="string" name="orgTypeOther" />
   <java-symbol type="string" name="orgTypeWork" />
@@ -986,11 +922,6 @@
   <java-symbol type="string" name="roamingText8" />
   <java-symbol type="string" name="roamingText9" />
   <java-symbol type="string" name="roamingTextSearching" />
-  <java-symbol type="string" name="save_password_label" />
-  <java-symbol type="string" name="save_password_message" />
-  <java-symbol type="string" name="save_password_never" />
-  <java-symbol type="string" name="save_password_notnow" />
-  <java-symbol type="string" name="save_password_remember" />
   <java-symbol type="string" name="selected" />
   <java-symbol type="string" name="sendText" />
   <java-symbol type="string" name="sending" />
@@ -1044,7 +975,6 @@
   <java-symbol type="string" name="sync_really_delete" />
   <java-symbol type="string" name="sync_too_many_deletes_desc" />
   <java-symbol type="string" name="sync_undo_deletes" />
-  <java-symbol type="string" name="text_copied" />
   <java-symbol type="string" name="time_of_day" />
   <java-symbol type="string" name="time_picker_decrement_hour_button" />
   <java-symbol type="string" name="time_picker_decrement_minute_button" />

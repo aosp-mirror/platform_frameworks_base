@@ -8389,6 +8389,7 @@ package android.app.job {
     method public long getTriggerContentMaxDelay();
     method public long getTriggerContentUpdateDelay();
     method @Nullable public android.app.job.JobInfo.TriggerContentUri[] getTriggerContentUris();
+    method public boolean isDataTransfer();
     method public boolean isExpedited();
     method public boolean isImportantWhileForeground();
     method public boolean isPeriodic();
@@ -8398,6 +8399,7 @@ package android.app.job {
     method public boolean isRequireCharging();
     method public boolean isRequireDeviceIdle();
     method public boolean isRequireStorageNotLow();
+    method public boolean isUserInitiated();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int BACKOFF_POLICY_EXPONENTIAL = 1; // 0x1
     field public static final int BACKOFF_POLICY_LINEAR = 0; // 0x0
@@ -8424,6 +8426,7 @@ package android.app.job {
     method public android.app.job.JobInfo build();
     method public android.app.job.JobInfo.Builder setBackoffCriteria(long, int);
     method public android.app.job.JobInfo.Builder setClipData(@Nullable android.content.ClipData, int);
+    method @NonNull public android.app.job.JobInfo.Builder setDataTransfer(boolean);
     method public android.app.job.JobInfo.Builder setEstimatedNetworkBytes(long, long);
     method @NonNull public android.app.job.JobInfo.Builder setExpedited(boolean);
     method public android.app.job.JobInfo.Builder setExtras(@NonNull android.os.PersistableBundle);
@@ -8445,6 +8448,7 @@ package android.app.job {
     method public android.app.job.JobInfo.Builder setTransientExtras(@NonNull android.os.Bundle);
     method public android.app.job.JobInfo.Builder setTriggerContentMaxDelay(long);
     method public android.app.job.JobInfo.Builder setTriggerContentUpdateDelay(long);
+    method @NonNull @RequiresPermission(android.Manifest.permission.RUN_LONG_JOBS) public android.app.job.JobInfo.Builder setUserInitiated(boolean);
   }
 
   public static final class JobInfo.TriggerContentUri implements android.os.Parcelable {
@@ -8472,6 +8476,7 @@ package android.app.job {
     method @Nullable public android.net.Uri[] getTriggeredContentUris();
     method public boolean isExpeditedJob();
     method public boolean isOverrideDeadlineExpired();
+    method public boolean isUserInitiatedJob();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.job.JobParameters> CREATOR;
     field public static final int STOP_REASON_APP_STANDBY = 12; // 0xc
@@ -8530,6 +8535,11 @@ package android.app.job {
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract boolean onStartJob(android.app.job.JobParameters);
     method public abstract boolean onStopJob(android.app.job.JobParameters);
+    method public final void setNotification(@NonNull android.app.job.JobParameters, int, @NonNull android.app.Notification, int);
+    method public final void updateEstimatedNetworkBytes(@NonNull android.app.job.JobParameters, long, long);
+    method public final void updateEstimatedNetworkBytes(@NonNull android.app.job.JobParameters, @NonNull android.app.job.JobWorkItem, long, long);
+    method public final void updateTransferredNetworkBytes(@NonNull android.app.job.JobParameters, long, long);
+    method public final void updateTransferredNetworkBytes(@NonNull android.app.job.JobParameters, @NonNull android.app.job.JobWorkItem, long, long);
     field public static final String PERMISSION_BIND = "android.permission.BIND_JOB_SERVICE";
   }
 
@@ -21803,6 +21813,7 @@ package android.media {
     method public void subscribeToVendorParameters(@NonNull java.util.List<java.lang.String>);
     method public void unsubscribeFromVendorParameters(@NonNull java.util.List<java.lang.String>);
     field public static final int BUFFER_FLAG_CODEC_CONFIG = 2; // 0x2
+    field public static final int BUFFER_FLAG_DECODE_ONLY = 32; // 0x20
     field public static final int BUFFER_FLAG_END_OF_STREAM = 4; // 0x4
     field public static final int BUFFER_FLAG_KEY_FRAME = 1; // 0x1
     field public static final int BUFFER_FLAG_PARTIAL_FRAME = 8; // 0x8
@@ -21853,7 +21864,7 @@ package android.media {
     field public static final int ERROR_RECLAIMED = 1101; // 0x44d
   }
 
-  public static final class MediaCodec.CryptoException extends java.lang.RuntimeException {
+  public static final class MediaCodec.CryptoException extends java.lang.RuntimeException implements android.media.MediaDrmThrowable {
     ctor public MediaCodec.CryptoException(int, @Nullable String);
     method public int getErrorCode();
     field @Deprecated public static final int ERROR_FRAME_TOO_LARGE = 8; // 0x8
@@ -21888,6 +21899,9 @@ package android.media {
   }
 
   public class MediaCodec.IncompatibleWithBlockModelException extends java.lang.RuntimeException {
+  }
+
+  public class MediaCodec.InvalidBufferFlagsException extends java.lang.RuntimeException {
   }
 
   public static final class MediaCodec.LinearBlock {
@@ -22353,7 +22367,7 @@ package android.media {
     method public void setMediaDrmSession(@NonNull byte[]) throws android.media.MediaCryptoException;
   }
 
-  public final class MediaCryptoException extends java.lang.Exception {
+  public final class MediaCryptoException extends java.lang.Exception implements android.media.MediaDrmThrowable {
     ctor public MediaCryptoException(@Nullable String);
   }
 
@@ -22576,7 +22590,7 @@ package android.media {
     method public long getTimestampMillis();
   }
 
-  public static final class MediaDrm.MediaDrmStateException extends java.lang.IllegalStateException {
+  public static final class MediaDrm.MediaDrmStateException extends java.lang.IllegalStateException implements android.media.MediaDrmThrowable {
     method @NonNull public String getDiagnosticInfo();
     method public int getErrorCode();
     method public boolean isTransient();
@@ -22649,7 +22663,7 @@ package android.media {
   @Deprecated @IntDef({android.media.MediaDrm.SECURITY_LEVEL_UNKNOWN, android.media.MediaDrm.SECURITY_LEVEL_SW_SECURE_CRYPTO, android.media.MediaDrm.SECURITY_LEVEL_SW_SECURE_DECODE, android.media.MediaDrm.SECURITY_LEVEL_HW_SECURE_CRYPTO, android.media.MediaDrm.SECURITY_LEVEL_HW_SECURE_DECODE, android.media.MediaDrm.SECURITY_LEVEL_HW_SECURE_ALL}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface MediaDrm.SecurityLevel {
   }
 
-  public static final class MediaDrm.SessionException extends java.lang.RuntimeException {
+  public static final class MediaDrm.SessionException extends java.lang.RuntimeException implements android.media.MediaDrmThrowable {
     ctor public MediaDrm.SessionException(int, @Nullable String);
     method @Deprecated public int getErrorCode();
     method public boolean isTransient();
@@ -22657,12 +22671,18 @@ package android.media {
     field @Deprecated public static final int ERROR_UNKNOWN = 0; // 0x0
   }
 
-  public class MediaDrmException extends java.lang.Exception {
+  public class MediaDrmException extends java.lang.Exception implements android.media.MediaDrmThrowable {
     ctor public MediaDrmException(String);
   }
 
-  public class MediaDrmResetException extends java.lang.IllegalStateException {
+  public class MediaDrmResetException extends java.lang.IllegalStateException implements android.media.MediaDrmThrowable {
     ctor public MediaDrmResetException(String);
+  }
+
+  public interface MediaDrmThrowable {
+    method public default int getErrorContext();
+    method public default int getOemError();
+    method public default int getVendorError();
   }
 
   public final class MediaExtractor {
@@ -39510,9 +39530,9 @@ package android.service.credentials {
   }
 
   public final class BeginCreateCredentialRequest implements android.os.Parcelable {
-    ctor public BeginCreateCredentialRequest(@NonNull String, @NonNull String, @NonNull android.os.Bundle);
+    ctor public BeginCreateCredentialRequest(@NonNull android.service.credentials.CallingAppInfo, @NonNull String, @NonNull android.os.Bundle);
     method public int describeContents();
-    method @NonNull public String getCallingPackage();
+    method @NonNull public android.service.credentials.CallingAppInfo getCallingAppInfo();
     method @NonNull public android.os.Bundle getData();
     method @NonNull public String getType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -39544,35 +39564,44 @@ package android.service.credentials {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.BeginGetCredentialOption> CREATOR;
   }
 
-  public final class BeginGetCredentialsRequest implements android.os.Parcelable {
+  public final class BeginGetCredentialRequest implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public java.util.List<android.service.credentials.BeginGetCredentialOption> getBeginGetCredentialOptions();
-    method @NonNull public String getCallingPackage();
+    method @NonNull public android.service.credentials.CallingAppInfo getCallingAppInfo();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.BeginGetCredentialsRequest> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.BeginGetCredentialRequest> CREATOR;
   }
 
-  public static final class BeginGetCredentialsRequest.Builder {
-    ctor public BeginGetCredentialsRequest.Builder(@NonNull String);
-    method @NonNull public android.service.credentials.BeginGetCredentialsRequest.Builder addBeginGetCredentialOption(@NonNull android.service.credentials.BeginGetCredentialOption);
-    method @NonNull public android.service.credentials.BeginGetCredentialsRequest build();
-    method @NonNull public android.service.credentials.BeginGetCredentialsRequest.Builder setBeginGetCredentialOptions(@NonNull java.util.List<android.service.credentials.BeginGetCredentialOption>);
+  public static final class BeginGetCredentialRequest.Builder {
+    ctor public BeginGetCredentialRequest.Builder(@NonNull android.service.credentials.CallingAppInfo);
+    method @NonNull public android.service.credentials.BeginGetCredentialRequest.Builder addBeginGetCredentialOption(@NonNull android.service.credentials.BeginGetCredentialOption);
+    method @NonNull public android.service.credentials.BeginGetCredentialRequest build();
+    method @NonNull public android.service.credentials.BeginGetCredentialRequest.Builder setBeginGetCredentialOptions(@NonNull java.util.List<android.service.credentials.BeginGetCredentialOption>);
   }
 
-  public final class BeginGetCredentialsResponse implements android.os.Parcelable {
-    method @NonNull public static android.service.credentials.BeginGetCredentialsResponse createWithAuthentication(@NonNull android.service.credentials.Action);
-    method @NonNull public static android.service.credentials.BeginGetCredentialsResponse createWithResponseContent(@NonNull android.service.credentials.CredentialsResponseContent);
+  public final class BeginGetCredentialResponse implements android.os.Parcelable {
+    method @NonNull public static android.service.credentials.BeginGetCredentialResponse createWithAuthentication(@NonNull android.service.credentials.Action);
+    method @NonNull public static android.service.credentials.BeginGetCredentialResponse createWithResponseContent(@NonNull android.service.credentials.CredentialsResponseContent);
     method public int describeContents();
     method @Nullable public android.service.credentials.Action getAuthenticationAction();
     method @Nullable public android.service.credentials.CredentialsResponseContent getCredentialsResponseContent();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.BeginGetCredentialsResponse> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.BeginGetCredentialResponse> CREATOR;
+  }
+
+  public final class CallingAppInfo implements android.os.Parcelable {
+    ctor public CallingAppInfo(@NonNull String, @NonNull java.util.Set<android.content.pm.Signature>);
+    method public int describeContents();
+    method @NonNull public String getPackageName();
+    method @NonNull public java.util.Set<android.content.pm.Signature> getSignatures();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.CallingAppInfo> CREATOR;
   }
 
   public final class CreateCredentialRequest implements android.os.Parcelable {
-    ctor public CreateCredentialRequest(@NonNull String, @NonNull String, @NonNull android.os.Bundle);
+    ctor public CreateCredentialRequest(@NonNull android.service.credentials.CallingAppInfo, @NonNull String, @NonNull android.os.Bundle);
     method public int describeContents();
-    method @NonNull public String getCallingPackage();
+    method @NonNull public android.service.credentials.CallingAppInfo getCallingAppInfo();
     method @NonNull public android.os.Bundle getData();
     method @NonNull public String getType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -39604,19 +39633,10 @@ package android.service.credentials {
     method @NonNull public android.service.credentials.CredentialEntry.Builder setAutoSelectAllowed(@NonNull boolean);
   }
 
-  public class CredentialProviderException extends java.lang.Exception {
-    ctor public CredentialProviderException(int, @NonNull String, @NonNull Throwable);
-    ctor public CredentialProviderException(int, @NonNull String);
-    ctor public CredentialProviderException(int, @NonNull Throwable);
-    ctor public CredentialProviderException(int);
-    method public int getErrorCode();
-    field public static final int ERROR_UNKNOWN = 0; // 0x0
-  }
-
   public abstract class CredentialProviderService extends android.app.Service {
     ctor public CredentialProviderService();
-    method public abstract void onBeginCreateCredential(@NonNull android.service.credentials.BeginCreateCredentialRequest, @NonNull android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<android.service.credentials.BeginCreateCredentialResponse,android.service.credentials.CredentialProviderException>);
-    method public abstract void onBeginGetCredentials(@NonNull android.service.credentials.BeginGetCredentialsRequest, @NonNull android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<android.service.credentials.BeginGetCredentialsResponse,android.service.credentials.CredentialProviderException>);
+    method public abstract void onBeginCreateCredential(@NonNull android.service.credentials.BeginCreateCredentialRequest, @NonNull android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<android.service.credentials.BeginCreateCredentialResponse,android.credentials.CreateCredentialException>);
+    method public abstract void onBeginGetCredential(@NonNull android.service.credentials.BeginGetCredentialRequest, @NonNull android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<android.service.credentials.BeginGetCredentialResponse,android.credentials.GetCredentialException>);
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
     field public static final String CAPABILITY_META_DATA_KEY = "android.credentials.capabilities";
     field public static final String EXTRA_CREATE_CREDENTIAL_EXCEPTION = "android.service.credentials.extra.CREATE_CREDENTIAL_EXCEPTION";
@@ -39650,14 +39670,14 @@ package android.service.credentials {
 
   public final class GetCredentialRequest implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public String getCallingPackage();
+    method @NonNull public android.service.credentials.CallingAppInfo getCallingAppInfo();
     method @NonNull public java.util.List<android.credentials.GetCredentialOption> getGetCredentialOptions();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.GetCredentialRequest> CREATOR;
   }
 
   public static final class GetCredentialRequest.Builder {
-    ctor public GetCredentialRequest.Builder(@NonNull String);
+    ctor public GetCredentialRequest.Builder(@NonNull android.service.credentials.CallingAppInfo);
     method @NonNull public android.service.credentials.GetCredentialRequest.Builder addGetCredentialOption(@NonNull android.credentials.GetCredentialOption);
     method @NonNull public android.service.credentials.GetCredentialRequest build();
     method @NonNull public android.service.credentials.GetCredentialRequest.Builder setGetCredentialOptions(@NonNull java.util.List<android.credentials.GetCredentialOption>);
@@ -44342,6 +44362,7 @@ package android.telephony {
     method @Deprecated public int getPhoneCount();
     method public int getPhoneType();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PHONE_STATE}) public int getPreferredOpportunisticDataSubscription();
+    method @NonNull public String getPrimaryImei();
     method @Nullable @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public android.telephony.ServiceState getServiceState();
     method @Nullable @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public android.telephony.ServiceState getServiceState(int);
     method @Nullable public android.telephony.SignalStrength getSignalStrength();
@@ -45389,6 +45410,7 @@ package android.telephony.ims {
     method public int describeContents();
     method public int getAttributeFlags();
     method @NonNull public java.util.Set<java.lang.String> getFeatureTags();
+    method @Nullable public android.telephony.ims.SipDetails getSipDetails();
     method public int getTransportType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int ATTR_EPDG_OVER_CELL_INTERNET = 1; // 0x1
@@ -45447,6 +45469,22 @@ package android.telephony.ims {
     method public void onRegistering(@NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public void onTechnologyChangeFailed(int, @NonNull android.telephony.ims.ImsReasonInfo);
     method public void onUnregistered(@NonNull android.telephony.ims.ImsReasonInfo);
+  }
+
+  public final class SipDetails implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getCSeq();
+    method @Nullable public String getCallId();
+    method public int getMethod();
+    method public int getReasonHeaderCause();
+    method @NonNull public String getReasonHeaderText();
+    method public int getResponseCode();
+    method @NonNull public String getResponsePhrase();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SipDetails> CREATOR;
+    field public static final int METHOD_PUBLISH = 2; // 0x2
+    field public static final int METHOD_REGISTER = 1; // 0x1
+    field public static final int METHOD_SUBSCRIBE = 3; // 0x3
   }
 
 }
@@ -45824,6 +45862,10 @@ package android.text {
     ctor public Editable.Factory();
     method public static android.text.Editable.Factory getInstance();
     method public android.text.Editable newEditable(CharSequence);
+  }
+
+  public final class EmojiConsistency {
+    method @NonNull public static java.util.Set<int[]> getEmojiConsistencySet();
   }
 
   public interface GetChars extends java.lang.CharSequence {

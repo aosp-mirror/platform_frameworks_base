@@ -4716,13 +4716,19 @@ package android.hardware.input {
 
   public final class VirtualKeyboardConfig extends android.hardware.input.VirtualInputDeviceConfig implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public String getLanguageTag();
+    method @NonNull public String getLayoutType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualKeyboardConfig> CREATOR;
+    field public static final String DEFAULT_LANGUAGE_TAG = "en-Latn-US";
+    field public static final String DEFAULT_LAYOUT_TYPE = "qwerty";
   }
 
   public static final class VirtualKeyboardConfig.Builder extends android.hardware.input.VirtualInputDeviceConfig.Builder<android.hardware.input.VirtualKeyboardConfig.Builder> {
     ctor public VirtualKeyboardConfig.Builder();
     method @NonNull public android.hardware.input.VirtualKeyboardConfig build();
+    method @NonNull public android.hardware.input.VirtualKeyboardConfig.Builder setLanguageTag(@NonNull String);
+    method @NonNull public android.hardware.input.VirtualKeyboardConfig.Builder setLayoutType(@NonNull String);
   }
 
   public class VirtualMouse implements java.io.Closeable {
@@ -9485,7 +9491,7 @@ package android.net.wifi.nl80211 {
     method public void setOnServiceDeadCallback(@NonNull Runnable);
     method public boolean setupInterfaceForClientMode(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.ScanEventCallback, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.ScanEventCallback);
     method public boolean setupInterfaceForSoftApMode(@NonNull String);
-    method @Nullable public android.net.wifi.nl80211.WifiNl80211Manager.SignalPollResult signalPoll(@NonNull String);
+    method @Deprecated @Nullable public android.net.wifi.nl80211.WifiNl80211Manager.SignalPollResult signalPoll(@NonNull String);
     method public boolean startPnoScan(@NonNull String, @NonNull android.net.wifi.nl80211.PnoSettings, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.PnoScanRequestCallback);
     method @Deprecated public boolean startScan(@NonNull String, int, @Nullable java.util.Set<java.lang.Integer>, @Nullable java.util.List<byte[]>);
     method public boolean startScan(@NonNull String, int, @Nullable java.util.Set<java.lang.Integer>, @Nullable java.util.List<byte[]>, @Nullable android.os.Bundle);
@@ -9531,11 +9537,11 @@ package android.net.wifi.nl80211 {
     method public void onFailure(int);
   }
 
-  public static class WifiNl80211Manager.SignalPollResult {
-    field public final int associationFrequencyMHz;
-    field public final int currentRssiDbm;
-    field public final int rxBitrateMbps;
-    field public final int txBitrateMbps;
+  @Deprecated public static class WifiNl80211Manager.SignalPollResult {
+    field @Deprecated public final int associationFrequencyMHz;
+    field @Deprecated public final int currentRssiDbm;
+    field @Deprecated public final int rxBitrateMbps;
+    field @Deprecated public final int txBitrateMbps;
   }
 
   @Deprecated public static interface WifiNl80211Manager.SoftApCallback {
@@ -12326,6 +12332,7 @@ package android.service.voice {
     method public int describeContents();
     method @NonNull public android.media.AudioFormat getAudioFormat();
     method @NonNull public android.os.ParcelFileDescriptor getAudioStreamParcelFileDescriptor();
+    method @NonNull public byte[] getInitialAudio();
     method @NonNull public android.os.PersistableBundle getMetadata();
     method @Nullable public android.media.AudioTimestamp getTimestamp();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -12338,6 +12345,7 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordAudioStream build();
     method @NonNull public android.service.voice.HotwordAudioStream.Builder setAudioFormat(@NonNull android.media.AudioFormat);
     method @NonNull public android.service.voice.HotwordAudioStream.Builder setAudioStreamParcelFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
+    method @NonNull public android.service.voice.HotwordAudioStream.Builder setInitialAudio(@NonNull byte[]);
     method @NonNull public android.service.voice.HotwordAudioStream.Builder setMetadata(@NonNull android.os.PersistableBundle);
     method @NonNull public android.service.voice.HotwordAudioStream.Builder setTimestamp(@NonNull android.media.AudioTimestamp);
   }
@@ -15113,6 +15121,7 @@ package android.telephony.ims {
     ctor public ImsRegistrationAttributes.Builder(int);
     method @NonNull public android.telephony.ims.ImsRegistrationAttributes build();
     method @NonNull public android.telephony.ims.ImsRegistrationAttributes.Builder setFeatureTags(@NonNull java.util.Set<java.lang.String>);
+    method @NonNull public android.telephony.ims.ImsRegistrationAttributes.Builder setSipDetails(@NonNull android.telephony.ims.SipDetails);
   }
 
   public class ImsService extends android.app.Service {
@@ -15399,6 +15408,15 @@ package android.telephony.ims {
     method public void onRemoved();
   }
 
+  public final class PublishAttributes implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.telephony.ims.RcsContactPresenceTuple> getPresenceTuples();
+    method public int getPublishState();
+    method @Nullable public android.telephony.ims.SipDetails getSipDetails();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.PublishAttributes> CREATOR;
+  }
+
   public final class RcsClientConfiguration implements android.os.Parcelable {
     ctor @Deprecated public RcsClientConfiguration(@NonNull String, @NonNull String, @NonNull String, @NonNull String);
     ctor public RcsClientConfiguration(@NonNull String, @NonNull String, @NonNull String, @NonNull String, boolean);
@@ -15556,18 +15574,25 @@ package android.telephony.ims {
 
   public static interface RcsUceAdapter.CapabilitiesCallback {
     method public void onCapabilitiesReceived(@NonNull java.util.List<android.telephony.ims.RcsContactUceCapability>);
-    method public void onComplete();
-    method public void onError(int, long);
+    method @Deprecated public void onComplete();
+    method public default void onComplete(@Nullable android.telephony.ims.SipDetails);
+    method @Deprecated public void onError(int, long);
+    method public default void onError(int, long, @Nullable android.telephony.ims.SipDetails);
   }
 
   public static interface RcsUceAdapter.OnPublishStateChangedListener {
-    method public void onPublishStateChange(int);
+    method @Deprecated public void onPublishStateChange(int);
+    method public default void onPublishStateChange(@NonNull android.telephony.ims.PublishAttributes);
   }
 
   public interface RegistrationManager {
     field public static final int SUGGESTED_ACTION_NONE = 0; // 0x0
     field public static final int SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK = 1; // 0x1
     field public static final int SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT = 2; // 0x2
+  }
+
+  public static class RegistrationManager.RegistrationCallback {
+    method public void onUnregistered(@NonNull android.telephony.ims.ImsReasonInfo, @NonNull android.telephony.ims.SipDetails);
   }
 
   public final class RtpHeaderExtension implements android.os.Parcelable {
@@ -15670,8 +15695,10 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION) public void destroySipDelegate(@NonNull android.telephony.ims.SipDelegateConnection, int);
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) public boolean isSupported() throws android.telephony.ims.ImsException;
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) public void registerImsStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsStateCallback) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerSipDialogStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.SipDialogStateCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION) public void triggerFullNetworkRegistration(@NonNull android.telephony.ims.SipDelegateConnection, @IntRange(from=100, to=699) int, @Nullable String);
     method public void unregisterImsStateCallback(@NonNull android.telephony.ims.ImsStateCallback);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterSipDialogStateCallback(@NonNull android.telephony.ims.SipDialogStateCallback) throws android.telephony.ims.ImsException;
     field public static final int DENIED_REASON_INVALID = 4; // 0x4
     field public static final int DENIED_REASON_IN_USE_BY_ANOTHER_DELEGATE = 1; // 0x1
     field public static final int DENIED_REASON_NOT_ALLOWED = 2; // 0x2
@@ -15694,6 +15721,22 @@ package android.telephony.ims {
     field public static final int SIP_DELEGATE_DESTROY_REASON_SUBSCRIPTION_TORN_DOWN = 4; // 0x4
     field public static final int SIP_DELEGATE_DESTROY_REASON_UNKNOWN = 0; // 0x0
     field public static final int SIP_DELEGATE_DESTROY_REASON_USER_DISABLED_RCS = 3; // 0x3
+  }
+
+  public final class SipDialogState implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getState();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SipDialogState> CREATOR;
+    field public static final int STATE_CLOSED = 2; // 0x2
+    field public static final int STATE_CONFIRMED = 1; // 0x1
+    field public static final int STATE_EARLY = 0; // 0x0
+  }
+
+  public abstract class SipDialogStateCallback {
+    ctor public SipDialogStateCallback();
+    method public abstract void onActiveSipDialogsChanged(@NonNull java.util.List<android.telephony.ims.SipDialogState>);
+    method public abstract void onError();
   }
 
   public final class SipMessage implements android.os.Parcelable {
@@ -15837,7 +15880,8 @@ package android.telephony.ims.feature {
 package android.telephony.ims.stub {
 
   public interface CapabilityExchangeEventListener {
-    method public default void onPublishUpdated(int, @NonNull String, int, @NonNull String) throws android.telephony.ims.ImsException;
+    method @Deprecated public default void onPublishUpdated(int, @NonNull String, int, @NonNull String) throws android.telephony.ims.ImsException;
+    method public default void onPublishUpdated(@NonNull android.telephony.ims.SipDetails) throws android.telephony.ims.ImsException;
     method public void onRemoteCapabilityRequest(@NonNull android.net.Uri, @NonNull java.util.Set<java.lang.String>, @NonNull android.telephony.ims.stub.CapabilityExchangeEventListener.OptionsRequestCallback) throws android.telephony.ims.ImsException;
     method public void onRequestPublishCapabilities(int) throws android.telephony.ims.ImsException;
     method public void onUnpublish() throws android.telephony.ims.ImsException;
@@ -15971,6 +16015,8 @@ package android.telephony.ims.stub {
     ctor public ImsRegistrationImplBase(@NonNull java.util.concurrent.Executor);
     method public final void onDeregistered(android.telephony.ims.ImsReasonInfo);
     method public final void onDeregistered(@Nullable android.telephony.ims.ImsReasonInfo, int, int);
+    method public final void onDeregistered(@Nullable android.telephony.ims.ImsReasonInfo, @NonNull android.telephony.ims.SipDetails);
+    method public final void onDeregistered(@Nullable android.telephony.ims.ImsReasonInfo, int, int, @NonNull android.telephony.ims.SipDetails);
     method public final void onRegistered(int);
     method public final void onRegistered(@NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public final void onRegistering(int);
@@ -16058,14 +16104,16 @@ package android.telephony.ims.stub {
 
   public static interface RcsCapabilityExchangeImplBase.PublishResponseCallback {
     method public void onCommandError(int) throws android.telephony.ims.ImsException;
-    method public void onNetworkResponse(@IntRange(from=100, to=699) int, @NonNull String) throws android.telephony.ims.ImsException;
-    method public void onNetworkResponse(@IntRange(from=100, to=699) int, @NonNull String, @IntRange(from=100, to=699) int, @NonNull String) throws android.telephony.ims.ImsException;
+    method @Deprecated public void onNetworkResponse(@IntRange(from=100, to=699) int, @NonNull String) throws android.telephony.ims.ImsException;
+    method @Deprecated public void onNetworkResponse(@IntRange(from=100, to=699) int, @NonNull String, @IntRange(from=100, to=699) int, @NonNull String) throws android.telephony.ims.ImsException;
+    method public default void onNetworkResponse(@NonNull android.telephony.ims.SipDetails) throws android.telephony.ims.ImsException;
   }
 
   public static interface RcsCapabilityExchangeImplBase.SubscribeResponseCallback {
     method public void onCommandError(int) throws android.telephony.ims.ImsException;
-    method public void onNetworkResponse(@IntRange(from=100, to=699) int, @NonNull String) throws android.telephony.ims.ImsException;
-    method public void onNetworkResponse(@IntRange(from=100, to=699) int, @NonNull String, @IntRange(from=100, to=699) int, @NonNull String) throws android.telephony.ims.ImsException;
+    method @Deprecated public void onNetworkResponse(@IntRange(from=100, to=699) int, @NonNull String) throws android.telephony.ims.ImsException;
+    method @Deprecated public void onNetworkResponse(@IntRange(from=100, to=699) int, @NonNull String, @IntRange(from=100, to=699) int, @NonNull String) throws android.telephony.ims.ImsException;
+    method public default void onNetworkResponse(@NonNull android.telephony.ims.SipDetails) throws android.telephony.ims.ImsException;
     method public void onNotifyCapabilitiesUpdate(@NonNull java.util.List<java.lang.String>) throws android.telephony.ims.ImsException;
     method public void onResourceTerminated(@NonNull java.util.List<android.util.Pair<android.net.Uri,java.lang.String>>) throws android.telephony.ims.ImsException;
     method public void onTerminated(@NonNull String, long) throws android.telephony.ims.ImsException;

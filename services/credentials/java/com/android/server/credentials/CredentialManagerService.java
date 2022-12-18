@@ -32,8 +32,8 @@ import android.credentials.ICreateCredentialCallback;
 import android.credentials.ICredentialManager;
 import android.credentials.IGetCredentialCallback;
 import android.credentials.IListEnabledProvidersCallback;
-import android.credentials.ListEnabledProvidersResponse;
 import android.credentials.ISetEnabledProvidersCallback;
+import android.credentials.ListEnabledProvidersResponse;
 import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.ICancellationSignal;
@@ -41,7 +41,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.credentials.BeginCreateCredentialRequest;
-import android.service.credentials.BeginGetCredentialsRequest;
+import android.service.credentials.BeginGetCredentialRequest;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -183,15 +183,11 @@ public final class CredentialManagerService
             // TODO : Return error when no providers available
 
             // Iterate over all provider sessions and invoke the request
-            providerSessions.forEach(
-                    providerGetSession -> {
-                        providerGetSession
-                                .getRemoteCredentialService()
-                                .onBeginGetCredentials(
-                                        (BeginGetCredentialsRequest)
-                                                providerGetSession.getProviderRequest(),
-                                        /* callback= */ providerGetSession);
-                    });
+            providerSessions.forEach(providerGetSession -> {
+                providerGetSession.getRemoteCredentialService().onBeginGetCredential(
+                        (BeginGetCredentialRequest) providerGetSession.getProviderRequest(),
+                        /*callback=*/providerGetSession);
+            });
             return cancelTransport;
         }
 

@@ -9159,6 +9159,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (Debug.isDebuggerConnected()) {
             sb.append("Debugger: Connected\n");
         }
+        if (crashInfo != null && crashInfo.exceptionHandlerClassName != null
+                && !crashInfo.exceptionHandlerClassName.isEmpty()) {
+            sb.append("Crash-Handler: ").append(crashInfo.exceptionHandlerClassName).append("\n");
+        }
         if (crashInfo != null && crashInfo.crashTag != null && !crashInfo.crashTag.isEmpty()) {
             sb.append("Crash-Tag: ").append(crashInfo.crashTag).append("\n");
         }

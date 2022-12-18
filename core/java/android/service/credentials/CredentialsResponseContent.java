@@ -29,7 +29,7 @@ import java.util.Objects;
 
 /**
  * The content to be displayed on the account selector UI, including credential entries,
- * actions etc. Returned as part of {@link BeginGetCredentialsResponse}
+ * actions etc. Returned as part of {@link BeginGetCredentialResponse}
  */
 public final class CredentialsResponseContent implements Parcelable {
     /** List of credential entries to be displayed on the UI. */

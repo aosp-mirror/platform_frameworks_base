@@ -56,6 +56,8 @@ public class InputDeviceTest {
         assertEquals(device.getSources(), outDevice.getSources());
         assertEquals(device.getKeyboardType(), outDevice.getKeyboardType());
         assertEquals(device.getCountryCode(), outDevice.getCountryCode());
+        assertEquals(device.getKeyboardLanguageTag(), outDevice.getKeyboardLanguageTag());
+        assertEquals(device.getKeyboardLayoutType(), outDevice.getKeyboardLayoutType());
         assertEquals(device.getMotionRanges().size(), outDevice.getMotionRanges().size());
 
         KeyCharacterMap keyCharacterMap = device.getKeyCharacterMap();
@@ -87,6 +89,8 @@ public class InputDeviceTest {
                 .setHasSensor(true)
                 .setHasBattery(true)
                 .setCountryCode(InputDeviceCountryCode.INTERNATIONAL)
+                .setKeyboardLanguageTag("en-US")
+                .setKeyboardLayoutType("qwerty")
                 .setSupportsUsi(true)
                 .build();
 

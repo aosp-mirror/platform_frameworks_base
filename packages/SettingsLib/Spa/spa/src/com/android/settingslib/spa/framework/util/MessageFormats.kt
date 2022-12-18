@@ -25,10 +25,12 @@ import androidx.annotation.StringRes
 import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.N)
+@SafeVarargs
 fun Context.formatString(@StringRes resId: Int, vararg arguments: Pair<String, Any>): String =
     resources.formatString(resId, *arguments)
 
 @RequiresApi(Build.VERSION_CODES.N)
+@SafeVarargs
 fun Resources.formatString(@StringRes resId: Int, vararg arguments: Pair<String, Any>): String =
     MessageFormat(getString(resId), Locale.getDefault(Locale.Category.FORMAT))
         .format(mapOf(*arguments))

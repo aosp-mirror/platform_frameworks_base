@@ -17960,4 +17960,87 @@ public class TelephonyManager {
         }
         return false;
     }
+
+    /**
+     * Returns the primary IMEI (International Mobile Equipment Identity) of the device as
+     * mentioned in GSMA TS.37. {@link #getImei(int)} returns the IMEI that belongs to the selected
+     * slotID whereas this API {@link #getPrimaryImei()} returns primary IMEI of the device.
+     * A single SIM device with only one IMEI will be set by default as primary IMEI.
+     * A multi-SIM device with multiple IMEIs will have one of the IMEIs set as primary as
+     * mentioned in GSMA TS37_2.2_REQ_8.
+     *
+     * <p>Requires one of the following permissions
+     * <ul>
+     *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
+     *     is a privileged permission that can only be granted to apps preloaded on the device.
+     *     <li>If the calling app is the device owner of a fully-managed device, a profile
+     *     owner of an organization-owned device, or their delegates (see {@link
+     *     android.app.admin.DevicePolicyManager#getEnrollmentSpecificId()}).
+     *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}) on any
+     *     active subscription.
+     *     <li>If the calling app is the default SMS role holder (see {@link
+     *     RoleManager#isRoleHeld(String)}).
+     *     <li>If the calling app has been granted the
+     *      {@link Manifest.permission#USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER} permission.
+     * </ul>
+     *
+     * @return Primary IMEI of type string
+     * @throws UnsupportedOperationException if the radio doesn't support this feature.
+     * @throws SecurityException if the caller does not have the required permission/privileges
+     */
+    @NonNull
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_GSM)
+    public String getPrimaryImei() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                Rlog.e(TAG, "getPrimaryImei(): IPhoneSubInfo instance is NULL");
+                throw new IllegalStateException("Telephony service not available.");
+            }
+            return telephony.getPrimaryImei(getOpPackageName(), getAttributionTag());
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getPrimaryImei() RemoteException : " + ex);
+            throw ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Convert SIM state into string.
+     *
+     * @param state SIM state.
+     * @return SIM state in string format.
+     *
+     * @hide
+     */
+    @NonNull
+    public static String simStateToString(@SimState int state) {
+        switch (state) {
+            case TelephonyManager.SIM_STATE_UNKNOWN:
+                return "UNKNOWN";
+            case TelephonyManager.SIM_STATE_ABSENT:
+                return "ABSENT";
+            case TelephonyManager.SIM_STATE_PIN_REQUIRED:
+                return "PIN_REQUIRED";
+            case TelephonyManager.SIM_STATE_PUK_REQUIRED:
+                return "PUK_REQUIRED";
+            case TelephonyManager.SIM_STATE_NETWORK_LOCKED:
+                return "NETWORK_LOCKED";
+            case TelephonyManager.SIM_STATE_READY:
+                return "READY";
+            case TelephonyManager.SIM_STATE_NOT_READY:
+                return "NOT_READY";
+            case TelephonyManager.SIM_STATE_PERM_DISABLED:
+                return "PERM_DISABLED";
+            case TelephonyManager.SIM_STATE_CARD_IO_ERROR:
+                return "CARD_IO_ERROR";
+            case TelephonyManager.SIM_STATE_CARD_RESTRICTED:
+                return "CARD_RESTRICTED";
+            case TelephonyManager.SIM_STATE_LOADED:
+                return "LOADED";
+            case TelephonyManager.SIM_STATE_PRESENT:
+                return "PRESENT";
+            default:
+                return "UNKNOWN(" + state + ")";
+        }
+    }
 }

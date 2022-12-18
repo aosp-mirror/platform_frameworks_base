@@ -1709,6 +1709,33 @@ final public class MediaCodec {
      */
     public static final int BUFFER_FLAG_MUXER_DATA = 16;
 
+    /**
+     * This indicates that the buffer is decoded and updates the internal state of the decoder,
+     * but does not produce any output buffer.
+     *
+     * When a buffer has this flag set,
+     * {@link OnFrameRenderedListener#onFrameRendered(MediaCodec, long, long)} and
+     * {@link Callback#onOutputBufferAvailable(MediaCodec, int, BufferInfo)} will not be called for
+     * that given buffer.
+     *
+     * For example, when seeking to a certain frame, that frame may need to reference previous
+     * frames in order for it to produce output. The preceding frames can be marked with this flag
+     * so that they are only decoded and their data is used when decoding the latter frame that
+     * should be initially displayed post-seek.
+     * Another example would be trick play, trick play is when a video is fast-forwarded and only a
+     * subset of the frames is to be rendered on the screen. The frames not to be rendered can be
+     * marked with this flag for the same reason as the above one.
+     * Marking frames with this flag improves the overall performance of playing a video stream as
+     * fewer frames need to be passed back to the app.
+     *
+     * In {@link CodecCapabilities#FEATURE_TunneledPlayback}, buffers marked with this flag
+     * are not rendered on the output surface.
+     *
+     * A frame should not be marked with this flag and {@link #BUFFER_FLAG_END_OF_STREAM}
+     * simultaneously, doing so will produce a {@link InvalidBufferFlagsException}
+     */
+    public static final int BUFFER_FLAG_DECODE_ONLY = 32;
+
     /** @hide */
     @IntDef(
         flag = true,
@@ -1719,6 +1746,7 @@ final public class MediaCodec {
             BUFFER_FLAG_END_OF_STREAM,
             BUFFER_FLAG_PARTIAL_FRAME,
             BUFFER_FLAG_MUXER_DATA,
+            BUFFER_FLAG_DECODE_ONLY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BufferFlag {}
@@ -1744,6 +1772,8 @@ final public class MediaCodec {
     private static final int CB_OUTPUT_AVAILABLE = 2;
     private static final int CB_ERROR = 3;
     private static final int CB_OUTPUT_FORMAT_CHANGE = 4;
+    private static final String EOS_AND_DECODE_ONLY_ERROR_MESSAGE = "An input buffer cannot have "
+            + "both BUFFER_FLAG_END_OF_STREAM and BUFFER_FLAG_DECODE_ONLY flags";
 
     private class EventHandler extends Handler {
         private MediaCodec mCodec;
@@ -2100,6 +2130,16 @@ final public class MediaCodec {
 
         IncompatibleWithBlockModelException(Throwable cause) {
             super(cause);
+        }
+    }
+
+    /**
+     * Thrown when a buffer is marked with an invalid combination of flags
+     * (e.g. both {@link #BUFFER_FLAG_END_OF_STREAM} and {@link #BUFFER_FLAG_DECODE_ONLY})
+     */
+    public class InvalidBufferFlagsException extends RuntimeException {
+        InvalidBufferFlagsException(String message) {
+            super(message);
         }
     }
 
@@ -2480,10 +2520,22 @@ final public class MediaCodec {
     /**
      * Thrown when a crypto error occurs while queueing a secure input buffer.
      */
-    public final static class CryptoException extends RuntimeException {
+    public final static class CryptoException extends RuntimeException
+            implements MediaDrmThrowable {
         public CryptoException(int errorCode, @Nullable String detailMessage) {
-            super(detailMessage);
+            this(detailMessage, errorCode, 0, 0, 0);
+        }
+
+        /**
+         * @hide
+         */
+        public CryptoException(String message, int errorCode, int vendorError, int oemError,
+                int errorContext) {
+            super(message);
             mErrorCode = errorCode;
+            mVendorError = vendorError;
+            mOemError = oemError;
+            mErrorContext = errorContext;
         }
 
         /**
@@ -2602,7 +2654,22 @@ final public class MediaCodec {
             return mErrorCode;
         }
 
-        private int mErrorCode;
+        @Override
+        public int getVendorError() {
+            return mVendorError;
+        }
+
+        @Override
+        public int getOemError() {
+            return mOemError;
+        }
+
+        @Override
+        public int getErrorContext() {
+            return mErrorContext;
+        }
+
+        private final int mErrorCode, mVendorError, mOemError, mErrorContext;
     }
 
     /**
@@ -2666,6 +2733,10 @@ final public class MediaCodec {
             int index,
             int offset, int size, long presentationTimeUs, int flags)
         throws CryptoException {
+        if ((flags & BUFFER_FLAG_DECODE_ONLY) != 0
+                && (flags & BUFFER_FLAG_END_OF_STREAM) != 0) {
+            throw new InvalidBufferFlagsException(EOS_AND_DECODE_ONLY_ERROR_MESSAGE);
+        }
         synchronized(mBufferLock) {
             if (mBufferMode == BUFFER_MODE_BLOCK) {
                 throw new IncompatibleWithBlockModelException("queueInputBuffer() "
@@ -2936,6 +3007,10 @@ final public class MediaCodec {
             @NonNull CryptoInfo info,
             long presentationTimeUs,
             int flags) throws CryptoException {
+        if ((flags & BUFFER_FLAG_DECODE_ONLY) != 0
+                && (flags & BUFFER_FLAG_END_OF_STREAM) != 0) {
+            throw new InvalidBufferFlagsException(EOS_AND_DECODE_ONLY_ERROR_MESSAGE);
+        }
         synchronized(mBufferLock) {
             if (mBufferMode == BUFFER_MODE_BLOCK) {
                 throw new IncompatibleWithBlockModelException("queueSecureInputBuffer() "

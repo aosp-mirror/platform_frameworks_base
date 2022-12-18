@@ -223,6 +223,9 @@ public class VcnGatewayConnectionTestBase {
         doReturn(mWakeLock)
                 .when(mDeps)
                 .newWakeLock(eq(mContext), eq(PowerManager.PARTIAL_WAKE_LOCK), any());
+        doReturn(1)
+                .when(mDeps)
+                .getParallelTunnelCount(eq(TEST_SUBSCRIPTION_SNAPSHOT), eq(TEST_SUB_GRP));
 
         setUpWakeupMessage(mTeardownTimeoutAlarm, VcnGatewayConnection.TEARDOWN_TIMEOUT_ALARM);
         setUpWakeupMessage(mDisconnectRequestAlarm, VcnGatewayConnection.DISCONNECT_REQUEST_ALARM);

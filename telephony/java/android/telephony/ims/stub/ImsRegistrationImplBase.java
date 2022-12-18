@@ -26,6 +26,7 @@ import android.os.RemoteException;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsRegistrationAttributes;
 import android.telephony.ims.RegistrationManager;
+import android.telephony.ims.SipDetails;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.util.Log;
@@ -509,6 +510,68 @@ public class ImsRegistrationImplBase {
         mCallbacks.broadcastAction((c) -> {
             try {
                 c.onDeregistered(reasonInfo, suggestedAction, imsRadioTech);
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, e + "onDeregistered() - Skipping callback.");
+            }
+        });
+    }
+
+    /**
+     * Notify the framework that the device is disconnected from the IMS network.
+     * <p>
+     * Note: Before calling {@link #onDeregistered(ImsReasonInfo, SipDetails)}, ImsService should
+     * ensure that any changes to {@link android.telephony.ims.feature.ImsFeature} capability
+     * availability is sent to the framework.
+     * For example,
+     * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO}
+     * and
+     * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE}
+     * may be set to unavailable to ensure the framework knows these services are no longer
+     * available due to de-registration.  If ImsService do not report capability changes impacted
+     * by de-registration, the framework will not know which features are no longer available as a
+     * result.
+     *
+     * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
+     * @param details the {@link SipDetails} related to disconnected Ims registration
+     * @hide This API is not part of the Android public SDK API
+     */
+    @SystemApi
+    public final void onDeregistered(@Nullable ImsReasonInfo info,
+            @NonNull SipDetails details) {
+        onDeregistered(info, RegistrationManager.SUGGESTED_ACTION_NONE, REGISTRATION_TECH_NONE,
+                details);
+    }
+
+    /**
+     * Notify the framework that the device is disconnected from the IMS network.
+     * <p>
+     * Note: Before calling {@link #onDeregistered(ImsReasonInfo, SipDetails)}, ImsService should
+     * ensure that any changes to {@link android.telephony.ims.feature.ImsFeature} capability
+     * availability is sent to the framework.
+     * For example,
+     * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO}
+     * and
+     * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE}
+     * may be set to unavailable to ensure the framework knows these services are no longer
+     * available due to de-registration.  If ImsService do not report capability changes impacted
+     * by de-registration, the framework will not know which features are no longer available as a
+     * result.
+     *
+     * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
+     * @param suggestedAction the expected behavior of radio protocol stack.
+     * @param details the {@link SipDetails} related to disconnected Ims registration
+     * @hide This API is not part of the Android public SDK API
+     */
+    @SystemApi
+    public final void onDeregistered(@Nullable ImsReasonInfo info,
+            @RegistrationManager.SuggestedAction int suggestedAction,
+            @ImsRegistrationTech int imsRadioTech, @NonNull SipDetails details) {
+        updateToDisconnectedState(info, suggestedAction, imsRadioTech);
+        // ImsReasonInfo should never be null.
+        final ImsReasonInfo reasonInfo = (info != null) ? info : new ImsReasonInfo();
+        mCallbacks.broadcastAction((c) -> {
+            try {
+                c.onDeregisteredWithDetails(reasonInfo, suggestedAction, imsRadioTech, details);
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, e + "onDeregistered() - Skipping callback.");
             }

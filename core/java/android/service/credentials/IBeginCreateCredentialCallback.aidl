@@ -9,5 +9,5 @@ import android.service.credentials.BeginCreateCredentialResponse;
  */
 oneway interface IBeginCreateCredentialCallback {
     void onSuccess(in BeginCreateCredentialResponse request);
-    void onFailure(int errorCode, in CharSequence message);
+    void onFailure(String errorType, in CharSequence message);
 }

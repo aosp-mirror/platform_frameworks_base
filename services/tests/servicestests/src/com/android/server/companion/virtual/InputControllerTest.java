@@ -54,6 +54,8 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class InputControllerTest {
+    private static final String LANGUAGE_TAG = "en-US";
+    private static final String LAYOUT_TYPE = "qwerty";
 
     @Mock
     private InputManagerInternal mInputManagerInternalMock;
@@ -100,7 +102,7 @@ public class InputControllerTest {
 
         final IBinder device2Token = new Binder("device2");
         mInputController.createKeyboard("keyboard", /*vendorId= */2, /*productId= */ 2,
-                device2Token, 2);
+                device2Token, 2, LANGUAGE_TAG, LAYOUT_TYPE);
         int device2Id = mInputController.getInputDeviceId(device2Token);
 
         assertWithMessage("Different devices should have different id").that(
@@ -177,5 +179,18 @@ public class InputControllerTest {
 
         verify(mInputManagerInternalMock).unsetTypeAssociation(
                 startsWith("virtualNavigationTouchpad:"));
+    }
+
+    @Test
+    public void createKeyboard_addAndRemoveKeyboardLayoutAssociation() {
+        final IBinder deviceToken = new Binder("device");
+
+        mInputController.createKeyboard("keyboard", /*vendorId= */2, /*productId= */ 2, deviceToken,
+                2, LANGUAGE_TAG, LAYOUT_TYPE);
+        verify(mInputManagerInternalMock).addKeyboardLayoutAssociation(anyString(),
+                eq(LANGUAGE_TAG), eq(LAYOUT_TYPE));
+
+        mInputController.unregisterInputDevice(deviceToken);
+        verify(mInputManagerInternalMock).removeKeyboardLayoutAssociation(anyString());
     }
 }

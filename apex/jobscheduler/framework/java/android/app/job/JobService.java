@@ -232,16 +232,8 @@ public abstract class JobService extends Service {
     public abstract boolean onStopJob(JobParameters params);
 
     /**
-     * Update how much data this job will transfer. This method can
-     * be called multiple times within the first 30 seconds after
-     * {@link #onStartJob(JobParameters)} has been called. Only
-     * one call will be heeded after that time has passed.
+     * Update the amount of data this job is estimated to transfer after the job has started.
      *
-     * This method (or an overload) must be called within the first
-     * 30 seconds for a data transfer job if a payload size estimate
-     * was not provided at the time of scheduling.
-     *
-     * @hide
      * @see JobInfo.Builder#setEstimatedNetworkBytes(long, long)
      */
     public final void updateEstimatedNetworkBytes(@NonNull JobParameters params,
@@ -250,16 +242,9 @@ public abstract class JobService extends Service {
     }
 
     /**
-     * Update how much data will transfer for the JobWorkItem. This
-     * method can be called multiple times within the first 30 seconds
-     * after {@link #onStartJob(JobParameters)} has been called.
-     * Only one call will be heeded after that time has passed.
+     * Update the amount of data this JobWorkItem is estimated to transfer after the job has
+     * started.
      *
-     * This method (or an overload) must be called within the first
-     * 30 seconds for a data transfer job if a payload size estimate
-     * was not provided at the time of scheduling.
-     *
-     * @hide
      * @see JobInfo.Builder#setEstimatedNetworkBytes(long, long)
      */
     public final void updateEstimatedNetworkBytes(@NonNull JobParameters params,
@@ -270,7 +255,6 @@ public abstract class JobService extends Service {
 
     /**
      * Tell JobScheduler how much data has successfully been transferred for the data transfer job.
-     * @hide
      */
     public final void updateTransferredNetworkBytes(@NonNull JobParameters params,
             @BytesLong long transferredDownloadBytes, @BytesLong long transferredUploadBytes) {
@@ -281,7 +265,6 @@ public abstract class JobService extends Service {
     /**
      * Tell JobScheduler how much data has been transferred for the data transfer
      * {@link JobWorkItem}.
-     * @hide
      */
     public final void updateTransferredNetworkBytes(@NonNull JobParameters params,
             @NonNull JobWorkItem item,
@@ -428,7 +411,6 @@ public abstract class JobService extends Service {
      *                                 Notification)}.
      * @param notification             The notification to be displayed.
      * @param jobEndNotificationPolicy The policy to apply to the notification when the job stops.
-     * @hide
      */
     public final void setNotification(@NonNull JobParameters params, int notificationId,
             @NonNull Notification notification,

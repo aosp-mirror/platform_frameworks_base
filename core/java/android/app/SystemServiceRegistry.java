@@ -1045,9 +1045,10 @@ public final class SystemServiceRegistry {
         registerService(Context.APPWIDGET_SERVICE, AppWidgetManager.class,
                 new CachedServiceFetcher<AppWidgetManager>() {
             @Override
-            public AppWidgetManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getServiceOrThrow(Context.APPWIDGET_SERVICE);
-                return new AppWidgetManager(ctx, IAppWidgetService.Stub.asInterface(b));
+            public AppWidgetManager createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(Context.APPWIDGET_SERVICE);
+                return b == null ? null : new AppWidgetManager(ctx,
+                        IAppWidgetService.Stub.asInterface(b));
             }});
 
         registerService(Context.MIDI_SERVICE, MidiManager.class,

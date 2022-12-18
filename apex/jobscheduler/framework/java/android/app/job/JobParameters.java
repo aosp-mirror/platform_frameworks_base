@@ -403,7 +403,6 @@ public class JobParameters implements Parcelable {
      * {@link android.Manifest.permission#RUN_LONG_JOBS} permission.
      *
      * @see JobInfo.Builder#setUserInitiated(boolean)
-     * @hide
      */
     public boolean isUserInitiatedJob() {
         return mIsUserInitiated;
