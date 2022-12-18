@@ -29,7 +29,7 @@ import com.android.internal.util.Preconditions;
 /**
  * A specific type of credential request to be sent to the provider during the query phase of
  * a get flow. This request contains limited parameters needed to populate a list of
- * {@link CredentialEntry} on the {@link BeginGetCredentialsResponse}.
+ * {@link CredentialEntry} on the {@link BeginGetCredentialResponse}.
  */
 public final class BeginGetCredentialOption implements Parcelable {
 
@@ -56,7 +56,7 @@ public final class BeginGetCredentialOption implements Parcelable {
     /**
      * Returns the request candidate query data, denoting a set of parameters
      * that can be used to populate a candidate list of credentials, as
-     * {@link CredentialEntry} on {@link BeginGetCredentialsResponse}. This list
+     * {@link CredentialEntry} on {@link BeginGetCredentialResponse}. This list
      * of entries is then presented to the user on a selector.
      *
      * <p>This data does not contain any sensitive parameters, and will be sent

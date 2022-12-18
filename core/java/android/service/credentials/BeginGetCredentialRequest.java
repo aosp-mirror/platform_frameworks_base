@@ -35,16 +35,16 @@ import java.util.Objects;
  *
  * <p>This request contains a list of {@link GetCredentialOption} that have parameters
  * to be used to query credentials, and return a list of {@link CredentialEntry} to be set
- * on the {@link BeginGetCredentialsResponse}. This list is then shown to the user on a selector.
+ * on the {@link BeginGetCredentialResponse}. This list is then shown to the user on a selector.
  *
  * If a {@link PendingIntent} is set on a {@link CredentialEntry}, and the user selects that
  * entry, a {@link GetCredentialRequest} with all parameters needed to get the actual
  * {@link android.credentials.Credential} will be sent as part of the {@link Intent} fired
  * through the {@link PendingIntent}.
  */
-public final class BeginGetCredentialsRequest implements Parcelable {
-    /** Calling package of the app requesting for credentials. */
-    @NonNull private final String mCallingPackage;
+public final class BeginGetCredentialRequest implements Parcelable {
+    /** Info pertaining to the app requesting for credentials. */
+    @NonNull private final CallingAppInfo mCallingAppInfo;
 
     /**
      * List of credential options. Each {@link BeginGetCredentialOption} object holds parameters to
@@ -52,35 +52,36 @@ public final class BeginGetCredentialsRequest implements Parcelable {
      *
      * This request does not reveal sensitive parameters. Complete list of parameters
      * is retrieved through the {@link PendingIntent} set on each {@link CredentialEntry}
-     * on {@link CredentialsResponseContent} set on {@link BeginGetCredentialsResponse},
+     * on {@link CredentialsResponseContent} set on {@link BeginGetCredentialResponse},
      * when the user selects one of these entries.
      */
     @NonNull private final List<BeginGetCredentialOption> mBeginGetCredentialOptions;
 
-    private BeginGetCredentialsRequest(@NonNull String callingPackage,
+    private BeginGetCredentialRequest(@NonNull CallingAppInfo callingAppInfo,
             @NonNull List<BeginGetCredentialOption> getBeginCredentialOptions) {
-        this.mCallingPackage = callingPackage;
+        this.mCallingAppInfo = callingAppInfo;
         this.mBeginGetCredentialOptions = getBeginCredentialOptions;
     }
 
-    private BeginGetCredentialsRequest(@NonNull Parcel in) {
-        mCallingPackage = in.readString8();
+    private BeginGetCredentialRequest(@NonNull Parcel in) {
+        mCallingAppInfo = in.readTypedObject(CallingAppInfo.CREATOR);
         List<BeginGetCredentialOption> getBeginCredentialOptions = new ArrayList<>();
         in.readTypedList(getBeginCredentialOptions, BeginGetCredentialOption.CREATOR);
         mBeginGetCredentialOptions = getBeginCredentialOptions;
         AnnotationValidations.validate(NonNull.class, null, mBeginGetCredentialOptions);
     }
 
-    public static final @NonNull Creator<BeginGetCredentialsRequest> CREATOR =
-            new Creator<BeginGetCredentialsRequest>() {
+    @NonNull
+    public static final Creator<BeginGetCredentialRequest> CREATOR =
+            new Creator<BeginGetCredentialRequest>() {
                 @Override
-                public BeginGetCredentialsRequest createFromParcel(Parcel in) {
-                    return new BeginGetCredentialsRequest(in);
+                public BeginGetCredentialRequest createFromParcel(Parcel in) {
+                    return new BeginGetCredentialRequest(in);
                 }
 
                 @Override
-                public BeginGetCredentialsRequest[] newArray(int size) {
-                    return new BeginGetCredentialsRequest[size];
+                public BeginGetCredentialRequest[] newArray(int size) {
+                    return new BeginGetCredentialRequest[size];
                 }
             };
 
@@ -91,40 +92,40 @@ public final class BeginGetCredentialsRequest implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString8(mCallingPackage);
+        dest.writeTypedObject(mCallingAppInfo, flags);
         dest.writeTypedList(mBeginGetCredentialOptions);
     }
 
     /**
-     * Returns the calling package of the app requesting credentials.
+     * Returns info pertaining to the app requesting credentials.
      */
-    public @NonNull String getCallingPackage() {
-        return mCallingPackage;
+    public @NonNull CallingAppInfo getCallingAppInfo() {
+        return mCallingAppInfo;
     }
 
     /**
      * Returns the list of type specific credential options to list credentials for in
-     * {@link BeginGetCredentialsResponse}.
+     * {@link BeginGetCredentialResponse}.
      */
     public @NonNull List<BeginGetCredentialOption> getBeginGetCredentialOptions() {
         return mBeginGetCredentialOptions;
     }
 
     /**
-     * Builder for {@link BeginGetCredentialsRequest}.
+     * Builder for {@link BeginGetCredentialRequest}.
      */
     public static final class Builder {
-        private String mCallingPackage;
+        private CallingAppInfo mCallingAppInfo;
         private List<BeginGetCredentialOption> mBeginGetCredentialOptions = new ArrayList<>();
 
         /**
          * Creates a new builder.
-         * @param callingPackage the calling package of the app requesting credentials
+         * @param callingAppInfo info pertaining to the app requesting credentials
          *
-         * @throws IllegalArgumentException If {@code callingPackage} is null or empty.
+         * @throws IllegalArgumentException If {@code callingAppInfo} is null or empty.
          */
-        public Builder(@NonNull String callingPackage) {
-            mCallingPackage = Preconditions.checkStringNotEmpty(callingPackage);
+        public Builder(@NonNull CallingAppInfo callingAppInfo) {
+            mCallingAppInfo = Objects.requireNonNull(callingAppInfo);
         }
 
         /**
@@ -158,18 +159,17 @@ public final class BeginGetCredentialsRequest implements Parcelable {
         }
 
         /**
-         * Builds a new {@link BeginGetCredentialsRequest} instance.
+         * Builds a new {@link BeginGetCredentialRequest} instance.
          *
          * @throws NullPointerException If {@code beginGetCredentialOptions} is null.
          * @throws IllegalArgumentException If {@code beginGetCredentialOptions} is empty, or if
-         * {@code callingPackage} is null or empty.
+         * {@code callingAppInfo} is null or empty.
          */
-        public @NonNull BeginGetCredentialsRequest build() {
-            Preconditions.checkStringNotEmpty(mCallingPackage,
-                    "Must set the calling package");
+        public @NonNull BeginGetCredentialRequest build() {
+            Objects.requireNonNull(mCallingAppInfo, "callingAppInfo");
             Preconditions.checkCollectionNotEmpty(mBeginGetCredentialOptions,
                     "beginGetCredentialOptions");
-            return new BeginGetCredentialsRequest(mCallingPackage, mBeginGetCredentialOptions);
+            return new BeginGetCredentialRequest(mCallingAppInfo, mBeginGetCredentialOptions);
         }
     }
 }

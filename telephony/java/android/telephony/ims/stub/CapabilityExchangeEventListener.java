@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.telephony.ims.ImsException;
 import android.telephony.ims.RcsContactUceCapability;
 import android.telephony.ims.RcsUceAdapter;
+import android.telephony.ims.SipDetails;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.RcsFeature;
 
@@ -108,11 +109,30 @@ public interface CapabilityExchangeEventListener {
      * the {@link ImsFeature#onFeatureReady()} callback. This may also happen in rare
      * cases when the Telephony stack has crashed.
      *
+     * @deprecated Replaced sip information with the newly added
+     * {@link #onPublishUpdated(SipDetails)}.
      */
+    @Deprecated
     default void onPublishUpdated(int reasonCode, @NonNull String reasonPhrase,
             int reasonHeaderCause, @NonNull String reasonHeaderText) throws ImsException {
     }
 
+    /**
+     * Notify the framework that the ImsService has refreshed the PUBLISH
+     * internally, which has resulted in a new PUBLISH result.
+     * <p>
+     * This method must be called to notify the framework of SUCCESS (200 OK) and FAILURE (300+)
+     * codes in order to keep the AOSP stack up to date.
+     * @param details The SIP information received in response to a publish operation.
+     * @throws ImsException If this {@link RcsCapabilityExchangeImplBase} instance is not
+     * currently connected to the framework. This can happen if the {@link RcsFeature} is not
+     * {@link ImsFeature#STATE_READY} and the {@link RcsFeature} has not received
+     * the {@link ImsFeature#onFeatureReady()} callback. This may also happen in rare
+     * cases when the Telephony stack has crashed.
+     */
+    default void onPublishUpdated(@NonNull SipDetails details)
+            throws ImsException {
+    }
     /**
      * Inform the framework of an OPTIONS query from a remote device for this device's UCE
      * capabilities.

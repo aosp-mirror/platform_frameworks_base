@@ -555,7 +555,7 @@ class UidPermissionPolicy : SchemePolicy() {
                 newFlags = newFlags or PermissionFlags.LEGACY_GRANTED
                 // Explicitly check against the old state to determine if this permission is new.
                 val isNewPermission =
-                    getPermissionFlags(appId, userId, permissionName, oldState) == 0
+                    getOldStatePermissionFlags(appId, userId, permissionName) == 0
                 if (isNewPermission) {
                     newFlags = newFlags or PermissionFlags.IMPLICIT
                 }
@@ -651,7 +651,7 @@ class UidPermissionPolicy : SchemePolicy() {
             }
             // Explicitly check against the old state to determine if this permission is new.
             val isNewPermission =
-                getPermissionFlags(appId, userId, implicitPermissionName, oldState) == 0
+                getOldStatePermissionFlags(appId, userId, implicitPermissionName) == 0
             if (!isNewPermission) {
                 return@implicitPermissions
             }
@@ -1023,12 +1023,11 @@ class UidPermissionPolicy : SchemePolicy() {
         permissionName: String
     ): Int = getPermissionFlags(state, appId, userId, permissionName)
 
-    private fun MutateStateScope.getPermissionFlags(
+    private fun MutateStateScope.getOldStatePermissionFlags(
         appId: Int,
         userId: Int,
-        permissionName: String,
-        state: AccessState = newState
-    ): Int = getPermissionFlags(state, appId, userId, permissionName)
+        permissionName: String
+    ): Int = getPermissionFlags(oldState, appId, userId, permissionName)
 
     private fun getPermissionFlags(
         state: AccessState,

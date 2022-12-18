@@ -59,8 +59,14 @@ class UidAppOpPolicy : BaseAppOpPolicy(UidAppOpPersistence()) {
     fun GetStateScope.getAppOpModes(appId: Int, userId: Int): IndexedMap<String, Int>? =
         state.userStates[userId].uidAppOpModes[appId]
 
-    fun MutateStateScope.removeAppOpModes(appId: Int, userId: Int): Boolean =
-        newState.userStates[userId].uidAppOpModes.removeReturnOld(appId) != null
+    fun MutateStateScope.removeAppOpModes(appId: Int, userId: Int): Boolean {
+        val userState = newState.userStates[userId]
+        val isChanged = userState.uidAppOpModes.removeReturnOld(appId) != null
+        if (isChanged) {
+            userState.requestWrite()
+        }
+        return isChanged
+    }
 
     fun GetStateScope.getAppOpMode(appId: Int, userId: Int, appOpName: String): Int =
         state.userStates[userId].uidAppOpModes[appId]

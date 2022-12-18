@@ -22,6 +22,7 @@ import android.app.slice.Slice
 import android.app.slice.SliceSpec
 import android.content.Context
 import android.content.Intent
+import android.content.pm.Signature
 import android.credentials.CreateCredentialRequest
 import android.credentials.GetCredentialOption
 import android.credentials.GetCredentialRequest
@@ -40,6 +41,7 @@ import android.os.Binder
 import android.os.Bundle
 import android.os.ResultReceiver
 import android.service.credentials.CredentialProviderService
+import android.util.ArraySet
 import com.android.credentialmanager.createflow.CreateCredentialUiState
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest.Companion.toBundle
@@ -351,7 +353,8 @@ class CredentialManagerRepo(
       intent, (PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
               or PendingIntent.FLAG_ONE_SHOT))
     val createPasswordRequest = android.service.credentials.CreateCredentialRequest(
-            context.applicationInfo.packageName,
+            android.service.credentials.CallingAppInfo(
+                    context.applicationInfo.packageName, ArraySet<Signature>()),
             TYPE_PASSWORD_CREDENTIAL,
             toBundle("beckett-bakert@gmail.com", "password123")
     )

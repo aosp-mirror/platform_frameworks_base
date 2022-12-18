@@ -22,15 +22,18 @@ import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.Signature;
 import android.credentials.ui.CreateCredentialProviderData;
 import android.credentials.ui.Entry;
 import android.credentials.ui.ProviderPendingIntentResponse;
 import android.service.credentials.BeginCreateCredentialRequest;
 import android.service.credentials.BeginCreateCredentialResponse;
+import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CreateCredentialRequest;
 import android.service.credentials.CreateEntry;
 import android.service.credentials.CredentialProviderInfo;
 import android.service.credentials.CredentialProviderService;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
@@ -65,11 +68,12 @@ public final class ProviderCreateSession extends ProviderSession<
         CreateCredentialRequest providerCreateRequest =
                 createProviderRequest(providerInfo.getCapabilities(),
                         createRequestSession.mClientRequest,
-                        createRequestSession.mClientCallingPackage);
+                        new CallingAppInfo(createRequestSession.mClientCallingPackage,
+                                new ArraySet<Signature>()));
         if (providerCreateRequest != null) {
             BeginCreateCredentialRequest providerBeginCreateRequest =
                     new BeginCreateCredentialRequest(
-                            providerCreateRequest.getCallingPackage(),
+                            providerCreateRequest.getCallingAppInfo(),
                             providerCreateRequest.getType(),
                             createRequestSession.mClientRequest.getCandidateQueryData());
             return new ProviderCreateSession(context, providerInfo, createRequestSession, userId,
@@ -82,10 +86,10 @@ public final class ProviderCreateSession extends ProviderSession<
     @Nullable
     private static CreateCredentialRequest createProviderRequest(List<String> providerCapabilities,
             android.credentials.CreateCredentialRequest clientRequest,
-            String clientCallingPackage) {
+            CallingAppInfo callingAppInfo) {
         String capability = clientRequest.getType();
         if (providerCapabilities.contains(capability)) {
-            return new CreateCredentialRequest(clientCallingPackage, capability,
+            return new CreateCredentialRequest(callingAppInfo, capability,
                     clientRequest.getCredentialData());
         }
         Log.i(TAG, "Unable to create provider request - capabilities do not match");
@@ -120,7 +124,8 @@ public final class ProviderCreateSession extends ProviderSession<
 
     /** Called when the provider response resulted in a failure. */
     @Override
-    public void onProviderResponseFailure(int errorCode, @Nullable CharSequence message) {
+    public void onProviderResponseFailure(int errorCode, @Nullable String errorType,
+            @Nullable CharSequence message) {
         updateStatusAndInvokeCallback(toStatus(errorCode));
     }
 

@@ -3872,8 +3872,8 @@ public final class ActiveServices {
                             throw new SecurityException("BIND_EXTERNAL_SERVICE failed, "
                                     + className + " is not an isolatedProcess");
                         }
-                        if (AppGlobals.getPackageManager().getPackageUid(callingPackage,
-                                0, userId) != callingUid) {
+                        if (!mAm.getPackageManagerInternal().isSameApp(callingPackage, callingUid,
+                                userId)) {
                             throw new SecurityException("BIND_EXTERNAL_SERVICE failed, "
                                     + "calling package not owned by calling UID ");
                         }

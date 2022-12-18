@@ -218,13 +218,13 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
     }
 
     @Override
-    public boolean arePackageModesDefault(String packageMode, @UserIdInt int userId) {
+    public boolean arePackageModesDefault(@NonNull String packageName, @UserIdInt int userId) {
         synchronized (mLock) {
             ArrayMap<String, SparseIntArray> packageModes = mUserPackageModes.get(userId, null);
             if (packageModes == null) {
                 return true;
             }
-            SparseIntArray opModes = packageModes.get(packageMode);
+            SparseIntArray opModes = packageModes.get(packageName);
             return (opModes == null || opModes.size() <= 0);
         }
     }

@@ -21,10 +21,12 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.apex.ApexInfo;
 import android.apex.IApexService;
+import android.app.compat.CompatChanges;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
+import android.compat.annotation.ChangeId;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -125,6 +127,14 @@ public class BinaryTransparencyService extends SystemService {
     private String mVbmetaDigest;
     // the system time (in ms) the last measurement was taken
     private long mMeasurementsLastRecordedMs;
+
+    /**
+     * Guards whether or not measurements of MBA to be performed. When this change is enabled,
+     * measurements of MBAs are performed. But when it is disabled, only measurements of APEX
+     * and modules are done.
+     */
+    @ChangeId
+    public static final long LOG_MBA_INFO = 245692487L;
 
     final class BinaryTransparencyServiceImpl extends IBinaryTransparencyService.Stub {
 
@@ -336,58 +346,63 @@ public class BinaryTransparencyService extends SystemService {
                         + " packages after considering preloads");
             }
 
-            // lastly measure all newly installed MBAs
-            for (PackageInfo packageInfo : getNewlyInstalledMbas()) {
-                if (packagesMeasured.contains(packageInfo.packageName)) {
-                    continue;
-                }
-                packagesMeasured.add(packageInfo.packageName);
-
-                Bundle packageMeasurement = measurePackage(packageInfo);
-                results.add(packageMeasurement);
-
-                if (record) {
-                    // compute digests of signing info
-                    String[] signerDigestHexStrings = computePackageSignerSha256Digests(
-                            packageInfo.signingInfo);
-
-                    // then extract package's InstallSourceInfo
-                    if (DEBUG) {
-                        Slog.d(TAG, "Extracting InstallSourceInfo for " + packageInfo.packageName);
+            if (CompatChanges.isChangeEnabled(LOG_MBA_INFO)) {
+                // lastly measure all newly installed MBAs
+                for (PackageInfo packageInfo : getNewlyInstalledMbas()) {
+                    if (packagesMeasured.contains(packageInfo.packageName)) {
+                        continue;
                     }
-                    InstallSourceInfo installSourceInfo = getInstallSourceInfo(
-                            packageInfo.packageName);
-                    String initiator = null;
-                    SigningInfo initiatorSignerInfo = null;
-                    String[] initiatorSignerInfoDigest = null;
-                    String installer = null;
-                    String originator = null;
+                    packagesMeasured.add(packageInfo.packageName);
 
-                    if (installSourceInfo != null) {
-                        initiator = installSourceInfo.getInitiatingPackageName();
-                        initiatorSignerInfo = installSourceInfo.getInitiatingPackageSigningInfo();
-                        if (initiatorSignerInfo != null) {
-                            initiatorSignerInfoDigest = computePackageSignerSha256Digests(
-                                    initiatorSignerInfo);
+                    Bundle packageMeasurement = measurePackage(packageInfo);
+                    results.add(packageMeasurement);
+
+                    if (record) {
+                        // compute digests of signing info
+                        String[] signerDigestHexStrings = computePackageSignerSha256Digests(
+                                packageInfo.signingInfo);
+
+                        // then extract package's InstallSourceInfo
+                        if (DEBUG) {
+                            Slog.d(TAG,
+                                    "Extracting InstallSourceInfo for " + packageInfo.packageName);
                         }
-                        installer = installSourceInfo.getInstallingPackageName();
-                        originator = installSourceInfo.getOriginatingPackageName();
-                    }
+                        InstallSourceInfo installSourceInfo = getInstallSourceInfo(
+                                packageInfo.packageName);
+                        String initiator = null;
+                        SigningInfo initiatorSignerInfo = null;
+                        String[] initiatorSignerInfoDigest = null;
+                        String installer = null;
+                        String originator = null;
 
-                    // we should now have all the info needed for the atom
-                    byte[] cDigest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
-                    FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
-                            packageInfo.packageName,
-                            packageInfo.getLongVersionCode(),
-                            (cDigest != null) ? HexEncoding.encodeToString(cDigest, false) : null,
-                            packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
-                            signerDigestHexStrings,
-                            MBA_STATUS_NEW_INSTALL,   // mba_status
-                            initiator,
-                            initiatorSignerInfoDigest,
-                            installer,
-                            originator
-                    );
+                        if (installSourceInfo != null) {
+                            initiator = installSourceInfo.getInitiatingPackageName();
+                            initiatorSignerInfo =
+                                    installSourceInfo.getInitiatingPackageSigningInfo();
+                            if (initiatorSignerInfo != null) {
+                                initiatorSignerInfoDigest = computePackageSignerSha256Digests(
+                                        initiatorSignerInfo);
+                            }
+                            installer = installSourceInfo.getInstallingPackageName();
+                            originator = installSourceInfo.getOriginatingPackageName();
+                        }
+
+                        // we should now have all the info needed for the atom
+                        byte[] cDigest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
+                        FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
+                                packageInfo.packageName,
+                                packageInfo.getLongVersionCode(),
+                                (cDigest != null) ? HexEncoding.encodeToString(cDigest, false)
+                                        : null,
+                                packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
+                                signerDigestHexStrings,
+                                MBA_STATUS_NEW_INSTALL,   // mba_status
+                                initiator,
+                                initiatorSignerInfoDigest,
+                                installer,
+                                originator
+                        );
+                    }
                 }
             }
             if (DEBUG) {

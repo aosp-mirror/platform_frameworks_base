@@ -18,7 +18,7 @@ package android.telephony.ims.aidl;
 
 import android.net.Uri;
 import android.telephony.ims.aidl.IOptionsRequestCallback;
-
+import android.telephony.ims.SipDetails;
 import java.util.List;
 
 /**
@@ -31,8 +31,7 @@ import java.util.List;
 oneway interface ICapabilityExchangeEventListener {
     void onRequestPublishCapabilities(int publishTriggerType);
     void onUnpublish();
-    void onPublishUpdated(int reasonCode, String reasonPhrase, int reasonHeaderCause,
-            String reasonHeaderText);
+    void onPublishUpdated(in SipDetails details);
     void onRemoteCapabilityRequest(in Uri contactUri,
             in List<String> remoteCapabilities, IOptionsRequestCallback cb);
 }

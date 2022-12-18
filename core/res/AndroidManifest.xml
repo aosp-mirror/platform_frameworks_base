@@ -816,6 +816,7 @@
     <protected-broadcast android:name="android.intent.action.PROFILE_REMOVED" />
     <protected-broadcast android:name="com.android.internal.telephony.cat.SMS_SENT_ACTION" />
     <protected-broadcast android:name="com.android.internal.telephony.cat.SMS_DELIVERY_ACTION" />
+    <protected-broadcast android:name="android.companion.virtual.action.VIRTUAL_DEVICE_REMOVED" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->

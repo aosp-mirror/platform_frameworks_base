@@ -1684,6 +1684,42 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         assertThat(mNotificationPanelViewController.isFullyExpanded()).isTrue();
     }
 
+    @Test
+    public void shadeExpanded_inShadeState() {
+        mStatusBarStateController.setState(SHADE);
+
+        mNotificationPanelViewController.setExpandedHeight(0);
+        assertThat(mNotificationPanelViewController.isShadeFullyOpen()).isFalse();
+
+        int transitionDistance = mNotificationPanelViewController.getMaxPanelTransitionDistance();
+        mNotificationPanelViewController.setExpandedHeight(transitionDistance);
+        assertThat(mNotificationPanelViewController.isShadeFullyOpen()).isTrue();
+    }
+
+    @Test
+    public void shadeExpanded_onKeyguard() {
+        mStatusBarStateController.setState(KEYGUARD);
+
+        int transitionDistance = mNotificationPanelViewController.getMaxPanelTransitionDistance();
+        mNotificationPanelViewController.setExpandedHeight(transitionDistance);
+        assertThat(mNotificationPanelViewController.isShadeFullyOpen()).isFalse();
+
+        // set maxQsExpansion in NPVC
+        int maxQsExpansion = 123;
+        mNotificationPanelViewController.setQs(mQs);
+        when(mQs.getDesiredHeight()).thenReturn(maxQsExpansion);
+        triggerLayoutChange();
+
+        mNotificationPanelViewController.setQsExpansionHeight(maxQsExpansion);
+        assertThat(mNotificationPanelViewController.isShadeFullyOpen()).isTrue();
+    }
+
+    @Test
+    public void shadeExpanded_onShadeLocked() {
+        mStatusBarStateController.setState(SHADE_LOCKED);
+        assertThat(mNotificationPanelViewController.isShadeFullyOpen()).isTrue();
+    }
+
     private static MotionEvent createMotionEvent(int x, int y, int action) {
         return MotionEvent.obtain(
                 /* downTime= */ 0, /* eventTime= */ 0, action, x, y, /* metaState= */ 0);

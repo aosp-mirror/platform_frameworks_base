@@ -68,6 +68,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
@@ -83,6 +84,7 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
@@ -204,6 +206,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private SinglePointerTouchProcessor mSinglePointerTouchProcessor;
     @Mock
+    private SessionTracker mSessionTracker;
+    @Mock
     private AlternateBouncerInteractor mAlternateBouncerInteractor;
 
     // Capture listeners so that they can be used to send events
@@ -240,6 +244,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 .thenReturn(mFpmOtherView);
         when(mEnrollView.getContext()).thenReturn(mContext);
         when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
+        when(mSessionTracker.getSessionId(anyInt())).thenReturn(
+                (new InstanceIdSequence(1 << 20)).newInstanceId());
 
         final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
         componentInfo.add(new ComponentInfoInternal("faceSensor" /* componentId */,
@@ -295,7 +301,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mDisplayManager, mHandler, mConfigurationController, mSystemClock,
                 mUnlockedScreenOffAnimationController, mSystemUIDialogManager, mLatencyTracker,
                 mActivityLaunchAnimator, alternateTouchProvider, mBiometricExecutor,
-                mPrimaryBouncerInteractor, mSinglePointerTouchProcessor,
+                mPrimaryBouncerInteractor, mSinglePointerTouchProcessor, mSessionTracker,
                 mAlternateBouncerInteractor);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();

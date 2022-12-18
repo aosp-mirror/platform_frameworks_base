@@ -2091,6 +2091,9 @@
     <!-- Label for when Do not disturb is off in QS detail panel [CHAR LIMIT=NONE] -->
     <string name="dnd_is_off">Do Not Disturb is off</string>
 
+    <!-- Label for when Do not disturb is on in lockscreen quick affordance [CHAR LIMIT=NONE] -->
+    <string name="dnd_is_on">Do Not Disturb is on</string>
+
     <!-- Prompt for when Do not disturb is on from automatic rule in QS [CHAR LIMIT=NONE] -->
     <string name="qs_dnd_prompt_auto_rule">Do Not Disturb was turned on by an automatic rule (<xliff:g name="rule">%s</xliff:g>).</string>
 
