@@ -55,6 +55,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.spy
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder
 import com.android.internal.R
+import com.android.server.LocalManagerRegistry
 import com.android.server.LocalServices
 import com.android.server.LockGuard
 import com.android.server.SystemConfig
@@ -148,6 +149,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
                 .mockStatic(LockGuard::class.java)
                 .mockStatic(EventLog::class.java)
                 .mockStatic(LocalServices::class.java)
+                .mockStatic(LocalManagerRegistry::class.java)
                 .mockStatic(DeviceConfig::class.java)
                 .mockStatic(HexEncoding::class.java)
                 .apply(withSession)
