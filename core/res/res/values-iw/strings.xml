@@ -2353,4 +2353,8 @@
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"ההרשאה הזו מאפשרת לאפליקציה נלווית להעביר הודעות נלוות למכשירים אחרים."</string>
     <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"הפעלה מהרקע של שירותים שפועלים בחזית"</string>
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"ההרשאה הזו מאפשרת לאפליקציה נלווית להפעיל מהרקע שירותים שפועלים בחזית."</string>
+    <!-- no translation found for mic_access_on_toast (2666925317663845156) -->
+    <skip />
+    <!-- no translation found for mic_access_off_toast (8111040892954242437) -->
+    <skip />
 </resources>

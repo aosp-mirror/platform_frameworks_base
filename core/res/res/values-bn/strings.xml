@@ -2352,4 +2352,8 @@
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"অন্যান্য ডিভাইসে কম্প্যানিয়ন মেসেজ ডেলিভার করতে কম্প্যানিয়ন অ্যাপকে অনুমতি দেয়।"</string>
     <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"ব্যাকগ্রাউন্ড থেকে ফোরগ্রাউন্ড পরিষেবা চালু করা"</string>
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"কম্প্যানিয়ন অ্যাপকে, ব্যাকগ্রাউন্ড থেকে ফোরগ্রাউন্ড পরিষেবা চালু করার অনুমতি দেয়।"</string>
+    <!-- no translation found for mic_access_on_toast (2666925317663845156) -->
+    <skip />
+    <!-- no translation found for mic_access_off_toast (8111040892954242437) -->
+    <skip />
 </resources>

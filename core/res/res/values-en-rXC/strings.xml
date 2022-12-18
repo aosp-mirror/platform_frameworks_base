@@ -43,10 +43,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‎‏‎‏‎‏‎‎‎‎‎‎‏‎‎‏‎‎‏‏‏‎‏‎‏‎‏‏‏‎‎‎‏‎‏‏‏‏‎‎‎‏‎‎‎‏‏‏‎‏‎‎‏‎‎‎‏‎The PINs you typed don\'t match.‎‏‎‎‏‎"</string>
     <string name="invalidPin" msgid="7542498253319440408">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‎‏‎‏‎‏‏‎‎‎‏‎‏‎‏‏‎‎‎‏‏‎‎‏‏‎‎‎‏‎‏‎‎‎‎‎‏‏‏‎‎‎‎‎‎‏‎‎‎‎‎‎‏‏‎‎‎‎Type a PIN that is 4 to 8 numbers.‎‏‎‎‏‎"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‏‏‏‎‏‎‎‎‏‏‎‏‎‏‏‏‏‏‎‏‏‏‎‏‎‏‏‎‏‎‏‎‏‎‎‎‎‏‎‏‏‎‏‎‎‎‎‎‏‎‏‏‎Type a PUK that is 8 numbers or longer.‎‏‎‎‏‎"</string>
-    <!-- no translation found for needPuk (3503414069503752211) -->
-    <skip />
-    <!-- no translation found for needPuk2 (3910763547447344963) -->
-    <skip />
+    <string name="needPuk" msgid="3503414069503752211">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‏‎‎‏‏‏‏‎‏‎‏‎‎‎‎‎‏‎‎‎‏‎‎‎‏‏‎‎‏‎‎‏‏‏‏‎‎‎‎‎‎‏‏‏‏‎‎‎‎‎‎‏‎‎‏‏‎Your SIM is PUK-locked. Type the PUK code to unlock it.‎‏‎‎‏‎"</string>
+    <string name="needPuk2" msgid="3910763547447344963">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‎‏‎‎‎‏‎‏‏‏‎‏‎‎‏‎‏‎‏‏‏‎‎‏‏‏‏‎‏‏‏‎‎‎‏‎‎‏‎‏‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‏‎Type PUK2 to unblock SIM.‎‏‎‎‏‎"</string>
     <string name="enablePin" msgid="2543771964137091212">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‏‎‎‏‏‎‏‎‏‎‎‏‎‏‏‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‎‎‎‎‏‎‎‎‏‏‎‎‎Unsuccessful, enable SIM/RUIM Lock.‎‏‎‎‏‎"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‎‎‏‏‏‏‎‏‎‏‏‏‎‏‏‎‎‏‎‏‏‎‎‏‎‏‏‏‎‎‎‎‎‏‏‎‎‎‎‎‏‎‏‎‎‏‏‏‏‎‏‎‏‎‎‎‎‎You have ‎‏‎‎‏‏‎<xliff:g id="NUMBER_1">%d</xliff:g>‎‏‎‎‏‏‏‎ remaining attempts before SIM is locked.‎‏‎‎‏‎</item>
@@ -963,22 +961,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‎‏‏‎‏‏‎‎‎‏‎‏‏‏‎‏‏‎‎‏‏‏‎‎‎‏‎‎‏‎‏‏‏‏‏‏‎‏‏‏‎‎‏‏‎‎‎‎‎‎‏‎‎‎‏‎‎Try again‎‏‎‎‏‎"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‏‏‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‏‏‎‎‏‎‏‎‎‏‏‏‎‎‎‎‏‎‎‏‏‎‎‎‏‎‎‎‎‏‏‏‎‏‎‎‎Unlock for all features and data‎‏‎‎‏‎"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‏‎‏‏‏‎‏‏‎‏‏‏‎‏‎‏‏‏‎‏‏‎‎‎‎‏‏‎‏‏‏‎‎‎‎‏‎‏‏‏‎‏‏‎‎‎‎‎‎‎‏‎‏‏‏‎‎‎Maximum Face Unlock attempts exceeded‎‏‎‎‏‎"</string>
-    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
-    <skip />
-    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
-    <skip />
-    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
-    <skip />
-    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
-    <skip />
-    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
-    <skip />
-    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
-    <skip />
-    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
-    <skip />
-    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
-    <skip />
+    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‏‎‏‎‏‏‏‏‏‏‏‎‏‎‏‎‏‏‎‎‎‏‏‏‎‎‏‏‏‏‏‏‎‎‏‎‎‏‎‏‏‏‎‏‎No SIM‎‏‎‎‏‎"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‎‏‎‏‎‏‎‎‎‎‎‏‏‏‎‏‎‏‎‏‏‎‏‏‎‏‎‏‏‎‎‏‎‎‏‏‎‏‎‏‎‏‏‏‏‏‏‎‏‏‏‏‏‎‎‏‎No SIM in tablet.‎‏‎‎‏‎"</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‏‎‏‎‏‎‏‎‏‏‏‏‎‏‏‏‏‏‎‎‏‎‏‎‏‎‎‏‏‏‎‎‎‎‏‎‏‎‏‏‎‏‏‏‎‎‏‎‎‎‎‎‎‏‎No SIM in your Android TV device.‎‏‎‎‏‎"</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‏‏‏‎‏‎‎‏‎‏‎‏‎‎‏‎‏‏‏‏‎‎‎‏‏‎‏‎‏‎‏‏‏‏‎‏‏‎‏‏‎‏‎‎‏‎‎‎‏‏‎‏‎‎‏‎‏‎No SIM in phone.‎‏‎‎‏‎"</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‏‏‎‏‎‎‎‏‎‎‎‏‏‏‏‎‎‎‏‏‎‏‎‎‏‎‎‏‏‏‏‏‏‏‏‎‏‎‎‏‏‏‏‏‏‎‎‎‎‎‏‎‏‏‏‏‎Add a SIM.‎‏‎‎‏‎"</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‎‎‏‏‏‎‏‏‎‎‏‏‎‎‎‏‎‏‏‏‎‏‎‎‏‏‏‎‏‎‏‎‎‏‏‏‏‏‏‏‎‎‎‎‎‎‎‎‏‏‎‎‎‎‎‎The SIM is missing or not readable. Add a SIM.‎‏‎‎‏‎"</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‏‎‏‏‎‏‏‏‏‎‏‎‏‏‏‏‏‏‎‎‎‎‎‎‏‎‏‎‏‏‏‎‏‎‎‎‎‏‏‎‏‎‎‎‎‏‎‏‏‏‎‎‏‏‎‏‎Unusable SIM.‎‏‎‎‏‎"</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‏‎‎‏‏‎‎‎‏‎‎‏‏‏‏‏‎‏‎‏‏‏‎‎‎‎‎‏‏‎‎‎‏‎‏‏‎‎‏‏‎‏‏‏‎‎‏‏‏‎‏‏‏‎‏‎Your SIM has been permanently deactivated.‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎ Contact your wireless service provider for another SIM.‎‏‎‎‏‎"</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‏‏‏‎‏‎‏‏‏‏‎‏‏‏‎‎‏‎‎‎‏‏‎‎‎‏‎‎‎‎‏‏‎‎‎‏‎‏‏‎‎‎‎‏‎‎‎‏‎‏‎‎‏‏‎‎Previous track‎‏‎‎‏‎"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‎‏‎‏‎‏‏‏‎‏‏‎‏‎‎‎‎‏‎‏‏‏‎‏‎‎‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‏‎‎‏‎‎‏‎‎‎‏‏‏‏‎Next track‎‏‎‎‏‎"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‎‎‎‏‏‎‏‏‏‏‏‎‏‎‎‏‏‏‎‏‎‎‏‎‎‎‏‎‏‎‎‏‎‏‎‎‎‏‏‏‏‎‎‏‎‏‎‏‏‎‎‏‏‏‎‎Pause‎‏‎‎‏‎"</string>
@@ -988,13 +978,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‎‎‎‎‏‏‏‎‎‎‏‏‎‎‏‏‎‎‎‎‏‎‏‎‏‎‎‎‏‏‎‎‎‎‏‎‏‏‏‎‎‎‏‏‎‎‏‎‎‏‎‏‎‎‏‎‎‎Fast forward‎‏‎‎‏‎"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‏‎‏‏‎‏‏‏‏‎‎‏‎‎‏‎‏‏‏‎‎‏‎‏‎‏‎‎‏‏‏‎‏‎‏‎‏‏‏‎‏‏‎‏‏‎‏‎‏‎‏‎‏‏‎Emergency calls only‎‏‎‎‏‎"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‎‎‎‎‏‏‎‏‏‎‎‎‎‎‎‎‏‏‎‎‏‏‏‎‎‏‎‏‎‏‏‏‏‎‏‏‎‎‎‎‏‏‎‎‎‏‏‏‏‏‏‎‎‎‏‏‎Network locked‎‏‎‎‏‎"</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‏‎‎‏‏‎‏‎‎‎‎‎‏‎‎‏‏‏‎‏‏‎‎‏‏‏‏‏‏‎‎‏‏‎‎‎‎‎‏‏‏‎‎‎‏‎‎‏‎‏‎‎‏‏‎‎SIM is PUK-locked.‎‏‎‎‏‎"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‏‎‏‎‏‎‎‏‏‎‏‏‏‎‏‎‏‏‎‏‎‎‎‏‎‏‎‎‎‎‎‎‏‏‎‎‏‎‏‏‏‎‏‎‏‎‏‏‏‏‎‎‎‎‏‏‎See the User Guide or contact Customer Care.‎‏‎‎‏‎"</string>
-    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
-    <skip />
-    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
-    <skip />
+    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‏‎‎‎‎‎‏‎‏‏‎‏‏‏‎‎‏‎‏‎‎‏‎‏‏‏‏‎‏‏‏‏‏‎‎‏‎‎‎‏‏‎‏‏‎‏‏‎‎‎‏‎‏‏‎‏‎‎‎SIM is locked.‎‏‎‎‏‎"</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‎‎‏‎‏‎‎‎‏‎‏‎‎‏‏‎‏‏‏‎‎‏‎‏‏‏‏‎‏‎‎‏‎‏‏‏‎‏‎‎‏‎‏‎‏‎‏‏‎‎‏‏‏‏‎‏‏‎Unlocking SIM…‎‏‎‎‏‎"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‎‏‎‎‎‏‎‎‎‏‏‏‏‎‎‎‎‏‎‏‏‎‎‎‎‏‎‎‏‎‎‏‏‏‎‏‏‏‏‎‎‏‎‏‎‏‏‏‏‎‎‎‎‎‎‎You have incorrectly drawn your unlock pattern ‎‏‎‎‏‏‎<xliff:g id="NUMBER_0">%1$d</xliff:g>‎‏‎‎‏‏‏‎ times. ‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎Try again in ‎‏‎‎‏‏‎<xliff:g id="NUMBER_1">%2$d</xliff:g>‎‏‎‎‏‏‏‎ seconds.‎‏‎‎‏‎"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‏‎‏‎‎‎‏‏‎‏‎‎‏‏‏‎‏‏‏‏‏‎‎‎‏‎‏‎‎‎‏‏‎‏‏‎‏‏‏‏‏‎‏‏‏‏‎‏‎‏‎‏‎‎‏‎‎‎You have incorrectly typed your password ‎‏‎‎‏‏‎<xliff:g id="NUMBER_0">%1$d</xliff:g>‎‏‎‎‏‏‏‎ times. ‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎Try again in ‎‏‎‎‏‏‎<xliff:g id="NUMBER_1">%2$d</xliff:g>‎‏‎‎‏‏‏‎ seconds.‎‏‎‎‏‎"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‏‏‎‎‎‏‏‎‏‏‏‏‏‎‎‏‏‎‏‎‏‎‎‏‎‎‏‎‏‏‏‏‏‎‏‎‏‏‎‎‏‎‎‎‏‏‏‎‏‏‎‎‎‎‎‎You have incorrectly typed your PIN ‎‏‎‎‏‏‎<xliff:g id="NUMBER_0">%1$d</xliff:g>‎‏‎‎‏‏‏‎ times. ‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎Try again in ‎‏‎‎‏‏‎<xliff:g id="NUMBER_1">%2$d</xliff:g>‎‏‎‎‏‏‏‎ seconds.‎‏‎‎‏‎"</string>
@@ -1378,13 +1365,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‎‎‏‏‎‏‏‎‏‏‏‎‏‎‏‏‏‏‏‏‎‎‎‏‏‏‏‎‎‏‏‎‎‏‎‎‎‎‏‏‏‎‏‏‎‏‎‎You can change this later in Settings &gt; Apps‎‏‎‎‏‎"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‏‏‎‏‏‎‎‏‏‎‏‏‏‏‎‎‎‏‎‎‎‏‎‎‎‏‏‎‏‎‏‏‎‏‏‎‎‏‏‎‏‏‏‎‏‏‎‏‎‎‏‎‏‏‏‎‎Always Allow‎‏‎‎‏‎"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‏‎‏‎‏‎‎‎‎‏‎‏‎‎‎‏‏‏‎‎‎‏‏‏‏‎‏‎‏‎‎‏‏‏‏‎‎‏‎‏‏‎‎‎‎‏‎‎‏‎‏‏‎‏‏‏‏‎Never Allow‎‏‎‎‏‎"</string>
-    <!-- no translation found for sim_removed_title (1349026474932481037) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (8469588437451533845) -->
-    <skip />
+    <string name="sim_removed_title" msgid="1349026474932481037">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‏‎‏‏‏‎‎‎‏‎‏‏‎‏‎‎‎‏‏‎‏‏‏‎‎‏‏‏‎‏‏‎‏‏‏‏‎‎‏‎‏‎‏‎‏‏‎‎‎‎‎‎‏‏‎‏‎SIM removed‎‏‎‎‏‎"</string>
+    <string name="sim_removed_message" msgid="8469588437451533845">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‏‎‎‎‏‎‏‎‎‎‎‎‎‏‎‏‏‏‎‎‏‏‏‏‎‏‏‎‎‎‎‎‎‎‎‎‏‏‎‏‏‏‏‎‏‏‏‎‎‎‎‏‎‏‎‏‎The mobile network will be unavailable until you restart with a valid SIM.‎‏‎‎‏‎"</string>
     <string name="sim_done_button" msgid="6464250841528410598">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‎‏‏‎‏‎‏‏‎‏‎‎‎‎‏‏‏‏‎‎‏‎‎‎‎‏‎‏‏‎‎‎‏‎‏‎‎‏‎‎‎‏‎‎‎‎‏‏‏‏‎‎‏‏‎‎Done‎‏‎‎‏‎"</string>
-    <!-- no translation found for sim_added_title (2976783426741012468) -->
-    <skip />
+    <string name="sim_added_title" msgid="2976783426741012468">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‏‎‏‎‎‏‏‏‏‏‎‏‎‏‎‎‎‏‏‎‎‎‎‎‏‎‏‎‎‎‏‎‎‎‎‏‎‏‎‏‏‎‎‎‎‎‏‏‏‏‏‏‏‎‏‎‎‎SIM added‎‏‎‎‏‎"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‎‏‎‎‎‏‎‎‎‏‏‏‏‎‎‏‎‎‏‎‎‏‏‏‏‏‎‎‎‎‎‏‏‏‎‏‎‏‏‏‎‎‎‎‏‎‎‎‎‎‏‏‎‎‎‎Restart your device to access the mobile network.‎‏‎‎‏‎"</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‏‎‏‏‎‏‎‏‎‏‏‎‏‎‏‏‏‎‏‎‏‎‏‎‎‎‎‎‏‏‎‏‏‎‏‏‏‎‏‏‎‏‎‏‎‎‏‏‏‎‎‏‎‏‏‎‎Restart‎‏‎‎‏‎"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‏‎‎‎‏‏‏‏‎‏‎‏‎‏‏‏‎‏‎‏‎‏‎‏‏‎‎‎‎‎‎‏‏‏‏‏‎‎‎‏‏‏‎‎‎‏‏‎‎‏‏‎‏‏‎‎Activate mobile service‎‏‎‎‏‎"</string>
@@ -1696,8 +1680,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‏‏‏‎‏‏‎‏‏‎‏‎‎‎‏‏‎‎‎‎‏‎‎‏‏‎‎‏‏‎‏‎‏‏‎‎‎‎‏‏‏‏‏‏‎‎‎‎‎‎‏‎‎‎‏‎‎SIM is now disabled. Enter PUK code to continue. Contact carrier for details.‎‏‎‎‏‎"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‏‎‏‏‎‎‎‎‏‏‎‏‏‏‎‎‎‎‎‏‎‎‎‏‏‏‏‎‏‎‏‏‎‎‏‎‎‎‎‎‏‏‏‏‎‏‏‎‎‎‏‎‏‎‎Enter desired PIN code‎‏‎‎‏‎"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‏‏‏‏‏‏‎‏‏‏‏‎‏‏‏‎‏‏‎‏‎‎‎‎‏‎‏‎‎‏‎‎‏‏‏‎‏‎‎‎‎‏‎‎‏‏‎‏‎‏‎‎‎Confirm desired PIN code‎‏‎‎‏‎"</string>
-    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
-    <skip />
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‏‏‎‏‏‎‏‎‏‎‏‏‏‏‏‎‏‎‏‎‎‏‎‏‎‎‏‎‎‎‏‎‏‎‎‎‏‎‏‏‎‏‏‎‏‎‎‎‏‏‎‏‏‎‏‏‏‎Unlocking SIM…‎‏‎‎‏‎"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‏‎‎‎‏‎‏‏‏‏‎‏‎‎‏‏‎‏‎‎‏‎‏‏‏‎‎‎‎‏‎‏‏‏‎‎‏‏‏‏‎‏‏‏‎‎‏‎‏‏‎‏‎‎‎‏‏‎Incorrect PIN code.‎‏‎‎‏‎"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‏‏‎‏‎‎‏‏‏‎‎‎‏‎‎‏‏‏‏‏‎‎‏‎‏‎‏‎‏‎‎‏‎‏‎‎‎‎‎‏‏‏‏‏‏‎‎‏‏‏‎‏‏‎‏‎Type a PIN that is 4 to 8 numbers.‎‏‎‎‏‎"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‎‏‏‏‏‎‏‏‎‏‎‎‎‏‎‏‎‎‏‏‏‎‎‏‎‏‏‎‏‏‎‏‎‏‏‎‏‎‎‏‏‏‎‎‏‏‎‎‎‎‎‎‎‏‏‎PUK code should be 8 numbers.‎‏‎‎‏‎"</string>
@@ -1754,8 +1737,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‏‎‎‏‎‎‏‏‎‏‏‎‎‎‎‏‎‏‎‏‏‎‎‎‏‏‎‏‎‎‏‏‏‎‎‏‎‎‎‏‎‏‎‎‏‎‏‏‏‏‏‏‏‏‏‏‎Turn off Shortcut‎‏‎‎‏‎"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‏‎‎‏‏‏‎‏‎‏‏‎‎‎‏‎‎‏‎‎‎‎‎‏‎‏‎‎‎‏‎‎‏‎‏‏‏‎‏‎‎‎‏‏‏‏‎‎‏‎‏‏‏‏‎‎Use Shortcut‎‏‎‎‏‎"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‎‏‎‎‎‎‏‏‎‎‏‎‏‏‏‎‎‏‏‎‎‏‎‏‎‏‏‎‎‎‎‎‏‎‏‎‏‎‏‏‎‏‏‏‎‏‏‏‏‏‏‎‏‎‏‎‎‎Color Inversion‎‏‎‎‏‎"</string>
-    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
-    <skip />
+    <string name="color_correction_feature_name" msgid="7975133554160979214">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‏‎‏‏‎‏‎‏‎‏‏‏‎‏‏‎‏‏‎‏‏‎‏‎‏‎‎‏‎‎‎‎‎‏‎‎‎‎‎‏‎‎‏‏‎‏‎‎‎‎‏‏‏‎‎Color correction‎‏‎‎‏‎"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‎‎‏‏‎‎‏‎‏‎‎‏‏‎‏‎‎‏‏‎‎‏‏‎‎‏‎‎‎‎‎‏‎‎‏‏‏‎‏‎‎‎‎‏‎‏‏‎‏‏‎‏‎‏‎‏‏‎One-Handed mode‎‏‎‎‏‎"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‎‏‎‏‏‏‎‏‎‎‏‏‎‎‎‎‎‎‏‏‏‏‎‎‎‎‏‎‎‏‏‏‎‏‏‏‏‏‏‎‏‏‎‏‏‏‎‎‏‎‏‏‎‎‏‎‎‎Extra dim‎‏‎‎‏‎"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‏‏‏‎‏‎‏‏‏‎‎‎‎‏‎‏‏‏‎‎‎‏‏‎‏‎‏‎‎‏‏‏‏‏‎‏‎‎‎‏‏‏‏‏‎‎‏‎‎‎‎‎‏‏‏‎Held volume keys. ‎‏‎‎‏‏‎<xliff:g id="SERVICE_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ turned on.‎‏‎‎‏‎"</string>
@@ -2352,4 +2334,8 @@
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‎‎‏‎‎‎‎‎‎‏‏‎‎‏‏‎‎‎‏‏‎‎‎‏‏‏‎‎‎‎‎‏‏‎‏‎‏‏‎‏‏‏‏‏‎‏‎‎‏‏‏‏‎‎‏‎‎Allows a companion app to deliver companion messages to other devices.‎‏‎‎‏‎"</string>
     <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‏‎‎‏‏‎‏‏‏‏‎‏‏‏‏‎‏‎‎‎‏‏‎‏‏‎‏‏‏‏‏‎‏‎‏‏‏‏‎‎‏‏‏‏‎‎‎‎‎‏‎‏‏‏‎‎Start foreground services from background‎‏‎‎‏‎"</string>
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‎‏‎‎‎‎‎‏‎‎‎‎‎‏‎‎‎‏‎‏‏‎‎‎‏‏‎‎‎‎‏‏‎‏‎‎‎‏‏‎‏‎‏‏‏‏‎‎‎‎‎‎‎‎‎‎‏‎Allows a companion app to start foreground services from background.‎‏‎‎‏‎"</string>
+    <!-- no translation found for mic_access_on_toast (2666925317663845156) -->
+    <skip />
+    <!-- no translation found for mic_access_off_toast (8111040892954242437) -->
+    <skip />
 </resources>
