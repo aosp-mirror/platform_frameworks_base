@@ -73,6 +73,12 @@ class AccessPolicy private constructor(
         }
     }
 
+    fun GetStateScope.onStateMutated() {
+        forEachSchemePolicy {
+            with(it) { onStateMutated() }
+        }
+    }
+
     fun MutateStateScope.onUserAdded(userId: Int) {
         newState.systemState.userIds += userId
         newState.userStates[userId] = UserState()
@@ -283,6 +289,8 @@ abstract class SchemePolicy {
         `object`: AccessUri,
         decision: Int
     )
+
+    open fun GetStateScope.onStateMutated() {}
 
     open fun MutateStateScope.onUserAdded(userId: Int) {}
 
