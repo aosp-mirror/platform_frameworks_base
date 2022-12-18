@@ -244,6 +244,20 @@ jobject hidlLogMessagesToJavaList(JNIEnv *env, const Vector<drm::V1_4::LogMessag
     }
     return arrayList;
 }
+
+int drmThrowException(JNIEnv* env, const char *className, const DrmStatus &err, const char *msg) {
+    using namespace android::jnihelp;
+    jstring _detailMessage = CreateExceptionMsg(env, msg);
+    int _status = ThrowException(env, className, "(Ljava/lang/String;III)V",
+                                 _detailMessage,
+                                 err.getCdmErr(),
+                                 err.getOemErr(),
+                                 err.getContext());
+    if (_detailMessage != NULL) {
+        env->DeleteLocalRef(_detailMessage);
+    }
+    return _status;
+}
 }  // namespace anonymous
 
 // ----------------------------------------------------------------------------
@@ -393,8 +407,8 @@ static void throwStateException(JNIEnv *env, const char *msg, const DrmStatus &e
 
     jint jerr = MediaErrorToJavaError(err);
     jobject exception = env->NewObject(gFields.stateException.classId,
-            gFields.stateException.init, static_cast<int>(jerr),
-            env->NewStringUTF(msg));
+            gFields.stateException.init, env->NewStringUTF(msg), static_cast<int>(jerr),
+            err.getCdmErr(), err.getOemErr(), err.getContext());
     env->Throw(static_cast<jthrowable>(exception));
 }
 
@@ -411,10 +425,13 @@ static void throwSessionException(JNIEnv *env, const char *msg, const DrmStatus 
     }
 
     jobject exception = env->NewObject(gFields.sessionException.classId,
-            gFields.sessionException.init, static_cast<int>(err),
-            env->NewStringUTF(msg));
+            gFields.sessionException.init,
+            env->NewStringUTF(msg),
+            jErrorCode,
+            err.getCdmErr(),
+            err.getOemErr(),
+            err.getContext());
 
-    env->SetIntField(exception, gFields.sessionException.errorCode, jErrorCode);
     env->Throw(static_cast<jthrowable>(exception));
 }
 
@@ -437,13 +454,13 @@ static bool throwExceptionAsNecessary(
         jniThrowException(env, "java/lang/UnsupportedOperationException", msg);
         return true;
     } else if (err == ERROR_DRM_NOT_PROVISIONED) {
-        jniThrowException(env, "android/media/NotProvisionedException", msg);
+        drmThrowException(env, "android/media/NotProvisionedException", err, msg);
         return true;
     } else if (err == ERROR_DRM_RESOURCE_BUSY) {
-        jniThrowException(env, "android/media/ResourceBusyException", msg);
+        drmThrowException(env, "android/media/ResourceBusyException", err, msg);
         return true;
     } else if (err == ERROR_DRM_DEVICE_REVOKED) {
-        jniThrowException(env, "android/media/DeniedByServerException", msg);
+        drmThrowException(env, "android/media/DeniedByServerException", err, msg);
         return true;
     } else if (err == DEAD_OBJECT) {
         jniThrowException(env, "android/media/MediaDrmResetException", msg);
@@ -915,11 +932,11 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     gFields.arraylistClassId = static_cast<jclass>(env->NewGlobalRef(clazz));
 
     FIND_CLASS(clazz, "android/media/MediaDrm$MediaDrmStateException");
-    GET_METHOD_ID(gFields.stateException.init, clazz, "<init>", "(ILjava/lang/String;)V");
+    GET_METHOD_ID(gFields.stateException.init, clazz, "<init>", "(Ljava/lang/String;IIII)V");
     gFields.stateException.classId = static_cast<jclass>(env->NewGlobalRef(clazz));
 
     FIND_CLASS(clazz, "android/media/MediaDrm$SessionException");
-    GET_METHOD_ID(gFields.sessionException.init, clazz, "<init>", "(ILjava/lang/String;)V");
+    GET_METHOD_ID(gFields.sessionException.init, clazz, "<init>", "(Ljava/lang/String;IIII)V");
     gFields.sessionException.classId = static_cast<jclass>(env->NewGlobalRef(clazz));
     GET_FIELD_ID(gFields.sessionException.errorCode, clazz, "mErrorCode", "I");
 
