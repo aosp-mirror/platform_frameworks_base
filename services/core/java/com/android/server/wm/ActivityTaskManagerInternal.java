@@ -23,6 +23,7 @@ import android.app.ActivityManager;
 import android.app.AppProtoEnums;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
+import android.app.ITaskStackListener;
 import android.app.ProfilerInfo;
 import android.content.ComponentName;
 import android.content.IIntentSender;
@@ -739,4 +740,10 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract void restartTaskActivityProcessIfVisible(
             int taskId, @NonNull String packageName);
+
+    /** Sets the task stack listener that gets callbacks when a task stack changes. */
+    public abstract void registerTaskStackListener(ITaskStackListener listener);
+
+    /** Unregister a task stack listener so that it stops receiving callbacks. */;
+    public abstract void unregisterTaskStackListener(ITaskStackListener listener);
 }

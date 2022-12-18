@@ -97,6 +97,8 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     private static final String FLAG_CANCEL_OVERRIDE_REQUESTS = "FLAG_CANCEL_OVERRIDE_REQUESTS";
     private static final String FLAG_APP_INACCESSIBLE = "FLAG_APP_INACCESSIBLE";
     private static final String FLAG_EMULATED_ONLY = "FLAG_EMULATED_ONLY";
+    private static final String FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP =
+            "FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP";
 
     /** Interface that allows reading the device state configuration. */
     interface ReadableConfig {
@@ -152,6 +154,10 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                                     break;
                                 case FLAG_EMULATED_ONLY:
                                     flags |= DeviceState.FLAG_EMULATED_ONLY;
+                                    break;
+                                case FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP:
+                                    flags |= DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP;
+                                    break;
                                 default:
                                     Slog.w(TAG, "Parsed unknown flag with name: "
                                             + configFlagString);
