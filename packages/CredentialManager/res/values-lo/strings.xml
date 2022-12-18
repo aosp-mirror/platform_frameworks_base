@@ -40,8 +40,7 @@
     <string name="other_password_manager" msgid="565790221427004141">"ຕົວຈັດການລະຫັດຜ່ານອື່ນໆ"</string>
     <string name="close_sheet" msgid="1393792015338908262">"ປິດຊີດ"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"ກັບຄືນໄປຫາໜ້າກ່ອນໜ້ານີ້"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="2953807735590034688">"ປິດການແນະນຳການດຳເນີນການຂອງຕົວຈັດການຂໍ້ມູນການເຂົ້າສູ່ລະບົບເຊິ່ງປາກົດຢູ່ລຸ່ມສຸດຂອງໜ້າຈໍ"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"ໃຊ້ກະແຈຜ່ານທີ່ບັນທຶກໄວ້ຂອງທ່ານສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"ໃຊ້ການເຂົ້າສູ່ລະບົບທີ່ບັນທຶກໄວ້ຂອງທ່ານສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"ເລືອກການເຂົ້າສູ່ລະບົບທີ່ບັນທຶກໄວ້ສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

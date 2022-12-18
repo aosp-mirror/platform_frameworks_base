@@ -40,8 +40,7 @@
     <string name="other_password_manager" msgid="565790221427004141">"Alți manageri de parole"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Închide foaia"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Revino la pagina precedentă"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="2953807735590034688">"Închide sugestia de acțiune de la Managerul de date de conectare, care apare în partea de jos a ecranului"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Folosești cheia de acces salvată pentru <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Folosești datele de conectare salvate pentru <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Alege o conectare salvată pentru <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
