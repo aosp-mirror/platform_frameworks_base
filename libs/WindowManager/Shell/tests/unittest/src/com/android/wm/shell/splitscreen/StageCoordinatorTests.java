@@ -155,7 +155,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
 
         // Verify move to undefined stage while split screen not activated moves task to side stage.
-        when(mMainStage.isActive()).thenReturn(false);
+        when(mStageCoordinator.isSplitScreenVisible()).thenReturn(false);
         mStageCoordinator.setSideStagePosition(SPLIT_POSITION_TOP_OR_LEFT, null);
         mStageCoordinator.moveToStage(task, STAGE_TYPE_UNDEFINED, SPLIT_POSITION_BOTTOM_OR_RIGHT,
                 new WindowContainerTransaction());
@@ -163,7 +163,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getSideStagePosition());
 
         // Verify move to undefined stage after split screen activated moves task based on position.
-        when(mMainStage.isActive()).thenReturn(true);
+        when(mStageCoordinator.isSplitScreenVisible()).thenReturn(true);
         assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getMainStagePosition());
         mStageCoordinator.moveToStage(task, STAGE_TYPE_UNDEFINED, SPLIT_POSITION_TOP_OR_LEFT,
                 new WindowContainerTransaction());
@@ -262,7 +262,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
     @Test
     public void testResolveStartStage_afterSplitActivated_retrievesStagePosition() {
-        when(mMainStage.isActive()).thenReturn(true);
+        when(mStageCoordinator.isSplitScreenVisible()).thenReturn(true);
         mStageCoordinator.setSideStagePosition(SPLIT_POSITION_TOP_OR_LEFT, null /* wct */);
 
         mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, SPLIT_POSITION_TOP_OR_LEFT,
