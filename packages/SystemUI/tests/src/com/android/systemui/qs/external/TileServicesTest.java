@@ -26,6 +26,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Handler;
@@ -58,6 +59,7 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -243,6 +245,32 @@ public class TileServicesTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         verify(manager).setBindRequested(true);
         verify(manager.getTileService()).onStartListening();
+    }
+
+    @Test
+    public void testValidCustomTileStartsActivity() {
+        CustomTile tile = mock(CustomTile.class);
+        PendingIntent pi = mock(PendingIntent.class);
+        ComponentName componentName = mock(ComponentName.class);
+        when(tile.getComponent()).thenReturn(componentName);
+        when(componentName.getPackageName()).thenReturn(this.getContext().getPackageName());
+
+        mTileService.startActivity(tile, pi);
+
+        verify(tile).startActivityAndCollapse(pi);
+    }
+
+    @Test
+    public void testInvalidCustomTileDoesNotStartActivity() {
+        CustomTile tile = mock(CustomTile.class);
+        PendingIntent pi = mock(PendingIntent.class);
+        ComponentName componentName = mock(ComponentName.class);
+        when(tile.getComponent()).thenReturn(componentName);
+        when(componentName.getPackageName()).thenReturn("invalid.package.name");
+
+        Assert.assertThrows(SecurityException.class, () -> mTileService.startActivity(tile, pi));
+
+        verify(tile, never()).startActivityAndCollapse(pi);
     }
 
     private class TestTileServices extends TileServices {
