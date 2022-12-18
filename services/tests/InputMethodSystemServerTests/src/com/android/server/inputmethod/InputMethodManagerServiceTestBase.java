@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -238,12 +239,17 @@ public class InputMethodManagerServiceTestBase {
 
     protected void verifyShowSoftInput(boolean setVisible, boolean showSoftInput)
             throws RemoteException {
+        verifyShowSoftInput(setVisible, showSoftInput, anyInt());
+    }
+
+    protected void verifyShowSoftInput(boolean setVisible, boolean showSoftInput, int showFlags)
+            throws RemoteException {
         synchronized (ImfLock.class) {
             verify(mMockInputMethodBindingController, times(setVisible ? 1 : 0))
                     .setCurrentMethodVisible();
         }
         verify(mMockInputMethod, times(showSoftInput ? 1 : 0))
-                .showSoftInput(any(), any(), anyInt(), any());
+                .showSoftInput(any(), any(), eq(showFlags), any());
     }
 
     protected void verifyHideSoftInput(boolean setNotVisible, boolean hideSoftInput)
