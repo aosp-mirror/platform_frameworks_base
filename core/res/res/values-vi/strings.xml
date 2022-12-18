@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Cho phép ứng dụng đọc tệp video trong bộ nhớ dùng chung."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"đọc tệp hình ảnh trong bộ nhớ dùng chung"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Cho phép ứng dụng đọc tệp hình ảnh trong bộ nhớ dùng chung."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"đọc các tệp hình ảnh và video mà người dùng đã chọn trong bộ nhớ dùng chung"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Cho phép ứng dụng đọc các tệp hình ảnh và video mà bạn chọn trong bộ nhớ dùng chung."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"sửa đổi hoặc xóa nội dung của bộ nhớ dùng chung"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Cho phép ứng dụng ghi nội dung của bộ nhớ dùng chung."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"thực hiện/nhận các cuộc gọi qua SIP"</string>

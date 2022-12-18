@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ পৰা ভিডিঅ’ ফাইল পঢ়িবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ পৰা প্ৰতিচ্ছবিৰ ফাইল পঢ়ক"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ পৰা প্ৰতিচ্ছবিৰ ফাইল পঢ়িবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"ব্যৱহাৰকাৰীয়ে শ্বেয়াৰ কৰা ষ্ট’ৰেজৰ পৰা বাছনি কৰা প্ৰতিচ্ছবি আৰু ভিডিঅ’ ফাইলসমূহ পঢ়া"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"আপুনি নিজৰ শ্বেয়াৰ কৰা ষ্ট’ৰেজৰ পৰা বাছনি কৰা প্ৰতিচ্ছবি আৰু ভিডিঅ’ ফাইলসমূহ পঢ়িবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ সমল সংশোধন কৰিব বা মচিব পাৰে"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ সমল লিখিবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP কল কৰা/পোৱা"</string>

@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ವೀಡಿಯೊ ಫೈಲ್‌ಗಳನ್ನು ಓದಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ಚಿತ್ರದ ಫೈಲ್‌ಗಳನ್ನು ಓದಿ"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ಚಿತ್ರದ ಫೈಲ್‌ಗಳನ್ನು ಓದಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ಬಳಕೆದಾರರು ಆಯ್ಕೆಮಾಡಿದ ಚಿತ್ರ ಮತ್ತು ವೀಡಿಯೊ ಫೈಲ್‌ಗಳನ್ನು ಓದಿರಿ"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ನೀವು ಆಯ್ಕೆಮಾಡಿದ ಚಿತ್ರ ಮತ್ತು ವೀಡಿಯೊ ಫೈಲ್‌ಗಳನ್ನು ಓದಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯ ವಿಷಯಗಳನ್ನು ಮಾರ್ಪಡಿಸಿ ಅಥವಾ ಅಳಿಸಿ"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯ ವಿಷಯಗಳನ್ನು ಬರೆಯಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"ಎಸ್‌ಐಪಿ ಕರೆಗಳನ್ನು ಮಾಡಿ/ಸ್ವೀಕರಿಸಿ"</string>

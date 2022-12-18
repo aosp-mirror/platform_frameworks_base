@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Дозволува апликацијата да ги чита видеодатотеките од споделениот капацитет."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"да чита датотеки со слики од споделениот капацитет"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Дозволува апликацијата да ги чита датотеките со слики од споделениот капацитет."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"да чита датотеки со слики и видеа избрани од корисникот од споделениот простор."</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Дозволува апликацијата да чита датотеки со слики и видеа што ќе ги изберете од вашиот споделен простор."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ги менува или брише содржините на заедничкото место за складирање"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Дозволува апликацијата да ги пишува содржините на заедничкото место за складирање."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"остварува/прима повици преку SIP"</string>
