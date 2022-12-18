@@ -12399,17 +12399,17 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setScore(int);
   }
 
-  public abstract class HotwordDetectionService extends android.app.Service {
+  public abstract class HotwordDetectionService extends android.app.Service implements android.service.voice.SandboxedDetectionServiceBase {
     ctor public HotwordDetectionService();
-    method public static int getMaxCustomInitializationStatus();
+    method @Deprecated public static int getMaxCustomInitializationStatus();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public void onDetect(@NonNull android.service.voice.AlwaysOnHotwordDetector.EventPayload, long, @NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle, @NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onStopDetection();
     method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
-    field public static final int INITIALIZATION_STATUS_SUCCESS = 0; // 0x0
-    field public static final int INITIALIZATION_STATUS_UNKNOWN = 100; // 0x64
+    field @Deprecated public static final int INITIALIZATION_STATUS_SUCCESS = 0; // 0x0
+    field @Deprecated public static final int INITIALIZATION_STATUS_UNKNOWN = 100; // 0x64
     field public static final String SERVICE_INTERFACE = "android.service.voice.HotwordDetectionService";
   }
 
@@ -12454,6 +12454,13 @@ package android.service.voice {
     ctor public HotwordRejectedResult.Builder();
     method @NonNull public android.service.voice.HotwordRejectedResult build();
     method @NonNull public android.service.voice.HotwordRejectedResult.Builder setConfidenceLevel(int);
+  }
+
+  public interface SandboxedDetectionServiceBase {
+    method public static int getMaxCustomInitializationStatus();
+    method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
+    field public static final int INITIALIZATION_STATUS_SUCCESS = 0; // 0x0
+    field public static final int INITIALIZATION_STATUS_UNKNOWN = 100; // 0x64
   }
 
   public class VoiceInteractionService extends android.app.Service {
