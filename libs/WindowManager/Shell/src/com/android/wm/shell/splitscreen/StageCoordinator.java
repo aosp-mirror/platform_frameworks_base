@@ -204,10 +204,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private boolean mIsDropEntering;
     private boolean mIsExiting;
 
-    /** The target stage to dismiss to when unlock after folded. */
-    @StageType
-    private int mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
-
     private DefaultMixedHandler mMixedHandler;
     private final Toast mSplitUnsupportedToast;
 
@@ -973,20 +969,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     void onKeyguardVisibilityChanged(boolean showing) {
         mKeyguardShowing = showing;
         if (!mMainStage.isActive()) {
-            return;
-        }
-
-        if (!mKeyguardShowing && mTopStageAfterFoldDismiss != STAGE_TYPE_UNDEFINED) {
-            if (ENABLE_SHELL_TRANSITIONS) {
-                final WindowContainerTransaction wct = new WindowContainerTransaction();
-                prepareExitSplitScreen(mTopStageAfterFoldDismiss, wct);
-                mSplitTransitions.startDismissTransition(wct, this,
-                        mTopStageAfterFoldDismiss, EXIT_REASON_DEVICE_FOLDED);
-            } else {
-                exitSplitScreen(
-                        mTopStageAfterFoldDismiss == STAGE_TYPE_MAIN ? mMainStage : mSideStage,
-                        EXIT_REASON_DEVICE_FOLDED);
-            }
             return;
         }
 
@@ -1828,14 +1810,28 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         sendOnBoundsChanged();
     }
 
-    private void onFoldedStateChanged(boolean folded) {
-        mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
+    @VisibleForTesting
+    void onFoldedStateChanged(boolean folded) {
+        int topStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
         if (!folded) return;
 
+        if (!mMainStage.isActive()) return;
+
         if (mMainStage.isFocused()) {
-            mTopStageAfterFoldDismiss = STAGE_TYPE_MAIN;
+            topStageAfterFoldDismiss = STAGE_TYPE_MAIN;
         } else if (mSideStage.isFocused()) {
-            mTopStageAfterFoldDismiss = STAGE_TYPE_SIDE;
+            topStageAfterFoldDismiss = STAGE_TYPE_SIDE;
+        }
+
+        if (ENABLE_SHELL_TRANSITIONS) {
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            prepareExitSplitScreen(topStageAfterFoldDismiss, wct);
+            mSplitTransitions.startDismissTransition(wct, this,
+                    topStageAfterFoldDismiss, EXIT_REASON_DEVICE_FOLDED);
+        } else {
+            exitSplitScreen(
+                    topStageAfterFoldDismiss == STAGE_TYPE_MAIN ? mMainStage : mSideStage,
+                    EXIT_REASON_DEVICE_FOLDED);
         }
     }
 
@@ -2118,7 +2114,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Update divider state after animation so that it is still around and positioned
             // properly for the animation itself.
             mSplitLayout.release();
-            mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
         }
     }
 
