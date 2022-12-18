@@ -57,7 +57,8 @@ static void FontFamily_Builder_addFont(CRITICAL_JNI_PARAMS_COMMA jlong builderPt
 
 // Regular JNI
 static jlong FontFamily_Builder_build(JNIEnv* env, jobject clazz, jlong builderPtr,
-            jstring langTags, jint variant, jboolean isCustomFallback) {
+                                      jstring langTags, jint variant, jboolean isCustomFallback,
+                                      jboolean isDefaultFallback) {
     std::unique_ptr<NativeFamilyBuilder> builder(toBuilder(builderPtr));
     uint32_t localeId;
     if (langTags == nullptr) {
@@ -66,9 +67,9 @@ static jlong FontFamily_Builder_build(JNIEnv* env, jobject clazz, jlong builderP
         ScopedUtfChars str(env, langTags);
         localeId = minikin::registerLocaleList(str.c_str());
     }
-    std::shared_ptr<minikin::FontFamily> family =
-            minikin::FontFamily::create(localeId, static_cast<minikin::FamilyVariant>(variant),
-                                        std::move(builder->fonts), isCustomFallback);
+    std::shared_ptr<minikin::FontFamily> family = minikin::FontFamily::create(
+            localeId, static_cast<minikin::FamilyVariant>(variant), std::move(builder->fonts),
+            isCustomFallback, isDefaultFallback);
     if (family->getCoverage().length() == 0) {
         // No coverage means minikin rejected given font for some reasons.
         jniThrowException(env, "java/lang/IllegalArgumentException",
@@ -116,10 +117,10 @@ static jlong FontFamily_getFont(CRITICAL_JNI_PARAMS_COMMA jlong familyPtr, jint 
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gFontFamilyBuilderMethods[] = {
-    { "nInitBuilder", "()J", (void*) FontFamily_Builder_initBuilder },
-    { "nAddFont", "(JJ)V", (void*) FontFamily_Builder_addFont },
-    { "nBuild", "(JLjava/lang/String;IZ)J", (void*) FontFamily_Builder_build },
-    { "nGetReleaseNativeFamily", "()J", (void*) FontFamily_Builder_GetReleaseFunc },
+        {"nInitBuilder", "()J", (void*)FontFamily_Builder_initBuilder},
+        {"nAddFont", "(JJ)V", (void*)FontFamily_Builder_addFont},
+        {"nBuild", "(JLjava/lang/String;IZZ)J", (void*)FontFamily_Builder_build},
+        {"nGetReleaseNativeFamily", "()J", (void*)FontFamily_Builder_GetReleaseFunc},
 };
 
 static const JNINativeMethod gFontFamilyMethods[] = {
