@@ -6890,7 +6890,8 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
 
             const uint32_t typeSize = dtohl(type->header.size);
             const size_t newEntryCount = dtohl(type->entryCount);
-
+            const size_t entrySize = type->flags & ResTable_type::FLAG_OFFSET16 ?
+                                       sizeof(uint16_t) : sizeof(uint32_t);
             if (kDebugLoadTableNoisy) {
                 printf("Type off %p: type=0x%x, headerSize=0x%x, size=%u\n",
                         (void*)(base-(const uint8_t*)chunk),
@@ -6898,9 +6899,9 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                         dtohs(type->header.headerSize),
                         typeSize);
             }
-            if (dtohs(type->header.headerSize)+(sizeof(uint32_t)*newEntryCount) > typeSize) {
+            if (dtohs(type->header.headerSize)+(entrySize*newEntryCount) > typeSize) {
                 ALOGW("ResTable_type entry index to %p extends beyond chunk end 0x%x.",
-                        (void*)(dtohs(type->header.headerSize) + (sizeof(uint32_t)*newEntryCount)),
+                        (void*)(dtohs(type->header.headerSize) + (entrySize*newEntryCount)),
                         typeSize);
                 return (mError=BAD_TYPE);
             }
