@@ -67,10 +67,11 @@ public final class ImeOpenCloseStressTest {
     private static final int NUM_TEST_ITERATIONS = 10;
 
     @Rule public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
-
-    @Rule
-    public ScreenCaptureRule mScreenCaptureRule =
+    @Rule public ScreenCaptureRule mScreenCaptureRule =
             new ScreenCaptureRule("/sdcard/InputMethodStressTest");
+    @Rule public DisableLockScreenRule mDisableLockScreenRule = new DisableLockScreenRule();
+    @Rule public ScreenOrientationRule mScreenOrientationRule =
+            new ScreenOrientationRule(true /* isPortrait */);
 
     private final Instrumentation mInstrumentation;
     private final int mSoftInputFlags;
@@ -485,7 +486,6 @@ public final class ImeOpenCloseStressTest {
 
         UiDevice uiDevice = UiDevice.getInstance(mInstrumentation);
 
-        uiDevice.freezeRotation();
         uiDevice.setOrientationRight();
         uiDevice.waitForIdle();
         Thread.sleep(1000);
@@ -502,7 +502,6 @@ public final class ImeOpenCloseStressTest {
 
         uiDevice.setOrientationNatural();
         uiDevice.waitForIdle();
-        uiDevice.unfreezeRotation();
     }
 
     private static void verifyShowBehavior(TestActivity activity) {
