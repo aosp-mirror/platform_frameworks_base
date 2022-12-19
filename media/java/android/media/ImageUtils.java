@@ -68,6 +68,7 @@ class ImageUtils {
             case ImageFormat.RAW_DEPTH10:
             case ImageFormat.DEPTH_JPEG:
             case ImageFormat.HEIC:
+            case ImageFormat.JPEG_R:
                 return 1;
             case ImageFormat.PRIVATE:
                 return 0;
@@ -231,6 +232,7 @@ class ImageUtils {
             case ImageFormat.DEPTH_POINT_CLOUD:
             case ImageFormat.DEPTH_JPEG:
             case ImageFormat.HEIC:
+            case ImageFormat.JPEG_R:
                 estimatedBytePerPixel = 0.3;
                 break;
             case ImageFormat.Y8:
@@ -304,6 +306,7 @@ class ImageUtils {
             case ImageFormat.RAW_DEPTH:
             case ImageFormat.RAW_DEPTH10:
             case ImageFormat.HEIC:
+            case ImageFormat.JPEG_R:
                 return new Size(image.getWidth(), image.getHeight());
             case ImageFormat.PRIVATE:
                 return new Size(0, 0);
