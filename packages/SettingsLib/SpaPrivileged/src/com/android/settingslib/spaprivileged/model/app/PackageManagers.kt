@@ -21,10 +21,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED
 import android.content.pm.PackageManager
-import android.util.Log
 import com.android.settingslib.spa.framework.util.asyncFilter
-
-private const val TAG = "PackageManagers"
 
 interface IPackageManagers {
     fun getPackageInfoAsUser(packageName: String, userId: Int): PackageInfo?
@@ -94,12 +91,7 @@ internal class PackageManagersImpl(
         }.toSet()
 
     override fun getPackageInfoAsUser(packageName: String, flags: Int, userId: Int): PackageInfo? =
-        try {
-            packageManagerWrapper.getPackageInfoAsUserCached(packageName, flags.toLong(), userId)
-        } catch (e: PackageManager.NameNotFoundException) {
-            Log.w(TAG, "getPackageInfoAsUserCached() failed", e)
-            null
-        }
+        packageManagerWrapper.getPackageInfoAsUserCached(packageName, flags.toLong(), userId)
 
     private fun Int.hasFlag(flag: Int) = (this and flag) > 0
 }

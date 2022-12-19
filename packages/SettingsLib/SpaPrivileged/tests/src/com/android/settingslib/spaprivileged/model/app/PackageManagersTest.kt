@@ -31,6 +31,74 @@ class PackageManagersTest {
     private val packageManagersImpl = PackageManagersImpl(fakePackageManagerWrapper)
 
     @Test
+    fun getPackageInfoAsUser_notFound() {
+        fakePackageManagerWrapper.fakePackageInfo = null
+
+        val packageInfo = packageManagersImpl.getPackageInfoAsUser(PACKAGE_NAME, 0)
+
+        assertThat(packageInfo).isNull()
+    }
+
+    @Test
+    fun getPackageInfoAsUser_found() {
+        fakePackageManagerWrapper.fakePackageInfo = PackageInfo()
+
+        val packageInfo = packageManagersImpl.getPackageInfoAsUser(PACKAGE_NAME, 0)
+
+        assertThat(packageInfo).isSameInstanceAs(fakePackageManagerWrapper.fakePackageInfo)
+    }
+
+    @Test
+    fun hasRequestPermission_packageInfoIsNull_returnFalse() {
+        fakePackageManagerWrapper.fakePackageInfo = null
+
+        val hasRequestPermission = with(packageManagersImpl) {
+            APP.hasRequestPermission(PERMISSION_A)
+        }
+
+        assertThat(hasRequestPermission).isFalse()
+    }
+
+    @Test
+    fun hasRequestPermission_requestedPermissionsIsNull_returnFalse() {
+        fakePackageManagerWrapper.fakePackageInfo = PackageInfo().apply {
+            requestedPermissions = null
+        }
+
+        val hasRequestPermission = with(packageManagersImpl) {
+            APP.hasRequestPermission(PERMISSION_A)
+        }
+
+        assertThat(hasRequestPermission).isFalse()
+    }
+
+    @Test
+    fun hasRequestPermission_notRequested_returnFalse() {
+        fakePackageManagerWrapper.fakePackageInfo = PackageInfo().apply {
+            requestedPermissions = emptyArray()
+        }
+
+        val hasRequestPermission = with(packageManagersImpl) {
+            APP.hasRequestPermission(PERMISSION_A)
+        }
+
+        assertThat(hasRequestPermission).isFalse()
+    }
+
+    @Test
+    fun hasRequestPermission_requested_returnTrue() {
+        fakePackageManagerWrapper.fakePackageInfo = PackageInfo().apply {
+            requestedPermissions = arrayOf(PERMISSION_A)
+        }
+
+        val hasRequestPermission = with(packageManagersImpl) {
+            APP.hasRequestPermission(PERMISSION_A)
+        }
+
+        assertThat(hasRequestPermission).isTrue()
+    }
+
+    @Test
     fun hasGrantPermission_packageInfoIsNull_returnFalse() {
         fakePackageManagerWrapper.fakePackageInfo = null
 
@@ -43,7 +111,9 @@ class PackageManagersTest {
 
     @Test
     fun hasGrantPermission_requestedPermissionsIsNull_returnFalse() {
-        fakePackageManagerWrapper.fakePackageInfo = PackageInfo()
+        fakePackageManagerWrapper.fakePackageInfo = PackageInfo().apply {
+            requestedPermissions = null
+        }
 
         val hasGrantPermission = with(packageManagersImpl) {
             APP.hasGrantPermission(PERMISSION_A)
@@ -94,18 +164,8 @@ class PackageManagersTest {
         assertThat(hasGrantPermission).isTrue()
     }
 
-    private inner class FakePackageManagerWrapper : PackageManagerWrapper {
-        var fakePackageInfo: PackageInfo? = null
-
-        override fun getPackageInfoAsUserCached(
-            packageName: String,
-            flags: Long,
-            userId: Int,
-        ): PackageInfo? = fakePackageInfo
-    }
-
     private companion object {
-        const val PACKAGE_NAME = "packageName"
+        const val PACKAGE_NAME = "package.name"
         const val PERMISSION_A = "permission.A"
         const val PERMISSION_B = "permission.B"
         const val UID = 123
@@ -114,4 +174,11 @@ class PackageManagersTest {
             uid = UID
         }
     }
+}
+
+private class FakePackageManagerWrapper : PackageManagerWrapper {
+    var fakePackageInfo: PackageInfo? = null
+
+    override fun getPackageInfoAsUserCached(packageName: String, flags: Long, userId: Int) =
+        fakePackageInfo
 }
