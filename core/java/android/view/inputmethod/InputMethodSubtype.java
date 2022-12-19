@@ -39,6 +39,7 @@ import java.util.HashSet;
 import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * This class is used to specify meta information of a subtype contained in an input method editor
@@ -87,6 +88,8 @@ public final class InputMethodSubtype implements Parcelable {
     private final int mSubtypeIconResId;
     private final int mSubtypeNameResId;
     private final CharSequence mSubtypeNameOverride;
+    private final String mPkLanguageTag;
+    private final String mPkLayoutType;
     private final int mSubtypeId;
     private final String mSubtypeLocale;
     private final String mSubtypeLanguageTag;
@@ -188,6 +191,30 @@ public final class InputMethodSubtype implements Parcelable {
             return this;
         }
         private CharSequence mSubtypeNameOverride = "";
+
+        /**
+         * Sets the physical keyboard hint information, such as language and layout.
+         *
+         * The system can use the hint information to automatically configure the physical keyboard
+         * for the subtype.
+         *
+         * @param languageTag is the preferred physical keyboard BCP-47 language tag. This is used
+         * to match the keyboardLocale attribute in the physical keyboard definition. If it's
+         * {@code null}, the subtype's language tag will be used.
+         * @param layoutType  is the preferred physical keyboard layout, which is used to match the
+         * keyboardLayoutType attribute in the physical keyboard definition. See
+         * {@link android.hardware.input.InputManager#ACTION_QUERY_KEYBOARD_LAYOUTS}.
+         */
+        @NonNull
+        public InputMethodSubtypeBuilder setPhysicalKeyboardHint(@Nullable ULocale languageTag,
+                @NonNull String layoutType) {
+            Objects.requireNonNull(layoutType, "layoutType cannot be null");
+            mPkLanguageTag = languageTag == null ? "" : languageTag.toLanguageTag();
+            mPkLayoutType = layoutType;
+            return this;
+        }
+        private String mPkLanguageTag = "";
+        private String mPkLayoutType = "";
 
         /**
          * @param subtypeId is the unique ID for this subtype. The input method framework keeps
@@ -322,6 +349,8 @@ public final class InputMethodSubtype implements Parcelable {
     private InputMethodSubtype(InputMethodSubtypeBuilder builder) {
         mSubtypeNameResId = builder.mSubtypeNameResId;
         mSubtypeNameOverride = builder.mSubtypeNameOverride;
+        mPkLanguageTag = builder.mPkLanguageTag;
+        mPkLayoutType = builder.mPkLayoutType;
         mSubtypeIconResId = builder.mSubtypeIconResId;
         mSubtypeLocale = builder.mSubtypeLocale;
         mSubtypeLanguageTag = builder.mSubtypeLanguageTag;
@@ -346,6 +375,10 @@ public final class InputMethodSubtype implements Parcelable {
         mSubtypeNameResId = source.readInt();
         CharSequence cs = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         mSubtypeNameOverride = cs != null ? cs : "";
+        s = source.readString8();
+        mPkLanguageTag = s != null ? s : "";
+        s = source.readString8();
+        mPkLayoutType = s != null ? s : "";
         mSubtypeIconResId = source.readInt();
         s = source.readString();
         mSubtypeLocale = s != null ? s : "";
@@ -375,6 +408,28 @@ public final class InputMethodSubtype implements Parcelable {
     @NonNull
     public CharSequence getNameOverride() {
         return mSubtypeNameOverride;
+    }
+
+    /**
+     * Returns the physical keyboard BCP-47 language tag.
+     *
+     * @attr ref android.R.styleable#InputMethod_Subtype_physicalKeyboardHintLanguageTag
+     * @see InputMethodSubtypeBuilder#setPhysicalKeyboardHint
+     */
+    @Nullable
+    public ULocale getPhysicalKeyboardHintLanguageTag() {
+        return TextUtils.isEmpty(mPkLanguageTag) ? null : ULocale.forLanguageTag(mPkLanguageTag);
+    }
+
+    /**
+     * Returns the physical keyboard layout type string.
+     *
+     * @attr ref android.R.styleable#InputMethod_Subtype_physicalKeyboardHintLayoutType
+     * @see InputMethodSubtypeBuilder#setPhysicalKeyboardHint
+     */
+    @NonNull
+    public String getPhysicalKeyboardHintLayoutType() {
+        return mPkLayoutType;
     }
 
     /**
@@ -729,6 +784,8 @@ public final class InputMethodSubtype implements Parcelable {
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         dest.writeInt(mSubtypeNameResId);
         TextUtils.writeToParcel(mSubtypeNameOverride, dest, parcelableFlags);
+        dest.writeString8(mPkLanguageTag);
+        dest.writeString8(mPkLayoutType);
         dest.writeInt(mSubtypeIconResId);
         dest.writeString(mSubtypeLocale);
         dest.writeString(mSubtypeLanguageTag);

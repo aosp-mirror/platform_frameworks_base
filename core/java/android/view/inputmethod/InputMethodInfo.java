@@ -34,6 +34,7 @@ import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
+import android.icu.util.ULocale;
 import android.inputmethodservice.InputMethodService;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -266,11 +267,18 @@ public final class InputMethodInfo implements Parcelable {
                     }
                     final TypedArray a = res.obtainAttributes(
                             attrs, com.android.internal.R.styleable.InputMethod_Subtype);
+                    String pkLanguageTag = a.getString(com.android.internal.R.styleable
+                            .InputMethod_Subtype_physicalKeyboardHintLanguageTag);
+                    String pkLayoutType = a.getString(com.android.internal.R.styleable
+                            .InputMethod_Subtype_physicalKeyboardHintLayoutType);
                     final InputMethodSubtype subtype = new InputMethodSubtypeBuilder()
                             .setSubtypeNameResId(a.getResourceId(com.android.internal.R.styleable
                                     .InputMethod_Subtype_label, 0))
                             .setSubtypeIconResId(a.getResourceId(com.android.internal.R.styleable
                                     .InputMethod_Subtype_icon, 0))
+                            .setPhysicalKeyboardHint(
+                                    pkLanguageTag == null ? null : new ULocale(pkLanguageTag),
+                                    pkLayoutType == null ? "" : pkLayoutType)
                             .setLanguageTag(a.getString(com.android.internal.R.styleable
                                     .InputMethod_Subtype_languageTag))
                             .setSubtypeLocale(a.getString(com.android.internal.R.styleable
