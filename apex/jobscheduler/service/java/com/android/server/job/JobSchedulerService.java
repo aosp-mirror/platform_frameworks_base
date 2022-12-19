@@ -3666,11 +3666,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             return canPersist;
         }
 
-        private void validateJob(JobInfo job, int callingUid) {
-            validateJob(job, callingUid, null);
-        }
-
-        private void validateJob(JobInfo job, int callingUid, @Nullable JobWorkItem jobWorkItem) {
+        private int validateJob(@NonNull JobInfo job, int callingUid, int sourceUserId,
+                @Nullable String sourcePkgName, @Nullable JobWorkItem jobWorkItem) {
             final boolean rejectNegativeNetworkEstimates = CompatChanges.isChangeEnabled(
                             JobInfo.REJECT_NEGATIVE_NETWORK_ESTIMATES, callingUid);
             job.enforceValidity(
@@ -3688,6 +3685,37 @@ public class JobSchedulerService extends com.android.server.SystemService
                 if (job.isPeriodic()) {
                     Slog.wtf(TAG, "Periodic jobs mustn't have"
                             + " FLAG_EXEMPT_FROM_APP_STANDBY. Job=" + job);
+                }
+            }
+            if (job.isUserInitiated()) {
+                int sourceUid = -1;
+                if (sourceUserId != -1 && sourcePkgName != null) {
+                    try {
+                        sourceUid = AppGlobals.getPackageManager().getPackageUid(
+                                sourcePkgName, 0, sourceUserId);
+                    } catch (RemoteException ex) {
+                        // Can't happen, PackageManager runs in the same process.
+                    }
+                }
+                // We aim to check the permission of both the source and calling app so that apps
+                // don't attempt to bypass the permission by using other apps to do the work.
+                if (sourceUid != -1) {
+                    // Check the permission of the source app.
+                    final int sourceResult =
+                            validateRunLongJobsPermission(sourceUid, sourcePkgName);
+                    if (sourceResult != JobScheduler.RESULT_SUCCESS) {
+                        return sourceResult;
+                    }
+                }
+                final String callingPkgName = job.getService().getPackageName();
+                if (callingUid != sourceUid || !callingPkgName.equals(sourcePkgName)) {
+                    // Source app is different from calling app. Make sure the calling app also has
+                    // the permission.
+                    final int callingResult =
+                            validateRunLongJobsPermission(callingUid, callingPkgName);
+                    if (callingResult != JobScheduler.RESULT_SUCCESS) {
+                        return callingResult;
+                    }
                 }
             }
             if (jobWorkItem != null) {
@@ -3710,6 +3738,19 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                 }
             }
+            return JobScheduler.RESULT_SUCCESS;
+        }
+
+        private int validateRunLongJobsPermission(int uid, String packageName) {
+            final int state = getRunLongJobsPermissionState(uid, packageName);
+            if (state == PermissionChecker.PERMISSION_HARD_DENIED) {
+                throw new SecurityException(android.Manifest.permission.RUN_LONG_JOBS
+                        + " required to schedule user-initiated jobs.");
+            }
+            if (state == PermissionChecker.PERMISSION_SOFT_DENIED) {
+                return JobScheduler.RESULT_FAILURE;
+            }
+            return JobScheduler.RESULT_SUCCESS;
         }
 
         // IJobScheduler implementation
@@ -3730,7 +3771,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
             }
 
-            validateJob(job, uid);
+            final int result = validateJob(job, uid, -1, null, null);
+            if (result != JobScheduler.RESULT_SUCCESS) {
+                return result;
+            }
 
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -3758,7 +3802,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                 throw new NullPointerException("work is null");
             }
 
-            validateJob(job, uid, work);
+            final int result = validateJob(job, uid, -1, null, work);
+            if (result != JobScheduler.RESULT_SUCCESS) {
+                return result;
+            }
 
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -3789,7 +3836,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                         + " not permitted to schedule jobs for other apps");
             }
 
-            validateJob(job, callerUid);
+            int result = validateJob(job, callerUid, userId, packageName, null);
+            if (result != JobScheduler.RESULT_SUCCESS) {
+                return result;
+            }
 
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -4263,11 +4313,16 @@ public class JobSchedulerService extends com.android.server.SystemService
         return 0;
     }
 
+    /** Returns true if both the appop and permission are granted. */
     private boolean checkRunLongJobsPermission(int packageUid, String packageName) {
-        // Returns true if both the appop and permission are granted.
+        return getRunLongJobsPermissionState(packageUid, packageName)
+                == PermissionChecker.PERMISSION_GRANTED;
+    }
+
+    private int getRunLongJobsPermissionState(int packageUid, String packageName) {
         return PermissionChecker.checkPermissionForPreflight(getTestableContext(),
                 android.Manifest.permission.RUN_LONG_JOBS, PermissionChecker.PID_UNKNOWN,
-                packageUid, packageName) == PermissionChecker.PERMISSION_GRANTED;
+                packageUid, packageName);
     }
 
     @VisibleForTesting
