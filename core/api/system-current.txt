@@ -13193,10 +13193,18 @@ package android.telephony {
 
   public final class DataSpecificRegistrationInfo implements android.os.Parcelable {
     method public int describeContents();
+    method public int getLteAttachExtraInfo();
+    method public int getLteAttachResultType();
     method @Deprecated @NonNull public android.telephony.LteVopsSupportInfo getLteVopsSupportInfo();
     method @Nullable public android.telephony.VopsSupportInfo getVopsSupportInfo();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.DataSpecificRegistrationInfo> CREATOR;
+    field public static final int LTE_ATTACH_EXTRA_INFO_CSFB_NOT_PREFERRED = 1; // 0x1
+    field public static final int LTE_ATTACH_EXTRA_INFO_NONE = 0; // 0x0
+    field public static final int LTE_ATTACH_EXTRA_INFO_SMS_ONLY = 2; // 0x2
+    field public static final int LTE_ATTACH_TYPE_COMBINED = 2; // 0x2
+    field public static final int LTE_ATTACH_TYPE_EPS_ONLY = 1; // 0x1
+    field public static final int LTE_ATTACH_TYPE_UNKNOWN = 0; // 0x0
   }
 
   public final class DataThrottlingRequest implements android.os.Parcelable {
@@ -13292,6 +13300,7 @@ package android.telephony {
     method public boolean isEmergencyEnabled();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int REGISTRATION_STATE_DENIED = 3; // 0x3
+    field public static final int REGISTRATION_STATE_EMERGENCY = 6; // 0x6
     field public static final int REGISTRATION_STATE_HOME = 1; // 0x1
     field public static final int REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING = 0; // 0x0
     field public static final int REGISTRATION_STATE_NOT_REGISTERED_SEARCHING = 2; // 0x2
