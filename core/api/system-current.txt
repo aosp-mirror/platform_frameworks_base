@@ -7876,6 +7876,7 @@ package android.media.tv.tuner.filter {
 
   public class MediaEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public long getAudioHandle();
+    method @NonNull public java.util.List<android.media.AudioPresentation> getAudioPresentations();
     method public long getAvDataId();
     method public long getDataLength();
     method public long getDts();
