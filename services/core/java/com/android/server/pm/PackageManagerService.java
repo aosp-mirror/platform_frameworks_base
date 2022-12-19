@@ -3395,6 +3395,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         enforceOwnerRights(snapshot, ownerPackage, callingUid);
         PackageManagerServiceUtils.enforceShellRestriction(mInjector.getUserManagerInternal(),
                 UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, sourceUserId);
+        if (!intentFilter.checkDataPathAndSchemeSpecificParts()) {
+            EventLog.writeEvent(0x534e4554, "246749936", callingUid);
+            throw new IllegalArgumentException("Invalid intent data paths or scheme specific parts"
+                    + " in the filter.");
+        }
         if (intentFilter.countActions() == 0) {
             Slog.w(TAG, "Cannot set a crossProfile intent filter with no filter actions");
             return;
