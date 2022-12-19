@@ -242,6 +242,10 @@ void RenderProxy::notifyCallbackPending() {
     mRenderThread.queue().post([this]() { mContext->sendLoadResetHint(); });
 }
 
+void RenderProxy::notifyExpensiveFrame() {
+    mRenderThread.queue().post([this]() { mContext->sendLoadIncreaseHint(); });
+}
+
 void RenderProxy::dumpProfileInfo(int fd, int dumpFlags) {
     mRenderThread.queue().runSync([&]() {
         std::lock_guard lock(mRenderThread.getJankDataMutex());

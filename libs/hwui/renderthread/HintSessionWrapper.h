@@ -33,6 +33,7 @@ public:
     void updateTargetWorkDuration(long targetDurationNanos);
     void reportActualWorkDuration(long actualDurationNanos);
     void sendLoadResetHint();
+    void sendLoadIncreaseHint();
 
 private:
     bool useHintSession();

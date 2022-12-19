@@ -992,6 +992,15 @@ public class HardwareRenderer {
     }
 
     /**
+     * Notifies the hardware renderer about upcoming expensive frames.
+     *
+     * @hide
+     */
+    public void notifyExpensiveFrame() {
+        nNotifyExpensiveFrame(mNativeProxy);
+    }
+
+    /**
      * b/68769804, b/66945974: For low FPS experiments.
      *
      * @hide
@@ -1551,4 +1560,6 @@ public class HardwareRenderer {
     private static native void nSetRtAnimationsEnabled(boolean rtAnimationsEnabled);
 
     private static native void nNotifyCallbackPending(long nativeProxy);
+
+    private static native void nNotifyExpensiveFrame(long nativeProxy);
 }

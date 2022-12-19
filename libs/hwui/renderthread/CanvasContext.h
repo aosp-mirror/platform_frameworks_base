@@ -218,6 +218,8 @@ public:
 
     void sendLoadResetHint();
 
+    void sendLoadIncreaseHint();
+
     void setSyncDelayDuration(nsecs_t duration);
 
 private:

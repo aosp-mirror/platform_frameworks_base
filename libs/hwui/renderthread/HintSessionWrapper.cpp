@@ -158,6 +158,11 @@ void HintSessionWrapper::sendLoadResetHint() {
     mLastFrameNotification = now;
 }
 
+void HintSessionWrapper::sendLoadIncreaseHint() {
+    if (!useHintSession()) return;
+    gAPH_sendHintFn(mHintSession, static_cast<int>(SessionHint::CPU_LOAD_UP));
+}
+
 } /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */
