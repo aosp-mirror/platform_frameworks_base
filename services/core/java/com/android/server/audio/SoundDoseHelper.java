@@ -66,7 +66,7 @@ public class SoundDoseHelper {
     private static final String TAG = "AS.SoundDoseHelper";
 
     /*package*/ static final String ACTION_CHECK_MUSIC_ACTIVE =
-            AudioService.class.getSimpleName() + ".CHECK_MUSIC_ACTIVE";
+            "com.android.server.audio.action.CHECK_MUSIC_ACTIVE";
 
     /** Flag to enable/disable the sound dose computation. */
     private static final boolean USE_CSD_FOR_SAFE_HEARING = false;

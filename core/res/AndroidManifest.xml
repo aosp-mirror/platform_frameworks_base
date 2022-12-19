@@ -315,6 +315,7 @@
     <protected-broadcast android:name="android.media.MASTER_BALANCE_CHANGED_ACTION" />
     <protected-broadcast android:name="android.media.SCO_AUDIO_STATE_CHANGED" />
     <protected-broadcast android:name="android.media.ACTION_SCO_AUDIO_STATE_UPDATED" />
+    <protected-broadcast android:name="com.android.server.audio.action.CHECK_MUSIC_ACTIVE" />
 
     <protected-broadcast android:name="android.intent.action.MEDIA_REMOVED" />
     <protected-broadcast android:name="android.intent.action.MEDIA_UNMOUNTED" />
