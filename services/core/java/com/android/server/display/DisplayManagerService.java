@@ -593,7 +593,7 @@ public final class DisplayManagerService extends SystemService {
                             getBrightnessConfigForDisplayWithPdsFallbackLocked(
                             logicalDisplay.getPrimaryDisplayDeviceLocked().getUniqueId(),
                             userSerial);
-                    dpc.setBrightnessConfiguration(config);
+                    dpc.setBrightnessConfiguration(config, /* shouldResetShortTermModel= */ true);
                 }
                 dpc.onSwitchUser(newUserId);
             });
@@ -1890,7 +1890,7 @@ public final class DisplayManagerService extends SystemService {
             }
             DisplayPowerController dpc = getDpcFromUniqueIdLocked(uniqueId);
             if (dpc != null) {
-                dpc.setBrightnessConfiguration(c);
+                dpc.setBrightnessConfiguration(c, /* shouldResetShortTermModel= */ true);
             }
         }
     }
@@ -1939,7 +1939,8 @@ public final class DisplayManagerService extends SystemService {
                     final DisplayPowerController dpc = mDisplayPowerControllers.get(
                             logicalDisplay.getDisplayIdLocked());
                     if (dpc != null) {
-                        dpc.setBrightnessConfiguration(config);
+                        dpc.setBrightnessConfiguration(config,
+                                /* shouldResetShortTermModel= */ false);
                     }
                 }
             });
