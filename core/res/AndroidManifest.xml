@@ -3422,6 +3422,8 @@
 
     <!-- Allows an app to prevent non-system-overlay windows from being drawn on top of it -->
     <permission android:name="android.permission.HIDE_OVERLAY_WINDOWS"
+                android:label="@string/permlab_hideOverlayWindows"
+                android:description="@string/permdesc_hideOverlayWindows"
                 android:protectionLevel="normal" />
 
     <!-- ================================== -->
