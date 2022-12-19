@@ -16,6 +16,8 @@
 
 package com.android.server.companion.virtual;
 
+import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
+
 import static com.android.server.wm.ActivityInterceptorCallback.VIRTUAL_DEVICE_SERVICE_ORDERED_ID;
 
 import android.annotation.NonNull;
@@ -386,6 +388,24 @@ public class VirtualDeviceManagerService extends SystemService {
                 }
             }
             return VirtualDeviceManager.DEVICE_ID_DEFAULT;
+        }
+
+        @Override // Binder call
+        public int getAudioPlaybackSessionId(int deviceId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
+                return virtualDevice != null
+                        ? virtualDevice.getAudioPlaybackSessionId() : AUDIO_SESSION_ID_GENERATE;
+            }
+        }
+
+        @Override // Binder call
+        public int getAudioRecordingSessionId(int deviceId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
+                return virtualDevice != null
+                        ? virtualDevice.getAudioRecordingSessionId() : AUDIO_SESSION_ID_GENERATE;
+            }
         }
 
         @Nullable

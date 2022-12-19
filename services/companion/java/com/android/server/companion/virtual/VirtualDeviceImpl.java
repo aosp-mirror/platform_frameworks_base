@@ -253,6 +253,16 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         return mParams.getDevicePolicy(policyType);
     }
 
+    /** Returns device-specific audio session id for playback. */
+    public int getAudioPlaybackSessionId() {
+        return mParams.getAudioPlaybackSessionId();
+    }
+
+    /** Returns device-specific audio session id for recording. */
+    public int getAudioRecordingSessionId() {
+        return mParams.getAudioRecordingSessionId();
+    }
+
     /** Returns the unique device ID of this device. */
     @Override // Binder call
     public int getDeviceId() {
