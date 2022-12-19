@@ -83,16 +83,6 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         }
     }
 
-    private void respondToClientAndFinish(CreateCredentialResponse response) {
-        Log.i(TAG, "respondToClientAndFinish");
-        try {
-            mClientCallback.onResponse(response);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-        finishSession();
-    }
-
     @Override
     public void onProviderStatusChanged(ProviderSession.Status status,
             ComponentName componentName) {
@@ -101,10 +91,47 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
 
     @Override
     public void onFinalResponseReceived(ComponentName componentName,
-            CreateCredentialResponse response) {
+            @Nullable CreateCredentialResponse response) {
         Log.i(TAG, "onFinalCredentialReceived from: " + componentName.flattenToString());
         if (response != null) {
-            respondToClientAndFinish(response);
+            respondToClientWithResponseAndFinish(response);
+        } else {
+            // TODO("Replace with properly defined error type)
+            respondToClientWithErrorAndFinish("unknown_type",
+                    "Invalid response");
         }
+    }
+
+    @Override
+    public void onFinalErrorReceived(ComponentName componentName, String errorType,
+            String message) {
+        respondToClientWithErrorAndFinish(errorType, message);
+    }
+
+    @Override
+    public void onUiCancellation() {
+        // TODO("Replace with properly defined error type")
+        respondToClientWithErrorAndFinish("user_cancelled",
+                "User cancelled the selector");
+    }
+
+    private void respondToClientWithResponseAndFinish(CreateCredentialResponse response) {
+        Log.i(TAG, "respondToClientWithResponseAndFinish");
+        try {
+            mClientCallback.onResponse(response);
+        } catch (RemoteException e) {
+            Log.i(TAG, "Issue while responding to client: " + e.getMessage());
+        }
+        finishSession();
+    }
+
+    private void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
+        Log.i(TAG, "respondToClientWithErrorAndFinish");
+        try {
+            mClientCallback.onError(errorType, errorMsg);
+        } catch (RemoteException e) {
+            Log.i(TAG, "Issue while responding to client: " + e.getMessage());
+        }
+        finishSession();
     }
 }
