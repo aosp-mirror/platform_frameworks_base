@@ -15,7 +15,9 @@
  */
 package com.android.server.usb.hal.port;
 
+import android.hardware.usb.UsbPort;
 import android.hardware.usb.UsbPortStatus;
+import android.hardware.usb.DisplayPortAltModeInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -42,6 +44,9 @@ public final class RawPortInfo implements Parcelable {
     public int powerBrickConnectionStatus;
     public final boolean supportsComplianceWarnings;
     public int[] complianceWarnings;
+    public int plugState;
+    public int supportedAltModes;
+    public DisplayPortAltModeInfo displayPortAltModeInfo;
 
     public RawPortInfo(String portId, int supportedModes) {
         this.portId = portId;
@@ -56,6 +61,9 @@ public final class RawPortInfo implements Parcelable {
         this.powerBrickConnectionStatus = UsbPortStatus.POWER_BRICK_STATUS_UNKNOWN;
         this.supportsComplianceWarnings = false;
         this.complianceWarnings = new int[] {};
+        this.plugState = UsbPortStatus.PLUG_STATE_UNKNOWN;
+        this.supportedAltModes = 0;
+        this.displayPortAltModeInfo = null;
     }
 
     public RawPortInfo(String portId, int supportedModes, int supportedContaminantProtectionModes,
@@ -76,7 +84,8 @@ public final class RawPortInfo implements Parcelable {
                     supportsEnableContaminantPresenceProtection, contaminantProtectionStatus,
                     supportsEnableContaminantPresenceDetection, contaminantDetectionStatus,
                     usbDataStatus, powerTransferLimited, powerBrickConnectionStatus,
-                    false, new int[] {});
+                    false, new int[] {}, UsbPortStatus.PLUG_STATE_UNKNOWN,
+                    0, null);
     }
 
     public RawPortInfo(String portId, int supportedModes, int supportedContaminantProtectionModes,
@@ -91,7 +100,10 @@ public final class RawPortInfo implements Parcelable {
             boolean powerTransferLimited,
             int powerBrickConnectionStatus,
             boolean supportsComplianceWarnings,
-            int[] complianceWarnings) {
+            int[] complianceWarnings,
+            int plugState,
+            int supportedAltModes,
+            DisplayPortAltModeInfo displayPortAltModeInfo) {
         this.portId = portId;
         this.supportedModes = supportedModes;
         this.supportedContaminantProtectionModes = supportedContaminantProtectionModes;
@@ -112,6 +124,9 @@ public final class RawPortInfo implements Parcelable {
         this.powerBrickConnectionStatus = powerBrickConnectionStatus;
         this.supportsComplianceWarnings = supportsComplianceWarnings;
         this.complianceWarnings = complianceWarnings;
+        this.plugState = plugState;
+        this.supportedAltModes = supportedAltModes;
+        this.displayPortAltModeInfo = displayPortAltModeInfo;
     }
 
     @Override
@@ -139,12 +154,19 @@ public final class RawPortInfo implements Parcelable {
         dest.writeInt(powerBrickConnectionStatus);
         dest.writeBoolean(supportsComplianceWarnings);
         dest.writeIntArray(complianceWarnings);
+        dest.writeInt(plugState);
+        dest.writeInt(supportedAltModes);
+        if ((supportedAltModes & UsbPort.FLAG_ALT_MODE_TYPE_DISPLAYPORT) != 0) {
+            displayPortAltModeInfo.writeToParcel(dest, 0);
+        }
     }
 
     public static final Parcelable.Creator<RawPortInfo> CREATOR =
             new Parcelable.Creator<RawPortInfo>() {
         @Override
         public RawPortInfo createFromParcel(Parcel in) {
+            DisplayPortAltModeInfo displayPortAltModeInfo;
+
             String id = in.readString();
             int supportedModes = in.readInt();
             int supportedContaminantProtectionModes = in.readInt();
@@ -163,6 +185,13 @@ public final class RawPortInfo implements Parcelable {
             int powerBrickConnectionStatus = in.readInt();
             boolean supportsComplianceWarnings = in.readBoolean();
             int[] complianceWarnings = in.createIntArray();
+            int plugState = in.readInt();
+            int supportedAltModes = in.readInt();
+            if ((supportedAltModes & UsbPort.FLAG_ALT_MODE_TYPE_DISPLAYPORT) != 0) {
+                displayPortAltModeInfo = DisplayPortAltModeInfo.CREATOR.createFromParcel(in);
+            } else {
+                displayPortAltModeInfo = null;
+            }
             return new RawPortInfo(id, supportedModes,
                     supportedContaminantProtectionModes, currentMode, canChangeMode,
                     currentPowerRole, canChangePowerRole,
@@ -172,7 +201,8 @@ public final class RawPortInfo implements Parcelable {
                     supportsEnableContaminantPresenceDetection,
                     contaminantDetectionStatus, usbDataStatus,
                     powerTransferLimited, powerBrickConnectionStatus,
-                    supportsComplianceWarnings, complianceWarnings);
+                    supportsComplianceWarnings, complianceWarnings,
+                    plugState, supportedAltModes, displayPortAltModeInfo);
         }
 
         @Override
