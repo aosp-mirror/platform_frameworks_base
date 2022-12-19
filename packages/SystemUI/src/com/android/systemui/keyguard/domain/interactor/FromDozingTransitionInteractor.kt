@@ -21,63 +21,45 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.DozeStateModel
+import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @SysUISingleton
-class AodLockscreenTransitionInteractor
+class FromDozingTransitionInteractor
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-) : TransitionInteractor(AodLockscreenTransitionInteractor::class.simpleName!!) {
+) : TransitionInteractor(FromDozingTransitionInteractor::class.simpleName!!) {
 
     override fun start() {
-        listenForTransitionToAodFromLockscreen()
-        listenForTransitionToLockscreenFromDozeStates()
+        listenForDozingToLockscreen()
     }
 
-    private fun listenForTransitionToAodFromLockscreen() {
+    private fun listenForDozingToLockscreen() {
         scope.launch {
-            keyguardInteractor
-                .dozeTransitionTo(DozeStateModel.DOZE_AOD)
+            keyguardInteractor.dozeTransitionModel
                 .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { pair ->
-                    val (dozeToAod, lastStartedStep) = pair
-                    if (lastStartedStep.to == KeyguardState.LOCKSCREEN) {
+                    val (dozeTransitionModel, lastStartedTransition) = pair
+                    if (
+                        isDozeOff(dozeTransitionModel.to) &&
+                            lastStartedTransition.to == KeyguardState.DOZING
+                    ) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,
-                                KeyguardState.LOCKSCREEN,
-                                KeyguardState.AOD,
-                                getAnimator(),
-                            )
-                        )
-                    }
-                }
-        }
-    }
-
-    private fun listenForTransitionToLockscreenFromDozeStates() {
-        val canGoToLockscreen = setOf(KeyguardState.AOD, KeyguardState.DOZING)
-        scope.launch {
-            keyguardInteractor
-                .dozeTransitionTo(DozeStateModel.FINISH)
-                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
-                .collect { pair ->
-                    val (dozeToAod, lastStartedStep) = pair
-                    if (canGoToLockscreen.contains(lastStartedStep.to)) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                lastStartedStep.to,
+                                KeyguardState.DOZING,
                                 KeyguardState.LOCKSCREEN,
                                 getAnimator(),
                             )
@@ -87,14 +69,14 @@ constructor(
         }
     }
 
-    private fun getAnimator(): ValueAnimator {
+    private fun getAnimator(duration: Duration = DEFAULT_DURATION): ValueAnimator {
         return ValueAnimator().apply {
             setInterpolator(Interpolators.LINEAR)
-            setDuration(TRANSITION_DURATION_MS)
+            setDuration(duration.inWholeMilliseconds)
         }
     }
 
     companion object {
-        private const val TRANSITION_DURATION_MS = 500L
+        private val DEFAULT_DURATION = 500.milliseconds
     }
 }
