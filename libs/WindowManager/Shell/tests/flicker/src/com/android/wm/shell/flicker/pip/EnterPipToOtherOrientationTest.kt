@@ -120,7 +120,7 @@ class EnterPipToOtherOrientationTest(flicker: FlickerTest) : PipTransition(flick
      */
     @Before
     fun setup() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(tapl.isTablet)
     }
 
     /**

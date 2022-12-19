@@ -23,7 +23,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.junit.FlickerBuilderProvider
 import com.android.server.wm.traces.common.ComponentNameMatcher
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume
 import org.junit.AssumptionViolatedException
 import org.junit.Test
@@ -41,12 +40,6 @@ constructor(
     protected val tapl: LauncherInstrumentation = LauncherInstrumentation()
 ) {
     init {
-        flicker.scenario.setIsTablet(
-            WindowManagerStateHelper(instrumentation, clearCacheAfterParsing = false)
-                .currentState
-                .wmState
-                .isTablet
-        )
         tapl.setExpectedRotationCheckEnabled(true)
     }
 
