@@ -841,7 +841,19 @@ public class ProcessCpuTracker {
         return sw.toString();
     }
 
-    final public String printCurrentState(long now) {
+    /**
+     * Returns current CPU state with all the processes as a String, sorted by load
+     * in descending order.
+     */
+    public final String printCurrentState(long now) {
+        return printCurrentState(now, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Returns current CPU state with the top {@code maxProcessesToDump} highest load
+     * processes as a String, sorted by load in descending order.
+     */
+    public final String printCurrentState(long now, int maxProcessesToDump) {
         final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
         buildWorkingProcs();
@@ -883,8 +895,8 @@ public class ProcessCpuTracker {
         if (DEBUG) Slog.i(TAG, "totalTime " + totalTime + " over sample time "
                 + (mCurrentSampleTime-mLastSampleTime));
 
-        int N = mWorkingProcs.size();
-        for (int i=0; i<N; i++) {
+        int dumpedProcessCount = Math.min(maxProcessesToDump, mWorkingProcs.size());
+        for (int i = 0; i < dumpedProcessCount; i++) {
             Stats st = mWorkingProcs.get(i);
             printProcessCPU(pw, st.added ? " +" : (st.removed ? " -": "  "),
                     st.pid, st.name, (int)st.rel_uptime,
