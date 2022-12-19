@@ -2504,4 +2504,20 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     public void attachAccessibilityOverlayToDisplay(int displayId, SurfaceControl sc) {
         mSystemSupport.attachAccessibilityOverlayToDisplay(displayId, sc);
     }
+
+    @Override
+    public void attachAccessibilityOverlayToWindow(int accessibilityWindowId, SurfaceControl sc)
+            throws RemoteException {
+        synchronized (mLock) {
+            RemoteAccessibilityConnection connection =
+                    mA11yWindowManager.getConnectionLocked(
+                            mSystemSupport.getCurrentUserIdLocked(),
+                            resolveAccessibilityWindowIdLocked(accessibilityWindowId));
+            if (connection == null) {
+                Slog.e(LOG_TAG, "unable to get remote accessibility connection.");
+                return;
+            }
+            connection.getRemote().attachAccessibilityOverlayToWindow(sc);
+        }
+    }
 }

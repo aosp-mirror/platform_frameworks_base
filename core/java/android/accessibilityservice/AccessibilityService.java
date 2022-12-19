@@ -3439,4 +3439,20 @@ public abstract class AccessibilityService extends Service {
             throw new RuntimeException(re);
         }
     }
+
+    /**
+     * Attaches an accessibility overlay {@link android.view.SurfaceControl} to the specified
+     * window. This method should be used when you want the overlay to move and resize as the parent
+     * window moves and resizes. To remove this overlay and free the associated resources, use
+     * <code> new SurfaceControl.Transaction().reparent(sc, null).apply();</code>.
+     *
+     * @param accessibilityWindowId The window id, from {@link AccessibilityWindowInfo#getId()}.
+     * @param sc the SurfaceControl containing the overlay content
+     */
+    public void attachAccessibilityOverlayToWindow(
+            int accessibilityWindowId, @NonNull SurfaceControl sc) {
+        Preconditions.checkNotNull(sc, "SurfaceControl cannot be null");
+        AccessibilityInteractionClient.getInstance(this)
+                .attachAccessibilityOverlayToWindow(mConnectionId, accessibilityWindowId, sc);
+    }
 }

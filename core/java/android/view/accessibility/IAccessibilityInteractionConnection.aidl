@@ -20,6 +20,7 @@ import android.graphics.Region;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.view.MagnificationSpec;
+import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.window.ScreenCapture;
@@ -65,4 +66,5 @@ oneway interface IAccessibilityInteractionConnection {
     void takeScreenshotOfWindow(int interactionId,
         in ScreenCapture.ScreenCaptureListener listener,
         IAccessibilityInteractionConnectionCallback callback);
+    void attachAccessibilityOverlayToWindow(in SurfaceControl sc);
 }

@@ -105,6 +105,7 @@ class DragResizeInputListener implements AutoCloseable {
                     FLAG_NOT_FOCUSABLE,
                     PRIVATE_FLAG_TRUSTED_OVERLAY,
                     TYPE_APPLICATION,
+                    null /* windowToken */,
                     mFocusGrantToken,
                     TAG + " of " + decorationSurface.toString(),
                     mInputChannel);
