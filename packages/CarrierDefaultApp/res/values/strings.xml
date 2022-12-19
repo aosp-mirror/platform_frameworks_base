@@ -14,17 +14,17 @@
     <string name="ssl_error_example">For example, the login page may not belong to the organization shown.</string>
     <string name="ssl_error_continue">Continue anyway via browser</string>
 
-    <!-- Telephony notification channel name for network boost notifications. -->
-    <string name="network_boost_notification_channel">Network boost</string>
-    <!-- Notification title text for the network boost notification. -->
-    <string name="network_boost_notification_title">%s recommends a data boost</string>
-    <!-- Notification detail text for the network boost notification. -->
-    <string name="network_boost_notification_detail">Buy a network boost for better performance</string>
-    <!-- Notification button text to cancel the network boost notification. -->
-    <string name="network_boost_notification_button_not_now">Not now</string>
-    <!-- Notification button text to manage the network boost notification. -->
-    <string name="network_boost_notification_button_manage">Manage</string>
+    <!-- Telephony notification channel name for performance boost notifications. -->
+    <string name="performance_boost_notification_channel">Performance boost</string>
+    <!-- Notification title text for the performance boost notification. -->
+    <string name="performance_boost_notification_title">%s recommends a performance boost</string>
+    <!-- Notification detail text for the performance boost notification. -->
+    <string name="performance_boost_notification_detail">Buy a performance boost for better network performance</string>
+    <!-- Notification button text to cancel the performance boost notification. -->
+    <string name="performance_boost_notification_button_not_now">Not now</string>
+    <!-- Notification button text to manage the performance boost notification. -->
+    <string name="performance_boost_notification_button_manage">Manage</string>
 
     <!-- Label to display when the slice purchase application opens. -->
-    <string name="slice_purchase_app_label">Purchase a network boost.</string>
+    <string name="slice_purchase_app_label">Purchase a performance boost.</string>
 </resources>
