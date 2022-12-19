@@ -85,7 +85,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private ImageButton mSmallButton;
     private ImageButton mMediumButton;
     private ImageButton mLargeButton;
-    private Button mCloseButton;
+    private Button mDoneButton;
     private Button mEditButton;
     private ImageButton mChangeModeButton;
     private boolean mAllowDiagonalScrolling = false;
@@ -160,9 +160,9 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         } else if (viewId == R.id.magnifier_large_button) {
             return mContext.getResources().getString(
                     R.string.accessibility_magnification_large);
-        } else if (viewId == R.id.magnifier_close_button) {
+        } else if (viewId == R.id.magnifier_done_button) {
             return mContext.getResources().getString(
-                    R.string.accessibility_magnification_close);
+                    R.string.accessibility_magnification_done);
         } else if (viewId == R.id.magnifier_edit_button) {
             return mContext.getResources().getString(
                     R.string.accessibility_resize);
@@ -247,7 +247,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 setMagnifierSize(MagnificationSize.LARGE);
             } else if (id == R.id.magnifier_edit_button) {
                 editMagnifierSizeMode(true);
-            } else if (id == R.id.magnifier_close_button) {
+            } else if (id == R.id.magnifier_done_button) {
                 hideSettingPanel();
             } else if (id == R.id.magnifier_full_button) {
                 hideSettingPanel();
@@ -381,7 +381,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mSmallButton = mSettingView.findViewById(R.id.magnifier_small_button);
         mMediumButton = mSettingView.findViewById(R.id.magnifier_medium_button);
         mLargeButton = mSettingView.findViewById(R.id.magnifier_large_button);
-        mCloseButton = mSettingView.findViewById(R.id.magnifier_close_button);
+        mDoneButton = mSettingView.findViewById(R.id.magnifier_done_button);
         mEditButton = mSettingView.findViewById(R.id.magnifier_edit_button);
         mChangeModeButton = mSettingView.findViewById(R.id.magnifier_full_button);
 
@@ -408,8 +408,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mLargeButton.setAccessibilityDelegate(mButtonDelegate);
         mLargeButton.setOnClickListener(mButtonClickListener);
 
-        mCloseButton.setAccessibilityDelegate(mButtonDelegate);
-        mCloseButton.setOnClickListener(mButtonClickListener);
+        mDoneButton.setAccessibilityDelegate(mButtonDelegate);
+        mDoneButton.setOnClickListener(mButtonClickListener);
 
         mChangeModeButton.setAccessibilityDelegate(mButtonDelegate);
         mChangeModeButton.setOnClickListener(mButtonClickListener);
