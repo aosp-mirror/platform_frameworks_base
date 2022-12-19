@@ -865,7 +865,7 @@ public class AppsFilterImplTest {
                 .addOverlayable("overlayableName", actorName)
                 .hideAsParsed();
         var overlay = pkg("com.some.package.overlay")
-                .setOverlay(true)
+                .setResourceOverlay(true)
                 .setOverlayTarget(target.getPackageName())
                 .setOverlayTargetOverlayableName("overlayableName")
                 .hideAsParsed();
@@ -952,7 +952,7 @@ public class AppsFilterImplTest {
                 .addOverlayable("overlayableName", actorName)
                 .hideAsParsed();
         var overlay = pkg("com.some.package.overlay")
-                .setOverlay(true)
+                .setResourceOverlay(true)
                 .setOverlayTarget(target.getPackageName())
                 .setOverlayTargetOverlayableName("overlayableName")
                 .hideAsParsed();

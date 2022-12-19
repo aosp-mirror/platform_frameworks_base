@@ -328,7 +328,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
             int[] userIds) {
         for (int userId = 0; userId < userIds.length; userId++) {
             final long previousFirstInstallTime =
-                    replacedPkgSetting.getUserStateOrDefault(userId).getFirstInstallTime();
+                    replacedPkgSetting.getUserStateOrDefault(userId).getFirstInstallTimeMillis();
             if (previousFirstInstallTime != 0) {
                 modifyUserState(userId).setFirstInstallTime(previousFirstInstallTime);
             }
@@ -897,7 +897,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                         ? null : otherState.getDisabledComponentsNoCopy().untrackedStorage(),
                 otherState.getInstallReason(), otherState.getUninstallReason(),
                 otherState.getHarmfulAppWarning(), otherState.getSplashScreenTheme(),
-                otherState.getFirstInstallTime());
+                otherState.getFirstInstallTimeMillis());
     }
 
     WatchedArraySet<String> getEnabledComponents(int userId) {
@@ -1091,7 +1091,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                     PackageProto.UserInfoProto.LAST_DISABLED_APP_CALLER,
                     state.getLastDisableAppCaller());
             proto.write(PackageProto.UserInfoProto.FIRST_INSTALL_TIME_MS,
-                    state.getFirstInstallTime());
+                    state.getFirstInstallTimeMillis());
             proto.end(userToken);
         }
     }
@@ -1384,6 +1384,13 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     @Override
     public int getHiddenApiEnforcementPolicy() {
         return AndroidPackageUtils.getHiddenApiEnforcementPolicy(getAndroidPackage(), this);
+    }
+
+    @Override
+    public boolean isApex() {
+        // TODO(b/256637152):
+        // TODO(b/243839669): Use a flag tracked directly in PackageSetting
+        return getAndroidPackage() != null && getAndroidPackage().isApex();
     }
 
 

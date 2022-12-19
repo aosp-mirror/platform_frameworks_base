@@ -136,7 +136,7 @@ class PackageUserStateDefault implements PackageUserStateInternal {
     }
 
     @Override
-    public long getFirstInstallTime() {
+    public long getFirstInstallTimeMillis() {
         return 0;
     }
 

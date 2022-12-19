@@ -1547,7 +1547,7 @@ public class PackageManagerSettingsTests {
                 : oldUserState.getOverlayPaths() == null)
                 && userState.getCeDataInode() == oldUserState.getCeDataInode()
                 && userState.getDistractionFlags() == oldUserState.getDistractionFlags()
-                && userState.getFirstInstallTime() == oldUserState.getFirstInstallTime()
+                && userState.getFirstInstallTimeMillis() == oldUserState.getFirstInstallTimeMillis()
                 && userState.getEnabledState() == oldUserState.getEnabledState()
                  && userState.getHarmfulAppWarning().equals(oldUserState.getHarmfulAppWarning())
                 && userState.getInstallReason() == oldUserState.getInstallReason()

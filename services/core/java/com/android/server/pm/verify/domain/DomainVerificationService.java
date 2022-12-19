@@ -832,11 +832,12 @@ public class DomainVerificationService extends SystemService
                 PackageStateInternal firstPkgSetting = snapshot.getPackageStateInternal(first);
                 PackageStateInternal secondPkgSetting = snapshot.getPackageStateInternal(second);
 
-                long firstInstallTime = firstPkgSetting == null
-                        ? -1L : firstPkgSetting.getUserStateOrDefault(userId).getFirstInstallTime();
-                long secondInstallTime = secondPkgSetting == null
-                        ? -1L
-                        : secondPkgSetting.getUserStateOrDefault(userId).getFirstInstallTime();
+                long firstInstallTime =
+                        firstPkgSetting == null ? -1L : firstPkgSetting.getUserStateOrDefault(
+                                userId).getFirstInstallTimeMillis();
+                long secondInstallTime =
+                        secondPkgSetting == null ? -1L : secondPkgSetting.getUserStateOrDefault(
+                                userId).getFirstInstallTimeMillis();
 
                 if (firstInstallTime != secondInstallTime) {
                     return (int) (firstInstallTime - secondInstallTime);
@@ -1974,7 +1975,7 @@ public class DomainVerificationService extends SystemService
             if (pkgSetting == null) {
                 continue;
             }
-            long installTime = pkgSetting.getUserStateOrDefault(userId).getFirstInstallTime();
+            long installTime = pkgSetting.getUserStateOrDefault(userId).getFirstInstallTimeMillis();
             if (installTime > latestInstall) {
                 latestInstall = installTime;
                 filteredPackages.clear();

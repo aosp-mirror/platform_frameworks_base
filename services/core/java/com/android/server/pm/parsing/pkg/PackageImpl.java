@@ -1624,7 +1624,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public boolean isOverlay() {
+    public boolean isResourceOverlay() {
         return getBoolean(Booleans.OVERLAY);
     }
 
@@ -2117,7 +2117,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setOverlay(boolean value) {
+    public PackageImpl setResourceOverlay(boolean value) {
         return setBoolean(Booleans.OVERLAY, value);
     }
 

@@ -171,7 +171,7 @@ public interface ParsingPackage {
 
     ParsingPackage setAllowTaskReparenting(boolean allowTaskReparenting);
 
-    ParsingPackage setOverlay(boolean isOverlay);
+    ParsingPackage setResourceOverlay(boolean isResourceOverlay);
 
     ParsingPackage setBackupInForeground(boolean backupInForeground);
 

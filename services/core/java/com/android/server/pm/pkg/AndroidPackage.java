@@ -572,6 +572,13 @@ public interface AndroidPackage {
     boolean isResetEnabledSettingsOnAppDataCleared();
 
     /**
+     * @see ApplicationInfo#PRIVATE_FLAG_IS_RESOURCE_OVERLAY
+     * @see ApplicationInfo#isResourceOverlay()
+     * @see R.styleable#AndroidManifestResourceOverlay
+     */
+    boolean isResourceOverlay();
+
+    /**
      * @see ApplicationInfo#FLAG_RESTORE_ANY_VERSION
      * @see R.styleable#AndroidManifestApplication_restoreAnyVersion
      */
@@ -1413,14 +1420,6 @@ public interface AndroidPackage {
      * @hide
      */
     boolean isHasDomainUrls();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_IS_RESOURCE_OVERLAY
-     * @see ApplicationInfo#isResourceOverlay()
-     * @see R.styleable#AndroidManifestResourceOverlay
-     * @hide
-     */
-    boolean isOverlay();
 
     /**
      * @see PackageInfo#mOverlayIsStatic

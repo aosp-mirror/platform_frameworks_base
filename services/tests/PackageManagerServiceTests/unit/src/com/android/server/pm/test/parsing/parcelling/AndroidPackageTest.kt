@@ -239,7 +239,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::isMultiArch,
         AndroidPackage::isNativeLibraryRootRequiresIsa,
         AndroidPackage::isOnBackInvokedCallbackEnabled,
-        AndroidPackage::isOverlay,
+        AndroidPackage::isResourceOverlay,
         AndroidPackage::isOverlayIsStatic,
         AndroidPackage::isPartiallyDirectBootAware,
         AndroidPackage::isPersistent,
