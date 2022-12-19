@@ -16031,6 +16031,7 @@ package android.telephony.ims.stub {
 
   public class ImsSmsImplBase {
     ctor public ImsSmsImplBase();
+    ctor public ImsSmsImplBase(@NonNull java.util.concurrent.Executor);
     method public void acknowledgeSms(int, @IntRange(from=0, to=65535) int, int);
     method public void acknowledgeSms(int, @IntRange(from=0, to=65535) int, int, @NonNull byte[]);
     method public void acknowledgeSmsReport(int, @IntRange(from=0, to=65535) int, int);
