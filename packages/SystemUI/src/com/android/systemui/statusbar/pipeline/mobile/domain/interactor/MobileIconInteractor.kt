@@ -45,6 +45,9 @@ interface MobileIconInteractor {
     /** Observable for the data enabled state of this connection */
     val isDataEnabled: StateFlow<Boolean>
 
+    /** True if the RAT icon should always be displayed and false otherwise. */
+    val alwaysShowDataRatIcon: StateFlow<Boolean>
+
     /** Observable for RAT type (network type) indicator */
     val networkTypeIconGroup: StateFlow<MobileIconGroup>
 
@@ -64,6 +67,7 @@ interface MobileIconInteractor {
 class MobileIconInteractorImpl(
     @Application scope: CoroutineScope,
     defaultSubscriptionHasDataEnabled: StateFlow<Boolean>,
+    override val alwaysShowDataRatIcon: StateFlow<Boolean>,
     defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>,
     defaultMobileIconGroup: StateFlow<MobileIconGroup>,
     override val isDefaultConnectionFailed: StateFlow<Boolean>,

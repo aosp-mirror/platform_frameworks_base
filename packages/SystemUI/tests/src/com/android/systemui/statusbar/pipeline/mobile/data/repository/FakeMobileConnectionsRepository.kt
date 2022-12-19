@@ -20,6 +20,7 @@ import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyManager
 import com.android.settingslib.SignalIcon
+import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
@@ -67,6 +68,8 @@ class FakeMobileConnectionsRepository(mobileMappings: MobileMappingsProxy) :
 
     private val _globalMobileDataSettingChangedEvent = MutableStateFlow(Unit)
     override val globalMobileDataSettingChangedEvent = _globalMobileDataSettingChangedEvent
+
+    override val defaultDataSubRatConfig = MutableStateFlow(MobileMappings.Config())
 
     private val _defaultMobileIconMapping = MutableStateFlow(TEST_MAPPING)
     override val defaultMobileIconMapping = _defaultMobileIconMapping

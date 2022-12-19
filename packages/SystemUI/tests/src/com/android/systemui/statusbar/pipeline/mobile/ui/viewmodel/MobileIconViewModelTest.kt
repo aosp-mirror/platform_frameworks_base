@@ -174,6 +174,66 @@ class MobileIconViewModelTest : SysuiTestCase() {
             job.cancel()
         }
 
+    @Test
+    fun networkType_alwaysShow_shownEvenWhenDisabled() =
+        runBlocking(IMMEDIATE) {
+            interactor.setIconGroup(THREE_G)
+            interactor.setIsDataEnabled(true)
+            interactor.alwaysShowDataRatIcon.value = true
+
+            var latest: Icon? = null
+            val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
+
+            val expected =
+                Icon.Resource(
+                    THREE_G.dataType,
+                    ContentDescription.Resource(THREE_G.dataContentDescription)
+                )
+            assertThat(latest).isEqualTo(expected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun networkType_alwaysShow_shownEvenWhenDisconnected() =
+        runBlocking(IMMEDIATE) {
+            interactor.setIconGroup(THREE_G)
+            interactor.isDataConnected.value = false
+            interactor.alwaysShowDataRatIcon.value = true
+
+            var latest: Icon? = null
+            val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
+
+            val expected =
+                Icon.Resource(
+                    THREE_G.dataType,
+                    ContentDescription.Resource(THREE_G.dataContentDescription)
+                )
+            assertThat(latest).isEqualTo(expected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun networkType_alwaysShow_shownEvenWhenFailedConnection() =
+        runBlocking(IMMEDIATE) {
+            interactor.setIconGroup(THREE_G)
+            interactor.setIsFailedConnection(true)
+            interactor.alwaysShowDataRatIcon.value = true
+
+            var latest: Icon? = null
+            val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
+
+            val expected =
+                Icon.Resource(
+                    THREE_G.dataType,
+                    ContentDescription.Resource(THREE_G.dataContentDescription)
+                )
+            assertThat(latest).isEqualTo(expected)
+
+            job.cancel()
+        }
+
     /** Convenience constructor for these tests */
     private fun defaultSignal(
         level: Int = 1,
