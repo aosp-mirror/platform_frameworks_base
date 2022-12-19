@@ -430,6 +430,7 @@ package android.provider {
   }
 
   public static final class Settings.Config extends android.provider.Settings.NameValueTable {
+    method @RequiresPermission(android.Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS) public static void clearMonitorCallback(@NonNull android.content.ContentResolver);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean deleteString(@NonNull String, @NonNull String);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static String getString(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static java.util.Map<java.lang.String,java.lang.String> getStrings(@NonNull String, @NonNull java.util.List<java.lang.String>);
@@ -437,6 +438,7 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean putString(@NonNull String, @NonNull String, @Nullable String, boolean);
     method public static void registerContentObserver(@Nullable String, boolean, @NonNull android.database.ContentObserver);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void resetToDefaults(int, @Nullable String);
+    method @RequiresPermission(android.Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS) public static void setMonitorCallback(@NonNull android.content.ContentResolver, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.MonitorCallback);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setStrings(@NonNull String, @NonNull java.util.Map<java.lang.String,java.lang.String>) throws android.provider.DeviceConfig.BadConfigException;
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void setSyncDisabledMode(int);
     method public static void unregisterContentObserver(@NonNull android.database.ContentObserver);
