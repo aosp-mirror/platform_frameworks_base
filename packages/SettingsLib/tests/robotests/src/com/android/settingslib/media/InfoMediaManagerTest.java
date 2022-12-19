@@ -340,6 +340,33 @@ public class InfoMediaManagerTest {
         assertThat(mInfoMediaManager.mMediaDevices).hasSize(routes.size());
     }
 
+    @Test
+    public void hasPreferenceRouteListing_oldSdkVersion_returnsFalse() {
+        assertThat(mInfoMediaManager.preferRouteListingOrdering()).isFalse();
+    }
+
+    @Test
+    public void hasPreferenceRouteListing_newSdkVersionWithPreferenceExist_returnsTrue() {
+        ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT",
+                Build.VERSION_CODES.UPSIDE_DOWN_CAKE);
+        when(mRouterManager.getRouteListingPreference(any())).thenReturn(
+                new RouteListingPreference.Builder().setItems(
+                        ImmutableList.of()).setUseSystemOrdering(false).build());
+        mInfoMediaManager.mRouterManager = mRouterManager;
+
+        assertThat(mInfoMediaManager.preferRouteListingOrdering()).isTrue();
+    }
+
+    @Test
+    public void hasPreferenceRouteListing_newSdkVersionWithPreferenceNotExist_returnsFalse() {
+        ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT",
+                Build.VERSION_CODES.UPSIDE_DOWN_CAKE);
+
+        when(mRouterManager.getRouteListingPreference(any())).thenReturn(null);
+
+        assertThat(mInfoMediaManager.preferRouteListingOrdering()).isFalse();
+    }
+
     private List<MediaRoute2Info> getRoutesListWithDuplicatedIds() {
         final List<MediaRoute2Info> routes = new ArrayList<>();
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
