@@ -43827,6 +43827,7 @@ package android.telephony {
 
   public final class SignalThresholdInfo implements android.os.Parcelable {
     method public int describeContents();
+    method public int getHysteresisDb();
     method public static int getMaximumNumberOfThresholdsAllowed();
     method public static int getMinimumNumberOfThresholdsAllowed();
     method public int getRadioAccessNetworkType();
@@ -43849,6 +43850,7 @@ package android.telephony {
   public static final class SignalThresholdInfo.Builder {
     ctor public SignalThresholdInfo.Builder();
     method @NonNull public android.telephony.SignalThresholdInfo build();
+    method @NonNull public android.telephony.SignalThresholdInfo.Builder setHysteresisDb(@IntRange(from=0) int);
     method @NonNull public android.telephony.SignalThresholdInfo.Builder setRadioAccessNetworkType(int);
     method @NonNull public android.telephony.SignalThresholdInfo.Builder setSignalMeasurementType(int);
     method @NonNull public android.telephony.SignalThresholdInfo.Builder setThresholds(@NonNull int[]);
