@@ -58,11 +58,4 @@ oneway interface IRemoteProvisioning {
      *
      */
     void getRegistration(String irpcName, IGetRegistrationCallback callback);
-
-    /**
-     * Cancel any active {@link getRegistration} call associated with the given
-     * callback. If no getRegistration call is currently active, this function is
-     * a noop.
-     */
-    void cancelGetRegistration(IGetRegistrationCallback callback);
 }
