@@ -37,6 +37,7 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.ui.binder.TintedIconViewBinder
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.media.taptotransfer.common.MediaTttIcon
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
@@ -69,6 +70,7 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
+        dumpManager: DumpManager,
         powerManager: PowerManager,
         @Main private val mainHandler: Handler,
         private val mediaTttFlags: MediaTttFlags,
@@ -83,6 +85,7 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         mainExecutor,
         accessibilityManager,
         configurationController,
+        dumpManager,
         powerManager,
         R.layout.media_ttt_chip_receiver,
         wakeLockBuilder,
@@ -162,6 +165,7 @@ open class MediaTttChipControllerReceiver @Inject constructor(
     }
 
     override fun start() {
+        super.start()
         if (mediaTttFlags.isMediaTttEnabled()) {
             commandQueue.addCallback(commandQueueCallbacks)
         }

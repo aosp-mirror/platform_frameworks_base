@@ -34,6 +34,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
@@ -72,6 +73,8 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     private lateinit var accessibilityManager: AccessibilityManager
     @Mock
     private lateinit var configurationController: ConfigurationController
+    @Mock
+    private lateinit var dumpManager: DumpManager
     @Mock
     private lateinit var mediaTttFlags: MediaTttFlags
     @Mock
@@ -122,6 +125,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             fakeExecutor,
             accessibilityManager,
             configurationController,
+            dumpManager,
             powerManager,
             Handler.getMain(),
             mediaTttFlags,
@@ -150,6 +154,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             FakeExecutor(FakeSystemClock()),
             accessibilityManager,
             configurationController,
+            dumpManager,
             powerManager,
             Handler.getMain(),
             mediaTttFlags,
