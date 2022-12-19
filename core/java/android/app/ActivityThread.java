@@ -502,7 +502,6 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     static volatile Handler sMainThreadHandler;  // set once in main()
-    private long mStartSeq; // Only accesssed from the main thread
 
     Bundle mCoreSettings = null;
 
@@ -6739,12 +6738,6 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         final IActivityManager mgr = ActivityManager.getService();
-        try {
-            mgr.finishAttachApplication(mStartSeq);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-
         final ContextImpl appContext = ContextImpl.createAppContext(this, data.info);
         mConfigurationController.updateLocaleListFromAppContext(appContext);
 
@@ -7675,8 +7668,6 @@ public final class ActivityThread extends ClientTransactionHandler
         sCurrentActivityThread = this;
         mConfigurationController = new ConfigurationController(this);
         mSystemThread = system;
-        mStartSeq = startSeq;
-
         if (!system) {
             android.ddm.DdmHandleAppName.setAppName("<pre-initialized>",
                                                     UserHandle.myUserId());
