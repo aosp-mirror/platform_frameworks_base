@@ -350,25 +350,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 return false;
             }
 
-            if (matchingCandidate(task)) {
-                return true;
-            }
-
-            // Looking for the embedded tasks (if any)
-            return !task.isLeafTaskFragment() && task.forAllLeafTaskFragments(
-                    this::matchingCandidate);
-        }
-
-        boolean matchingCandidate(TaskFragment taskFragment) {
-            final Task task = taskFragment.asTask();
-            if (task == null) {
-                return false;
-            }
-
             // Overlays should not be considered as the task's logical top activity.
-            // Activities of the tasks that embedded from this one should not be used.
-            final ActivityRecord r = task.getTopNonFinishingActivity(false /* includeOverlays */,
-                    false /* includingEmbeddedTask */);
+            final ActivityRecord r = task.getTopNonFinishingActivity(false /* includeOverlays */);
 
             if (r == null || r.finishing || r.mUserId != userId
                     || r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {

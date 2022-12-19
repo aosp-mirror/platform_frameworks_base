@@ -844,12 +844,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // activity cannot be focused unless it is on the same TaskFragment as the focusedApp's.
             TaskFragment parent = activity.getTaskFragment();
             if (parent != null && parent.isEmbedded()) {
-                Task hostTask = focusedApp.getTask();
-                if (hostTask.isEmbedded()) {
-                    // Use the hosting task if the current task is embedded.
-                    hostTask = hostTask.getParent().asTaskFragment().getTask();
-                }
-                if (activity.isDescendantOf(hostTask)
+                if (activity.getTask() == focusedApp.getTask()
                         && activity.getTaskFragment() != focusedApp.getTaskFragment()) {
                     return false;
                 }

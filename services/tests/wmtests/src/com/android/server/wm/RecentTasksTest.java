@@ -804,19 +804,6 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     @Test
-    public void testVisibleEmbeddedTask_expectNotVisible() {
-        Task task = createTaskBuilder(".Task")
-                .setFlags(FLAG_ACTIVITY_NEW_TASK)
-                .build();
-        doReturn(true).when(task).isEmbedded();
-        mRecentTasks.add(task);
-
-        assertThat(mCallbacksRecorder.mAdded).hasSize(1);
-        assertFalse("embedded task should not be visible recents",
-                mRecentTasks.isVisibleRecentTask(task));
-    }
-
-    @Test
     public void testVisibleTask_displayCanNotShowTaskFromRecents_expectNotVisible() {
         final DisplayContent displayContent = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
         doReturn(false).when(displayContent).canShowTasksInHostDeviceRecents();
