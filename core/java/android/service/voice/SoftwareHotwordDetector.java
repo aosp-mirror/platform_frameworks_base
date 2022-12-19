@@ -46,7 +46,7 @@ import java.io.PrintWriter;
  *
  * @hide
  **/
-class SoftwareHotwordDetector extends AbstractHotwordDetector {
+class SoftwareHotwordDetector extends AbstractDetector {
     private static final String TAG = SoftwareHotwordDetector.class.getSimpleName();
     private static final boolean DEBUG = false;
 
