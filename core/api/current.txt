@@ -11968,6 +11968,7 @@ package android.content.pm {
     method @Deprecated public abstract void addPreferredActivity(@NonNull android.content.IntentFilter, int, @Nullable android.content.ComponentName[], @NonNull android.content.ComponentName);
     method @RequiresPermission(value="android.permission.WHITELIST_RESTRICTED_PERMISSIONS", conditional=true) public boolean addWhitelistedRestrictedPermission(@NonNull String, @NonNull String, int);
     method public boolean canPackageQuery(@NonNull String, @NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull public boolean[] canPackageQuery(@NonNull String, @NonNull String[]) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract boolean canRequestPackageInstalls();
     method public abstract String[] canonicalToCurrentPackageNames(@NonNull String[]);
     method @CheckResult public abstract int checkPermission(@NonNull String, @NonNull String);
