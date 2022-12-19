@@ -51,7 +51,7 @@ import java.util.Set;
 
 final class SpeechRecognitionManagerServiceImpl extends
         AbstractPerUserSystemService<SpeechRecognitionManagerServiceImpl,
-            SpeechRecognitionManagerService> {
+                SpeechRecognitionManagerService> {
     private static final String TAG = SpeechRecognitionManagerServiceImpl.class.getSimpleName();
 
     private static final int MAX_CONCURRENT_CONNECTIONS_BY_CLIENT = 10;
@@ -127,13 +127,14 @@ final class SpeechRecognitionManagerServiceImpl extends
         }
 
         IBinder.DeathRecipient deathRecipient =
-                () -> handleClientDeath(creatorCallingUid, service, true /* invoke #cancel */);
+                () -> handleClientDeath(
+                        clientToken, creatorCallingUid, service, true /* invoke #cancel */);
 
         try {
             clientToken.linkToDeath(deathRecipient, 0);
         } catch (RemoteException e) {
             // RemoteException == binder already died, schedule disconnect anyway.
-            handleClientDeath(creatorCallingUid, service, true /* invoke #cancel */);
+            handleClientDeath(clientToken, creatorCallingUid, service, true /* invoke #cancel */);
             return;
         }
 
@@ -146,7 +147,7 @@ final class SpeechRecognitionManagerServiceImpl extends
                                 Intent recognizerIntent,
                                 IRecognitionListener listener,
                                 @NonNull AttributionSource attributionSource)
-                                        throws RemoteException {
+                                throws RemoteException {
                             attributionSource.enforceCallingUid();
                             if (!attributionSource.isTrusted(mMaster.getContext())) {
                                 attributionSource = mMaster.getContext()
@@ -154,6 +155,7 @@ final class SpeechRecognitionManagerServiceImpl extends
                                         .registerAttributionSource(attributionSource);
                             }
                             service.startListening(recognizerIntent, listener, attributionSource);
+                            service.associateClientWithActiveListener(clientToken, listener);
                         }
 
                         @Override
@@ -166,11 +168,11 @@ final class SpeechRecognitionManagerServiceImpl extends
                         public void cancel(
                                 IRecognitionListener listener,
                                 boolean isShutdown) throws RemoteException {
-
                             service.cancel(listener, isShutdown);
 
                             if (isShutdown) {
                                 handleClientDeath(
+                                        clientToken,
                                         creatorCallingUid,
                                         service,
                                         false /* invoke #cancel */);
@@ -201,12 +203,16 @@ final class SpeechRecognitionManagerServiceImpl extends
     }
 
     private void handleClientDeath(
-            int callingUid,
+            IBinder clientToken, int callingUid,
             RemoteSpeechRecognitionService service, boolean invokeCancel) {
         if (invokeCancel) {
-            service.shutdown();
+            service.shutdown(clientToken);
         }
-        removeService(callingUid, service);
+        synchronized (mLock) {
+            if (!service.hasActiveSessions()) {
+                removeService(callingUid, service);
+            }
+        }
     }
 
     @GuardedBy("mLock")
@@ -245,7 +251,6 @@ final class SpeechRecognitionManagerServiceImpl extends
                                         service.getServiceComponentName().equals(serviceComponent))
                                 .findFirst();
                 if (existingService.isPresent()) {
-
                     if (mMaster.debug) {
                         Slog.i(TAG, "Reused existing connection to " + serviceComponent);
                     }

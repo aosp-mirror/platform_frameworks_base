@@ -40475,6 +40475,7 @@ package android.speech {
 
   public abstract class RecognitionService extends android.app.Service {
     ctor public RecognitionService();
+    method public int getMaxConcurrentSessionsCount();
     method public final android.os.IBinder onBind(android.content.Intent);
     method protected abstract void onCancel(android.speech.RecognitionService.Callback);
     method public void onCheckRecognitionSupport(@NonNull android.content.Intent, @NonNull android.speech.RecognitionService.SupportCallback);
