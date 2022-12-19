@@ -40,6 +40,7 @@ import android.os.UserHandle
 import android.permission.IOnPermissionsChangeListener
 import android.permission.PermissionManager
 import android.provider.Settings
+import android.util.IntArray as GrowingIntArray
 import android.util.Log
 import com.android.internal.compat.IPlatformCompat
 import com.android.server.FgThread
@@ -61,6 +62,7 @@ import com.android.server.pm.permission.LegacyPermissionState
 import com.android.server.pm.permission.PermissionManagerServiceInterface
 import com.android.server.pm.permission.PermissionManagerServiceInternal
 import com.android.server.pm.pkg.AndroidPackage
+import libcore.util.EmptyArray
 import java.io.FileDescriptor
 import java.io.PrintWriter
 
@@ -77,6 +79,7 @@ class PermissionService(
     private lateinit var packageManagerInternal: PackageManagerInternal
     private lateinit var packageManagerLocal: PackageManagerLocal
     private lateinit var platformCompat: IPlatformCompat
+    private lateinit var systemConfig: SystemConfig
     private lateinit var userManagerService: UserManagerService
 
     private val mountedStorageVolumes = IndexedSet<String?>()
@@ -94,6 +97,7 @@ class PermissionService(
         platformCompat = IPlatformCompat.Stub.asInterface(
             ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE)
         )
+        systemConfig = SystemConfig.getInstance()
         userManagerService = UserManagerService.getInstance()
 
         handlerThread = ServiceThread(LOG_TAG, Process.THREAD_PRIORITY_BACKGROUND, true)
@@ -263,7 +267,10 @@ class PermissionService(
     }
 
     override fun getPermissionGids(permissionName: String, userId: Int): IntArray {
-        TODO("Not yet implemented")
+        val permission = service.getState {
+            with(policy) { getPermissions()[permissionName] }
+        } ?: return EmptyArray.INT
+        return permission.getGidsForUser(userId)
     }
 
     override fun addPermission(permissionInfo: PermissionInfo, async: Boolean): Boolean {
@@ -286,6 +293,29 @@ class PermissionService(
         TODO("Not yet implemented")
     }
 
+    override fun getGidsForUid(uid: Int): IntArray {
+        val appId = UserHandle.getAppId(uid)
+        val userId = UserHandle.getUserId(uid)
+        val permissionFlags = service.getState {
+            with(policy) { getUidPermissionFlags(appId, userId) }
+        } ?: return EmptyArray.INT
+        val gids = GrowingIntArray.wrap(systemConfig.globalGids)
+        permissionFlags.forEachIndexed { _, permissionName, flags ->
+            if (!PermissionFlags.isPermissionGranted(flags)) {
+                return@forEachIndexed
+            }
+            val permission = service.getState {
+                with(policy) { getPermissions()[permissionName] }
+            } ?: return@forEachIndexed
+            val permissionGids = permission.getGidsForUser(userId)
+            if (permissionGids.isEmpty()) {
+                return@forEachIndexed
+            }
+            gids.addAll(permissionGids)
+        }
+        return gids.toArray()
+    }
+
     override fun grantRuntimePermission(packageName: String, permissionName: String, userId: Int) {
         TODO("Not yet implemented")
     }
@@ -304,14 +334,6 @@ class PermissionService(
         userId: Int
     ) {
         TODO("Not yet implemented")
-    }
-
-    override fun addOnPermissionsChangeListener(listener: IOnPermissionsChangeListener) {
-        onPermissionsChangeListeners.addListener(listener)
-    }
-
-    override fun removeOnPermissionsChangeListener(listener: IOnPermissionsChangeListener) {
-        onPermissionsChangeListeners.removeListener(listener)
     }
 
     override fun getPermissionFlags(packageName: String, permissionName: String, userId: Int): Int {
@@ -493,21 +515,29 @@ class PermissionService(
         TODO("Not yet implemented")
     }
 
+    override fun addOnPermissionsChangeListener(listener: IOnPermissionsChangeListener) {
+        onPermissionsChangeListeners.addListener(listener)
+    }
+
+    override fun removeOnPermissionsChangeListener(listener: IOnPermissionsChangeListener) {
+        onPermissionsChangeListeners.removeListener(listener)
+    }
+
     override fun addOnRuntimePermissionStateChangedListener(
         listener: PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener
     ) {
-        TODO("Not yet implemented")
+        // TODO: Should be removed once we remove PermissionPolicyService.
     }
 
     override fun removeOnRuntimePermissionStateChangedListener(
         listener: PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener
     ) {
-        TODO("Not yet implemented")
+        // TODO: Should be removed once we remove PermissionPolicyService.
     }
 
     override fun getSplitPermissions(): List<SplitPermissionInfoParcelable> {
         return PermissionManager.splitPermissionInfoListToParcelableList(
-            SystemConfig.getInstance().splitPermissions
+            systemConfig.splitPermissions
         )
     }
 
@@ -532,10 +562,6 @@ class PermissionService(
             }
         }
         return appOpPermissionPackageNames
-    }
-
-    override fun getGidsForUid(uid: Int): IntArray {
-        TODO("Not yet implemented")
     }
 
     override fun backupRuntimePermissions(userId: Int): ByteArray? {
