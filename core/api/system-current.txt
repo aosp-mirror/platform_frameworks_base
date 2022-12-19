@@ -3043,6 +3043,7 @@ package android.companion.virtual {
     field public static final int LOCK_STATE_DEFAULT = 0; // 0x0
     field public static final int NAVIGATION_POLICY_DEFAULT_ALLOWED = 0; // 0x0
     field public static final int NAVIGATION_POLICY_DEFAULT_BLOCKED = 1; // 0x1
+    field public static final int POLICY_TYPE_AUDIO = 1; // 0x1
     field public static final int POLICY_TYPE_SENSORS = 0; // 0x0
     field public static final int RECENTS_POLICY_ALLOW_IN_HOST_DEVICE_RECENTS = 1; // 0x1
   }

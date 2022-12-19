@@ -21197,6 +21197,7 @@ package android.media {
     method @NonNull public android.media.AudioTrack.Builder setAudioAttributes(@NonNull android.media.AudioAttributes) throws java.lang.IllegalArgumentException;
     method @NonNull public android.media.AudioTrack.Builder setAudioFormat(@NonNull android.media.AudioFormat) throws java.lang.IllegalArgumentException;
     method @NonNull public android.media.AudioTrack.Builder setBufferSizeInBytes(@IntRange(from=0) int) throws java.lang.IllegalArgumentException;
+    method @NonNull public android.media.AudioTrack.Builder setContext(@NonNull android.content.Context);
     method @NonNull public android.media.AudioTrack.Builder setEncapsulationMode(int);
     method @NonNull public android.media.AudioTrack.Builder setOffloadedPlayback(boolean);
     method @NonNull public android.media.AudioTrack.Builder setPerformanceMode(int);
