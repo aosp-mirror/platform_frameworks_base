@@ -84,8 +84,7 @@ public abstract class MediaOutputBaseAdapter extends
             int viewType) {
         mContext = viewGroup.getContext();
         mHolderView = LayoutInflater.from(mContext).inflate(
-                mController.isAdvancedLayoutSupported() ? MediaItem.getMediaLayoutId(
-                        viewType) /*R.layout.media_output_list_item_advanced*/
+                mController.isAdvancedLayoutSupported() ? MediaItem.getMediaLayoutId(viewType)
                         : R.layout.media_output_list_item, viewGroup, false);
 
         return null;
@@ -308,9 +307,10 @@ public abstract class MediaOutputBaseAdapter extends
                         updateTitleIcon(currentVolume == 0 ? R.drawable.media_output_icon_volume_off
                                         : R.drawable.media_output_icon_volume,
                                 mController.getColorItemContent());
+                    } else {
+                        animateCornerAndVolume(mSeekBar.getProgress(),
+                                MediaOutputSeekbar.scaleVolumeToProgress(currentVolume));
                     }
-                    animateCornerAndVolume(mSeekBar.getProgress(),
-                            MediaOutputSeekbar.scaleVolumeToProgress(currentVolume));
                 } else {
                     if (!mVolumeAnimator.isStarted()) {
                         if (mController.isAdvancedLayoutSupported()) {
@@ -396,23 +396,18 @@ public abstract class MediaOutputBaseAdapter extends
         }
 
         void updateMutedVolumeIcon() {
+            mIconAreaLayout.setBackground(
+                    mContext.getDrawable(R.drawable.media_output_item_background_active));
             updateTitleIcon(R.drawable.media_output_icon_volume_off,
                     mController.getColorItemContent());
-            final GradientDrawable iconAreaBackgroundDrawable =
-                    (GradientDrawable) mIconAreaLayout.getBackground();
-            iconAreaBackgroundDrawable.setCornerRadius(mController.getActiveRadius());
         }
 
         void updateUnmutedVolumeIcon() {
+            mIconAreaLayout.setBackground(
+                    mContext.getDrawable(R.drawable.media_output_title_icon_area)
+            );
             updateTitleIcon(R.drawable.media_output_icon_volume,
                     mController.getColorItemContent());
-            final GradientDrawable iconAreaBackgroundDrawable =
-                    (GradientDrawable) mIconAreaLayout.getBackground();
-            iconAreaBackgroundDrawable.setCornerRadii(new float[]{
-                    mController.getActiveRadius(),
-                    mController.getActiveRadius(),
-                    0, 0, 0, 0, mController.getActiveRadius(), mController.getActiveRadius()
-            });
         }
 
         void updateTitleIcon(@DrawableRes int id, int color) {
