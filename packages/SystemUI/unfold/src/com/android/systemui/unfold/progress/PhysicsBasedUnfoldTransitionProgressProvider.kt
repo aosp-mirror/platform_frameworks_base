@@ -16,6 +16,7 @@
 package com.android.systemui.unfold.progress
 
 import android.os.Trace
+import android.os.Trace.TRACE_TAG_APP
 import android.util.Log
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FloatPropertyCompat
@@ -157,7 +158,10 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
     }
 
     private fun onStartTransition() {
+        Trace.beginSection( "$TAG#onStartTransition")
         listeners.forEach { it.onTransitionStarted() }
+        Trace.endSection()
+
         isTransitionRunning = true
 
         if (DEBUG) {
