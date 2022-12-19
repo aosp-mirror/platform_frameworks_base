@@ -25,6 +25,7 @@ import androidx.lifecycle.liveData
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.testutils.firstWithTimeoutOrNull
+import com.android.settingslib.spaprivileged.framework.common.appOpsManager
 import com.android.settingslib.spaprivileged.model.app.IAppOpsController
 import com.android.settingslib.spaprivileged.model.app.IPackageManagers
 import com.android.settingslib.spaprivileged.test.R
@@ -37,6 +38,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.verify
+import org.mockito.Spy
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 import org.mockito.Mockito.`when` as whenever
@@ -50,17 +53,20 @@ class AppOpPermissionAppListTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    @Spy
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Mock
     private lateinit var packageManagers: IPackageManagers
 
+    @Mock
+    private lateinit var appOpsManager: AppOpsManager
+
     private lateinit var listModel: TestAppOpPermissionAppListModel
 
     @Before
-    fun setUp() = runTest {
-        whenever(packageManagers.getAppOpPermissionPackages(USER_ID, PERMISSION))
-            .thenReturn(emptySet())
+    fun setUp() {
+        whenever(context.appOpsManager).thenReturn(appOpsManager)
         listModel = TestAppOpPermissionAppListModel()
     }
 
@@ -221,6 +227,16 @@ class AppOpPermissionAppListTest {
         assertThat(appOpsController.setAllowedCalledWith).isTrue()
     }
 
+    @Test
+    fun setAllowed_setModeByUid() {
+        listModel.setModeByUid = true
+        val record = listModel.transformItem(APP)
+
+        listModel.setAllowed(record = record, newAllowed = true)
+
+        verify(appOpsManager).setUidMode(listModel.appOp, APP.uid, AppOpsManager.MODE_ALLOWED)
+    }
+
     private fun getIsAllowed(record: AppOpPermissionRecord): Boolean? {
         lateinit var isAllowedState: State<Boolean?>
         composeTestRule.setContent {
@@ -236,6 +252,7 @@ class AppOpPermissionAppListTest {
         override val footerResId = R.string.test_app_op_permission_footer
         override val appOp = AppOpsManager.OP_MANAGE_MEDIA
         override val permission = PERMISSION
+        override var setModeByUid = false
     }
 
     private companion object {
