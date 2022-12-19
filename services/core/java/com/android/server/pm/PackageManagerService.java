@@ -1597,8 +1597,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         ServiceManager.addService("package", iPackageManager);
         final PackageManagerNative pmn = new PackageManagerNative(m);
         ServiceManager.addService("package_native", pmn);
-        LocalManagerRegistry.addManager(PackageManagerLocal.class,
-                new PackageManagerLocalImpl(m));
         return m;
     }
 
@@ -1797,6 +1795,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         // Expose private service for system components to use.
         LocalServices.addService(PackageManagerInternal.class, new PackageManagerInternalImpl());
+        LocalManagerRegistry.addManager(PackageManagerLocal.class,
+                new PackageManagerLocalImpl(this));
         LocalServices.addService(TestUtilityService.class, this);
         mTestUtilityService = LocalServices.getService(TestUtilityService.class);
         mUserManager = injector.getUserManagerService();
