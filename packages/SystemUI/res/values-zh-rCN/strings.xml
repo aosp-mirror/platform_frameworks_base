@@ -731,6 +731,8 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"WLAN 已关闭"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"蓝牙已关闭"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"“勿扰”模式已关闭"</string>
+    <!-- no translation found for dnd_is_on (7009368176361546279) -->
+    <skip />
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"某个自动规则（<xliff:g id="ID_1">%s</xliff:g>）已开启勿扰模式。"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"某个应用（<xliff:g id="ID_1">%s</xliff:g>）已开启勿扰模式。"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"某个自动规则或应用已开启勿扰模式。"</string>

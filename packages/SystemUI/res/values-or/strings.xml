@@ -731,6 +731,8 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"ୱାଇ-ଫାଇ ବନ୍ଦ ଅଛି"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ବ୍ଲୁଟୂଥ୍‍‌ ଅଫ୍ ଅଛି"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଅଫ୍‍ ଅଛି"</string>
+    <!-- no translation found for dnd_is_on (7009368176361546279) -->
+    <skip />
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"ଏକ (<xliff:g id="ID_1">%s</xliff:g>) ନିୟମ ଦ୍ୱାରା \"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ସ୍ୱଚାଳିତ ଭାବେ ଅନ୍‍ କରାଗଲା।"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"ଏକ ଆପ୍‍ (<xliff:g id="ID_1">%s</xliff:g>) ଦ୍ୱାରା \"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଅନ୍‌ କରାଗଲା।"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ଏକ ସ୍ୱଚାଳିତ ନିୟମ କିମ୍ବା ଆପ୍‍ ଦ୍ୱାରା \"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଅନ୍‍ କରାଗଲା।"</string>
@@ -1010,10 +1012,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"ଏକ ଉନ୍ନତ ସେଲ୍ଫି ପାଇଁ ସାମ୍ନା ଡିସପ୍ଲେକୁ ଫ୍ଲିପ କରିବେ?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ଉଚ୍ଚ ରିଜୋଲ୍ୟୁସନ ସହ ଅଧିକ ଚଉଡ଼ାର ଏକ ଫଟୋ ନେବା ପାଇଁ ପଛ-ପଟର କେମେରା ବ୍ୟବହାର କରନ୍ତୁ।"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ଏହି ସ୍କ୍ରିନ ବନ୍ଦ ହୋଇଯିବ"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ଫୋଲ୍ଡ କରାଯାଇପାରୁଥିବା ଡିଭାଇସକୁ ଅନଫୋଲ୍ଡ କରାଯାଉଛି"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ଫୋଲ୍ଡ କରାଯାଇପାରୁଥିବା ଡିଭାଇସକୁ ଫ୍ଲିପ କରାଯାଉଛି"</string>
     <!-- no translation found for stylus_battery_low (7134370101603167096) -->
     <skip />
 </resources>
