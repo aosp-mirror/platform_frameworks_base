@@ -16,14 +16,19 @@
 
 package com.android.server.input;
 
+import android.annotation.BinderThread;
 import android.annotation.ColorInt;
 import android.content.Context;
 import android.graphics.Color;
+import android.hardware.input.IKeyboardBacklightListener;
+import android.hardware.input.IKeyboardBacklightState;
 import android.hardware.input.InputManager;
 import android.hardware.lights.Light;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
@@ -67,6 +72,11 @@ final class KeyboardBacklightController implements InputManager.InputDeviceListe
     private final PersistentDataStore mDataStore;
     private final Handler mHandler;
     private final SparseArray<Light> mKeyboardBacklights = new SparseArray<>();
+
+    // List of currently registered keyboard backlight listeners
+    @GuardedBy("mKeyboardBacklightListenerRecords")
+    private final SparseArray<KeyboardBacklightListenerRecord> mKeyboardBacklightListenerRecords =
+            new SparseArray<>();
 
     static {
         // Fixed brightness levels to avoid issues when converting back and forth from the
@@ -128,6 +138,9 @@ final class KeyboardBacklightController implements InputManager.InputDeviceListe
         if (DEBUG) {
             Slog.d(TAG, "Changing brightness from " + currBrightness + " to " + newBrightness);
         }
+
+        notifyKeyboardBacklightChanged(deviceId, BRIGHTNESS_LEVELS.headSet(newBrightness).size(),
+                true/* isTriggeredByKeyPress */);
 
         synchronized (mDataStore) {
             try {
@@ -217,6 +230,62 @@ final class KeyboardBacklightController implements InputManager.InputDeviceListe
         return null;
     }
 
+    /** Register the keyboard backlight listener for a process. */
+    @BinderThread
+    public void registerKeyboardBacklightListener(IKeyboardBacklightListener listener,
+            int pid) {
+        synchronized (mKeyboardBacklightListenerRecords) {
+            if (mKeyboardBacklightListenerRecords.get(pid) != null) {
+                throw new IllegalStateException("The calling process has already registered "
+                        + "a KeyboardBacklightListener.");
+            }
+            KeyboardBacklightListenerRecord record = new KeyboardBacklightListenerRecord(pid,
+                    listener);
+            try {
+                listener.asBinder().linkToDeath(record, 0);
+            } catch (RemoteException ex) {
+                throw new RuntimeException(ex);
+            }
+            mKeyboardBacklightListenerRecords.put(pid, record);
+        }
+    }
+
+    /** Unregister the keyboard backlight listener for a process. */
+    @BinderThread
+    public void unregisterKeyboardBacklightListener(IKeyboardBacklightListener listener,
+            int pid) {
+        synchronized (mKeyboardBacklightListenerRecords) {
+            KeyboardBacklightListenerRecord record = mKeyboardBacklightListenerRecords.get(pid);
+            if (record == null) {
+                throw new IllegalStateException("The calling process has no registered "
+                        + "KeyboardBacklightListener.");
+            }
+            if (record.mListener != listener) {
+                throw new IllegalStateException("The calling process has a different registered "
+                        + "KeyboardBacklightListener.");
+            }
+            record.mListener.asBinder().unlinkToDeath(record, 0);
+            mKeyboardBacklightListenerRecords.remove(pid);
+        }
+    }
+
+    private void notifyKeyboardBacklightChanged(int deviceId, int currentBacklightLevel,
+            boolean isTriggeredByKeyPress) {
+        synchronized (mKeyboardBacklightListenerRecords) {
+            for (int i = 0; i < mKeyboardBacklightListenerRecords.size(); i++) {
+                mKeyboardBacklightListenerRecords.valueAt(i).notifyKeyboardBacklightChanged(
+                        deviceId, new KeyboardBacklightState(currentBacklightLevel),
+                        isTriggeredByKeyPress);
+            }
+        }
+    }
+
+    private void onKeyboardBacklightListenerDied(int pid) {
+        synchronized (mKeyboardBacklightListenerRecords) {
+            mKeyboardBacklightListenerRecords.remove(pid);
+        }
+    }
+
     void dump(PrintWriter pw) {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
         ipw.println(TAG + ": " + mKeyboardBacklights.size() + " keyboard backlights");
@@ -226,5 +295,50 @@ final class KeyboardBacklightController implements InputManager.InputDeviceListe
             ipw.println(i + ": { id: " + light.getId() + ", name: " + light.getName() + " }");
         }
         ipw.decreaseIndent();
+    }
+
+    // A record of a registered Keyboard backlight listener from one process.
+    private class KeyboardBacklightListenerRecord implements IBinder.DeathRecipient {
+        public final int mPid;
+        public final IKeyboardBacklightListener mListener;
+
+        KeyboardBacklightListenerRecord(int pid, IKeyboardBacklightListener listener) {
+            mPid = pid;
+            mListener = listener;
+        }
+
+        @Override
+        public void binderDied() {
+            if (DEBUG) {
+                Slog.d(TAG, "Keyboard backlight listener for pid " + mPid + " died.");
+            }
+            onKeyboardBacklightListenerDied(mPid);
+        }
+
+        public void notifyKeyboardBacklightChanged(int deviceId, IKeyboardBacklightState state,
+                boolean isTriggeredByKeyPress) {
+            try {
+                mListener.onBrightnessChanged(deviceId, state, isTriggeredByKeyPress);
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "Failed to notify process " + mPid
+                        + " that keyboard backlight changed, assuming it died.", ex);
+                binderDied();
+            }
+        }
+    }
+
+    private static class KeyboardBacklightState extends IKeyboardBacklightState {
+
+        KeyboardBacklightState(int brightnessLevel) {
+            this.brightnessLevel = brightnessLevel;
+            this.maxBrightnessLevel = NUM_BRIGHTNESS_CHANGE_STEPS;
+        }
+
+        @Override
+        public String toString() {
+            return "KeyboardBacklightState{brightnessLevel=" + brightnessLevel
+                    + ", maxBrightnessLevel=" + maxBrightnessLevel
+                    + "}";
+        }
     }
 }

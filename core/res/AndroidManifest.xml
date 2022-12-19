@@ -6855,6 +6855,12 @@
     <permission android:name="android.permission.REMAP_MODIFIER_KEYS"
                 android:protectionLevel="signature" />
 
+    <!-- Allows low-level access to monitor keyboard backlight changes.
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.MONITOR_KEYBOARD_BACKLIGHT"
+                android:protectionLevel="signature" />
+
     <uses-permission android:name="android.permission.HANDLE_QUERY_PACKAGE_RESTART" />
 
     <!-- Allows financed device kiosk apps to perform actions on the Device Lock service
