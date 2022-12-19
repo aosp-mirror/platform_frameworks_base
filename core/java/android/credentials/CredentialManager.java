@@ -270,9 +270,22 @@ public final class CredentialManager {
      *
      * @hide
      */
-    public static boolean isServiceEnabled() {
+    public static boolean isServiceEnabled(Context context) {
+        if (context == null) {
+	    return false;
+        }
+        CredentialManager credentialManager =
+                (CredentialManager) context.getSystemService(Context.CREDENTIAL_SERVICE);
+        if (credentialManager != null) {
+            return credentialManager.isServiceEnabled();
+        }
+        return false;
+    }
+
+    private boolean isServiceEnabled() {
         return DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER, true);
+                DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER,
+                true);
     }
 
     private static class GetCredentialTransport extends IGetCredentialCallback.Stub {
