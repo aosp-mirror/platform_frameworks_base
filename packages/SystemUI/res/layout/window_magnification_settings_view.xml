@@ -16,12 +16,13 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/magnifier_panel_view"
-    android:layout_width="@dimen/magnification_max_size"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:background="@drawable/accessibility_magnification_setting_view_bg"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="@dimen/magnification_setting_background_padding">
     <LinearLayout
-        android:layout_width="@dimen/magnification_max_size"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <TextView
@@ -29,11 +30,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/accessibility_magnifier_size"
-            android:textAppearance="?android:attr/textAppearanceListItem"
-            android:textColor="?android:attr/textColorAlertDialogListItem"
+            android:textAppearance="@style/TextAppearance.MagnificationSetting.Title"
             android:focusable="true"
-            android:layout_gravity="center_vertical|left"
-            android:layout_marginStart="20dp"/>
+            android:layout_gravity="center_vertical|left" />
 
         <Button
             android:id="@+id/magnifier_edit_button"
@@ -44,12 +43,11 @@
             android:textAppearance="?android:attr/textAppearanceListItem"
             android:textColor="?android:attr/textColorAlertDialogListItem"
             android:focusable="true"
-            android:layout_gravity="right"
-            android:layout_marginEnd="20dp"/>
+            android:layout_gravity="right" />
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="@dimen/magnification_max_size"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <ImageButton
@@ -58,7 +56,6 @@
             android:layout_height="56dp"
             android:scaleType="center"
             android:layout_weight="1"
-            android:layout_marginStart="12dp"
             android:background="@drawable/accessibility_magnification_setting_view_btn_bg"
             android:padding="@dimen/magnification_switch_button_padding"
             android:src="@drawable/ic_magnification_menu_small"
@@ -95,7 +92,6 @@
             android:layout_height="56dp"
             android:scaleType="center"
             android:layout_weight="1"
-            android:layout_marginEnd="12dp"
             android:background="@drawable/accessibility_magnification_setting_view_btn_bg"
             android:padding="@dimen/magnification_switch_button_padding"
             android:src="@drawable/ic_open_in_new_fullscreen"
@@ -107,68 +103,49 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingTop="8dp"
-        android:paddingEnd="20dp"
-        android:paddingStart="20dp"
+        android:layout_marginTop="@dimen/magnification_setting_view_margin"
+        android:layout_marginBottom="@dimen/magnification_setting_view_margin"
         android:focusable="true">
 
-        <LinearLayout
+        <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="?android:attr/selectableItemBackground"
-            android:ellipsize="marquee"
-            android:gravity="center_vertical"
-            android:minHeight="?android:attr/listPreferredItemHeightSmall"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:text="@string/accessibility_allow_diagonal_scrolling"
-                android:textAppearance="?android:attr/textAppearanceListItem"
-                android:textColor="?android:attr/textColorAlertDialogListItem" />
-        </LinearLayout>
+            android:singleLine="true"
+            android:text="@string/accessibility_allow_diagonal_scrolling"
+            android:textAppearance="@style/TextAppearance.MagnificationSetting.Title" />
 
         <Switch
             android:id="@+id/magnifier_horizontal_lock_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right|center"
-            android:theme="@android:style/Theme.DeviceDefault.DayNight"/>
+            android:layout_gravity="right" />
     </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/accessibility_magnification_zoom"
-        android:textAppearance="?android:attr/textAppearanceListItem"
-        android:textColor="?android:attr/textColorAlertDialogListItem"
-        android:focusable="true"
-        android:layout_marginStart="20dp"
-        android:paddingTop="2dp"
-        android:paddingBottom="10dp"/>
+        android:textAppearance="@style/TextAppearance.MagnificationSetting.Title"
+        android:focusable="true" />
 
     <SeekBar
         android:id="@+id/magnifier_zoom_seekbar"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:layout_marginTop="@dimen/magnification_setting_seekbar_margin"
         android:progress="0"
-        android:max="6"
-        android:layout_marginEnd="20dp"
-        android:theme="@android:style/Theme.DeviceDefault.DayNight"/>
-
+        android:max="6" />
 
     <Button
         android:id="@+id/magnifier_close_button"
         android:background="@drawable/accessibility_magnification_setting_view_btn_bg"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/accessibility_magnification_close"
         android:textAppearance="?android:attr/textAppearanceListItem"
         android:textColor="?android:attr/textColorAlertDialogListItem"
         android:focusable="true"
         android:layout_gravity="center_horizontal"
-        android:paddingBottom="24dp"/>
+        android:layout_marginTop="@dimen/magnification_setting_view_margin"/>
 </LinearLayout>

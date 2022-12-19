@@ -1334,4 +1334,13 @@
         <item name="biometricsEnrollProgressHelp">@color/udfps_enroll_progress_help</item>
         <item name="biometricsEnrollProgressHelpWithTalkback">@color/udfps_enroll_progress_help_with_talkback</item>
     </style>
+
+    <!-- Magnification styles -->
+    <style name="TextAppearance.MagnificationSetting" />
+
+    <style name="TextAppearance.MagnificationSetting.Title">
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:textColor">?androidprv:attr/textColorPrimary</item>
+        <item name="android:textSize">@dimen/magnification_setting_text_size</item>
+    </style>
 </resources>

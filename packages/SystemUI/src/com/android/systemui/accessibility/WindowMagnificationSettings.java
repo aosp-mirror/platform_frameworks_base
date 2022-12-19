@@ -428,7 +428,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     }
 
     void onConfigurationChanged(int configDiff) {
-        if ((configDiff & ActivityInfo.CONFIG_UI_MODE) != 0) {
+        if ((configDiff & ActivityInfo.CONFIG_UI_MODE) != 0
+                || (configDiff & ActivityInfo.CONFIG_ASSETS_PATHS) != 0) {
             boolean showSettingPanelAfterThemeChange = mIsVisible;
             hideSettingPanel(/* resetPosition= */ false);
             inflateView();
