@@ -85,9 +85,9 @@ static jlong FontFamily_create(CRITICAL_JNI_PARAMS_COMMA jlong builderPtr) {
     if (builder->fonts.empty()) {
         return 0;
     }
-    std::shared_ptr<minikin::FontFamily> family =
-            minikin::FontFamily::create(builder->langId, builder->variant,
-                                        std::move(builder->fonts), true /* isCustomFallback */);
+    std::shared_ptr<minikin::FontFamily> family = minikin::FontFamily::create(
+            builder->langId, builder->variant, std::move(builder->fonts),
+            true /* isCustomFallback */, false /* isDefaultFallback */);
     if (family->getCoverage().length() == 0) {
         return 0;
     }

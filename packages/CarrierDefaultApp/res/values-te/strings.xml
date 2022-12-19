@@ -13,7 +13,7 @@
     <string name="action_bar_label" msgid="4290345990334377177">"మొబైల్ నెట్‌వర్క్‌కి సైన్ ఇన్ చేయండి"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"మీరు చేరడానికి ప్రయత్నిస్తున్న నెట్‌వర్క్ భద్రతా సమస్యలను కలిగి ఉంది."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"ఉదాహరణకు, లాగిన్ పేజీ చూపిన సంస్థకు చెందినది కాకపోవచ్చు."</string>
-    <string name="ssl_error_continue" msgid="1138548463994095584">"ఏదేమైనా బ్రౌజర్ ద్వారా కొనసాగించు"</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"ఏదేమైనా బ్రౌజర్ ద్వారా కొనసాగించండి"</string>
     <string name="network_boost_notification_channel" msgid="5430986172506159199">"నెట్‌వర్క్ బూస్ట్"</string>
     <string name="network_boost_notification_title" msgid="8226368121348880044">"డేటా బూస్ట్‌ను %s సిఫార్సు చేస్తోంది"</string>
     <string name="network_boost_notification_detail" msgid="3812434025544196192">"మెరుగైన పనితీరు కోసం నెట్‌వర్క్ బూస్ట్‌ను కొనుగోలు చేయండి"</string>

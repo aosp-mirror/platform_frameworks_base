@@ -520,6 +520,14 @@ public class ImsCallSession {
                 @NonNull Set<RtpHeaderExtension> extensions) {
             // no-op
         }
+
+        /**
+         * Called when radio to send ANBRQ message to the access network to query the desired
+         * bitrate.
+         */
+        public void callSessionSendAnbrQuery(int mediaType, int direction, int bitsPerSecond) {
+            // no-op
+        }
     }
 
     private final IImsCallSession miSession;
@@ -1224,6 +1232,27 @@ public class ImsCallSession {
     }
 
     /**
+     * Deliver the bitrate for the indicated media type, direction and bitrate to the upper layer.
+     *
+     * @param mediaType MediaType is used to identify media stream such as audio or video.
+     * @param direction Direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate received from the NW through the Recommended
+     *        bitrate MAC Control Element message and ImsStack converts this value from MAC bitrate
+     *        to audio/video codec bitrate (defined in TS26.114).
+     */
+    public void callSessionNotifyAnbr(int mediaType, int direction, int bitsPerSecond) {
+        if (mClosed) {
+            return;
+        }
+
+        try {
+            miSession.callSessionNotifyAnbr(mediaType, direction, bitsPerSecond);
+        } catch (RemoteException e) {
+            Log.e(TAG, "callSessionNotifyAnbr" + e);
+        }
+    }
+
+    /**
      * A listener type for receiving notification on IMS call session events.
      * When an event is generated for an {@link IImsCallSession},
      * the application is notified by having one of the methods called on
@@ -1713,6 +1742,26 @@ public class ImsCallSession {
                 if (mListener != null) {
                     mListener.callSessionRtpHeaderExtensionsReceived(
                             new ArraySet<RtpHeaderExtension>(extensions));
+                }
+            }, mListenerExecutor);
+        }
+
+        /**
+         * ANBR Query received.
+         *
+         * @param mediaType MediaType is used to identify media stream such as audio or video.
+         * @param direction Direction of this packet stream (e.g. uplink or downlink).
+         * @param bitsPerSecond This value is the bitrate requested by the other party UE through
+         *        RTP CMR, RTCPAPP or TMMBR, and ImsStack converts this value to the MAC bitrate
+         *        (defined in TS36.321, range: 0 ~ 8000 kbit/s).
+         */
+        @Override
+        public void callSessionSendAnbrQuery(int mediaType, int direction,
+                int bitsPerSecond) {
+            Log.d(TAG, "callSessionSendAnbrQuery in ImsCallSession");
+            TelephonyUtils.runWithCleanCallingIdentity(()-> {
+                if (mListener != null) {
+                    mListener.callSessionSendAnbrQuery(mediaType, direction, bitsPerSecond);
                 }
             }, mListenerExecutor);
         }

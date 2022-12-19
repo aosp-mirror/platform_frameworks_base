@@ -20,7 +20,9 @@ import android.os.ICancellationSignal;
 import android.service.credentials.BeginGetCredentialRequest;
 import android.service.credentials.BeginCreateCredentialRequest;
 import android.service.credentials.IBeginGetCredentialCallback;
+import android.service.credentials.ClearCredentialStateRequest;
 import android.service.credentials.IBeginCreateCredentialCallback;
+import android.service.credentials.IClearCredentialStateCallback;
 import android.os.ICancellationSignal;
 
 /**
@@ -31,4 +33,5 @@ import android.os.ICancellationSignal;
 interface ICredentialProviderService {
     ICancellationSignal onBeginGetCredential(in BeginGetCredentialRequest request, in IBeginGetCredentialCallback callback);
     ICancellationSignal onBeginCreateCredential(in BeginCreateCredentialRequest request, in IBeginCreateCredentialCallback callback);
+    ICancellationSignal onClearCredentialState(in ClearCredentialStateRequest request, in IClearCredentialStateCallback callback);
 }

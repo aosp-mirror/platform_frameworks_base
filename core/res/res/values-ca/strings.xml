@@ -2353,4 +2353,8 @@
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"Permet que una aplicació complementària enviï missatges complementaris a altres dispositius."</string>
     <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"Inicia serveis en primer pla des d\'un segon pla"</string>
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permet que una aplicació complementària iniciï serveis en primer pla des d\'un segon pla."</string>
+    <!-- no translation found for mic_access_on_toast (2666925317663845156) -->
+    <skip />
+    <!-- no translation found for mic_access_off_toast (8111040892954242437) -->
+    <skip />
 </resources>

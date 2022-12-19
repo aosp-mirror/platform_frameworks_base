@@ -2356,4 +2356,8 @@
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"يسمح هذا الإذن للتطبيق المصاحب بتسليم الرسائل المصاحبة إلى الأجهزة الأخرى."</string>
     <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"بدء الخدمات التي تعمل في المقدّمة من الخلفية"</string>
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"يسمح هذا الإذن للتطبيق المصاحب ببدء الخدمات التي تعمل في المقدّمة من الخلفية."</string>
+    <!-- no translation found for mic_access_on_toast (2666925317663845156) -->
+    <skip />
+    <!-- no translation found for mic_access_off_toast (8111040892954242437) -->
+    <skip />
 </resources>

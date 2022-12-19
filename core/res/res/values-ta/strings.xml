@@ -2352,4 +2352,8 @@
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"பிற சாதனங்களுக்குத் துணை மெசேஜ்களை வழங்க துணைத் தயாரிப்பு ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"பின்னணியில் இருந்து முன்புலச் சேவைகளைத் தொடங்குதல்"</string>
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"பின்னணியிலிருந்து முன்புலச் சேவைகளைத் தொடங்க துணைத் தயாரிப்பு ஆப்ஸை அனுமதிக்கும்."</string>
+    <!-- no translation found for mic_access_on_toast (2666925317663845156) -->
+    <skip />
+    <!-- no translation found for mic_access_off_toast (8111040892954242437) -->
+    <skip />
 </resources>

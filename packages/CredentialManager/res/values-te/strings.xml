@@ -40,8 +40,7 @@
     <string name="other_password_manager" msgid="565790221427004141">"ఇతర పాస్‌వర్డ్ మేనేజర్‌లు"</string>
     <string name="close_sheet" msgid="1393792015338908262">"షీట్‌ను మూసివేయండి"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"మునుపటి పేజీకి తిరిగి వెళ్లండి"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="2953807735590034688">"స్క్రీన్ దిగువున కనిపించే ఆధారాల మేనేజర్ చర్య సూచనను మూసివేయండి"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం మీ సేవ్ చేసిన పాస్-కీ వివరాలను ఉపయోగించాలా?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం మీరు సేవ్ చేసిన సైన్ ఇన్ వివరాలను ఉపయోగించాలా?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం సేవ్ చేసిన సైన్ ఇన్ వివరాలను ఎంచుకోండి"</string>
