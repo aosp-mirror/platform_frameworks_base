@@ -495,16 +495,6 @@ public class MagnificationControllerTest {
     }
 
     @Test
-    public void setScaleOneThroughExternalRequest_fullScreenEnabled_removeMagnificationButton()
-            throws RemoteException {
-        setMagnificationEnabled(MODE_FULLSCREEN);
-        mScreenMagnificationController.setScaleAndCenter(TEST_DISPLAY, 1.0f,
-                MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y, false, TEST_SERVICE_ID);
-
-        verify(mWindowMagnificationManager).removeMagnificationButton(eq(TEST_DISPLAY));
-    }
-
-    @Test
     public void onPerformScaleAction_magnifierEnabled_handleScaleChange() throws RemoteException {
         final float newScale = 4.0f;
         setMagnificationEnabled(MODE_WINDOW);
@@ -756,7 +746,7 @@ public class MagnificationControllerTest {
 
         mMagnificationController.onWindowMagnificationActivationState(TEST_DISPLAY, true);
 
-        assertFalse(mScreenMagnificationController.isMagnifying(TEST_DISPLAY));
+        verify(mScreenMagnificationController).reset(eq(TEST_DISPLAY), eq(false));
     }
 
     @Test

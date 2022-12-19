@@ -254,13 +254,15 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         final DisableMagnificationCallback animationEndCallback =
                 new DisableMagnificationCallback(transitionCallBack, displayId, targetMode,
                         scale, currentCenter, true);
+
+        setDisableMagnificationCallbackLocked(displayId, animationEndCallback);
+
         if (targetMode == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW) {
             screenMagnificationController.reset(displayId, animationEndCallback);
         } else {
             windowMagnificationMgr.disableWindowMagnification(displayId, false,
                     animationEndCallback);
         }
-        setDisableMagnificationCallbackLocked(displayId, animationEndCallback);
     }
 
     /**
@@ -481,17 +483,17 @@ public class MagnificationController implements WindowMagnificationManager.Callb
      */
     private boolean shouldNotifyMagnificationChange(int displayId, int changeMode) {
         synchronized (mLock) {
-            final boolean fullScreenMagnifying = mFullScreenMagnificationController != null
-                    && mFullScreenMagnificationController.isMagnifying(displayId);
+            final boolean fullScreenActivated = mFullScreenMagnificationController != null
+                    && mFullScreenMagnificationController.isActivated(displayId);
             final boolean windowEnabled = mWindowMagnificationMgr != null
                     && mWindowMagnificationMgr.isWindowMagnifierEnabled(displayId);
             final Integer transitionMode = mTransitionModes.get(displayId);
-            if (((changeMode == MAGNIFICATION_MODE_FULLSCREEN && fullScreenMagnifying)
+            if (((changeMode == MAGNIFICATION_MODE_FULLSCREEN && fullScreenActivated)
                     || (changeMode == MAGNIFICATION_MODE_WINDOW && windowEnabled))
                     && (transitionMode == null)) {
                 return true;
             }
-            if ((!fullScreenMagnifying && !windowEnabled)
+            if ((!fullScreenActivated && !windowEnabled)
                     && (transitionMode == null)) {
                 return true;
             }
@@ -742,7 +744,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                     mWindowMagnificationMgr.getCenterY(displayId));
         } else {
             if (mFullScreenMagnificationController == null
-                    || !mFullScreenMagnificationController.isMagnifying(displayId)) {
+                    || !mFullScreenMagnificationController.isActivated(displayId)) {
                 return null;
             }
             mTempPoint.set(mFullScreenMagnificationController.getCenterX(displayId),
@@ -766,9 +768,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                 if (mFullScreenMagnificationController == null) {
                     return false;
                 }
-                isActivated = mFullScreenMagnificationController.isMagnifying(displayId)
-                        || mFullScreenMagnificationController.isForceShowMagnifiableBounds(
-                        displayId);
+                isActivated = mFullScreenMagnificationController.isActivated(displayId);
             }
         } else if (mode == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW) {
             synchronized (mLock) {
@@ -829,7 +829,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                     final FullScreenMagnificationController screenMagnificationController =
                             getFullScreenMagnificationController();
                     if (mCurrentMode == ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
-                            && !screenMagnificationController.isMagnifying(mDisplayId)) {
+                            && !screenMagnificationController.isActivated(mDisplayId)) {
                         MagnificationConfig.Builder configBuilder =
                                 new MagnificationConfig.Builder();
                         Region region = new Region();
