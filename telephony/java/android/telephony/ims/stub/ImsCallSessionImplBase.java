@@ -74,6 +74,7 @@ public class ImsCallSessionImplBase implements AutoCloseable {
 
     /** @hide */
     @IntDef(
+        prefix = "MEDIA_STREAM_TYPE_",
         value = {
             MEDIA_STREAM_TYPE_AUDIO,
             MEDIA_STREAM_TYPE_VIDEO
@@ -94,6 +95,7 @@ public class ImsCallSessionImplBase implements AutoCloseable {
 
     /** @hide */
     @IntDef(
+        prefix = "MEDIA_STREAM_DIRECTION_",
         value = {
             MEDIA_STREAM_DIRECTION_UPLINK,
             MEDIA_STREAM_DIRECTION_DOWNLINK
