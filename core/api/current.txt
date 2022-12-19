@@ -39865,18 +39865,12 @@ package android.service.credentials {
   }
 
   public final class GetCredentialRequest implements android.os.Parcelable {
+    ctor public GetCredentialRequest(@NonNull android.service.credentials.CallingAppInfo, @NonNull android.credentials.GetCredentialOption);
     method public int describeContents();
     method @NonNull public android.service.credentials.CallingAppInfo getCallingAppInfo();
-    method @NonNull public java.util.List<android.credentials.GetCredentialOption> getGetCredentialOptions();
+    method @NonNull public android.credentials.GetCredentialOption getGetCredentialOption();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.GetCredentialRequest> CREATOR;
-  }
-
-  public static final class GetCredentialRequest.Builder {
-    ctor public GetCredentialRequest.Builder(@NonNull android.service.credentials.CallingAppInfo);
-    method @NonNull public android.service.credentials.GetCredentialRequest.Builder addGetCredentialOption(@NonNull android.credentials.GetCredentialOption);
-    method @NonNull public android.service.credentials.GetCredentialRequest build();
-    method @NonNull public android.service.credentials.GetCredentialRequest.Builder setGetCredentialOptions(@NonNull java.util.List<android.credentials.GetCredentialOption>);
   }
 
 }
