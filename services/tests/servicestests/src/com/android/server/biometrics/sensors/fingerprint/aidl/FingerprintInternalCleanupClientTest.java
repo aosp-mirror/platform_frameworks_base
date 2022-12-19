@@ -137,6 +137,32 @@ public class FingerprintInternalCleanupClientTest {
         verify(mCallback).onClientFinished(eq(mClient), eq(true));
     }
 
+    @Test
+    public void cleanupUnknownHalTemplatesAfterEnumerationWhenVirtualIsDisabled() {
+        mClient = createClient();
+
+        final List<Fingerprint> templates = List.of(
+                new Fingerprint("one", 1, 1),
+                new Fingerprint("two", 2, 1),
+                new Fingerprint("three", 3, 1)
+        );
+        mClient.start(mCallback);
+        for (int i = templates.size() - 1; i >= 0; i--) {
+            mClient.getCurrentEnumerateClient().onEnumerationResult(templates.get(i), i);
+        }
+        // The first template is removed after enumeration
+        assertThat(mClient.getUnknownHALTemplates().size()).isEqualTo(2);
+
+        // Simulate finishing the removal of the first template.
+        // |remaining| is 0 because one FingerprintRemovalClient is associated with only one
+        // biometrics ID.
+        mClient.getCurrentRemoveClient().onRemoved(templates.get(0), 0);
+        assertThat(mClient.getUnknownHALTemplates().size()).isEqualTo(1);
+        // Simulate finishing the removal of the second template.
+        mClient.getCurrentRemoveClient().onRemoved(templates.get(1), 0);
+        assertThat(mClient.getUnknownHALTemplates()).isEmpty();
+    }
+
     protected FingerprintInternalCleanupClient createClient() {
         final List<Fingerprint> enrollments = new ArrayList<>();
         final Map<Integer, Long> authenticatorIds = new HashMap<>();
