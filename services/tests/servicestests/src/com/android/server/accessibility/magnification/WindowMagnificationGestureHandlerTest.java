@@ -63,11 +63,12 @@ public class WindowMagnificationGestureHandlerTest {
     public static final int STATE_SHOW_MAGNIFIER_SHORTCUT = 2;
     public static final int STATE_TWO_FINGERS_DOWN = 3;
     public static final int STATE_SHOW_MAGNIFIER_TRIPLE_TAP = 4;
-    public static final int STATE_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD = 5;
+    public static final int STATE_NOT_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD = 5;
+    public static final int STATE_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD = 6;
     //TODO: Test it after can injecting Handler to GestureMatcher is available.
 
     public static final int FIRST_STATE = STATE_IDLE;
-    public static final int LAST_STATE = STATE_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD;
+    public static final int LAST_STATE = STATE_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD;
 
     // Co-prime x and y, to potentially catch x-y-swapped errors
     public static final float DEFAULT_TAP_X = 301;
@@ -164,13 +165,25 @@ public class WindowMagnificationGestureHandlerTest {
     @Test
     public void testTripleTapAndHold_logSessionDuration() {
         // perform triple tap on spy gesture handler
-        goFromStateIdleTo(STATE_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD);
+        goFromStateIdleTo(STATE_NOT_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD);
 
         // perform up event on spy gesture handler
-        returnToNormalFrom(STATE_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD);
+        returnToNormalFrom(STATE_NOT_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD);
 
         verify(mMockWindowMagnificationGestureHandler)
                 .logMagnificationTripleTapAndHoldSession(anyLong());
+    }
+
+    @Test
+    public void testTripleTapAndHold_enabled_releaseHold_expectedValue() {
+        goFromStateIdleTo(STATE_SHOW_MAGNIFIER_TRIPLE_TAP);
+        tap();
+        tap();
+        tapAndHold();
+        send(upEvent(DEFAULT_TAP_X, DEFAULT_TAP_Y));
+
+        assertIn(STATE_SHOW_MAGNIFIER_TRIPLE_TAP);
+        returnToNormalFrom(STATE_SHOW_MAGNIFIER_TRIPLE_TAP);
     }
 
     private void forEachState(IntConsumer action) {
@@ -199,7 +212,8 @@ public class WindowMagnificationGestureHandlerTest {
                         == mWindowMagnificationGestureHandler.mDetectingState, state);
             }
                 break;
-            case STATE_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD: {
+            case STATE_NOT_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD:
+            case STATE_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD: {
                 check(isWindowMagnifierEnabled(DISPLAY_0), state);
                 check(mWindowMagnificationGestureHandler.mCurrentState
                         == mWindowMagnificationGestureHandler.mViewportDraggingState, state);
@@ -256,8 +270,16 @@ public class WindowMagnificationGestureHandlerTest {
                     tap();
                 }
                 break;
-                case STATE_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD: {
+                case STATE_NOT_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD: {
                     // Perform triple tap and hold gesture
+                    tap();
+                    tap();
+                    tapAndHold();
+                }
+                break;
+                case STATE_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD: {
+                    // enabled then perform triple tap and hold gesture
+                    goFromStateIdleTo(STATE_SHOW_MAGNIFIER_SHORTCUT);
                     tap();
                     tap();
                     tapAndHold();
@@ -296,8 +318,13 @@ public class WindowMagnificationGestureHandlerTest {
                 tap();
             }
             break;
-            case STATE_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD: {
+            case STATE_NOT_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD: {
                 send(upEvent(DEFAULT_TAP_X, DEFAULT_TAP_Y));
+            }
+            break;
+            case STATE_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD: {
+                send(upEvent(DEFAULT_TAP_X, DEFAULT_TAP_Y));
+                returnToNormalFrom(STATE_SHOW_MAGNIFIER_SHORTCUT);
             }
             break;
             default:
