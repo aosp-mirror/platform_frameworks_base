@@ -87,9 +87,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
@@ -275,7 +277,9 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     @Override
     public void onDeviceListUpdate(List<MediaDevice> devices) {
-        if (mMediaDevices.isEmpty() || !mIsRefreshing) {
+        boolean isListEmpty =
+                isAdvancedLayoutSupported() ? mMediaItemList.isEmpty() : mMediaDevices.isEmpty();
+        if (isListEmpty || !mIsRefreshing) {
             buildMediaDevices(devices);
             mCallback.onDeviceListChanged();
         } else {
@@ -646,16 +650,19 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                         for (MediaDevice device : devices) {
                             if (device.isMutingExpectedDevice()) {
                                 mMediaItemList.add(0, new MediaItem(device));
+                                mMediaItemList.add(1, new MediaItem(mContext.getString(
+                                        R.string.media_output_group_title_speakers_and_displays),
+                                        MediaItem.MediaItemType.TYPE_GROUP_DIVIDER));
                             } else {
                                 mMediaItemList.add(new MediaItem(device));
                             }
                         }
+                        mMediaItemList.add(new MediaItem());
                     } else {
                         mMediaItemList.addAll(
                                 devices.stream().map(MediaItem::new).collect(Collectors.toList()));
+                        categorizeMediaItems(null);
                     }
-
-                    categorizeMediaItems();
                     return;
                 }
                 // selected device exist
@@ -666,11 +673,12 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                         mMediaItemList.add(new MediaItem(device));
                     }
                 }
-                categorizeMediaItems();
+                categorizeMediaItems(connectedMediaDevice);
                 return;
             }
             // To keep the same list order
             final List<MediaDevice> targetMediaDevices = new ArrayList<>();
+            final Map<Integer, MediaItem> dividerItems = new HashMap<>();
             for (MediaItem originalMediaItem : mMediaItemList) {
                 for (MediaDevice newDevice : devices) {
                     if (originalMediaItem.getMediaDevice().isPresent()
@@ -680,6 +688,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                         break;
                     }
                 }
+                if (originalMediaItem.getMediaItemType()
+                        == MediaItem.MediaItemType.TYPE_GROUP_DIVIDER) {
+                    dividerItems.put(mMediaItemList.indexOf(originalMediaItem), originalMediaItem);
+                }
             }
             if (targetMediaDevices.size() != devices.size()) {
                 devices.removeAll(targetMediaDevices);
@@ -688,13 +700,34 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             mMediaItemList.clear();
             mMediaItemList.addAll(
                     targetMediaDevices.stream().map(MediaItem::new).collect(Collectors.toList()));
-            categorizeMediaItems();
+            dividerItems.forEach((key, item) -> {
+                mMediaItemList.add(key, item);
+            });
+            mMediaItemList.add(new MediaItem());
         }
     }
 
-    private void categorizeMediaItems() {
+    private void categorizeMediaItems(MediaDevice connectedMediaDevice) {
         synchronized (mMediaDevicesLock) {
-            //TODO(255124239): do the categorization here
+            Set<String> selectedDevicesIds = getSelectedMediaDevice().stream().map(
+                    MediaDevice::getId).collect(Collectors.toSet());
+            if (connectedMediaDevice != null) {
+                selectedDevicesIds.add(connectedMediaDevice.getId());
+            }
+            int latestSelected = 1;
+            for (MediaItem item : mMediaItemList) {
+                if (item.getMediaDevice().isPresent()) {
+                    MediaDevice device = item.getMediaDevice().get();
+                    if (selectedDevicesIds.contains(device.getId())) {
+                        latestSelected = mMediaItemList.indexOf(item) + 1;
+                    } else {
+                        mMediaItemList.add(latestSelected, new MediaItem(mContext.getString(
+                                R.string.media_output_group_title_speakers_and_displays),
+                                MediaItem.MediaItemType.TYPE_GROUP_DIVIDER));
+                        break;
+                    }
+                }
+            }
             mMediaItemList.add(new MediaItem());
         }
     }
