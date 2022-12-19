@@ -47,18 +47,18 @@ import com.android.server.LocalManagerRegistry
 import com.android.server.LocalServices
 import com.android.server.ServiceThread
 import com.android.server.SystemConfig
-import com.android.server.pm.PackageManagerLocal
-import com.android.server.pm.permission.PermissionManagerServiceInterface
 import com.android.server.permission.access.AccessCheckingService
 import com.android.server.permission.access.PermissionUri
 import com.android.server.permission.access.UidUri
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.hasAnyBit
 import com.android.server.permission.access.util.hasBits
+import com.android.server.pm.PackageManagerLocal
 import com.android.server.pm.UserManagerService
 import com.android.server.pm.permission.LegacyPermission
 import com.android.server.pm.permission.LegacyPermissionSettings
 import com.android.server.pm.permission.LegacyPermissionState
+import com.android.server.pm.permission.PermissionManagerServiceInterface
 import com.android.server.pm.permission.PermissionManagerServiceInternal
 import com.android.server.pm.pkg.AndroidPackage
 import java.io.FileDescriptor
@@ -85,7 +85,7 @@ class PermissionService(
     private lateinit var handler: Handler
 
     private lateinit var onPermissionsChangeListeners: OnPermissionsChangeListeners
-    private lateinit var permissionFlagsListener: OnPermissionFlagsChangedListener
+    private lateinit var onPermissionFlagsChangedListener: OnPermissionFlagsChangedListener
 
     fun initialize() {
         packageManagerInternal = LocalServices.getService(PackageManagerInternal::class.java)
@@ -100,8 +100,8 @@ class PermissionService(
         handler = Handler(handlerThread.looper)
 
         onPermissionsChangeListeners = OnPermissionsChangeListeners(FgThread.get().looper)
-        permissionFlagsListener = OnPermissionFlagsChangedListener()
-        policy.addOnPermissionFlagsChangedListener(permissionFlagsListener)
+        onPermissionFlagsChangedListener = OnPermissionFlagsChangedListener()
+        policy.addOnPermissionFlagsChangedListener(onPermissionFlagsChangedListener)
     }
 
     override fun getAllPermissionGroups(flags: Int): List<PermissionGroupInfo> {
@@ -234,9 +234,7 @@ class PermissionService(
                     with(policy) { getPermissionGroups()[permissionGroupName] }
                 } ?: return null
 
-                if (!snapshot.isPackageVisibleToUid(
-                        permissionGroup.packageName, callingUid
-                    )) {
+                if (!snapshot.isPackageVisibleToUid(permissionGroup.packageName, callingUid)) {
                     return null
                 }
             }
@@ -674,9 +672,11 @@ class PermissionService(
      * If you're doing surgery on app code/data, use [PackageFreezer] to guard your work against
      * the app being relaunched.
      */
-    private fun killUid(appId: Int, userId: Int, reason: String) {
+    private fun killUid(uid: Int, reason: String) {
         val activityManager = ActivityManager.getService()
         if (activityManager != null) {
+            val appId = UserHandle.getAppId(uid)
+            val userId = UserHandle.getUserId(uid)
             val identity = Binder.clearCallingIdentity()
             try {
                 activityManager.killUidForPermissionChange(appId, userId, reason)
@@ -729,7 +729,12 @@ class PermissionService(
      * Callback invoked when interesting actions have been taken on a permission.
      */
     private inner class OnPermissionFlagsChangedListener :
-        UidPermissionPolicy.OnPermissionFlagsChangedListener {
+        UidPermissionPolicy.OnPermissionFlagsChangedListener() {
+        private val runtimePermissionChangedUids = IntSet()
+        // Mapping from UID to whether only notifications permissions are revoked.
+        private val runtimePermissionRevokedUids = IntBooleanMap()
+        private val gidsChangedUids = IntSet()
+
         override fun onPermissionFlagsChanged(
             appId: Int,
             userId: Int,
@@ -741,37 +746,49 @@ class PermissionService(
             val permission = service.getState {
                 with(policy) { getPermissions()[permissionName] }
             } ?: return
+            val wasPermissionGranted = PermissionFlags.isPermissionGranted(oldFlags)
+            val isPermissionGranted = PermissionFlags.isPermissionGranted(newFlags)
 
-            val isPermissionGranted = !PermissionFlags.isPermissionGranted(oldFlags) &&
-                PermissionFlags.isPermissionGranted(newFlags)
-            val isPermissionRevoked = PermissionFlags.isPermissionGranted(oldFlags) &&
-                !PermissionFlags.isPermissionGranted(newFlags)
+            if (permission.isRuntime) {
+                // Different from the old implementation, which notifies the listeners when the
+                // permission flags have changed for a non-runtime permission, now we no longer do
+                // that because permission flags are only for runtime permissions and the listeners
+                // aren't being notified of non-runtime permission grant state changes anyway.
+                runtimePermissionChangedUids += uid
+                if (wasPermissionGranted && !isPermissionGranted) {
+                    runtimePermissionRevokedUids[uid] =
+                        permissionName in NOTIFICATIONS_PERMISSIONS &&
+                            runtimePermissionRevokedUids.getWithDefault(uid, true)
+                }
+            }
 
-            if (isPermissionGranted) {
-                if (permission.isRuntime) {
-                    onPermissionsChangeListeners.onPermissionsChanged(uid)
-                }
-                handler.post {
-                    if (permission.hasGids) {
-                        killUid(appId, userId, PermissionManager.KILL_APP_REASON_GIDS_CHANGED)
-                    }
-                }
-            } else if (isPermissionRevoked) {
-                // TODO: STOPSHIP skip kill for revokePostNotificationPermissionWithoutKillForTest
-                if (permission.isRuntime) {
-                    onPermissionsChangeListeners.onPermissionsChanged(uid)
-                    handler.post {
-                        if (!(permissionName == Manifest.permission.POST_NOTIFICATIONS &&
-                            isAppBackupAndRestoreRunning(uid))) {
-                            killUid(
-                                appId, userId, PermissionManager.KILL_APP_REASON_PERMISSIONS_REVOKED
-                            )
-                        }
-                    }
-                }
-            } else if (oldFlags != newFlags) {
+            if (permission.hasGids && !wasPermissionGranted && isPermissionGranted) {
+                gidsChangedUids += uid
+            }
+        }
+
+        override fun onStateMutated() {
+            runtimePermissionChangedUids.forEachIndexed { _, uid ->
                 onPermissionsChangeListeners.onPermissionsChanged(uid)
             }
+            runtimePermissionChangedUids.clear()
+
+            runtimePermissionRevokedUids.forEachIndexed {
+                _, uid, areOnlyNotificationsPermissionsRevoked ->
+                handler.post {
+                    if (areOnlyNotificationsPermissionsRevoked &&
+                        isAppBackupAndRestoreRunning(uid)) {
+                        return@post
+                    }
+                    killUid(uid, PermissionManager.KILL_APP_REASON_PERMISSIONS_REVOKED)
+                }
+            }
+            runtimePermissionRevokedUids.clear()
+
+            gidsChangedUids.forEachIndexed { _, uid ->
+                handler.post { killUid(uid, PermissionManager.KILL_APP_REASON_GIDS_CHANGED) }
+            }
+            gidsChangedUids.clear()
         }
 
         private fun isAppBackupAndRestoreRunning(uid: Int): Boolean {
@@ -780,13 +797,13 @@ class PermissionService(
                 return false
             }
             return try {
+                val contentResolver = context.contentResolver
                 val userId = UserHandle.getUserId(uid)
                 val isInSetup = Settings.Secure.getIntForUser(
-                    context.contentResolver, Settings.Secure.USER_SETUP_COMPLETE, userId
+                    contentResolver, Settings.Secure.USER_SETUP_COMPLETE, userId
                 ) == 0
                 val isInDeferredSetup = Settings.Secure.getIntForUser(
-                    context.contentResolver,
-                    Settings.Secure.USER_SETUP_PERSONALIZATION_STATE, userId
+                    contentResolver, Settings.Secure.USER_SETUP_PERSONALIZATION_STATE, userId
                 ) == Settings.Secure.USER_SETUP_PERSONALIZATION_STARTED
                 isInSetup || isInDeferredSetup
             } catch (e: Settings.SettingNotFoundException) {
@@ -809,18 +826,12 @@ class PermissionService(
         }
 
         private fun handleOnPermissionsChanged(uid: Int) {
-            val count = listeners.beginBroadcast()
-            try {
-                for (i in 0 until count) {
-                    val callback = listeners.getBroadcastItem(i)
-                    try {
-                        callback.onPermissionsChanged(uid)
-                    } catch (e: RemoteException) {
-                        Log.e(LOG_TAG, "Permission listener is dead", e)
-                    }
+            listeners.broadcast { listener ->
+                try {
+                    listener.onPermissionsChanged(uid)
+                } catch (e: RemoteException) {
+                    Log.e(LOG_TAG, "Error when calling OnPermissionsChangeListener", e)
                 }
-            } finally {
-                listeners.finishBroadcast()
             }
         }
 
@@ -837,6 +848,7 @@ class PermissionService(
                 obtainMessage(MSG_ON_PERMISSIONS_CHANGED, uid, 0).sendToTarget()
             }
         }
+
         companion object {
             private const val MSG_ON_PERMISSIONS_CHANGED = 1
         }
@@ -852,5 +864,9 @@ class PermissionService(
         @ChangeId
         @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
         private val BACKGROUND_RATIONALE_CHANGE_ID = 147316723L
+
+        private val NOTIFICATIONS_PERMISSIONS = indexedSetOf(
+            Manifest.permission.POST_NOTIFICATIONS
+        )
     }
 }

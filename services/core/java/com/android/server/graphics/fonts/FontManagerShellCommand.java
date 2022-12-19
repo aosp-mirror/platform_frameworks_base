@@ -163,19 +163,25 @@ public class FontManagerShellCommand extends ShellCommand {
         // Dump named font family first.
         List<FontConfig.FontFamily> families = fontConfig.getFontFamilies();
 
-        w.println("Named Font Families");
+        // Dump FontFamilyList
+        w.println("Named Family List");
         w.increaseIndent();
-        for (int i = 0; i < families.size(); ++i) {
-            final FontConfig.FontFamily family = families.get(i);
-
-            // Here, only dump the named family only.
-            if (family.getName() == null) continue;
-
-            w.println("Named Family (" + family.getName() + ")");
-            final List<FontConfig.Font> fonts = family.getFontList();
+        List<FontConfig.NamedFamilyList> namedFamilyLists = fontConfig.getNamedFamilyLists();
+        for (int i = 0; i < namedFamilyLists.size(); ++i) {
+            final FontConfig.NamedFamilyList namedFamilyList = namedFamilyLists.get(i);
+            w.println("Named Family (" + namedFamilyList.getName() + ")");
             w.increaseIndent();
-            for (int j = 0; j < fonts.size(); ++j) {
-                dumpSingleFontConfig(w, fonts.get(j));
+            final List<FontConfig.FontFamily> namedFamilies = namedFamilyList.getFamilies();
+            for (int j = 0; j < namedFamilies.size(); ++j) {
+                final FontConfig.FontFamily family = namedFamilies.get(j);
+
+                w.println("Family");
+                final List<FontConfig.Font> fonts = family.getFontList();
+                w.increaseIndent();
+                for (int k = 0; k < fonts.size(); ++k) {
+                    dumpSingleFontConfig(w, fonts.get(k));
+                }
+                w.decreaseIndent();
             }
             w.decreaseIndent();
         }

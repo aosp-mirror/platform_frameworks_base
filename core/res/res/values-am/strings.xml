@@ -392,14 +392,10 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"ይህ መተግበሪያ በጀርባ ላይ ማሄድ ይችላል። ይሄ ባትሪውን በይበልጥ ሊጨርሰው ይችላል።"</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"በጀርባ ላይ ውሂብ ይጠቀማል"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"ይህ መተግበሪያ በጀርባ ላይ ውሂብ ሊጠቀም ይችላል። ይሄ የውሂብ ፍጆታን ሊጨምር ይችላል።"</string>
-    <!-- no translation found for permlab_schedule_exact_alarm (6683283918033029730) -->
-    <skip />
-    <!-- no translation found for permdesc_schedule_exact_alarm (8198009212013211497) -->
-    <skip />
-    <!-- no translation found for permlab_use_exact_alarm (348045139777131552) -->
-    <skip />
-    <!-- no translation found for permdesc_use_exact_alarm (7033761461886938912) -->
-    <skip />
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"በትክክል በጊዜ የተያዙ እርምጃዎችን መርሐግብር ያስይዙ"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"ይህ መተግበሪያ ሥራ ወደፊት በሚፈለገው ጊዜ እንዲከናወን መርሐግብር ማስያዝ ይችላል። እንዲሁም ይህ ማለት እርስዎ መሣሪያውን በንቃት በማይጠቀሙበት ጊዜ መተግበሪያው ሊያሄድ ይችላል ማለት ነው።"</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"ማንቂያዎችን ወይም የክስተት አስታዋሾችን መርሐግብር ያስይዙ"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"ይህ መተግበሪያ ወደፊት በሚፈለግበት ጊዜ እርስዎን ለማሳወቅ እንደ ማንቂያዎች እና አስታዋሾች ያሉ እርምጃዎችን መርሐግብር ማስያዝ ይችላል።"</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"ትግበራ ሁልጊዜ አሂድ ላይ አድርግ"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"መተግበሪያው የራሱን ክፍሎች በማህደረ ትውስታ ውስጥ በቋሚነት የሚቀጥሉ እንዲያደርግ ይፈቅድለታል። ይህ ለሌላ መተግበሪያዎች ያለውን ማህደረ ትውስታ በመገደብ ጡባዊ ተኮውን ሊያንቀራፍፈው ይችላል።"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"መተግበሪያው የራሱን ክፍሎች በማህደረ ትውስታ ውስጥ በቋሚነት የሚቀጥሉ እንዲያደርግ ይፈቅድለታል። ይህ ለሌላ መተግበሪያዎች ያለውን ማህደረ ትውስታ በመገደብ የእርስዎን Android TV ሊያንቀራፍፈው ይችላል።"</string>
@@ -428,10 +424,8 @@
     <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"መተግበሪያው የፊት አገልግሎትን በ«remoteMessaging» ዓይነት እንዲጠቀም ይፈቅዳል"</string>
     <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"የፊት አገልግሎትን በ«systemExempted» ዓይነት ማስሄድ"</string>
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"መተግበሪያው የፊት አገልግሎትን በ«systemExempted» ዓይነት እንዲጠቀም ይፈቅዳል"</string>
-    <!-- no translation found for permlab_foregroundServiceFileManagement (2585000987966045030) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceFileManagement (417103601269698508) -->
-    <skip />
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"የፊት አገልግሎትን በ«fileManagement» ዓይነት ማስሄድ"</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"መተግበሪያው የፊት አገልግሎቶችን በ«fileManagement» ዓይነት እንዲጠቀም ያስችላል"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"የፊት አገልግሎትን በ«specialUse» ዓይነት ማስሄድ"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"መተግበሪያው የፊት አገልግሎትን በ«specialUse» ዓይነት እንዲጠቀም ይፈቅዳል"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"የመተግበሪያ ማከማቻ ቦታ ለካ"</string>
@@ -2350,20 +2344,16 @@
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"በዥረት በመልቀቅ ወቅት በሥዕል-ላይ-ሥዕል ማየት አይችሉም"</string>
     <string name="system_locale_title" msgid="711882686834677268">"የሥርዓት ነባሪ"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ካርድ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
-    <!-- no translation found for permlab_companionProfileWatch (2457738382085872542) -->
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"የእጅ ሰዓቶችን ለማስተዳደር የአጃቢ የእጅ ሰዓት መገለጫ ፍቃድ"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"አጃቢ መተግበሪያ የእጅ ሰዓቶችን እንዲያስተዳድር ያስችላል።"</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"የአጃቢ መሣሪያ ተገኝነትን ተመልከት"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"አጃቢ መተግበሪያ መሳሪያዎቹ በአቅራቢያ ሲሆኑ ወይም ሩቅ ሲሆኑ የአጃቢ መሳሪያ መኖሩን ለማየት ያስችላል።"</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"አጃቢ መልዕክቶችን አድርስ"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"አጃቢ መተግበሪያ አጃቢ መልዕክቶችን ወደ ሌሎች መሣሪያዎች እንዲያደርስ ያስችላል።"</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"የፊት አገልግሎቶችን ከዳራ ይጀምሩ"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"አጃቢ መተግበሪያ ከዳራ የፊት አገልግሎቶችን እንዲጀምር ያስችላል።"</string>
+    <!-- no translation found for mic_access_on_toast (2666925317663845156) -->
     <skip />
-    <!-- no translation found for permdesc_companionProfileWatch (5655698581110449397) -->
-    <skip />
-    <!-- no translation found for permlab_observeCompanionDevicePresence (9008994909653990465) -->
-    <skip />
-    <!-- no translation found for permdesc_observeCompanionDevicePresence (3011699826788697852) -->
-    <skip />
-    <!-- no translation found for permlab_deliverCompanionMessages (3931552294842980887) -->
-    <skip />
-    <!-- no translation found for permdesc_deliverCompanionMessages (2170847384281412850) -->
-    <skip />
-    <!-- no translation found for permlab_startForegroundServicesFromBackground (6363004936218638382) -->
-    <skip />
-    <!-- no translation found for permdesc_startForegroundServicesFromBackground (4071826571656001537) -->
+    <!-- no translation found for mic_access_off_toast (8111040892954242437) -->
     <skip />
 </resources>

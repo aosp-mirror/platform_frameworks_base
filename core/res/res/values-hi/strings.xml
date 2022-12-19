@@ -2352,4 +2352,8 @@
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"इससे साथी ऐप्लिकेशन को अन्य डिवाइसों पर, साथी ऐप्लिकेशन के मैसेज डिलीवर करने की अनुमति मिलती है."</string>
     <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"बैकग्राउंड में फ़ोरग्राउंड सेवाएं चलाने की अनुमति दें"</string>
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"इससे साथी ऐप्लिकेशन को बैकग्राउंड में फ़ोरग्राउंड सेवाएं चलाने की अनुमति मिलती है."</string>
+    <!-- no translation found for mic_access_on_toast (2666925317663845156) -->
+    <skip />
+    <!-- no translation found for mic_access_off_toast (8111040892954242437) -->
+    <skip />
 </resources>

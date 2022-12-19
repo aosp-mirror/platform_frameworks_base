@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import static android.text.FontConfig.NamedFamilyList;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -36,6 +38,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +49,7 @@ import java.util.regex.Pattern;
  * @hide
  */
 public class FontListParser {
+    private static final String TAG = "FontListParser";
 
     // XML constants for FontFamily.
     private static final String ATTR_NAME = "name";
@@ -148,27 +152,60 @@ public class FontListParser {
             boolean allowNonExistingFile)
             throws XmlPullParserException, IOException {
         List<FontConfig.FontFamily> families = new ArrayList<>();
+        List<FontConfig.NamedFamilyList> resultNamedFamilies = new ArrayList<>();
         List<FontConfig.Alias> aliases = new ArrayList<>(customization.getAdditionalAliases());
 
-        Map<String, FontConfig.FontFamily> oemNamedFamilies =
+        Map<String, NamedFamilyList> oemNamedFamilies =
                 customization.getAdditionalNamedFamilies();
 
+        boolean firstFamily = true;
         parser.require(XmlPullParser.START_TAG, null, "familyset");
         while (keepReading(parser)) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String tag = parser.getName();
             if (tag.equals("family")) {
-                FontConfig.FontFamily family = readFamily(parser, fontDir, updatableFontMap,
-                        allowNonExistingFile);
-                if (family == null) {
+                final String name = parser.getAttributeValue(null, "name");
+                if (name == null) {
+                    FontConfig.FontFamily family = readFamily(parser, fontDir, updatableFontMap,
+                            allowNonExistingFile);
+                    if (family == null) {
+                        continue;
+                    }
+                    families.add(family);
+
+                } else {
+                    FontConfig.NamedFamilyList namedFamilyList = readNamedFamily(
+                            parser, fontDir, updatableFontMap, allowNonExistingFile);
+                    if (namedFamilyList == null) {
+                        continue;
+                    }
+                    if (!oemNamedFamilies.containsKey(name)) {
+                        // The OEM customization overrides system named family. Skip if OEM
+                        // customization XML defines the same named family.
+                        resultNamedFamilies.add(namedFamilyList);
+                    }
+                    if (firstFamily) {
+                        // The first font family is used as a fallback family as well.
+                        families.addAll(namedFamilyList.getFamilies());
+                    }
+                }
+                firstFamily = false;
+            } else if (tag.equals("family-list")) {
+                FontConfig.NamedFamilyList namedFamilyList = readNamedFamilyList(
+                        parser, fontDir, updatableFontMap, allowNonExistingFile);
+                if (namedFamilyList == null) {
                     continue;
                 }
-                String name = family.getName();
-                if (name == null || !oemNamedFamilies.containsKey(name)) {
+                if (!oemNamedFamilies.containsKey(namedFamilyList.getName())) {
                     // The OEM customization overrides system named family. Skip if OEM
                     // customization XML defines the same named family.
-                    families.add(family);
+                    resultNamedFamilies.add(namedFamilyList);
                 }
+                if (firstFamily) {
+                    // The first font family is used as a fallback family as well.
+                    families.addAll(namedFamilyList.getFamilies());
+                }
+                firstFamily = false;
             } else if (tag.equals("alias")) {
                 aliases.add(readAlias(parser));
             } else {
@@ -176,12 +213,12 @@ public class FontListParser {
             }
         }
 
-        families.addAll(oemNamedFamilies.values());
+        resultNamedFamilies.addAll(oemNamedFamilies.values());
 
         // Filters aliases that point to non-existing families.
         Set<String> namedFamilies = new ArraySet<>();
-        for (int i = 0; i < families.size(); ++i) {
-            String name = families.get(i).getName();
+        for (int i = 0; i < resultNamedFamilies.size(); ++i) {
+            String name = resultNamedFamilies.get(i).getName();
             if (name != null) {
                 namedFamilies.add(name);
             }
@@ -194,7 +231,8 @@ public class FontListParser {
             }
         }
 
-        return new FontConfig(families, filtered, lastModifiedDate, configVersion);
+        return new FontConfig(families, filtered, resultNamedFamilies, lastModifiedDate,
+                configVersion);
     }
 
     private static boolean keepReading(XmlPullParser parser)
@@ -215,7 +253,6 @@ public class FontListParser {
     public static @Nullable FontConfig.FontFamily readFamily(XmlPullParser parser, String fontDir,
             @Nullable Map<String, File> updatableFontMap, boolean allowNonExistingFile)
             throws XmlPullParserException, IOException {
-        final String name = parser.getAttributeValue(null, "name");
         final String lang = parser.getAttributeValue("", "lang");
         final String variant = parser.getAttributeValue(null, "variant");
         final String ignore = parser.getAttributeValue(null, "ignore");
@@ -246,7 +283,68 @@ public class FontListParser {
         if (skip || fonts.isEmpty()) {
             return null;
         }
-        return new FontConfig.FontFamily(fonts, name, LocaleList.forLanguageTags(lang), intVariant);
+        return new FontConfig.FontFamily(fonts, LocaleList.forLanguageTags(lang), intVariant);
+    }
+
+    private static void throwIfAttributeExists(String attrName, XmlPullParser parser) {
+        if (parser.getAttributeValue(null, attrName) != null) {
+            throw new IllegalArgumentException(attrName + " cannot be used in FontFamily inside "
+                    + " family or family-list with name attribute.");
+        }
+    }
+
+    /**
+     * Read a font family with name attribute as a single element family-list element.
+     */
+    public static @Nullable FontConfig.NamedFamilyList readNamedFamily(
+            @NonNull XmlPullParser parser, @NonNull String fontDir,
+            @Nullable Map<String, File> updatableFontMap, boolean allowNonExistingFile)
+            throws XmlPullParserException, IOException {
+        final String name = parser.getAttributeValue(null, "name");
+        throwIfAttributeExists("lang", parser);
+        throwIfAttributeExists("variant", parser);
+        throwIfAttributeExists("ignore", parser);
+
+        final FontConfig.FontFamily family = readFamily(parser, fontDir, updatableFontMap,
+                allowNonExistingFile);
+        if (family == null) {
+            return null;
+        }
+        return new NamedFamilyList(Collections.singletonList(family), name);
+    }
+
+    /**
+     * Read a family-list element
+     */
+    public static @Nullable FontConfig.NamedFamilyList readNamedFamilyList(
+            @NonNull XmlPullParser parser, @NonNull String fontDir,
+            @Nullable Map<String, File> updatableFontMap, boolean allowNonExistingFile)
+            throws XmlPullParserException, IOException {
+        final String name = parser.getAttributeValue(null, "name");
+        final List<FontConfig.FontFamily> familyList = new ArrayList<>();
+        while (keepReading(parser)) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) continue;
+            final String tag = parser.getName();
+            if (tag.equals("family")) {
+                throwIfAttributeExists("name", parser);
+                throwIfAttributeExists("lang", parser);
+                throwIfAttributeExists("variant", parser);
+                throwIfAttributeExists("ignore", parser);
+
+                final FontConfig.FontFamily family = readFamily(parser, fontDir, updatableFontMap,
+                        allowNonExistingFile);
+                if (family != null) {
+                    familyList.add(family);
+                }
+            } else {
+                skip(parser);
+            }
+        }
+
+        if (familyList.isEmpty()) {
+            return null;
+        }
+        return new FontConfig.NamedFamilyList(familyList, name);
     }
 
     /** Matches leading and trailing XML whitespace. */

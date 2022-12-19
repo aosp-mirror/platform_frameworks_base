@@ -40,8 +40,7 @@
     <string name="other_password_manager" msgid="565790221427004141">"기타 비밀번호 관리자"</string>
     <string name="close_sheet" msgid="1393792015338908262">"시트 닫기"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"이전 페이지로 돌아가기"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="2953807735590034688">"화면 하단에 표시되는 인증 관리자 작업 제안 닫기"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱용 저장된 패스키를 사용하시겠습니까?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱용 저장된 로그인 정보를 사용하시겠습니까?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱용 저장된 로그인 정보 선택"</string>

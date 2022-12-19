@@ -582,6 +582,14 @@ public class TelephonyCallback {
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public static final int EVENT_LINK_CAPACITY_ESTIMATE_CHANGED = 37;
 
+    /**
+     * Event to norify the Anbr information from Radio to Ims.
+     *
+     * @see ImsCallSessionImplBase#callSessionNotifyAnbr.
+     *
+     * @hide
+     */
+    public static final int EVENT_TRIGGER_NOTIFY_ANBR = 38;
 
     /**
      * @hide
@@ -623,7 +631,8 @@ public class TelephonyCallback {
             EVENT_DATA_ENABLED_CHANGED,
             EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED,
             EVENT_LEGACY_CALL_STATE_CHANGED,
-            EVENT_LINK_CAPACITY_ESTIMATE_CHANGED
+            EVENT_LINK_CAPACITY_ESTIMATE_CHANGED,
+            EVENT_TRIGGER_NOTIFY_ANBR
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TelephonyEvent {

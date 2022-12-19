@@ -40,8 +40,7 @@
     <string name="other_password_manager" msgid="565790221427004141">"Գաղտնաբառերի այլ կառավարիչներ"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Փակել թերթը"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Անցնել նախորդ էջ"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="2953807735590034688">"Փակել Մուտքի տվյալների կառավարչի հուշումը, որը ցուցադրվում է էկրանի ներքևի հատվածում"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Օգտագործե՞լ պահված անցաբառը <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի համար"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Օգտագործե՞լ մուտքի պահված տվյալները <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի համար"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Ընտրեք մուտքի պահված տվյալներ <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի համար"</string>

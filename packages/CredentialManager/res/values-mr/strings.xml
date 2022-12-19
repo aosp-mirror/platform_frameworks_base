@@ -40,8 +40,7 @@
     <string name="other_password_manager" msgid="565790221427004141">"इतर पासवर्ड व्यवस्थापक"</string>
     <string name="close_sheet" msgid="1393792015338908262">"शीट बंद करा"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"मागील पेजवर परत जा"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="2953807735590034688">"स्क्रीनच्या तळाशी दिसणाऱ्या क्रेडेंशियल व्यवस्थापक कृती सूचना बंद करा"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी तुमची सेव्ह केलेली पासकी वापरायची का?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी तुमचे सेव्ह केलेले साइन-इन वापरायचे का?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी सेव्ह केलेले साइन-इन निवडा"</string>
