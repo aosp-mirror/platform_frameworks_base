@@ -22,6 +22,8 @@ import com.android.settingslib.mobile.TelephonyIcons
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakeMobileIconInteractor : MobileIconInteractor {
+    override val alwaysShowDataRatIcon = MutableStateFlow(false)
+
     private val _iconGroup = MutableStateFlow<SignalIcon.MobileIconGroup>(TelephonyIcons.THREE_G)
     override val networkTypeIconGroup = _iconGroup
 

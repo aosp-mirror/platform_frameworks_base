@@ -54,6 +54,8 @@ class FakeMobileIconsInteractor(mobileMappings: MobileMappingsProxy) : MobileIco
     private val _activeDataConnectionHasDataEnabled = MutableStateFlow(false)
     override val activeDataConnectionHasDataEnabled = _activeDataConnectionHasDataEnabled
 
+    override val alwaysShowDataRatIcon = MutableStateFlow(false)
+
     private val _defaultMobileIconMapping = MutableStateFlow(TEST_MAPPING)
     override val defaultMobileIconMapping = _defaultMobileIconMapping
 
