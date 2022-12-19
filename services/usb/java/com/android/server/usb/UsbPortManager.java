@@ -682,7 +682,10 @@ public class UsbPortManager {
         mHandler.sendMessage(message);
     }
 
-    public void addSimulatedPort(String portId, int supportedModes, IndentingPrintWriter pw) {
+    public void addSimulatedPort(String portId, int supportedModes,
+        boolean supportsComplianceWarnings,
+        IndentingPrintWriter pw) {
+
         synchronized (mLock) {
             if (mSimulatedPorts.containsKey(portId)) {
                 pw.println("Port with same name already exists.  Please remove it first.");
@@ -692,7 +695,25 @@ public class UsbPortManager {
             pw.println("Adding simulated port: portId=" + portId
                     + ", supportedModes=" + UsbPort.modeToString(supportedModes));
             mSimulatedPorts.put(portId,
-                    new RawPortInfo(portId, supportedModes));
+                    new RawPortInfo(
+                            portId,
+                            supportedModes,
+                            UsbPortStatus.CONTAMINANT_PROTECTION_NONE,
+                            UsbPortStatus.MODE_NONE,
+                            false,
+                            UsbPortStatus.POWER_ROLE_NONE,
+                            false,
+                            UsbPortStatus.DATA_ROLE_NONE,
+                            false,
+                            false,
+                            UsbPortStatus.CONTAMINANT_PROTECTION_NONE,
+                            false,
+                            UsbPortStatus.CONTAMINANT_DETECTION_NOT_SUPPORTED,
+                            UsbPortStatus.DATA_STATUS_UNKNOWN,
+                            false,
+                            UsbPortStatus.POWER_BRICK_STATUS_UNKNOWN,
+                            supportsComplianceWarnings,
+                            new int[] {}));
             updatePortsLocked(pw, null);
         }
     }

@@ -987,9 +987,12 @@ public class UsbService extends IUsbManager.Stub {
                     mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
                             "", 0);
                 }
-            } else if ("add-port".equals(args[0]) && args.length == 3) {
+        } else if ("add-port".equals(args[0]) && args.length >= 3) {
                 final String portId = args[1];
                 final int supportedModes;
+
+                int i;
+                boolean supportsComplianceWarnings = false;
                 switch (args[2]) {
                     case "ufp":
                         supportedModes = MODE_UFP;
@@ -1007,8 +1010,19 @@ public class UsbService extends IUsbManager.Stub {
                         pw.println("Invalid mode: " + args[2]);
                         return;
                 }
+                for (i=3; i<args.length; i++) {
+                    switch (args[i]) {
+                    case "--compliance-warnings":
+                        supportsComplianceWarnings = true;
+                        continue;
+                    default:
+                        pw.println("Invalid Identifier: " + args[i]);
+                    }
+                }
                 if (mPortManager != null) {
-                    mPortManager.addSimulatedPort(portId, supportedModes, pw);
+                    mPortManager.addSimulatedPort(portId, supportedModes,
+                            supportsComplianceWarnings,
+                            pw);
                     pw.println();
                     mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
                             "", 0);
@@ -1121,7 +1135,9 @@ public class UsbService extends IUsbManager.Stub {
                 pw.println("Dump current USB state or issue command:");
                 pw.println("  ports");
                 pw.println("  set-port-roles <id> <source|sink|no-power> <host|device|no-data>");
-                pw.println("  add-port <id> <ufp|dfp|dual|none>");
+                pw.println("  add-port <id> <ufp|dfp|dual|none> <optional args>");
+                pw.println("    <optional args> include:");
+                pw.println("      --compliance-warnings: enables compliance warnings on port");
                 pw.println("  connect-port <id> <ufp|dfp><?> <source|sink><?> <host|device><?>");
                 pw.println("    (add ? suffix if mode, power role, or data role can be changed)");
                 pw.println("  disconnect-port <id>");
@@ -1132,7 +1148,7 @@ public class UsbService extends IUsbManager.Stub {
                 pw.println("  dumpsys usb set-port-roles \"default\" source device");
                 pw.println();
                 pw.println("Example USB type C port simulation with full capabilities:");
-                pw.println("  dumpsys usb add-port \"matrix\" dual");
+                pw.println("  dumpsys usb add-port \"matrix\" dual --compliance-warnings");
                 pw.println("  dumpsys usb connect-port \"matrix\" ufp? sink? device?");
                 pw.println("  dumpsys usb ports");
                 pw.println("  dumpsys usb disconnect-port \"matrix\"");
@@ -1160,15 +1176,15 @@ public class UsbService extends IUsbManager.Stub {
                 pw.println("  dumpsys usb set-contaminant-status \"matrix\" false");
                 pw.println();
                 pw.println("Example simulate compliance warnings:");
-                pw.println("  dumpsys usb add-port \"matrix\" dual");
+                pw.println("  dumpsys usb add-port \"matrix\" dual --compliance-warnings");
                 pw.println("  dumpsys usb set-compliance-reasons \"matrix\" <reason-list>");
                 pw.println("  dumpsys usb clear-compliance-reasons \"matrix\"");
                 pw.println("<reason-list> is expected to be formatted as \"1, ..., 4\"");
                 pw.println("with reasons that need to be simulated.");
-                pw.println("  1: debug accessory");
-                pw.println("  2: bc12");
-                pw.println("  3: missing rp");
-                pw.println("  4: type c");
+                pw.println("  1: other");
+                pw.println("  2: debug accessory");
+                pw.println("  3: bc12");
+                pw.println("  4: missing rp");
                 pw.println();
                 pw.println("Example USB device descriptors:");
                 pw.println("  dumpsys usb dump-descriptors -dump-short");
