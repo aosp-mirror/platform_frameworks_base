@@ -360,7 +360,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             GetCredentialException exception = maybeGetPendingIntentException(
                     providerPendingIntentResponse);
             if (exception != null) {
-                invokeCallbackWithError(exception.errorType,
+                invokeCallbackWithError(exception.getType(),
                         exception.getMessage());
                 return;
             }
@@ -393,7 +393,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         GetCredentialException exception = maybeGetPendingIntentException(
                 providerPendingIntentResponse);
         if (exception != null) {
-            invokeCallbackWithError(exception.errorType,
+            invokeCallbackWithError(exception.getType(),
                     exception.getMessage());
             return;
         }

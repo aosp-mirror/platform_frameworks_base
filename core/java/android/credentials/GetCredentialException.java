@@ -32,46 +32,60 @@ import java.util.concurrent.Executor;
  * Activity, CancellationSignal, Executor, OutcomeReceiver)} operation.
  */
 public class GetCredentialException extends Exception {
+    /**
+     * The error type value for when no credential is found available for the given {@link
+     * CredentialManager#executeGetCredential(GetCredentialRequest, Activity, CancellationSignal,
+     * Executor, OutcomeReceiver)} request.
+     */
+    @NonNull
+    public static final String TYPE_NO_CREDENTIAL =
+            "android.credentials.GetCredentialException.TYPE_NO_CREDENTIAL";
 
     @NonNull
-    public final String errorType;
+    private final String mType;
 
-    /**
-     * Constructs a {@link GetCredentialException}.
-     *
-     * @throws IllegalArgumentException If errorType is empty.
-     */
-    public GetCredentialException(@NonNull String errorType, @Nullable String message) {
-        this(errorType, message, null);
+    /** Returns the specific exception type. */
+    @NonNull
+    public String getType() {
+        return mType;
     }
 
     /**
      * Constructs a {@link GetCredentialException}.
      *
-     * @throws IllegalArgumentException If errorType is empty.
+     * @throws IllegalArgumentException If type is empty.
+     */
+    public GetCredentialException(@NonNull String type, @Nullable String message) {
+        this(type, message, null);
+    }
+
+    /**
+     * Constructs a {@link GetCredentialException}.
+     *
+     * @throws IllegalArgumentException If type is empty.
      */
     public GetCredentialException(
-            @NonNull String errorType, @Nullable String message, @Nullable Throwable cause) {
+            @NonNull String type, @Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
-        this.errorType = Preconditions.checkStringNotEmpty(errorType,
-                "errorType must not be empty");
+        this.mType = Preconditions.checkStringNotEmpty(type,
+                "type must not be empty");
     }
 
     /**
      * Constructs a {@link GetCredentialException}.
      *
-     * @throws IllegalArgumentException If errorType is empty.
+     * @throws IllegalArgumentException If type is empty.
      */
-    public GetCredentialException(@NonNull String errorType, @Nullable Throwable cause) {
-        this(errorType, null, cause);
+    public GetCredentialException(@NonNull String type, @Nullable Throwable cause) {
+        this(type, null, cause);
     }
 
     /**
      * Constructs a {@link GetCredentialException}.
      *
-     * @throws IllegalArgumentException If errorType is empty.
+     * @throws IllegalArgumentException If type is empty.
      */
-    public GetCredentialException(@NonNull String errorType) {
-        this(errorType, null, null);
+    public GetCredentialException(@NonNull String type) {
+        this(type, null, null);
     }
 }

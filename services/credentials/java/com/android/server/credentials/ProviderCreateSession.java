@@ -237,7 +237,7 @@ public final class ProviderCreateSession extends ProviderSession<
                 pendingIntentResponse);
         if (exception != null) {
             invokeCallbackWithError(
-                    exception.errorType,
+                    exception.getType(),
                     exception.getMessage());
             return;
         }
