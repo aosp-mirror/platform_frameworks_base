@@ -169,19 +169,19 @@ public final class BackgroundDexOptServiceUnitTest {
     }
 
     @Test
-    public void testBootCompleted() {
+    public void testBootCompleted() throws Exception {
         initUntilBootCompleted();
     }
 
     @Test
-    public void testNoExecutionForIdleJobBeforePostBootUpdate() {
+    public void testNoExecutionForIdleJobBeforePostBootUpdate() throws Exception {
         initUntilBootCompleted();
 
         assertThat(mService.onStartJob(mJobServiceForIdle, mJobParametersForIdle)).isFalse();
     }
 
     @Test
-    public void testNoExecutionForLowStorage() {
+    public void testNoExecutionForLowStorage() throws Exception {
         initUntilBootCompleted();
         when(mPackageManager.isStorageLow()).thenReturn(true);
 
@@ -191,7 +191,7 @@ public final class BackgroundDexOptServiceUnitTest {
     }
 
     @Test
-    public void testNoExecutionForNoOptimizablePackages() {
+    public void testNoExecutionForNoOptimizablePackages() throws Exception {
         initUntilBootCompleted();
         when(mDexOptHelper.getOptimizablePackages(any())).thenReturn(Collections.emptyList());
 
@@ -201,7 +201,7 @@ public final class BackgroundDexOptServiceUnitTest {
     }
 
     @Test
-    public void testPostBootUpdateFullRun() {
+    public void testPostBootUpdateFullRun() throws Exception {
         initUntilBootCompleted();
 
         runFullJob(mJobServiceForPostBoot, mJobParametersForPostBoot,
@@ -210,7 +210,7 @@ public final class BackgroundDexOptServiceUnitTest {
     }
 
     @Test
-    public void testPostBootUpdateFullRunWithPackageFailure() {
+    public void testPostBootUpdateFullRunWithPackageFailure() throws Exception {
         mDexOptResultForPackageAAA = PackageDexOptimizer.DEX_OPT_FAILED;
 
         initUntilBootCompleted();
@@ -224,7 +224,7 @@ public final class BackgroundDexOptServiceUnitTest {
     }
 
     @Test
-    public void testIdleJobFullRun() {
+    public void testIdleJobFullRun() throws Exception {
         initUntilBootCompleted();
         runFullJob(mJobServiceForPostBoot, mJobParametersForPostBoot,
                 /* expectedReschedule= */ false, /* expectedStatus= */ STATUS_OK,
@@ -235,7 +235,7 @@ public final class BackgroundDexOptServiceUnitTest {
     }
 
     @Test
-    public void testIdleJobFullRunWithFailureOnceAndSuccessAfterUpdate() {
+    public void testIdleJobFullRunWithFailureOnceAndSuccessAfterUpdate() throws Exception {
         mDexOptResultForPackageAAA = PackageDexOptimizer.DEX_OPT_FAILED;
 
         initUntilBootCompleted();
@@ -271,7 +271,7 @@ public final class BackgroundDexOptServiceUnitTest {
     }
 
     @Test
-    public void testIdleJobFullRunWithFatalError() {
+    public void testIdleJobFullRunWithFatalError() throws Exception {
         initUntilBootCompleted();
         runFullJob(mJobServiceForPostBoot, mJobParametersForPostBoot,
                 /* expectedReschedule= */ false, /* expectedStatus= */ STATUS_OK,
@@ -285,7 +285,7 @@ public final class BackgroundDexOptServiceUnitTest {
     }
 
     @Test
-    public void testSystemReadyWhenDisabled() {
+    public void testSystemReadyWhenDisabled() throws Exception {
         when(mInjector.isBackgroundDexOptDisabled()).thenReturn(true);
 
         mService.systemReady();
@@ -294,7 +294,7 @@ public final class BackgroundDexOptServiceUnitTest {
     }
 
     @Test
-    public void testStopByCancelFlag() {
+    public void testStopByCancelFlag() throws Exception {
         when(mInjector.createAndStartThread(any(), any())).thenReturn(Thread.currentThread());
         initUntilBootCompleted();
 
@@ -447,7 +447,7 @@ public final class BackgroundDexOptServiceUnitTest {
     }
 
     @Test
-    public void testStopByThermal() {
+    public void testStopByThermal() throws Exception {
         when(mInjector.createAndStartThread(any(), any())).thenReturn(Thread.currentThread());
         initUntilBootCompleted();
 
@@ -478,7 +478,7 @@ public final class BackgroundDexOptServiceUnitTest {
     }
 
     @Test
-    public void testDisableJobSchedulerJobs() {
+    public void testDisableJobSchedulerJobs() throws Exception {
         when(mInjector.getCallingUid()).thenReturn(Process.SHELL_UID);
         mService.setDisableJobSchedulerJobs(true);
         assertThat(mService.onStartJob(mJobServiceForIdle, mJobParametersForIdle)).isFalse();
@@ -492,7 +492,7 @@ public final class BackgroundDexOptServiceUnitTest {
         assertThrows(SecurityException.class, () -> mService.setDisableJobSchedulerJobs(true));
     }
 
-    private void initUntilBootCompleted() {
+    private void initUntilBootCompleted() throws Exception {
         ArgumentCaptor<BroadcastReceiver> argReceiver = ArgumentCaptor.forClass(
                 BroadcastReceiver.class);
         ArgumentCaptor<IntentFilter> argIntentFilter = ArgumentCaptor.forClass(IntentFilter.class);
@@ -515,7 +515,7 @@ public final class BackgroundDexOptServiceUnitTest {
         assertThat(jobIds).containsExactlyElementsIn(expectedJobIds);
     }
 
-    private void verifyLastControlDexOptBlockingCall(boolean expected) {
+    private void verifyLastControlDexOptBlockingCall(boolean expected) throws Exception {
         ArgumentCaptor<Boolean> argDexOptBlock = ArgumentCaptor.forClass(Boolean.class);
         verify(mDexOptHelper, atLeastOnce()).controlDexOptBlocking(argDexOptBlock.capture());
         assertThat(argDexOptBlock.getValue()).isEqualTo(expected);
@@ -523,7 +523,7 @@ public final class BackgroundDexOptServiceUnitTest {
 
     private void runFullJob(BackgroundDexOptJobService jobService, JobParameters params,
             boolean expectedReschedule, int expectedStatus, int totalJobFinishedWithParams,
-            @Nullable String expectedSkippedPackage) {
+            @Nullable String expectedSkippedPackage) throws Exception {
         when(mInjector.createAndStartThread(any(), any())).thenReturn(Thread.currentThread());
         addFullRunSequence(expectedSkippedPackage);
         assertThat(mService.onStartJob(jobService, params)).isTrue();

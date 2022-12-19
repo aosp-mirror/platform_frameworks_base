@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
+import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 
@@ -45,6 +46,7 @@ import android.util.TimingsTraceLog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemServerInitThreadPool;
+import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -242,33 +244,39 @@ public class AppDataHelper {
                 }
             }
 
-            // Prepare the application profiles only for upgrades and
-            // first boot (so that we don't repeat the same operation at
-            // each boot).
-            //
-            // We only have to cover the upgrade and first boot here
-            // because for app installs we prepare the profiles before
-            // invoking dexopt (in installPackageLI).
-            //
-            // We also have to cover non system users because we do not
-            // call the usual install package methods for them.
-            //
-            // NOTE: in order to speed up first boot time we only create
-            // the current profile and do not update the content of the
-            // reference profile. A system image should already be
-            // configured with the right profile keys and the profiles
-            // for the speed-profile prebuilds should already be copied.
-            // That's done in #performDexOptUpgrade.
-            //
-            // TODO(calin, mathieuc): We should use .dm files for
-            // prebuilds profiles instead of manually copying them in
-            // #performDexOptUpgrade. When we do that we should have a
-            // more granular check here and only update the existing
-            // profiles.
-            if (mPm.isDeviceUpgrading() || mPm.isFirstBoot()
-                    || (userId != UserHandle.USER_SYSTEM)) {
-                mArtManagerService.prepareAppProfiles(pkg, userId,
-                        /* updateReferenceProfileContent= */ false);
+            if (!useArtService()) { // ART Service handles this on demand instead.
+                // Prepare the application profiles only for upgrades and
+                // first boot (so that we don't repeat the same operation at
+                // each boot).
+                //
+                // We only have to cover the upgrade and first boot here
+                // because for app installs we prepare the profiles before
+                // invoking dexopt (in installPackageLI).
+                //
+                // We also have to cover non system users because we do not
+                // call the usual install package methods for them.
+                //
+                // NOTE: in order to speed up first boot time we only create
+                // the current profile and do not update the content of the
+                // reference profile. A system image should already be
+                // configured with the right profile keys and the profiles
+                // for the speed-profile prebuilds should already be copied.
+                // That's done in #performDexOptUpgrade.
+                //
+                // TODO(calin, mathieuc): We should use .dm files for
+                // prebuilds profiles instead of manually copying them in
+                // #performDexOptUpgrade. When we do that we should have a
+                // more granular check here and only update the existing
+                // profiles.
+                if (mPm.isDeviceUpgrading() || mPm.isFirstBoot()
+                        || (userId != UserHandle.USER_SYSTEM)) {
+                    try {
+                        mArtManagerService.prepareAppProfiles(pkg, userId,
+                                /* updateReferenceProfileContent= */ false);
+                    } catch (LegacyDexoptDisabledException e2) {
+                        throw new RuntimeException(e2);
+                    }
+                }
             }
 
             if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && ceDataInode != -1) {
@@ -578,7 +586,12 @@ public class AppDataHelper {
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
-        mArtManagerService.clearAppProfiles(pkg);
+        // TODO(b/251903639): Call into ART Service.
+        try {
+            mArtManagerService.clearAppProfiles(pkg);
+        } catch (LegacyDexoptDisabledException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void destroyAppDataLIF(AndroidPackage pkg, int userId, int flags) {
@@ -615,8 +628,11 @@ public class AppDataHelper {
     }
 
     private void destroyAppProfilesLeafLIF(AndroidPackage pkg) {
+        // TODO(b/251903639): Call into ART Service.
         try {
             mInstaller.destroyAppProfiles(pkg.getPackageName());
+        } catch (LegacyDexoptDisabledException e) {
+            throw new RuntimeException(e);
         } catch (Installer.InstallerException e) {
             Slog.w(TAG, String.valueOf(e));
         }
