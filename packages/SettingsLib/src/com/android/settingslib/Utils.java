@@ -23,6 +23,9 @@ import android.graphics.ColorFilter;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
+import android.hardware.usb.UsbManager;
+import android.hardware.usb.UsbPort;
+import android.hardware.usb.UsbPortStatus;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.NetworkCapabilities;
@@ -40,6 +43,7 @@ import android.telephony.AccessNetworkConstants;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -55,6 +59,7 @@ import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.settingslib.utils.BuildCompatUtils;
 
 import java.text.NumberFormat;
+import java.util.List;
 
 public class Utils {
 
@@ -638,4 +643,31 @@ public class Utils {
                 (VcnTransportInfo) networkCapabilities.getTransportInfo();
         return vcnTransportInfo.getWifiInfo();
     }
+
+    /** Whether there is any incompatible chargers in the current UsbPort? */
+    public static boolean containsIncompatibleChargers(Context context, String tag) {
+        final List<UsbPort> usbPortList =
+                context.getSystemService(UsbManager.class).getPorts();
+        if (usbPortList == null || usbPortList.isEmpty()) {
+            return false;
+        }
+        for (UsbPort usbPort : usbPortList) {
+            Log.d(tag, "usbPort: " + usbPort);
+            final UsbPortStatus usbStatus = usbPort.getStatus();
+            if (usbStatus == null || !usbStatus.isConnected()) {
+                continue;
+            }
+            final int[] complianceWarnings = usbStatus.getComplianceWarnings();
+            if (complianceWarnings == null || complianceWarnings.length == 0) {
+                continue;
+            }
+            for (int complianceWarningType : complianceWarnings) {
+                if (complianceWarningType != 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }
